@@ -19,8 +19,8 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
+import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -741,7 +741,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 <EuiText
                   size="s"
                   css={css`
-                    margin-bottom: ${euiThemeVars.euiSize};
+                    margin-bottom: ${euiTheme.size.base};
                   `}
                 >
                   <h4>
@@ -768,7 +768,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 <EuiText
                   size="s"
                   css={css`
-                    margin-bottom: ${euiThemeVars.euiSize};
+                    margin-bottom: ${euiTheme.size.base};
                   `}
                 >
                   <h4>
