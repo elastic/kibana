@@ -11,7 +11,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { TaskPriority, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { RawAction, ActionTypeRegistryContract, InMemoryConnector } from './types';
+import type { RawAction, ConnectorTypeRegistryContract, InMemoryConnector } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import type { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
@@ -21,7 +21,7 @@ import { hasReachedTheQueuedActionsLimit } from './lib/has_reached_queued_action
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
   isESOCanEncrypt: boolean;
-  actionTypeRegistry: ActionTypeRegistryContract;
+  actionTypeRegistry: ConnectorTypeRegistryContract;
   inMemoryConnectors: InMemoryConnector[];
   configurationUtilities: ActionsConfigurationUtilities;
   logger: Logger;
@@ -226,7 +226,7 @@ function validateConnector({
 }: {
   id: string;
   connector: InMemoryConnector | RawAction;
-  actionTypeRegistry: ActionTypeRegistryContract;
+  actionTypeRegistry: ConnectorTypeRegistryContract;
 }) {
   const { name, isMissingSecrets, actionTypeId } = connector;
 

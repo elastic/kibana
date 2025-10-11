@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { transformConnectorsForExport } from './transform_connectors_for_export';
-import { actionTypeRegistryMock } from '../action_type_registry.mock';
-import type { ActionType, ActionTypeRegistryContract, ActionTypeSecrets } from '../types';
+import { connectorTypeRegistryMock } from '../connector_type_registry.mock';
+import type { ActionType, ConnectorTypeRegistryContract, ActionTypeSecrets } from '../types';
 
 describe('transform connector for export', () => {
   const connectorType: jest.Mocked<ActionType> = {
@@ -27,8 +27,8 @@ describe('transform connector for export', () => {
       },
     },
   };
-  const actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract> =
-    actionTypeRegistryMock.create();
+  const connectorTypeRegistry: jest.Mocked<ConnectorTypeRegistryContract> =
+    connectorTypeRegistryMock.create();
 
   const connectorsWithNoSecrets = [
     {
@@ -232,8 +232,8 @@ describe('transform connector for export', () => {
   ];
 
   it('should not change connectors without secrets', () => {
-    actionTypeRegistry.get.mockReturnValue(connectorType);
-    expect(transformConnectorsForExport(connectorsWithNoSecrets, actionTypeRegistry)).toEqual(
+    connectorTypeRegistry.get.mockReturnValue(connectorType);
+    expect(transformConnectorsForExport(connectorsWithNoSecrets, connectorTypeRegistry)).toEqual(
       connectorsWithNoSecrets.map((connector) => ({
         ...connector,
         attributes: {
@@ -245,7 +245,7 @@ describe('transform connector for export', () => {
   });
 
   it('should remove secrets for connectors with secrets', () => {
-    actionTypeRegistry.get.mockReturnValue({
+    connectorTypeRegistry.get.mockReturnValue({
       ...connectorType,
       validate: {
         config: { schema: schema.object({}) },
@@ -259,7 +259,7 @@ describe('transform connector for export', () => {
         },
       },
     });
-    expect(transformConnectorsForExport(connectorsWithSecrets, actionTypeRegistry)).toEqual(
+    expect(transformConnectorsForExport(connectorsWithSecrets, connectorTypeRegistry)).toEqual(
       connectorsWithSecrets.map((connector) => ({
         ...connector,
         attributes: {

@@ -8,7 +8,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { ActionTypeRegistry } from '../action_type_registry';
+import type { ConnectorTypeRegistry } from '../connector_type_registry';
 import type { ActionTypeConfig, ActionTypeSecrets } from '../types';
 import { buildExecutor } from './executor';
 import type { ExecutorParams, SubActionConnectorType } from './types';
@@ -21,7 +21,7 @@ export const register = <Config extends ActionTypeConfig, Secrets extends Action
   configurationUtilities,
 }: {
   configurationUtilities: ActionsConfigurationUtilities;
-  actionTypeRegistry: PublicMethodsOf<ActionTypeRegistry>;
+  actionTypeRegistry: PublicMethodsOf<ConnectorTypeRegistry>;
   connector: SubActionConnectorType<Config, Secrets>;
   logger: Logger;
 }) => {

@@ -15,8 +15,8 @@ import {
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../../common';
-import type { ActionTypeRegistryOpts } from '../action_type_registry';
-import { ActionTypeRegistry } from '../action_type_registry';
+import type { ConnectorTypeRegistryOpts } from '../connector_type_registry';
+import { ConnectorTypeRegistry } from '../connector_type_registry';
 import { ActionsClient } from './actions_client';
 import type { ExecutorType, ActionType } from '../types';
 import type { ILicenseState } from '../lib';
@@ -93,8 +93,8 @@ const postDeleteHook = jest.fn();
 
 let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
-let actionTypeRegistry: ActionTypeRegistry;
-let actionTypeRegistryParams: ActionTypeRegistryOpts;
+let connectorTypeRegistry: ConnectorTypeRegistry;
+let connectorTypeRegistryParams: ConnectorTypeRegistryOpts;
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
@@ -116,7 +116,7 @@ beforeEach(() => {
   jest.resetAllMocks();
   logger = loggerMock.create();
   mockedLicenseState = licenseStateMock.create();
-  actionTypeRegistryParams = {
+  connectorTypeRegistryParams = {
     licensing: licensingMock.createSetup(),
     taskManager: mockTaskManager,
     taskRunnerFactory: new TaskRunnerFactory(
@@ -132,10 +132,10 @@ beforeEach(() => {
     licenseState: mockedLicenseState,
     inMemoryConnectors: [],
   };
-  actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+  connectorTypeRegistry = new ConnectorTypeRegistry(connectorTypeRegistryParams);
   actionsClient = new ActionsClient({
     logger,
-    actionTypeRegistry,
+    connectorTypeRegistry,
     unsecuredSavedObjectsClient,
     scopedClusterClient,
     kibanaIndices,
@@ -170,7 +170,7 @@ describe('create()', () => {
         },
         references: [],
       };
-      actionTypeRegistry.register({
+      connectorTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
         minimumLicenseRequired: 'basic',
@@ -211,7 +211,7 @@ describe('create()', () => {
         },
         references: [],
       };
-      actionTypeRegistry.register({
+      connectorTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
         minimumLicenseRequired: 'basic',
@@ -260,7 +260,7 @@ describe('create()', () => {
         },
         references: [],
       };
-      actionTypeRegistry.register({
+      connectorTypeRegistry.register({
         id: savedObjectCreateResult.attributes.actionTypeId,
         name: 'My action type',
         minimumLicenseRequired: 'basic',
@@ -304,7 +304,7 @@ describe('create()', () => {
         },
         references: [],
       };
-      actionTypeRegistry.register({
+      connectorTypeRegistry.register({
         id: savedObjectCreateResult.attributes.actionTypeId,
         name: 'My action type',
         minimumLicenseRequired: 'basic',
@@ -362,7 +362,7 @@ describe('create()', () => {
       },
       references: [],
     };
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
@@ -416,7 +416,7 @@ describe('create()', () => {
   });
 
   test('validates config', async () => {
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
@@ -450,7 +450,7 @@ describe('create()', () => {
     const connectorValidator = () => {
       return '[param1] is required';
     };
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
@@ -493,7 +493,7 @@ describe('create()', () => {
   });
 
   test('encrypts action type options unless specified not to', async () => {
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
@@ -591,7 +591,7 @@ describe('create()', () => {
       microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
     });
 
-    const localActionTypeRegistryParams = {
+    const localConnectorTypeRegistryParams = {
       licensing: licensingMock.createSetup(),
       taskManager: mockTaskManager,
       taskRunnerFactory: new TaskRunnerFactory(
@@ -608,10 +608,10 @@ describe('create()', () => {
       inMemoryConnectors: [],
     };
 
-    actionTypeRegistry = new ActionTypeRegistry(localActionTypeRegistryParams);
+    connectorTypeRegistry = new ConnectorTypeRegistry(localConnectorTypeRegistryParams);
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -635,7 +635,7 @@ describe('create()', () => {
       },
       references: [],
     };
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
@@ -675,7 +675,7 @@ describe('create()', () => {
       },
       references: [],
     };
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
@@ -705,7 +705,7 @@ describe('create()', () => {
 
   test('throws error when predefined id match a pre-configure action id', async () => {
     const preDefinedId = 'mySuperRadTestPreconfiguredId';
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
@@ -720,7 +720,7 @@ describe('create()', () => {
 
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -767,7 +767,7 @@ describe('create()', () => {
   });
 
   it('throws when creating a system connector', async () => {
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: '.cases',
       name: 'Cases',
       minimumLicenseRequired: 'platinum',
@@ -798,7 +798,7 @@ describe('create()', () => {
   it('throws when creating a system connector where the action type is not registered but a system connector exists in the in-memory list', async () => {
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -858,7 +858,7 @@ describe('get()', () => {
     test('ensures user is authorised to get preconfigured type of action', async () => {
       actionsClient = new ActionsClient({
         logger,
-        actionTypeRegistry,
+        connectorTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -894,7 +894,7 @@ describe('get()', () => {
     test('ensures user is authorised to get a system action', async () => {
       actionsClient = new ActionsClient({
         logger,
-        actionTypeRegistry,
+        connectorTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -950,7 +950,7 @@ describe('get()', () => {
     test('throws when user is not authorised to get preconfigured of action', async () => {
       actionsClient = new ActionsClient({
         logger,
-        actionTypeRegistry,
+        connectorTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -992,7 +992,7 @@ describe('get()', () => {
     test('throws when user is not authorised to get a system action', async () => {
       actionsClient = new ActionsClient({
         logger,
-        actionTypeRegistry,
+        connectorTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -1113,7 +1113,7 @@ describe('get()', () => {
   test('return predefined action with id', async () => {
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1156,7 +1156,7 @@ describe('get()', () => {
   it('throws when getting a system action by default', async () => {
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1189,7 +1189,7 @@ describe('get()', () => {
   it('does not throw when getting a system action if throwIfSystemAction=false', async () => {
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1259,7 +1259,7 @@ describe('getBulk()', () => {
 
       actionsClient = new ActionsClient({
         logger,
-        actionTypeRegistry,
+        connectorTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -1396,7 +1396,7 @@ describe('getBulk()', () => {
 
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1490,7 +1490,7 @@ describe('getBulk()', () => {
 
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1563,7 +1563,7 @@ describe('getBulk()', () => {
 
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1647,7 +1647,7 @@ describe('getOAuthAccessToken()', () => {
   ): ReturnType<ActionsClient['getOAuthAccessToken']> {
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1944,7 +1944,7 @@ describe('getOAuthAccessToken()', () => {
 
 describe('delete()', () => {
   beforeEach(() => {
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-delete',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
@@ -2062,7 +2062,7 @@ describe('delete()', () => {
   it('throws when trying to delete a preconfigured connector', async () => {
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -2100,7 +2100,7 @@ describe('delete()', () => {
   it('throws when trying to delete a system connector', async () => {
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -2168,7 +2168,7 @@ describe('delete()', () => {
 
 describe('update()', () => {
   function updateOperation(): ReturnType<ActionsClient['update']> {
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
@@ -2277,7 +2277,7 @@ describe('update()', () => {
   });
 
   test('updates an action with all given properties', async () => {
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
@@ -2361,7 +2361,7 @@ describe('update()', () => {
   });
 
   test('updates an action with isMissingSecrets "true" (set true as the import result), to isMissingSecrets', async () => {
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
@@ -2433,7 +2433,7 @@ describe('update()', () => {
   });
 
   test('validates config', async () => {
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
@@ -2472,7 +2472,7 @@ describe('update()', () => {
   });
 
   test('validates connector: config and secrets', async () => {
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
@@ -2510,7 +2510,7 @@ describe('update()', () => {
   });
 
   test('encrypts action type options unless specified not to', async () => {
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
@@ -2599,7 +2599,7 @@ describe('update()', () => {
   });
 
   test('throws an error when ensureActionTypeEnabled throws', async () => {
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
@@ -2649,7 +2649,7 @@ describe('update()', () => {
   it('throws when trying to update a preconfigured connector', async () => {
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -2694,7 +2694,7 @@ describe('update()', () => {
   it('throws when trying to update a system connector', async () => {
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -2792,7 +2792,7 @@ describe('execute()', () => {
           },
         ],
         logger,
-        actionTypeRegistry,
+        connectorTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -2806,7 +2806,7 @@ describe('execute()', () => {
         getEventLogClient,
       });
 
-      actionTypeRegistry.register({
+      connectorTypeRegistry.register({
         id: '.cases',
         name: 'Cases',
         minimumLicenseRequired: 'platinum',
@@ -2854,7 +2854,7 @@ describe('execute()', () => {
           },
         ],
         logger,
-        actionTypeRegistry,
+        connectorTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -2868,7 +2868,7 @@ describe('execute()', () => {
         getEventLogClient,
       });
 
-      actionTypeRegistry.register({
+      connectorTypeRegistry.register({
         id: '.cases',
         name: 'Cases',
         minimumLicenseRequired: 'platinum',
@@ -2897,7 +2897,7 @@ describe('execute()', () => {
       });
     });
 
-    test('pass the params to the actionTypeRegistry when authorizing system actions', async () => {
+    test('pass the params to the connectorTypeRegistry when authorizing system actions', async () => {
       const getKibanaPrivileges = jest.fn().mockReturnValue(['test/create']);
 
       actionsClient = new ActionsClient({
@@ -2915,7 +2915,7 @@ describe('execute()', () => {
           },
         ],
         logger,
-        actionTypeRegistry,
+        connectorTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -2929,7 +2929,7 @@ describe('execute()', () => {
         getEventLogClient,
       });
 
-      actionTypeRegistry.register({
+      connectorTypeRegistry.register({
         id: '.cases',
         name: 'Cases',
         minimumLicenseRequired: 'platinum',
@@ -3163,7 +3163,7 @@ describe('isActionTypeEnabled()', () => {
     executor: jest.fn(),
   };
   beforeEach(() => {
-    actionTypeRegistry.register(fooActionType);
+    connectorTypeRegistry.register(fooActionType);
   });
 
   test('should call isLicenseValidForActionType of the license state with notifyUsage false by default', () => {
@@ -3187,7 +3187,7 @@ describe('isPreconfigured()', () => {
   test('should return true if the connector is a preconfigured connector', () => {
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -3236,7 +3236,7 @@ describe('isPreconfigured()', () => {
   test('should return false if the connector is not preconfigured connector', () => {
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -3287,7 +3287,7 @@ describe('isSystemAction()', () => {
   test('should return true if the connector is a system connectors', () => {
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -3336,7 +3336,7 @@ describe('isSystemAction()', () => {
   test('should return false if connector id is not a system action', () => {
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,

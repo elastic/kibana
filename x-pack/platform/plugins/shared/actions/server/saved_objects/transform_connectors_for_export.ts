@@ -8,18 +8,18 @@
 import type { SavedObject } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { validateSecrets } from '../lib';
-import type { RawAction, ActionType, ActionTypeRegistryContract } from '../types';
+import type { RawAction, ActionType, ConnectorTypeRegistryContract } from '../types';
 
 export function transformConnectorsForExport(
   connectors: SavedObject[],
-  actionTypeRegistry: ActionTypeRegistryContract
+  connectorTypeRegistry: ConnectorTypeRegistryContract
 ): Array<SavedObject<RawAction>> {
   return connectors.map((c) => {
     const connector = c as SavedObject<RawAction>;
     return transformConnectorForExport(
       connector,
-      actionTypeRegistry.get(connector.attributes.actionTypeId),
-      actionTypeRegistry.getUtils()
+      connectorTypeRegistry.get(connector.attributes.actionTypeId),
+      connectorTypeRegistry.getUtils()
     );
   });
 }

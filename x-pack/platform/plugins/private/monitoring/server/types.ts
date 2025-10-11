@@ -30,7 +30,7 @@ import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { RouteConfig, RouteMethod, Headers } from '@kbn/core/server';
-import type { ActionTypeRegistry } from '@kbn/actions-plugin/server/action_type_registry';
+import type { ConnectorTypeRegistry } from '@kbn/actions-plugin/server/connector_type_registry';
 import type { ElasticsearchModifiedSource } from '../common/types/es';
 import type { RulesByType } from '../common/types/alerts';
 import type { configSchema, MonitoringConfig } from './config';
@@ -121,7 +121,7 @@ export interface LegacyRequest<Params = any, Query = any, Body = any> {
   headers: Headers;
   getKibanaStatsCollector: () => any;
   getUiSettingsService: () => any;
-  getActionTypeRegistry: () => ReturnType<ActionTypeRegistry['list']>;
+  getActionTypeRegistry: () => ReturnType<ConnectorTypeRegistry['list']>;
   getRulesClient: () => ReturnType<AlertingServerStart['getRulesClientWithRequest']> | null;
   getActionsClient: () => ReturnType<
     ActionsPluginsStartContact['getActionsClientWithRequest']
