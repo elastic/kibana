@@ -6,14 +6,14 @@
  */
 import React, { useRef } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import { type NewPackagePolicy, SetupTechnology } from '@kbn/fleet-plugin/public';
 import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AZURE_SETUP_FORMAT_TEST_SUBJECTS } from '@kbn/cloud-security-posture-common';
 import { useAzureCredentialsForm } from './azure_hooks';
-import { updatePolicyWithInputs } from '../utils';
+import { updatePolicyWithInputs, preloadPolicyWithCloudCredentials } from '../utils';
 import type { CspRadioOption } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
 import { AZURE_SETUP_FORMAT, ARM_TEMPLATE_EXTERNAL_DOC_URL } from '../constants';
@@ -190,6 +190,29 @@ export const AzureCredentialsForm = ({
 }: AzureCredentialsFormProps) => {
   const isValidAzureRef = useRef(isValid);
   const {
+    azurePolicyType,
+    azureEnabled,
+    azureManualFieldsEnabled,
+    templateName,
+    isAzureCloudConnectorEnabled,
+    azureOrganizationEnabled,
+  } = useCloudSetup();
+
+  // Preload policy with default Azure credentials to reduce Fleet updates
+  preloadPolicyWithCloudCredentials({
+    provider: 'azure',
+    input,
+    newPolicy,
+    updatePolicy,
+    policyType: azurePolicyType,
+    packageInfo,
+    templateName: templateName || '',
+    setupTechnology: SetupTechnology.AGENT_BASED,
+    isCloudConnectorEnabled: isAzureCloudConnectorEnabled,
+    organizationEnabled: azureOrganizationEnabled,
+  });
+
+  const {
     group,
     fields,
     azureCredentialsType,
@@ -204,19 +227,13 @@ export const AzureCredentialsForm = ({
     updatePolicy,
     isValid,
   });
-  const { azurePolicyType, azureEnabled, azureManualFieldsEnabled } = useCloudSetup();
 
   if (!setupFormat) {
     onSetupFormatChange(AZURE_SETUP_FORMAT.ARM_TEMPLATE);
   }
 
   // This sets the Fleet wrapper's isValid to false if Azure is not enabled for this version of the integration
-  if (
-    isValidAzureRef.current &&
-    isValid &&
-    !azureEnabled // &&
-    // setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE
-  ) {
+  if (isValidAzureRef.current && isValid && !azureEnabled) {
     isValidAzureRef.current = false;
     updatePolicy({ updatedPolicy: newPolicy, isValid: false });
   }
@@ -225,7 +242,7 @@ export const AzureCredentialsForm = ({
     return (
       <>
         <EuiSpacer size="l" />
-        <EuiCallOut color="warning">
+        <EuiCallOut announceOnMount color="warning">
           <FormattedMessage
             id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.azureNotSupportedMessage"
             defaultMessage="CIS Azure is not supported on the current Integration version, please upgrade your integration to the latest version to use CIS Azure"

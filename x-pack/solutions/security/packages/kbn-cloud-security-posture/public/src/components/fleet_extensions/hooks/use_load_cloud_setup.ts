@@ -9,7 +9,7 @@ import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/se
 import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 import type { SetupTechnology } from '@kbn/fleet-plugin/common/types';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import { getInputHiddenVars, updatePolicyWithInputs, hasErrors, getSelectedInput } from '../utils';
+import { updatePolicyWithInputs, hasErrors, getSelectedInput } from '../utils';
 import { useSetupTechnology } from './use_setup_technology';
 import type { CloudProviders, CloudSetupConfig, UpdatePolicy } from '../types';
 
@@ -63,20 +63,14 @@ export const useLoadCloudSetup = ({
     (!isEditPage && isAgentlessAvailable) || (isEditPage && isAgentlessEnabled);
 
   const setEnabledPolicyInput = useCallback(
-    (provider: CloudProviders, showCloudConnectors: boolean = false) => {
+    (provider: CloudProviders) => {
       const inputType = config.providers[provider].type;
-      const inputVars = getInputHiddenVars(
-        provider,
-        packageInfo,
-        templateName,
-        setupTechnology,
-        showCloudConnectors
-      );
 
-      const policy = updatePolicyWithInputs(newPolicy, inputType, inputVars);
+      // Only enable the selected input type and disable all others
+      const policy = updatePolicyWithInputs(newPolicy, inputType);
       updatePolicy({ updatedPolicy: policy });
     },
-    [config.providers, packageInfo, templateName, setupTechnology, newPolicy, updatePolicy]
+    [config.providers, newPolicy, updatePolicy]
   );
 
   return {

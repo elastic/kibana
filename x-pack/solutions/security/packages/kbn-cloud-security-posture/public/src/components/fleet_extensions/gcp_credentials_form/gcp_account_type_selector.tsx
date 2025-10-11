@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
@@ -16,7 +16,7 @@ import {
   GCP_ORGANIZATION_ACCOUNT,
   GCP_SINGLE_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
-import { updatePolicyWithInputs, gcpField, getGcpInputVarsFields } from '../utils';
+import { updatePolicyWithInputs, gcpField, getGcpInputVarsFields, getAccountType } from '../utils';
 import type { CspRadioGroupProps } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
 import type { UpdatePolicy } from '../types';
@@ -53,11 +53,6 @@ const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps
     testId: GCP_SINGLE_ACCOUNT_TEST_SUBJ,
   },
 ];
-
-type GcpAccountType = typeof GCP_SINGLE_ACCOUNT | typeof GCP_ORGANIZATION_ACCOUNT;
-
-const getGcpAccountType = (input: NewPackagePolicyInput): GcpAccountType | undefined =>
-  input.streams[0].vars?.['gcp.account_type']?.value;
 
 export const GcpAccountTypeSelect = ({
   input,
@@ -119,20 +114,6 @@ export const GcpAccountTypeSelect = ({
     }
   };
 
-  useEffect(() => {
-    if (!getGcpAccountType(input)) {
-      updatePolicy({
-        updatedPolicy: updatePolicyWithInputs(newPolicy, gcpPolicyType, {
-          'gcp.account_type': {
-            value: gcpOrganizationEnabled ? GCP_ORGANIZATION_ACCOUNT : GCP_SINGLE_ACCOUNT,
-            type: 'text',
-          },
-        }),
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input, updatePolicy]);
-
   return (
     <>
       <EuiText color="subdued" size="s">
@@ -144,7 +125,7 @@ export const GcpAccountTypeSelect = ({
       <EuiSpacer size="l" />
       {!gcpOrganizationEnabled && (
         <>
-          <EuiCallOut color="warning">
+          <EuiCallOut color="warning" announceOnMount>
             <FormattedMessage
               id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.accountType.organizationNotSupportedMessage"
               defaultMessage="GCP Organization not supported in current integration version. Please upgrade to the latest version to enable GCP Organizations integration."
@@ -155,15 +136,16 @@ export const GcpAccountTypeSelect = ({
       )}
       <RadioGroup
         disabled={disabled}
-        idSelected={getGcpAccountType(input) || ''}
+        idSelected={getAccountType('gcp', input, newPolicy) || ''}
         options={gcpAccountTypeOptions}
         onChange={(accountType) =>
-          accountType !== getGcpAccountType(input) && onSetupFormatChange(accountType)
+          accountType !== getAccountType('gcp', input, newPolicy) &&
+          onSetupFormatChange(accountType)
         }
         size="m"
         name="gcpAccountType"
       />
-      {getGcpAccountType(input) === GCP_ORGANIZATION_ACCOUNT && (
+      {getAccountType('gcp', input, newPolicy) === GCP_ORGANIZATION_ACCOUNT && (
         <>
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
@@ -174,7 +156,7 @@ export const GcpAccountTypeSelect = ({
           </EuiText>
         </>
       )}
-      {getGcpAccountType(input) === GCP_SINGLE_ACCOUNT && (
+      {getAccountType('gcp', input, newPolicy) === GCP_SINGLE_ACCOUNT && (
         <>
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">

@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import { type NewPackagePolicy, SetupTechnology } from '@kbn/fleet-plugin/public';
 import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -18,7 +18,7 @@ import {
 import { getAwsCredentialsFormManualOptions } from './get_aws_credentials_form_options';
 import type { CspRadioOption } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
-import { updatePolicyWithInputs } from '../utils';
+import { updatePolicyWithInputs, preloadPolicyWithCloudCredentials } from '../utils';
 import { useAwsCredentialsForm } from './aws_hooks';
 import { AWS_SETUP_FORMAT } from '../constants';
 import { AwsInputVarFields } from './aws_input_var_fields';
@@ -137,7 +137,29 @@ export const AwsCredentialsForm = ({
   hasInvalidRequiredVars,
   isValid,
 }: AwsFormProps) => {
-  const { awsPolicyType, shortName, awsInputFieldMapping } = useCloudSetup();
+  const {
+    awsPolicyType,
+    shortName,
+    awsInputFieldMapping,
+    templateName,
+    isAwsCloudConnectorEnabled,
+    awsOrganizationEnabled,
+  } = useCloudSetup();
+
+  // Preload policy with default AWS credentials to reduce Fleet updates
+  preloadPolicyWithCloudCredentials({
+    provider: 'aws',
+    input,
+    newPolicy,
+    updatePolicy,
+    policyType: awsPolicyType,
+    packageInfo,
+    templateName: templateName || '',
+    setupTechnology: SetupTechnology.AGENT_BASED,
+    isCloudConnectorEnabled: isAwsCloudConnectorEnabled,
+    organizationEnabled: awsOrganizationEnabled,
+  });
+
   const {
     awsCredentialsType,
     setupFormat,

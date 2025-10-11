@@ -1,10 +1,373 @@
-# CloudSetup Component Guide for Claude Code
+# CloudSetup Agent Guide
 
-This guide provides comprehensive instructions for working with the CloudSetup component system in Kibana's Cloud Security Posture package.
+This comprehensive guide provides instructions, patterns, and workflows for AI coding agents and developers working with the CloudSetup component system in Kibana's Cloud Security Posture package. It includes decision trees, code generation templates, validation checklists, and troubleshooting workflows optimized for both automated agents and human developers.
+
+## Agent Usage Instructions
+
+### For AI Coding Agents
+
+When working with CloudSetup components, always:
+
+1. **Read this guide first** - Understand the architecture before making changes
+2. **Use the decision trees** - Follow structured workflows for consistent results
+3. **Apply validation checklists** - Ensure code quality and prevent regressions
+4. **Reference code templates** - Use provided patterns for new components
+5. **Check troubleshooting guides** - Resolve common issues systematically
+
+### For Human Developers
+
+This guide serves as both documentation and AI agent instructions. Use it to:
+
+- Understand component architecture and relationships
+- Follow best practices for new feature development
+- Maintain consistency across the codebase
+- Onboard new team members efficiently
 
 ## Overview
 
 The CloudSetup component system provides a unified interface for configuring cloud security integrations across AWS, GCP, and Azure platforms. It handles credential management, setup formats, account types, and deployment methods.
+
+## AI Agent Development Workflows
+
+### 🤖 Decision Tree: Adding New Cloud Provider Support
+
+```mermaid
+graph TD
+    A[New Cloud Provider Request] --> B{Provider Supported by Kibana Fleet?}
+    B -->|No| C[Reject - Requires Fleet Plugin Support First]
+    B -->|Yes| D[Create Provider Directory Structure]
+    D --> E[Implement Core Components]
+    E --> F[Add to Provider Registry]
+    F --> G[Implement Preload Logic]
+    G --> H[Add Tests]
+    H --> I[Update Documentation]
+    I --> J[Validation Checklist]
+```
+
+**Implementation Steps:**
+
+1. **Create directory**: `/[provider]_credentials_form/`
+2. **Core files needed**:
+   - `[provider]_credentials_form.tsx` (agent-based)
+   - `[provider]_credentials_form_agentless.tsx` (agentless)
+   - `[provider]_input_var_fields.tsx`
+   - `[provider]_setup_info.tsx`
+3. **Add to constants**: Update `constants.ts` with provider-specific values
+4. **Implement preload**: Add provider logic to `preloadPolicyWithCloudCredentials()`
+5. **Register provider**: Update `CloudSetupProvider` and routing
+
+### 🔧 Decision Tree: Modifying Existing Components
+
+```mermaid
+graph TD
+    A[Component Change Request] --> B{Change Type?}
+    B -->|New Field| C[Add to Input Variables]
+    B -->|New Credential Type| D[Update Credential Type Enum]
+    B -->|New Setup Format| E[Add Setup Format Logic]
+    B -->|Bug Fix| F[Identify Root Cause]
+
+    C --> G[Update Form Validation]
+    D --> H[Update Type Selectors]
+    E --> I[Update Format Handlers]
+    F --> J[Apply Fix with Tests]
+
+    G --> K[Update Preload Logic]
+    H --> K
+    I --> K
+    J --> K
+    K --> L[Run Validation Checklist]
+```
+
+### 🚨 Error Handling Decision Tree
+
+```mermaid
+graph TD
+    A[Error Encountered] --> B{Error Type?}
+    B -->|TypeScript| C[Check Type Definitions]
+    B -->|Runtime| D[Check Props/State]
+    B -->|Validation| E[Check Form Validation Rules]
+    B -->|API/Fleet| F[Check Policy Updates]
+
+    C --> G[Fix Types, Run type-check]
+    D --> H[Check Component Props]
+    E --> I[Update Validation Logic]
+    F --> J[Check Fleet Policy Structure]
+
+    G --> K[Test & Verify]
+    H --> K
+    I --> K
+    J --> K
+```
+
+## 📋 Agent Validation Checklists
+
+### ✅ New Component Checklist
+
+- [ ] **File Structure**: Follows naming conventions (`[provider]_[component].tsx`)
+- [ ] **TypeScript**: All props and interfaces properly typed (no `any` types)
+- [ ] **Imports**: Only necessary imports, properly organized
+- [ ] **Props Interface**: Documented with JSDoc comments
+- [ ] **Error Handling**: Graceful error states and loading states
+- [ ] **Accessibility**: ARIA labels, keyboard navigation support
+- [ ] **Testing**: Unit tests for component logic
+- [ ] **Documentation**: Updated component guide and usage examples
+- [ ] **Preload Integration**: If form component, integrated with preload pattern
+- [ ] **Fleet Integration**: Properly updates policy structure
+
+### ✅ Modification Checklist
+
+- [ ] **Backward Compatibility**: Changes don't break existing functionality
+- [ ] **Type Safety**: All TypeScript errors resolved
+- [ ] **Performance**: No unnecessary re-renders or API calls
+- [ ] **Error Boundaries**: Proper error handling implemented
+- [ ] **Testing Updated**: Tests reflect new behavior
+- [ ] **Documentation Updated**: Changes documented in this guide
+- [ ] **Preload Logic**: Updated if policy structure changes
+- [ ] **Validation Rules**: Form validation updated if needed
+
+### ✅ Bug Fix Checklist
+
+- [ ] **Root Cause Identified**: Clear understanding of the issue
+- [ ] **Minimal Fix**: Changes are minimal and targeted
+- [ ] **No Side Effects**: Fix doesn't introduce new issues
+- [ ] **Test Coverage**: Bug scenario covered by tests
+- [ ] **Edge Cases Handled**: Similar edge cases addressed
+- [ ] **Documentation Updated**: Known issues section updated if needed
+
+## 🎯 Agent Code Generation Templates
+
+### New Cloud Provider Form Template
+
+```typescript
+// File: [provider]_credentials_form/[provider]_credentials_form.tsx
+import React from 'react';
+import { EuiForm, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { type NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
+
+import {
+  updatePolicyWithInputs,
+  preloadPolicyWithCloudCredentials,
+  [PROVIDER]_CREDENTIALS_TYPE,
+} from '../utils';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
+import type { UpdatePolicy } from '../types';
+
+interface [Provider]FormProps {
+  newPolicy: NewPackagePolicy;
+  input: NewPackagePolicyInput;
+  updatePolicy: UpdatePolicy;
+  packageInfo: PackageInfo;
+  disabled: boolean;
+  isEditPage?: boolean;
+  hasInvalidRequiredVars: boolean;
+}
+
+export const [Provider]CredentialsForm = ({
+  input,
+  newPolicy,
+  updatePolicy,
+  packageInfo,
+  disabled,
+  hasInvalidRequiredVars,
+}: [Provider]FormProps) => {
+  const {
+    [provider]PolicyType,
+    templateName,
+    [provider]OrganizationEnabled,
+  } = useCloudSetup();
+
+  // Preload policy with default [Provider] credentials to reduce Fleet updates
+  preloadPolicyWithCloudCredentials({
+    provider: '[provider]',
+    input,
+    newPolicy,
+    updatePolicy,
+    policyType: [provider]PolicyType,
+    packageInfo,
+    templateName: templateName || '',
+    setupTechnology: SetupTechnology.AGENT_BASED,
+    isCloudConnectorEnabled: false, // Update based on provider support
+    organizationEnabled: [provider]OrganizationEnabled,
+  });
+
+  // Component implementation...
+
+  return (
+    <EuiForm>
+      {/* Form fields */}
+    </EuiForm>
+  );
+};
+```
+
+### New Preload Provider Logic Template
+
+```typescript
+// Add to utils.ts in addProviderSpecificUpdates()
+case '[provider]':
+  updatedPolicy = add[Provider]TemplateUpdates(
+    updatedPolicy,
+    packageInfo,
+    templateName,
+    setupTechnology
+  );
+  break;
+
+// Add new function:
+const add[Provider]TemplateUpdates = (
+  policy: NewPackagePolicy,
+  packageInfo: PackageInfo,
+  templateName: string,
+  setupTechnology: SetupTechnology
+): NewPackagePolicy => {
+  // Only process for agent-based setup if using templates
+  if (setupTechnology === SetupTechnology.AGENTLESS) {
+    return policy;
+  }
+
+  // Get template URL from package if available
+  const templateUrl = get[Provider]TemplateDefaultValue(packageInfo, templateName);
+  if (!templateUrl) {
+    return policy;
+  }
+
+  // Set template URL in appropriate policy structure
+  return {
+    ...policy,
+    vars: { // or config, depending on provider structure
+      ...policy.vars,
+      [provider]_template_url: {
+        value: templateUrl,
+        type: 'text',
+      },
+    },
+  };
+};
+```
+
+## 🔍 Agent Troubleshooting Guides
+
+### Common Issues and Solutions
+
+#### Issue: Component Not Rendering
+
+**Symptoms**: Component appears blank or throws runtime errors
+**Diagnostic Steps**:
+
+1. Check browser console for errors
+2. Verify all required props are passed
+3. Check TypeScript compilation errors
+4. Validate component registration in parent
+
+**Solutions**:
+
+```typescript
+// ✅ Ensure proper prop validation
+interface ComponentProps {
+  requiredProp: string;
+  optionalProp?: boolean;
+}
+
+// ✅ Add error boundaries
+const ComponentWithErrorBoundary = () => {
+  try {
+    return <YourComponent {...props} />;
+  } catch (error) {
+    return <ErrorFallback error={error} />;
+  }
+};
+```
+
+#### Issue: Form Validation Not Working
+
+**Symptoms**: Form allows invalid submissions or shows incorrect validation states
+**Diagnostic Steps**:
+
+1. Check validation rules in form component
+2. Verify validation functions are called
+3. Check Fleet policy validation integration
+4. Validate error state management
+
+**Solutions**:
+
+```typescript
+// ✅ Proper validation implementation
+const validateField = (value: string): string[] => {
+  const errors: string[] = [];
+  if (!value) errors.push('Field is required');
+  if (value.length < 3) errors.push('Minimum 3 characters');
+  return errors;
+};
+
+// ✅ Integration with hasInvalidRequiredVars
+const fieldErrors = validateField(fieldValue);
+const isFieldInvalid = fieldErrors.length > 0 || hasInvalidRequiredVars;
+```
+
+#### Issue: Policy Updates Not Working
+
+**Symptoms**: Changes don't persist or cause multiple API calls
+**Diagnostic Steps**:
+
+1. Check preload function implementation
+2. Verify updatePolicy function usage
+3. Check policy structure matches Fleet expectations
+4. Validate no conflicting useEffect hooks
+
+**Solutions**:
+
+```typescript
+// ✅ Use preload pattern for initialization
+preloadPolicyWithCloudCredentials({
+  provider: 'aws',
+  // ... other params
+});
+
+// ✅ Use updatePolicy for user interactions only
+const handleFieldChange = (field: string, value: string) => {
+  updatePolicy({
+    updatedPolicy: updatePolicyWithInputs(newPolicy, policyType, {
+      [field]: { value, type: 'text' },
+    }),
+  });
+};
+```
+
+### Performance Troubleshooting
+
+#### Issue: Slow Form Loading
+
+**Diagnostic Approach**:
+
+1. Check for excessive useEffect hooks
+2. Monitor policy update frequency
+3. Verify preload efficiency
+4. Check for unnecessary re-renders
+
+**Solutions**:
+
+- Consolidate initialization logic in preload
+- Remove redundant useEffect hooks
+- Use React.memo() for expensive components
+- Implement proper dependency arrays
+
+#### Issue: Memory Leaks
+
+**Diagnostic Approach**:
+
+1. Check for uncleaned event listeners
+2. Verify useEffect cleanup functions
+3. Monitor component mount/unmount cycles
+4. Check for retained references
+
+**Solutions**:
+
+- Add cleanup functions to useEffect hooks
+- Use AbortController for async operations
+- Properly dispose of event listeners
+- Avoid closures over large objects
 
 ## Core Architecture
 
@@ -988,4 +1351,119 @@ const useCloudFormationTemplate = ({ packageInfo, newPolicy, updatePolicy }) => 
 5. **Validate internationalization** with different locales
 6. **Performance test preload efficiency** vs original useEffect approach
 
-This guide provides comprehensive coverage of the CloudSetup component system. When working with these components, refer to the specific component files for detailed implementation examples and the test files for usage patterns.
+## 🤖 AI Agent Specific Instructions
+
+### Constraints and Limitations
+
+**NEVER do these actions without explicit user permission:**
+
+- Delete existing components or files
+- Remove existing functionality or features
+- Modify critical interfaces that other components depend on
+- Change Fleet policy structure without validation
+- Remove security-related validation logic
+- Modify authentication or authorization logic
+
+**ALWAYS do these actions when making changes:**
+
+- Run TypeScript type checking after modifications
+- Add proper JSDoc comments to new functions/interfaces
+- Follow existing naming conventions and file structure
+- Use provided validation checklists
+- Test changes with provided test patterns
+- Update relevant documentation sections
+
+### Code Quality Standards for AI Agents
+
+```typescript
+// ✅ GOOD: Explicit types, clear naming, proper error handling
+interface CloudProviderFormProps {
+  /** The policy being configured by the user */
+  newPolicy: NewPackagePolicy;
+  /** Input configuration for this specific provider */
+  input: NewPackagePolicyInput;
+  /** Function to update the policy state */
+  updatePolicy: (update: { updatedPolicy: NewPackagePolicy }) => void;
+  /** Package metadata and configuration */
+  packageInfo: PackageInfo;
+  /** Whether the form should be in disabled state */
+  disabled: boolean;
+  /** Whether this is an edit operation vs new creation */
+  isEditPage?: boolean;
+  /** Whether there are validation errors on required fields */
+  hasInvalidRequiredVars: boolean;
+}
+
+// ❌ BAD: any types, unclear naming, no error handling
+interface Props {
+  data: any;
+  callback: (x: any) => void;
+  flag: boolean;
+}
+```
+
+### Decision Framework for AI Agents
+
+When encountering ambiguous requirements, use this priority order:
+
+1. **User Safety**: Ensure changes don't break existing functionality
+2. **Security**: Maintain all security validations and constraints
+3. **Performance**: Follow preload patterns, avoid excessive API calls
+4. **Consistency**: Match existing code patterns and conventions
+5. **Maintainability**: Write clear, documented, testable code
+6. **User Experience**: Ensure forms remain accessible and intuitive
+
+### Communication Guidelines for AI Agents
+
+When working on CloudSetup components:
+
+**✅ DO communicate:**
+
+- What changes you're making and why
+- Any potential risks or impacts identified
+- Validation steps you're taking
+- Alternative approaches considered
+- Dependencies or prerequisites needed
+
+**❌ DON'T assume:**
+
+- User requirements are complete
+- Existing code patterns are incorrect
+- Performance optimizations are always needed
+- Breaking changes are acceptable
+- Security requirements are flexible
+
+### Knowledge Boundaries for AI Agents
+
+**Topics you can confidently help with:**
+
+- Component structure and TypeScript interfaces
+- Form validation and error handling
+- React patterns and performance optimization
+- Fleet policy structure and updates
+- Testing strategies and implementation
+- Code organization and documentation
+
+**Topics requiring human validation:**
+
+- Security and authentication changes
+- Fleet plugin integration modifications
+- Breaking API changes
+- Production deployment considerations
+- User experience design decisions
+- Business logic and requirements interpretation
+
+### Quality Assurance for AI Agents
+
+Before completing any task, verify:
+
+- [ ] All TypeScript errors resolved (`yarn type:check`)
+- [ ] Code follows established patterns in existing components
+- [ ] No `any` types introduced (unless absolutely necessary)
+- [ ] Error handling properly implemented
+- [ ] Documentation updated to reflect changes
+- [ ] Validation checklist completed
+- [ ] No security validations removed or weakened
+- [ ] Performance considerations addressed
+
+This guide provides comprehensive coverage of the CloudSetup component system optimized for both human developers and AI coding agents. When working with these components, always refer to the decision trees, validation checklists, and code templates provided to ensure consistent, high-quality results.

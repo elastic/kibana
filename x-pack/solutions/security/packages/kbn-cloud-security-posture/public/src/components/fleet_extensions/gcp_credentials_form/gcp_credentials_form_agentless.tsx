@@ -13,12 +13,14 @@ import type {
   NewPackagePolicyInput,
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { ORGANIZATION_ACCOUNT } from '@kbn/cloud-security-posture-common';
 import {
   getTemplateUrlFromPackageInfo,
   updatePolicyWithInputs,
   gcpField,
   getGcpInputVarsFields,
+  preloadPolicyWithCloudCredentials,
 } from '../utils';
 import {
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
@@ -48,8 +50,28 @@ export const GcpCredentialsFormAgentless = ({
   packageInfo,
   hasInvalidRequiredVars,
 }: GcpFormAgentlessProps) => {
-  const { showCloudTemplates, templateName, gcpPolicyType, gcpOverviewPath } = useCloudSetup();
+  const {
+    showCloudTemplates,
+    templateName,
+    gcpPolicyType,
+    gcpOverviewPath,
+    gcpOrganizationEnabled,
+  } = useCloudSetup();
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
+
+  // Preload policy with default GCP credentials to reduce Fleet updates
+  preloadPolicyWithCloudCredentials({
+    provider: 'gcp',
+    input,
+    newPolicy,
+    updatePolicy,
+    policyType: gcpPolicyType,
+    packageInfo,
+    templateName: templateName || '',
+    setupTechnology: SetupTechnology.AGENTLESS,
+    isCloudConnectorEnabled: false, // GCP doesn't support cloud connectors yet
+    organizationEnabled: gcpOrganizationEnabled,
+  });
   const isOrganization = accountType === ORGANIZATION_ACCOUNT;
   const organizationFields = ['gcp.organization_id', 'gcp.credentials.json'];
   const singleAccountFields = ['gcp.project_id', 'gcp.credentials.json'];
@@ -82,7 +104,7 @@ export const GcpCredentialsFormAgentless = ({
       <EuiSpacer size="m" />
       {!showCloudTemplates && (
         <>
-          <EuiCallOut color="warning">
+          <EuiCallOut announceOnMount color="warning">
             <FormattedMessage
               id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudFormationSupportedMessage"
               defaultMessage="Launch Cloud Shell for automated credentials not supported in current integration version. Please upgrade to the latest version to enable Launch Cloud Shell for automated credentials."

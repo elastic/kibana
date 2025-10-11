@@ -38,67 +38,6 @@ const getSetupFormatFromInput = (
 const getAzureCredentialsType = (input: NewPackagePolicyInput): AzureCredentialsType | undefined =>
   input.streams[0].vars?.['azure.credentials.type']?.value;
 
-const getAzureArmTemplateUrl = (newPolicy: NewPackagePolicy, policyType?: string) => {
-  if (!policyType) {
-    return undefined;
-  }
-  const template: string | undefined = newPolicy?.inputs?.find((i) => i.type === policyType)?.config
-    ?.arm_template_url?.value;
-
-  return template || undefined;
-};
-
-const updateAzureArmTemplateUrlInPolicy = (
-  newPolicy: NewPackagePolicy,
-  updatePolicy: UpdatePolicy,
-  templateUrl: string | undefined,
-  policyType?: string
-) => {
-  updatePolicy?.({
-    updatedPolicy: {
-      ...newPolicy,
-      inputs: newPolicy.inputs.map((input) => {
-        if (input.type === policyType) {
-          return {
-            ...input,
-            config: { arm_template_url: { value: templateUrl } },
-          };
-        }
-        return input;
-      }),
-    },
-  });
-};
-
-const useUpdateAzureArmTemplate = ({
-  packageInfo,
-  newPolicy,
-  updatePolicy,
-  setupFormat,
-}: {
-  packageInfo: PackageInfo;
-  newPolicy: NewPackagePolicy;
-  updatePolicy: UpdatePolicy;
-  setupFormat: AzureSetupFormat;
-}) => {
-  const { azurePolicyType, templateName } = useCloudSetup();
-  const azureArmTemplateUrl = getAzureArmTemplateUrl(newPolicy, azurePolicyType);
-
-  if (setupFormat === AZURE_SETUP_FORMAT.MANUAL) {
-    if (azureArmTemplateUrl) {
-      updateAzureArmTemplateUrlInPolicy(newPolicy, updatePolicy, undefined, azurePolicyType);
-    }
-    return;
-  }
-  const templateUrl = getArmTemplateUrlFromPackage(packageInfo, templateName);
-
-  if (templateUrl === '') return;
-
-  if (azureArmTemplateUrl === templateUrl) return;
-
-  updateAzureArmTemplateUrlInPolicy(newPolicy, updatePolicy, templateUrl, azurePolicyType);
-};
-
 export const useAzureCredentialsForm = ({
   newPolicy,
   input,
@@ -141,13 +80,6 @@ export const useAzureCredentialsForm = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setupFormat, input.type]);
-
-  useUpdateAzureArmTemplate({
-    packageInfo,
-    newPolicy,
-    updatePolicy,
-    setupFormat,
-  });
 
   const defaultAzureManualCredentialType = AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY;
 
