@@ -17,7 +17,12 @@ import type {
 import { useTimefilter } from '@kbn/ml-date-picker';
 import type { ResultLinks } from '@kbn/data-visualizer-plugin/common/app';
 import { HelpMenu } from '../../components/help_menu';
-import { useMlApi, useMlKibana, useMlLocator } from '../../contexts/kibana';
+import {
+  useMlApi,
+  useMlKibana,
+  useMlLocator,
+  useMlManagementLocatorInternal,
+} from '../../contexts/kibana';
 
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { isFullLicense } from '../../license';
@@ -39,6 +44,7 @@ export const FileDataVisualizerPage: FC = () => {
   } = useMlKibana();
   const mlApi = useMlApi();
   const mlLocator = useMlLocator()!;
+  const mlManagementLocator = useMlManagementLocatorInternal();
   getMlNodeCount(mlApi);
 
   const [FileDataVisualizer, setFileDataVisualizer] = useState<FileDataVisualizerSpec | null>(null);
@@ -56,13 +62,15 @@ export const FileDataVisualizerPage: FC = () => {
           icon: 'machineLearningApp',
           type: 'file',
           getUrl: async () => {
-            return await mlLocator.getUrl({
-              page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE,
-              pageState: {
-                index: dataViewId,
-                globalState,
-              },
-            });
+            return (
+              await mlManagementLocator.getUrl({
+                page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE,
+                pageState: {
+                  index: dataViewId,
+                  globalState,
+                },
+              })
+            ).url!;
           },
           canDisplay: async () => {
             try {

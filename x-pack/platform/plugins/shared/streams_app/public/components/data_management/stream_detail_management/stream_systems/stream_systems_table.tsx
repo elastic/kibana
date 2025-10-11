@@ -10,10 +10,10 @@ import { useEffect } from 'react';
 import {} from 'react';
 import React, { useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiCodeBlock } from '@elastic/eui';
 import { EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import { type Streams, type System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
+import { ConditionPanel } from '../../shared';
 import { SystemEventsSparkline } from './system_events_sparkline';
 import { SystemDetailExpanded } from './system_detail_expanded';
 import { TableTitle } from './table_title';
@@ -45,6 +45,7 @@ export function StreamSystemsTable({
       name: i18n.translate('xpack.streams.streamSystemsTable.columns.title', {
         defaultMessage: 'Title',
       }),
+      width: '15%',
       sortable: true,
       truncateText: true,
     },
@@ -53,6 +54,7 @@ export function StreamSystemsTable({
       name: i18n.translate('xpack.streams.streamSystemsTable.columns.description', {
         defaultMessage: 'Description',
       }),
+      width: '30%',
       truncateText: {
         lines: 4,
       },
@@ -62,20 +64,23 @@ export function StreamSystemsTable({
       name: i18n.translate('xpack.streams.streamSystemsTable.columns.filter', {
         defaultMessage: 'Filter',
       }),
+      width: '25%',
       render: (filter: System['filter']) => {
-        return <EuiCodeBlock>{JSON.stringify(filter)}</EuiCodeBlock>;
+        return <ConditionPanel condition={filter} />;
       },
     },
     {
       name: i18n.translate('xpack.streams.streamSystemsTable.columns.eventsLast24Hours', {
         defaultMessage: 'Events (last 24 hours)',
       }),
+      width: '20%',
       render: (system: System) => {
         return <SystemEventsSparkline system={system} definition={definition} />;
       },
     },
     {
       name: 'Actions',
+      width: '5%',
       actions: [
         {
           name: i18n.translate('xpack.streams.streamSystemsTable.columns.actions.cloneActionName', {
@@ -211,7 +216,7 @@ export function StreamSystemsTable({
         itemId="name"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         columns={columnsWithExpandingRowToggle}
-        selection={{ initialSelected: selectedSystems, onSelectionChange: setSelectedSystems }}
+        selection={{ selected: selectedSystems, onSelectionChange: setSelectedSystems }}
       />
     </>
   );

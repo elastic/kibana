@@ -6,29 +6,39 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { API_VERSIONS } from '@kbn/elastic-assistant-common';
-import { WORKFLOW_INSIGHTS } from '../../translations';
+import { API_VERSIONS, DefendInsightType } from '@kbn/elastic-assistant-common';
+
 import type { SecurityWorkflowInsight } from '../../../../../../../common/endpoint/types/workflow_insights';
+import { ActionType } from '../../../../../../../common/endpoint/types/workflow_insights';
 import { WORKFLOW_INSIGHTS_ROUTE } from '../../../../../../../common/endpoint/constants';
 import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
+import { WORKFLOW_INSIGHTS } from '../../translations';
 
 interface UseFetchInsightsConfig {
   endpointId: string;
   onSuccess: () => void;
   scanCompleted: boolean;
   expectedCount: number | null;
+  insightTypes: DefendInsightType[];
 }
 
 const MAX_RETRIES = 5;
+// incompatible_antivirus can still show up after remediation
+// since we currently always pull last 24 hours of events
+const REFRESH_ONLY_TYPES = new Set<DefendInsightType>([
+  DefendInsightType.Enum.policy_response_failure,
+]);
 
 export const useFetchInsights = ({
   endpointId,
   onSuccess,
   scanCompleted,
   expectedCount,
+  insightTypes,
 }: UseFetchInsightsConfig) => {
   const { http } = useKibana().services;
   const toasts = useToasts();
+  const insightTypesSet = new Set(insightTypes);
 
   return useQuery<SecurityWorkflowInsight[], Error, SecurityWorkflowInsight[]>(
     [`fetchInsights-${endpointId}`, expectedCount],
@@ -48,10 +58,21 @@ export const useFetchInsights = ({
             size: 100,
           },
         });
-        if (result.length === expectedCount) {
+        const relevantResults = result.filter((insight) => {
+          if (!insightTypesSet.has(insight.type)) {
+            return false;
+          }
+
+          if (REFRESH_ONLY_TYPES.has(insight.type)) {
+            return insight.action.type === ActionType.Refreshed;
+          }
+
+          return true;
+        });
+        if (relevantResults.length === expectedCount) {
           onSuccess();
         }
-        return result;
+        return relevantResults;
       } catch (error) {
         toasts.addDanger({
           title: WORKFLOW_INSIGHTS.toasts.fetchInsightsError,

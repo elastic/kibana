@@ -52,7 +52,23 @@
             "label": "startTour",
             "description": [],
             "signature": [
-              "(enabledSteps: ",
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/navigation-tour/src/tour_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation-tour",
+            "id": "def-public.TourManager.activateTour",
+            "type": "Function",
+            "tags": [],
+            "label": "activateTour",
+            "description": [],
+            "signature": [
+              "(visibleStepIds: ",
               "TourStepId",
               "[]) => void"
             ],
@@ -62,10 +78,10 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-navigation-tour",
-                "id": "def-public.TourManager.startTour.$1",
+                "id": "def-public.TourManager.activateTour.$1",
                 "type": "Array",
                 "tags": [],
-                "label": "enabledSteps",
+                "label": "visibleStepIds",
                 "description": [],
                 "signature": [
                   "TourStepId",
@@ -158,22 +174,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-navigation-tour",
-            "id": "def-public.TourManager.isLastStep",
-            "type": "Function",
-            "tags": [],
-            "label": "isLastStep",
-            "description": [],
-            "signature": [
-              "() => boolean"
-            ],
-            "path": "src/core/packages/chrome/navigation-tour/src/tour_manager.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -188,9 +188,9 @@
         "label": "Tour",
         "description": [],
         "signature": [
-          "({ tourManager }: ",
+          "(props: ",
           "TourProps",
-          ") => React.JSX.Element | null"
+          ") => React.JSX.Element"
         ],
         "path": "src/core/packages/chrome/navigation-tour/src/tour.tsx",
         "deprecated": false,
@@ -201,7 +201,7 @@
             "id": "def-public.Tour.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ tourManager }",
+            "label": "props",
             "description": [],
             "signature": [
               "TourProps"
@@ -247,7 +247,23 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-chrome-navigation-tour",
+        "id": "def-public.TourStepId",
+        "type": "Type",
+        "tags": [],
+        "label": "TourStepId",
+        "description": [],
+        "signature": [
+          "\"sidenav-home\" | \"sidenav-more\" | \"sidenav-manage-data\""
+        ],
+        "path": "src/core/packages/chrome/navigation-tour/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "server": {

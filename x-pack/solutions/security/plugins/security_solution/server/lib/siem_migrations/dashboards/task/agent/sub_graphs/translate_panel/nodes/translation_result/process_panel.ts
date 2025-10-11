@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getQueryColumnsFromESQLQuery } from '@kbn/esql-utils';
 import type { ParsedPanel } from '../../../../../../../../../../common/siem_migrations/parsers/types';
+import type { EsqlColumn } from '../../types';
 
 interface ColumnInfo {
   columnId: string;
@@ -49,10 +49,15 @@ interface PanelJSON {
 }
 
 // Process the panel and return the modified panelJSON
-export const processPanel = (panel: object, query: string, parsedPanel: ParsedPanel): object => {
+export const processPanel = (
+  panel: object,
+  query: string,
+  esqlColumns: EsqlColumn[],
+  parsedPanel: ParsedPanel
+): object => {
   const panelJSON = structuredClone(panel) as PanelJSON;
 
-  const { columnList, columns } = parseColumns(query);
+  const { columnList, columns } = parseColumns(esqlColumns);
   const vizType = parsedPanel.viz_type;
 
   // Set panel basic properties
@@ -79,43 +84,33 @@ export const processPanel = (panel: object, query: string, parsedPanel: ParsedPa
 };
 
 // Parse columns from ESQL query and build column array for panel JSON
-function parseColumns(query: string): { columnList: ColumnInfo[]; columns: string[] } {
-  const columnNames = getQueryColumnsFromESQLQuery(query);
+function parseColumns(extractedColumns: EsqlColumn[]): {
+  columnList: ColumnInfo[];
+  columns: string[];
+} {
   const columnList: ColumnInfo[] = [];
-  const columns: string[] = [];
-
-  let metricIndex = 0;
-
-  columnNames.forEach((columnName) => {
-    // For now, assume numeric columns are metrics (first columns) and string columns are dimensions. This is a simplification.
-    // TODO: Determine column types of the ESQL query using the LLM
-    const isNumeric = metricIndex === 0; // First column is "typically" the metric
-
-    if (isNumeric) {
-      columnList.splice(metricIndex, 0, {
+  const columnNames: string[] = [];
+  extractedColumns.forEach(({ name: columnName, type }, index) => {
+    if (index === 0) {
+      columnList.push({
         columnId: columnName,
         fieldName: columnName,
-        meta: { type: 'number' },
+        meta: { type },
+        /* The first column is mostly a metric so here we are making that assumption
+         * unless we have better way to do this. */
         inMetricDimension: true,
       });
-      columns.splice(metricIndex, 0, columnName);
-      metricIndex++;
     } else {
       columnList.push({
         columnId: columnName,
         fieldName: columnName,
         meta: { type: 'string' },
       });
-      columns.push(columnName);
+      columnNames.push(columnName);
     }
   });
 
-  // Ensure at least one column has inMetricDimension if no numeric columns
-  if (metricIndex === 0 && columnList.length > 0) {
-    columnList[0].inMetricDimension = true;
-  }
-
-  return { columnList, columns };
+  return { columnList, columns: columnNames };
 }
 
 // Configure chart-specific properties

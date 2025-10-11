@@ -25,6 +25,7 @@ Array [
       >
         <div
           class="euiText emotion-euiText-s"
+          tabindex="0"
         >
           <span
             color="success"
@@ -102,8 +103,27 @@ exports[`SSL Certificate component shallow renders 1`] = `
   <MonitorSSLCertificate
     tls={
       Object {
-        "certificate_not_valid_after": "2020-04-24T11:41:38.200Z",
-        "certificate_not_valid_before": "2019-04-24T11:41:38.200Z",
+        "server": Object {
+          "hash": Object {
+            "sha1": "b7b4b89ef0d0caf39d223736f0fdbb03c7b426f1",
+            "sha256": "12b00d04db0db8caa302bfde043e88f95baceb91e86ac143e93830b4bbec726d",
+          },
+          "x509": Object {
+            "issuer": Object {
+              "common_name": "GlobalSign CloudSSL CA - SHA256 - G3",
+              "distinguished_name": "",
+            },
+            "not_after": "2020-04-24T11:41:38.200Z",
+            "not_before": "2019-04-24T11:41:38.200Z",
+            "public_key_algorithm": "RSA",
+            "serial_number": "1234567890",
+            "signature_algorithm": "SHA256-RSA",
+            "subject": Object {
+              "common_name": "r2.shared.global.fastly.net",
+              "distinguished_name": "",
+            },
+          },
+        },
       }
     }
   />

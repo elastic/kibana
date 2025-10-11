@@ -52,6 +52,7 @@ import {
   SessionUnexpectedError,
   type SessionValue,
 } from '../session_management';
+import type { UiamServicePublic } from '../uiam';
 import type { UserProfileServiceStartInternal } from '../user_profile';
 
 /**
@@ -95,6 +96,7 @@ export interface AuthenticatorOptions {
   loggers: LoggerFactory;
   clusterClient: IClusterClient;
   session: PublicMethodsOf<Session>;
+  uiam?: UiamServicePublic;
   getServerBaseURL: () => string;
   isElasticCloudDeployment: () => boolean;
   customLogoutURL?: string;
@@ -137,11 +139,27 @@ const ACCESS_AGREEMENT_ROUTE = '/security/access_agreement';
  * The route to the overwritten session UI.
  */
 const OVERWRITTEN_SESSION_ROUTE = '/security/overwritten_session';
-function assertLoginAttempt(attempt: ProviderLoginAttempt) {
+function assertLoginAttempt(
+  attempt: ProviderLoginAttempt,
+  providers: Map<string, BaseAuthenticationProvider>
+) {
   if (!isLoginAttemptWithProviderType(attempt) && !isLoginAttemptWithProviderName(attempt)) {
     throw new Error(
       'Login attempt should be an object with non-empty "provider.type" or "provider.name" property.'
     );
+  }
+
+  const providerType = isLoginAttemptWithProviderType(attempt)
+    ? attempt?.provider?.type
+    : providers.get(attempt?.provider?.name as string)?.type;
+
+  if (
+    !attempt?.value &&
+    [OIDCAuthenticationProvider.type, SAMLAuthenticationProvider.type].includes(
+      providerType as string
+    )
+  ) {
+    throw new Error('Login "attempt.value" should not be empty.');
   }
 }
 
@@ -239,6 +257,7 @@ export class Authenticator {
       }),
       getServerBaseURL: this.options.getServerBaseURL,
       isElasticCloudDeployment: this.options.isElasticCloudDeployment,
+      uiam: this.options.uiam,
     };
 
     this.providers = new Map(
@@ -289,7 +308,7 @@ export class Authenticator {
    * @param attempt Login attempt description.
    */
   async login(request: KibanaRequest, attempt: ProviderLoginAttempt) {
-    assertLoginAttempt(attempt);
+    assertLoginAttempt(attempt, this.providers);
 
     const { value: existingSessionValue } = await this.getSessionValue(request);
 

@@ -78,6 +78,7 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
           <>
             <EuiSpacer />
             <EuiCallOut
+              announceOnMount
               color="danger"
               title={i18n.translate(
                 'xpack.enterpriseSearch.searchApplications.searchApplication.indices.addIndicesFlyout.updateError.title',

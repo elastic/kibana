@@ -1,0 +1,12 @@
+steps:
+  - command: .buildkite/scripts/steps/check_saved_objects.sh
+    label: 'Check changes in Saved Objects'
+    agents:
+      machineType: n2-standard-2
+      preemptible: true
+    depends_on:
+      - build
+      - quick_checks
+      - checks
+    timeout_in_minutes: 10
+    soft_fail: true # Can be removed when we are confident that this check is not too disruptive

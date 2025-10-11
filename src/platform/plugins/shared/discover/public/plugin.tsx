@@ -399,6 +399,10 @@ export class DiscoverPlugin
 
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
+        const getEmbeddableServices = () => import('./plugin_imports/embeddable_services');
+        const { addControlsFromSavedSession } = await getEmbeddableServices();
+        addControlsFromSavedSession(container, savedObject);
+
         const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
         container.addNewPanel(
           {
@@ -453,9 +457,9 @@ export class DiscoverPlugin
       });
     });
 
-    plugins.embeddable.registerTransforms(SEARCH_EMBEDDABLE_TYPE, async () => {
+    plugins.embeddable.registerLegacyURLTransform(SEARCH_EMBEDDABLE_TYPE, async () => {
       const { searchEmbeddableTransforms } = await getEmbeddableServices();
-      return searchEmbeddableTransforms;
+      return searchEmbeddableTransforms.transformOut;
     });
   }
 }
