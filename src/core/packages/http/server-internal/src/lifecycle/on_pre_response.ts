@@ -34,6 +34,7 @@ const preResponseResult = {
       type: OnPreResponseResultType.render,
       body: responseRender.body,
       headers: responseRender?.headers,
+      statusCode: responseRender?.statusCode,
     };
   },
   isRender(result: OnPreResponseResult): result is OnPreResponseResultRender {
@@ -93,7 +94,8 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
             }
           }
         } else if (preResponseResult.isRender(result)) {
-          const overriddenResponse = responseToolkit.response(result.body).code(statusCode);
+          const responseStatusCode = result.statusCode ?? statusCode;
+          const overriddenResponse = responseToolkit.response(result.body).code(responseStatusCode);
           const originalHeaders = isBoom(response) ? response.output.headers : response.headers;
           setHeaders(overriddenResponse, originalHeaders as { [key: string]: string });
           if (result.headers) {
