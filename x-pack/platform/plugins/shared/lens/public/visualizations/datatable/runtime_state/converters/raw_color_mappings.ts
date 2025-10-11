@@ -6,6 +6,7 @@
  */
 
 import type { ColumnState } from '../../../../../common/expressions';
+import { trackRuntimeMigration } from '../../../../runtime_state';
 import type { DeprecatedColorMappingConfig } from '../../../../runtime_state/converters/raw_color_mappings';
 import {
   convertToRawColorMappings,
@@ -42,6 +43,8 @@ export const convertToRawColorMappingsFn = (
     });
 
     if (!hasDeprecatedColorMappings) return state as DatatableVisualizationState;
+
+    trackRuntimeMigration('rawColorMappings', 'datatable');
 
     const convertedColumns = state.columns.map((column) => {
       if (column.colorMapping?.assignments || column.colorMapping?.specialAssignments) {

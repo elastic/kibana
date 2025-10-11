@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { trackRuntimeMigration } from '../../../../runtime_state';
 import type { DeprecatedColorMappingConfig } from '../../../../runtime_state/converters/raw_color_mappings';
 import {
   convertToRawColorMappings,
@@ -34,6 +35,8 @@ export const convertToRawColorMappingsFn = (
       : false;
 
     if (!hasDeprecatedColorMapping) return state as TagcloudState;
+
+    trackRuntimeMigration('rawColorMappings', 'tagcloud');
 
     const columnMeta = state.tagAccessor ? getColumnMeta?.(state.layerId, state.tagAccessor) : null;
 
