@@ -44,8 +44,14 @@ export const AugmentMessageCodeBlockButton = ({ currentConversation, codeBlockDe
     </SendToTimelineButton>
   );
 
-  const updateQueryInForm = DETECTION_RULES_CREATE_FORM_CONVERSATION_ID ===
-    currentConversation.title && <UpdateQueryInFormButton query={codeBlockDetails.content ?? ''} />;
+  console.log(
+    'UpdateQueryInFormButton',
+    DETECTION_RULES_CREATE_FORM_CONVERSATION_ID,
+    currentConversation.title
+  );
+  const updateQueryInForm = currentConversation.title.startsWith(
+    DETECTION_RULES_CREATE_FORM_CONVERSATION_ID
+  ) && <UpdateQueryInFormButton query={codeBlockDetails.content ?? ''} />;
 
   return (
     <>

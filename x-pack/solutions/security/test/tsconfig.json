@@ -63,5 +63,7 @@
     "@kbn/rison",
     "@kbn/core-chrome-browser",
     "@kbn/management-settings-ids",
+    "@kbn/openapi-common",
+    "@kbn/spaces-plugin",
   ]
 }

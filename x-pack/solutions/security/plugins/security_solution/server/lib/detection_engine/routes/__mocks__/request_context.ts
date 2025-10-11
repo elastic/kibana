@@ -213,6 +213,7 @@ const createSecuritySolutionRequestContextMock = (
     getMlAuthz: jest.fn(() => ({
       validateRuleType: jest.fn(async () => ({ valid: true, message: undefined })),
     })),
+    getInferenceService: jest.fn(),
   };
 };
 
