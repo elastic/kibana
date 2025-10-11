@@ -49,29 +49,10 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJob
   const euiBorderWidthThick = euiTheme.border.width.thick;
   const euiPageBackgroundColor = euiTheme.colors.backgroundBasePlain;
 
-  // Amsterdam: euiTheme.colors.vis.euiColorVis2
-  // Borealis:  euiTheme.colors.vis.euiColorVis4
-  const borderColorIndexPattern = euiTheme.flags.hasVisColorAdjustment
-    ? euiTheme.colors.vis.euiColorVis2
-    : euiTheme.colors.vis.euiColorVis4;
-
-  // Amsterdam: euiTheme.colors.vis.euiColorVis7
-  // Borealis:  euiTheme.colors.vis.euiColorVis8
-  const borderColorIngestPipeline = euiTheme.flags.hasVisColorAdjustment
-    ? euiTheme.colors.vis.euiColorVis7
-    : euiTheme.colors.vis.euiColorVis8;
-
-  // Amsterdam: euiTheme.colors.vis.euiColorVis1
-  // Borealis:  euiTheme.colors.vis.euiColorVis2
-  const borderColorTransform = euiTheme.flags.hasVisColorAdjustment
-    ? euiTheme.colors.vis.euiColorVis1
-    : euiTheme.colors.vis.euiColorVis2;
-
-  // Amsterdam: euiTheme.colors.vis.euiColorVis3
-  // Borealis:  euiTheme.colors.vis.euiColorVis5
-  const borderBottomColorTrainedModel = euiTheme.flags.hasVisColorAdjustment
-    ? euiTheme.colors.vis.euiColorVis3
-    : euiTheme.colors.vis.euiColorVis5;
+  const borderColorIndexPattern = euiTheme.colors.vis.euiColorVis4;
+  const borderColorIngestPipeline = euiTheme.colors.vis.euiColorVis8;
+  const borderColorTransform = euiTheme.colors.vis.euiColorVis2;
+  const borderBottomColorTrainedModel = euiTheme.colors.vis.euiColorVis5;
 
   // Amsterdam + Borealis
   const borderColorAnalytics = euiTheme.colors.vis.euiColorVis0;
