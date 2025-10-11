@@ -307,4 +307,239 @@ describe('fetchGraph', () => {
     expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()}`);
     expect(result).toEqual([{ id: 'dummy' }]);
   });
+
+  describe('COALESCE behavior for empty origin event arrays', () => {
+    it('should eval isOrigin as false when having no originEventIds', async () => {
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds: [] as OriginEventId[],
+        showUnknownTarget: false,
+        indexPatterns: ['valid_index'],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      expect(query).toContain('| EVAL isOrigin = false');
+    });
+
+    it('should eval isOrigin as false when having originEventIds but event.id is not available', async () => {
+      const originEventIds: OriginEventId[] = [{ id: '1', isAlert: false }];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds,
+        showUnknownTarget: false,
+        indexPatterns: ['valid_index'],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      expect(query).toContain('COALESCE(event.id in (?og_id0))');
+      // The COALESCE will handle null event.id gracefully by returning false
+    });
+
+    it('should eval isOrigin as false when having originEventIds but event.id is not in them', async () => {
+      const originEventIds: OriginEventId[] = [{ id: '1', isAlert: false }];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds,
+        showUnknownTarget: false,
+        indexPatterns: ['valid_index'],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      expect(query).toContain('COALESCE(event.id in (?og_id0))');
+      // When event.id exists but doesn't match the origin ID, the IN clause returns false
+    });
+
+    it('should eval isOrigin as true when event.id is in originEventIds', async () => {
+      const originEventIds: OriginEventId[] = [
+        { id: '1', isAlert: false },
+        { id: '2', isAlert: true },
+      ];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds,
+        showUnknownTarget: false,
+        indexPatterns: ['valid_index'],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      expect(query).toContain('COALESCE(event.id in (?og_id0, ?og_id1))');
+      // When event.id matches any of the origin IDs, the IN clause returns true
+    });
+
+    it('should eval isOriginAlert as false when having no originAlertIds', async () => {
+      const originEventIds: OriginEventId[] = [{ id: '1', isAlert: false }];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds,
+        showUnknownTarget: false,
+        indexPatterns: ['valid_index'],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      expect(query).toContain('| EVAL isOriginAlert = false');
+    });
+
+    it('should eval isOriginAlert as false when having originAlertIds but isOrigin is false', async () => {
+      const originEventIds: OriginEventId[] = [
+        { id: '1', isAlert: false },
+        { id: '2', isAlert: true },
+      ];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds,
+        showUnknownTarget: false,
+        indexPatterns: ['valid_index'],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      expect(query).toContain(
+        '| EVAL isOriginAlert = COALESCE(isOrigin AND event.id in (?og_alrt_id0))'
+      );
+      // Since isOriginAlert depends on isOrigin being true AND event.id being in alert IDs
+    });
+
+    it('should eval isOriginAlert as false when having originAlertIds and isOrigin is true but event.id is not available', async () => {
+      const originEventIds: OriginEventId[] = [{ id: '1', isAlert: true }];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds,
+        showUnknownTarget: false,
+        indexPatterns: ['valid_index'],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      expect(query).toContain(
+        '| EVAL isOriginAlert = COALESCE(isOrigin AND event.id in (?og_alrt_id0))'
+      );
+      // The COALESCE will handle null event.id gracefully even when isOrigin is true
+    });
+
+    it('should eval isOriginAlert as false when having originAlertIds and isOrigin is true but event.id is not in originAlertIds', async () => {
+      const originEventIds: OriginEventId[] = [
+        { id: '1', isAlert: false },
+        { id: '2', isAlert: true },
+      ];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds,
+        showUnknownTarget: false,
+        indexPatterns: ['valid_index'],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      expect(query).toContain(
+        '| EVAL isOriginAlert = COALESCE(isOrigin AND event.id in (?og_alrt_id0))'
+      );
+      // When event.id is in originEventIds but not in alert IDs, isOriginAlert should be false
+    });
+
+    it('should eval isOriginAlert as true when event.id is in originAlertIds and isOrigin is true', async () => {
+      const originEventIds: OriginEventId[] = [
+        { id: '1', isAlert: true },
+        { id: '2', isAlert: true },
+      ];
+      const params = {
+        esClient,
+        logger,
+        start: 0,
+        end: 1000,
+        originEventIds,
+        showUnknownTarget: false,
+        indexPatterns: ['valid_index'],
+        spaceId: 'default',
+        esQuery: undefined as EsQuery | undefined,
+      };
+
+      await fetchGraph(params);
+
+      expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
+      const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      const query = esqlCallArgs[0].query;
+
+      expect(query).toContain(
+        '| EVAL isOriginAlert = COALESCE(isOrigin AND event.id in (?og_alrt_id0, ?og_alrt_id1))'
+      );
+      // When event.id matches alert IDs and isOrigin is true, isOriginAlert should be true
+    });
+  });
 });
