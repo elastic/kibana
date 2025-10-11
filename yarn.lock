@@ -15937,10 +15937,10 @@ buffers@~0.1.1:
   resolved "https://registry.yarnpkg.com/buffers/-/buffers-0.1.1.tgz#b24579c3bed4d6d396aeee6d9a8ae7f5482ab7bb"
   integrity sha512-9q/rDEGSb/Qsvv2qvzIzdluL5k7AaJOTrw23z9reQthrbF7is4CtlT0DXyO1oei2DCp4uojjzQ7igaSHp1kAEQ==
 
-buildkite-test-collector@^1.8.1:
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/buildkite-test-collector/-/buildkite-test-collector-1.8.1.tgz#f1529929e1aab6681818713f533489d35113484b"
-  integrity sha512-f+npzAQZy1Im4OYwwISY5DcuspBMAaeYayIYVrgmpypBxsnJk06Gdw8qnJ578+9NLumXD8OR0X/TKamxebDVyg==
+buildkite-test-collector@^1.9.2:
+  version "1.9.2"
+  resolved "https://registry.yarnpkg.com/buildkite-test-collector/-/buildkite-test-collector-1.9.2.tgz#d21ba3ad01723bd2c8c857fefbd0e6f755a5a079"
+  integrity sha512-LacjsmPczb6JlwFLb0tf82epA5jVAyfuzEs2A4yXG3/NseGNFrfQiW+xFLk1afFwGaoSSrPHBQc2k4qN2YcNTA==
   dependencies:
     axios "^1.8.2"
     dotenv "^16.0.2"
