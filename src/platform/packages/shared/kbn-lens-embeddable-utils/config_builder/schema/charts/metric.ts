@@ -27,7 +27,7 @@ import {
   esqlColumnSchema,
   genericOperationOptionsSchema,
 } from '../metric_ops';
-import { coloringTypeSchema } from '../color';
+import { colorByValueAbsolute, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
   bucketDateHistogramOperationSchema,
@@ -137,7 +137,7 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
   /**
    * Color configuration
    */
-  color: schema.maybe(coloringTypeSchema),
+  color: schema.maybe(schema.oneOf([colorByValueAbsolute, staticColorSchema])),
   /**
    * Where to apply the color (background or value)
    */
@@ -180,7 +180,7 @@ const metricStateSecondaryMetricOptionsSchema = schema.object({
   /**
    * Color configuration
    */
-  color: schema.maybe(coloringTypeSchema),
+  color: schema.maybe(schema.oneOf([colorByValueAbsolute, staticColorSchema])),
 });
 
 const metricStateBreakdownByOptionsSchema = schema.object({
