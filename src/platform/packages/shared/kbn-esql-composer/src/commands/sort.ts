@@ -73,6 +73,11 @@ export function sort(
 ): QueryOperator {
   // Handle parameterized query case
   if (typeof firstArg === 'string' && firstArg.includes('?')) {
+    if (isCommandOptions(secondArg)) {
+      throw new Error(
+        'CommandOptions cannot be used as the second argument when first argument is a parameterized query string'
+      );
+    }
     const thirdArg = restArgs[0];
     const options = isCommandOptions(thirdArg) ? thirdArg : undefined;
     // When firstArg is a parameterized string, secondArg is the params object

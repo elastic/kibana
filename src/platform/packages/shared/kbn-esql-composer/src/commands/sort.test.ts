@@ -47,4 +47,12 @@ describe('sort', () => {
 
     expect(pipeline.toString()).toEqual('FROM logs-*\n  | SORT @timestamp DESC, log.level ASC');
   });
+
+  it('throws error when CommandOptions is passed as second argument with parameterized query', () => {
+    expect(() => {
+      source.pipe(sort('??timestamp DESC', { comment: 'Invalid usage' }));
+    }).toThrow(
+      'CommandOptions cannot be used as the second argument when first argument is a parameterized query string'
+    );
+  });
 });

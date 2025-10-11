@@ -13,21 +13,17 @@ import type { CommandOptions } from '../types';
  * Type guard to check if a value is a CommandOptions object
  */
 export function isCommandOptions(value: unknown): value is CommandOptions {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    !Array.isArray(value) &&
-    'comment' in value
-  );
+  return typeof value === 'object' && value !== null && !Array.isArray(value) && 'comment' in value;
 }
 
 /**
  * Extracts CommandOptions from the end of a variadic argument list.
  * Returns the options and the remaining arguments.
  */
-export function extractOptions<TArg>(
-  args: Array<TArg | CommandOptions>
-): { options: CommandOptions | undefined; remaining: TArg[] } {
+export function extractOptions<TArg>(args: Array<TArg | CommandOptions>): {
+  options: CommandOptions | undefined;
+  remaining: TArg[];
+} {
   if (args.length === 0) {
     return { options: undefined, remaining: [] };
   }
