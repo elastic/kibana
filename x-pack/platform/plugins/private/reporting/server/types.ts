@@ -51,7 +51,7 @@ export interface ReportingSetup {
  * Plugin Start Contract
  */
 export type ReportingStart = ReportingSetup;
-export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
+export type ReportingUser = AuthenticatedUser | false;
 
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
