@@ -40,6 +40,8 @@ const convertBaseFromEs = (document: Document) => {
     title: document._source.title,
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
+    space_id: document._source.space_id,
+    connector_id: document._source.connector_id,
   };
 };
 
@@ -103,6 +105,8 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     created_at: conversation.created_at,
     updated_at: conversation.updated_at,
     rounds: serializeStepResults(conversation.rounds),
+    space_id: conversation.space_id,
+    connector_id: conversation.connector_id,
   };
 };
 
@@ -147,5 +151,7 @@ export const createRequestToEs = ({
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),
     rounds: serializeStepResults(conversation.rounds),
+    space_id: conversation.space_id,
+    connector_id: conversation.connector_id,
   };
 };

@@ -25,6 +25,8 @@ const storageSettings = {
       created_at: types.date({}),
       updated_at: types.date({}),
       rounds: types.object({ dynamic: true }),
+      space_id: types.keyword({}),
+      connector_id: types.keyword({}),
     },
   },
 } satisfies IndexStorageSettings;
@@ -37,6 +39,8 @@ export interface ConversationProperties {
   title: string;
   created_at: string;
   updated_at: string;
+  space_id?: string;
+  connector_id?: string;
   rounds: PersistentConversationRound[];
 }
 

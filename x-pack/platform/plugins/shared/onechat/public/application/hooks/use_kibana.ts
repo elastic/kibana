@@ -10,10 +10,10 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { OnechatStartDependencies } from '../../types';
 
-export type StartServices = CoreStart & {
-  plugins: OnechatStartDependencies;
-  appParams: { history: ScopedHistory };
-};
+export type StartServices = CoreStart &
+  OnechatStartDependencies & {
+    appParams: { history: ScopedHistory };
+  };
 
 const useTypedKibana = () => useKibana<StartServices>();
 

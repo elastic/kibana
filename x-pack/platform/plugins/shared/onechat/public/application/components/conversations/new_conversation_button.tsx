@@ -8,15 +8,27 @@
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
+import type { ConversationSettings } from '../../../services/types';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 import { useConversationId } from '../../hooks/use_conversation_id';
+import { useOnechatServices } from '../../hooks/use_onechat_service';
 import { useIsSendingMessage } from '../../hooks/use_is_sending_message';
 import { useSendMessage } from '../../context/send_message/send_message_context';
 
 export const NewConversationButton: React.FC<{}> = () => {
   const { createOnechatUrl } = useNavigation();
   const conversationId = useConversationId();
+  const { conversationSettingsService } = useOnechatServices();
+
+  // Subscribe to conversation settings to get the isFlyoutMode
+  const conversationSettings = useObservable<ConversationSettings>(
+    conversationSettingsService.getConversationSettings$(),
+    {}
+  );
+
+  const isFlyoutMode = conversationSettings?.isFlyoutMode;
   const isNewConversation = !conversationId;
   const isSendingMessage = useIsSendingMessage();
   const { cleanConversation } = useSendMessage();
@@ -32,6 +44,10 @@ export const NewConversationButton: React.FC<{}> = () => {
   const buttonProps = isDisabled
     ? {
         disabled: true,
+      }
+    : isFlyoutMode
+    ? {
+        onClick: handleClick,
       }
     : {
         href: createOnechatUrl(appPaths.chat.new),

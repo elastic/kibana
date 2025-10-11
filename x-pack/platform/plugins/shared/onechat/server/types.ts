@@ -10,11 +10,23 @@ import type { RunToolFn } from '@kbn/onechat-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
-import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { CustomRequestHandlerContext } from '@kbn/core/server';
 import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
+
+/**
+ * Request handler context for onechat plugin routes
+ */
+export type OnechatRequestHandlerContext = CustomRequestHandlerContext<{
+  onechat: {
+    spaces: {
+      getSpaceId: () => string;
+    };
+  };
+}>;
 
 export interface OnechatSetupDependencies {
   cloud?: CloudSetup;

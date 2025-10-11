@@ -7,12 +7,15 @@
 
 import { EuiListGroupItem, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import type { ConversationWithoutRounds } from '@kbn/onechat-common';
+import useObservable from 'react-use/lib/useObservable';
+import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+import type { ConversationSettings } from '../../../../services/types';
 import { useConversationId } from '../../../hooks/use_conversation_id';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
+import { useOnechatServices } from '../../../hooks/use_onechat_service';
 import { useConversationActions } from '../../../hooks/use_conversation_actions';
 
 interface ConversationItemProps {
@@ -22,22 +25,44 @@ interface ConversationItemProps {
 export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation }) => {
   const { createOnechatUrl } = useNavigation();
   const currentConversationId = useConversationId();
-  const { deleteConversation } = useConversationActions();
+  const { conversationSettingsService } = useOnechatServices();
+  const { setSelectedConversation, deleteConversation } = useConversationActions();
   const isActive = currentConversationId === conversation.id;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const confirmModalTitleId = useGeneratedHtmlId({ prefix: 'deleteConversationModal' });
+
+  // Subscribe to conversation settings to get the isFlyoutMode
+  const conversationSettings = useObservable<ConversationSettings>(
+    conversationSettingsService.getConversationSettings$(),
+    {}
+  );
+
+  const isFlyoutMode = conversationSettings?.isFlyoutMode;
+
+  const handleClick = useCallback(() => {
+    setSelectedConversation({
+      conversationId: conversation.id,
+    });
+  }, [setSelectedConversation, conversation.id]);
 
   const handleDelete = useCallback(async () => {
     setShowDeleteModal(false);
     await deleteConversation(conversation.id);
   }, [conversation.id, deleteConversation]);
 
+  const itemProps = isFlyoutMode
+    ? {
+        onClick: handleClick,
+      }
+    : {
+        href: createOnechatUrl(appPaths.chat.conversation({ conversationId: conversation.id })),
+      };
+
   return (
     <>
       <EuiListGroupItem
         color="text"
         size="s"
-        href={createOnechatUrl(appPaths.chat.conversation({ conversationId: conversation.id }))}
         data-test-subj={`conversationItem-${conversation.id}`}
         label={conversation.title}
         isActive={isActive}
@@ -51,8 +76,9 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation
             }
           ),
           onClick: () => setShowDeleteModal(true),
-          'data-test-subj': `delete-conversation-button-${conversation.id}`,
+          'data-test-subj': 'delete-conversation-button',
         }}
+        {...itemProps}
       />
       {showDeleteModal && (
         <EuiConfirmModal

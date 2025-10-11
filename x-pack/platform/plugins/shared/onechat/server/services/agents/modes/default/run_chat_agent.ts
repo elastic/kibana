@@ -44,8 +44,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     runId = uuidv4(),
     agentId,
     abortSignal,
+    toolParameters,
   },
-  { logger, request, modelProvider, toolProvider, events }
+  { logger, request, modelProvider, toolProvider, events, contentReferencesStore }
 ) => {
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -72,6 +73,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const initialMessages = conversationToLangchainMessages({
     nextInput,
     previousRounds: conversation,
+    toolParameters,
   });
 
   const agentGraph = createAgentGraph({
@@ -111,7 +113,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   );
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(
-    addRoundCompleteEvent({ userInput: nextInput }),
+    addRoundCompleteEvent({ userInput: nextInput, contentReferencesStore }),
     shareReplay()
   );
 

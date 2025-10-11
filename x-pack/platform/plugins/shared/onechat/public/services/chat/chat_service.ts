@@ -22,6 +22,7 @@ export interface ChatParams {
   conversationId?: string;
   capabilities?: AgentCapabilities;
   input: string;
+  toolParameters?: any;
 }
 
 export class ChatService {
@@ -37,6 +38,7 @@ export class ChatService {
       agent_id: params.agentId,
       conversation_id: params.conversationId,
       connector_id: params.connectorId,
+      tool_parameters: params.toolParameters,
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
     };
     return defer(() => {

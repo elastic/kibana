@@ -7,13 +7,16 @@
 
 import { EuiButtonIcon, EuiResizableContainer, useEuiScrollBar, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { useLocation } from 'react-router-dom';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { ConversationInputForm } from './conversation_input/conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useSyncAgentId } from '../../hooks/use_sync_agent_id';
+import { useOnechatServices } from '../../hooks/use_onechat_service';
+import type { ConversationSettings } from '../../../services/types';
 import { useConversationId } from '../../hooks/use_conversation_id';
 import { useSendMessage } from '../../context/send_message/send_message_context';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
@@ -30,11 +33,20 @@ const conversationContainerStyles = css`
 `;
 
 export const Conversation: React.FC<{}> = () => {
+  const [starterPrompt, setStarterPrompt] = useState('');
+
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
   const { euiTheme } = useEuiTheme();
   const { isResponseLoading } = useSendMessage();
   const { isFetched } = useConversationStatus();
+  const { conversationSettingsService } = useOnechatServices();
+
+  // Subscribe to conversation settings to get the newConversationSubtitle
+  const conversationSettings = useObservable<ConversationSettings>(
+    conversationSettingsService.getConversationSettings$(),
+    {}
+  );
   const location = useLocation<LocationState>();
 
   const shouldStickToBottom = location.state?.shouldStickToBottom ?? true;
@@ -90,24 +102,40 @@ export const Conversation: React.FC<{}> = () => {
       {(EuiResizablePanel, EuiResizableButton) => {
         return (
           <>
-            <EuiResizablePanel initialSize={80}>
-              <div ref={scrollContainerRef} css={scrollContainerStyles}>
-                <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
-              </div>
-              {showScrollButton && (
-                <EuiButtonIcon
-                  display="base"
-                  size="s"
-                  color="text"
-                  css={scrollDownButtonStyles}
-                  iconType="sortDown"
-                  aria-label="Scroll down"
-                  onClick={scrollToMostRecentRoundBottom}
-                />
-              )}
-            </EuiResizablePanel>
+            {hasActiveConversation ? (
+              <EuiResizablePanel initialSize={80}>
+                <div ref={scrollContainerRef} css={scrollContainerStyles}>
+                  <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
+                </div>
+                {showScrollButton && (
+                  <EuiButtonIcon
+                    display="base"
+                    size="s"
+                    color="text"
+                    css={scrollDownButtonStyles}
+                    iconType="sortDown"
+                    aria-label="Scroll down"
+                    onClick={scrollToMostRecentRoundBottom}
+                  />
+                )}
+              </EuiResizablePanel>
+            ) : (
+              <EuiResizablePanel initialSize={80}>
+                <div css={fullHeightStyles}>
+                  <NewConversationPrompt setStarterPrompt={setStarterPrompt} />
+                </div>
+              </EuiResizablePanel>
+            )}
             <EuiResizableButton />
             <EuiResizablePanel initialSize={20} minSize="20%">
+              {conversationSettings?.selectedContextComponent ?? null}
+              <ConversationInputForm
+                starterPrompt={starterPrompt}
+                contextPrompt={conversationSettings?.contextPrompt}
+                onSubmit={() => {
+                  scrollToMostRecentRoundTop();
+                }}
+              />
               <ConversationContent css={contentStyles}>
                 <ConversationInputForm onSubmit={scrollToMostRecentRoundTop} />
               </ConversationContent>

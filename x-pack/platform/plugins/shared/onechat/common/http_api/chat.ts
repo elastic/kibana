@@ -20,6 +20,7 @@ export interface ChatRequestBodyPayload {
   conversation_id?: string;
   capabilities?: AgentCapabilities;
   input: string;
+  tool_parameters?: Record<string, any>;
 }
 
 export interface ChatResponse {

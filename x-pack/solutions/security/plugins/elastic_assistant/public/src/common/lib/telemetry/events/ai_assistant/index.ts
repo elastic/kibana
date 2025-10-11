@@ -74,6 +74,19 @@ export const assistantQuickPrompt: AssistantTelemetryEvent = {
   },
 };
 
+export const assistantStarterPromptEvent: AssistantTelemetryEvent = {
+  eventType: AssistantEventTypes.AssistantStarterPrompt,
+  schema: {
+    promptTitle: {
+      type: 'keyword',
+      _meta: {
+        description: 'Title of the starter prompt',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const assistantSettingToggledEvent: AssistantTelemetryEvent = {
   eventType: AssistantEventTypes.AssistantSettingToggled,
   schema: {
@@ -98,5 +111,6 @@ export const assistantTelemetryEvents = [
   assistantInvokedEvent,
   assistantMessageSentEvent,
   assistantQuickPrompt,
+  assistantStarterPromptEvent,
   assistantSettingToggledEvent,
 ];

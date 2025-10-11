@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import type {
   ToolEventEmitter,
   ModelProvider,
@@ -79,4 +80,9 @@ export interface ToolHandlerContext {
    * Logger scoped to this execution
    */
   logger: Logger;
+  /**
+   * Content references store for managing content references during tool execution.
+   * Can be used to add and manage content references that will be included in the final response.
+   */
+  contentReferencesStore: ContentReferencesStore;
 }

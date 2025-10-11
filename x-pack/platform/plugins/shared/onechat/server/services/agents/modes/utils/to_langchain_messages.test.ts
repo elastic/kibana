@@ -204,4 +204,61 @@ describe('conversationLangchainMessages', () => {
     expect((toolCallAIMessage as AIMessage).tool_calls).toHaveLength(1);
     expect((toolCallAIMessage as AIMessage).tool_calls![0].name).toBe(sanitizeToolId('.search'));
   });
+
+  it('merges toolParameters with tool call params', () => {
+    const toolCall1 = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
+      { type: ToolResultType.other, data: { result: 'result!' } },
+    ]);
+    const previousRounds: ConversationRound[] = [
+      {
+        id: 'round-1',
+        input: makeRoundInput('find foo'),
+        steps: [makeToolCallStep(toolCall1)],
+        response: makeAssistantResponse('done!'),
+      },
+    ];
+    const nextInput = makeRoundInput('next');
+    const toolParameters = { apiKey: 'secret123', timeout: 5000 };
+    const result = conversationToLangchainMessages({ previousRounds, nextInput, toolParameters });
+    // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
+    expect(result).toHaveLength(5);
+    const [_human, toolCallAIMessage] = result;
+
+    expect(isAIMessage(toolCallAIMessage)).toBe(true);
+    expect((toolCallAIMessage as AIMessage).tool_calls).toHaveLength(1);
+    const toolCallFromMessage = (toolCallAIMessage as AIMessage).tool_calls![0];
+    expect(toolCallFromMessage.args).toEqual({
+      query: 'foo',
+      apiKey: 'secret123',
+      timeout: 5000,
+    });
+  });
+
+  it('handles empty toolParameters', () => {
+    const toolCall2 = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
+      { type: ToolResultType.other, data: { result: 'result!' } },
+    ]);
+    const previousRounds: ConversationRound[] = [
+      {
+        id: 'round-1',
+        input: makeRoundInput('find foo'),
+        steps: [makeToolCallStep(toolCall2)],
+        response: makeAssistantResponse('done!'),
+      },
+    ];
+    const nextInput = makeRoundInput('next');
+    const result = conversationToLangchainMessages({
+      previousRounds,
+      nextInput,
+      toolParameters: {},
+    });
+    // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
+    expect(result).toHaveLength(5);
+    const [_human, toolCallAIMessage] = result;
+
+    expect(isAIMessage(toolCallAIMessage)).toBe(true);
+    expect((toolCallAIMessage as AIMessage).tool_calls).toHaveLength(1);
+    const toolCallFromMessage2 = (toolCallAIMessage as AIMessage).tool_calls![0];
+    expect(toolCallFromMessage2.args).toEqual({ query: 'foo' });
+  });
 });

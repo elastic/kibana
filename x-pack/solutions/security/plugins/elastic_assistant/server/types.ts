@@ -90,6 +90,10 @@ export interface ElasticAssistantPluginStart {
    */
   inference: InferenceServerStart;
   /**
+   * Analytics service setup contract.
+   */
+  telemetry: AnalyticsServiceSetup;
+  /**
    * Register features to be used by the elastic assistant.
    *
    * Note: Be sure to use the pluginName that is sent in the request headers by your plugin to ensure it is extracted
@@ -125,6 +129,13 @@ export interface ElasticAssistantPluginStart {
    * @param callback
    */
   registerCallback: (callbackId: CallbackIds, callback: Function) => void;
+  /**
+   * Get the knowledge base data client for a given request.
+   * @param request The Kibana request to get the client for
+   */
+  getKnowledgeBaseDataClient: (
+    request: KibanaRequest
+  ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
 }
 
 export interface ElasticAssistantPluginSetupDependencies {
@@ -145,6 +156,7 @@ export interface ElasticAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
   productDocBase: ProductDocBaseStartContract;
   security: SecurityPluginStart;
+  analytics: AnalyticsServiceSetup;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {

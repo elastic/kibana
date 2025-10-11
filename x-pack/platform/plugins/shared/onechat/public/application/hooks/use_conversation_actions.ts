@@ -18,10 +18,14 @@ import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { useQueryClient } from '@tanstack/react-query';
 import produce from 'immer';
 import { useEffect, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { queryKeys } from '../query_keys';
 import { storageKeys } from '../storage_keys';
 import { appPaths } from '../utils/app_paths';
+import type { ConversationSettings } from '../../services/types';
+import { useOnechatLastConversation } from './use_space_aware_context/use_last_conversation';
+import { useOnechatSpaceId } from './use_space_aware_context/use_space_id';
 import { createNewConversation, newConversationId } from '../utils/new_conversation';
 import { useConversationId } from './use_conversation_id';
 import { useNavigation } from './use_navigation';
@@ -32,9 +36,20 @@ const pendingRoundId = '__pending__';
 export const useConversationActions = () => {
   const queryClient = useQueryClient();
   const conversationId = useConversationId();
+  // Space-aware context hooks - these will be used when conversation settings are properly set up
+  const spaceId = useOnechatSpaceId();
+  const { setLastConversation } = useOnechatLastConversation({ spaceId });
+  const { conversationSettingsService, conversationsService } = useOnechatServices();
   const [, setAgentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
-  const { conversationsService } = useOnechatServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
+
+  // Subscribe to conversation settings to get the isFlyoutMode
+  const conversationSettings = useObservable<ConversationSettings>(
+    conversationSettingsService.getConversationSettings$(),
+    {}
+  );
+
+  const isFlyoutMode = conversationSettings?.isFlyoutMode;
   const setConversation = (updater: (conversation?: Conversation) => Conversation) => {
     queryClient.setQueryData<Conversation>(queryKey, updater);
   };
@@ -56,9 +71,22 @@ export const useConversationActions = () => {
       shouldAllowConversationRedirectRef.current = false;
     };
   }, []);
+  const setSelectedConversation = ({ conversationId: id }: { conversationId?: string }) => {
+    // Update the last conversation in localStorage
+    setLastConversation({
+      id: id ?? '',
+    });
+    conversationSettingsService.setConversationSettings({
+      ...conversationSettings,
+      selectedConversationId: id ?? undefined,
+    });
+  };
+
   const navigateToConversation = ({ nextConversationId }: { nextConversationId: string }) => {
     // Navigate to the conversation if redirect is allowed
-    if (shouldAllowConversationRedirectRef.current) {
+    if (isFlyoutMode) {
+      setSelectedConversation({ conversationId: nextConversationId });
+    } else if (shouldAllowConversationRedirectRef.current) {
       const path = appPaths.chat.conversation({ conversationId: nextConversationId });
       const params = undefined;
       const state = { shouldStickToBottom: false };
@@ -67,6 +95,7 @@ export const useConversationActions = () => {
   };
 
   return {
+    setSelectedConversation,
     removeNewConversationQuery: () => {
       queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(newConversationId) });
     },
@@ -78,7 +107,11 @@ export const useConversationActions = () => {
         produce((draft) => {
           const nextRound: ConversationRound = {
             id: pendingRoundId,
-            input: { message: userMessage },
+            input: {
+              message: `${
+                conversationSettings?.transformUserContextPrompt?.(userMessage) ?? userMessage
+              }`,
+            },
             response: { message: '' },
             steps: [],
           };
@@ -117,6 +150,19 @@ export const useConversationActions = () => {
         })
       );
       setAgentIdStorage(agentId);
+    },
+    setConnector: (connectorId: string) => {
+      setConversation(
+        produce((draft) => {
+          if (!draft) {
+            const newConversation = createNewConversation();
+            newConversation.connector_id = connectorId;
+            return newConversation;
+          }
+
+          draft.connector_id = connectorId;
+        })
+      );
     },
     addReasoningStep: ({ step }: { step: ReasoningStep }) => {
       setCurrentRound((round) => {

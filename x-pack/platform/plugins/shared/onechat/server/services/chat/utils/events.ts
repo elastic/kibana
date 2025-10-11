@@ -21,6 +21,7 @@ export const createConversationCreatedEvent = (
     data: {
       conversation_id: conversation.id,
       title: conversation.title,
+      connector_id: conversation.connector_id,
     },
   };
 };
