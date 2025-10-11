@@ -14,7 +14,7 @@ import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import type { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
-import type { SearchEmbeddableSerializedState } from '../types';
+import type { SearchEmbeddableSerializedState } from '../../../common/embeddable/types';
 import { deserializeState, serializeState } from './serialization_utils';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/server';
 

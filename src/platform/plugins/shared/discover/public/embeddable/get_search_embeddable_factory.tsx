@@ -38,7 +38,8 @@ import { SearchEmbeddableGridComponent } from './components/search_embeddable_gr
 import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
-import type { SearchEmbeddableApi, SearchEmbeddableSerializedState } from './types';
+import type { SearchEmbeddableSerializedState } from '../../common/embeddable/types';
+import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
 import { BaseAppWrapper } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';

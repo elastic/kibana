@@ -26,13 +26,13 @@ import type { DataGridDensity, DataTableColumnsMeta } from '@kbn/unified-data-ta
 
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { DiscoverServices } from '../build_services';
-import { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
+import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
 import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
+import type { SearchEmbeddableSerializedState } from '../../common/embeddable/types';
 import type {
   PublishesWritableSavedSearch,
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedAttributes,
-  SearchEmbeddableSerializedState,
   SearchEmbeddableStateManager,
 } from './types';
 

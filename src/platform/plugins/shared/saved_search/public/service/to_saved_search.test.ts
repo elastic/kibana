@@ -10,7 +10,7 @@
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import type { SavedSearchByValueAttributes } from './types';
+import type { SavedSearchByValueAttributes } from '../../common';
 import { byValueToSavedSearch } from './to_saved_search';
 import type { DiscoverSessionTab } from '../../server';
 
