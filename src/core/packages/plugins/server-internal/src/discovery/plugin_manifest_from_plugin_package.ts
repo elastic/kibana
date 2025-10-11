@@ -31,6 +31,8 @@ export function pluginManifestFromPluginPackage(
       name: manifest.owner.join(' & '),
     },
     server: manifest.plugin.server,
+    service: manifest.plugin.service,
+    remoteServices: manifest.plugin.remoteServices,
     ui: manifest.plugin.browser,
     configPath: manifest.plugin.configPath ?? snakeCase(manifest.plugin.id),
   };
