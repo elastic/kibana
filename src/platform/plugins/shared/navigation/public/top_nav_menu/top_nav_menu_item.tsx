@@ -23,6 +23,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
+import { SplitButton } from '@kbn/split-button';
 import type { TopNavMenuData } from './top_nav_menu_data';
 
 export interface TopNavMenuItemProps extends TopNavMenuData {
@@ -74,6 +75,15 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
     if (isDisabled()) return;
 
     props.run(event.currentTarget);
+    if (props.isMobileMenu) {
+      props.closePopover();
+    }
+  }
+
+  function handleSecondaryButtonClick(event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) {
+    if (isDisabled()) return;
+
+    props.secondaryButton?.run(event.currentTarget);
     if (props.isMobileMenu) {
       props.closePopover();
     }
@@ -135,6 +145,17 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
       >
         <ButtonContainer />
       </EuiButton>
+    ) : props.secondaryButton ? (
+      <SplitButton
+        {...commonButtonProps}
+        onSecondaryButtonClick={handleSecondaryButtonClick}
+        secondaryButtonAriaLabel={props.secondaryButton.ariaLabel}
+        secondaryButtonIcon={props.secondaryButton.iconType ?? undefined}
+        secondaryButtonTitle={props.secondaryButton.label}
+        size="s"
+      >
+        <ButtonContainer />
+      </SplitButton>
     ) : (
       <EuiHeaderLink size="s" {...commonButtonProps} {...overrideProps}>
         <ButtonContainer />
