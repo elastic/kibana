@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execFile } from 'child_process';
+import { execFile, execFileSync } from 'child_process';
 import { availableParallelism } from 'os';
 import { isAbsolute, join } from 'path';
 import { existsSync, readdirSync, readFileSync } from 'fs';
@@ -67,6 +67,15 @@ void run(async ({ log, flagsReader }) => {
 
   logger.write('--- All checks finished.');
   printResults(startTime, results);
+
+  logger.write('--- Committing any stashed changes...');
+  const commitsMade = await commitStashedContents();
+  if (commitsMade > 0) {
+    logger.info(`Committed ${commitsMade} stashed change(s), pushing...`);
+    await pushCommits();
+  } else {
+    logger.info('No stashed changes to commit.');
+  }
 
   const failedChecks = results.filter((check) => !check.success);
   if (failedChecks.length > 0) {
@@ -151,7 +160,12 @@ async function runCheckAsync(script: string): Promise<CheckResult> {
 
   return new Promise((resolve) => {
     validateScriptPath(script);
-    const scriptProcess = execFile('bash', [script]);
+    const scriptProcess = execFile('bash', [script], {
+      env: {
+        ...process.env,
+        STASH_QUICKCHECK_CHANGES: 'true',
+      },
+    });
     let output = '';
     const appendToOutput = (data: string | Buffer) => (output += data.toString());
 
@@ -222,6 +236,58 @@ function validateScriptPath(scriptPath: string) {
   } else {
     return;
   }
+}
+
+async function commitStashedContents() {
+  let commitsMade = 0;
+  let stashMessage;
+  const configGitOnce = (() => {
+    let configured = false;
+    return () => {
+      if (configured) return;
+      configured = true;
+      execFileSync('git', ['config', 'user.name', 'kibanamachine']);
+      execFileSync('git', [
+        'config',
+        'user.email',
+        '42973632+kibanamachine@users.noreply.github.com',
+      ]);
+      return true;
+    };
+  })();
+  while ((stashMessage = execFileSync('git', ['stash', 'list', '-1']).toString().trim())) {
+    configGitOnce();
+    const messageWithoutContext = stashMessage.split(': ').slice(2).join(': ');
+    logger.info('Committing: ' + messageWithoutContext);
+    execFileSync('git', ['stash', 'pop'], { stdio: 'inherit' });
+    execFileSync('git', ['commit', '-am', `"${messageWithoutContext}"`], {
+      stdio: 'inherit',
+    });
+    commitsMade++;
+  }
+  return commitsMade;
+}
+
+async function pushCommits() {
+  return new Promise<void>((resolve, reject) => {
+    const gitProcess = execFile('git', ['push']);
+    let output = '';
+    const appendToOutput = (data: string | Buffer) => (output += data.toString());
+
+    gitProcess.stdout?.on('data', appendToOutput);
+    gitProcess.stderr?.on('data', appendToOutput);
+
+    gitProcess.on('exit', (code) => {
+      if (code === 0) {
+        logger.info('Pushed commits to remote.');
+        resolve();
+      } else {
+        logger.error('Failed to push commits:');
+        logger.error(output);
+        reject(new Error('Failed to push commits'));
+      }
+    });
+  });
 }
 
 function stripRoot(script: string) {
