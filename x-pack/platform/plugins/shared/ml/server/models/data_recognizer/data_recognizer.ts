@@ -9,41 +9,41 @@ import fs from 'fs';
 import Boom from '@hapi/boom';
 import numeral from '@elastic/numeral';
 import type {
-  KibanaRequest,
   IScopedClusterClient,
+  KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import moment from 'moment';
-import { merge, intersection } from 'lodash';
+import { intersection, merge } from 'lodash';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { CompatibleModule } from '../../../common/constants/app';
-import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
+import type { AnalysisLimits, Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
 import type { MlClient } from '../../lib/ml_client';
-import type { RecognizeModuleResultDataView } from '../../../common/types/modules';
-import { ML_MODULE_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import type {
-  KibanaObjects,
+  DatafeedOverride,
+  DatafeedResponse,
+  DataRecognizerConfigResponse,
+  FileBasedModule,
+  GeneralDatafeedsOverride,
+  GeneralJobsOverride,
+  JobOverride,
+  JobResponse,
+  JobSpecificOverride,
   KibanaObjectConfig,
+  KibanaObjectResponse,
+  KibanaObjects,
+  Logo,
+  Module,
   ModuleDatafeed,
   ModuleJob,
-  Module,
-  FileBasedModule,
-  Logo,
-  JobOverride,
-  DatafeedOverride,
-  GeneralJobsOverride,
-  DatafeedResponse,
-  JobResponse,
-  KibanaObjectResponse,
-  DataRecognizerConfigResponse,
-  GeneralDatafeedsOverride,
-  JobSpecificOverride,
+  RecognizeModuleResultDataView,
   RecognizeResult,
 } from '../../../common/types/modules';
 import { isGeneralJobOverride } from '../../../common/types/modules';
+import { ML_MODULE_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import {
   getLatestDataOrBucketTimestamp,
   prefixDatafeedId,
@@ -55,7 +55,6 @@ import { fieldsServiceProvider } from '../fields_service';
 import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
 import type { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
-import type { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import type { MLSavedObjectService } from '../../saved_objects';
 
 const ML_DIR = 'ml';
@@ -258,7 +257,7 @@ export class DataRecognizer {
     }
 
     try {
-      const idsWithTitle = await this._dataViewsService.getIdsWithTitle();
+      const idsWithTitle = await this._dataViewsService.getSavedIdsWithTitle();
       // create temp objects with a function for running the query
       const tempObjs = idsWithTitle.map(({ id, title, name }) => {
         return {

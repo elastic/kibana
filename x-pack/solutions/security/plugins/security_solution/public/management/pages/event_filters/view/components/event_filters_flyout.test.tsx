@@ -69,7 +69,7 @@ describe('Event filter flyout', () => {
         http: {},
         data: {
           dataViews: {
-            getIdsWithTitle: async () =>
+            getSavedIdsWithTitle: async () =>
               Promise.resolve([{ id: 'myfakeid', title: 'hello*,world*,refreshed*' }]),
             create: async ({ title }: { title: string }) =>
               Promise.resolve({

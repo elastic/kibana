@@ -11,28 +11,28 @@ import type { HttpSetup } from '@kbn/core/public';
 import type { Observable, Subscription } from 'rxjs';
 import {
   BehaviorSubject,
-  Subject,
+  distinctUntilChanged,
   first,
   firstValueFrom,
   from,
   map,
-  distinctUntilChanged,
+  Subject,
 } from 'rxjs';
 
 import type {
+  DataViewField,
   DataViewsServicePublic,
   MatchedItem,
-  DataViewField,
 } from '@kbn/data-views-plugin/public';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 
 import type {
+  MatchedIndicesSet,
   RollupIndicesCapsResponse,
   RollupIndiciesCapability,
-  MatchedIndicesSet,
   TimestampOption,
 } from './types';
-import { getMatchedIndices, ensureMinimumTime, extractTimeFields, removeSpaces } from './lib';
+import { ensureMinimumTime, extractTimeFields, getMatchedIndices, removeSpaces } from './lib';
 import type { GetFieldsOptions } from './shared_imports';
 
 export const matchedIndiciesDefault = {
@@ -304,9 +304,16 @@ export class DataViewEditorService {
     this.updateState({ isLoadingSourcesInternal: false });
   };
 
+  /**
+   * This function returns the list of names for all the dataViews (saved object and adhoc ones).
+   * We want to prevent users from creating new dataViews with names that already exist.
+   */
   private loadDataViewNames = async (initialName?: string) => {
-    const dataViewListItems = await this.dataViews.getIdsWithTitle(true);
-    const dataViewNames = dataViewListItems.map((item) => item.name || item.title);
+    const dataViewListItems = await this.dataViews.getSavedIdsWithTitle(true);
+    const allDataViews = await this.dataViews.getCachedIdsWithTitle();
+    const dataViewNames = [
+      ...new Set([...dataViewListItems, ...allDataViews].map((item) => item.name || item.title)),
+    ];
     return initialName ? dataViewNames.filter((v) => v !== initialName) : dataViewNames;
   };
 

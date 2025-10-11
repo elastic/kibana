@@ -7,7 +7,7 @@
 
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
-import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { DataViewManagerScopeName } from '../constants';
 import { SLICE_PREFIX } from '../constants';
 import type {
@@ -59,16 +59,6 @@ export const sharedDataViewManagerSlice = createSlice({
 
         state.dataViews.push(dataViewSpec);
       } else {
-        if (
-          // NOTE: user is allowed to duplicate a managed data view and
-          // we want both to show up in the list
-          state.adhocDataViews.find(
-            (dv) => dv.title === dataViewSpec.title && dv.managed === dataViewSpec.managed
-          )
-        ) {
-          return;
-        }
-
         state.adhocDataViews.push(dataViewSpec);
       }
     },

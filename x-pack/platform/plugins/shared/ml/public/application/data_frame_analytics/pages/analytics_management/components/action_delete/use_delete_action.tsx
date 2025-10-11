@@ -14,9 +14,9 @@ import { useMlKibana } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 
 import {
+  useCanDeleteIndex,
   useDeleteAnalytics,
   useDeleteAnalyticsAndDestIndex,
-  useCanDeleteIndex,
 } from '../../services/analytics_service';
 
 import type {
@@ -25,7 +25,7 @@ import type {
 } from '../analytics_list/common';
 import { isDataFrameAnalyticsRunning } from '../analytics_list/common';
 
-import { deleteActionNameText, DeleteActionName } from './delete_action_name';
+import { DeleteActionName, deleteActionNameText } from './delete_action_name';
 
 import type { JobType } from '../../../../../../../common/types/saved_objects';
 
@@ -62,7 +62,9 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
 
   const checkDataViewExists = async () => {
     try {
-      const dv = (await dataViews.getIdsWithTitle(true)).find(({ title }) => title === indexName);
+      const dv = (await dataViews.getSavedIdsWithTitle(true)).find(
+        ({ title }) => title === indexName
+      );
       if (dv !== undefined) {
         setDataViewExists(true);
       } else {

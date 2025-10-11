@@ -120,7 +120,7 @@ export const useWorkspaceLoader = ({
         return null;
       }
 
-      const dataViews = await data.dataViews.getIdsWithTitle();
+      const dataViews = await data.dataViews.getSavedIdsWithTitle();
 
       /**
        * Deal with situation of request to open saved workspace. Otherwise clean up store,

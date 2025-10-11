@@ -13,33 +13,34 @@ import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import type { PersistenceAPI } from '../types';
-import { DataViewLazy } from './data_view_lazy';
-import { DEFAULT_DATA_VIEW_ID } from '../constants';
-import type { AbstractDataView } from './abstract_data_views';
-
-import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
-import { DataView } from './data_view';
 import type {
-  OnNotification,
-  OnError,
-  UiSettingsCommon,
-  IDataViewsApiClient,
-  GetFieldsOptions,
-  DataViewSpec,
   DataViewAttributes,
+  DataViewFieldMap,
+  DataViewSpec,
   FieldAttrs,
   FieldAttrsAsObject,
   FieldSpec,
-  DataViewFieldMap,
+  GetFieldsOptions,
+  IDataViewsApiClient,
+  OnError,
+  OnNotification,
+  PersistenceAPI,
+  RuntimeField,
+  RuntimeFieldSpec,
+  RuntimeType,
   TypeMeta,
+  UiSettingsCommon,
 } from '../types';
+import { DataViewLazy } from './data_view_lazy';
+import { DEFAULT_DATA_VIEW_ID } from '../constants';
+import type { AbstractDataView } from './abstract_data_views';
+import { DataView } from './data_view';
 
 import type { SavedObject } from '..';
 import { META_FIELDS } from '..';
 import { DataViewMissingIndices } from '../lib';
 import { findByName } from '../utils';
-import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../errors';
+import { DataViewInsufficientAccessError, DuplicateDataViewError } from '../errors';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
@@ -268,10 +269,14 @@ export interface DataViewsServicePublicMethods {
    */
   getIds: (refresh?: boolean) => Promise<string[]>;
   /**
-   * Get list of data view ids and title (and more) for each data view.
+   * Get list of data view ids and title (and more) for each saved data view.
    * @param refresh - clear cache and fetch from server
    */
-  getIdsWithTitle: (refresh?: boolean) => Promise<DataViewListItem[]>;
+  getSavedIdsWithTitle: (refresh?: boolean) => Promise<DataViewListItem[]>;
+  /**
+   * Get list of data view ids and title (and more) for each cached data view.
+   */
+  getCachedIdsWithTitle: () => Promise<DataViewListItem[]>;
   /**
    * Get list of data view ids and title (and more) for each data view.
    * @param refresh - clear cache and fetch from server
@@ -483,10 +488,10 @@ export class DataViewsService {
   };
 
   /**
-   * Gets list of index pattern ids with titles.
+   * Gets list of index pattern ids with titles from the savedObject cache
    * @param refresh Force refresh of index pattern list
    */
-  getIdsWithTitle = async (refresh: boolean = false): Promise<DataViewListItem[]> => {
+  getSavedIdsWithTitle = async (refresh: boolean = false): Promise<DataViewListItem[]> => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
@@ -502,6 +507,27 @@ export class DataViewsService {
       name: obj?.attributes?.name,
       timeFieldName: obj?.attributes?.timeFieldName,
       managed: obj?.managed,
+    }));
+  };
+
+  /**
+   * Get a list of index patterns ids with titles from the cache
+   */
+  getCachedIdsWithTitle = async (): Promise<DataViewListItem[]> => {
+    if (!this.dataViewCache) {
+      return [];
+    }
+
+    const dataViews = await Promise.all(Array.from(this.dataViewCache.values()));
+    return dataViews.map((dv) => ({
+      id: dv.id || '',
+      namespaces: dv.namespaces,
+      title: dv.title,
+      type: dv.type,
+      typeMeta: dv.typeMeta,
+      name: dv.name,
+      timeFieldName: dv.timeFieldName,
+      managed: dv.managed,
     }));
   };
 
@@ -1404,7 +1430,7 @@ export class DataViewsService {
   }
 
   private async getDefaultDataViewId() {
-    const patterns = await this.getIdsWithTitle();
+    const patterns = await this.getSavedIdsWithTitle();
     let defaultId: string | null = await this.getDefaultId();
     const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
 

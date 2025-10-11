@@ -32,5 +32,5 @@ export const dataViewsService = {
   getDefaultId: jest.fn(),
   updateSavedObject: jest.fn(),
   refreshFields: jest.fn(),
-  getIdsWithTitle: jest.fn(),
+  getSavedIdsWithTitle: jest.fn(),
 } as unknown as jest.Mocked<DataViewsService>;

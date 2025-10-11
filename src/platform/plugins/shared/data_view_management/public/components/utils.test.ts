@@ -11,7 +11,7 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { getIndexPatterns } from './utils';
 
 const indexPatternContractMock = {
-  getIdsWithTitle: jest.fn().mockReturnValue(
+  getSavedIdsWithTitle: jest.fn().mockReturnValue(
     Promise.resolve([
       {
         id: 'test',

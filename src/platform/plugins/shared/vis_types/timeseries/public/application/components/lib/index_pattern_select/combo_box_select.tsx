@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { EuiComboBoxProps } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
@@ -20,7 +20,7 @@ import type { SelectIndexComponentProps } from './types';
 import type { IndexPatternValue } from '../../../../../common/types';
 
 /** @internal **/
-type IdsWithTitle = Awaited<ReturnType<DataViewsService['getIdsWithTitle']>>;
+type IdsWithTitle = Awaited<ReturnType<DataViewsService['getSavedIdsWithTitle']>>;
 
 /** @internal **/
 type SelectedOptions = EuiComboBoxProps<string>['selectedOptions'];
@@ -70,7 +70,7 @@ export const ComboBoxSelect = ({
 
   useEffect(() => {
     async function fetchIndexes() {
-      setAvailableIndexes(await getDataViewsStart().getIdsWithTitle());
+      setAvailableIndexes(await getDataViewsStart().getSavedIdsWithTitle());
     }
 
     fetchIndexes();

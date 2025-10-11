@@ -189,7 +189,7 @@ export function useIndexInput({
   useEffect(
     function loadDataViewListItems() {
       async function getFilteredDataViewListItems() {
-        const dataViewIds = await dataViews.getIdsWithTitle();
+        const dataViewIds = await dataViews.getSavedIdsWithTitle();
         const supportedFieldTypes = inferrer.getSupportedFieldTypes();
 
         const hasTextField = async ({ id }: { id: string }) => {

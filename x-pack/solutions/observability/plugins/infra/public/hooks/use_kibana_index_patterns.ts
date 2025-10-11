@@ -28,7 +28,7 @@ export const useKibanaIndexPatternTitles = () => {
 
   const [indexPatternTitlesRequest, fetchIndexPatternTitles] = useTrackedPromise(
     {
-      createPromise: () => indexPatterns.getIdsWithTitle(true),
+      createPromise: () => indexPatterns.getSavedIdsWithTitle(true),
       onResolve: setIndexPatternTitles,
     },
     [indexPatterns]

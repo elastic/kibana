@@ -44,7 +44,7 @@ export const createSourcererDataView = async ({
   if (dataViewId === null) {
     return;
   }
-  let allDataViews: DataViewListItem[] = await dataViewService.getIdsWithTitle();
+  let allDataViews: DataViewListItem[] = await dataViewService.getSavedIdsWithTitle();
   const siemDataViewExist = allDataViews.find((dv) => dv.id === dataViewId);
   const alertDataViewExist = allDataViews.find((dv) => dv.id === alertDataViewId);
 

@@ -102,7 +102,7 @@ export class IndexPatternSelect extends Component<IndexPatternSelectInternalProp
   };
 
   debouncedFetch = _.debounce(async (searchValue: string) => {
-    const dataViews = await this.props.indexPatternService.getIdsWithTitle();
+    const dataViews = await this.props.indexPatternService.getSavedIdsWithTitle();
     if (!this.isMounted || searchValue !== this.state.searchValue) {
       return;
     }

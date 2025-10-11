@@ -50,9 +50,9 @@ import { DataControlEditorStrings } from './data_control_constants';
 import { getDataControlFieldRegistry } from './data_control_editor_utils';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
 import {
-  isDataControlFactory,
   type DataControlFactory,
   type DataControlFieldRegistry,
+  isDataControlFactory,
 } from './types';
 import type { ControlFactory } from '../types';
 import { confirmDeleteControl } from '../../common';
@@ -194,7 +194,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     value: dataViewListItems = [],
     error: dataViewListError,
   } = useAsync(async () => {
-    return dataViewsService.getIdsWithTitle();
+    return dataViewsService.getSavedIdsWithTitle();
   });
 
   const {
@@ -282,6 +282,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
             >
               {dataViewListError ? (
                 <EuiCallOut
+                  announceOnMount
                   color="danger"
                   iconType="error"
                   title={DataControlEditorStrings.manageControl.dataSource.getDataViewListErrorTitle()}
@@ -310,6 +311,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
           <EuiFormRow label={DataControlEditorStrings.manageControl.dataSource.getFieldTitle()}>
             {fieldListError ? (
               <EuiCallOut
+                announceOnMount
                 color="danger"
                 iconType="error"
                 title={DataControlEditorStrings.manageControl.dataSource.getFieldListErrorTitle()}

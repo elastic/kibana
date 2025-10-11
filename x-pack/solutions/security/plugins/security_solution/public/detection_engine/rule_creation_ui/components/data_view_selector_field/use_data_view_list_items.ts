@@ -32,7 +32,7 @@ export function useDataViewListItems(): UseDataViewsResult {
     setIsFetching(true);
     (async () => {
       try {
-        setDataViews(await dataViewsService.getIdsWithTitle(true));
+        setDataViews(await dataViewsService.getSavedIdsWithTitle(true));
       } catch (e) {
         addError(e, { title: i18n.DATA_VIEWS_FETCH_ERROR });
       } finally {
