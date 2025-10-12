@@ -9,10 +9,10 @@
 
 import { suggestForExpression } from '../suggestionEngine';
 import type { ExpressionContext, FunctionParameterContext } from '../types';
-import { getValidSignaturesAndTypesToSuggestNext } from '../../helpers';
 import { getFunctionDefinition } from '../../../functions';
 import type { ISuggestionItem } from '../../../../../commands_registry/types';
 import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../../../../types';
+import { SignatureAnalyzer } from '../SignatureAnalyzer';
 
 /** Matches comma followed by optional whitespace at end of text */
 const STARTING_NEW_PARAM_REGEX = /,\s*$/;
@@ -38,14 +38,14 @@ export async function suggestInFunction(ctx: ExpressionContext): Promise<ISugges
     return [];
   }
 
-  const validSignatures = getValidSignaturesAndTypesToSuggestNext(
-    functionExpression,
-    context,
-    functionDefinition
-  );
+  const analyzer = SignatureAnalyzer.fromNode(functionExpression, context, functionDefinition);
+
+  if (!analyzer) {
+    return [];
+  }
 
   const paramContext = buildInFunctionParameterContext(
-    validSignatures,
+    analyzer,
     functionExpression.name,
     functionDefinition,
     options.functionParameterContext
@@ -70,7 +70,7 @@ export async function suggestInFunction(ctx: ExpressionContext): Promise<ISugges
 
 /** Builds function parameter context, adding current function to ignore list */
 function buildInFunctionParameterContext(
-  validationResult: ReturnType<typeof getValidSignaturesAndTypesToSuggestNext>,
+  analyzer: SignatureAnalyzer,
   functionName: string,
   functionDefinition: ReturnType<typeof getFunctionDefinition>,
   existingContext?: FunctionParameterContext
@@ -80,16 +80,14 @@ function buildInFunctionParameterContext(
     ? existingIgnored
     : [...existingIgnored, functionName];
 
-  const firstArgumentType = validationResult.enrichedArgs[0]?.dataType;
-
   return {
-    paramDefinitions: validationResult.compatibleParamDefs,
+    paramDefinitions: analyzer.getCompatibleParamDefs(),
     functionsToIgnore,
-    hasMoreMandatoryArgs: validationResult.hasMoreMandatoryArgs,
+    hasMoreMandatoryArgs: analyzer.getHasMoreMandatoryArgs(),
     functionDefinition,
-    firstArgumentType,
-    currentParameterIndex: validationResult.argIndex,
-    validSignatures: validationResult.validSignatures,
+    firstArgumentType: analyzer.getFirstArgumentType(),
+    currentParameterIndex: analyzer.getCurrentParameterIndex(),
+    validSignatures: analyzer.getValidSignatures(),
   };
 }
 

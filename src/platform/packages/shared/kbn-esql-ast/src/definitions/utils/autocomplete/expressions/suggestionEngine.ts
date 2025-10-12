@@ -23,7 +23,8 @@ import {
   endsWithLikeOrRlikeToken,
   endsWithIsOrIsNotToken,
 } from './operators/utils';
-import type { ESQLFunction } from '../../../../types';
+import type { ESQLFunction, ESQLSingleAstItem, ESQLUnknownItem } from '../../../../types';
+import type { inOperators, patternMatchOperators } from '../../../all_operators';
 import { getExpressionType } from '../../expressions';
 import { getNullCheckOperatorSuggestions } from '../../operators';
 
@@ -63,24 +64,39 @@ async function trySuggestForPartialOperators(
   const trimmed = innerText.trimEnd();
   const low = trimmed.toLowerCase();
 
-  const buildSyntheticBinary = (opName: 'in' | 'not in' | 'like' | 'rlike'): ESQLFunction => {
+  type InOpName = (typeof inOperators)[number]['name'];
+  type LikeOpName = (typeof patternMatchOperators)[number]['name'];
+
+  const buildSyntheticBinary = (
+    opName: InOpName | LikeOpName
+  ): ESQLFunction<'binary-expression'> => {
     const L = innerText.length;
+
+    const left: ESQLSingleAstItem | undefined = expressionRoot;
+    const rightPlaceholder: ESQLUnknownItem = {
+      type: 'unknown',
+      name: '',
+      text: '',
+      location: { min: L, max: L },
+      incomplete: true,
+    };
+
     return {
       type: 'function',
       name: opName,
       subtype: 'binary-expression',
-      args: [expressionRoot as any, undefined as any],
+      args: [left ?? rightPlaceholder, rightPlaceholder],
       incomplete: true,
       location: { min: L, max: L },
       text: opName,
-    } as unknown as ESQLFunction;
+    };
   };
 
   // LIKE / RLIKE / NOT LIKE / NOT RLIKE
   if (endsWithLikeOrRlikeToken(trimmed)) {
-    const opName = (low.endsWith('rlike') || low.endsWith('not rlike') ? 'rlike' : 'like') as
-      | 'like'
-      | 'rlike';
+    const opName = (
+      low.endsWith('rlike') || low.endsWith('not rlike') ? 'rlike' : 'like'
+    ) as LikeOpName;
     const synthetic = buildSyntheticBinary(opName);
 
     return (await dispatchOperators({ ...ctx, expressionRoot: synthetic })) ?? [];
@@ -88,7 +104,7 @@ async function trySuggestForPartialOperators(
 
   // IN / NOT IN
   if (endsWithInOrNotInToken(trimmed)) {
-    const opName: 'in' | 'not in' = low.endsWith('not in') ? 'not in' : 'in';
+    const opName: InOpName = (low.endsWith('not in') ? 'not in' : 'in') as InOpName;
     const synthetic = buildSyntheticBinary(opName);
 
     return (await dispatchOperators({ ...ctx, expressionRoot: synthetic })) ?? [];
@@ -96,10 +112,8 @@ async function trySuggestForPartialOperators(
 
   // IS / IS NOT
   if (endsWithIsOrIsNotToken(trimmed)) {
-    const leftType = getExpressionType(expressionRoot as any, ctx.context?.columns);
-    const leftParamType = (
-      leftType === 'unknown' || leftType === 'unsupported' ? 'any' : leftType
-    ) as any;
+    const leftType = getExpressionType(expressionRoot, ctx.context?.columns);
+    const leftParamType = leftType === 'unknown' || leftType === 'unsupported' ? 'any' : leftType;
 
     return getNullCheckOperatorSuggestions(innerText, ctx.location, leftParamType);
   }

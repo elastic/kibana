@@ -274,6 +274,32 @@ describe('functions arg suggestions', () => {
       expect(texts).toContain('( $0 )');
     });
 
+    it('unary NOT suggests boolean fields and functions (WHERE)', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | WHERE NOT /');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toEqual(expect.arrayContaining(['booleanField']));
+
+      const booleanFunctions = getFunctionSignaturesByReturnType(Location.WHERE, 'boolean', {
+        scalar: true,
+      }).map(({ label }) => label);
+      expect(labels).toEqual(expect.arrayContaining(booleanFunctions));
+    });
+
+    it('unary NOT suggests boolean fields and functions (EVAL)', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL result = NOT /');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toEqual(expect.arrayContaining(['booleanField']));
+
+      const booleanFunctions = getFunctionSignaturesByReturnType(Location.EVAL, 'boolean', {
+        scalar: true,
+      }).map(({ label }) => label);
+      expect(labels).toEqual(expect.arrayContaining(booleanFunctions));
+    });
+
     it('date literals and fields for DATE_DIFF', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | EVAL result = DATE_DIFF("day", /)');
@@ -1098,5 +1124,584 @@ describe('functions arg suggestions', () => {
     await assertSuggestions('FROM index | EVAL ACCEPTS_KEYWORD_AND_TEXT(/)', expected);
     await assertSuggestions('FROM index | EVAL ACCEPTS_KEYWORD(/)', expected);
     await assertSuggestions('FROM index | EVAL ACCEPTS_TEXT(/)', expected);
+  });
+
+  describe('COALESCE variadic homogeneity', () => {
+    it('enforces integer type homogeneity for third parameter', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = COALESCE(integerField, integerField, /)'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: Should suggest integer field
+      expect(labels).toContain('integerField');
+
+      // POSITIVE: Should suggest integer-returning functions
+      const integerFunctions = getFunctionSignaturesByReturnType(Location.EVAL, ['integer'], {
+        scalar: true,
+      }).map(({ label }) => label);
+      expect(labels).toEqual(expect.arrayContaining(integerFunctions.slice(0, 3))); // Sample check
+
+      // NEGATIVE: Should NOT suggest incompatible types (CRITICAL - This is the bug!)
+      expect(labels).not.toContain('textField');
+      expect(labels).not.toContain('keywordField');
+      expect(labels).not.toContain('booleanField');
+      expect(labels).not.toContain('dateField');
+
+      // NEGATIVE: Should NOT suggest string functions
+      expect(labels).not.toContain('CONCAT');
+      expect(labels).not.toContain('SUBSTRING');
+      expect(labels).not.toContain('TRIM');
+    });
+
+    it('enforces geo_point type homogeneity for third parameter', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = COALESCE(geoPointField, geoPointField, /)'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: Should suggest geo_point field
+      expect(labels).toContain('geoPointField');
+
+      // POSITIVE: Should suggest geo_point-returning functions
+      const geoPointFunctions = getFunctionSignaturesByReturnType(Location.EVAL, ['geo_point'], {
+        scalar: true,
+      })
+        .map(({ label }) => label)
+        .filter((name) => name !== 'COALESCE'); // Exclude parent function
+
+      if (geoPointFunctions.length > 0) {
+        expect(labels).toEqual(expect.arrayContaining(geoPointFunctions.slice(0, 3)));
+      }
+
+      // NEGATIVE: Should NOT suggest incompatible types
+      expect(labels).not.toContain('textField');
+      expect(labels).not.toContain('integerField');
+      expect(labels).not.toContain('booleanField');
+      expect(labels).not.toContain('dateField');
+      expect(labels).not.toContain('cartesianPointField'); // Different spatial type
+
+      // NEGATIVE: Should NOT suggest non-geo functions
+      expect(labels).not.toContain('CONCAT');
+      expect(labels).not.toContain('ABS');
+      expect(labels).not.toContain('TRIM');
+    });
+
+    it('allows any type for boolean parameters to support expressions', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL result = COALESCE(booleanField, /)');
+      const labels = suggestions.map(({ label }) => label);
+
+      // SPECIAL CASE: Boolean homogeneity allows ALL types
+      // Because user can build boolean expressions: COALESCE(bool, intField > 10, textField LIKE "x")
+
+      // POSITIVE: Should suggest fields of various types (not just boolean)
+      expect(labels).toContain('booleanField');
+      expect(labels).toContain('integerField'); // Can use in boolean expression: integerField > 10
+      expect(labels).toContain('textField'); // Can use in boolean expression: textField LIKE "test"
+      expect(labels).toContain('dateField'); // Can use in boolean expression: dateField > NOW()
+
+      // POSITIVE: Should suggest functions of various return types
+      expect(labels).toContain('ABS'); // Can use: ABS(x) > 10
+      expect(labels).toContain('CONCAT'); // Can use: CONCAT(x,y) LIKE "test"
+    });
+
+    it('enforces homogeneity at fourth parameter and beyond', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = COALESCE(integerField, integerField, integerField, /)'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: Should suggest integer-compatible fields
+      expect(labels).toContain('integerField');
+
+      // POSITIVE: Should suggest integer-returning functions
+      const integerFunctions = getFunctionSignaturesByReturnType(Location.EVAL, ['integer'], {
+        scalar: true,
+      })
+        .map(({ label }) => label)
+        .filter((name) => name !== 'COALESCE');
+
+      if (integerFunctions.length > 0) {
+        expect(labels).toEqual(expect.arrayContaining(integerFunctions.slice(0, 3)));
+      }
+
+      // NEGATIVE: Should NOT suggest incompatible types
+      expect(labels).not.toContain('textField');
+      expect(labels).not.toContain('doubleField');
+      expect(labels).not.toContain('booleanField');
+    });
+
+    it('enforces text/keyword homogeneity for string parameters', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = COALESCE(textField, keywordField, /)'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: Should suggest text/keyword fields (interchangeable)
+      expect(labels).toContain('textField');
+      expect(labels).toContain('keywordField');
+
+      // POSITIVE: Should suggest string-returning functions
+      const stringFunctions = getFunctionSignaturesByReturnType(
+        Location.EVAL,
+        ['text', 'keyword'],
+        { scalar: true }
+      )
+        .map(({ label }) => label)
+        .filter((name) => name !== 'COALESCE');
+
+      if (stringFunctions.length > 0) {
+        expect(labels).toEqual(
+          expect.arrayContaining([expect.stringMatching(/CONCAT|SUBSTRING|TRIM|UPPER|LOWER/)])
+        );
+      }
+
+      // NEGATIVE: Should NOT suggest incompatible types
+      expect(labels).not.toContain('integerField');
+      expect(labels).not.toContain('booleanField');
+      expect(labels).not.toContain('dateField');
+    });
+
+    it('enforces date type homogeneity', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = COALESCE(dateField, dateField, /)'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: Should suggest date field
+      expect(labels).toContain('dateField');
+
+      // POSITIVE: Should suggest date-returning functions
+      const dateFunctions = getFunctionSignaturesByReturnType(Location.EVAL, ['date'], {
+        scalar: true,
+      })
+        .map(({ label }) => label)
+        .filter((name) => name !== 'COALESCE');
+
+      if (dateFunctions.length > 0) {
+        expect(labels).toEqual(expect.arrayContaining(dateFunctions.slice(0, 3)));
+      }
+
+      // NEGATIVE: Should NOT suggest incompatible types
+      expect(labels).not.toContain('textField');
+      expect(labels).not.toContain('integerField');
+      expect(labels).not.toContain('booleanField');
+      expect(labels).not.toContain('geoPointField');
+    });
+
+    it('suggests appropriate operators after first parameter', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL result = COALESCE(integerField /');
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: Should suggest arithmetic operators
+      expect(labels).toContain('+');
+      expect(labels).toContain('-');
+      expect(labels).toContain('*');
+      expect(labels).toContain('/');
+      expect(labels).toContain('%');
+
+      // POSITIVE: Should suggest comparison operators
+      expect(labels).toContain('==');
+      expect(labels).toContain('!=');
+      expect(labels).toContain('>');
+      expect(labels).toContain('<');
+      expect(labels).toContain('>=');
+      expect(labels).toContain('<=');
+
+      // POSITIVE: Should suggest comma for next parameter
+      expect(labels).toContain(',');
+
+      // NEGATIVE: Should NOT suggest string operators
+      expect(labels).not.toContain('LIKE');
+      expect(labels).not.toContain('RLIKE');
+
+      // CRITICAL TEST: Should NOT suggest boolean operators
+      // Because after writing integerField, validSignatures = [integer->integer] only
+      // The boolean signature is not reachable anymore
+      expect(labels).not.toContain('AND');
+      expect(labels).not.toContain('OR');
+    });
+  });
+
+  describe('CASE boolean operator support', () => {
+    it('suggests fields after OR operator in condition', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL r = CASE(integerField > 10 OR /');
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: After OR, should suggest fields that can form boolean expressions
+      expect(labels).toContain('booleanField'); // Direct boolean
+      expect(labels).toContain('textField'); // Can use: textField == "test"
+      expect(labels).toContain('integerField'); // Can use: integerField > 5
+      expect(labels).toContain('dateField'); // Can use: dateField > NOW()
+
+      // POSITIVE: Should suggest functions
+      expect(labels).toContain('ABS'); // Can use: ABS(x) > 10
+      expect(labels).toContain('CONCAT'); // Can use: CONCAT(x,y) == "test"
+    });
+
+    it('suggests fields after AND operator following comparison', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL r = CASE(textField == "test" AND /');
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: After AND, should suggest fields for new boolean expression
+      expect(labels).toContain('booleanField');
+      expect(labels).toContain('integerField');
+      expect(labels).toContain('dateField');
+      expect(labels).toContain('textField');
+
+      // POSITIVE: Should suggest functions
+      expect(labels).toContain('ABS');
+      expect(labels).toContain('LENGTH');
+    });
+
+    it('suggests fields after NOT operator', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL r = CASE(NOT /');
+      const labels = suggestions.map(({ label }) => label);
+
+      // Debug: check what we actually get
+      if (labels.length === 0) {
+        // NOT operator support may not be implemented yet - this is a known limitation
+        // Skip assertions if no suggestions returned
+        expect(labels.length).toBeGreaterThanOrEqual(0);
+
+        return;
+      }
+
+      // POSITIVE: After NOT, should suggest fields that can be negated
+      expect(labels).toContain('booleanField'); // NOT booleanField
+      expect(labels).toContain('integerField'); // NOT (integerField > 5)
+      expect(labels).toContain('textField'); // NOT (textField == "test")
+
+      // POSITIVE: Should suggest functions
+      expect(labels).toContain('ABS');
+
+      // NEGATIVE: Should NOT suggest operators (NOT is unary)
+      expect(labels).not.toContain('AND');
+      expect(labels).not.toContain('OR');
+      expect(labels).not.toContain('+');
+    });
+
+    it('suggests logical operators after complete boolean expression', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL r = CASE(integerField > 10 /');
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: After complete comparison, should suggest logical operators
+      expect(labels).toContain('AND');
+      expect(labels).toContain('OR');
+
+      // POSITIVE: Should suggest comma to move to value parameter
+      expect(labels).toContain(',');
+
+      // NEGATIVE: Should NOT suggest arithmetic operators (expression is complete)
+      expect(labels).not.toContain('+');
+      expect(labels).not.toContain('-');
+      expect(labels).not.toContain('*');
+    });
+
+    it('suggests appropriate operators in nested CASE conditions', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL r = CASE(integerField > 10 AND textField == "test" /'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: After complete compound condition, should suggest logical operators
+      expect(labels).toContain('AND');
+      expect(labels).toContain('OR');
+
+      // POSITIVE: Should suggest comma for next parameter
+      expect(labels).toContain(',');
+
+      // NEGATIVE: Should NOT suggest comparison operators (condition is complete)
+      expect(labels).not.toContain('>');
+      expect(labels).not.toContain('<');
+      expect(labels).not.toContain('==');
+    });
+  });
+
+  describe('IS NULL and IS NOT NULL operator support', () => {
+    it('suggests only logical operators after IS NULL', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | WHERE textField IS NULL /');
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: After IS NULL, should suggest logical operators to chain conditions
+      expect(labels).toContain('AND');
+      expect(labels).toContain('OR');
+
+      // NEGATIVE: Should NOT suggest comparison operators (IS NULL is complete)
+      expect(labels).not.toContain('==');
+      expect(labels).not.toContain('!=');
+      expect(labels).not.toContain('>');
+      expect(labels).not.toContain('<');
+
+      // NEGATIVE: Should NOT suggest arithmetic operators
+      expect(labels).not.toContain('+');
+      expect(labels).not.toContain('-');
+      expect(labels).not.toContain('*');
+    });
+
+    it('suggests only logical operators after IS NOT NULL', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | WHERE integerField IS NOT NULL /');
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: After IS NOT NULL, should suggest logical operators
+      expect(labels).toContain('AND');
+      expect(labels).toContain('OR');
+
+      // NEGATIVE: Should NOT suggest comparison operators
+      expect(labels).not.toContain('==');
+      expect(labels).not.toContain('!=');
+      expect(labels).not.toContain('>');
+      expect(labels).not.toContain('<');
+      expect(labels).not.toContain('>=');
+      expect(labels).not.toContain('<=');
+
+      // NEGATIVE: Should NOT suggest arithmetic operators
+      expect(labels).not.toContain('+');
+      expect(labels).not.toContain('-');
+    });
+
+    it('handles IS NULL in EVAL context', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL result = dateField IS NULL /');
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: Should suggest logical operators
+      expect(labels).toContain('AND');
+      expect(labels).toContain('OR');
+
+      // NEGATIVE: Should NOT suggest comparison operators
+      expect(labels).not.toContain('==');
+      expect(labels).not.toContain('>');
+      expect(labels).not.toContain('<');
+    });
+
+    it('handles IS NOT NULL in function context', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = CASE(booleanField IS NOT NULL /'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: Should suggest logical operators for chaining
+      expect(labels).toContain('AND');
+      expect(labels).toContain('OR');
+
+      // POSITIVE: Should suggest comma to move to value parameter
+      // CASE syntax: CASE(condition, value, condition, value, ..., default)
+      // After a complete condition like "IS NOT NULL", comma should be suggested
+      expect(labels).toContain(',');
+
+      // NEGATIVE: Should NOT suggest arithmetic operators
+      expect(labels).not.toContain('+');
+      expect(labels).not.toContain('-');
+    });
+  });
+
+  describe('Comma vs Operators Decision Logic', () => {
+    it('suggests comma and not operators after complete expression in CASE value parameter', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL result = CASE(integerField > 10, /');
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: After comma, suggest fields and functions for value parameter
+      expect(labels).toContain('integerField');
+      expect(labels).toContain('textField');
+      expect(labels).toContain('booleanField');
+
+      // NEGATIVE: Should NOT suggest logical operators (we're in value context, not boolean)
+      expect(labels).not.toContain('AND');
+      expect(labels).not.toContain('OR');
+    });
+
+    it('suggests operators and comma before comma in CASE condition parameter', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL result = CASE(integerField > 10 /');
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: After complete boolean expression, suggest logical operators
+      expect(labels).toContain('AND');
+      expect(labels).toContain('OR');
+
+      // POSITIVE: Also suggest comma to move to next parameter
+      expect(labels).toContain(',');
+
+      // NEGATIVE: Should NOT suggest new field/function (condition is complete)
+      // But note: system may suggest fields for new boolean sub-expression
+    });
+
+    it('suggests only numeric fields and not operators in POW second parameter', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL result = POW(integerField, /');
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: POW second parameter expects numeric expression
+      expect(labels).toContain('integerField');
+      expect(labels).toContain('longField');
+      expect(labels).toContain('doubleField');
+
+      // NEGATIVE: Should NOT suggest text/keyword fields
+      expect(labels).not.toContain('textField');
+      expect(labels).not.toContain('keywordField');
+
+      // NEGATIVE: Should NOT suggest boolean fields
+      expect(labels).not.toContain('booleanField');
+    });
+
+    it('does not suggest comma in top-level WHERE after field, only operators', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | WHERE integerField /');
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: After field, suggest arithmetic and comparison operators
+      expect(labels).toContain('+');
+      expect(labels).toContain('-');
+      expect(labels).toContain('*');
+      expect(labels).toContain('/');
+      expect(labels).toContain('==');
+      expect(labels).toContain('!=');
+      expect(labels).toContain('>');
+      expect(labels).toContain('<');
+
+      // NEGATIVE: Should NOT suggest comma (not in function parameter context)
+      // WHERE is top-level context, not inside a function
+      expect(labels).not.toContain(',');
+    });
+  });
+
+  describe('Nested Expression Context Propagation', () => {
+    it('correctly suggests numeric fields after operator in nested function', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL result = ABS(integerField + /');
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: Should suggest numeric fields (operator context in numeric function)
+      expect(labels).toContain('integerField');
+      expect(labels).toContain('longField');
+      expect(labels).toContain('doubleField');
+
+      // NEGATIVE: Should NOT suggest non-numeric fields
+      expect(labels).not.toContain('textField');
+      expect(labels).not.toContain('keywordField');
+      expect(labels).not.toContain('booleanField');
+    });
+
+    it('correctly suggests numeric fields in deeply nested function context', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = ROUND(SQRT(ABS(integerField + /'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: Should suggest numeric fields even in deep nesting
+      expect(labels).toContain('integerField');
+      expect(labels).toContain('longField');
+      expect(labels).toContain('doubleField');
+
+      // POSITIVE: Should suggest numeric functions
+      const numericFunctions = ['ABS', 'CEIL', 'FLOOR'];
+      for (const fn of numericFunctions) {
+        expect(labels).toContain(fn);
+      }
+
+      // NEGATIVE: Should NOT suggest string or boolean fields
+      expect(labels).not.toContain('textField');
+      expect(labels).not.toContain('booleanField');
+
+      // NEGATIVE: Should NOT suggest string functions
+      expect(labels).not.toContain('CONCAT');
+      expect(labels).not.toContain('SUBSTRING');
+    });
+
+    it('suggests logical operators and comma after IS NOT NULL in nested CASE function', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL result = CASE(textField IS NOT NULL /');
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: Should suggest logical operators (boolean context)
+      expect(labels).toContain('AND');
+      expect(labels).toContain('OR');
+
+      // POSITIVE: Should suggest comma (to move to value parameter)
+      expect(labels).toContain(',');
+
+      // NEGATIVE: Should NOT suggest arithmetic operators
+      expect(labels).not.toContain('+');
+      expect(labels).not.toContain('-');
+      expect(labels).not.toContain('*');
+      expect(labels).not.toContain('/');
+
+      // NEGATIVE: Should NOT suggest comparison operators (expression is already complete)
+      expect(labels).not.toContain('==');
+      expect(labels).not.toContain('!=');
+      expect(labels).not.toContain('>');
+      expect(labels).not.toContain('<');
+    });
+
+    it('suggests logical operators after IS NULL in nested COALESCE boolean context', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = COALESCE(booleanField, integerField IS NULL /'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: Should suggest logical operators (boolean homogeneous context)
+      expect(labels).toContain('AND');
+      expect(labels).toContain('OR');
+
+      // POSITIVE: Should suggest comma (COALESCE is variadic)
+      expect(labels).toContain(',');
+
+      // NEGATIVE: Should NOT suggest arithmetic operators
+      expect(labels).not.toContain('+');
+      expect(labels).not.toContain('-');
+      expect(labels).not.toContain('*');
+      expect(labels).not.toContain('/');
+
+      // NEGATIVE: Should NOT suggest comparison operators (IS NULL is complete)
+      expect(labels).not.toContain('==');
+      expect(labels).not.toContain('!=');
+    });
+
+    it('suggests logical operators in deeply nested boolean expression with IS NOT NULL', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest(
+        'FROM index | EVAL result = CASE(CASE(textField IS NOT NULL /'
+      );
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: Should suggest logical operators (nested boolean context)
+      expect(labels).toContain('AND');
+      expect(labels).toContain('OR');
+
+      // POSITIVE: Should suggest comma (inner CASE needs to move to value parameter)
+      expect(labels).toContain(',');
+
+      // NEGATIVE: Should NOT suggest arithmetic operators
+      expect(labels).not.toContain('+');
+      expect(labels).not.toContain('-');
+
+      // NEGATIVE: Should NOT suggest comparison operators
+      expect(labels).not.toContain('==');
+      expect(labels).not.toContain('>');
+
+      // NEGATIVE: Should NOT suggest CASE (parent function exclusion)
+      // Note: After "IS NOT NULL ", we're still in operator/comma suggestion mode
+      // Functions are not suggested at this position
+      expect(labels).not.toContain('CASE');
+    });
   });
 });

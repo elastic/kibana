@@ -20,9 +20,7 @@ const handlers: Record<ExpressionPosition, (ctx: ExpressionContext) => Promise<I
   {
     in_function: suggestInFunction,
     after_operator: suggestAfterOperator,
-    after_column: suggestAfterComplete,
-    after_function: suggestAfterComplete,
-    after_literal: suggestAfterComplete,
+    after_complete: suggestAfterComplete,
     after_not: suggestAfterNot,
     empty_expression: suggestForEmptyExpression,
   };

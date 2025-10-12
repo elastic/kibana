@@ -13,12 +13,10 @@ import type { ESQLSingleAstItem } from '../../../../types';
 import { isNullCheckOperator } from './utils';
 
 export type ExpressionPosition =
-  | 'after_column'
-  | 'after_function'
   | 'in_function'
   | 'after_not'
   | 'after_operator'
-  | 'after_literal'
+  | 'after_complete'
   | 'empty_expression';
 
 /** Matches " not" at end of string (case insensitive) */
@@ -42,19 +40,17 @@ export function getPosition(
     return 'after_not';
   }
 
-  // No expression parsed yet (e.g., "FROM a | EVAL |")
   if (!expressionRoot) {
     return 'empty_expression';
   }
 
-  // Column reference (e.g., "field|" or "field |")
   if (isColumn(expressionRoot)) {
     const escapedColumn = expressionRoot.parts.join('\\.').replace(REGEX_SPECIAL_CHARS, '\\$&');
     const endsWithColumnName = new RegExp(`${escapedColumn}$`).test(innerText);
 
     // If cursor is after column but text continues, suggest operators
     if (!endsWithColumnName) {
-      return 'after_column';
+      return 'after_complete';
     }
   }
 
@@ -63,16 +59,21 @@ export function getPosition(
     if (expressionRoot.subtype === 'variadic-call') {
       const cursorIsInside = within(innerText.length, expressionRoot);
 
-      return cursorIsInside ? 'in_function' : 'after_function';
+      return cursorIsInside ? 'in_function' : 'after_complete';
+    }
+
+    // Postfix unary operators (IS NULL, IS NOT NULL) are complete when not marked incomplete
+    // Incomplete means partial typing like "IS N" - should be handled by pre-pass
+    if (expressionRoot.subtype === 'postfix-unary-expression' && !expressionRoot.incomplete) {
+      return 'after_complete';
     }
 
     // Binary operators (e.g., "field = |", "field IN |")
     return 'after_operator';
   }
 
-  // Literal value (e.g., "123|" or "\"text\"|")
   if (isLiteral(expressionRoot)) {
-    return 'after_literal';
+    return 'after_complete';
   }
 
   return 'empty_expression';
