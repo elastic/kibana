@@ -3393,7 +3393,7 @@
         "label": "RunStepCommand",
         "description": [],
         "signature": [
-          "{ workflowYaml: string; stepId: string; contextOverride?: Record<string, any> | undefined; }"
+          "{ stepId: string; workflowYaml: string; contextOverride?: Record<string, any> | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
@@ -3688,7 +3688,7 @@
             "section": "def-common.ExecutionStatus",
             "text": "ExecutionStatus"
           },
-          "; startedAt: string; stepId?: string | undefined; workflowId?: string | undefined; finishedAt: string; workflowName?: string | undefined; triggeredBy?: string | undefined; }"
+          "; startedAt: string; workflowId?: string | undefined; finishedAt: string; triggeredBy?: string | undefined; stepId?: string | undefined; workflowName?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
@@ -3803,7 +3803,7 @@
             "section": "def-common.ExecutionStatus",
             "text": "ExecutionStatus"
           },
-          "; input?: Record<string, any> | null | undefined; output?: Record<string, any> | null | undefined; startedAt: string; stepId: string; stepType?: string | undefined; scopeStack: ",
+          "; input?: Record<string, any> | null | undefined; output?: Record<string, any> | null | undefined; startedAt: string; workflowId: string; stepId: string; workflowRunId: string; stepType?: string | undefined; scopeStack: ",
           {
             "pluginId": "@kbn/workflows",
             "scope": "common",
@@ -3811,7 +3811,7 @@
             "section": "def-common.StackFrame",
             "text": "StackFrame"
           },
-          "[]; workflowRunId: string; workflowId: string; completedAt?: string | undefined; executionTimeMs?: number | undefined; topologicalIndex: number; globalExecutionIndex: number; stepExecutionIndex: number; }"
+          "[]; completedAt?: string | undefined; executionTimeMs?: number | undefined; topologicalIndex: number; globalExecutionIndex: number; stepExecutionIndex: number; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
