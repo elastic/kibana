@@ -57,6 +57,7 @@ export interface ExpressionContextOptions {
   controlType?: ESQLVariableType;
   addSpaceAfterOperator?: boolean;
   openSuggestions?: boolean;
+  isInsideInList?: boolean; // Flag to indicate we're inside an IN operator list
 }
 
 export interface FunctionParameterContext {

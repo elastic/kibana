@@ -1428,6 +1428,32 @@ describe('functions arg suggestions', () => {
       expect(labels).not.toContain('<');
       expect(labels).not.toContain('==');
     });
+
+    it('suggests pattern strings for LIKE operator inside CASE', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL r = CASE(textField LIKE /');
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: Should suggest pattern strings
+      expect(labels).toContain('""'); // Empty pattern
+      expect(labels).toContain('"*"'); // Wildcard pattern
+
+      // POSITIVE: Should suggest opening parenthesis for list form
+      expect(labels).toContain('( ... )');
+    });
+
+    it('suggests pattern strings inside LIKE list in CASE', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL r = CASE(textField LIKE ( /');
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: Inside list, should suggest pattern strings
+      expect(labels).toContain('""');
+      expect(labels).toContain('"*"');
+
+      // NEGATIVE: Should NOT suggest opening parenthesis again (already inside list)
+      expect(labels).not.toContain('(');
+    });
   });
 
   describe('IS NULL and IS NOT NULL operator support', () => {
@@ -1487,6 +1513,21 @@ describe('functions arg suggestions', () => {
       expect(labels).not.toContain('==');
       expect(labels).not.toContain('>');
       expect(labels).not.toContain('<');
+    });
+
+    it('suggests IS NULL and IS NOT NULL after partial IS operator in CASE', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL result = CASE(textField IS /');
+      const labels = suggestions.map(({ label }) => label);
+
+      // POSITIVE: Should suggest IS NULL and IS NOT NULL completions
+      expect(labels).toContain('IS NULL');
+      expect(labels).toContain('IS NOT NULL');
+
+      // NEGATIVE: Should NOT suggest fields/functions when completing IS operator
+      expect(labels).not.toContain('textField');
+      expect(labels).not.toContain('integerField');
+      expect(labels).not.toContain('ABS');
     });
 
     it('handles IS NOT NULL in function context', async () => {
