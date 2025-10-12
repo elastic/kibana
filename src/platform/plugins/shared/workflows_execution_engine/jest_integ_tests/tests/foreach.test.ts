@@ -44,7 +44,7 @@ steps:
             type: slack
             connector-id: ${FakeConnectors.slack2.name}
             with:
-              message: 'OuterForeach index: {{steps.outerForeachStep.index}}; InnerForeach item: {{foreach.item}}; InnerForeach index: {{foreach.index}}; InnerForeach total: {{foreach.total}}'
+              message: 'TEMPREMOVE OuterForeach index: {{steps.outerForeachStep.index}}; InnerForeach item: {{foreach.item}}; InnerForeach index: {{foreach.index}}; InnerForeach total: {{foreach.total}}'
 `;
   }
 
