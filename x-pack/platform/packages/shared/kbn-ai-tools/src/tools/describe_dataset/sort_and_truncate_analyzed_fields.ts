@@ -5,57 +5,47 @@
  * 2.0.
  */
 
-import { partition, shuffle } from 'lodash';
 import { truncateList } from '@kbn/inference-common';
 import type { DocumentAnalysis, TruncatedDocumentAnalysis } from './document_analysis';
+import { selectFields } from './select_fields';
 
 export function sortAndTruncateAnalyzedFields(
   analysis: DocumentAnalysis,
-  options: { dropEmpty?: boolean; dropUnmapped?: boolean } = {}
+  options: { dropEmpty?: boolean; dropUnmapped?: boolean; limit?: number } = {}
 ): TruncatedDocumentAnalysis {
-  const { dropEmpty = false, dropUnmapped = false } = options;
-  const { fields, ...meta } = analysis;
-  const [nonEmptyFields, emptyFields] = partition(analysis.fields, (field) => !field.empty);
+  const { dropEmpty = false, dropUnmapped = false, limit = 500 } = options;
 
-  // randomize field selection to get a somewhat more illustrative set of fields when
-  // the # of fields exceeds the threshold, instead of alphabetically sorted
-  // additionally, prefer non-empty fields over empty fields
-  const sortedFields = [...shuffle(nonEmptyFields), ...shuffle(emptyFields)];
-
-  const filteredFields =
-    dropEmpty || dropUnmapped
-      ? sortedFields.filter((field) => {
-          const shouldBeDropped =
-            (dropEmpty && field.empty) || (dropUnmapped && field.types.length === 0);
-
-          return !shouldBeDropped;
-        })
-      : fields;
+  const fields = selectFields(analysis, { dropEmpty, dropUnmapped, limit });
 
   return {
-    ...meta,
+    ...analysis,
     fields: truncateList(
-      filteredFields.map((field) => {
-        const types = field.types.join(',') || '(unnmapped)';
+      fields.map((field) => {
+        const types = field.types.join(',') || '(unmapped)';
         let label = `${field.name}:${types}`;
 
         if (field.empty) {
           return `${field.name} (empty)`;
         }
 
-        label += ` - ${field.cardinality} distinct values`;
+        const distinctValueLabel =
+          typeof field.cardinality === 'number' ? field.cardinality : 'unknown';
+        label += ` - ${distinctValueLabel} distinct values`;
 
         if (field.name === '@timestamp' || field.name === 'event.ingested') {
           return `${label}`;
         }
 
-        const shortValues = field.values.filter((value) => {
+        const shortValues = field.values.filter(({ value }) => {
           return String(value).length <= 1024;
         });
 
         if (shortValues.length) {
           return `${label} (${truncateList(
-            shortValues.map((value) => '`' + value + '`'),
+            shortValues.map(({ value, count }) => {
+              const valueLabel = typeof value === 'string' ? value : String(value);
+              return '`' + valueLabel + '`' + ` (${count})`;
+            }),
             field.types.includes('text') || field.types.includes('match_only_text') ? 2 : 10
           ).join(', ')})`;
         }

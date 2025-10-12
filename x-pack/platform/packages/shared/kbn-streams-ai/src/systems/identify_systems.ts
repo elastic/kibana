@@ -4,19 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
+import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { Streams, System } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
-import pLimit from 'p-limit';
+import type { ReasoningPower } from '@kbn/inference-prompt-utils/src/flows/reasoning/types';
 import { IdentifySystemsPrompt } from './prompt';
 import { clusterLogs } from '../cluster_logs/cluster_logs';
 import conditionSchemaText from '../shared/condition_schema.text';
-import { generateStreamDescription } from '../description/generate_description';
-
-const CONCURRENT_DESCRIPTION_REQUESTS = 5;
 
 /**
  * Identifies systems in a stream, by:
@@ -35,6 +32,8 @@ export async function identifySystems({
   inferenceClient,
   logger,
   dropUnmapped = false,
+  power = 'medium',
+  maxSteps: initialMaxSteps,
 }: {
   stream: Streams.all.Definition;
   systems?: System[];
@@ -45,7 +44,9 @@ export async function identifySystems({
   inferenceClient: BoundInferenceClient;
   logger: Logger;
   dropUnmapped?: boolean;
-}): Promise<{ systems: System[] }> {
+  power?: ReasoningPower;
+  maxSteps?: number;
+}): Promise<{ systems: Array<{ name: string; filter: Condition }> }> {
   const [analysis, initialClustering] = await Promise.all([
     describeDataset({
       start,
@@ -71,14 +72,16 @@ export async function identifySystems({
     }),
   ]);
 
+  const maxSteps = initialMaxSteps ?? power === 'low' ? 3 : power === 'medium' ? 5 : 12;
+
   const response = await executeAsReasoningAgent({
-    maxSteps: 3,
+    maxSteps,
     input: {
       stream: {
         name: stream.name,
       },
       dataset_analysis: JSON.stringify(
-        sortAndTruncateAnalyzedFields(analysis, { dropEmpty: true, dropUnmapped })
+        formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped })
       ),
       initial_clustering: JSON.stringify(initialClustering),
       condition_schema: conditionSchemaText,
@@ -88,6 +91,7 @@ export async function identifySystems({
     finalToolChoice: {
       function: 'finalize_systems',
     },
+    power,
     toolCallbacks: {
       validate_systems: async (toolCall) => {
         const clustering = await clusterLogs({
@@ -102,6 +106,7 @@ export async function identifySystems({
               condition: system.filter as Condition,
             };
           }),
+          dropUnmapped,
         });
 
         return {
@@ -123,35 +128,12 @@ export async function identifySystems({
     },
   });
 
-  const limiter = pLimit(CONCURRENT_DESCRIPTION_REQUESTS);
-
   return {
-    systems: await Promise.all(
-      response.toolCalls.flatMap((toolCall) =>
-        toolCall.function.arguments.systems.map(async (args) => {
-          const system = {
-            ...args,
-            filter: args.filter as Condition,
-            description: '',
-          };
-
-          const description = await limiter(async () => {
-            return await generateStreamDescription({
-              stream,
-              start,
-              end,
-              esClient,
-              inferenceClient,
-              system,
-            });
-          });
-
-          return {
-            ...system,
-            description,
-          };
-        })
-      )
+    systems: response.toolCalls.flatMap((toolCall) =>
+      toolCall.function.arguments.systems.map((system) => ({
+        name: system.name,
+        filter: system.filter as Condition,
+      }))
     ),
   };
 }

@@ -71,7 +71,50 @@ export async function getProfiler({
   const port = await getPort({
     host: '127.0.0.1',
     port: inspectorPort,
+    exclusive: true,
   });
+
+  log.debug({
+    port,
+    inspectorPort,
+  });
+
+  // Discover processes that are currently listening on the inspector port so we can highlight
+  // potential conflicts when attaching the profiler.
+  const inspectorListenerPids: string[] = (() => {
+    try {
+      const { stdout } = execa.commandSync(`lsof -nP -iTCP:${inspectorPort} -sTCP:LISTEN -t`);
+
+      return stdout
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line): line is string => line.length > 0);
+    } catch (error) {
+      if (error instanceof Error) {
+        const potentialStdout = (error as { stdout?: unknown }).stdout;
+
+        if (typeof potentialStdout === 'string') {
+          return potentialStdout
+            .split('\n')
+            .map((line) => line.trim())
+            .filter((line): line is string => line.length > 0);
+        }
+      }
+
+      throw error;
+    }
+  })();
+
+  if (inspectorListenerPids.length === 0) {
+    log.debug(`No inspector listeners found on port ${inspectorPort}`);
+  } else {
+    const pidList = inspectorListenerPids.join(',');
+    const { stdout: inspectorListenerDetails } = execa.commandSync(
+      `ps -p ${pidList} -o pid,ppid,user,command`
+    );
+
+    log.debug(`Inspector listeners on port ${inspectorPort}:\n${inspectorListenerDetails}`);
+  }
 
   if (port !== inspectorPort) {
     // Inspector is already running, see if it's attached to the selected process

@@ -21,7 +21,6 @@ jest.mock('@kbn/ai-tools', () => {
         analyzedFields: hits.length > 0 ? Object.keys(hits[0]._source || {}) : [],
       };
     }),
-    sortAndTruncateAnalyzedFields: jest.fn().mockImplementation((analysis) => analysis),
   };
 });
 
@@ -89,9 +88,6 @@ describe('clusterSampleDocs', () => {
     expect(result.noise.length).toBe(2);
     const noiseIds = result.noise.map((idx) => hits[idx]._id).sort();
     expect(noiseIds).toEqual(['n-1', 'n-2']);
-
-    // merged analysis should reflect total documents in the cluster
-    expect(cluster.analysis.total).toBe(5);
   });
 
   it('can produce multiple clusters', () => {

@@ -15,6 +15,7 @@ import type { LogDocument } from '@kbn/apm-synthtrace-client';
 import { Serializable } from '@kbn/apm-synthtrace-client';
 import { SampleParserClient } from '@kbn/sample-log-parser';
 import type { WiredIngest, WiredStream } from '@kbn/streams-schema/src/models/ingest/wired';
+import { castArray } from 'lodash';
 import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 
@@ -22,12 +23,17 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
   const { logger } = runOptions;
   const client = new SampleParserClient({ logger });
 
-  const { rpm } = (runOptions.scenarioOpts ?? {}) as { rpm?: number };
+  const { rpm, streamType, systems } = (runOptions.scenarioOpts ?? {}) as {
+    rpm?: number;
+    systems?: string | string[];
+    streamType?: 'classic' | 'wired';
+  };
 
   const generators = await client.getLogGenerators({
     rpm,
+    streamType: streamType === 'classic' ? 'classic' : 'wired',
     systems: {
-      loghub: true,
+      loghub: castArray(systems ?? []).flatMap((item) => item.split(',')),
     },
   });
 
@@ -37,22 +43,36 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
 
       try {
         // Setting linux child stream
-        await streamsClient.forkStream('logs', {
-          stream: { name: 'logs.linux' },
-          where: { field: 'attributes.filepath', eq: 'Linux.log' },
-        });
+        await streamsClient.forkStream(
+          'logs',
+          {
+            stream: { name: 'logs.linux' },
+            where: { field: 'attributes.filepath', eq: 'Linux.log' },
+          },
+          { ignore: [409] }
+        );
 
         // Setting windows child stream
-        await streamsClient.forkStream('logs', {
-          stream: { name: 'logs.windows' },
-          where: { field: 'attributes.filepath', eq: 'Windows.log' },
-        });
+        await streamsClient.forkStream(
+          'logs',
+          {
+            stream: { name: 'logs.windows' },
+            where: { field: 'attributes.filepath', eq: 'Windows.log' },
+          },
+          { ignore: [409] }
+        );
 
         // Setting android child stream
-        await streamsClient.forkStream('logs', {
-          stream: { name: 'logs.android' },
-          where: { field: 'attributes.filepath', eq: 'Android.log' },
-        });
+        await streamsClient.forkStream(
+          'logs',
+          {
+            stream: { name: 'logs.android' },
+            where: { field: 'attributes.filepath', eq: 'Android.log' },
+          },
+          {
+            ignore: [409],
+          }
+        );
 
         await streamsClient.enableFailureStore('logs.android');
         await streamsClient.putIngestStream('logs.android', {
@@ -71,7 +91,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
           } as WiredIngest,
         } as WiredStream.Definition);
       } catch (error) {
-        logger.error(`Error occurred while forking streams: ${error.message}`);
+        logger.error(new Error(`Error occurred while forking streams`, { cause: error }));
       }
     },
     generate: ({ range, clients: { streamsClient } }) => {

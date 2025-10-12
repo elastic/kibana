@@ -68,11 +68,13 @@ export async function getNodeProcesses(
       });
     });
 
-  return candidates.map(({ pid, command }) => {
+  const processesWithPorts = candidates.map(({ pid, command }) => {
     return {
       pid,
       command,
       ports: portsByPid[pid] ?? [],
     };
   });
+
+  return processesWithPorts;
 }

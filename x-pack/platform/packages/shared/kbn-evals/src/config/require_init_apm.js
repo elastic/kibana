@@ -12,8 +12,17 @@
 const { UndiciInstrumentation } = require('@opentelemetry/instrumentation-undici');
 const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
 const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
 
 require('../../../../../../../src/setup_node_env');
+
+// const { captureIncomingRequestBodies } = require('./capture_incoming_request_bodies');
+// const { captureTransportRequestBodies } = require('./capture_transport_request_bodies');
+
+// captureIncomingRequestBodies();
+// captureTransportRequestBodies();
+
+// diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 // we send an empty process.argv argument, as playwright uses the same --config
 // flag as kibana, leading it to not read from kibana.{dev.}yml
 require('../../../../../../../src/cli/apm')('playwright', []);

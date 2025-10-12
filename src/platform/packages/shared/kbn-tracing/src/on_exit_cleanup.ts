@@ -21,8 +21,10 @@ export function installShutdownHandlers(
 ) {
   const timeout = options.timeout ?? 5000;
 
-  const shutdown = once(() => {
-    Promise.race([
+  let hasShutdown = false;
+
+  const shutdown = once((...args) => {
+    return Promise.race([
       cleanup(),
       new Promise((_resolve, reject) =>
         setTimeout(() => reject(new Error(`Cleanup did not complete in time, exiting`)), timeout)
@@ -34,11 +36,27 @@ export function installShutdownHandlers(
       })
       .then((response) => {
         return response;
+      })
+      .finally(() => {
+        hasShutdown = true;
       });
   });
 
-  process.on('SIGINT', shutdown);
-  process.on('SIGTERM', shutdown);
-  process.on('beforeExit', shutdown);
-  process.on('uncaughtExceptionMonitor', shutdown);
+  process.once('SIGINT', shutdown);
+  process.once('SIGTERM', shutdown);
+  process.once('beforeExit', shutdown);
+
+  const originalExit = process.exit.bind(process);
+
+  // @ts-expect-error
+  process.exit = (...args) => {
+    if (hasShutdown) {
+      originalExit(...args);
+      return;
+    }
+
+    shutdown().finally(() => {
+      originalExit(...args);
+    });
+  };
 }

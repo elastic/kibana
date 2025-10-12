@@ -26,6 +26,7 @@ export async function runProfiler({
   log: ToolingLog;
   addCleanupTask: (cb: () => void) => void;
 }) {
+  log.info(`Run profiler`);
   const controller = new AbortController();
   if (flags.timeout) {
     setTimeout(() => {

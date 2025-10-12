@@ -35,5 +35,6 @@ export function runSystemIdentification({
     logger,
     stream,
     systems,
+    dropUnmapped: true,
   });
 }

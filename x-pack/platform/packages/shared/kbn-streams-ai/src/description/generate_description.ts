@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Streams, System } from '@kbn/streams-schema';
-import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
+import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type BoundInferenceClient } from '@kbn/inference-common';
 import { conditionToQueryDsl } from '@kbn/streamlang';
@@ -41,7 +41,7 @@ export async function generateStreamDescription({
     input: {
       name: system?.name || stream.name,
       dataset_analysis: JSON.stringify(
-        sortAndTruncateAnalyzedFields(analysis, { dropEmpty: true, dropUnmapped: false })
+        formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped: false })
       ),
     },
     prompt: GenerateStreamDescriptionPrompt,
