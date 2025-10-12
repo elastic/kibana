@@ -426,8 +426,8 @@ export class TaskRunner<
       })
     );
     await withAlertingSpan('alerting:update-alerts', () =>
-      this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
-        await alertsClient.updatePersistedAlertsWithScheduledActions();
+      this.timer.runWithTimer(TaskRunnerTimerSpan.UpdateAlerts, async () => {
+        await alertsClient.updatePersistedAlerts();
       })
     );
 

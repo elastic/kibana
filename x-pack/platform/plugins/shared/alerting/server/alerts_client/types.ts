@@ -88,7 +88,7 @@ export interface IAlertsClient<
     alertIds: string[];
     maintenanceWindowIds: string[];
   } | null>;
-  updatePersistedAlertsWithScheduledActions(): Promise<void>;
+  updatePersistedAlerts(): Promise<void>;
   isTrackedAlert(id: string): boolean;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
   getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean): {
