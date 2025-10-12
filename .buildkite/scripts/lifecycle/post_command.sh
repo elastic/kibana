@@ -10,14 +10,26 @@ IS_TEST_EXECUTION_STEP="$(buildkite-agent meta-data get "${BUILDKITE_JOB_ID}_is_
 
 if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   echo "--- Upload Artifacts"
-  buildkite-agent artifact upload '**/.scout/test-artifacts/**/*.png'
+  echo "PWD"
+  echo $PWD
   buildkite-agent artifact upload '.scout/reports/scout-playwright-test-failures-*/**/*'
   buildkite-agent artifact upload 'target/junit/**/*'
   buildkite-agent artifact upload 'target/kibana-coverage/jest/**/*'
   buildkite-agent artifact upload 'target/kibana-coverage/functional/**/*'
   buildkite-agent artifact upload 'target/kibana-*'
-  buildkite-agent artifact upload 'target/kibana-security-solution/**/*.png'
-  buildkite-agent artifact upload 'target/kibana-security-solution/**/management/**/*.mp4'
+  buildkite-agent artifact upload 'target/kibana-security-solution/cypress/screenshots/**/*'
+  buildkite-agent artifact upload 'target/kibana-security-solution/cypress/videos/**/*'
+  buildkite-agent artifact upload 'kibana/target/kibana-security-solution/cypress/screenshots/**/*'
+  buildkite-agent artifact upload 'kibana/target/kibana-security-solution/cypress/videos/**/*'
+
+  # For flaky test runner (when PWD is kibana/ subdirectory and target is in parent)
+  if [[ -d ../target/kibana-security-solution/cypress ]]; then
+    CURRENT_DIR=$(pwd)
+    cd ..
+    buildkite-agent artifact upload 'target/kibana-security-solution/cypress/screenshots/**/*'
+    buildkite-agent artifact upload 'target/kibana-security-solution/cypress/videos/**/*'
+    cd "$CURRENT_DIR"
+  fi
   buildkite-agent artifact upload 'target/kibana-osquery/**/*.png'
   buildkite-agent artifact upload 'target/kibana-osquery/**/*.mp4'
   buildkite-agent artifact upload 'target/kibana-fleet/**/*.png'

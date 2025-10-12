@@ -104,7 +104,7 @@ function expectDefaultRulesTableState(): void {
 // Failing: See https://github.com/elastic/kibana/issues/237214
 // Failing: See https://github.com/elastic/kibana/issues/237258
 // Failing: See https://github.com/elastic/kibana/issues/237215
-describe.skip(
+describe(
   'Rules table: persistent state',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
