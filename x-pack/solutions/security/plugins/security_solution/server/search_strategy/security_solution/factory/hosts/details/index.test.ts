@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as buildQuery from './query.host_details.dsl';
+import { buildHostDetailsQuery } from './query.host_details.dsl';
 import { hostDetails } from '.';
 import {
   mockOptions,
@@ -19,6 +19,8 @@ import type {
 } from '@kbn/core/server';
 import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
 
+jest.mock('./query.host_details.dsl');
+
 const mockDeps = {
   esClient: {} as IScopedClusterClient,
   savedObjectsClient: {} as SavedObjectsClientContract,
@@ -27,16 +29,16 @@ const mockDeps = {
 };
 
 describe('hostDetails search strategy', () => {
-  const buildHostDetailsQuery = jest.spyOn(buildQuery, 'buildHostDetailsQuery');
+  const buildHostDetailsQueryMock = jest.mocked(buildHostDetailsQuery);
 
   afterEach(() => {
-    buildHostDetailsQuery.mockClear();
+    buildHostDetailsQueryMock.mockClear();
   });
 
   describe('buildDsl', () => {
     test('should build dsl query', () => {
       hostDetails.buildDsl(mockOptions);
-      expect(buildHostDetailsQuery).toHaveBeenCalledWith(mockOptions);
+      expect(buildHostDetailsQueryMock).toHaveBeenCalledWith(mockOptions);
     });
   });
 

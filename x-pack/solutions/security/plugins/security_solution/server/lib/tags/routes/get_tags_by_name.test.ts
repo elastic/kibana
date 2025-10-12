@@ -13,10 +13,12 @@ import {
 } from '../../detection_engine/routes/__mocks__';
 import { mockGetTagsResult } from '../__mocks__';
 import { getTagsByNameRoute } from './get_tags_by_name';
+import type { SecuritySolutionRequestHandlerContextMock } from '../../detection_engine/routes/__mocks__/request_context';
 
 describe('getTagsByNameRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
-  const { context } = requestContextMock.createTools();
+  let context: SecuritySolutionRequestHandlerContextMock;
+
   const logger = { error: jest.fn() } as unknown as Logger;
 
   const mockGetRequest = requestMock.create({
@@ -32,8 +34,14 @@ describe('getTagsByNameRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     server = serverMock.create();
+    ({ context } = requestContextMock.createTools());
 
     getTagsByNameRoute(server.router, logger);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should return tags with the exact name', async () => {

@@ -18,16 +18,18 @@ import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { querySignalsRoute } from './query_signals_route';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 
 describe('query for signal', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { context } = requestContextMock.createTools();
+  let context: SecuritySolutionRequestHandlerContextMock;
   context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise(getEmptySignalsResponse())
   );
   const ruleDataClient = ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts');
 
   beforeEach(() => {
+    jest.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
@@ -36,6 +38,11 @@ describe('query for signal', () => {
     );
 
     querySignalsRoute(server.router, ruleDataClient);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('query and agg on signals index', () => {

@@ -8,7 +8,6 @@
 import { ZodError } from '@kbn/zod';
 
 import { Direction } from '../../../../../common/search_strategy';
-import * as buildQuery from './query.first_or_last_seen.dsl';
 import { firstOrLastSeen } from '.';
 import {
   mockOptions,
@@ -19,9 +18,15 @@ import {
 } from './__mocks__';
 import type { FirstLastSeenRequestOptionsInput } from '../../../../../common/api/search_strategy';
 
+const { buildFirstOrLastSeenQuery } = jest.requireMock<
+  typeof import('./query.first_or_last_seen.dsl')
+>('./query.first_or_last_seen.dsl');
+
+jest.mock('./query.first_or_last_seen.dsl');
+
 describe('firstLastSeen search strategy', () => {
   describe('first seen search strategy', () => {
-    const buildFirstLastSeenQuery = jest.spyOn(buildQuery, 'buildFirstOrLastSeenQuery');
+    const buildFirstLastSeenQuery = jest.mocked(buildFirstOrLastSeenQuery);
 
     afterEach(() => {
       buildFirstLastSeenQuery.mockClear();
@@ -46,17 +51,17 @@ describe('firstLastSeen search strategy', () => {
   });
 
   describe('last seen search strategy', () => {
-    const buildFirstLastSeenQuery = jest.spyOn(buildQuery, 'buildFirstOrLastSeenQuery');
+    const buildFirstLastSeenQueryLast = jest.mocked(buildFirstOrLastSeenQuery);
 
     afterEach(() => {
-      buildFirstLastSeenQuery.mockClear();
+      buildFirstLastSeenQueryLast.mockClear();
     });
 
     describe('buildDsl', () => {
       test('should build dsl query', () => {
         const options: FirstLastSeenRequestOptionsInput = { ...mockOptions, order: Direction.desc };
         firstOrLastSeen.buildDsl(options);
-        expect(buildFirstLastSeenQuery).toHaveBeenCalledWith(options);
+        expect(buildFirstLastSeenQueryLast).toHaveBeenCalledWith(options);
       });
     });
 

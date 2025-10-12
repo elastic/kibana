@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as buildQuery from './query.dns_network.dsl';
+import { buildDnsQuery } from './query.dns_network.dsl';
 import { networkDns } from '.';
 import {
   mockOptions,
@@ -13,8 +13,10 @@ import {
   formattedSearchStrategyResponse,
 } from './__mocks__';
 
+jest.mock('./query.dns_network.dsl');
+
 describe('networkDns search strategy', () => {
-  const mockBuildDnsQuery = jest.spyOn(buildQuery, 'buildDnsQuery');
+  const mockBuildDnsQuery = jest.mocked(buildDnsQuery);
 
   afterEach(() => {
     mockBuildDnsQuery.mockClear();

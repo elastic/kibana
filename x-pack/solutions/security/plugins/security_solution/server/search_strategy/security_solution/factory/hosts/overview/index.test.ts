@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as buildQuery from './query.overview_host.dsl';
+import { buildOverviewHostQuery } from './query.overview_host.dsl';
 import { hostOverview } from '.';
 import {
   mockOptions,
@@ -13,17 +13,19 @@ import {
   formattedSearchStrategyResponse,
 } from './__mocks__';
 
+jest.mock('./query.overview_host.dsl');
+
 describe('hostOverview search strategy', () => {
-  const buildOverviewHostQuery = jest.spyOn(buildQuery, 'buildOverviewHostQuery');
+  const buildOverviewHostQueryMock = jest.mocked(buildOverviewHostQuery);
 
   afterEach(() => {
-    buildOverviewHostQuery.mockClear();
+    buildOverviewHostQueryMock.mockClear();
   });
 
   describe('buildDsl', () => {
     test('should build dsl query', () => {
       hostOverview.buildDsl(mockOptions);
-      expect(buildOverviewHostQuery).toHaveBeenCalledWith(mockOptions);
+      expect(buildOverviewHostQueryMock).toHaveBeenCalledWith(mockOptions);
     });
   });
 

@@ -7,7 +7,7 @@
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
-import * as buildQuery from './dsl/query.dsl';
+import { buildQuery } from './dsl/query.dsl';
 import { authentications } from '.';
 import {
   mockOptions,
@@ -16,8 +16,10 @@ import {
 } from './__mocks__';
 import type { UserAuthenticationsRequestOptions } from '../../../../../../common/api/search_strategy';
 
+jest.mock('./dsl/query.dsl');
+
 describe('authentications search strategy', () => {
-  const buildAuthenticationQuery = jest.spyOn(buildQuery, 'buildQuery');
+  const buildAuthenticationQuery = jest.mocked(buildQuery);
 
   afterEach(() => {
     buildAuthenticationQuery.mockClear();

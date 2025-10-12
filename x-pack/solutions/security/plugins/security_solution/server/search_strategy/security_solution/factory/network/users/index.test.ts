@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-import * as buildQuery from './query.users_network.dsl';
+import { buildUsersQuery } from './query.users_network.dsl';
 import { networkUsers } from '.';
 import {
   mockOptions,
@@ -15,17 +15,19 @@ import {
 } from './__mocks__';
 import type { NetworkUsersRequestOptions } from '../../../../../../common/api/search_strategy';
 
+jest.mock('./query.users_network.dsl');
+
 describe('networkUsers search strategy', () => {
-  const buildUsersQuery = jest.spyOn(buildQuery, 'buildUsersQuery');
+  const buildUsersQueryMock = jest.mocked(buildUsersQuery);
 
   afterEach(() => {
-    buildUsersQuery.mockClear();
+    buildUsersQueryMock.mockClear();
   });
 
   describe('buildDsl', () => {
     test('should build dsl query', () => {
       networkUsers.buildDsl(mockOptions);
-      expect(buildUsersQuery).toHaveBeenCalledWith(mockOptions);
+      expect(buildUsersQueryMock).toHaveBeenCalledWith(mockOptions);
     });
 
     test('should throw error if query size is greater equal than DEFAULT_MAX_TABLE_QUERY_SIZE ', () => {

@@ -7,8 +7,8 @@
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
-import * as buildQuery from './query.all_hosts.dsl';
-import * as buildRiskQuery from '../../risk_score/all/query.risk_score.dsl';
+import { buildHostsQuery } from './query.all_hosts.dsl';
+import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';
 import { allHosts } from '.';
 import {
   mockOptions,
@@ -29,6 +29,9 @@ class IndexNotFoundException extends Error {
   }
 }
 
+jest.mock('./query.all_hosts.dsl');
+jest.mock('../../risk_score/all/query.risk_score.dsl');
+
 const mockDeps = () => ({
   ...defaultMockDeps,
   spaceId: 'test-space',
@@ -38,7 +41,7 @@ const mockDeps = () => ({
 });
 
 describe('allHosts search strategy', () => {
-  const buildAllHostsQuery = jest.spyOn(buildQuery, 'buildHostsQuery');
+  const buildAllHostsQuery = jest.mocked(buildHostsQuery);
 
   afterEach(() => {
     buildAllHostsQuery.mockClear();
@@ -111,7 +114,7 @@ describe('allHosts search strategy', () => {
     });
 
     test('should query host risk only for hostNames in the current page', async () => {
-      const buildHostsRiskQuery = jest.spyOn(buildRiskQuery, 'buildRiskScoreQuery');
+      const buildHostsRiskQuery = jest.mocked(buildRiskScoreQuery);
       const mockedDeps = mockDeps();
       // @ts-expect-error incomplete type
       mockedDeps.esClient.asCurrentUser.search.mockResponse({ hits: { hits: [] } });

@@ -8,19 +8,21 @@
 import { usersRelatedHosts } from '.';
 import { mockDeps, mockOptions, mockSearchStrategyResponse, mockRelatedHosts } from './__mocks__';
 import { get } from 'lodash/fp';
-import * as buildQuery from './query.related_hosts.dsl';
+import { buildRelatedHostsQuery } from './query.related_hosts.dsl';
+
+jest.mock('./query.related_hosts.dsl');
 
 describe('usersRelatedHosts search strategy', () => {
-  const buildRelatedHostsQuery = jest.spyOn(buildQuery, 'buildRelatedHostsQuery');
+  const buildRelatedHostsQueryMock = jest.mocked(buildRelatedHostsQuery);
 
   afterEach(() => {
-    buildRelatedHostsQuery.mockClear();
+    buildRelatedHostsQueryMock.mockClear();
   });
 
   describe('buildDsl', () => {
     test('should build dsl query', () => {
       usersRelatedHosts.buildDsl(mockOptions);
-      expect(buildRelatedHostsQuery).toHaveBeenCalledWith(mockOptions);
+      expect(buildRelatedHostsQueryMock).toHaveBeenCalledWith(mockOptions);
     });
   });
 

@@ -12,7 +12,7 @@ import { riskScore } from '.';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { RiskSeverity, type HostRiskScore } from '../../../../../../common/search_strategy';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
-import * as buildQuery from './query.risk_score.dsl';
+import { buildRiskScoreQuery } from './query.risk_score.dsl';
 import { get } from 'lodash/fp';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
@@ -95,8 +95,10 @@ export const mockOptions: RiskScoreRequestOptions = {
   factoryQueryType: EntityRiskQueries.list,
 };
 
+jest.mock('./query.risk_score.dsl');
+
 describe('buildRiskScoreQuery search strategy', () => {
-  const buildKpiRiskScoreQuery = jest.spyOn(buildQuery, 'buildRiskScoreQuery');
+  const buildKpiRiskScoreQuery = jest.mocked(buildRiskScoreQuery);
 
   afterEach(() => {
     jest.clearAllMocks();
