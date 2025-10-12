@@ -73,17 +73,19 @@ describe('Component templates API - update route', () => {
         });
         expect(updateComponentTemplate).toHaveBeenCalledWith({
           name: 'test-template',
-          template: {
-            settings: { index: { number_of_shards: 1 } },
-            data_stream_options: {
-              failure_store: {
-                enabled: true,
+          body: {
+            template: {
+              settings: { index: { number_of_shards: 1 } },
+              data_stream_options: {
+                failure_store: {
+                  enabled: true,
+                },
               },
             },
+            version: 1,
+            _meta: { description: 'Test template' },
+            deprecated: false,
           },
-          version: 1,
-          _meta: { description: 'Test template' },
-          deprecated: false,
         });
         expect(res).toEqual({
           body: { acknowledged: true },
@@ -113,12 +115,14 @@ describe('Component templates API - update route', () => {
         });
         expect(updateComponentTemplate).toHaveBeenCalledWith({
           name: 'test-template',
-          template: {
-            settings: { index: { number_of_shards: 1 } },
+          body: {
+            template: {
+              settings: { index: { number_of_shards: 1 } },
+            },
+            version: 1,
+            _meta: { description: 'Test template' },
+            deprecated: false,
           },
-          version: 1,
-          _meta: { description: 'Test template' },
-          deprecated: false,
         });
         expect(res).toEqual({
           body: { acknowledged: true },
