@@ -13,8 +13,6 @@ import {
   formattedSearchStrategyResponse,
 } from './__mocks__';
 
-jest.mock('./query.top_countries_network.dsl');
-
 describe('networkTopCountries search strategy', () => {
   const buildTopCountriesQuery = jest.spyOn(buildQuery, 'buildTopCountriesQuery');
 

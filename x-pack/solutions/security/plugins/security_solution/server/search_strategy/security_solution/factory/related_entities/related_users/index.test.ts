@@ -10,8 +10,6 @@ import { mockDeps, mockOptions, mockSearchStrategyResponse, mockRelatedHosts } f
 import { get } from 'lodash/fp';
 import * as buildQuery from './query.related_users.dsl';
 
-jest.mock('./query.related_users.dsl');
-
 describe('hostsRelatedUsers search strategy', () => {
   const buildRelatedUsersQuery = jest.spyOn(buildQuery, 'buildRelatedUsersQuery');
 
