@@ -43,7 +43,7 @@ import { getPosition, getCommaAndPipe, rightAfterColumn } from './utils';
 import { isMarkerNode, findAstPosition } from '../../../definitions/utils/ast';
 import { within } from '../../../ast/location';
 import { inOperators, nullCheckOperators } from '../../../definitions/all_operators';
-import { buildExpresionFunctionParameterContext } from '../../../definitions/utils';
+import { buildExpressionFunctionParameterContext } from '../../../definitions/utils';
 
 export async function autocomplete(
   query: string,
@@ -419,7 +419,7 @@ function buildCustomFilteringContext(
     return undefined;
   }
 
-  const basicContext = buildExpresionFunctionParameterContext(foundFunction, context);
+  const basicContext = buildExpressionFunctionParameterContext(foundFunction, context);
 
   if (!basicContext) {
     return undefined;

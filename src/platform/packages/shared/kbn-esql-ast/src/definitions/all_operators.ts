@@ -31,6 +31,10 @@ export const inOperators: FunctionDefinition[] = operatorFunctionDefinitions.fil
   ({ name }) => name === 'in' || name === 'not in'
 );
 
+export const patternMatchOperators: FunctionDefinition[] = operatorFunctionDefinitions.filter(
+  ({ name }) => name === 'like' || name === 'not like' || name === 'rlike' || name === 'not rlike'
+);
+
 export const logicalOperators: FunctionDefinition[] = [
   {
     name: 'and',

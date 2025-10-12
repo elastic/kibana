@@ -15,17 +15,11 @@ import {
 } from '../../../../../commands_registry/complete_items';
 import type { ESQLColumn, ESQLFunction } from '../../../../../types';
 import { getBinaryExpressionOperand, getExpressionType } from '../../../expressions';
-import {
-  getFieldsSuggestions,
-  getFunctionsSuggestions,
-  getLiteralsSuggestions,
-} from '../../helpers';
 import type { ExpressionContext } from '../types';
 import { getLogicalContinuationSuggestions, shouldSuggestOpenListForOperand } from './utils';
-import { getColumnsByTypeFromCtx, getLicenseCheckerFromCtx } from '../utils';
 import { shouldSuggestComma } from '../commaDecisionEngine';
-import type { GetColumnsByTypeFn } from '../../../../../commands_registry/types';
 import { buildConstantsDefinitions } from '../../../literals';
+import { SuggestionBuilder } from '../SuggestionBuilder';
 
 // ============================================================================
 // eg. IN / NOT IN Operators
@@ -88,38 +82,25 @@ async function getSuggestionsForColumn(
     return [];
   }
 
-  const suggestions: ISuggestionItem[] = [];
+  // Use SuggestionBuilder to eliminate duplicated suggestion patterns
+  const builder = new SuggestionBuilder(ctx);
 
-  // Add field suggestions
-  const getByType: GetColumnsByTypeFn = (types, ignored, options) =>
-    getColumnsByTypeFromCtx(ctx, types, ignored, options);
-  {
-    const fieldSuggestions = await getFieldsSuggestions([argType], getByType, {
-      ignoreColumns: ignoredColumns,
-    });
-    suggestions.push(...fieldSuggestions);
-  }
-
-  // Add function suggestions
-  const functionSuggestions = getFunctionsSuggestions({
-    location: ctx.location,
+  await builder.addFields({
     types: [argType],
-    options: {},
-    context: ctx.context,
-    callbacks: { hasMinimumLicenseRequired: getLicenseCheckerFromCtx(ctx) },
+    ignoredColumns,
   });
-  suggestions.push(...functionSuggestions);
 
-  // Add literal suggestions
-  const literalSuggestions = getLiteralsSuggestions([argType], ctx.location, {
-    includeDateLiterals: true,
-    includeCompatibleLiterals: true,
-    addComma: false,
-    advanceCursorAndOpenSuggestions: false,
-  });
-  suggestions.push(...literalSuggestions);
+  builder
+    .addFunctions({
+      types: [argType],
+    })
+    .addLiterals({
+      types: [argType],
+      includeDateLiterals: true,
+      includeCompatibleLiterals: true,
+    });
 
-  return suggestions;
+  return builder.build();
 }
 
 // ============================================================================

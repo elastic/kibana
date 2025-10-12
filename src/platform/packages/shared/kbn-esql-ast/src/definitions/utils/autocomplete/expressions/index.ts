@@ -9,4 +9,4 @@
 
 export { suggestForExpression } from './suggestionEngine';
 export { getPosition as getExpressionPosition, type ExpressionPosition } from './position';
-export { buildExpresionFunctionParameterContext } from './utils';
+export { buildExpressionFunctionParameterContext } from './utils';

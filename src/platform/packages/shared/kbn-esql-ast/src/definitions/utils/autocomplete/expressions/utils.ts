@@ -9,14 +9,42 @@
 
 import type { ESQLFunction } from '../../../../types';
 import { nullCheckOperators, inOperators } from '../../../all_operators';
-import type { ExpressionContext, FunctionParameterContext } from './types';
-import type { GetColumnsByTypeFn, ICommandContext } from '../../../../commands_registry/types';
-import { getFunctionDefinition, getValidSignaturesAndTypesToSuggestNext } from '../..';
+import type { FunctionParameterContext } from './types';
+import type { ICommandContext } from '../../../../commands_registry/types';
+import { getFunctionDefinition } from '../..';
+import { SignatureAnalyzer } from './SignatureAnalyzer';
+import type { Signature } from '../../../types';
 
 export type SpecialFunctionName = 'case' | 'count' | 'bucket';
 
 /** IN, NOT IN, IS NULL, IS NOT NULL operators requiring special autocomplete handling */
 export const specialOperators = [...inOperators, ...nullCheckOperators];
+
+/**
+ * Detects if function signatures accept arbitrary/complex expressions in parameters.
+ *
+ * This pattern indicates functions where parameters can contain complex expressions
+ * (not just simple values), characterized by:
+ * - Variadic with multiple parameters (minParams >= 2)
+ * - Unknown return type (depends on arguments)
+ * - Mixed parameter types (boolean + any)
+ *
+ * Examples: CASE(condition1, value1, condition2, value2, ..., default)
+ */
+export function acceptsArbitraryExpressions(signatures: Signature[]): boolean {
+  if (!signatures || signatures.length === 0) {
+    return false;
+  }
+
+  return signatures.some((sig) => {
+    const isVariadicWithMultipleParams = sig.minParams != null && sig.minParams >= 2;
+    const hasUnknownReturn = sig.returnType === 'unknown';
+    const hasMixedBooleanAndAny =
+      sig.params.some(({ type }) => type === 'boolean') && sig.params.some((p) => p.type === 'any');
+
+    return isVariadicWithMultipleParams && hasUnknownReturn && hasMixedBooleanAndAny;
+  });
+}
 
 /** Checks if operator is a NULL check (IS NULL, IS NOT NULL) */
 export function isNullCheckOperator(name: string) {
@@ -44,54 +72,9 @@ export function matchesSpecialFunction(name: string, expected: SpecialFunctionNa
   return name.toLowerCase() === expected;
 }
 
-/** Retrieves columns by type from context callbacks */
-export function getColumnsByTypeFromCtx(
-  ctx: ExpressionContext,
-  types: any,
-  ignored: string[] = [],
-  opts: any = {}
-) {
-  const getter = ctx.callbacks?.getByType as GetColumnsByTypeFn | undefined;
-
-  if (!getter) {
-    return Promise.resolve([]);
-  }
-
-  return getter(types, ignored, opts);
-}
-
-/** Retrieves license checker from context callbacks */
-export function getLicenseCheckerFromCtx(ctx: ExpressionContext) {
-  return ctx.callbacks?.hasMinimumLicenseRequired;
-}
-
-/** Retrieves active product from context */
-export function getActiveProductFromCtx(ctx: ExpressionContext) {
-  return ctx.context?.activeProduct;
-}
-
-/** Retrieves command name from context */
-export function getCommandNameFromCtx(ctx: ExpressionContext): string {
-  return ctx.command.name;
-}
-
-/** Retrieves function parameter context from options */
-export function getFunctionParamContextFromCtx(ctx: ExpressionContext) {
-  return ctx.options.functionParameterContext;
-}
-
-/** Checks if cursor is followed by comma */
-export function isCursorFollowedByCommaFromCtx(ctx: ExpressionContext): boolean {
-  return ctx.options.isCursorFollowedByComma ?? false;
-}
-
-// ============================================================================
-// Helper Functions: Function Parameter Context
-// ============================================================================
-
 // Builds function parameter context for suggestions
 // Commands with special filtering (like STATS) can extend with command-specific functionsToIgnore
-export function buildExpresionFunctionParameterContext(
+export function buildExpressionFunctionParameterContext(
   fn: ESQLFunction,
   context?: ICommandContext
 ): FunctionParameterContext | null {
@@ -101,12 +84,19 @@ export function buildExpresionFunctionParameterContext(
     return null;
   }
 
-  const validationResult = getValidSignaturesAndTypesToSuggestNext(fn, context, fnDefinition);
+  const analyzer = SignatureAnalyzer.fromNode(fn, context, fnDefinition);
+
+  if (!analyzer) {
+    return null;
+  }
 
   return {
-    paramDefinitions: validationResult.compatibleParamDefs,
+    paramDefinitions: analyzer.getCompatibleParamDefs(),
     functionsToIgnore: [fn.name], // Basic recursion prevention
-    hasMoreMandatoryArgs: validationResult.hasMoreMandatoryArgs,
+    hasMoreMandatoryArgs: analyzer.getHasMoreMandatoryArgs(),
     functionDefinition: fnDefinition,
+    firstArgumentType: analyzer.getFirstArgumentType(),
+    currentParameterIndex: analyzer.getCurrentParameterIndex(),
+    validSignatures: analyzer.getValidSignatures(),
   };
 }

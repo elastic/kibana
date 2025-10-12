@@ -819,7 +819,6 @@ describe('STATS Autocomplete', () => {
                 scalar: true,
               }
             ),
-            ...['integerField', 'integerPrompt'],
           ],
           mockCallbacks,
           mockContext,
