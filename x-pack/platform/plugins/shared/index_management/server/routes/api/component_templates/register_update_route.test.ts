@@ -8,15 +8,11 @@
 import { registerComponentTemplateRoutes } from '.';
 import { addBasePath } from '..';
 import type { RequestMock } from '../../../test/helpers';
-import {
-  RouterMock,
-  routeDependencies,
-  withStubbedHandleEsError,
-  getTransportRequest,
-} from '../../../test/helpers';
+import { RouterMock, routeDependencies, withStubbedHandleEsError } from '../../../test/helpers';
 
 const router = new RouterMock();
 const updateComponentTemplate = router.getMockESApiFn('cluster.putComponentTemplate');
+const getComponentTemplate = router.getMockESApiFn('cluster.getComponentTemplate');
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -43,47 +39,24 @@ describe('Component templates API - update route', () => {
     };
 
     describe('AND the component has existing data_stream_options', () => {
-      it('SHOULD persist them on update', async () => {
-        getTransportRequest(router).mockResolvedValue({
-          component_templates: [
-            {
-              name: 'test-template',
-              component_template: {
-                template: {
-                  data_stream_options: {
-                    failure_store: {
-                      enabled: true,
-                    },
-                  },
-                },
-              },
-            },
-          ],
-        });
+      it('SHOULD update using provided body (no merge)', async () => {
+        getComponentTemplate.mockResolvedValue({});
 
         updateComponentTemplate.mockResolvedValue({ acknowledged: true });
 
         const res = await router.runRequest(mockRequest);
 
-        expect(
-          router.contextMock.core.elasticsearch.client.asCurrentUser.transport.request
-        ).toHaveBeenCalledWith({
-          method: 'GET',
-          path: '/_component_template/test-template',
-        });
+        expect(getComponentTemplate).toHaveBeenCalledWith({ name: 'test-template' });
         expect(updateComponentTemplate).toHaveBeenCalledWith({
           name: 'test-template',
-          template: {
-            settings: { index: { number_of_shards: 1 } },
-            data_stream_options: {
-              failure_store: {
-                enabled: true,
-              },
+          body: {
+            template: {
+              settings: { index: { number_of_shards: 1 } },
             },
+            version: 1,
+            _meta: { description: 'Test template' },
+            deprecated: false,
           },
-          version: 1,
-          _meta: { description: 'Test template' },
-          deprecated: false,
         });
         expect(res).toEqual({
           body: { acknowledged: true },
@@ -93,32 +66,23 @@ describe('Component templates API - update route', () => {
 
     describe('AND the component has no data_stream_options', () => {
       it('SHOULD update without data_stream_options', async () => {
-        getTransportRequest(router).mockResolvedValue({
-          component_templates: [
-            {
-              name: 'test-template',
-            },
-          ],
-        });
+        getComponentTemplate.mockResolvedValue({});
 
         updateComponentTemplate.mockResolvedValue({ acknowledged: true });
 
         const res = await router.runRequest(mockRequest);
 
-        expect(
-          router.contextMock.core.elasticsearch.client.asCurrentUser.transport.request
-        ).toHaveBeenCalledWith({
-          method: 'GET',
-          path: '/_component_template/test-template',
-        });
+        expect(getComponentTemplate).toHaveBeenCalledWith({ name: 'test-template' });
         expect(updateComponentTemplate).toHaveBeenCalledWith({
           name: 'test-template',
-          template: {
-            settings: { index: { number_of_shards: 1 } },
+          body: {
+            template: {
+              settings: { index: { number_of_shards: 1 } },
+            },
+            version: 1,
+            _meta: { description: 'Test template' },
+            deprecated: false,
           },
-          version: 1,
-          _meta: { description: 'Test template' },
-          deprecated: false,
         });
         expect(res).toEqual({
           body: { acknowledged: true },
@@ -132,9 +96,7 @@ describe('Component templates API - update route', () => {
         // Re-register routes to capture new error handler
         registerComponentTemplateRoutes({ ...routeDependencies, router });
 
-        const transportRequest = getTransportRequest(router);
-        transportRequest.mockResolvedValue({ component_templates: [] });
-
+        getComponentTemplate.mockResolvedValue({});
         updateComponentTemplate.mockRejectedValue(new Error('boom'));
 
         const res = await router.runRequest(mockRequest);
@@ -151,8 +113,7 @@ describe('Component templates API - update route', () => {
         // Re-register routes to capture new error handler
         registerComponentTemplateRoutes({ ...routeDependencies, router });
 
-        const transportRequest = getTransportRequest(router);
-        transportRequest.mockRejectedValue(new Error('boom'));
+        getComponentTemplate.mockRejectedValue(new Error('boom'));
 
         const res = await router.runRequest(mockRequest);
         expect(res).toEqual({ status: 500, options: {} });

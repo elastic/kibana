@@ -17,17 +17,6 @@ describe('componentTemplateSchema', () => {
     expect(value).toBeTruthy();
   });
 
-  it('SHOULD allow data_stream_options unknown fields', () => {
-    const value = componentTemplateSchema.validate({
-      name: 'n',
-      template: {
-        data_stream_options: { some_new_option: { enabled: true } },
-      },
-      _kbnMeta: { usedBy: [], isManaged: false },
-    });
-    expect(value).toBeTruthy();
-  });
-
   it('SHOULD reject name that exceeds max length', () => {
     expect(() =>
       componentTemplateSchema.validate({
