@@ -20,6 +20,8 @@ xpack.features.overrides:
   stackAlerts.hidden: true
   ### By default, this feature named as `Synthetics and Uptime`, but should be renamed to `Synthetics` since `Uptime` is not available.
   uptime.name: 'Synthetics'
+  ### Workflows Management should be moved from Analytics category to the Observability one.
+  workflowsManagement.category: 'observability'
 
 # Elastic Managed LLM
 xpack.actions.preconfigured:
