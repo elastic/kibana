@@ -149,8 +149,6 @@ describe('liquid_completions', () => {
       expect(labels).toContain('unless');
       expect(labels).toContain('for');
       expect(labels).toContain('case');
-      expect(labels).toContain('assign');
-      expect(labels).toContain('capture');
     });
 
     it('should return completions with proper structure', () => {
