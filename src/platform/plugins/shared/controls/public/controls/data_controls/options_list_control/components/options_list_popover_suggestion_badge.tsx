@@ -22,6 +22,7 @@ export const OptionsListPopoverSuggestionBadge = ({ documentCount }: { documentC
         position={'right'}
       >
         <EuiText
+          tabIndex={0}
           size="xs"
           aria-hidden={true}
           className="eui-textNumber"

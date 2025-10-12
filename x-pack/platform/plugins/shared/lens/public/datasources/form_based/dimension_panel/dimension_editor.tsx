@@ -466,7 +466,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       if (isActive && disabledStatus) {
         label = (
           <EuiToolTip content={disabledStatus} display="block" position="left">
-            <EuiText color="danger" size="s">
+            <EuiText color="danger" size="s" tabIndex={0}>
               <strong>{label}</strong>
             </EuiText>
           </EuiToolTip>
@@ -474,7 +474,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       } else if (disabledStatus) {
         label = (
           <EuiToolTip content={disabledStatus} display="block" position="left">
-            <span>{operationDisplay[operationType].displayName}</span>
+            <span tabIndex={0}>{operationDisplay[operationType].displayName}</span>
           </EuiToolTip>
         );
       } else if (!compatibleWithCurrentField) {
