@@ -207,6 +207,7 @@ export const useDiscoverHistogram = (
    * Request params
    */
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
+  const currentTabControlState = useCurrentTabSelector((tab) => tab.controlGroupState);
   const {
     timeRangeRelative: relativeTimeRange,
     timeRangeAbsolute: timeRange,
@@ -420,6 +421,7 @@ export const useDiscoverHistogram = (
     onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
     breakdownField,
     esqlVariables,
+    controlsState: currentTabControlState,
     onBreakdownFieldChange,
     searchSessionId,
     getModifiedVisAttributes,
@@ -489,6 +491,12 @@ const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) =
   return stateContainer.dataState.data$.documents$.pipe(
     distinctUntilChanged((prev, curr) => prev.fetchStatus === curr.fetchStatus),
     filter(({ fetchStatus }) => [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(fetchStatus)),
+    filter(({ fetchStatus }) => {
+      const isAlreadyAborted = stateContainer.dataState.getAbortController()?.signal.aborted;
+      // skip updating the histogram props if the fetch was aborted
+      // this will prevent the redundant histogram fetching
+      return !(fetchStatus === FetchStatus.ERROR && isAlreadyAborted);
+    }),
     map((documentsValue) => {
       return getUnifiedHistogramPropsForEsql({
         documentsValue,
