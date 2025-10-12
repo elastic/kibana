@@ -49,7 +49,6 @@ export function AlertingPopoverAndFlyout({ canSaveAlerts, canReadAlerts, canRead
   } = useApmPluginContext();
   const button = (
     <EuiHeaderLink
-      color="primary"
       iconType="arrowDown"
       iconSide="right"
       onClick={() => setPopoverOpen((prevState) => !prevState)}

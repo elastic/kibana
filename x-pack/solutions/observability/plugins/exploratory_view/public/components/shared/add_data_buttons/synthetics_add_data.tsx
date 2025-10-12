@@ -19,7 +19,6 @@ export function SyntheticsAddData() {
         defaultMessage: 'Navigate to a tutorial about adding Uptime data',
       })}
       href={kibana.services?.application?.getUrlForApp('/home#/tutorial/uptimeMonitors')}
-      color="primary"
     >
       {ADD_DATA_LABEL}
     </EuiHeaderLink>

@@ -27,7 +27,7 @@ export function UxInspectorHeaderLink({ isDev }: { isDev: boolean }) {
   }
 
   return (
-    <EuiHeaderLink color="primary" onClick={inspect}>
+    <EuiHeaderLink onClick={inspect}>
       {i18n.translate('xpack.ux.inspectButtonText', {
         defaultMessage: 'Inspect',
       })}

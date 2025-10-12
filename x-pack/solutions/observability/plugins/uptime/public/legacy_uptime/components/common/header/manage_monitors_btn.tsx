@@ -15,7 +15,6 @@ export const ManageMonitorsBtn = () => {
     <EuiToolTip content={NAVIGATE_LABEL}>
       <EuiHeaderLink
         aria-label={NAVIGATE_LABEL}
-        color="primary"
         data-test-subj="syntheticsManagementPageLink"
       >
         <FormattedMessage

@@ -139,7 +139,7 @@ export const FeatureFeedbackButton = ({
       target="_blank"
       onClickCapture={onClickCapture}
       data-test-subj={dts}
-      color="primary"
+      color="text"
     >
       {surveyButtonText}
     </EuiButtonEmpty>

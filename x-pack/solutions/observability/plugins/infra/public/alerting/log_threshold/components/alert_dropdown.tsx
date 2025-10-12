@@ -113,7 +113,6 @@ export const AlertDropdown = () => {
         panelPaddingSize="none"
         button={
           <EuiHeaderLink
-            color="primary"
             iconSide={'right'}
             iconType={'arrowDown'}
             onClick={openPopover}

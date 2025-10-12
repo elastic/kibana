@@ -28,21 +28,19 @@ export function HeaderMenu(): React.ReactElement | null {
           <EuiHeaderLinks gutterSize="xs">
             <FeedbackButton />
             <EuiHeaderLink
-              color="primary"
               href={http.basePath.prepend('/app/observability/annotations')}
             >
               {i18n.translate('xpack.slo.home.annotations', {
                 defaultMessage: 'Annotations',
               })}
             </EuiHeaderLink>
-            <EuiHeaderLink color="primary" href={docLinks.links.observability.slo} target="_blank">
+            <EuiHeaderLink href={docLinks.links.observability.slo} target="_blank">
               {i18n.translate('xpack.slo.headerMenu.documentation', {
                 defaultMessage: 'SLO documentation',
               })}
             </EuiHeaderLink>
             {!isServerless && (
               <EuiHeaderLink
-                color="primary"
                 href={http.basePath.prepend(`${SLOS_BASE_PATH}${SLO_SETTINGS_PATH}`)}
               >
                 {i18n.translate('xpack.slo.headerMenu.settings', {
@@ -50,7 +48,7 @@ export function HeaderMenu(): React.ReactElement | null {
                 })}
               </EuiHeaderLink>
             )}
-            <EuiHeaderLink color="primary" href={http.basePath.prepend('/app/slos/management')}>
+            <EuiHeaderLink href={http.basePath.prepend('/app/slos/management')}>
               {i18n.translate('xpack.slo.home.manage', {
                 defaultMessage: 'Manage SLOs',
               })}

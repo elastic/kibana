@@ -36,7 +36,6 @@ export function GiveFeedbackHeaderLink() {
       target="_blank"
       iconType="popout"
       iconSide="right"
-      color="primary"
       aria-label={i18n.translate('xpack.apm.views.storageExplorer.giveFeedbackAriaLabel', {
         defaultMessage: 'Give feedback on storage explorer',
       })}

@@ -108,7 +108,7 @@ export const InfrastructurePage = () => {
                         {config.featureFlags.alertsAndRulesDropdownEnabled && (
                           <MetricsAlertDropdown />
                         )}
-                        <EuiHeaderLink color={'primary'} {...settingsLinkProps}>
+                        <EuiHeaderLink {...settingsLinkProps}>
                           {settingsTabTitle}
                         </EuiHeaderLink>
                         <Routes>
@@ -199,7 +199,6 @@ const HeaderLinkAddDataRoute = ({
           href={onboardingLocator?.getRedirectUrl({
             category: onboardingFlow === OnboardingFlow.Hosts ? 'host' : undefined,
           })}
-          color="primary"
         >
           {ADD_DATA_LABEL}
         </EuiHeaderLink>

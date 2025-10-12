@@ -43,7 +43,6 @@ export function ApmHeaderActionMenu() {
 
       {featureFlags.storageExplorerAvailable && (
         <EuiHeaderLink
-          color="primary"
           href={apmHref('/storage-explorer')}
           data-test-subj="apmStorageExplorerHeaderLink"
         >
@@ -66,7 +65,6 @@ export function ApmHeaderActionMenu() {
       )}
 
       <EuiHeaderLink
-        color="primary"
         href={apmHref('/settings')}
         data-test-subj="apmSettingsHeaderLink"
       >
@@ -78,7 +76,6 @@ export function ApmHeaderActionMenu() {
       <InspectorHeaderLink />
 
       <EuiHeaderLink
-        color="primary"
         href={kibanaHref('/app/apm/tutorial')}
         data-test-subj="apmAddDataHeaderLink"
       >

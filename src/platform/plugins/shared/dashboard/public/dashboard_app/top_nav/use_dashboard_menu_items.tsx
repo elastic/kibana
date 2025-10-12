@@ -364,7 +364,6 @@ export const useDashboardMenuItems = ({
         emphasize: true,
         id: 'edit',
         iconType: 'pencil',
-        color: 'text',
         testId: 'dashboardEditMode',
         className: 'eui-hideFor--s eui-hideFor--xs', // hide for small screens - editing doesn't work in mobile mode.
         run: () => {

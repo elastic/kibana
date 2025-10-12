@@ -19,7 +19,6 @@ export function MobileAddData() {
         defaultMessage: 'Navigate to a tutorial about adding mobile APM data',
       })}
       href={kibana.services?.application?.getUrlForApp('/apm/tutorial')}
-      color="primary"
     >
       {ADD_DATA_LABEL}
     </EuiHeaderLink>

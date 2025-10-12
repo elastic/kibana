@@ -121,7 +121,6 @@ export const ToggleAlertFlyoutButton = () => {
       <EuiPopover
         button={
           <EuiHeaderLink
-            color="primary"
             aria-label={ToggleFlyoutTranslations.toggleButtonAriaLabel}
             data-test-subj="syntheticsAlertsRulesButton"
             iconType="arrowDown"

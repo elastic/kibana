@@ -83,7 +83,6 @@ export function ActionMenuContent(): React.ReactElement {
             defaultMessage: 'Navigate to the "Explore Data" view to visualize Synthetics/User data',
           })}
           href={syntheticExploratoryViewLink}
-          color="primary"
           data-test-subj={'uptimeExploreDataButton'}
         >
           {ANALYZE_DATA}
@@ -96,7 +95,6 @@ export function ActionMenuContent(): React.ReactElement {
         aria-label={i18n.translate('xpack.uptime.page_header.settingsLink.label', {
           defaultMessage: 'Navigate to the Uptime settings page',
         })}
-        color="primary"
         data-test-subj="settings-page-link"
         href={history.createHref({
           pathname: SETTINGS_ROUTE,
@@ -111,7 +109,6 @@ export function ActionMenuContent(): React.ReactElement {
           defaultMessage: 'Navigate to a tutorial about adding Uptime data',
         })}
         href={kibana.services?.application?.getUrlForApp('/home#/tutorial/uptimeMonitors')}
-        color="primary"
       >
         {ADD_DATA_LABEL}
       </EuiHeaderLink>

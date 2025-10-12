@@ -28,7 +28,6 @@ export function FeedbackButton({ disabled }: Props) {
       iconType="popout"
       iconSide="right"
       target="_blank"
-      color="primary"
       isDisabled={disabled}
       data-test-subj="sloFeedbackButton"
     >

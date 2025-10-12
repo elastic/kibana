@@ -31,7 +31,7 @@ export function AnomalyDetectionSetupLink() {
   const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
 
   let tooltipText: string = '';
-  let color: 'warning' | 'primary' | 'success' | 'danger' = 'primary';
+  let color: 'warning' | 'text' | 'success' | 'danger' = 'text';
   let icon: IconType | undefined;
 
   if (anomalyDetectionSetupState === AnomalyDetectionSetupState.Failure) {

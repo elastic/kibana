@@ -25,7 +25,6 @@ export function ProfilingHeaderActionMenu() {
         })}
       >
         <EuiHeaderLink
-          color="primary"
           onClick={() => {
             const query = qs.parse(window.location.search);
             const storageExplorerURL = url.format({
@@ -44,7 +43,7 @@ export function ProfilingHeaderActionMenu() {
           })}
         </EuiHeaderLink>
       </EuiToolTip>
-      <EuiHeaderLink href={router.link('/settings')} color="primary">
+      <EuiHeaderLink href={router.link('/settings')}>
         {i18n.translate('xpack.profiling.headerActionMenu.settings', {
           defaultMessage: 'Settings',
         })}
@@ -53,7 +52,6 @@ export function ProfilingHeaderActionMenu() {
         href={router.link('/add-data-instructions', {
           query: { selectedTab: AddDataTabs.Kubernetes },
         })}
-        color="primary"
       >
         {i18n.translate('xpack.profiling.headerActionMenu.addData', {
           defaultMessage: 'Add data',

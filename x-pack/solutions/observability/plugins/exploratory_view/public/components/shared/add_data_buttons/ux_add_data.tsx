@@ -19,7 +19,6 @@ export function UXAddData() {
         defaultMessage: 'Navigate to a tutorial about adding user experience APM data',
       })}
       href={kibana.services?.application?.getUrlForApp('/apm/tutorial')}
-      color="primary"
     >
       {ADD_DATA_LABEL}
     </EuiHeaderLink>

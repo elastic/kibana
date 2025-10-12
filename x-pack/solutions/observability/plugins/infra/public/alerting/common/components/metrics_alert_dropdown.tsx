@@ -210,7 +210,6 @@ export const MetricsAlertDropdown = () => {
         anchorPosition="downLeft"
         button={
           <EuiHeaderLink
-            color="primary"
             iconSide={'right'}
             iconType={'arrowDown'}
             onClick={togglePopover}
