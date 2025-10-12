@@ -193,8 +193,8 @@ describe('extractLiquidErrorPosition', () => {
 
       const result = extractLiquidErrorPosition(longText, errorMessage);
 
-      expect(result.start).toBe(longText.indexOf('error'));
-      expect(result.end).toBe(longText.indexOf('error') + 'error'.length);
+      expect(result.start).toBe(longText.indexOf('{{'));
+      expect(result.end).toBe(longText.indexOf('}}') + 2);
     });
 
     it('should handle text with no liquid syntax', () => {
@@ -235,8 +235,8 @@ describe('extractLiquidErrorPosition', () => {
 
       const result = extractLiquidErrorPosition(text, errorMessage);
 
-      expect(result.start).toBe(3); // Position of 'error'
-      expect(result.end).toBe(8); // End of 'error'
+      expect(result.start).toBe(text.indexOf('{{')); // Position of '{{'
+      expect(result.end).toBe(text.indexOf('}}') + 2); // End of '}}'
     });
 
     it('should handle end position at text end', () => {
@@ -245,8 +245,8 @@ describe('extractLiquidErrorPosition', () => {
 
       const result = extractLiquidErrorPosition(text, errorMessage);
 
-      expect(result.start).toBe(text.indexOf('error'));
-      expect(result.end).toBe(text.indexOf('error') + 'error'.length);
+      expect(result.start).toBe(text.indexOf('{{'));
+      expect(result.end).toBe(text.indexOf('}}') + 2);
     });
 
     it('should not exceed text boundaries', () => {

@@ -112,13 +112,13 @@ describe('validateLiquidTemplate', () => {
       expect(result[0]).toMatchObject({
         id: 'liquid-template-1-9-1-21',
         source: 'liquid-template-validation',
-        message: "tag 'unknownTag' not found",
+        message: 'tag "unknownTag" not found',
         startLineNumber: 1,
         startColumn: 9,
         endLineNumber: 1,
         endColumn: 21,
         severity: 'error',
-        hoverMessage: "tag 'unknownTag' not found",
+        hoverMessage: 'tag "unknownTag" not found',
       });
     });
 
@@ -134,15 +134,15 @@ describe('validateLiquidTemplate', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
-        id: 'liquid-template-1-9-1-26',
+        id: 'liquid-template-1-9-1-24',
         source: 'liquid-template-validation',
-        message: "output '{{ unclosed' not closed",
+        message: 'output "{{ unclosed world" not closed',
         startLineNumber: 1,
         startColumn: 9,
         endLineNumber: 1,
-        endColumn: 26,
+        endColumn: 24,
         severity: 'error',
-        hoverMessage: "output '{{ unclosed' not closed",
+        hoverMessage: 'output "{{ unclosed world" not closed',
       });
     });
 
@@ -158,19 +158,19 @@ describe('validateLiquidTemplate', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
-        id: 'liquid-template-1-9-1-26',
+        id: 'liquid-template-1-9-1-24',
         source: 'liquid-template-validation',
-        message: "tag '{% unclosed' not closed",
+        message: 'tag "{% unclosed world" not closed',
         startLineNumber: 1,
         startColumn: 9,
         endLineNumber: 1,
-        endColumn: 26,
+        endColumn: 24,
         severity: 'error',
-        hoverMessage: "tag '{% unclosed' not closed",
+        hoverMessage: 'tag "{% unclosed world" not closed',
       });
     });
 
-    it('should handle malformed liquid syntax', () => {
+    it("one bracket missing shouldn't throw an error", () => {
       const yamlString = 'Hello { invalid syntax } world';
 
       mockExtractLiquidErrorPosition.mockReturnValue({
@@ -180,18 +180,7 @@ describe('validateLiquidTemplate', () => {
 
       const result = validateLiquidTemplate(yamlString);
 
-      expect(result).toHaveLength(1);
-      expect(result[0]).toMatchObject({
-        id: 'liquid-template-1-9-1-26',
-        source: 'liquid-template-validation',
-        message: 'Invalid liquid syntax',
-        startLineNumber: 1,
-        startColumn: 9,
-        endLineNumber: 1,
-        endColumn: 26,
-        severity: 'error',
-        hoverMessage: 'Invalid liquid syntax',
-      });
+      expect(result).toEqual([]);
     });
   });
 
@@ -215,7 +204,7 @@ describe('validateLiquidTemplate', () => {
 
   describe('position conversion', () => {
     it('should convert offset to line/column correctly for single line', () => {
-      const yamlString = 'Hello {{ world }}';
+      const yamlString = 'Hello {{ world | unknownFilter }}';
 
       mockExtractLiquidErrorPosition.mockReturnValue({
         start: 7, // Position of 'w' in 'world'
@@ -231,25 +220,37 @@ describe('validateLiquidTemplate', () => {
     });
 
     it('should convert offset to line/column correctly for multi-line', () => {
+      // String breakdown:
+      // Line 1: "Line 1\n" (positions 0-6, 7 chars including newline)
+      // Line 2: "Line 2 with {{ error | unknownFilter }} here\n" (starts at position 7)
+      //         - Position 7-18: "Line 2 with "
+      //         - Position 19-20: "{{" (opening braces)
+      //         - Position 21: " "
+      //         - Position 22-26: "error"
+      //         - Position 27-44: " | unknownFilter }}"
+      // Line 3: "Line 3" (starts after Line 2's newline)
       const yamlString = `Line 1
-Line 2 with {{ error }} here
+Line 2 with {{ error | unknownFilter }} here
 Line 3`;
 
       mockExtractLiquidErrorPosition.mockReturnValue({
-        start: 20, // Position of 'error' in the full string
-        end: 25,
+        start: 20, // Points to second '{' in '{{' on line 2
+        end: 25, // Points after 'r' in 'error'
       });
 
       const result = validateLiquidTemplate(yamlString);
 
+      // Line 2 starts at offset 7 in the full string
+      // Error starts at offset 20, which is 13 chars into line 2
+      // Column is 1-indexed, so 13 + 1 = 14
       expect(result[0].startLineNumber).toBe(2);
-      expect(result[0].startColumn).toBe(16);
+      expect(result[0].startColumn).toBe(14);
       expect(result[0].endLineNumber).toBe(2);
-      expect(result[0].endColumn).toBe(21);
+      expect(result[0].endColumn).toBe(19);
     });
 
     it('should handle position at the beginning of text', () => {
-      const yamlString = '{{ error }} at start';
+      const yamlString = '{{ error | unknownFilter }} at start';
 
       mockExtractLiquidErrorPosition.mockReturnValue({
         start: 0,
@@ -265,7 +266,7 @@ Line 3`;
     });
 
     it('should handle position at the end of text', () => {
-      const yamlString = 'at end {{ error }}';
+      const yamlString = 'at end {{ error | unknownFilter }}';
 
       mockExtractLiquidErrorPosition.mockReturnValue({
         start: 8,
@@ -284,11 +285,11 @@ Line 3`;
   describe('integration with extractLiquidErrorPosition', () => {
     it('should call extractLiquidErrorPosition with correct parameters', () => {
       const yamlString = 'Hello {{ name | unknownFilter }} world';
-      const errorMessage = 'undefined filter: unknownFilter, line:1, col:15';
+      const errorMessage = 'undefined filter: unknownFilter, line:1, col:7';
 
       mockExtractLiquidErrorPosition.mockReturnValue({
-        start: 15,
-        end: 27,
+        start: 6,
+        end: 12,
       });
 
       validateLiquidTemplate(yamlString);
