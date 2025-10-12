@@ -705,16 +705,18 @@ triggers:
         expect(result.matchType).toBe('variable-complete');
         expect(result.fullKey).toBe('consts.apiUrl');
       });
-
+      // matches as 'liquid-block-keyword' which is then filtered out
+      // later by the completion provider's isInsideLiquidBlock check
       it('should handle empty line', () => {
         const result = parseLineForCompletion('');
-        expect(result.matchType).toBeNull();
+        expect(result.matchType).toBe('liquid-block-keyword');
         expect(result.fullKey).toBe('');
       });
-
+      // matches as 'liquid-block-keyword' which is then filtered out
+      // later by the completion provider's isInsideLiquidBlock check
       it('should handle line with only spaces', () => {
         const result = parseLineForCompletion('    ');
-        expect(result.matchType).toBeNull();
+        expect(result.matchType).toBe('liquid-block-keyword');
         expect(result.fullKey).toBe('');
       });
     });
