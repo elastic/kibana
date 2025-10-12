@@ -12,7 +12,7 @@ import { riskScore } from '.';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { RiskSeverity, type HostRiskScore } from '../../../../../../common/search_strategy';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
-import { buildRiskScoreQuery } from './query.risk_score.dsl';
+import * as buildQuery from './query.risk_score.dsl';
 import { get } from 'lodash/fp';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
@@ -70,6 +70,24 @@ export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
   loaded: 2,
 };
 
+const searchMock = jest.fn();
+const ALERT_INDEX_PATTERN = '.test-alerts-security.alerts';
+const TEST_SPACE_ID = 'test-default';
+const mockDeps = {
+  esClient: {
+    asCurrentUser: {
+      search: searchMock,
+    },
+  } as unknown as IScopedClusterClient,
+  ruleDataClient: {
+    ...(ruleRegistryMocks.createRuleDataClient(ALERT_INDEX_PATTERN) as IRuleDataClient),
+  },
+  savedObjectsClient: {} as SavedObjectsClientContract,
+  endpointContext: createMockEndpointAppContext(),
+  request: {} as KibanaRequest,
+  spaceId: TEST_SPACE_ID,
+};
+
 export const mockOptions: RiskScoreRequestOptions = {
   defaultIndex: ['logs-*'],
   riskScoreEntity: EntityType.host,
@@ -77,34 +95,8 @@ export const mockOptions: RiskScoreRequestOptions = {
   factoryQueryType: EntityRiskQueries.list,
 };
 
-jest.mock('./query.risk_score.dsl');
-
 describe('buildRiskScoreQuery search strategy', () => {
-  let searchMock: jest.Mock;
-  let mockDeps: Parameters<typeof riskScore.parse>[2];
-  const ALERT_INDEX_PATTERN = '.test-alerts-security.alerts';
-  const TEST_SPACE_ID = 'test-default';
-
-  const buildKpiRiskScoreQuery = jest.mocked(buildRiskScoreQuery);
-
-  beforeEach(() => {
-    searchMock = jest.fn();
-
-    mockDeps = {
-      esClient: {
-        asCurrentUser: {
-          search: searchMock,
-        },
-      } as unknown as IScopedClusterClient,
-      ruleDataClient: {
-        ...(ruleRegistryMocks.createRuleDataClient(ALERT_INDEX_PATTERN) as IRuleDataClient),
-      },
-      savedObjectsClient: {} as SavedObjectsClientContract,
-      endpointContext: createMockEndpointAppContext(),
-      request: {} as KibanaRequest,
-      spaceId: TEST_SPACE_ID,
-    };
-  });
+  const buildKpiRiskScoreQuery = jest.spyOn(buildQuery, 'buildRiskScoreQuery');
 
   afterEach(() => {
     jest.clearAllMocks();

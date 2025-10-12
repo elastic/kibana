@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildHttpQuery } from './query.http_network.dsl';
+import * as buildQuery from './query.http_network.dsl';
 import { networkHttp } from '.';
 import {
   mockOptions,
@@ -13,19 +13,17 @@ import {
   formattedSearchStrategyResponse,
 } from './__mocks__';
 
-jest.mock('./query.http_network.dsl');
-
 describe('networkHttp search strategy', () => {
-  const buildHttpQueryMock = jest.mocked(buildHttpQuery);
+  const buildHttpQuery = jest.spyOn(buildQuery, 'buildHttpQuery');
 
   afterEach(() => {
-    buildHttpQueryMock.mockClear();
+    buildHttpQuery.mockClear();
   });
 
   describe('buildDsl', () => {
     test('should build dsl query', () => {
       networkHttp.buildDsl(mockOptions);
-      expect(buildHttpQueryMock).toHaveBeenCalledWith(mockOptions);
+      expect(buildHttpQuery).toHaveBeenCalledWith(mockOptions);
     });
   });
 

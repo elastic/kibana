@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildNetworkDetailsQuery } from './query.details_network.dsl';
+import * as buildQuery from './query.details_network.dsl';
 import { networkDetails } from '.';
 import {
   mockOptions,
@@ -13,19 +13,17 @@ import {
   formattedSearchStrategyResponse,
 } from './__mocks__';
 
-jest.mock('./query.details_network.dsl');
-
 describe('networkDetails search strategy', () => {
-  const buildNetworkDetailsQueryMock = jest.mocked(buildNetworkDetailsQuery);
+  const buildNetworkDetailsQuery = jest.spyOn(buildQuery, 'buildNetworkDetailsQuery');
 
   afterEach(() => {
-    buildNetworkDetailsQueryMock.mockClear();
+    buildNetworkDetailsQuery.mockClear();
   });
 
   describe('buildDsl', () => {
     test('should build dsl query', () => {
       networkDetails.buildDsl(mockOptions);
-      expect(buildNetworkDetailsQueryMock).toHaveBeenCalledWith(mockOptions);
+      expect(buildNetworkDetailsQuery).toHaveBeenCalledWith(mockOptions);
     });
   });
 

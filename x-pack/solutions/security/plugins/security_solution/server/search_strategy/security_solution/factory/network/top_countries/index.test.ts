@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildTopCountriesQuery } from './query.top_countries_network.dsl';
+import * as buildQuery from './query.top_countries_network.dsl';
 import { networkTopCountries } from '.';
 import {
   mockOptions,
@@ -16,16 +16,16 @@ import {
 jest.mock('./query.top_countries_network.dsl');
 
 describe('networkTopCountries search strategy', () => {
-  const buildTopCountriesQueryMock = jest.mocked(buildTopCountriesQuery);
+  const buildTopCountriesQuery = jest.spyOn(buildQuery, 'buildTopCountriesQuery');
 
   afterEach(() => {
-    buildTopCountriesQueryMock.mockClear();
+    buildTopCountriesQuery.mockClear();
   });
 
   describe('buildDsl', () => {
     test('should build dsl query', () => {
       networkTopCountries.buildDsl(mockOptions);
-      expect(buildTopCountriesQueryMock).toHaveBeenCalledWith(mockOptions);
+      expect(buildTopCountriesQuery).toHaveBeenCalledWith(mockOptions);
     });
   });
 

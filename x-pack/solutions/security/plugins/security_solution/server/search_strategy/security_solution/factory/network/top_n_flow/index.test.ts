@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildTopNFlowQuery, buildTopNFlowCountQuery } from './query.top_n_flow_network.dsl';
+import * as buildQuery from './query.top_n_flow_network.dsl';
 import { networkTopNFlow, networkTopNFlowCount } from '.';
 import {
   mockOptions,
@@ -16,20 +16,18 @@ import {
   formattedCountStrategyResponse,
 } from './__mocks__';
 
-jest.mock('./query.top_n_flow_network.dsl');
-
 describe('Network TopNFlow search strategy', () => {
   describe('networkTopNFlow', () => {
-    const buildTopNFlowQueryMock = jest.mocked(buildTopNFlowQuery);
+    const buildTopNFlowQuery = jest.spyOn(buildQuery, 'buildTopNFlowQuery');
 
     afterEach(() => {
-      buildTopNFlowQueryMock.mockClear();
+      buildTopNFlowQuery.mockClear();
     });
 
     describe('buildDsl', () => {
       test('should build dsl query', () => {
         networkTopNFlow.buildDsl(mockOptions);
-        expect(buildTopNFlowQueryMock).toHaveBeenCalledWith(mockOptions);
+        expect(buildTopNFlowQuery).toHaveBeenCalledWith(mockOptions);
       });
     });
 
@@ -42,16 +40,16 @@ describe('Network TopNFlow search strategy', () => {
   });
 
   describe('networkTopNFlowCount', () => {
-    const buildTopNFlowCountQueryMock = jest.mocked(buildTopNFlowCountQuery);
+    const buildTopNFlowCountQuery = jest.spyOn(buildQuery, 'buildTopNFlowCountQuery');
 
     afterEach(() => {
-      buildTopNFlowCountQueryMock.mockClear();
+      buildTopNFlowCountQuery.mockClear();
     });
 
     describe('buildDsl', () => {
       test('should build dsl query', () => {
         networkTopNFlowCount.buildDsl(mockCountOptions);
-        expect(buildTopNFlowCountQueryMock).toHaveBeenCalledWith(mockCountOptions);
+        expect(buildTopNFlowCountQuery).toHaveBeenCalledWith(mockCountOptions);
       });
     });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildDnsQuery } from './query.dns_network.dsl';
+import * as dnsQuery from './query.dns_network.dsl';
 import { networkDns } from '.';
 import {
   mockOptions,
@@ -13,19 +13,21 @@ import {
   formattedSearchStrategyResponse,
 } from './__mocks__';
 
-jest.mock('./query.dns_network.dsl');
-
 describe('networkDns search strategy', () => {
-  const mockBuildDnsQuery = jest.mocked(buildDnsQuery);
+  let buildDnsQuerySpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    buildDnsQuerySpy = jest.spyOn(dnsQuery, 'buildDnsQuery');
+  });
 
   afterEach(() => {
-    mockBuildDnsQuery.mockClear();
+    buildDnsQuerySpy.mockRestore();
   });
 
   describe('buildDsl', () => {
     test('should build dsl query', () => {
       networkDns.buildDsl(mockOptions);
-      expect(mockBuildDnsQuery).toHaveBeenCalledWith(mockOptions);
+      expect(buildDnsQuerySpy).toHaveBeenCalledWith(mockOptions);
     });
   });
 

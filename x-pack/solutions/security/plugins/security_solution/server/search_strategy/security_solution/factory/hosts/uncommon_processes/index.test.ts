@@ -7,7 +7,7 @@
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
-import { buildQuery } from './dsl/query.dsl';
+import * as buildQuery from './dsl/query.dsl';
 import { uncommonProcesses } from '.';
 import {
   mockOptions,
@@ -16,10 +16,8 @@ import {
 } from './__mocks__';
 import type { HostUncommonProcessesRequestOptions } from '../../../../../../common/api/search_strategy';
 
-jest.mock('./dsl/query.dsl');
-
 describe('uncommonProcesses search strategy', () => {
-  const buildUncommonProcessesQuery = jest.mocked(buildQuery);
+  const buildUncommonProcessesQuery = jest.spyOn(buildQuery, 'buildQuery');
 
   afterEach(() => {
     buildUncommonProcessesQuery.mockClear();

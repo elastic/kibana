@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { buildObservedServiceDetailsQuery } from './query.observed_service_details.dsl';
+import * as buildQuery from './query.observed_service_details.dsl';
 import { observedServiceDetails } from '.';
 import { mockOptions, mockSearchStrategyResponse } from './__mocks__';
 
 jest.mock('./query.observed_service_details.dsl');
 
 describe('serviceDetails search strategy', () => {
-  const buildServiceDetailsQuery = jest.mocked(buildObservedServiceDetailsQuery);
+  const buildServiceDetailsQuery = jest.spyOn(buildQuery, 'buildObservedServiceDetailsQuery');
 
   afterEach(() => {
     buildServiceDetailsQuery.mockClear();

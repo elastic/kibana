@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { IEsSearchResponse } from '@kbn/search-types';
-import { buildManagedUserDetailsQuery } from './query.managed_user_details.dsl';
+import * as buildQuery from './query.managed_user_details.dsl';
 import { managedUserDetails } from '.';
 import type { ManagedUserFields } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import type { ManagedUserDetailsRequestOptionsInput } from '../../../../../../common/api/search_strategy';
@@ -140,19 +140,17 @@ export const mockSearchStrategyResponse: IEsSearchResponse<ManagedUserFields> = 
   loaded: 21,
 };
 
-jest.mock('./query.managed_user_details.dsl');
-
 describe('userDetails search strategy', () => {
-  const buildManagedUserDetailsQueryMock = jest.mocked(buildManagedUserDetailsQuery);
+  const buildManagedUserDetailsQuery = jest.spyOn(buildQuery, 'buildManagedUserDetailsQuery');
 
   afterEach(() => {
-    buildManagedUserDetailsQueryMock.mockClear();
+    buildManagedUserDetailsQuery.mockClear();
   });
 
   describe('buildDsl', () => {
     test('should build dsl query', () => {
       managedUserDetails.buildDsl(mockOptions);
-      expect(buildManagedUserDetailsQueryMock).toHaveBeenCalledWith(mockOptions);
+      expect(buildManagedUserDetailsQuery).toHaveBeenCalledWith(mockOptions);
     });
   });
 

@@ -6,19 +6,17 @@
  */
 
 import { kpiRiskScore } from '.';
-import { buildKpiRiskScoreQuery } from './query.kpi_risk_score.dsl';
+import * as buildQuery from './query.kpi_risk_score.dsl';
 
 import { mockOptions } from './__mocks__';
 
-jest.mock('./query.kpi_risk_score.dsl');
-
 describe('buildKpiRiskScoreQuery search strategy', () => {
-  const buildKpiRiskScoreQueryMock = jest.mocked(buildKpiRiskScoreQuery);
+  const buildKpiRiskScoreQuery = jest.spyOn(buildQuery, 'buildKpiRiskScoreQuery');
 
   describe('buildDsl', () => {
     test('should build dsl query', () => {
       kpiRiskScore.buildDsl(mockOptions);
-      expect(buildKpiRiskScoreQueryMock).toHaveBeenCalledWith(mockOptions);
+      expect(buildKpiRiskScoreQuery).toHaveBeenCalledWith(mockOptions);
     });
   });
 });
