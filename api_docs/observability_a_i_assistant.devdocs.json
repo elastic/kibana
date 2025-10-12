@@ -5397,6 +5397,31 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseGenAIConnectorsResult.isConnectorSelectionRestricted",
+            "type": "boolean",
+            "tags": [],
+            "label": "isConnectorSelectionRestricted",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseGenAIConnectorsResult.defaultConnector",
+            "type": "string",
+            "tags": [],
+            "label": "defaultConnector",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5561,21 +5586,6 @@
         "description": [],
         "signature": [
           "\"observability:logSources\""
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/ui_settings/settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.aiAssistantPreferredAIAssistantType",
-        "type": "string",
-        "tags": [],
-        "label": "aiAssistantPreferredAIAssistantType",
-        "description": [],
-        "signature": [
-          "\"aiAssistant:preferredAIAssistantType\""
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
@@ -9023,6 +9033,26 @@
                         "text": "AssistantScope"
                       },
                       "[]"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-server.ObservabilityAIAssistantClient.Unnamed.$1.analytics",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "analytics",
+                    "description": [],
+                    "signature": [
+                      "{ optIn: (optInConfig: ",
+                      "OptInConfig",
+                      ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+                      "Observable",
+                      "<",
+                      "TelemetryCounter",
+                      ">; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "deprecated": false,

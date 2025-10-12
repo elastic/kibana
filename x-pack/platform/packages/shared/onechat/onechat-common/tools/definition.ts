@@ -34,7 +34,10 @@ export enum ToolType {
  *
  * Use as a common base for browser-side and server-side tool types.
  */
-export interface ToolDefinition<TConfig extends object = Record<string, unknown>> {
+export interface ToolDefinition<
+  TType extends ToolType = ToolType,
+  TConfig extends object = Record<string, unknown>
+> {
   /**
    * A unique id for this tool.
    */
@@ -42,7 +45,7 @@ export interface ToolDefinition<TConfig extends object = Record<string, unknown>
   /**
    * The type of the tool
    */
-  type: ToolType;
+  type: TType;
   /**
    * The description for this tool, which will be exposed to the LLM.
    */
@@ -61,8 +64,10 @@ export interface ToolDefinition<TConfig extends object = Record<string, unknown>
   configuration: TConfig;
 }
 
-export interface ToolDefinitionWithSchema<TConfig extends object = Record<string, unknown>>
-  extends ToolDefinition<TConfig> {
+export interface ToolDefinitionWithSchema<
+  TType extends ToolType = ToolType,
+  TConfig extends object = Record<string, unknown>
+> extends ToolDefinition<TType, TConfig> {
   /**
    * the JSON schema associated with this tool's input parameters.
    */

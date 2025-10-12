@@ -36,7 +36,7 @@ const esArchiveIndex =
 
 export default function (ftrContext: FtrProviderContext) {
   const { getService, getPageObjects } = ftrContext;
-  const pageObjects = getPageObjects(['common', 'searchPlayground', 'searchStart']);
+  const pageObjects = getPageObjects(['common', 'searchPlayground']);
   const commonAPI = MachineLearningCommonAPIProvider(ftrContext);
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -189,11 +189,11 @@ export default function (ftrContext: FtrProviderContext) {
           it('should be able to create index from UI', async () => {
             await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
             await pageObjects.searchPlayground.PlaygroundStartChatPage.clickCreateIndex();
-            await pageObjects.searchStart.expectToBeOnCreateIndexPage();
-            await pageObjects.searchStart.setIndexNameValue(indexName);
-            await pageObjects.searchStart.expectCreateIndexButtonToBeEnabled();
-            await pageObjects.searchStart.clickCreateIndexButton();
-            await pageObjects.searchStart.expectToBeOnIndexDetailsPage();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToBeOnCreateIndexPage();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.setIndexNameValue(indexName);
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToBeEnabled();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.clickCreateIndexButton();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToBeOnIndexDetailsPage();
 
             // add mapping
             await es.indices.putMapping({

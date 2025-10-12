@@ -57,6 +57,7 @@ export const postReadinessTaskRoute = (
           await esClient.index({
             index: SIEM_READINESS_INDEX,
             body: indexDocument,
+            refresh: 'true', // Force refresh to make the document searchable immediately
           });
 
           logger.info(

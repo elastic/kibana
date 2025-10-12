@@ -923,6 +923,7 @@ describe('CasesService', () => {
             "title": "Super Bad Security Issue",
             "total_alerts": 0,
             "total_comments": 0,
+            "total_events": 0,
             "updated_at": "2019-11-25T21:54:48.952Z",
             "updated_by": Object {
               "email": "testemail@elastic.co",
@@ -1145,6 +1146,7 @@ describe('CasesService', () => {
                   "title": "Super Bad Security Issue",
                   "total_alerts": 0,
                   "total_comments": 0,
+                  "total_events": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -2286,6 +2288,7 @@ describe('CasesService', () => {
       'category',
       'customFields',
       'observables',
+      'settings',
       'incremental_id',
       'settings',
       'total_alerts',

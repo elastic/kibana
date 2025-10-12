@@ -11,7 +11,12 @@ import type { ParsedPanel } from '../../../../../../../../common/siem_migrations
 import { DashboardResourceIdentifier } from '../../../../../../../../common/siem_migrations/dashboards/resources';
 import type { OriginalDashboardVendor } from '../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { MigrationResources } from '../../../../../common/task/retrievers/resource_retriever';
-import type { MigrateDashboardState, TranslatePanelNodeParams, TranslatedPanel } from '../../types';
+import type {
+  MigrateDashboardState,
+  TranslatePanelNodeParams,
+  TranslatedPanel,
+  MigrateDashboardGraphParams,
+} from '../../types';
 import { getTranslatePanelGraph } from '../../sub_graphs/translate_panel';
 import type { TranslatePanelGraphParams } from '../../sub_graphs/translate_panel/types';
 import { createMarkdownPanel } from '../../helpers/markdown_panel/create_markdown_panel';
@@ -22,6 +27,9 @@ export type TranslatePanelNode = ((
   subgraph?: ReturnType<typeof getTranslatePanelGraph>;
 };
 
+/** Number of panels to be processed concurrently per dashboard */
+const DEFAULT_PANELS_CONCURRENCY = 4;
+
 export interface TranslatePanel {
   node: TranslatePanelNode;
   conditionalEdge: (state: MigrateDashboardState) => Send[];
@@ -29,8 +37,21 @@ export interface TranslatePanel {
 }
 // This is a special node, it's goal is to use map-reduce to translate the dashboard panels in parallel.
 // This is the recommended technique at the time of writing this code. LangGraph docs: https://langchain-ai.github.io/langgraphjs/how-tos/map-reduce/.
-export const getTranslatePanelNode = (params: TranslatePanelGraphParams): TranslatePanel => {
-  const translatePanelSubGraph = getTranslatePanelGraph(params);
+export const getTranslatePanelNode = (params: MigrateDashboardGraphParams): TranslatePanel => {
+  // Convert MigrateDashboardGraphParams to TranslatePanelGraphParams
+  const translatePanelGraphParams: TranslatePanelGraphParams = {
+    model: params.model,
+    esScopedClient: params.esScopedClient,
+    esqlKnowledgeBase: params.esqlKnowledgeBase,
+    dashboardMigrationsRetriever: params.dashboardMigrationsRetriever,
+    telemetryClient: params.telemetryClient,
+    logger: params.logger,
+    inference: params.inference,
+    request: params.request,
+    connectorId: params.connectorId,
+  };
+
+  const translatePanelSubGraph = getTranslatePanelGraph(translatePanelGraphParams);
   return {
     // Fan-in: the results of the individual panel translations are aggregated back into the overall dashboard state via state reducer.
     node: async ({ index, ...nodeParams }) => {
@@ -41,7 +62,9 @@ export const getTranslatePanelNode = (params: TranslatePanelGraphParams): Transl
         }
 
         // Invoke the subgraph to translate the panel
-        const output = await translatePanelSubGraph.invoke(nodeParams);
+        const output = await translatePanelSubGraph.invoke(nodeParams, {
+          maxConcurrency: DEFAULT_PANELS_CONCURRENCY,
+        });
 
         if (!output.elastic_panel) {
           throw new Error('No panel visualization generated');
@@ -54,8 +77,8 @@ export const getTranslatePanelNode = (params: TranslatePanelGraphParams): Transl
           comments: output.comments,
         };
       } catch (err) {
-        params.logger.error(`Error translating panel: ${err}`);
         const message = `Error translating panel: ${err.toString()}`;
+        params.logger.error(message);
         translatedPanel = {
           index,
           title: nodeParams.parsed_panel.title,

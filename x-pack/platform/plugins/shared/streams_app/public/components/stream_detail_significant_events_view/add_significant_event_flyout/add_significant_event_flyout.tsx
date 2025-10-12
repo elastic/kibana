@@ -193,6 +193,7 @@ export function AddSignificantEventFlyout({
       aria-labelledby="addSignificantEventFlyout"
       onClose={() => onClose()}
       size={isEditMode ? 's' : 'l'}
+      type={isEditMode ? 'push' : 'overlay'}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
@@ -230,11 +231,11 @@ export function AddSignificantEventFlyout({
               `}
             >
               <EuiPanel hasShadow={false} paddingSize="l">
-                <EuiText>
+                <EuiText size="xs">
                   <h4>
                     {i18n.translate(
                       'xpack.streams.streamDetailView.addSignificantEventFlyout.selectOptionLabel',
-                      { defaultMessage: 'Select an option' }
+                      { defaultMessage: 'Select a method' }
                     )}
                   </h4>
                 </EuiText>
@@ -278,7 +279,7 @@ export function AddSignificantEventFlyout({
               </EuiPanel>
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={2}>
+          <EuiFlexItem grow={3}>
             <EuiFlexGroup
               direction="column"
               gutterSize="none"
