@@ -728,6 +728,16 @@ Object {
       "required": false,
       "type": "date",
     },
+    "kibana.alert.last_scheduled_actions.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.last_scheduled_actions.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.maintenance_window_ids": Object {
       "array": true,
       "required": false,
@@ -1417,6 +1427,16 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.last_scheduled_actions.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.last_scheduled_actions.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.maintenance_window_ids": Object {
       "array": true,
@@ -2571,6 +2591,16 @@ Object {
       "required": false,
       "type": "date",
     },
+    "kibana.alert.last_scheduled_actions.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.last_scheduled_actions.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.maintenance_window_ids": Object {
       "array": true,
       "required": false,
@@ -3723,6 +3753,16 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.last_scheduled_actions.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.last_scheduled_actions.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.maintenance_window_ids": Object {
       "array": true,
@@ -4877,6 +4917,16 @@ Object {
       "required": false,
       "type": "date",
     },
+    "kibana.alert.last_scheduled_actions.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.last_scheduled_actions.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.maintenance_window_ids": Object {
       "array": true,
       "required": false,
@@ -6029,6 +6079,16 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.last_scheduled_actions.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.last_scheduled_actions.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.maintenance_window_ids": Object {
       "array": true,
@@ -7189,6 +7249,16 @@ Object {
       "required": false,
       "type": "date",
     },
+    "kibana.alert.last_scheduled_actions.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.last_scheduled_actions.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.maintenance_window_ids": Object {
       "array": true,
       "required": false,
@@ -8342,6 +8412,16 @@ Object {
       "required": false,
       "type": "date",
     },
+    "kibana.alert.last_scheduled_actions.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.last_scheduled_actions.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.maintenance_window_ids": Object {
       "array": true,
       "required": false,
@@ -9494,6 +9574,16 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.last_scheduled_actions.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.last_scheduled_actions.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.maintenance_window_ids": Object {
       "array": true,
@@ -10663,6 +10753,16 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.last_scheduled_actions.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.last_scheduled_actions.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.maintenance_window_ids": Object {
       "array": true,

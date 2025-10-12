@@ -729,7 +729,7 @@ export class AlertsClient<
         },
       });
     } catch (err) {
-      this.options.logger.warn(
+      this.options.logger.error(
         `Error updating alert last scheduled actions ${this.ruleInfoMessage}: ${err}`,
         this.logTags
       );
