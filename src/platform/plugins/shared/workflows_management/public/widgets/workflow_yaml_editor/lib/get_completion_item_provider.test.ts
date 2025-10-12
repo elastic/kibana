@@ -351,6 +351,250 @@ steps:
         expect.arrayContaining(['["api-url"]'])
       );
     });
+
+    it('should provide rrule suggestions in empty scheduled trigger with block', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      |<-
+steps: []
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([
+          'Daily at 9 AM',
+          'Business hours (weekdays 8 AM & 5 PM)',
+          'Monthly on 1st and 15th',
+          'Custom RRule',
+        ])
+      );
+    });
+
+    it('should provide rrule suggestions in scheduled trigger with block with proper YAML', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      |<-
+steps: []
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([
+          'Daily at 9 AM',
+          'Business hours (weekdays 8 AM & 5 PM)',
+          'Monthly on 1st and 15th',
+          'Custom RRule',
+        ])
+      );
+    });
+
+    it('should provide rrule suggestions in scheduled trigger with block with empty map', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      |<-
+steps: []
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([
+          'Daily at 9 AM',
+          'Business hours (weekdays 8 AM & 5 PM)',
+          'Monthly on 1st and 15th',
+          'Custom RRule',
+        ])
+      );
+    });
+
+    it('should provide rrule suggestions in scheduled trigger with block with cursor inside', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      |<-
+steps: []
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([
+          'Daily at 9 AM',
+          'Business hours (weekdays 8 AM & 5 PM)',
+          'Monthly on 1st and 15th',
+          'Custom RRule',
+        ])
+      );
+    });
+
+    it('should NOT provide rrule suggestions when rrule already exists', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: UTC
+        byhour: [9]
+        byminute: [0]
+      |<-
+steps: []
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).not.toEqual(
+        expect.arrayContaining([
+          'Daily at 9 AM',
+          'Business hours (weekdays 8 AM & 5 PM)',
+          'Monthly on 1st and 15th',
+          'Custom RRule',
+        ])
+      );
+    });
+
+    it('should NOT provide rrule suggestions when every already exists', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      every: "5m"
+      |<-
+steps: []
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).not.toEqual(
+        expect.arrayContaining([
+          'Daily at 9 AM',
+          'Business hours (weekdays 8 AM & 5 PM)',
+          'Monthly on 1st and 15th',
+          'Custom RRule',
+        ])
+      );
+    });
+
+    it('should provide timezone suggestions for tzid field in scheduled trigger', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - name: scheduled-trigger
+    type: scheduled
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: |<-
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+
+      // Should include timezone suggestions
+      expect(suggestions.length).toBeGreaterThan(0);
+
+      // Should have timezone documentation
+      const firstSuggestion = suggestions[0];
+      expect(firstSuggestion?.documentation).toBeDefined();
+      expect(firstSuggestion?.detail).toContain('Timezone:');
+    });
+
+    it('should filter timezone suggestions based on prefix', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - name: scheduled-trigger
+    type: scheduled
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: Amer|<-
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+
+      // Should only include American timezones
+      expect(suggestions.length).toBeGreaterThan(0);
+      expect(
+        suggestions.every((s) => typeof s.label === 'string' && s.label.startsWith('America/'))
+      ).toBe(true);
+    });
+
+    it('should prioritize UTC timezones in suggestions', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - name: scheduled-trigger
+    type: scheduled
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: |<-
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+
+      // Should have timezone suggestions
+      expect(suggestions.length).toBeGreaterThan(0);
+
+      // Should have timezone documentation
+      const firstSuggestion = suggestions[0];
+      expect(firstSuggestion?.documentation).toBeDefined();
+      expect(firstSuggestion?.detail).toContain('Timezone:');
+    });
+
+    it('should replace entire tzid value when selecting timezone', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - name: scheduled-trigger
+    type: scheduled
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: UTC |<-
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+
+      // Should have timezone suggestions
+      expect(suggestions.length).toBeGreaterThan(0);
+
+      // Check that suggestions have InsertAsSnippet insertTextRules
+      const firstSuggestion = suggestions[0];
+      expect(firstSuggestion?.insertTextRules).toBe(
+        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+      );
+    });
   });
 
   describe('parseLineForCompletion', () => {

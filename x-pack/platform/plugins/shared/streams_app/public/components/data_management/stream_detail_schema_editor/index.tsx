@@ -58,6 +58,11 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
     refreshDefinition,
   });
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
+  const definitionFieldMap = React.useMemo(() => {
+    const map: Set<string> = new Set();
+    definitionFields.forEach((field) => map.add(field.name));
+    return map;
+  }, [definitionFields]);
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: pendingChangesCount > 0,
@@ -77,7 +82,9 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
       toMountPoint(
         <StreamsAppContextProvider context={context}>
           <SchemaChangesReviewModal
-            fields={fields}
+            fields={fields.filter(
+              (field) => field.status !== 'unmapped' || definitionFieldMap.has(field.name)
+            )}
             streamType={getStreamTypeFromDefinition(definition.stream)}
             definition={definition}
             storedFields={definitionFields}
