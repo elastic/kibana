@@ -19,23 +19,25 @@ import { querySignalsRoute } from './query_signals_route';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
+import type { RuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
 
 describe('query for signal', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
-  context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise(getEmptySignalsResponse())
-  );
-  const ruleDataClient = ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts');
+  let ruleDataClient: RuleDataClientMock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(getEmptySignalsResponse())
+    );
+    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       getEmptySignalsResponse() as any
     );
+    ruleDataClient = ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts');
 
     querySignalsRoute(server.router, ruleDataClient);
   });
