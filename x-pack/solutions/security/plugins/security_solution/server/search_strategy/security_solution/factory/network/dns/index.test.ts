@@ -17,7 +17,7 @@ describe('networkDns search strategy', () => {
   const mockBuildDnsQuery = jest.spyOn(buildQuery, 'buildDnsQuery');
 
   afterEach(() => {
-    mockBuildDnsQuery.mockRestore();
+    mockBuildDnsQuery.mockClear();
   });
 
   describe('buildDsl', () => {
