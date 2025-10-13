@@ -203,13 +203,11 @@ const componentStyles = {
       height: '100%',
       overflow: 'hidden',
     }),
-  scrollableWrapper: () =>
-    css({
-      minHeight: 0,
-    }),
-  scrollableContent: () =>
-    css({
-      height: '100%',
-      overflowY: 'auto',
-    }),
+  scrollableWrapper: css({
+    minHeight: 0,
+  }),
+  scrollableContent: css({
+    height: '100%',
+    overflowY: 'auto',
+  }),
 };
