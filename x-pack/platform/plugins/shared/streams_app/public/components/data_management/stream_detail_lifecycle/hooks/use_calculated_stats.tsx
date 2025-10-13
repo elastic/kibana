@@ -30,7 +30,10 @@ export const useCalculatedStats = ({
       return undefined;
     }
 
-    const rangeInDays = moment(timeState.end).diff(moment(timeState.start), 'days', true);
+    const effectiveStart = stats.creationDate
+      ? moment.max(moment(timeState.start), moment(stats.creationDate))
+      : moment(timeState.start);
+    const rangeInDays = moment(timeState.end).diff(effectiveStart, 'days', true);
     const countRange = aggregations.buckets.reduce((sum, bucket) => sum + bucket.doc_count, 0);
 
     const bytesPerDoc = stats.totalDocs && stats.sizeBytes ? stats.sizeBytes / stats.totalDocs : 0;
