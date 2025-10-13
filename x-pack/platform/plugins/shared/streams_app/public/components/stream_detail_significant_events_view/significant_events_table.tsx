@@ -49,7 +49,7 @@ export function SignificantEventsTable({
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
   const [selectedFeature, setSelectedFeature] = useState<Feature>();
-  const { featuresByName } = useStreamFeatures(definition);
+  const { featuresByName, refreshFeatures } = useStreamFeatures(definition);
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
     {
@@ -222,6 +222,7 @@ export function SignificantEventsTable({
           feature={selectedFeature}
           closeFlyout={() => {
             setSelectedFeature(undefined);
+            refreshFeatures();
           }}
         />
       )}
