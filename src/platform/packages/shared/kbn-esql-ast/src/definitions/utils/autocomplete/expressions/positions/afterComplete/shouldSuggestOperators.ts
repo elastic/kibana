@@ -11,7 +11,7 @@ import type { SupportedDataType } from '../../../../../types';
 import { supportsArithmeticOperations } from '../../../../../types';
 import type { ExpressionContext, FunctionParameterContext } from '../../types';
 import { SignatureAnalyzer } from '../../SignatureAnalyzer';
-import { arithmeticOperators } from '../../../../../all_operators';
+import { arithmeticOperators, logicalOperators } from '../../../../../all_operators';
 
 export interface OperatorRuleContext {
   expressionType: SupportedDataType | 'unknown';
@@ -134,10 +134,23 @@ const rules: Rule[] = [
     const firstType = functionParameterContext.firstArgumentType;
 
     if (firstType === 'boolean') {
+      // If current expression is already boolean, suggest only logical operators
+      if (expressionType === 'boolean') {
+        // Use logicalOperators from all_operators (AND, OR) - NOT is excluded as it's unary
+        const logicalOperatorNames = logicalOperators.map((op) => op.name.toUpperCase());
+
+        return {
+          shouldSuggest: true,
+          allowedOperators: logicalOperatorNames,
+          reason: 'Boolean homogeneous function - boolean expression',
+        };
+      }
+
+      // If current expression is NOT boolean (e.g., integerField after "integerField > 10,")
+      // Allow ALL operators so user can build boolean expression (integerField > 5)
       return {
         shouldSuggest: true,
-        allowedOperators: ['AND', 'OR', 'NOT'],
-        reason: 'Boolean homogeneous function',
+        reason: 'Boolean homogeneous function - allow building boolean expression',
       };
     }
 

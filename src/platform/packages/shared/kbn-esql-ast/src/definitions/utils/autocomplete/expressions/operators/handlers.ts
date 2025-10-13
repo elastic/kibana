@@ -64,7 +64,9 @@ export async function handleListOperator(ctx: ExpressionContext): Promise<ISugge
         ...(list.values || []).filter(isColumn).map((col: ESQLColumn) => col.parts.join('.')),
       ].filter(Boolean);
 
-      return getSuggestionsForColumn(leftOperand, ctx, ignoredColumns);
+      const suggestions = await getSuggestionsForColumn(leftOperand, ctx, ignoredColumns);
+
+      return suggestions;
     }
   }
 
@@ -100,7 +102,9 @@ async function getSuggestionsForColumn(
       includeCompatibleLiterals: true,
     });
 
-  return builder.build();
+  const result = builder.build();
+
+  return result;
 }
 
 // ============================================================================
@@ -128,14 +132,40 @@ export async function handleStringListOperator(
   context: ExpressionContext
 ): Promise<ISuggestionItem[] | null> {
   const fn = context.expressionRoot as ESQLFunction | undefined;
-  if (!fn) return null;
+
+  if (!fn) {
+    return null;
+  }
 
   const operator = fn.name.toLowerCase();
   const rightOperand = getBinaryExpressionOperand(fn, 'right');
+  const leftOperand = getBinaryExpressionOperand(fn, 'left');
 
-  // No list yet or an empty list: suggest opening parenthesis and basic patterns
+  // No list yet: suggest any string expressions (LIKE pattern can be any string expression)
   if (shouldSuggestOpenListForOperand(rightOperand)) {
-    return [listCompleteItem, ...getStringPatternSuggestions(operator)];
+    // LIKE/RLIKE accepts any string pattern, so suggest all string-compatible expressions
+    const builder = new SuggestionBuilder(context);
+
+    const ignoredColumns = isColumn(leftOperand)
+      ? [leftOperand.parts.join('.')].filter(Boolean)
+      : [];
+
+    await builder.addFields({
+      types: ['any'],
+      ignoredColumns,
+    });
+
+    builder
+      .addFunctions({
+        types: ['any'],
+      })
+      .addLiterals({
+        types: ['any'],
+        includeDateLiterals: false,
+        includeCompatibleLiterals: true,
+      });
+
+    return builder.build();
   }
 
   // Only handle list form; otherwise, delegate by returning null

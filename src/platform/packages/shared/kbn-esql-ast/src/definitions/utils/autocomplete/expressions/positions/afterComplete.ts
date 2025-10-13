@@ -166,8 +166,6 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
   const includeComma = shouldSuggestComma(commaContext);
 
   // Build suggestions based on rule engine decision and context
-  // Special case: string/IP/version literals can't be extended with operators, only comma
-  // Numeric and boolean literals can have operators (arithmetic or logical)
   const isNonExtendableLiteral =
     paramState.isLiteral && !isNumericType(expressionType) && expressionType !== 'boolean';
 
@@ -176,7 +174,7 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
       return [commaCompleteItem];
     }
 
-    return []; // No comma, no operators for non-extendable literal
+    return [];
   }
 
   // For non-literals, numeric literals, or boolean literals: include operators and optionally comma

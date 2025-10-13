@@ -284,7 +284,7 @@ function matchesArity(signature: FunctionDefinition['signatures'][number], arity
  * @param position
  * @returns
  */
-function getParamAtPosition(
+export function getParamAtPosition(
   { params, minParams }: FunctionDefinition['signatures'][number],
   position: number
 ) {
