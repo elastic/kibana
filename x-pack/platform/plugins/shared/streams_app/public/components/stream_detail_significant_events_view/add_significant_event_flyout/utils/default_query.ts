@@ -15,8 +15,8 @@ export function defaultQuery(): StreamQueryKql {
     kql: {
       query: '',
     },
-    system: undefined,
+    feature: undefined,
   };
 }
 
-export const NO_SYSTEM = { filter: { always: {} }, name: '_NO_SYSTEM' };
+export const NO_FEATURE = { filter: { always: {} }, name: '_NO_FEATURE' };
