@@ -15,6 +15,7 @@ import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { RunStepResult } from '../step/node_implementation';
 import { buildStepExecutionId } from '../utils';
 import { WorkflowScopeStack } from './workflow_scope_stack';
+import { WorkflowTemplatingEngine } from '../templating_engine';
 
 export interface ContextManagerInit {
   // New properties for logging
@@ -32,6 +33,7 @@ export class WorkflowContextManager {
   private workflowExecutionGraph: WorkflowGraph;
   private workflowExecutionState: WorkflowExecutionState;
   private esClient: ElasticsearchClient;
+  private templateEngine: WorkflowTemplatingEngine;
   private fakeRequest?: KibanaRequest;
   private coreStart?: CoreStart;
 
@@ -50,6 +52,7 @@ export class WorkflowContextManager {
     this.coreStart = init.coreStart;
     this.node = init.node;
     this.stackFrames = init.stackFrames;
+    this.templateEngine = new WorkflowTemplatingEngine();
   }
 
   // Any change here should be reflected in the 'getContextSchemaForPath' function for frontend validation to work
@@ -89,6 +92,40 @@ export class WorkflowContextManager {
     this.enrichStepContextWithMockedData(stepContext);
     this.enrichStepContextAccordingToStepScope(stepContext);
     return stepContext;
+  }
+
+  /**
+   * Recursively resolves template expressions in any value (string, object, array, or primitive).
+   *
+   * This method traverses the input value and replaces all template expressions (e.g., `{{workflow.id}}`,
+   * `{{steps.step1.output}}`) with their actual values from the current workflow execution context.
+   *
+   * @param obj - The value to render. Can be:
+   *   - A string with template expressions: `"{{workflow.name}}"`
+   *   - An object with string properties: `{ name: "{{workflow.name}}", id: "{{workflow.id}}" }`
+   *   - An array: `["{{step1.output}}", "static value"]`
+   *   - A nested structure combining any of the above
+   *   - Primitive values (numbers, booleans) are returned as-is
+   *
+   * @returns The same type as the input, with all template expressions resolved to their actual values
+   *
+   * @example
+   * ```typescript
+   * // Render a simple string
+   * const result = contextManager.renderValueAccordingToContext("Workflow: {{workflow.name}}");
+   * // => "Workflow: My Workflow"
+   *
+   * // Render an object with templates
+   * const config = contextManager.renderValueAccordingToContext({
+   *   url: "{{steps.fetchData.output.apiUrl}}",
+   *   headers: { "X-Request-Id": "{{execution.id}}" }
+   * });
+   * // => { url: "https://api.example.com", headers: { "X-Request-Id": "exec-123" } }
+   * ```
+   */
+  public renderValueAccordingToContext<T>(obj: T): T {
+    const context = this.getContext();
+    return this.renderValueRecursively(obj, context) as T;
   }
 
   public readContextPath(propertyPath: string): { pathExists: boolean; value: any } {
@@ -238,5 +275,34 @@ export class WorkflowContextManager {
       },
       stepState: latestStepExecution.state,
     };
+  }
+
+  private renderValueRecursively(value: unknown, context: StepContext): unknown {
+    // Handle null and undefined
+    if (value === null || value === undefined) {
+      return value;
+    }
+
+    // Handle string values - render them using the template engine
+    if (typeof value === 'string') {
+      return this.templateEngine.render(value, context);
+    }
+
+    // Handle arrays - recursively render each element
+    if (Array.isArray(value)) {
+      return value.map((item) => this.renderValueRecursively(item, context));
+    }
+
+    // Handle objects - recursively render each property
+    if (typeof value === 'object') {
+      const renderedObject: Record<string, any> = {};
+      for (const [key, val] of Object.entries(value)) {
+        renderedObject[key] = this.renderValueRecursively(val, context);
+      }
+      return renderedObject;
+    }
+
+    // Return primitive values as-is (numbers, booleans, etc.)
+    return value;
   }
 }
