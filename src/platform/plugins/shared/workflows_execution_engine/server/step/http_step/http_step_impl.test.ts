@@ -28,7 +28,9 @@ describe('HttpStepImpl', () => {
   let mockStep: HttpGraphNode;
 
   let stepContextAbortController: AbortController;
-  let mockContextManager: jest.Mocked<Pick<WorkflowContextManager, 'getContext'>> & {
+  let mockContextManager: jest.Mocked<
+    Pick<WorkflowContextManager, 'getContext' | 'renderValueAccordingToContext'>
+  > & {
     abortController: AbortController;
   };
 
@@ -36,8 +38,9 @@ describe('HttpStepImpl', () => {
     stepContextAbortController = new AbortController();
     mockContextManager = {
       getContext: jest.fn(),
+      renderValueAccordingToContext: jest.fn(<T>(value: T): T => value),
       abortController: stepContextAbortController,
-    };
+    } as any;
 
     mockStepExecutionRuntime = {
       contextManager: mockContextManager,
@@ -94,28 +97,32 @@ describe('HttpStepImpl', () => {
 
   describe('getInput', () => {
     it('should render URL with context', () => {
-      const context = {
-        execution: { id: 'test-run', isTestRun: false, startedAt: new Date() },
-        workflow: { id: 'test-workflow', name: 'Test', enabled: true, spaceId: 'default' },
-        steps: {},
-        baseUrl: 'https://api.example.com',
-      };
-      mockContextManager.getContext.mockReturnValue(context as any);
+      mockContextManager.renderValueAccordingToContext.mockImplementation((value: any) => {
+        if (value === '{{baseUrl}}/users') {
+          return 'https://api.example.com/users';
+        }
+        return value;
+      });
       mockStep.configuration.with.url = '{{baseUrl}}/users';
 
       const input = httpStep.getInput();
 
+      expect(mockContextManager.renderValueAccordingToContext).toHaveBeenCalledWith(
+        '{{baseUrl}}/users'
+      );
       expect(input.url).toBe('https://api.example.com/users');
     });
 
     it('should render headers with context', () => {
-      const context = {
-        execution: { id: 'test-run', isTestRun: false, startedAt: new Date() },
-        workflow: { id: 'test-workflow', name: 'Test', enabled: true, spaceId: 'default' },
-        steps: {},
-        authToken: 'bearer-token-123',
-      };
-      mockContextManager.getContext.mockReturnValue(context as any);
+      mockContextManager.renderValueAccordingToContext.mockImplementation((value: any) => {
+        if (typeof value === 'object' && value.Authorization) {
+          return {
+            Authorization: 'Bearer bearer-token-123',
+            'Content-Type': 'application/json',
+          };
+        }
+        return value;
+      });
       mockStep.configuration.with.headers = {
         Authorization: 'Bearer {{authToken}}',
         'Content-Type': 'application/json',
@@ -123,6 +130,10 @@ describe('HttpStepImpl', () => {
 
       const input = httpStep.getInput();
 
+      expect(mockContextManager.renderValueAccordingToContext).toHaveBeenCalledWith({
+        Authorization: 'Bearer {{authToken}}',
+        'Content-Type': 'application/json',
+      });
       expect(input.headers).toEqual({
         Authorization: 'Bearer bearer-token-123',
         'Content-Type': 'application/json',
@@ -130,14 +141,16 @@ describe('HttpStepImpl', () => {
     });
 
     it('should render body with context', () => {
-      const context = {
-        execution: { id: 'test-run', isTestRun: false, startedAt: new Date() },
-        workflow: { id: 'test-workflow', name: 'Test', enabled: true, spaceId: 'default' },
-        steps: {},
-        userId: 123,
-        name: 'John Doe',
-      };
-      mockContextManager.getContext.mockReturnValue(context as any);
+      mockContextManager.renderValueAccordingToContext.mockImplementation((value: any) => {
+        if (typeof value === 'object' && value.id && value.name) {
+          return {
+            id: '123',
+            name: 'John Doe',
+            active: true,
+          };
+        }
+        return value;
+      });
       mockStep.configuration.with.body = {
         id: '{{userId}}',
         name: '{{name}}',
@@ -146,6 +159,11 @@ describe('HttpStepImpl', () => {
 
       const input = httpStep.getInput();
 
+      expect(mockContextManager.renderValueAccordingToContext).toHaveBeenCalledWith({
+        id: '{{userId}}',
+        name: '{{name}}',
+        active: true,
+      });
       expect(input.body).toEqual({
         id: '123',
         name: 'John Doe',
@@ -154,12 +172,6 @@ describe('HttpStepImpl', () => {
     });
 
     it('should use default method and timeout', () => {
-      const context = {
-        execution: { id: 'test-run', isTestRun: false, startedAt: new Date() },
-        workflow: { id: 'test-workflow', name: 'Test', enabled: true, spaceId: 'default' },
-        steps: {},
-      };
-      mockContextManager.getContext.mockReturnValue(context as any);
       (mockStep.configuration.with as any).method = undefined;
       (mockStep.configuration.with as any).timeout = undefined;
 
@@ -288,12 +300,6 @@ describe('HttpStepImpl', () => {
         data: { success: true },
       };
       (mockedAxios as any).mockResolvedValueOnce(mockResponse);
-      const context = {
-        execution: { id: 'test-run', isTestRun: false, startedAt: new Date() },
-        workflow: { id: 'test-workflow', name: 'Test', enabled: true, spaceId: 'default' },
-        steps: {},
-      };
-      mockContextManager.getContext.mockReturnValue(context as any);
 
       await httpStep.run();
 
@@ -345,12 +351,6 @@ describe('HttpStepImpl', () => {
         mockWorkflowRuntime
       );
 
-      mockContextManager.getContext.mockReturnValue({
-        execution: { id: 'test-run', isTestRun: false, startedAt: new Date() },
-        workflow: { id: 'test-workflow', name: 'Test', enabled: true, spaceId: 'default' },
-        steps: {},
-      } as any);
-
       (mockedAxios as any).mockResolvedValueOnce({ data: { success: true }, status: 200 });
 
       await httpStep.run();
@@ -383,12 +383,6 @@ describe('HttpStepImpl', () => {
         mockUrlValidator,
         mockWorkflowRuntime
       );
-
-      mockContextManager.getContext.mockReturnValue({
-        execution: { id: 'test-run', isTestRun: false, startedAt: new Date() },
-        workflow: { id: 'test-workflow', name: 'Test', enabled: true, spaceId: 'default' },
-        steps: {},
-      } as any);
 
       await httpStep.run();
 
@@ -432,12 +426,6 @@ describe('HttpStepImpl', () => {
         mockUrlValidator,
         mockWorkflowRuntime
       );
-
-      mockContextManager.getContext.mockReturnValue({
-        execution: { id: 'test-run', isTestRun: false, startedAt: new Date() },
-        workflow: { id: 'test-workflow', name: 'Test', enabled: true, spaceId: 'default' },
-        steps: {},
-      } as any);
 
       (mockedAxios as any).mockResolvedValueOnce({ data: { success: true }, status: 200 });
 
