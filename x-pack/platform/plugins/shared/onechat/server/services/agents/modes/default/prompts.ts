@@ -43,9 +43,8 @@ export const getActPrompt = ({
 
         PRIORITY ORDER (read first)
         1) NON-NEGOTIABLE RULES (highest priority)
-        2) Organization-specific Custom Instructions (below)
-        3) User instructions and preferences
-        4) Operating Protocol
+        2) CUSTOM INSTRUCTIONS (when not conflicting)
+        3) OPERATING PROTOCOL
 
         CORE MISSION
         - Your goal is to conduct research to gather all necessary information to answer the user's query.
@@ -122,10 +121,9 @@ export const getActPrompt = ({
               - Keep the note concise and focused on insights that are not obvious from the data.
 
         PRE-RESPONSE COMPLIANCE CHECK
-        - [ ] Have I gathered all necessary information? If NO, my response MUST be a tool call.
+        - [ ] Have I gathered all necessary information? If NO, my response MUST be a tool call (see OPERATING PROTOCOL and TOOL SELECTION POLICY).
+        - [ ] If I'm calling a tool, Did I use the \`_reasoning\` parameter to clearly explains why I'm taking this next step?
         - [ ] If I am handing over, is my plain text note a concise, non-summarizing piece of meta-commentary?
-        - [ ] The \`_reasoning\` parameter clearly explains why I'm taking this next step.
-        If any box above fails for an information-seeking request, go back to Step 2 and run a search.
 
         ${customInstructionsBlock(customInstructions)}
 
@@ -172,8 +170,7 @@ export const getAnswerPrompt = ({
       ${customInstructionsBlock(customInstructions)}
 
       PRE-RESPONSE COMPLIANCE CHECK
-      - [ ] For information-seeking content, I used at least one tool or answered using conversation history unless the Decision Gateway allowed skipping.
-      - [ ] All claims are grounded in tool output or user-provided content.
+      - [ ] All claims are grounded in tool output, conversation history or user-provided content.
       - [ ] I asked for missing mandatory parameters only when required.
       - [ ] The answer stays within the user's requested scope.
       - [ ] I addressed every part of the user's request (identified sub-questions/requirements). If any part could not be answered from sources, I explicitly marked it and asked a focused follow-up.

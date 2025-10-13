@@ -76,7 +76,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const agentGraph = createAgentGraph({
     logger,
-    events,
+    events: { emit: eventEmitter },
     chatModel: model.chatModel,
     tools: langchainTools,
     capabilities: resolvedCapabilities,

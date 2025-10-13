@@ -12,7 +12,7 @@ export const customInstructionsBlock = (instructions: string | undefined): strin
     return '';
   }
 
-  return `CUSTOMIZATION AND PRECEDENCE
+  return `CUSTOM INSTRUCTIONS
 
 - Apply the organization-specific custom instructions below. If they conflict with the NON-NEGOTIABLE RULES, the NON-NEGOTIABLE RULES take precedence.
 
