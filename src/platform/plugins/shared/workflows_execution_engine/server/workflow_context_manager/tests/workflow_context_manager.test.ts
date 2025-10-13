@@ -19,6 +19,7 @@ import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
+import type { WorkflowTemplatingEngine } from '../../templating_engine';
 
 jest.mock('../../utils', () => ({
   buildStepExecutionId: jest.fn().mockImplementation((executionId, stepId, path) => {
@@ -48,6 +49,10 @@ describe('WorkflowContextManager', () => {
     workflowExecutionState.getLatestStepExecution = jest
       .fn()
       .mockReturnValue({} as EsWorkflowStepExecution);
+    const templatingEngineMock = {} as unknown as WorkflowTemplatingEngine;
+    templatingEngineMock.render = jest
+      .fn()
+      .mockImplementation((template) => `rendered(${template})`);
 
     // Provide a dummy esClient as required by ContextManagerInit
     const esClient = {
@@ -60,6 +65,7 @@ describe('WorkflowContextManager', () => {
     } as any;
 
     const underTest = new WorkflowContextManager({
+      templateEngine: templatingEngineMock,
       node: fakeNode as AtomicGraphNode,
       stackFrames: fakeStackFrames,
       workflowExecutionGraph,
@@ -72,6 +78,7 @@ describe('WorkflowContextManager', () => {
       workflowExecutionState,
       underTest,
       esClient,
+      templatingEngineMock,
     };
   }
 
@@ -647,6 +654,321 @@ describe('WorkflowContextManager', () => {
           error: null,
         })
       );
+    });
+  });
+
+  describe('renderValueAccordingToContext', () => {
+    const workflow: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      description: 'A test workflow',
+      enabled: true,
+      consts: {
+        API_URL: 'https://api.example.com',
+        TIMEOUT: 5000,
+      },
+      triggers: [],
+      steps: [
+        {
+          name: 'fetchData',
+          type: 'console',
+          with: {
+            message: 'Fetching data',
+          },
+        } as ConnectorStep,
+        {
+          name: 'processData',
+          type: 'console',
+          with: {
+            message: 'Processing data',
+          },
+        } as ConnectorStep,
+      ],
+    };
+    let testContainer: ReturnType<typeof createTestContainer>;
+
+    beforeEach(() => {
+      testContainer = createTestContainer(workflow);
+      fakeNode.id = 'processData';
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        id: 'exec-123',
+        workflowId: 'workflow-456',
+        spaceId: 'space-789',
+        scopeStack: [] as StackFrame[],
+        startedAt: new Date('2023-01-01T00:00:00Z').toISOString(),
+        context: {
+          inputs: {
+            userId: 'user-123',
+            count: 10,
+          },
+        } as Record<string, any>,
+      } as EsWorkflowExecution);
+
+      testContainer.workflowExecutionState.getLatestStepExecution = jest
+        .fn()
+        .mockImplementation((stepId) => {
+          if (stepId === 'fetchData') {
+            return {
+              state: { status: 'completed' },
+              output: { data: ['item1', 'item2'], total: 2 },
+              error: null,
+            };
+          }
+          return undefined;
+        });
+    });
+
+    describe('string rendering', () => {
+      it('should render a simple string template', () => {
+        const result = testContainer.underTest.renderValueAccordingToContext(
+          'Execution ID: {{execution.id}}'
+        );
+        expect(result).toBe('rendered(Execution ID: {{execution.id}})');
+      });
+
+      it('should render a string with multiple template expressions', () => {
+        const result = testContainer.underTest.renderValueAccordingToContext(
+          'Workflow {{workflow.name}} in space {{workflow.spaceId}}'
+        );
+        expect(result).toBe('rendered(Workflow {{workflow.name}} in space {{workflow.spaceId}})');
+      });
+
+      it('should return plain string without templates as-is', () => {
+        const result = testContainer.underTest.renderValueAccordingToContext('Plain text');
+        expect(result).toBe('rendered(Plain text)');
+      });
+    });
+
+    describe('object rendering', () => {
+      it('should render object properties with templates', () => {
+        const input = {
+          executionId: '{{execution.id}}',
+          workflowName: '{{workflow.name}}',
+          staticValue: 'no template',
+        };
+        const result = testContainer.underTest.renderValueAccordingToContext(input);
+        expect(result).toEqual({
+          executionId: 'rendered({{execution.id}})',
+          workflowName: 'rendered({{workflow.name}})',
+          staticValue: 'rendered(no template)',
+        });
+      });
+
+      it('should render nested objects with templates', () => {
+        const input = {
+          config: {
+            url: '{{consts.API_URL}}',
+            timeout: '{{consts.TIMEOUT}}',
+            headers: {
+              requestId: '{{execution.id}}',
+            },
+          },
+        };
+        const result = testContainer.underTest.renderValueAccordingToContext(input);
+        expect(result).toEqual({
+          config: {
+            url: 'rendered({{consts.API_URL}})',
+            timeout: 'rendered({{consts.TIMEOUT}})',
+            headers: {
+              requestId: 'rendered({{execution.id}})',
+            },
+          },
+        });
+      });
+
+      it('should handle empty objects', () => {
+        const result = testContainer.underTest.renderValueAccordingToContext({});
+        expect(result).toEqual({});
+      });
+    });
+
+    describe('array rendering', () => {
+      it('should render array elements with templates', () => {
+        const input = ['{{execution.id}}', '{{workflow.name}}', 'static value'];
+        const result = testContainer.underTest.renderValueAccordingToContext(input);
+        expect(result).toEqual([
+          'rendered({{execution.id}})',
+          'rendered({{workflow.name}})',
+          'rendered(static value)',
+        ]);
+      });
+
+      it('should render array of objects with templates', () => {
+        const input = [
+          { id: '{{execution.id}}', name: 'First' },
+          { id: '{{workflow.id}}', name: 'Second' },
+        ];
+        const result = testContainer.underTest.renderValueAccordingToContext(input);
+        expect(result).toEqual([
+          { id: 'rendered({{execution.id}})', name: 'rendered(First)' },
+          { id: 'rendered({{workflow.id}})', name: 'rendered(Second)' },
+        ]);
+      });
+
+      it('should handle empty arrays', () => {
+        const result = testContainer.underTest.renderValueAccordingToContext([]);
+        expect(result).toEqual([]);
+      });
+
+      it('should render nested arrays with templates', () => {
+        const input = [['{{execution.id}}', '{{workflow.id}}'], ['{{consts.API_URL}}']];
+        const result = testContainer.underTest.renderValueAccordingToContext(input);
+        expect(result).toEqual([
+          ['rendered({{execution.id}})', 'rendered({{workflow.id}})'],
+          ['rendered({{consts.API_URL}})'],
+        ]);
+      });
+    });
+
+    describe('primitive value handling', () => {
+      it('should return numbers as-is', () => {
+        expect(testContainer.underTest.renderValueAccordingToContext(42)).toBe(42);
+        expect(testContainer.underTest.renderValueAccordingToContext(0)).toBe(0);
+        expect(testContainer.underTest.renderValueAccordingToContext(-10)).toBe(-10);
+        expect(testContainer.underTest.renderValueAccordingToContext(3.14)).toBe(3.14);
+      });
+
+      it('should return booleans as-is', () => {
+        expect(testContainer.underTest.renderValueAccordingToContext(true)).toBe(true);
+        expect(testContainer.underTest.renderValueAccordingToContext(false)).toBe(false);
+      });
+
+      it('should return null as-is', () => {
+        expect(testContainer.underTest.renderValueAccordingToContext(null)).toBe(null);
+      });
+
+      it('should return undefined as-is', () => {
+        expect(testContainer.underTest.renderValueAccordingToContext(undefined)).toBe(undefined);
+      });
+    });
+
+    describe('complex nested structures', () => {
+      it('should render deeply nested structure with mixed types', () => {
+        const input = {
+          metadata: {
+            executionId: '{{execution.id}}',
+            timestamp: '{{execution.startedAt}}',
+            flags: {
+              isTest: true,
+              enabled: false,
+            },
+          },
+          data: [
+            {
+              id: 1,
+              name: '{{workflow.name}}',
+              items: ['{{steps.fetchData.output}}', 'static'],
+            },
+            {
+              id: 2,
+              config: {
+                url: '{{consts.API_URL}}',
+                timeout: 5000,
+              },
+            },
+          ],
+          count: 42,
+          nullValue: null,
+        };
+
+        const result = testContainer.underTest.renderValueAccordingToContext(input);
+
+        expect(result).toEqual({
+          metadata: {
+            executionId: 'rendered({{execution.id}})',
+            timestamp: 'rendered({{execution.startedAt}})',
+            flags: {
+              isTest: true,
+              enabled: false,
+            },
+          },
+          data: [
+            {
+              id: 1,
+              name: 'rendered({{workflow.name}})',
+              items: ['rendered({{steps.fetchData.output}})', 'rendered(static)'],
+            },
+            {
+              id: 2,
+              config: {
+                url: 'rendered({{consts.API_URL}})',
+                timeout: 5000,
+              },
+            },
+          ],
+          count: 42,
+          nullValue: null,
+        });
+      });
+
+      it('should render arrays containing mixed types', () => {
+        const input = [
+          '{{execution.id}}',
+          42,
+          true,
+          null,
+          { key: '{{workflow.name}}' },
+          ['nested', '{{consts.API_URL}}'],
+        ];
+
+        const result = testContainer.underTest.renderValueAccordingToContext(input);
+
+        expect(result).toEqual([
+          'rendered({{execution.id}})',
+          42,
+          true,
+          null,
+          { key: 'rendered({{workflow.name}})' },
+          ['rendered(nested)', 'rendered({{consts.API_URL}})'],
+        ]);
+      });
+    });
+
+    describe('referencing step outputs', () => {
+      it('should render templates referencing previous step data', () => {
+        const input = {
+          previousStepOutput: '{{steps.fetchData.output}}',
+          previousStepStatus: '{{steps.fetchData.status}}',
+        };
+
+        const result = testContainer.underTest.renderValueAccordingToContext(input);
+
+        expect(result).toEqual({
+          previousStepOutput: 'rendered({{steps.fetchData.output}})',
+          previousStepStatus: 'rendered({{steps.fetchData.status}})',
+        });
+      });
+    });
+
+    describe('referencing inputs and consts', () => {
+      it('should render templates referencing inputs', () => {
+        const input = {
+          userId: '{{inputs.userId}}',
+          count: '{{inputs.count}}',
+        };
+
+        const result = testContainer.underTest.renderValueAccordingToContext(input);
+
+        expect(result).toEqual({
+          userId: 'rendered({{inputs.userId}})',
+          count: 'rendered({{inputs.count}})',
+        });
+      });
+
+      it('should render templates referencing consts', () => {
+        const input = {
+          apiUrl: '{{consts.API_URL}}',
+          timeout: '{{consts.TIMEOUT}}',
+        };
+
+        const result = testContainer.underTest.renderValueAccordingToContext(input);
+
+        expect(result).toEqual({
+          apiUrl: 'rendered({{consts.API_URL}})',
+          timeout: 'rendered({{consts.TIMEOUT}})',
+        });
+      });
     });
   });
 });

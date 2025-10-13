@@ -15,10 +15,11 @@ import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { RunStepResult } from '../step/node_implementation';
 import { buildStepExecutionId } from '../utils';
 import { WorkflowScopeStack } from './workflow_scope_stack';
-import { WorkflowTemplatingEngine } from '../templating_engine';
+import type { WorkflowTemplatingEngine } from '../templating_engine';
 
 export interface ContextManagerInit {
   // New properties for logging
+  templateEngine: WorkflowTemplatingEngine;
   workflowExecutionGraph: WorkflowGraph;
   workflowExecutionState: WorkflowExecutionState;
   node: GraphNodeUnion;
@@ -52,7 +53,7 @@ export class WorkflowContextManager {
     this.coreStart = init.coreStart;
     this.node = init.node;
     this.stackFrames = init.stackFrames;
-    this.templateEngine = new WorkflowTemplatingEngine();
+    this.templateEngine = init.templateEngine;
   }
 
   // Any change here should be reflected in the 'getContextSchemaForPath' function for frontend validation to work
