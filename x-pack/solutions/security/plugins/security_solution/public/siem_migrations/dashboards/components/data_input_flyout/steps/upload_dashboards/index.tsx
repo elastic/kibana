@@ -38,10 +38,15 @@ export const DashboardsUploadStep = ({
         <EuiFlexItem>
           <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiStepNumber titleSize="xs" number={1} status={dataInputStatus} />
+              <EuiStepNumber
+                titleSize="xs"
+                number={1}
+                status={dataInputStatus}
+                data-test-subj="dashboardsUploadStepNumber"
+              />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiTitle size="xs">
+              <EuiTitle size="xs" data-test-subj="dashboardsUploadTitle">
                 <b>{i18n.DASHBOARDS_UPLOAD_STEP_TITLE}</b>
               </EuiTitle>
             </EuiFlexItem>
