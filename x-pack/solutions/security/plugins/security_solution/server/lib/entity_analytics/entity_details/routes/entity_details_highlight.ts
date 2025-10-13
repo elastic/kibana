@@ -10,13 +10,9 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import {
   getVulnerabilitiesQuery,
-  buildMisconfigurationsFindingsQuery,
   VULNERABILITIES_RESULT_EVALUATION,
 } from '@kbn/cloud-security-posture-common/utils/findings_query_builders';
-import {
-  buildGenericEntityFlyoutPreviewQuery,
-  buildVulnerabilityEntityFlyoutPreviewQuery,
-} from '@kbn/cloud-security-posture-common';
+import { buildVulnerabilityEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import type { Replacements } from '@kbn/elastic-assistant-common';
@@ -180,37 +176,6 @@ export const entityDetailsHighlightsRoute = (
             })
           );
 
-          const misconfigurationQuery = buildMisconfigurationsFindingsQuery(
-            {
-              query: buildGenericEntityFlyoutPreviewQuery(
-                entityField,
-                entityIdentifier,
-                'failed', // Only returns failed misconfigurations
-                'result.evaluation'
-              ),
-            },
-            {} // second param is rulesStates which is only available inside cloud posture plugin server
-          );
-
-          const misconfigurations = await esClient.search({
-            ...misconfigurationQuery,
-            _source: false,
-            fields,
-            size: 100,
-            aggs: undefined,
-            query: misconfigurationQuery.query as QueryDslQueryContainer,
-          });
-
-          const misconfigurationsAnonymized = misconfigurations.hits.hits.map((hit) =>
-            transformRawDataToRecord({
-              anonymizationFields,
-              currentReplacements: localReplacements,
-              getAnonymizedValue,
-              onNewReplacements: localOnNewReplacements,
-              rawData: getRawDataOrDefault(hit.fields),
-            })
-          );
-
           const vulnerabilitiesQuery = getVulnerabilitiesQuery({
             query: buildVulnerabilityEntityFlyoutPreviewQuery(entityField, entityIdentifier),
             enabled: true,
@@ -325,7 +290,6 @@ export const entityDetailsHighlightsRoute = (
               summary: {
                 assetCriticality: assetCriticalityAnonymized,
                 riskScore: anonymizedRiskScore,
-                failedMisconfigurations: misconfigurationsAnonymized,
                 vulnerabilities: vulnerabilitiesAnonymized ?? [],
                 vulnerabilitiesTotal, // Prevents the UI from displaying the wrong number of vulnerabilities
                 anomalies: anomaliesAnonymized,

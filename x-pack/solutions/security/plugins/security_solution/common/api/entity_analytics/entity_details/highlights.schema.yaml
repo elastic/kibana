@@ -63,10 +63,6 @@ paths:
                         type: array
                         items:
                           type: object
-                      failedMisconfigurations:
-                        type: array
-                        items:
-                          type: object
                       vulnerabilities:
                         type: array
                         items:
