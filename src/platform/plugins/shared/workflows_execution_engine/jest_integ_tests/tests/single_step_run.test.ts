@@ -155,9 +155,6 @@ steps:
     });
 
     it('should call the connector with the overriden context', () => {
-      const stepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-      );
       expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
         expect.objectContaining({
           id: FakeConnectors.slack1.id,
