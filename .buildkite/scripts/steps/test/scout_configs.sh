@@ -37,11 +37,14 @@ fi
 
 # The first retry should only run the configs that failed in the previous attempt
 # Any subsequent retries, which would generally only happen by someone clicking the button in the UI, will run everything
+RETRY_FAILED_PAIRS=""
 if [[ -z "$configs" && "${BUILDKITE_RETRY_COUNT:-0}" == "1" ]]; then
-  configs=$(buildkite-agent meta-data get "$FAILED_CONFIGS_KEY" --default '')
-  if [[ -n "$configs" ]]; then
-    echo "--- Retrying only failed configs"
-    echo "$configs"
+  RETRY_FAILED_PAIRS=$(buildkite-agent meta-data get "$FAILED_CONFIGS_KEY" --default '')
+  if [[ -n "$RETRY_FAILED_PAIRS" ]]; then
+    echo "--- Retrying only failed config+mode pairs"
+    echo "$RETRY_FAILED_PAIRS"
+    # Extract unique configs from failed pairs for processing
+    configs=$(echo "$RETRY_FAILED_PAIRS" | sed 's/ (.*)//' | sort -u)
   fi
 fi
 
@@ -84,7 +87,29 @@ while read -r config_path; do
   fi
 
   for mode in $RUN_MODE_LIST; do
+    # If we're retrying specific failed pairs, check if this config+mode pair should be retried
+    if [[ -n "$RETRY_FAILED_PAIRS" ]]; then
+      config_mode_pair="$config_path ($mode)"
+      if ! echo "$RETRY_FAILED_PAIRS" | grep -Fxq "$config_mode_pair"; then
+        echo "--- [ skipped - not in retry list ] $config_path ($mode)"
+        continue
+      fi
+    fi
+
+    # Create unique execution key for this config+mode pair
+    # Replace slashes and special characters to make a valid metadata key
+    CONFIG_MODE_EXECUTION_KEY=$(echo "${config_path}_${mode}_executed" | sed 's/[^a-zA-Z0-9_-]/_/g')
+    IS_CONFIG_MODE_EXECUTED=$(buildkite-agent meta-data get "$CONFIG_MODE_EXECUTION_KEY" --default "false" --log-level error)
+
+    if [[ "${IS_CONFIG_MODE_EXECUTED}" == "true" ]]; then
+      echo "--- [ already-tested ] $config_path ($mode)"
+      results+=("$config_path ($mode) ✅ (cached)")
+      continue
+    fi
+
     echo "--- Running tests: $config_path ($mode)"
+
+    start=$(date +%s)
 
     # prevent non-zero exit code from breaking the loop
     set +e;
@@ -92,13 +117,26 @@ while read -r config_path; do
     EXIT_CODE=$?
     set -e;
 
+    timeSec=$(($(date +%s)-start))
+    if [[ $timeSec -gt 60 ]]; then
+      min=$((timeSec/60))
+      sec=$((timeSec-(min*60)))
+      duration="${min}m ${sec}s"
+    else
+      duration="${timeSec}s"
+    fi
+
     if [[ $EXIT_CODE -eq 2 ]]; then
       configWithoutTests+=("$config_path ($mode)")
     elif [[ $EXIT_CODE -ne 0 ]]; then
-      failedConfigs+=("$config_path ($mode) ❌")
+      failedConfigs+=("$config_path ($mode)")
       FINAL_EXIT_CODE=10  # Ensure we exit with failure if any test fails with (exit code 10 to match FTR)
+      echo "Scout test exited with code $EXIT_CODE for $config_path ($mode)"
+      echo "^^^ +++"
     else
-      results+=("$config_path ($mode) ✅")
+      # Test was successful, so mark it as executed
+      buildkite-agent meta-data set "$CONFIG_MODE_EXECUTION_KEY" "true"
+      results+=("$config_path ($mode) ✅ (${duration})")
     fi
   done
 done <<< "$configs"
@@ -125,8 +163,20 @@ fi
 
 if [[ ${#failedConfigs[@]} -gt 0 ]]; then
   echo "❌ Failed tests:"
-  printf '%s\n' "${failedConfigs[@]}"
-  buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
+  for config in "${failedConfigs[@]}"; do
+    echo "  $config ❌"
+  done
+
+  # Store failed config+mode pairs for retry
+  failed_pairs=""
+  for config in "${failedConfigs[@]}"; do
+    if [[ -n "$failed_pairs" ]]; then
+      failed_pairs="${failed_pairs}"$'\n'"$config"
+    else
+      failed_pairs="$config"
+    fi
+  done
+  buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failed_pairs"
 fi
 
 source .buildkite/scripts/steps/test/scout_upload_report_events.sh
