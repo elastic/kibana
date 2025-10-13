@@ -15,6 +15,7 @@ export type ContentPackIncludedObjects =
   | ContentPackIncludeAll
   | {
       objects: {
+        mappings: boolean;
         queries: Array<{ id: string }>;
         routing: Array<{ destination: string } & ContentPackIncludedObjects>;
       };
@@ -33,6 +34,7 @@ export const contentPackIncludedObjectsSchema: z.Schema<ContentPackIncludedObjec
     includeAllSchema,
     z.object({
       objects: z.object({
+        mappings: z.boolean(),
         queries: z.array(z.object({ id: z.string() })),
         routing: z.array(
           contentPackIncludedObjectsSchema.and(

@@ -6,30 +6,34 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import { Loading } from './loading';
 
 describe('<Loading />', () => {
   it('uses EuiIcon by default', () => {
-    expect(shallow(<Loading />)).toMatchInlineSnapshot(`
+    const { container } = render(<Loading />);
+    expect(container.firstChild).toMatchInlineSnapshot(`
       <div
-        className="canvasLoading"
+        class="canvasLoading"
       >
-        <EuiIcon
+        <span
           color="ghost"
-          type="clock"
+          data-euiicon-type="clock"
         />
       </div>
     `);
   });
 
   it('uses EuiLoadingSpinner when animating', () => {
-    expect(shallow(<Loading animated />)).toMatchInlineSnapshot(`
+    const { container } = render(<Loading animated />);
+    expect(container.firstChild).toMatchInlineSnapshot(`
       <div
-        className="canvasLoading"
+        class="canvasLoading"
       >
-        <EuiLoadingSpinner
-          size="m"
+        <span
+          aria-label="Loading"
+          class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+          role="progressbar"
         />
       </div>
     `);

@@ -15,6 +15,7 @@ import {
   EuiInMemoryTable,
   useEuiTheme,
   EuiHighlight,
+  EuiIconTip,
   EuiButtonIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -33,7 +34,7 @@ import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { DataQualityColumn } from './data_quality_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useStreamHistogramFetch } from '../../hooks/use_streams_histogram_fetch';
+import { useStreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { RetentionColumn } from './retention_column';
 import {
@@ -45,14 +46,26 @@ import {
   NO_STREAMS_MESSAGE,
   DATA_QUALITY_COLUMN_HEADER,
   DOCUMENTS_COLUMN_HEADER,
+  FAILURE_STORE_PERMISSIONS_ERROR,
 } from './translations';
 import { DiscoverBadgeButton } from '../stream_badges';
+
+const datePickerStyle = css`
+  .euiFormControlLayout {
+    height: 40px;
+  }
+  .euiButton {
+    height: 40px;
+  }
+`;
 
 export function StreamsTreeTable({
   loading,
   streams = [],
+  canReadFailureStore = false,
 }: {
   streams?: ListStreamDetail[];
+  canReadFailureStore?: boolean;
   loading?: boolean;
 }) {
   const router = useStreamsAppRouter();
@@ -161,7 +174,11 @@ export function StreamsTreeTable({
 
   const numDataPoints = 25;
 
-  const { getStreamDocCounts } = useStreamHistogramFetch(numDataPoints);
+  const { getStreamDocCounts } = useStreamDocCountsFetch({
+    groupTotalCountByTimestamp: true,
+    numDataPoints,
+    canReadFailureStore,
+  });
 
   const sorting = {
     sort: {
@@ -283,7 +300,19 @@ export function StreamsTreeTable({
         },
         {
           field: 'documentsCount',
-          name: DOCUMENTS_COLUMN_HEADER,
+          name: (
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              {DOCUMENTS_COLUMN_HEADER}
+              {!canReadFailureStore && (
+                <EuiIconTip
+                  content={FAILURE_STORE_PERMISSIONS_ERROR}
+                  type="warning"
+                  color="warning"
+                  size="s"
+                />
+              )}
+            </EuiFlexGroup>
+          ),
           width: '180px',
           sortable: false,
           align: 'right',
@@ -300,13 +329,28 @@ export function StreamsTreeTable({
         },
         {
           field: 'dataQuality',
-          name: DATA_QUALITY_COLUMN_HEADER,
+          name: (
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              {DATA_QUALITY_COLUMN_HEADER}
+              {!canReadFailureStore && (
+                <EuiIconTip
+                  content={FAILURE_STORE_PERMISSIONS_ERROR}
+                  type="warning"
+                  color="warning"
+                  size="s"
+                />
+              )}
+            </EuiFlexGroup>
+          ),
           width: '150px',
           sortable: false,
           dataType: 'number',
           render: (_: unknown, item: TableRow) =>
             item.data_stream ? (
-              <DataQualityColumn histogramQueryFetch={getStreamDocCounts(item.stream.name)} />
+              <DataQualityColumn
+                histogramQueryFetch={getStreamDocCounts(item.stream.name)}
+                streamName={item.stream.name}
+              />
             ) : null,
         },
         {
@@ -325,6 +369,7 @@ export function StreamsTreeTable({
                 defaultMessage: 'Retention policy for {name}',
                 values: { name: item.stream.name },
               })}
+              dataTestSubj={`retentionColumn-${item.stream.name}`}
             />
           ),
         },
@@ -366,7 +411,11 @@ export function StreamsTreeTable({
           incremental: true,
           'aria-label': STREAMS_TABLE_SEARCH_ARIA_LABEL,
         },
-        toolsRight: <StreamsAppSearchBar showDatePicker />,
+        toolsRight: (
+          <div className={datePickerStyle}>
+            <StreamsAppSearchBar showDatePicker />
+          </div>
+        ),
       }}
       tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
     />

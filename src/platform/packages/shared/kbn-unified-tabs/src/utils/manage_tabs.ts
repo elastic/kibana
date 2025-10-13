@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
 import type { TabItem } from '../types';
 
 export interface TabsState {
@@ -48,10 +47,12 @@ export const selectTab = ({ items, selectedItem }: TabsState, item: TabItem): Ta
   };
 };
 
-export const selectRecentlyClosedTab = ({ items }: TabsState, item: TabItem): TabsState => {
-  const nextSelectedItem = omit(item, 'closedAt');
+export const selectRecentlyClosedTab = (
+  { items }: TabsState,
+  nextSelectedItem: TabItem
+): TabsState => {
   return {
-    items: [...items.filter((i) => i.id !== item.id), nextSelectedItem],
+    items: [...items, nextSelectedItem],
     selectedItem: nextSelectedItem,
   };
 };
@@ -157,6 +158,7 @@ export const closeTabsToTheRight = (
   item: TabItem
 ): TabsState => {
   const itemIndex = items.findIndex((i) => i.id === item.id);
+  const selectedTabIndex = selectedItem ? items.findIndex((i) => i.id === selectedItem.id) : -1;
 
   if (itemIndex === -1 || itemIndex === items.length - 1) {
     return {
@@ -166,9 +168,10 @@ export const closeTabsToTheRight = (
   }
 
   const nextItems = items.slice(0, itemIndex + 1);
+  const isSelectedTabClosed = selectedTabIndex > itemIndex;
 
   return {
     items: nextItems,
-    selectedItem,
+    selectedItem: isSelectedTabClosed ? item : selectedItem,
   };
 };

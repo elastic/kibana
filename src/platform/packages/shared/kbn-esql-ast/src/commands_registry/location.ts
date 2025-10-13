@@ -19,10 +19,12 @@ const commandOptionNameToLocation: Record<string, Location> = {
   row: Location.ROW,
   sort: Location.SORT,
   stats: Location.STATS,
-  inlinestats: Location.STATS,
+  'inline stats': Location.STATS,
   by: Location.STATS_BY,
   enrich: Location.ENRICH,
   with: Location.ENRICH_WITH,
+  // Rerank is a special case, because it is the only command that requrire a boolen validation inside the ON Clause
+  on: Location.RERANK,
   dissect: Location.DISSECT,
   rename: Location.RENAME,
   join: Location.JOIN,

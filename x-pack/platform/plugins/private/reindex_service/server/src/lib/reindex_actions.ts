@@ -15,9 +15,10 @@ import type {
 } from '@kbn/core/server';
 import { REINDEX_OP_TYPE, getRollupJobByIndexName } from '@kbn/upgrade-assistant-pkg-server';
 import type { FlatSettings } from '@kbn/upgrade-assistant-pkg-server';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import type { ReindexArgs, ReindexOptions, ReindexOperation } from '../../../common';
 import type { ReindexSavedObject } from './types';
-import { ReindexStatus, ReindexStep } from '../../../common';
+import { ReindexStep } from '../../../common';
 
 // TODO: base on elasticsearch.requestTimeout?
 export const LOCK_WINDOW = moment.duration(90, 'seconds');

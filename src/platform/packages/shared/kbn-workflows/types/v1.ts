@@ -22,6 +22,7 @@ export enum ExecutionStatus {
   COMPLETED = 'completed',
   FAILED = 'failed',
   CANCELLED = 'cancelled',
+  TIMED_OUT = 'timed_out',
   SKIPPED = 'skipped',
 }
 export type ExecutionStatusUnion = `${ExecutionStatus}`;
@@ -68,6 +69,8 @@ export interface EsWorkflowExecution {
   workflowDefinition: WorkflowYaml;
   yaml: string;
   currentNodeId?: string; // The node currently being executed
+  /** If specified, the only this step and its children will be executed */
+  stepId?: string;
   scopeStack: StackFrame[];
   createdAt: string;
   error: string | null;
@@ -75,6 +78,7 @@ export interface EsWorkflowExecution {
   startedAt: string;
   finishedAt: string;
   cancelRequested: boolean;
+  cancellationReason?: string;
   cancelledAt?: string;
   cancelledBy?: string;
   duration: number;
@@ -157,6 +161,7 @@ export interface WorkflowExecutionDto {
   workflowId?: string;
   workflowName?: string;
   workflowDefinition: WorkflowYaml;
+  stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
   duration: number | null;
   triggeredBy?: string; // 'manual' or 'scheduled'
@@ -227,10 +232,28 @@ export const RunWorkflowCommandSchema = z.object({
 });
 export type RunWorkflowCommand = z.infer<typeof RunWorkflowCommandSchema>;
 
+export const RunStepCommandSchema = z.object({
+  workflowYaml: z.string(),
+  stepId: z.string(),
+  contextOverride: z.record(z.any()).optional(),
+});
+export type RunStepCommand = z.infer<typeof RunStepCommandSchema>;
+
+export const TestWorkflowCommandSchema = z.object({
+  workflowYaml: z.string(),
+  inputs: z.record(z.any()),
+});
+export type TestWorkflowCommand = z.infer<typeof TestWorkflowCommandSchema>;
+
 export const RunWorkflowResponseSchema = z.object({
   workflowExecutionId: z.string(),
 });
 export type RunWorkflowResponseDto = z.infer<typeof RunWorkflowResponseSchema>;
+
+export const TestWorkflowResponseSchema = z.object({
+  workflowExecutionId: z.string(),
+});
+export type TestWorkflowResponseDto = z.infer<typeof TestWorkflowResponseSchema>;
 
 export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
@@ -282,6 +305,7 @@ export interface WorkflowListDto {
 export interface WorkflowExecutionEngineModel
   extends Pick<EsWorkflow, 'id' | 'name' | 'enabled' | 'definition' | 'yaml'> {
   isTestRun?: boolean;
+  spaceId?: string;
 }
 
 export interface WorkflowListItemAction {

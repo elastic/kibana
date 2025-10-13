@@ -17,12 +17,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { InstalledPackageUIPackageListItem } from '../types';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
+import { ExperimentalFeaturesService } from '../../../../../services';
 
 export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
   selectedItems: InstalledPackageUIPackageListItem[];
 }> = ({ selectedItems }) => {
   const [isOpen, setIsOpen] = useState(false);
-
+  const { enablePackageRollback } = ExperimentalFeaturesService.get();
   const button = (
     <EuiButton
       iconType="arrowDown"
@@ -38,7 +39,11 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
   );
 
   const {
-    actions: { bulkUpgradeIntegrationsWithConfirmModal, bulkUninstallIntegrationsWithConfirmModal },
+    actions: {
+      bulkUpgradeIntegrationsWithConfirmModal,
+      bulkUninstallIntegrationsWithConfirmModal,
+      bulkRollbackIntegrationsWithConfirmModal,
+    },
   } = useInstalledIntegrationsActions();
 
   const openUpgradeModal = useCallback(() => {
@@ -51,6 +56,11 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
     return bulkUninstallIntegrationsWithConfirmModal(selectedItems);
   }, [selectedItems, bulkUninstallIntegrationsWithConfirmModal]);
 
+  const openRollbackModal = useCallback(async () => {
+    setIsOpen(false);
+    return bulkRollbackIntegrationsWithConfirmModal(selectedItems);
+  }, [selectedItems, bulkRollbackIntegrationsWithConfirmModal]);
+
   const items = useMemo(() => {
     const hasUpgreadableIntegrations = selectedItems.some(
       (item) =>
@@ -61,6 +71,10 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
 
     const hasUninstallableIntegrations = selectedItems.some(
       (item) => (item.packagePoliciesInfo?.count ?? 0) > 0
+    );
+
+    const hasRollbackableIntegrations = selectedItems.some(
+      (item) => !!item.installationInfo?.previous_version
     );
 
     return [
@@ -114,8 +128,34 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
           />
         )}
       </EuiContextMenuItem>,
+      ...(enablePackageRollback
+        ? [
+            <EuiContextMenuItem
+              key="rollback"
+              icon="returnKey"
+              disabled={!hasRollbackableIntegrations}
+              onClick={openRollbackModal}
+            >
+              <FormattedMessage
+                id="xpack.fleet.epmInstalledIntegrations.bulkRollbackButton"
+                defaultMessage={
+                  'Rollback {count, plural, one {# integration} other {# integrations}}'
+                }
+                values={{
+                  count: selectedItems.length,
+                }}
+              />
+            </EuiContextMenuItem>,
+          ]
+        : []),
     ];
-  }, [selectedItems, openUninstallModal, openUpgradeModal]);
+  }, [
+    selectedItems,
+    openUninstallModal,
+    openUpgradeModal,
+    openRollbackModal,
+    enablePackageRollback,
+  ]);
 
   return (
     <EuiPopover

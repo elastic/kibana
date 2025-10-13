@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { EventsTableForCases } from './table';
 import { TestProviders } from '../../../common/mock';
 import { useCaseEventsDataView } from './use_events_data_view';
@@ -47,7 +47,7 @@ describe('EventsTableForCases', () => {
     ]);
   });
 
-  it('renders the table', () => {
+  it('renders the table', async () => {
     render(
       <EventsTableForCases
         events={[
@@ -61,5 +61,60 @@ describe('EventsTableForCases', () => {
     );
 
     expect(screen.getByTestId('body-data-grid')).toBeInTheDocument();
+
+    // Check if value cells are displayed at all
+    await waitFor(() => {
+      const cells = screen.getAllByTestId('dataGridRowCell');
+
+      expect(cells.length).toBeGreaterThan(2);
+    });
+  });
+
+  it('applies the pagination correctly', async () => {
+    const newLocal = new Array(100).fill(0).map((_, index) => ({
+      eventId: `event-${index}`,
+      index: 'test-index',
+    }));
+
+    render(<EventsTableForCases events={newLocal} />, { wrapper: TestProviders });
+
+    await waitFor(() => {
+      // should have 4 pages (default is 25 per page, we are pulling in data for 100 events)
+      expect(screen.getByTestId('pagination-button-0')).toBeInTheDocument();
+      expect(screen.getByTestId('pagination-button-3')).toBeInTheDocument();
+    });
+
+    // test if the endpoint is called with proper pagination parameters
+    await act(() => {
+      screen.getByTestId('pagination-button-3').click();
+    });
+
+    expect(jest.mocked(searchEvents)).toHaveBeenCalled();
+    expect(jest.mocked(searchEvents)).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.any(DataView),
+      expect.objectContaining({ pageIndex: 3, itemsPerPage: 25 })
+    );
+  });
+
+  it('calls the search events function', () => {
+    render(
+      <EventsTableForCases
+        events={[
+          {
+            eventId: 'mock-event-id',
+            index: 'test-index',
+          },
+        ]}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    expect(jest.mocked(searchEvents)).toHaveBeenCalled();
+    expect(jest.mocked(searchEvents)).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.any(DataView),
+      expect.objectContaining({ eventIds: expect.arrayContaining(['mock-event-id']) })
+    );
   });
 });

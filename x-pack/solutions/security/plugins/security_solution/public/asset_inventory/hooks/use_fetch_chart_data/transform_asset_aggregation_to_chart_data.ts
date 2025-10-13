@@ -38,14 +38,25 @@ const tooltipOtherLabel = i18n.translate(
   }
 );
 
+const UNCATEGORIZED_LABEL = i18n.translate(
+  'xpack.securitySolution.assetInventory.chart.uncategorizedLabel',
+  { defaultMessage: 'uncategorized' }
+);
+
 export function transformAssetAggregationToChartData(agg: AssetAggs): AssetInventoryChartData[] {
   const result: AssetInventoryChartData[] = [];
 
   for (const typeBucket of agg.entityType.buckets) {
     for (const subtypeBucket of typeBucket.entitySubType.buckets) {
+      // Format "Uncategorized" labels to include the entity type
+      const formattedSubType =
+        subtypeBucket.key === 'Uncategorized'
+          ? `${typeBucket.key} (${UNCATEGORIZED_LABEL})`
+          : subtypeBucket.key;
+
       result.push({
         [ASSET_FIELDS.ENTITY_TYPE]: typeBucket.key,
-        [ASSET_FIELDS.ENTITY_SUB_TYPE]: subtypeBucket.key,
+        [ASSET_FIELDS.ENTITY_SUB_TYPE]: formattedSubType,
         count: subtypeBucket.doc_count,
       });
     }

@@ -9,18 +9,21 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
+import type { ConvertToLookupIndexModalProps } from './convert_to_lookup_index_modal';
 import { ConvertToLookupIndexModal } from './convert_to_lookup_index_modal';
 
 const defaultProps = {
   onCloseModal: jest.fn(),
   onConvert: jest.fn(),
   sourceIndexName: 'my-index',
-};
+  isConverting: false,
+  errorMessage: '',
+} as ConvertToLookupIndexModalProps;
 
-const renderModal = () => {
+const renderModal = (props?: Partial<ConvertToLookupIndexModalProps>) => {
   return render(
     <IntlProvider>
-      <ConvertToLookupIndexModal {...defaultProps} />
+      <ConvertToLookupIndexModal {...defaultProps} {...props} />
     </IntlProvider>
   );
 };
@@ -95,5 +98,23 @@ describe('ConvertToLookupIndexModal', () => {
     await waitFor(() => {
       expect(defaultProps.onConvert).toHaveBeenCalledWith('lookup-my-index');
     });
+  });
+
+  it('should disable lookup index name input and convert button when isConverting is true', () => {
+    const { getByTestId } = renderModal({ isConverting: true });
+
+    // Check if the lookup index name input is disabled
+    expect(getByTestId('lookupIndexName')).toBeDisabled();
+
+    // Check if the convert button is disabled
+    expect(getByTestId('convertButton')).toBeDisabled();
+  });
+
+  it('should display the error message when errorMessage prop is provided', () => {
+    const { getByText, getByTestId } = renderModal({ errorMessage: 'Conversion failed' });
+
+    // Check if the error message is displayed
+    expect(getByTestId('errorCallout')).toBeInTheDocument();
+    expect(getByText('Conversion failed')).toBeInTheDocument();
   });
 });
