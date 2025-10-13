@@ -88,6 +88,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
         refresh();
         setIsFeatureDetectionFlyoutOpen(false);
       }}
+      setFeatures={setDetectedFeatures}
     />
   ) : null;
 

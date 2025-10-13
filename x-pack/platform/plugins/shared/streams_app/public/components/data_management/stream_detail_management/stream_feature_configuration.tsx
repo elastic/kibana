@@ -86,6 +86,7 @@ export function StreamFeatureConfiguration({ definition }: StreamConfigurationPr
               refresh();
               setIsFlyoutVisible(false);
             }}
+            setFeatures={setFeatures}
           />
         )}
       </EuiFlexGroup>
