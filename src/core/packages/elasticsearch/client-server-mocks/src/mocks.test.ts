@@ -35,6 +35,10 @@ describe('Mocked client', () => {
     expectMocked(client.nodes.info);
   });
 
+  it('helper methods should be mocked', () => {
+    expectMocked(client.helpers.bulk);
+  });
+
   it('`close` should be mocked', () => {
     expectMocked(client.close);
   });
