@@ -85,6 +85,7 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/rule-data-utils",
     "@kbn/utility-types",
+    "@kbn/utility-types-jest",
   ],
   "exclude": ["target/**/*"]
 }
