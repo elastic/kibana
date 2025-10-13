@@ -58,7 +58,8 @@
     "@kbn/i18n-react",
     "@kbn/inference-tracing",
     "@kbn/core-http-browser",
-    "@kbn/spaces-utils"
+    "@kbn/spaces-utils",
+    "@kbn/usage-collection-plugin"
   ],
   "exclude": ["target/**/*"]
 }
