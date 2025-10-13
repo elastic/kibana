@@ -25,7 +25,6 @@ import type { SharePluginSetup, SharePluginStart, LocatorPublic } from '@kbn/sha
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ConsoleSpecClientContract } from './spec_client';
 import type { EmbeddedConsoleView } from './embeddable_console';
 import type { ConsoleUILocatorParams } from './locator';
 
@@ -98,6 +97,4 @@ export interface ConsolePluginStart {
    * When registering an alternate view ensure that the content component you register is lazy loaded.
    */
   registerEmbeddedConsoleAlternateView?: (view: EmbeddedConsoleView | null) => void;
-  /** Public spec client for consumers */
-  specClient: ConsoleSpecClientContract;
 }

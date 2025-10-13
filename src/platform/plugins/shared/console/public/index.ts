@@ -20,7 +20,6 @@ export type {
   EmbeddedConsoleView,
   EmbeddedConsoleViewButtonProps,
 } from './types';
-export type { ConsoleSpecClientContract } from './types/spec_client';
 
 export { ConsoleUIPlugin as Plugin };
 
