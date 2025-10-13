@@ -11,6 +11,7 @@ import type { ChartType } from '@kbn/visualization-utils';
 export enum ToolResultType {
   resource = 'resource',
   tabularData = 'tabular_data',
+  dashboard = 'dashboard',
   query = 'query',
   other = 'other',
   error = 'error',

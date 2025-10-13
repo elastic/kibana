@@ -16,7 +16,10 @@ export const internalNamespaces = {
 /**
  * List of protected namespaces which can only be used by internal tools.
  */
-export const protectedNamespaces: string[] = [internalNamespaces.platformCore];
+export const protectedNamespaces: string[] = [
+  internalNamespaces.platformCore,
+  'platform.dashboard', // Owned by dashboard_agent plugin
+];
 
 /**
  * Checks if the provided tool name belongs to a protected namespace.
