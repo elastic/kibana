@@ -28,10 +28,10 @@ export const RelaxedCrowdstrikeBaseApiResponseSchema = z.object({}).passthrough(
 export const CrowdstrikeBaseApiResponseSchema = z
   .object({
     resources: z.array(z.any()),
-    errors: z.array(z.any()).nullable(),
+    errors: z.array(z.any()).nullable().default(null),
     meta: z
       .object({
-        query_time: z.number().optional(),
+        query_time: z.coerce.number().optional(),
         powered_by: z.string().optional(),
         trace_id: z.string().optional(),
       })
@@ -50,10 +50,10 @@ export const CrowdstrikeGetAgentOnlineStatusResponseSchema = z
         })
         .passthrough()
     ),
-    errors: z.array(z.any()).nullable(),
+    errors: z.array(z.any()).nullable().default(null),
     meta: z
       .object({
-        query_time: z.number().optional(),
+        query_time: z.coerce.number().optional(),
         powered_by: z.string().optional(),
         trace_id: z.string().optional(),
       })
@@ -187,10 +187,10 @@ export const CrowdstrikeGetAgentsResponseSchema = z
         })
         .passthrough()
     ),
-    errors: z.array(z.any()).nullable(),
+    errors: z.array(z.any()).nullable().default(null),
     meta: z
       .object({
-        query_time: z.number().optional(),
+        query_time: z.coerce.number().optional(),
         powered_by: z.string().optional(),
         trace_id: z.string().optional(),
       })
@@ -209,12 +209,12 @@ export const CrowdstrikeHostActionsResponseSchema = z
     ),
     meta: z
       .object({
-        query_time: z.number().optional(),
+        query_time: z.coerce.number().optional(),
         powered_by: z.string().optional(),
         trace_id: z.string().optional(),
       })
       .passthrough(),
-    errors: z.array(z.any()).nullable(),
+    errors: z.array(z.any()).nullable().default(null),
   })
   .passthrough();
 
@@ -238,7 +238,7 @@ export const CrowdstrikeGetAgentsParamsSchema = z
 export const CrowdstrikeGetTokenResponseSchema = z
   .object({
     access_token: z.string(),
-    expires_in: z.number(),
+    expires_in: z.coerce.number(),
     token_type: z.string(),
     id_token: z.string().optional(),
     issued_token_type: z.string().optional(),
@@ -260,7 +260,7 @@ export const CrowdstrikeInitRTRResponseSchema = z
   .object({
     meta: z
       .object({
-        query_time: z.number().optional(),
+        query_time: z.coerce.number().optional(),
         powered_by: z.string().optional(),
         trace_id: z.string().optional(),
       })
@@ -280,7 +280,7 @@ export const CrowdstrikeInitRTRResponseSchema = z
             base_command: z.string().optional(),
             aid: z.string().optional(),
             errors: z.array(z.any()).optional(),
-            query_time: z.number().optional(),
+            query_time: z.coerce.number().optional(),
             offline_queued: z.boolean().optional(),
           })
           .passthrough()
@@ -312,7 +312,7 @@ export const CrowdstrikeExecuteRTRResponseSchema = z
               base_command: z.string(),
               aid: z.string(),
               errors: z.array(z.any()),
-              query_time: z.number(),
+              query_time: z.coerce.number(),
               offline_queued: z.boolean(),
             })
             .passthrough()
@@ -321,12 +321,12 @@ export const CrowdstrikeExecuteRTRResponseSchema = z
       .passthrough(),
     meta: z
       .object({
-        query_time: z.number(),
+        query_time: z.coerce.number(),
         powered_by: z.string(),
         trace_id: z.string(),
       })
       .passthrough(),
-    errors: z.array(z.any()).nullable(),
+    errors: z.array(z.any()).nullable().default(null),
   })
   .passthrough();
 
@@ -334,7 +334,7 @@ export const CrowdstrikeGetScriptsResponseSchema = z
   .object({
     meta: z
       .object({
-        query_time: z.number().optional(),
+        query_time: z.coerce.number().optional(),
         powered_by: z.string().optional(),
         trace_id: z.string().optional(),
       })
@@ -356,10 +356,10 @@ export const CrowdstrikeGetScriptsResponseSchema = z
             name: z.string().optional(),
             permission_type: z.string().optional(),
             platform: z.array(z.string()).optional(),
-            run_attempt_count: z.number().optional(),
-            run_success_count: z.number().optional(),
+            run_attempt_count: z.coerce.number().optional(),
+            run_success_count: z.coerce.number().optional(),
             sha256: z.string().optional(),
-            size: z.number().optional(),
+            size: z.coerce.number().optional(),
             write_access: z.boolean().optional(),
           })
           .passthrough()

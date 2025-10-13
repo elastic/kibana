@@ -22,7 +22,7 @@ const configSchemaProps = {
       WebhookMethods.DELETE,
     ])
     .default(WebhookMethods.POST),
-  headers: HeadersSchema.nullable(),
+  headers: HeadersSchema.nullable().default(null),
   hasAuth: AuthConfiguration.hasAuth,
   authType: AuthConfiguration.authType,
   certType: AuthConfiguration.certType,

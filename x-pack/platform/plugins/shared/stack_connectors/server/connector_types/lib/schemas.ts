@@ -8,4 +8,4 @@
 import { z } from '@kbn/zod';
 
 const PORT_MAX = 256 * 256 - 1;
-export const portSchema = () => z.number().min(1).max(PORT_MAX);
+export const portSchema = () => z.coerce.number().min(1).max(PORT_MAX);

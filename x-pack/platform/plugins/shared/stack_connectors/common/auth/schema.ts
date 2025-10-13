@@ -33,17 +33,17 @@ export const AuthConfiguration = {
   accessTokenUrl: z.string().optional(),
   clientId: z.string().optional(),
   scope: z.string().optional(),
-  additionalFields: z.string().optional().nullable(),
+  additionalFields: z.string().nullish(),
 };
 
 export const SecretConfiguration = {
-  user: z.string().nullable(),
-  password: z.string().nullable(),
-  crt: z.string().nullable(),
-  key: z.string().nullable(),
-  pfx: z.string().nullable(),
-  clientSecret: z.string().nullable(),
-  secretHeaders: HeadersSchema.nullable(),
+  user: z.string().nullable().default(null),
+  password: z.string().nullable().default(null),
+  crt: z.string().nullable().default(null),
+  key: z.string().nullable().default(null),
+  pfx: z.string().nullable().default(null),
+  clientSecret: z.string().nullable().default(null),
+  secretHeaders: HeadersSchema.nullable().default(null),
 };
 
 export const SecretConfigurationSchemaValidation = {

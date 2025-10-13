@@ -17,7 +17,7 @@ import type {
 } from './schema';
 
 export type Config = z.infer<typeof ConfigSchema>;
-export type Secrets = z.infer<typeof SecretsSchema>;
+export type Secrets = z.input<typeof SecretsSchema>;
 export type XSOARRunActionParams = z.infer<typeof XSOARRunActionParamsSchema>;
 export type XSOARRunActionResponse = z.infer<typeof XSOARRunActionResponseSchema>;
 export type XSOARPlaybooksActionParams = void;

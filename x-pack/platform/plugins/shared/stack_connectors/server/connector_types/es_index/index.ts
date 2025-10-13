@@ -45,7 +45,7 @@ const ConfigSchema = z
   .object({
     index: z.string(),
     refresh: z.boolean().default(false),
-    executionTimeField: z.string().nullable(),
+    executionTimeField: z.string().nullable().default(null),
   })
   .strict();
 
@@ -62,6 +62,7 @@ const ParamsSchema = z
     indexOverride: z
       .string()
       .nullable()
+      .default(null)
       .refine(
         (pattern) => pattern === null || (pattern && pattern.startsWith(ALERT_HISTORY_PREFIX)),
         {

@@ -97,97 +97,13 @@ describe('validateParams()', () => {
     }).toThrowErrorMatchingInlineSnapshot(`
       "error validating action params: [
         {
-          \\"code\\": \\"invalid_union\\",
-          \\"unionErrors\\": [
-            {
-              \\"issues\\": [
-                {
-                  \\"received\\": 2,
-                  \\"code\\": \\"invalid_literal\\",
-                  \\"expected\\": \\"trace\\",
-                  \\"path\\": [
-                    \\"level\\"
-                  ],
-                  \\"message\\": \\"Invalid literal value, expected \\\\\\"trace\\\\\\"\\"
-                }
-              ],
-              \\"name\\": \\"ZodError\\"
-            },
-            {
-              \\"issues\\": [
-                {
-                  \\"received\\": 2,
-                  \\"code\\": \\"invalid_literal\\",
-                  \\"expected\\": \\"debug\\",
-                  \\"path\\": [
-                    \\"level\\"
-                  ],
-                  \\"message\\": \\"Invalid literal value, expected \\\\\\"debug\\\\\\"\\"
-                }
-              ],
-              \\"name\\": \\"ZodError\\"
-            },
-            {
-              \\"issues\\": [
-                {
-                  \\"received\\": 2,
-                  \\"code\\": \\"invalid_literal\\",
-                  \\"expected\\": \\"info\\",
-                  \\"path\\": [
-                    \\"level\\"
-                  ],
-                  \\"message\\": \\"Invalid literal value, expected \\\\\\"info\\\\\\"\\"
-                }
-              ],
-              \\"name\\": \\"ZodError\\"
-            },
-            {
-              \\"issues\\": [
-                {
-                  \\"received\\": 2,
-                  \\"code\\": \\"invalid_literal\\",
-                  \\"expected\\": \\"warn\\",
-                  \\"path\\": [
-                    \\"level\\"
-                  ],
-                  \\"message\\": \\"Invalid literal value, expected \\\\\\"warn\\\\\\"\\"
-                }
-              ],
-              \\"name\\": \\"ZodError\\"
-            },
-            {
-              \\"issues\\": [
-                {
-                  \\"received\\": 2,
-                  \\"code\\": \\"invalid_literal\\",
-                  \\"expected\\": \\"error\\",
-                  \\"path\\": [
-                    \\"level\\"
-                  ],
-                  \\"message\\": \\"Invalid literal value, expected \\\\\\"error\\\\\\"\\"
-                }
-              ],
-              \\"name\\": \\"ZodError\\"
-            },
-            {
-              \\"issues\\": [
-                {
-                  \\"received\\": 2,
-                  \\"code\\": \\"invalid_literal\\",
-                  \\"expected\\": \\"fatal\\",
-                  \\"path\\": [
-                    \\"level\\"
-                  ],
-                  \\"message\\": \\"Invalid literal value, expected \\\\\\"fatal\\\\\\"\\"
-                }
-              ],
-              \\"name\\": \\"ZodError\\"
-            }
-          ],
+          \\"expected\\": \\"'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'\\",
+          \\"received\\": \\"number\\",
+          \\"code\\": \\"invalid_type\\",
           \\"path\\": [
             \\"level\\"
           ],
-          \\"message\\": \\"Invalid input\\"
+          \\"message\\": \\"Expected 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal', received number\\"
         }
       ]"
     `);
@@ -197,97 +113,20 @@ describe('validateParams()', () => {
     }).toThrowErrorMatchingInlineSnapshot(`
       "error validating action params: [
         {
-          \\"code\\": \\"invalid_union\\",
-          \\"unionErrors\\": [
-            {
-              \\"issues\\": [
-                {
-                  \\"received\\": \\"foo\\",
-                  \\"code\\": \\"invalid_literal\\",
-                  \\"expected\\": \\"trace\\",
-                  \\"path\\": [
-                    \\"level\\"
-                  ],
-                  \\"message\\": \\"Invalid literal value, expected \\\\\\"trace\\\\\\"\\"
-                }
-              ],
-              \\"name\\": \\"ZodError\\"
-            },
-            {
-              \\"issues\\": [
-                {
-                  \\"received\\": \\"foo\\",
-                  \\"code\\": \\"invalid_literal\\",
-                  \\"expected\\": \\"debug\\",
-                  \\"path\\": [
-                    \\"level\\"
-                  ],
-                  \\"message\\": \\"Invalid literal value, expected \\\\\\"debug\\\\\\"\\"
-                }
-              ],
-              \\"name\\": \\"ZodError\\"
-            },
-            {
-              \\"issues\\": [
-                {
-                  \\"received\\": \\"foo\\",
-                  \\"code\\": \\"invalid_literal\\",
-                  \\"expected\\": \\"info\\",
-                  \\"path\\": [
-                    \\"level\\"
-                  ],
-                  \\"message\\": \\"Invalid literal value, expected \\\\\\"info\\\\\\"\\"
-                }
-              ],
-              \\"name\\": \\"ZodError\\"
-            },
-            {
-              \\"issues\\": [
-                {
-                  \\"received\\": \\"foo\\",
-                  \\"code\\": \\"invalid_literal\\",
-                  \\"expected\\": \\"warn\\",
-                  \\"path\\": [
-                    \\"level\\"
-                  ],
-                  \\"message\\": \\"Invalid literal value, expected \\\\\\"warn\\\\\\"\\"
-                }
-              ],
-              \\"name\\": \\"ZodError\\"
-            },
-            {
-              \\"issues\\": [
-                {
-                  \\"received\\": \\"foo\\",
-                  \\"code\\": \\"invalid_literal\\",
-                  \\"expected\\": \\"error\\",
-                  \\"path\\": [
-                    \\"level\\"
-                  ],
-                  \\"message\\": \\"Invalid literal value, expected \\\\\\"error\\\\\\"\\"
-                }
-              ],
-              \\"name\\": \\"ZodError\\"
-            },
-            {
-              \\"issues\\": [
-                {
-                  \\"received\\": \\"foo\\",
-                  \\"code\\": \\"invalid_literal\\",
-                  \\"expected\\": \\"fatal\\",
-                  \\"path\\": [
-                    \\"level\\"
-                  ],
-                  \\"message\\": \\"Invalid literal value, expected \\\\\\"fatal\\\\\\"\\"
-                }
-              ],
-              \\"name\\": \\"ZodError\\"
-            }
+          \\"received\\": \\"foo\\",
+          \\"code\\": \\"invalid_enum_value\\",
+          \\"options\\": [
+            \\"trace\\",
+            \\"debug\\",
+            \\"info\\",
+            \\"warn\\",
+            \\"error\\",
+            \\"fatal\\"
           ],
           \\"path\\": [
             \\"level\\"
           ],
-          \\"message\\": \\"Invalid input\\"
+          \\"message\\": \\"Invalid enum value. Expected 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal', received 'foo'\\"
         }
       ]"
     `);

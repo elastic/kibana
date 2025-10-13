@@ -11,23 +11,23 @@ import { TinesStoryObjectSchema } from '../../../common/tines/schema';
 // Tines response base schema
 export const TinesBaseApiResponseSchema = z.object({
   meta: z.object({
-    pages: z.number(),
+    pages: z.coerce.number(),
   }),
 });
 
 // Stories action schema
 export const TinesStoriesApiResponseSchema = TinesBaseApiResponseSchema.extend({
-  stories: z.array(TinesStoryObjectSchema.extend({})),
+  stories: z.array(TinesStoryObjectSchema.extend({}).strip()),
 });
 
 // Webhooks action schema
 export const TinesWebhooksApiResponseSchema = TinesBaseApiResponseSchema.extend({
   agents: z.array(
     z.object({
-      id: z.number(),
+      id: z.coerce.number(),
       name: z.string(),
       type: z.string(),
-      story_id: z.number(),
+      story_id: z.coerce.number(),
       options: z.object({
         path: z.string().optional(),
         secret: z.string().optional(),

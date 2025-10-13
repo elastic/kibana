@@ -14,9 +14,9 @@ import { validateOtherFieldsKeys } from './validators';
 export const ExternalIncidentServiceConfigurationBase = {
   apiUrl: z.string(),
   isOAuth: z.boolean().default(false),
-  userIdentifierValue: z.string().nullable(), // required if isOAuth = true
-  clientId: z.string().nullable(), // required if isOAuth = true
-  jwtKeyId: z.string().nullable(), // required if isOAuth = true
+  userIdentifierValue: z.string().nullable().default(null), // required if isOAuth = true
+  clientId: z.string().nullable().default(null), // required if isOAuth = true
+  jwtKeyId: z.string().nullable().default(null), // required if isOAuth = true
 };
 
 export const ExternalIncidentServiceConfiguration = {
@@ -33,11 +33,11 @@ export const ExternalIncidentServiceConfigurationSchema = z
   .strict();
 
 export const ExternalIncidentServiceSecretConfiguration = {
-  password: z.string().nullable(), // required if isOAuth = false
-  username: z.string().nullable(), // required if isOAuth = false
-  clientSecret: z.string().nullable(), // required if isOAuth = true
-  privateKey: z.string().nullable(), // required if isOAuth = true
-  privateKeyPassword: z.string().nullable(),
+  password: z.string().nullable().default(null), // required if isOAuth = false
+  username: z.string().nullable().default(null), // required if isOAuth = false
+  clientSecret: z.string().nullable().default(null), // required if isOAuth = true
+  privateKey: z.string().nullable().default(null), // required if isOAuth = true
+  privateKeyPassword: z.string().nullable().default(null),
 };
 
 export const ExternalIncidentServiceSecretConfigurationSchema = z
@@ -53,16 +53,17 @@ const CommentsSchema = z
       })
       .strict()
   )
-  .nullable();
+  .nullable()
+  .default(null);
 
 const CommonAttributes = {
   short_description: z.string(),
-  description: z.string().nullable(),
-  externalId: z.string().nullable(),
-  category: z.string().nullable(),
-  subcategory: z.string().nullable(),
+  description: z.string().nullable().default(null),
+  externalId: z.string().nullable().default(null),
+  category: z.string().nullable().default(null),
+  subcategory: z.string().nullable().default(null),
   correlation_id: z.string().nullable().default(DEFAULT_ALERTS_GROUPING_KEY),
-  correlation_display: z.string().nullable(),
+  correlation_display: z.string().nullable().default(null),
   additional_fields: z
     .record(
       z.string().superRefine((value, ctx) => {
@@ -78,7 +79,8 @@ const CommonAttributes = {
         fieldName: 'additional_fields',
       })
     )
-    .nullable(),
+    .nullable()
+    .default(null),
 };
 
 export const commonIncidentSchemaObjectProperties = Object.keys(CommonAttributes);
@@ -89,9 +91,9 @@ export const ExecutorSubActionPushParamsSchemaITSM = z
     incident: z
       .object({
         ...CommonAttributes,
-        severity: z.string().nullable(),
-        urgency: z.string().nullable(),
-        impact: z.string().nullable(),
+        severity: z.string().nullable().default(null),
+        urgency: z.string().nullable().default(null),
+        impact: z.string().nullable().default(null),
       })
       .strict(),
     comments: CommentsSchema,
@@ -104,13 +106,31 @@ export const ExecutorSubActionPushParamsSchemaSIR = z
     incident: z
       .object({
         ...CommonAttributes,
-        dest_ip: z.union([z.string().nullable(), z.array(z.string()).nullable()]).default(null),
-        malware_hash: z
-          .union([z.string().nullable(), z.array(z.string()).nullable()])
+        dest_ip: z
+          .union([
+            z.string().nullable().default(null),
+            z.array(z.string()).nullable().default(null),
+          ])
           .default(null),
-        malware_url: z.union([z.string().nullable(), z.array(z.string()).nullable()]).default(null),
-        source_ip: z.union([z.string().nullable(), z.array(z.string()).nullable()]).default(null),
-        priority: z.string().nullable(),
+        malware_hash: z
+          .union([
+            z.string().nullable().default(null),
+            z.array(z.string()).nullable().default(null),
+          ])
+          .default(null),
+        malware_url: z
+          .union([
+            z.string().nullable().default(null),
+            z.array(z.string()).nullable().default(null),
+          ])
+          .default(null),
+        source_ip: z
+          .union([
+            z.string().nullable().default(null),
+            z.array(z.string()).nullable().default(null),
+          ])
+          .default(null),
+        priority: z.string().nullable().default(null),
       })
       .strict(),
     comments: CommentsSchema,
@@ -120,17 +140,17 @@ export const ExecutorSubActionPushParamsSchemaSIR = z
 // Schema for ServiceNow ITOM
 export const ExecutorSubActionAddEventParamsSchema = z
   .object({
-    source: z.string().nullable(),
-    event_class: z.string().nullable(),
-    resource: z.string().nullable(),
-    node: z.string().nullable(),
-    metric_name: z.string().nullable(),
-    type: z.string().nullable(),
-    severity: z.string().nullable(),
-    description: z.string().nullable(),
-    additional_info: z.string().nullable(),
+    source: z.string().nullable().default(null),
+    event_class: z.string().nullable().default(null),
+    resource: z.string().nullable().default(null),
+    node: z.string().nullable().default(null),
+    metric_name: z.string().nullable().default(null),
+    type: z.string().nullable().default(null),
+    severity: z.string().nullable().default(null),
+    description: z.string().nullable().default(null),
+    additional_info: z.string().nullable().default(null),
     message_key: z.string().nullable().default(DEFAULT_ALERTS_GROUPING_KEY),
-    time_of_event: z.string().nullable(),
+    time_of_event: z.string().nullable().default(null),
   })
   .strict();
 
@@ -144,7 +164,7 @@ export const ExecutorSubActionCloseIncidentParamsSchema = z
   .object({
     incident: z
       .object({
-        externalId: z.string().nullable(),
+        externalId: z.string().nullable().default(null),
         correlation_id: z.string().default(DEFAULT_ALERTS_GROUPING_KEY).nullable(),
       })
       .strict(),

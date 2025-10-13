@@ -30,7 +30,7 @@ export type XmattersConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
 >;
 
 const configSchemaProps = {
-  configUrl: z.string().nullable(),
+  configUrl: z.string().nullable().default(null),
   usesBasic: z.boolean().default(true),
 };
 const ConfigSchema = z.object(configSchemaProps).strict();
@@ -39,9 +39,9 @@ export type ConnectorTypeConfigType = z.infer<typeof ConfigSchema>;
 // secrets definition
 export type ConnectorTypeSecretsType = z.infer<typeof SecretsSchema>;
 const secretSchemaProps = {
-  user: z.string().nullable(),
-  password: z.string().nullable(),
-  secretsUrl: z.string().nullable(),
+  user: z.string().nullable().default(null),
+  password: z.string().nullable().default(null),
+  secretsUrl: z.string().nullable().default(null),
 };
 const SecretsSchema = z.object(secretSchemaProps).strict();
 

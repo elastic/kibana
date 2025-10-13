@@ -20,7 +20,7 @@ export const ConfigSchema = z
     inferenceId: z.string(),
     providerConfig: z.object({}).passthrough().default({}),
     taskTypeConfig: z.object({}).passthrough().default({}),
-    contextWindowLength: z.number().optional(),
+    contextWindowLength: z.coerce.number().optional(),
   })
   .strict();
 
@@ -40,7 +40,7 @@ export const ChatCompleteParamsSchema = z
 const AIMessage = z
   .object({
     role: z.string(),
-    content: z.string().optional().nullable(),
+    content: z.string().nullish(),
     name: z.string().optional(),
     tool_calls: z
       .array(
@@ -91,7 +91,7 @@ export const UnifiedChatCompleteParamsSchema = z
          * compatible with
          * [o1 series models](https://platform.openai.com/docs/guides/reasoning).
          */
-        max_tokens: z.number().optional(),
+        max_tokens: z.coerce.number().optional(),
         /**
          * Developer-defined tags and values used for filtering completions in the
          * [dashboard](https://platform.openai.com/chat-completions).
@@ -102,19 +102,14 @@ export const UnifiedChatCompleteParamsSchema = z
          * you will be charged based on the number of generated tokens across all of the
          * choices. Keep `n` as `1` to minimize costs.
          */
-        n: z.number().optional(),
+        n: z.coerce.number().optional(),
         /**
          * Up to 4 sequences where the API will stop generating further tokens.
          */
-        stop: z
-          .union([z.string(), z.array(z.string())])
-          .optional()
-          .nullable(),
+        stop: z.union([z.string(), z.array(z.string())]).nullish(),
         /**
      * The maximum number of tokens to generate in the completion. Requests can use
-    schema.maybe(
-      schema.nullable(schema.oneOf([z.string(), schema.arrayOf(schema.string())]))
-    ),
+     z.union([z.string(), z.array(z.string)]).optional(),
     /**
      * What sampling temperature to use, between 0 and 2. Higher values like 0.8 will
      * make the output more random, while lower values like 0.2 will make it more
@@ -122,7 +117,7 @@ export const UnifiedChatCompleteParamsSchema = z
      *
      * We generally recommend altering this or `top_p` but not both.
      */
-        temperature: z.number().optional(),
+        temperature: z.coerce.number().optional(),
         /**
          * Controls which (if any) tool is called by the model. `none` means the model will
          * not call any tool and instead generates a message. `auto` means the model can
@@ -162,7 +157,7 @@ export const UnifiedChatCompleteParamsSchema = z
          *
          * We generally recommend altering this or `temperature` but not both.
          */
-        top_p: z.number().optional(),
+        top_p: z.coerce.number().optional(),
         /**
          * A unique identifier representing your end-user, which can help OpenAI to monitor
          * and detect abuse.
@@ -186,20 +181,19 @@ export const UnifiedChatCompleteResponseSchema = z
           .object({
             finish_reason: z
               .enum(['stop', 'length', 'tool_calls', 'content_filter', 'function_call'])
-              .nullable()
-              .optional(),
-            index: z.number().optional(),
+              .nullish(),
+            index: z.coerce.number().optional(),
             message: z
               .object({
-                content: z.string().optional().nullable(),
-                refusal: z.string().optional().nullable(),
+                content: z.string().nullish(),
+                refusal: z.string().nullish(),
                 role: z.string().optional(),
                 tool_calls: z
                   .array(
                     z
                       .object({
                         id: z.string().optional(),
-                        index: z.number().optional(),
+                        index: z.coerce.number().optional(),
                         function: z
                           .object({
                             arguments: z.string().optional(),
@@ -219,18 +213,17 @@ export const UnifiedChatCompleteResponseSchema = z
           .strict()
       )
       .default([]),
-    created: z.number().optional(),
+    created: z.coerce.number().optional(),
     model: z.string().optional(),
     object: z.string().optional(),
     usage: z
       .object({
-        completion_tokens: z.number().optional(),
-        prompt_tokens: z.number().optional(),
-        total_tokens: z.number().optional(),
+        completion_tokens: z.coerce.number().optional(),
+        prompt_tokens: z.coerce.number().optional(),
+        total_tokens: z.coerce.number().optional(),
       })
       .strict()
-      .optional()
-      .nullable(),
+      .nullish(),
   })
   .strict();
 
@@ -256,8 +249,8 @@ export const RerankResponseSchema = z
     z
       .object({
         text: z.string().optional(),
-        index: z.number(),
-        score: z.number(),
+        index: z.coerce.number(),
+        score: z.coerce.number(),
       })
       .strict()
   )

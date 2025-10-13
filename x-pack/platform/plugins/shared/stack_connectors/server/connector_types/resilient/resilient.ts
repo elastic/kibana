@@ -173,8 +173,8 @@ export class ResilientConnector extends CaseConnector<
           headers: this.getAuthHeaders(),
           responseSchema: z
             .object({
-              id: z.number(),
-              create_date: z.number(),
+              id: z.coerce.number(),
+              create_date: z.coerce.number(),
             })
             .passthrough(),
         },
@@ -219,7 +219,7 @@ export class ResilientConnector extends CaseConnector<
           data,
           headers: this.getAuthHeaders(),
           responseSchema: z
-            .object({ success: z.boolean(), message: z.string().nullable() })
+            .object({ success: z.boolean(), message: z.string().nullable().default(null) })
             .passthrough(),
         },
         connectorUsageCollector

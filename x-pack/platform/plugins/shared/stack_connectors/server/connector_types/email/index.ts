@@ -69,14 +69,14 @@ const EMAIL_FOOTER_DIVIDER = '\n\n---\n\n';
 
 const ConfigSchemaProps = {
   service: z.string().default('other'),
-  host: z.string().nullable(),
-  port: portSchema().nullable(),
-  secure: z.boolean().nullable(),
+  host: z.string().nullable().default(null),
+  port: portSchema().nullable().default(null),
+  secure: z.boolean().nullable().default(null),
   from: z.string(),
   hasAuth: z.boolean().default(true),
-  tenantId: z.string().nullable(),
-  clientId: z.string().nullable(),
-  oauthTokenUrl: z.string().nullable(),
+  tenantId: z.string().nullable().default(null),
+  clientId: z.string().nullable().default(null),
+  oauthTokenUrl: z.string().nullable().default(null),
 };
 
 const ConfigSchema = z.object(ConfigSchemaProps).strict();
@@ -179,9 +179,9 @@ function validateConfig(
 export type ConnectorTypeSecretsType = z.infer<typeof SecretsSchema>;
 
 const SecretsSchemaProps = {
-  user: z.string().nullable().optional(),
-  password: z.string().nullable().optional(),
-  clientSecret: z.string().nullable().optional(),
+  user: z.string().nullable().default(null),
+  password: z.string().nullable().default(null),
+  clientSecret: z.string().nullable().default(null),
 };
 
 const SecretsSchema = z.object(SecretsSchemaProps).strict();

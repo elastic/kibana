@@ -23,7 +23,7 @@ export const SecretsSchema = z
 
 const SuccessfulResponse = z
   .object({
-    took: z.number(),
+    took: z.coerce.number(),
     requestId: z.string(),
     result: z.string(),
   })
@@ -31,11 +31,11 @@ const SuccessfulResponse = z
 
 export const FailureResponse = z
   .object({
-    code: z.number().optional(),
+    code: z.coerce.number().optional(),
     message: z.string().optional(),
     result: z.string().optional(),
     errors: z.array(z.object({ title: z.string(), code: z.string() }).strict()).optional(),
-    took: z.number().optional(),
+    took: z.coerce.number().optional(),
     requestId: z.string().optional(),
   })
   .passthrough();

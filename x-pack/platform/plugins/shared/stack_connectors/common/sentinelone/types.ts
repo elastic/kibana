@@ -48,7 +48,7 @@ export type SentinelOneSecrets = z.infer<typeof SentinelOneSecretsSchema>;
 export type SentinelOneBaseApiResponse = z.infer<typeof SentinelOneBaseApiResponseSchema>;
 
 export type SentinelOneGetAgentsParams = Partial<z.infer<typeof SentinelOneGetAgentsParamsSchema>>;
-export type SentinelOneGetAgentsResponse = z.infer<typeof SentinelOneGetAgentsResponseSchema>;
+export type SentinelOneGetAgentsResponse = z.input<typeof SentinelOneGetAgentsResponseSchema>;
 
 export type SentinelOneExecuteScriptParams = z.infer<typeof SentinelOneExecuteScriptParamsSchema>;
 export type SentinelOneExecuteScriptResponse = z.infer<
@@ -134,7 +134,7 @@ export type SentinelOneGetRemoteScriptsParams = Partial<
   z.infer<typeof SentinelOneGetRemoteScriptsParamsSchema>
 >;
 
-export type SentinelOneGetRemoteScriptsResponse = z.infer<
+export type SentinelOneGetRemoteScriptsResponse = z.input<
   typeof SentinelOneGetRemoteScriptsResponseSchema
 >;
 

@@ -16,7 +16,7 @@ import type {
   TheHiveIncidentResponseSchema,
 } from './schema';
 
-export type TheHiveConfig = z.infer<typeof TheHiveConfigSchema>;
+export type TheHiveConfig = z.input<typeof TheHiveConfigSchema>;
 export type TheHiveSecrets = z.infer<typeof TheHiveSecretsSchema>;
 
 export type ExecutorParams = z.infer<typeof ExecutorParamsSchema>;
@@ -36,4 +36,4 @@ export interface ExternalServiceIncidentResponse {
 
 export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId'>;
 
-export type GetIncidentResponse = z.infer<typeof TheHiveIncidentResponseSchema>;
+export type GetIncidentResponse = z.input<typeof TheHiveIncidentResponseSchema>;

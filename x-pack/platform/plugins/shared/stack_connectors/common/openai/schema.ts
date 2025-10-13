@@ -22,7 +22,7 @@ export const ConfigSchema = z.union([
       apiProvider: z.enum([OpenAiProviderType.AzureAi]),
       apiUrl: z.string(),
       headers: z.record(z.string(), z.string()).optional(),
-      contextWindowLength: z.number().optional(),
+      contextWindowLength: z.coerce.number().optional(),
     })
     .strict(),
   z
@@ -33,7 +33,7 @@ export const ConfigSchema = z.union([
       projectId: z.string().optional(),
       defaultModel: z.string().default(DEFAULT_OPENAI_MODEL),
       headers: z.record(z.string(), z.string()).optional(),
-      contextWindowLength: z.number().optional(),
+      contextWindowLength: z.coerce.number().optional(),
     })
     .strict(),
   z
@@ -43,7 +43,7 @@ export const ConfigSchema = z.union([
       defaultModel: z.string(),
       verificationMode: z.enum(['full', 'certificate', 'none']).default('full').optional(),
       headers: z.record(z.string(), z.string()).optional(),
-      contextWindowLength: z.number().optional(),
+      contextWindowLength: z.coerce.number().optional(),
       enableNativeFunctionCalling: z.boolean().optional(),
     })
     .strict(),
@@ -67,7 +67,7 @@ export const RunActionParamsSchema = z
     body: z.string(),
     // abort signal from client
     signal: z.any().optional(),
-    timeout: z.number().optional(),
+    timeout: z.coerce.number().optional(),
     telemetryMetadata: TelemetryMetadataSchema.optional(),
   })
   .strict();
@@ -168,16 +168,13 @@ export const InvokeAIActionParamsSchema = z
         }),
       ])
       .optional(),
-    n: z.number().optional(),
-    stop: z
-      .union([z.string(), z.array(z.string())])
-      .optional()
-      .nullable(),
-    temperature: z.number().optional(),
+    n: z.coerce.number().optional(),
+    stop: z.union([z.string(), z.array(z.string())]).nullish(),
+    temperature: z.coerce.number().optional(),
     response_format: z.any().optional(),
     // abort signal from client
     signal: z.any().optional(),
-    timeout: z.number().optional(),
+    timeout: z.coerce.number().optional(),
     telemetryMetadata: TelemetryMetadataSchema.optional(),
   })
   .strict();
@@ -186,9 +183,9 @@ export const InvokeAIActionResponseSchema = z
   .object({
     message: z.string(),
     usage: z.object({
-      prompt_tokens: z.number(),
-      completion_tokens: z.number(),
-      total_tokens: z.number(),
+      prompt_tokens: z.coerce.number(),
+      completion_tokens: z.coerce.number(),
+      total_tokens: z.coerce.number(),
     }),
   })
   .strict();
@@ -200,7 +197,7 @@ export const StreamActionParamsSchema = z
     stream: z.boolean().default(false),
     // abort signal from client
     signal: z.any().optional(),
-    timeout: z.number().optional(),
+    timeout: z.coerce.number().optional(),
     telemetryMetadata: TelemetryMetadataSchema.optional(),
   })
   .strict();
@@ -210,22 +207,22 @@ export const StreamingResponseSchema = z.any();
 export const RunActionResponseSchema = z.object({
   id: z.string().optional(),
   object: z.string().optional(),
-  created: z.number().optional(),
+  created: z.coerce.number().optional(),
   model: z.string().optional(),
   usage: z.object({
-    prompt_tokens: z.number(),
-    completion_tokens: z.number(),
-    total_tokens: z.number(),
+    prompt_tokens: z.coerce.number(),
+    completion_tokens: z.coerce.number(),
+    total_tokens: z.coerce.number(),
   }),
   choices: z.array(
     z.object({
       message: z.object({
         role: z.string(),
         // nullable because message can contain function calls instead of final response when used with RAG
-        content: z.string().nullable().optional(),
+        content: z.string().nullish(),
       }),
       finish_reason: z.string().optional(),
-      index: z.number().optional(),
+      index: z.coerce.number().optional(),
     })
   ),
 });

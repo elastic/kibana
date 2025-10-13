@@ -17,7 +17,7 @@ export const ConfigSchema = z
 export const SecretsSchema = z
   .object({
     apiKey: z.string(),
-    apiKeyID: z.string().nullable(),
+    apiKeyID: z.string().nullable().default(null),
   })
   .strict();
 
@@ -33,11 +33,11 @@ export const XSOARPlaybooksActionResponseSchema = z.object({
 export const XSOARRunActionParamsSchema = z
   .object({
     name: z.string(),
-    playbookId: z.string().nullable(),
+    playbookId: z.string().nullable().default(null),
     createInvestigation: z.boolean(),
-    severity: z.number(),
+    severity: z.coerce.number(),
     isRuleSeverity: z.boolean().default(false).nullable(),
-    body: z.string().nullable(),
+    body: z.string().nullable().default(null),
   })
   .strict();
 export const XSOARRunActionResponseSchema = z.object({});

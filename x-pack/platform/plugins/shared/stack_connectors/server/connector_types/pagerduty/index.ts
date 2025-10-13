@@ -45,7 +45,7 @@ export type PagerDutyConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions
 export type ConnectorTypeConfigType = z.infer<typeof ConfigSchema>;
 
 const configSchemaProps = {
-  apiUrl: z.string().nullable(),
+  apiUrl: z.string().nullable().default(null),
 };
 const ConfigSchema = z.object(configSchemaProps).strict();
 // secrets definition

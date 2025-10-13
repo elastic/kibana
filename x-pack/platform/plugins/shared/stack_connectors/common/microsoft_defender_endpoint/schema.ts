@@ -70,8 +70,8 @@ export const AgentListParamsSchema = z
     osPlatform: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
     riskScore: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
     rbacGroupId: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    page: z.number().min(1).default(1).optional(),
-    pageSize: z.number().min(1).max(1000).default(20).optional(),
+    page: z.coerce.number().min(1).default(1).optional(),
+    pageSize: z.coerce.number().min(1).max(1000).default(20).optional(),
   })
   .strict();
 
@@ -140,8 +140,8 @@ export const GetActionsParamsSchema = z
     type: z.union([MachineActionTypeSchema, z.array(MachineActionTypeSchema).min(1)]).optional(),
     requestor: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
     creationDateTimeUtc: z.union([z.string().min(1), z.array(z.string().min(1)).min(1)]).optional(),
-    page: z.number().min(1).default(1).optional(),
-    pageSize: z.number().min(1).max(1000).default(20).optional(),
+    page: z.coerce.number().min(1).default(1).optional(),
+    pageSize: z.coerce.number().min(1).max(1000).default(20).optional(),
     sortField: z.string().min(1).optional(),
     sortDirection: z.enum(['asc', 'desc']).optional(),
   })
@@ -162,7 +162,7 @@ export const MSDefenderLibraryFileSchema = z
     lastUpdatedTime: z.string().optional(),
     createdBy: z.string().optional(),
     hasParameters: z.boolean().optional(),
-    parametersDescription: z.string().optional().nullable(),
+    parametersDescription: z.string().nullish(),
   })
   .passthrough();
 

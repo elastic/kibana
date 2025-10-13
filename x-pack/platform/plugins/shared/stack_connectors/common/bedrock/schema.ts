@@ -20,7 +20,7 @@ export const ConfigSchema = z
   .object({
     apiUrl: z.string(),
     defaultModel: z.string().default(DEFAULT_BEDROCK_MODEL),
-    contextWindowLength: z.number().optional(),
+    contextWindowLength: z.coerce.number().optional(),
   })
   .strict();
 
@@ -37,7 +37,7 @@ export const RunActionParamsSchema = z
     model: z.string().optional(),
     // abort signal from client
     signal: z.any().optional(),
-    timeout: z.number().optional(),
+    timeout: z.coerce.number().optional(),
     raw: z.boolean().optional(),
     telemetryMetadata: TelemetryMetadataSchema.optional(),
   })
@@ -73,10 +73,10 @@ export const BedrockToolChoiceSchema = z
 
 export const BedrockUsageSchema = z
   .object({
-    input_tokens: z.number(),
-    output_tokens: z.number(),
+    input_tokens: z.coerce.number(),
+    output_tokens: z.coerce.number(),
     // added with Sonnet 3.7
-    cache_creation_input_tokens: z.number().optional(),
+    cache_creation_input_tokens: z.coerce.number().optional(),
   })
   .passthrough()
   .optional();
@@ -85,13 +85,13 @@ export const InvokeAIActionParamsSchema = z
   .object({
     messages: z.array(BedrockMessageSchema),
     model: z.string().optional(),
-    temperature: z.number().optional(),
+    temperature: z.coerce.number().optional(),
     stopSequences: z.array(z.string()).optional(),
     system: z.string().optional(),
-    maxTokens: z.number().optional(),
+    maxTokens: z.coerce.number().optional(),
     // abort signal from client
     signal: z.any().optional(),
-    timeout: z.number().optional(),
+    timeout: z.coerce.number().optional(),
     anthropicVersion: z.string().optional(),
     tools: z
       .array(
@@ -127,14 +127,14 @@ export const InvokeAIRawActionParamsSchema = z
         .strict()
     ),
     model: z.string().optional(),
-    temperature: z.number().optional(),
+    temperature: z.coerce.number().optional(),
     stopSequences: z.array(z.string()).optional(),
     system: z.string().optional(),
-    maxTokens: z.number().optional(),
+    maxTokens: z.coerce.number().optional(),
     // abort signal from client
     signal: z.any().optional(),
     anthropicVersion: z.string().optional(),
-    timeout: z.number().optional(),
+    timeout: z.coerce.number().optional(),
     tools: z
       .array(
         z
@@ -200,14 +200,14 @@ export const ConverseActionParamsSchema = z
     messages: z.array(z.any()),
     model: z.string().optional(),
     system: z.array(z.any()).optional(),
-    temperature: z.number().optional(),
-    maxTokens: z.number().optional(),
+    temperature: z.coerce.number().optional(),
+    maxTokens: z.coerce.number().optional(),
     stopSequences: z.array(z.string()).optional(),
     tools: z.array(z.any()).optional(),
     toolChoice: z.any().optional(),
     // Kibana related properties
     signal: z.any().optional(),
-    timeout: z.number().optional(),
+    timeout: z.coerce.number().optional(),
     telemetryMetadata: TelemetryMetadataSchema.optional(),
     connectorUsageCollector: z.any().optional(),
   })

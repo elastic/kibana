@@ -442,9 +442,13 @@ describe('validateCommonConnector', () => {
       const ctx = {
         addIssue: jest.fn(),
       } as unknown as z.RefinementCtx;
-      expect(validateOtherFieldsKeys('short_description', ctx)).toEqual(
-        'The following properties cannot be defined inside additional_fields: short_description.'
-      );
+      validateOtherFieldsKeys('short_description', ctx);
+      expect(ctx.addIssue).toHaveBeenCalledTimes(1);
+      expect(ctx.addIssue).toHaveBeenNthCalledWith(1, {
+        code: 'custom',
+        message:
+          'The following properties cannot be defined inside additional_fields: short_description.',
+      });
     });
   });
 });

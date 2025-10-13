@@ -30,10 +30,10 @@ export const ExternalIncidentServiceSecretConfigurationSchema = z
 
 const incidentSchemaObject = {
   summary: z.string(),
-  description: z.string().nullable(),
+  description: z.string().nullable().default(null),
   externalId: z.string().nullable().default(null),
-  issueType: z.string().nullable(),
-  priority: z.string().nullable(),
+  issueType: z.string().nullable().default(null),
+  priority: z.string().nullable().default(null),
   labels: z
     .array(
       z.string().refine(
@@ -41,8 +41,9 @@ const incidentSchemaObject = {
         (val) => ({ message: `The label ${val} cannot contain spaces` })
       )
     )
-    .nullable(),
-  parent: z.string().nullable(),
+    .nullable()
+    .default(null),
+  parent: z.string().nullable().default(null),
   otherFields: z
     .record(
       z.string().superRefine((value, ctx) => {
@@ -58,7 +59,8 @@ const incidentSchemaObject = {
         fieldName: 'otherFields',
       })
     )
-    .nullable(),
+    .nullable()
+    .default(null),
 };
 
 export const incidentSchemaObjectProperties = Object.keys(incidentSchemaObject);

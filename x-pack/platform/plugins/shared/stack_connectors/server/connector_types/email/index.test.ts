@@ -164,9 +164,19 @@ describe('config validation', () => {
     // empty object
     expect(() => {
       validateConfig(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [from]: expected value of type [string] but got [undefined]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action type config: [
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"string\\",
+          \\"received\\": \\"undefined\\",
+          \\"path\\": [
+            \\"from\\"
+          ],
+          \\"message\\": \\"Required\\"
+        }
+      ]"
+    `);
 
     // no service or host/port
     expect(() => {
@@ -472,9 +482,28 @@ describe('params validation', () => {
     // empty object
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [subject]: expected value of type [string] but got [undefined]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: [
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"string\\",
+          \\"received\\": \\"undefined\\",
+          \\"path\\": [
+            \\"subject\\"
+          ],
+          \\"message\\": \\"Required\\"
+        },
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"string\\",
+          \\"received\\": \\"undefined\\",
+          \\"path\\": [
+            \\"message\\"
+          ],
+          \\"message\\": \\"Required\\"
+        }
+      ]"
+    `);
   });
 
   test('params validation for emails calls validateEmailAddresses', async () => {

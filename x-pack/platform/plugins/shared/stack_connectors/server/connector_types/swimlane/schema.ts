@@ -17,13 +17,13 @@ export const ConfigMap = {
 export const ConfigMapSchema = z.object(ConfigMap).strict();
 
 export const ConfigMapping = {
-  ruleNameConfig: ConfigMapSchema.nullable(),
-  alertIdConfig: ConfigMapSchema.nullable(),
-  caseIdConfig: ConfigMapSchema.nullable(),
-  caseNameConfig: ConfigMapSchema.nullable(),
-  commentsConfig: ConfigMapSchema.nullable(),
-  severityConfig: ConfigMapSchema.nullable(),
-  descriptionConfig: ConfigMapSchema.nullable(),
+  ruleNameConfig: ConfigMapSchema.nullable().default(null),
+  alertIdConfig: ConfigMapSchema.nullable().default(null),
+  caseIdConfig: ConfigMapSchema.nullable().default(null),
+  caseNameConfig: ConfigMapSchema.nullable().default(null),
+  commentsConfig: ConfigMapSchema.nullable().default(null),
+  severityConfig: ConfigMapSchema.nullable().default(null),
+  descriptionConfig: ConfigMapSchema.nullable().default(null),
 };
 
 export const ConfigMappingSchema = z.object(ConfigMapping).strict();
@@ -44,12 +44,12 @@ export const SwimlaneSecretsConfiguration = {
 export const SwimlaneSecretsConfigurationSchema = z.object(SwimlaneSecretsConfiguration).strict();
 
 const SwimlaneFields = {
-  alertId: z.string().nullable(),
-  ruleName: z.string().nullable(),
-  caseId: z.string().nullable(),
-  caseName: z.string().nullable(),
-  severity: z.string().nullable(),
-  description: z.string().nullable(),
+  alertId: z.string().nullable().default(null),
+  ruleName: z.string().nullable().default(null),
+  caseId: z.string().nullable().default(null),
+  caseName: z.string().nullable().default(null),
+  severity: z.string().nullable().default(null),
+  description: z.string().nullable().default(null),
 };
 
 export const ExecutorSubActionPushParamsSchema = z
@@ -57,10 +57,13 @@ export const ExecutorSubActionPushParamsSchema = z
     incident: z
       .object({
         ...SwimlaneFields,
-        externalId: z.string().nullable(),
+        externalId: z.string().nullable().default(null),
       })
       .strict(),
-    comments: z.array(z.object({ comment: z.string(), commentId: z.string() }).strict()).nullable(),
+    comments: z
+      .array(z.object({ comment: z.string(), commentId: z.string() }).strict())
+      .nullable()
+      .default(null),
   })
   .strict();
 

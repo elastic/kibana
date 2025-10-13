@@ -190,6 +190,14 @@ describe('validate params', () => {
                     \\"subActionParams\\"
                   ],
                   \\"message\\": \\"Required\\"
+                },
+                {
+                  \\"code\\": \\"unrecognized_keys\\",
+                  \\"keys\\": [
+                    \\"message\\"
+                  ],
+                  \\"path\\": [],
+                  \\"message\\": \\"Unrecognized key(s) in object: 'message'\\"
                 }
               ],
               \\"name\\": \\"ZodError\\"
@@ -212,6 +220,14 @@ describe('validate params', () => {
                     \\"subActionParams\\"
                   ],
                   \\"message\\": \\"Required\\"
+                },
+                {
+                  \\"code\\": \\"unrecognized_keys\\",
+                  \\"keys\\": [
+                    \\"message\\"
+                  ],
+                  \\"path\\": [],
+                  \\"message\\": \\"Unrecognized key(s) in object: 'message'\\"
                 }
               ],
               \\"name\\": \\"ZodError\\"
@@ -234,6 +250,14 @@ describe('validate params', () => {
                     \\"subActionParams\\"
                   ],
                   \\"message\\": \\"Required\\"
+                },
+                {
+                  \\"code\\": \\"unrecognized_keys\\",
+                  \\"keys\\": [
+                    \\"message\\"
+                  ],
+                  \\"path\\": [],
+                  \\"message\\": \\"Unrecognized key(s) in object: 'message'\\"
                 }
               ],
               \\"name\\": \\"ZodError\\"

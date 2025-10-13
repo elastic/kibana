@@ -15,7 +15,7 @@ export const TinesSecretsSchema = z.object({ email: z.string(), token: z.string(
 export const TinesStoriesActionParamsSchema = null;
 export const TinesStoryObjectSchema = z
   .object({
-    id: z.number(),
+    id: z.coerce.number(),
     name: z.string(),
     published: z.boolean(),
   })
@@ -28,12 +28,12 @@ export const TinesStoriesActionResponseSchema = z
   .strict();
 
 // Webhooks action schema
-export const TinesWebhooksActionParamsSchema = z.object({ storyId: z.number() }).strict();
+export const TinesWebhooksActionParamsSchema = z.object({ storyId: z.coerce.number() }).strict();
 export const TinesWebhookObjectSchema = z
   .object({
-    id: z.number(),
+    id: z.coerce.number(),
     name: z.string(),
-    storyId: z.number(),
+    storyId: z.coerce.number(),
     path: z.string(),
     secret: z.string(),
   })

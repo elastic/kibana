@@ -21,7 +21,7 @@ export const ConfigSchema = z
     defaultModel: z.string().default(DEFAULT_GEMINI_MODEL),
     gcpRegion: z.string(),
     gcpProjectID: z.string(),
-    contextWindowLength: z.number().optional(),
+    contextWindowLength: z.coerce.number().optional(),
   })
   .strict();
 
@@ -36,8 +36,8 @@ export const RunActionParamsSchema = z
     body: z.any(),
     model: z.string().optional(),
     signal: z.any().optional(),
-    timeout: z.number().optional(),
-    temperature: z.number().optional(),
+    timeout: z.coerce.number().optional(),
+    temperature: z.coerce.number().optional(),
     stopSequences: z.array(z.string()).optional(),
     raw: z.boolean().optional(),
     telemetryMetadata: TelemetryMetadataSchema.optional(),
@@ -48,9 +48,9 @@ export const RunApiResponseSchema = z.object({
   candidates: z.any(),
   usageMetadata: z
     .object({
-      promptTokenCount: z.number(),
-      candidatesTokenCount: z.number(),
-      totalTokenCount: z.number(),
+      promptTokenCount: z.coerce.number(),
+      candidatesTokenCount: z.coerce.number(),
+      totalTokenCount: z.coerce.number(),
     })
     .strict(),
 });
@@ -60,9 +60,9 @@ export const RunActionResponseSchema = z.object({
   stop_reason: z.string().optional(),
   usageMetadata: z
     .object({
-      promptTokenCount: z.number(),
-      candidatesTokenCount: z.number(),
-      totalTokenCount: z.number(),
+      promptTokenCount: z.coerce.number(),
+      candidatesTokenCount: z.coerce.number(),
+      totalTokenCount: z.coerce.number(),
     })
     .strict()
     .optional(),
@@ -72,14 +72,14 @@ export const RunActionRawResponseSchema = z.any();
 
 export const InvokeAIActionParamsSchema = z
   .object({
-    maxOutputTokens: z.number().optional(),
+    maxOutputTokens: z.coerce.number().optional(),
     messages: z.any(),
     systemInstruction: z.string().optional(),
     model: z.string().optional(),
-    temperature: z.number().optional(),
+    temperature: z.coerce.number().optional(),
     stopSequences: z.array(z.string()).optional(),
     signal: z.any().optional(),
-    timeout: z.number().optional(),
+    timeout: z.coerce.number().optional(),
     tools: z.array(z.any()).optional(),
     toolConfig: z
       .object({
@@ -94,14 +94,14 @@ export const InvokeAIActionParamsSchema = z
 
 export const InvokeAIRawActionParamsSchema = z
   .object({
-    maxOutputTokens: z.number().optional(),
+    maxOutputTokens: z.coerce.number().optional(),
     messages: z.any(),
     systemInstruction: z.string().optional(),
     model: z.string().optional(),
-    temperature: z.number().optional(),
+    temperature: z.coerce.number().optional(),
     stopSequences: z.array(z.string()).optional(),
     signal: z.any().optional(),
-    timeout: z.number().optional(),
+    timeout: z.coerce.number().optional(),
     tools: z.array(z.any()).optional(),
     telemetryMetadata: TelemetryMetadataSchema.optional(),
   })
@@ -112,9 +112,9 @@ export const InvokeAIActionResponseSchema = z
     message: z.string(),
     usageMetadata: z
       .object({
-        promptTokenCount: z.number(),
-        candidatesTokenCount: z.number(),
-        totalTokenCount: z.number(),
+        promptTokenCount: z.coerce.number(),
+        candidatesTokenCount: z.coerce.number(),
+        totalTokenCount: z.coerce.number(),
       })
       .strict()
       .optional(),

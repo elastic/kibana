@@ -44,15 +44,16 @@ const AdditionalFields = {
         fieldName: 'additionalFields',
       })
     )
-    .nullable(),
+    .nullable()
+    .default(null),
 };
 
 const CommonIncidentAttributes = {
   name: z.string(),
-  description: z.string().nullable(),
-  externalId: z.string().nullable(),
-  incidentTypes: z.array(z.number()).nullable(),
-  severityCode: z.number().nullable(),
+  description: z.string().nullable().default(null),
+  externalId: z.string().nullable().default(null),
+  incidentTypes: z.array(z.coerce.number()).nullable().default(null),
+  severityCode: z.coerce.number().nullable().default(null),
   ...AdditionalFields,
 };
 
@@ -82,14 +83,15 @@ export const ExecutorSubActionPushParamsSchema = z.object({
         })
         .strict()
     )
-    .nullable(),
+    .nullable()
+    .default(null),
 });
 
 export const PushToServiceIncidentSchema = {
   name: z.string(),
-  description: z.string().nullable(),
-  incidentTypes: z.array(z.number()).nullable(),
-  severityCode: z.number().nullable(),
+  description: z.string().nullable().default(null),
+  incidentTypes: z.array(z.coerce.number()).nullable().default(null),
+  severityCode: z.coerce.number().nullable().default(null),
   ...AdditionalFields,
 };
 
@@ -101,7 +103,7 @@ export const ExecutorSubActionGetSeverityParamsSchema = z.object({}).strict();
 const ArrayOfValuesSchema = z.array(
   z
     .object({
-      value: z.number(),
+      value: z.coerce.number(),
       label: z.string(),
     })
     .passthrough()
@@ -121,7 +123,7 @@ export const GetSeverityResponseSchema = z
 
 const ValuesItemSchema = z
   .object({
-    value: z.union([z.number(), z.string()]),
+    value: z.union([z.coerce.number(), z.string()]),
     label: z.string(),
     enabled: z.boolean(),
     hidden: z.boolean(),
@@ -134,14 +136,14 @@ export const ExternalServiceFieldsSchema = z
     input_type: z.string(),
     name: z.string(),
     read_only: z.boolean(),
-    required: z.string().nullable(),
+    required: z.string().nullable().default(null),
     text: z.string(),
-    prefix: z.string().nullable(),
-    values: z.array(ValuesItemSchema).nullable(),
+    prefix: z.string().nullable().default(null),
+    values: z.array(ValuesItemSchema).nullable().default(null),
   })
   .passthrough();
 
-export type ResilientFieldMeta = z.infer<typeof ExternalServiceFieldsSchema>;
+export type ResilientFieldMeta = z.input<typeof ExternalServiceFieldsSchema>;
 
 export const GetCommonFieldsResponseSchema = z.array(ExternalServiceFieldsSchema);
 
@@ -156,7 +158,7 @@ export const ExternalServiceIncidentResponseSchema = z
 
 export const GetIncidentResponseSchema = z
   .object({
-    id: z.number(),
-    inc_last_modified_date: z.number(),
+    id: z.coerce.number(),
+    inc_last_modified_date: z.coerce.number(),
   })
   .passthrough();

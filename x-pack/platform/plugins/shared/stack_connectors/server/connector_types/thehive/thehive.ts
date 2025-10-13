@@ -39,7 +39,7 @@ export class TheHiveConnector extends CaseConnector<
 > {
   private url: string;
   private apiKey: string;
-  private organisation: string | null;
+  private organisation: string | null | undefined;
   private urlWithoutTrailingSlash: string;
 
   constructor(

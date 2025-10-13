@@ -20,7 +20,7 @@ export const ExternalIncidentServiceConfiguration = {
   createIncidentResponseKey: z.string(),
   getIncidentMethod: z.enum([WebhookMethods.GET, WebhookMethods.POST]).default(WebhookMethods.GET),
   getIncidentUrl: z.string(),
-  getIncidentJson: z.string().nullable(),
+  getIncidentJson: z.string().nullable().default(null),
   getIncidentResponseExternalTitleKey: z.string(),
   viewIncidentUrl: z.string(),
   updateIncidentUrl: z.string(),
@@ -28,13 +28,13 @@ export const ExternalIncidentServiceConfiguration = {
     .enum([WebhookMethods.POST, WebhookMethods.PATCH, WebhookMethods.PUT])
     .default(WebhookMethods.PUT),
   updateIncidentJson: z.string(),
-  createCommentUrl: z.string().nullable(),
+  createCommentUrl: z.string().nullable().default(null),
   createCommentMethod: z
     .enum([WebhookMethods.POST, WebhookMethods.PUT, WebhookMethods.PATCH])
     .default(WebhookMethods.PUT)
     .nullable(),
-  createCommentJson: z.string().nullable(),
-  headers: HeadersSchema.nullable(),
+  createCommentJson: z.string().nullable().default(null),
+  headers: HeadersSchema.nullable().default(null),
   hasAuth: AuthConfiguration.hasAuth,
   authType: AuthConfiguration.authType,
   certType: AuthConfiguration.certType,
@@ -55,12 +55,12 @@ export const ExecutorSubActionPushParamsSchema = z
     incident: z
       .object({
         title: z.string(),
-        description: z.string().nullable(),
-        id: z.string().nullable(),
-        severity: z.string().nullable(),
-        status: z.string().nullable(),
-        externalId: z.string().nullable(),
-        tags: z.array(z.string()).nullable(),
+        description: z.string().nullable().default(null),
+        id: z.string().nullable().default(null),
+        severity: z.string().nullable().default(null),
+        status: z.string().nullable().default(null),
+        externalId: z.string().nullable().default(null),
+        tags: z.array(z.string()).nullable().default(null),
       })
       .strict(),
     comments: z
@@ -72,7 +72,8 @@ export const ExecutorSubActionPushParamsSchema = z
           })
           .strict()
       )
-      .nullable(),
+      .nullable()
+      .default(null),
   })
   .strict();
 
