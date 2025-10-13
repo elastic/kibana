@@ -30,6 +30,9 @@ export const RULES_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-rules
 export const SETTINGS = '[data-test-subj="solutionSideNavItemLink-administration"]';
 export const SETTINGS_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-administration"]';
 
+export const MIGRATIONS_LANDING = '[data-test-subj="solutionSideNavItemLink-siem_migrations"]';
+export const MIGRATIONS_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-siem_migrations"]';
+
 // nested links
 export const OVERVIEW = '[data-test-subj="solutionSideNavPanelLink-overview"]';
 
@@ -96,6 +99,9 @@ export const KIBANA_LOADING_ICON = '[data-test-subj="kbnLoadingMessage"]';
 // Siem Migrations
 export const TRANSLATED_RULES_PAGE = getDataTestSubjectSelector(
   'solutionSideNavPanelLink-siem_migrations-rules'
+);
+export const TRANSLATED_DASHBOARDS_PAGE = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-siem_migrations-dashboards'
 );
 
 // opens the navigation panel for a given nested link
