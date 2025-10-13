@@ -84,4 +84,10 @@ export interface OnechatPluginStart {
    * Tools service, to manage or execute tools.
    */
   tools: ToolsStart;
+  /**
+   * Agents service, to execute agents.
+   */
+  agents: {
+    execute: (args: any) => Promise<any>;
+  };
 }

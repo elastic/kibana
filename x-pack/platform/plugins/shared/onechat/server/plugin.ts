@@ -94,13 +94,16 @@ export class OnechatPlugin
       savedObjects,
     });
 
-    const { tools, runnerFactory } = startServices;
+    const { tools, agents, runnerFactory } = startServices;
     const runner = runnerFactory.getRunner();
 
     return {
       tools: {
         getRegistry: ({ request }) => tools.getRegistry({ request }),
         execute: runner.runTool.bind(runner),
+      },
+      agents: {
+        execute: agents.execute.bind(agents),
       },
     };
   }

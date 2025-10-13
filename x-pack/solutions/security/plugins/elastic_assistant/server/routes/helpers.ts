@@ -39,12 +39,7 @@ import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { isEmpty } from 'lodash';
-import type { ChatAgentEvent, RoundInput, ConversationRound } from '@kbn/onechat-common';
-import {
-  isMessageChunkEvent,
-  isMessageCompleteEvent,
-  isRoundCompleteEvent,
-} from '@kbn/onechat-common';
+import type { RoundInput, ConversationRound } from '@kbn/onechat-common';
 import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { generateChatTitle } from '../lib/langchain/graphs/default_assistant_graph/nodes/generate_chat_title';
 import { getPrompt } from '../lib/prompt/get_prompt';
@@ -420,14 +415,13 @@ export const agentBuilderExecute = async ({
   timeout,
 }: LangChainExecuteParams) => {
   const assistantContext = context.elasticAssistant;
-  const httpClient = assistantContext.getHttpClient();
+  const onechatAgents = assistantContext.getOnechatAgents();
 
   // Get data clients for anonymization and conversation handling
   const anonymizationFieldsDataClient =
     await assistantContext.getAIAssistantAnonymizationFieldsDataClient();
 
-  // Convert messages to onechat format with anonymization support
-  const conversation: ConversationRound[] = [];
+  // Get the last message as the next input
   let nextInput: RoundInput | undefined;
 
   // Get the last message as the next input
@@ -454,38 +448,9 @@ export const agentBuilderExecute = async ({
     throw new Error('No user message found to process');
   }
 
-  // Handle streaming vs non-streaming with content references and anonymization
+  // Initialize variables for response processing
   let accumulatedContent = '';
-  let finalTraceData: TraceData = {};
-  let isStreamingComplete = false;
-
-  const onEvent = (event: ChatAgentEvent) => {
-    if (isMessageChunkEvent(event)) {
-      // Accumulate text chunks for streaming
-      accumulatedContent += event.data.text_chunk;
-
-      if (isStream && onLlmResponse) {
-        // Stream the chunk immediately
-        onLlmResponse(event.data.text_chunk, {}, false);
-      }
-    } else if (isMessageCompleteEvent(event)) {
-      // Final message is complete
-      accumulatedContent = event.data.message_content;
-      isStreamingComplete = true;
-
-      if (!isStream && onLlmResponse) {
-        // Send the complete message for non-streaming
-        onLlmResponse(event.data.message_content, finalTraceData, false);
-      }
-    } else if (isRoundCompleteEvent(event)) {
-      // Round is complete, extract trace data if available
-      if (event.data.round.trace_id) {
-        finalTraceData = {
-          traceId: event.data.round.trace_id,
-        };
-      }
-    }
-  };
+  const finalTraceData: TraceData = {};
 
   try {
     // Resolve model-aware prompts for tools before calling the onechat agent
@@ -529,28 +494,49 @@ export const agentBuilderExecute = async ({
 
     logger.debug(`Resolved tool prompts: ${JSON.stringify(Object.keys(toolPrompts))}`);
 
-    // Call the onechat agent via HTTP API
-    const onechatResponse = await httpClient.post('/api/agent_builder/converse', {
-      body: JSON.stringify({
-        agent_id: 'siem-security-analyst',
-        connector_id: connectorId,
-        conversation_id: conversationId || undefined,
-        input: nextInput?.message || '',
+    // Note: The following parameters are not supported by onechat agent execution:
+    // - threadId: Handled by passing conversation history instead
+    // - systemPrompt: The onechat agent uses its own system prompt from configuration
+    // - screenContext: Handled by the onechat agent's own tools
+    // - timeout: Handled by abortSignal or higher-level timeout
+    // - inference: The onechat agent handles its own model inference
+    // - llmTasks: The onechat agent handles its own LLM tasks
+
+    // Convert existing messages to conversation rounds for onechat
+    const conversationRounds: ConversationRound[] = [];
+    for (let i = 0; i < messages.length - 1; i += 2) {
+      const userMessage = messages[i];
+      const assistantMessage = messages[i + 1];
+
+      if (userMessage.role === 'user' && assistantMessage.role === 'assistant') {
+        conversationRounds.push({
+          id: `round-${i}`,
+          input: { message: userMessage.content },
+          steps: [], // No intermediate steps for now
+          response: { message: assistantMessage.content },
+        });
+      }
+    }
+
+    // Call the onechat agent via agents service
+    const agentResult = await onechatAgents.execute({
+      agentId: 'siem-security-analyst',
+      agentParams: {
+        nextInput,
+        conversation: conversationRounds,
         capabilities: {
           // Add any required capabilities here
         },
-      }),
-      signal: abortSignal,
+      },
+      abortSignal,
+      defaultConnectorId: connectorId,
     });
 
-    // Process the onechat response
-    if (onechatResponse.ok) {
-      const responseData = await onechatResponse.json();
-      // Handle the response data as needed
-      logger.debug('Onechat agent execution completed successfully');
-    } else {
-      throw new Error(`Onechat agent execution failed: ${onechatResponse.statusText}`);
-    }
+    logger.debug('Onechat agent execution completed successfully');
+
+    // Extract the response content from the agent result
+    const agentResponse = agentResult.result.round.response.message;
+    accumulatedContent = agentResponse;
 
     // Process the final response with content references and anonymization
     let finalResponse = accumulatedContent;
@@ -569,9 +555,14 @@ export const agentBuilderExecute = async ({
       });
     }
 
-    // For streaming mode, we need to call onLlmResponse with the final processed content
-    // to ensure conversation updates happen properly
-    if (isStream && onLlmResponse && isStreamingComplete) {
+    // Call onNewReplacements if new replacements were created during agent execution
+    // This ensures anonymization updates are properly handled
+    if (onNewReplacements && replacements && Object.keys(replacements).length > 0) {
+      onNewReplacements(replacements);
+    }
+
+    // Call onLlmResponse with the final processed content to ensure conversation updates happen properly
+    if (onLlmResponse) {
       await onLlmResponse(finalResponse, finalTraceData, false);
     }
 
