@@ -14,9 +14,9 @@ import addFormats from 'ajv-formats';
 import Ajv, { type ErrorObject } from 'ajv-draft-04';
 import { checkRefs } from './resolve';
 
-const OAS_3_0_SCHEMA_PATH = Path.resolve(__dirname, './schema.json');
+export const OAS_3_0_SCHEMA_PATH = Path.resolve(__dirname, './schema.json');
 
-export function validate(relativePathToYaml: string) {
+export function validate(relativePathToYaml: string): { valid: boolean; errors?: ErrorObject[] } {
   const yaml = load(
     Fs.readFileSync(Path.resolve(REPO_ROOT, relativePathToYaml)).toString('utf-8'),
     { schema: JSON_SCHEMA }

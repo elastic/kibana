@@ -11,7 +11,7 @@ import Path from 'node:path';
 import Fs from 'node:fs';
 import chalk from 'chalk';
 import { run } from '@kbn/dev-cli-runner';
-import { validate } from './src/validate';
+import { validate, OAS_3_0_SCHEMA_PATH } from './src/validate';
 
 const kibanaYamlRelativePath = './oas_docs/output/kibana.yaml';
 const kibanaServerlessYamlRelativePath = './oas_docs/output/kibana.serverless.yaml';
@@ -77,9 +77,11 @@ run(
                   error.params.passingSchemas !== null &&
                   (paths?.length ? paths.some((path) => error.instancePath.startsWith(path)) : true)
               )
-              .map(({ instancePath, message }) => {
+              .map(({ instancePath, message, schemaPath }) => {
                 errorCount++;
-                return `${chalk.bold(instancePath)}\n${message}`;
+                return `${chalk.bold(
+                  instancePath
+                )}\n${message}\nFailed check @ schema path: ${schemaPath}`;
               })
               .join('\n\n');
           } else if (typeof result.errors === 'string') {
@@ -140,8 +142,13 @@ run(
 
     updateBaselineFile();
 
-    log.info('Done');
+    log.info('Validation complete');
     if (invalidSpec) {
+      log.info(
+        `${chalk.bold(
+          'TIP'
+        )}: Use the "Failed check @ schema path <path>" to see the JSONSchema for the expected shape in:\n${OAS_3_0_SCHEMA_PATH}`
+      );
       process.exit(1);
     }
   },
