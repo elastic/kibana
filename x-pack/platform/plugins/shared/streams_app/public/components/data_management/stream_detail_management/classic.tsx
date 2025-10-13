@@ -145,7 +145,7 @@ export function ClassicStreamDetailManagement({
           defaultMessage: 'View details about this classic stream’s data quality',
         })}
       >
-        <span tabIndex={0}>
+        <span data-test-subj="dataQualityTab" tabIndex={0}>
           {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
             defaultMessage: 'Data quality',
           })}
