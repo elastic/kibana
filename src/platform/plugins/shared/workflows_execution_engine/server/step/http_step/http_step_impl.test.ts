@@ -10,8 +10,9 @@
 import type { HttpGraphNode } from '@kbn/workflows/graph';
 import axios from 'axios';
 import { UrlValidator } from '../../lib/url_validator';
-import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import { HttpStepImpl } from './http_step_impl';
 
@@ -20,25 +21,36 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('HttpStepImpl', () => {
   let httpStep: HttpStepImpl;
-  let mockContextManager: jest.Mocked<WorkflowContextManager>;
+  let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
   let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
   let mockWorkflowLogger: jest.Mocked<IWorkflowEventLogger>;
   let mockUrlValidator: UrlValidator;
   let mockStep: HttpGraphNode;
 
   let stepContextAbortController: AbortController;
+  let mockContextManager: jest.Mocked<Pick<WorkflowContextManager, 'getContext'>> & {
+    abortController: AbortController;
+  };
 
   beforeEach(() => {
     stepContextAbortController = new AbortController();
     mockContextManager = {
       getContext: jest.fn(),
       abortController: stepContextAbortController,
+    };
+
+    mockStepExecutionRuntime = {
+      contextManager: mockContextManager,
+      startStep: jest.fn().mockResolvedValue(undefined),
+      finishStep: jest.fn().mockResolvedValue(undefined),
+      failStep: jest.fn().mockResolvedValue(undefined),
+      getCurrentStepState: jest.fn(),
+      setCurrentStepState: jest.fn().mockResolvedValue(undefined),
+      stepExecutionId: 'test-step-exec-id',
+      abortController: stepContextAbortController,
     } as any;
 
     mockWorkflowRuntime = {
-      startStep: jest.fn(),
-      finishStep: jest.fn(),
-      setCurrentStepResult: jest.fn(),
       navigateToNextNode: jest.fn(),
     } as any;
 
@@ -69,7 +81,7 @@ describe('HttpStepImpl', () => {
 
     httpStep = new HttpStepImpl(
       mockStep,
-      mockContextManager,
+      mockStepExecutionRuntime,
       mockWorkflowLogger,
       mockUrlValidator,
       mockWorkflowRuntime
@@ -285,9 +297,18 @@ describe('HttpStepImpl', () => {
 
       await httpStep.run();
 
-      expect(mockWorkflowRuntime.startStep).toHaveBeenCalledWith();
-      expect(mockWorkflowRuntime.setCurrentStepResult).toHaveBeenCalled();
-      expect(mockWorkflowRuntime.finishStep).toHaveBeenCalledWith();
+      expect(mockStepExecutionRuntime.startStep).toHaveBeenCalledWith({
+        url: 'https://api.example.com/data',
+        method: 'GET',
+        headers: {},
+        body: undefined,
+      });
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        data: { success: true },
+      });
       expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
 
@@ -318,7 +339,7 @@ describe('HttpStepImpl', () => {
       mockUrlValidator = new UrlValidator({ allowedHosts: ['api.example.com'] });
       httpStep = new HttpStepImpl(
         mockStep,
-        mockContextManager,
+        mockStepExecutionRuntime,
         mockWorkflowLogger,
         mockUrlValidator,
         mockWorkflowRuntime
@@ -357,7 +378,7 @@ describe('HttpStepImpl', () => {
             },
           },
         },
-        mockContextManager,
+        mockStepExecutionRuntime,
         mockWorkflowLogger,
         mockUrlValidator,
         mockWorkflowRuntime
@@ -383,22 +404,11 @@ describe('HttpStepImpl', () => {
         })
       );
 
-      // Should start the step, set the error result, finish the step, but not go to next step
-      expect(mockWorkflowRuntime.startStep).toHaveBeenCalled();
-      expect(mockWorkflowRuntime.setCurrentStepResult).toHaveBeenCalledWith(
-        expect.objectContaining({
-          input: {
-            url: 'https://malicious.com/test',
-            method: 'GET',
-            headers: {},
-            body: undefined,
-          },
-          output: undefined,
-          error:
-            'target url "https://malicious.com/test" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts',
-        })
+      // Should start the step, fail the step, and navigate to next node
+      expect(mockStepExecutionRuntime.startStep).toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith(
+        'target url "https://malicious.com/test" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts'
       );
-      expect(mockWorkflowRuntime.finishStep).toHaveBeenCalled();
       expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
 
@@ -417,7 +427,7 @@ describe('HttpStepImpl', () => {
             },
           },
         },
-        mockContextManager,
+        mockStepExecutionRuntime,
         mockWorkflowLogger,
         mockUrlValidator,
         mockWorkflowRuntime

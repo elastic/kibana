@@ -31,5 +31,7 @@
     "@kbn/es-query",
     "@kbn/discover-utils",
     "@kbn/fields-metadata-plugin",
+    "@kbn/apm-types",
+    "@kbn/esql-utils",
   ]
 }

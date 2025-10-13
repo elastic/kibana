@@ -18,6 +18,7 @@ export async function getPackagePoliciesCountByPackageName(soClient: SavedObject
   >({
     type: savedObjectType,
     perPage: 0,
+    filter: `${savedObjectType}.attributes.latest_revision:true`,
     aggs: {
       count_by_package_name: {
         terms: {
