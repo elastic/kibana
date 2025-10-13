@@ -260,7 +260,7 @@ async function retryOnTimeout<T>(fn: () => Promise<T>, timeout = 60_000): Promis
   return pRetry(
     async () => {
       try {
-        return await pTimeout(fn(), { milliseconds: timeout });
+        return await pTimeout(fn(), timeout);
       } catch (err: any) {
         if (!(err instanceof TimeoutError)) {
           throw new AbortError(err); // don't retry on non-timeout errors

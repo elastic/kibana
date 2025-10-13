@@ -174,10 +174,8 @@ export class LlmProxy {
           },
         });
       }),
-      {
-        milliseconds: 30000,
-        message: `Interceptor "${name}" timed out after 30000ms`,
-      }
+      30000,
+      `Interceptor "${name}" timed out after 30000ms`
     );
 
     return {
