@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import type { ScopedModel } from '@kbn/onechat-server';
+import type { ScopedModel, ToolEventEmitter } from '@kbn/onechat-server';
 import type { Logger } from '@kbn/logging';
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
 import { generateEsql } from '@kbn/onechat-genai-utils';
@@ -53,6 +53,7 @@ type VisualizationState = typeof VisualizationStateAnnotation.State;
 export const createVisualizationGraph = (
   model: ScopedModel,
   logger: Logger,
+  events: ToolEventEmitter,
   esClient: IScopedClusterClient
 ) => {
   // Node: Generate ES|QL query
@@ -67,17 +68,19 @@ export const createVisualizationGraph = (
             ? `Existing esql query to modify: "${state.parsedExistingConfig.dataset.query}"\n\nUser query: ${state.nlQuery}`
             : state.nlQuery,
         model,
+        events,
+        logger,
         esClient: esClient.asCurrentUser,
       });
 
-      if (!generateEsqlResponse.queries || generateEsqlResponse.queries.length === 0) {
+      if (!generateEsqlResponse.query) {
         action = {
           type: 'generate_esql',
           success: false,
           error: 'No queries generated',
         };
       } else {
-        const esqlQuery = generateEsqlResponse.queries[0];
+        const esqlQuery = generateEsqlResponse.query;
         logger.debug(`Generated ES|QL query: ${esqlQuery}`);
         action = {
           type: 'generate_esql',

@@ -49,7 +49,7 @@ export interface GenerateEsqlOptions {
   /**
    * The resource (index/datastream/alias) to target
    */
-  index: string;
+  index?: string;
   /**
    * Additional context to provide to the model (user prompt)
    */

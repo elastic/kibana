@@ -57,7 +57,7 @@ This tool will:
     tags: [],
     handler: async (
       { query: nlQuery, chartType, esql, existingConfig },
-      { esClient, modelProvider, logger }
+      { esClient, modelProvider, logger, events }
     ) => {
       try {
         // Step 1: Determine chart type if not provided
@@ -88,7 +88,7 @@ This tool will:
         const schema = metricSchema;
 
         // Create and invoke the validation retry graph
-        const graph = createVisualizationGraph(model, logger, esClient);
+        const graph = createVisualizationGraph(model, logger, events, esClient);
 
         const finalState = await graph.invoke({
           nlQuery,
