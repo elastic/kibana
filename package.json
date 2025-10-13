@@ -1854,7 +1854,7 @@
     "clarify": "^2.2.0",
     "clean-webpack-plugin": "^4.0.0",
     "cli-progress": "^3.12.0",
-    "cli-table3": "^0.6.1",
+    "cli-table3": "^0.6.5",
     "content-security-policy-parser": "^0.6.0",
     "cpy": "^8.1.1",
     "css-loader": "^7.1.2",
