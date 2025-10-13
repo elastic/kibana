@@ -26,7 +26,6 @@ import {
   SEARCH_PRODUCT_NAME,
   SEARCH_INDICES,
   SEARCH_HOMEPAGE,
-  SEARCH_INDICES_START,
   SEARCH_INDEX_MANAGEMENT,
   SEARCH_APPS_TITLE,
 } from '../common/constants';
@@ -99,7 +98,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       ENTERPRISE_SEARCH_DATA_PLUGIN.ID,
       SEARCH_HOMEPAGE,
       SEARCH_INDICES,
-      SEARCH_INDICES_START,
       SEARCH_INDEX_MANAGEMENT,
     ];
 
