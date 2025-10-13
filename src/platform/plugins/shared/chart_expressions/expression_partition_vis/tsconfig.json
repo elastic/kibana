@@ -18,7 +18,6 @@
     "@kbn/data-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/charts-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/i18n",
     "@kbn/coloring",
     "@kbn/embeddable-plugin",
@@ -35,6 +34,7 @@
     "@kbn/ebt-tools",
     "@kbn/react-kibana-context-theme",
     "@kbn/field-formats-common",
+    "@kbn/visualizations-common"
   ],
   "exclude": [
     "target/**/*",

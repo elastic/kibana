@@ -19,11 +19,9 @@ import {
 } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
 import { LegendValue } from '@elastic/charts';
-import {
- LegendSize
-} from '@kbn/chart-expressions-common';
+import { LegendSize } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { type PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { type PartitionLegendValue } from '@kbn/expression-partition-vis-plugin/common';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import type { PieVisualizationState, SharedPieLayerState } from '../../../common/types';

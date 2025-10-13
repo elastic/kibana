@@ -17,7 +17,7 @@ import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import {
   getAccessorByDimension,
   getColumnByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+} from '@kbn/chart-expressions-common';
 import type { AxisExtentConfigResult, CommonXYDataLayerConfig } from '../../common';
 
 export interface XDomain {

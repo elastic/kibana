@@ -19,7 +19,7 @@ import type {
 import {
   getAccessorByDimension,
   getColumnByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+} from '@kbn/chart-expressions-common';
 import type {
   CommonXYDataLayerConfig,
   CommonXYLayerConfig,

@@ -19,8 +19,8 @@ import type { FC } from 'react';
 import React from 'react';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
-import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { getAccessorByDimension } from '@kbn/chart-expressions-common';
+import type { PersistedState } from '@kbn/visualizations-common';
 import type { KbnPalettes } from '@kbn/palettes';
 import type {
   CommonXYDataLayerConfig,

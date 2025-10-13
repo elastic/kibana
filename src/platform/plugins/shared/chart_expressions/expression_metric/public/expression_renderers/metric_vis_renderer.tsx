@@ -21,7 +21,7 @@ import {
   PERFORMANCE_TRACKER_TYPES,
 } from '@kbn/ebt-tools';
 import type { IInterpreterRenderHandlers, Datatable } from '@kbn/expressions-plugin/common';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
 import type { ExpressionMetricPluginStart } from '../plugin';
 import type { MetricVisRenderConfig, VisParams } from '../../common';

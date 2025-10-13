@@ -20,7 +20,7 @@ import {
   getEditServerlessBreadcrumbs,
 } from '../breadcrumbs';
 import type { SavedVisInstance, VisualizeServices, IEditorController } from '../../types';
-import { VisualizeConstants } from '../../../../common/constants';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 import { getTypes } from '../../../services';
 import { redirectToSavedObjectPage } from '../utils';
 import type { VisualizeInput } from '../../..';

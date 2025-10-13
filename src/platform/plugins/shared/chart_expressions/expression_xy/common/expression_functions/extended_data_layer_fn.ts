@@ -10,7 +10,7 @@
 import type {
   ExpressionValueVisDimension,
 } from '@kbn/chart-expressions-common';
-import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { validateAccessor } from '@kbn/chart-expressions-common';
 import type { ExtendedDataLayerArgs, ExtendedDataLayerFn } from '../types';
 import { EXTENDED_DATA_LAYER, LayerTypes } from '../constants';
 import { getAccessors, normalizeTable, getShowLines } from '../helpers';

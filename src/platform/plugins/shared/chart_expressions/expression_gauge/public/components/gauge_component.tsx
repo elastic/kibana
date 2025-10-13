@@ -23,7 +23,7 @@ import {
   findAccessor,
   getFormatByAccessor,
   isVisDimension,
-} from '@kbn/visualizations-plugin/common/utils';
+} from '@kbn/chart-expressions-common';
 import { i18n } from '@kbn/i18n';
 import type { GaugeRenderProps, GaugeLabelMajorMode } from '../../common';
 import { GaugeLabelMajorModes, GaugeColorModes, GaugeTicksPositions } from '../../common';

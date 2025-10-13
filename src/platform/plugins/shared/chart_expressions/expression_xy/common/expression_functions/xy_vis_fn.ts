@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { validateAccessor } from '@kbn/chart-expressions-common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type {
   ExpressionValueVisDimension,

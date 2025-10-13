@@ -9,8 +9,10 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin/common';
-import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
-import { findAccessorOrFail } from '../utils/accessors';
+import {
+  findAccessorOrFail,
+  type ExpressionValueVisDimension,
+} from '@kbn/chart-expressions-common';
 
 export interface Arguments {
   accessor: string | number;

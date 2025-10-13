@@ -49,14 +49,15 @@ import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/pu
 import type { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
 import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
+import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
+import type { PersistedState } from '@kbn/visualizations-common';
 import {
+  DEFAULT_LEGEND_SIZE,
+  LegendSizeToPixels,
   getAccessorByDimension,
   getColumnByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
-import { DEFAULT_LEGEND_SIZE, LegendSizeToPixels } from '@kbn/chart-expressions-common';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+  getOverridesFor,
+} from '@kbn/chart-expressions-common';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';

@@ -8,9 +8,7 @@
  */
 
 import { LegendDisplay } from '@kbn/expression-partition-vis-plugin/common';
-import type {
-  LegendSize,
-} from '@kbn/chart-expressions-common';
+import { LegendSize } from '@kbn/chart-expressions-common';
 
 const mockUiStateGet = jest.fn().mockReturnValue(() => false);
 

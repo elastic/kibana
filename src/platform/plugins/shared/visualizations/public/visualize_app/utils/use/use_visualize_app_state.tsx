@@ -25,7 +25,7 @@ import type {
 } from '../../types';
 import { visStateToEditorState } from '../utils';
 import { createVisualizeAppState } from '../create_visualize_app_state';
-import { VisualizeConstants } from '../../../../common/constants';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 /**
  * This effect is responsible for instantiating the visualize app state container,
  * which is in sync with "_a" url param

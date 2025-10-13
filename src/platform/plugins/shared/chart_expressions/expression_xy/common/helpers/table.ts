@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 

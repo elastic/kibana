@@ -10,7 +10,7 @@
 import type {
   ExpressionValueVisDimension,
 } from '@kbn/chart-expressions-common';
-import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor, getFormatByAccessor } from '@kbn/chart-expressions-common';
 import type { DatatableColumn, Datatable } from '@kbn/expressions-plugin/public';
 import type { BucketColumns } from '../../common/types';
 

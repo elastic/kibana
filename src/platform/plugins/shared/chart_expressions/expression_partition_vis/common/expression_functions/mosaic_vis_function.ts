@@ -8,10 +8,9 @@
  */
 
 import { Position } from '@elastic/charts';
-import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
-import {
-  DEFAULT_LEGEND_SIZE, LegendSize
-} from '@kbn/chart-expressions-common';;
+import { validateAccessor } from '@kbn/chart-expressions-common';
+import { prepareLogTable } from '@kbn/visualizations-common';
+import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/chart-expressions-common';
 import {
   LegendDisplay,
   type PartitionChartProps,

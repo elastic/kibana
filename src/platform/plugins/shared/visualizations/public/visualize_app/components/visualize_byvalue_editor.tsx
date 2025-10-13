@@ -23,7 +23,7 @@ import {
 import type { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import type { VisualizeAppProps } from '../app';
-import { VisualizeConstants } from '../../../common/constants';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 
 export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [originatingApp, setOriginatingApp] = useState<string>();

@@ -12,7 +12,7 @@ import { GroupBy, SmallMultiples, Predicate } from '@elastic/charts';
 import type {
   ExpressionValueVisDimension,
 } from '@kbn/chart-expressions-common';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 
 interface SplitChartProps {

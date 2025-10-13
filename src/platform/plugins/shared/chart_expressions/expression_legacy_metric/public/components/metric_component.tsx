@@ -13,7 +13,7 @@ import {
   getColumnByAccessor,
   getAccessor,
   getFormatByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+} from '@kbn/chart-expressions-common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';

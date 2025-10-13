@@ -12,7 +12,7 @@ import { visTypeAliasRegistry } from './vis_type_alias_registry';
 import { BaseVisType } from './base_vis_type';
 import type { VisTypeDefinition } from './types';
 import type { VisGroups } from './vis_groups_enum';
-import type { VisParams } from '../../common';
+import type { VisParams } from '@kbn/visualizations-common';
 
 /**
  * Vis Types Service

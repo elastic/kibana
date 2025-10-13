@@ -13,7 +13,7 @@ import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/commo
 import type {
   ExpressionValueVisDimension,
 } from '@kbn/chart-expressions-common';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import { getFormatter } from './formatters';
 
 export const getSplitDimensionAccessor = (

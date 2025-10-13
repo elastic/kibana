@@ -14,7 +14,7 @@ import type {
   VisualizeByValueState,
   VisualizeEmbeddableState,
 } from '../types';
-import { VISUALIZE_SAVED_OBJECT_TYPE } from '../../constants';
+import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
 import { extractVisReferences } from '../../references/extract_vis_references';
 import type {
   StoredVisualizeByReferenceState,

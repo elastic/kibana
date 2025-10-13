@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common/types';
-import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import type { ExpressionValueVisDimension } from '.';
 
 const getAccessorByIndex = (accessor: number, columns: Datatable['columns']) =>
   columns.length > accessor ? accessor : undefined;

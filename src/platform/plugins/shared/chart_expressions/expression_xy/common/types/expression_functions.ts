@@ -18,7 +18,6 @@ import type {
   ExecutionContext,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
-import type { XYLegendValue } from '@kbn/visualizations-plugin/common';
 import type { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 
 import type {
@@ -27,6 +26,7 @@ import type {
   ExpressionValueVisDimension,
   LegendLayout,
   LegendSize,
+  XYLegendValue,
 } from '@kbn/chart-expressions-common';
 import type {
   AxisExtentModes,
