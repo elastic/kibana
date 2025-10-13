@@ -2396,6 +2396,13 @@ module.exports = {
                   "Observability solution tests should import from '@kbn/scout-oblt' instead.",
               },
             ],
+            patterns: [
+              {
+                group: ['@kbn/scout/**', '@playwright/test/**', 'playwright/**'],
+                message:
+                  "Observability solution tests should import from '@kbn/scout-oblt' instead.",
+              },
+            ],
           },
         ],
       },
@@ -2419,6 +2426,13 @@ module.exports = {
               },
               {
                 name: 'playwright',
+                message:
+                  "Security solution tests should import from '@kbn/scout-security' instead.",
+              },
+            ],
+            patterns: [
+              {
+                group: ['@kbn/scout/**', '@playwright/test/**', 'playwright/**'],
                 message:
                   "Security solution tests should import from '@kbn/scout-security' instead.",
               },
