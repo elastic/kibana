@@ -103,7 +103,6 @@ export const openAndAcknowledgedAlertsInternalTool = (
         throw new Error(`Size ${actualSize} is out of range`);
       }
 
-
       const query = getOpenAndAcknowledgedAlertsQuery({
         alertsIndexPattern: actualAlertsIndexPattern,
         anonymizationFields,

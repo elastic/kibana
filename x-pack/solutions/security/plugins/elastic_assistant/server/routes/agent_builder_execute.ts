@@ -94,19 +94,16 @@ export const agentBuilderExecute = async ({
   systemPrompt,
   timeout,
 }: AgentBuilderExecuteParams) => {
-
   const startTime = Date.now(); // Track start time for telemetry
 
   const assistantContext = await context.elasticAssistant;
   const onechatAgents = assistantContext.getOnechatAgents();
-
 
   // Start title generation immediately (non-blocking)
   let titleGenerationPromise: Promise<void> | undefined;
   if (conversationId && messages.length > 0) {
     titleGenerationPromise = (async () => {
       try {
-
         const conversationsDataClient =
           await assistantContext.getAIAssistantConversationsDataClient();
         if (conversationsDataClient) {
@@ -128,7 +125,7 @@ export const agentBuilderExecute = async ({
             defaultConnectorId: connectorId,
           });
 
-              const generatedTitle = titleResult.result.round.response.message;
+          const generatedTitle = titleResult.result.round.response.message;
 
           // Update the conversation with the generated title
           await conversationsDataClient.updateConversation({
@@ -137,7 +134,6 @@ export const agentBuilderExecute = async ({
               title: generatedTitle.slice(0, 60), // Ensure max 60 characters
             },
           });
-
         }
       } catch (error) {
         logger.error(`Failed to generate chat title: ${error.message}`);
@@ -191,8 +187,7 @@ export const agentBuilderExecute = async ({
           namespace: field.namespace ?? 'default',
         }));
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   }
 
   // Get the last message as the next input
@@ -296,7 +291,6 @@ export const agentBuilderExecute = async ({
       }
     }
 
-
     // Attach anonymization fields, existing replacements, and tool parameters to the request in a way that doesn't break user context
     // We'll use symbols to avoid conflicts with existing request properties
     (request as any)[ANONYMIZATION_FIELDS_SYMBOL] = anonymizationFields;
@@ -347,7 +341,6 @@ export const agentBuilderExecute = async ({
     if (agentResult.result.round.steps && agentResult.result.round.steps.length > 0) {
       // Process each tool step to extract content references
       for (const step of agentResult.result.round.steps) {
-
         if (step.type === 'tool_call' && step.results && step.results.length > 0) {
           for (const result of step.results) {
             if (result.type === 'other' && result.data) {
@@ -356,7 +349,6 @@ export const agentBuilderExecute = async ({
                 step.tool_id === 'core.security.product_documentation' &&
                 result.data.content?.documents
               ) {
-
                 // Process product documentation results
                 const documents = result.data.content.documents;
                 for (let i = 0; i < documents.length; i++) {
@@ -378,26 +370,15 @@ export const agentBuilderExecute = async ({
                 }
               } else if (step.tool_id === 'core.security.alert_counts' && result.data.result) {
                 // Process alert counts results
-                console.log('🚀 [AGENT_BUILDER] Processing alert counts results');
-
                 // Add content reference for alert counts using SecurityAlertsPage type
                 const reference = contentReferencesStore.add((p) => ({
                   type: 'SecurityAlertsPage' as const,
                   id: p.id,
                 }));
 
-                console.log('🚀 [AGENT_BUILDER] Created reference:', reference);
-
                 // Add citation to the response content using contentReferenceBlock
                 const citation = contentReferenceBlock(reference);
-                console.log('🚀 [AGENT_BUILDER] Created citation:', citation);
-
                 accumulatedContent += ` ${citation}`;
-                console.log(
-                  '🚀 [AGENT_BUILDER] Created content reference for alert counts:',
-                  reference
-                );
-                console.log('🚀 [AGENT_BUILDER] Updated accumulatedContent:', accumulatedContent);
               } else if (
                 step.tool_id === 'core.security.open_and_acknowledged_alerts' &&
                 result.data.alerts
@@ -417,10 +398,6 @@ export const agentBuilderExecute = async ({
                     // Add citation to the response content
                     const citation = `[${referenceId}]`;
                     accumulatedContent += ` ${citation}`;
-                    console.log(
-                      '🚀 [AGENT_BUILDER] Created content reference for alert:',
-                      referenceId
-                    );
                   }
                 }
               } else {
@@ -431,26 +408,12 @@ export const agentBuilderExecute = async ({
                   href: `#tool-result-${step.tool_id || 'unknown_tool'}`,
                 }));
 
-                console.log('🚀 [AGENT_BUILDER] Created reference:', reference);
-
                 // Add citation to the response content using contentReferenceBlock
                 const citation = contentReferenceBlock(reference);
-                console.log('🚀 [AGENT_BUILDER] Created citation:', citation);
-
                 accumulatedContent += ` ${citation}`;
-                console.log(
-                  '🚀 [AGENT_BUILDER] Created content reference for generic tool:',
-                  reference
-                );
-                console.log('🚀 [AGENT_BUILDER] Updated accumulatedContent:', accumulatedContent);
               }
             }
           }
-        } else {
-          console.log(
-            '🚀 [AGENT_BUILDER] Skipping step (not a tool_call or no tool results):',
-            step.type
-          );
         }
       }
     }
@@ -474,15 +437,8 @@ export const agentBuilderExecute = async ({
     }
 
     // Call onLlmResponse with the final processed content to ensure conversation updates happen properly
-    console.log(
-      '🚀 [AGENT_BUILDER] About to call onLlmResponse with finalResponse:',
-      finalResponse
-    );
     if (onLlmResponse) {
       await onLlmResponse(finalResponse, finalTraceData, false);
-      console.log('🚀 [AGENT_BUILDER] onLlmResponse completed successfully');
-    } else {
-      console.log('🚀 [AGENT_BUILDER] onLlmResponse is not provided');
     }
 
     // Title generation is already running in parallel (started at the beginning)
@@ -509,9 +465,6 @@ export const agentBuilderExecute = async ({
 
     // For streaming, we need to return a proper streaming response
     if (isStream) {
-      console.log('🚀 [AGENT_BUILDER] Creating streaming response');
-      console.log('🚀 [AGENT_BUILDER] finalResponse for streaming:', finalResponse);
-
       // Create a streaming response similar to the langchain execution
       const {
         end: streamEnd,
@@ -521,21 +474,12 @@ export const agentBuilderExecute = async ({
 
       // Push the final response as a content chunk
       push({ payload: finalResponse, type: 'content' });
-      console.log('🚀 [AGENT_BUILDER] Pushed content to stream');
 
       // End the stream
       streamEnd();
-      console.log('🚀 [AGENT_BUILDER] Stream ended, returning responseWithHeaders');
 
       return responseWithHeaders;
     } else {
-      console.log('🚀 [AGENT_BUILDER] Creating static response');
-      console.log('🚀 [AGENT_BUILDER] finalResponse for static:', finalResponse);
-      console.log(
-        '🚀 [AGENT_BUILDER] contentReferences being sent:',
-        contentReferencesStore.getStore()
-      );
-
       // Return static response format (matching langchain execution format)
       const contentReferences = contentReferencesStore.getStore();
       const metadata = !isEmpty(contentReferences) ? { contentReferences } : {};
@@ -556,10 +500,6 @@ export const agentBuilderExecute = async ({
       });
     }
   } catch (error) {
-    console.log('🚀 [AGENT_BUILDER] ERROR occurred:', error);
-    console.log('🚀 [AGENT_BUILDER] Error message:', error.message);
-    console.log('🚀 [AGENT_BUILDER] Error stack:', error.stack);
-
     logger.error('Agent builder execution failed:', error);
 
     if (onLlmResponse) {
