@@ -72,11 +72,6 @@ export const getCAIAttachmentsBackfillTaskId = (spaceId: string, owner: Owner): 
   return `${CAI_ATTACHMENTS_BACKFILL_TASK_ID}-${spaceId}-${owner}`;
 };
 
-const CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID = 'cai_cases_attachments_synchronization_task';
-export const getCAIAttachmentsSynchronizationTaskId = (spaceId: string, owner: Owner): string => {
-  return `${CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID}-${spaceId}-${owner}`;
-};
-
 export const getAttachmentsSynchronizationSourceQuery = (
   lastSyncAt: Date,
   spaceId: string,
