@@ -165,12 +165,6 @@ const TabPreviewInner: React.FC<{
 }> = ({ tabItem, tabPreviewData }) => {
   const { euiTheme } = useEuiTheme();
   const previewQuery = getPreviewQuery(tabPreviewData);
-  let previewQueryLabel = isOfAggregateQueryType(tabPreviewData.query)
-    ? 'ES|QL'
-    : tabPreviewData.query.language === 'kuery'
-    ? 'KQL'
-    : tabPreviewData.query.language;
-  previewQueryLabel = previewQueryLabel[0].toUpperCase() + previewQueryLabel.slice(1);
 
   return (
     <>
@@ -185,19 +179,14 @@ const TabPreviewInner: React.FC<{
           </EuiText>
         ) : null}
         {previewQuery ? (
-          <>
-            <EuiText size="s" className="eui-textBreakWord" css={getPreviewtitleCss(euiTheme)}>
-              {previewQueryLabel}:
-            </EuiText>
-            <EuiCodeBlock
-              language={getQueryLanguage(tabPreviewData)}
-              transparentBackground
-              paddingSize="none"
-              css={codeBlockCss}
-            >
-              {previewQuery}
-            </EuiCodeBlock>
-          </>
+          <EuiCodeBlock
+            language={getQueryLanguage(tabPreviewData)}
+            transparentBackground
+            paddingSize="none"
+            css={codeBlockCss}
+          >
+            {previewQuery}
+          </EuiCodeBlock>
         ) : null}
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner
