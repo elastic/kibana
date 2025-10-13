@@ -43,7 +43,7 @@ export interface RiskScoreService {
   refreshRiskScoreIndex: () => Promise<void>;
   resetToZero: (
     deps: Pick<ResetToZeroDependencies, 'refresh' | 'entityType' | 'excludedEntities'>
-  ) => Promise<void>;
+  ) => Promise<{ scoresWritten: number }>;
 }
 
 export interface RiskScoreServiceFactoryParams {
@@ -117,7 +117,7 @@ export const riskScoreServiceFactory = ({
   resetToZero: async (
     deps: Pick<ResetToZeroDependencies, 'refresh' | 'entityType' | 'excludedEntities'>
   ) => {
-    await resetToZero({
+    const results = await resetToZero({
       ...deps,
       esClient,
       dataClient: riskScoreDataClient,
@@ -125,6 +125,7 @@ export const riskScoreServiceFactory = ({
       assetCriticalityService,
       logger,
     });
+    return results;
   },
 
   getRiskInputsIndex: async (params) => riskScoreDataClient.getRiskInputsIndex(params),
