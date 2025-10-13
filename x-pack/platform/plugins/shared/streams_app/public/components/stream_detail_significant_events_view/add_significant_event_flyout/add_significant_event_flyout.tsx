@@ -40,6 +40,7 @@ import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useAIFeatures } from './generated_flow_form/use_ai_features';
 import { validateQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+import { GenerateSuggestionButton } from '../../data_management/stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 
 interface Props {
   onClose: () => void;
@@ -113,8 +114,8 @@ export function AddSignificantEventFlyout({
     }
   }, [selectedFlow]);
 
-  const generateQueries = useCallback(() => {
-    const connector = aiFeatures?.genAiConnectors.selectedConnector;
+  const generateQueries = useCallback((connectorId?: string) => {
+    const connector = connectorId || aiFeatures?.genAiConnectors.selectedConnector;
     if (!connector || selectedSystems.length === 0) {
       return;
     }
@@ -256,8 +257,9 @@ export function AddSignificantEventFlyout({
                       selectedSystems={selectedSystems}
                       onSystemsChange={setSelectedSystems}
                     />
-                    <EuiButton
-                      iconType="sparkles"
+                    <GenerateSuggestionButton
+                      aiFeatures={aiFeatures!}
+                      onClick={generateQueries}
                       fill
                       isLoading={isGenerating}
                       disabled={
@@ -265,7 +267,6 @@ export function AddSignificantEventFlyout({
                         selectedSystems.length === 0 ||
                         !aiFeatures?.genAiConnectors?.selectedConnector
                       }
-                      onClick={generateQueries}
                     >
                       {i18n.translate(
                         'xpack.streams.streamDetailView.addSignificantEventFlyout.generateSuggestionsButtonLabel',
@@ -273,7 +274,7 @@ export function AddSignificantEventFlyout({
                           defaultMessage: 'Generate suggestions',
                         }
                       )}
-                    </EuiButton>
+                    </GenerateSuggestionButton>
                   </>
                 )}
               </EuiPanel>
