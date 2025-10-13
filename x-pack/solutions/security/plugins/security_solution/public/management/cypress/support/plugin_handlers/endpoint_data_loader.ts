@@ -20,6 +20,7 @@ import { STARTED_TRANSFORM_STATES } from '../../../../../common/constants';
 import {
   ENDPOINT_ALERTS_INDEX,
   ENDPOINT_EVENTS_INDEX,
+  ENDPOINT_DEVICE_INDEX,
 } from '../../../../../scripts/endpoint/common/constants';
 import {
   METADATA_DATASTREAM,
@@ -120,6 +121,7 @@ export const cyLoadEndpointDataHandler = async (
     POLICY_RESPONSE_INDEX,
     ENDPOINT_EVENTS_INDEX,
     ENDPOINT_ALERTS_INDEX,
+    ENDPOINT_DEVICE_INDEX,
     alertsPerHost,
     enableFleetIntegration,
     undefined,
