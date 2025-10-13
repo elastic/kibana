@@ -18,14 +18,14 @@ import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 import {
+  ALERT_RULE_CREATED_BY,
   ALERT_RULE_FROM,
-  ALERT_RULE_TYPE,
   ALERT_RULE_NOTE,
   ALERT_RULE_PARAMETERS,
-  ALERT_RULE_CREATED_BY,
-  ALERT_SUPPRESSION_START,
-  ALERT_SUPPRESSION_END,
+  ALERT_RULE_TYPE,
   ALERT_SUPPRESSION_DOCS_COUNT,
+  ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_TERMS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
@@ -36,12 +36,12 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
 import type { TimelineEventsDetailsRequestOptionsInput } from '@kbn/timelines-plugin/common';
 import {
-  ALERT_ORIGINAL_TIME,
   ALERT_GROUP_ID,
+  ALERT_NEW_TERMS,
+  ALERT_ORIGINAL_TIME,
+  ALERT_RULE_INDICES,
   ALERT_RULE_TIMELINE_ID,
   ALERT_THRESHOLD_RESULT,
-  ALERT_NEW_TERMS,
-  ALERT_RULE_INDICES,
 } from '../../../../common/field_maps/field_names';
 import {
   isEqlRule,
@@ -53,12 +53,11 @@ import {
 import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import type {
-  SendAlertToTimelineActionProps,
-  ThresholdAggregationData,
-  UpdateAlertStatusActionProps,
+  CreateTimeline,
   CreateTimelineProps,
   GetExceptionFilter,
-  CreateTimeline,
+  SendAlertToTimelineActionProps,
+  ThresholdAggregationData,
 } from './types';
 import type {
   TimelineEventsDetailsItem,
@@ -70,9 +69,9 @@ import { formatTimelineResponseToModel } from '../../../timelines/components/ope
 import { convertKueryToElasticSearchQuery } from '../../../common/lib/kuery';
 import { getField, getFieldKey } from '../../../helpers';
 import {
-  replaceTemplateFieldFromQuery,
-  replaceTemplateFieldFromMatchFilters,
   replaceTemplateFieldFromDataProviders,
+  replaceTemplateFieldFromMatchFilters,
+  replaceTemplateFieldFromQuery,
 } from './helpers';
 import type {
   DataProvider,
@@ -86,50 +85,6 @@ import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
-import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
-
-export const updateAlertStatusAction = async ({
-  query,
-  alertIds,
-  selectedStatus,
-  setEventsLoading,
-  setEventsDeleted,
-  onAlertStatusUpdateSuccess,
-  onAlertStatusUpdateFailure,
-}: UpdateAlertStatusActionProps) => {
-  try {
-    setEventsLoading({ eventIds: alertIds, isLoading: true });
-
-    const response = await updateAlertStatus({
-      query: query && JSON.parse(query),
-      status: selectedStatus,
-      signalIds: alertIds,
-    });
-
-    setEventsDeleted({ eventIds: alertIds, isDeleted: true });
-
-    if (response.version_conflicts && alertIds.length === 1) {
-      throw new Error(
-        i18n.translate(
-          'xpack.securitySolution.detectionEngine.alerts.updateAlertStatusFailedSingleAlert',
-          {
-            defaultMessage: 'Failed to update alert because it was already being modified.',
-          }
-        )
-      );
-    }
-
-    onAlertStatusUpdateSuccess(
-      response.updated ?? 0,
-      response.version_conflicts ?? 0,
-      selectedStatus
-    );
-  } catch (error) {
-    onAlertStatusUpdateFailure(selectedStatus, error);
-  } finally {
-    setEventsLoading({ eventIds: alertIds, isLoading: false });
-  }
-};
 
 export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
   if (Array.isArray(ecs)) {

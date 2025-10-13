@@ -5,26 +5,6 @@
  * 2.0.
  */
 
-import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
-import type {
-  ASSET_POLICY_TEMPLATE,
-  SUPPORTED_CLOUDBEAT_INPUTS,
-  CLOUDBEAT_AWS,
-  CLOUDBEAT_AZURE,
-  CLOUDBEAT_GCP,
-} from './constants';
+import type { SUPPORTED_CLOUDBEAT_INPUTS } from './constants';
 
 export type AssetInput = (typeof SUPPORTED_CLOUDBEAT_INPUTS)[number];
-
-type AssetPolicyInput =
-  | { type: typeof CLOUDBEAT_AZURE; policy_template: typeof ASSET_POLICY_TEMPLATE }
-  | { type: typeof CLOUDBEAT_GCP; policy_template: typeof ASSET_POLICY_TEMPLATE }
-  | { type: typeof CLOUDBEAT_AWS; policy_template: typeof ASSET_POLICY_TEMPLATE };
-
-export type AssetInventoryInputTypes =
-  | typeof CLOUDBEAT_AZURE
-  | typeof CLOUDBEAT_GCP
-  | typeof CLOUDBEAT_AWS;
-
-// Extend NewPackagePolicyInput with known string literals for input type and policy template
-export type NewPackagePolicyAssetInput = NewPackagePolicyInput & AssetPolicyInput;

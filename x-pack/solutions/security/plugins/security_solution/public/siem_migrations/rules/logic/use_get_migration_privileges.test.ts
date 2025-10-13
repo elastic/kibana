@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { renderHook, waitFor, act } from '@testing-library/react';
-import { useQueryClient } from '@kbn/react-query';
-import {
-  useGetMigrationMissingPrivileges,
-  useInvalidateGetMigrationPrivileges,
-} from './use_get_migration_privileges';
+import { renderHook, waitFor } from '@testing-library/react';
+import { useGetMigrationMissingPrivileges } from './use_get_migration_privileges';
 import { getRuleMigrationMissingPrivileges } from '../api';
 import { TestProviders } from '../../../common/mock/test_providers';
 
@@ -60,33 +56,6 @@ describe('Get Migration Privileges Hooks', () => {
       });
 
       expect(result.current.error).toBe(mockError);
-    });
-  });
-
-  describe('useInvalidateGetMigrationPrivileges', () => {
-    const invalidateQueries = jest.fn();
-
-    beforeEach(() => {
-      (useQueryClient as jest.Mock).mockReturnValue({
-        invalidateQueries,
-      });
-    });
-
-    it('invalidates the query cache for privileges', () => {
-      const { result } = renderHook(() => useInvalidateGetMigrationPrivileges(), {
-        wrapper: TestProviders,
-      });
-
-      act(() => {
-        result.current();
-      });
-
-      expect(invalidateQueries).toHaveBeenCalledWith(
-        ['GET', '/internal/siem_migrations/rules/missing_privileges'],
-        {
-          refetchType: 'active',
-        }
-      );
     });
   });
 });

@@ -20,7 +20,6 @@ import {
   ALERTS_PATH,
   APP_UI_ID,
   CASES_FEATURE_ID,
-  CASES_PATH,
   DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
   RULES_PATH,
@@ -180,22 +179,6 @@ export const isDashboardViewPath = (pathname: string): boolean =>
     exact: false,
     strict: false,
   }) != null;
-
-const isAlertsPath = (pathname: string): boolean => {
-  return !!matchPath(pathname, {
-    path: `${ALERTS_PATH}`,
-    strict: false,
-  });
-};
-
-const isCaseDetailsPath = (pathname: string): boolean => {
-  return !!matchPath(pathname, {
-    path: `${CASES_PATH}/:detailName`,
-    strict: false,
-  });
-};
-export const isTourPath = (pathname: string): boolean =>
-  isAlertsPath(pathname) || isCaseDetailsPath(pathname);
 
 export const isThreatIntelligencePath = (pathname: string): boolean => {
   return !!matchPath(pathname, {

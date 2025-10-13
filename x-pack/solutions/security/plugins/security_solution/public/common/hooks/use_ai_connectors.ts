@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMemo, useCallback } from 'react';
-import { useQuery, useQueryClient } from '@kbn/react-query';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAppToasts } from './use_app_toasts';
 import { loadAiConnectors } from '../utils/connectors/ai_connectors';
 import * as i18n from './translations';
@@ -40,12 +40,4 @@ export const useAIConnectors = () => {
     }),
     [data, isLoading, error]
   );
-};
-
-export const useInvalidateGetAIConnectors = () => {
-  const queryClient = useQueryClient();
-
-  return useCallback(() => {
-    queryClient.invalidateQueries(QUERY_KEY);
-  }, [queryClient]);
 };

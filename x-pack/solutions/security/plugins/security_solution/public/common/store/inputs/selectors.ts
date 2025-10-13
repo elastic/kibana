@@ -11,7 +11,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { InputsState } from './reducer';
 import type { State } from '../types';
 
-import type { InputsModel, InputsRange, GlobalQuery } from './model';
+import type { GlobalQuery, InputsModel, InputsRange } from './model';
 
 const defaultQuery = {
   id: 'kql',
@@ -78,9 +78,6 @@ export const timelineQueryByIdSelector = createSelector(
 
 export const timelineQueryByIdSelectorFactory = () =>
   createSelector(timelineQueryByIdSelector, (query) => query);
-
-export const timelineQueriesFactory = () =>
-  createSelector(selectTimeline, (timeline) => timeline.queries);
 
 export const globalSelector = () => createSelector(selectGlobal, (global) => global);
 

@@ -102,14 +102,6 @@ export interface EmbeddableData {
 
 export type OnEmbeddableLoaded = (data: EmbeddableData) => void;
 
-export enum VisualizationContextMenuDefaultActionName {
-  addToExistingCase = 'addToExistingCase',
-  addToNewCase = 'addToNewCase',
-  inspect = 'inspect',
-  openInLens = 'openInLens',
-  saveToLibrary = 'saveToLibrary',
-}
-
 export interface LensEmbeddableComponentProps {
   applyGlobalQueriesAndFilters?: boolean;
   applyPageAndTabsFilters?: boolean;
@@ -206,21 +198,6 @@ export interface VisualizationEmbeddableProps extends LensEmbeddableComponentPro
    * Indices to use when fetching the lens component
    */
   signalIndexName?: string | null;
-}
-
-export interface VisualizationResponse<Hit = {}, Aggregations = {} | undefined> {
-  took: number;
-  _shards: {
-    total: number;
-    successful: number;
-    skipped: number;
-    failed: number;
-  };
-  aggregations?: Aggregations;
-  hits: {
-    total: number;
-    hits: Hit[];
-  };
 }
 
 export interface SavedObjectReference {

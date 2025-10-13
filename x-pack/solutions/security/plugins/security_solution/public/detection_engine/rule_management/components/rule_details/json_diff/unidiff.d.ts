@@ -29,7 +29,6 @@ declare module 'unidiff' {
 }
 
 declare module 'unidiff/hunk' {
-  export const ADDED: ADDED;
   export const REMOVED: REMOVED;
   export const UNMODIFIED: UNMODIFIED;
 
@@ -47,8 +46,6 @@ declare module 'unidiff/hunk' {
     changes: LineChange[];
     unified(): string;
   }
-
-  export function lineChanges(change: ChangeWithType): LineChange[];
 
   export function hunk(aOffset: number, bOffset: number, lchanges: LineChange[]): UniDiffHunk;
 }

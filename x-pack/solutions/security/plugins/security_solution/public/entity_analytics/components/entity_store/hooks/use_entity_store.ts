@@ -17,8 +17,8 @@ import type {
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import {
   type DeleteEntityEngineResponse,
-  type StopEntityEngineResponse,
   type EntityType,
+  type StopEntityEngineResponse,
 } from '../../../../../common/api/entity_analytics';
 import { useEntityStoreRoutes } from '../../../api/entity_store';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
@@ -79,8 +79,6 @@ export const useEnableEntityStoreMutation = (
     }
   );
 };
-
-export const INIT_ENTITY_ENGINE_STATUS_KEY = ['POST', 'INIT_ENTITY_ENGINE'];
 
 export const STOP_ENTITY_ENGINE_STATUS_KEY = ['POST', 'STOP_ENTITY_ENGINE'];
 export const useStopEntityEngineMutation = (entityTypes: EntityType[]) => {

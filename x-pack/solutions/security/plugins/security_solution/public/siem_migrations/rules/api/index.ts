@@ -14,45 +14,45 @@ import { KibanaServices } from '../../../common/lib/kibana';
 
 import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
 import {
-  SIEM_RULE_MIGRATIONS_PATH,
-  SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
   SIEM_RULE_MIGRATION_INSTALL_PATH,
-  SIEM_RULE_MIGRATION_START_PATH,
-  SIEM_RULE_MIGRATION_STATS_PATH,
-  SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH,
+  SIEM_RULE_MIGRATION_MISSING_PRIVILEGES_PATH,
+  SIEM_RULE_MIGRATION_PATH,
   SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH,
   SIEM_RULE_MIGRATION_RESOURCES_PATH,
-  SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH,
-  SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH,
-  SIEM_RULE_MIGRATION_MISSING_PRIVILEGES_PATH,
   SIEM_RULE_MIGRATION_RULES_PATH,
-  SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH,
-  SIEM_RULE_MIGRATION_PATH,
+  SIEM_RULE_MIGRATION_START_PATH,
+  SIEM_RULE_MIGRATION_STATS_PATH,
   SIEM_RULE_MIGRATION_STOP_PATH,
+  SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH,
   SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH,
+  SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
+  SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH,
+  SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH,
+  SIEM_RULE_MIGRATIONS_PATH,
+  SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationResponse,
+  CreateRuleMigrationRulesRequestBody,
+  GetRuleMigrationIntegrationsResponse,
+  GetRuleMigrationIntegrationsStatsResponse,
+  GetRuleMigrationPrebuiltRulesResponse,
+  GetRuleMigrationPrivilegesResponse,
+  GetRuleMigrationResourcesMissingResponse,
+  GetRuleMigrationRulesResponse,
   GetRuleMigrationTranslationStatsResponse,
   InstallMigrationRulesResponse,
   StartRuleMigrationRequestBody,
-  GetRuleMigrationResourcesMissingResponse,
-  UpsertRuleMigrationResourcesRequestBody,
-  UpsertRuleMigrationResourcesResponse,
-  GetRuleMigrationPrebuiltRulesResponse,
   StartRuleMigrationResponse,
-  GetRuleMigrationIntegrationsResponse,
-  GetRuleMigrationPrivilegesResponse,
-  GetRuleMigrationRulesResponse,
-  CreateRuleMigrationRulesRequestBody,
-  GetRuleMigrationIntegrationsStatsResponse,
-  UpdateRuleMigrationRulesResponse,
-  UpdateRuleMigrationRequestBody,
   StopRuleMigrationResponse,
   UpdateRuleMigrationIndexPatternResponse,
+  UpdateRuleMigrationRequestBody,
+  UpdateRuleMigrationRulesResponse,
+  UpsertRuleMigrationResourcesRequestBody,
+  UpsertRuleMigrationResourcesResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { RuleMigrationStats } from '../types';
-import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../../common/types';
+import type { GetMigrationsStatsAllParams, GetMigrationStatsParams } from '../../common/types';
 
 /** Retrieves the stats for the specific migration. */
 export const getRuleMigrationStats = async ({
@@ -345,10 +345,6 @@ export const getIntegrations = async ({
   );
 };
 
-export interface GetIntegrationsStatsParams {
-  /** Optional AbortSignal for cancelling request */
-  signal?: AbortSignal;
-}
 /** Retrieves existing integrations. */
 export const getIntegrationsStats = async ({
   signal,

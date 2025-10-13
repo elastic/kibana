@@ -36,21 +36,6 @@ import * as i18n from './translations';
 
 export const DEFAULT_CONTEXT_ID = 'alert-renderer';
 
-export const ALERT_RENDERER_FIELDS = [
-  DESTINATION_IP,
-  DESTINATION_PORT,
-  EVENT_CATEGORY,
-  FILE_NAME,
-  HOST_NAME,
-  KIBANA_ALERT_RULE_NAME,
-  KIBANA_ALERT_SEVERITY,
-  PROCESS_NAME,
-  PROCESS_PARENT_NAME,
-  SOURCE_IP,
-  SOURCE_PORT,
-  USER_NAME,
-];
-
 export const alertRenderer: RowRenderer = {
   id: RowRendererIdEnum.alert,
   isInstance: (ecs) => eventKindMatches(get('event.kind', ecs)),

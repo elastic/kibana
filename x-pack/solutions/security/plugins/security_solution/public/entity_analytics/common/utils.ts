@@ -7,6 +7,7 @@
 
 import { euiThemeVars } from '@kbn/ui-theme'; // eslint-disable-line @elastic/eui/no-restricted-eui-imports
 import { RiskSeverity } from '../../../common/search_strategy';
+
 export { RISK_LEVEL_RANGES as RISK_SCORE_RANGES } from '../../../common/entity_analytics/risk_engine';
 
 export const SEVERITY_UI_SORT_ORDER = [
@@ -54,7 +55,6 @@ export enum UserRiskScoreQueryId {
 export enum HostRiskScoreQueryId {
   DEFAULT = 'HostRiskScore',
   HOST_DETAILS_RISK_SCORE = 'HostDetailsRiskScore',
-  OVERVIEW_RISKY_HOSTS = 'OverviewRiskyHosts',
   HOSTS_BY_RISK = 'HostsByRisk',
 }
 

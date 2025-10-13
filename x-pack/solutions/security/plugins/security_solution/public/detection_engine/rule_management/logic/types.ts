@@ -11,13 +11,9 @@ import type { RuleSnooze } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import type { RuleSnoozeSettings } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type {
-  RuleCustomizationStatus,
-  WarningSchema,
-} from '../../../../common/api/detection_engine';
-import type { RuleExecutionStatus } from '../../../../common/api/detection_engine/rule_monitoring';
-
+import type { RuleCustomizationStatus } from '../../../../common/api/detection_engine';
 import { SortOrder } from '../../../../common/api/detection_engine';
+import type { RuleExecutionStatus } from '../../../../common/api/detection_engine/rule_monitoring';
 import type {
   RuleCreateProps,
   RuleResponse,
@@ -29,6 +25,7 @@ import type {
 } from '../../../../common/api/detection_engine/rule_management';
 import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
 import type { GapRangeValue } from '../../rule_gaps/constants';
+
 export interface CreateRulesProps {
   rule: RuleCreateProps;
   signal?: AbortSignal;
@@ -144,46 +141,6 @@ export interface ImportDataProps {
   overwriteExceptions?: boolean;
   overwriteActionConnectors?: boolean;
   signal?: AbortSignal;
-}
-
-export interface ImportRulesResponseError {
-  rule_id: string;
-  error: {
-    status_code: number;
-    message: string;
-  };
-}
-
-export interface ImportResponseError {
-  id: string;
-  error: {
-    status_code: number;
-    message: string;
-  };
-}
-
-export interface ExceptionsImportError {
-  error: {
-    status_code: number;
-    message: string;
-  };
-  id?: string | undefined;
-  list_id?: string | undefined;
-  item_id?: string | undefined;
-}
-
-export interface ImportDataResponse {
-  success: boolean;
-  success_count: number;
-  rules_count?: number;
-  errors: Array<ImportRulesResponseError | ImportResponseError>;
-  exceptions_success?: boolean;
-  exceptions_success_count?: number;
-  exceptions_errors?: ExceptionsImportError[];
-  action_connectors_success?: boolean;
-  action_connectors_success_count?: number;
-  action_connectors_errors?: Array<ImportRulesResponseError | ImportResponseError>;
-  action_connectors_warnings?: WarningSchema[];
 }
 
 export interface ExportDocumentsProps {

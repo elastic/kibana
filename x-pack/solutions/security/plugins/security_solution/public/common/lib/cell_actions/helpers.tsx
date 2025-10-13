@@ -84,9 +84,6 @@ export const getLinkColumnDefinition = (
     }
   });
 
-/** a noop required by the filter in / out buttons */
-export const onFilterAdded = () => {};
-
 /** a hook to eliminate the verbose boilerplate required to use common services */
 export const useKibanaServices = () => {
   const {

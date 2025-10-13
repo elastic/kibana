@@ -7,17 +7,17 @@
 
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { getRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import { savedRuleMock, rulesMock } from '../../logic/mock';
+import { rulesMock, savedRuleMock } from '../../logic/mock';
 
 import type {
-  PatchRuleProps,
-  CreateRulesProps,
-  UpdateRulesProps,
-  PrePackagedRulesStatusResponse,
   BasicFetchProps,
+  CreateRulesProps,
   FetchRuleProps,
-  FetchRulesResponse,
   FetchRulesProps,
+  FetchRulesResponse,
+  PatchRuleProps,
+  PrePackagedRulesStatusResponse,
+  UpdateRulesProps,
 } from '../../logic/types';
 
 export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RuleResponse> =>
@@ -55,8 +55,5 @@ export const fetchRuleById = jest.fn(
 
 export const fetchRules = async (_: FetchRulesProps): Promise<FetchRulesResponse> =>
   Promise.resolve(rulesMock);
-
-export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> =>
-  Promise.resolve(['elastic', 'love', 'quality', 'code']);
 
 export const performBulkAction = jest.fn();

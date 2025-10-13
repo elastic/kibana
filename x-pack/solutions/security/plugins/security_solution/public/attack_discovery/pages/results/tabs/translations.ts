@@ -13,10 +13,3 @@ export const CURRENT = i18n.translate(
     defaultMessage: 'Current',
   }
 );
-
-export const PREVIOUS = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.results.tabs.previousTabLabel',
-  {
-    defaultMessage: 'Previous',
-  }
-);

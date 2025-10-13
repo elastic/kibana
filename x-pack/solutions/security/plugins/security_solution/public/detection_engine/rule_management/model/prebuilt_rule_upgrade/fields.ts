@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  DiffableCommonFields,
+
+import type {
+  DiffableCustomQueryFields,
+  DiffableEqlFields,
+  DiffableEsqlFields,
+  DiffableMachineLearningFields,
+  DiffableNewTermsFields,
+  DiffableSavedQueryFields,
+  DiffableThreatMatchFields,
+  DiffableThresholdFields,
   NON_UPGRADEABLE_DIFFABLE_FIELDS,
-  type DiffableCustomQueryFields,
-  type DiffableEqlFields,
-  type DiffableEsqlFields,
-  type DiffableMachineLearningFields,
-  type DiffableNewTermsFields,
-  type DiffableSavedQueryFields,
-  type DiffableThreatMatchFields,
-  type DiffableThresholdFields,
-  type ThreeWayRuleFieldsDiff,
+  ThreeWayRuleFieldsDiff,
 } from '../../../../../common/api/detection_engine';
+import { DiffableCommonFields } from '../../../../../common/api/detection_engine';
 
 export type NonUpgradeableDiffableFields = (typeof NON_UPGRADEABLE_DIFFABLE_FIELDS)[number];
 
@@ -68,10 +69,4 @@ export const COMMON_FIELD_NAMES = DiffableCommonFields.keyof().options;
 
 export function isCommonFieldName(fieldName: string): fieldName is keyof DiffableCommonFields {
   return (COMMON_FIELD_NAMES as string[]).includes(fieldName);
-}
-
-export function isNonUpgradeableFieldName(
-  fieldName: string
-): fieldName is NonUpgradeableDiffableFields {
-  return (NON_UPGRADEABLE_DIFFABLE_FIELDS as Readonly<string[]>).includes(fieldName);
 }

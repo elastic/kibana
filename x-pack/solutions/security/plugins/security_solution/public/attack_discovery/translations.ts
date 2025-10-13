@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const COLLECTION = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.mitre.attack.tactics.collectionLabel',
-  {
-    defaultMessage: 'Collection',
-  }
-);
-
 export const EXECUTION = i18n.translate(
   'xpack.securitySolution.attackDiscovery.mitre.attack.tactics.executionLabel',
   {

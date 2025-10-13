@@ -6,10 +6,7 @@
  */
 
 import { useContext } from 'react';
-import type { IndicatorsFiltersContextValue } from '../../indicators/hooks/use_filters_context';
 import { IndicatorsFiltersContext } from '../../indicators/hooks/use_filters_context';
-
-export type UseFiltersValue = IndicatorsFiltersContextValue;
 
 /**
  * Custom react hook housing logic for KQL bar

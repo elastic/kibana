@@ -14,7 +14,6 @@ import { getAlertsPreviewEsqlQuery } from '../../alerts_preview_tab/get_alerts_p
 import { getAlertsPreviewLensAttributes } from '../../alerts_preview_tab/get_alerts_preview_lens_attributes';
 import { PreviewTab } from '../../preview_tab';
 import * as i18n from '../../translations';
-import type { Sorting } from '../../types';
 import type { AlertsSelectionSettings } from '../../../types';
 
 const SUMMARY_TAB_EMBEDDABLE_ID = 'alertSummaryEmbeddable--id';
@@ -22,16 +21,6 @@ const PREVIEW_TAB_EMBEDDABLE_ID = 'alertsPreviewEmbeddable--id';
 
 export const ALERT_SUMMARY_TEST_SUBJ = 'alertSummaryPreviewTab';
 export const ALERTS_PREVIEW_TEST_SUBJ = 'alertsPreviewTab';
-
-export const DEFAULT_ALERT_SUMMARY_SORT: Sorting = {
-  columnId: 'count',
-  direction: 'desc',
-};
-
-export const DEFAULT_ALERTS_PREVIEW_SORT: Sorting = {
-  columnId: 'kibana.alert.risk_score',
-  direction: 'desc',
-};
 
 export interface TabInfo {
   content: JSX.Element;

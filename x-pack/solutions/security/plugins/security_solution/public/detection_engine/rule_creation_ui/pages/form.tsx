@@ -16,7 +16,6 @@ import type {
 } from '../../common/types';
 import { DataSourceType } from '../../common/types';
 import { useKibana } from '../../../common/lib/kibana';
-import type { FormHook } from '../../../shared_imports';
 import { useFormData } from '../../../shared_imports';
 import { schema as defineRuleSchema } from '../components/step_define_rule/schema';
 import { schema as aboutRuleSchema } from '../components/step_about_rule/schema';
@@ -142,10 +141,3 @@ export const useRuleIndexPattern = ({
   }, [dataSourceType, isIndexPatternLoading, data, dataViewId, initIndexPattern]);
   return { indexPattern, isIndexPatternLoading, browserFields };
 };
-
-export interface UseRuleFormsErrors {
-  defineStepForm?: FormHook<DefineStepRule, DefineStepRule>;
-  aboutStepForm?: FormHook<AboutStepRule, AboutStepRule>;
-  scheduleStepForm?: FormHook<ScheduleStepRule, ScheduleStepRule>;
-  actionsStepForm?: FormHook<ActionsStepRule, ActionsStepRule>;
-}

@@ -8,7 +8,6 @@
 import { isEmpty } from 'lodash/fp';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { TimelineEventsType } from '../../../../../common/types/timeline';
 import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import type { OnPinEvent, OnUnPinEvent } from '../events';
@@ -72,28 +71,6 @@ export const getPinOnClick = ({
     onPinEvent(eventId);
   }
 };
-
-/**
- * Creates mapping of eventID -> fieldData for given fieldsToKeep. Used to store additional field
- * data necessary for custom timeline actions in conjunction with selection state
- * @param timelineData
- * @param eventIds
- * @param fieldsToKeep
- */
-export const getEventIdToDataMapping = (
-  timelineData: TimelineItem[],
-  eventIds: string[],
-  fieldsToKeep: string[]
-): Record<string, TimelineNonEcsData[]> =>
-  timelineData.reduce((acc, v) => {
-    const fvm = eventIds.includes(v._id)
-      ? { [v._id]: v.data.filter((ti) => fieldsToKeep.includes(ti.field)) }
-      : {};
-    return {
-      ...acc,
-      ...fvm,
-    };
-  }, {});
 
 export const isEventBuildingBlockType = (event: Ecs): boolean =>
   !isEmpty(event.kibana?.alert?.building_block_type);

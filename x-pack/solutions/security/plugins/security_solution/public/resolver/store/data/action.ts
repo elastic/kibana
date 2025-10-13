@@ -8,11 +8,11 @@
 import actionCreatorFactory from 'typescript-fsa';
 import type {
   NewResolverTree,
+  ResolverSchema,
   SafeEndpointEvent,
   SafeResolverEvent,
-  ResolverSchema,
 } from '../../../../common/endpoint/types';
-import type { TreeFetcherParameters, PanelViewAndParameters, TimeFilters } from '../../types';
+import type { TimeFilters, TreeFetcherParameters } from '../../types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/analyzer');
 
@@ -44,14 +44,6 @@ export const serverReturnedResolverData = actionCreator<{
    */
   detectedBounds?: TimeFilters;
 }>('SERVER_RETURNED_RESOLVER_DATA');
-
-export const appRequestedNodeEventsInCategory = actionCreator<{
-  /**
-   * Id that identify the scope of analyzer
-   */
-  readonly id: string;
-  parameters: PanelViewAndParameters;
-}>('APP_REQUESTED_NODE_EVENTS_IN_CATEGORY');
 
 export const appRequestedResolverData = actionCreator<{
   /**
@@ -197,11 +189,6 @@ export const userOverrodeDateRange = actionCreator<{
   readonly id: string;
   readonly timeRange: TimeFilters;
 }>('USER_OVERRODE_DATE_RANGE');
-
-export const userOverrodeSourcererSelection = actionCreator<{
-  readonly id: string;
-  readonly indices: string[];
-}>('USER_OVERRODE_SOURCERER_SELECTION');
 
 /**
  * When the server returns an error after the app requests node data for a set of nodes.

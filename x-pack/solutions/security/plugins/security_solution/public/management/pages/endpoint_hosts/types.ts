@@ -10,7 +10,6 @@ import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   AppLocation,
-  EndpointPendingActions,
   EndpointSortableField,
   HostInfo,
   Immutable,
@@ -74,8 +73,6 @@ export interface EndpointState {
   metadataTransformStats: AsyncResourceState<TransformStats[]>;
   isInitialized: boolean;
 }
-
-export type AgentIdsPendingActions = Map<string, EndpointPendingActions['pending_actions']>;
 
 /**
  * Set containing Package Policy IDs which are used but do not exist anymore

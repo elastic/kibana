@@ -13,8 +13,6 @@ import { EMPTY_VALUE } from '../constants/common';
 
 moment.suppressDeprecationWarnings = true;
 
-export const FULL_DATE = 'MMMM Do YYYY @ HH:mm:ss';
-
 /**
  * Converts a string or moment date to the 'MMMM Do YYYY @ HH:mm:ss' format.
  * @param date Date to be formatted

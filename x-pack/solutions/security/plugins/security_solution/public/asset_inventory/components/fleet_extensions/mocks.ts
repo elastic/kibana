@@ -77,28 +77,6 @@ export const getMockPackageInfoGCP = () => {
   } as PackageInfo;
 };
 
-export const getMockPackageInfoAssetAzure = () => {
-  return {
-    name: 'cloud_asset_inventory',
-    version: '1.0.0',
-    policy_templates: [
-      {
-        title: '',
-        description: '',
-        name: 'asset_inventory',
-        inputs: [
-          {
-            type: CLOUDBEAT_AZURE,
-            title: 'Azure',
-            description: '',
-            vars: [{}],
-          },
-        ],
-      },
-    ],
-  } as PackageInfo;
-};
-
 const getPolicyMock = (
   type: AssetInput,
   deployment: string,

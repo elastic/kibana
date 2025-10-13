@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './constants';
+export type * from './constants';
 
 export * from './actions';
 export * from './name';

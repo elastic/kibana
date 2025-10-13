@@ -22,7 +22,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AIConnector } from '@kbn/elastic-assistant';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { uniq } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
@@ -39,10 +38,7 @@ const updateButtonProps: EuiSuperUpdateButtonProps = {
 };
 
 const DATE_PICKER_WIDTH = '345px';
-export const MAX_ALERTS = 500;
-export const MIN_ALERTS = 50;
 export const STEP = 50;
-export const NO_INDEX_PATTERNS: DataView[] = [];
 
 const box = {
   incremental: true,

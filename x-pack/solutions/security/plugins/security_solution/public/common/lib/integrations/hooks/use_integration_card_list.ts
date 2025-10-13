@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { useCallback, useMemo } from 'react';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
@@ -21,8 +22,6 @@ import { useIntegrationContext } from './integration_context';
 import { getIntegrationLinkState } from '../../../hooks/integrations/use_integration_link_state';
 import { addPathParamToUrl } from '../../../utils/integrations';
 import type { UseSelectedTabReturn } from './use_selected_tab';
-
-export type GetCardItemExtraProps = (card: IntegrationCardItem) => Partial<IntegrationCardItem>;
 
 const useAddSecurityProps = (activeIntegrations: GetInstalledPackagesResponse['items']) => {
   const { navigateTo, getAppUrl } = useNavigation();

@@ -8,8 +8,7 @@
 import { throttle } from 'lodash/fp';
 import { useMemo, useState } from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
-import { niceTimeFormatByDay, timeFormatter } from '@elastic/charts';
-import moment from 'moment-timezone';
+import type moment from 'moment-timezone';
 import type { IToasts } from '@kbn/core/public';
 
 export const getDaysDiff = (minDate: moment.Moment, maxDate: moment.Moment) => {
@@ -20,13 +19,6 @@ export const getDaysDiff = (minDate: moment.Moment, maxDate: moment.Moment) => {
   }
 
   return diff;
-};
-
-export const histogramDateTimeFormatter = (domain: [string, string] | null, fixedDiff?: number) => {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const diff = fixedDiff ?? getDaysDiff(moment(domain![0]), moment(domain![1]));
-  const format = niceTimeFormatByDay(diff);
-  return timeFormatter(format);
 };
 
 export const useThrottledResizeObserver = (wait = 100) => {

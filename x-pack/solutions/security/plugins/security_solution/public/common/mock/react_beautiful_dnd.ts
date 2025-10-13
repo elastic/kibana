@@ -11,7 +11,6 @@ import type {
   DroppableProvided,
   DroppableStateSnapshot,
 } from '@hello-pangea/dnd';
-import type React from 'react';
 
 jest.mock('@hello-pangea/dnd', () => ({
   Droppable: ({
@@ -60,5 +59,4 @@ jest.mock('@hello-pangea/dnd', () => ({
         mode: null,
       }
     ),
-  DragDropContext: ({ children }: { children: React.ReactNode }) => children,
 }));

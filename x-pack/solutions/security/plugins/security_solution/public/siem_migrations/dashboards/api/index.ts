@@ -23,21 +23,21 @@ import {
   SIEM_DASHBOARD_MIGRATIONS_PATH,
 } from '../../../../common/siem_migrations/dashboards/constants';
 import type {
-  CreateDashboardMigrationRequestBody,
-  StartDashboardsMigrationRequestBody,
-  StopDashboardsMigrationResponse,
   CreateDashboardMigrationDashboardsRequestBody,
+  CreateDashboardMigrationRequestBody,
   CreateDashboardMigrationResponse,
+  GetAllTranslationStatsDashboardMigrationResponse,
+  GetDashboardMigrationDashboardsResponse,
   GetDashboardMigrationResourcesMissingResponse,
   GetDashboardMigrationResourcesResponse,
   GetDashboardMigrationResponse,
+  InstallMigrationDashboardsResponse,
+  StartDashboardsMigrationRequestBody,
+  StartDashboardsMigrationResponse,
+  StopDashboardsMigrationResponse,
+  UpdateDashboardMigrationRequestBody,
   UpsertDashboardMigrationResourcesRequestBody,
   UpsertDashboardMigrationResourcesResponse,
-  StartDashboardsMigrationResponse,
-  UpdateDashboardMigrationRequestBody,
-  GetDashboardMigrationDashboardsResponse,
-  InstallMigrationDashboardsResponse,
-  GetAllTranslationStatsDashboardMigrationResponse,
 } from '../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { KibanaServices } from '../../../common/lib/kibana';
 import type { DashboardMigrationStats } from '../types';
@@ -281,8 +281,6 @@ export const startDashboardMigration = async ({
     }
   );
 };
-
-export type StopDashboardMigrationParams = WithSignal<GetDashboardMigrationParams>;
 
 export const stopDashboardMigration = async ({
   migrationId,

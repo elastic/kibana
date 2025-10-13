@@ -6,8 +6,7 @@
  */
 
 import { rgba } from 'polished';
-import styled, { createGlobalStyle } from 'styled-components';
-import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
+import styled from 'styled-components';
 
 /**
  * TIMELINE BODY
@@ -26,13 +25,6 @@ export const TimelineContainer = styled.div.attrs(({ className = '' }) => ({
  * TIMELINE BODY
  */
 export const SELECTOR_TIMELINE_BODY_CLASS_NAME = 'securitySolutionTimeline__body';
-
-// SIDE EFFECT: the following creates a global class selector
-export const TimelineBodyGlobalStyle = createGlobalStyle`
-  body.${IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME} .${SELECTOR_TIMELINE_BODY_CLASS_NAME} {
-    overflow: hidden;
-  }
-`;
 
 export const TimelineBody = styled.div.attrs(({ className = '' }) => ({
   className: `${SELECTOR_TIMELINE_BODY_CLASS_NAME} ${className}`,
@@ -66,38 +58,6 @@ TimelineBody.displayName = 'TimelineBody';
  */
 
 export const EVENTS_TABLE_CLASS_NAME = 'siemEventsTable';
-
-export const EventsTh = styled.div.attrs<{ role: string }>(
-  ({ className = '', role = 'columnheader' }) => ({
-    className: `siemEventsTable__th ${className}`,
-    role,
-  })
-)`
-  align-items: center;
-  display: flex;
-  flex-shrink: 0;
-  min-width: 0;
-
-  .siemEventsTable__thGroupActions &:first-child:last-child {
-    flex: 1;
-  }
-
-  .siemEventsTable__thGroupData &:hover {
-    background-color: ${({ theme }) => theme.eui.euiTableHoverColor};
-    cursor: move; /* Fallback for IE11 */
-    cursor: grab;
-  }
-
-  > div:focus {
-    outline: 0; /* disable focus on Resizable element */
-  }
-
-  /* don't display Draggable placeholder */
-
-  [data-rbd-placeholder-context-id] {
-    display: none !important;
-  }
-`;
 
 export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__trSupplement ${className}` as string,

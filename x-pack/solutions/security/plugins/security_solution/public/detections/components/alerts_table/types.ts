@@ -16,7 +16,6 @@ import type {
 } from '@elastic/eui';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { AlertsUserProfilesData } from '../../configurations/security_solution_detections/fetch_page_context';
-import type { Status } from '../../../../common/api/detection_engine';
 import type { Note } from '../../../../common/api/timeline';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import type { TimelineModel } from '../../../timelines/store/model';
@@ -30,16 +29,6 @@ export interface SetEventsLoadingProps {
 export interface SetEventsDeletedProps {
   eventIds: string[];
   isDeleted: boolean;
-}
-
-export interface UpdateAlertStatusActionProps {
-  query?: string;
-  alertIds: string[];
-  selectedStatus: Status;
-  setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
-  setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
-  onAlertStatusUpdateSuccess: (updated: number, conflicts: number, status: Status) => void;
-  onAlertStatusUpdateFailure: (status: Status, error: Error) => void;
 }
 
 export interface SendAlertToTimelineActionProps {

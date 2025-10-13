@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  EuiStatelessTourStep,
-  EuiTourActions,
-  EuiTourState,
-  EuiTourStepProps,
-} from '@elastic/eui';
+import type { EuiStatelessTourStep, EuiTourState } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -27,11 +22,6 @@ import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../common/constan
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useIsElementMounted } from '../rules_table/guided_onboarding/use_is_element_mounted';
 import * as i18n from './translations';
-
-export interface RulesFeatureTourContextType {
-  steps: EuiTourStepProps[];
-  actions: EuiTourActions;
-}
 
 export const CREATE_NEW_RULE_TOUR_ANCHOR = 'create-new-rule-tour-anchor';
 

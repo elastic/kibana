@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { ActionCreator } from 'typescript-fsa';
-
-import type { Filter, Query } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 
 import type { UsersQueryProps } from '../types';
 import type { NavTab } from '../../../../common/components/navigation/types';
@@ -15,28 +13,15 @@ import type { NavTab } from '../../../../common/components/navigation/types';
 import type { UsersDetailsTableType } from '../../store/model';
 import type { usersModel } from '../../store';
 
-interface UsersDetailsComponentReduxProps {
-  query: Query;
-  filters: Filter[];
-}
-
 interface UserBodyComponentDispatchProps {
   detailName: string;
   usersDetailsPagePath: string;
-}
-
-interface UsersDetailsComponentDispatchProps extends UserBodyComponentDispatchProps {
-  setUsersDetailsTablesActivePageToZero: ActionCreator<null>;
 }
 
 export interface UsersDetailsProps {
   detailName: string;
   usersDetailsPagePath: string;
 }
-
-export type UsersDetailsComponentProps = UsersDetailsComponentReduxProps &
-  UsersDetailsComponentDispatchProps &
-  UsersQueryProps;
 
 type KeyUsersDetailsNavTab = `${UsersDetailsTableType}`;
 
