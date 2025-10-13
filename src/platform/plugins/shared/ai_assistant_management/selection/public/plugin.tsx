@@ -57,6 +57,7 @@ export class AIAssistantManagementPlugin
 {
   private readonly kibanaBranch: string;
   private readonly buildFlavor: BuildFlavor;
+  private readonly isServerless: boolean;
   private registeredAiAssistantManagementSelectionApp?: ManagementApp;
   private licensingSubscription?: Subscription;
   private aiAssistantTypeSubscription?: Subscription;
@@ -64,6 +65,7 @@ export class AIAssistantManagementPlugin
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
     this.buildFlavor = this.initializerContext.env.packageInfo.buildFlavor;
+    this.isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
@@ -129,7 +131,7 @@ export class AIAssistantManagementPlugin
     const aiAssistantType$ = new BehaviorSubject<AIAssistantType>(preferredAIAssistantType);
     // Keep aiAssistantType$ in sync with UI setting without page reload
     this.aiAssistantTypeSubscription = coreStart.uiSettings
-      .get$<AIAssistantType>(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY)
+      .get$<AIAssistantType>(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, AIAssistantType.Default)
       .subscribe((nextValue) => {
         aiAssistantType$.next(nextValue);
       });
@@ -144,7 +146,7 @@ export class AIAssistantManagementPlugin
       coreStart.application.capabilities.management.ai.aiAssistantManagementSelection;
 
     // Toggle visibility based on license at runtime
-    if (licensing) {
+    if (!this.isServerless && licensing) {
       this.licensingSubscription = licensing.license$.subscribe((license) => {
         const isEnterprise = license?.hasAtLeast('enterprise');
         if (isEnterprise && isAiAssistantManagementSelectionEnabled) {
@@ -155,6 +157,20 @@ export class AIAssistantManagementPlugin
       });
     }
 
+    this.registerNavControl(coreStart, openChatSubject, startDeps.spaces);
+
+    return {
+      aiAssistantType$: aiAssistantType$.asObservable(),
+      openChat$: openChatSubject.asObservable(),
+      completeOpenChat,
+    };
+  }
+
+  private registerNavControl(
+    coreStart: CoreStart,
+    openChatSubject: BehaviorSubject<{ assistant: AIAssistantType }>,
+    spaces?: SpacesPluginStart
+  ) {
     const isObservabilityAIAssistantEnabled =
       coreStart.application.capabilities.observabilityAIAssistant?.show === true;
     const isSecurityAIAssistantEnabled =
@@ -165,23 +181,25 @@ export class AIAssistantManagementPlugin
     );
 
     if (
+      !this.isServerless &&
       isUntouchedUiSetting &&
       (isObservabilityAIAssistantEnabled || isSecurityAIAssistantEnabled)
     ) {
       coreStart.chrome.navControls.registerRight({
         mount: (element) => {
           ReactDOM.render(
-            <NavControlInitiator
-              isObservabilityAIAssistantEnabled={isObservabilityAIAssistantEnabled}
-              isSecurityAIAssistantEnabled={isSecurityAIAssistantEnabled}
-              coreStart={coreStart}
-              triggerOpenChat={(event: { assistant: AIAssistantType }) =>
-                openChatSubject.next(event)
-              }
-              spaces={startDeps.spaces}
-            />,
-            element,
-            () => {}
+            coreStart.rendering.addContext(
+              <NavControlInitiator
+                isObservabilityAIAssistantEnabled={isObservabilityAIAssistantEnabled}
+                isSecurityAIAssistantEnabled={isSecurityAIAssistantEnabled}
+                coreStart={coreStart}
+                triggerOpenChat={(event: { assistant: AIAssistantType }) =>
+                  openChatSubject.next(event)
+                }
+                spaces={spaces}
+              />
+            ),
+            element
           );
 
           return () => {
@@ -192,12 +210,6 @@ export class AIAssistantManagementPlugin
         order: 1001,
       });
     }
-
-    return {
-      aiAssistantType$: aiAssistantType$.asObservable(),
-      openChat$: openChatSubject.asObservable(),
-      completeOpenChat,
-    };
   }
 
   public stop() {
