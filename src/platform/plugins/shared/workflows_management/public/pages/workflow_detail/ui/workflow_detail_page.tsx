@@ -48,55 +48,40 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const [hasChanges, setHasChanges] = useState(false);
   const [highlightDiff, setHighlightDiff] = useState(false);
 
+  const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
+  const closeModal = useCallback(() => {
+    setWorkflowExecuteModalOpen(false);
+  }, []);
+
   const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
 
   const { updateWorkflow, testWorkflow } = useWorkflowActions();
 
   const canSaveWorkflow = Boolean(application?.capabilities.workflowsManagement.updateWorkflow);
   const canRunWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
-  const canTestWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
 
-  const handleSave = () => {
-    if (!id) {
-      notifications?.toasts.addError(new Error('Workflow is not loaded'), {
-        toastLifeTimeMs: 3000,
-        title: i18n.translate('workflows.workflowDetailHeader.error.workflowNotLoaded', {
-          defaultMessage: 'Workflow is not loaded',
-        }),
-      });
-      return;
-    }
-    updateWorkflow.mutate(
-      {
-        id,
-        workflow: {
-          yaml: workflowYaml,
-        },
-      },
-      {
-        onError: (err: unknown) => {
-          // Extract message from HTTP error body and update the error message
-          if (
-            err &&
-            typeof err === 'object' &&
-            'body' in err &&
-            err.body &&
-            typeof err.body === 'object' &&
-            'message' in err.body &&
-            typeof err.body.message === 'string'
-          ) {
-            (err as any).message = err.body.message;
-          }
-          notifications?.toasts.addError(err as Error, {
-            toastLifeTimeMs: 3000,
-            title: 'Failed to save workflow',
-          });
-        },
-      }
-    );
-  };
-
-  const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
+  const handleSave = useCallback(
+    (onSuccess?: () => void) => {
+      updateWorkflow.mutate(
+        { id, workflow: { yaml: workflowYaml } },
+        {
+          ...(onSuccess && { onSuccess }),
+          onError: (err) => {
+            if (err.body?.message) {
+              err.message = err.body.message; // Extract message from HTTP error body and update the error message
+            }
+            notifications?.toasts.addError(err, {
+              toastLifeTimeMs: 3000,
+              title: i18n.translate('workflows.detail.error.workflowSaveFailed', {
+                defaultMessage: 'Failed to save workflow',
+              }),
+            });
+          },
+        }
+      );
+    },
+    [id, workflowYaml, updateWorkflow, notifications?.toasts]
+  );
 
   const definitionFromCurrentYaml: WorkflowYaml | null = useMemo(() => {
     const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
@@ -107,42 +92,50 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     return parsingResult.data as WorkflowYaml;
   }, [workflowYaml]);
 
-  const handleRunClick = () => {
+  const handleRun = useCallback(() => {
     setWorkflowExecuteModalOpen(true);
-  };
+  }, [setWorkflowExecuteModalOpen]);
 
-  const handleRunWorkflow = (event: Record<string, any>) => {
-    testWorkflow.mutate(
-      { workflowYaml, inputs: event },
-      {
-        onSuccess: ({ workflowExecutionId }) => {
-          notifications?.toasts.addSuccess(
-            i18n.translate('workflows.workflowDetailHeader.success.workflowTestRunStarted', {
-              defaultMessage: 'Workflow test run started',
-            }),
-            {
-              toastLifeTimeMs: 3000,
+  const handleRunWorkflow = useCallback(
+    (event: Record<string, any>) => {
+      testWorkflow.mutate(
+        { workflowYaml, inputs: event },
+        {
+          onSuccess: ({ workflowExecutionId }) => {
+            notifications?.toasts.addSuccess(
+              i18n.translate('workflows.workflowDetailHeader.success.workflowTestRunStarted', {
+                defaultMessage: 'Workflow test run started',
+              }),
+              { toastLifeTimeMs: 3000 }
+            );
+            setSelectedExecution(workflowExecutionId);
+          },
+          onError: (err) => {
+            if (err.body?.message) {
+              err.message = err.body.message; // Extract message from HTTP error body and update the error message
             }
-          );
-          setSelectedExecution(workflowExecutionId);
-        },
-        onError: (err: unknown) => {
-          notifications?.toasts.addError(err as Error, {
-            toastLifeTimeMs: 3000,
-            title: i18n.translate('workflows.workflowDetailHeader.error.workflowTestRunFailed', {
-              defaultMessage: 'Failed to test workflow',
-            }),
-          });
-        },
-      }
-    );
-  };
+            notifications?.toasts.addError(err as Error, {
+              toastLifeTimeMs: 3000,
+              title: i18n.translate('workflows.workflowDetailHeader.error.workflowTestRunFailed', {
+                defaultMessage: 'Failed to test workflow',
+              }),
+            });
+          },
+        }
+      );
+    },
+    [notifications?.toasts, setSelectedExecution, testWorkflow, workflowYaml]
+  );
+
+  const handleSaveAndRun = useCallback(() => {
+    handleSave(() => handleRun());
+  }, [handleRun, handleSave]);
 
   const handleToggleWorkflow = useCallback(() => {
     if (!workflow) {
       notifications?.toasts.addError(new Error('Workflow is not loaded'), {
         toastLifeTimeMs: 3000,
-        title: i18n.translate('workflows.workflowDetailHeader.error.workflowNotLoaded', {
+        title: i18n.translate('workflows.detail.error.workflowNotLoaded', {
           defaultMessage: 'Workflow is not loaded',
         }),
       });
@@ -171,10 +164,13 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     setHasChanges(false);
   }, [workflow]);
 
-  const handleChange = (wfString: string = '') => {
-    setWorkflowYaml(wfString);
-    setHasChanges(originalWorkflowYaml !== wfString);
-  };
+  const handleChange = useCallback(
+    (wfString: string = '') => {
+      setWorkflowYaml(wfString);
+      setHasChanges(originalWorkflowYaml !== wfString);
+    },
+    [originalWorkflowYaml]
+  );
 
   if (workflowError) {
     const error = workflowError as Error;
@@ -200,10 +196,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             canSaveWorkflow={canSaveWorkflow}
             isValid={workflow?.valid ?? true}
             isEnabled={workflow?.enabled ?? false}
-            handleRunClick={handleRunClick}
+            handleRunClick={handleRun}
             handleSave={handleSave}
             handleToggleWorkflow={handleToggleWorkflow}
-            canTestWorkflow={canTestWorkflow}
             handleTabChange={setActiveTab}
             hasUnsavedChanges={hasChanges}
             highlightDiff={highlightDiff}
@@ -218,6 +213,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                 workflow={workflow}
                 workflowYaml={yamlValue}
                 onWorkflowYamlChange={handleChange}
+                handleSave={handleSave}
+                handleRun={handleRun}
+                handleSaveAndRun={handleSaveAndRun}
                 hasChanges={hasChanges}
                 execution={execution}
                 activeTab={activeTab}
@@ -245,10 +243,10 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           />
         </EuiFlexItem>
 
-        {workflowExecuteModalOpen && workflow && (
+        {workflowExecuteModalOpen && definitionFromCurrentYaml && (
           <WorkflowExecuteModal
             definition={definitionFromCurrentYaml}
-            onClose={() => setWorkflowExecuteModalOpen(false)}
+            onClose={closeModal}
             onSubmit={handleRunWorkflow}
           />
         )}
