@@ -31,10 +31,12 @@ export const StreamFeatureDetailsFlyout = ({
   feature,
   definition,
   closeFlyout,
+  refreshFeatures,
 }: {
   feature: Feature;
   definition: Streams.all.Definition;
   closeFlyout: () => void;
+  refreshFeatures: () => void;
 }) => {
   const [featureDescription, setFeatureDescription] = React.useState(feature.description);
   const { upsertQuery } = useStreamFeaturesApi(definition);
@@ -53,6 +55,7 @@ export const StreamFeatureDetailsFlyout = ({
       filter: featureFilter,
     }).finally(() => {
       setIsUpdating(false);
+      refreshFeatures();
       closeFlyout();
     });
   };

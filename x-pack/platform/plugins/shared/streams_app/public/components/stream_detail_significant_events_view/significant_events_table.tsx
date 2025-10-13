@@ -222,8 +222,8 @@ export function SignificantEventsTable({
           feature={selectedFeature}
           closeFlyout={() => {
             setSelectedFeature(undefined);
-            refreshFeatures();
           }}
+          refreshFeatures={refreshFeatures}
         />
       )}
       {isDeleteModalVisible && selectedDeleteItem && (

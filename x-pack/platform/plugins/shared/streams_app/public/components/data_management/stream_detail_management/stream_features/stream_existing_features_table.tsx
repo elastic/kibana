@@ -245,8 +245,8 @@ export function StreamExistingFeaturesTable({
           feature={selectedFeature}
           closeFlyout={() => {
             setSelectedFeature(undefined);
-            refreshFeatures();
           }}
+          refreshFeatures={refreshFeatures}
         />
       )}
     </div>
