@@ -33,6 +33,7 @@ import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
 import { LensDocumentService, type LensDocument } from '../../../persistence';
 import { DOC_TYPE } from '../../../../common/constants';
+import { LensMapsProvider } from '../../../lens_maps_context';
 
 export type EditLensConfigurationProps = Omit<
   EditConfigPanelProps,
@@ -247,9 +248,11 @@ export async function getEditLensConfiguration(
         <Provider store={lensStore}>
           <KibanaRenderContextProvider {...coreStart}>
             <KibanaContextProvider services={lensServices}>
-              <RootDragDropProvider>
-                <LensEditConfigurationFlyout {...configPanelProps} />
-              </RootDragDropProvider>
+              <LensMapsProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
+                <RootDragDropProvider>
+                  <LensEditConfigurationFlyout {...configPanelProps} />
+                </RootDragDropProvider>
+              </LensMapsProvider>
             </KibanaContextProvider>
           </KibanaRenderContextProvider>
         </Provider>

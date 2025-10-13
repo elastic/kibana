@@ -49,6 +49,7 @@ import type { LensAppLocator, MainHistoryLocationState } from '../../common/loca
 import { LENS_SHARE_STATE_ACTION } from '../../common/locator/locator';
 import { LensDocumentService } from '../persistence';
 import type { LensSerializedState } from '../react_embeddable/types';
+import { LensMapsProvider } from '../lens_maps_context';
 
 function getInitialContext(history: AppMountParameters['history']) {
   const historyLocationState = history.location.state as
@@ -356,23 +357,25 @@ export async function mountApp(
 
       return (
         <Provider store={lensStore}>
-          <App
-            incomingState={embeddableEditorIncomingState}
-            editorFrame={instance}
-            initialInput={initialInput}
-            redirectTo={redirectCallback}
-            redirectToOrigin={redirectToOrigin}
-            onAppLeave={params.onAppLeave}
-            setHeaderActionMenu={params.setHeaderActionMenu}
-            history={props.history}
-            datasourceMap={datasourceMap}
-            visualizationMap={visualizationMap}
-            initialContext={initialContext}
-            contextOriginatingApp={originatingApp}
-            topNavMenuEntryGenerators={topNavMenuEntryGenerators}
-            theme$={core.theme.theme$}
-            coreStart={coreStart}
-          />
+          <LensMapsProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
+            <App
+              incomingState={embeddableEditorIncomingState}
+              editorFrame={instance}
+              initialInput={initialInput}
+              redirectTo={redirectCallback}
+              redirectToOrigin={redirectToOrigin}
+              onAppLeave={params.onAppLeave}
+              setHeaderActionMenu={params.setHeaderActionMenu}
+              history={props.history}
+              datasourceMap={datasourceMap}
+              visualizationMap={visualizationMap}
+              initialContext={initialContext}
+              contextOriginatingApp={originatingApp}
+              topNavMenuEntryGenerators={topNavMenuEntryGenerators}
+              theme$={core.theme.theme$}
+              coreStart={coreStart}
+            />
+          </LensMapsProvider>
         </Provider>
       );
     }

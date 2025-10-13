@@ -125,6 +125,9 @@ export type { ChartInfo } from './chart_info_api';
 export { layerTypes } from '../common/layer_types';
 export { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 
+export { LensMapsProvider, useLensMaps } from './lens_maps_context';
+export type { LensMapsProviderProps } from './lens_maps_context';
+
 export type { LensPublicStart, LensPublicSetup, LensSuggestionsApi } from './plugin';
 
 export const plugin = () => new LensPlugin();

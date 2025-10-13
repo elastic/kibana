@@ -35,6 +35,7 @@ import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
+import { LensMapsProvider } from '../lens_maps_context';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
@@ -224,7 +225,12 @@ export const createLensEmbeddableFactory = (
       return {
         api,
         Component: () => (
-          <LensEmbeddableComponent api={api} internalApi={internalApi} onUnmount={onUnmount} />
+          <LensMapsProvider
+            visualizationMap={services.visualizationMap}
+            datasourceMap={services.datasourceMap}
+          >
+            <LensEmbeddableComponent api={api} internalApi={internalApi} onUnmount={onUnmount} />
+          </LensMapsProvider>
         ),
       };
     },
