@@ -161,6 +161,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultAbsoluteRange();
+
+      // add panel to populate data views before filters can be added.
+      await dashboardAddPanel.clickAddFromLibrary();
+      await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
+      await find.clickByButtonText('lnsPieVis');
+      await dashboardAddPanel.closeAddPanel();
+
       await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'US' });
       await filterBar.toggleFilterPinned('geo.src');
       await filterBar.addFilter({ field: 'geo.dest', operation: 'is', value: 'LS' });
