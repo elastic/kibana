@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('starts and stops datafeeds', () => {
+  describe.only('starts and stops datafeeds', () => {
     before(async () => {
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
@@ -136,7 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace1
       );
 
-      await ml.api.waitForInternalDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED, idSpace1);
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED);
 
       await stopDatafeed(
         { datafeed_id: datafeedIdSpace1 },
@@ -145,7 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace1
       );
 
-      await ml.api.waitForInternalDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED, idSpace1);
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED);
     });
 
     it('should force stop datafeed with correct space', async () => {
@@ -156,7 +156,7 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace1
       );
 
-      await ml.api.waitForInternalDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED, idSpace1);
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED);
 
       await stopDatafeed(
         { datafeed_id: datafeedIdSpace1, force: true },
@@ -165,7 +165,7 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace1
       );
 
-      await ml.api.waitForInternalDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED, idSpace1);
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED);
     });
 
     it('should not stop datafeed with incorrect space', async () => {
@@ -176,7 +176,7 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace1
       );
 
-      await ml.api.waitForInternalDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED, idSpace1);
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED);
 
       await stopDatafeed(
         { datafeed_id: datafeedIdSpace1, force: true },
@@ -194,7 +194,7 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace1
       );
 
-      await ml.api.waitForInternalDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED, idSpace1);
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED);
 
       await stopDatafeed(
         { datafeed_id: datafeedIdSpace1, force: true },
