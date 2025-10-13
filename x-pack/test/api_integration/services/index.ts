@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { SecuritySolutionApiProvider as DetectionsApiProvider } from '@kbn/security-solution-test-api-clients/supertest/detections.gen';
+import { SecuritySolutionApiProvider as EntityAnalyticsApiProvider } from '@kbn/security-solution-test-api-clients/supertest/entity_analytics.gen';
+import { SecuritySolutionApiProvider as ExceptionsApiProvider } from '@kbn/security-solution-test-api-clients/supertest/exceptions.gen';
 import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/api_integration/services';
 import { services as commonServices } from '../../common/services';
 
@@ -22,9 +25,7 @@ import { IngestPipelinesProvider } from './ingest_pipelines';
 import { IndexManagementProvider } from './index_management';
 import { DataViewApiProvider } from './data_view_api';
 import { SloApiProvider } from './slo';
-import { SecuritySolutionApiProvider } from './security_solution_api.gen';
 import { FleetAndAgents } from './fleet_and_agents';
-import { SecuritySolutionApiProvider as SecuritySolutionExceptionsApiProvider } from './security_solution_exceptions_api.gen';
 
 export const services = {
   ...commonServices,
@@ -43,7 +44,8 @@ export const services = {
   ingestPipelines: IngestPipelinesProvider,
   indexManagement: IndexManagementProvider,
   slo: SloApiProvider,
-  securitySolutionApi: SecuritySolutionApiProvider,
   fleetAndAgents: FleetAndAgents,
-  securitySolutionExceptionsApi: SecuritySolutionExceptionsApiProvider,
+  detectionsApi: DetectionsApiProvider,
+  exceptionsApi: ExceptionsApiProvider,
+  entityAnalyticsApi: EntityAnalyticsApiProvider,
 };
