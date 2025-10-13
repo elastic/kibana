@@ -31,8 +31,11 @@ export class EnterForeachNodeImpl implements NodeImplementation {
 
   private async enterForeach(): Promise<void> {
     let foreachState = this.stepExecutionRuntime.getCurrentStepState();
-    await this.stepExecutionRuntime.startStep();
-    const evaluatedItems = this.getItems();
+    const foreachExpression = this.getForeachExpression();
+    await this.stepExecutionRuntime.startStep({
+      foreach: foreachExpression,
+    });
+    const evaluatedItems = this.getItems(foreachExpression);
 
     if (evaluatedItems.length === 0) {
       this.workflowLogger.logDebug(
@@ -90,10 +93,10 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
-  private getItems(): any[] {
+  private getForeachExpression(): string {
     if (!this.node.configuration.foreach) {
       throw new Error(
-        `Foreach configuration is required for step "${this.node.stepId}". Please specify an array or expression that evaluates to an array.`
+        `Foreach configuration is required. Please specify an array or expression that evaluates to an array.`
       );
     }
 
@@ -102,6 +105,10 @@ export class EnterForeachNodeImpl implements NodeImplementation {
         this.node.configuration.foreach
       );
 
+    return renderedForeachExpression;
+  }
+
+  private getItems(renderedForeachExpression: string): any[] {
     const parsingResult = this.tryParseJSON(renderedForeachExpression);
 
     if (parsingResult) {

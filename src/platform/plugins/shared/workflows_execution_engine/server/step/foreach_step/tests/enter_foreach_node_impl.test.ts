@@ -68,60 +68,42 @@ describe('EnterForeachNodeImpl', () => {
       expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenCalledWith('0');
     });
 
-    it('should start step', async () => {
-      await underTest.run();
-
-      expect(stepExecutionRuntime.startStep).toHaveBeenCalledTimes(1);
-      expect(stepExecutionRuntime.startStep).toHaveBeenCalledWith();
-    });
-
     describe('when foreach configuration is an array with items', () => {
       beforeEach(() => {
+        node.configuration.foreach = JSON.stringify(['item1', 'item2', 'item3']);
         stepExecutionRuntime.contextManager.renderValueAccordingToContext = jest
           .fn()
           .mockImplementation((input) => input);
+        stepExecutionRuntime.contextManager.renderValueAccordingToContext = jest
+          .fn()
+          .mockReturnValue(JSON.stringify(['renderedItem1', 'renderedItem2', 'renderedItem3']));
+      });
+
+      it('should render foreach expression', async () => {
+        await underTest.run();
+
+        expect(
+          stepExecutionRuntime.contextManager.renderValueAccordingToContext
+        ).toHaveBeenCalledWith(JSON.stringify(['item1', 'item2', 'item3']));
+      });
+
+      it('should start step with foreach input equal to provided rendered JSON', async () => {
+        await underTest.run();
+        expect(stepExecutionRuntime.startStep).toHaveBeenCalledWith({
+          foreach: JSON.stringify(['renderedItem1', 'renderedItem2', 'renderedItem3']),
+        });
       });
 
       it('should initialize foreach state if configuration contains JSON', async () => {
-        node.configuration.foreach = JSON.stringify(['item1', 'item2', 'item3']);
         await underTest.run();
 
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-          items: ['item1', 'item2', 'item3'],
-          item: 'item1',
+          items: ['renderedItem1', 'renderedItem2', 'renderedItem3'],
+          item: 'renderedItem1',
           index: 0,
           total: 3,
         });
-      });
-
-      it('should initialize foreach state from the context', async () => {
-        node.configuration.foreach = 'steps.testStep.array';
-        (stepExecutionRuntime.contextManager.readContextPath as jest.Mock).mockReturnValue({
-          value: ['item1', 'item2', 'item3'],
-          pathExists: true,
-        });
-        await underTest.run();
-
-        expect(stepExecutionRuntime.contextManager.readContextPath).toHaveBeenCalledWith(
-          'steps.testStep.array'
-        );
-        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
-        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-          items: ['item1', 'item2', 'item3'],
-          item: 'item1',
-          index: 0,
-          total: 3,
-        });
-      });
-
-      it('should log debug message about items count', async () => {
-        await underTest.run();
-
-        expect(workflowLogger.logDebug).toHaveBeenCalledWith(
-          `Foreach step "testStep" will iterate over 3 items.`,
-          { workflow: { step_id: 'testStep' } }
-        );
       });
     });
 
@@ -134,6 +116,14 @@ describe('EnterForeachNodeImpl', () => {
         (stepExecutionRuntime.contextManager.readContextPath as jest.Mock).mockReturnValue({
           value: ['item1', 'item2', 'item3'],
           pathExists: true,
+        });
+      });
+
+      it('should start step with foreach input equal to rendered value', async () => {
+        await underTest.run();
+
+        expect(stepExecutionRuntime.startStep).toHaveBeenCalledWith({
+          foreach: 'steps.testStep.arrayRendered',
         });
       });
 
@@ -232,7 +222,6 @@ describe('EnterForeachNodeImpl', () => {
       node.configuration.foreach = undefined as any;
 
       await expect(underTest.run()).rejects.toThrowError('Foreach configuration is required');
-      expect(stepExecutionRuntime.startStep).toHaveBeenCalledTimes(1);
       expect(workflowExecutionRuntimeManager.navigateToNextNode).not.toHaveBeenCalled();
     });
 
