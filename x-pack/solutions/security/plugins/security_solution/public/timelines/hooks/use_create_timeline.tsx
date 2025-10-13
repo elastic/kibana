@@ -23,7 +23,7 @@ import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data
 import { DataViewManagerScopeName } from '../../data_view_manager/constants';
 import { sourcererActions, sourcererSelectors } from '../../sourcerer/store';
 import { SourcererScopeName } from '../../sourcerer/store/model';
-import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../data_view_manager/hooks/use_security_default_patterns';
 
 export interface UseCreateTimelineParams {
@@ -57,7 +57,7 @@ export const useCreateTimeline = ({
     sourcererSelectors.defaultDataView
   ) ?? { id: '', patternList: [] };
 
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const {
     id: experimentalSecurityDefaultDataViewId,
