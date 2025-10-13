@@ -113,6 +113,7 @@ export const createExternalService = (
     secrets,
   }: {
     config?: { allowedChannels?: Array<{ id?: string; name: string }> };
+
     secrets: { token: string };
   },
   logger: Logger,
@@ -219,13 +220,14 @@ export const createExternalService = (
 
     return channelToUse;
   };
-
   const postMessage = async ({
     channels,
     channelIds = [],
     channelNames = [],
     text,
-  }: PostMessageSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
+  }: PostMessageSubActionParams & { channelNames?: string[] }): Promise<
+    ConnectorTypeExecutorResult<unknown>
+  > => {
     try {
       validateChannelNames(channelNames);
       const channelToUse = getChannelToUse({ channels, channelIds });
@@ -252,7 +254,9 @@ export const createExternalService = (
     channelIds = [],
     channelNames = [],
     text,
-  }: PostBlockkitSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
+  }: PostBlockkitSubActionParams & { channelNames?: string[] }): Promise<
+    ConnectorTypeExecutorResult<unknown>
+  > => {
     try {
       validateChannelNames(channelNames);
       const channelToUse = getChannelToUse({ channels, channelIds });

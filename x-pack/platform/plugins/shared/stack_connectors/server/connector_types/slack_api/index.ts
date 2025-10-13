@@ -110,6 +110,11 @@ const slackApiExecutor = async ({
   connectorUsageCollector,
 }: SlackApiExecutorOptions): Promise<ActionTypeExecutorResult<unknown>> => {
   const subAction = params.subAction;
+  const subActionParams = params.subActionParams as {
+    channelNames?: string[];
+    channelsIds?: string[];
+    channels?: string[];
+  };
 
   if (!api[subAction]) {
     const errorMessage = `[Action][ExternalService] -> [Slack API] Unsupported subAction type ${subAction}.`;
@@ -119,6 +124,12 @@ const slackApiExecutor = async ({
 
   if (!supportedSubActions.includes(subAction)) {
     const errorMessage = `[Action][ExternalService] -> [Slack API] subAction ${subAction} not implemented.`;
+    logger.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  if (subActionParams.channelNames?.every((channel) => !channel.startsWith('#'))) {
+    const errorMessage = `[Action][ExternalService] -> [Slack API] Unsupported channel name. Must start with #`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
   }

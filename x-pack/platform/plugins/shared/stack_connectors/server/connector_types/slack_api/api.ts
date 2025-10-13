@@ -26,7 +26,7 @@ const postMessageHandler = async ({
 }: {
   externalService: SlackApiService;
   params: PostMessageSubActionParams;
-}) => await externalService.postMessage({ channelIds, channels, text, channelNames });
+}) => await externalService.postMessage({ channelIds, channels, channelNames, text });
 
 const postBlockkitHandler = async ({
   externalService,

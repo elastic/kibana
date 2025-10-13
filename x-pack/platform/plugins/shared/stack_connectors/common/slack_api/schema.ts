@@ -33,6 +33,7 @@ export const ValidChannelIdParamsSchema = schema.object({
 });
 
 export const PostMessageSubActionParamsSchema = schema.object({
+  // deprecated
   channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
   channelIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
   channelNames: schema.maybe(schema.arrayOf(schema.string({ validate: validateChannelName }))),
@@ -58,6 +59,7 @@ export function validateChannelName(value: string) {
 }
 
 export const PostBlockkitSubActionParamsSchema = schema.object({
+  // deprecated
   channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
   channelIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
   channelNames: schema.maybe(schema.arrayOf(schema.string({ validate: validateChannelName }))),
