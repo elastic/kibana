@@ -8,9 +8,7 @@
  */
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type {
-  ExpressionValueVisDimension,
-} from '@kbn/chart-expressions-common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { getFormatByAccessor, getColumnByAccessor } from '@kbn/chart-expressions-common';
 
 export const getFormat = (

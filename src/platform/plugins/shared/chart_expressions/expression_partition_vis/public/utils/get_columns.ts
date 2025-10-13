@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ExpressionValueVisDimension,
-} from '@kbn/chart-expressions-common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/chart-expressions-common';
 import type { DatatableColumn, Datatable } from '@kbn/expressions-plugin/public';
 import type { BucketColumns } from '../../common/types';

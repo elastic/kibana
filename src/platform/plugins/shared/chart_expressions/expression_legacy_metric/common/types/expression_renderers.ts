@@ -8,9 +8,7 @@
  */
 
 import type { $Values } from '@kbn/utility-types';
-import type {
-  ExpressionValueVisDimension,
-} from '@kbn/chart-expressions-common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import type {
   ColorMode,
   Labels,

@@ -10,9 +10,7 @@
 import type { AccessorFn } from '@elastic/charts';
 import type { DatatableColumn, Datatable } from '@kbn/expressions-plugin/public';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
-import type {
-  ExpressionValueVisDimension,
-} from '@kbn/chart-expressions-common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 
 export const getSplitDimensionAccessor = (

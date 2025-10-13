@@ -13,13 +13,8 @@ import type {
   FormatFactory,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import type {
-  ExpressionValueVisDimension,
-} from '@kbn/chart-expressions-common';
-import {
-  getAccessorByDimension,
-  getColumnByAccessor,
-} from '@kbn/chart-expressions-common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import { getAccessorByDimension, getColumnByAccessor } from '@kbn/chart-expressions-common';
 import type {
   CommonXYDataLayerConfig,
   CommonXYLayerConfig,

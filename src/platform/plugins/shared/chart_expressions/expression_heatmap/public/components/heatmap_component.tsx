@@ -27,10 +27,7 @@ import { Chart, Heatmap, ScaleType, Settings, TooltipType, Tooltip } from '@elas
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
 import { LegendToggle, EmptyPlaceholder, useActiveCursor } from '@kbn/charts-plugin/public';
-import {
-  getAccessorByDimension,
-  getFormatByAccessor,
-} from '@kbn/chart-expressions-common';
+import { getAccessorByDimension, getFormatByAccessor } from '@kbn/chart-expressions-common';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { IconChartHeatmap } from '@kbn/chart-icons';
