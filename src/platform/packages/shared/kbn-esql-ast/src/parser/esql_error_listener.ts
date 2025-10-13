@@ -18,6 +18,7 @@ const SYNTAX_ERRORS_TO_IGNORE = [
 
 const REPLACE_DEV = /,{0,1}(?<!\s)\s*DEV_\w+\s*/g;
 const REPLACE_ORPHAN_COMMA = /{, /g;
+
 export class ESQLErrorListener extends antlr4.ErrorListener<any> {
   protected errors: EditorError[] = [];
 

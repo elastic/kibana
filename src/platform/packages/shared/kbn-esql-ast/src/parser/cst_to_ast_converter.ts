@@ -1752,7 +1752,7 @@ export class CstToAstConverter {
     const left = resolveItem(
       this.visitValueExpression(leftCtx) ?? this.fromParserRuleToUnknown(leftCtx)
     ) as ast.ESQLAstExpression;
-    const right = this.visitTuple(rightCtxs, ctx.LP(), ctx.RP());
+    const right = this.toTuple(rightCtxs, ctx.LP(), ctx.RP());
     const expression = this.toFunction(
       ctx.NOT() ? 'not in' : 'in',
       ctx,
