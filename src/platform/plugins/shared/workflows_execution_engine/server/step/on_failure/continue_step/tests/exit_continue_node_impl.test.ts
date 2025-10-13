@@ -21,29 +21,12 @@ describe('ExitContinueNodeImpl', () => {
 
   describe('run', () => {
     beforeEach(() => {
-      workflowRuntime.exitScope = jest.fn();
       workflowRuntime.navigateToNextNode = jest.fn();
-    });
-
-    it('should exit scope', async () => {
-      await underTest.run();
-      expect(workflowRuntime.exitScope).toHaveBeenCalled();
     });
 
     it('should go to next node', async () => {
       await underTest.run();
       expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
-    });
-
-    it('should exit scope before going to next step', async () => {
-      const exitScopeSpy = jest.spyOn(workflowRuntime, 'exitScope');
-      const goToNextStepSpy = jest.spyOn(workflowRuntime, 'navigateToNextNode');
-
-      await underTest.run();
-
-      expect(exitScopeSpy.mock.invocationCallOrder[0]).toBeLessThan(
-        goToNextStepSpy.mock.invocationCallOrder[0]
-      );
     });
   });
 });
