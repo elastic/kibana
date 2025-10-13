@@ -34,13 +34,13 @@ The cases as data features is in technical preview, meaning the schema for the c
 | created\_by.profile\_uid | keyword | The user ID of the user who created the case. |
 | created\_by.full\_name | keyword | The full name of the user who created the case. |
 | created\_by.email | keyword | The email address of the user who created the case. |
-| updated\_at | date | The date of when case was last modified, provided in ISO 8601 \[2\] format |
+| updated\_at | date | The date of when case was last modified, provided in ISO 8601 \[2\] and set to the servers' timezone. |
 | updated\_at\_ms | long | The case update timestamp in milliseconds. |
 | updated\_by.username | keyword | The username of the user who last updated the case. |
 | updated\_by.profile\_uid | keyword | The User ID of the user who last updated the case. |
 | updated\_by.full\_name | keyword | The full name of the user who last updated the case. |
 | updated\_by.email | keyword | The email address of the user who last updated the case. |
-| closed\_at | date | The date of case closure, provided in ISO 8601 \[2\] format|
+| closed\_at | date | The date of case closure, provided in ISO 8601 \[2\] format and set to the servers' timezone. |
 | closed\_at\_ms | long | The case closure timestamp in milliseconds. |
 | closed\_by.username | keyword | The username of the user who closed the case. |
 | closed\_by.profile\_uid | keyword | The User ID of the user who closed the case. |
@@ -69,12 +69,12 @@ The cases as data features is in technical preview, meaning the schema for the c
 | @timestamp | date | The date that the comment was added to the case analytics indices. |
 | case\_id | keyword | The case UUID.  |
 | comment | text | The user’s comment. |
-| created\_at | date | The date the comment was added, provided in ISO 8601 \[2\] format |
+| created\_at | date | The date the comment was added, provided in ISO 8601 \[2\] format and set to the servers' timezone. |
 | created\_by.username | keyword | The username of the user who created the case. |
 | created\_by.profile\_uid | keyword | The user ID of the user who created the case. |
 | created\_by.full\_name | keyword | The full name of the user who created the case. |
 | created\_by.email | keyword | The email address of the user who created the case. |
-| updated\_at | date | The date of the last case update, provided in ISO 8601 \[2\] format |
+| updated\_at | date | The date of the last case update, provided in ISO 8601 \[2\] format and set to the servers' timezone. |
 | updated\_by.username | keyword | The username of the user who last updated the case. |
 | updated\_by.profile\_uid | keyword | The user ID of the user who last updated the case. |
 | updated\_by.full\_name | keyword | The full name of the user who last updated the case. |
@@ -96,7 +96,7 @@ The cases as data features is in technical preview, meaning the schema for the c
 | payload.file.extension | keyword | The file extension. |
 | payload.file.mimeType | keyword | The file mime type. |
 | payload.file.name | keyword | The file name. |
-| created\_at | date | The date of when the case was created, provided in ISO 8601 \[2\] format |
+| created\_at | date | The date of when the case was created, provided in ISO 8601 \[2\] format and set to the servers' timezone. |
 | created\_by.username | keyword | The username of the user who created the case. |
 | created\_by.profile\_uid | keyword | The user ID of the user who created the case. |
 | created\_by.full\_name | keyword | The full name of the user who created the case. |
@@ -116,7 +116,7 @@ The cases as data features is in technical preview, meaning the schema for the c
 | payload.tags | keyword | The new case tags. |
 | payload.category | keyword | The new case category. |
 | payload.severity | keyword | The new case severity. Possible values are: `low`, `medium`, `high`, `critical` |
-| created\_at | date | The date of when the case was created, provided in ISO 8601 \[2\] format |
+| created\_at | date | The date of when the case was created, provided in ISO 8601 \[2\] format and set to the servers' timezone. |
 | created\_at\_ms | long |  |
 | created\_by.username | keyword | The username of the user who created the case. |
 | created\_by.profile\_uid | keyword | The user ID of the user who created the case. |
