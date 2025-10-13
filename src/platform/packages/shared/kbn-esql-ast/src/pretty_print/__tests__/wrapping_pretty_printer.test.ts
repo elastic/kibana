@@ -29,6 +29,68 @@ const assertReprint = (src: string, expected: string = src) => {
 };
 
 describe('commands', () => {
+  describe('header commands', () => {
+    describe('SET', () => {
+      test('single SET command with short query', () => {
+        const { text } = reprint('SET timeout = "30s"; FROM index');
+
+        expect(text).toBe('SET timeout = "30s";\nFROM index');
+      });
+
+      test('multiple SET commands with short query', () => {
+        const { text } = reprint(
+          'SET timeout = "30s"; SET max_results = 100; FROM index | LIMIT 10'
+        );
+
+        expect('\n' + text).toBe(`
+SET timeout = "30s";
+SET max_results = 100;
+FROM index | LIMIT 10`);
+      });
+
+      test('SET command with long query wraps correctly', () => {
+        const { text } = reprint(
+          'SET timeout = "30s"; FROM very_long_index_name_that_exceeds_line_length | WHERE very_long_field_name == "value" | LIMIT 100'
+        );
+
+        expect('\n' + text).toBe(`
+SET timeout = "30s";
+FROM very_long_index_name_that_exceeds_line_length
+  | WHERE very_long_field_name == "value"
+  | LIMIT 100`);
+      });
+
+      test('multiple SET commands with long query', () => {
+        const { text } = reprint(
+          'SET timeout = "30s"; SET max_results = 1000; FROM very_long_index_name_that_exceeds_line_length | WHERE field == "value"'
+        );
+
+        expect('\n' + text).toBe(`
+SET timeout = "30s";
+SET max_results = 1000;
+FROM very_long_index_name_that_exceeds_line_length | WHERE field == "value"`);
+      });
+
+      test('SET with keyword identifier', () => {
+        const { text } = reprint('SET key = "value"; FROM index');
+
+        expect(text).toBe('SET `key` = "value";\nFROM index');
+      });
+
+      test('SET with numeric value', () => {
+        const { text } = reprint('SET max_results = 500; FROM index');
+
+        expect(text).toBe('SET max_results = 500;\nFROM index');
+      });
+
+      test('SET with boolean value', () => {
+        const { text } = reprint('SET debug = true; FROM index');
+
+        expect(text).toBe('SET debug = TRUE;\nFROM index');
+      });
+    });
+  });
+
   describe('JOIN', () => {
     test('with short identifiers', () => {
       const { text } = reprint('FROM a | RIGHT JOIN b ON d, e');
