@@ -26,7 +26,7 @@ interface UserAuthenticationAttributes extends BasicAttributes {
   providerType: string;
 }
 
-type SecurityTelemetryAttributes = BasicAttributes &
+export type SecurityTelemetryAttributes = BasicAttributes &
   Partial<PrivilegeRegistrationAttributes> &
   Partial<UserAuthenticationAttributes>;
 
