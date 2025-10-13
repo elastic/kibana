@@ -22,8 +22,11 @@ import {
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
 } from '../..';
 import { HostStatus } from '../../../../../../common/endpoint/types';
+import { ExperimentalFeaturesService } from '../../../../experimental_features_service';
+import { allowedExperimentalValues } from '../../../../../../common';
 
 jest.mock('../../../user_privileges');
+jest.mock('../../../../experimental_features_service');
 
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
@@ -51,6 +54,8 @@ describe('useHostIsolationAction', () => {
   };
 
   beforeEach(() => {
+    (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue(allowedExperimentalValues);
+
     appContextMock = createAppRootMockRenderer();
     authMockSetter = appContextMock.getUserPrivilegesMockSetter(useUserPrivilegesMock);
     hookProps = {

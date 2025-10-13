@@ -19,6 +19,8 @@ import type { ActionListApiResponse } from '../../../../../common/endpoint/types
 import { MANAGEMENT_PATH } from '../../../../../common/constants';
 import { getActionListMock } from '../../../components/endpoint_response_actions_list/mocks';
 import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
+import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../../../common';
 
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
@@ -36,6 +38,8 @@ jest.mock('../../../hooks/response_actions/use_get_endpoint_action_list', () => 
     useGetEndpointActionList: () => mockUseGetEndpointActionList,
   };
 });
+
+jest.mock('../../../../common/experimental_features_service');
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
@@ -145,6 +149,9 @@ describe('Response actions history page', () => {
       advanceTimers: jest.advanceTimersByTime,
       pointerEventsCheck: 0,
     });
+
+    (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue(allowedExperimentalValues);
+
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
     render = () => (renderResult = mockedContext.render(<ResponseActionsListPage />));
