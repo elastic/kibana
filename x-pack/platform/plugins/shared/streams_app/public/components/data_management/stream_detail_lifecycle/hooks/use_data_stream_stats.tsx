@@ -48,6 +48,7 @@ export const useDataStreamStats = ({
       ] = await Promise.all([
         client.getDataStreamsStats({
           datasetQuery: definition.stream.name,
+          includeCreationDate: true,
         }),
         streamsRepositoryClient.fetch('GET /internal/streams/{name}/failure_store/stats', {
           signal,
@@ -57,7 +58,7 @@ export const useDataStreamStats = ({
         }),
       ]);
 
-      if (!dsStats) {
+      if (!dsStats || !dsStats.creationDate) {
         return;
       }
 
