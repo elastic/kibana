@@ -456,6 +456,10 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           await browser.setLocalStorageItem('solutionNavigationTour:completed', 'true');
           await browser.refresh();
         },
+        isTourStepVisible: async (stepId: TourStepId) => {
+          log.debug('SolutionNavigation.sidenav.tour.isTourStepVisible', stepId);
+          return await testSubjects.exists(`nav-tour-step-${stepId}`, { timeout: TIMEOUT_CHECK });
+        },
         expectTourStepVisible: async (stepId: TourStepId) => {
           log.debug('SolutionNavigation.sidenav.tour.expectTourStepVisible', stepId);
           await testSubjects.existOrFail(`nav-tour-step-${stepId}`);
