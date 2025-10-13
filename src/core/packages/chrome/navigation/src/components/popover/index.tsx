@@ -42,6 +42,15 @@ import {
  */
 let anyPopoverOpen: boolean = false;
 
+// Track if the keyboard was used to decide if we should close the popover on blur
+let wasKeyboardUsed = false;
+window.addEventListener('keydown', () => {
+  wasKeyboardUsed = true;
+});
+window.addEventListener('mousedown', () => {
+  wasKeyboardUsed = false;
+});
+
 /**
  * Utility function to check if any popover is open.
  *
@@ -185,6 +194,8 @@ export const SideNavPopover = ({
 
   const handleBlur: FocusEventHandler = useCallback(
     (e) => {
+      if (!wasKeyboardUsed) return;
+
       clearTimeout();
 
       const nextFocused = e.relatedTarget;
