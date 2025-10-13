@@ -15,7 +15,7 @@ describe('Pie Schema', () => {
     type: 'pie' as const,
     dataset: {
       type: 'dataView' as const,
-      name: 'test-data-view',
+      id: 'test-data-view',
     },
   };
 
@@ -55,7 +55,7 @@ describe('Pie Schema', () => {
       type: 'donut' as const,
       dataset: {
         type: 'dataView' as const,
-        name: 'test-data-view',
+        id: 'test-data-view',
       },
       metrics: [
         {
