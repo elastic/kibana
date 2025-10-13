@@ -7,11 +7,13 @@
 
 import { duration } from 'moment';
 import type { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import { ML_ALERT_TYPES } from '@kbn/ml-plugin/common/constants/alerts';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const AD_JOB_ID = 'rt-anomaly-mean-value-ui';
 const DATAFEED_ID = `datafeed-${AD_JOB_ID}`;
 const BASIC_TEST_DATA_INDEX = `rt-ad-basic-data-anomalies-ui`;
+const AAD_INDEX_NAME = '.alerts-ml.anomaly-detection.alerts-default';
 
 function getAnomalyDetectionConfig(): Job {
   return {
@@ -41,18 +43,12 @@ function getDatafeedConfig(): Datafeed {
   } as Datafeed;
 }
 
-const AAD_INDEX_NAME = '.alerts-ml.anomaly-detection.alerts-default';
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['triggersActionsUI', 'timePicker']);
+  const supertest = getService('supertest');
   const elasticChart = getService('elasticChart');
 
   async function createSourceIndex() {
@@ -104,6 +100,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
+  async function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function createAnomalyDetectionRule() {
+    const { body: createdRule } = await supertest
+      .post(`/api/alerting/rule`)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        name: 'ml-explorer-alert-ui',
+        consumer: 'alerts',
+        enabled: true,
+        rule_type_id: ML_ALERT_TYPES.ANOMALY_DETECTION,
+        schedule: { interval: '1m' },
+        actions: [],
+        notify_when: 'onActiveAlert',
+        params: {
+          includeInterim: true,
+          jobSelection: {
+            jobIds: [AD_JOB_ID],
+          },
+          severity: 0,
+          resultType: 'bucket',
+          topNBuckets: 3,
+          lookbackInterval: undefined,
+        },
+      })
+      .expect(200);
+
+    return createdRule;
+  }
+
   async function waitForAlertsInIndex(minCount: number = 1): Promise<any[]> {
     return await retry.try(async () => {
       const searchResult = await es.search({
@@ -144,13 +172,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
 
+      // Create index and ingest baseline data
       await createSourceIndex();
       await ingestNormalDocs(BASIC_TEST_DATA_INDEX);
 
+      // Create and start ML job to establish baseline
       await ml.api.createAnomalyDetectionJob(getAnomalyDetectionConfig());
       await ml.api.createDatafeed(getDatafeedConfig());
       await ml.api.openAnomalyDetectionJob(AD_JOB_ID);
       await ml.api.startDatafeed(DATAFEED_ID);
+
+      // Wait for job to process baseline data
+      await ml.api.assertJobResultsExist(AD_JOB_ID);
     });
 
     after(async () => {
@@ -162,36 +195,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('shows alerts table in explorer after rule fires', async () => {
-      await ml.navigation.navigateToAlertsAndAction();
-      await pageObjects.triggersActionsUI.clickCreateAlertButton();
-      await ml.alerting.selectAnomalyDetectionAlertType();
+      // Create alert
+      await createAnomalyDetectionRule();
 
-      await ml.alerting.selectJobs([AD_JOB_ID]);
-      await ml.alerting.selectResultType('bucket');
-      await ml.alerting.setIncludeInterim(true);
-      await ml.alerting.setSeverity(0);
-
-      const ruleName = 'ml-explorer-alert-ui';
-      await pageObjects.triggersActionsUI.setAlertName(ruleName);
-      await pageObjects.triggersActionsUI.setAlertInterval(10, 's');
-      await pageObjects.triggersActionsUI.saveAlert();
-
+      // Ingest anomalous data to trigger the alert
       await ingestAnomalousDoc(BASIC_TEST_DATA_INDEX);
-      // Wait for bucket to finalize
+
+      // Wait for ML bucket to finalize (bucket_span is 1m)
       await sleep(60 * 1000);
 
-      // Wait for alert to be created before checking the UI
+      // Wait for alert to be created
       await waitForAlertsInIndex(1);
 
+      // Navigate to anomaly explorer to verify alerts UI
       await ml.navigation.navigateToAnomalyExplorer(AD_JOB_ID, { from: 'now-24h', to: 'now' }, () =>
         elasticChart.setNewChartUiDebugFlag(true)
       );
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
       await ml.commonUI.waitForDatePickerIndicatorLoaded();
 
+      // Verify alerts panel toggle is present
       await testSubjects.existOrFail('mlAlertsPanelToggle');
 
-      // Select the entire Overall swim lane (brush across the full row) to ensure alerts are included
+      // Select the entire Overall swim lane to trigger alerts display
       await ml.swimLane.waitForSwimLanesToLoad();
       const overallSwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneOverall';
       const cells = await ml.swimLane.getCells(overallSwimLaneTestSubj);
@@ -205,7 +231,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await ml.swimLane.waitForSwimLanesToLoad();
 
-      // Verify the swimlane alerts popover and mini alerts table are shown
+      // Verify alerts UI components are displayed
       await testSubjects.existOrFail('mlSwimLaneWrapper');
       await testSubjects.existOrFail('mlSwimLaneAlertsPopover');
       await testSubjects.existOrFail('mlSwimLaneAlertsMiniTable');
