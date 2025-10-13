@@ -83,3 +83,5 @@ export type {
 export * from './src/types';
 
 export * from './src/data_types/logs/constants';
+
+export * from './src/recommended_fields';
