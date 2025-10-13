@@ -30,7 +30,6 @@ import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_
 
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.;000Z';
-const selectedPatterns = 'alerts';
 
 jest.mock('../../shared/hooks/use_navigate_to_left_panel');
 
@@ -38,13 +37,6 @@ const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
 jest.mock('../../../../common/containers/use_global_time', () => {
   return {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
-  };
-});
-
-const mockUseSourcererDataView = jest.fn().mockReturnValue({ selectedPatterns });
-jest.mock('../../../../sourcerer/containers', () => {
-  return {
-    useSourcererDataView: (...props: unknown[]) => mockUseSourcererDataView(...props),
   };
 });
 

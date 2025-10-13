@@ -28,7 +28,6 @@ import { InsightsSection } from './insights_section';
 import { useAlertPrevalence } from '../../shared/hooks/use_alert_prevalence';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useExpandSection } from '../hooks/use_expand_section';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 
 jest.mock('../../shared/hooks/use_alert_prevalence');
@@ -62,20 +61,12 @@ jest.mock('../../../../common/hooks/use_experimental_features');
 
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.;000Z';
-const selectedPatterns = 'alerts';
 
 jest.mock('../hooks/use_expand_section');
 const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
 jest.mock('../../../../common/containers/use_global_time', () => {
   return {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
-  };
-});
-
-const mockUseSourcererDataView = jest.fn().mockReturnValue({ selectedPatterns });
-jest.mock('../../../../sourcerer/containers', () => {
-  return {
-    useSourcererDataView: (...props: unknown[]) => mockUseSourcererDataView(...props),
   };
 });
 
@@ -106,7 +97,6 @@ const renderInsightsSection = (contextValue: DocumentDetailsContext) =>
 
 describe('<InsightsSection />', () => {
   beforeEach(() => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
       indexPatterns: ['index'],
     });

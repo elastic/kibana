@@ -7,14 +7,12 @@
 
 import { EuiFlexGroup, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import React, { useMemo } from 'react';
-
 import { StatItemHeader } from './stat_item_header';
 import { useToggleStatus } from './use_toggle_status';
 import type { StatItemsProps } from './types';
 import { ChartHeight, FlexItem } from './utils';
 import { MetricEmbeddable } from './metric_embeddable';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { PageScope } from '../../../data_view_manager/constants';
 
 export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from, id, to }) => {
@@ -36,7 +34,6 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
   } = statItems;
 
   const { isToggleExpanded, onToggle } = useToggleStatus({ id });
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   return (
     <FlexItem grow={1} data-test-subj={key}>
@@ -67,7 +64,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
                     id={`${id}-bar-embeddable`}
                     height={ChartHeight}
                     inspectTitle={description}
-                    scopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
+                    scopeId={PageScope.explore}
                   />
                 </FlexItem>
               )}
@@ -82,7 +79,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
                       id={`${id}-area-embeddable`}
                       height={ChartHeight}
                       inspectTitle={description}
-                      scopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
+                      scopeId={PageScope.explore}
                     />
                   </FlexItem>
                 </>

@@ -8,10 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { encode } from '@kbn/rison';
-
 import { PageScope } from '../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import {
   RULE_FROM_EQL_URL_PARAM,
@@ -26,9 +23,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import type { TimelineModel } from '../../store/model';
 import { timelineSelectors } from '../../store';
 import { createTimeline as dispatchCreateNewTimeline } from '../../store/actions';
-
 import { useGetAllTimeline } from '../../containers/all';
-
 import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME, useQueryTimelineById } from './helpers';
 import { OpenTimelineModalBody } from './open_timeline_modal/open_timeline_modal_body';
@@ -160,21 +155,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       (state) => getTimeline(state, TimelineId.active)?.savedObjectId ?? ''
     );
 
-    const { dataViewId: oldDataViewId, selectedPatterns: oldSelectedPatterns } =
-      useSourcererDataView(PageScope.timeline);
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-    const { dataView: experimentalDataView } = useDataView(PageScope.timeline);
-    const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
-
-    const dataViewId = useMemo(
-      () => (newDataViewPickerEnabled ? experimentalDataView.id || '' : oldDataViewId),
-      [experimentalDataView.id, newDataViewPickerEnabled, oldDataViewId]
-    );
-    const selectedPatterns = useMemo(
-      () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
-      [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
-    );
+    const { dataView } = useDataView(PageScope.timeline);
+    const selectedPatterns = useSelectedPatterns(PageScope.timeline);
+    const dataViewId = useMemo(() => dataView.id || '', [dataView.id]);
 
     const {
       customTemplateTimelineCount,

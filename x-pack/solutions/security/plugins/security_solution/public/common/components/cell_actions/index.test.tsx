@@ -13,7 +13,17 @@ import { CellActions } from '@kbn/cell-actions';
 
 jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
   useDataView: jest.fn(() => ({
-    dataView: { id: 'security-default-dataview-id', fields: { getByName: jest.fn() } },
+    dataView: {
+      id: 'security-default-dataview-id',
+      fields: {
+        getByName: jest.fn().mockReturnValue({
+          toSpec: jest.fn().mockReturnValue({
+            searchable: true,
+            aggregatable: true,
+          }),
+        }),
+      },
+    },
   })),
 }));
 
@@ -27,12 +37,6 @@ jest.mock('@kbn/cell-actions', () => ({
   CellActions: jest.fn(() => <div data-test-subj="cell-actions-component" />),
 }));
 
-const mockFieldSpec = { someFieldSpec: 'theFieldSpec' };
-const mockGetFieldSpec = jest.fn((_: string) => mockFieldSpec);
-const mockUseGetFieldSpec = jest.fn((_: unknown) => mockGetFieldSpec);
-jest.mock('../../hooks/use_get_field_spec', () => ({
-  useGetFieldSpec: (param: unknown) => mockUseGetFieldSpec(param),
-}));
 const mockDataViewId = 'security-default-dataview-id';
 const mockUseDataViewId = jest.fn((_: unknown) => mockDataViewId);
 jest.mock('../../hooks/use_data_view_id', () => ({
@@ -91,7 +95,7 @@ describe('SecurityCellActions', () => {
 
     expect(MockCellActions).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: [{ field: mockFieldSpec, value: 'fieldValue' }],
+        data: [{ field: { aggregatable: true, searchable: true }, value: 'fieldValue' }],
       }),
       {}
     );

@@ -21,7 +21,6 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { PageScope } from '../../../data_view_manager/constants';
 import type { GetSecurityAlertsTableProp } from './types';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { SummaryViewSelector } from '../../../common/components/events_viewer/summary_view_select';
 import { updateGroups } from '../../../common/store/grouping/actions';
 import { useKibana } from '../../../common/lib/kibana';
@@ -30,7 +29,6 @@ import { useDataTableFilters } from '../../../common/hooks/use_data_table_filter
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { AdditionalFiltersAction } from './additional_filters_action';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 const { changeViewMode } = dataTableActions;
 
@@ -45,10 +43,7 @@ const AdditionalToolbarControlsComponent = ({
     services: { telemetry },
   } = useKibana();
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(PageScope.alerts);
-
-  const isNewDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
+  const { dataView } = useDataView(PageScope.alerts);
 
   const groupId = useMemo(() => groupIdSelector(), []);
   const { options } = useDeepEqualSelector((state) => groupId(state, tableType)) ?? {
@@ -77,13 +72,7 @@ const AdditionalToolbarControlsComponent = ({
     [dispatch, tableType, trackGroupChange]
   );
 
-  const fields = useMemo(
-    () =>
-      isNewDataViewPickerEnabled
-        ? experimentalDataView.fields.map((field) => field.spec)
-        : Object.values(oldSourcererDataView.fields || {}),
-    [experimentalDataView.fields, isNewDataViewPickerEnabled, oldSourcererDataView.fields]
-  );
+  const fields = useMemo(() => dataView.fields.map((field) => field.spec), [dataView.fields]);
 
   const groupSelector = useGetGroupSelectorStateless({
     groupingId: tableType,

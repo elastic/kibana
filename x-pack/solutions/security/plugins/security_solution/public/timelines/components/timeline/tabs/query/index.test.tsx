@@ -11,7 +11,6 @@ import QueryTabContent from '.';
 import { defaultRowRenderers } from '../../body/renderers';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { useTimelineEventsDetails } from '../../../../containers/details';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import {
   createMockStore,
@@ -67,7 +66,6 @@ jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
 
-jest.mock('../../../../../sourcerer/containers');
 jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
@@ -180,10 +178,6 @@ const renderTestComponents = (props?: Partial<ComponentProps<typeof TestComponen
   });
 };
 
-const useSourcererDataViewMocked = jest.fn().mockReturnValue({
-  ...mockSourcererScope,
-});
-
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 
 const useTimelineEventsSpy = jest.spyOn(useTimelineEventsModule, 'useTimelineEvents');
@@ -246,8 +240,6 @@ describe.skip('query tab with unified timeline', () => {
     });
 
     (useTimelineEventsDetails as jest.Mock).mockImplementation(() => [false, {}]);
-
-    (useSourcererDataView as jest.Mock).mockImplementation(useSourcererDataViewMocked);
 
     jest.mocked(useDataView).mockReturnValue(withIndices(mockSourcererScope.selectedPatterns));
 

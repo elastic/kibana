@@ -29,7 +29,6 @@ import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '../../../shared/components/test_ids';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -66,7 +65,6 @@ const NO_DATA_MESSAGE = 'No correlations data available.';
 describe('CorrelationsDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
       indexPatterns: ['index'],
     });
