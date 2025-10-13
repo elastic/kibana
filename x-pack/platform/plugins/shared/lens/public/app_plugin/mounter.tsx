@@ -370,8 +370,6 @@ export async function mountApp(
               onAppLeave={params.onAppLeave}
               setHeaderActionMenu={params.setHeaderActionMenu}
               history={props.history}
-              datasourceMap={datasourceMap}
-              visualizationMap={visualizationMap}
               initialContext={initialContext}
               contextOriginatingApp={originatingApp}
               topNavMenuEntryGenerators={topNavMenuEntryGenerators}

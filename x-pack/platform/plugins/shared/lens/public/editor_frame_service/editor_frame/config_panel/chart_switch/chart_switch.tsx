@@ -33,6 +33,7 @@ import { generateId } from '../../../../id_generator/id_generator';
 import type { SelectableEntry } from './chart_switch_selectable';
 import { ChartSwitchSelectable } from './chart_switch_selectable';
 import { ChartSwitchOptionPrepend } from './chart_option';
+import { useEditorFrameService } from '../../../editor_frame_service_context';
 
 type VisChartSwitchPosition = VisualizationType & {
   visualizationId: string;
@@ -52,8 +53,6 @@ interface VisualizationSelection {
 
 export interface ChartSwitchProps {
   framePublicAPI: FramePublicAPI;
-  visualizationMap: VisualizationMap;
-  datasourceMap: DatasourceMap;
   layerId: string;
   onChartSelect: () => void;
 }
@@ -84,11 +83,10 @@ function safeFnCall<TReturn>(action: () => TReturn, defaultReturnValue: TReturn)
 
 export const ChartSwitch = memo(function ChartSwitch({
   framePublicAPI,
-  visualizationMap,
-  datasourceMap,
   layerId,
   onChartSelect,
 }: ChartSwitchProps) {
+  const { datasourceMap, visualizationMap } = useEditorFrameService();
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const visualization = useLensSelector(selectVisualization);

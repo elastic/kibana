@@ -9,26 +9,24 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { StaticHeader } from '../../../shared_components';
 import type {
-  DatasourceMap,
   FramePublicAPI,
   VisualizationLayerWidgetProps,
   VisualizationMap,
 } from '../../../types';
 import { ChartSwitchPopover } from './chart_switch/chart_switch_popover';
+import { useEditorFrameService } from '../../editor_frame_service_context';
 
 export function LayerHeader({
   activeVisualizationId,
   layerConfigProps,
-  visualizationMap,
-  datasourceMap,
   onlyAllowSwitchToSubtypes,
 }: {
-  visualizationMap: VisualizationMap;
-  datasourceMap: DatasourceMap;
   activeVisualizationId: string;
   layerConfigProps: VisualizationLayerWidgetProps;
   onlyAllowSwitchToSubtypes?: boolean;
 }) {
+  const { datasourceMap, visualizationMap } = useEditorFrameService();
+
   const activeVisualization = visualizationMap[activeVisualizationId];
   if (!activeVisualization) {
     return null;

@@ -18,8 +18,6 @@ import type {
   Visualization,
   FramePublicAPI,
   DatasourceDimensionEditorProps,
-  DatasourceMap,
-  VisualizationMap,
   UserMessagesGetter,
   AddLayerFunction,
   RegisterLibraryAnnotationGroupFunction,
@@ -30,8 +28,6 @@ import type {
 
 export interface ConfigPanelWrapperProps {
   framePublicAPI: FramePublicAPI;
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
   core: DatasourceDimensionEditorProps['core'];
   dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
@@ -67,8 +63,6 @@ export interface LayerPanelProps {
   /** Set the attributes state */
   setCurrentAttributes?: (attrs: TypedLensSerializedState['attributes']) => void;
   visualizationState: unknown;
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
   framePublicAPI: FramePublicAPI;
   core: DatasourceDimensionEditorProps['core'];
   activeVisualization: Visualization;
