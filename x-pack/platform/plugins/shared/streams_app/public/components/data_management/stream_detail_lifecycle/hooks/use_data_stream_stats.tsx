@@ -82,6 +82,7 @@ export const useDataStreamStats = ({
     },
     [
       dataStreamsClient,
+      streamsRepositoryClient,
       definition.stream.name,
       aggregations?.buckets,
       timeState.end,
