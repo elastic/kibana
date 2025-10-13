@@ -445,6 +445,7 @@ class PackageClientImpl implements PackageClient {
       spaceIds: ['*'],
       fields: ['id', 'name'],
     });
+    // rollback all package policies that are accessible to the internal user, we don't have a request when called from an async task
     const packagePolicyIdsForInternalUser = packagePolicySORes.saved_objects.map((so) => so.id);
 
     return await rollbackInstallation({

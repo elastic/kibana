@@ -163,7 +163,11 @@ async function installPackageIfNotInstalled(
       }
       return;
     }
+  } catch (error) {
+    logger.error(`Failed to rollback package ${pkg.package_name}, error: ${error}`);
+  }
 
+  try {
     const installResult = await packageClient.installPackage({
       pkgName: pkg.package_name,
       pkgVersion: pkg.package_version,
