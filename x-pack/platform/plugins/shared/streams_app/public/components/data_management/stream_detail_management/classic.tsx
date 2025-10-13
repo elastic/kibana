@@ -67,13 +67,9 @@ export function ClassicStreamDetailManagement({
           bottomBorder="extended"
           pageTitle={
             <EuiFlexGroup gutterSize="s" alignItems="center">
-              {i18n.translate('xpack.streams.entityDetailViewWithoutParams.manageStreamTitle', {
-                defaultMessage: 'Manage stream {streamId}',
-                values: { streamId: key },
-              })}
+              {key}
               <EuiBadgeGroup gutterSize="s">
-                {Streams.ClassicStream.Definition.is(definition.stream) && <ClassicStreamBadge />}
-                {Streams.WiredStream.Definition.is(definition.stream) && <WiredStreamBadge />}
+                <ClassicStreamBadge />
                 <LifecycleBadge lifecycle={definition.effective_lifecycle} />
               </EuiBadgeGroup>
             </EuiFlexGroup>
@@ -93,7 +89,7 @@ export function ClassicStreamDetailManagement({
                 'xpack.streams.unmanagedStreamOverview.missingDatastream.description',
                 {
                   defaultMessage:
-                    'The underlying Elasticsearch data stream for this classic stream is missing. Recreate the data stream to restore the stream by sending data before using the management features.',
+                    'The underlying Elasticsearch data stream for this classic stream is missing or not accessible. Recreate the data stream to restore the stream by sending data before using the management features.',
                 }
               )}
             </p>
