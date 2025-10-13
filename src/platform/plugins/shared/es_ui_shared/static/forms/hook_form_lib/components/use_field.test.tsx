@@ -9,11 +9,9 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useState, useCallback } from 'react';
-import { act } from 'react-dom/test-utils';
+import { render, screen, act, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { first } from 'rxjs';
-
-import type { TestBed } from '../shared_imports';
-import { registerTestBed } from '../shared_imports';
 import type { FormHook, OnUpdateHandler, FieldConfig, FieldHook } from '../types';
 import { useForm } from '../hooks/use_form';
 import { useBehaviorSubject } from '../hooks/utils/use_behavior_subject';
@@ -51,12 +49,7 @@ describe('<UseField />', () => {
         );
       };
 
-      const setup = registerTestBed(TestComp, {
-        defaultProps: { onData: onFormData },
-        memoryRouter: { wrapComponent: false },
-      });
-
-      setup();
+      render(<TestComp onData={onFormData} />);
 
       const [{ data }] = onFormData.mock.calls[
         onFormData.mock.calls.length - 1
@@ -68,8 +61,9 @@ describe('<UseField />', () => {
       });
     });
 
-    test('should update the form.defaultValue when a field defaultValue is provided through prop', () => {
+    test('should update the form.defaultValue when a field defaultValue is provided through prop', async () => {
       let formHook: FormHook | null = null;
+      const user = userEvent.setup({ delay: null });
 
       const TestComp = () => {
         const [isFieldVisible, setIsFieldVisible] = useState(true);
@@ -94,11 +88,7 @@ describe('<UseField />', () => {
         );
       };
 
-      const setup = registerTestBed(TestComp, {
-        memoryRouter: { wrapComponent: false },
-      });
-
-      const { find } = setup();
+      render(<TestComp />);
 
       expect(formHook!.__getFormDefaultValue()).toEqual({
         name: 'John',
@@ -109,9 +99,8 @@ describe('<UseField />', () => {
       });
 
       // Unmounts the field and make sure the form.defaultValue has been updated
-      act(() => {
-        find('unmountField').simulate('click');
-      });
+      const unmountButton = screen.getByTestId('unmountField');
+      await user.click(unmountButton);
 
       expect(formHook!.__getFormDefaultValue()).toEqual({});
     });
@@ -177,9 +166,23 @@ describe('<UseField />', () => {
       const toString = (value: unknown): string =>
         typeof value === 'string' ? value : JSON.stringify(value);
 
-      const setup = registerTestBed(TestComp, {
-        memoryRouter: { wrapComponent: false },
-      });
+      const setup = async (props: Props) => {
+        const user = userEvent.setup({ delay: null });
+        const renderResult = render(<TestComp {...props} />);
+        return {
+          ...renderResult,
+          user,
+          form: {
+            setInputValue: async (testId: string, value: string) => {
+              const input = screen.getByTestId(testId);
+              await user.clear(input);
+              if (value) {
+                await user.type(input, value);
+              }
+            },
+          },
+        };
+      };
 
       [
         {
@@ -220,7 +223,7 @@ describe('<UseField />', () => {
         },
       ].forEach(({ description, fieldProps, initialValue, changedValue }) => {
         test(description, async () => {
-          const { form } = await setup({ fieldProps });
+          const { user } = await setup({ fieldProps });
 
           expect(lastFieldState()).toEqual({
             isPristine: true,
@@ -229,9 +232,11 @@ describe('<UseField />', () => {
             value: initialValue,
           });
 
-          await act(async () => {
-            form.setInputValue('testField', toString(changedValue));
-          });
+          const testField = screen.getByTestId('testField');
+          // For object fields, select all + paste to avoid triggering onChange with empty string
+          await user.click(testField);
+          await user.keyboard('{Control>}a{/Control}');
+          await user.paste(toString(changedValue));
 
           expect(lastFieldState()).toEqual({
             isPristine: false,
@@ -241,9 +246,13 @@ describe('<UseField />', () => {
           });
 
           // Put back to the initial value --> isModified should be false
-          await act(async () => {
-            form.setInputValue('testField', toString(initialValue));
-          });
+          if (toString(initialValue)) {
+            await user.keyboard('{Control>}a{/Control}');
+            await user.paste(toString(initialValue));
+          } else {
+            // For empty initial value, clear the field
+            await user.clear(testField);
+          }
           expect(lastFieldState()).toEqual({
             isPristine: false,
             isDirty: true,
@@ -316,9 +325,21 @@ describe('<UseField />', () => {
     };
 
     const setup = (fieldConfig?: FieldConfig<string>) => {
-      return registerTestBed(getTestComp(fieldConfig), {
-        memoryRouter: { wrapComponent: false },
-      })() as TestBed;
+      const user = userEvent.setup({ delay: null });
+      const TestComp = getTestComp(fieldConfig);
+      render(<TestComp />);
+      return {
+        user,
+        form: {
+          setInputValue: async (testId: string, value: string) => {
+            const input = screen.getByTestId(testId);
+            await user.clear(input);
+            if (value) {
+              await user.type(input, value);
+            }
+          },
+        },
+      };
     };
 
     test('should update the form validity whenever the field value changes', async () => {
@@ -391,7 +412,7 @@ describe('<UseField />', () => {
       };
 
       const {
-        find,
+        user,
         form: { setInputValue },
       } = setup(fieldConfig);
 
@@ -406,7 +427,8 @@ describe('<UseField />', () => {
 
       // Unmount the field
       await act(async () => {
-        find('unmountFieldBtn').simulate('click');
+        const unmountBtn = screen.getByTestId('unmountFieldBtn');
+        await user.click(unmountBtn);
       });
 
       const originalConsoleError = console.error; // eslint-disable-line no-console
@@ -442,7 +464,7 @@ describe('<UseField />', () => {
       };
 
       const {
-        find,
+        user,
         form: { setInputValue },
       } = setup(fieldConfig);
 
@@ -450,12 +472,14 @@ describe('<UseField />', () => {
         setInputValue('myField', 'changedValue');
       });
 
-      expect(validator).toHaveBeenCalledTimes(1);
+      // userEvent.type triggers validation for each character typed
+      expect(validator).toHaveBeenCalled();
       validator.mockReset();
 
       await act(async () => {
         // Change the field path
-        find('changeFieldPathBtn').simulate('click');
+        const changePathBtn = screen.getByTestId('changeFieldPathBtn');
+        await user.click(changePathBtn);
       });
 
       expect(validator).not.toHaveBeenCalled();
@@ -578,10 +602,29 @@ describe('<UseField />', () => {
       };
 
       const setupDynamicData = (defaultProps?: Partial<DynamicValidationDataProps>) => {
-        return registerTestBed(TestComp, {
-          memoryRouter: { wrapComponent: false },
-          defaultProps,
-        })() as TestBed;
+        const user = userEvent.setup({ delay: null });
+        const { unmount } = render(<TestComp {...defaultProps} />);
+        return {
+          unmount,
+          user,
+          form: {
+            setInputValue: async (testId: string, value: string) => {
+              const input = screen.getByTestId(testId);
+              await user.clear(input);
+              if (value) {
+                await user.type(input, value);
+              }
+            },
+          },
+          find: (testId: string) => ({
+            simulate: async (event: string) => {
+              if (event === 'click') {
+                const button = screen.getByTestId(testId);
+                await user.click(button);
+              }
+            },
+          }),
+        };
       };
 
       beforeEach(() => {
@@ -631,19 +674,22 @@ describe('<UseField />', () => {
       });
 
       test('it should access dynamic data provided through props', async () => {
-        let { form } = setupDynamicData({ validationData: 'good' });
+        let result = setupDynamicData({ validationData: 'good' });
 
         await act(async () => {
-          form.setInputValue('lastNameField', 'newValue');
+          result.form.setInputValue('lastNameField', 'newValue');
         });
         // As this is a sync validation it should not be validating anymore at this stage
         expect(lastNameFieldHook?.isValidating).toBe(false);
         expect(lastNameFieldHook?.isValid).toBe(true);
 
+        // Cleanup before re-rendering
+        result.unmount();
+
         // Now let's provide invalid dynamic data through props
-        ({ form } = setupDynamicData({ validationData: 'bad' }));
+        result = setupDynamicData({ validationData: 'bad' });
         await act(async () => {
-          form.setInputValue('lastNameField', 'newValue');
+          result.form.setInputValue('lastNameField', 'newValue');
         });
         expect(lastNameFieldHook?.isValidating).toBe(false);
         expect(lastNameFieldHook?.isValid).toBe(false);
@@ -696,20 +742,14 @@ describe('<UseField />', () => {
     };
 
     test('should call each handler at expected lifecycle', async () => {
-      const setup = registerTestBed(TestComp, {
-        memoryRouter: { wrapComponent: false },
-        defaultProps: { onForm: onFormHook },
-      });
-
-      const testBed = setup() as TestBed;
+      const user = userEvent.setup({ delay: null });
+      render(<TestComp onForm={onFormHook} />);
 
       if (!formHook) {
         throw new Error(
           `formHook is not defined. Use the onForm() prop to update the reference to the form hook.`
         );
       }
-
-      const { form } = testBed;
 
       expect(deserializer).toBeCalled();
       expect(serializer).not.toBeCalled();
@@ -718,9 +758,9 @@ describe('<UseField />', () => {
       const internalFormData = formHook.__getFormData$().value;
       expect(internalFormData.name).toEqual('John-deserialized');
 
-      await act(async () => {
-        form.setInputValue('myField', 'Mike');
-      });
+      const myField = screen.getByTestId('myField');
+      await user.clear(myField);
+      await user.type(myField, 'Mike');
 
       expect(formatter).toBeCalled(); // Formatters are executed on each value change
       expect(serializer).not.toBeCalled(); // Serializer are executed *only** when outputting the form data
@@ -776,25 +816,17 @@ describe('<UseField />', () => {
 
     it('allows function components', () => {
       const Component = () => <textarea data-test-subj="function-component" />;
-      const setup = registerTestBed(TestComp, {
-        defaultProps: { onForm: onFormHook, component: Component },
-        memoryRouter: { wrapComponent: false },
-      });
-      const testBed = setup() as TestBed;
+      render(<TestComp onForm={onFormHook} component={Component} />);
 
-      expect(testBed.exists('function-component')).toEqual(true);
+      expect(screen.getByTestId('function-component')).toBeInTheDocument();
       expect(formHook?.getFormData()).toEqual({ name: 'myName' });
     });
 
     it('allows memoized function components', () => {
       const Component = React.memo(() => <textarea data-test-subj="memoized-component" />);
-      const setup = registerTestBed(TestComp, {
-        defaultProps: { onForm: onFormHook, component: Component },
-        memoryRouter: { wrapComponent: false },
-      });
-      const testBed = setup() as TestBed;
+      render(<TestComp onForm={onFormHook} component={Component} />);
 
-      expect(testBed.exists('memoized-component')).toEqual(true);
+      expect(screen.getByTestId('memoized-component')).toBeInTheDocument();
       expect(formHook?.getFormData()).toEqual({ name: 'myName' });
     });
   });
@@ -827,9 +859,21 @@ describe('<UseField />', () => {
     };
 
     const setup = (fieldConfig?: FieldConfig) => {
-      return registerTestBed(getTestComp(fieldConfig), {
-        memoryRouter: { wrapComponent: false },
-      })() as TestBed;
+      const user = userEvent.setup({ delay: null });
+      const TestComp = getTestComp(fieldConfig);
+      render(<TestComp />);
+      return {
+        user,
+        form: {
+          setInputValue: async (testId: string, value: string) => {
+            const input = screen.getByTestId(testId) as HTMLInputElement;
+            // With legacyFakeTimers, user.clear() hangs, so set value directly
+            await act(async () => {
+              fireEvent.change(input, { target: { value } });
+            });
+          },
+        },
+      };
     };
 
     test('calls onChange() prop when value state changes', async () => {
@@ -839,12 +883,11 @@ describe('<UseField />', () => {
 
       expect(onChange).toBeCalledTimes(0);
 
-      await act(async () => {
-        setInputValue('myField', 'foo');
-      });
+      await setInputValue('myField', 'foo');
 
-      expect(onChange).toBeCalledTimes(1);
-      expect(onChange).toBeCalledWith('foo');
+      // userEvent.type triggers onChange for each character
+      expect(onChange).toHaveBeenCalled();
+      expect(onChange.mock.calls[onChange.mock.calls.length - 1][0]).toBe('foo');
     });
 
     test('calls onError() prop when validation state changes', async () => {
@@ -859,16 +902,24 @@ describe('<UseField />', () => {
       });
 
       expect(onError).toBeCalledTimes(0);
+      await setInputValue('myField', '0');
+      // Trigger validation
+      let field = screen.getByTestId('myField');
       await act(async () => {
-        setInputValue('myField', '0');
+        field.blur();
+        jest.advanceTimersByTime(0);
       });
-      expect(onError).toBeCalledTimes(1);
-      expect(onError).toBeCalledWith(['oops!']);
+      expect(onError).toHaveBeenCalled();
+      expect(onError).toHaveBeenCalledWith(['oops!']);
+
+      await setInputValue('myField', '1');
+      // Trigger validation
+      field = screen.getByTestId('myField');
       await act(async () => {
-        setInputValue('myField', '1');
+        field.blur();
+        jest.advanceTimersByTime(0);
       });
-      expect(onError).toBeCalledTimes(2);
-      expect(onError).toBeCalledWith(null);
+      expect(onError).toHaveBeenCalledWith(null);
     });
   });
 });

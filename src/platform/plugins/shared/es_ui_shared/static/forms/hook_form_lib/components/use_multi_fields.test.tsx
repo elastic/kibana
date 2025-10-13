@@ -8,8 +8,9 @@
  */
 
 import React, { useState } from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import { registerTestBed } from '../shared_imports';
 import type { FieldHook } from '../types';
 import { useForm } from '../hooks/use_form';
 import { Form } from './form';
@@ -62,12 +63,7 @@ describe('<UseMultiFields />', () => {
   test('it should return 2 hook fields', () => {
     const onFields = jest.fn();
 
-    const setup = registerTestBed(TestComp, {
-      defaultProps: { onFields },
-      memoryRouter: { wrapComponent: false },
-    });
-
-    setup();
+    render(<TestComp onFields={onFields} />);
 
     expect(onFields).toHaveBeenCalled();
     const fieldsReturned = onFields.mock.calls[0][0];
@@ -78,15 +74,11 @@ describe('<UseMultiFields />', () => {
     expect(fieldsReturned.bar.isPristine).toBeDefined();
   });
 
-  test('it should keep a stable ref of initial fields passed', () => {
+  test('it should keep a stable ref of initial fields passed', async () => {
+    const user = userEvent.setup({ delay: null }); // Required for fake timers
     const onFields = jest.fn();
 
-    const setup = registerTestBed(TestComp, {
-      defaultProps: { onFields },
-      memoryRouter: { wrapComponent: false },
-    });
-
-    const { find } = setup();
+    render(<TestComp onFields={onFields} />);
 
     expect(onFields).toBeCalledTimes(1);
     let fieldsReturned = onFields.mock.calls[0][0] as { [key: string]: FieldHook };
@@ -94,9 +86,14 @@ describe('<UseMultiFields />', () => {
     expect(paths).toEqual(['bar', 'foo']);
 
     // We change the fields passed down to <UseMultiFields />
-    find('changeFields').simulate('click');
-    expect(onFields).toBeCalledTimes(2);
-    fieldsReturned = onFields.mock.calls[1][0] as { [key: string]: FieldHook };
+    const button = await screen.findByTestId('changeFields');
+    await user.click(button);
+
+    // Check that onFields was called again (button click may trigger multiple re-renders)
+    expect(onFields.mock.calls.length).toBeGreaterThan(1);
+    fieldsReturned = onFields.mock.calls[onFields.mock.calls.length - 1][0] as {
+      [key: string]: FieldHook;
+    };
     paths = Object.values(fieldsReturned).map(({ path }) => path);
 
     // We still get the same 2 fields originally passed

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act } from 'react-dom/test-utils';
+import { act } from '@testing-library/react';
 import sinon from 'sinon';
 
 import type { UseRequestHelpers } from './use_request.test.helpers';
