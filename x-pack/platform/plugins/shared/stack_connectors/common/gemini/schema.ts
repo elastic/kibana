@@ -8,41 +8,51 @@
 import { z } from '@kbn/zod';
 import { DEFAULT_GEMINI_MODEL } from './constants';
 
-export const TelemetryMetadataSchema = z.object({
-  pluginId: z.string().optional(),
-  aggregateBy: z.string().optional(),
-});
+export const TelemetryMetadataSchema = z
+  .object({
+    pluginId: z.string().optional(),
+    aggregateBy: z.string().optional(),
+  })
+  .strict();
 
-export const ConfigSchema = z.object({
-  apiUrl: z.string(),
-  defaultModel: z.string().default(DEFAULT_GEMINI_MODEL),
-  gcpRegion: z.string(),
-  gcpProjectID: z.string(),
-  contextWindowLength: z.number().optional(),
-});
+export const ConfigSchema = z
+  .object({
+    apiUrl: z.string(),
+    defaultModel: z.string().default(DEFAULT_GEMINI_MODEL),
+    gcpRegion: z.string(),
+    gcpProjectID: z.string(),
+    contextWindowLength: z.number().optional(),
+  })
+  .strict();
 
-export const SecretsSchema = z.object({
-  credentialsJson: z.string(),
-});
+export const SecretsSchema = z
+  .object({
+    credentialsJson: z.string(),
+  })
+  .strict();
 
-export const RunActionParamsSchema = z.object({
-  body: z.any(),
-  model: z.string().optional(),
-  signal: z.any().optional(),
-  timeout: z.number().optional(),
-  temperature: z.number().optional(),
-  stopSequences: z.array(z.string()).optional(),
-  raw: z.boolean().optional(),
-  telemetryMetadata: TelemetryMetadataSchema.optional(),
-});
+export const RunActionParamsSchema = z
+  .object({
+    body: z.any(),
+    model: z.string().optional(),
+    signal: z.any().optional(),
+    timeout: z.number().optional(),
+    temperature: z.number().optional(),
+    stopSequences: z.array(z.string()).optional(),
+    raw: z.boolean().optional(),
+    telemetryMetadata: TelemetryMetadataSchema.optional(),
+  })
+  .strict();
 
 export const RunApiResponseSchema = z.object({
   candidates: z.any(),
-  usageMetadata: z.object({
-    promptTokenCount: z.number(),
-    candidatesTokenCount: z.number(),
-    totalTokenCount: z.number(),
-  }),
+  usageMetadata: z
+    .object({
+      promptTokenCount: z.number(),
+      candidatesTokenCount: z.number(),
+      totalTokenCount: z.number(),
+    })
+    .strict(),
 });
 
 export const RunActionResponseSchema = z.object({
@@ -54,62 +64,75 @@ export const RunActionResponseSchema = z.object({
       candidatesTokenCount: z.number(),
       totalTokenCount: z.number(),
     })
+    .strict()
     .optional(),
 });
 
 export const RunActionRawResponseSchema = z.any();
 
-export const InvokeAIActionParamsSchema = z.object({
-  maxOutputTokens: z.number().optional(),
-  messages: z.any(),
-  systemInstruction: z.string().optional(),
-  model: z.string().optional(),
-  temperature: z.number().optional(),
-  stopSequences: z.array(z.string()).optional(),
-  signal: z.any().optional(),
-  timeout: z.number().optional(),
-  tools: z.array(z.any()).optional(),
-  toolConfig: z
-    .object({
-      mode: z.enum(['AUTO', 'ANY', 'NONE']),
-      allowedFunctionNames: z.array(z.string()).optional(),
-    })
-    .optional(),
-  telemetryMetadata: TelemetryMetadataSchema.optional(),
-});
+export const InvokeAIActionParamsSchema = z
+  .object({
+    maxOutputTokens: z.number().optional(),
+    messages: z.any(),
+    systemInstruction: z.string().optional(),
+    model: z.string().optional(),
+    temperature: z.number().optional(),
+    stopSequences: z.array(z.string()).optional(),
+    signal: z.any().optional(),
+    timeout: z.number().optional(),
+    tools: z.array(z.any()).optional(),
+    toolConfig: z
+      .object({
+        mode: z.enum(['AUTO', 'ANY', 'NONE']),
+        allowedFunctionNames: z.array(z.string()).optional(),
+      })
+      .strict()
+      .optional(),
+    telemetryMetadata: TelemetryMetadataSchema.optional(),
+  })
+  .strict();
 
-export const InvokeAIRawActionParamsSchema = z.object({
-  maxOutputTokens: z.number().optional(),
-  messages: z.any(),
-  systemInstruction: z.string().optional(),
-  model: z.string().optional(),
-  temperature: z.number().optional(),
-  stopSequences: z.array(z.string()).optional(),
-  signal: z.any().optional(),
-  timeout: z.number().optional(),
-  tools: z.array(z.any()).optional(),
-  telemetryMetadata: TelemetryMetadataSchema.optional(),
-});
+export const InvokeAIRawActionParamsSchema = z
+  .object({
+    maxOutputTokens: z.number().optional(),
+    messages: z.any(),
+    systemInstruction: z.string().optional(),
+    model: z.string().optional(),
+    temperature: z.number().optional(),
+    stopSequences: z.array(z.string()).optional(),
+    signal: z.any().optional(),
+    timeout: z.number().optional(),
+    tools: z.array(z.any()).optional(),
+    telemetryMetadata: TelemetryMetadataSchema.optional(),
+  })
+  .strict();
 
-export const InvokeAIActionResponseSchema = z.object({
-  message: z.string(),
-  usageMetadata: z
-    .object({
-      promptTokenCount: z.number(),
-      candidatesTokenCount: z.number(),
-      totalTokenCount: z.number(),
-    })
-    .optional(),
-});
+export const InvokeAIActionResponseSchema = z
+  .object({
+    message: z.string(),
+    usageMetadata: z
+      .object({
+        promptTokenCount: z.number(),
+        candidatesTokenCount: z.number(),
+        totalTokenCount: z.number(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
 
 export const InvokeAIRawActionResponseSchema = z.any();
 
 export const StreamingResponseSchema = z.any();
 
-export const DashboardActionParamsSchema = z.object({
-  dashboardId: z.string(),
-});
+export const DashboardActionParamsSchema = z
+  .object({
+    dashboardId: z.string(),
+  })
+  .strict();
 
-export const DashboardActionResponseSchema = z.object({
-  available: z.boolean(),
-});
+export const DashboardActionResponseSchema = z
+  .object({
+    available: z.boolean(),
+  })
+  .strict();

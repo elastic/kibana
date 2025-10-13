@@ -99,6 +99,7 @@ export const SecretConfigurationSchemaValidation = {
 
 export const SecretConfigurationSchema = z
   .object(SecretConfiguration)
+  .strict()
   .superRefine((secrets, ctx) => {
     const errorMessage = SecretConfigurationSchemaValidation.validate(secrets);
     if (errorMessage) {

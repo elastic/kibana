@@ -8,32 +8,40 @@
 import { z } from '@kbn/zod';
 import { DEFAULT_BEDROCK_MODEL } from './constants';
 
-export const TelemetryMetadataSchema = z.object({
-  pluginId: z.string().optional(),
-  aggregateBy: z.string().optional(),
-});
+export const TelemetryMetadataSchema = z
+  .object({
+    pluginId: z.string().optional(),
+    aggregateBy: z.string().optional(),
+  })
+  .strict();
 
 // Connector schema
-export const ConfigSchema = z.object({
-  apiUrl: z.string(),
-  defaultModel: z.string().default(DEFAULT_BEDROCK_MODEL),
-  contextWindowLength: z.number().optional(),
-});
+export const ConfigSchema = z
+  .object({
+    apiUrl: z.string(),
+    defaultModel: z.string().default(DEFAULT_BEDROCK_MODEL),
+    contextWindowLength: z.number().optional(),
+  })
+  .strict();
 
-export const SecretsSchema = z.object({
-  accessKey: z.string(),
-  secret: z.string(),
-});
+export const SecretsSchema = z
+  .object({
+    accessKey: z.string(),
+    secret: z.string(),
+  })
+  .strict();
 
-export const RunActionParamsSchema = z.object({
-  body: z.string(),
-  model: z.string().optional(),
-  // abort signal from client
-  signal: z.any().optional(),
-  timeout: z.number().optional(),
-  raw: z.boolean().optional(),
-  telemetryMetadata: TelemetryMetadataSchema.optional(),
-});
+export const RunActionParamsSchema = z
+  .object({
+    body: z.string(),
+    model: z.string().optional(),
+    // abort signal from client
+    signal: z.any().optional(),
+    timeout: z.number().optional(),
+    raw: z.boolean().optional(),
+    telemetryMetadata: TelemetryMetadataSchema.optional(),
+  })
+  .strict();
 
 export const BedrockMessageSchema = z
   .object({
@@ -41,6 +49,7 @@ export const BedrockMessageSchema = z
     content: z.string().optional(),
     rawContent: z.array(z.any()).optional(),
   })
+  .strict()
   .superRefine((value, ctx) => {
     if (value.content === undefined && value.rawContent === undefined) {
       ctx.addIssue({
@@ -55,10 +64,12 @@ export const BedrockMessageSchema = z
     }
   });
 
-export const BedrockToolChoiceSchema = z.object({
-  type: z.enum(['auto', 'any', 'tool']),
-  name: z.string().optional(),
-});
+export const BedrockToolChoiceSchema = z
+  .object({
+    type: z.enum(['auto', 'any', 'tool']),
+    name: z.string().optional(),
+  })
+  .strict();
 
 export const BedrockUsageSchema = z
   .object({
@@ -70,64 +81,69 @@ export const BedrockUsageSchema = z
   .passthrough()
   .optional();
 
-export const InvokeAIActionParamsSchema = z.object({
-  messages: z.array(BedrockMessageSchema),
-  model: z.string().optional(),
-  temperature: z.number().optional(),
-  stopSequences: z.array(z.string()).optional(),
-  system: z.string().optional(),
-  maxTokens: z.number().optional(),
-  // abort signal from client
-  signal: z.any().optional(),
-  timeout: z.number().optional(),
-  anthropicVersion: z.string().optional(),
-  tools: z
-    .array(
+export const InvokeAIActionParamsSchema = z
+  .object({
+    messages: z.array(BedrockMessageSchema),
+    model: z.string().optional(),
+    temperature: z.number().optional(),
+    stopSequences: z.array(z.string()).optional(),
+    system: z.string().optional(),
+    maxTokens: z.number().optional(),
+    // abort signal from client
+    signal: z.any().optional(),
+    timeout: z.number().optional(),
+    anthropicVersion: z.string().optional(),
+    tools: z
+      .array(
+        z.object({
+          name: z.string(),
+          description: z.string(),
+          input_schema: z.object({}).passthrough(),
+        })
+      )
+      .optional(),
+    toolChoice: BedrockToolChoiceSchema.optional(),
+    telemetryMetadata: TelemetryMetadataSchema.optional(),
+  })
+  .strict();
+
+export const InvokeAIActionResponseSchema = z
+  .object({
+    message: z.string(),
+    usage: BedrockUsageSchema,
+  })
+  .strict();
+
+export const InvokeAIRawActionParamsSchema = z
+  .object({
+    messages: z.array(
       z.object({
-        name: z.string(),
-        description: z.string(),
-        input_schema: z.object({}).passthrough(),
+        role: z.string(),
+        content: z.any(),
       })
-    )
-    .optional(),
-  toolChoice: BedrockToolChoiceSchema.optional(),
-  telemetryMetadata: TelemetryMetadataSchema.optional(),
-});
-
-export const InvokeAIActionResponseSchema = z.object({
-  message: z.string(),
-  usage: BedrockUsageSchema,
-});
-
-export const InvokeAIRawActionParamsSchema = z.object({
-  messages: z.array(
-    z.object({
-      role: z.string(),
-      content: z.any(),
-    })
-  ),
-  model: z.string().optional(),
-
-  temperature: z.number().optional(),
-  stopSequences: z.array(z.string()).optional(),
-  system: z.string().optional(),
-  maxTokens: z.number().optional(),
-  // abort signal from client
-  signal: z.any().optional(),
-  anthropicVersion: z.string().optional(),
-  timeout: z.number().optional(),
-  tools: z
-    .array(
-      z.object({
-        name: z.string(),
-        description: z.string(),
-        input_schema: z.object({}).passthrough(),
-      })
-    )
-    .optional(),
-  toolChoice: BedrockToolChoiceSchema.optional(),
-  telemetryMetadata: TelemetryMetadataSchema.optional(),
-});
+    ),
+    model: z.string().optional(),
+    temperature: z.number().optional(),
+    stopSequences: z.array(z.string()).optional(),
+    system: z.string().optional(),
+    maxTokens: z.number().optional(),
+    // abort signal from client
+    signal: z.any().optional(),
+    anthropicVersion: z.string().optional(),
+    timeout: z.number().optional(),
+    tools: z
+      .array(
+        z.object({
+          name: z.string(),
+          description: z.string(),
+          input_schema: z.object({}).passthrough(),
+        })
+      )
+      .optional(),
+    toolChoice: BedrockToolChoiceSchema.optional(),
+    telemetryMetadata: TelemetryMetadataSchema.optional(),
+  })
+  .strict();
 
 export const InvokeAIRawActionResponseSchema = z.object({}).passthrough();
 
@@ -148,21 +164,27 @@ export const RunActionResponseSchema = z.object({
 export const StreamingResponseSchema = z.any();
 
 // Run action schema
-export const DashboardActionParamsSchema = z.object({
-  dashboardId: z.string(),
-});
+export const DashboardActionParamsSchema = z
+  .object({
+    dashboardId: z.string(),
+  })
+  .strict();
 
-export const DashboardActionResponseSchema = z.object({
-  available: z.boolean(),
-});
+export const DashboardActionResponseSchema = z
+  .object({
+    available: z.boolean(),
+  })
+  .strict();
 
-export const BedrockClientSendParamsSchema = z.object({
-  // ConverseCommand | ConverseStreamCommand from @aws-sdk/client-bedrock-runtime
-  command: z.any(),
-  // Kibana related properties
-  signal: z.any().optional(),
-  telemetryMetadata: TelemetryMetadataSchema.optional(),
-});
+export const BedrockClientSendParamsSchema = z
+  .object({
+    // ConverseCommand | ConverseStreamCommand from @aws-sdk/client-bedrock-runtime
+    command: z.any(),
+    // Kibana related properties
+    signal: z.any().optional(),
+    telemetryMetadata: TelemetryMetadataSchema.optional(),
+  })
+  .strict();
 
 export const BedrockClientSendResponseSchema = z.object({}).passthrough();
 

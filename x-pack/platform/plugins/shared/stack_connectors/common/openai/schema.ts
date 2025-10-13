@@ -8,177 +8,200 @@
 import { z } from '@kbn/zod';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from './constants';
 
-export const TelemetryMetadataSchema = z.object({
-  pluginId: z.string().optional(),
-  aggregateBy: z.string().optional(),
-});
+export const TelemetryMetadataSchema = z
+  .object({
+    pluginId: z.string().optional(),
+    aggregateBy: z.string().optional(),
+  })
+  .strict();
 
 // Connector schema
 export const ConfigSchema = z.union([
-  z.object({
-    apiProvider: z.enum([OpenAiProviderType.AzureAi]),
-    apiUrl: z.string(),
-    headers: z.record(z.string(), z.string()).optional(),
-    contextWindowLength: z.number().optional(),
-  }),
-  z.object({
-    apiProvider: z.enum([OpenAiProviderType.OpenAi]),
-    apiUrl: z.string(),
-    organizationId: z.string().optional(),
-    projectId: z.string().optional(),
-    defaultModel: z.string().default(DEFAULT_OPENAI_MODEL),
-    headers: z.record(z.string(), z.string()).optional(),
-    contextWindowLength: z.number().optional(),
-  }),
-  z.object({
-    apiProvider: z.enum([OpenAiProviderType.Other]),
-    apiUrl: z.string(),
-    defaultModel: z.string(),
-    verificationMode: z.enum(['full', 'certificate', 'none']).default('full').optional(),
-    headers: z.record(z.string(), z.string()).optional(),
-    contextWindowLength: z.number().optional(),
-    enableNativeFunctionCalling: z.boolean().optional(),
-  }),
+  z
+    .object({
+      apiProvider: z.enum([OpenAiProviderType.AzureAi]),
+      apiUrl: z.string(),
+      headers: z.record(z.string(), z.string()).optional(),
+      contextWindowLength: z.number().optional(),
+    })
+    .strict(),
+  z
+    .object({
+      apiProvider: z.enum([OpenAiProviderType.OpenAi]),
+      apiUrl: z.string(),
+      organizationId: z.string().optional(),
+      projectId: z.string().optional(),
+      defaultModel: z.string().default(DEFAULT_OPENAI_MODEL),
+      headers: z.record(z.string(), z.string()).optional(),
+      contextWindowLength: z.number().optional(),
+    })
+    .strict(),
+  z
+    .object({
+      apiProvider: z.enum([OpenAiProviderType.Other]),
+      apiUrl: z.string(),
+      defaultModel: z.string(),
+      verificationMode: z.enum(['full', 'certificate', 'none']).default('full').optional(),
+      headers: z.record(z.string(), z.string()).optional(),
+      contextWindowLength: z.number().optional(),
+      enableNativeFunctionCalling: z.boolean().optional(),
+    })
+    .strict(),
 ]);
 
 export const SecretsSchema = z.union([
-  z.object({ apiKey: z.string() }),
-  z.object({
-    apiKey: z.string().min(1).optional(),
-    certificateData: z.string().min(1).optional(),
-    privateKeyData: z.string().min(1).optional(),
-    caData: z.string().min(1).optional(),
-  }),
+  z.object({ apiKey: z.string() }).strict(),
+  z
+    .object({
+      apiKey: z.string().min(1).optional(),
+      certificateData: z.string().min(1).optional(),
+      privateKeyData: z.string().min(1).optional(),
+      caData: z.string().min(1).optional(),
+    })
+    .strict(),
 ]);
 
 // Run action schema
-export const RunActionParamsSchema = z.object({
-  body: z.string(),
-  // abort signal from client
-  signal: z.any().optional(),
-  timeout: z.number().optional(),
-  telemetryMetadata: TelemetryMetadataSchema.optional(),
-});
+export const RunActionParamsSchema = z
+  .object({
+    body: z.string(),
+    // abort signal from client
+    signal: z.any().optional(),
+    timeout: z.number().optional(),
+    telemetryMetadata: TelemetryMetadataSchema.optional(),
+  })
+  .strict();
 
-const AIMessage = z.object({
-  role: z.string(),
-  content: z.string(),
-  name: z.string().optional(),
-  function_call: z
-    .object({
-      arguments: z.string(),
-      name: z.string(),
-    })
-    .optional(),
-  tool_calls: z
-    .array(
-      z.object({
-        id: z.string(),
-        function: z.object({
-          arguments: z.string(),
-          name: z.string(),
-        }),
-        type: z.string(),
+const AIMessage = z
+  .object({
+    role: z.string(),
+    content: z.string(),
+    name: z.string().optional(),
+    function_call: z
+      .object({
+        arguments: z.string(),
+        name: z.string(),
       })
-    )
-    .optional(),
-  tool_call_id: z.string().optional(),
-});
+      .strict()
+      .optional(),
+    tool_calls: z
+      .array(
+        z
+          .object({
+            id: z.string(),
+            function: z.object({
+              arguments: z.string(),
+              name: z.string(),
+            }),
+            type: z.string(),
+          })
+          .strict()
+      )
+      .optional(),
+    tool_call_id: z.string().optional(),
+  })
+  .strict();
 
 // Run action schema
-export const InvokeAIActionParamsSchema = z.object({
-  messages: z.array(AIMessage),
-  model: z.string().optional(),
-  tools: z
-    .array(
-      z
-        .object({
+export const InvokeAIActionParamsSchema = z
+  .object({
+    messages: z.array(AIMessage),
+    model: z.string().optional(),
+    tools: z
+      .array(
+        z
+          .object({
+            type: z.literal('function'),
+            function: z
+              .object({
+                description: z.string().optional(),
+                name: z.string(),
+                parameters: z.object({}).passthrough(),
+                strict: z.boolean().optional(),
+              })
+              .passthrough(),
+          })
+          // Not sure if this will include other properties, we should pass them if it does
+          .passthrough()
+      )
+      .optional(),
+    tool_choice: z
+      .union([
+        z.literal('none'),
+        z.literal('auto'),
+        z.literal('required'),
+        z.object({
           type: z.literal('function'),
-          function: z
-            .object({
-              description: z.string().optional(),
-              name: z.string(),
-              parameters: z.object({}).passthrough(),
-              strict: z.boolean().optional(),
-            })
-            .passthrough(),
-        })
-        // Not sure if this will include other properties, we should pass them if it does
-        .passthrough()
-    )
-    .optional(),
-  tool_choice: z
-    .union([
-      z.literal('none'),
-      z.literal('auto'),
-      z.literal('required'),
-      z.object({
-        type: z.literal('function'),
-        function: z.object({ name: z.string() }).passthrough(),
-      }),
-    ])
-    .optional(),
-  // Deprecated in favor of tools
-  functions: z
-    .array(
-      z
-        .object({
+          function: z.object({ name: z.string() }).passthrough(),
+        }),
+      ])
+      .optional(),
+    // Deprecated in favor of tools
+    functions: z
+      .array(
+        z
+          .object({
+            name: z.string(),
+            description: z.string(),
+            parameters: z
+              .object({
+                type: z.string(),
+                properties: z.object({}).passthrough(),
+                additionalProperties: z.boolean(),
+                $schema: z.string(),
+              })
+              .passthrough(),
+          })
+          // Not sure if this will include other properties, we should pass them if it does
+          .passthrough()
+      )
+      .optional(),
+    // Deprecated in favor of tool_choice
+    function_call: z
+      .union([
+        z.literal('none'),
+        z.literal('auto'),
+        z.object({
           name: z.string(),
-          description: z.string(),
-          parameters: z
-            .object({
-              type: z.string(),
-              properties: z.object({}).passthrough(),
-              additionalProperties: z.boolean(),
-              $schema: z.string(),
-            })
-            .passthrough(),
-        })
-        // Not sure if this will include other properties, we should pass them if it does
-        .passthrough()
-    )
-    .optional(),
-  // Deprecated in favor of tool_choice
-  function_call: z
-    .union([
-      z.literal('none'),
-      z.literal('auto'),
-      z.object({
-        name: z.string(),
-      }),
-    ])
-    .optional(),
-  n: z.number().optional(),
-  stop: z
-    .union([z.string(), z.array(z.string())])
-    .optional()
-    .nullable(),
-  temperature: z.number().optional(),
-  response_format: z.any().optional(),
-  // abort signal from client
-  signal: z.any().optional(),
-  timeout: z.number().optional(),
-  telemetryMetadata: TelemetryMetadataSchema.optional(),
-});
+        }),
+      ])
+      .optional(),
+    n: z.number().optional(),
+    stop: z
+      .union([z.string(), z.array(z.string())])
+      .optional()
+      .nullable(),
+    temperature: z.number().optional(),
+    response_format: z.any().optional(),
+    // abort signal from client
+    signal: z.any().optional(),
+    timeout: z.number().optional(),
+    telemetryMetadata: TelemetryMetadataSchema.optional(),
+  })
+  .strict();
 
-export const InvokeAIActionResponseSchema = z.object({
-  message: z.string(),
-  usage: z.object({
-    prompt_tokens: z.number(),
-    completion_tokens: z.number(),
-    total_tokens: z.number(),
-  }),
-});
+export const InvokeAIActionResponseSchema = z
+  .object({
+    message: z.string(),
+    usage: z.object({
+      prompt_tokens: z.number(),
+      completion_tokens: z.number(),
+      total_tokens: z.number(),
+    }),
+  })
+  .strict();
 
 // Execute action schema
-export const StreamActionParamsSchema = z.object({
-  body: z.string(),
-  stream: z.boolean().default(false),
-  // abort signal from client
-  signal: z.any().optional(),
-  timeout: z.number().optional(),
-  telemetryMetadata: TelemetryMetadataSchema.optional(),
-});
+export const StreamActionParamsSchema = z
+  .object({
+    body: z.string(),
+    stream: z.boolean().default(false),
+    // abort signal from client
+    signal: z.any().optional(),
+    timeout: z.number().optional(),
+    telemetryMetadata: TelemetryMetadataSchema.optional(),
+  })
+  .strict();
 
 export const StreamingResponseSchema = z.any();
 
@@ -206,10 +229,14 @@ export const RunActionResponseSchema = z.object({
 });
 
 // Run action schema
-export const DashboardActionParamsSchema = z.object({
-  dashboardId: z.string(),
-});
+export const DashboardActionParamsSchema = z
+  .object({
+    dashboardId: z.string(),
+  })
+  .strict();
 
-export const DashboardActionResponseSchema = z.object({
-  available: z.boolean(),
-});
+export const DashboardActionResponseSchema = z
+  .object({
+    available: z.boolean(),
+  })
+  .strict();

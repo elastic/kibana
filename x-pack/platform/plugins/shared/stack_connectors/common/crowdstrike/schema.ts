@@ -9,13 +9,17 @@ import { z } from '@kbn/zod';
 import { SUB_ACTION } from './constants';
 
 // Connector schema
-export const CrowdstrikeConfigSchema = z.object({
-  url: z.string(),
-});
-export const CrowdstrikeSecretsSchema = z.object({
-  clientId: z.string(),
-  clientSecret: z.string(),
-});
+export const CrowdstrikeConfigSchema = z
+  .object({
+    url: z.string(),
+  })
+  .strict();
+export const CrowdstrikeSecretsSchema = z
+  .object({
+    clientId: z.string(),
+    clientSecret: z.string(),
+  })
+  .strict();
 
 export const CrowdstrikeApiDoNotValidateResponsesSchema = z.any();
 
@@ -216,17 +220,21 @@ export const CrowdstrikeHostActionsResponseSchema = z
 
 // TODO temporary any value
 export const CrowdstrikeRTRCommandParamsSchema = z.any();
-export const CrowdstrikeHostActionsParamsSchema = z.object({
-  command: z.enum(['contain', 'lift_containment']),
-  actionParameters: z.object({}).passthrough().optional(),
-  ids: z.array(z.string()),
-  alertIds: z.array(z.string()).optional(),
-  comment: z.string().optional(),
-});
+export const CrowdstrikeHostActionsParamsSchema = z
+  .object({
+    command: z.enum(['contain', 'lift_containment']),
+    actionParameters: z.object({}).passthrough().optional(),
+    ids: z.array(z.string()),
+    alertIds: z.array(z.string()).optional(),
+    comment: z.string().optional(),
+  })
+  .strict();
 
-export const CrowdstrikeGetAgentsParamsSchema = z.object({
-  ids: z.array(z.string()),
-});
+export const CrowdstrikeGetAgentsParamsSchema = z
+  .object({
+    ids: z.array(z.string()),
+  })
+  .strict();
 export const CrowdstrikeGetTokenResponseSchema = z
   .object({
     access_token: z.string(),
@@ -239,10 +247,12 @@ export const CrowdstrikeGetTokenResponseSchema = z
   })
   .passthrough();
 
-export const CrowdstrikeHostActionsSchema = z.object({
-  subAction: z.literal(SUB_ACTION.HOST_ACTIONS),
-  subActionParams: CrowdstrikeHostActionsParamsSchema,
-});
+export const CrowdstrikeHostActionsSchema = z
+  .object({
+    subAction: z.literal(SUB_ACTION.HOST_ACTIONS),
+    subActionParams: CrowdstrikeHostActionsParamsSchema,
+  })
+  .strict();
 
 export const CrowdstrikeActionParamsSchema = CrowdstrikeHostActionsSchema;
 
@@ -280,9 +290,11 @@ export const CrowdstrikeInitRTRResponseSchema = z
   })
   .passthrough();
 
-export const CrowdstrikeInitRTRParamsSchema = z.object({
-  endpoint_ids: z.array(z.string()),
-});
+export const CrowdstrikeInitRTRParamsSchema = z
+  .object({
+    endpoint_ids: z.array(z.string()),
+  })
+  .strict();
 
 export const CrowdstrikeExecuteRTRResponseSchema = z
   .object({

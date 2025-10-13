@@ -8,39 +8,49 @@
 import { z } from '@kbn/zod';
 
 // Connector schema
-export const TinesConfigSchema = z.object({ url: z.string() });
-export const TinesSecretsSchema = z.object({ email: z.string(), token: z.string() });
+export const TinesConfigSchema = z.object({ url: z.string() }).strict();
+export const TinesSecretsSchema = z.object({ email: z.string(), token: z.string() }).strict();
 
 // Stories action schema
 export const TinesStoriesActionParamsSchema = null;
-export const TinesStoryObjectSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  published: z.boolean(),
-});
-export const TinesStoriesActionResponseSchema = z.object({
-  stories: z.array(TinesStoryObjectSchema),
-  incompleteResponse: z.boolean(),
-});
+export const TinesStoryObjectSchema = z
+  .object({
+    id: z.number(),
+    name: z.string(),
+    published: z.boolean(),
+  })
+  .strict();
+export const TinesStoriesActionResponseSchema = z
+  .object({
+    stories: z.array(TinesStoryObjectSchema),
+    incompleteResponse: z.boolean(),
+  })
+  .strict();
 
 // Webhooks action schema
-export const TinesWebhooksActionParamsSchema = z.object({ storyId: z.number() });
-export const TinesWebhookObjectSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  storyId: z.number(),
-  path: z.string(),
-  secret: z.string(),
-});
-export const TinesWebhooksActionResponseSchema = z.object({
-  webhooks: z.array(TinesWebhookObjectSchema),
-  incompleteResponse: z.boolean(),
-});
+export const TinesWebhooksActionParamsSchema = z.object({ storyId: z.number() }).strict();
+export const TinesWebhookObjectSchema = z
+  .object({
+    id: z.number(),
+    name: z.string(),
+    storyId: z.number(),
+    path: z.string(),
+    secret: z.string(),
+  })
+  .strict();
+export const TinesWebhooksActionResponseSchema = z
+  .object({
+    webhooks: z.array(TinesWebhookObjectSchema),
+    incompleteResponse: z.boolean(),
+  })
+  .strict();
 
 // Run action schema
-export const TinesRunActionParamsSchema = z.object({
-  webhook: TinesWebhookObjectSchema.optional(),
-  webhookUrl: z.string().optional(),
-  body: z.string(),
-});
+export const TinesRunActionParamsSchema = z
+  .object({
+    webhook: TinesWebhookObjectSchema.optional(),
+    webhookUrl: z.string().optional(),
+    body: z.string(),
+  })
+  .strict();
 export const TinesRunActionResponseSchema = z.object({});

@@ -11,32 +11,40 @@ export const SlackApiSecretsSchema = z.object({
   token: z.string().min(1),
 });
 
-export const SlackApiConfigSchema = z.object({
-  allowedChannels: z
-    .array(
-      z.object({
-        id: z.string().min(1),
-        name: z.string().min(1),
-      })
-    )
-    .max(25)
-    .optional(),
-});
+export const SlackApiConfigSchema = z
+  .object({
+    allowedChannels: z
+      .array(
+        z.object({
+          id: z.string().min(1),
+          name: z.string().min(1),
+        })
+      )
+      .max(25)
+      .optional(),
+  })
+  .strict();
 
-export const ValidChannelIdSubActionParamsSchema = z.object({
-  channelId: z.string().optional(),
-});
+export const ValidChannelIdSubActionParamsSchema = z
+  .object({
+    channelId: z.string().optional(),
+  })
+  .strict();
 
-export const ValidChannelIdParamsSchema = z.object({
-  subAction: z.literal('validChannelId'),
-  subActionParams: ValidChannelIdSubActionParamsSchema,
-});
+export const ValidChannelIdParamsSchema = z
+  .object({
+    subAction: z.literal('validChannelId'),
+    subActionParams: ValidChannelIdSubActionParamsSchema,
+  })
+  .strict();
 
-export const PostMessageSubActionParamsSchema = z.object({
-  channels: z.array(z.string()).max(1).optional(),
-  channelIds: z.array(z.string()).max(1).optional(),
-  text: z.string().min(1),
-});
+export const PostMessageSubActionParamsSchema = z
+  .object({
+    channels: z.array(z.string()).max(1).optional(),
+    channelIds: z.array(z.string()).max(1).optional(),
+    text: z.string().min(1),
+  })
+  .strict();
 
 export function validateBlockkit(text: string, ctx: z.RefinementCtx) {
   try {
@@ -56,21 +64,27 @@ export function validateBlockkit(text: string, ctx: z.RefinementCtx) {
   }
 }
 
-export const PostBlockkitSubActionParamsSchema = z.object({
-  channels: z.array(z.string()).max(1).optional(),
-  channelIds: z.array(z.string()).max(1).optional(),
-  text: z.string().superRefine(validateBlockkit),
-});
+export const PostBlockkitSubActionParamsSchema = z
+  .object({
+    channels: z.array(z.string()).max(1).optional(),
+    channelIds: z.array(z.string()).max(1).optional(),
+    text: z.string().superRefine(validateBlockkit),
+  })
+  .strict();
 
-export const PostMessageParamsSchema = z.object({
-  subAction: z.literal('postMessage'),
-  subActionParams: PostMessageSubActionParamsSchema,
-});
+export const PostMessageParamsSchema = z
+  .object({
+    subAction: z.literal('postMessage'),
+    subActionParams: PostMessageSubActionParamsSchema,
+  })
+  .strict();
 
-export const PostBlockkitParamsSchema = z.object({
-  subAction: z.literal('postBlockkit'),
-  subActionParams: PostBlockkitSubActionParamsSchema,
-});
+export const PostBlockkitParamsSchema = z
+  .object({
+    subAction: z.literal('postBlockkit'),
+    subActionParams: PostBlockkitSubActionParamsSchema,
+  })
+  .strict();
 
 export const SlackApiParamsSchema = z.union([
   ValidChannelIdParamsSchema,

@@ -11,10 +11,12 @@ import { z } from '@kbn/zod';
 import { SUB_ACTION } from './constants';
 
 // Connector schema
-export const SentinelOneConfigSchema = z.object({ url: z.string() });
-export const SentinelOneSecretsSchema = z.object({
-  token: z.string(),
-});
+export const SentinelOneConfigSchema = z.object({ url: z.string() }).strict();
+export const SentinelOneSecretsSchema = z
+  .object({
+    token: z.string(),
+  })
+  .strict();
 
 export const SentinelOneApiDoNotValidateResponsesSchema = z.any();
 
@@ -22,10 +24,12 @@ export const SentinelOneBaseApiResponseSchema = z.object({}).passthrough().optio
 
 export const SentinelOneGetAgentsResponseSchema = z
   .object({
-    pagination: z.object({
-      totalItems: z.number(),
-      nextCursor: z.string().nullable(),
-    }),
+    pagination: z
+      .object({
+        totalItems: z.number(),
+        nextCursor: z.string().nullable(),
+      })
+      .strict(),
     errors: z.array(z.string()).nullable(),
     data: z.array(
       z
@@ -77,18 +81,22 @@ export const SentinelOneGetAgentsResponseSchema = z
           scanAbortedAt: z.string().nullable(),
           isUninstalled: z.boolean(),
           networkQuarantineEnabled: z.boolean(),
-          tags: z.object({
-            sentinelone: z.array(
-              z.object({
-                assignedBy: z.string(),
-                assignedAt: z.string(),
-                assignedById: z.string(),
-                key: z.string(),
-                value: z.string(),
-                id: z.string(),
-              })
-            ),
-          }),
+          tags: z
+            .object({
+              sentinelone: z.array(
+                z
+                  .object({
+                    assignedBy: z.string(),
+                    assignedAt: z.string(),
+                    assignedById: z.string(),
+                    key: z.string(),
+                    value: z.string(),
+                    id: z.string(),
+                  })
+                  .strict()
+              ),
+            })
+            .strict(),
           externalIp: z.string(),
           siteId: z.string(),
           machineType: z.string(),
@@ -157,44 +165,50 @@ export const SentinelOneGetAgentsResponseSchema = z
   })
   .passthrough();
 
-export const SentinelOneIsolateHostResponseSchema = z.object({
-  errors: z.array(z.string()).nullable(),
-  data: z.object({ affected: z.number() }).passthrough(),
-});
+export const SentinelOneIsolateHostResponseSchema = z
+  .object({
+    errors: z.array(z.string()).nullable(),
+    data: z.object({ affected: z.number() }).passthrough(),
+  })
+  .strict();
 
-export const SentinelOneGetRemoteScriptsParamsSchema = z.object({
-  query: z.string().nullable(),
-  // Possible values (multiples comma delimiter): `linux` or `macos` or `windows`
-  osTypes: z.string().nullable(),
-  // possible values (multiples comma delimiter): `action` or `artifactCollection` or `dataCollection`
-  scriptType: z.string().nullable(),
-  // Cursor position returned by the last request. Use to iterate over more than 1000 items. Example: "YWdlbnRfaWQ6NTgwMjkzODE=".
-  cursor: z.string().nullable(),
-  // List of group IDs to filter by. Example: "225494730938493804,225494730938493915".
-  groupIds: z.string().nullable(),
-  // A list of script IDs. Example: "225494730938493804,225494730938493915".
-  ids: z.string().nullable(),
-  // Is the script runnable in Advanced Response Scripts
-  isAvailableForArs: z.boolean().nullable(),
-  // Limit number of returned items (1-1000). Example: "10".
-  limit: z.number().max(1000).min(1).default(10).nullable(),
-  // List of Site IDs to filter by. Example: "225494730938493804,225494730938493915".
-  siteIds: z.string().nullable(),
-  // Skip first number of items (0-1000). To iterate over more than 1000 items, use "cursor". Example: "150".
-  skip: z.number().nullable(),
-  // If true, total number of items will not be calculated, which speeds up execution time.
-  skipCount: z.boolean().nullable(),
-  // The column to sort the results by. Example: "id".
-  sortBy: z.string().nullable(),
-  // Sort direction. Example: "asc" or "desc"
-  sortOrder: z.string().nullable(),
-});
+export const SentinelOneGetRemoteScriptsParamsSchema = z
+  .object({
+    query: z.string().nullable(),
+    // Possible values (multiples comma delimiter): `linux` or `macos` or `windows`
+    osTypes: z.string().nullable(),
+    // possible values (multiples comma delimiter): `action` or `artifactCollection` or `dataCollection`
+    scriptType: z.string().nullable(),
+    // Cursor position returned by the last request. Use to iterate over more than 1000 items. Example: "YWdlbnRfaWQ6NTgwMjkzODE=".
+    cursor: z.string().nullable(),
+    // List of group IDs to filter by. Example: "225494730938493804,225494730938493915".
+    groupIds: z.string().nullable(),
+    // A list of script IDs. Example: "225494730938493804,225494730938493915".
+    ids: z.string().nullable(),
+    // Is the script runnable in Advanced Response Scripts
+    isAvailableForArs: z.boolean().nullable(),
+    // Limit number of returned items (1-1000). Example: "10".
+    limit: z.number().max(1000).min(1).default(10).nullable(),
+    // List of Site IDs to filter by. Example: "225494730938493804,225494730938493915".
+    siteIds: z.string().nullable(),
+    // Skip first number of items (0-1000). To iterate over more than 1000 items, use "cursor". Example: "150".
+    skip: z.number().nullable(),
+    // If true, total number of items will not be calculated, which speeds up execution time.
+    skipCount: z.boolean().nullable(),
+    // The column to sort the results by. Example: "id".
+    sortBy: z.string().nullable(),
+    // Sort direction. Example: "asc" or "desc"
+    sortOrder: z.string().nullable(),
+  })
+  .strict();
 
-export const SentinelOneFetchAgentFilesParamsSchema = z.object({
-  agentId: z.string().min(1),
-  zipPassCode: z.string().min(10),
-  files: z.array(z.string().min(1)),
-});
+export const SentinelOneFetchAgentFilesParamsSchema = z
+  .object({
+    agentId: z.string().min(1),
+    zipPassCode: z.string().min(10),
+    files: z.array(z.string().min(1)),
+  })
+  .strict();
 
 export const SentinelOneFetchAgentFilesResponseSchema = z
   .object({
@@ -208,10 +222,12 @@ export const SentinelOneFetchAgentFilesResponseSchema = z
   })
   .passthrough();
 
-export const SentinelOneDownloadAgentFileParamsSchema = z.object({
-  agentId: z.string().min(1),
-  activityId: z.string().min(1),
-});
+export const SentinelOneDownloadAgentFileParamsSchema = z
+  .object({
+    agentId: z.string().min(1),
+    activityId: z.string().min(1),
+  })
+  .strict();
 
 export const SentinelOneDownloadAgentFileResponseSchema = z.any();
 
@@ -243,15 +259,18 @@ export const SentinelOneGetActivitiesParamsSchema = z
     userEmails: z.string().min(1).optional(),
     userIds: z.string().min(1).optional(),
   })
+  .strict()
   .optional();
 
 export const SentinelOneGetActivitiesResponseSchema = z
   .object({
     errors: z.array(z.string()).optional(),
-    pagination: z.object({
-      nextCursor: z.string().nullable(),
-      totalItems: z.number(),
-    }),
+    pagination: z
+      .object({
+        nextCursor: z.string().nullable(),
+        totalItems: z.number(),
+      })
+      .strict(),
     data: z.array(
       z
         .object({
@@ -293,10 +312,12 @@ export const AlertIds = z.array(z.string()).optional();
 export const SentinelOneGetRemoteScriptsResponseSchema = z
   .object({
     errors: z.array(z.string()).nullable(),
-    pagination: z.object({
-      nextCursor: z.string().nullable(),
-      totalItems: z.number(),
-    }),
+    pagination: z
+      .object({
+        nextCursor: z.string().nullable(),
+        totalItems: z.number(),
+      })
+      .strict(),
     data: z.array(
       z
         .object({
@@ -353,35 +374,40 @@ export const SentinelOneGetRemoteScriptsResponseSchema = z
   })
   .passthrough();
 
-export const SentinelOneExecuteScriptParamsSchema = z.object({
-  // Only a sub-set of filters are defined below. This API, however, support many more filters
-  // which can be added in the future if needed.
-  filter: z.object({
-    uuids: z.string().min(1).optional(),
-    ids: z.string().min(1).optional(),
-  }),
-  script: z.object({
-    apiKey: z.string().optional(),
-    inputParams: z.string().optional(),
-    outputDirectory: z.string().optional(),
-    outputDestination: z.enum(['Local', 'None', 'SentinelCloud', 'SingularityXDR']).optional(),
-    passwordFromScope: z
+export const SentinelOneExecuteScriptParamsSchema = z
+  .object({
+    // Only a sub-set of filters are defined below. This API, however, support many more filters
+    // which can be added in the future if needed.
+    filter: z
       .object({
-        scopeLevel: z.string().optional(),
-        scopeId: z.string().optional(),
+        uuids: z.string().min(1).optional(),
+        ids: z.string().min(1).optional(),
       })
-      .optional(),
-    password: z.string().optional(),
-    requiresApproval: z.boolean().optional(),
-    scriptId: z.string(),
-    scriptName: z.string().optional(),
-    scriptRuntimeTimeoutSeconds: z.number().optional(),
-    singularityxdrKeyword: z.string().optional(),
-    singularityxdrUrl: z.string().optional(),
-    taskDescription: z.string().optional(),
-  }),
-  alertIds: AlertIds,
-});
+      .strict(),
+    script: z.object({
+      apiKey: z.string().optional(),
+      inputParams: z.string().optional(),
+      outputDirectory: z.string().optional(),
+      outputDestination: z.enum(['Local', 'None', 'SentinelCloud', 'SingularityXDR']).optional(),
+      passwordFromScope: z
+        .object({
+          scopeLevel: z.string().optional(),
+          scopeId: z.string().optional(),
+        })
+        .strict()
+        .optional(),
+      password: z.string().optional(),
+      requiresApproval: z.boolean().optional(),
+      scriptId: z.string(),
+      scriptName: z.string().optional(),
+      scriptRuntimeTimeoutSeconds: z.number().optional(),
+      singularityxdrKeyword: z.string().optional(),
+      singularityxdrUrl: z.string().optional(),
+      taskDescription: z.string().optional(),
+    }),
+    alertIds: AlertIds,
+  })
+  .strict();
 
 export const SentinelOneExecuteScriptResponseSchema = z
   .object({
@@ -398,9 +424,11 @@ export const SentinelOneExecuteScriptResponseSchema = z
   })
   .passthrough();
 
-export const SentinelOneGetRemoteScriptResultsParamsSchema = z.object({
-  taskIds: z.array(z.string()),
-});
+export const SentinelOneGetRemoteScriptResultsParamsSchema = z
+  .object({
+    taskIds: z.array(z.string()),
+  })
+  .strict();
 
 export const SentinelOneGetRemoteScriptResultsResponseSchema = z
   .object({
@@ -409,9 +437,11 @@ export const SentinelOneGetRemoteScriptResultsResponseSchema = z
   })
   .passthrough();
 
-export const SentinelOneDownloadRemoteScriptResultsParamsSchema = z.object({
-  taskId: z.string().min(1),
-});
+export const SentinelOneDownloadRemoteScriptResultsParamsSchema = z
+  .object({
+    taskId: z.string().min(1),
+  })
+  .strict();
 
 export const SentinelOneDownloadRemoteScriptResultsResponseSchema = z.any();
 
@@ -423,186 +453,196 @@ export const SentinelOneGetRemoteScriptStatusParamsSchema = z
 
 export const SentinelOneGetRemoteScriptStatusResponseSchema = z
   .object({
-    pagination: z.object({
-      totalItems: z.number(),
-      nextCursor: z.string().nullable(),
-    }),
+    pagination: z
+      .object({
+        totalItems: z.number(),
+        nextCursor: z.string().nullable(),
+      })
+      .strict(),
     errors: z.array(z.object({ type: z.string() }).passthrough()).nullable(),
     data: z.array(z.map(z.string(), z.any())),
   })
   .passthrough();
 
-export const SentinelOneBaseFilterSchema = z.object({
-  K8SNodeName__contains: z.string().nullable(),
-  coreCount__lt: z.string().nullable(),
-  rangerStatuses: z.string().nullable(),
-  adUserQuery__contains: z.string().nullable(),
-  rangerVersionsNin: z.string().nullable(),
-  rangerStatusesNin: z.string().nullable(),
-  coreCount__gte: z.string().nullable(),
-  threatCreatedAt__gte: z.string().nullable(),
-  decommissionedAt__lte: z.string().nullable(),
-  operationalStatesNin: z.string().nullable(),
-  appsVulnerabilityStatusesNin: z.string().nullable(),
-  mitigationMode: z.string().nullable(),
-  createdAt__gte: z.string().nullable(),
-  gatewayIp: z.string().nullable(),
-  cloudImage__contains: z.string().nullable(),
-  registeredAt__between: z.string().nullable(),
-  threatMitigationStatus: z.string().nullable(),
-  installerTypesNin: z.string().nullable(),
-  appsVulnerabilityStatuses: z.string().nullable(),
-  threatResolved: z.string().nullable(),
-  mitigationModeSuspicious: z.string().nullable(),
-  isUpToDate: z.string().nullable(),
-  adComputerQuery__contains: z.string().nullable(),
-  updatedAt__gte: z.string().nullable(),
-  azureResourceGroup__contains: z.string().nullable(),
-  scanStatus: z.string().nullable(),
-  threatContentHash: z.string().nullable(),
-  osTypesNin: z.string().nullable(),
-  threatRebootRequired: z.string().nullable(),
-  totalMemory__between: z.string().nullable(),
-  firewallEnabled: z.string().nullable(),
-  gcpServiceAccount__contains: z.string().nullable(),
-  updatedAt__gt: z.string().nullable(),
-  remoteProfilingStates: z.string().nullable(),
-  filteredGroupIds: z.string().nullable(),
-  agentVersions: z.string().nullable(),
-  activeThreats: z.string().nullable(),
-  machineTypesNin: z.string().nullable(),
-  lastActiveDate__gt: z.string().nullable(),
-  awsSubnetIds__contains: z.string().nullable(),
-  installerTypes: z.string().nullable(),
-  registeredAt__gte: z.string().nullable(),
-  migrationStatus: z.string().nullable(),
-  cloudTags__contains: z.string().nullable(),
-  totalMemory__gte: z.string().nullable(),
-  decommissionedAt__lt: z.string().nullable(),
-  threatCreatedAt__lt: z.string().nullable(),
-  updatedAt__lte: z.string().nullable(),
-  osArch: z.string().nullable(),
-  registeredAt__gt: z.string().nullable(),
-  registeredAt__lt: z.string().nullable(),
-  siteIds: z.string().nullable(),
-  networkInterfaceInet__contains: z.string().nullable(),
-  groupIds: z.string().nullable(),
-  uuids: z.string().nullable(),
-  accountIds: z.string().nullable(),
-  scanStatusesNin: z.string().nullable(),
-  cpuCount__lte: z.string().nullable(),
-  locationIds: z.string().nullable(),
-  awsSecurityGroups__contains: z.string().nullable(),
-  networkStatusesNin: z.string().nullable(),
-  activeThreats__gt: z.string().nullable(),
-  infected: z.string().nullable(),
-  osVersion__contains: z.string().nullable(),
-  machineTypes: z.string().nullable(),
-  agentPodName__contains: z.string().nullable(),
-  computerName__like: z.string().nullable(),
-  threatCreatedAt__gt: z.string().nullable(),
-  consoleMigrationStatusesNin: z.string().nullable(),
-  computerName: z.string().nullable(),
-  decommissionedAt__between: z.string().nullable(),
-  cloudInstanceId__contains: z.string().nullable(),
-  createdAt__lte: z.string().nullable(),
-  coreCount__between: z.string().nullable(),
-  totalMemory__lte: z.string().nullable(),
-  remoteProfilingStatesNin: z.string().nullable(),
-  adComputerMember__contains: z.string().nullable(),
-  threatCreatedAt__between: z.string().nullable(),
-  totalMemory__gt: z.string().nullable(),
-  ids: z.string().nullable(),
-  agentVersionsNin: z.string().nullable(),
-  updatedAt__between: z.string().nullable(),
-  locationEnabled: z.string().nullable(),
-  locationIdsNin: z.string().nullable(),
-  osTypes: z.string().nullable(),
-  encryptedApplications: z.string().nullable(),
-  filterId: z.string().nullable(),
-  decommissionedAt__gt: z.string().nullable(),
-  adUserMember__contains: z.string().nullable(),
-  uuid: z.string().nullable(),
-  coreCount__lte: z.string().nullable(),
-  coreCount__gt: z.string().nullable(),
-  cloudNetwork__contains: z.string().nullable(),
-  clusterName__contains: z.string().nullable(),
-  cpuCount__gte: z.string().nullable(),
-  query: z.string().nullable(),
-  lastActiveDate__between: z.string().nullable(),
-  rangerStatus: z.string().nullable(),
-  domains: z.string().nullable(),
-  cloudProvider: z.string().nullable(),
-  lastActiveDate__lt: z.string().nullable(),
-  scanStatuses: z.string().nullable(),
-  hasLocalConfiguration: z.string().nullable(),
-  networkStatuses: z.string().nullable(),
-  isPendingUninstall: z.string().nullable(),
-  createdAt__gt: z.string().nullable(),
-  cpuCount__lt: z.string().nullable(),
-  consoleMigrationStatuses: z.string().nullable(),
-  adQuery: z.string().nullable(),
-  updatedAt__lt: z.string().nullable(),
-  createdAt__lt: z.string().nullable(),
-  adComputerName__contains: z.string().nullable(),
-  cloudInstanceSize__contains: z.string().nullable(),
-  registeredAt__lte: z.string().nullable(),
-  networkQuarantineEnabled: z.string().nullable(),
-  cloudAccount__contains: z.string().nullable(),
-  cloudLocation__contains: z.string().nullable(),
-  rangerVersions: z.string().nullable(),
-  networkInterfaceGatewayMacAddress__contains: z.string().nullable(),
-  uuid__contains: z.string().nullable(),
-  agentNamespace__contains: z.string().nullable(),
-  K8SNodeLabels__contains: z.string().nullable(),
-  adQuery__contains: z.string().nullable(),
-  K8SType__contains: z.string().nullable(),
-  countsFor: z.string().nullable(),
-  totalMemory__lt: z.string().nullable(),
-  externalId__contains: z.string().nullable(),
-  filteredSiteIds: z.string().nullable(),
-  decommissionedAt__gte: z.string().nullable(),
-  cpuCount__gt: z.string().nullable(),
-  threatHidden: z.string().nullable(),
-  isUninstalled: z.string().nullable(),
-  computerName__contains: z.string().nullable(),
-  lastActiveDate__lte: z.string().nullable(),
-  adUserName__contains: z.string().nullable(),
-  isActive: z.string().nullable(),
-  userActionsNeeded: z.string().nullable(),
-  threatCreatedAt__lte: z.string().nullable(),
-  domainsNin: z.string().nullable(),
-  operationalStates: z.string().nullable(),
-  externalIp__contains: z.string().nullable(),
-  isDecommissioned: z.string().nullable(),
-  networkInterfacePhysical__contains: z.string().nullable(),
-  lastActiveDate__gte: z.string().nullable(),
-  createdAt__between: z.string().nullable(),
-  cpuCount__between: z.string().nullable(),
-  lastLoggedInUserName__contains: z.string().nullable(),
-  awsRole__contains: z.string().nullable(),
-  K8SVersion__contains: z.string().nullable(),
-  alertIds: AlertIds,
-});
+export const SentinelOneBaseFilterSchema = z
+  .object({
+    K8SNodeName__contains: z.string().nullable(),
+    coreCount__lt: z.string().nullable(),
+    rangerStatuses: z.string().nullable(),
+    adUserQuery__contains: z.string().nullable(),
+    rangerVersionsNin: z.string().nullable(),
+    rangerStatusesNin: z.string().nullable(),
+    coreCount__gte: z.string().nullable(),
+    threatCreatedAt__gte: z.string().nullable(),
+    decommissionedAt__lte: z.string().nullable(),
+    operationalStatesNin: z.string().nullable(),
+    appsVulnerabilityStatusesNin: z.string().nullable(),
+    mitigationMode: z.string().nullable(),
+    createdAt__gte: z.string().nullable(),
+    gatewayIp: z.string().nullable(),
+    cloudImage__contains: z.string().nullable(),
+    registeredAt__between: z.string().nullable(),
+    threatMitigationStatus: z.string().nullable(),
+    installerTypesNin: z.string().nullable(),
+    appsVulnerabilityStatuses: z.string().nullable(),
+    threatResolved: z.string().nullable(),
+    mitigationModeSuspicious: z.string().nullable(),
+    isUpToDate: z.string().nullable(),
+    adComputerQuery__contains: z.string().nullable(),
+    updatedAt__gte: z.string().nullable(),
+    azureResourceGroup__contains: z.string().nullable(),
+    scanStatus: z.string().nullable(),
+    threatContentHash: z.string().nullable(),
+    osTypesNin: z.string().nullable(),
+    threatRebootRequired: z.string().nullable(),
+    totalMemory__between: z.string().nullable(),
+    firewallEnabled: z.string().nullable(),
+    gcpServiceAccount__contains: z.string().nullable(),
+    updatedAt__gt: z.string().nullable(),
+    remoteProfilingStates: z.string().nullable(),
+    filteredGroupIds: z.string().nullable(),
+    agentVersions: z.string().nullable(),
+    activeThreats: z.string().nullable(),
+    machineTypesNin: z.string().nullable(),
+    lastActiveDate__gt: z.string().nullable(),
+    awsSubnetIds__contains: z.string().nullable(),
+    installerTypes: z.string().nullable(),
+    registeredAt__gte: z.string().nullable(),
+    migrationStatus: z.string().nullable(),
+    cloudTags__contains: z.string().nullable(),
+    totalMemory__gte: z.string().nullable(),
+    decommissionedAt__lt: z.string().nullable(),
+    threatCreatedAt__lt: z.string().nullable(),
+    updatedAt__lte: z.string().nullable(),
+    osArch: z.string().nullable(),
+    registeredAt__gt: z.string().nullable(),
+    registeredAt__lt: z.string().nullable(),
+    siteIds: z.string().nullable(),
+    networkInterfaceInet__contains: z.string().nullable(),
+    groupIds: z.string().nullable(),
+    uuids: z.string().nullable(),
+    accountIds: z.string().nullable(),
+    scanStatusesNin: z.string().nullable(),
+    cpuCount__lte: z.string().nullable(),
+    locationIds: z.string().nullable(),
+    awsSecurityGroups__contains: z.string().nullable(),
+    networkStatusesNin: z.string().nullable(),
+    activeThreats__gt: z.string().nullable(),
+    infected: z.string().nullable(),
+    osVersion__contains: z.string().nullable(),
+    machineTypes: z.string().nullable(),
+    agentPodName__contains: z.string().nullable(),
+    computerName__like: z.string().nullable(),
+    threatCreatedAt__gt: z.string().nullable(),
+    consoleMigrationStatusesNin: z.string().nullable(),
+    computerName: z.string().nullable(),
+    decommissionedAt__between: z.string().nullable(),
+    cloudInstanceId__contains: z.string().nullable(),
+    createdAt__lte: z.string().nullable(),
+    coreCount__between: z.string().nullable(),
+    totalMemory__lte: z.string().nullable(),
+    remoteProfilingStatesNin: z.string().nullable(),
+    adComputerMember__contains: z.string().nullable(),
+    threatCreatedAt__between: z.string().nullable(),
+    totalMemory__gt: z.string().nullable(),
+    ids: z.string().nullable(),
+    agentVersionsNin: z.string().nullable(),
+    updatedAt__between: z.string().nullable(),
+    locationEnabled: z.string().nullable(),
+    locationIdsNin: z.string().nullable(),
+    osTypes: z.string().nullable(),
+    encryptedApplications: z.string().nullable(),
+    filterId: z.string().nullable(),
+    decommissionedAt__gt: z.string().nullable(),
+    adUserMember__contains: z.string().nullable(),
+    uuid: z.string().nullable(),
+    coreCount__lte: z.string().nullable(),
+    coreCount__gt: z.string().nullable(),
+    cloudNetwork__contains: z.string().nullable(),
+    clusterName__contains: z.string().nullable(),
+    cpuCount__gte: z.string().nullable(),
+    query: z.string().nullable(),
+    lastActiveDate__between: z.string().nullable(),
+    rangerStatus: z.string().nullable(),
+    domains: z.string().nullable(),
+    cloudProvider: z.string().nullable(),
+    lastActiveDate__lt: z.string().nullable(),
+    scanStatuses: z.string().nullable(),
+    hasLocalConfiguration: z.string().nullable(),
+    networkStatuses: z.string().nullable(),
+    isPendingUninstall: z.string().nullable(),
+    createdAt__gt: z.string().nullable(),
+    cpuCount__lt: z.string().nullable(),
+    consoleMigrationStatuses: z.string().nullable(),
+    adQuery: z.string().nullable(),
+    updatedAt__lt: z.string().nullable(),
+    createdAt__lt: z.string().nullable(),
+    adComputerName__contains: z.string().nullable(),
+    cloudInstanceSize__contains: z.string().nullable(),
+    registeredAt__lte: z.string().nullable(),
+    networkQuarantineEnabled: z.string().nullable(),
+    cloudAccount__contains: z.string().nullable(),
+    cloudLocation__contains: z.string().nullable(),
+    rangerVersions: z.string().nullable(),
+    networkInterfaceGatewayMacAddress__contains: z.string().nullable(),
+    uuid__contains: z.string().nullable(),
+    agentNamespace__contains: z.string().nullable(),
+    K8SNodeLabels__contains: z.string().nullable(),
+    adQuery__contains: z.string().nullable(),
+    K8SType__contains: z.string().nullable(),
+    countsFor: z.string().nullable(),
+    totalMemory__lt: z.string().nullable(),
+    externalId__contains: z.string().nullable(),
+    filteredSiteIds: z.string().nullable(),
+    decommissionedAt__gte: z.string().nullable(),
+    cpuCount__gt: z.string().nullable(),
+    threatHidden: z.string().nullable(),
+    isUninstalled: z.string().nullable(),
+    computerName__contains: z.string().nullable(),
+    lastActiveDate__lte: z.string().nullable(),
+    adUserName__contains: z.string().nullable(),
+    isActive: z.string().nullable(),
+    userActionsNeeded: z.string().nullable(),
+    threatCreatedAt__lte: z.string().nullable(),
+    domainsNin: z.string().nullable(),
+    operationalStates: z.string().nullable(),
+    externalIp__contains: z.string().nullable(),
+    isDecommissioned: z.string().nullable(),
+    networkInterfacePhysical__contains: z.string().nullable(),
+    lastActiveDate__gte: z.string().nullable(),
+    createdAt__between: z.string().nullable(),
+    cpuCount__between: z.string().nullable(),
+    lastLoggedInUserName__contains: z.string().nullable(),
+    awsRole__contains: z.string().nullable(),
+    K8SVersion__contains: z.string().nullable(),
+    alertIds: AlertIds,
+  })
+  .strict();
 
 export const SentinelOneIsolateHostParamsSchema = SentinelOneBaseFilterSchema;
 
 export const SentinelOneGetAgentsParamsSchema = SentinelOneBaseFilterSchema;
 
-export const SentinelOneIsolateHostSchema = z.object({
-  subAction: z.literal(SUB_ACTION.ISOLATE_HOST),
-  subActionParams: SentinelOneIsolateHostParamsSchema,
-});
+export const SentinelOneIsolateHostSchema = z
+  .object({
+    subAction: z.literal(SUB_ACTION.ISOLATE_HOST),
+    subActionParams: SentinelOneIsolateHostParamsSchema,
+  })
+  .strict();
 
-export const SentinelOneReleaseHostSchema = z.object({
-  subAction: z.literal(SUB_ACTION.RELEASE_HOST),
-  subActionParams: SentinelOneIsolateHostParamsSchema,
-});
+export const SentinelOneReleaseHostSchema = z
+  .object({
+    subAction: z.literal(SUB_ACTION.RELEASE_HOST),
+    subActionParams: SentinelOneIsolateHostParamsSchema,
+  })
+  .strict();
 
-export const SentinelOneExecuteScriptSchema = z.object({
-  subAction: z.literal(SUB_ACTION.EXECUTE_SCRIPT),
-  subActionParams: SentinelOneExecuteScriptParamsSchema,
-});
+export const SentinelOneExecuteScriptSchema = z
+  .object({
+    subAction: z.literal(SUB_ACTION.EXECUTE_SCRIPT),
+    subActionParams: SentinelOneExecuteScriptParamsSchema,
+  })
+  .strict();
 
 export const SentinelOneActionParamsSchema = z.union([
   SentinelOneIsolateHostSchema,

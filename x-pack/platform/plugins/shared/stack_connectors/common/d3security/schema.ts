@@ -9,18 +9,22 @@ import { z } from '@kbn/zod';
 import { D3SecuritySeverity } from './constants';
 
 // Connector schema
-export const D3SecurityConfigSchema = z.object({
-  url: z.string(),
-});
+export const D3SecurityConfigSchema = z
+  .object({
+    url: z.string(),
+  })
+  .strict();
 
-export const D3SecuritySecretsSchema = z.object({ token: z.string() });
+export const D3SecuritySecretsSchema = z.object({ token: z.string() }).strict();
 
 // Run action schema
-export const D3SecurityRunActionParamsSchema = z.object({
-  body: z.string().optional(),
-  severity: z.string().default(D3SecuritySeverity.EMPTY).optional(),
-  eventType: z.string().default('').optional(),
-});
+export const D3SecurityRunActionParamsSchema = z
+  .object({
+    body: z.string().optional(),
+    severity: z.string().default(D3SecuritySeverity.EMPTY).optional(),
+    eventType: z.string().default('').optional(),
+  })
+  .strict();
 
 export const D3SecurityRunActionResponseSchema = z.object({
   refid: z.string(),

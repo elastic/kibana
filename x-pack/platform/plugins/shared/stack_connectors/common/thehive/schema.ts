@@ -8,33 +8,43 @@
 import { z } from '@kbn/zod';
 import { TheHiveSeverity, TheHiveTLP, SUB_ACTION } from './constants';
 
-export const TheHiveConfigSchema = z.object({
-  url: z.string(),
-  organisation: z.string().nullable(),
-});
+export const TheHiveConfigSchema = z
+  .object({
+    url: z.string(),
+    organisation: z.string().nullable(),
+  })
+  .strict();
 
-export const TheHiveSecretsSchema = z.object({
-  apiKey: z.string(),
-});
+export const TheHiveSecretsSchema = z
+  .object({
+    apiKey: z.string(),
+  })
+  .strict();
 
-export const ExecutorSubActionPushParamsSchema = z.object({
-  incident: z.object({
-    title: z.string(),
-    description: z.string(),
-    externalId: z.string().nullable(),
-    severity: z.number().default(TheHiveSeverity.MEDIUM).nullable(),
-    tlp: z.number().default(TheHiveTLP.AMBER).nullable(),
-    tags: z.array(z.string()).nullable(),
-  }),
-  comments: z
-    .array(
-      z.object({
-        comment: z.string(),
-        commentId: z.string(),
+export const ExecutorSubActionPushParamsSchema = z
+  .object({
+    incident: z
+      .object({
+        title: z.string(),
+        description: z.string(),
+        externalId: z.string().nullable(),
+        severity: z.number().default(TheHiveSeverity.MEDIUM).nullable(),
+        tlp: z.number().default(TheHiveTLP.AMBER).nullable(),
+        tags: z.array(z.string()).nullable(),
       })
-    )
-    .nullable(),
-});
+      .strict(),
+    comments: z
+      .array(
+        z
+          .object({
+            comment: z.string(),
+            commentId: z.string(),
+          })
+          .strict()
+      )
+      .nullable(),
+  })
+  .strict();
 
 export const PushToServiceIncidentSchema = {
   title: z.string(),
@@ -44,32 +54,40 @@ export const PushToServiceIncidentSchema = {
   tags: z.array(z.string()).nullable(),
 };
 
-export const ExecutorSubActionGetIncidentParamsSchema = z.object({
-  externalId: z.string(),
-});
+export const ExecutorSubActionGetIncidentParamsSchema = z
+  .object({
+    externalId: z.string(),
+  })
+  .strict();
 
-export const ExecutorSubActionCreateAlertParamsSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  type: z.string(),
-  source: z.string(),
-  sourceRef: z.string(),
-  severity: z.number().default(TheHiveSeverity.MEDIUM).nullable(),
-  isRuleSeverity: z.boolean().default(false).nullable(),
-  tlp: z.number().default(TheHiveTLP.AMBER).nullable(),
-  tags: z.array(z.string()).nullable(),
-  body: z.string().nullable(),
-});
+export const ExecutorSubActionCreateAlertParamsSchema = z
+  .object({
+    title: z.string(),
+    description: z.string(),
+    type: z.string(),
+    source: z.string(),
+    sourceRef: z.string(),
+    severity: z.number().default(TheHiveSeverity.MEDIUM).nullable(),
+    isRuleSeverity: z.boolean().default(false).nullable(),
+    tlp: z.number().default(TheHiveTLP.AMBER).nullable(),
+    tags: z.array(z.string()).nullable(),
+    body: z.string().nullable(),
+  })
+  .strict();
 
 export const ExecutorParamsSchema = z.union([
-  z.object({
-    subAction: z.literal(SUB_ACTION.PUSH_TO_SERVICE),
-    subActionParams: ExecutorSubActionPushParamsSchema,
-  }),
-  z.object({
-    subAction: z.literal(SUB_ACTION.CREATE_ALERT),
-    subActionParams: ExecutorSubActionCreateAlertParamsSchema,
-  }),
+  z
+    .object({
+      subAction: z.literal(SUB_ACTION.PUSH_TO_SERVICE),
+      subActionParams: ExecutorSubActionPushParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal(SUB_ACTION.CREATE_ALERT),
+      subActionParams: ExecutorSubActionCreateAlertParamsSchema,
+    })
+    .strict(),
 ]);
 
 export const TheHiveIncidentResponseSchema = z.object({
