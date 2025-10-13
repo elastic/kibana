@@ -48,19 +48,22 @@ export function EditDiscoveryRule({
   onSubmit,
   operationTypes,
 }: Props) {
+  const operationLabel = i18n.translate(
+    'xpack.apm.fleetIntegration.apmAgent.editDisacoveryRule.operation',
+    { defaultMessage: 'Operation' }
+  );
+
   return (
     <EuiPanel paddingSize="m" hasBorder={true}>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiFormFieldset
             legend={{
-              children: i18n.translate(
-                'xpack.apm.fleetIntegration.apmAgent.editDisacoveryRule.operation',
-                { defaultMessage: 'Operation' }
-              ),
+              children: operationLabel,
             }}
           >
             <EuiSelect
+              aria-label={operationLabel}
               data-test-subj="apmEditDiscoveryRuleSelect"
               options={operationTypes.map((item) => ({
                 text: item.operation.label,
