@@ -146,6 +146,60 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.effectiveToIngestLifecycle",
+        "type": "Function",
+        "tags": [],
+        "label": "effectiveToIngestLifecycle",
+        "description": [],
+        "signature": [
+          "(effectiveLifecycle: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IngestStreamEffectiveLifecycle",
+            "text": "IngestStreamEffectiveLifecycle"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IngestStreamLifecycleAll",
+            "text": "IngestStreamLifecycleAll"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/lifecycle.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.effectiveToIngestLifecycle.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "effectiveLifecycle",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamEffectiveLifecycle",
+                "text": "IngestStreamEffectiveLifecycle"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/lifecycle.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.findInheritedLifecycle",
         "type": "Function",
         "tags": [],
@@ -2374,6 +2428,37 @@
             "docId": "kibKbnStreamsSchemaPluginApi",
             "section": "def-common.IngestStreamLifecycleInherit",
             "text": "IngestStreamLifecycleInherit"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.IngestStreamLifecycleAll",
+        "type": "Type",
+        "tags": [],
+        "label": "IngestStreamLifecycleAll",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IngestStreamLifecycle",
+            "text": "IngestStreamLifecycle"
+          },
+          " | ",
+          "IngestStreamLifecycleError",
+          " | ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IngestStreamLifecycleDisabled",
+            "text": "IngestStreamLifecycleDisabled"
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
