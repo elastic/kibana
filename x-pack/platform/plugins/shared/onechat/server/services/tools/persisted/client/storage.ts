@@ -14,7 +14,7 @@ import { chatSystemIndex } from '@kbn/onechat-server';
 export const toolIndexName = chatSystemIndex('tools');
 
 const storageSettings = {
-  version: 1, // Increment this to apply new storage settings!
+  version: 1,
   name: toolIndexName,
   mappings: {
     properties: {

@@ -17,7 +17,7 @@ import {
 } from './fields';
 
 export const assetStorageSettings = {
-  version: 1, // Increment this to apply new storage settings!
+  version: 1,
   name: '.kibana_streams_assets',
   mappings: {
     properties: {

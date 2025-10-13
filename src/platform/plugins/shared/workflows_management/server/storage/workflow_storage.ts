@@ -16,7 +16,7 @@ import { workflowSystemIndex } from './indices';
 export const workflowIndexName = workflowSystemIndex('workflows');
 
 const storageSettings = {
-  version: 1, // Increment this to apply new storage settings!
+  version: 1,
   name: workflowIndexName,
   mappings: {
     properties: {

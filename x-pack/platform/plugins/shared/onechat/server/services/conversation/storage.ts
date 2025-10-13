@@ -14,7 +14,7 @@ import type { PersistentConversationRound } from './types';
 export const conversationIndexName = chatSystemIndex('conversations');
 
 const storageSettings = {
-  version: 1, // Increment this to apply new storage settings!
+  version: 1,
   name: conversationIndexName,
   mappings: {
     properties: {
