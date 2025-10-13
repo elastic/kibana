@@ -85,7 +85,7 @@ export const anomalySwimLaneControlsStateSchema = schema.object({
   perPage: schema.maybe(schema.number()),
 });
 
-const anomalySwimlaneEmbeddableStateViewBySchema = schema.object({
+export const anomalySwimlaneEmbeddableStateViewBySchema = schema.object({
   ...serializedTitlesSchema.getPropSchemas(),
   ...anomalySwimlaneEmbeddableCustomInputViewBySchema.getPropSchemas(),
 });
