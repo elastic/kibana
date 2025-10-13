@@ -19,12 +19,10 @@ export const StorageSizeCard = ({
   definition,
   stats,
   statsError,
-  failureStoreEnabled,
 }: {
   definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
   statsError?: Error;
-  failureStoreEnabled: boolean;
 }) => {
   const hasPrivileges = definition.privileges?.monitor ?? false;
   const metric = [
@@ -48,7 +46,9 @@ export const StorageSizeCard = ({
       'data-test-subj': 'storageSize',
     },
   ];
-  const inaccurateMetric = failureStoreEnabled && !definition.privileges?.manage_failure_store;
+  const inaccurateMetric = Boolean(
+    stats?.hasFailureStore && !definition.privileges?.manage_failure_store
+  );
 
   const title = (
     <FormattedMessage

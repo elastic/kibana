@@ -63,12 +63,6 @@ export const StreamDetailGeneralData = ({
     error: statsError,
   } = useDataStreamStats({ definition, timeState, aggregations });
 
-  const { data: failureStore } = useFailureStoreStats({
-    definition,
-    timeState,
-    aggregations,
-  });
-
   const { signal } = useAbortController();
 
   const getIlmPolicies = () =>
@@ -142,20 +136,10 @@ export const StreamDetailGeneralData = ({
           <RetentionCard definition={definition} openEditModal={() => setIsEditModalOpen(true)} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <StorageSizeCard
-            definition={definition}
-            stats={stats}
-            statsError={statsError}
-            failureStoreEnabled={failureStore?.config?.enabled ?? false}
-          />
+          <StorageSizeCard definition={definition} stats={stats} statsError={statsError} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <IngestionCard
-            definition={definition}
-            stats={stats}
-            statsError={statsError}
-            failureStoreEnabled={failureStore?.config?.enabled ?? false}
-          />
+          <IngestionCard definition={definition} stats={stats} statsError={statsError} />
         </EuiFlexItem>
       </EuiFlexGroup>
       {definition.privileges.lifecycle && isIlmLifecycle(definition.effective_lifecycle) ? (
