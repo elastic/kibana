@@ -4170,6 +4170,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cloud-defend-plugin@link:x-pack/solutions/security/plugins/cloud_defend":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cloud-experiments-plugin@link:x-pack/platform/plugins/private/cloud_integrations/cloud_experiments":
   version "0.0.0"
   uid ""
@@ -6162,6 +6166,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/kubernetes-security-plugin@link:x-pack/solutions/security/plugins/kubernetes_security":
+  version "0.0.0"
+  uid ""
+
 "@kbn/langchain@link:x-pack/platform/packages/shared/kbn-langchain":
   version "0.0.0"
   uid ""
@@ -6547,6 +6555,10 @@
   uid ""
 
 "@kbn/observability-ai-assistant-app-plugin@link:x-pack/solutions/observability/plugins/observability_ai_assistant_app":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-ai-assistant-management-plugin@link:x-pack/solutions/observability/plugins/observability_ai_assistant_management":
   version "0.0.0"
   uid ""
 
@@ -7114,6 +7126,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-connectors-plugin@link:x-pack/solutions/search/plugins/search_connectors":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-connectors@link:src/platform/packages/shared/kbn-search-connectors":
   version "0.0.0"
   uid ""
@@ -7130,11 +7146,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-index-documents@link:x-pack/solutions/search/packages/kbn-search-index-documents":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-indices@link:x-pack/solutions/search/plugins/search_indices":
   version "0.0.0"
   uid ""
 
 "@kbn/search-inference-endpoints@link:x-pack/solutions/search/plugins/search_inference_endpoints":
+  version "0.0.0"
+  uid ""
+
+"@kbn/search-navigation@link:x-pack/solutions/search/plugins/search_solution/search_navigation":
   version "0.0.0"
   uid ""
 
@@ -7734,6 +7758,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/streams-app-wrapper-plugin@link:x-pack/solutions/observability/plugins/observability_streams_wrapper":
+  version "0.0.0"
+  uid ""
+
 "@kbn/streams-plugin@link:x-pack/platform/plugins/shared/streams":
   version "0.0.0"
   uid ""
@@ -7859,6 +7887,10 @@
   uid ""
 
 "@kbn/third-party-vis-lens-example-plugin@link:x-pack/examples/third_party_vis_lens_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/threat-intelligence-plugin@link:x-pack/solutions/security/plugins/threat_intelligence":
   version "0.0.0"
   uid ""
 
