@@ -192,6 +192,7 @@ export class WorkflowContextManager {
   }
 
   private enrichStepContextAccordingToStepScope(stepContext: StepContext): void {
+    const x = this.workflowExecutionState.getWorkflowExecution();
     let scopeStack = WorkflowScopeStack.fromStackFrames(
       this.workflowExecutionState.getWorkflowExecution().scopeStack
     );
