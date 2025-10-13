@@ -84,7 +84,7 @@ class TelemetryConfigurationDTO {
     maxCompressedResponseSize: 8 * 1024 * 1024, // 8 MB
   };
   private readonly DEFAULT_ENCRYPTION_PUBLIC_KEYS: Record<string, string> = {
-    'test-pubkey': `-----BEGIN PUBLIC KEY-----
+    'diagnostic-queries-sda-key': `-----BEGIN PUBLIC KEY-----
 MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA5GwrUTWUB+o5NwmADZ4e
 Th5nnmGQSJ7/Dn9x/EnujK1+TLRM/wx2Sk1U0LWvf3X9YYZA9IMsdZmxJPNuZhkr
 bljo1bZW3H3HbSkzY4xcy6xs4TNF5nB2njHnSsvwSFBbAKu2prn/x6PU9/2gyCJ3
