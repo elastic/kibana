@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { PageScope } from '../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { AuthenticationsUserTable } from '../../../components/authentication/authentications_user_table';
 import { histogramConfigs } from '../../../components/authentication/helpers';
 import type { AuthenticationsUserTableProps } from '../../../components/authentication/types';
@@ -27,33 +26,29 @@ export const AuthenticationsQueryTabBody = ({
   type,
   deleteQuery,
   userName,
-}: AuthenticationsUserTableProps) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+}: AuthenticationsUserTableProps) => (
+  <>
+    <MatrixHistogram
+      endDate={endDate}
+      filterQuery={filterQuery}
+      id={HISTOGRAM_QUERY_ID}
+      startDate={startDate}
+      {...histogramConfigs}
+      sourcererScopeId={PageScope.explore}
+    />
 
-  return (
-    <>
-      <MatrixHistogram
-        endDate={endDate}
-        filterQuery={filterQuery}
-        id={HISTOGRAM_QUERY_ID}
-        startDate={startDate}
-        {...histogramConfigs}
-        sourcererScopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
-      />
-
-      <AuthenticationsUserTable
-        endDate={endDate}
-        filterQuery={filterQuery}
-        indexNames={indexNames}
-        setQuery={setQuery}
-        deleteQuery={deleteQuery}
-        startDate={startDate}
-        type={type}
-        skip={skip}
-        userName={userName}
-      />
-    </>
-  );
-};
+    <AuthenticationsUserTable
+      endDate={endDate}
+      filterQuery={filterQuery}
+      indexNames={indexNames}
+      setQuery={setQuery}
+      deleteQuery={deleteQuery}
+      startDate={startDate}
+      type={type}
+      skip={skip}
+      userName={userName}
+    />
+  </>
+);
 
 AuthenticationsQueryTabBody.displayName = 'AllUsersQueryTabBody';

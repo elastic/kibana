@@ -20,8 +20,6 @@ import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
 import { PageScope } from '../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import {
   useAssetCriticalityData,
@@ -53,7 +51,6 @@ import { navTabsUsersDetails } from './nav_tabs';
 import type { UsersDetailsProps } from './types';
 import { getUsersDetailsPageFilters } from './helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { LastEventTime } from '../../../../common/components/last_event_time';
@@ -109,31 +106,15 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [detailName]
   );
 
-  const {
-    indicesExist: oldIndicesExist,
-    selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataViewSpec,
-  } = useSourcererDataView();
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { dataView: experimentalDataView, status } = useDataView(PageScope.explore);
-  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.explore);
-
-  const indicesExist = newDataViewPickerEnabled
-    ? experimentalDataView.hasMatchedIndices()
-    : oldIndicesExist;
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const { dataView, status } = useDataView(PageScope.explore);
+  const selectedPatterns = useSelectedPatterns(PageScope.explore);
+  const indicesExist = dataView.hasMatchedIndices();
 
   const [rawFilteredQuery, kqlError] = useMemo(() => {
     try {
       return [
         buildEsQuery(
-          newDataViewPickerEnabled
-            ? experimentalDataView
-            : dataViewSpecToViewBase(oldSourcererDataViewSpec),
+          dataView,
           [query],
           [...usersDetailsPageFilters, ...globalFilters],
           getEsQueryConfig(uiSettings)
@@ -142,15 +123,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     } catch (e) {
       return [undefined, e];
     }
-  }, [
-    experimentalDataView,
-    globalFilters,
-    newDataViewPickerEnabled,
-    oldSourcererDataViewSpec,
-    query,
-    uiSettings,
-    usersDetailsPageFilters,
-  ]);
+  }, [dataView, globalFilters, query, uiSettings, usersDetailsPageFilters]);
 
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
@@ -221,7 +194,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     onChange: calculateEntityRiskScore,
   });
 
-  if (newDataViewPickerEnabled && status === 'pristine') {
+  if (status === 'pristine') {
     return <PageLoader />;
   }
 
@@ -231,11 +204,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
-            <SiemSearchBar
-              dataView={experimentalDataView}
-              id={InputsModelId.global}
-              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
-            />
+            <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
@@ -280,7 +249,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                   narrowDateRange={narrowDateRange}
                   indexPatterns={selectedPatterns}
                   jobNameById={jobNameById}
-                  scopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
+                  scopeId={PageScope.explore}
                 />
               )}
             </AnomalyTableProvider>

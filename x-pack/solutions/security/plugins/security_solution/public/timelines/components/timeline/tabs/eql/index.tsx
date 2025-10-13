@@ -25,14 +25,12 @@ import {
   DocumentDetailsRightPanelKey,
 } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { timelineSelectors } from '../../../../store';
 import { useTimelineEvents } from '../../../../containers';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
 import { timelineDefaults } from '../../../../store/defaults';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useEqlEventsCountPortal } from '../../../../../common/hooks/use_timeline_events_count';
 import type { TimelineModel } from '../../../../store/model';
 import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
@@ -76,36 +74,13 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const { portalNode: eqlEventsCountPortalNode } = useEqlEventsCountPortal();
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const {
-    dataViewId: oldDataViewId,
-    loading: oldSourcererLoading,
-    selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataViewSpec,
-  } = useSourcererDataView(PageScope.timeline);
-
   const { dataView: experimentalDataView, status } = useDataView(PageScope.timeline);
-  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
-  const experimentalDataViewId = experimentalDataView.id ?? null;
-
-  const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataViewId : oldDataViewId),
-    [experimentalDataViewId, newDataViewPickerEnabled, oldDataViewId]
-  );
-  const dataViewLoading = useMemo(
-    () => (newDataViewPickerEnabled ? status !== 'ready' : oldSourcererLoading),
-    [newDataViewPickerEnabled, oldSourcererLoading, status]
-  );
-
-  const runtimeMappings = useMemo(() => {
-    return newDataViewPickerEnabled
-      ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings)
-      : (oldSourcererDataViewSpec.runtimeFieldMap as RunTimeMappings);
-  }, [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataViewSpec.runtimeFieldMap]);
-
-  const selectedPatterns = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
-    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
+  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const dataViewId = experimentalDataView.id ?? null;
+  const dataViewLoading = useMemo(() => status !== 'ready', [status]);
+  const runtimeMappings = useMemo(
+    () => experimentalDataView.getRuntimeMappings() as RunTimeMappings,
+    [experimentalDataView]
   );
 
   const { augmentedColumnHeaders, timelineQueryFieldsFromColumns } = useTimelineColumns(columns);
@@ -232,11 +207,10 @@ export const EqlTabContentComponent: React.FC<Props> = ({
           setTimelineFullScreen={setTimelineFullScreen}
           timelineFullScreen={timelineFullScreen}
           timelineId={timelineId}
-          newDataViewPickerEnabled={newDataViewPickerEnabled}
         />
       </EuiFlexGroup>
     ),
-    [activeTab, newDataViewPickerEnabled, setTimelineFullScreen, timelineFullScreen, timelineId]
+    [activeTab, setTimelineFullScreen, timelineFullScreen, timelineId]
   );
 
   return (

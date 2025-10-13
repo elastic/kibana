@@ -31,7 +31,6 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
@@ -46,7 +45,6 @@ import { DefaultFieldRenderer } from '../../../../timelines/components/field_ren
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { CellActions } from '../../shared/components/cell_actions';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
@@ -110,14 +108,7 @@ export interface HostDetailsProps {
  */
 export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, scopeId }) => {
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns();
-
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const selectedPatterns = useSelectedPatterns();
 
   const dispatch = useDispatch();
   const { telemetry } = useKibana().services;
