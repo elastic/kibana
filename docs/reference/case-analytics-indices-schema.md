@@ -48,7 +48,7 @@ The cases as data features is in technical preview, meaning the schema for the c
 | closed\_by.email | keyword | The email address of the user who closed the case. |
 | assignees | keyword | The user IDs of the users assigned to the case. |
 | time\_to\_resolve | long | How long it took to close the case. The time is presented in seconds and is calculated as `case.closed_at - case.created_at` |
-| time\_to\_acknowledge | long | The time in seconds taken to mark the case as in progress. It is calculated as `case.in_progress_at - case.created_at` |
+| time\_to\_acknowledge | long | The time in seconds taken to mark the case as in progress. It is calculated by measuring how long it took to update the case status to **In progress** after the case was created. |
 | time\_to\_investigate | long | How long it took to move the case from in progress to closed. The time is presented in seconds and is calculated as `case.closed_at - case.in_progress_at` |
 | custom\_fields.type | keyword | The custom field type. |
 | custom\_fields.label | keyword | The custom field label. |
