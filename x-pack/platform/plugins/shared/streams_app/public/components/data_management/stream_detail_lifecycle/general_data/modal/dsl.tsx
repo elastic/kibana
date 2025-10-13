@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState, useEffect } from 'react';
-import type { IngestStreamLifecycle } from '@kbn/streams-schema';
+import type { IngestStreamLifecycleAll, IngestStreamLifecycleDSL } from '@kbn/streams-schema';
 import { isDslLifecycle } from '@kbn/streams-schema';
 import {
   EuiButton,
@@ -22,9 +22,9 @@ import { useBoolean } from '@kbn/react-hooks';
 import { parseDuration } from '../../helpers/helpers';
 
 interface Props {
-  initialValue: IngestStreamLifecycle;
+  initialValue: IngestStreamLifecycleAll;
   isDisabled: boolean;
-  setLifecycle: (lifecycle: IngestStreamLifecycle) => void;
+  setLifecycle: (lifecycle: IngestStreamLifecycleDSL) => void;
   setSaveButtonDisabled: (isDisabled: boolean) => void;
 }
 
