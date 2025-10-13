@@ -310,7 +310,7 @@ export class ScoutPlaywrightReporter implements Reporter {
         action: ScoutReportEventAction.RUN_END,
       },
       process: {
-        duration: process.uptime() * 1000,
+        uptime: Math.floor(process.uptime() * 1000),
       },
     });
 
