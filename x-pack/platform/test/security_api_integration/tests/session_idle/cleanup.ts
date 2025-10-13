@@ -101,6 +101,10 @@ export default function ({ getService }: FtrProviderContext) {
     const addLogging = {
       persistent: {
         'logger.org.elasticsearch.xpack.security.authc': 'debug',
+        'logger.com.sun.org.apache.xerces': 'debug',
+        'logger.org.apache.xerces': 'debug',
+        'logger.com.sun.org.apache.xerces.internal': 'debug',
+        'logger.org.apache.xerces.internal': 'debug',
       },
     };
     await esSupertest.put('/_cluster/settings').send(addLogging).expect(200);

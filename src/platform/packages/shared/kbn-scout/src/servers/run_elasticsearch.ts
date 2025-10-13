@@ -104,6 +104,10 @@ export async function runElasticsearch(
   await esClient.cluster.putSettings({
     persistent: {
       'logger.org.elasticsearch.xpack.security.authc': 'trace',
+      'logger.com.sun.org.apache.xerces': 'trace',
+      'logger.org.apache.xerces': 'trace',
+      'logger.com.sun.org.apache.xerces.internal': 'trace',
+      'logger.org.apache.xerces.internal': 'trace',
     },
   });
 
