@@ -9,11 +9,10 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, dashboard, spaceSelector, header } = getPageObjects([
+  const { common, dashboard, spaceSelector } = getPageObjects([
     'common',
     'dashboard',
     'spaceSelector',
-    'header',
   ]);
   const globalNav = getService('globalNav');
   const kibanaServer = getService('kibanaServer');

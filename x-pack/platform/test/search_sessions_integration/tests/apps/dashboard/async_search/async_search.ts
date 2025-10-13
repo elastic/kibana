@@ -12,12 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
-  const { common, header, dashboard, visChart } = getPageObjects([
-    'common',
-    'header',
-    'dashboard',
-    'visChart',
-  ]);
+  const { common, dashboard, visChart } = getPageObjects(['common', 'dashboard', 'visChart']);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
