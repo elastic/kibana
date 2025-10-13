@@ -91,29 +91,13 @@ while read -r config; do
 
   # Scout reporter
   if [[ "${SCOUT_REPORTER_ENABLED:-}" =~ ^(1|true)$ ]]; then
-    REPORT_DIR=$(ls -td .scout/reports/scout-ftr-*/ 2>/dev/null | head -n 1)
+    # Upload events after running each config
+    echo "Upload Scout reporter events to AppEx QA's team cluster for config $config"
+    node scripts/scout upload-events --dontFailOnError
+    echo "Upload successful, removing local events at .scout/reports"
+    rm -rf .scout/reports
   else
-    REPORT_DIR=""
-    echo "Scout reporter is disabled, skipping report upload..."
-  fi
-  # Skip report upload if we can't find the report directory
-  if [ -n "$REPORT_DIR" ]; then
-    EVENT_LOG_FILE="${REPORT_DIR}event-log.ndjson"
-    if [ -f "$EVENT_LOG_FILE" ]; then
-      # Upload events after running each config
-      echo "Upload Scout reporter events to AppEx QA's team cluster for config $config"
-      if [[ "${SCOUT_REPORTER_ENABLED:-}" == "true" ]]; then
-        node scripts/scout upload-events --dontFailOnError --eventLogPath "$EVENT_LOG_FILE"
-      else
-        echo "⚠️ The SCOUT_REPORTER_ENABLED environment variable is not 'true'. Skipping event upload."
-      fi
-    else
-      echo "❌ Could not find event log file '$EVENT_LOG_FILE' for config $config"
-      buildkite-agent annotate --style 'warning' --context 'scout-reporter' "Could not find event log file for config \`$config\`."
-    fi
-  else
-    echo "❌ Could not find any scout report directory '$REPORT_DIR'."
-    buildkite-agent annotate --style 'warning' --context 'scout-reporter' "Could not find any scout report directory \`$REPORT_DIR\`."
+    echo "SCOUT_REPORTER_ENABLED=$SCOUT_REPORTER_ENABLED, skipping event upload."
   fi
 
   timeSec=$(($(date +%s)-start))
