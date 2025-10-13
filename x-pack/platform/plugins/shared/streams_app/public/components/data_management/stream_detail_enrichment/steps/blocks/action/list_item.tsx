@@ -13,6 +13,7 @@ import {
   EuiPanel,
   EuiTextTruncate,
   useEuiTheme,
+  euiTextTruncate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isActionBlock } from '@kbn/streamlang';
@@ -63,21 +64,29 @@ export const ActionBlockListItem = ({
       {stepUnderEdit && !step.parentId && <BlockDisableOverlay />}
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
         <EuiFlexItem>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="xs" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <ProcessorStatusIndicator
-                    stepRef={stepRef}
-                    stepsProcessingSummaryMap={stepsProcessingSummaryMap}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <strong data-test-subj="streamsAppProcessorLegend">
-                    {step.action.toUpperCase()}
-                  </strong>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <ProcessorStatusIndicator
+                stepRef={stepRef}
+                stepsProcessingSummaryMap={stepsProcessingSummaryMap}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={true}
+              css={css`
+                min-width: 0;
+                margin-right: ${euiTheme.size.s};
+              `}
+            >
+              <strong
+                data-test-subj="streamsAppProcessorLegend"
+                css={css`
+                  display: block;
+                  ${euiTextTruncate()}
+                `}
+              >
+                {step.action.toUpperCase()}
+              </strong>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="xs">

@@ -23,10 +23,9 @@ export interface RenovatePackageRule {
 export function ruleFilter(rule: RenovatePackageRule) {
   // Explicit list of rules that are allowed to be disabled.
   const allowedDisabledRules = [
-    'bazel', // Per operations team. This is slated for removal, and does not make sense to track.
     'typescript', // These updates are always handled manually
-    'webpack', // While we are in the middle of a webpack upgrade. TODO: Remove this once we are done.
     'puppeteer', // These updates are always handled manually
+    'undici', // These updates are always handled manually, and only with Node.js upgrades
   ];
   // Rules that use custom managers are not supported by this tool, and are ignored.
   const rulesWithCustomManagers = ['chainguard', 'chainguard-fips'];

@@ -6,7 +6,6 @@
  */
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import moment from 'moment';
 import type {
   UserActionAction,
   CommentUserAction,
@@ -50,8 +49,6 @@ import type {
   CasesSimilarResponseUI,
   ObservableUI,
   InternalFindCaseUserActions,
-  CaseSummary,
-  InferenceConnectors,
   EventAttachmentUI,
 } from '../../common/ui/types';
 import { CaseMetricsFeature } from '../../common/types/api';
@@ -368,19 +365,6 @@ export const basicCaseMetrics: SingleCaseMetrics = {
       reopenDates: [],
     },
   },
-};
-
-export const mockCaseSummary: CaseSummary = {
-  content: 'case summary',
-  generatedAt: moment().toISOString(),
-};
-
-export const mockInferenceConnectors: InferenceConnectors = {
-  connectors: [
-    {
-      connectorId: 'connector-id',
-    },
-  ],
 };
 
 export const mockCase: CaseUI = {

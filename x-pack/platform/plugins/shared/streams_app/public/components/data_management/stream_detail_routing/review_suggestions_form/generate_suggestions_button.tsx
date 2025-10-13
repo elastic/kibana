@@ -23,10 +23,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AIFeatures } from '../../stream_detail_enrichment/steps/blocks/action/grok/use_ai_features';
 import { useKibana } from '../../../../hooks/use_kibana';
-
-export { useAIFeatures } from '../../stream_detail_enrichment/steps/blocks/action/grok/use_ai_features';
+import type { AIFeatures } from '../../../../hooks/use_ai_features';
 
 export interface GenerateSuggestionButtonProps extends EuiButtonProps {
   onClick(connectorId: string): void;

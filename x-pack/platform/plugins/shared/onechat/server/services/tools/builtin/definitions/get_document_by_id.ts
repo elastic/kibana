@@ -6,9 +6,10 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools } from '@kbn/onechat-common';
+import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import { getDocumentById } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { createErrorResult } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const getDocumentByIdSchema = z.object({
@@ -19,6 +20,7 @@ const getDocumentByIdSchema = z.object({
 export const getDocumentByIdTool = (): BuiltinToolDefinition<typeof getDocumentByIdSchema> => {
   return {
     id: platformCoreTools.getDocumentById,
+    type: ToolType.builtin,
     description:
       'Retrieve the full content (source) of an Elasticsearch document based on its ID and index name.',
     schema: getDocumentByIdSchema,
@@ -45,16 +47,13 @@ export const getDocumentByIdTool = (): BuiltinToolDefinition<typeof getDocumentB
 
       return {
         results: [
-          {
-            type: ToolResultType.error,
-            data: {
-              message: `Document with ID '${result.id}' not found in index '${result.index}'`,
-              metadata: {
-                id: result.id,
-                index: result.index,
-              },
+          createErrorResult({
+            message: `Document with ID '${result.id}' not found in index '${result.index}'`,
+            metadata: {
+              id: result.id,
+              index: result.index,
             },
-          },
+          }),
         ],
       };
     },

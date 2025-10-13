@@ -32,7 +32,6 @@ import {
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
-import { useAIFeatures } from './review_suggestions_form/generate_suggestions_button';
 import { ReviewSuggestionsForm } from './review_suggestions_form/review_suggestions_form';
 import { GenerateSuggestionButton } from './review_suggestions_form/generate_suggestions_button';
 import { NoSuggestionsCallout } from './review_suggestions_form/no_suggestions_callout';
@@ -41,6 +40,7 @@ import {
   ReviewSuggestionsFormProvider,
 } from './review_suggestions_form/use_review_suggestions_form';
 import { useTimefilter } from '../../../hooks/use_timefilter';
+import { useAIFeatures } from '../../../hooks/use_ai_features';
 
 function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestingLevel: boolean) {
   if (maxNestingLevel) {
@@ -70,7 +70,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   const canManageRoutingRules = definition.privileges.manage;
   const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
   const shouldDisplayCreateButton = definition.privileges.simulate;
-  const CreateButtonComponent = aiFeatures ? EuiButtonEmpty : EuiButton;
+  const CreateButtonComponent = aiFeatures && aiFeatures.enabled ? EuiButtonEmpty : EuiButton;
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
@@ -92,7 +92,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
             min-height: 80px;
           `}
         >
-          {aiFeatures && (
+          {aiFeatures && aiFeatures.enabled && (
             <EuiFlexItem grow={false}>
               <GenerateSuggestionButton
                 size="s"
@@ -208,7 +208,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
             </EuiDroppable>
           </EuiDragDropContext>
 
-          {aiFeatures && shouldDisplayCreateButton && (
+          {aiFeatures && aiFeatures.enabled && shouldDisplayCreateButton && (
             <>
               <EuiSpacer size="m" />
               {reviewSuggestionForm.isEmpty ? (
