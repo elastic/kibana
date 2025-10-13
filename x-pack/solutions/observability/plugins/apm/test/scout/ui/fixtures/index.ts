@@ -10,80 +10,21 @@ import type {
   ObltTestFixtures,
   ObltWorkerFixtures,
   KibanaUrl,
+  BrowserAuthFixture,
 } from '@kbn/scout-oblt';
 import { test as base, createLazyPageObject } from '@kbn/scout-oblt';
-import type { BrowserAuthFixture } from '@kbn/scout/src/playwright/fixtures/scope/test';
-import type { KibanaRole } from '@kbn/scout/src/common/services/custom_role';
 import { ServiceMapPage } from './page_objects/service_map';
 import { ServiceInventoryPage } from './page_objects/service_inventory';
 import { StorageExplorerPage } from './page_objects/storage_explorer';
-
-// APM-specific role definitions matching authentication.ts
-const APM_ROLES = {
-  apmAllPrivilegesWithoutWriteSettings: {
-    elasticsearch: {
-      cluster: ['manage_api_key'],
-      indices: [
-        {
-          names: ['apm-*'],
-          privileges: ['read', 'view_index_metadata'],
-        },
-      ],
-    },
-    kibana: [
-      {
-        base: [],
-        feature: { apm: ['minimal_all'], ml: ['all'] },
-        spaces: ['*'],
-      },
-    ],
-  } as KibanaRole,
-
-  apmReadPrivilegesWithWriteSettings: {
-    elasticsearch: {
-      cluster: ['manage_api_key'],
-    },
-    kibana: [
-      {
-        base: [],
-        feature: {
-          apm: ['minimal_read', 'settings_save'],
-          advancedSettings: ['all'],
-          ml: ['all'],
-          savedObjectsManagement: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  } as KibanaRole,
-
-  apmMonitor: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['traces-apm*', 'logs-apm*', 'metrics-apm*', 'apm-*'],
-          privileges: ['monitor', 'read'],
-        },
-      ],
-      cluster: ['monitor'],
-    },
-    kibana: [
-      {
-        base: [],
-        feature: {
-          apm: ['all', 'read'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  } as KibanaRole,
-};
+import { ServiceGroupsPage } from './page_objects/service_groups';
+import { APM_ROLES } from './constants';
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
     serviceMapPage: ServiceMapPage;
     serviceInventoryPage: ServiceInventoryPage;
     storageExplorerPage: StorageExplorerPage;
+    serviceGroupsPage: ServiceGroupsPage;
   };
 }
 
@@ -105,6 +46,7 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
       serviceMapPage: createLazyPageObject(ServiceMapPage, page, kbnUrl),
       serviceInventoryPage: createLazyPageObject(ServiceInventoryPage, page, kbnUrl),
       storageExplorerPage: createLazyPageObject(StorageExplorerPage, page, kbnUrl),
+      serviceGroupsPage: createLazyPageObject(ServiceGroupsPage, page, kbnUrl),
     };
 
     await use(extendedPageObjects);
