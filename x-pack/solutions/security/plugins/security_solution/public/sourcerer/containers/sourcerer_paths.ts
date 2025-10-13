@@ -8,16 +8,16 @@
 import { matchPath } from 'react-router-dom';
 
 import {
-  CASES_PATH,
   ALERTS_PATH,
   ATTACK_DISCOVERY_PATH,
+  CASES_PATH,
+  DATA_QUALITY_PATH,
+  ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   HOSTS_PATH,
-  USERS_PATH,
   NETWORK_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
-  DATA_QUALITY_PATH,
-  ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
+  USERS_PATH,
 } from '../../../common/constants';
 import { SourcererScopeName } from '../store/model';
 
@@ -47,8 +47,7 @@ const explorePaths = [
 ];
 
 export const getScopeFromPath = (
-  pathname: string,
-  newDataViewPickerEnabled?: boolean
+  pathname: string
 ): SourcererScopeName.default | SourcererScopeName.detections | SourcererScopeName.explore => {
   if (
     matchPath(pathname, {
@@ -60,7 +59,6 @@ export const getScopeFromPath = (
   }
 
   if (
-    newDataViewPickerEnabled &&
     matchPath(pathname, {
       path: explorePaths,
       strict: false,

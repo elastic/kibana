@@ -11,13 +11,10 @@ import styled from '@emotion/styled';
 import { v4 as uuidv4 } from 'uuid';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
-
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import { droppableTimelineProvidersPrefix } from '../../../../common/components/drag_and_drop/helpers';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 import { Empty } from './empty';
@@ -107,13 +104,8 @@ const CustomTooltipDiv = styled.div`
 
 export const DataProviders = React.memo<Props>(({ timelineId }) => {
   const dispatch = useDispatch();
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { browserFields: oldBrowserFields } = useSourcererDataView(SourcererScopeName.timeline);
-
-  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
-
-  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+  const browserFields = useBrowserFields(SourcererScopeName.timeline);
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 

@@ -11,8 +11,6 @@ import '@testing-library/jest-dom';
 import { AIValue } from './ai_value';
 import { useSyncTimerangeUrlParam } from '../../common/hooks/search_bar/use_sync_timerange_url_param';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useAiValueRoleCheck } from '../hooks/use_ai_value_role_check';
@@ -26,10 +24,6 @@ jest.mock('../../common/hooks/search_bar/use_sync_timerange_url_param', () => ({
 
 jest.mock('../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
-}));
-
-jest.mock('../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn(),
 }));
 
 jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => ({
@@ -113,12 +107,6 @@ const mockUseSyncTimerangeUrlParam = useSyncTimerangeUrlParam as jest.MockedFunc
 const mockUseDeepEqualSelector = useDeepEqualSelector as jest.MockedFunction<
   typeof useDeepEqualSelector
 >;
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.MockedFunction<
-  typeof useIsExperimentalFeatureEnabled
->;
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
 const mockUseAlertsPrivileges = useAlertsPrivileges as jest.MockedFunction<
   typeof useAlertsPrivileges
 >;
@@ -137,15 +125,6 @@ describe('AIValue', () => {
       from: '2023-01-01T00:00:00.000Z',
       to: '2023-01-31T23:59:59.999Z',
     });
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-    mockUseSourcererDataView.mockReturnValue({
-      loading: false,
-      browserFields: {},
-      dataViewId: 'test-id',
-      indicesExist: true,
-      selectedPatterns: [],
-      sourcererDataView: {} as Record<string, unknown>,
-    });
     mockUseAlertsPrivileges.mockReturnValue({
       hasKibanaREAD: true,
       hasIndexRead: true,
@@ -160,7 +139,9 @@ describe('AIValue', () => {
     });
     mockUseDataView.mockReturnValue({
       status: 'ready',
-      dataView: {} as never,
+      dataView: {
+        hasMatchedIndices: jest.fn(),
+      } as never,
     });
     mockUseAiValueRoleCheck.mockReturnValue({
       hasRequiredRole: true,
@@ -184,8 +165,7 @@ describe('AIValue', () => {
       expect(screen.getByTestId('page-loader')).toBeInTheDocument();
     });
 
-    it('shows page loader when new data view picker is enabled and status is pristine', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    it('shows page loader when data view status is pristine', () => {
       mockUseDataView.mockReturnValue({
         status: 'pristine',
         dataView: {} as never,
@@ -200,14 +180,10 @@ describe('AIValue', () => {
       expect(screen.getByTestId('page-loader')).toBeInTheDocument();
     });
 
-    it('shows loading spinner when sourcerer is loading', () => {
-      mockUseSourcererDataView.mockReturnValue({
-        loading: true,
-        browserFields: {},
-        dataViewId: 'test-id',
-        indicesExist: true,
-        selectedPatterns: [],
-        sourcererDataView: {} as Record<string, unknown>,
+    it('shows loading spinner when data view is loading', () => {
+      mockUseDataView.mockReturnValue({
+        status: 'loading',
+        dataView: {} as never,
       });
 
       render(
@@ -326,35 +302,13 @@ describe('AIValue', () => {
 
       expect(mockUseSyncTimerangeUrlParam).toHaveBeenCalled();
       expect(mockUseDeepEqualSelector).toHaveBeenCalledWith(expect.any(Function));
-      expect(mockUseIsExperimentalFeatureEnabled).toHaveBeenCalledWith('newDataViewPickerEnabled');
       expect(mockUseAiValueRoleCheck).toHaveBeenCalled();
       expect(mockUseAlertsPrivileges).toHaveBeenCalled();
     });
   });
 
   describe('Data View Picker Integration', () => {
-    it('uses old sourcerer loading when new data view picker is disabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-      mockUseSourcererDataView.mockReturnValue({
-        loading: true,
-        browserFields: {},
-        dataViewId: 'test-id',
-        indicesExist: true,
-        selectedPatterns: [],
-        sourcererDataView: {} as Record<string, unknown>,
-      });
-
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('aiValueLoader')).toBeInTheDocument();
-    });
-
-    it('uses new data view status when new data view picker is enabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    it('uses data view status', () => {
       mockUseDataView.mockReturnValue({
         status: 'loading',
         dataView: {} as never,

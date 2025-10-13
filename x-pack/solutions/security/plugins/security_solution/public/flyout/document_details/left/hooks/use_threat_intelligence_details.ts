@@ -7,7 +7,8 @@
 
 import { useMemo } from 'react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import type { RunTimeMappings } from '../../../../../common/api/search_strategy';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import type { CtiEnrichment, EventFields } from '../../../../../common/search_strategy';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import {
@@ -19,7 +20,6 @@ import {
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useInvestigationTimeEnrichment } from '../../shared/hooks/use_investigation_enrichment';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useDocumentDetailsContext } from '../../shared/context';
 
@@ -66,12 +66,16 @@ export const useThreatIntelligenceDetails = (): ThreatIntelligenceDetailsResult 
     pageName === SecurityPageName.detections
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
-  const sourcererDataView = useSourcererDataView(sourcererScope);
+  const { dataView } = useDataView(sourcererScope);
+  const runtimeMappings = useMemo(
+    () => dataView.getRuntimeMappings() as RunTimeMappings,
+    [dataView]
+  );
 
   const [isEventDataLoading, eventData] = useTimelineEventsDetails({
     indexName,
     eventId,
-    runtimeMappings: sourcererDataView.sourcererDataView.runtimeFieldMap as RunTimeMappings,
+    runtimeMappings,
     skip: !eventId,
   });
 

@@ -9,8 +9,6 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { useRuleFromTimeline } from './use_rule_from_timeline';
 import { useGetInitialUrlParamValue } from '../../common/utils/global_query_string/helpers';
 import { resolveTimeline } from '../../timelines/containers/api';
-import { useSourcererDataView } from '../../sourcerer/containers';
-import { mockSourcererScope } from '../../sourcerer/containers/mocks';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../common/hooks/use_app_toasts.mock';
 import { mockTimeline } from '../../../server/lib/timeline/__mocks__/create_timelines';
@@ -27,7 +25,6 @@ jest.mock('../../common/hooks/use_experimental_features');
 jest.mock('../../common/utils/global_query_string/helpers');
 jest.mock('../../timelines/containers/api');
 jest.mock('../../common/hooks/use_app_toasts');
-jest.mock('../../sourcerer/containers');
 jest.mock('../../common/components/discover_in_timeline/use_discover_in_timeline_context');
 jest.mock('../../common/components/link_to', () => {
   const originalModule = jest.requireActual('../../common/components/link_to');
@@ -117,13 +114,6 @@ describe('useRuleFromTimeline', () => {
 
   describe('initial data view === rule from timeline data view', () => {
     beforeEach(() => {
-      (useSourcererDataView as jest.Mock).mockReturnValue({
-        ...mockSourcererScope,
-        dataViewId: 'custom-data-view-id',
-        selectedPatterns: ['awesome-*'],
-        sourcererDataView: {},
-      });
-
       jest.mocked(useDataView).mockReturnValue(withIndices(['awesome-*'], 'custom-data-view-id'));
     });
 
@@ -138,18 +128,6 @@ describe('useRuleFromTimeline', () => {
 
   describe('initial data view !== rule from timeline data view', () => {
     beforeEach(() => {
-      (useSourcererDataView as jest.Mock)
-        .mockReturnValueOnce({
-          ...mockSourcererScope,
-          dataViewId: 'security-solution',
-          selectedPatterns: ['auditbeat-*'],
-        })
-        .mockReturnValue({
-          ...mockSourcererScope,
-          dataViewId: 'custom-data-view-id',
-          selectedPatterns: ['awesome-*'],
-        });
-
       const initialDataView = getMockDataView();
       initialDataView.id = 'security-solution';
 

@@ -13,23 +13,21 @@ import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
-  GraphGroupedNodePreviewPanelKey,
-  GROUP_PREVIEW_BANNER,
   getNodeDocumentMode,
   getSingleDocumentData,
+  GraphGroupedNodePreviewPanelKey,
+  GROUP_PREVIEW_BANNER,
   type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
 import {
   ALERT_PREVIEW_BANNER,
@@ -54,14 +52,8 @@ const MAX_DOCUMENTS_TO_LOAD = 50;
  */
 export const GraphVisualization: React.FC = memo(() => {
   const toasts = useToasts();
-  const oldDataView = useGetScopedSourcererDataView({
-    sourcererScope: SourcererScopeName.default,
-  });
 
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.default);
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
+  const { dataView } = useDataView(SourcererScopeName.default);
   const dataViewIndexPattern = dataView ? dataView.getIndexPattern() : undefined;
 
   const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser, scopeId } =

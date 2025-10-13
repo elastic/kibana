@@ -15,12 +15,10 @@ import { useKibana } from '../../lib/kibana';
 import { hasAccessToSecuritySolution } from '../../../helpers_access';
 
 import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 const useHiddenTimelineRoutes = () => {
   const normalizedLinks = useNormalizedAppLinks();
-  const hiddenTimelineRoutes = useMemo(
+  return useMemo(
     () =>
       Object.values(normalizedLinks).reduce((acc: string[], link: NormalizedLink) => {
         if (link.hideTimeline) {
@@ -30,32 +28,20 @@ const useHiddenTimelineRoutes = () => {
       }, []),
     [normalizedLinks]
   );
-  return hiddenTimelineRoutes;
 };
 
 export const useShowTimelineForGivenPath = () => {
   const { capabilities } = useKibana().services.application;
   const userHasSecuritySolutionVisible = hasAccessToSecuritySolution(capabilities);
 
-  const { indicesExist: oldIndicesExist, dataViewId } = useSourcererDataView(
-    SourcererScopeName.timeline
-  );
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataView } = useDataView(SourcererScopeName.timeline);
-
-  const indicesExist = newDataViewPickerEnabled ? dataView.hasMatchedIndices() : oldIndicesExist;
+  const indicesExist = dataView.hasMatchedIndices();
 
   const hiddenTimelineRoutes = useHiddenTimelineRoutes();
-
-  const isTimelineAllowed = useMemo(() => {
-    // NOTE: with new Data View Picker, data view is always defined
-    if (newDataViewPickerEnabled) {
-      return userHasSecuritySolutionVisible && indicesExist;
-    }
-
-    return userHasSecuritySolutionVisible && (indicesExist || dataViewId === null);
-  }, [newDataViewPickerEnabled, userHasSecuritySolutionVisible, indicesExist, dataViewId]);
+  const isTimelineAllowed = useMemo(
+    () => userHasSecuritySolutionVisible && indicesExist,
+    [userHasSecuritySolutionVisible, indicesExist]
+  );
 
   const getIsTimelineVisible = useCallback(
     (pathname: string) => {

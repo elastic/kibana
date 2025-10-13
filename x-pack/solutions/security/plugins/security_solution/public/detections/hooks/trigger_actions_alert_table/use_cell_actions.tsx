@@ -9,16 +9,13 @@ import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { useCallback, useMemo } from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { RenderContext } from '@kbn/response-ops-alerts-table/types';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common/components/cell_actions';
 import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
 import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useGetFieldSpec } from '../../../common/hooks/use_get_field_spec';
-import { useDataViewId } from '../../../common/hooks/use_data_view_id';
 import type {
-  SecurityAlertsTableContext,
   GetSecurityAlertsTableProp,
+  SecurityAlertsTableContext,
 } from '../../components/alerts_table/types';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
@@ -29,8 +26,7 @@ export const useCellActionsOptions = (
     'columns' | 'oldAlertsData' | 'pageIndex' | 'pageSize' | 'dataGridRef'
   >
 ) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
+  const { dataView } = useDataView(SourcererScopeName.detections);
 
   const {
     columns = [],
@@ -39,28 +35,16 @@ export const useCellActionsOptions = (
     pageSize = 0,
     dataGridRef,
   } = context ?? {};
-  const oldGetFieldSpec = useGetFieldSpec(SourcererScopeName.detections);
-  const oldDataViewId = useDataViewId(SourcererScopeName.detections);
-  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id : oldDataViewId;
+  const dataViewId = dataView.id;
 
   const cellActionsMetadata = useMemo(
     () => ({ scopeId: tableId, dataViewId }),
     [dataViewId, tableId]
   );
+  // @ts-ignore Type '(FieldSpec | undefined)[]' is not assignable to type 'FieldSpec[]'
   const cellActionsFields: UseDataGridColumnsSecurityCellActionsProps['fields'] = useMemo(
-    () =>
-      columns.map(
-        (column) =>
-          (newDataViewPickerEnabled
-            ? experimentalDataView.fields?.getByName(column.id)?.toSpec()
-            : oldGetFieldSpec(column.id)) ?? {
-            name: '',
-            type: '', // When type is an empty string all cell actions are incompatible
-            aggregatable: false,
-            searchable: false,
-          }
-      ),
-    [columns, experimentalDataView.fields, oldGetFieldSpec, newDataViewPickerEnabled]
+    () => columns.map((column) => dataView.fields?.getByName(column.id)?.toSpec()),
+    [columns, dataView.fields]
   );
 
   /**

@@ -8,14 +8,11 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
 import { useSelectDataView } from '../../../data_view_manager/hooks/use_select_data_view';
 import type { Note } from '../../../../common/api/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { createNote } from '../notes/helpers';
-import { sourcererActions } from '../../../sourcerer/store';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import {
@@ -40,11 +37,10 @@ import type { UpdateTimeline } from './types';
 export const useUpdateTimeline = () => {
   const dispatch = useDispatch();
   const selectDataView = useSelectDataView();
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   return useCallback(
     // NOTE: this is only enabled for the data view picker test
-    // eslint-disable-next-line complexity
+
     ({
       duplicate,
       id,
@@ -65,23 +61,11 @@ export const useUpdateTimeline = () => {
         _timeline = { ...timeline, updated: undefined, changed: true, version: null };
       }
 
-      if (newDataViewPickerEnabled) {
-        selectDataView({
-          id: _timeline.dataViewId,
-          fallbackPatterns: _timeline.indexNames,
-          scope: DataViewManagerScopeName.timeline,
-        });
-      } else {
-        if (!isEmpty(_timeline.indexNames) && !newDataViewPickerEnabled) {
-          dispatch(
-            sourcererActions.setSelectedDataView({
-              id: SourcererScopeName.timeline,
-              selectedDataViewId: _timeline.dataViewId,
-              selectedPatterns: _timeline.indexNames,
-            })
-          );
-        }
-      }
+      selectDataView({
+        id: _timeline.dataViewId,
+        fallbackPatterns: _timeline.indexNames,
+        scope: DataViewManagerScopeName.timeline,
+      });
 
       if (
         _timeline.status === TimelineStatusEnum.immutable &&
@@ -155,6 +139,6 @@ export const useUpdateTimeline = () => {
         );
       }
     },
-    [dispatch, newDataViewPickerEnabled, selectDataView]
+    [dispatch, selectDataView]
   );
 };

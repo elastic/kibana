@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { pick } from 'lodash/fp';
@@ -16,9 +16,7 @@ import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { SuperDatePicker } from '../../common/components/super_date_picker';
 import { AIValueMetrics } from '../components/ai_value';
 import { InputsModelId } from '../../common/store/inputs/constants';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { HeaderPage } from '../../common/components/header_page';
 import * as i18n from './translations';
@@ -43,15 +41,11 @@ import { useAiValueRoleCheck } from '../hooks/use_ai_value_role_check';
  */
 
 const AIValueComponent = () => {
-  const { loading: oldIsSourcererLoading } = useSourcererDataView();
   const { from, to } = useDeepEqualSelector((state) =>
     pick(['from', 'to'], inputsSelectors.valueReportTimeRangeSelector(state))
   );
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { status } = useDataView();
-
-  const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
 
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
@@ -72,7 +66,7 @@ const AIValueComponent = () => {
     return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
   }
 
-  if (newDataViewPickerEnabled && status === 'pristine') {
+  if (status === 'pristine') {
     return <PageLoader />;
   }
 
@@ -107,7 +101,7 @@ const AIValueComponent = () => {
             : []),
         ]}
       />
-      {isSourcererLoading ? (
+      {status !== 'ready' ? (
         <EuiLoadingSpinner size="l" data-test-subj="aiValueLoader" />
       ) : (
         <EuiFlexGroup direction="column" data-test-subj="aiValueSections">

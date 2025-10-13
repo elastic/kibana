@@ -41,7 +41,6 @@ const removeListener = <T extends AnyAction>(listener: Listener<T>) =>
 export const useInitDataViewManager = () => {
   const dispatch = useDispatch();
   const services = useKibana().services;
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const attacksAlertsAlignmentEnabled = useIsExperimentalFeatureEnabled('attacksAlertsAlignment');
 
   const {
@@ -62,12 +61,6 @@ export const useInitDataViewManager = () => {
   }, [dispatch, loadingSignalIndex, signalIndexMappingOutdated, signalIndexName]);
 
   useEffect(() => {
-    // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
-    // Also, make sure it works exactly as x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/use_init_sourcerer.tsx
-    if (!newDataViewPickerEnabled) {
-      return;
-    }
-
     onSignalIndexUpdated();
     // because we only want onSignalIndexUpdated to run when signalIndexName updates,
     // but we want to know about the updates from the dependencies of onSignalIndexUpdated
@@ -75,11 +68,6 @@ export const useInitDataViewManager = () => {
   }, [signalIndexName]);
 
   useEffect(() => {
-    // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
-    if (!newDataViewPickerEnabled) {
-      return;
-    }
-
     // NOTE: init listener contains logic that preloads default security solution data view
     const dataViewsLoadingListener = createInitListener(
       {
@@ -123,7 +111,6 @@ export const useInitDataViewManager = () => {
   }, [
     attacksAlertsAlignmentEnabled,
     dispatch,
-    newDataViewPickerEnabled,
     services.application,
     services.dataViews,
     services.http,
