@@ -3,5 +3,5 @@
   "id": "@kbn/visualizations-common",
   "owner": "@elastic/kibana-visualizations",
   "group": "platform",
-  "visibility": "private"
+  "visibility": "shared"
 }
