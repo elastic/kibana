@@ -30,7 +30,6 @@ export const registerExecuteQueryFunction = ({
   resources,
   signal,
 }: FunctionRegistrationParameters) => {
-
   functions.registerInstruction(({ availableFunctionNames }) => {
     if (!availableFunctionNames.includes(QUERY_FUNCTION_NAME)) {
       return;
