@@ -10,28 +10,22 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FailureStoreIngestionRate } from './ingestion_rate';
 
-// Mock timefilter hook to provide deterministic timeState
-jest.mock('../../../../hooks/use_timefilter', () => ({
-  useTimefilter: () => ({ timeState: { from: 111, to: 222 } }),
-}));
+jest.mock('../../../../hooks/use_timefilter');
+jest.mock('../common/chart_components');
+jest.mock('../../../streams_app_search_bar');
 
-// Capture props passed to the chart component
-let lastChartProps: any;
-jest.mock('../common/chart_components', () => ({
-  FailureStoreChartBarSeries: (p: any) => {
-    lastChartProps = p; // store for assertions
-    return <div data-test-subj="failureStoreChart" />;
-  },
-}));
+import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { FailureStoreChartBarSeries } from '../common/chart_components';
+import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 
-// Mock search bar to assert showDatePicker flag
-jest.mock('../../../streams_app_search_bar', () => ({
-  StreamsAppSearchBar: (p: any) => (
-    <div data-test-subj="streamsAppSearchBar" data-show-date-picker={String(!!p.showDatePicker)} />
-  ),
-}));
+const mockUseTimefilter = useTimefilter as jest.MockedFunction<typeof useTimefilter>;
+const mockFailureStoreChartBarSeries = FailureStoreChartBarSeries as jest.MockedFunction<
+  typeof FailureStoreChartBarSeries
+>;
+const mockStreamsAppSearchBar = StreamsAppSearchBar as jest.MockedFunction<
+  typeof StreamsAppSearchBar
+>;
 
-// Helper render with i18n
 const renderI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('FailureStoreIngestionRate', () => {
@@ -40,7 +34,25 @@ describe('FailureStoreIngestionRate', () => {
   const statsB = { points: [4, 5] } as any;
 
   beforeEach(() => {
-    lastChartProps = undefined;
+    jest.clearAllMocks();
+
+    mockUseTimefilter.mockReturnValue({
+      timeState: { from: 111, to: 222 },
+    });
+
+    mockFailureStoreChartBarSeries.mockImplementation(
+      ({ definition: def, stats, isLoadingStats }) => (
+        <div data-test-subj="failureStoreChart">
+          <div>Definition: {def.id}</div>
+          <div>Loading: {isLoadingStats.toString()}</div>
+          {stats && <div>Stats: {stats.points?.length || 0} points</div>}
+        </div>
+      )
+    );
+
+    mockStreamsAppSearchBar.mockImplementation(({ showDatePicker }) => (
+      <div data-test-subj="streamsAppSearchBar" data-show-date-picker={String(!!showDatePicker)} />
+    ));
   });
 
   it('renders heading, search bar, and chart with initial props', () => {
@@ -48,25 +60,19 @@ describe('FailureStoreIngestionRate', () => {
       <FailureStoreIngestionRate definition={definition} stats={statsA} isLoadingStats={false} />
     );
 
-    // Heading text
     expect(
       screen.getByRole('heading', { name: /Failure ingestion rate over time/i })
     ).toBeInTheDocument();
 
-    // Search bar should indicate date picker enabled
     expect(screen.getByTestId('streamsAppSearchBar')).toHaveAttribute(
       'data-show-date-picker',
       'true'
     );
 
-    // Chart placeholder present
     expect(screen.getByTestId('failureStoreChart')).toBeInTheDocument();
-
-    // Props passed to chart component
-    expect(lastChartProps.definition).toBe(definition);
-    expect(lastChartProps.stats).toBe(statsA);
-    expect(lastChartProps.isLoadingStats).toBe(false);
-    expect(lastChartProps.timeState).toEqual({ from: 111, to: 222 });
+    expect(screen.getByText('Definition: stream-1')).toBeInTheDocument();
+    expect(screen.getByText('Loading: false')).toBeInTheDocument();
+    expect(screen.getByText('Stats: 3 points')).toBeInTheDocument();
   });
 
   it('updates chart props on rerender when stats or loading state change', () => {
@@ -74,9 +80,8 @@ describe('FailureStoreIngestionRate', () => {
       <FailureStoreIngestionRate definition={definition} stats={statsA} isLoadingStats={false} />
     );
 
-    // Initial assert
-    expect(lastChartProps.stats).toBe(statsA);
-    expect(lastChartProps.isLoadingStats).toBe(false);
+    expect(screen.getByText('Stats: 3 points')).toBeInTheDocument();
+    expect(screen.getByText('Loading: false')).toBeInTheDocument();
 
     rerender(
       <I18nProvider>
@@ -84,7 +89,7 @@ describe('FailureStoreIngestionRate', () => {
       </I18nProvider>
     );
 
-    expect(lastChartProps.stats).toBe(statsB);
-    expect(lastChartProps.isLoadingStats).toBe(true);
+    expect(screen.getByText('Stats: 2 points')).toBeInTheDocument();
+    expect(screen.getByText('Loading: true')).toBeInTheDocument();
   });
 });

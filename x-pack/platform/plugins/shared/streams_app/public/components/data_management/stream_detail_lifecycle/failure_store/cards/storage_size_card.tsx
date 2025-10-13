@@ -54,5 +54,5 @@ export const StorageSizeCard = ({
     },
   ];
 
-  return <BaseMetricCard title={title} metrics={metric} />;
+  return <BaseMetricCard title={title} metrics={metric} data-test-subj="failureStoreStorageSize" />;
 };

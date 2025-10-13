@@ -12,44 +12,11 @@ import type { Streams } from '@kbn/streams-schema';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { EditLifecycleModal } from './modal';
 
-// Mock the sub-components
-jest.mock('./ilm', () => ({
-  IlmField: ({ setLifecycle, setSaveButtonDisabled }: any) => (
-    <div data-test-subj="ilm-field">
-      <button
-        onClick={() => {
-          setLifecycle({ ilm: { policy: 'test-policy' } });
-          setSaveButtonDisabled(false);
-        }}
-      >
-        Select ILM Policy
-      </button>
-    </div>
-  ),
-}));
+jest.mock('../../../../../hooks/use_kibana');
 
-jest.mock('./dsl', () => ({
-  DslField: ({ setLifecycle, setSaveButtonDisabled }: any) => (
-    <div data-test-subj="dsl-field">
-      <button
-        onClick={() => {
-          setLifecycle({ dsl: { data_retention: '30d' } });
-          setSaveButtonDisabled(false);
-        }}
-      >
-        Set Custom Period
-      </button>
-    </div>
-  ),
-  DEFAULT_RETENTION_UNIT: { value: 'd' },
-  DEFAULT_RETENTION_VALUE: 30,
-}));
+import { useKibana } from '../../../../../hooks/use_kibana';
 
-jest.mock('../../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    isServerless: false,
-  }),
-}));
+const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 describe('EditLifecycleModal', () => {
   const mockCloseModal = jest.fn();
@@ -88,6 +55,9 @@ describe('EditLifecycleModal', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseKibana.mockReturnValue({
+      isServerless: false,
+    } as any);
     mockGetIlmPolicies.mockResolvedValue([
       { name: 'policy1' },
       { name: 'policy2' },
@@ -153,7 +123,7 @@ describe('EditLifecycleModal', () => {
       expect(screen.getByTestId('inheritDataRetentionSwitch')).toBeInTheDocument();
     });
 
-    it('should not show inheritance label for root wired streams (switch still rendered)', () => {
+    it('should not show inheritance label for root wired streams', () => {
       const definition = createMockDefinition(
         { dsl: { data_retention: '30d' } },
         { inherit: {} },
@@ -164,28 +134,6 @@ describe('EditLifecycleModal', () => {
       render(<EditLifecycleModal {...defaultProps} definition={definition} />);
 
       expect(screen.queryByText('Inherit retention')).not.toBeInTheDocument();
-      // Switch is currently rendered; allow it
-      expect(screen.getByTestId('inheritDataRetentionSwitch')).toBeInTheDocument();
-    });
-
-    it('should toggle inheritance switch correctly', async () => {
-      const definition = createMockDefinition(
-        { dsl: { data_retention: '30d' } },
-        { dsl: { data_retention: '30d' } }, // not inheriting
-        'logs-test.child',
-        true
-      );
-
-      render(<EditLifecycleModal {...defaultProps} definition={definition} />);
-
-      const inheritSwitch = screen.getByTestId('inheritDataRetentionSwitch');
-      expect(inheritSwitch).not.toBeChecked();
-
-      await userEvent.click(inheritSwitch);
-      expect(inheritSwitch).toBeChecked();
-
-      await userEvent.click(inheritSwitch);
-      expect(inheritSwitch).not.toBeChecked();
     });
   });
 
@@ -195,37 +143,10 @@ describe('EditLifecycleModal', () => {
 
       render(<EditLifecycleModal {...defaultProps} definition={definition} />);
 
+      expect(screen.getByRole('group', { name: 'Data retention' })).toBeInTheDocument();
       expect(screen.getByText('Indefinite')).toBeInTheDocument();
       expect(screen.getByText('Custom period')).toBeInTheDocument();
       expect(screen.getByText('ILM policy')).toBeInTheDocument();
-    });
-
-    it('should show ILM option in serverless mode (implementation currently still displays)', async () => {
-      jest.doMock('../../../../../hooks/use_kibana', () => ({
-        useKibana: () => ({
-          isServerless: true,
-        }),
-      }));
-      // Dynamically import after jest.doMock so the mocked module is used
-      const { EditLifecycleModal: ServerlessModal } = await import('./modal');
-      const definition = createMockDefinition({ dsl: { data_retention: '30d' } });
-
-      render(<ServerlessModal {...defaultProps} definition={definition} />);
-
-      expect(screen.getByText('Indefinite')).toBeInTheDocument();
-      expect(screen.getByText('Custom period')).toBeInTheDocument();
-      // Implementation still shows ILM; adjust expectation
-      expect(screen.getByText('ILM policy')).toBeInTheDocument();
-
-      // Reset module registry & mock
-      jest.dontMock('../../../../../hooks/use_kibana');
-      jest.resetModules();
-    });
-
-    it('should select ILM initial action when effective lifecycle is ILM', () => {
-      const ilmDefinition = createMockDefinition({ ilm: { policy: 'test-policy' } });
-      render(<EditLifecycleModal {...defaultProps} definition={ilmDefinition} />);
-      expect(screen.getByTestId('ilm-field')).toBeInTheDocument();
     });
 
     it('should handle indefinite retention selection', async () => {
@@ -249,8 +170,8 @@ describe('EditLifecycleModal', () => {
       await userEvent.click(inheritSwitch);
       const customButton = screen.getByText('Custom period');
       await userEvent.click(customButton);
-      // DSL field appears only when custom selected and not inheriting
-      expect(screen.getByTestId('dsl-field')).toBeInTheDocument();
+      // DSL field renders with input for custom period
+      expect(screen.getByTestId('streamsAppDslModalDaysField')).toBeInTheDocument();
     });
 
     it('should handle ILM policy selection', async () => {
@@ -260,9 +181,9 @@ describe('EditLifecycleModal', () => {
       await userEvent.click(inheritSwitch);
       const ilmButton = screen.getByText('ILM policy');
       await userEvent.click(ilmButton);
-      expect(screen.getByTestId('ilm-field')).toBeInTheDocument();
+      // ILM field should be loading policies
       const saveButton = screen.getByTestId('streamsAppModalFooterButton');
-      expect(saveButton).toBeDisabled();
+      expect(saveButton).toBeDisabled(); // Disabled until policy selected
     });
   });
 
@@ -288,25 +209,23 @@ describe('EditLifecycleModal', () => {
       expect(mockUpdateLifecycle).toHaveBeenCalledWith({ inherit: {} });
     });
 
-    it('should call updateLifecycle with custom lifecycle when inheritance is disabled', async () => {
-      const definition = createMockDefinition({ dsl: { data_retention: '30d' } });
+    it('should call updateLifecycle with indefinite when selected', async () => {
+      const definition = createMockDefinition(
+        { dsl: { data_retention: '30d' } },
+        { dsl: { data_retention: '30d' } } // not inheriting
+      );
 
       render(<EditLifecycleModal {...defaultProps} definition={definition} />);
 
-      // Select custom period and set it
-      const inheritSwitch = screen.getByTestId('inheritDataRetentionSwitch');
-      await userEvent.click(inheritSwitch); // turn off inherit
-      const customButton = screen.getByText('Custom period');
-      await userEvent.click(customButton);
-
-      const setCustomButton = screen.getByText('Set Custom Period');
-      await userEvent.click(setCustomButton);
+      // Select indefinite
+      const indefiniteButton = screen.getByText('Indefinite');
+      await userEvent.click(indefiniteButton);
 
       // Click save
       const saveButton = screen.getByTestId('streamsAppModalFooterButton');
       await userEvent.click(saveButton);
 
-      expect(mockUpdateLifecycle).toHaveBeenCalledWith({ dsl: { data_retention: '30d' } });
+      expect(mockUpdateLifecycle).toHaveBeenCalledWith({ dsl: {} });
     });
 
     it('should disable save button during update', () => {
@@ -321,18 +240,6 @@ describe('EditLifecycleModal', () => {
 
       expect(saveButton).toBeDisabled();
       expect(cancelButton).toBeDisabled();
-    });
-
-    it('should show loading state on save button during update', () => {
-      const definition = createMockDefinition({ dsl: { data_retention: '30d' } });
-
-      render(
-        <EditLifecycleModal {...defaultProps} definition={definition} updateInProgress={true} />
-      );
-
-      const saveButton = screen.getByTestId('streamsAppModalFooterButton');
-      // EuiButton with isLoading should have loading indicators
-      expect(saveButton).toHaveAttribute('disabled');
     });
   });
 

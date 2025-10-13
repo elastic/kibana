@@ -10,12 +10,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DslField } from './dsl';
 
-// Mock streams schema helpers used for type refinement
-jest.mock('@kbn/streams-schema', () => ({
-  // isDslLifecycle just checks presence of dsl key
-  isDslLifecycle: (v: any) => !!v?.dsl,
-}));
-
 // Helper render with i18n provider
 const renderI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 

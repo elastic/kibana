@@ -26,7 +26,11 @@ export const RetentionCard = ({
   const {
     privileges: { manage_failure_store: manageFailureStorePrivilege },
   } = definition;
-  if (!failureStore || !failureStore.retentionPeriod) {
+  if (
+    !failureStore ||
+    !failureStore.enabled ||
+    (!failureStore.retentionPeriod.custom && !failureStore.retentionPeriod.default)
+  ) {
     return null;
   }
   const { retentionPeriod } = failureStore;

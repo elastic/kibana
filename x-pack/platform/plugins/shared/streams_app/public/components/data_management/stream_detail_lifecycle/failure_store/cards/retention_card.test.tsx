@@ -8,79 +8,49 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { RetentionCard } from './retention_card';
 
-// Mock discover link hook
+// Mock discover link hook with a simpler implementation
 jest.mock('../../hooks/use_failure_store_redirect_link', () => ({
   useFailureStoreRedirectLink: () => ({ href: '/app/discover#/?_a=test' }),
 }));
 
-// Mock formatter for deterministic output
-jest.mock('../../helpers/format_size_units', () => ({
-  getTimeSizeAndUnitLabel: (p: any) => (p ? `${p.size}${p.unit}` : 'N/A'),
-}));
-
-// Mock Streams schema (only pieces used). We define the jest.fn inside the factory to
-// avoid referencing a TDZ variable (Jest hoists jest.mock calls). We'll grab the fn
-// after import via Streams.WiredStream.GetResponse.is.
+// Mock Streams schema to control wired stream detection
+const mockWiredIs = jest.fn(() => false);
 jest.mock('@kbn/streams-schema', () => {
-  const wiredIs = jest.fn(() => false);
+  const actual = jest.requireActual('@kbn/streams-schema');
   return {
+    ...actual,
     Streams: {
-      WiredStream: { GetResponse: { is: wiredIs } },
-      ingest: { all: { GetResponse: { is: () => true } } },
+      ...actual.Streams,
+      WiredStream: {
+        ...actual.Streams.WiredStream,
+        GetResponse: {
+          is: () => mockWiredIs(),
+        },
+      },
     },
   };
 });
-
-// Import after mock so we can access and control the mock function
-import { Streams } from '@kbn/streams-schema';
-const mockWiredIs = Streams.WiredStream.GetResponse.is as unknown as jest.Mock;
-
-// Mock BaseMetricCard to expose props
-jest.mock('../../common/base_metric_card', () => ({
-  BaseMetricCard: (p: any) => {
-    return (
-      <div data-test-subj="baseMetricCard">
-        <h3>{p.title}</h3>
-        <div data-test-subj="actions">
-          {p.actions?.map((a: any) => (
-            <button
-              key={a['data-test-subj']}
-              data-test-subj={a['data-test-subj']}
-              onClick={a.onClick}
-              aria-label={a.ariaLabel}
-            >
-              {a['data-test-subj']}
-            </button>
-          ))}
-        </div>
-        {p.metrics?.map((m: any) => (
-          <div key={m['data-test-subj']} data-test-subj={m['data-test-subj']}>
-            <span data-test-subj="metricData">{m.data}</span>
-            <span data-test-subj="metricSubtitle">{m.subtitle}</span>
-          </div>
-        ))}
-      </div>
-    );
-  },
-}));
 
 const makeDefinition = (canManage = true) =>
   ({
     privileges: { manage_failure_store: canManage },
   } as any);
 
-const customFailureStore = {
+const customFailureStore: FailureStore = {
   retentionPeriod: {
-    custom: { size: 7, unit: 'd' },
+    custom: '7d',
   },
+  enabled: true,
 };
 
-const defaultFailureStore = {
+const defaultFailureStore: FailureStore = {
   retentionPeriod: {
-    default: { size: 30, unit: 'd' },
+    default: '30d',
   },
+  enabled: true,
 };
 
 const renderI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
@@ -100,7 +70,11 @@ describe('RetentionCard', () => {
 
   it('returns null when retentionPeriod missing', () => {
     const { container } = renderI18n(
-      <RetentionCard openModal={jest.fn()} definition={makeDefinition()} failureStore={{} as any} />
+      <RetentionCard
+        openModal={jest.fn()}
+        definition={makeDefinition()}
+        failureStore={{ enabled: true, retentionPeriod: {} }}
+      />
     );
     expect(container.firstChild).toBeNull();
   });
@@ -110,12 +84,12 @@ describe('RetentionCard', () => {
       <RetentionCard
         openModal={jest.fn()}
         definition={makeDefinition(true)}
-        failureStore={customFailureStore as any}
+        failureStore={customFailureStore}
       />
     );
-    const metric = screen.getByTestId('failureStoreRetention');
-    expect(metric.querySelector('[data-test-subj="metricData"]')!.textContent).toBe('7d');
-    expect(metric.querySelector('[data-test-subj="metricSubtitle"]')!.textContent).toMatch(
+
+    expect(screen.getByTestId('failureStoreRetention-metric')).toHaveTextContent('7 days');
+    expect(screen.getByTestId('failureStoreRetention-metric-subtitle')).toHaveTextContent(
       /Custom retention period/i
     );
   });
@@ -125,12 +99,12 @@ describe('RetentionCard', () => {
       <RetentionCard
         openModal={jest.fn()}
         definition={makeDefinition(true)}
-        failureStore={defaultFailureStore as any}
+        failureStore={defaultFailureStore}
       />
     );
-    const metric = screen.getByTestId('failureStoreRetention');
-    expect(metric.querySelector('[data-test-subj="metricData"]')!.textContent).toBe('30d');
-    expect(metric.querySelector('[data-test-subj="metricSubtitle"]')!.textContent).toMatch(
+
+    expect(screen.getByTestId('failureStoreRetention-metric')).toHaveTextContent('30 days');
+    expect(screen.getByTestId('failureStoreRetention-metric-subtitle')).toHaveTextContent(
       /Default retention period/i
     );
   });
@@ -141,7 +115,7 @@ describe('RetentionCard', () => {
       <RetentionCard
         openModal={openModal}
         definition={makeDefinition(true)}
-        failureStore={defaultFailureStore as any}
+        failureStore={defaultFailureStore}
       />
     );
     fireEvent.click(screen.getByTestId('streamFailureStoreEditRetention'));
@@ -154,7 +128,7 @@ describe('RetentionCard', () => {
       <RetentionCard
         openModal={jest.fn()}
         definition={makeDefinition(false)}
-        failureStore={defaultFailureStore as any}
+        failureStore={defaultFailureStore}
       />
     );
     expect(screen.queryByTestId('streamFailureStoreEditRetention')).toBeNull();
@@ -167,7 +141,7 @@ describe('RetentionCard', () => {
       <RetentionCard
         openModal={jest.fn()}
         definition={makeDefinition(true)}
-        failureStore={defaultFailureStore as any}
+        failureStore={defaultFailureStore}
       />
     );
     expect(screen.queryByTestId('streamFailureStoreEditRetention')).toBeNull();

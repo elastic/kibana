@@ -11,11 +11,22 @@ import userEvent from '@testing-library/user-event';
 import type { Streams } from '@kbn/streams-schema';
 import { RetentionCard } from './retention_card';
 
-// Mock the IlmLink component
-jest.mock('../ilm_link', () => ({
-  IlmLink: ({ lifecycle }: { lifecycle: any }) => (
-    <span data-test-subj="ilm-link">{lifecycle.ilm.policy}</span>
-  ),
+jest.mock('../../../../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    dependencies: {
+      start: {
+        share: {
+          url: {
+            locators: {
+              get: () => ({
+                getRedirectUrl: () => 'http://localhost/ilm',
+              }),
+            },
+          },
+        },
+      },
+    },
+  }),
 }));
 
 describe('RetentionCard', () => {
@@ -53,7 +64,7 @@ describe('RetentionCard', () => {
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
       expect(screen.getByText('Retention')).toBeInTheDocument();
-      expect(screen.getByTestId('ilm-link')).toHaveTextContent('my-ilm-policy');
+      expect(screen.getByText('my-ilm-policy')).toBeInTheDocument();
       expect(screen.getByText(/ILM policy/)).toBeInTheDocument();
     });
 

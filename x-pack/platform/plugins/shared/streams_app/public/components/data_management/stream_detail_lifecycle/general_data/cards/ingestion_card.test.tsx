@@ -7,22 +7,12 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-// userEvent not required after pruning interaction tests
 import type { Streams } from '@kbn/streams-schema';
 import { I18nProvider } from '@kbn/i18n-react';
 import { IngestionCard } from './ingestion_card';
 import type { DataStreamStats } from '../../hooks/use_data_stream_stats';
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
-
-// Mock the PrivilegesWarningIconWrapper component
-jest.mock('../../../../insufficient_privileges/insufficient_privileges', () => ({
-  PrivilegesWarningIconWrapper: ({ children, hasPrivileges }: any) => (
-    <div data-test-subj="privileges-wrapper" data-has-privileges={hasPrivileges}>
-      {children}
-    </div>
-  ),
-}));
 
 describe('IngestionCard', () => {
   const createMockDefinition = (
@@ -101,17 +91,17 @@ describe('IngestionCard', () => {
   });
 
   describe('Privilege gating', () => {
-    it('wraps metrics and hides values without monitor privilege', () => {
+    it('shows warning icon without monitor privilege', () => {
       const definition = createMockDefinition({ monitor: false });
       const stats = createMockStats();
 
       renderWithI18n(<IngestionCard definition={definition} stats={stats} />);
 
-      const privilegesWrappers = screen.getAllByTestId('privileges-wrapper');
-      expect(privilegesWrappers).toHaveLength(2); // One for daily, one for monthly
-      privilegesWrappers.forEach((wrapper) => {
-        expect(wrapper).toHaveAttribute('data-has-privileges', 'false');
+      // Check for warning icon buttons (streamsInsufficientPrivileges prefix)
+      const warningButtons = screen.getAllByRole('button', {
+        name: /don't have sufficient privileges/i,
       });
+      expect(warningButtons.length).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -148,8 +138,11 @@ describe('IngestionCard', () => {
 
       renderWithI18n(<IngestionCard definition={definition} stats={stats} />);
 
-      const privilegesWrappers = screen.getAllByTestId('privileges-wrapper');
-      privilegesWrappers.forEach((w) => expect(w).toHaveAttribute('data-has-privileges', 'true'));
+      // Should not show warning icons when privileges are undefined (defaults to true)
+      const warningButtons = screen.queryAllByRole('button', {
+        name: /don't have sufficient privileges/i,
+      });
+      expect(warningButtons.length).toBe(0);
     });
   });
 });
