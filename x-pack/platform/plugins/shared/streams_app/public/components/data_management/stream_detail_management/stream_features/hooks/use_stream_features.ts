@@ -29,7 +29,7 @@ export const useStreamFeatures = (definition: Streams.all.Definition) => {
 
   const features = useMemo(() => value?.features ?? [], [value?.features]);
 
-  const systemsByName = useMemo(
+  const featuresByName = useMemo(
     () => Object.fromEntries(features.map((f) => [f.name, f])),
     [features]
   );
