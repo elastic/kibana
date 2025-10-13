@@ -22,7 +22,6 @@ import {
 } from './charts';
 import { fromAPItoLensState, fromLensStateToAPI } from './transforms/charts/metric';
 import type { LensApiState } from './schema';
-import { isLensLegacyFormat } from './utils';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 
 export class LensConfigBuilder {
@@ -56,15 +55,14 @@ export class LensConfigBuilder {
    * @returns Lens internal configuration
    */
   async build(
-    config: LensConfig | LensApiState,
+    config: LensConfig,
     options: LensConfigOptions = {}
   ): Promise<LensAttributes | LensEmbeddableInput> {
     if (!this.dataViewsAPI) {
       throw new Error('DataViews API is required to build Lens configurations');
     }
 
-    const chartType = isLensLegacyFormat(config) ? config.chartType : config.type;
-    const chartBuilderFn = this.charts[chartType];
+    const chartBuilderFn = this.charts[config.chartType];
     const chartConfig = await chartBuilderFn(config as any, {
       dataViewsAPI: this.dataViewsAPI,
     });
@@ -91,7 +89,6 @@ export class LensConfigBuilder {
   }
 
   fromAPIFormat(config: LensApiState): LensAttributes {
-    // Currently we only support metric conversion from API to attributes
     const chartType = config.type;
     if (chartType === 'metric') {
       const converter = this.apiConvertersByChart[chartType];
