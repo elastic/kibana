@@ -49,7 +49,7 @@ import type { LensAppLocator, MainHistoryLocationState } from '../../common/loca
 import { LENS_SHARE_STATE_ACTION } from '../../common/locator/locator';
 import { LensDocumentService } from '../persistence';
 import type { LensSerializedState } from '../react_embeddable/types';
-import { LensMapsProvider } from '../lens_maps_context';
+import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
 
 function getInitialContext(history: AppMountParameters['history']) {
   const historyLocationState = history.location.state as
@@ -357,7 +357,10 @@ export async function mountApp(
 
       return (
         <Provider store={lensStore}>
-          <LensMapsProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
+          <EditorFrameServiceProvider
+            visualizationMap={visualizationMap}
+            datasourceMap={datasourceMap}
+          >
             <App
               incomingState={embeddableEditorIncomingState}
               editorFrame={instance}
@@ -375,7 +378,7 @@ export async function mountApp(
               theme$={core.theme.theme$}
               coreStart={coreStart}
             />
-          </LensMapsProvider>
+          </EditorFrameServiceProvider>
         </Provider>
       );
     }

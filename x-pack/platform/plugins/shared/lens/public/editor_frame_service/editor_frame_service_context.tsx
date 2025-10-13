@@ -6,16 +6,16 @@
  */
 
 import React, { createContext, useContext, type ReactNode } from 'react';
-import type { DatasourceMap, VisualizationMap } from './types';
+import type { DatasourceMap, VisualizationMap } from '../types';
 
-interface LensMapsContextValue {
+interface EditorFrameServiceValue {
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
 }
 
-const LensMapsContext = createContext<LensMapsContextValue | undefined>(undefined);
+const EditorFrameServiceContext = createContext<EditorFrameServiceValue | undefined>(undefined);
 
-export interface LensMapsProviderProps {
+export interface EditorFrameServiceProviderProps {
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
   children: ReactNode;
@@ -25,41 +25,45 @@ export interface LensMapsProviderProps {
  * Provider component that makes visualizationMap and datasourceMap available
  * throughout the component tree via React context.
  *
+ * This provides the same values returned by plugin.initEditorFrameService().
+ *
  * This should be added at the root of:
  * - Full-page Lens editor
  * - Inline edit configuration flyout
  * - Embeddable component
  */
-export function LensMapsProvider({
+export function EditorFrameServiceProvider({
   visualizationMap,
   datasourceMap,
   children,
-}: LensMapsProviderProps) {
+}: EditorFrameServiceProviderProps) {
   return (
-    <LensMapsContext.Provider value={{ visualizationMap, datasourceMap }}>
+    <EditorFrameServiceContext.Provider value={{ visualizationMap, datasourceMap }}>
       {children}
-    </LensMapsContext.Provider>
+    </EditorFrameServiceContext.Provider>
   );
 }
 
 /**
  * Hook to access visualizationMap and datasourceMap from context.
  *
- * @throws Error if used outside of LensMapsProvider
+ * Returns the same values as plugin.initEditorFrameService().
+ *
+ * @throws Error if used outside of EditorFrameServiceProvider
  *
  * @example
  * ```tsx
  * function MyComponent() {
- *   const { visualizationMap, datasourceMap } = useLensMaps();
+ *   const { visualizationMap, datasourceMap } = useEditorFrameService();
  *   const activeViz = visualizationMap[activeId];
  *   // ...
  * }
  * ```
  */
-export function useLensMaps(): LensMapsContextValue {
-  const context = useContext(LensMapsContext);
+export function useEditorFrameService(): EditorFrameServiceValue {
+  const context = useContext(EditorFrameServiceContext);
   if (!context) {
-    throw new Error('useLensMaps must be used within a LensMapsProvider');
+    throw new Error('useEditorFrameService must be used within an EditorFrameServiceProvider');
   }
   return context;
 }

@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { LensMapsProvider, useLensMaps } from './lens_maps_context';
-import type { DatasourceMap, VisualizationMap, Visualization, Datasource } from './types';
+import { EditorFrameServiceProvider, useEditorFrameService } from './editor_frame_service_context';
+import type { DatasourceMap, VisualizationMap, Visualization, Datasource } from '../types';
 
-describe('LensMapsContext', () => {
+describe('EditorFrameServiceContext', () => {
   const mockVisualizationMap: VisualizationMap = {
     testViz: {} as Visualization,
   };
@@ -20,7 +20,7 @@ describe('LensMapsContext', () => {
   };
 
   function TestComponent() {
-    const { visualizationMap, datasourceMap } = useLensMaps();
+    const { visualizationMap, datasourceMap } = useEditorFrameService();
     return (
       <div>
         <span data-test-subj="viz-count">{Object.keys(visualizationMap).length}</span>
@@ -31,22 +31,25 @@ describe('LensMapsContext', () => {
 
   it('provides visualizationMap and datasourceMap to children', () => {
     render(
-      <LensMapsProvider visualizationMap={mockVisualizationMap} datasourceMap={mockDatasourceMap}>
+      <EditorFrameServiceProvider
+        visualizationMap={mockVisualizationMap}
+        datasourceMap={mockDatasourceMap}
+      >
         <TestComponent />
-      </LensMapsProvider>
+      </EditorFrameServiceProvider>
     );
 
     expect(screen.getByTestId('viz-count')).toHaveTextContent('1');
     expect(screen.getByTestId('ds-count')).toHaveTextContent('1');
   });
 
-  it('throws error when useLensMaps is used outside provider', () => {
+  it('throws error when useEditorFrameService is used outside provider', () => {
     // Suppress console.error for this test
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     expect(() => {
       render(<TestComponent />);
-    }).toThrow('useLensMaps must be used within a LensMapsProvider');
+    }).toThrow('useEditorFrameService must be used within an EditorFrameServiceProvider');
 
     consoleError.mockRestore();
   });
