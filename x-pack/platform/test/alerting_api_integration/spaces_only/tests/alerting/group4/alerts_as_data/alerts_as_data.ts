@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { expect as expectExpect } from 'expect';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
