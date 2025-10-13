@@ -23,6 +23,11 @@ import { getEndpointConsoleCommands } from '../..';
 import React from 'react';
 import type { EndpointPrivileges } from '../../../../../../common/endpoint/types';
 import { enterConsoleCommand, getConsoleSelectorsAndActionMock } from '../../../console/mocks';
+import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../../../../common';
+
+jest.mock('../../../../../common/experimental_features_service');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe('When using runscript action from response console', () => {
   let mockedContext: AppContextTestRender;
@@ -47,6 +52,8 @@ describe('When using runscript action from response console', () => {
   });
 
   beforeEach(() => {
+    mockedExperimentalFeaturesService.get.mockReturnValue(allowedExperimentalValues);
+
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     mockedContext = createAppRootMockRenderer();
@@ -91,8 +98,6 @@ describe('When using runscript action from response console', () => {
 
       render = () => _render('sentinel_one');
 
-      mockedContext.setExperimentalFlag({ responseActionsSentinelOneRunScriptEnabled: true });
-
       apiMocks.responseProvider.fetchScriptList.mockReturnValue({
         data: [
           {
@@ -128,7 +133,10 @@ describe('When using runscript action from response console', () => {
     });
 
     it('should error when the feature flag is disabled', async () => {
-      mockedContext.setExperimentalFlag({ responseActionsSentinelOneRunScriptEnabled: false });
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        ...allowedExperimentalValues,
+        responseActionsSentinelOneRunScriptEnabled: false,
+      });
       await render();
       await enterConsoleCommand(renderResult, user, 'runscript');
 

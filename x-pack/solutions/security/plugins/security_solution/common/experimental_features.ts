@@ -213,4 +213,4 @@ export const parseExperimentalConfigValue = (
   };
 };
 
-export const getExperimentalAllowedValues = (): string[] => [...allowedKeys];
+export const getExperimentalAllowedValuesKeys = (): string[] => [...allowedKeys];
