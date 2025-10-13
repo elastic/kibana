@@ -175,7 +175,11 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
         hits: { hits: activeAlerts },
       } = await es.search({
         index: alertAsDataIndex,
-        query: { match_all: {} },
+        query: {
+          bool: {
+            filter: { term: { 'kibana.alert.rule.uuid': createdRule.id } },
+          },
+        },
       });
       log.info(`active alerts from first run: ${JSON.stringify(activeAlerts)}`);
 
@@ -210,7 +214,11 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
           hits: { hits: alerts },
         } = await es.search({
           index: alertAsDataIndex,
-          query: { match_all: {} },
+          query: {
+            bool: {
+              filter: { term: { 'kibana.alert.rule.uuid': createdRule.id } },
+            },
+          },
         });
         log.info(`alerts after first run: ${JSON.stringify(alerts)}`);
 
