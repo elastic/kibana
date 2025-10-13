@@ -20,6 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
+  useEuiFontSize,
   useEuiTheme,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
@@ -335,7 +336,9 @@ export function DataTableDocumentToolbarBtn({
           css={css`
             border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
             .euiButtonEmpty__content {
+              font-size: ${useEuiFontSize('xs').fontSize};
               flex-direction: row-reverse;
+              line-height: ${useEuiFontSize('xs').lineHeight};
             }
           `}
         >
