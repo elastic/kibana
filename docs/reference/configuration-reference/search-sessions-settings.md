@@ -47,7 +47,3 @@ If a setting is applicable to {{ech}} environments, its name is followed by this
 ::::
 
 :::::
-
-
-
-
