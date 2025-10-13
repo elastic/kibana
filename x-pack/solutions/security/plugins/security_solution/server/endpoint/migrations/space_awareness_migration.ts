@@ -136,8 +136,6 @@ const migrateArtifactsToSpaceAware = async (
   const updateProcessor = new QueueProcessor<UpdateExceptionListItemOptions & { listId: string }>({
     batchSize: 50,
     batchHandler: async ({ data: artifactUpdates }) => {
-      // TODO:PT add a `bulkUpdate()` to the exceptionsListClient
-
       migrationStats.itemsNeedingUpdates += artifactUpdates.length;
 
       await pMap(
@@ -171,9 +169,9 @@ const migrateArtifactsToSpaceAware = async (
       namespaceType: listIds.map(() => 'agnostic'),
       filter: listIds.map(
         // Find all artifacts that do NOT have a space owner id tag
-        () => `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`
+        () => `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`
       ),
-      perPage: undefined,
+      perPage: 1_000,
       sortField: undefined,
       sortOrder: undefined,
       maxSize: undefined,
