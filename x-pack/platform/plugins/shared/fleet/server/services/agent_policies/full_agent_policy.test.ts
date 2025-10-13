@@ -133,7 +133,7 @@ jest.mock('../download_source', () => {
   return {
     downloadSourceService: {
       getDefaultDownloadSourceId: async () => 'default-download-source-id',
-      get: async (soClient: any, id: string): Promise<DownloadSource> => {
+      get: async (id: string): Promise<DownloadSource> => {
         if (id === 'test-ds-1') {
           return {
             id: 'test-ds-1',
@@ -761,6 +761,7 @@ describe('getFullAgentPolicy', () => {
       },
     });
   });
+
   it('should return agent binary with secrets if there are any present', async () => {
     mockAgentPolicy({
       namespace: 'default',

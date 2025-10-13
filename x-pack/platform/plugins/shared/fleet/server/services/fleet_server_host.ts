@@ -150,7 +150,13 @@ class FleetServerHostService {
       { id: options?.id, overwrite: options?.overwrite }
     );
     logger.debug(`Created fleet server host ${options?.id}`);
-    return savedObjectToFleetServerHost(res);
+    // soClient.create doesn't return the decrypted attributes, so we need to fetch it again.
+    const retrievedSo =
+      await this.encryptedSoClient.getDecryptedAsInternalUser<FleetServerHostSOAttributes>(
+        FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+        res.id
+      );
+    return savedObjectToFleetServerHost(retrievedSo);
   }
 
   public async get(id: string): Promise<FleetServerHost> {

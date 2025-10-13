@@ -156,6 +156,13 @@ function getMockedEncryptedSoClient() {
           host: 'http://artifacts.co',
         });
       }
+      case 'generated-id': {
+        return mockDownloadSourceSO('generated-id', {
+          is_default: true,
+          name: 'New default host',
+          host: 'http://test.co',
+        });
+      }
       default:
         throw new Error('not found: ' + id);
     }
@@ -234,6 +241,7 @@ describe('Download Service', () => {
       const soClient = getMockedSoClient({
         defaultDownloadSourceId: 'existing-default-download-source',
       });
+      getMockedEncryptedSoClient();
 
       await downloadSourceService.create(soClient, esClient, {
         is_default: true,

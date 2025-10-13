@@ -165,6 +165,7 @@ describe('migrateSettingsToFleetServerHost', () => {
 
   it('should migrate settings to new saved object', async () => {
     const soClient = getMockedSoClient({ findSettings: true });
+    getMockedEncryptedSoClient();
 
     mockedGetAgentsByKuery.mockResolvedValueOnce({
       agents: [

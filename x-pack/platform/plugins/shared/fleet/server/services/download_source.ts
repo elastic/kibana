@@ -189,7 +189,13 @@ class DownloadSourceService {
       }
     );
     logger.debug(`Creating new download source ${options?.id}`);
-    return savedObjectToDownloadSource(newSo);
+    // soClient.create doesn't return the decrypted attributes, so we need to fetch it again.
+    const retrievedSo =
+      await this.encryptedSoClient.getDecryptedAsInternalUser<DownloadSourceSOAttributes>(
+        DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+        newSo.id
+      );
+    return savedObjectToDownloadSource(retrievedSo);
   }
 
   public async update(

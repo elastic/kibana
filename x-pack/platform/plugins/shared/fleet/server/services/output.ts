@@ -755,7 +755,12 @@ class OutputService {
       id,
     });
     logger.debug(`Created new output ${id}`);
-    return outputSavedObjectToOutput(newSo);
+    // soClient.create doesn't return the decrypted attributes, so we need to fetch it again.
+    const retrievedSo = await this.encryptedSoClient.getDecryptedAsInternalUser<OutputSOAttributes>(
+      SAVED_OBJECT_TYPE,
+      newSo.id
+    );
+    return outputSavedObjectToOutput(retrievedSo);
   }
 
   public async bulkGet(ids: string[], { ignoreNotFound = false } = { ignoreNotFound: true }) {
