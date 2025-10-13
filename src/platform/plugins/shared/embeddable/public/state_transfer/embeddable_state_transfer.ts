@@ -133,7 +133,7 @@ export class EmbeddableStateTransfer {
    * A wrapper around the {@link ApplicationStart.navigateToApp} method which navigates to the specified appId
    * with multiple {@link EmbeddablePackageState | embeddable package state}
    */
-  public async navigateToWithMultipleEmbeddablePackage<SerializedStateType extends object = object>(
+  public async navigateToWithEmbeddablePackages<SerializedStateType extends object = object>(
     appId: string,
     options?: { path?: string; state: Array<EmbeddablePackageState<SerializedStateType>> }
   ): Promise<void> {

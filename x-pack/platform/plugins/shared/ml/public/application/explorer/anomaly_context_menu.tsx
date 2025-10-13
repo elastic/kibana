@@ -202,7 +202,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithMultipleEmbeddablePackage('dashboards', {
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
         state,
         path,
       });

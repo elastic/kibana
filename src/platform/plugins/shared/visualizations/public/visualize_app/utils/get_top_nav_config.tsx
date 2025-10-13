@@ -189,7 +189,7 @@ export const getTopNavConfig = (
           }
 
           if (stateTransfer) {
-            stateTransfer.navigateToWithMultipleEmbeddablePackage(app, {
+            stateTransfer.navigateToWithEmbeddablePackages(app, {
               state: [
                 {
                   type: VISUALIZE_EMBEDDABLE_TYPE,
@@ -255,7 +255,7 @@ export const getTopNavConfig = (
       return;
     }
 
-    stateTransfer.navigateToWithMultipleEmbeddablePackage(originatingApp, {
+    stateTransfer.navigateToWithEmbeddablePackages(originatingApp, {
       state: [
         {
           serializedState: serializeState({
@@ -609,7 +609,7 @@ export const getTopNavConfig = (
                   history.replace(appPath);
                   setActiveUrl(appPath);
 
-                  stateTransfer.navigateToWithMultipleEmbeddablePackage('dashboards', {
+                  stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
                     state: [
                       {
                         serializedState: serializeState({

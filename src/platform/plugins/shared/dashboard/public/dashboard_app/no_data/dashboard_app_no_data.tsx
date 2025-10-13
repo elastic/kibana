@@ -96,7 +96,7 @@ export const DashboardAppNoDataPage = ({
 
           await embeddableService
             .getStateTransfer()
-            .navigateToWithMultipleEmbeddablePackage<LensSerializedState>('dashboards', {
+            .navigateToWithEmbeddablePackages<LensSerializedState>('dashboards', {
               state: [
                 {
                   type: 'lens',

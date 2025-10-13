@@ -129,7 +129,7 @@ describe('embeddable state transfer', () => {
   });
 
   it('can send an outgoing embeddable package state', async () => {
-    await stateTransfer.navigateToWithMultipleEmbeddablePackage(destinationApp, {
+    await stateTransfer.navigateToWithEmbeddablePackages(destinationApp, {
       state: [{ type: 'coolestType', serializedState: { rawState: { savedObjectId: '150' } } }],
     });
     expect(store.set).toHaveBeenCalledWith(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
@@ -151,7 +151,7 @@ describe('embeddable state transfer', () => {
     store.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
       kibanaIsNowForSports: 'extremeSportsKibana',
     });
-    await stateTransfer.navigateToWithMultipleEmbeddablePackage(destinationApp, {
+    await stateTransfer.navigateToWithEmbeddablePackages(destinationApp, {
       state: [{ type: 'coolestType', serializedState: { rawState: { savedObjectId: '150' } } }],
     });
     expect(store.set).toHaveBeenCalledWith(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
@@ -171,7 +171,7 @@ describe('embeddable state transfer', () => {
   });
 
   it('sets isTransferInProgress to true when sending an outgoing embeddable package state', async () => {
-    await stateTransfer.navigateToWithMultipleEmbeddablePackage(destinationApp, {
+    await stateTransfer.navigateToWithEmbeddablePackages(destinationApp, {
       state: [{ type: 'coolestType', serializedState: { rawState: { savedObjectId: '150' } } }],
     });
     expect(stateTransfer.isTransferInProgress).toEqual(true);
@@ -357,7 +357,7 @@ describe('embeddable state transfer', () => {
     });
   });
 
-  describe('navigateToWithMultipleEmbeddablePackage', () => {
+  describe('navigateToWithEmbeddablePackages', () => {
     it('stores multiple embeddable packages and navigates', async () => {
       const multiplePackages: EmbeddablePackageState[] = [
         {
@@ -372,7 +372,7 @@ describe('embeddable state transfer', () => {
         },
       ];
 
-      await stateTransfer.navigateToWithMultipleEmbeddablePackage(destinationApp, {
+      await stateTransfer.navigateToWithEmbeddablePackages(destinationApp, {
         state: multiplePackages,
       });
 
@@ -406,7 +406,7 @@ describe('embeddable state transfer', () => {
         },
       ];
 
-      await stateTransfer.navigateToWithMultipleEmbeddablePackage(destinationApp, {
+      await stateTransfer.navigateToWithEmbeddablePackages(destinationApp, {
         state: multiplePackages,
       });
 

@@ -465,7 +465,7 @@ export class SavedMap {
         });
         return;
       }
-      await this._getStateTransfer().navigateToWithMultipleEmbeddablePackage(this._originatingApp, {
+      await this._getStateTransfer().navigateToWithEmbeddablePackages(this._originatingApp, {
         state: [
           {
             embeddableId: newCopyOnSave ? undefined : this._embeddableId,
@@ -477,7 +477,7 @@ export class SavedMap {
       });
       return;
     } else if (dashboardId) {
-      await this._getStateTransfer().navigateToWithMultipleEmbeddablePackage('dashboards', {
+      await this._getStateTransfer().navigateToWithEmbeddablePackages('dashboards', {
         state: [
           {
             type: MAP_SAVED_OBJECT_TYPE,

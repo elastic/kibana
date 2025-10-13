@@ -201,7 +201,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithMultipleEmbeddablePackage('dashboards', {
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
         state,
         path,
       });

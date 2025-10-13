@@ -40,7 +40,7 @@ export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTran
     getIncomingEditorState: jest.fn(),
     getIncomingEmbeddablePackage: jest.fn(),
     navigateToEditor: jest.fn(),
-    navigateToWithMultipleEmbeddablePackage: jest.fn(),
+    navigateToWithEmbeddablePackages: jest.fn(),
   };
 };
 

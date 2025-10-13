@@ -217,7 +217,7 @@ export async function mountApp(
     if (stateTransfer && props?.state) {
       const { state: rawState, isCopied } = props;
       const { references } = extract(rawState as unknown as EmbeddableStateWithType);
-      stateTransfer.navigateToWithMultipleEmbeddablePackage<LensSerializedState>(
+      stateTransfer.navigateToWithEmbeddablePackages<LensSerializedState>(
         mergedOriginatingApp,
         {
           path: embeddableEditorIncomingState?.originatingPath,

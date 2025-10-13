@@ -59,7 +59,7 @@ describe('CopyToDashboardModal', () => {
     },
   };
   const closeModalMock = jest.fn();
-  const navigateToWithMultipleEmbeddablePackageMock = jest.fn();
+  const navigateToWithEmbeddablePackagesMock = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -67,7 +67,7 @@ describe('CopyToDashboardModal', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../services/kibana_services').embeddableService = {
       getStateTransfer: () => ({
-        navigateToWithMultipleEmbeddablePackage: navigateToWithMultipleEmbeddablePackageMock,
+        navigateToWithEmbeddablePackages: navigateToWithEmbeddablePackagesMock,
       }),
     };
   });
@@ -115,7 +115,7 @@ describe('CopyToDashboardModal', () => {
       });
 
       await waitFor(() =>
-        expect(navigateToWithMultipleEmbeddablePackageMock).toHaveBeenCalledWith('dashboards', {
+        expect(navigateToWithEmbeddablePackagesMock).toHaveBeenCalledWith('dashboards', {
           path: '#/create',
           state: [
             {
@@ -162,7 +162,7 @@ describe('CopyToDashboardModal', () => {
       });
 
       await waitFor(() =>
-        expect(navigateToWithMultipleEmbeddablePackageMock).toHaveBeenCalledWith('dashboards', {
+        expect(navigateToWithEmbeddablePackagesMock).toHaveBeenCalledWith('dashboards', {
           path: '#/view/dashboardTwo?_a=(viewMode:edit)',
           state: [
             {
