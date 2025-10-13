@@ -61,6 +61,7 @@ function createTestRules(): void {
 
 function visitRulesTableWithState(urlTableState: Record<string, unknown>): void {
   visit(RULES_MANAGEMENT_URL, { visitOptions: { qs: { rulesTable: encode(urlTableState) } } });
+  cy.get('[data-test-subj="timeline-bottom-bar-container"]', { timeout: 60000 }).should('exist');
 }
 
 function setStorageState(storageTableState: Record<string, unknown>): void {
@@ -97,13 +98,6 @@ function expectDefaultRulesTableState(): void {
   expectTablePage(1);
 }
 
-// Failing: See https://github.com/elastic/kibana/issues/237238
-// Failing: See https://github.com/elastic/kibana/issues/237237
-// Failing: See https://github.com/elastic/kibana/issues/237236
-// Failing: See https://github.com/elastic/kibana/issues/237217
-// Failing: See https://github.com/elastic/kibana/issues/237214
-// Failing: See https://github.com/elastic/kibana/issues/237258
-// Failing: See https://github.com/elastic/kibana/issues/237215
 describe(
   'Rules table: persistent state',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
@@ -122,6 +116,9 @@ describe(
     describe('while on a happy path', { tags: ['@ess', '@serverless'] }, () => {
       it('activates management tab by default', () => {
         visit(RULES_MANAGEMENT_URL);
+        cy.get('[data-test-subj="timeline-bottom-bar-container"]', { timeout: 60000 }).should(
+          'exist'
+        );
 
         expectRulesManagementTab();
       });
@@ -215,6 +212,9 @@ describe(
         beforeEach(() => {
           login();
           visit(RULES_MANAGEMENT_URL);
+          cy.get('[data-test-subj="timeline-bottom-bar-container"]', { timeout: 60000 }).should(
+            'exist'
+          );
         });
 
         it('persists after reloading the page', () => {
@@ -246,6 +246,9 @@ describe(
 
           visit(DASHBOARDS_URL);
           visit(RULES_MANAGEMENT_URL);
+          cy.get('[data-test-subj="timeline-bottom-bar-container"]', { timeout: 60000 }).should(
+            'exist'
+          );
 
           expectRulesManagementTab();
           expectRulesTableState();
@@ -258,6 +261,9 @@ describe(
 
           visit(KIBANA_HOME);
           visit(RULES_MANAGEMENT_URL);
+          cy.get('[data-test-subj="timeline-bottom-bar-container"]', { timeout: 60000 }).should(
+            'exist'
+          );
 
           expectRulesManagementTab();
           expectRulesTableState();
@@ -319,6 +325,9 @@ describe(
           });
 
           visit(RULES_MANAGEMENT_URL);
+          cy.get('[data-test-subj="timeline-bottom-bar-container"]', { timeout: 60000 }).should(
+            'exist'
+          );
 
           expectRulesTableState();
           expectTablePage(1);
@@ -331,6 +340,9 @@ describe(
         beforeEach(() => {
           login();
           visit(RULES_MANAGEMENT_URL);
+          cy.get('[data-test-subj="timeline-bottom-bar-container"]', { timeout: 60000 }).should(
+            'exist'
+          );
         });
 
         it('persists after clearing the session storage', () => {
@@ -352,6 +364,9 @@ describe(
           goToTablePage(2);
 
           visit(RULES_MANAGEMENT_URL);
+          cy.get('[data-test-subj="timeline-bottom-bar-container"]', { timeout: 60000 }).should(
+            'exist'
+          );
 
           expectRulesManagementTab();
           expectRulesTableState();
@@ -365,6 +380,9 @@ describe(
         beforeEach(() => {
           login();
           visit(RULES_MANAGEMENT_URL);
+          cy.get('[data-test-subj="timeline-bottom-bar-container"]', { timeout: 60000 }).should(
+            'exist'
+          );
         });
 
         it('persists after corrupting the session storage data', () => {
@@ -386,6 +404,9 @@ describe(
           goToTablePage(2);
 
           visit(RULES_MANAGEMENT_URL, { visitOptions: { qs: { rulesTable: '(!invalid)' } } });
+          cy.get('[data-test-subj="timeline-bottom-bar-container"]', { timeout: 60000 }).should(
+            'exist'
+          );
 
           expectRulesManagementTab();
           expectRulesTableState();
@@ -404,6 +425,9 @@ describe(
               },
             },
           });
+          cy.get('[data-test-subj="timeline-bottom-bar-container"]', { timeout: 60000 }).should(
+            'exist'
+          );
 
           expectRulesManagementTab();
           expectDefaultRulesTableState();
