@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const security = getService('security');
 
-  describe.only('shows lose changes warning when switching from edit mode to view mode', function viewEditModeTests() {
+  describe('shows lose changes warning when switching from edit mode to view mode', function viewEditModeTests() {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
