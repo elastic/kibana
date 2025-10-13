@@ -8,8 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import { ML_ENTITY_FIELD_OPERATIONS, ML_ENTITY_FIELD_TYPE } from '@kbn/ml-anomaly-utils';
+import { mlEntityFieldSchema } from '@kbn/ml-anomaly-utils/schemas';
 import { serializedTitlesSchema } from '../schemas';
-import { mlEntityFieldSchema } from '../../../../../../packages/shared/ml/anomaly_utils/schemas';
 
 export const severityThresholdSchema = schema.object({
   min: schema.number(),
