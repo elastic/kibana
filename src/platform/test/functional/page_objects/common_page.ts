@@ -377,6 +377,7 @@ export class CommonPageObject extends FtrService {
     });
 
     // Wait for URL to stabilize (no more redirects)
+    let lastUrl = finalUrl;
     await this.retry.tryForTime(this.defaultFindTimeout, async () => {
       await this.sleep(501);
 
@@ -384,8 +385,11 @@ export class CommonPageObject extends FtrService {
 
       this.log.debug('in navigateTo url = ' + currentUrl);
 
-      if (finalUrl !== currentUrl) {
-        throw new Error('URL changed, waiting for it to settle');
+      if (lastUrl !== currentUrl) {
+        const msg = `URL changed from "${lastUrl}" to "${currentUrl}", waiting for it to settle`;
+        this.log.debug(msg);
+        lastUrl = currentUrl;
+        throw new Error(msg);
       }
     });
   }
