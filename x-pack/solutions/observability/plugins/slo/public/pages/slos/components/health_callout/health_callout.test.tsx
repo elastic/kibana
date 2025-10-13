@@ -101,7 +101,10 @@ describe('HealthCallout', () => {
     render(
       <I18nProvider>
         <HealthCallout
-          sloList={[{ id: '1', name: 'SLO 1' }, { id: '2', name: 'SLO 2' }]}
+          sloList={[
+            { id: '1', name: 'SLO 1' },
+            { id: '2', name: 'SLO 2' },
+          ]}
         />
       </I18nProvider>
     );
@@ -110,9 +113,13 @@ describe('HealthCallout', () => {
       'The following transform is in a missing state:'
     );
     const summaryTransformId = getSLOSummaryTransformId('1', undefined);
-    expect(screen.getByText((content, element) => content.startsWith(summaryTransformId))).toBeInTheDocument();
+    expect(
+      screen.getByText((content, element) => content.startsWith(summaryTransformId))
+    ).toBeInTheDocument();
     const summaryTransformId2 = getSLOSummaryTransformId('2', undefined);
-    expect(screen.queryByText((content, element) => content.startsWith(summaryTransformId2))).not.toBeInTheDocument();
+    expect(
+      screen.queryByText((content, element) => content.startsWith(summaryTransformId2))
+    ).not.toBeInTheDocument();
   });
 
   it('should show 2 missing entries for summary and rollup', () => {
@@ -132,16 +139,25 @@ describe('HealthCallout', () => {
     render(
       <I18nProvider>
         <HealthCallout
-          sloList={[{ id: '1', name: 'SLO 1' }, { id: '2', name: 'SLO 2' }]}
+          sloList={[
+            { id: '1', name: 'SLO 1' },
+            { id: '2', name: 'SLO 2' },
+          ]}
         />
       </I18nProvider>
     );
     fireEvent.click(screen.getByText(/Transform error detected/));
-    expect(screen.getByText(/The following transforms are in a missing state:/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/The following transforms are in a missing state:/)
+    ).toBeInTheDocument();
     const summaryTransformId = getSLOSummaryTransformId('1', undefined);
-    expect(screen.getByText((content, element) => content.startsWith(summaryTransformId))).toBeInTheDocument();
+    expect(
+      screen.getByText((content, element) => content.startsWith(summaryTransformId))
+    ).toBeInTheDocument();
     const summaryTransformId2 = getSLOSummaryTransformId('2', undefined);
-    expect(screen.queryByText((content, element) => content.startsWith(summaryTransformId2))).not.toBeInTheDocument();
+    expect(
+      screen.queryByText((content, element) => content.startsWith(summaryTransformId2))
+    ).not.toBeInTheDocument();
   });
 
   it('should show a mix of missing and unhealthy entries', () => {
@@ -179,15 +195,23 @@ describe('HealthCallout', () => {
     ).toBeInTheDocument();
 
     const rollupTransformId1 = getSLOTransformId('1', undefined);
-    expect(screen.getByText((content, element) => content.startsWith(rollupTransformId1))).toBeInTheDocument();
+    expect(
+      screen.getByText((content, element) => content.startsWith(rollupTransformId1))
+    ).toBeInTheDocument();
 
     const summaryTransformId1 = getSLOSummaryTransformId('1', undefined);
-    expect(screen.getByText((content, element) => content.startsWith(summaryTransformId1))).toBeInTheDocument();
+    expect(
+      screen.getByText((content, element) => content.startsWith(summaryTransformId1))
+    ).toBeInTheDocument();
 
     const rollupTransformId2 = getSLOTransformId('2', undefined);
-    expect(screen.getByText((content, element) => content.startsWith(rollupTransformId2))).toBeInTheDocument();
+    expect(
+      screen.getByText((content, element) => content.startsWith(rollupTransformId2))
+    ).toBeInTheDocument();
 
     const summaryTransformId2 = getSLOSummaryTransformId('2', undefined);
-    expect(screen.getByText((content, element) => content.startsWith(summaryTransformId2))).toBeInTheDocument();
+    expect(
+      screen.getByText((content, element) => content.startsWith(summaryTransformId2))
+    ).toBeInTheDocument();
   });
 });
