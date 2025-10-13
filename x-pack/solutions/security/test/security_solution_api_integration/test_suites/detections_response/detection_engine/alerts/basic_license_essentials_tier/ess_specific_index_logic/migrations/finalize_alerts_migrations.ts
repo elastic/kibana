@@ -194,34 +194,6 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(indices.map((s: any) => s.is_outdated)).to.eql([false, false]);
     });
 
-    // it's been skipped since it was originally introduced in
-    // https://github.com/elastic/kibana/pull/85690. Created ticket to track skip.
-    // https://github.com/elastic/kibana/issues/179593
-    it('deletes the underlying migration task', async () => {
-      await waitFor(
-        async () => {
-          const {
-            body: {
-              migrations: [{ completed }],
-            },
-          } = await supertest
-            .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
-            .set('kbn-xsrf', 'true')
-            .send({ migration_ids: [createdMigration.migration_id] })
-            .expect(200);
-
-          return completed;
-        },
-        `polling finalize_migration until complete`,
-        log
-      );
-
-      // const [{ taskId }] = await getMigration({ id: migration.migration_id });
-      // expect(taskId.length).greaterThan(0);
-      // const { statusCode } = await es.tasks.get({ task_id: taskId }, { ignore: [404] });
-      // expect(statusCode).to.eql(404);
-    });
-
     it('subsequent attempts at finalization are idempotent', async () => {
       await waitFor(
         async () => {

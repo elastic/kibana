@@ -1786,7 +1786,7 @@
         "label": "AlertStatus",
         "description": [],
         "signature": [
-          "\"recovered\" | \"active\" | \"untracked\""
+          "\"active\" | \"recovered\" | \"untracked\""
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_status.ts",
         "deprecated": false,
@@ -1811,6 +1811,21 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.createRuleFromTemplateRoute",
+        "type": "string",
+        "tags": [],
+        "label": "createRuleFromTemplateRoute",
+        "description": [],
+        "signature": [
+          "\"/rules/create/template/:templateId\""
+        ],
+        "path": "src/platform/packages/shared/kbn-rule-data-utils/src/routes/stack_rule_paths.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

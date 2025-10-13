@@ -7,40 +7,19 @@
 
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { ToolType } from '@kbn/onechat-common';
-import type { Resolver } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 import type { ToolFormData } from '../../components/tools/form/types/tool_form_types';
-import { useEsqlToolFormValidationResolver } from '../../components/tools/form/validation/esql_tool_form_validation';
+import { getToolTypeDefaultValues } from '../../components/tools/form/registry/tools_form_registry';
+import { useToolRegistryResolver } from './use_tool_registry_resolver';
 
-const getDefaultValues = (toolType: ToolType): ToolFormData => {
-  switch (toolType) {
-    case ToolType.esql:
-      return {
-        toolId: '',
-        description: '',
-        esql: '',
-        labels: [],
-        params: [],
-        type: ToolType.esql,
-      };
-    default:
-      return {
-        toolId: '',
-        description: '',
-        labels: [],
-        type: toolType,
-      };
-  }
-};
+export const useToolForm = (tool?: ToolDefinitionWithSchema, selectedToolType?: ToolType) => {
+  const toolType = tool?.type ?? selectedToolType ?? ToolType.esql;
 
-export const useToolForm = (tool?: ToolDefinitionWithSchema) => {
-  const esqlResolver = useEsqlToolFormValidationResolver();
-
-  const toolType = tool?.type ?? ToolType.esql;
+  const dynamicResolver = useToolRegistryResolver(toolType);
 
   const form = useForm<ToolFormData>({
-    defaultValues: getDefaultValues(toolType),
-    resolver: toolType === ToolType.esql ? (esqlResolver as Resolver<ToolFormData>) : undefined,
+    defaultValues: getToolTypeDefaultValues(toolType),
+    resolver: dynamicResolver,
     mode: 'onBlur',
   });
   return form;

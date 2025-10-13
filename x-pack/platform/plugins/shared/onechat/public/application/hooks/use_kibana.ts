@@ -7,10 +7,12 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { OnechatStartDependencies } from '../../types';
 
 export type StartServices = CoreStart & {
   plugins: OnechatStartDependencies;
+  appParams: { history: ScopedHistory };
 };
 
 const useTypedKibana = () => useKibana<StartServices>();

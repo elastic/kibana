@@ -11,6 +11,7 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 
 import { schema } from '@kbn/config-schema';
 import type { Message, Replacements } from '@kbn/elastic-assistant-common';
+import { v4 as uuidv4 } from 'uuid';
 import {
   getIsConversationOwner,
   API_VERSIONS,
@@ -105,6 +106,7 @@ export const postActionsConnectorExecuteRoute = (
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
+          const threadId = uuidv4();
           let newMessage: Pick<Message, 'content' | 'role'> | undefined;
           const conversationId = request.body.conversationId;
           const actionTypeId = request.body.actionTypeId;
@@ -218,6 +220,7 @@ export const postActionsConnectorExecuteRoute = (
               actionsClient,
               actionTypeId,
               connectorId,
+              threadId,
               contentReferencesStore,
               isOssModel,
               inferenceChatModelDisabled,

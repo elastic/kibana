@@ -9,23 +9,29 @@
 
 import { useState } from 'react';
 import {
-  selectRestorableTabRuntimeHistogramLayoutProps,
+  DEFAULT_HISTOGRAM_KEY_PREFIX,
+  selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabSelector,
 } from '../../state_management/redux';
+import type { UseUnifiedHistogramOptions } from './use_discover_histogram';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 
-export const useUnifiedHistogramRuntimeState = (stateContainer: DiscoverStateContainer) => {
+export const useUnifiedHistogramRuntimeState = (
+  stateContainer: DiscoverStateContainer,
+  localStorageKeyPrefix?: string
+) => {
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
-
-  const [options] = useState<{
-    initialLayoutProps: ReturnType<typeof selectRestorableTabRuntimeHistogramLayoutProps>;
-  }>(() => ({
-    initialLayoutProps: selectRestorableTabRuntimeHistogramLayoutProps(
+  const [options] = useState<UseUnifiedHistogramOptions>(() => {
+    const layoutPropsMap = selectInitialUnifiedHistogramLayoutPropsMap(
       stateContainer.runtimeStateManager,
       currentTabId
-    ),
-  }));
+    );
+
+    return {
+      initialLayoutProps: layoutPropsMap[localStorageKeyPrefix ?? DEFAULT_HISTOGRAM_KEY_PREFIX],
+    };
+  });
 
   const unifiedHistogramProps = useDiscoverHistogram(stateContainer, options);
 

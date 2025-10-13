@@ -234,6 +234,7 @@ export interface LangChainExecuteParams {
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   connectorId: string;
+  threadId: string;
   contentReferencesStore: ContentReferencesStore;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
@@ -267,6 +268,7 @@ export const langChainExecute = async ({
   telemetry,
   actionTypeId,
   connectorId,
+  threadId,
   contentReferencesStore,
   inferenceChatModelDisabled,
   isOssModel,
@@ -327,11 +329,12 @@ export const langChainExecute = async ({
     abortSignal,
     assistantContext,
     dataClients,
-    alertsIndexPattern: request.body.alertsIndexPattern,
+    alertsIndexPattern: request.body.alertsIndexPattern || '.alerts-security.alerts-default',
     core: context.core,
     actionsClient,
     assistantTools,
     conversationId,
+    threadId,
     connectorId,
     contentReferencesStore,
     esClient,
@@ -350,7 +353,7 @@ export const langChainExecute = async ({
     responseLanguage,
     savedObjectsClient,
     screenContext,
-    size: request.body.size,
+    size: request.body.size || 10,
     systemPrompt,
     timeout,
     telemetry,

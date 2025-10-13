@@ -43,17 +43,20 @@ export const registerInstallationRoutes = ({
       const esClient = core.elasticsearch.client.asCurrentUser;
 
       const { sampleDataManager } = getServices();
+      const { client: soClient, getImporter } = core.savedObjects;
 
       try {
-        const indexName = await sampleDataManager.installSampleData({
+        const installResponse = await sampleDataManager.installSampleData({
           sampleType: DatasetSampleType.elasticsearch,
           esClient,
+          soClient,
+          soImporter: getImporter(soClient),
         });
 
         return res.ok<InstallResponse>({
           body: {
             status: 'installed',
-            indexName,
+            ...installResponse,
           },
         });
       } catch (e) {
@@ -95,6 +98,7 @@ export const registerInstallationRoutes = ({
     async (ctx, req, res) => {
       const core = await ctx.core;
       const esClient = core.elasticsearch.client.asCurrentUser;
+      const soClient = core.savedObjects.client;
 
       const { sampleDataManager } = getServices();
 
@@ -102,6 +106,7 @@ export const registerInstallationRoutes = ({
         const statusData = await sampleDataManager.getSampleDataStatus({
           sampleType: DatasetSampleType.elasticsearch,
           esClient,
+          soClient,
         });
 
         return res.ok<StatusResponse>({

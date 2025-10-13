@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AnalyticsServiceSetup, Logger, EventTypeOpts } from '@kbn/core/server';
 import type { ItemDocument } from '../types';
 import type { MigrationState } from './types';
 
@@ -18,6 +19,21 @@ interface StartMigrationTaskTelemetry<I extends ItemDocument = ItemDocument> {
   aborted: (error: Error) => void;
 }
 
-export interface SiemMigrationTelemetryClient<I extends ItemDocument = ItemDocument> {
-  startSiemMigrationTask(): StartMigrationTaskTelemetry<I>;
+export abstract class SiemMigrationTelemetryClient<I extends ItemDocument = ItemDocument> {
+  public abstract startSiemMigrationTask(): StartMigrationTaskTelemetry<I>;
+
+  constructor(
+    protected readonly telemetry: AnalyticsServiceSetup,
+    protected readonly logger: Logger,
+    protected readonly migrationId: string,
+    protected readonly modelName: string = ''
+  ) {}
+
+  protected reportEvent<T extends object>(eventTypeOpts: EventTypeOpts<T>, data: T): void {
+    try {
+      this.telemetry.reportEvent(eventTypeOpts.eventType, data);
+    } catch (e) {
+      this.logger.error(`Error reporting event ${eventTypeOpts.eventType}: ${e.message}`);
+    }
+  }
 }

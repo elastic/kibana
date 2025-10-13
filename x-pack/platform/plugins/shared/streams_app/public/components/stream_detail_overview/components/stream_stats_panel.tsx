@@ -19,13 +19,15 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { type Streams, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 
-import { IlmLink } from '../../data_management/stream_detail_lifecycle/ilm_link';
+import { useTimefilter } from '../../../hooks/use_timefilter';
+import { IlmLink } from '../../data_management/stream_detail_lifecycle/general_data/ilm_link';
 import {
   formatBytes,
   formatIngestionRate,
 } from '../../data_management/stream_detail_lifecycle/helpers/format_bytes';
 import { useDataStreamStats } from '../../data_management/stream_detail_lifecycle/hooks/use_data_stream_stats';
 import { PrivilegesWarningIconWrapper } from '../../insufficient_privileges/insufficient_privileges';
+import { useAggregations } from '../../data_management/stream_detail_lifecycle/hooks/use_ingestion_rate';
 
 interface StreamStatsPanelProps {
   definition: Streams.ingest.all.GetResponse;
@@ -88,7 +90,13 @@ const StatItem = ({ label, value, withBorder = false }: StatItemProps) => {
 };
 
 export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
-  const dataStreamStats = useDataStreamStats({ definition }).stats;
+  const { timeState } = useTimefilter();
+  const { aggregations } = useAggregations({
+    definition,
+    timeState,
+    isFailureStore: false,
+  });
+  const dataStreamStats = useDataStreamStats({ definition, timeState, aggregations }).stats;
   const retentionLabel = i18n.translate('xpack.streams.entityDetailOverview.retention', {
     defaultMessage: 'Data retention',
   });
@@ -127,7 +135,10 @@ export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
               value={
                 <PrivilegesWarningIconWrapper
                   hasPrivileges={definition.privileges.monitor}
-                  title="totalDocCount"
+                  title={i18n.translate(
+                    'xpack.streams.streamStatsPanel.privilegesWarningIconWrapper.totaldoccountLabel',
+                    { defaultMessage: 'Total doc count' }
+                  )}
                 >
                   {dataStreamStats ? formatNumber(dataStreamStats.totalDocs || 0, 'decimal0') : '-'}
                 </PrivilegesWarningIconWrapper>
@@ -138,7 +149,10 @@ export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
               value={
                 <PrivilegesWarningIconWrapper
                   hasPrivileges={definition.privileges.monitor}
-                  title="sizeBytes"
+                  title={i18n.translate(
+                    'xpack.streams.streamStatsPanel.privilegesWarningIconWrapper.sizebytesLabel',
+                    { defaultMessage: 'Size in bytes' }
+                  )}
                 >
                   {dataStreamStats && dataStreamStats.sizeBytes
                     ? formatBytes(dataStreamStats.sizeBytes)
@@ -166,7 +180,10 @@ export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
               value={
                 <PrivilegesWarningIconWrapper
                   hasPrivileges={definition.privileges.monitor}
-                  title="ingestionRate"
+                  title={i18n.translate(
+                    'xpack.streams.streamStatsPanel.privilegesWarningIconWrapper.ingestionrateLabel',
+                    { defaultMessage: 'Ingestion rate' }
+                  )}
                 >
                   {dataStreamStats
                     ? formatIngestionRate(dataStreamStats.bytesPerDay || 0, true)

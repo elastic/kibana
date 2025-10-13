@@ -189,7 +189,9 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   public async performApiUnifiedCompletionStream(params: UnifiedChatCompleteParams) {
     const parentSpan = trace.getActiveSpan();
     const body = { ...params.body, n: undefined }; // exclude n param for now, constant is used on the inference API side
-    parentSpan?.setAttribute('inference.raw_request', JSON.stringify(body));
+    if (parentSpan?.isRecording()) {
+      parentSpan.setAttribute('inference.raw_request', JSON.stringify(body));
+    }
     const response = await this.esClient.transport.request<UnifiedChatCompleteResponse>(
       {
         method: 'POST',

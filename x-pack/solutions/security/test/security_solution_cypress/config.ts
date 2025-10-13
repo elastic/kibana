@@ -53,12 +53,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // in order to force Fleet to reach out to the registry to download the
         // packages listed in fleet_packages.json
         // See: https://elastic.slack.com/archives/CNMNXV4RG/p1683033379063079
-        '--feature_flags.overrides.elasticAssistant.assistantSharingEnabled=true',
         `--xpack.fleet.developer.bundledPackageLocation=./inexistentDir`,
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'bulkEditAlertSuppressionEnabled',
           'doesNotMatchForIndicatorMatchRuleEnabled',
-          'continueSuppressionWindowAdvancedSettingEnabled',
         ])}`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',

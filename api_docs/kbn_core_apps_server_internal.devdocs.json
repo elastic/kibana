@@ -136,7 +136,7 @@
         "label": "CoreAppConfigType",
         "description": [],
         "signature": [
-          "{ readonly allowDynamicConfigOverrides: boolean; }"
+          "{ readonly allowDynamicConfigOverrides: boolean; readonly skipBundleRoutesIfCdnEnabled: boolean; }"
         ],
         "path": "src/core/packages/apps/server-internal/src/core_app_config.ts",
         "deprecated": false,

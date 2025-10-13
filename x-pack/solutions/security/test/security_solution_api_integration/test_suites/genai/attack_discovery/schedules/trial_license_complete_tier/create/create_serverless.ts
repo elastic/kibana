@@ -7,16 +7,21 @@
 
 import expect from 'expect';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { ATTACK_DISCOVERY_SCHEDULES } from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_INTERNAL_SCHEDULES } from '@kbn/elastic-assistant-common';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllAttackDiscoverySchedules,
   enableAttackDiscoverySchedulesFeature,
-  getMissingAssistantKibanaPrivilegesError,
+  getMissingAssistantAndScheduleKibanaPrivilegesError,
+  getMissingScheduleKibanaPrivilegesError,
 } from '../../utils/helpers';
 import { getAttackDiscoverySchedulesApis } from '../../utils/apis';
 import { getSimpleAttackDiscoverySchedule } from '../../mocks';
-import { noKibanaPrivileges, securitySolutionOnlyAllSpace2 } from '../../../../utils/auth/roles';
+import {
+  noKibanaPrivileges,
+  securitySolutionOnlyAllSpace2,
+  securitySolutionOnlyAllSpacesAllAttackDiscoveryMinimalAll,
+} from '../../../../utils/auth/roles';
 import { checkIfScheduleExists } from '../../utils/check_schedule_exists';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -64,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect.objectContaining({ ...getSimpleAttackDiscoverySchedule() })
           );
 
-          checkIfScheduleExists({ getService, id: schedule.id, kibanaSpace: kibanaSpace1 });
+          await checkIfScheduleExists({ getService, id: schedule.id, kibanaSpace: kibanaSpace1 });
         });
       });
     });
@@ -81,8 +86,27 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(result).toEqual(
-          getMissingAssistantKibanaPrivilegesError({
-            routeDetails: `POST ${ATTACK_DISCOVERY_SCHEDULES}`,
+          getMissingAssistantAndScheduleKibanaPrivilegesError({
+            routeDetails: `POST ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}`,
+          })
+        );
+      });
+
+      it('should not be able to create a schedule without `update schedule` kibana privileges', async () => {
+        const superTest = await utils.createSuperTestWithCustomRole(
+          securitySolutionOnlyAllSpacesAllAttackDiscoveryMinimalAll
+        );
+
+        const apisNoPrivileges = getAttackDiscoverySchedulesApis({ supertest: superTest });
+
+        const result = await apisNoPrivileges.create({
+          schedule: getSimpleAttackDiscoverySchedule(),
+          expectedHttpCode: 403,
+        });
+
+        expect(result).toEqual(
+          getMissingScheduleKibanaPrivilegesError({
+            routeDetails: `POST ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}`,
           })
         );
       });
@@ -99,8 +123,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(result).toEqual(
-          getMissingAssistantKibanaPrivilegesError({
-            routeDetails: `POST ${ATTACK_DISCOVERY_SCHEDULES}`,
+          getMissingAssistantAndScheduleKibanaPrivilegesError({
+            routeDetails: `POST ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}`,
           })
         );
       });

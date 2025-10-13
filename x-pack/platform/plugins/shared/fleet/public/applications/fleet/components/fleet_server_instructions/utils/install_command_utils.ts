@@ -112,8 +112,8 @@ function getArtifact(
 export function getInstallCommandForPlatform({
   platform,
   esOutputHost,
-  esOutputProxy,
   serviceToken,
+  esOutputProxy,
   policyId,
   fleetServerHost,
   isProductionDeployment,
@@ -124,8 +124,8 @@ export function getInstallCommandForPlatform({
 }: {
   platform: PLATFORM_TYPE;
   esOutputHost: string;
-  esOutputProxy?: FleetProxy | undefined;
   serviceToken: string;
+  esOutputProxy?: FleetProxy | undefined;
   policyId?: string;
   fleetServerHost?: FleetServerHost | null;
   isProductionDeployment?: boolean;
@@ -204,7 +204,7 @@ export function getInstallCommandForPlatform({
     mac_aarch64: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
     mac_x86_64: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
     windows: `${artifact.downloadCommand}\n.\\elastic-agent.exe install ${commandArgumentsStr}`,
-    windows_msi: `${artifact.downloadCommand}\n.\\elastic-agent.msi --% INSTALLARGS="${commandArgumentsStr}"`,
+    windows_msi: `${artifact.downloadCommand}\n.\\elastic-agent-${kibanaVersion}-windows-x86_64.msi --% INSTALLARGS="${commandArgumentsStr}"`,
     deb_aarch64: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,
     deb_x86_64: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,
     rpm_aarch64: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,

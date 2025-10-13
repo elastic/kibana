@@ -91,6 +91,9 @@ export const SessionViewSearchBar = ({
       {showPagination && (
         <EuiPagination
           data-test-subj="sessionView:searchPagination"
+          aria-label={i18n.translate('xpack.sessionView.searchBar.pagination.ariaLabel', {
+            defaultMessage: 'Search results pagination',
+          })}
           css={styles.pagination}
           pageCount={totalMatches}
           activePage={selectedResult}

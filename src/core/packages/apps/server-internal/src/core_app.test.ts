@@ -17,8 +17,9 @@ import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
 import { PluginType } from '@kbn/core-base-common';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
-import { of } from 'rxjs';
+import { of, ReplaySubject } from 'rxjs';
 import { CoreAppsService } from './core_app';
+import type { CoreAppConfig } from './core_app_config';
 
 const emptyPlugins = (): UiPlugins => ({
   internal: new Map(),
@@ -27,6 +28,7 @@ const emptyPlugins = (): UiPlugins => ({
 });
 
 describe('CoreApp', () => {
+  const config$ = new ReplaySubject<CoreAppConfig>(1);
   let coreContext: ReturnType<typeof mockCoreContext.create>;
   let coreApp: CoreAppsService;
   let internalCorePreboot: ReturnType<typeof coreInternalLifecycleMock.createInternalPreboot>;
@@ -37,6 +39,9 @@ describe('CoreApp', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     coreContext = mockCoreContext.create();
+
+    coreContext.configService.atPath.mockReturnValue(config$);
+    config$.next({ allowDynamicConfigOverrides: false, skipBundleRoutesIfCdnEnabled: false });
 
     internalCorePreboot = coreInternalLifecycleMock.createInternalPreboot();
 
@@ -188,8 +193,8 @@ describe('CoreApp', () => {
         runtimePluginDependencies: [],
       });
     });
-    it('calls `registerBundleRoutes` with the correct options', () => {
-      coreApp.preboot(internalCorePreboot, prebootUIPlugins);
+    it('calls `registerBundleRoutes` with the correct options', async () => {
+      await coreApp.preboot(internalCorePreboot, prebootUIPlugins);
 
       expect(registerBundleRoutesMock).toHaveBeenCalledTimes(1);
       expect(registerBundleRoutesMock).toHaveBeenCalledWith({
@@ -200,14 +205,22 @@ describe('CoreApp', () => {
       });
     });
 
-    it('does not call `registerBundleRoutes` if there are no `preboot` UI plugins', () => {
-      coreApp.preboot(internalCorePreboot, emptyPlugins());
+    it('does not call `registerBundleRoutes` if there are no `preboot` UI plugins', async () => {
+      await coreApp.preboot(internalCorePreboot, emptyPlugins());
 
       expect(registerBundleRoutesMock).not.toHaveBeenCalled();
     });
 
-    it('main route handles core app rendering', () => {
-      coreApp.preboot(internalCorePreboot, prebootUIPlugins);
+    it('does not call `registerBundleRoutes` if the CDN is configured', async () => {
+      config$.next({ allowDynamicConfigOverrides: false, skipBundleRoutesIfCdnEnabled: true });
+      internalCorePreboot.http.staticAssets.isUsingCdn.mockReturnValueOnce(true);
+      await coreApp.preboot(internalCorePreboot, prebootUIPlugins);
+
+      expect(registerBundleRoutesMock).not.toHaveBeenCalled();
+    });
+
+    it('main route handles core app rendering', async () => {
+      await coreApp.preboot(internalCorePreboot, prebootUIPlugins);
 
       expect(prebootHTTPResourcesRegistrar.register).toHaveBeenCalledWith(
         {
@@ -234,8 +247,8 @@ describe('CoreApp', () => {
       expect(mockResponseFactory.renderCoreApp).toHaveBeenCalled();
     });
 
-    it('main route handles unknown public API requests', () => {
-      coreApp.preboot(internalCorePreboot, prebootUIPlugins);
+    it('main route handles unknown public API requests', async () => {
+      await coreApp.preboot(internalCorePreboot, prebootUIPlugins);
 
       const [[, handler]] = prebootHTTPResourcesRegistrar.register.mock.calls;
       const mockResponseFactory = httpResourcesMock.createResponseFactory();
@@ -254,8 +267,8 @@ describe('CoreApp', () => {
       });
     });
 
-    it('main route handles unknown internal API requests', () => {
-      coreApp.preboot(internalCorePreboot, prebootUIPlugins);
+    it('main route handles unknown internal API requests', async () => {
+      await coreApp.preboot(internalCorePreboot, prebootUIPlugins);
 
       const [[, handler]] = prebootHTTPResourcesRegistrar.register.mock.calls;
       const mockResponseFactory = httpResourcesMock.createResponseFactory();
@@ -274,7 +287,7 @@ describe('CoreApp', () => {
       });
     });
 
-    it('registers expected static dirs if there are public plugins', () => {
+    it('registers expected static dirs if there are public plugins', async () => {
       prebootUIPlugins.internal.set('some-plugin', {
         publicAssetsDir: '/foo',
         publicTargetDir: '/bar',
@@ -303,7 +316,7 @@ describe('CoreApp', () => {
       internalCorePreboot.http.staticAssets.getPluginServerPath.mockImplementation(
         (name: string, path: string) => `/static-assets-path/${name}/${path}`
       );
-      coreApp.preboot(internalCorePreboot, prebootUIPlugins);
+      await coreApp.preboot(internalCorePreboot, prebootUIPlugins);
 
       expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledTimes(
         // Twice for all UI plugins + core's UI asset routes + @elastic/charts assets
@@ -339,9 +352,9 @@ describe('CoreApp', () => {
       );
     });
 
-    it('does not register any static dirs if there are no public plugins', () => {
+    it('does not register any static dirs if there are no public plugins', async () => {
       prebootUIPlugins = emptyPlugins();
-      coreApp.preboot(internalCorePreboot, prebootUIPlugins);
+      await coreApp.preboot(internalCorePreboot, prebootUIPlugins);
       expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledTimes(0);
     });
   });
@@ -384,6 +397,30 @@ describe('CoreApp', () => {
       packageInfo: coreContext.env.packageInfo,
       staticAssets: expect.any(Object),
     });
+  });
+
+  it('`setup` calls `registerBundleRoutes` if the CDN is configured but skipBundleRoutesIfCdnEnabled is false', async () => {
+    config$.next({ allowDynamicConfigOverrides: false, skipBundleRoutesIfCdnEnabled: false });
+    internalCoreSetup.http.staticAssets.isUsingCdn.mockReturnValueOnce(true);
+    const uiPlugins = emptyPlugins();
+    await coreApp.setup(internalCoreSetup, uiPlugins);
+
+    expect(registerBundleRoutesMock).toHaveBeenCalledTimes(1);
+    expect(registerBundleRoutesMock).toHaveBeenCalledWith({
+      uiPlugins,
+      router: expect.any(Object),
+      packageInfo: coreContext.env.packageInfo,
+      staticAssets: expect.any(Object),
+    });
+  });
+
+  it('`setup` does not call `registerBundleRoutes` if the CDN is configured', async () => {
+    config$.next({ allowDynamicConfigOverrides: false, skipBundleRoutesIfCdnEnabled: true });
+    internalCoreSetup.http.staticAssets.isUsingCdn.mockReturnValueOnce(true);
+    const uiPlugins = emptyPlugins();
+    await coreApp.setup(internalCoreSetup, uiPlugins);
+
+    expect(registerBundleRoutesMock).toHaveBeenCalledTimes(0);
   });
 
   it('registers expected static dirs for all plugins with static dirs', async () => {

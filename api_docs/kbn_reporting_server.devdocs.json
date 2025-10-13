@@ -1321,6 +1321,18 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.ScheduleType",
+        "type": "Enum",
+        "tags": [],
+        "label": "ScheduleType",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
@@ -1483,6 +1495,21 @@
       },
       {
         "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_DATA_STREAM_INDEX_TEMPLATE",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_DATA_STREAM_INDEX_TEMPLATE",
+        "description": [],
+        "signature": [
+          "\".kibana-reporting\""
+        ],
+        "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
         "id": "def-server.REPORTING_DATA_STREAM_WILDCARD",
         "type": "string",
         "tags": [],
@@ -1505,6 +1532,21 @@
         "description": [],
         "signature": [
           "\".reporting-*,.kibana-reporting*\""
+        ],
+        "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_INDEX_TEMPLATE_MAPPING_META_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_INDEX_TEMPLATE_MAPPING_META_FIELD",
+        "description": [],
+        "signature": [
+          "\"template_version\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/server/constants.ts",
         "deprecated": false,

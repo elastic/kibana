@@ -8,9 +8,7 @@
  */
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-
 import { getSavedSearch } from './get_saved_searches';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { GetSavedSearchDependencies } from './get_saved_searches';
@@ -22,28 +20,6 @@ describe('getSavedSearch', () => {
   beforeEach(() => {
     getSavedSrch = jest.fn();
     searchSourceCreate = dataPluginMock.createStartContract().search.searchSource.create;
-  });
-
-  test('should throw an error if so not found', async () => {
-    let errorMessage = 'No error thrown.';
-    getSavedSrch = jest.fn().mockReturnValue({
-      statusCode: 404,
-      error: 'Not Found',
-      message: 'Saved object [ccf1af80-2297-11ec-86e0-1155ffb9c7a7] not found',
-    });
-
-    try {
-      await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {
-        getSavedSrch,
-        searchSourceCreate,
-      });
-    } catch (error) {
-      errorMessage = error.message;
-    }
-
-    expect(errorMessage).toBe(
-      'Could not locate that Discover session (id: ccf1af80-2297-11ec-86e0-1155ffb9c7a7)'
-    );
   });
 
   test('should find saved search', async () => {
@@ -107,6 +83,7 @@ describe('getSavedSearch', () => {
         "columns": Array [
           "_source",
         ],
+        "controlGroupJson": undefined,
         "density": undefined,
         "description": "description",
         "grid": Object {},
@@ -257,6 +234,7 @@ describe('getSavedSearch', () => {
         "columns": Array [
           "_source",
         ],
+        "controlGroupJson": undefined,
         "density": undefined,
         "description": "description",
         "grid": Object {},

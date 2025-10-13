@@ -17,7 +17,7 @@ export const contextWindowLengthField: ConfigFieldSchema = {
   isRequired: false,
   helpText: (
     <FormattedMessage
-      defaultMessage="Can be set to manually define the context length of the default model used by the connector. Useful for open source or more recent models"
+      defaultMessage="(experimental) can be set to manually define the context length of the default model used by the connector. Useful for open source or more recent models."
       id="xpack.stackConnectors.components.bedrock.contextWindowLength"
     />
   ),

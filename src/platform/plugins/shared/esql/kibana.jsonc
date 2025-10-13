@@ -19,10 +19,13 @@
       "dataViews",
       "uiActions",
       "contentManagement",
+      "share",
+      "fileUpload",
+      "fieldFormats"
     ],
     "requiredBundles": [
       "kibanaReact",
-      "kibanaUtils",
+      "kibanaUtils"
     ]
   }
 }

@@ -16,7 +16,7 @@ export const fromEs = <TConfig extends object = {}>(
     throw new Error('No source found on get conversation response');
   }
   return {
-    id: document._id,
+    id: document._source.id,
     type: document._source.type,
     description: document._source.description,
     tags: document._source.tags,
@@ -28,14 +28,17 @@ export const fromEs = <TConfig extends object = {}>(
 
 export const createAttributes = ({
   createRequest,
+  space,
   creationDate = new Date(),
 }: {
   createRequest: ToolCreateParams;
+  space: string;
   creationDate?: Date;
 }): ToolProperties => {
   return {
     id: createRequest.id,
     type: createRequest.type,
+    space,
     description: createRequest.description ?? '',
     tags: createRequest.tags ?? [],
     configuration: createRequest.configuration,

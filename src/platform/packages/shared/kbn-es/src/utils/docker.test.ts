@@ -493,6 +493,108 @@ describe('resolveEsArgs()', () => {
       ]
     `);
   });
+
+  test('should not add UIAM-related args when run in Serverless mode without `--uiam` option', () => {
+    const esArgs = resolveEsArgs([], {
+      ssl: true,
+      kibanaUrl: 'http://localhost:5601/',
+      projectType,
+      basePath: baseEsPath,
+      uiam: false,
+    });
+
+    expect(esArgs).toMatchInlineSnapshot(`
+      Array [
+        "--env",
+        "xpack.security.http.ssl.enabled=true",
+        "--env",
+        "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
+        "--env",
+        "xpack.security.http.ssl.verification_mode=certificate",
+        "--env",
+        "xpack.security.authc.native_role_mappings.enabled=true",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.order=0",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=/usr/share/elasticsearch/config/secrets/idp_metadata.xml",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=urn:mock-idp",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://localhost:5601",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://localhost:5601/api/security/saml/callback",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://localhost:5601/logout",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.principal=http://saml.elastic-cloud.com/attributes/principal",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.groups=http://saml.elastic-cloud.com/attributes/roles",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.name=http://saml.elastic-cloud.com/attributes/name",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.mail=http://saml.elastic-cloud.com/attributes/email",
+      ]
+    `);
+  });
+
+  test('should add UIAM-related args when run in Serverless mode with `--uiam` option', () => {
+    const esArgs = resolveEsArgs([], {
+      ssl: true,
+      kibanaUrl: 'http://localhost:5601/',
+      projectType,
+      basePath: baseEsPath,
+      uiam: true,
+    });
+
+    expect(esArgs).toMatchInlineSnapshot(`
+      Array [
+        "--env",
+        "xpack.security.http.ssl.enabled=true",
+        "--env",
+        "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
+        "--env",
+        "xpack.security.http.ssl.verification_mode=certificate",
+        "--env",
+        "xpack.security.authc.native_role_mappings.enabled=true",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.order=0",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=/usr/share/elasticsearch/config/secrets/idp_metadata.xml",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=urn:mock-idp",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://localhost:5601",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://localhost:5601/api/security/saml/callback",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://localhost:5601/logout",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.principal=http://saml.elastic-cloud.com/attributes/principal",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.groups=http://saml.elastic-cloud.com/attributes/roles",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.name=http://saml.elastic-cloud.com/attributes/name",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.mail=http://saml.elastic-cloud.com/attributes/email",
+        "--env",
+        "metering.url=http://localhost:5601/",
+        "--env",
+        "metering.report_period=60m",
+        "--env",
+        "xpack.security.authc.realms.saml.cloud-saml-kibana.private_attributes=http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token,http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token_expires_at,http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token,http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token_expires_at",
+        "--env",
+        "serverless.organization_id=1234567890",
+        "--env",
+        "serverless.project_type=elasticsearch",
+        "--env",
+        "serverless.project_id=abcde1234567890",
+        "--env",
+        "serverless.universal_iam_service.enabled=true",
+        "--env",
+        "serverless.universal_iam_service.url=http://uiam-cosmosdb-gateway:8080",
+      ]
+    `);
+  });
 });
 
 describe('setupServerlessVolumes()', () => {

@@ -9,7 +9,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  describe('visualizations - create', () => {
+  describe('visualizations - get', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'

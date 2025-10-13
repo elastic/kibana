@@ -49,6 +49,7 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
     onUpdate,
     onApply,
     onCancel,
+    applyButtonLabel,
   }: InlineEditLensEmbeddableContext) {
     mountInlinePanel({
       core: this.core,
@@ -65,6 +66,7 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
             onApply,
             onCancel,
             closeFlyout,
+            applyButtonLabel,
           });
         }
       },

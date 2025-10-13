@@ -39,6 +39,7 @@ export const convertToEntityManagerDefinition = (
     },
     version: description.version,
     managed: true,
+    capabilities: description.capabilities,
   };
 
   return entityDefinitionSchema.parse(definition);

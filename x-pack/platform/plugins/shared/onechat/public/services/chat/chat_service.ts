@@ -9,7 +9,9 @@ import type { Observable } from 'rxjs';
 import { defer } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
-import type { ChatEvent } from '@kbn/onechat-common';
+import type { ChatEvent, AgentCapabilities } from '@kbn/onechat-common';
+import { getKibanaDefaultAgentCapabilities } from '@kbn/onechat-common/agents';
+import { publicApiPath } from '../../../common/constants';
 import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
 import { unwrapOnechatErrors } from '../utils/errors';
 
@@ -18,6 +20,7 @@ export interface ChatParams {
   agentId?: string;
   connectorId?: string;
   conversationId?: string;
+  capabilities?: AgentCapabilities;
   input: string;
 }
 
@@ -34,9 +37,10 @@ export class ChatService {
       agent_id: params.agentId,
       conversation_id: params.conversationId,
       connector_id: params.connectorId,
+      capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
     };
     return defer(() => {
-      return this.http.post('/api/chat/converse/async', {
+      return this.http.post(`${publicApiPath}/converse/async`, {
         signal: params.signal,
         asResponse: true,
         rawResponse: true,

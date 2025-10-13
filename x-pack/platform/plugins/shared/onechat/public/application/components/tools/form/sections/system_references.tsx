@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiMarkdownEditorRef } from '@elastic/eui';
 import {
   EuiFieldText,
   EuiFlexGroup,
@@ -16,10 +17,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useRef } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { i18nMessages } from '../i18n';
 import { ToolFormSection } from '../components/tool_form_section';
+import { i18nMessages } from '../i18n';
 import { ToolFormMode } from '../tool_form';
 import type { ToolFormData } from '../types/tool_form_types';
 export interface SystemReferencesProps {
@@ -31,6 +32,8 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
     control,
     formState: { errors },
   } = useFormContext<ToolFormData>();
+
+  const descriptionRef = useRef<EuiMarkdownEditorRef>(null);
 
   const isReadOnly = mode === ToolFormMode.View;
   const isToolIdDisabled = mode === ToolFormMode.Edit || isReadOnly;
@@ -75,12 +78,9 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       }
-      documentation={{
-        title: i18nMessages.systemReferences.documentation.toolBasicsDocumentationLink,
-        href: '#', // TODO: add documentation link when available
-      }}
     >
       <EuiFormRow
+        data-test-subj="agentBuilderToolIdRow"
         isDisabled={isToolIdDisabled}
         label={i18nMessages.systemReferences.form.toolId.label}
         isInvalid={!!errors.toolId}
@@ -92,6 +92,7 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
           name="toolId"
           render={({ field: { ref, ...field }, fieldState: { invalid } }) => (
             <EuiFieldText
+              data-test-subj="agentBuilderToolIdInput"
               disabled={isToolIdDisabled}
               placeholder="namespace.tool_name (e.g., acme.financial.search)"
               readOnly={isReadOnly}
@@ -103,6 +104,7 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
         />
       </EuiFormRow>
       <EuiFormRow
+        data-test-subj="agentBuilderToolDescriptionRow"
         label={i18nMessages.systemReferences.form.description.label}
         isInvalid={!!errors.description}
         error={errors.description?.message}
@@ -110,14 +112,18 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
         <Controller
           control={control}
           name="description"
-          render={({ field }) => (
-            <EuiMarkdownEditor
-              aria-label={i18nMessages.systemReferences.form.description.label}
-              height={482}
-              readOnly={isReadOnly}
-              {...field}
-            />
-          )}
+          render={({ field: { ref, ...field } }) => {
+            ref(descriptionRef.current?.textarea);
+            return (
+              <EuiMarkdownEditor
+                data-test-subj="agentBuilderToolDescriptionEditor"
+                aria-label={i18nMessages.systemReferences.form.description.label}
+                readOnly={isReadOnly}
+                ref={descriptionRef}
+                {...field}
+              />
+            );
+          }}
         />
       </EuiFormRow>
     </ToolFormSection>

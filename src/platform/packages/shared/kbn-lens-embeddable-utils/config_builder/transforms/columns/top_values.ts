@@ -141,7 +141,7 @@ export function fromTermsLensStateToAPI(
   return {
     operation: 'terms',
     fields: [column.sourceField].concat(column.params.secondaryFields ?? []),
-    label,
+    ...(label ? { label } : {}),
     size: column.params.size,
     ...(column.params.accuracyMode != null
       ? { increase_accuracy: column.params.accuracyMode }

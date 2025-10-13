@@ -945,7 +945,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                 kafkaBrokerReachabilityTimeoutInput.value
               ),
               required_acks: parseIntegerIfStringDefined(kafkaBrokerAckReliabilityInput.value),
-              write_to_logs_streams: writeToStreams.value,
               ...shipperParams,
               ...(maybeSecrets ? { secrets: maybeSecrets } : {}),
             } as KafkaOutput;
@@ -977,7 +976,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                   },
                 }),
               proxy_id: proxyIdValue,
-              write_to_logs_streams: writeToStreams.value,
               ...shipperParams,
             } as NewLogstashOutput;
           case outputType.RemoteElasticsearch:

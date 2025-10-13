@@ -17,7 +17,7 @@ import type {
 } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { formatHit } from '@kbn/discover-utils';
+import { formatFieldValue, formatHit } from '@kbn/discover-utils';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -58,10 +58,13 @@ export function SourceDocument({
 }) {
   const styles = useMemoCss(componentStyles);
   const pairs: FormattedHit = useTopLevelObjectColumns
-    ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
-        0,
-        maxEntries
-      )
+    ? getTopLevelObjectPairs(
+        row.raw,
+        columnId,
+        dataView,
+        shouldShowFieldHandler,
+        fieldFormats
+      ).slice(0, maxEntries)
     : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
 
   return (
@@ -100,7 +103,8 @@ function getTopLevelObjectPairs(
   row: EsHitRecord,
   columnId: string,
   dataView: DataView,
-  shouldShowFieldHandler: ShouldShowFieldInTableHandler
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler,
+  fieldFormats: FieldFormatsStart
 ) {
   const innerColumns = getInnerColumns(row.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first
@@ -112,16 +116,8 @@ function getTopLevelObjectPairs(
     const displayKey = dataView.fields.getByName
       ? dataView.fields.getByName(key)?.displayName
       : undefined;
-    const formatter = subField
-      ? dataView.getFormatterForField(subField)
-      : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
     const formatted = values
-      .map((val: unknown) =>
-        formatter.convert(val, 'html', {
-          field: subField,
-          hit: row,
-        })
-      )
+      .map((value: unknown) => formatFieldValue(value, row, fieldFormats, dataView, subField))
       .join(', ');
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     if (displayKey) {

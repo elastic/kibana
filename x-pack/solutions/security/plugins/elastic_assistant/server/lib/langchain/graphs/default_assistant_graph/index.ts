@@ -37,6 +37,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   alertsIndexPattern,
   assistantTools = [],
   connectorId,
+  threadId,
   contentReferencesStore,
   conversationId,
   core,
@@ -232,6 +233,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
     ...(llmType === 'bedrock' ? { signal: abortSignal } : {}),
     contentReferencesStore,
+    checkpointSaver: await assistantContext.getCheckpointSaver(),
   });
 
   const conversationMessages = await getConversationWithNewMessage({
@@ -263,6 +265,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     responseLanguage,
     conversationId,
     connectorId,
+    threadId,
     llmType,
     isStream,
     isOssModel,

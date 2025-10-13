@@ -24,6 +24,7 @@ const mockConversations = {
 const testProps = {
   conversationSharedState: ConversationSharedState.PRIVATE,
   conversationsLoaded: true,
+  currentUser: { name: 'elastic' },
   selectedConversation: welcomeConvo,
   title: 'Test Title',
   docLinks: {
@@ -109,7 +110,7 @@ describe('AssistantHeader', () => {
   });
 
   it('renders share badge when sharing is enabled', () => {
-    render(<AssistantHeader {...testProps} isAssistantSharingEnabled={true} />, {
+    render(<AssistantHeader {...testProps} />, {
       wrapper: TestProviders,
     });
     expect(screen.getByTestId('shareBadgeButton')).not.toBeDisabled();
@@ -120,16 +121,9 @@ describe('AssistantHeader', () => {
   });
 
   it('disables share badge when isConversationOwner=false', () => {
-    render(
-      <AssistantHeader
-        {...testProps}
-        isConversationOwner={false}
-        isAssistantSharingEnabled={true}
-      />,
-      {
-        wrapper: TestProviders,
-      }
-    );
+    render(<AssistantHeader {...testProps} isConversationOwner={false} />, {
+      wrapper: TestProviders,
+    });
     expect(screen.getByTestId('shareBadgeButton')).toBeDisabled();
     expect(screen.getByTestId('connector-selector')).toBeDisabled();
     expect(

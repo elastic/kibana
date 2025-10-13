@@ -115,7 +115,7 @@ export class ParameterReplacer {
 
     const value = this.resolveParamValue(node);
 
-    if (!value) {
+    if (value === null || value === undefined) {
       return node;
     }
 
@@ -131,6 +131,12 @@ export class ParameterReplacer {
       isFunctionExpression(parent) &&
       parent.subtype === 'variadic-call'
     ) {
+      if (parent.name === 'bucket' && node.type === 'literal') {
+        return Builder.expression.literal.string(String(value), {
+          unquoted: String(value).match(/^now\(\)/i) !== null,
+        });
+      }
+
       return Builder.identifier(String(value));
     }
 

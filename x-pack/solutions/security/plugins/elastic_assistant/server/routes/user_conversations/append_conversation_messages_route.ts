@@ -63,7 +63,6 @@ export const appendConversationMessageRoute = (router: ElasticAssistantPluginRou
               statusCode: 404,
             });
           }
-
           const conversation = await dataClient?.appendConversationMessages({
             existingConversation,
             messages: request.body.messages.map((message) =>
@@ -74,6 +73,7 @@ export const appendConversationMessageRoute = (router: ElasticAssistantPluginRou
                   }
                 : message
             ),
+            authenticatedUser,
           });
           if (conversation == null) {
             return assistantResponse.error({

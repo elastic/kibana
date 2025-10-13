@@ -8,7 +8,7 @@
 import { mockSiemMigrationsDataResourcesClient } from '../../../common/data/__mocks__/mocks';
 import type { RuleMigrationsDataClient } from '../rule_migrations_data_client';
 import type { RuleMigrationsDataIntegrationsClient } from '../rule_migrations_data_integrations_client';
-import type { RuleMigrationsDataLookupsClient } from '../rule_migrations_data_lookups_client';
+import type { SiemMigrationsDataLookupsClient } from '../../../common/data/siem_migrations_data_lookups_client';
 import type { RuleMigrationsDataMigrationClient } from '../rule_migrations_data_migration_client';
 import type { RuleMigrationsDataPrebuiltRulesClient } from '../rule_migrations_data_prebuilt_rules_client';
 import type { RuleMigrationsDataRulesClient } from '../rule_migrations_data_rules_client';
@@ -42,10 +42,10 @@ export const mockRuleMigrationsDataPrebuiltRulesClient = {
   populate: jest.fn().mockResolvedValue(undefined),
   search: jest.fn().mockResolvedValue([]),
 } as unknown as jest.Mocked<RuleMigrationsDataPrebuiltRulesClient>;
-export const mockRuleMigrationsDataLookupsClient = {
+export const mockSiemMigrationsDataLookupsClient = {
   create: jest.fn().mockResolvedValue(undefined),
   indexData: jest.fn().mockResolvedValue(undefined),
-} as unknown as jest.Mocked<RuleMigrationsDataLookupsClient>;
+} as unknown as jest.Mocked<SiemMigrationsDataLookupsClient>;
 export const mockRuleMigrationsDataMigrationsClient = {
   create: jest.fn().mockResolvedValue(undefined),
   get: jest.fn().mockResolvedValue(undefined),
@@ -66,7 +66,7 @@ export const createRuleMigrationsDataClientMock = () =>
     resources: mockSiemMigrationsDataResourcesClient,
     integrations: mockRuleMigrationsDataIntegrationsClient,
     prebuiltRules: mockRuleMigrationsDataPrebuiltRulesClient,
-    lookups: mockRuleMigrationsDataLookupsClient,
+    lookups: mockSiemMigrationsDataLookupsClient,
     migrations: mockRuleMigrationsDataMigrationsClient,
     deleteMigration: mockDeleteMigration,
   } as jest.MockedObjectDeep<RuleMigrationsDataClient>);

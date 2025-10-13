@@ -41,7 +41,7 @@ export function removeCombinedFieldsFromMappings(
   mappings: MappingTypeMapping,
   combinedFields: CombinedField[]
 ) {
-  const updatedMappings = { properties: {}, ...mappings };
+  const updatedMappings = { properties: {}, ...cloneDeep(mappings) };
   combinedFields.forEach((combinedField) => {
     delete updatedMappings.properties[combinedField.combinedFieldName];
   });
@@ -72,9 +72,10 @@ export function removeCombinedFieldsFromPipeline(
   pipeline: IngestPipeline,
   combinedFields: CombinedField[]
 ) {
+  const updatedPipeline = cloneDeep(pipeline);
   return {
-    ...pipeline,
-    processors: pipeline.processors.filter((processor) => {
+    ...updatedPipeline,
+    processors: updatedPipeline.processors.filter((processor) => {
       return 'set' in processor
         ? !combinedFields.some((combinedField) => {
             return processor.set.field === combinedField.combinedFieldName;
@@ -108,6 +109,32 @@ export function isWithinLonRange(
     'min_value' in fieldStats[fieldName] &&
     fieldStats[fieldName]!.min_value! >= -180
   );
+}
+
+export function getLatLonFields(results: FindFileStructureResponse | undefined) {
+  const latFields: string[] = [];
+  const lonFields: string[] = [];
+  if (results !== undefined) {
+    getFieldNames(results).forEach((columnName: string) => {
+      if (isWithinLatRange(columnName, results!.field_stats)) {
+        latFields.push(columnName);
+      }
+      if (isWithinLonRange(columnName, results!.field_stats)) {
+        lonFields.push(columnName);
+      }
+    });
+  }
+  return { latFields, lonFields };
+}
+
+export function isLatLonCompatible(results: FindFileStructureResponse | undefined) {
+  if (!results) {
+    return false;
+  }
+
+  const { latFields, lonFields } = getLatLonFields(results);
+  const allFields = [...new Set([...latFields, ...lonFields])];
+  return latFields.length > 0 && lonFields.length > 0 && allFields.length > 1;
 }
 
 export function createGeoPointCombinedField(

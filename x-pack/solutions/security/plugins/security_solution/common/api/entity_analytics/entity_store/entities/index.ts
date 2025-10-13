@@ -7,3 +7,4 @@
 
 export * from './common.gen';
 export * from './list_entities.gen';
+export * from './upsert_entity.gen';

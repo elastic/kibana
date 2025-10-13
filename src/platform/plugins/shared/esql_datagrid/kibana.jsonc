@@ -12,7 +12,8 @@
       "data",
       "uiActions",
       "fieldFormats",
-      "share"
+      "share",
+      "dataViews"
     ],
     "requiredBundles": [
       "kibanaReact",

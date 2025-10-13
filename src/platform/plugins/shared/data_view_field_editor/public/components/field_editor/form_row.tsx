@@ -26,6 +26,7 @@ interface Props {
   children: React.ReactNode;
   description?: string | JSX.Element;
   withDividerRule?: boolean;
+  disabled?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -34,6 +35,7 @@ export const FormRow = ({
   description,
   children,
   formFieldPath,
+  disabled,
   withDividerRule = false,
   'data-test-subj': dataTestSubj,
 }: Props) => {
@@ -52,6 +54,7 @@ export const FormRow = ({
                 label: title,
                 showLabel: false,
                 'data-test-subj': 'toggle',
+                disabled,
               },
             }}
           />

@@ -27,6 +27,7 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
+import type { ReindexServicePublicStart } from '@kbn/reindex-service-plugin/public';
 
 import type { EuiBreadcrumb } from '@elastic/eui';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -57,6 +58,7 @@ export interface AppDependencies {
     licensing?: LicensingPluginStart;
     ml?: MlPluginStart;
     streams?: StreamsPluginStart;
+    reindexService: ReindexServicePublicStart;
   };
   services: {
     uiMetricService: UiMetricService;

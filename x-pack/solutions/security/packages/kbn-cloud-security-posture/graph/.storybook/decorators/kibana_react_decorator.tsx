@@ -168,6 +168,11 @@ const services: Partial<KibanaServices> = {
     dataViews: {
       getIdsWithTitle: () => [],
     },
+    search: {
+      session: {
+        state$: of({}),
+      },
+    },
   },
   dataViewEditor: {
     userPermissions: {
