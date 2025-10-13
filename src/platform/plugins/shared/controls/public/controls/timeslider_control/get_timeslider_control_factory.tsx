@@ -22,6 +22,7 @@ import {
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { css } from '@emotion/react';
 import { TimeSliderPopoverButton } from './components/time_slider_popover_button';
 import { TimeSliderPopoverContent } from './components/time_slider_popover_content';
 import { TimeSliderPrepend } from './components/time_slider_prepend';
@@ -49,8 +50,6 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
 > => {
   return {
     type: TIME_SLIDER_CONTROL,
-    // getIconType: () => 'search',
-    // getDisplayName: () => displayName,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState.rawState;
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
@@ -298,7 +297,11 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
           return (
             <EuiInputPopover
               {...controlPanelClassNames}
-              panelClassName="timeSlider__panelOverride"
+              css={css`
+                width: 100%;
+                height: 100%;
+                max-inline-size: 100%;
+              `}
               input={
                 <TimeSliderPopoverButton
                   onClick={() => {
