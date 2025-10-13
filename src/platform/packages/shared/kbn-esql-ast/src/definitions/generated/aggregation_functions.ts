@@ -2670,9 +2670,29 @@ const topDefinition: FunctionDefinition = {
           constantOnly: true,
         },
         {
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'boolean',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -2693,9 +2713,29 @@ const topDefinition: FunctionDefinition = {
           constantOnly: true,
         },
         {
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -2716,9 +2756,29 @@ const topDefinition: FunctionDefinition = {
           constantOnly: true,
         },
         {
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
         },
@@ -2736,14 +2796,26 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          constantOnly: true,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
         },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
+          optional: true,
         },
       ],
       returnType: 'integer',
@@ -2759,14 +2831,26 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          constantOnly: true,
+        },
+      ],
+      returnType: 'ip',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'ip',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
         },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
+          optional: true,
         },
       ],
       returnType: 'ip',
@@ -2782,14 +2866,26 @@ const topDefinition: FunctionDefinition = {
           name: 'limit',
           type: 'integer',
           optional: false,
-          constantOnly: true,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
         },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
+          optional: true,
         },
       ],
       returnType: 'keyword',
@@ -2806,10 +2902,25 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
         },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+        },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
         },
       ],
       returnType: 'long',
@@ -2826,10 +2937,25 @@ const topDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
         },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+        },
         {
           name: 'order',
           type: 'keyword',
-          optional: false,
+          optional: true,
         },
       ],
       returnType: 'keyword',
