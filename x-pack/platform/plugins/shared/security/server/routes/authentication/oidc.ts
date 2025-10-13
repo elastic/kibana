@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { performance } from 'perf_hooks';
-
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
