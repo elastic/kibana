@@ -126,7 +126,6 @@ while read -r config_path; do
     if [[ -n "$RETRY_FAILED_PAIRS" ]]; then
       config_mode_pair="$config_path ($mode)"
       if ! echo "$RETRY_FAILED_PAIRS" | grep -Fxq "$config_mode_pair"; then
-        echo "--- [ skipped - not in retry list ] $config_path ($mode)"
         continue
       fi
     fi
