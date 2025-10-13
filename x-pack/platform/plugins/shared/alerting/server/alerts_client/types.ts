@@ -288,3 +288,11 @@ export type ScopedQueryAggregationResult = Record<
     };
   }
 >;
+
+export interface UpdatePersistedAlertsQueryParams {
+  [alertId: string]: {
+    group: string;
+    date: string;
+    throttled?: { [key: string]: { date: string } };
+  };
+}

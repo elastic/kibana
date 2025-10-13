@@ -47,7 +47,13 @@ import { LegacyAlertsClient } from './legacy_alerts_client';
 import type { IIndexPatternString } from '../alerts_service/resource_installer_utils';
 import { getIndexTemplateAndPattern } from '../alerts_service/resource_installer_utils';
 import type { CreateAlertsClientParams } from '../alerts_service/alerts_service';
-import type { AlertRule, LogAlertsOpts, SearchResult, DetermineDelayedAlertsOpts } from './types';
+import type {
+  AlertRule,
+  LogAlertsOpts,
+  SearchResult,
+  DetermineDelayedAlertsOpts,
+  UpdatePersistedAlertsQueryParams,
+} from './types';
 import type {
   IAlertsClient,
   InitializeExecutionOpts,
@@ -79,6 +85,7 @@ import {
 import { ErrorWithType } from '../lib/error_with_type';
 import { DEFAULT_MAX_ALERTS } from '../config';
 import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
+import { retryTransientEsErrors } from '../alerts_service/lib/retry_transient_es_errors';
 
 export interface AlertsClientParams extends CreateAlertsClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
@@ -685,37 +692,42 @@ export class AlertsClient<
   public async updatePersistedAlerts() {
     const { rawActiveAlerts } = this.getRawAlertInstancesForState(true);
 
-    const allAlertsToUpdate = Object.values(rawActiveAlerts).reduce((acc, rawAlert) => {
-      const { meta } = rawAlert;
-      if (!!meta?.uuid && meta.lastScheduledActions) {
-        const { group, date, actions } = meta.lastScheduledActions;
-        acc[meta.uuid] = {
-          group,
-          date,
-          ...(actions ? { throttled: actions } : {}),
-        };
-      }
+    const updateByQueryParams = Object.values(rawActiveAlerts).reduce(
+      (acc: UpdatePersistedAlertsQueryParams, rawAlert) => {
+        const { meta } = rawAlert;
+        if (!!meta?.uuid && meta.lastScheduledActions) {
+          const { group, date, actions } = meta.lastScheduledActions;
+          acc[meta.uuid] = {
+            group,
+            date,
+            ...(actions ? { throttled: actions } : {}),
+          };
+        }
 
-      return acc;
-    }, {} as { [key: string]: { group: string; date: string; throttled?: { [key: string]: { date: string } } } });
+        return acc;
+      },
+      {}
+    );
 
-    const idsToUpdate = Object.keys(allAlertsToUpdate);
+    const idsToUpdate = Object.keys(updateByQueryParams);
 
     if (idsToUpdate.length === 0) {
       return;
     }
     try {
       const esClient = await this.options.elasticsearchClientPromise;
-      await esClient.updateByQuery({
-        query: {
-          terms: {
-            _id: idsToUpdate,
-          },
-        },
-        conflicts: 'proceed',
-        index: this.indexTemplateAndPattern.alias,
-        script: {
-          source: `
+      await retryTransientEsErrors(
+        () =>
+          esClient.updateByQuery({
+            query: {
+              terms: {
+                _id: idsToUpdate,
+              },
+            },
+            conflicts: 'proceed',
+            index: this.indexTemplateAndPattern.alias,
+            script: {
+              source: `
             if (params.containsKey(ctx._source['${ALERT_UUID}'])) {
               ctx._source['${ALERT_LAST_SCHEDULED_ACTIONS_GROUP}'] = params[ctx._source['${ALERT_UUID}']].group;
               ctx._source['${ALERT_LAST_SCHEDULED_ACTIONS_DATE}'] = params[ctx._source['${ALERT_UUID}']].date;
@@ -724,10 +736,12 @@ export class AlertsClient<
               }
             }
           `,
-          lang: 'painless',
-          params: allAlertsToUpdate,
-        },
-      });
+              lang: 'painless',
+              params: updateByQueryParams,
+            },
+          }),
+        { logger: this.options.logger }
+      );
     } catch (err) {
       this.options.logger.error(
         `Error updating alert last scheduled actions ${this.ruleInfoMessage}: ${err}`,
