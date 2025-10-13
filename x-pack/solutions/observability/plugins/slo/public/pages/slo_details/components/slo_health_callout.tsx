@@ -17,7 +17,7 @@ import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
 import { useActionModal } from '../../../context/action_modal';
 import { getSloHealthStateText } from '../../../lib/slo_health_helpers';
 import { getSLOTransformId, getSLOSummaryTransformId } from '../../../../common/constants';
-import { ExternalLinkDisplayText } from './external_link_display_text';
+import { HealthCalloutContentWithCTA } from './external_link_display_text';
 
 export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
   const { isLoading, isError, data } = useFetchSloHealth({ list: [slo] });
@@ -110,7 +110,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
           <ul>
             {health.rollup === 'unhealthy' && !!rollupUrl && (
               <li key={`${slo.id}-rollup-unhealthy`}>
-                <ExternalLinkDisplayText
+                <HealthCalloutContentWithCTA
                   textSize="s"
                   content={unhealthyRollupContent}
                   url={rollupUrl}
@@ -119,7 +119,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
               </li>
             )}
             {health.summary === 'unhealthy' && !!summaryUrl && (
-              <ExternalLinkDisplayText
+              <HealthCalloutContentWithCTA
                 textSize="s"
                 content={unhealthySummaryContent}
                 url={summaryUrl}
@@ -128,7 +128,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
             )}
             {health.rollup === 'missing' && !!rollupUrl && (
               <li key={`${slo.id}-rollup-missing`}>
-                <ExternalLinkDisplayText
+                <HealthCalloutContentWithCTA
                   textSize="s"
                   content={missingRollupContent}
                   url={rollupUrl}
@@ -138,7 +138,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
               </li>
             )}
             {health.summary === 'missing' && !!summaryUrl && (
-              <ExternalLinkDisplayText
+              <HealthCalloutContentWithCTA
                 textSize="s"
                 content={missingSummaryContent}
                 url={summaryUrl}

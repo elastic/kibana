@@ -11,7 +11,7 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
 import { getSloHealthStateText } from '../../../../lib/slo_health_helpers';
-import { ExternalLinkDisplayText } from '../../../slo_details/components/external_link_display_text';
+import { HealthCalloutContentWithCTA } from '../../../slo_details/components/external_link_display_text';
 import { paths } from '../../../../../common/locators/paths';
 
 const CALLOUT_SESSION_STORAGE_KEY = 'slo_health_callout_hidden';
@@ -97,7 +97,7 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
             <ul>
               {unhealthyAndMissingSloList.map((result) => (
                 <li key={result.sloId}>
-                  <ExternalLinkDisplayText
+                  <HealthCalloutContentWithCTA
                     textSize="xs"
                     content={result.sloName}
                     url={paths.sloDetails(result.sloId, '*', undefined, 'overview')}
