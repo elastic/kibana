@@ -8,10 +8,15 @@
  */
 
 import { EventEmitter } from 'events';
+import { diag } from '@opentelemetry/api';
 import { createCleanupBeforeExit } from './create_cleanup_before_exit';
 
 const flushPromises = async () => {
-  await new Promise<void>((resolve) => setImmediate(resolve));
+  await new Promise<void>((resolve) => process.nextTick(resolve));
+};
+
+const waitForTimers = async (ms = 5) => {
+  await new Promise<void>((resolve) => setTimeout(resolve, ms));
 };
 
 type MockedProcess = NodeJS.Process & {
@@ -120,5 +125,57 @@ describe('createCleanupBeforeExit', () => {
 
     expect(handlerA).not.toHaveBeenCalled();
     expect(handlerB).toHaveBeenCalledTimes(1);
+  });
+
+  it('logs a timeout warning when a blocking handler exceeds its timeout', async () => {
+    const warnSpy = jest.spyOn(diag, 'warn').mockImplementation(() => {});
+
+    try {
+      const { proc } = createMockProc();
+      const cleanupBeforeExit = createCleanupBeforeExit(proc);
+
+      cleanupBeforeExit(() => new Promise(() => {}), { blockExit: true, timeout: 1 });
+
+      proc.emit('beforeExit', 0);
+      await flushPromises();
+      await waitForTimers();
+      await flushPromises();
+
+      expect(warnSpy).toHaveBeenCalled();
+      const warningMessage = String(warnSpy.mock.calls.at(-1)?.[0] ?? '');
+      expect(warningMessage).toContain('Timeout');
+    } finally {
+      warnSpy.mockRestore();
+    }
+  });
+
+  it('logs an error when a non-blocking handler outlives process.exit', async () => {
+    const warnSpy = jest.spyOn(diag, 'warn').mockImplementation(() => {});
+
+    try {
+      const { proc, originalExit } = createMockProc();
+      const cleanupBeforeExit = createCleanupBeforeExit(proc);
+
+      cleanupBeforeExit(() => new Promise(() => {}), { timeout: 1 });
+
+      proc.emit('beforeExit', 0);
+      await flushPromises();
+
+      proc.exit(0);
+      expect(originalExit).toHaveBeenCalledWith(0);
+
+      await waitForTimers();
+      await flushPromises();
+
+      expect(warnSpy).toHaveBeenCalled();
+      const messages = warnSpy.mock.calls.map(([error]) => String(error));
+      expect(
+        messages.some(
+          (message) => message.includes('Timeout') || message.includes('Process exited')
+        )
+      ).toBe(true);
+    } finally {
+      warnSpy.mockRestore();
+    }
   });
 });

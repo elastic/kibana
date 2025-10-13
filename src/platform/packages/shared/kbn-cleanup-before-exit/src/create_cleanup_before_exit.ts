@@ -32,12 +32,12 @@ export function createCleanupBeforeExit(proc: NodeJS.Process) {
     handlersInstalled = true;
 
     proc.once('beforeExit', cleanup);
-
+    proc.once('uncaughtExceptionMonitor', cleanup);
     proc.once('SIGINT', cleanup);
     proc.once('SIGTERM', cleanup);
 
     // @ts-expect-error
-    proc.exit = (exitCode) => {
+    proc.exit = once((exitCode) => {
       if (cleanupHandlers.filter((handler) => handler.blockExit).length === 0) {
         originalProcessExit(exitCode);
       } else {
@@ -46,7 +46,7 @@ export function createCleanupBeforeExit(proc: NodeJS.Process) {
           originalProcessExit(exitCode);
         });
       }
-    };
+    });
   };
 
   return function cleanupBeforeExit(
