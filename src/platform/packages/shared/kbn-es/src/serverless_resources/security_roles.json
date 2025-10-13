@@ -44,9 +44,10 @@
           "ml": [
             "read"
           ],
-          "siemV3": [
+          "siemV4": [
             "read",
-            "read_alerts"
+            "read_alerts",
+            "endpoint_exceptions_read"
           ],
           "securitySolutionAssistant": [
             "all"
@@ -124,9 +125,10 @@
           "ml": [
             "read"
           ],
-          "siemV3": [
+          "siemV4": [
             "read",
-            "read_alerts"
+            "read_alerts",
+            "endpoint_exceptions_read"
           ],
           "securitySolutionAssistant": [
             "all"
@@ -226,7 +228,7 @@
           "ml": [
             "read"
           ],
-          "siemV3": [
+          "siemV4": [
             "all",
             "read_alerts",
             "crud_alerts",
@@ -235,6 +237,7 @@
             "event_filters_all",
             "host_isolation_exceptions_all",
             "blocklist_all",
+            "endpoint_exceptions_all",
             "policy_management_read",
             "host_isolation_all",
             "process_operations_all",
@@ -348,10 +351,11 @@
           "ml": [
             "read"
           ],
-          "siemV3": [
+          "siemV4": [
             "all",
             "read_alerts",
-            "crud_alerts"
+            "crud_alerts",
+            "endpoint_exceptions_all"
           ],
           "securitySolutionAssistant": [
             "all"
@@ -441,10 +445,11 @@
           "ml": [
             "read"
           ],
-          "siemV3": [
+          "siemV4": [
             "all",
             "read_alerts",
-            "crud_alerts"
+            "crud_alerts",
+            "endpoint_exceptions_all"
           ],
           "securitySolutionAssistant": [
             "all"
@@ -528,10 +533,11 @@
           "ml": [
             "all"
           ],
-          "siemV3": [
+          "siemV4": [
             "all",
             "read_alerts",
-            "crud_alerts"
+            "crud_alerts",
+            "endpoint_exceptions_all"
           ],
           "securitySolutionAssistant": [
             "all"
@@ -630,10 +636,11 @@
           "ml": [
             "all"
           ],
-          "siemV3": [
+          "siemV4": [
             "all",
             "read_alerts",
-            "crud_alerts"
+            "crud_alerts",
+            "endpoint_exceptions_all"
           ],
           "securitySolutionAssistant": [
             "all"
