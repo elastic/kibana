@@ -886,7 +886,6 @@ export class FleetPlugin
         const authz = await getAuthzFromRequest(request);
         return new OutputClient(soClient, authz);
       },
-      cloudConnectorService,
       runWithCache,
     };
   }
