@@ -12,9 +12,6 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  // FIXME:PT delete?
-  excludePoliciesInFilterEnabled: false,
-
   kubernetesEnabled: false,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
@@ -111,12 +108,12 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Disables ESQL-based risk scoring
    */
-  disableESQLRiskScoring: true,
+  disableESQLRiskScoring: false,
 
   /**
    * Enable resetting risk scores to zero for outdated entities
    */
-  enableRiskScoreResetToZero: false,
+  enableRiskScoreResetToZero: true,
 
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
