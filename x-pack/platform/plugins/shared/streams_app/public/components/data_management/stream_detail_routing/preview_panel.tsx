@@ -228,7 +228,7 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
         <DocumentMatchFilterControls
           onFilterChange={setDocumentMatchFilter}
           matchedDocumentPercentage={approximateMatchingPercentage}
-          isDisabled={!!documentsError || !condition}
+          isDisabled={!!documentsError || !condition || (condition && !isProcessedCondition)}
         />
         {content}
       </EuiFlexGroup>
