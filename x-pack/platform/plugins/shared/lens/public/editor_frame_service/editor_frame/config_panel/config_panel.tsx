@@ -40,8 +40,10 @@ import {
   registerLibraryAnnotationGroup,
 } from '../../../state_management';
 import { getRemoveOperation } from '../../../utils';
+import { useLensAppServices } from '../../../app_plugin/app_helpers';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
+  // const { visualizationMap } = useLensAppServices();
   const visualization = useLensSelector(selectVisualization);
 
   const activeVisualization = visualization.activeId

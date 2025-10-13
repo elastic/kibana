@@ -13,10 +13,11 @@ import type { ChromeStart } from '@kbn/core-chrome-browser';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { useRef, useCallback, useMemo, useState } from 'react';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { LensAppLocator, LensAppLocatorParams } from '../../common/locator/locator';
 import type { VisualizeEditorContext } from '../types';
 import type { LensDocument } from '../persistence';
-import type { RedirectToOriginProps } from './types';
+import type { LensAppServices, RedirectToOriginProps } from './types';
 
 const VISUALIZE_APP_ID = 'visualize';
 
@@ -205,3 +206,6 @@ export function useNavigateBackToApp({
     closeGoBackToVizEditorModal: () => setIsGoBackToVizEditorModalVisible(false),
   };
 }
+
+// Helper hook to wrap useKibana with LensAppServices
+export const useLensAppServices = () => useKibana<LensAppServices>().services;

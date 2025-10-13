@@ -56,6 +56,7 @@ export interface EditorFrameProps {
 }
 
 export function EditorFrame(props: EditorFrameProps) {
+  console.log('CAN HAZ EDITOR FRAME?');
   const { datasourceMap, visualizationMap } = props;
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
