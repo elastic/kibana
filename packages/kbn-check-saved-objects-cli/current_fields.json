@@ -193,6 +193,7 @@
     "title",
     "total_alerts",
     "total_comments",
+    "total_events",
     "updated_at",
     "updated_by",
     "updated_by.email",
@@ -620,8 +621,6 @@
     "version",
     "wsState"
   ],
-  "guided-onboarding-guide-state": [],
-  "guided-onboarding-plugin-state": [],
   "index-pattern": [
     "name",
     "title",
@@ -942,6 +941,7 @@
   "risk-engine-configuration": [
     "alertSampleSizePerShard",
     "dataViewId",
+    "enableResetToZero",
     "enabled",
     "excludeAlertStatuses",
     "filter",

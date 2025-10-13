@@ -24,7 +24,7 @@ describe('No data screen', () => {
 
     it('shows no data screen instead of service inventory', () => {
       cy.visitKibana('/app/apm/');
-      cy.contains('Add the APM integration');
+      cy.contains('Add data');
     });
 
     it('shows settings page', () => {

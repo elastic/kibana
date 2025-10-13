@@ -36,7 +36,7 @@ const PROMPT_SUGGESTIONS = [
   ...getFunctionSuggestions({
     location: Location.COMPLETION,
     returnTypes: ['text', 'keyword', 'unknown'],
-  }).map((fn) => `${fn.text}`),
+  }).map((fn) => `${fn.text} `),
 ];
 
 describe('COMPLETION Autocomplete', () => {
@@ -101,13 +101,13 @@ describe('COMPLETION Autocomplete', () => {
 
   it('suggests inference endpoints as the values for inference_id', async () => {
     await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "`, [
-      'inference_1',
+      '"inference_1"',
     ]);
     await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "i/`, [
-      'inference_1',
+      '"inference_1"',
     ]);
     await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "inf/`, [
-      'inference_1',
+      '"inference_1"',
     ]);
   });
 

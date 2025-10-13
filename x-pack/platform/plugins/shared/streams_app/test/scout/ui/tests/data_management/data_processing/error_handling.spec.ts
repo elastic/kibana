@@ -9,8 +9,7 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
-// Failing: See https://github.com/elastic/kibana/issues/236525
-test.describe.skip(
+test.describe(
   'Stream data processing - error handling and recovery',
   { tag: ['@ess', '@svlOblt'] },
   () => {
@@ -51,15 +50,18 @@ test.describe.skip(
       await pageObjects.streams.confirmChangesInReviewModal();
 
       // Should show error and stay in creating state
-      await pageObjects.streams.expectToastVisible();
-      await expect(page.getByText("An issue occurred saving processors' changes")).toBeVisible();
-      await pageObjects.streams.closeToasts();
+      await pageObjects.toasts.waitFor();
+      expect(await pageObjects.toasts.getHeaderText()).toBe(
+        "An issue occurred saving processors' changes."
+      );
+      await pageObjects.toasts.closeAll();
 
       // Restore network and retry
       await page.route('**/streams/**/_ingest', async (route) => {
         await route.continue();
       });
       await pageObjects.streams.saveStepsListChanges();
+      await pageObjects.streams.confirmChangesInReviewModal();
 
       // Should succeed
       expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
@@ -74,9 +76,10 @@ test.describe.skip(
       await pageObjects.streams.fillProcessorFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
+
       await pageObjects.streams.saveStepsListChanges();
       await pageObjects.streams.confirmChangesInReviewModal();
-      await pageObjects.streams.closeToasts();
+      await pageObjects.toasts.closeAll();
 
       // Edit the processor
       await pageObjects.streams.clickEditProcessor(0);
@@ -92,9 +95,11 @@ test.describe.skip(
       await pageObjects.streams.saveStepsListChanges();
 
       // Should show error and return to editing state
-      await pageObjects.streams.expectToastVisible();
-      await expect(page.getByText("An issue occurred saving processors' changes")).toBeVisible();
-      await pageObjects.streams.closeToasts();
+      await pageObjects.toasts.waitFor();
+      expect(await pageObjects.toasts.getHeaderText()).toBe(
+        "An issue occurred saving processors' changes."
+      );
+      await pageObjects.toasts.closeAll();
 
       // Restore network and retry
       await page.route('**/streams/**/_ingest', async (route) => {
@@ -103,8 +108,8 @@ test.describe.skip(
       await pageObjects.streams.saveStepsListChanges();
 
       // Should succeed
-      await pageObjects.streams.expectToastVisible();
-      await expect(page.getByText("Stream's processors updated")).toBeVisible();
+      await pageObjects.toasts.waitFor();
+      expect(await pageObjects.toasts.getHeaderText()).toBe("Stream's processors updated");
     });
   }
 );

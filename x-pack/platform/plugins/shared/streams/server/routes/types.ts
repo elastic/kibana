@@ -18,7 +18,7 @@ import type { AssetClient } from '../lib/streams/assets/asset_client';
 import type { AssetService } from '../lib/streams/assets/asset_service';
 import type { QueryClient } from '../lib/streams/assets/query/query_client';
 import type { StreamsClient } from '../lib/streams/client';
-import type { StreamsTelemetryClient } from '../lib/telemetry/client';
+import type { EbtTelemetryClient } from '../lib/telemetry';
 import type { StreamsServer } from '../types';
 import type { SystemClient } from '../lib/streams/system/system_client';
 
@@ -45,7 +45,7 @@ export interface RouteHandlerScopedClients {
 export interface RouteDependencies {
   assets: AssetService;
   server: StreamsServer;
-  telemetry: StreamsTelemetryClient;
+  telemetry: EbtTelemetryClient;
   getScopedClients: GetScopedClients;
 }
 
