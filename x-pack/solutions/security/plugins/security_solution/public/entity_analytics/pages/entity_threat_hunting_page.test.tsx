@@ -10,24 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { EntityThreatHuntingPage } from './entity_threat_hunting_page';
 import { TestProviders } from '../../common/mock';
-import { useSourcererDataView } from '../../sourcerer/containers';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-
-jest.mock('../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn(() => ({
-    indicesExist: true,
-    loading: false,
-    sourcererDataView: { id: 'test', matchedIndices: ['index-1'] },
-  })),
-}));
-
-jest.mock('../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn((flag: string) => {
-    if (flag === 'newDataViewPickerEnabled') return false;
-    return false;
-  }),
-}));
 
 jest.mock('../../data_view_manager/hooks/use_data_view', () => ({
   useDataView: jest.fn(() => ({
@@ -54,24 +37,11 @@ jest.mock('../components/threat_hunting/threat_hunting_entities_table', () => ({
   ),
 }));
 
-const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 const mockUseDataView = useDataView as jest.Mock;
 
 describe('EntityThreatHuntingPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    mockUseSourcererDataView.mockReturnValue({
-      indicesExist: true,
-      loading: false,
-      sourcererDataView: { id: 'test', matchedIndices: ['index-1'] },
-    });
-
-    mockUseIsExperimentalFeatureEnabled.mockImplementation((flag: string) => {
-      if (flag === 'newDataViewPickerEnabled') return false;
-      return false;
-    });
 
     mockUseDataView.mockReturnValue({
       dataView: { id: 'test', matchedIndices: ['index-1'] },
@@ -135,30 +105,7 @@ describe('EntityThreatHuntingPage', () => {
     expect(screen.getByTestId('threat-hunting-entities-table')).toBeInTheDocument();
   });
 
-  it('renders loading spinner when sourcerer is loading', () => {
-    mockUseSourcererDataView.mockReturnValue({
-      indicesExist: true,
-      loading: true,
-      sourcererDataView: { id: 'test', matchedIndices: ['index-1'] },
-    });
-
-    render(
-      <MemoryRouter>
-        <EntityThreatHuntingPage />
-      </MemoryRouter>,
-      { wrapper: TestProviders }
-    );
-
-    expect(screen.getByTestId('threatHuntingLoader')).toBeInTheDocument();
-  });
-
   it('renders empty prompt when indices do not exist', () => {
-    mockUseSourcererDataView.mockReturnValue({
-      indicesExist: false,
-      loading: false,
-      sourcererDataView: { id: 'test', matchedIndices: [] },
-    });
-
     mockUseDataView.mockReturnValue({
       dataView: { id: 'test', matchedIndices: [] },
       status: 'ready',

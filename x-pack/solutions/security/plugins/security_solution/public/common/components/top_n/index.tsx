@@ -10,7 +10,7 @@ import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 
 import type { Filter, Query } from '@kbn/es-query';
-import { type DataView, type DataViewSpec, getEsQueryConfig } from '@kbn/data-plugin/common';
+import { type DataView, getEsQueryConfig } from '@kbn/data-plugin/common';
 import { isActiveTimeline } from '../../../helpers';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useGlobalTime } from '../../containers/use_global_time';
@@ -77,7 +77,6 @@ const connector = connect(makeMapStateToProps);
 export interface OwnProps {
   browserFields: BrowserFields;
   field: string;
-  dataViewSpec?: DataViewSpec;
   dataView: DataView;
   scopeId?: string;
   toggleTopN: () => void;
@@ -98,7 +97,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
   browserFields,
   dataProviders,
   field,
-  dataViewSpec,
   dataView,
   globalFilters = EMPTY_FILTERS,
   globalQuery = EMPTY_QUERY,
@@ -122,7 +120,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
             config: getEsQueryConfig(uiSettings),
             dataProviders,
             filters: activeTimelineFilters,
-            dataViewSpec,
             dataView,
             kqlMode,
             kqlQuery: {
@@ -137,7 +134,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
       uiSettings,
       dataProviders,
       activeTimelineFilters,
-      dataViewSpec,
       dataView,
       kqlMode,
       activeTimelineKqlQueryExpression,
@@ -158,7 +154,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
       filters={isActiveTimeline(scopeId ?? '') ? EMPTY_FILTERS : globalFilters}
       from={isActiveTimeline(scopeId ?? '') ? activeTimelineFrom : from}
       dataView={dataView}
-      dataViewSpec={dataViewSpec}
       options={options}
       paddingSize={paddingSize}
       query={isActiveTimeline(scopeId ?? '') ? EMPTY_QUERY : globalQuery}

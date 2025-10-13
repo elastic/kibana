@@ -121,20 +121,18 @@ describe('global header', () => {
     expect(link?.getAttribute('href')).toBe(ADD_THREAT_INTELLIGENCE_DATA_PATH);
   });
 
-  // TODO: Skipping until feature flag is enabled https://github.com/elastic/security-team/issues/11959 by default
-  // it.each(sourcererPaths)('shows data view manager on %s page', (pathname) => {
-  //   (useLocation as jest.Mock).mockReturnValue({ pathname });
-  //
-  //   const { getByTestId } = render(
-  //     <TestProviders store={store}>
-  //       <GlobalHeader />
-  //     </TestProviders>
-  //   );
-  //   expect(getByTestId(DATA_VIEW_PICKER_TEST_ID)).toBeInTheDocument();
-  // });
+  it.each(sourcererPaths)('shows data view manager on %s page', (pathname) => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname });
 
-  // TODO: Skipping until feature flag is enabled https://github.com/elastic/security-team/issues/11959 by default
-  it.skip('shows data view manager on rule details page', () => {
+    const { getByTestId } = render(
+      <TestProviders store={store}>
+        <GlobalHeader />
+      </TestProviders>
+    );
+    expect(getByTestId(DATA_VIEW_PICKER_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('shows data view manager on rule details page', () => {
     (useLocation as jest.Mock).mockReturnValue({ pathname: sourcererPaths[2] });
 
     const { getByTestId } = render(

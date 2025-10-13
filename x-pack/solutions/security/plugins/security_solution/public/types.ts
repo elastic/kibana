@@ -7,10 +7,10 @@
 
 import type { Observable } from 'rxjs';
 
-import type { CoreStart, AppMountParameters, AppLeaveHandler } from '@kbn/core/public';
+import type { AppLeaveHandler, AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { DataPublicPluginStart, DataPublicPluginSetup } from '@kbn/data-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -27,14 +27,14 @@ import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
+import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
 import type { KubernetesSecurityStart } from '@kbn/kubernetes-security-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { OsqueryPluginStart } from '@kbn/osquery-plugin/public';
-import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -62,13 +62,12 @@ import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
-import type { ProductFeatureKeyType, ProductFeatureKeys } from '@kbn/security-solution-features';
+import type { ProductFeatureKeys, ProductFeatureKeyType } from '@kbn/security-solution-features';
 import type { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-assistant-shared-state-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import type { Logger } from '@kbn/logging';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -97,7 +96,7 @@ import type { Dashboards } from './dashboards';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
 import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 import type { ExperimentalFeatures } from '../common/experimental_features';
-import type { SetComponents, GetComponents$ } from './contract_components';
+import type { GetComponents$, SetComponents } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
 import type { SecuritySolutionUiConfigType } from './common/types';
 import type { OnboardingService } from './onboarding/service';
@@ -212,7 +211,6 @@ export type StartServices = CoreStart &
     timelineDataService: DataPublicPluginStart;
     siemMigrations: SiemMigrationsService;
     productDocBase: ProductDocBasePluginStart;
-    logger: Logger;
   };
 
 export type StartRenderServices = Pick<

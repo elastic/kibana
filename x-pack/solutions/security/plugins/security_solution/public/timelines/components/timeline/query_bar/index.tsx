@@ -14,14 +14,10 @@ import { FilterStateStore } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import styled from '@emotion/styled';
 import { PageScope } from '../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 
-import {
-  convertKueryToElasticSearchQuery,
-  dataViewSpecToViewBase,
-} from '../../../../common/lib/kuery';
+import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
 import type { KqlMode } from '../../../store/model';
 import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
 import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
@@ -31,7 +27,6 @@ import { buildGlobalQuery, getNonDropAreaFilters, TIMELINE_FILTER_DROP_AREA } fr
 import { timelineActions } from '../../../store';
 import type { KueryFilterQuery, KueryFilterQueryKind } from '../../../../../common/types/timeline';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 
 export interface QueryBarTimelineComponentProps {
   dataProviders: DataProvider[];
@@ -114,28 +109,8 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const [dateRangeTo, setDateRangTo] = useState<string>(
       toStr != null ? toStr : new Date(to).toISOString()
     );
-    const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataViewSpec } =
-      useSourcererDataView(PageScope.timeline);
-
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-    const { dataView: experimentalDataView } = useDataView(PageScope.timeline);
-
-    const experimentalBrowserFields = useBrowserFields(PageScope.timeline);
-
-    const dataViewBase = useMemo(
-      () => dataViewSpecToViewBase(oldSourcererDataViewSpec),
-      [oldSourcererDataViewSpec]
-    );
-
-    const dataView = useMemo(
-      () => (newDataViewPickerEnabled ? experimentalDataView : dataViewBase),
-      [newDataViewPickerEnabled, experimentalDataView, dataViewBase]
-    );
-
-    const browserFields = useMemo(
-      () => (newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields),
-      [experimentalBrowserFields, newDataViewPickerEnabled, oldBrowserFields]
-    );
+    const { dataView } = useDataView(PageScope.timeline);
+    const browserFields = useBrowserFields(PageScope.timeline);
 
     const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
     const [filterQueryConverted, setFilterQueryConverted] = useState<Query>({
@@ -308,7 +283,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           onSavedQuery={onSavedQuery}
           dataTestSubj={'timelineQueryInput'}
           displayStyle="inPage"
-          preventCacheClearOnUnmount={newDataViewPickerEnabled}
+          preventCacheClearOnUnmount={true}
         />
       </SearchBarContainer>
     );

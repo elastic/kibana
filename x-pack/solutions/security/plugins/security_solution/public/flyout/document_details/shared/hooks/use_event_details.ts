@@ -9,12 +9,10 @@ import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-pl
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { PageScope } from '../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DEFAULT_ALERTS_INDEX, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import type { RunTimeMappings } from '../../../../../common/api/search_strategy';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 import type { SearchHit } from '../../../../../common/search_strategy';
 import type { GetFieldsData } from './use_get_fields_data';
@@ -94,20 +92,9 @@ export const useEventDetails = ({
   const sourcererScope =
     pageName === SecurityPageName.detections ? PageScope.alerts : PageScope.default;
 
-  const sourcererDataView = useSourcererDataView(sourcererScope);
-
-  const oldRuntimeMappings: RunTimeMappings = sourcererDataView.sourcererDataView
-    .runtimeFieldMap as RunTimeMappings;
-  const oldBrowserFields = sourcererDataView.browserFields;
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataView } = useDataView(sourcererScope);
-  const experimentalBrowserFields = useBrowserFields(sourcererScope);
-
-  const runtimeMappings = newDataViewPickerEnabled
-    ? (dataView?.getRuntimeMappings() as RunTimeMappings)
-    : oldRuntimeMappings;
-  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+  const browserFields = useBrowserFields(sourcererScope);
+  const runtimeMappings = dataView?.getRuntimeMappings() as RunTimeMappings;
 
   const [loading, dataFormattedForFieldBrowser, searchHit, dataAsNestedObject, refetchFlyoutData] =
     useTimelineEventsDetails({

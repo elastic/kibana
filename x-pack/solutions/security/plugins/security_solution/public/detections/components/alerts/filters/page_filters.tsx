@@ -12,8 +12,7 @@ import type { AlertFilterControlsProps } from '@kbn/alerts-ui-shared/src/alert_f
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { useHistory } from 'react-router-dom';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
-import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { DataView } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
@@ -54,12 +53,10 @@ export type PageFiltersProps = Pick<
   AlertFilterControlsProps,
   'filters' | 'onFiltersChange' | 'query' | 'timeRange' | 'onInit'
 > & {
-  dataView: DataView | DataViewSpec;
+  dataView: DataView;
 };
 
 export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   const { http, notifications, dataViews } = useKibana().services;
   const services = useMemo(
     () => ({
@@ -93,10 +90,10 @@ export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
     [urlStorage]
   );
 
-  // TODO change to .getIndexPattern() once we remove the newDataViewPickerEnabled feature flag and we have a DataView object
   const alertsIndicesTitle = useMemo(
     () =>
-      dataView.title
+      dataView
+        .getIndexPattern()
         ?.split(',')
         .filter((index) => index.includes(DEFAULT_ALERTS_INDEX))
         .join(','),
@@ -125,7 +122,7 @@ export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
       dataViewSpec={customDataViewSpec}
       defaultControls={DEFAULT_DETECTION_PAGE_FILTERS}
       maxControls={4}
-      preventCacheClearOnUnmount={newDataViewPickerEnabled}
+      preventCacheClearOnUnmount={true}
       ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}
       services={services}
       setControlsUrlState={setFilterControlsUrlState}

@@ -37,10 +37,13 @@ const IndicatorsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) =
 );
 
 const IndicatorsPageContent: FC = () => {
-  const { sourcererDataView: sourcererDataViewSpec, browserFields } = useTIDataView();
+  const {
+    browserFields,
+    sourcererDataView: { fields },
+  } = useTIDataView();
 
   const { fieldFormats } = useKibana().services;
-  const dataView = new DataView({ spec: sourcererDataViewSpec, fieldFormats });
+  const dataView = new DataView({ spec: fields, fieldFormats });
 
   const columnSettings = useColumnSettings();
 
@@ -81,11 +84,7 @@ const IndicatorsPageContent: FC = () => {
       subHeader={<UpdateStatus isUpdating={isFetchingIndicators} updatedAt={dataUpdatedAt} />}
     >
       <FiltersGlobal>
-        <SiemSearchBar
-          dataView={dataView}
-          id={InputsModelId.global}
-          sourcererDataViewSpec={sourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
-        />
+        <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
       </FiltersGlobal>
 
       <IndicatorsBarChartWrapper

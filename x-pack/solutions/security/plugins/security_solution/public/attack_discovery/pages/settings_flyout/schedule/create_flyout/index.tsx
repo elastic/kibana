@@ -18,12 +18,10 @@ import {
 } from '@elastic/eui';
 import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 import React, { useCallback, useState } from 'react';
-
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ConfirmationModal } from '../confirmation_modal';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { Footer } from '../../footer';
 import { MIN_FLYOUT_WIDTH } from '../../constants';
 import { useEditForm } from '../edit_form';
@@ -64,8 +62,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
     settings,
   });
 
-  const { sourcererDataView } = useSourcererDataView();
-  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
+  const { dataView } = useDataView(PageScope.alerts);
 
   const { mutateAsync: createAttackDiscoverySchedule, isLoading: isLoadingQuery } =
     useCreateAttackDiscoverySchedule();
@@ -82,9 +79,8 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
           scheduleData,
           alertsIndexPattern ?? '',
           connector,
-          sourcererDataView,
           uiSettings,
-          experimentalDataView
+          dataView
         );
         await createAttackDiscoverySchedule({ scheduleToCreate });
         onClose();
@@ -92,15 +88,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
         // Error is handled by the mutation's onError callback, so no need to do anything here
       }
     },
-    [
-      aiConnectors,
-      alertsIndexPattern,
-      createAttackDiscoverySchedule,
-      experimentalDataView,
-      onClose,
-      sourcererDataView,
-      uiSettings,
-    ]
+    [aiConnectors, alertsIndexPattern, createAttackDiscoverySchedule, dataView, onClose, uiSettings]
   );
 
   const { editForm, actionButtons } = useEditForm({

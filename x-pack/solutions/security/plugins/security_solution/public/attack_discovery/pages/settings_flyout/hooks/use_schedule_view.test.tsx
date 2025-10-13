@@ -11,7 +11,6 @@ import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-li
 import { useScheduleView } from './use_schedule_view';
 import { useFindAttackDiscoverySchedules } from '../schedule/logic/use_find_schedules';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { TestProviders } from '../../../../common/mock';
 import { mockFindAttackDiscoverySchedules } from '../../mock/mock_find_attack_discovery_schedules';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
@@ -26,13 +25,9 @@ jest.mock('react-router', () => ({
   withRouter: jest.fn(),
 }));
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../sourcerer/containers');
 jest.mock('../schedule/logic/use_find_schedules');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
 const mockUseFindAttackDiscoverySchedules = useFindAttackDiscoverySchedules as jest.MockedFunction<
   typeof useFindAttackDiscoverySchedules
 >;
@@ -70,11 +65,6 @@ describe('useScheduleView', () => {
     jest.clearAllMocks();
 
     setupUseKibana();
-
-    mockUseSourcererDataView.mockReturnValue({
-      sourcererDataView: {},
-      loading: false,
-    } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
 
     mockUseFindAttackDiscoverySchedules.mockReturnValue({
       data: mockFindAttackDiscoverySchedules,

@@ -13,11 +13,9 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../data_view_manager/constants';
 import { OPEN_FLYOUT_BUTTON_TEST_ID } from './test_ids';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { useKibana } from '../../common/lib/kibana';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { DocumentEventTypes } from '../../common/lib/telemetry';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 
 export const OPEN_FLYOUT_BUTTON = i18n.translate(
@@ -48,14 +46,7 @@ export interface OpenFlyoutButtonIconProps {
  */
 export const OpenFlyoutButtonIcon = memo(
   ({ eventId, timelineId, iconType }: OpenFlyoutButtonIconProps) => {
-    const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(PageScope.timeline);
-
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-    const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
-
-    const selectedPatterns = newDataViewPickerEnabled
-      ? experimentalSelectedPatterns
-      : oldSelectedPatterns;
+    const selectedPatterns = useSelectedPatterns(PageScope.timeline);
 
     const { telemetry } = useKibana().services;
     const { openFlyout } = useExpandableFlyoutApi();

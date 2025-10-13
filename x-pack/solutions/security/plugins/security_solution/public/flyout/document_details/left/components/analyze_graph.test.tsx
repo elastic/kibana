@@ -23,7 +23,6 @@ import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { DocumentDetailsAnalyzerPanelKey } from '../../shared/constants/panel_keys';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -82,7 +81,6 @@ describe('<AnalyzeGraph />', () => {
 
     mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
     (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
     (useDataView as jest.Mock).mockReturnValue({

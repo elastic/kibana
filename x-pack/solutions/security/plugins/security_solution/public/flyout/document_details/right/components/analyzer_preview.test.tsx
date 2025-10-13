@@ -15,11 +15,12 @@ import { DocumentDetailsContext } from '../../shared/context';
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import * as mock from '../mocks/mock_analyzer_data';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+
+import * as mock from '../mocks/mock_analyzer_data';
 
 jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),

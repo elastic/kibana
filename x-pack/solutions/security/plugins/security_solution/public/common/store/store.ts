@@ -8,12 +8,12 @@
 import thunk from 'redux-thunk';
 import type {
   Action,
-  Store,
-  Middleware,
-  Dispatch,
-  PreloadedState,
   AnyAction,
+  Dispatch,
+  Middleware,
+  PreloadedState,
   Reducer,
+  Store,
 } from 'redux';
 import { applyMiddleware, createStore as createReduxStore } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
@@ -61,8 +61,7 @@ export const createStoreFactory = async (
     dataViewService: startPlugins.data.dataViews,
     uiSettings: coreStart.uiSettings,
     spaces: startPlugins.spaces,
-    // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
-    skip: enableExperimental.newDataViewPickerEnabled,
+    skip: true,
   });
 
   const timelineInitialState = {

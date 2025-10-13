@@ -76,15 +76,6 @@ jest.mock('../../../../common/hooks/timeline/use_investigate_in_timeline', () =>
   useInvestigateInTimeline: () => mockInvestigateInTimeline,
 }));
 
-jest.mock('../../../../sourcerer/components/use_get_sourcerer_data_view', () => ({
-  useGetScopedSourcererDataView: () => ({
-    dataView: {
-      id: 'old-data-view',
-      getIndexPattern: jest.fn().mockReturnValue('old-data-view-pattern'),
-    },
-  }),
-}));
-
 jest.mock('../../../../data_view_manager/hooks/use_data_view', () => ({
   useDataView: () => ({
     dataView: {

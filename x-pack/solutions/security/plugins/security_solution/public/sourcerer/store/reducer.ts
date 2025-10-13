@@ -6,15 +6,11 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-
-import { PageScope } from '../../data_view_manager/constants';
 import {
   setDataView,
   setDataViewLoading,
   setSelectedDataView,
-  setSignalIndexName,
   setSourcererDataViews,
-  setSourcererScopeLoading,
 } from './actions';
 import type { SourcererModel } from './model';
 import { initDataView, initialSourcererState } from './model';
@@ -23,10 +19,6 @@ import { validateSelectedPatterns } from './helpers';
 export type SourcererState = SourcererModel;
 
 export const sourcererReducer = reducerWithInitialState(initialSourcererState)
-  .case(setSignalIndexName, (state, { signalIndexName }) => ({
-    ...state,
-    signalIndexName,
-  }))
   .case(setDataViewLoading, (state, { id, loading }) => ({
     ...state,
     ...(id === state.defaultDataView.id
@@ -46,33 +38,6 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       ...(state.kibanaDataViews.find(({ id }) => id === dataView.id) ?? initDataView),
       ...dataView,
     })),
-  }))
-  .case(setSourcererScopeLoading, (state, { id, loading }) => ({
-    ...state,
-    sourcererScopes: {
-      ...state.sourcererScopes,
-      ...(id != null
-        ? {
-            [id]: {
-              ...state.sourcererScopes[id],
-              loading,
-            },
-          }
-        : {
-            [PageScope.default]: {
-              ...state.sourcererScopes[PageScope.default],
-              loading,
-            },
-            [PageScope.alerts]: {
-              ...state.sourcererScopes[PageScope.alerts],
-              loading,
-            },
-            [PageScope.timeline]: {
-              ...state.sourcererScopes[PageScope.timeline],
-              loading,
-            },
-          }),
-    },
   }))
   .case(setSelectedDataView, (state, payload) => {
     const { shouldValidateSelectedPatterns = true, ...patternsInfo } = payload;

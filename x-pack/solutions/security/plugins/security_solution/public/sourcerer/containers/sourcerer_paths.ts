@@ -52,8 +52,7 @@ const explorePaths = [
 ];
 
 export const getScopeFromPath = (
-  pathname: string,
-  newDataViewPickerEnabled?: boolean
+  pathname: string
 ): PageScope.default | PageScope.alerts | PageScope.attacks | PageScope.explore => {
   if (
     matchPath(pathname, {
@@ -65,7 +64,6 @@ export const getScopeFromPath = (
   }
 
   if (
-    newDataViewPickerEnabled &&
     matchPath(pathname, {
       path: attacksPaths,
       strict: false,
@@ -75,7 +73,6 @@ export const getScopeFromPath = (
   }
 
   if (
-    newDataViewPickerEnabled &&
     matchPath(pathname, {
       path: explorePaths,
       strict: false,

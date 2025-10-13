@@ -14,12 +14,10 @@ import {
   Wrapper,
 } from './wrapper';
 import { TestProviders } from '../../../common/mock';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
-jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../data_view_manager/hooks/use_data_view');
 jest.mock('./content', () => ({
   AttacksPageContent: () => <div data-test-subj={'attacks-page-content'} />,
@@ -28,122 +26,99 @@ jest.mock('./content', () => ({
 const dataView: DataView = createStubDataView({ spec: {} });
 
 describe('<Wrapper />', () => {
-  describe('newDataViewPickerEnabled false', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-      (useDataView as jest.Mock).mockReturnValue({});
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-    it('should render an error', async () => {
-      render(
-        <TestProviders>
-          <Wrapper />
-        </TestProviders>
-      );
+  it('should render a loading skeleton if the dataView status is pristine', async () => {
+    (useDataView as jest.Mock).mockReturnValue({ dataView, status: 'pristine' });
 
-      expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
-        'Unable to retrieve the data view'
-      );
+    render(
+      <TestProviders>
+        <Wrapper />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
+      expect(screen.getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
     });
   });
 
-  describe('newDataViewPickerEnabled true', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+  it('should render a loading skeleton if the dataView status is loading', async () => {
+    (useDataView as jest.Mock).mockReturnValue({ dataView, status: 'loading' });
+
+    render(
+      <TestProviders>
+        <Wrapper />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
+      expect(screen.getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
+    });
+  });
+
+  it('should render an error if the dataView status is error', async () => {
+    (useDataView as jest.Mock).mockReturnValue({
+      dataView: undefined,
+      status: 'error',
     });
 
-    it('should render a loading skeleton if the dataView status is pristine', async () => {
-      (useDataView as jest.Mock).mockReturnValue({ dataView, status: 'pristine' });
+    render(
+      <TestProviders>
+        <Wrapper />
+      </TestProviders>
+    );
 
-      render(
-        <TestProviders>
-          <Wrapper />
-        </TestProviders>
-      );
+    expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
+    expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
+      'Unable to retrieve the data view'
+    );
+  });
 
-      await waitFor(() => {
-        expect(screen.getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-        expect(screen.getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
-      });
+  it('should render an error if the dataView status is ready but it has no indices', async () => {
+    (useDataView as jest.Mock).mockReturnValue({
+      dataView: {
+        ...dataView,
+        getRuntimeMappings: jest.fn(),
+        hasMatchedIndices: jest.fn().mockReturnValue(false),
+      },
+      status: 'ready',
     });
 
-    it('should render a loading skeleton if the dataView status is loading', async () => {
-      (useDataView as jest.Mock).mockReturnValue({ dataView, status: 'loading' });
+    render(
+      <TestProviders>
+        <Wrapper />
+      </TestProviders>
+    );
 
-      render(
-        <TestProviders>
-          <Wrapper />
-        </TestProviders>
-      );
+    expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
+    expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
+      'Unable to retrieve the data view'
+    );
+  });
 
-      await waitFor(() => {
-        expect(screen.getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-        expect(screen.getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
-      });
+  it('should render the content', async () => {
+    (useDataView as jest.Mock).mockReturnValue({
+      dataView: {
+        ...dataView,
+        id: 'id',
+        getIndexPattern: jest.fn().mockReturnValue('title'),
+        getRuntimeMappings: jest.fn(),
+        hasMatchedIndices: jest.fn().mockReturnValue(true),
+      },
+      status: 'ready',
     });
 
-    it('should render an error if the dataView status is error', async () => {
-      (useDataView as jest.Mock).mockReturnValue({
-        dataView: undefined,
-        status: 'error',
-      });
+    render(
+      <TestProviders>
+        <Wrapper />
+      </TestProviders>
+    );
 
-      render(
-        <TestProviders>
-          <Wrapper />
-        </TestProviders>
-      );
-
-      expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
-        'Unable to retrieve the data view'
-      );
-    });
-
-    it('should render an error if the dataView status is ready but it has no indices', async () => {
-      (useDataView as jest.Mock).mockReturnValue({
-        dataView: {
-          ...dataView,
-          getRuntimeMappings: jest.fn(),
-          hasMatchedIndices: jest.fn().mockReturnValue(false),
-        },
-        status: 'ready',
-      });
-
-      render(
-        <TestProviders>
-          <Wrapper />
-        </TestProviders>
-      );
-
-      expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
-        'Unable to retrieve the data view'
-      );
-    });
-
-    it('should render the content', async () => {
-      (useDataView as jest.Mock).mockReturnValue({
-        dataView: {
-          ...dataView,
-          id: 'id',
-          getIndexPattern: jest.fn().mockReturnValue('title'),
-          getRuntimeMappings: jest.fn(),
-          hasMatchedIndices: jest.fn().mockReturnValue(true),
-        },
-        status: 'ready',
-      });
-
-      render(
-        <TestProviders>
-          <Wrapper />
-        </TestProviders>
-      );
-
-      expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(await screen.findByTestId('attacks-page-content')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
+    expect(await screen.findByTestId('attacks-page-content')).toBeInTheDocument();
   });
 });

@@ -19,8 +19,6 @@ import { InputsModelId } from '../../store/inputs/constants';
 import type { TimeRange } from '../../store/inputs/model';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
-import { sourcererActions } from '../../store/actions';
-import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 
 interface InvestigateInTimelineArgs {
   /**
@@ -59,7 +57,6 @@ export const useInvestigateInTimeline = () => {
 
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
   const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const clearTimelineTemplate = useCreateTimeline({
     timelineId: TimelineId.active,
@@ -129,21 +126,11 @@ export const useInvestigateInTimeline = () => {
         // Only show detection alerts
         // (This is required so the timeline event count matches the prevalence count)
         if (!keepDataView) {
-          if (newDataViewPickerEnabled) {
-            setSelectedDataView({
-              scope: PageScope.timeline,
-              id: defaultDataView.id,
-              fallbackPatterns: [signalIndexName || ''],
-            });
-          } else {
-            dispatch(
-              sourcererActions.setSelectedDataView({
-                id: PageScope.timeline,
-                selectedDataViewId: defaultDataView.id,
-                selectedPatterns: [signalIndexName || ''],
-              })
-            );
-          }
+          setSelectedDataView({
+            scope: PageScope.timeline,
+            id: defaultDataView.id,
+            fallbackPatterns: [signalIndexName || ''],
+          });
         }
         // Unlock the time range from the global time range
         dispatch(inputsActions.removeLinkTo([InputsModelId.timeline, InputsModelId.global]));
@@ -153,7 +140,6 @@ export const useInvestigateInTimeline = () => {
       clearTimelineTemplate,
       clearTimelineDefault,
       dispatch,
-      newDataViewPickerEnabled,
       setSelectedDataView,
       defaultDataView.id,
       signalIndexName,

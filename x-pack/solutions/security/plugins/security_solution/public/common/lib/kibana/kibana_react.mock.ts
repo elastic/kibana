@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { RecursivePartial } from '@elastic/eui/src/components/common';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
@@ -30,11 +29,11 @@ import {
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_REFRESH_RATE_INTERVAL,
-  DEFAULT_TIME_RANGE,
-  DEFAULT_TO,
-  DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
+  DEFAULT_RULES_TABLE_REFRESH_SETTING,
+  DEFAULT_TIME_RANGE,
+  DEFAULT_TO,
   SECURITY_FEATURE_ID,
 } from '../../../../common/constants';
 import type { StartServices } from '../../../types';
@@ -116,7 +115,6 @@ export const createStartServicesMock = (
   const apm = mockApm();
   const data = dataPluginMock.createStartContract();
   const customDataService = dataPluginMock.createStartContract();
-  const logger = loggingSystemMock.createLogger();
   const security = securityMock.createSetup();
   const urlService = new MockUrlService();
   const locator = urlService.locators.create(new MlLocatorDefinition());
@@ -160,7 +158,6 @@ export const createStartServicesMock = (
     apm,
     cases,
     kql,
-    logger,
     unifiedSearch,
     navigation,
     discover,

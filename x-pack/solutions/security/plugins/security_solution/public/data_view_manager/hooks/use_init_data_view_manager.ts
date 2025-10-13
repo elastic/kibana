@@ -20,9 +20,7 @@ import { createInitListener } from '../redux/listeners/init_listener';
 import { sharedDataViewManagerSlice } from '../redux/slices';
 import { type SelectDataViewAsyncPayload } from '../redux/actions';
 import { PageScope } from '../constants';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useUserInfo } from '../../detections/components/user_info';
-import { useDataViewManagerLogger } from './use_data_view_logger';
 
 type OriginalListener = Parameters<typeof originalAddListener>[0];
 
@@ -43,16 +41,9 @@ const removeListener = <T extends AnyAction>(listener: Listener<T>) =>
 export const useInitDataViewManager = () => {
   const dispatch = useDispatch();
   const services = useKibana().services;
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const enableAlertsAndAttacksAlignment = services.uiSettings.get(
     ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
     false
-  );
-
-  const logger = useDataViewManagerLogger('useInitDataViewManager');
-  const createInitListenerLogger = useDataViewManagerLogger('createInitListener');
-  const createDataViewSelectedListenerLogger = useDataViewManagerLogger(
-    'createDataViewSelectedListener'
   );
 
   const {
@@ -69,17 +60,10 @@ export const useInitDataViewManager = () => {
           isOutdated: !!signalIndexMappingOutdated,
         })
       );
-      logger.debug(`signal index set: ${signalIndexName}`);
     }
-  }, [dispatch, loadingSignalIndex, logger, signalIndexMappingOutdated, signalIndexName]);
+  }, [dispatch, loadingSignalIndex, signalIndexMappingOutdated, signalIndexName]);
 
   useEffect(() => {
-    // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
-    // Also, make sure it works exactly as x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/use_init_sourcerer.tsx
-    if (!newDataViewPickerEnabled) {
-      return;
-    }
-
     onSignalIndexUpdated();
     // because we only want onSignalIndexUpdated to run when signalIndexName updates,
     // but we want to know about the updates from the dependencies of onSignalIndexUpdated
@@ -87,11 +71,6 @@ export const useInitDataViewManager = () => {
   }, [signalIndexName]);
 
   useEffect(() => {
-    // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
-    if (!newDataViewPickerEnabled) {
-      return;
-    }
-
     // NOTE: init listener contains logic that preloads default security solution data view
     const dataViewsLoadingListener = createInitListener(
       {
@@ -101,12 +80,9 @@ export const useInitDataViewManager = () => {
         application: services.application,
         spaces: services.spaces,
         storage: services.storage,
-        logger: createInitListenerLogger,
       },
       enableAlertsAndAttacksAlignment
     );
-
-    logger.debug('Registering data view manager listeners');
 
     dispatch(addListener(dataViewsLoadingListener));
 
@@ -123,11 +99,8 @@ export const useInitDataViewManager = () => {
         scope,
         dataViews: services.dataViews,
         storage: services.storage,
-        logger: createDataViewSelectedListenerLogger,
       })
     );
-
-    logger.debug('Registering data view selected listeners for all scopes');
 
     listeners.forEach((dataViewSelectedListener) => {
       dispatch(addListener(dataViewSelectedListener));
@@ -136,35 +109,25 @@ export const useInitDataViewManager = () => {
     // NOTE: this kicks off the data loading in the Data View Picker
 
     return () => {
-      logger.debug('Cleaning up listeners');
       dispatch(removeListener(dataViewsLoadingListener));
       listeners.forEach((dataViewSelectedListener) => {
-        logger.debug(`Removed listener for scope ${dataViewSelectedListener.actionCreator.name}`);
         dispatch(removeListener(dataViewSelectedListener));
       });
     };
   }, [
     enableAlertsAndAttacksAlignment,
     dispatch,
-    logger,
-    newDataViewPickerEnabled,
     services.application,
     services.dataViews,
     services.http,
-    createInitListenerLogger,
     services.spaces,
     services.storage,
     services.uiSettings,
-    createDataViewSelectedListenerLogger,
   ]);
 
   return useCallback(
-    (initialSelection: SelectDataViewAsyncPayload[]) => {
-      logger.debug(
-        `Initializing Data View Manager with initial selection: ${JSON.stringify(initialSelection)}`
-      );
-      dispatch(sharedDataViewManagerSlice.actions.init(initialSelection));
-    },
-    [dispatch, logger]
+    (initialSelection: SelectDataViewAsyncPayload[]) =>
+      dispatch(sharedDataViewManagerSlice.actions.init(initialSelection)),
+    [dispatch]
   );
 };

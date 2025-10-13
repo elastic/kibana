@@ -24,12 +24,10 @@ import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { GroupTakeActionItems } from './types';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { combineQueries } from '../../../common/lib/kuery';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import { InspectButton } from '../../../common/components/inspect';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../../common/lib/kibana';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
@@ -151,25 +149,16 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const {
     services: { uiSettings },
   } = useKibana();
-  const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } =
-    useSourcererDataView(pageScope);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { dataView: experimentalDataView } = useDataView(pageScope);
-  const experimentalBrowserFields = useBrowserFields(pageScope);
-
-  const sourcererDataView = oldSourcererDataView;
-  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+  const { dataView } = useDataView(pageScope);
+  const browserFields = useBrowserFields(pageScope);
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
-      if (browserFields != null && sourcererDataView) {
+      if (browserFields != null) {
         return combineQueries({
           config: getEsQueryConfig(uiSettings),
           dataProviders: [],
-          dataViewSpec: sourcererDataView,
-          dataView: experimentalDataView,
+          dataView,
           browserFields,
           filters: [
             ...defaultFilters,
@@ -186,9 +175,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     },
     [
       browserFields,
-      sourcererDataView,
       uiSettings,
-      experimentalDataView,
+      dataView,
       defaultFilters,
       globalFilters,
       parentGroupingFilter,

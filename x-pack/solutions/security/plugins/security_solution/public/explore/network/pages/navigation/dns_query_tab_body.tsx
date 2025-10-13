@@ -7,9 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getOr } from 'lodash/fp';
-
 import { PageScope } from '../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { NetworkDnsTable } from '../../components/network_dns_table';
 import { ID, useNetworkDns } from '../../containers/network_dns';
 import { manageQuery } from '../../../../common/components/page/manage_query';
@@ -101,8 +99,6 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
     [getTitle]
   );
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   return (
     <>
       <MatrixHistogram
@@ -112,7 +108,7 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
         filterQuery={filterQuery}
         startDate={startDate}
         {...dnsHistogramConfigs}
-        sourcererScopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
+        sourcererScopeId={PageScope.explore}
       />
       <NetworkDnsTableManage
         data={networkDns}

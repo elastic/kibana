@@ -32,8 +32,6 @@ import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { HeaderPage } from '../../common/components/header_page';
 import { useEntityAnalyticsRoutes } from '../api/api';
 import { usePrivilegedMonitoringEngineStatus } from '../hooks/use_privileged_monitoring_health';
@@ -107,26 +105,14 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
   const { initPrivilegedMonitoringEngine } = useEntityAnalyticsRoutes();
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const {
-    indicesExist: oldIndicesExist,
-    loading: oldIsSourcererLoading,
-    sourcererDataView: oldSourcererDataViewSpec,
-  } = useSourcererDataView();
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataView, status } = useDataView(PageScope.explore);
-  const { dataViewSpec } = useDataViewSpec(PageScope.explore); // TODO: newDataViewPicker - this could be left, as the fieldMap spec is actually being used
-
-  const isSourcererLoading = useMemo(
-    () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
-    [newDataViewPickerEnabled, oldIsSourcererLoading, status]
-  );
-
+  const { dataViewSpec } = useDataViewSpec(PageScope.explore);
+  const isSourcererLoading = useMemo(() => status !== 'ready', [status]);
   const indicesExist = useMemo(
-    () => (newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist),
-    [dataView?.matchedIndices?.length, newDataViewPickerEnabled, oldIndicesExist]
+    () => !!dataView?.matchedIndices?.length,
+    [dataView?.matchedIndices?.length]
   );
 
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataViewSpec;
   const engineStatus = usePrivilegedMonitoringEngineStatus();
 
   const initEngineCallBack = useCallback(
@@ -193,7 +179,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     min-height: calc(100vh - 240px);
   `;
 
-  if (newDataViewPickerEnabled && status === 'pristine') {
+  if (status === 'pristine') {
     return <PageLoader />;
   }
 
@@ -205,11 +191,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     <>
       {state.type === 'dashboard' && (
         <FiltersGlobal>
-          <SiemSearchBar
-            dataView={dataView}
-            id={InputsModelId.global}
-            sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
-          />
+          <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
         </FiltersGlobal>
       )}
 
@@ -335,7 +317,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
               callout={state.onboardingCallout}
               error={state.error}
               onManageUserClicked={onManageUserClicked}
-              sourcererDataView={sourcererDataView}
+              dataViewSpec={dataViewSpec}
             />
           </>
         )}

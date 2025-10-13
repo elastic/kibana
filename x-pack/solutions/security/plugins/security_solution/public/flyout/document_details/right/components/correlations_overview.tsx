@@ -11,7 +11,6 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { useSelector } from 'react-redux';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
@@ -27,9 +26,7 @@ import { CORRELATIONS_TEST_ID } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { sourcererSelectors } from '../../../../sourcerer/store';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
 /**
@@ -41,13 +38,7 @@ export const CorrelationsOverview: React.FC = () => {
   const { dataAsNestedObject, eventId, getFieldsData, scopeId, isRulePreview, isPreviewMode } =
     useDocumentDetailsContext();
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const oldSecurityDefaultPatterns =
-    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
-  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
-  const securityDefaultPatterns = newDataViewPickerEnabled
-    ? experimentalSecurityDefaultIndexPatterns
-    : oldSecurityDefaultPatterns;
+  const { indexPatterns } = useSecurityDefaultPatterns();
 
   const goToCorrelationsTab = useNavigateToLeftPanel({
     tab: LeftPanelInsightsTab,
@@ -121,7 +112,7 @@ export const CorrelationsOverview: React.FC = () => {
           {showAlertsByAncestry && (
             <RelatedAlertsByAncestry
               documentId={documentId}
-              indices={securityDefaultPatterns}
+              indices={indexPatterns}
               scopeId={scopeId}
             />
           )}
