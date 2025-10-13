@@ -24,10 +24,10 @@ The cases as data feature is in technical preview, meaning the schema for the ca
 | description | text / semantic\_text | The case description. |
 | tags | keyword | Tags added to case. |
 | category | keyword | The case category. |
-| status | keyword | The case status. Possible values are: `open`, `in-progress`, `closed` |
+| status | keyword | The case status. Possible values are `open`, `in-progress`, `closed`. |
 | status\_sort | long | The status of the case. Possible values are `0`, `10`, `20`, where `0` corresponds to the `open` status, `10` corresponds to the `in-progress` status, and `20` corresponds to the `closed` status.|
-| severity | keyword | The case severity. Possible values are: `low`, `medium`, `high`, `critical` |
-| severity\_sort | long | The severity of the case. Possible values: `0`, `10`, `20`, `30`, where `0` corresponds to the `low` severity, `10` corresponds to the `medium` severity, `20` corresponds to the `high` severity, and `30` corresponds to the `critical` severity.|
+| severity | keyword | The case severity. Possible values are `low`, `medium`, `high`, `critical`. |
+| severity\_sort | long | The severity of the case. Possible values are `0`, `10`, `20`, `30`, where `0` corresponds to the `low` severity, `10` corresponds to the `medium` severity, `20` corresponds to the `high` severity, and `30` corresponds to the `critical` severity.|
 | created\_at | date | The date of when the case was created, provided in ISO 8601 \[2\] format and set to the servers' timezone.  |
 | created\_at\_ms | long | The case creation timestamp in milliseconds. |
 | created\_by.username | keyword | The username of the user who created the case. |
@@ -110,12 +110,12 @@ The cases as data feature is in technical preview, meaning the schema for the ca
 | :---- | :---- | :---- |
 | @timestamp | date | The date of the insertion of the attachment in the CAI |
 | case\_id | keyword | The case UUID. |
-| action | keyword | The user’s action. Possible values are: `add`, `create`, `update`, `delete`  |
-| type | keyword | The type of the action a user took. Possible values are: `status`, `create\_case`, `delete\_case` |
-| payload.status | keyword | The new case status. Possible values are: `open`, `in-progress`, `closed` |
+| action | keyword | The user’s action. Possible values are `add`, `create`, `update`, `delete`.  |
+| type | keyword | The type of the action a user took. Possible values are `status`, `create\_case`, `delete\_case`. |
+| payload.status | keyword | The new case status. Possible values are `open`, `in-progress`, `closed`. |
 | payload.tags | keyword | The new case tags. |
 | payload.category | keyword | The new case category. |
-| payload.severity | keyword | The new case severity. Possible values are: `low`, `medium`, `high`, `critical` |
+| payload.severity | keyword | The new case severity. Possible values are `low`, `medium`, `high`, `critical`. |
 | created\_at | date | The date of when the case was created, provided in ISO 8601 \[2\] format and set to the servers' timezone. |
 | created\_at\_ms | long |  |
 | created\_by.username | keyword | The username of the user who created the case. |
