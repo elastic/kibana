@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { test, apmAuth, testData } from '../../fixtures';
+import { test, testData } from '../../fixtures';
 
 const timeRange = {
   rangeFrom: testData.OPBEANS_START_DATE,
@@ -33,7 +33,7 @@ test.describe('Storage Explorer - Viewer (No Permissions)', { tag: ['@ess', '@sv
 
 test.describe('Storage Explorer - Monitor User', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
-    await apmAuth.loginAsApmMonitor(browserAuth);
+    await browserAuth.loginAsApmMonitor();
   });
 
   test('user navigates and explores storage explorer functionality', async ({
@@ -56,6 +56,11 @@ test.describe('Storage Explorer - Monitor User', { tag: ['@ess'] }, () => {
       // Verify the services table is present and contains data
       const servicesTable = page.getByRole('table');
       await expect(servicesTable).toBeVisible();
+
+      await page.getByTestId('serviceLink_nodejs').scrollIntoViewIfNeeded();
+      await expect(page.getByTestId('serviceLink_nodejs')).toBeVisible();
+      await expect(page.getByTestId('serviceLink_java')).toBeVisible();
+      await expect(page.getByTestId('serviceLink_rum-js')).toBeVisible();
     });
   });
 });
@@ -71,7 +76,7 @@ test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
     pageObjects: { storageExplorerPage },
   }) => {
     await test.step('verify charts and data in the storageExplorerServicesTable', async () => {
-      await storageExplorerPage.gotoWithTimeRange(timeRange.rangeFrom, timeRange.rangeTo);
+      await storageExplorerPage.goto();
       await expect(storageExplorerPage.pageTitle).toBeVisible();
 
       // Verify the chart is present
@@ -89,18 +94,17 @@ test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
 
       // Check that we have actual service rows (not just headers)
       const serviceRows = page.locator('tbody tr');
-      await expect(serviceRows).toHaveCount(3);
+      await expect(serviceRows).toHaveCount(6);
 
       // Verify the service icon links are present
       await page.getByTestId('serviceLink_nodejs').scrollIntoViewIfNeeded();
       await expect(page.getByTestId('serviceLink_nodejs')).toBeVisible();
-      await expect(page.getByTestId('serviceLink_java')).toBeVisible();
-      await expect(page.getByTestId('serviceLink_rum-js')).toBeVisible();
+      await expect(page.getByTestId('serviceLink_go')).toHaveCount(2);
 
-      // Verif the opbeans services with actual data are present
-      await expect(page.getByLabel('opbeans-node')).toBeVisible();
-      await expect(page.getByLabel('opbeans-java')).toBeVisible();
-      await expect(page.getByLabel('opbeans-rum')).toBeVisible();
+      // Verify the synthetic services with actual data are present
+      await expect(page.getByLabel('synth-node-1')).toBeVisible();
+      await expect(page.getByLabel('synth-go-1')).toBeVisible();
+      await expect(page.getByLabel('synth-go-2')).toBeVisible();
     });
 
     await test.step('verify navigation links Go to Service inventory and Go to Index Management and the Download report link are visible', async () => {

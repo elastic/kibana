@@ -19,6 +19,12 @@ import { StorageExplorerPage } from './page_objects/storage_explorer';
 import { ServiceGroupsPage } from './page_objects/service_groups';
 import { APM_ROLES } from './constants';
 
+export interface ApmBrowserAuthFixture extends BrowserAuthFixture {
+  loginAsApmAllPrivilegesWithoutWriteSettings: () => Promise<void>;
+  loginAsApmReadPrivilegesWithWriteSettings: () => Promise<void>;
+  loginAsApmMonitor: () => Promise<void>;
+}
+
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
     serviceMapPage: ServiceMapPage;
@@ -26,6 +32,7 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
     storageExplorerPage: StorageExplorerPage;
     serviceGroupsPage: ServiceGroupsPage;
   };
+  browserAuth: ApmBrowserAuthFixture;
 }
 
 export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
@@ -51,22 +58,23 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
 
     await use(extendedPageObjects);
   },
-});
+  browserAuth: async (
+    { browserAuth }: { browserAuth: BrowserAuthFixture },
+    use: (browserAuth: ApmBrowserAuthFixture) => Promise<void>
+  ) => {
+    const loginAsApmAllPrivilegesWithoutWriteSettings = async () =>
+      browserAuth.loginWithCustomRole(APM_ROLES.apmAllPrivilegesWithoutWriteSettings);
+    const loginAsApmReadPrivilegesWithWriteSettings = async () =>
+      browserAuth.loginWithCustomRole(APM_ROLES.apmReadPrivilegesWithWriteSettings);
+    const loginAsApmMonitor = async () => browserAuth.loginWithCustomRole(APM_ROLES.apmMonitor);
 
-// Export custom APM login methods for direct use in tests
-// These roles match the ones defined in server/test_helpers/create_apm_users/authentication.ts
-//
-// Roles:
-// - apmAllPrivilegesWithoutWriteSettings: Has APM 'minimal_all' + ML 'all', but cannot save settings
-// - apmReadPrivilegesWithWriteSettings: Has APM 'minimal_read' + 'settings_save' + advanced settings access
-// - apmMonitor: Has APM 'read' with monitoring privileges
-export const apmAuth = {
-  loginAsApmAllPrivilegesWithoutWriteSettings: (browserAuth: BrowserAuthFixture) =>
-    browserAuth.loginWithCustomRole(APM_ROLES.apmAllPrivilegesWithoutWriteSettings),
-  loginAsApmReadPrivilegesWithWriteSettings: (browserAuth: BrowserAuthFixture) =>
-    browserAuth.loginWithCustomRole(APM_ROLES.apmReadPrivilegesWithWriteSettings),
-  loginAsApmMonitor: (browserAuth: BrowserAuthFixture) =>
-    browserAuth.loginWithCustomRole(APM_ROLES.apmMonitor),
-};
+    await use({
+      ...browserAuth,
+      loginAsApmAllPrivilegesWithoutWriteSettings,
+      loginAsApmReadPrivilegesWithWriteSettings,
+      loginAsApmMonitor,
+    });
+  },
+});
 
 export * as testData from './constants';
