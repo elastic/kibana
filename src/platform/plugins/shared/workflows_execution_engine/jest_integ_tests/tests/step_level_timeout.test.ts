@@ -70,7 +70,7 @@ steps:
     );
   });
 
-  it('should have duration near timeout specified for timeouted step', async () => {
+  it('should have execution duration close to configured timeout value', async () => {
     const timeoutStepExecutions = Array.from(
       workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
     ).filter(
