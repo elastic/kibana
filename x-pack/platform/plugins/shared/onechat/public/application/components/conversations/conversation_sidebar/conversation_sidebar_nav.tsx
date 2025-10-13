@@ -16,6 +16,7 @@ export const ConversationSidebarNav: React.FC<{}> = () => {
   const { createOnechatUrl } = useNavigation();
   const agentsHref = createOnechatUrl(appPaths.agents.list);
   const toolsHref = createOnechatUrl(appPaths.tools.list);
+  const evaluationsHref = createOnechatUrl(appPaths.evaluations.list);
   const { euiTheme } = useEuiTheme();
   const containerStyles = css`
     border-top: 1px solid ${euiTheme.border.color};
@@ -45,6 +46,18 @@ export const ConversationSidebarNav: React.FC<{}> = () => {
           <FormattedMessage
             id="xpack.onechat.conversationSidebar.navigation.tools"
             defaultMessage="Tools"
+          />
+        }
+      />
+      <EuiListGroupItem
+        color="text"
+        size="s"
+        href={evaluationsHref}
+        iconType="wrench"
+        label={
+          <FormattedMessage
+            id="xpack.onechat.conversationSidebar.navigation.evaluations"
+            defaultMessage="Evaluations"
           />
         }
       />

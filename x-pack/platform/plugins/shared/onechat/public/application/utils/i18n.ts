@@ -242,6 +242,9 @@ export const labels = {
       }),
     },
   },
+  evaluations: {
+    title: i18n.translate('xpack.onechat.evaluations.title', { defaultMessage: 'Evaluations' }),
+  },
   agents: {
     title: i18n.translate('xpack.onechat.agents.list.title', { defaultMessage: 'Agents' }),
     newAgent: i18n.translate('xpack.onechat.agents.new.title', { defaultMessage: 'New Agent' }),

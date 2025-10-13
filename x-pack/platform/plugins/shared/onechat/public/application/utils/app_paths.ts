@@ -30,4 +30,9 @@ export const appPaths = {
     new: '/tools/new',
     details: ({ toolId }: { toolId: string }) => `/tools/${toolId}`,
   },
+  evaluations: {
+    list: '/evaluations',
+    conversation: ({ conversationId }: { conversationId: string }) =>
+      `/evaluations/${conversationId}`,
+  },
 };

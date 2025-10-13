@@ -90,6 +90,24 @@ const cards: Array<{
     iconType: 'wrench',
     link: { path: appPaths.tools.list },
   },
+  // Evaluations
+  {
+    key: 'evaluations',
+    title: (
+      <FormattedMessage
+        id="xpack.onechat.welcome.quickNavigation.evaluations.title"
+        defaultMessage="Evaluations"
+      />
+    ),
+    description: (
+      <FormattedMessage
+        id="xpack.onechat.welcome.quickNavigation.evaluations.description"
+        defaultMessage="Evaluate your agents' responses."
+      />
+    ),
+    iconType: 'wrench',
+    link: { path: appPaths.evaluations.list },
+  },
   // Documentation - Get Started
   {
     key: 'documentation',

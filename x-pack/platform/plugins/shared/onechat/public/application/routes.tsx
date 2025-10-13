@@ -14,6 +14,7 @@ import { OnechatConversationsPage } from './pages/conversations';
 import { OnechatToolCreatePage } from './pages/tool_create';
 import { OnechatToolDetailsPage } from './pages/tool_details';
 import { OnechatToolsPage } from './pages/tools';
+import { OnechatEvaluationsPage } from './pages/evaluations';
 
 export const OnechatRoutes: React.FC<{}> = () => {
   return (
@@ -44,6 +45,14 @@ export const OnechatRoutes: React.FC<{}> = () => {
 
       <Route path="/tools">
         <OnechatToolsPage />
+      </Route>
+
+      <Route path="/evaluations/:conversationId">
+        <OnechatEvaluationsPage />
+      </Route>
+
+      <Route path="/evaluations">
+        <OnechatEvaluationsPage />
       </Route>
 
       {/* Default to conversations page */}
