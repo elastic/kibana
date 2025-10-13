@@ -14,6 +14,7 @@ import kbnRison from '@kbn/rison';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
+import { useActionModal } from '../../../context/action_modal';
 import { getSloHealthStateText } from '../../../lib/slo_health_helpers';
 import { getSLOTransformId, getSLOSummaryTransformId } from '../../../../common/constants';
 import { ExternalLinkDisplayText } from './external_link_display_text';
@@ -26,6 +27,14 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
       url: { locators },
     },
   } = useKibana().services;
+  const { triggerAction } = useActionModal();
+
+  const handleReset = () => {
+    triggerAction({
+      type: 'reset',
+      item: slo,
+    });
+  };
 
   const managementLocator = locators.get(MANAGEMENT_APP_LOCATOR);
 
@@ -124,6 +133,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
                   content={missingRollupContent}
                   url={rollupUrl}
                   isMissing={true}
+                  handleReset={handleReset}
                 />
               </li>
             )}
@@ -133,6 +143,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
                 content={missingSummaryContent}
                 url={summaryUrl}
                 isMissing={true}
+                handleReset={handleReset}
               />
             )}
           </ul>
