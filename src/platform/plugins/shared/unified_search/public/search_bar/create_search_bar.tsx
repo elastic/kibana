@@ -9,16 +9,13 @@
 
 import { isEqual } from 'lodash';
 import React, { useEffect, useRef } from 'react';
-
-import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { Query, AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { Query, AggregateQuery } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-
-import type { UnifiedSearchPublicPluginStart } from '../types';
 import { SearchBar } from '.';
 import type { SearchBarOwnProps } from '.';
 import { useFilterManager } from './lib/use_filter_manager';
@@ -26,6 +23,7 @@ import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
 import { canShowSavedQuery } from './lib/can_show_saved_query';
+import type { UnifiedSearchPublicPluginStart } from '../types';
 
 export interface StatefulSearchBarDeps {
   core: CoreStart;
@@ -34,7 +32,6 @@ export interface StatefulSearchBarDeps {
   usageCollection?: UsageCollectionSetup;
   isScreenshotMode?: boolean;
   unifiedSearch: Omit<UnifiedSearchPublicPluginStart, 'ui'>;
-  cloud?: CloudStart;
 }
 
 export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> = Omit<
@@ -159,7 +156,6 @@ export function createSearchBar({
   usageCollection,
   isScreenshotMode = false,
   unifiedSearch,
-  cloud,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
@@ -222,7 +218,6 @@ export function createSearchBar({
           storage,
           usageCollection,
           unifiedSearch,
-          cloud,
           ...core,
         }}
       >

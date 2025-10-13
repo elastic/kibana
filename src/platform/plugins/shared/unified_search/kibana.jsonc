@@ -25,8 +25,7 @@
       "savedObjectsManagement"
     ],
     "optionalPlugins": [
-      "usageCollection",
-      "cloud"
+      "usageCollection"
     ],
     "requiredBundles": [
       "kibanaUtils",
