@@ -27,6 +27,9 @@ If a setting is applicable to {{ech}} environments, its name is followed by this
 `data.search.sessions.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   `false` by default. Set to `true` to enable background searches.
 
+`data.search.sessions.maxUpdateRetries` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   How many retries {{kib}} can perform while attempting to send a search to the background. The default is `10`.
+
 `data.search.sessions.defaultExpiration` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   How long background search results are stored before they expire and are deleted. When users extend the validity period of the background search, this setting also determines by how long. The default is `7d`.
 ::::
