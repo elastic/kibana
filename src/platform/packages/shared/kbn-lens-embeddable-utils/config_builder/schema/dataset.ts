@@ -17,10 +17,10 @@ export const datasetTypeSchema = schema.oneOf([
      * The name of the Kibana data view to use as the data source.
      * Example: 'my-data-view'
      */
-    name: schema.string({
+    id: schema.string({
       meta: {
         description:
-          'The name of the Kibana data view to use as the data source. Example: "my-data-view".',
+          'The id of the Kibana data view to use as the data source. Example: "my-data-view".',
       },
     }),
   }),

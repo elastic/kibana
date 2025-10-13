@@ -28,7 +28,7 @@ import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyWithCreatedRule = await createRule(supertest, log, getSimpleRule());
 
         // delete that rule by its id
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: false },
             body: { ids: [bodyWithCreatedRule.id], action: 'delete' },
@@ -67,7 +67,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should return an error if the id does not exist when trying to delete an id', async () => {
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: false },
             body: { ids: ['c4e80a0d-e20f-4efc-84c1-08112da5a612'], action: 'delete' },
@@ -131,7 +131,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('Should delete a single rule with investigation field', async () => {
         // delete the rule in bulk using the bulk_actions endpoint
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: false },
             body: {

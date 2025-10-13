@@ -18,7 +18,10 @@ export type {
   Provider,
   ProviderInput,
   RunWorkflowCommand,
+  RunStepCommand,
   RunWorkflowResponseDto,
+  TestWorkflowResponseDto,
+  TestWorkflowCommand,
   StackFrame,
   UpdatedWorkflowResponseDto,
   // dtos

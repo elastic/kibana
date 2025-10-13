@@ -123,15 +123,8 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/{action_id}/file/{file_id}:
     get:
-      description: >
-        Get information for the specified file using the file ID.
-
-        > info
-
-        > To construct a `file_id`, combine the `action_id` and `agent_id`
-        values using a dot separator:
-
-        > {`file_id`} = {`action_id`}`.`{`agent_id`}
+      description: |
+        Get information for the specified response action file download.
       operationId: EndpointFileInfo
       parameters:
         - in: path
@@ -139,7 +132,17 @@ paths:
           required: true
           schema:
             type: string
-        - in: path
+        - description: >
+            The file identifier is constructed in one of two ways:
+
+            - For Elastic Defend agents (`agentType` of `endpoint`): combine the
+            `action_id` and `agent_id` values using a dot (`.`) separator:
+
+            `{file_id}` = `{action_id}.{agent_id}`
+
+            - For all other agent types: the `file_id` is the `agent_id` for
+            which the response action was sent to.
+          in: path
           name: file_id
           required: true
           schema:
@@ -149,22 +152,43 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                      agentId:
+                        type: string
+                      agentType:
+                        type: string
+                      created:
+                        format: date-time
+                        type: string
+                      id:
+                        type: string
+                      mimeType:
+                        type: string
+                      name:
+                        type: string
+                      size:
+                        type: number
+                      status:
+                        enum:
+                          - AWAITING_UPLOAD
+                          - UPLOADING
+                          - READY
+                          - UPLOAD_ERROR
+                          - DELETED
+                        type: string
           description: OK
       summary: Get file information
       tags:
         - Security Endpoint Management API
   /api/endpoint/action/{action_id}/file/{file_id}/download:
     get:
-      description: >
-        Download a file from an endpoint. 
-
-        > info
-
-        > To construct a `file_id`, combine the `action_id` and `agent_id`
-        values using a dot separator:
-
-        > {`file_id`} = {`action_id`}`.`{`agent_id`}
+      description: |
+        Download a file associated with a response action.
       operationId: EndpointFileDownload
       parameters:
         - in: path
@@ -172,7 +196,17 @@ paths:
           required: true
           schema:
             type: string
-        - in: path
+        - description: >
+            The file identifier is constructed in one of two ways:
+
+            - For Elastic Defend agents (`agentType` of `endpoint`): combine the
+            `action_id` and `agent_id` values using a dot (`.`) separator:
+
+            `{file_id}` = `{action_id}.{agent_id}`
+
+            - For all other agent types: the `file_id` is the `agent_id` for
+            which the response action was sent to.
+          in: path
           name: file_id
           required: true
           schema:
@@ -180,11 +214,46 @@ paths:
       responses:
         '200':
           content:
-            application/json:
+            application/octet-stream:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                format: binary
+                type: string
           description: OK
       summary: Download a file
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/action/cancel:
+    post:
+      description: >-
+        Cancel a running or pending response action (Applies only to some agent
+        types).
+      operationId: CancelAction
+      requestBody:
+        content:
+          application/json:
+            examples:
+              MicrosoftDefenderEndpoint:
+                summary: >-
+                  Cancel a response action on a Microsoft Defender for Endpoint
+                  host
+                value:
+                  agent_type: microsoft_defender_endpoint
+                  comment: Cancelling action due to change in requirements
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    id: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
+            schema:
+              $ref: '#/components/schemas/CancelRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
+          description: Successfully cancelled the response action
+      summary: Cancel a response action
       tags:
         - Security Endpoint Management API
   /api/endpoint/action/execute:
@@ -742,6 +811,57 @@ components:
         - microsoft_defender_endpoint
       example: endpoint
       type: string
+    CancelRouteRequestBody:
+      allOf:
+        - type: object
+          properties:
+            agent_type:
+              $ref: '#/components/schemas/AgentTypes'
+            alert_ids:
+              description: >-
+                If this action is associated with any alerts, they can be
+                specified here. The action will be logged in any cases
+                associated with the specified alerts.
+              example:
+                - alert-id-1
+                - alert-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
+            case_ids:
+              description: The IDs of cases where the action taken will be logged.
+              example:
+                - case-id-1
+                - case-id-2
+              items:
+                minLength: 1
+                type: string
+              minItems: 1
+              type: array
+            comment:
+              $ref: '#/components/schemas/Comment'
+            endpoint_ids:
+              $ref: '#/components/schemas/EndpointIds'
+            parameters:
+              $ref: '#/components/schemas/Parameters'
+          required:
+            - endpoint_ids
+        - type: object
+          properties:
+            parameters:
+              type: object
+              properties:
+                id:
+                  description: ID of the response action to cancel
+                  example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
+                  minLength: 1
+                  type: string
+              required:
+                - id
+          required:
+            - parameters
     CloudFileScriptParameters:
       type: object
       properties:

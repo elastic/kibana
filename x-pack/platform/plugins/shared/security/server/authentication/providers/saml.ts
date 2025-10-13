@@ -11,7 +11,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { isInternalURL } from '@kbn/std';
 
 import type { AuthenticationProviderOptions } from './base';
-import { BaseAuthenticationProvider } from './base';
+import { BaseAuthenticationProvider, ELASTIC_CLOUD_SSO_REALM_NAME } from './base';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
@@ -117,6 +117,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    */
   private readonly useRelayStateDeepLink: boolean;
 
+  /**
+   * Indicates if we should use UIAM service for this SAML provider.
+   */
+  private readonly useUiam: boolean;
+
   constructor(
     protected readonly options: Readonly<AuthenticationProviderOptions>,
     samlOptions?: Readonly<{ realm?: string; useRelayStateDeepLink?: boolean }>
@@ -125,6 +130,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     this.realm = samlOptions?.realm;
     this.useRelayStateDeepLink = samlOptions?.useRelayStateDeepLink ?? false;
+
+    // Switch SAML authentication provider to UIAM in case it's enabled, and we're using Elastic Cloud SSO realm.
+    this.useUiam = !!options.uiam && this.realm === ELASTIC_CLOUD_SSO_REALM_NAME;
   }
 
   /**
@@ -264,6 +272,23 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     if (state === undefined && !isIdPInitiatedSLORequest && !isSPInitiatedSLOResponse) {
       this.logger.debug('There is no SAML session to invalidate.');
       return DeauthenticationResult.notHandled();
+    }
+
+    // When SAML authentication provider is in UIAM mode, UIAM service is responsible for
+    // invalidating the user session tokens.
+    if (this.useUiam) {
+      if (state?.accessToken) {
+        try {
+          await this.options.uiam?.invalidateSessionTokens(state.accessToken, state.refreshToken!);
+        } catch (err) {
+          this.logger.error(
+            () => `Failed to deauthenticate UIAM user: ${getDetailedErrorMessage(err)}`
+          );
+          return DeauthenticationResult.failed(err);
+        }
+      }
+
+      return DeauthenticationResult.redirectTo(this.options.urls.loggedOut(request));
     }
 
     if (state?.accessToken || isIdPInitiatedSLORequest || isSPInitiatedSLOResponse) {
@@ -449,7 +474,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         `${this.options.basePath.get(request)}/`,
       {
         user: this.authenticationInfoToAuthenticatedUser(result.authentication),
-        userProfileGrant: { type: 'accessToken', accessToken: result.access_token },
+        userProfileGrant: this.useUiam
+          ? this.options.uiam?.getUserProfileGrant(result.access_token)
+          : { type: 'accessToken', accessToken: result.access_token },
         state: {
           accessToken: result.access_token,
           refreshToken: result.refresh_token,
@@ -566,12 +593,12 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
-    try {
-      const authHeaders = {
-        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
-      };
-      const user = await this.getUser(request, authHeaders);
+    const authHeaders: Record<string, string> | undefined = this.useUiam
+      ? this.options.uiam?.getAuthenticationHeaders(accessToken)
+      : { authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString() };
 
+    try {
+      const user = await this.getUser(request, authHeaders);
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });
     } catch (err) {

@@ -10,7 +10,7 @@ import { EuiSpacer, EuiPortal } from '@elastic/eui';
 
 import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
 import { FLEET_SERVER_PACKAGE } from '../../../../../../common';
-
+import { isAgentMigrationSupported } from '../../../../../../common/services';
 import type { Agent } from '../../../types';
 
 import {
@@ -122,7 +122,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     draftKuery,
     setDraftKuery,
     fetchData,
-    currentRequestRef,
+    queryHasChanged,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
   } = useFetchAgentsData();
@@ -179,7 +179,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSortOrder(sort!.direction);
   };
 
-  const protectedAndFleetAgents = useMemo(() => {
+  const unsupportedMigrateAgents = useMemo(() => {
     const protectedAgents = Array.isArray(selectedAgents)
       ? selectedAgents.filter(
           (agent) => agentPoliciesIndexedById[agent.policy_id as string]?.is_protected
@@ -192,7 +192,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           )
         )
       : [];
-    return [...protectedAgents, ...fleetAgents];
+    const unsupportedVersionAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) => !isAgentMigrationSupported(agent))
+      : [];
+    return [...protectedAgents, ...fleetAgents, ...unsupportedVersionAgents];
   }, [selectedAgents, agentPoliciesIndexedById]);
 
   const renderActions = (agent: Agent) => {
@@ -301,8 +304,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     fetchData({ refreshTags });
     setShowAgentActivityTour(true);
   };
-
-  const isCurrentRequestIncremented = currentRequestRef?.current === 1;
 
   return (
     <>
@@ -430,7 +431,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <AgentMigrateFlyout
             agents={[agentToMigrate]}
             agentCount={1}
-            protectedAndFleetAgents={protectedAndFleetAgents ?? []}
+            unsupportedMigrateAgents={unsupportedMigrateAgents ?? []}
             onClose={() => {
               setAgentToMigrate(undefined);
             }}
@@ -493,7 +494,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         latestAgentActionErrors={latestAgentActionErrors.length}
         sortField={sortField}
         sortOrder={sortOrder}
-        protectedAndFleetAgents={protectedAndFleetAgents}
+        unsupportedMigrateAgents={unsupportedMigrateAgents}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}
@@ -532,7 +533,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         isUsingFilter={isUsingFilter}
         setEnrollmentFlyoutState={setEnrollmentFlyoutState}
         clearFilters={clearFilters}
-        isCurrentRequestIncremented={isCurrentRequestIncremented}
+        queryHasChanged={queryHasChanged}
       />
     </>
   );

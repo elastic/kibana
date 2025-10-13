@@ -13,7 +13,8 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-elasticsearch-client-server-internal"
+    "@kbn/core-elasticsearch-client-server-internal",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

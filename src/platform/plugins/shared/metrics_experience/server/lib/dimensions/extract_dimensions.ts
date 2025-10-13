@@ -8,8 +8,9 @@
  */
 
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
+import { type ES_FIELD_TYPES } from '@kbn/field-types';
 import type { Dimension } from '../../../common/types';
-import { getEcsFieldDescriptions } from '../fields/get_ecs_field_descriptions';
+import { DIMENSION_TYPES } from '../../../common/fields/constants';
 
 const INVALID_FIELD_NAME = '_metric_names_hash';
 export function extractDimensions(
@@ -25,28 +26,15 @@ export function extractDimensions(
     }
 
     for (const [type, typeInfo] of Object.entries(fieldInfo)) {
-      if (typeInfo.time_series_dimension !== true || (filterSet && !filterSet.has(fieldName))) {
+      if (
+        typeInfo.time_series_dimension !== true ||
+        (filterSet && !filterSet.has(fieldName)) ||
+        !DIMENSION_TYPES.includes(type as ES_FIELD_TYPES)
+      ) {
         continue;
       }
 
-      const description = Array.isArray(typeInfo.meta?.description)
-        ? typeInfo.meta.description.join(', ')
-        : typeInfo.meta?.description;
-
-      result.set(fieldName, { name: fieldName, type, description });
-    }
-  }
-
-  // TODO: this needs to be replaed by the FieldsMetadataService
-  const ecsDescriptions = getEcsFieldDescriptions(Array.from(result.keys()));
-
-  for (const [fieldName, description] of ecsDescriptions) {
-    const currentResult = result.get(fieldName);
-    if (description && currentResult) {
-      result.set(fieldName, {
-        ...currentResult,
-        description: currentResult.description || description,
-      });
+      result.set(fieldName, { name: fieldName, type: type as ES_FIELD_TYPES });
     }
   }
 

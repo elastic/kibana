@@ -16,7 +16,7 @@ import { queryKeys } from '../../query_keys';
 import { duplicateName } from '../../utils/duplicate_name';
 import { searchParamNames } from '../../search_param_names';
 
-export type AgentEditState = Omit<AgentDefinition, 'type'>;
+export type AgentEditState = Omit<AgentDefinition, 'type' | 'readonly'>;
 
 const defaultToolSelection: ToolSelection[] = [
   {

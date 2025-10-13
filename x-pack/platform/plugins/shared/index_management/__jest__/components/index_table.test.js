@@ -64,6 +64,12 @@ for (let i = 0; i < 105; i++) {
   });
 }
 
+indices.push({
+  ...getBaseFakeIndex(true),
+  name: `lookup-index`,
+  mode: 'lookup',
+});
+
 const urlServiceMock = {
   locators: {
     get: () => ({
@@ -167,7 +173,9 @@ describe('index table', () => {
         executionContext: executionContextServiceMock.createStartContract(),
         chrome: chromeServiceMock.createStartContract(),
       },
-      plugins: {},
+      plugins: {
+        reindexService: {},
+      },
       url: urlServiceMock,
       // Default stateful configuration
       config: {
@@ -353,6 +361,61 @@ describe('index table', () => {
 
     const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
     checkboxes.at(1).simulate('change', { target: { checked: true } });
+    rendered.update();
+    const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
+    actionButton.simulate('click');
+    rendered.update();
+    snapshot(getActionMenuButtons(rendered));
+  });
+
+  test('should not show "Convert to lookup index" option in the context menu when lookup index is selected', async () => {
+    const rendered = mountWithIntl(component);
+    await runAllPromises();
+    rendered.update();
+
+    const indexName = 'lookup-index';
+
+    // Filter the table to find the index
+    const searchInput = rendered.find('input.euiFieldSearch').first();
+    searchInput.instance().value = indexName;
+    searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
+    rendered.update();
+
+    const allNames = namesText(rendered);
+    const rowIndex = allNames.indexOf(indexName);
+
+    const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
+    checkboxes.at(rowIndex).simulate('change', { target: { checked: true } });
+    rendered.update();
+    const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
+    actionButton.simulate('click');
+    rendered.update();
+    snapshot(getActionMenuButtons(rendered));
+  });
+
+  test('should not show "Convert to lookup index" option in the context menu when hidden index is selected', async () => {
+    const rendered = mountWithIntl(component);
+    await runAllPromises();
+    rendered.update();
+
+    const indexName = '.admin1';
+
+    // Enable "Show hidden indices"
+    const switchControl = findTestSubject(rendered, 'checkboxToggles-includeHiddenIndices');
+    switchControl.simulate('click');
+    rendered.update();
+
+    // Filter the table to find the index
+    const searchInput = rendered.find('input.euiFieldSearch').first();
+    searchInput.instance().value = indexName;
+    searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
+    rendered.update();
+
+    const allNames = namesText(rendered);
+    const rowIndex = allNames.indexOf(indexName);
+
+    const checkboxes = findTestSubject(rendered, 'indexTableRowCheckbox');
+    checkboxes.at(rowIndex).simulate('change', { target: { checked: true } });
     rendered.update();
     const actionButton = findTestSubject(rendered, 'indexActionsContextMenuButton');
     actionButton.simulate('click');

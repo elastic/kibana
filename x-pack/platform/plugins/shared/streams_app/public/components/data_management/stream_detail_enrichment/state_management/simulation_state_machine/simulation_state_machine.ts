@@ -11,7 +11,7 @@ import type { FlattenRecord } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
-import { getValidSteps, isValidStep } from '../../utils';
+import { getValidSteps } from '../../utils';
 import type {
   SimulationInput,
   SimulationContext,
@@ -36,7 +36,10 @@ export interface StepsEventParams {
 
 const hasSamples = (samples: SampleDocumentWithUIAttributes[]) => !isEmpty(samples);
 
-const hasAnyValidSteps = (steps: StreamlangStepWithUIAttributes[]) => steps.some(isValidStep);
+const hasAnyValidSteps = (steps: StreamlangStepWithUIAttributes[]) => {
+  const validSteps = getValidSteps(steps);
+  return validSteps.length > 0;
+};
 
 export const simulationMachine = setup({
   types: {
@@ -118,7 +121,7 @@ export const simulationMachine = setup({
     processorChangeDebounceTime: 300,
   },
   guards: {
-    canSimulate: ({ context }) => hasSamples(context.samples) && hasAnyValidSteps(context.steps),
+    canSimulate: ({ context }) => hasAnyValidSteps(context.steps),
     hasSteps: (_, params: StepsEventParams) => !isEmpty(params.steps),
     '!hasSamples': (_, params: { samples: SampleDocumentWithUIAttributes[] }) =>
       !hasSamples(params.samples),
@@ -138,6 +141,7 @@ export const simulationMachine = setup({
     steps: input.steps,
     samples: [],
     streamName: input.streamName,
+    streamType: input.streamType,
   }),
   initial: 'idle',
   on: {

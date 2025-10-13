@@ -14,7 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 export function useWorkflowExecution(workflowExecutionId: string | null) {
   const { http } = useKibana().services;
 
-  return useQuery<WorkflowExecutionDto>({
+  return useQuery<WorkflowExecutionDto, Error>({
     networkMode: 'always',
     queryKey: ['stepExecutions', workflowExecutionId],
     queryFn: () => http!.get(`/api/workflowExecutions/${workflowExecutionId}`),

@@ -173,6 +173,7 @@
     "@kbn/core-pricing-browser",
     "@kbn/core-pricing-server-internal",
     "@kbn/core-pricing-common",
+    "@kbn/lazy-object",
   ],
   "exclude": [
     "target/**/*",

@@ -134,7 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
             'searchSynonyms',
             'searchQueryRules',
             'searchPlayground',
-            'siemV3',
+            'siemV4',
             'slo',
             'streams',
             'securitySolutionAssistant',
@@ -143,6 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
             'securitySolutionTimeline',
             'securitySolutionNotes',
             'securitySolutionSiemMigrations',
+            'workflowsManagement',
             'fleet',
             'fleetv2',
           ].sort()

@@ -6,16 +6,20 @@
  */
 
 import React from 'react';
-import { mapPercentageToQuality } from '@kbn/dataset-quality-plugin/common';
-import { DatasetQualityIndicator, calculatePercentage } from '@kbn/dataset-quality-plugin/public';
+import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
+import { EuiLink } from '@elastic/eui';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
-import type { StreamHistogramFetch } from '../../hooks/use_streams_histogram_fetch';
+import { calculateDataQuality } from '../../util/calculate_data_quality';
+import type { StreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
 export function DataQualityColumn({
   histogramQueryFetch,
+  streamName,
 }: {
-  histogramQueryFetch: StreamHistogramFetch;
+  histogramQueryFetch: StreamDocCountsFetch;
+  streamName: string;
 }) {
   const histogramQueryResult = useAsync(() => histogramQueryFetch.docCount, [histogramQueryFetch]);
   const failedDocsResult = useAsync(
@@ -52,20 +56,29 @@ export function DataQualityColumn({
     ? Number(failedDocsResult.value?.values?.[0]?.[0])
     : 0;
 
-  const degradedPercentage = calculatePercentage({
+  const quality = calculateDataQuality({
     totalDocs: docCount,
-    count: degradedDocCount,
+    degradedDocs: degradedDocCount,
+    failedDocs: failedDocCount,
   });
-
-  const failedPercentage = calculatePercentage({
-    totalDocs: docCount,
-    count: failedDocCount,
-  });
-
-  const quality = mapPercentageToQuality([degradedPercentage, failedPercentage]);
 
   const isLoading =
     histogramQueryResult.loading || failedDocsResult?.loading || degradedDocsResult.loading;
 
-  return <DatasetQualityIndicator quality={quality} isLoading={isLoading} />;
+  const router = useStreamsAppRouter();
+
+  return (
+    <EuiLink
+      href={router.link('/{key}/management/{tab}', {
+        path: { key: streamName, tab: 'dataQuality' },
+      })}
+      data-test-subj={`streamsDataQualityLink-${streamName}`}
+    >
+      <DatasetQualityIndicator
+        dataTestSubj={`dataQualityIndicator-${streamName}`}
+        quality={quality}
+        isLoading={isLoading}
+      />
+    </EuiLink>
+  );
 }

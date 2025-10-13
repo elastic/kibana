@@ -35,7 +35,7 @@ export const getAttackDiscoveryBaseKibanaFeature = (): BaseKibanaFeatureConfig =
   alerting: alertingFeatures,
   privileges: {
     all: {
-      api: ['elasticAssistant'],
+      api: ['elasticAssistant'], // only required by legacy internal API routes authz
       app: [ATTACK_DISCOVERY_FEATURE_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
