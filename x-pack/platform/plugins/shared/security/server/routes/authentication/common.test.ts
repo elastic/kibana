@@ -30,7 +30,6 @@ import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 jest.mock('../../otel/instrumentation', () => ({
   securityTelemetry: {
     recordLogoutAttempt: jest.fn(),
-    recordBasicTokenLoginDuration: jest.fn(),
   },
 }));
 
@@ -592,8 +591,6 @@ describe('Common authentication routes', () => {
           redirectURL: '/mock-server-basepath/some-url#/app/nav',
         },
       });
-
-      expect(securityTelemetry.recordBasicTokenLoginDuration).not.toHaveBeenCalled();
     });
 
     it('correctly performs OIDC login.', async () => {
@@ -622,8 +619,6 @@ describe('Common authentication routes', () => {
           redirectURL: '/mock-server-basepath/some-url#/app/nav',
         },
       });
-
-      expect(securityTelemetry.recordBasicTokenLoginDuration).not.toHaveBeenCalled();
     });
 
     it('correctly performs Basic login.', async () => {
@@ -650,15 +645,6 @@ describe('Common authentication routes', () => {
         redirectURL: '/mock-server-basepath/some-url#/app/nav',
         value: { username: 'some-user', password: 'some-password' },
       });
-
-      expect(securityTelemetry.recordBasicTokenLoginDuration).toHaveBeenCalledWith(
-        expect.any(Number),
-        {
-          providerType: 'basic',
-          providerName: 'basic1',
-          outcome: 'success',
-        }
-      );
     });
 
     it('correctly performs Token login.', async () => {
@@ -685,15 +671,6 @@ describe('Common authentication routes', () => {
         redirectURL: '/mock-server-basepath/some-url#/app/nav',
         value: { username: 'some-user', password: 'some-password' },
       });
-
-      expect(securityTelemetry.recordBasicTokenLoginDuration).toHaveBeenCalledWith(
-        expect.any(Number),
-        {
-          providerType: 'token',
-          providerName: 'token1',
-          outcome: 'success',
-        }
-      );
     });
 
     it('correctly performs generic login.', async () => {

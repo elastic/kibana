@@ -187,28 +187,10 @@ export function defineCommonRoutes({
         value: getLoginAttemptForProviderType(providerType, redirectURL, params),
       });
 
-      const duration = performance.now() - startTime;
-
       if (authenticationResult.redirected() || authenticationResult.succeeded()) {
-        if (isBasicOrTokenLogin) {
-          securityTelemetry.recordBasicTokenLoginDuration(duration, {
-            providerType,
-            providerName,
-            outcome: 'success',
-          });
-        }
-
         return response.ok({
           body: { location: authenticationResult.redirectURL || redirectURL },
           headers: authenticationResult.authResponseHeaders,
-        });
-      }
-
-      if (isBasicOrTokenLogin) {
-        securityTelemetry.recordBasicTokenLoginDuration(duration, {
-          providerType,
-          providerName,
-          outcome: 'failure',
         });
       }
 

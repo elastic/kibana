@@ -60,14 +60,10 @@ export function defineSAMLRoutes({ router, getAuthenticationService }: RouteDefi
       const duration = performance.now() - startTime;
 
       if (authenticationResult.redirected()) {
-        securityTelemetry.recordSamlLoginDuration(duration, { outcome: 'success' });
-
         return response.redirected({
           headers: { location: authenticationResult.redirectURL! },
         });
       }
-
-      securityTelemetry.recordSamlLoginDuration(duration, { outcome: 'failure' });
 
       return response.unauthorized({ body: authenticationResult.error });
     }

@@ -340,6 +340,7 @@ export class Authenticator {
     }
 
     for (const [providerName, provider] of providers) {
+      const startTime = performance.now();
       // Check if current session has been set by this provider.
       const ownsSession =
         existingSessionValue?.provider.name === providerName &&
@@ -350,6 +351,11 @@ export class Authenticator {
         attempt.value,
         ownsSession ? existingSessionValue!.state : null
       );
+
+      securityTelemetry.recordLoginDuration(performance.now() - startTime, {
+        providerType: provider.type,
+        outcome: authenticationResult.notHandled() ? 'failure' : 'success',
+      });
 
       if (!authenticationResult.notHandled()) {
         if (!ownsSession && existingSessionValue?.provider.name) {
@@ -873,7 +879,6 @@ export class Authenticator {
 
       securityTelemetry.recordUserProfileActivationDuration(duration, {
         providerType: provider.type,
-        providerName: provider.name,
         outcome: 'success',
       });
 
@@ -899,7 +904,6 @@ export class Authenticator {
 
       securityTelemetry.recordSessionCreationDuration(duration, {
         providerType: provider.type,
-        providerName: provider.name,
         outcome: 'success',
       });
 

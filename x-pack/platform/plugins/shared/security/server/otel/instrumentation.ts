@@ -13,41 +13,35 @@ import {
   ValueType,
 } from '@opentelemetry/api';
 
-export interface SecurityTelemetryAttributes {
-  providerType?: string;
-  providerName?: string;
-  realm?: string;
-  outcome?: 'success' | 'failure';
-  application?: string;
-  [key: string]: any;
+interface BasicAttributes {
+  outcome: 'success' | 'failure';
 }
+
+interface PrivilegeRegistrationAttributes extends BasicAttributes {
+  application: string;
+  deletedPrivileges: number;
+}
+
+interface UserAuthenticationAttributes extends BasicAttributes {
+  providerType: string;
+}
+
+type SecurityTelemetryAttributes = BasicAttributes &
+  Partial<PrivilegeRegistrationAttributes> &
+  Partial<UserAuthenticationAttributes>;
 
 class SecurityTelemetry {
   private readonly meter = metrics.getMeter('kibana.security');
 
-  private readonly basicTokenLoginDuration: Histogram<Attributes>;
-  private readonly samlLoginDuration: Histogram<Attributes>;
-  private readonly oidcLoginDuration: Histogram<Attributes>;
-  private readonly userProfileActivationDuration: any;
+  private readonly loginDuration: Histogram<Attributes>;
+  private readonly userProfileActivationDuration: Histogram<Attributes>;
   private readonly sessionCreationDuration: Histogram<Attributes>;
   private readonly logoutCounter: Counter<Attributes>;
   private readonly privilegeRegistrationDuration: Histogram<Attributes>;
 
   constructor() {
-    this.basicTokenLoginDuration = this.meter.createHistogram('auth.basic_token.login.duration', {
-      description: 'Duration of basic/token login attempts',
-      unit: 'ms',
-      valueType: ValueType.DOUBLE,
-    });
-
-    this.samlLoginDuration = this.meter.createHistogram('auth.saml.login.duration', {
-      description: 'Duration of SAML login attempts',
-      unit: 'ms',
-      valueType: ValueType.DOUBLE,
-    });
-
-    this.oidcLoginDuration = this.meter.createHistogram('auth.oidc.login.duration', {
-      description: 'Duration of OIDC login attempts',
+    this.loginDuration = this.meter.createHistogram('auth.saml.login.duration', {
+      description: 'Duration of login attempts',
       unit: 'ms',
       valueType: ValueType.DOUBLE,
     });
@@ -83,14 +77,12 @@ class SecurityTelemetry {
     );
   }
 
-  private transformAttributes(attributes: SecurityTelemetryAttributes): Attributes {
-    const { application, providerType, providerName, realm, outcome, ...rest } = attributes;
+  private transformAttributes<T = SecurityTelemetryAttributes>(attributes: T): Attributes {
+    const { application, providerType, outcome, ...rest } = attributes;
 
     const transformed: Attributes = {
       ...(application ? { 'auth.application': application } : {}),
       ...(providerType ? { 'auth.provider.type': providerType } : {}),
-      ...(providerName ? { 'auth.provider.name': providerName } : {}),
-      ...(realm ? { 'auth.realm': realm } : {}),
       ...(outcome ? { 'auth.outcome': outcome } : {}),
       ...rest,
     };
@@ -98,45 +90,37 @@ class SecurityTelemetry {
     return transformed;
   }
 
-  recordBasicTokenLoginDuration = (duration: number, attributes: SecurityTelemetryAttributes) => {
-    const transformedAttributes = this.transformAttributes(attributes);
-
-    this.basicTokenLoginDuration.record(duration, transformedAttributes);
-  };
-
-  recordSamlLoginDuration = (duration: number, attributes: SecurityTelemetryAttributes) => {
-    const transformedAttributes = this.transformAttributes(attributes);
-    this.samlLoginDuration.record(duration, transformedAttributes);
-  };
-
-  recordOidcLoginDuration = (duration: number, attributes: SecurityTelemetryAttributes) => {
-    const transformedAttributes = this.transformAttributes(attributes);
-    this.oidcLoginDuration.record(duration, transformedAttributes);
+  recordLoginDuration = (duration: number, attributes: UserAuthenticationAttributes) => {
+    const transformedAttributes =
+      this.transformAttributes<UserAuthenticationAttributes>(attributes);
+    this.loginDuration.record(duration, transformedAttributes);
   };
 
   recordUserProfileActivationDuration = (
     duration: number,
-    attributes: SecurityTelemetryAttributes
+    attributes: UserAuthenticationAttributes
   ) => {
-    const transformedAttributes = this.transformAttributes(attributes);
+    const transformedAttributes =
+      this.transformAttributes<UserAuthenticationAttributes>(attributes);
     this.userProfileActivationDuration.record(duration, transformedAttributes);
   };
 
-  recordSessionCreationDuration = (duration: number, attributes: SecurityTelemetryAttributes) => {
+  recordSessionCreationDuration = (duration: number, attributes: UserAuthenticationAttributes) => {
     const transformedAttributes = this.transformAttributes(attributes);
     this.sessionCreationDuration.record(duration, transformedAttributes);
   };
 
-  recordLogoutAttempt = (attributes: SecurityTelemetryAttributes) => {
-    const transformedAttributes = this.transformAttributes(attributes);
+  recordLogoutAttempt = (attributes: BasicAttributes) => {
+    const transformedAttributes = this.transformAttributes<BasicAttributes>(attributes);
     this.logoutCounter.add(1, transformedAttributes);
   };
 
   recordPrivilegeRegistrationDuration = (
     duration: number,
-    attributes: SecurityTelemetryAttributes
+    attributes: PrivilegeRegistrationAttributes
   ) => {
-    const transformedAttributes = this.transformAttributes(attributes);
+    const transformedAttributes =
+      this.transformAttributes<PrivilegeRegistrationAttributes>(attributes);
     this.privilegeRegistrationDuration.record(duration, transformedAttributes);
   };
 }

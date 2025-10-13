@@ -233,6 +233,7 @@ registerPrivilegesWithClusterTest(`inserts privileges when we don't have any exi
     expectTelemetryRecorded({
       application,
       outcome: 'success',
+      deletedPrivileges: 0,
     });
   },
 });
@@ -306,6 +307,7 @@ registerPrivilegesWithClusterTest(`deletes no-longer specified privileges`, {
     expectTelemetryRecorded({
       application,
       outcome: 'success',
+      deletedPrivileges: 3,
     });
   },
 });
@@ -401,6 +403,7 @@ registerPrivilegesWithClusterTest(`updates privileges when global actions don't 
     expectTelemetryRecorded({
       application,
       outcome: 'success',
+      deletedPrivileges: 0,
     });
   },
 });
@@ -496,6 +499,7 @@ registerPrivilegesWithClusterTest(`updates privileges when space actions don't m
     expectTelemetryRecorded({
       application,
       outcome: 'success',
+      deletedPrivileges: 0,
     });
   },
 });

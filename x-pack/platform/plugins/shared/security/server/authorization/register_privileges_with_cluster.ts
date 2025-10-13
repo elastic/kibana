@@ -93,6 +93,7 @@ export async function registerPrivilegesWithCluster(
     securityTelemetry.recordPrivilegeRegistrationDuration(performance.now() - startTime, {
       application,
       outcome: 'success',
+      deletedPrivileges: privilegesToDelete.length,
     });
   } catch (err) {
     logger.error(
