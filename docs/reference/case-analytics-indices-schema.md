@@ -12,7 +12,7 @@ This page lists fields that can appear in case analytics indices documents. Thes
 % [Use cases as data](docs-content://explore-analyze/alerts-cases/cases/cases-as-data.md).
 
 ::::{important}
-The cases as data features is in technical preview, meaning the schema for the case analytics indices is subject to change. 
+The cases as data feature is in technical preview, meaning the schema for the case analytics indices is subject to change. 
 ::::
 
 ## General case data 
