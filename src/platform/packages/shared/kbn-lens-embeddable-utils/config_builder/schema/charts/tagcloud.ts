@@ -9,33 +9,14 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import {
-  countMetricOperationSchema,
-  counterRateOperationSchema,
-  cumulativeSumOperationSchema,
-  differencesOperationSchema,
-  formulaOperationDefinitionSchema,
-  lastValueOperationSchema,
-  metricOperationSchema,
-  movingAverageOperationSchema,
-  percentileOperationSchema,
-  percentileRanksOperationSchema,
-  staticOperationDefinitionSchema,
-  uniqueCountMetricOperationSchema,
-  sumMetricOperationSchema,
-  esqlColumnSchema,
-  genericOperationOptionsSchema,
-} from '../metric_ops';
+import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
 import { coloringTypeSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
-import {
-  bucketDateHistogramOperationSchema,
-  bucketTermsOperationSchema,
-  bucketHistogramOperationSchema,
-  bucketRangesOperationSchema,
-  bucketFiltersOperationSchema,
-} from '../bucket_ops';
 import { layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import {
+  mergeAllBucketsWithChartDimensionSchema,
+  mergeAllMetricsWithChartDimensionSchema,
+} from './shared';
 
 const tagcloudStateMetricOptionsSchema = schema.object({
   /**
@@ -89,41 +70,11 @@ export const tagcloudStateSchemaNoESQL = schema.object({
   /**
    * Primary value configuration, must define operation.
    */
-  metric: schema.oneOf([
-    // oneOf allows only 12 items
-    // so break down metrics based on the type: field-based, reference-based, formula-like
-    schema.oneOf([
-      schema.allOf([tagcloudStateMetricOptionsSchema, countMetricOperationSchema]),
-      schema.allOf([tagcloudStateMetricOptionsSchema, uniqueCountMetricOperationSchema]),
-      schema.allOf([tagcloudStateMetricOptionsSchema, metricOperationSchema]),
-      schema.allOf([tagcloudStateMetricOptionsSchema, sumMetricOperationSchema]),
-      schema.allOf([tagcloudStateMetricOptionsSchema, lastValueOperationSchema]),
-      schema.allOf([tagcloudStateMetricOptionsSchema, percentileOperationSchema]),
-      schema.allOf([tagcloudStateMetricOptionsSchema, percentileRanksOperationSchema]),
-    ]),
-    schema.oneOf([
-      schema.allOf([tagcloudStateMetricOptionsSchema, differencesOperationSchema]),
-      schema.allOf([tagcloudStateMetricOptionsSchema, movingAverageOperationSchema]),
-      schema.allOf([tagcloudStateMetricOptionsSchema, cumulativeSumOperationSchema]),
-      schema.allOf([tagcloudStateMetricOptionsSchema, counterRateOperationSchema]),
-    ]),
-    schema.oneOf([
-      schema.allOf([tagcloudStateMetricOptionsSchema, staticOperationDefinitionSchema]),
-      schema.allOf([tagcloudStateMetricOptionsSchema, formulaOperationDefinitionSchema]),
-    ]),
-  ]),
+  metric: mergeAllMetricsWithChartDimensionSchema(tagcloudStateMetricOptionsSchema),
   /**
    * Configure how to break down to tags
    */
-  tag_by: schema.maybe(
-    schema.oneOf([
-      schema.allOf([tagcloudStateTagsByOptionsSchema, bucketDateHistogramOperationSchema]),
-      schema.allOf([tagcloudStateTagsByOptionsSchema, bucketTermsOperationSchema]),
-      schema.allOf([tagcloudStateTagsByOptionsSchema, bucketHistogramOperationSchema]),
-      schema.allOf([tagcloudStateTagsByOptionsSchema, bucketRangesOperationSchema]),
-      schema.allOf([tagcloudStateTagsByOptionsSchema, bucketFiltersOperationSchema]),
-    ])
-  ),
+  tag_by: schema.maybe(mergeAllBucketsWithChartDimensionSchema(tagcloudStateTagsByOptionsSchema)),
 });
 
 const tagcloudStateSchemaESQL = schema.object({

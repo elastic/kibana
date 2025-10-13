@@ -29,7 +29,7 @@ describe('Tagcloud Schema', () => {
       const input = {
         ...baseTagcloudConfig,
         metric: {
-          operation: 'count' as const,
+          operation: 'count',
           field: 'test_field',
           show_metric_label: false,
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
@@ -259,6 +259,26 @@ describe('Tagcloud Schema', () => {
         },
       };
 
+      expect(() => tagcloudStateSchema.validate(input)).toThrow();
+    });
+
+    it('throw when missing DSL and esql operation in a configuration', () => {
+      const input = {
+        type: 'tagcloud' as const,
+        dataset: {
+          type: 'esql' as const,
+          query: 'FROM my-index | LIMIT 100',
+        },
+        metric: {
+          operation: 'value',
+          column: 'count' as const,
+        },
+        tag_by: {
+          operation: 'terms',
+          fields: ['category'],
+          size: 5,
+        },
+      };
       expect(() => tagcloudStateSchema.validate(input)).toThrow();
     });
   });
