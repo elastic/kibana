@@ -71,13 +71,12 @@ export interface EmbeddableSetup {
   registerReactEmbeddableFactory: typeof registerReactEmbeddableFactory;
 
   /**
-   * Use registerTransforms to register transforms for an embeddable type.
-   * Public transforms registry uses transformOut to convert StoredEmbeddableState from URL into EmbeddableState.
-   * transformIn is not used.
+   * Register legacyURLTransform for an embeddable type.
+   * LegacyURLTransform is used to convert StoredEmbeddableState from URL into EmbeddableState.
    */
-  registerTransforms: (
+  registerLegacyURLTransform: (
     type: string,
-    getTransforms: () => Promise<EmbeddableTransforms<any, any> | undefined>
+    getTransformOut: () => Promise<EmbeddableTransforms['transformOut']>
   ) => void;
 
   /**
@@ -92,7 +91,9 @@ export interface EmbeddableSetup {
 export interface EmbeddableStart {
   getAddFromLibraryComponent: () => Promise<React.FC<AddFromLibraryFormProps>>;
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
-  getTransforms: (type: string) => Promise<EmbeddableTransforms | undefined>;
-  hasTransforms: (type: string) => boolean;
+  getLegacyURLTransform: (
+    type: string
+  ) => Promise<EmbeddableTransforms['transformOut'] | undefined>;
+  hasLegacyURLTransform: (type: string) => boolean;
   getEnhancement: (enhancementId: string) => PersistableState;
 }
