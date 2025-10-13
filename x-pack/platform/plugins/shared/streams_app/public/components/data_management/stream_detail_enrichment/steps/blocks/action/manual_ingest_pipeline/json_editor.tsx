@@ -167,7 +167,7 @@ export const JsonEditor = () => {
         return { suggestions };
       },
     };
-  }, [streamsRepositoryClient]);
+  }, [streamsRepositoryClient, signal]);
 
   React.useEffect(() => {
     const disposable = monaco.languages.registerCompletionItemProvider('xjson', suggestionProvider);
