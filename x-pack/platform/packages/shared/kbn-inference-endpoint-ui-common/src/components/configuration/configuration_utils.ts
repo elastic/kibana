@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { FieldType } from '../../types/types';
+import { FieldType, type Map } from '../../types/types';
 
-export const validIntInput = (
-  value: string | number | boolean | null | Record<string, string>
-): boolean => {
+export const validIntInput = (value: string | number | boolean | null | Map): boolean => {
   // reject non integers (including x.0 floats), but don't validate if empty
   return (value !== null || value !== '') &&
     (isNaN(Number(value)) ||
@@ -21,30 +19,25 @@ export const validIntInput = (
 
 export const ensureCorrectTyping = (
   type: FieldType,
-  value: string | number | boolean | null | Record<string, string>
-): string | number | boolean | null | Record<string, string> => {
+  value: string | number | boolean | null | Map
+): string | number | boolean | null | Map => {
   switch (type) {
     case FieldType.INTEGER:
       return validIntInput(value) ? ensureIntType(value) : value;
     case FieldType.BOOLEAN:
       return ensureBooleanType(value);
     case FieldType.MAP:
-      // return ensureMapType(value);
       return value;
     default:
       return ensureStringType(value);
   }
 };
 
-export const ensureStringType = (
-  value: string | number | boolean | null | Record<string, string>
-): string => {
+export const ensureStringType = (value: string | number | boolean | null | Map): string => {
   return value !== null ? String(value) : '';
 };
 
-export const ensureIntType = (
-  value: string | number | boolean | null | Record<string, string>
-): number | null => {
+export const ensureIntType = (value: string | number | boolean | null | Map): number | null => {
   // int is null-safe to prevent empty values from becoming zeroes
   if (value === null || value === '') {
     return null;
@@ -53,8 +46,6 @@ export const ensureIntType = (
   return parseInt(String(value), 10);
 };
 
-export const ensureBooleanType = (
-  value: string | number | boolean | null | Record<string, string>
-): boolean => {
+export const ensureBooleanType = (value: string | number | boolean | null | Map): boolean => {
   return Boolean(value);
 };

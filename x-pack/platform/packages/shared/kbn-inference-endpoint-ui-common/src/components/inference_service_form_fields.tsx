@@ -31,7 +31,7 @@ import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public
 import type { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
 import type { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
-import { isRecordOfStrings } from '../types/types';
+import { isMapWithStringValues } from '../types/types';
 import {
   SERVICE_PROVIDERS,
   solutionKeys,
@@ -99,6 +99,7 @@ interface InferenceServicesProps {
     currentSolution?: SolutionView;
     isPreconfigured?: boolean;
     allowContextWindowLength?: boolean;
+    enableCustomHeaders?: boolean;
   };
   http: HttpSetup;
   toasts: IToasts;
@@ -113,6 +114,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     enforceAdaptiveAllocations,
     isPreconfigured,
     currentSolution,
+    enableCustomHeaders,
   },
 }) => {
   const { data: providers, isLoading } = useProviders(http, toasts);
@@ -176,9 +178,19 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       if (overrides?.serverlessOnly && !enforceAdaptiveAllocations) {
         overrides = undefined;
       }
+      if (enableCustomHeaders !== true) {
+        overrides = {
+          ...(overrides ?? {}),
+          ...(overrides?.hidden
+            ? {
+                hidden: [...overrides.hidden, 'headers'],
+              }
+            : { hidden: ['headers'] }),
+        };
+      }
       return overrides;
     },
-    [enforceAdaptiveAllocations]
+    [enforceAdaptiveAllocations, enableCustomHeaders]
   );
 
   const providerName = useMemo(
@@ -477,7 +489,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
               typeof configValue === 'string' ||
               typeof configValue === 'number' ||
               typeof configValue === 'boolean' ||
-              (typeof configValue === 'object' && isRecordOfStrings(configValue)) ||
+              (typeof configValue === 'object' && isMapWithStringValues(configValue)) ||
               configValue === null ||
               configValue === undefined
             ) {

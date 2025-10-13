@@ -8,143 +8,27 @@
 import { connectorOverrides } from './connector_overrides';
 import type { ConnectorFormSchema, InferenceConnectorProviderConfig } from './types';
 
-const dataToBeDeserialized = {
-  actionTypeId: '.inference',
-  isPreconfigured: false,
-  isDeprecated: false,
-  referencedByCount: 0,
-  isMissingSecrets: false,
-  isSystemAction: false,
-  id: 'test-id',
-  name: 'test-name',
-  config: {
-    provider: 'openai',
-    taskType: 'chat_completion',
-    inferenceId: 'openai-chat_completion-qnn5arzkrwk',
-    providerConfig: {
-      api_key: null,
-      organization_id: null,
-      'rate_limit.requests_per_minute': null,
-      model_id: 'gpt-4.1',
-      url: null,
-      adaptive_allocations: {
-        max_number_of_allocations: 4,
-        min_number_of_allocations: 0,
-      },
+function getData(config: ConnectorFormSchema['config']) {
+  return {
+    actionTypeId: '.inference',
+    isPreconfigured: false,
+    isDeprecated: false,
+    referencedByCount: 0,
+    isMissingSecrets: false,
+    isSystemAction: false,
+    id: 'test-id',
+    name: 'test-name',
+    config: {
+      provider: 'openai',
+      taskType: 'chat_completion',
+      inferenceId: 'openai-chat_completion-qnn5arzkrwk',
+      ...config,
     },
-    contextWindowLength: 5000,
-    headers: {
-      'custom-test-key': 'custom-test-value',
-    },
-    taskTypeConfig: {},
-  },
-  actionType: 'AI Connector',
-  compatibility: [
-    'Generative AI for Security',
-    'Generative AI for Search',
-    'Generative AI for Observability',
-  ],
-  secrets: {},
-};
-
-const deserializedData = {
-  actionTypeId: '.inference',
-  isPreconfigured: false,
-  isDeprecated: false,
-  referencedByCount: 0,
-  isMissingSecrets: false,
-  isSystemAction: false,
-  id: 'test-id',
-  name: 'test-name',
-  config: {
-    provider: 'openai',
-    taskType: 'chat_completion',
-    inferenceId: 'openai-chat_completion-qnn5arzkrwk',
-    providerConfig: {
-      api_key: null,
-      organization_id: null,
-      'rate_limit.requests_per_minute': null,
-      model_id: 'gpt-4.1',
-      url: null,
-      headers: {
-        'custom-test-key': 'custom-test-value',
-      },
-      max_number_of_allocations: 4,
-    },
-    contextWindowLength: 5000,
-    taskTypeConfig: {},
-  },
-  actionType: 'AI Connector',
-  compatibility: [
-    'Generative AI for Security',
-    'Generative AI for Search',
-    'Generative AI for Observability',
-  ],
-  secrets: {},
-};
-
-const dataToBeSerialized = {
-  actionTypeId: '.inference',
-  isDeprecated: false,
-  name: 'test-connector',
-  config: {
-    provider: 'openai',
-    taskType: 'chat_completion',
-    inferenceId: 'openai-chat_completion-fgmnqk2fxld',
-    contextWindowLength: '5000',
-    providerConfig: {
-      max_number_of_allocations: 4,
-      api_key: null,
-      organization_id: null,
-      'rate_limit.requests_per_minute': null,
-      model_id: 'gpt-4.1',
-      url: null,
-      headers: {
-        'test-header-key-1': 'test-header-value-1',
-        'test-header-key-2': 'test-header-value-2',
-      },
-    },
-  },
-  secrets: {
-    providerSecrets: {
-      api_key: 'secret-api-key',
-    },
-  },
-};
-
-const serializedData = {
-  actionTypeId: '.inference',
-  isDeprecated: false,
-  name: 'test-connector',
-  config: {
-    provider: 'openai',
-    taskType: 'chat_completion',
-    inferenceId: 'openai-chat_completion-fgmnqk2fxld',
-    contextWindowLength: '5000',
-    providerConfig: {
-      api_key: null,
-      organization_id: null,
-      'rate_limit.requests_per_minute': null,
-      model_id: 'gpt-4.1',
-      url: null,
-      adaptive_allocations: {
-        enabled: true,
-        min_number_of_allocations: 0,
-        max_number_of_allocations: 4,
-      },
-      num_threads: 1,
-    },
-    headers: {
-      'test-header-key-1': 'test-header-value-1',
-      'test-header-key-2': 'test-header-value-2',
-    },
-  },
-  secrets: {
-    providerSecrets: {
-      api_key: 'secret-api-key',
-    },
-  },
-};
+    actionType: 'AI Connector',
+    compatibility: ['Generative AI for Security'],
+    secrets: {},
+  };
+}
 
 describe('connectorOverrides', () => {
   describe('Inference connector type', () => {
@@ -166,6 +50,38 @@ describe('connectorOverrides', () => {
     });
 
     describe('Deserializer', () => {
+      const dataToBeDeserialized = getData({
+        providerConfig: {
+          api_key: null,
+          organization_id: null,
+          'rate_limit.requests_per_minute': null,
+          model_id: 'gpt-4.1',
+          url: null,
+          adaptive_allocations: {
+            max_number_of_allocations: 4,
+            min_number_of_allocations: 0,
+          },
+        },
+        headers: {
+          'custom-test-key': 'custom-test-value',
+        },
+        taskTypeConfig: {},
+      });
+      const deserializedData = getData({
+        providerConfig: {
+          api_key: null,
+          organization_id: null,
+          'rate_limit.requests_per_minute': null,
+          model_id: 'gpt-4.1',
+          url: null,
+          headers: {
+            'custom-test-key': 'custom-test-value',
+          },
+          max_number_of_allocations: 4,
+        },
+        taskTypeConfig: {},
+      });
+
       it('should move headers into the provider config as the form expects', async () => {
         const deserialized = formDeserializer(dataToBeDeserialized);
         expect(deserialized).toEqual(deserializedData);
@@ -185,6 +101,41 @@ describe('connectorOverrides', () => {
     });
 
     describe('Serializer', () => {
+      const dataToBeSerialized = getData({
+        providerConfig: {
+          max_number_of_allocations: 4,
+          api_key: null,
+          organization_id: null,
+          'rate_limit.requests_per_minute': null,
+          model_id: 'gpt-4.1',
+          url: null,
+          headers: {
+            'test-header-key-1': 'test-header-value-1',
+            'test-header-key-2': 'test-header-value-2',
+          },
+        },
+      });
+
+      const serializedData = getData({
+        providerConfig: {
+          api_key: null,
+          organization_id: null,
+          'rate_limit.requests_per_minute': null,
+          model_id: 'gpt-4.1',
+          url: null,
+          adaptive_allocations: {
+            enabled: true,
+            min_number_of_allocations: 0,
+            max_number_of_allocations: 4,
+          },
+          num_threads: 1,
+        },
+        headers: {
+          'test-header-key-1': 'test-header-value-1',
+          'test-header-key-2': 'test-header-value-2',
+        },
+      });
+
       it('should move headers out of the provider config', async () => {
         const serialized = formSerializer(dataToBeSerialized);
         expect(serialized).toEqual(serializedData);

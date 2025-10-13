@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 import type { ConfigEntryView } from '../../types/types';
-import { FieldType } from '../../types/types';
+import { FieldType, type Map } from '../../types/types';
 import { ConfigFieldTitularComponent } from './titular_component_registry';
 import { ConfigurationField } from './configuration_field';
 import * as LABELS from '../../translations';
@@ -31,10 +31,7 @@ interface ItemFormRowProps {
   isInternalProvider?: boolean;
   isEdit?: boolean;
   isLoading: boolean;
-  setConfigEntry: (
-    key: string,
-    value: string | number | boolean | null | Record<string, string>
-  ) => void;
+  setConfigEntry: (key: string, value: string | number | boolean | null | Map) => void;
 }
 
 export const ItemFormRow: React.FC<ItemFormRowProps> = ({

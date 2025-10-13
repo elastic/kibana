@@ -13,10 +13,12 @@ interface ConfigEntry extends ConfigProperties {
 
 export * from './dynamic_config/types';
 
+export type Map = Record<string, string>;
+
 export interface ConfigEntryView extends ConfigEntry {
   isValid: boolean;
   validationErrors: string[];
-  value: string | number | boolean | null | Record<string, string>;
+  value: string | number | boolean | null | Map;
 }
 
 export type FieldsConfiguration = Record<string, ConfigProperties>;
@@ -54,7 +56,7 @@ export interface InferenceEndpoint {
 }
 
 // Helper function to check if an object is a Record<string, string> - supports custom headers
-export function isRecordOfStrings(value: unknown): value is Record<string, string> {
+export function isMapWithStringValues(value: unknown): value is Map {
   return (
     typeof value === 'object' &&
     value !== null &&

@@ -25,7 +25,7 @@ import {
 
 import { isEmpty } from 'lodash/fp';
 import type { ConfigEntryView } from '../../types/types';
-import { FieldType } from '../../types/types';
+import { FieldType, type Map } from '../../types/types';
 import {
   ADD_LABEL,
   DELETE_LABEL,
@@ -38,7 +38,7 @@ import { ensureBooleanType, ensureCorrectTyping, ensureStringType } from './conf
 interface ConfigurationFieldProps {
   configEntry: ConfigEntryView;
   isLoading: boolean;
-  setConfigValue: (value: number | string | boolean | null) => void;
+  setConfigValue: (value: number | string | boolean | null | Map) => void;
   isEdit?: boolean;
   isPreconfigured?: boolean;
 }
@@ -46,7 +46,7 @@ interface ConfigurationFieldProps {
 interface ConfigInputFieldProps {
   configEntry: ConfigEntryView;
   isLoading: boolean;
-  validateAndSetConfigValue: (value: string | boolean) => void;
+  validateAndSetConfigValue: (value: string | boolean | Map) => void;
   isEdit?: boolean;
   isPreconfigured?: boolean;
 }
@@ -220,16 +220,14 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
 }) => {
   const { isValid, value, default_value: defaultValue, key, updatable } = configEntry;
   const [checked, setChecked] = useState<boolean>(isEdit);
-  const [headers, setHeaders] = useState<Record<string, string>>(
-    value ?? defaultValue ?? { '': '' }
-  );
+  const [headers, setHeaders] = useState<Map>((value as Map) ?? defaultValue ?? { '': '' });
 
   const onChange = (e: EuiSwitchEvent) => {
     setChecked(e.target.checked);
     // clear headers if unchecking
     if (e.target.checked === false) {
-      setHeaders({});
-      validateAndSetConfigValue(null);
+      setHeaders({ '': '' });
+      validateAndSetConfigValue('');
     }
   };
 
@@ -237,7 +235,7 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
     return headersArray.reduce((acc, [k, v]) => {
       acc[k] = v;
       return acc;
-    }, {} as Record<string, string>);
+    }, {} as Map);
   };
 
   const iterableHeaders = useMemo(
@@ -267,7 +265,6 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
                             const newHeaders = [...Object.entries(prevHeaders)];
                             newHeaders[index][0] = e.target.value;
                             const headersObj = convertToHeadersObject(newHeaders);
-                            // @ts-ignore
                             validateAndSetConfigValue(headersObj);
                             return headersObj;
                           });
@@ -286,7 +283,6 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
                             const newHeaders = [...Object.entries(prevHeaders)];
                             newHeaders[index][1] = e.target.value;
                             const headersObj = convertToHeadersObject(newHeaders);
-                            // @ts-ignore
                             validateAndSetConfigValue(headersObj);
                             return headersObj;
                           });
@@ -305,7 +301,6 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
                         const newHeaders = iterableHeaders.toSpliced(index, 1);
                         const headersObj = convertToHeadersObject(newHeaders);
                         setHeaders(headersObj);
-                        // @ts-ignore
                         validateAndSetConfigValue(headersObj);
                       }}
                       iconType="minusInCircle"
@@ -352,7 +347,7 @@ export const ConfigurationField: React.FC<ConfigurationFieldProps> = ({
   isEdit,
   isPreconfigured,
 }) => {
-  const validateAndSetConfigValue = (value: number | string | boolean | Record<string, string>) => {
+  const validateAndSetConfigValue = (value: number | string | boolean | Map) => {
     setConfigValue(ensureCorrectTyping(configEntry.type, value));
   };
 
