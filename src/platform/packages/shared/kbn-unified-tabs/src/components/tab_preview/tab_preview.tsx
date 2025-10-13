@@ -148,7 +148,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
         <EuiSplitPanel.Outer
           grow
           css={getPreviewContainerCss(euiTheme, showPreview, tabPosition)}
-          data-test-subj={`unifiedTabs_tabPreview_${tabItem.id}`}
+          data-test-subj={`unifiedTabs_tabPreview_outerPanel_${tabItem.id}`}
         >
           {showPreview && !!tabPreviewData && (
             <TabPreviewInner tabItem={tabItem} tabPreviewData={tabPreviewData} />
@@ -174,6 +174,7 @@ const TabPreviewInner: React.FC<{
             size="s"
             className="eui-textBreakWord"
             css={previewQuery ? getPreviewtitleCss(euiTheme) : undefined}
+            data-test-subj={`unifiedTabs_tabPreview_title_${tabItem.id}`}
           >
             {tabPreviewData.title}
           </EuiText>
@@ -184,6 +185,7 @@ const TabPreviewInner: React.FC<{
             transparentBackground
             paddingSize="none"
             css={codeBlockCss}
+            data-test-subj={`unifiedTabs_tabPreview_query_${tabItem.id}`}
           >
             {previewQuery}
           </EuiCodeBlock>
@@ -195,6 +197,7 @@ const TabPreviewInner: React.FC<{
         paddingSize="none"
         className="eui-textBreakWord"
         css={getSplitPanelCss(euiTheme)}
+        data-test-subj={`unifiedTabs_tabPreview_label_${tabItem.id}`}
       >
         {tabPreviewData.status === TabStatus.RUNNING ? (
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>

@@ -236,9 +236,11 @@ export class UnifiedTabsPageObject extends FtrService {
   }
 
   public async isTabPreviewVisible() {
-    const tabPreview = await this.find.byCssSelector('[data-test-subj^="unifiedTabs_tabPreview_"]');
+    const tabPreviews = await this.find.allByCssSelector(
+      '[data-test-subj^="unifiedTabs_tabPreview_label_"]'
+    );
 
-    return tabPreview ? await tabPreview.isDisplayed() : false;
+    return tabPreviews.length === 1;
   }
 
   public async closeTabPreviewWithEsc() {
@@ -248,6 +250,49 @@ export class UnifiedTabsPageObject extends FtrService {
         return !(await this.isTabPreviewVisible());
       });
     }
+  }
+
+  public async openTabPreview(index: number) {
+    const tabElements = await this.getTabElements();
+    if (index < 0 || index >= tabElements.length) {
+      throw new Error(`Tab index ${index} is out of bounds`);
+    }
+    await this.testSubjects.moveMouseTo('breadcrumbs');
+    const tabElement = tabElements[index];
+    const controlElement = await tabElement.findByCssSelector(
+      '[data-test-subj^="unifiedTabs_selectTabBtn_"]'
+    );
+    await controlElement.moveMouseTo();
+    await this.retry.waitFor('tab preview to appear', async () => {
+      return await this.isTabPreviewVisible();
+    });
+  }
+
+  public async getTabPreviewContent(index: number) {
+    await this.openTabPreview(index);
+
+    const getVisibleText = async (selector: string): Promise<string> => {
+      const elements = await this.find.allByCssSelector(`[data-test-subj^="${selector}"]`);
+      if (elements?.length > 1) {
+        throw new Error(
+          `Expected exactly one element for selector ${selector}, but found ${elements.length}`
+        );
+      }
+      if (elements?.length === 0) {
+        return '';
+      }
+      return await elements[0].getVisibleText();
+    };
+
+    const content = {
+      title: await getVisibleText('unifiedTabs_tabPreview_title_'),
+      query: await getVisibleText('unifiedTabs_tabPreview_query_'),
+      label: await getVisibleText('unifiedTabs_tabPreview_label_'),
+    };
+
+    await this.closeTabPreviewWithEsc();
+
+    return content;
   }
 
   public async openTabsBarMenu() {
