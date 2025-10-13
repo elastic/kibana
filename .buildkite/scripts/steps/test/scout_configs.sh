@@ -80,37 +80,34 @@ configWithoutTests=()
 
 FINAL_EXIT_CODE=0
 
-# Function to upload Scout events if report directory exists
+# Function to upload Scout events if available and clean up
 upload_events_if_available() {
   local config_path="$1"
   local mode="$2"
 
-  # Find the most recent Scout report directory for this test run
-  REPORT_DIR=$(ls -td .scout/reports/scout-*/ 2>/dev/null | head -n 1)
-  if [ -n "$REPORT_DIR" ]; then
-    EVENT_LOG_FILE="${REPORT_DIR}event-log.ndjson"
-    if [ -f "$EVENT_LOG_FILE" ]; then
+  if [[ "${SCOUT_REPORTER_ENABLED:-}" =~ ^(1|true)$ ]]; then
+    if [ -d ".scout/reports" ] && [ "$(ls -A .scout/reports 2>/dev/null)" ]; then
       echo "--- Upload Scout reporter events for $config_path ($mode)"
-      if [[ "${SCOUT_REPORTER_ENABLED:-}" == "true" ]]; then
-        # prevent non-zero exit code from breaking the script
-        set +e;
-        node scripts/scout upload-events --dontFailOnError --eventLogPath "$EVENT_LOG_FILE"
-        UPLOAD_EXIT_CODE=$?
-        set -e;
+      # prevent non-zero exit code from breaking the script
+      set +e;
+      node scripts/scout upload-events --dontFailOnError
+      UPLOAD_EXIT_CODE=$?
+      set -e;
 
-        if [[ $UPLOAD_EXIT_CODE -eq 0 ]]; then
-          echo "✅ Upload completed for $config_path ($mode) from $EVENT_LOG_FILE"
-        else
-          echo "⚠️ Upload failed for $config_path ($mode) with exit code $UPLOAD_EXIT_CODE"
-        fi
+      if [[ $UPLOAD_EXIT_CODE -eq 0 ]]; then
+        echo "✅ Upload completed for $config_path ($mode)"
       else
-        echo "⚠️ The SCOUT_REPORTER_ENABLED environment variable is not 'true'. Skipping event upload."
+        echo "⚠️ Upload failed for $config_path ($mode) with exit code $UPLOAD_EXIT_CODE"
       fi
+
+      # Clean up reports directory after upload attempt
+      echo "🧹 Cleaning up Scout reports directory"
+      rm -rf .scout/reports
     else
-      echo "❌ Could not find event log file '$EVENT_LOG_FILE' for $config_path ($mode)"
+      echo "❌ No Scout reports found for $config_path ($mode)"
     fi
   else
-    echo "❌ Could not find any scout report directory for $config_path ($mode)"
+    echo "⚠️ The SCOUT_REPORTER_ENABLED environment variable is not 'true'. Skipping event upload."
   fi
 }
 
