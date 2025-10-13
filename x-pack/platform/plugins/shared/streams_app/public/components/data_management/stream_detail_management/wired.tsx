@@ -79,13 +79,13 @@ export function WiredStreamDetailManagement({
             title={i18n.translate('xpack.streams.wiredStreamOverview.noPrivileges.title', {
               defaultMessage: "Data stream couldn't be loaded",
             })}
-            color="warning"
-            iconType="warning"
+            color="danger"
+            iconType="error"
           >
             <p>
               {i18n.translate('xpack.streams.wiredStreamOverview.noPrivileges.description', {
                 defaultMessage:
-                  "You don't have the required privileges to view streams. Make sure you have sufficient view_index_metadata privileges.",
+                  "You don't have the required privileges to view this stream. Make sure you have sufficient view_index_metadata privileges.",
               })}
             </p>
           </EuiCallOut>
