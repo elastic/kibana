@@ -27,7 +27,7 @@ xpack.features.overrides:
   ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
   ml:
     category: "security"
-    order: 1102
+    order: 1103
   ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
   siemV4:
     privileges:
