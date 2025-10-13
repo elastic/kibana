@@ -430,7 +430,7 @@ describe('PendingActionsSelector', () => {
     );
   });
 
-  test('fetch data when popover is open and not when popover is closed', async () => {
+  test('should fetch data when popover is opened', async () => {
     // Test with popover closed (default state)
     await renderAndWaitForComponent(<PendingActionsSelector {...defaultProps} />);
 
@@ -455,6 +455,36 @@ describe('PendingActionsSelector', () => {
         enabled: true,
       })
     );
+  });
+
+  test('should not fetch data repeatedly when popover is open', async () => {
+    // Test with popover closed (default state)
+    await renderAndWaitForComponent(<PendingActionsSelector {...defaultProps} />);
+
+    expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({
+        enabled: false,
+      })
+    );
+
+    // Clear previous calls
+    mockUseGetEndpointActionList.mockClear();
+
+    // Test with popover open
+    await renderAndWaitForComponent(
+      <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+    );
+
+    expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({
+        enabled: true,
+      })
+    );
+
+    // expect only being called once
+    expect(mockUseGetEndpointActionList).toHaveBeenCalledTimes(1);
   });
 
   describe('Privilege validation', () => {
