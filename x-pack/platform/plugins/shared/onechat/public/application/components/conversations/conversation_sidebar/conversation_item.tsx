@@ -17,9 +17,13 @@ import { useConversationActions } from '../../../hooks/use_conversation_actions'
 
 interface ConversationItemProps {
   conversation: ConversationWithoutRounds;
+  isEvaluation?: boolean;
 }
 
-export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation }) => {
+export const ConversationItem: React.FC<ConversationItemProps> = ({
+  conversation,
+  isEvaluation = false,
+}) => {
   const { createOnechatUrl } = useNavigation();
   const currentConversationId = useConversationId();
   const { deleteConversation } = useConversationActions();
@@ -37,7 +41,13 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation
       <EuiListGroupItem
         color="text"
         size="s"
-        href={createOnechatUrl(appPaths.chat.conversation({ conversationId: conversation.id }))}
+        href={
+          isEvaluation
+            ? createOnechatUrl(
+                appPaths.evaluations.conversation({ conversationId: conversation.id })
+              )
+            : createOnechatUrl(appPaths.chat.conversation({ conversationId: conversation.id }))
+        }
         data-test-subj={`conversationItem-${conversation.id}`}
         label={conversation.title}
         isActive={isActive}
