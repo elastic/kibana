@@ -290,7 +290,9 @@ function SpanFlyoutBody({
                 defaultMessage: 'Type',
               })}
             >
-              <EuiBadge color="hollow">{spanTypes.spanType}</EuiBadge>
+              <EuiBadge color="hollow" tabIndex={0}>
+                {spanTypes.spanType}
+              </EuiBadge>
             </EuiToolTip>
             {spanTypes.spanSubtype && (
               <EuiToolTip
@@ -298,7 +300,9 @@ function SpanFlyoutBody({
                   defaultMessage: 'Subtype',
                 })}
               >
-                <EuiBadge color="hollow">{spanTypes.spanSubtype}</EuiBadge>
+                <EuiBadge color="hollow" tabIndex={0}>
+                  {spanTypes.spanSubtype}
+                </EuiBadge>
               </EuiToolTip>
             )}
             {spanTypes.spanAction && (
@@ -307,7 +311,9 @@ function SpanFlyoutBody({
                   defaultMessage: 'Action',
                 })}
               >
-                <EuiBadge color="hollow">{spanTypes.spanAction}</EuiBadge>
+                <EuiBadge color="hollow" tabIndex={0}>
+                  {spanTypes.spanAction}
+                </EuiBadge>
               </EuiToolTip>
             )}
 

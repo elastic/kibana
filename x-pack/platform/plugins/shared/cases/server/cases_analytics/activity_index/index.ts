@@ -15,13 +15,10 @@ import {
   CAI_ACTIVITY_INDEX_VERSION,
   CAI_ACTIVITY_SOURCE_INDEX,
   getActivitySourceQuery,
-  getCAIActivitySynchronizationTaskId,
   getCAIActivityBackfillTaskId,
-  CAI_ACTIVITY_SYNC_TYPE,
 } from './constants';
 import { CAI_ACTIVITY_INDEX_MAPPINGS } from './mappings';
 import { CAI_ACTIVITY_INDEX_SCRIPT, CAI_ACTIVITY_INDEX_SCRIPT_ID } from './painless_scripts';
-import { scheduleCAISynchronizationTask } from '../tasks/synchronization_task';
 
 export const createActivityAnalyticsIndex = ({
   esClient,
@@ -53,29 +50,3 @@ export const createActivityAnalyticsIndex = ({
     sourceIndex: CAI_ACTIVITY_SOURCE_INDEX,
     sourceQuery: getActivitySourceQuery(spaceId, owner),
   });
-
-export const scheduleActivityAnalyticsSyncTask = ({
-  taskManager,
-  logger,
-  spaceId,
-  owner,
-}: {
-  taskManager: TaskManagerStartContract;
-  logger: Logger;
-  spaceId: string;
-  owner: Owner;
-}) => {
-  const taskId = getCAIActivitySynchronizationTaskId(spaceId, owner);
-  scheduleCAISynchronizationTask({
-    taskId,
-    sourceIndex: CAI_ACTIVITY_SOURCE_INDEX,
-    destIndex: getActivityDestinationIndexName(spaceId, owner),
-    spaceId,
-    owner,
-    syncType: CAI_ACTIVITY_SYNC_TYPE,
-    taskManager,
-    logger,
-  }).catch((e) => {
-    logger.error(`Error scheduling ${taskId} task, received ${e.message}`);
-  });
-};
