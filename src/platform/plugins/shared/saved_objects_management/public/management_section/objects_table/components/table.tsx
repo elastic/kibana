@@ -147,7 +147,7 @@ export class Table extends PureComponent<TableProps, TableState> {
               }
             )}
           >
-            <span>-</span>
+            <span tabIndex={0}>-</span>
           </EuiToolTip>
         );
       }
@@ -156,7 +156,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       if (updatedAt.diff(moment(), 'days') > -7) {
         return (
           <EuiToolTip content={updatedAt.format('LL LT')}>
-            <span>
+            <span tabIndex={0}>
               <FormattedRelative value={new Date(dateTime).getTime()} />
             </span>
           </EuiToolTip>
@@ -164,7 +164,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       }
       return (
         <EuiToolTip content={updatedAt.format('LL LT')}>
-          <span>{updatedAt.format('LL')}</span>
+          <span tabIndex={0}>{updatedAt.format('LL')}</span>
         </EuiToolTip>
       );
     };
