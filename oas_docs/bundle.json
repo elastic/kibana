@@ -25588,13 +25588,26 @@
         ],
         "requestBody": {
           "content": {
+            "application/gzip": {
+              "schema": {
+                "format": "binary",
+                "type": "string"
+              }
+            },
             "application/gzip; application/zip": {
               "schema": {
                 "format": "binary",
                 "type": "string"
               }
+            },
+            "application/zip": {
+              "schema": {
+                "format": "binary",
+                "type": "string"
+              }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
