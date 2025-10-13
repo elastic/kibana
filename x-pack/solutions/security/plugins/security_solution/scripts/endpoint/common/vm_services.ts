@@ -83,7 +83,10 @@ export const createMultipassHostVmClient = (
   name: string,
   log: ToolingLog = createToolingLogger()
 ): HostVm => {
-  const exec = async (command: string, options?: { silent?: boolean }): Promise<HostVmExecResponse> => {
+  const exec = async (
+    command: string,
+    options?: { silent?: boolean }
+  ): Promise<HostVmExecResponse> => {
     const execResponse = await execa
       .command(`multipass exec ${name} -- ${command}`, { maxBuffer: MAX_BUFFER })
       .catch((e) => {
@@ -325,7 +328,10 @@ export const createVagrantHostVmClient = (
 
   log.debug(`Creating Vagrant VM client for [${name}] with vagrantfile [${vagrantFile}]`);
 
-  const exec = async (command: string, options?: { silent?: boolean }): Promise<HostVmExecResponse> => {
+  const exec = async (
+    command: string,
+    options?: { silent?: boolean }
+  ): Promise<HostVmExecResponse> => {
     const execResponse = await execa
       .command(`vagrant ssh -- ${command}`, execaOptions)
       .catch((e) => {
