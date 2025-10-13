@@ -6,14 +6,8 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  useCurrentEuiBreakpoint,
-  EuiSpacer,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, useCurrentEuiBreakpoint } from '@elastic/eui';
+
 import { Observability } from './observability';
 import { Security } from './security';
 
@@ -22,14 +16,6 @@ export const AlternateSolutions: React.FC = () => {
 
   return (
     <>
-      <EuiTitle size="xxs">
-        <h4>
-          {i18n.translate('xpack.searchHomepage.threatDetectionSolutions.title', {
-            defaultMessage: 'Looking for logs or threat detection solutions?',
-          })}
-        </h4>
-      </EuiTitle>
-      <EuiSpacer />
       <EuiFlexGroup gutterSize="xl" direction={currentBreakpoint === 'xl' ? 'row' : 'column'}>
         <EuiFlexItem>
           <Observability />
