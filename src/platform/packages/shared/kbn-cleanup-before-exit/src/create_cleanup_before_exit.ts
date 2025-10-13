@@ -29,6 +29,9 @@ export function createCleanupBeforeExit(proc: NodeJS.Process) {
   });
 
   const installHandlers = () => {
+    if (handlersInstalled) {
+      return;
+    }
     handlersInstalled = true;
 
     proc.once('beforeExit', cleanup);
