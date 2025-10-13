@@ -11,6 +11,7 @@ import type { Scalar, Document, Pair, Node } from 'yaml';
 import { YAMLParseError, isPair, isScalar, parseDocument, visit } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
+import moment from 'moment-timezone';
 import type { BuiltInStepType, TriggerType } from '@kbn/workflows';
 import {
   ForEachStepSchema,
@@ -47,6 +48,8 @@ let builtInStepTypesCache: Array<{
   description: string;
   icon: monaco.languages.CompletionItemKind;
 }> | null = null;
+
+const TIMEZONE_NAMES_SORTED = moment.tz.names().sort();
 
 /**
  * Extract built-in step types from the workflow schema (single source of truth)
@@ -182,7 +185,8 @@ function isInScheduledTriggerWithBlock(yamlDocument: Document, absolutePosition:
 
   visit(yamlDocument, {
     Map(key, node, ancestors) {
-      if (!node.range || node.get('type') !== 'scheduled') return;
+      if (!node.range) return;
+      if (node.get('type') !== 'scheduled') return;
 
       // Check if we're inside this trigger's range
       if (absolutePosition < node.range[0] || absolutePosition > node.range[2]) return;
@@ -1043,6 +1047,45 @@ function getRRuleSchedulingSuggestions(range: monaco.IRange): monaco.languages.C
   return suggestions;
 }
 
+/**
+ * Get timezone suggestions for tzid field
+ */
+function getTimezoneSuggestions(
+  range: monaco.IRange,
+  prefix: string = ''
+): monaco.languages.CompletionItem[] {
+  const suggestions: monaco.languages.CompletionItem[] = [];
+
+  const filteredTimezones = prefix
+    ? TIMEZONE_NAMES_SORTED.filter((tz) => tz.toLowerCase().includes(prefix.toLowerCase()))
+    : TIMEZONE_NAMES_SORTED;
+
+  // Limit to 25 suggestions for performance
+  const limitedTimezones = filteredTimezones.slice(0, 25);
+
+  limitedTimezones.forEach((timezone) => {
+    const offset = moment.tz(timezone).format('Z');
+    const offsetText = moment.tz(timezone).format('z');
+
+    suggestions.push({
+      label: timezone,
+      kind: monaco.languages.CompletionItemKind.EnumMember,
+      insertText: timezone,
+      range,
+      documentation: {
+        value: `**${timezone}**\n\nOffset: ${offset} (${offsetText})\n\nTimezone identifier for RRule scheduling.`,
+      },
+      filterText: timezone,
+      sortText: timezone.startsWith('UTC') ? `!${timezone}` : timezone, // Prioritize UTC timezones
+      detail: `Timezone: ${offset}`,
+      preselect: timezone === 'UTC',
+      insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, // Ensure full replacement
+    });
+  });
+
+  return suggestions;
+}
+
 export function getSuggestion(
   key: string,
   context: monaco.languages.CompletionContext,
@@ -1133,7 +1176,11 @@ export function getCompletionItemProvider(
             const parsedYaml = yamlDocument.toJS();
 
             // If we have basic workflow structure, use it for completion context
-            if (parsedYaml && typeof parsedYaml === 'object' && 'steps' in parsedYaml) {
+            if (
+              parsedYaml &&
+              typeof parsedYaml === 'object' &&
+              ('steps' in parsedYaml || 'triggers' in parsedYaml)
+            ) {
               workflowData = parsedYaml;
             } else {
               return {
@@ -1149,7 +1196,10 @@ export function getCompletionItemProvider(
           }
         }
 
-        const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowData);
+        const workflowGraph =
+          workflowData && workflowData.steps
+            ? WorkflowGraph.fromWorkflowDefinition(workflowData)
+            : null;
         const path = getCurrentPath(yamlDocument, absolutePosition);
         const yamlNode = yamlDocument.getIn(path, true);
         const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;
@@ -1163,7 +1213,7 @@ export function getCompletionItemProvider(
 
         let context: z.ZodType;
         try {
-          context = getContextSchemaForPath(workflowData, workflowGraph, path);
+          context = getContextSchemaForPath(workflowData, workflowGraph!, path);
         } catch (contextError) {
           // Fallback to the main workflow schema if context detection fails
           context = workflowYamlSchema;
@@ -1266,6 +1316,31 @@ export function getCompletionItemProvider(
         // First check if we're in a connector's with block (using enhanced detection)
         const connectorType = getConnectorTypeFromContext(yamlDocument, path, model, position);
         // Detected connector type
+
+        // Check if we're editing a timezone field (tzid or timezone) - works in any context
+        const timezoneLine = model.getLineContent(position.lineNumber);
+        const tzidLineUpToCursor = timezoneLine.substring(0, position.column - 1);
+        const timezoneFieldMatch = tzidLineUpToCursor.match(/^\s*(?:tzid|timezone)\s*:\s*(.*)$/);
+
+        if (timezoneFieldMatch) {
+          const prefix = timezoneFieldMatch[1].trim();
+
+          const tzidValueStart =
+            timezoneFieldMatch.index! + timezoneFieldMatch[0].indexOf(timezoneFieldMatch[1]);
+          const tzidValueRange = {
+            startLineNumber: position.lineNumber,
+            endLineNumber: position.lineNumber,
+            startColumn: tzidValueStart + 1,
+            endColumn: position.column,
+          };
+
+          const timezoneSuggestions = getTimezoneSuggestions(tzidValueRange, prefix);
+
+          return {
+            suggestions: timezoneSuggestions,
+            incomplete: true,
+          };
+        }
 
         // Check if we're in a scheduled trigger's with block for RRule suggestions
         if (isInScheduledTriggerWithBlock(yamlDocument, absolutePosition)) {
