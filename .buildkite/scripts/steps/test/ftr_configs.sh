@@ -90,7 +90,13 @@ while read -r config; do
   set -e;
 
   # Scout reporter
-  REPORT_DIR=$(ls -td .scout/reports/scout-ftr-*/ 2>/dev/null | head -n 1)
+  if [[ "${SCOUT_REPORTER_ENABLED:-}" =~ ^(1|true)$ ]]; then
+    REPORT_DIR=$(ls -td .scout/reports/scout-ftr-*/ 2>/dev/null | head -n 1)
+  else
+    REPORT_DIR=""
+    echo "Scout reporter is disabled, skipping report upload..."
+  fi
+  # Skip report upload if we can't find the report directory
   if [ -n "$REPORT_DIR" ]; then
     EVENT_LOG_FILE="${REPORT_DIR}event-log.ndjson"
     if [ -f "$EVENT_LOG_FILE" ]; then
