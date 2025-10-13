@@ -10,7 +10,7 @@ import { log, syntheticsMonitor, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import type { SupertestWithRoleScopeType } from '../../services';
+import type { RoleCredentials, SupertestWithRoleScopeType } from '../../services';
 import { customRoles } from './custom_roles';
 import { addIntegrationToLogIndexTemplate, cleanLogIndexTemplate } from './utils';
 
@@ -98,6 +98,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('No access user', () => {
       let supertestNoAccessWithCookieCredentials: SupertestWithRoleScopeType;
+      let roleAuthc: RoleCredentials;
 
       before(async () => {
         await saml.setCustomRole(customRoles.noAccessUserRole);
@@ -106,9 +107,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             useCookieHeader: true,
             withInternalHeaders: true,
           });
+        roleAuthc = await saml.createM2mApiKeyWithCustomRoleScope();
       });
 
       after(async () => {
+        await saml.invalidateM2mApiKeyWithRoleScope(roleAuthc);
         await saml.deleteCustomRole();
       });
 
@@ -126,6 +129,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Read user', () => {
       let supertestReadWithCookieCredentials: SupertestWithRoleScopeType;
+      let roleAuthc: RoleCredentials;
 
       before(async () => {
         await saml.setCustomRole(customRoles.readUserRole);
@@ -134,9 +138,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             useCookieHeader: true,
             withInternalHeaders: true,
           });
+        roleAuthc = await saml.createM2mApiKeyWithCustomRoleScope();
       });
 
       after(async () => {
+        await saml.invalidateM2mApiKeyWithRoleScope(roleAuthc);
         await saml.deleteCustomRole();
       });
 
@@ -154,6 +160,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('uncategorized datastreams', () => {
       let supertestDatasetQualityMonitorWithCookieCredentials: SupertestWithRoleScopeType;
+      let roleAuthc: RoleCredentials;
 
       before(async () => {
         await saml.setCustomRole(customRoles.datasetQualityMonitorUserRole);
@@ -162,6 +169,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             useCookieHeader: true,
             withInternalHeaders: true,
           });
+        roleAuthc = await saml.createM2mApiKeyWithCustomRoleScope();
+
         await synthtraceLogsEsClient.index([
           timerange('2023-11-20T15:00:00.000Z', '2023-11-20T15:01:00.000Z')
             .interval('1m')
@@ -175,6 +184,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
+        await saml.invalidateM2mApiKeyWithRoleScope(roleAuthc);
         await saml.deleteCustomRole();
         await synthtraceLogsEsClient.clean();
       });
@@ -194,6 +204,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('categorized datastreams', () => {
       const integration = 'my-custom-integration';
       let supertestDatasetQualityMonitorWithCookieCredentials: SupertestWithRoleScopeType;
+      let roleAuthc: RoleCredentials;
 
       before(async () => {
         await saml.setCustomRole(customRoles.datasetQualityMonitorUserRole);
@@ -202,6 +213,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             useCookieHeader: true,
             withInternalHeaders: true,
           });
+        roleAuthc = await saml.createM2mApiKeyWithCustomRoleScope();
         await addIntegrationToLogIndexTemplate({ esClient: es, name: integration });
 
         await synthtraceLogsEsClient.index([
@@ -218,6 +230,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       after(async () => {
         await cleanLogIndexTemplate({ esClient: es });
+        await saml.invalidateM2mApiKeyWithRoleScope(roleAuthc);
         await saml.deleteCustomRole();
         await synthtraceLogsEsClient.clean();
       });
@@ -250,6 +263,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('multiple dataStream types are requested', () => {
       let supertestDatasetQualityMonitorWithCookieCredentials: SupertestWithRoleScopeType;
+      let roleAuthc: RoleCredentials;
 
       before(async () => {
         await saml.setCustomRole(customRoles.datasetQualityMonitorUserRole);
@@ -258,6 +272,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             useCookieHeader: true,
             withInternalHeaders: true,
           });
+        roleAuthc = await saml.createM2mApiKeyWithCustomRoleScope();
         await synthtraceLogsEsClient.index([
           timerange('2023-11-20T15:00:00.000Z', '2023-11-20T15:01:00.000Z')
             .interval('1m')
@@ -300,6 +315,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
+        await saml.invalidateM2mApiKeyWithRoleScope(roleAuthc);
         saml.deleteCustomRole();
         await synthtraceLogsEsClient.clean();
         await syntheticsSynthrace.clean();
@@ -308,6 +324,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Dataset quality monitor user', () => {
       let supertestDatasetQualityMonitorWithCookieCredentials: SupertestWithRoleScopeType;
+      let roleAuthc: RoleCredentials;
 
       before(async () => {
         await saml.setCustomRole(customRoles.datasetQualityMonitorUserRole);
@@ -316,9 +333,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             useCookieHeader: true,
             withInternalHeaders: true,
           });
+        roleAuthc = await saml.createM2mApiKeyWithCustomRoleScope();
       });
 
       after(async () => {
+        await saml.invalidateM2mApiKeyWithRoleScope(roleAuthc);
         await saml.deleteCustomRole();
       });
 

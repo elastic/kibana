@@ -9,7 +9,7 @@ import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 
-import type { SupertestWithRoleScopeType } from '../../services';
+import type { RoleCredentials, SupertestWithRoleScopeType } from '../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { customRoles } from './custom_roles';
 
@@ -137,9 +137,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Dataset quality monitor user', () => {
       let supertestDatasetQualityMonitorWithCookieCredentials: SupertestWithRoleScopeType;
+      let roleAuthc: RoleCredentials;
 
       before(async () => {
         await saml.setCustomRole(customRoles.datasetQualityMonitorUserRole);
+        roleAuthc = await saml.createM2mApiKeyWithCustomRoleScope();
         supertestDatasetQualityMonitorWithCookieCredentials =
           await customRoleScopedSupertest.getSupertestWithCustomRoleScope({
             useCookieHeader: true,
@@ -148,6 +150,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
+        await saml.invalidateM2mApiKeyWithRoleScope(roleAuthc);
         await saml.deleteCustomRole();
       });
 

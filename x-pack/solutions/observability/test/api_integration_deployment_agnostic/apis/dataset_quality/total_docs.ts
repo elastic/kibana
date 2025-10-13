@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import type { SupertestWithRoleScopeType } from '../../services';
+import type { RoleCredentials, SupertestWithRoleScopeType } from '../../services';
 import { customRoles } from './custom_roles';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -33,6 +33,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     this.onlyEsVersion('8.19 || >=9.1');
 
     let supertestNoAccessWithCookieCredentials: SupertestWithRoleScopeType;
+    let roleAuthc: RoleCredentials;
 
     before(async () => {
       await saml.setCustomRole(customRoles.noAccessUserRole);
@@ -41,9 +42,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           useCookieHeader: true,
           withInternalHeaders: true,
         });
+      roleAuthc = await saml.createM2mApiKeyWithCustomRoleScope();
     });
 
     after(async () => {
+      await saml.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       await saml.deleteCustomRole();
     });
 
