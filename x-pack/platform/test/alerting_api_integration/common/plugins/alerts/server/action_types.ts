@@ -67,9 +67,26 @@ export function defineActionTypes(
     },
   };
 
+  const deprecatedActionType: ActionType = {
+    id: 'test.deprecated',
+    name: 'Test: Deprecated',
+    minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({}, { defaultValue: {} }) },
+      secrets: { schema: schema.object({}, { defaultValue: {} }) },
+      params: { schema: schema.object({}, { defaultValue: {} }) },
+    },
+    async executor() {
+      return { status: 'ok', actionId: '' };
+    },
+    isDeprecated: true,
+  };
+
   actions.registerType(noopActionType);
   actions.registerType(throwActionType);
   actions.registerType(cappedActionType);
+  actions.registerType(deprecatedActionType);
   actions.registerType(getIndexRecordActionType());
   actions.registerType(getDelayedActionType());
   actions.registerType(getFailingActionType());

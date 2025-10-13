@@ -14,6 +14,7 @@ import type { GenericValidationResult } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 import type { AppMockRenderer } from '../test_utils';
 import { createAppMockRenderer } from '../test_utils';
+
 jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../lib/action_connector_api', () => ({
