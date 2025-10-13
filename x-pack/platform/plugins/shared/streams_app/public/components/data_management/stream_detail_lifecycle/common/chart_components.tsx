@@ -26,7 +26,7 @@ import moment from 'moment';
 import React, { useMemo } from 'react';
 import { orderIlmPhases } from '../helpers/helpers';
 import { formatBytes } from '../helpers/format_bytes';
-import type { DataStreamStats } from '../hooks/use_data_stream_stats';
+import type { DataStreamStats, EnhancedDataStreamStats } from '../hooks/use_data_stream_stats';
 import { useIlmPhasesColorAndDescription } from '../hooks/use_ilm_phases_color_and_description';
 import type { useAggregations } from '../hooks/use_ingestion_rate';
 import { useIngestionRate, useIngestionRatePerTier } from '../hooks/use_ingestion_rate';
@@ -55,7 +55,7 @@ interface FailureStoreChartProps extends BaseChartComponentProps {
 
 type ChartComponentProps = MainStreamChartProps | FailureStoreChartProps;
 type ChartPhasesComponentProps = BaseChartComponentProps & {
-  stats?: DataStreamStats;
+  stats?: EnhancedDataStreamStats;
 };
 
 export function ChartBarSeries({

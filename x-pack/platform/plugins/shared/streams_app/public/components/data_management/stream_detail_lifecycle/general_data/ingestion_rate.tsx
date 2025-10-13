@@ -11,7 +11,7 @@ import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
 import type { TimeState } from '@kbn/es-query';
 import { useKibana } from '../../../../hooks/use_kibana';
-import type { DataStreamStats } from '../hooks/use_data_stream_stats';
+import type { EnhancedDataStreamStats } from '../hooks/use_data_stream_stats';
 import { ChartBarSeries, ChartBarPhasesSeries } from '../common/chart_components';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 import type { useAggregations } from '../hooks/use_ingestion_rate';
@@ -26,7 +26,7 @@ export function IngestionRate({
   aggregationsError,
 }: {
   definition: Streams.ingest.all.GetResponse;
-  stats?: DataStreamStats;
+  stats?: EnhancedDataStreamStats;
   isLoadingStats: boolean;
   timeState: TimeState;
   isLoadingAggregations: boolean;

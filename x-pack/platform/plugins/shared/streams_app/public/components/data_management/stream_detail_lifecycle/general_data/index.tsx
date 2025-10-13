@@ -159,7 +159,7 @@ export const StreamDetailGeneralData = ({
         <IngestionRate
           definition={definition}
           isLoadingStats={isLoadingStats}
-          stats={stats}
+          stats={enhancedStats}
           timeState={timeState}
           isLoadingAggregations={isLoadingAggregations}
           aggregationsError={aggregationsError}

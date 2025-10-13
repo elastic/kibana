@@ -14,7 +14,7 @@ import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
 import { IngestionCard } from './cards/ingestion_card';
 import { FailureStoreIngestionRate } from './ingestion_rate';
-import type { FailureStoreStats } from '../hooks/use_failure_store_stats';
+import type { EnhancedFailureStoreStats } from '../hooks/use_failure_store_stats';
 import type { useAggregations } from '../hooks/use_ingestion_rate';
 
 export const FailureStoreInfo = ({
@@ -33,7 +33,7 @@ export const FailureStoreInfo = ({
   definition: Streams.ingest.all.GetResponse;
   statsError: Error | undefined;
   isLoadingStats: boolean;
-  stats?: FailureStoreStats;
+  stats?: EnhancedFailureStoreStats;
   config?: FailureStore;
   timeState: TimeState;
   aggregations?: ReturnType<typeof useAggregations>['aggregations'];

@@ -7,6 +7,7 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { useFailureStoreStats } from './use_failure_store_stats';
+import { useCalculatedFailureStoreStats } from './use_calculated_failure_store_stats';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import type { TimeState } from '@kbn/es-query';
@@ -15,9 +16,13 @@ import { of } from 'rxjs';
 jest.mock('../../../../hooks/use_kibana');
 jest.mock('../../../../hooks/use_timefilter');
 jest.mock('./use_ingestion_rate');
+jest.mock('./use_calculated_failure_store_stats');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseTimefilter = useTimefilter as jest.MockedFunction<typeof useTimefilter>;
+const mockUseCalculatedFailureStoreStats = useCalculatedFailureStoreStats as jest.MockedFunction<
+  typeof useCalculatedFailureStoreStats
+>;
 
 describe('useFailureStoreStats', () => {
   const mockStreamsRepositoryClient = {
@@ -95,6 +100,12 @@ describe('useFailureStoreStats', () => {
     };
 
     mockStreamsRepositoryClient.fetch.mockResolvedValue(mockFetchResponse);
+
+    // Mock the calculated stats hook to return the expected calculated values
+    mockUseCalculatedFailureStoreStats.mockReturnValue({
+      bytesPerDoc: 5000,
+      bytesPerDay: 107142.85714285713,
+    });
   });
 
   describe('successful data fetching', () => {
@@ -106,13 +117,32 @@ describe('useFailureStoreStats', () => {
 
       mockStreamsRepositoryClient.fetch.mockResolvedValue(mockFetchResponse);
 
-      const { result } = renderHook(() =>
-        useFailureStoreStats({
+      const { result } = renderHook(() => {
+        const failureStoreStats = useFailureStoreStats({
           definition: mockDefinition,
+        });
+
+        const calculatedStats = useCalculatedFailureStoreStats({
+          stats: failureStoreStats.data?.stats,
           timeState: mockTimeState,
           aggregations: mockAggregations,
-        })
-      );
+        });
+
+        return {
+          ...failureStoreStats,
+          data: failureStoreStats.data
+            ? {
+                ...failureStoreStats.data,
+                stats: failureStoreStats.data.stats
+                  ? {
+                      ...failureStoreStats.data.stats,
+                      ...calculatedStats,
+                    }
+                  : undefined,
+              }
+            : undefined,
+        };
+      });
 
       await waitFor(() => {
         expect(result.current.data).toBeDefined();
@@ -146,13 +176,37 @@ describe('useFailureStoreStats', () => {
         stats: statsWithZeroDocs,
       });
 
-      const { result } = renderHook(() =>
-        useFailureStoreStats({
+      mockUseCalculatedFailureStoreStats.mockReturnValue({
+        bytesPerDoc: 0,
+        bytesPerDay: 0,
+      });
+
+      const { result } = renderHook(() => {
+        const failureStoreStats = useFailureStoreStats({
           definition: mockDefinition,
+        });
+
+        const calculatedStats = useCalculatedFailureStoreStats({
+          stats: failureStoreStats.data?.stats,
           timeState: mockTimeState,
           aggregations: mockAggregations,
-        })
-      );
+        });
+
+        return {
+          ...failureStoreStats,
+          data: failureStoreStats.data
+            ? {
+                ...failureStoreStats.data,
+                stats: failureStoreStats.data.stats
+                  ? {
+                      ...failureStoreStats.data.stats,
+                      ...calculatedStats,
+                    }
+                  : undefined,
+              }
+            : undefined,
+        };
+      });
 
       await waitFor(() => {
         expect(result.current.data).toBeDefined();
@@ -169,13 +223,34 @@ describe('useFailureStoreStats', () => {
         stats: null,
       });
 
-      const { result } = renderHook(() =>
-        useFailureStoreStats({
+      mockUseCalculatedFailureStoreStats.mockReturnValue(undefined);
+
+      const { result } = renderHook(() => {
+        const failureStoreStats = useFailureStoreStats({
           definition: mockDefinition,
+        });
+
+        const calculatedStats = useCalculatedFailureStoreStats({
+          stats: failureStoreStats.data?.stats,
           timeState: mockTimeState,
           aggregations: mockAggregations,
-        })
-      );
+        });
+
+        return {
+          ...failureStoreStats,
+          data: failureStoreStats.data
+            ? {
+                ...failureStoreStats.data,
+                stats: failureStoreStats.data.stats
+                  ? {
+                      ...failureStoreStats.data.stats,
+                      ...calculatedStats,
+                    }
+                  : undefined,
+              }
+            : undefined,
+        };
+      });
 
       await waitFor(() => {
         expect(result.current.data).toBeDefined();
@@ -195,13 +270,32 @@ describe('useFailureStoreStats', () => {
         stats: statsWithoutCreationDate,
       });
 
-      const { result } = renderHook(() =>
-        useFailureStoreStats({
+      const { result } = renderHook(() => {
+        const failureStoreStats = useFailureStoreStats({
           definition: mockDefinition,
+        });
+
+        const calculatedStats = useCalculatedFailureStoreStats({
+          stats: failureStoreStats.data?.stats,
           timeState: mockTimeState,
           aggregations: mockAggregations,
-        })
-      );
+        });
+
+        return {
+          ...failureStoreStats,
+          data: failureStoreStats.data
+            ? {
+                ...failureStoreStats.data,
+                stats: failureStoreStats.data.stats
+                  ? {
+                      ...failureStoreStats.data.stats,
+                      ...calculatedStats,
+                    }
+                  : undefined,
+              }
+            : undefined,
+        };
+      });
 
       await waitFor(() => {
         expect(result.current.data).toBeDefined();
@@ -214,13 +308,32 @@ describe('useFailureStoreStats', () => {
       const mockError = new Error('Failed to fetch failure store stats');
       mockStreamsRepositoryClient.fetch.mockRejectedValue(mockError);
 
-      const { result } = renderHook(() =>
-        useFailureStoreStats({
+      const { result } = renderHook(() => {
+        const failureStoreStats = useFailureStoreStats({
           definition: mockDefinition,
+        });
+
+        const calculatedStats = useCalculatedFailureStoreStats({
+          stats: failureStoreStats.data?.stats,
           timeState: mockTimeState,
           aggregations: mockAggregations,
-        })
-      );
+        });
+
+        return {
+          ...failureStoreStats,
+          data: failureStoreStats.data
+            ? {
+                ...failureStoreStats.data,
+                stats: failureStoreStats.data.stats
+                  ? {
+                      ...failureStoreStats.data.stats,
+                      ...calculatedStats,
+                    }
+                  : undefined,
+              }
+            : undefined,
+        };
+      });
 
       await waitFor(() => {
         expect(result.current.error).toBeDefined();
@@ -231,13 +344,32 @@ describe('useFailureStoreStats', () => {
 
   describe('loading states', () => {
     it('should return loading state correctly', () => {
-      const { result } = renderHook(() =>
-        useFailureStoreStats({
+      const { result } = renderHook(() => {
+        const failureStoreStats = useFailureStoreStats({
           definition: mockDefinition,
+        });
+
+        const calculatedStats = useCalculatedFailureStoreStats({
+          stats: failureStoreStats.data?.stats,
           timeState: mockTimeState,
           aggregations: mockAggregations,
-        })
-      );
+        });
+
+        return {
+          ...failureStoreStats,
+          data: failureStoreStats.data
+            ? {
+                ...failureStoreStats.data,
+                stats: failureStoreStats.data.stats
+                  ? {
+                      ...failureStoreStats.data.stats,
+                      ...calculatedStats,
+                    }
+                  : undefined,
+              }
+            : undefined,
+        };
+      });
 
       expect(result.current.isLoading).toBe(true);
       expect(result.current.data).toBeUndefined();
