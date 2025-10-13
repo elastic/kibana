@@ -36,11 +36,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     await PageObjects.exports.clickExportTopNavButton();
     await retry.waitFor('the popover to be opened', async () => {
-      return await exports.isExportPopoverOpen();
+      return await PageObjects.exports.isExportPopoverOpen();
     });
     await PageObjects.reporting.selectExportItem('CSV');
     await retry.waitFor('the flyout to be opened', async () => {
-      return await exports.isExportFlyoutOpen();
+      return await PageObjects.exports.isExportFlyoutOpen();
     });
     await PageObjects.reporting.clickGenerateReportButton();
     await PageObjects.exports.closeExportFlyout();
@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('is available if new', async () => {
         await PageObjects.reporting.openExportPopover();
         await retry.waitFor('the popover to be opened', async () => {
-          return await exports.isExportPopoverOpen();
+          return await PageObjects.exports.isExportPopoverOpen();
         });
         expect(await PageObjects.exports.isPopoverItemEnabled('CSV')).to.be(true);
         await PageObjects.reporting.openExportPopover();
@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.reporting.openExportPopover();
         await retry.waitFor('the popover to be opened', async () => {
-          return await exports.isExportPopoverOpen();
+          return await PageObjects.exports.isExportPopoverOpen();
         });
         expect(await PageObjects.exports.isPopoverItemEnabled('CSV')).to.be(true);
         await PageObjects.reporting.openExportPopover();
