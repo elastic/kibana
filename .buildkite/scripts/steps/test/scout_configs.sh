@@ -41,7 +41,7 @@ RETRY_FAILED_PAIRS=""
 if [[ -z "$configs" && "${BUILDKITE_RETRY_COUNT:-0}" == "1" ]]; then
   RETRY_FAILED_PAIRS=$(buildkite-agent meta-data get "$FAILED_CONFIGS_KEY" --default '')
   if [[ -n "$RETRY_FAILED_PAIRS" ]]; then
-    echo "--- Retrying only failed config+mode pairs"
+    echo "--- Retrying only failed 'Playwright config + mode' pairs"
     echo "$RETRY_FAILED_PAIRS"
     # Extract unique configs from failed pairs for processing
     configs=$(echo "$RETRY_FAILED_PAIRS" | sed 's/ (.*)//' | sort -u)
@@ -49,13 +49,13 @@ if [[ -z "$configs" && "${BUILDKITE_RETRY_COUNT:-0}" == "1" ]]; then
 fi
 
 if [ -z "$configs" ] && [ "$SCOUT_CONFIG_GROUP_KEY" != "" ]; then
-  echo "--- downloading scout test configuration"
+  echo "--- Downloading Scout Test Configuration"
   download_artifact scout_playwright_configs.json .
   configs=$(jq -r '.[env.SCOUT_CONFIG_GROUP_KEY].configs[]' scout_playwright_configs.json)
 fi
 
 if [ -z "$configs" ]; then
-  echo "unable to determine configs to run"
+  echo "Unable to determine configs to run"
   exit 1
 fi
 
@@ -86,6 +86,7 @@ while read -r config_path; do
     continue
   fi
 
+  Run config for each mode
   for mode in $RUN_MODE_LIST; do
     # If we're retrying specific failed pairs, check if this config+mode pair should be retried
     if [[ -n "$RETRY_FAILED_PAIRS" ]]; then
@@ -97,12 +98,11 @@ while read -r config_path; do
     fi
 
     # Create unique execution key for this config+mode pair
-    # Replace slashes and special characters to make a valid metadata key
     CONFIG_MODE_EXECUTION_KEY=$(echo "${config_path}_${mode}_executed" | sed 's/[^a-zA-Z0-9_-]/_/g')
     IS_CONFIG_MODE_EXECUTED=$(buildkite-agent meta-data get "$CONFIG_MODE_EXECUTION_KEY" --default "false" --log-level error)
 
     if [[ "${IS_CONFIG_MODE_EXECUTED}" == "true" ]]; then
-      echo "--- [ already-tested ] $config_path ($mode)"
+      echo "--- [ already-completed ] $config_path ($mode)"
       results+=("$config_path ($mode) ✅ (cached)")
       continue
     fi
@@ -126,17 +126,48 @@ while read -r config_path; do
       duration="${timeSec}s"
     fi
 
+    # Always try to upload events regardless of test outcome (for observability)
+    # Find the most recent Scout report directory for this test run
+    REPORT_DIR=$(ls -td .scout/reports/scout-*/ 2>/dev/null | head -n 1)
+    if [ -n "$REPORT_DIR" ]; then
+      EVENT_LOG_FILE="${REPORT_DIR}event-log.ndjson"
+      if [ -f "$EVENT_LOG_FILE" ]; then
+        echo "--- Upload Scout reporter events for $config_path ($mode)"
+        if [[ "${SCOUT_REPORTER_ENABLED:-}" == "true" ]]; then
+          # prevent non-zero exit code from breaking the script
+          set +e;
+          node scripts/scout upload-events --dontFailOnError --eventLogPath "$EVENT_LOG_FILE"
+          UPLOAD_EXIT_CODE=$?
+          set -e;
+
+          if [[ $UPLOAD_EXIT_CODE -eq 0 ]]; then
+            echo "✅ Upload completed for $config_path ($mode) from $EVENT_LOG_FILE"
+          else
+            echo "⚠️ Upload failed for $config_path ($mode) with exit code $UPLOAD_EXIT_CODE"
+          fi
+        else
+          echo "⚠️ The SCOUT_REPORTER_ENABLED environment variable is not 'true'. Skipping event upload."
+        fi
+      else
+        echo "❌ Could not find event log file '$EVENT_LOG_FILE' for $config_path ($mode)"
+      fi
+    else
+      echo "❌ Could not find any scout report directory for $config_path ($mode)"
+    fi
+
+    # Now handle test results - retry logic depends only on test success/failure
     if [[ $EXIT_CODE -eq 2 ]]; then
       # No tests found - mark as executed so we don't retry it
       buildkite-agent meta-data set "$CONFIG_MODE_EXECUTION_KEY" "true"
       configWithoutTests+=("$config_path ($mode)")
     elif [[ $EXIT_CODE -ne 0 ]]; then
+      # Test run failed - add to failed configs for retry
       failedConfigs+=("$config_path ($mode)")
       FINAL_EXIT_CODE=10  # Ensure we exit with failure if any test fails with (exit code 10 to match FTR)
       echo "Scout test exited with code $EXIT_CODE for $config_path ($mode)"
       echo "^^^ +++"
     else
-      # Test was successful, so mark it as executed
+      # Test run was successful - mark as executed
       buildkite-agent meta-data set "$CONFIG_MODE_EXECUTION_KEY" "true"
       results+=("$config_path ($mode) ✅ (${duration})")
     fi
@@ -180,7 +211,5 @@ if [[ ${#failedConfigs[@]} -gt 0 ]]; then
   done
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failed_pairs"
 fi
-
-source .buildkite/scripts/steps/test/scout_upload_report_events.sh
 
 exit $FINAL_EXIT_CODE  # Exit with 10 only if there were config failures
