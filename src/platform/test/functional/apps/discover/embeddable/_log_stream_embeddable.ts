@@ -17,10 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const synthtrace = getService('synthtrace');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const { dashboard, savedObjects } = getPageObjects([
-    'dashboard',
-    'savedObjects',
-  ]);
+  const { dashboard, savedObjects } = getPageObjects(['dashboard', 'savedObjects']);
 
   const start = moment().subtract(30, 'minutes').valueOf();
   const end = moment().add(30, 'minutes').valueOf();
