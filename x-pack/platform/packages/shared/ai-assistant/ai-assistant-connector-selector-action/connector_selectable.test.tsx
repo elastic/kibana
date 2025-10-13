@@ -55,9 +55,9 @@ describe('ConnectorSelectable', () => {
     ];
 
     allConnectors.forEach((connector) => {
+      expect(screen.queryByText(connector.label)).toBeInTheDocument();
       expect(connector['data-test-subj']).toBeDefined();
       expect(screen.queryByTestId(connector['data-test-subj']!)).toBeInTheDocument();
-      expect(screen.queryByText(connector.label)).toBeInTheDocument();
     });
 
     expect(allConnectors.length).toBe(6);

@@ -119,6 +119,7 @@ export const GridColumn = ({
                   // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
                   css={css`
                     align-self: stretch;
+                    min-width: 0;
                     & > .euiPopover,
                     & > .euiPopover > .euiCard {
                       height: 100%;

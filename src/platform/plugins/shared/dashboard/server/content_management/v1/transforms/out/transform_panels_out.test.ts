@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getDashboardStateSchema } from '../../schema';
 import { transformPanelsOut } from './transform_panels_out';
 
 describe('transformPanelsOut', () => {
@@ -23,7 +24,9 @@ describe('transformPanelsOut', () => {
         },
       },
     ];
-    expect(transformPanelsOut(panelsJSON, sections)).toMatchInlineSnapshot(`
+    const panels = transformPanelsOut(panelsJSON, sections);
+    getDashboardStateSchema().panels.validate(panels);
+    expect(panels).toMatchInlineSnapshot(`
       Array [
         Object {
           "config": Object {
@@ -31,7 +34,6 @@ describe('transformPanelsOut', () => {
           },
           "grid": Object {
             "h": 15,
-            "i": "2e814ac0-33c2-4676-9d29-e1f868cddebd",
             "w": 24,
             "x": 0,
             "y": 0,
@@ -42,7 +44,6 @@ describe('transformPanelsOut', () => {
         Object {
           "collapsed": true,
           "grid": Object {
-            "i": "bcebc09a-270f-42ef-8d45-daf5f5f4f511",
             "y": 15,
           },
           "panels": Array [
@@ -52,7 +53,6 @@ describe('transformPanelsOut', () => {
               },
               "grid": Object {
                 "h": 15,
-                "i": "d724d87b-2256-4c8b-8aa3-55bc0b8881c6",
                 "w": 24,
                 "x": 0,
                 "y": 0,
@@ -62,6 +62,7 @@ describe('transformPanelsOut', () => {
             },
           ],
           "title": "Section 1",
+          "uid": "bcebc09a-270f-42ef-8d45-daf5f5f4f511",
         },
       ]
     `);
