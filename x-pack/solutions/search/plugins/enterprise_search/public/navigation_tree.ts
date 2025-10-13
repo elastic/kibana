@@ -181,7 +181,7 @@ export const getNavigationTreeDefinition = ({
                   iconV2: 'launch',
                   id: 'getting_started',
                   link: 'searchGettingStarted',
-                  title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.gettingStarted', {
                     defaultMessage: 'Getting started',
                   }),
                 },
