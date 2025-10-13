@@ -27,7 +27,7 @@ The cases as data features is in technical preview, meaning the schema for the c
 | status | keyword | The case status. Possible values are: `open`, `in-progress`, `closed` |
 | status\_sort | long | The status of the case. Possible values are `0`, `10`, `20`, where `0` corresponds to the `open` status, `10` corresponds to the `in-progress` status, and `20` corresponds to the `closed` status.|
 | severity | keyword | The case severity. Possible values are: `low`, `medium`, `high`, `critical` |
-| severity\_sort | long | The severity of the case. Possible values: `0`, `10`, `20`, `30` |
+| severity\_sort | long | The severity of the case. Possible values: `0`, `10`, `20`, `30`, where `0` corresponds to the `low` severity, `10` corresponds to the `medium` severity, `20` corresponds to the `high` severity, and `30` corresponds to the `critical` severity.|
 | created\_at | date | The date of when the case was created, provided in ISO 8601 \[2\] format |
 | created\_at\_ms | long | The case creation timestamp in milliseconds. |
 | created\_by.username | keyword | The username of the user who created the case. |
