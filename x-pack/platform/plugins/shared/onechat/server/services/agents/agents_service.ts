@@ -17,6 +17,7 @@ import type { Runner } from '@kbn/onechat-server';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AgentsServiceSetup, AgentsServiceStart } from './types';
 import type { ToolsServiceStart } from '../tools';
+import type { ElementRegistry } from '../element_registry';
 import {
   createBuiltinAgentRegistry,
   createBuiltinProviderFn,
@@ -25,9 +26,11 @@ import {
 } from './builtin';
 import { createPersistedProviderFn } from './persisted';
 import { createAgentRegistry } from './agent_registry';
+import { setElementRegistry } from './modes/default/prompts';
 
 export interface AgentsServiceSetupDeps {
   logger: Logger;
+  elementRegistry: ElementRegistry;
 }
 
 export interface AgentsServiceStartDeps {
@@ -42,6 +45,7 @@ export class AgentsService {
   private builtinRegistry: BuiltinAgentRegistry;
 
   private setupDeps?: AgentsServiceSetupDeps;
+  private elementRegistry?: ElementRegistry;
 
   constructor() {
     this.builtinRegistry = createBuiltinAgentRegistry();
@@ -49,6 +53,10 @@ export class AgentsService {
 
   setup(setupDeps: AgentsServiceSetupDeps): AgentsServiceSetup {
     this.setupDeps = setupDeps;
+    this.elementRegistry = setupDeps.elementRegistry;
+
+    // Make element registry available to prompt generation
+    setElementRegistry(this.elementRegistry);
 
     registerBuiltinAgents({ registry: this.builtinRegistry });
 

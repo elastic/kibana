@@ -6,10 +6,5 @@
  */
 
 export { ElementRegistry } from './element_registry';
-export type {
-  CustomElementConfig,
-  RendererContext,
-  RendererFactory,
-  ElementAttributes,
-  MarkdownParser,
-} from './types';
+export type { CustomElementConfig, ElementRegistry as IElementRegistry } from './types';
+

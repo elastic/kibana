@@ -7,6 +7,8 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { visualizationElement, ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+
 import type { OnechatConfig } from './config';
 import { ServiceManager } from './services';
 import type {
@@ -20,6 +22,7 @@ import { registerRoutes } from './routes';
 import { registerUISettings } from './ui_settings';
 import type { OnechatHandlerContext } from './request_handler_context';
 import { registerOnechatHandlerContext } from './request_handler_context';
+import { ElementRegistry } from './services/element_registry';
 
 export class OnechatPlugin
   implements
@@ -31,13 +34,14 @@ export class OnechatPlugin
     >
 {
   private logger: Logger;
-  // @ts-expect-error unused for now
   private config: OnechatConfig;
   private serviceManager = new ServiceManager();
+  private elementRegistry: ElementRegistry;
 
   constructor(context: PluginInitializerContext<OnechatConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.elementRegistry = new ElementRegistry(this.logger.get('elementRegistry'));
   }
 
   setup(
@@ -47,6 +51,13 @@ export class OnechatPlugin
     const serviceSetups = this.serviceManager.setupServices({
       logger: this.logger.get('services'),
       workflowsManagement: setupDeps.workflowsManagement,
+      elementRegistry: this.elementRegistry,
+    });
+
+    // Register built-in visualization element
+    this.elementRegistry.register({
+      tagName: visualizationElement.tagName,
+      toolResultType: ToolResultType.tabularData,
     });
 
     registerFeatures({ features: setupDeps.features });
@@ -76,6 +87,9 @@ export class OnechatPlugin
       },
       agents: {
         register: serviceSetups.agents.register.bind(serviceSetups.agents),
+      },
+      elementRegistry: {
+        registerCustomElement: (config) => this.elementRegistry.register(config),
       },
     };
   }

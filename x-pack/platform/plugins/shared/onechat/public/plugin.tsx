@@ -84,7 +84,6 @@ export class OnechatPlugin
       this.logger.error('Error registering Agent Builder management section', error);
     }
 
-    // Register built-in visualization element
     this.elementRegistry.register({
       tagName: visualizationElement.tagName,
       attributes: visualizationElement.attributes,

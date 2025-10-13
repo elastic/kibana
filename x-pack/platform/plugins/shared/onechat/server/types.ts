@@ -15,6 +15,7 @@ import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-
 import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
+import type { CustomElementConfig } from './services/element_registry';
 
 export interface OnechatSetupDependencies {
   cloud?: CloudSetup;
@@ -62,6 +63,13 @@ export interface AgentsSetup {
   register: (definition: BuiltInAgentDefinition) => void;
 }
 
+export interface ElementRegistrySetup {
+  /**
+   * Register a custom rendering element with prompt generation
+   */
+  registerCustomElement: (config: CustomElementConfig) => void;
+}
+
 /**
  * Setup contract of the onechat plugin.
  */
@@ -74,6 +82,10 @@ export interface OnechatPluginSetup {
    * Tools setup contract, can be used to register built-in tools.
    */
   tools: ToolsSetup;
+  /**
+   * Element registry setup contract, can be used to register custom rendering elements.
+   */
+  elementRegistry: ElementRegistrySetup;
 }
 
 /**

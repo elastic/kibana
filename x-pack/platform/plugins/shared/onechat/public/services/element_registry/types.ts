@@ -66,4 +66,3 @@ export type RendererFactory = (
  * Markdown parser plugin type (from unified)
  */
 export type MarkdownParser = (tree: any) => void;
-
