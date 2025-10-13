@@ -18,12 +18,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { InstalledPackageUIPackageListItem } from '../types';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
 import { ExperimentalFeaturesService } from '../../../../../services';
+import { useLicense } from '../../../../../hooks';
 
 export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
   selectedItems: InstalledPackageUIPackageListItem[];
 }> = ({ selectedItems }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { enablePackageRollback } = ExperimentalFeaturesService.get();
+  const licenseService = useLicense();
   const button = (
     <EuiButton
       iconType="arrowDown"
@@ -133,7 +135,7 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
             <EuiContextMenuItem
               key="rollback"
               icon="returnKey"
-              disabled={!hasRollbackableIntegrations}
+              disabled={!hasRollbackableIntegrations || !licenseService.isEnterprise()}
               onClick={openRollbackModal}
             >
               <FormattedMessage
@@ -155,6 +157,7 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
     openUpgradeModal,
     openRollbackModal,
     enablePackageRollback,
+    licenseService,
   ]);
 
   return (
