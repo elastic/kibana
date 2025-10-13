@@ -529,6 +529,7 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
         class="euiFlexItem c5 emotion-euiFlexItem-growZero"
       >
         <nav
+          aria-label="Table pagination"
           class="euiPagination emotion-euiPagination"
           data-test-subj="numberedPagination"
         >
