@@ -152,30 +152,31 @@ describe('createCleanupBeforeExit', () => {
   it('logs an error when a non-blocking handler outlives process.exit', async () => {
     const warnSpy = jest.spyOn(diag, 'warn').mockImplementation(() => {});
 
+    jest.useFakeTimers();
+
     try {
       const { proc, originalExit } = createMockProc();
       const cleanupBeforeExit = createCleanupBeforeExit(proc);
 
-      cleanupBeforeExit(() => new Promise(() => {}), { timeout: 1 });
+      cleanupBeforeExit(() => new Promise(() => {}), { timeout: 1000, blockExit: false });
+      cleanupBeforeExit(() => new Promise(() => {}), { timeout: 1000, blockExit: true });
 
       proc.emit('beforeExit', 0);
-      await flushPromises();
 
       proc.exit(0);
-      expect(originalExit).toHaveBeenCalledWith(0);
 
-      await waitForTimers();
-      await flushPromises();
+      await jest.advanceTimersToNextTimerAsync();
 
       expect(warnSpy).toHaveBeenCalled();
+
+      expect(originalExit).toHaveBeenCalled();
+
       const messages = warnSpy.mock.calls.map(([error]) => String(error));
-      expect(
-        messages.some(
-          (message) => message.includes('Timeout') || message.includes('Process exited')
-        )
-      ).toBe(true);
+
+      expect(messages.some((message) => message.includes('Process exited'))).toBe(true);
     } finally {
       warnSpy.mockRestore();
+      jest.useRealTimers();
     }
   });
 });

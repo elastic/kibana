@@ -22,15 +22,23 @@ export function wrapCleanupCallback(
     return Promise.race([
       Promise.resolve().then(() => cb()),
       new Promise<void>((_, reject) => {
-        const timeout = options.timeout ?? DEFAULT_TIMEOUT;
-        if (options.blockExit) {
-          processExitSignal.addEventListener('abort', () => {
-            reject(new Error(`Process exited before cleanup could finish`));
-          });
+        function rejectOnProcessExit() {
+          reject(new Error(`Process exited before cleanup could finish`));
         }
-        setTimeout(() => {
+
+        function rejectOnTimeout() {
           reject(new Error(`Timeout of ${timeout}ms reached before cleanup could finish`));
-        }, timeout).unref();
+        }
+
+        const timeout = options.timeout ?? DEFAULT_TIMEOUT;
+        if (!options.blockExit) {
+          if (processExitSignal.aborted) {
+            rejectOnProcessExit();
+          } else {
+            processExitSignal.addEventListener('abort', rejectOnProcessExit);
+          }
+        }
+        setTimeout(rejectOnTimeout, timeout).unref();
       }),
     ]).catch((error) => {
       diag.warn(error);
