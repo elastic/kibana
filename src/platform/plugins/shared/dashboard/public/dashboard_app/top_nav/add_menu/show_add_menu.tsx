@@ -196,6 +196,7 @@ export const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuPr
                 variableType: ESQLVariableType.VALUES,
                 controlType: EsqlControlType.VALUES_FROM_QUERY,
                 esqlVariables: variablesInParent,
+                parentApi: dashboardApi,
                 onSaveControl: (controlState: DefaultControlApi) => {
                   controlGroupApi?.addNewPanel({
                     panelType: 'esqlControl',

@@ -145,8 +145,10 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
               <EuiToolTip
                 className="timeline-select-search-filter-tooltip"
                 content={i18n.FILTER_OR_SEARCH_WITH_KQL}
+                disableScreenReaderOutput
               >
                 <EuiSuperSelect
+                  aria-label={i18n.FILTER_OR_SEARCH_WITH_KQL}
                   className="timeline-select-search-or-filter"
                   data-test-subj="timeline-select-search-or-filter"
                   hasDividers={true}
