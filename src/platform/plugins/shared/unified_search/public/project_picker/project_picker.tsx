@@ -31,11 +31,11 @@ import { css } from '@emotion/react';
 
 const strings = {
   getProjectPickerButtonAriaLabel: () =>
-    i18n.translate('projectPicker.projectPickerButtonLabel', {
+    i18n.translate('unifiedSearch.projectPicker.projectPickerButtonLabel', {
       defaultMessage: 'Cross-project search project picker',
     }),
   getProjectPickerButtonLabel: (numberOfProjects: number, totalProjects: number) =>
-    i18n.translate('projectPicker.originProjectTooltip', {
+    i18n.translate('unifiedSearch.projectPicker.originProjectTooltip', {
       defaultMessage:
         'Searching {numberOfProjects} of {totalProjects, plural, one {# project} other {# projects}}',
       values: {
@@ -44,15 +44,15 @@ const strings = {
       },
     }),
   getProjectPickerPopoverTitle: () =>
-    i18n.translate('projectPicker.projectPickerPopoverTitle', {
+    i18n.translate('unifiedSearch.projectPicker.projectPickerPopoverTitle', {
       defaultMessage: 'Cross-project search scope',
     }),
   getManageCrossProjectSearchLabel: () =>
-    i18n.translate('projectPicker.manageCrossProjectSearchLabel', {
+    i18n.translate('unifiedSearch.projectPicker.manageCrossProjectSearchLabel', {
       defaultMessage: 'Manage cross-project search',
     }),
   getOriginProjectLabel: () =>
-    i18n.translate('projectPicker.thisProjectLabel', {
+    i18n.translate('unifiedSearch.projectPicker.thisProjectLabel', {
       defaultMessage: 'This project',
     }),
 };
@@ -287,7 +287,7 @@ export const ProjectPicker = () => {
                 {tags.length ? (
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
-                      title={i18n.translate('projectPicker.tagTooltipTitle', {
+                      title={i18n.translate('unifiedSearch.projectPicker.tagTooltipTitle', {
                         defaultMessage: 'Custom tags',
                       })}
                       content={tags.map((tag) => (
@@ -343,7 +343,7 @@ export const ProjectPicker = () => {
                   <EuiButtonIcon
                     display="empty"
                     iconType="gear"
-                    aria-label={i18n.translate('projectPicker.settingsButtonLabel', {
+                    aria-label={i18n.translate('unifiedSearch.projectPicker.settingsButtonLabel', {
                       defaultMessage: 'Manage cross-project search',
                     })}
                     onClick={() => {
@@ -367,7 +367,7 @@ export const ProjectPicker = () => {
               {
                 id: 'all',
                 value: 'all',
-                label: i18n.translate('projectPicker.allProjectsLabel', {
+                label: i18n.translate('unifiedSearch.projectPicker.allProjectsLabel', {
                   defaultMessage: 'All projects',
                 }),
               },
@@ -390,7 +390,7 @@ export const ProjectPicker = () => {
           <EuiTitle size="xxxs">
             <p css={{ padding: `${euiTheme.size.s}` }}>
               <FormattedMessage
-                id="projectPicker.numberOfProjectsDescription"
+                id="unifiedSearch.projectPicker.numberOfProjectsDescription"
                 defaultMessage="Searching across {numberOfProjects, plural, one {# project} other {# projects}}"
                 values={{
                   numberOfProjects:
