@@ -39,9 +39,15 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint
 import { useGetEndpointActionList as _useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
 import { OUTPUT_MESSAGES } from '../translations';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import type { ExperimentalFeatures } from '../../../../../common';
+import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../../../common';
 
 const useGetEndpointActionListMock = _useGetEndpointActionList as jest.Mock;
+
+jest.mock('../../../../common/experimental_features_service');
+const mockedExperimentalFeaturesService = ExperimentalFeaturesService as jest.Mocked<
+  typeof ExperimentalFeaturesService
+>;
 
 jest.mock('../../../hooks/response_actions/use_get_endpoint_action_list', () => {
   const original = jest.requireActual(
@@ -212,6 +218,8 @@ describe('Response actions history', () => {
   });
 
   beforeEach(async () => {
+    mockedExperimentalFeaturesService.get.mockReturnValue(allowedExperimentalValues);
+
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
     mockedContext = createAppRootMockRenderer();
@@ -1571,19 +1579,14 @@ describe('Response actions history', () => {
   });
 
   describe('Actions filter', () => {
-    let featureFlags: Partial<ExperimentalFeatures>;
+    const filterPrefix = 'actions-filter';
 
     beforeEach(() => {
-      featureFlags = {
-        crowdstrikeRunScriptEnabled: true,
-        microsoftDefenderEndpointCancelEnabled: true,
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        ...allowedExperimentalValues,
         responseActionsEndpointMemoryDump: true,
-      };
-
-      mockedContext.setExperimentalFlag(featureFlags);
+      });
     });
-
-    const filterPrefix = 'actions-filter';
 
     it('should have a search bar', async () => {
       render();
@@ -1625,12 +1628,11 @@ describe('Response actions history', () => {
     });
 
     it('should show a list of actions (without `cancel`) when cancel feature flag is disabled', async () => {
-      // Set the cancel feature flag to false
-      const featureFlagsWithoutCancel = {
-        ...featureFlags,
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        ...allowedExperimentalValues,
         microsoftDefenderEndpointCancelEnabled: false,
-      };
-      mockedContext.setExperimentalFlag(featureFlagsWithoutCancel);
+        responseActionsEndpointMemoryDump: true,
+      });
 
       render({ 'data-test-height': 350 });
       const { getByTestId, getAllByTestId } = renderResult;

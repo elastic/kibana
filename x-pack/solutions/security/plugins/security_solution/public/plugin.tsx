@@ -391,13 +391,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (!this._store) {
       const { createStoreFactory } = await this.lazyApplicationDependencies();
 
-      this._store = await createStoreFactory(
-        coreStart,
-        startPlugins,
-        subPlugins,
-        this.storage,
-        this.experimentalFeatures
-      );
+      this._store = await createStoreFactory(coreStart, startPlugins, subPlugins, this.storage);
     }
     if (startPlugins.timelines) {
       startPlugins.timelines.setTimelineEmbeddedStore(this._store);

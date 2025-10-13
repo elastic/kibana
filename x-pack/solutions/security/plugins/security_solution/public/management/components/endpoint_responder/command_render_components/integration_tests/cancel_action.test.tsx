@@ -22,6 +22,7 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpo
 import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { PendingActionsResponse } from '../../../../../../common/endpoint/types';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../../../../common';
 
 jest.mock('../../../../../common/experimental_features_service');
 
@@ -98,16 +99,6 @@ describe('When using cancel action from response actions console', () => {
   beforeEach(() => {
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     mockedContext = createAppRootMockRenderer();
-
-    // Set default experimental flags
-    mockedContext.setExperimentalFlag({ microsoftDefenderEndpointCancelEnabled: true });
-
-    // Reset the ExperimentalFeaturesService mock to default enabled state
-    // @ts-expect-error - we do not need to specify whole object for testing purposes
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      microsoftDefenderEndpointCancelEnabled: true,
-      microsoftDefenderEndpointRunScriptEnabled: true,
-    });
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
   });
@@ -237,12 +228,10 @@ describe('When using cancel action from response actions console', () => {
     });
 
     it('should disable cancel command for Microsoft Defender Endpoint when feature flag is disabled', async () => {
-      // @ts-expect-error - we do not need to specify whole object for testing purposes
       mockedExperimentalFeaturesService.get.mockReturnValue({
+        ...allowedExperimentalValues,
         microsoftDefenderEndpointCancelEnabled: false,
-        microsoftDefenderEndpointRunScriptEnabled: true,
       });
-      mockedContext.setExperimentalFlag({ microsoftDefenderEndpointCancelEnabled: false });
 
       const renderResult = await renderConsole('microsoft_defender_endpoint');
 

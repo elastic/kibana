@@ -10,7 +10,6 @@ import { applyMiddleware, combineReducers, compose, createStore } from 'redux';
 import type { CoreStart } from '@kbn/core/public';
 import { managementReducer } from '../../../management/store/reducer';
 import { appReducer } from '../../store/app';
-import { ExperimentalFeaturesService } from '../../experimental_features_service';
 import { managementMiddlewareFactory } from '../../../management/store/middleware';
 import type { StartPlugins } from '../../../types';
 import type { State } from '../../store';
@@ -46,10 +45,6 @@ export const createFleetContextReduxStore = ({
   preloadedState = {
     // @ts-expect-error TS2322
     management: undefined,
-    // @ts-expect-error TS2322
-    app: {
-      enableExperimental: ExperimentalFeaturesService.get(),
-    },
   },
   additionalMiddleware = [],
 }: CreateFleetContextReduxStoreProps) => {

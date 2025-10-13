@@ -7,7 +7,6 @@
 
 import type { AnyAction, Reducer } from 'redux';
 import { combineReducers } from 'redux';
-
 import type { DataTableState } from '@kbn/securitysolution-data-table';
 import { dataTableReducer } from '@kbn/securitysolution-data-table';
 import { enableMapSet } from 'immer';
@@ -16,19 +15,17 @@ import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
 import { createInitialInputsState, inputsReducer } from './inputs';
 import { sourcererModel, sourcererReducer } from '../../sourcerer/store';
-
 import type { HostsPluginReducer } from '../../explore/hosts/store';
 import type { NetworkPluginReducer } from '../../explore/network/store';
 import type { UsersPluginReducer } from '../../explore/users/store';
 import type { TimelinePluginReducer } from '../../timelines/store';
-
 import type { SecuritySubPlugins } from '../../app/types';
 import type { ManagementPluginReducer } from '../../management';
 import type { State } from './types';
 import type { AppAction } from './actions';
 import type { SourcererModel } from '../../sourcerer/store/model';
 import { initDataView } from '../../sourcerer/store/model';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import { allowedExperimentalValues } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from '../../sourcerer/store/helpers';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
 import { groupsReducer } from './grouping/reducer';
@@ -63,13 +60,11 @@ export const createInitialState = (
     kibanaDataViews,
     signalIndexName,
     signalIndexMappingOutdated,
-    enableExperimental,
   }: {
     defaultDataView: SourcererModel['defaultDataView'];
     kibanaDataViews: SourcererModel['kibanaDataViews'];
     signalIndexName: SourcererModel['signalIndexName'];
     signalIndexMappingOutdated: SourcererModel['signalIndexMappingOutdated'];
-    enableExperimental: ExperimentalFeatures;
   },
   dataTableState: DataTableState,
   groupsState: GroupState,
@@ -99,9 +94,9 @@ export const createInitialState = (
 
   const preloadedState: State = {
     ...pluginsInitState,
-    app: { ...initialAppState, enableExperimental },
+    app: { ...initialAppState },
     dragAndDrop: initialDragAndDropState,
-    inputs: createInitialInputsState(enableExperimental.socTrendsEnabled),
+    inputs: createInitialInputsState(allowedExperimentalValues.socTrendsEnabled),
     sourcerer: {
       ...sourcererModel.initialSourcererState,
       sourcererScopes: {

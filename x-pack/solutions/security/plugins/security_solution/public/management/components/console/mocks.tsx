@@ -48,7 +48,7 @@ interface ConsoleSelectorsAndActionsMock {
 export interface ConsoleTestSetup
   extends Pick<
     AppContextTestRender,
-    'startServices' | 'coreStart' | 'depsStart' | 'queryClient' | 'history' | 'setExperimentalFlag'
+    'startServices' | 'coreStart' | 'depsStart' | 'queryClient' | 'history'
   > {
   renderConsole(props?: Partial<ConsoleProps>): ReturnType<AppContextTestRender['render']>;
 
@@ -248,8 +248,7 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
   // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
   const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
   const mockedContext = createAppRootMockRenderer();
-  const { startServices, coreStart, depsStart, queryClient, history, setExperimentalFlag } =
-    mockedContext;
+  const { startServices, coreStart, depsStart, queryClient, history } = mockedContext;
 
   let renderResult: ReturnType<AppContextTestRender['render']>;
 
@@ -294,7 +293,6 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
     depsStart,
     queryClient,
     history,
-    setExperimentalFlag,
     renderConsole,
     user,
     commands: commandList,

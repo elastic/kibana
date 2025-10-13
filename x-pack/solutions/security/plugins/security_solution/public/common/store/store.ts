@@ -8,12 +8,12 @@
 import thunk from 'redux-thunk';
 import type {
   Action,
-  Store,
-  Middleware,
-  Dispatch,
-  PreloadedState,
   AnyAction,
+  Dispatch,
+  Middleware,
+  PreloadedState,
   Reducer,
+  Store,
 } from 'redux';
 import { applyMiddleware, createStore as createReduxStore } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
@@ -36,7 +36,7 @@ import type { State } from './types';
 import type { TimelineState } from '../../timelines/store/types';
 import type { SourcererDataView } from '../../sourcerer/store/model';
 import type { StartedSubPlugins, StartPlugins } from '../../types';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import { allowedExperimentalValues } from '../../../common/experimental_features';
 import type { AnalyzerState } from '../../resolver/types';
 import { resolverMiddlewareFactory } from '../../resolver/store/middleware';
 import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory';
@@ -52,8 +52,7 @@ export const createStoreFactory = async (
   coreStart: CoreStart,
   startPlugins: StartPlugins,
   subPlugins: StartedSubPlugins,
-  storage: Storage,
-  enableExperimental: ExperimentalFeatures
+  storage: Storage
 ): Promise<Store<State, Action>> => {
   const { kibanaDataViews, defaultDataView, signal } = await createDefaultDataView({
     application: coreStart.application,
@@ -62,7 +61,7 @@ export const createStoreFactory = async (
     uiSettings: coreStart.uiSettings,
     spaces: startPlugins.spaces,
     // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
-    skip: enableExperimental.newDataViewPickerEnabled,
+    skip: allowedExperimentalValues.newDataViewPickerEnabled,
   });
 
   const timelineInitialState = {
@@ -124,7 +123,6 @@ export const createStoreFactory = async (
       kibanaDataViews,
       signalIndexName: signal.name,
       signalIndexMappingOutdated: signal.index_mapping_outdated,
-      enableExperimental,
     },
     dataTableInitialState,
     groupsInitialState,

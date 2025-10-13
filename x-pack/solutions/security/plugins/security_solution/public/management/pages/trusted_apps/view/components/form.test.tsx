@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { screen, cleanup, act, fireEvent, getByTestId } from '@testing-library/react';
+import { act, cleanup, fireEvent, getByTestId, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
-import { OperatingSystem, ConditionEntryField } from '@kbn/securitysolution-utils';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useFetchIndex } from '../../../../../common/containers/source';
@@ -31,9 +31,13 @@ import { forceHTMLElementOffsetWidth } from '../../../../components/effected_pol
 import type { TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import type { ExperimentalFeatures } from '../../../../../../common';
+import { allowedExperimentalValues } from '../../../../../../common';
 
 jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/containers/source');
+jest.mock('../../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
@@ -184,7 +188,12 @@ describe('Trusted apps form', () => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
-    mockedContext.setExperimentalFlag({ trustedAppsAdvancedMode: true });
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+      (flag: keyof ExperimentalFeatures) => {
+        if (flag === 'trustedAppsAdvancedMode') return true;
+        return allowedExperimentalValues[flag];
+      }
+    );
     latestUpdatedItem = createItem();
     (useFetchIndex as jest.Mock).mockImplementation(() => [
       false,
@@ -531,15 +540,23 @@ describe('Trusted apps form', () => {
 
       describe('Process Descendants', () => {
         beforeEach(() => {
-          mockedContext.setExperimentalFlag({
-            filterProcessDescendantsForTrustedAppsEnabled: true,
-          });
+          (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+            (flag: keyof ExperimentalFeatures) => {
+              if (flag === 'trustedAppsAdvancedMode') return true;
+              if (flag === 'filterProcessDescendantsForTrustedAppsEnabled') return true;
+              return allowedExperimentalValues[flag];
+            }
+          );
         });
 
         it('should not display button when feature flag is disabled', () => {
-          mockedContext.setExperimentalFlag({
-            filterProcessDescendantsForTrustedAppsEnabled: false,
-          });
+          (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+            (flag: keyof ExperimentalFeatures) => {
+              if (flag === 'trustedAppsAdvancedMode') return true;
+              if (flag === 'filterProcessDescendantsForTrustedAppsEnabled') return false;
+              return allowedExperimentalValues[flag];
+            }
+          );
           const propsItem: Partial<ArtifactFormComponentProps['item']> = {
             tags: ['policy:all', 'form_mode:advanced'],
           };

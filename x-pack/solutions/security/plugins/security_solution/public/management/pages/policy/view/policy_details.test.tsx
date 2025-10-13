@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount, type ComponentType as EnzymeComponentType } from 'enzyme';
+import { type ComponentType as EnzymeComponentType, mount } from 'enzyme';
 import React from 'react';
 import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
@@ -32,10 +32,13 @@ import { APP_UI_ID } from '../../../../../common/constants';
 import { createLicenseServiceMock } from '../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../common/hooks/__mocks__/use_license';
 import { useHostIsolationExceptionsAccess } from '../../../hooks/artifacts/use_host_isolation_exceptions_access';
+import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../../../common';
 
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/hooks/use_license');
 jest.mock('../../../hooks/artifacts/use_host_isolation_exceptions_access');
+jest.mock('../../../../common/experimental_features_service');
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 const useLicenseMock = _useLicense as jest.Mock;
@@ -49,7 +52,6 @@ describe('Policy Details', () => {
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];
   let middlewareSpy: AppContextTestRender['middlewareSpy'];
-  let setExperimentalFlag: AppContextTestRender['setExperimentalFlag'];
   let http: typeof coreStart.http;
   let render: () => ReturnType<typeof mount>;
   let policyPackagePolicy: ReturnType<typeof generator.generatePolicyPackagePolicy>;
@@ -61,7 +63,7 @@ describe('Policy Details', () => {
     const appContextMockRenderer = createAppRootMockRenderer();
     const AppWrapper = appContextMockRenderer.AppWrapper;
 
-    ({ history, coreStart, middlewareSpy, setExperimentalFlag } = appContextMockRenderer);
+    ({ history, coreStart, middlewareSpy } = appContextMockRenderer);
     render = () =>
       mount(<PolicyDetails />, { wrappingComponent: AppWrapper as EnzymeComponentType<{}> });
     http = coreStart.http;
@@ -322,7 +324,10 @@ describe('Policy Details', () => {
         ])(
           'should not display the %s tab with no privileges',
           async (_: string, privilege: string, selector: string) => {
-            setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+            (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+              ...allowedExperimentalValues,
+              endpointExceptionsMovedUnderManagement: true,
+            });
 
             await renderWithPrivilege(privilege, false);
             expect(policyView.find(`button#${selector}`)).toHaveLength(0);
@@ -337,7 +342,10 @@ describe('Policy Details', () => {
         ])(
           'should display the %s tab with  the correct privilege',
           async (_: string, privilege: string, selector: string) => {
-            setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+            (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+              ...allowedExperimentalValues,
+              endpointExceptionsMovedUnderManagement: true,
+            });
 
             await renderWithPrivilege(privilege, true);
             expect(policyView.find(`button#${selector}`)).toHaveLength(1);
@@ -345,7 +353,7 @@ describe('Policy Details', () => {
         );
 
         it('should not display endpoint exceptions without the feature flag enabled', async () => {
-          setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
+          (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue(allowedExperimentalValues);
 
           await renderWithPrivilege('canReadEndpointExceptions', true);
           expect(policyView.find('button#endpointExceptions')).toHaveLength(0);
@@ -368,7 +376,10 @@ describe('Policy Details', () => {
         ])(
           'should redirect to policy details when no %s required privileges',
           async (_: string, privilege: string, path: string) => {
-            setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+            (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+              ...allowedExperimentalValues,
+              endpointExceptionsMovedUnderManagement: true,
+            });
 
             history.push(path);
             await renderWithPrivilege(privilege, false);

@@ -12,8 +12,10 @@ import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { endpointPageHttpMock } from '../endpoint_hosts/mocks';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../common/components/user_privileges');
+jest.mock('../../../common/hooks/use_experimental_features');
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
@@ -26,7 +28,7 @@ describe('when in the Administration tab', () => {
     render = () => mockedContext.render(<ManagementContainer />);
     mockedContext.history.push('/administration/endpoints');
 
-    mockedContext.setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -172,7 +174,7 @@ describe('when in the Administration tab', () => {
 
   describe('when `endpointExceptionsMovedUnderManagement` feature flag is disabled', () => {
     beforeEach(() => {
-      mockedContext.setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     });
 
     it('should display `notFoundPage` for the endpoint exceptions page with read privilege', async () => {
