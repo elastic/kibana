@@ -12,7 +12,7 @@ import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { TickFormatter } from '@elastic/charts';
-import type { StreamQuery, Streams } from '@kbn/streams-schema';
+import type { Feature, StreamQuery, Streams } from '@kbn/streams-schema';
 import { StreamFeatureDetailsFlyout } from '../data_management/stream_detail_management/stream_features/stream_feature_details_flyout';
 import type { SignificantEventItem } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
@@ -20,6 +20,7 @@ import { formatChangePoint } from './utils/change_point';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';
 import { buildDiscoverParams } from './utils/discover_helpers';
 import { useTimefilter } from '../../hooks/use_timefilter';
+import { useStreamFeatures } from '../data_management/stream_detail_management/stream_features/hooks/use_stream_features';
 
 export function SignificantEventsTable({
   definition,
@@ -47,7 +48,8 @@ export function SignificantEventsTable({
   const [selectedDeleteItem, setSelectedDeleteItem] = useState<SignificantEventItem>();
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
-  const [isFeatureDetailFlyoutOpen, setIsFeatureDetailFlyoutOpen] = useState<string>('');
+  const [selectedFeature, setSelectedFeature] = useState<Feature>();
+  const { featuresByName } = useStreamFeatures(definition);
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
     {
@@ -85,12 +87,12 @@ export function SignificantEventsTable({
             )}
             onClick={() => {
               if (query.feature?.name) {
-                setIsFeatureDetailFlyoutOpen(query.feature.name);
+                setSelectedFeature(featuresByName[query.feature.name]);
               }
             }}
             iconOnClick={() => {
               if (query.feature?.name) {
-                setIsFeatureDetailFlyoutOpen(query.feature.name);
+                setSelectedFeature(featuresByName[query.feature.name]);
               }
             }}
             iconOnClickAriaLabel={i18n.translate(
@@ -214,12 +216,12 @@ export function SignificantEventsTable({
         tableLayout="auto"
         itemId="id"
       />
-      {isFeatureDetailFlyoutOpen && (
+      {selectedFeature && (
         <StreamFeatureDetailsFlyout
           definition={definition}
-          featureName={isFeatureDetailFlyoutOpen}
+          feature={selectedFeature}
           closeFlyout={() => {
-            setIsFeatureDetailFlyoutOpen('');
+            setSelectedFeature(undefined);
           }}
         />
       )}
