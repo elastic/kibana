@@ -37,7 +37,7 @@ The cases as data feature is in technical preview, meaning the schema for the ca
 | updated\_at | date | The date of when case was last modified, provided in ISO 8601 \[2\] and set to the servers' timezone. |
 | updated\_at\_ms | long | The case update timestamp in milliseconds. |
 | updated\_by.username | keyword | The username of the user who last updated the case. |
-| updated\_by.profile\_uid | keyword | The User ID of the user who last updated the case. |
+| updated\_by.profile\_uid | keyword | The user ID of the user who last updated the case. |
 | updated\_by.full\_name | keyword | The full name of the user who last updated the case. |
 | updated\_by.email | keyword | The email address of the user who last updated the case. |
 | closed\_at | date | The date of case closure, provided in ISO 8601 \[2\] format and set to the servers' timezone. |
