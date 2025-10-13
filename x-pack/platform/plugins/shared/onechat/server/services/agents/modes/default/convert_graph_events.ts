@@ -78,24 +78,24 @@ export const convertGraphEvents = ({
 
           // process last emitted message
           const lastMessage: BaseMessage = event.data.output.nextMessage;
-
           const toolCalls = extractToolCalls(lastMessage);
+
           if (toolCalls.length > 0) {
-            const toolCallEvents: ToolCallEvent[] = [];
-            const reasoningEvents: ReasoningEvent[] = [];
+            const messageText = extractTextContent(lastMessage);
+            let hasReasoningEvent = false;
 
             for (const toolCall of toolCalls) {
               const toolId = toolIdentifierFromToolCall(toolCall, toolIdMapping);
               const { toolCallId, args } = toolCall;
 
-              // TODO: can also check message content now that can identify those
               const { _reasoning, ...toolCallArgs } = args;
               if (_reasoning) {
-                reasoningEvents.push(createReasoningEvent(_reasoning));
+                events.push(createReasoningEvent(_reasoning));
+                hasReasoningEvent = true;
               }
 
               toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
-              toolCallEvents.push(
+              events.push(
                 createToolCallEvent({
                   toolId,
                   toolCallId,
@@ -103,7 +103,9 @@ export const convertGraphEvents = ({
                 })
               );
             }
-            events.push(...reasoningEvents, ...toolCallEvents);
+            if (messageText && !hasReasoningEvent) {
+              events.push(createReasoningEvent(messageText));
+            }
           }
 
           return of(...events);
