@@ -31,14 +31,13 @@ import type {
 } from './types';
 
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
-import { workflowExecutionLoop } from './workflow_execution_loop';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { LogsRepository } from './repositories/logs_repository/logs_repository';
-import { resumeWorkflow, runWorkflow, setupDependencies } from './execution_functions';
+import { resumeWorkflow, runWorkflow } from './execution_functions';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
