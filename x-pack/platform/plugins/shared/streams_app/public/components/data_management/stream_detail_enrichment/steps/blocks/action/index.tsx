@@ -67,7 +67,7 @@ export function ActionBlock(props: StepConfigurationProps) {
       }
     >
       {isUnderEdit ? (
-        <ActionBlockEditor {...props} processorMetrics={processorMetrics} />
+        <ActionBlockEditor {...props} ref={freshBlockRef} processorMetrics={processorMetrics} />
       ) : (
         <ActionBlockListItem {...props} processorMetrics={processorMetrics} />
       )}

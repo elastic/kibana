@@ -88,6 +88,9 @@ export function EmbeddedMapSelect({
         onChange={onChange}
         itemLayoutAlign="top"
         hasDividers
+        aria-label={i18n.translate('xpack.apm.serviceOverview.embeddedMap.dropdown.ariaLabel', {
+          defaultMessage: 'Map',
+        })}
       />
     </EuiFlexGroup>
   );
