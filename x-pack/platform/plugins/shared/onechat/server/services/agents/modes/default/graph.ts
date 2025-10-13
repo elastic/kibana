@@ -17,6 +17,7 @@ import type { AgentEventEmitter } from '@kbn/onechat-server';
 import { createReasoningEvent, extractTextContent } from '@kbn/onechat-genai-utils/langchain';
 import { getActPrompt, getAnswerPrompt } from './prompts';
 import { getRandomAnsweringMessage, getRandomThinkingMessage } from './i18n';
+import type { ResolvedConfiguration } from '../types';
 
 const StateAnnotation = Annotation.Root({
   // inputs
@@ -39,7 +40,7 @@ export type StateType = typeof StateAnnotation.State;
 export const createAgentGraph = ({
   chatModel,
   tools,
-  customInstructions,
+  configuration,
   capabilities,
   logger,
   events,
@@ -47,7 +48,7 @@ export const createAgentGraph = ({
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
   capabilities: ResolvedAgentCapabilities;
-  customInstructions?: string;
+  configuration: ResolvedConfiguration;
   logger: Logger;
   events: AgentEventEmitter;
 }) => {
@@ -61,7 +62,7 @@ export const createAgentGraph = ({
     events.emit(createReasoningEvent(getRandomThinkingMessage(), { transient: true }));
     const response = await model.invoke(
       getActPrompt({
-        customInstructions,
+        customInstructions: configuration.research.instructions,
         capabilities,
         messages: [...state.initialMessages, ...state.addedMessages],
       })
@@ -102,7 +103,7 @@ export const createAgentGraph = ({
     events.emit(createReasoningEvent(getRandomAnsweringMessage(), { transient: true }));
     const response = await answeringModel.invoke(
       getAnswerPrompt({
-        customInstructions,
+        customInstructions: configuration.answer.instructions,
         capabilities,
         handoverNote: state.handoverNote,
         discussion: [...state.initialMessages, ...state.addedMessages],

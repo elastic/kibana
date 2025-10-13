@@ -29,8 +29,7 @@ export const createAgentHandler = ({
         runId,
         abortSignal,
         agentId: agent.id,
-        toolSelection: agent.configuration.tools,
-        customInstructions: agent.configuration.instructions,
+        agentConfiguration: agent.configuration,
       },
       context
     );
