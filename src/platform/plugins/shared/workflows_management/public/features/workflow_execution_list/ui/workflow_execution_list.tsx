@@ -19,7 +19,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { type WorkflowExecutionListDto } from '@kbn/workflows';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -55,6 +55,14 @@ export const WorkflowExecutionList = ({
   setPaginationObserver,
 }: WorkflowExecutionListProps) => {
   const styles = useMemoCss(componentStyles);
+  const scrollableContentRef = useRef<HTMLDivElement>(null);
+
+  // Reset scroll position when filters change
+  useEffect(() => {
+    if (scrollableContentRef.current) {
+      scrollableContentRef.current.scrollTop = 0;
+    }
+  }, [filters.statuses, filters.executionTypes]);
 
   let content: React.ReactNode = null;
 
@@ -179,8 +187,10 @@ export const WorkflowExecutionList = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </header>
-      <EuiFlexItem grow={true} css={styles.scrollableContent}>
-        {content}
+      <EuiFlexItem grow={true} css={styles.scrollableWrapper}>
+        <div ref={scrollableContentRef} css={styles.scrollableContent}>
+          {content}
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -193,9 +203,13 @@ const componentStyles = {
       height: '100%',
       overflow: 'hidden',
     }),
-  scrollableContent: ({ euiTheme }: UseEuiTheme) =>
+  scrollableWrapper: () =>
     css({
+      minHeight: 0,
+    }),
+  scrollableContent: () =>
+    css({
+      height: '100%',
       overflowY: 'auto',
-      minHeight: 0, // This is important for flex items to shrink properly
     }),
 };
