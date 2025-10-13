@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { performance } from 'perf_hooks';
-
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { parseNextURL } from '@kbn/std';
@@ -176,10 +174,6 @@ export function defineCommonRoutes({
     createLicensedRouteHandler(async (context, request, response) => {
       const { providerType, providerName, currentURL, params } = request.body;
       const redirectURL = parseNextURL(currentURL, basePath.serverBasePath);
-      const isBasicOrTokenLogin =
-        providerType === BasicAuthenticationProvider.type ||
-        providerType === TokenAuthenticationProvider.type;
-      const startTime = performance.now();
 
       const authenticationResult = await getAuthenticationService().login(request, {
         provider: { name: providerName },

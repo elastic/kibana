@@ -19,7 +19,7 @@ interface BasicAttributes {
 
 interface PrivilegeRegistrationAttributes extends BasicAttributes {
   application: string;
-  deletedPrivileges: number;
+  deletedPrivileges?: number;
 }
 
 interface UserAuthenticationAttributes extends BasicAttributes {
@@ -77,11 +77,12 @@ class SecurityTelemetry {
     );
   }
 
-  private transformAttributes<T = SecurityTelemetryAttributes>(attributes: T): Attributes {
-    const { application, providerType, outcome, ...rest } = attributes;
+  private transformAttributes<T extends SecurityTelemetryAttributes>(attributes: T): Attributes {
+    const { application, providerType, outcome, deletedPrivileges, ...rest } = attributes;
 
     const transformed: Attributes = {
-      ...(application ? { 'auth.application': application } : {}),
+      ...(application ? { application } : {}),
+      ...(deletedPrivileges ? { 'deleted.privileges': deletedPrivileges } : {}),
       ...(providerType ? { 'auth.provider.type': providerType } : {}),
       ...(outcome ? { 'auth.outcome': outcome } : {}),
       ...rest,

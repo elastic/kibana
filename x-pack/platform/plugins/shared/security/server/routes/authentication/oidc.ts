@@ -257,7 +257,6 @@ export function defineOIDCRoutes({
     response: KibanaResponseFactory,
     loginAttempt: ProviderLoginAttempt
   ) {
-    const startTime = performance.now();
 
     try {
       // We handle the fact that the user might get redirected to Kibana while already having a session
