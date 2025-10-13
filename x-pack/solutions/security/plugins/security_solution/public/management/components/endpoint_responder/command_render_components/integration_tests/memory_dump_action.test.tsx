@@ -96,7 +96,6 @@ describe('Memory dump response action', () => {
 
   describe('and agent type is Endpoint', () => {
     beforeEach(() => {
-      mockedContext.setExperimentalFlag({ responseActionsEndpointMemoryDump: true });
       (ExperimentalFeaturesServiceMock.get as jest.Mock).mockReturnValue({
         responseActionsEndpointMemoryDump: true,
       });
@@ -106,7 +105,6 @@ describe('Memory dump response action', () => {
       (ExperimentalFeaturesServiceMock.get as jest.Mock).mockReturnValue({
         responseActionsEndpointMemoryDump: false,
       });
-      mockedContext.setExperimentalFlag({ responseActionsEndpointMemoryDump: false });
       await render();
       await enterConsoleCommand(renderResult, user, 'memory-dump --kernel');
 
