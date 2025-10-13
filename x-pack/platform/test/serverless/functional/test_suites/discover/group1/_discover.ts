@@ -197,7 +197,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         log.debug('setAbsoluteRangeForAnotherQuery');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitUntilTabIsLoaded();
       });
 
       it('should support querying on nested fields', async function () {
