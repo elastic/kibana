@@ -80,6 +80,40 @@ configWithoutTests=()
 
 FINAL_EXIT_CODE=0
 
+# Function to upload Scout events if report directory exists
+upload_events_if_available() {
+  local config_path="$1"
+  local mode="$2"
+
+  # Find the most recent Scout report directory for this test run
+  REPORT_DIR=$(ls -td .scout/reports/scout-*/ 2>/dev/null | head -n 1)
+  if [ -n "$REPORT_DIR" ]; then
+    EVENT_LOG_FILE="${REPORT_DIR}event-log.ndjson"
+    if [ -f "$EVENT_LOG_FILE" ]; then
+      echo "--- Upload Scout reporter events for $config_path ($mode)"
+      if [[ "${SCOUT_REPORTER_ENABLED:-}" == "true" ]]; then
+        # prevent non-zero exit code from breaking the script
+        set +e;
+        node scripts/scout upload-events --dontFailOnError --eventLogPath "$EVENT_LOG_FILE"
+        UPLOAD_EXIT_CODE=$?
+        set -e;
+
+        if [[ $UPLOAD_EXIT_CODE -eq 0 ]]; then
+          echo "✅ Upload completed for $config_path ($mode) from $EVENT_LOG_FILE"
+        else
+          echo "⚠️ Upload failed for $config_path ($mode) with exit code $UPLOAD_EXIT_CODE"
+        fi
+      else
+        echo "⚠️ The SCOUT_REPORTER_ENABLED environment variable is not 'true'. Skipping event upload."
+      fi
+    else
+      echo "❌ Could not find event log file '$EVENT_LOG_FILE' for $config_path ($mode)"
+    fi
+  else
+    echo "❌ Could not find any scout report directory for $config_path ($mode)"
+  fi
+}
+
 # Run tests for each config
 while read -r config_path; do
   if [[ -z "$config_path" ]]; then
@@ -126,48 +160,21 @@ while read -r config_path; do
       duration="${timeSec}s"
     fi
 
-    # Always try to upload events regardless of test outcome (for observability)
-    # Find the most recent Scout report directory for this test run
-    REPORT_DIR=$(ls -td .scout/reports/scout-*/ 2>/dev/null | head -n 1)
-    if [ -n "$REPORT_DIR" ]; then
-      EVENT_LOG_FILE="${REPORT_DIR}event-log.ndjson"
-      if [ -f "$EVENT_LOG_FILE" ]; then
-        echo "--- Upload Scout reporter events for $config_path ($mode)"
-        if [[ "${SCOUT_REPORTER_ENABLED:-}" == "true" ]]; then
-          # prevent non-zero exit code from breaking the script
-          set +e;
-          node scripts/scout upload-events --dontFailOnError --eventLogPath "$EVENT_LOG_FILE"
-          UPLOAD_EXIT_CODE=$?
-          set -e;
-
-          if [[ $UPLOAD_EXIT_CODE -eq 0 ]]; then
-            echo "✅ Upload completed for $config_path ($mode) from $EVENT_LOG_FILE"
-          else
-            echo "⚠️ Upload failed for $config_path ($mode) with exit code $UPLOAD_EXIT_CODE"
-          fi
-        else
-          echo "⚠️ The SCOUT_REPORTER_ENABLED environment variable is not 'true'. Skipping event upload."
-        fi
-      else
-        echo "❌ Could not find event log file '$EVENT_LOG_FILE' for $config_path ($mode)"
-      fi
-    else
-      echo "❌ Could not find any scout report directory for $config_path ($mode)"
-    fi
-
     # Now handle test results - retry logic depends only on test success/failure
     if [[ $EXIT_CODE -eq 2 ]]; then
       # No tests found - mark as executed so we don't retry it
       buildkite-agent meta-data set "$CONFIG_MODE_EXECUTION_KEY" "true"
       configWithoutTests+=("$config_path ($mode)")
     elif [[ $EXIT_CODE -ne 0 ]]; then
-      # Test run failed - add to failed configs for retry
+      # Test run failed - try to upload events for observability, then mark as failed
+      upload_events_if_available "$config_path" "$mode"
       failedConfigs+=("$config_path ($mode)")
       FINAL_EXIT_CODE=10  # Ensure we exit with failure if any test fails with (exit code 10 to match FTR)
       echo "Scout test exited with code $EXIT_CODE for $config_path ($mode)"
       echo "^^^ +++"
     else
-      # Test run was successful - mark as executed
+      # Test run was successful - upload events then mark as executed
+      upload_events_if_available "$config_path" "$mode"
       buildkite-agent meta-data set "$CONFIG_MODE_EXECUTION_KEY" "true"
       results+=("$config_path ($mode) ✅ (${duration})")
     fi
