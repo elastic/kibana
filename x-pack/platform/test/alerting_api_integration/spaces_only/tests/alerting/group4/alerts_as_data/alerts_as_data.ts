@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { expect as expectExpect } from 'expect';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
@@ -38,7 +39,11 @@ import {
   EVENT_ACTION,
   EVENT_KIND,
   SPACE_IDS,
+  ALERT_LAST_SCHEDULED_ACTIONS_GROUP,
+  ALERT_LAST_SCHEDULED_ACTIONS_DATE,
+  ALERT_LAST_SCHEDULED_ACTIONS_THROTTLED,
 } from '@kbn/rule-data-utils';
+import { RuleNotifyWhen } from '@kbn/alerting-types';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
 import type { TaskManagerDoc } from '../../../../../common/lib';
@@ -56,7 +61,11 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const objectRemover = new ObjectRemover(supertestWithoutAuth);
 
-  type PatternFiringAlert = Alert & { patternIndex: number; instancePattern: boolean[] };
+  type PatternFiringAlert = Alert & {
+    patternIndex: number;
+    instancePattern: boolean[];
+    [ALERT_LAST_SCHEDULED_ACTIONS_THROTTLED]?: object;
+  };
 
   const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
   const timestampPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
@@ -505,6 +514,96 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(alertCDocRun3[ALERT_PREVIOUS_ACTION_GROUP]).to.be(undefined);
       });
     }
+
+    it('should not write alerts with the state data', async () => {
+      const { body: createdAction } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          connector_type_id: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      const pattern = {
+        alertA: [true, true, true], // stays active across executions
+      };
+
+      const response = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.patternFiringAad',
+            schedule: { interval: '1d' },
+            throttle: null,
+            notify_when: null,
+            params: {
+              pattern,
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+                frequency: {
+                  summary: false,
+                  throttle: '2d',
+                  notify_when: RuleNotifyWhen.THROTTLE,
+                },
+              },
+            ],
+          })
+        );
+
+      expect(response.status).to.eql(200);
+      const ruleId = response.body.id;
+      const actionUuid = response.body.actions[0].uuid;
+      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+
+      const events: IValidatedEvent[] = await waitForEventLogDocs(
+        ruleId,
+        new Map([['execute', { equal: 1 }]])
+      );
+      const executeEvent = events[0];
+      const executionUuid = executeEvent?.kibana?.alert?.rule?.execution?.uuid;
+      expect(executionUuid).not.to.be(undefined);
+
+      // Query for alerts
+      const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>();
+      // Get alert state from task document
+      // we will remove this when we remove alerts from tasks state
+      const state: any = await getTaskState(ruleId);
+
+      const source: PatternFiringAlert = alertDocsRun1[0]._source!;
+      const lastScheduledActionsDateFromAAD = source[ALERT_LAST_SCHEDULED_ACTIONS_DATE];
+
+      const lastScheduledActionsUUID = state.alertInstances.alertA.meta.uuid;
+      const lastScheduledActionsDate = state.alertInstances.alertA.meta.lastScheduledActions.date;
+      const lastScheduledActionsGroup = state.alertInstances.alertA.meta.lastScheduledActions.group;
+      const lastScheduledActionsActions =
+        state.alertInstances.alertA.meta.lastScheduledActions.actions;
+
+      expect(lastScheduledActionsDate).to.match(timestampPattern);
+      expect(lastScheduledActionsGroup).to.equal('default');
+
+      expect(alertDocsRun1.length).to.equal(1);
+
+      expect(source[ALERT_UUID]).to.equal(lastScheduledActionsUUID);
+
+      expect(source[ALERT_LAST_SCHEDULED_ACTIONS_DATE]).to.match(timestampPattern);
+      expect(source[ALERT_LAST_SCHEDULED_ACTIONS_GROUP]).to.equal('default');
+      expect(source[ALERT_LAST_SCHEDULED_ACTIONS_THROTTLED]).to.eql({
+        [actionUuid]: { date: lastScheduledActionsDateFromAAD },
+      });
+
+      // we will remove these when we remove alerts from task state
+      expect(source[ALERT_LAST_SCHEDULED_ACTIONS_DATE]).to.equal(lastScheduledActionsDate);
+      expect(source[ALERT_LAST_SCHEDULED_ACTIONS_GROUP]).to.equal(lastScheduledActionsGroup);
+      expect(source[ALERT_LAST_SCHEDULED_ACTIONS_THROTTLED]).eql(lastScheduledActionsActions);
+    });
   });
 
   function testExpectRuleData(
