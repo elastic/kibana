@@ -18,7 +18,7 @@ export {
 } from './autocomplete/helpers';
 export {
   suggestForExpression,
-  buildExpresionFunctionParameterContext,
+  buildExpressionFunctionParameterContext,
 } from './autocomplete/expressions';
 export {
   buildColumnSuggestions as buildFieldsDefinitionsWithMetadata,

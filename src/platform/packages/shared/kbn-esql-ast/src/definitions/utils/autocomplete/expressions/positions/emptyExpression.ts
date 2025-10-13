@@ -9,31 +9,17 @@
 
 import { ESQLVariableType } from '@kbn/esql-types';
 import { uniq } from 'lodash';
-import {
-  matchesSpecialFunction,
-  getColumnsByTypeFromCtx,
-  getLicenseCheckerFromCtx,
-  getCommandNameFromCtx,
-  isCursorFollowedByCommaFromCtx,
-} from '../utils';
-import { getAcceptedTypesForParamContext } from '../operators/utils';
+import { matchesSpecialFunction } from '../utils';
 import { shouldSuggestComma, type CommaContext } from '../commaDecisionEngine';
 import type { ExpressionContext } from '../types';
 import { ensureKeywordAndText } from '../../functions';
-import {
-  getControlSuggestion,
-  getVariablePrefix,
-  getFunctionsSuggestions,
-  getLiteralsSuggestions,
-  getFieldsSuggestions,
-} from '../../helpers';
+import { SuggestionBuilder } from '../SuggestionBuilder';
+import { SignatureAnalyzer } from '../SignatureAnalyzer';
+import { getControlSuggestion, getVariablePrefix, getLiteralsSuggestions } from '../../helpers';
 import { buildValueDefinitions } from '../../../values';
 import { getCompatibleLiterals } from '../../../literals';
 import type { FunctionDefinitionTypes, FunctionParameterType } from '../../../../types';
-import {
-  type ISuggestionItem,
-  type GetColumnsByTypeFn,
-} from '../../../../../commands_registry/types';
+import { type ISuggestionItem } from '../../../../../commands_registry/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../../../constants';
 import { allStarConstant } from '../../../../../..';
 
@@ -74,17 +60,33 @@ async function handleFunctionParameterContext(
   functionParamContext: NonNullable<ExpressionContext['options']['functionParameterContext']>,
   ctx: ExpressionContext
 ): Promise<ISuggestionItem[]> {
-  const { location, context, options } = ctx;
-  const { paramDefinitions, functionDefinition } = functionParamContext;
-  const commandName = getCommandNameFromCtx(ctx);
-  const ignoredColumns = options.ignoredColumnsForEmptyExpression || [];
-  const isCursorFollowedByComma = isCursorFollowedByCommaFromCtx(ctx);
-
-  if (!functionDefinition) {
+  // Early validation
+  if (!isValidFunctionParameterPosition(functionParamContext)) {
     return [];
   }
 
-  // Empty paramDefinitions = no valid signature for this position → return []
+  // Try exclusive suggestions first (COUNT(*), enum values)
+  const exclusiveSuggestions = tryExclusiveSuggestions(functionParamContext, ctx);
+
+  if (exclusiveSuggestions.length > 0) {
+    return exclusiveSuggestions;
+  }
+
+  // Build composite suggestions (literals + fields + functions)
+  return buildCompositeSuggestions(functionParamContext, ctx);
+}
+
+/** Validates that we can suggest for this function parameter position */
+function isValidFunctionParameterPosition(
+  functionParamContext: NonNullable<ExpressionContext['options']['functionParameterContext']>
+): boolean {
+  const { functionDefinition, paramDefinitions } = functionParamContext;
+
+  if (!functionDefinition) {
+    return false;
+  }
+
+  // Empty paramDefinitions = no valid signature for this position → return false
   // Example: FUNC(double, double, /) with only 1-2 param signatures → suggest nothing
   //
   // Exception (continue suggesting) only for variadic functions (CONCAT, COALESCE):
@@ -92,116 +94,159 @@ async function handleFunctionParameterContext(
   const isVariadicFunction = functionDefinition.signatures?.some((sig) => sig.minParams != null);
 
   if (paramDefinitions.length === 0 && !isVariadicFunction) {
-    return [];
+    return false;
   }
+
+  return true;
+}
+
+/** Try suggestions that are exclusive (if present, return only these) */
+function tryExclusiveSuggestions(
+  functionParamContext: NonNullable<ExpressionContext['options']['functionParameterContext']>,
+  ctx: ExpressionContext
+): ISuggestionItem[] {
+  const { functionDefinition, paramDefinitions } = functionParamContext;
+  const { options } = ctx;
 
   const suggestions: ISuggestionItem[] = [];
 
-  // Suggest "*" for COUNT function (e.g., "COUNT(*)")
-  if (
-    functionParamContext &&
-    functionParamContext.functionDefinition &&
-    matchesSpecialFunction(functionParamContext.functionDefinition.name, 'count')
-  ) {
+  // Special case: COUNT function suggests "*" (e.g., "COUNT(*)")
+  if (matchesSpecialFunction(functionDefinition!.name, 'count')) {
     suggestions.push(allStarConstant);
   }
 
-  // Suggest enum/predefined values if defined (e.g., DATE_DIFF units: "year", "month", "day")
-  // This is exclusive - if enum values exist, return only those
+  // Enum values are exclusive - if present, return only those
   const enumItems = buildEnumValueSuggestions(
     paramDefinitions,
-    functionDefinition,
+    functionDefinition!,
     Boolean(functionParamContext.hasMoreMandatoryArgs),
-    isCursorFollowedByComma
+    options.isCursorFollowedByComma ?? false
   );
 
   if (enumItems.length > 0) {
     return enumItems;
   }
 
-  // Determine what types to suggest and whether to add comma after suggestion
-  const { acceptedTypes, shouldAddComma, allowFieldsAndFunctions } = getParamSuggestionConfig(
+  return suggestions;
+}
+
+/** Build composite suggestions: literals + fields + functions */
+async function buildCompositeSuggestions(
+  functionParamContext: NonNullable<ExpressionContext['options']['functionParameterContext']>,
+  ctx: ExpressionContext
+): Promise<ISuggestionItem[]> {
+  const { paramDefinitions, functionDefinition } = functionParamContext;
+  const { options } = ctx;
+
+  // Determine configuration
+  const config = getParamSuggestionConfig(
     functionParamContext,
     paramDefinitions,
-    functionDefinition,
-    isCursorFollowedByComma,
-    functionParamContext.firstArgumentType
+    functionDefinition!,
+    options.isCursorFollowedByComma ?? false
   );
 
-  const hasMoreMandatoryArgs = Boolean(functionParamContext.hasMoreMandatoryArgs);
+  const suggestions: ISuggestionItem[] = [];
 
-  // Suggest constant-only literals (e.g., "true", "false", "null", string/number literals)
-  suggestions.push(
-    ...buildConstantOnlyLiteralSuggestions(
-      paramDefinitions,
-      context,
-      shouldAddComma,
-      hasMoreMandatoryArgs
-    )
-  );
+  // Add literal suggestions
+  suggestions.push(...buildLiteralSuggestions(functionParamContext, ctx, config));
 
-  // Suggest date literals (e.g., "now()", "1 hour", "2 days") except for FTS functions
-  // Skip for BUCKET function in STATS BY context
-  const isFtsFunction = FULL_TEXT_SEARCH_FUNCTIONS.includes(functionDefinition.name);
-  const dateItems = isFtsFunction
-    ? []
-    : getLiteralsSuggestions(
-        paramDefinitions.map(({ type }) => type),
-        location,
-        {
-          includeDateLiterals: true,
-          includeCompatibleLiterals: false,
-          addComma: shouldAddComma,
-          advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
-        }
-      );
-
-  const isBucketInStatsBy =
-    matchesSpecialFunction(functionDefinition.name, 'bucket') && commandName === 'stats';
-
-  if (!isBucketInStatsBy) {
-    suggestions.push(...dateItems);
-  }
-
-  // Suggest field/column names matching parameter types (e.g., "doubleField", "stringField")
-  if (allowFieldsAndFunctions) {
-    const getByType: GetColumnsByTypeFn = (types, ignored, opts) =>
-      getColumnsByTypeFromCtx(ctx, types, ignored, opts);
-
-    const fieldSuggestions = await getFieldsSuggestions(acceptedTypes, getByType, {
-      ignoreColumns: ignoredColumns,
-      addSpaceAfterField: shouldAddComma,
-      openSuggestions: true,
-      addComma: shouldAddComma,
-      promoteToTop: true,
-    });
-
-    suggestions.push(...fieldSuggestions);
-  }
-
-  // Suggest functions matching parameter types (e.g., "ROUND($0)", "ABS($0)")
-  // Skip if parameter only accepts fields (fieldsOnly constraint)
-  if (allowFieldsAndFunctions && paramDefinitions.every(({ fieldsOnly }) => !fieldsOnly)) {
+  // Add field and function suggestions
+  if (config.allowFieldsAndFunctions) {
     suggestions.push(
-      ...getFunctionsSuggestions({
-        location,
-        types: acceptedTypes,
-        options: {
-          ignored: functionParamContext.functionsToIgnore || [],
-          addComma: shouldAddComma,
-        },
-        context,
-        callbacks: { hasMinimumLicenseRequired: getLicenseCheckerFromCtx(ctx) },
-      })
+      ...(await buildFieldAndFunctionSuggestions(functionParamContext, ctx, config))
     );
   }
 
   return suggestions;
 }
 
+/** Build all literal suggestions (constants + dates) */
+function buildLiteralSuggestions(
+  functionParamContext: NonNullable<ExpressionContext['options']['functionParameterContext']>,
+  ctx: ExpressionContext,
+  config: ReturnType<typeof getParamSuggestionConfig>
+): ISuggestionItem[] {
+  const { paramDefinitions, functionDefinition } = functionParamContext;
+  const { location, context, command } = ctx;
+
+  const hasMoreMandatoryArgs = Boolean(functionParamContext.hasMoreMandatoryArgs);
+  const suggestions: ISuggestionItem[] = [];
+
+  // Constant-only literals (true, false, null, string/number literals)
+  suggestions.push(
+    ...buildConstantOnlyLiteralSuggestions(
+      paramDefinitions,
+      context,
+      config.shouldAddComma,
+      hasMoreMandatoryArgs
+    )
+  );
+
+  // Date literals (now(), 1 hour, 2 days) except for FTS functions and BUCKET in STATS
+  const isFtsFunction = FULL_TEXT_SEARCH_FUNCTIONS.includes(functionDefinition!.name);
+  const isBucketInStatsBy =
+    matchesSpecialFunction(functionDefinition!.name, 'bucket') && command.name === 'stats';
+
+  if (!isFtsFunction && !isBucketInStatsBy) {
+    const dateItems = getLiteralsSuggestions(
+      paramDefinitions.map(({ type }) => type),
+      location,
+      {
+        includeDateLiterals: true,
+        includeCompatibleLiterals: false,
+        addComma: config.shouldAddComma,
+        advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+      }
+    );
+    suggestions.push(...dateItems);
+  }
+
+  return suggestions;
+}
+
+/** Build field and function suggestions using SuggestionBuilder */
+async function buildFieldAndFunctionSuggestions(
+  functionParamContext: NonNullable<ExpressionContext['options']['functionParameterContext']>,
+  ctx: ExpressionContext,
+  config: ReturnType<typeof getParamSuggestionConfig>
+): Promise<ISuggestionItem[]> {
+  const { paramDefinitions } = functionParamContext;
+  const { options } = ctx;
+  const ignoredColumns = options.ignoredColumnsForEmptyExpression || [];
+
+  const builder = new SuggestionBuilder(ctx);
+
+  // Suggest fields when:
+  // - there is at least one non-constant parameter, OR
+  // - param definitions are empty (variadic/unknown position, e.g., CONCAT third+ arg)
+  const hasNonConstantParam = paramDefinitions.some(({ constantOnly }) => !constantOnly);
+  const isVariadicOrUnknownPosition = paramDefinitions.length === 0;
+  if (hasNonConstantParam || isVariadicOrUnknownPosition) {
+    await builder.addFields({
+      types: config.acceptedTypes,
+      ignoredColumns,
+      addComma: config.shouldAddComma,
+      promoteToTop: true,
+    });
+  }
+
+  // Always allow functions unless explicitly fieldsOnly, even for constant-only params.
+  // Functions can produce constant values (e.g., ABS(10)), which are valid for constant-only arguments.
+  if (paramDefinitions.every(({ fieldsOnly }) => !fieldsOnly)) {
+    builder.addFunctions({
+      types: config.acceptedTypes,
+      ignoredFunctions: functionParamContext.functionsToIgnore || [],
+      addComma: config.shouldAddComma,
+    });
+  }
+
+  return builder.build();
+}
+
 /** Handles suggestions for top-level expression (not inside a function parameter) */
 async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestionItem[]> {
-  const { location, context, options } = ctx;
+  const { context, options } = ctx;
   const ignoredColumns = options.ignoredColumnsForEmptyExpression || [];
   const addSpaceAfterField = options.addSpaceAfterFirstField ?? true;
   const suggestFields = options.suggestFields ?? true;
@@ -211,32 +256,27 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
   const suggestions: ISuggestionItem[] = [];
   const acceptedTypes: FunctionParameterType[] = ['any'];
 
-  // Suggest fields/columns (e.g., "field1", "field2")
-  if (suggestFields) {
-    const getByType: GetColumnsByTypeFn = (types, ignored, opt) =>
-      getColumnsByTypeFromCtx(ctx, types, ignored, opt);
+  // Suggest fields/columns and functions using SuggestionBuilder
+  if (suggestFields || suggestFunctions) {
+    const builder = new SuggestionBuilder(ctx);
 
-    const fieldSuggestions = await getFieldsSuggestions(acceptedTypes, getByType, {
-      ignoreColumns: ignoredColumns,
-      addSpaceAfterField,
-      openSuggestions: true,
-      promoteToTop: true,
-      values: controlType === ESQLVariableType.VALUES,
-    });
-    suggestions.push(...fieldSuggestions);
-  }
-
-  // Suggest functions (e.g., "ROUND($0)", "ABS($0)")
-  if (suggestFunctions) {
-    suggestions.push(
-      ...getFunctionsSuggestions({
-        location,
+    if (suggestFields) {
+      await builder.addFields({
         types: acceptedTypes,
-        options: { ignored: [] },
-        context,
-        callbacks: { hasMinimumLicenseRequired: getLicenseCheckerFromCtx(ctx) },
-      })
-    );
+        ignoredColumns,
+        addSpaceAfterField,
+        promoteToTop: true,
+      });
+    }
+
+    if (suggestFunctions) {
+      builder.addFunctions({
+        types: acceptedTypes,
+        ignoredFunctions: [],
+      });
+    }
+
+    suggestions.push(...builder.build());
   }
 
   // Suggest control variables (e.g., "?fieldName", "$valueName") if supported and not already present
@@ -282,15 +322,10 @@ function getParamSuggestionConfig(
   functionParamContext: NonNullable<ExpressionContext['options']['functionParameterContext']>,
   paramDefinitions: ParamDefinition[],
   functionDefinition: FunctionDef,
-  isCursorFollowedByComma: boolean,
-  firstArgumentType?: string
+  isCursorFollowedByComma: boolean
 ) {
-  const nonConstantParams = paramDefinitions.filter(({ constantOnly }) => !constantOnly);
-
-  const acceptedTypes = getAcceptedTypesForParamContext(paramDefinitions, {
-    firstArgumentType,
-    functionSignatures: functionDefinition.signatures,
-  }) as FunctionParameterType[];
+  const analyzer = SignatureAnalyzer.from(functionParamContext);
+  const acceptedTypes = (analyzer?.getAcceptedTypes() ?? ['any']) as FunctionParameterType[];
 
   const hasMoreMandatoryArgs = Boolean(functionParamContext.hasMoreMandatoryArgs);
 
@@ -304,11 +339,10 @@ function getParamSuggestionConfig(
 
   const shouldAddComma = shouldSuggestComma(commaContext);
 
-  let allowFieldsAndFunctions = nonConstantParams.length > 0 || paramDefinitions.length === 0;
-
-  if (!allowFieldsAndFunctions && matchesSpecialFunction(functionDefinition.name, 'bucket')) {
-    allowFieldsAndFunctions = true;
-  }
+  // Always allow running the field/function builder. The builder will suppress
+  // fields when all params are constant-only, but still allow functions that
+  // can produce constant values of accepted types.
+  const allowFieldsAndFunctions = true;
 
   return { acceptedTypes, shouldAddComma, allowFieldsAndFunctions };
 }

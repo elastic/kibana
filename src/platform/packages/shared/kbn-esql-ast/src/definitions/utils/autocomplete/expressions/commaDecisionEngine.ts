@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SupportedDataType } from '../../../types';
+import type { SupportedDataType, Signature } from '../../../types';
 import { FunctionDefinitionTypes } from '../../../types';
+import { acceptsArbitraryExpressions } from './utils';
 
 export interface CommaContext {
   /** Determines which strategy handler to use */
@@ -139,13 +140,5 @@ function hasExpressionHeavyParameters(
 
   // Pattern: boolean + any params, minParams >= 2, returnType = unknown
   // Example: CASE function accepts expressions in all parameters
-  return signatures.some((signature) => {
-    const hasMinParams = signature.minParams != null && signature.minParams >= 2;
-    const hasUnknownReturn = signature.returnType === 'unknown';
-    const hasBooleanAndAny =
-      signature.params.some(({ type }) => type === 'boolean') &&
-      signature.params.some(({ type }) => type === 'any');
-
-    return hasMinParams && hasUnknownReturn && hasBooleanAndAny;
-  });
+  return acceptsArbitraryExpressions(signatures as Signature[]);
 }

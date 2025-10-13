@@ -17,15 +17,9 @@ import type {
   SuggestForExpressionParams,
 } from './types';
 import { isNullCheckOperator } from './utils';
-import { dispatchOperators } from './operators/dispatcher';
-import {
-  endsWithInOrNotInToken,
-  endsWithLikeOrRlikeToken,
-  endsWithIsOrIsNotToken,
-} from './operators/utils';
-import type { ESQLFunction } from '../../../../types';
-import { getExpressionType } from '../../expressions';
-import { getNullCheckOperatorSuggestions } from '../../operators';
+import { dispatchPartialOperators } from './operators/partial/dispatcher';
+import { detectIn, detectLike, detectNullCheck } from './operators/partial/utils';
+import { nullCheckOperators, inOperators, patternMatchOperators } from '../../../all_operators';
 
 const WHITESPACE_REGEX = /\s/;
 const LAST_WORD_BOUNDARY_REGEX = /\b\w(?=\w*$)/;
@@ -35,76 +29,62 @@ export async function suggestForExpression(
   params: SuggestForExpressionParams
 ): Promise<ISuggestionItem[]> {
   const baseCtx = buildContext(params);
-  // Pre-pass: handle partial operators (IN/NOT IN, LIKE/RLIKE/NOT LIKE, IS/IS NOT)
   const preSuggestions = await trySuggestForPartialOperators(baseCtx);
-  if (preSuggestions?.length) {
+
+  if (preSuggestions !== null) {
     return attachRanges(baseCtx, preSuggestions);
   }
+
   const position: ExpressionPosition = getPosition(baseCtx.innerText, baseCtx.expressionRoot);
 
   const ctx = { ...baseCtx, position };
   const suggestions = await dispatchStates(ctx, position);
-
   return attachRanges(ctx, suggestions);
 }
 
 /**
  * Pre-pass for partial operator tokens before the AST exists.
- * - Detects trailing IN/NOT IN, LIKE/RLIKE/NOT LIKE, IS/IS NOT.
- * - IN/LIKE: synthesize a temporary binary node and dispatch operator handlers.
- * - IS: return null-check suggestions based on the left type.
- * Purpose: provide operator-specific suggestions (e.g. list/patterns) even inside
- * function args (e.g. CASE(field IN ▌)) before the parser forms the operator node.
+ * Handles IN/NOT IN, LIKE/RLIKE, and IS/IS NOT operators.
+ * Purpose: provide operator-specific suggestions even inside function args
+ * (e.g. CASE(field IN ▌), CASE(field IS ▌)) when the user is typing a partial operator
+ * and the parser hasn't formed the operator node yet.
+ *
+ * Only runs when AST doesn't have a complete operator node (e.g., deep inside CASE).
+ * For complete expressions (e.g., WHERE field IN), the normal flow handles it.
  */
 async function trySuggestForPartialOperators(
   ctx: ExpressionContext
 ): Promise<ISuggestionItem[] | null> {
   const { innerText, expressionRoot } = ctx;
-  const trimmed = innerText.trimEnd();
-  const low = trimmed.toLowerCase();
 
-  const buildSyntheticBinary = (opName: 'in' | 'not in' | 'like' | 'rlike'): ESQLFunction => {
-    const L = innerText.length;
-    return {
-      type: 'function',
-      name: opName,
-      subtype: 'binary-expression',
-      args: [expressionRoot as any, undefined as any],
-      incomplete: true,
-      location: { min: L, max: L },
-      text: opName,
-    } as unknown as ESQLFunction;
-  };
+  // Skip if we already have a complete operator function node (e.g., WHERE field LIKE)
+  // In that case, the normal flow should handle it
+  if (expressionRoot?.type === 'function') {
+    const operatorName = (expressionRoot as any).name?.toLowerCase();
 
-  // LIKE / RLIKE / NOT LIKE / NOT RLIKE
-  if (endsWithLikeOrRlikeToken(trimmed)) {
-    const opName = (low.endsWith('rlike') || low.endsWith('not rlike') ? 'rlike' : 'like') as
-      | 'like'
-      | 'rlike';
-    const synthetic = buildSyntheticBinary(opName);
+    // Combine all partial operators from definitions
+    const partialOperatorNames = [
+      ...nullCheckOperators.map((op) => op.name),
+      ...inOperators.map((op) => op.name),
+      ...patternMatchOperators.map((op) => op.name),
+    ];
 
-    return (await dispatchOperators({ ...ctx, expressionRoot: synthetic })) ?? [];
+    if (partialOperatorNames.includes(operatorName)) {
+      return null;
+    }
   }
 
-  // IN / NOT IN
-  if (endsWithInOrNotInToken(trimmed)) {
-    const opName: 'in' | 'not in' = low.endsWith('not in') ? 'not in' : 'in';
-    const synthetic = buildSyntheticBinary(opName);
+  // Try each detector in sequence
+  const detection = detectNullCheck(innerText) || detectLike(innerText) || detectIn(innerText);
 
-    return (await dispatchOperators({ ...ctx, expressionRoot: synthetic })) ?? [];
+  if (!detection) {
+    return null;
   }
 
-  // IS / IS NOT
-  if (endsWithIsOrIsNotToken(trimmed)) {
-    const leftType = getExpressionType(expressionRoot as any, ctx.context?.columns);
-    const leftParamType = (
-      leftType === 'unknown' || leftType === 'unsupported' ? 'any' : leftType
-    ) as any;
+  // Dispatch to appropriate handler
+  const result = await dispatchPartialOperators(detection.operatorName, detection, ctx);
 
-    return getNullCheckOperatorSuggestions(innerText, ctx.location, leftParamType);
-  }
-
-  return null;
+  return result;
 }
 
 /** Derives innerText and option flags from the incoming params.*/

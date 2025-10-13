@@ -414,8 +414,17 @@ export const ESQL_NUMBER_TYPES: readonly SupportedDataType[] = [
   ...ESQL_NUMERIC_DECIMAL_TYPES,
 ];
 
+export const ESQL_ARITHMETIC_TYPES: readonly string[] = [
+  ...ESQL_NUMBER_TYPES,
+  'aggregate_metric_double',
+];
+
 export function isNumericType(type: unknown): type is ESQLNumericLiteralType {
   return typeof type === 'string' && (type === 'decimal' || ESQL_NUMBER_TYPES.includes(type));
+}
+
+export function supportsArithmeticOperations(type: string): boolean {
+  return ESQL_ARITHMETIC_TYPES.includes(type);
 }
 
 export const ESQL_STRING_TYPES = ['keyword', 'text'] as const;

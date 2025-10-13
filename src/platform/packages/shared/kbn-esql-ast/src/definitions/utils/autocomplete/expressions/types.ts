@@ -57,6 +57,7 @@ export interface ExpressionContextOptions {
   controlType?: ESQLVariableType;
   addSpaceAfterOperator?: boolean;
   openSuggestions?: boolean;
+  isInsideInList?: boolean; // Flag to indicate we're inside an IN operator list
 }
 
 export interface FunctionParameterContext {
@@ -72,4 +73,9 @@ export interface FunctionParameterContext {
   currentParameterIndex?: number;
   // Signaturres that match the already-given arguments
   validSignatures?: Signature[];
+}
+
+export interface PartialOperatorDetection {
+  operatorName: string;
+  textBeforeCursor?: string;
 }

@@ -15,17 +15,11 @@ import {
 } from '../../../../../commands_registry/complete_items';
 import type { ESQLColumn, ESQLFunction } from '../../../../../types';
 import { getBinaryExpressionOperand, getExpressionType } from '../../../expressions';
-import {
-  getFieldsSuggestions,
-  getFunctionsSuggestions,
-  getLiteralsSuggestions,
-} from '../../helpers';
 import type { ExpressionContext } from '../types';
 import { getLogicalContinuationSuggestions, shouldSuggestOpenListForOperand } from './utils';
-import { getColumnsByTypeFromCtx, getLicenseCheckerFromCtx } from '../utils';
 import { shouldSuggestComma } from '../commaDecisionEngine';
-import type { GetColumnsByTypeFn } from '../../../../../commands_registry/types';
 import { buildConstantsDefinitions } from '../../../literals';
+import { SuggestionBuilder } from '../SuggestionBuilder';
 
 // ============================================================================
 // eg. IN / NOT IN Operators
@@ -70,7 +64,9 @@ export async function handleListOperator(ctx: ExpressionContext): Promise<ISugge
         ...(list.values || []).filter(isColumn).map((col: ESQLColumn) => col.parts.join('.')),
       ].filter(Boolean);
 
-      return getSuggestionsForColumn(leftOperand, ctx, ignoredColumns);
+      const suggestions = await getSuggestionsForColumn(leftOperand, ctx, ignoredColumns);
+
+      return suggestions;
     }
   }
 
@@ -88,38 +84,27 @@ async function getSuggestionsForColumn(
     return [];
   }
 
-  const suggestions: ISuggestionItem[] = [];
+  // Use SuggestionBuilder to eliminate duplicated suggestion patterns
+  const builder = new SuggestionBuilder(ctx);
 
-  // Add field suggestions
-  const getByType: GetColumnsByTypeFn = (types, ignored, options) =>
-    getColumnsByTypeFromCtx(ctx, types, ignored, options);
-  {
-    const fieldSuggestions = await getFieldsSuggestions([argType], getByType, {
-      ignoreColumns: ignoredColumns,
-    });
-    suggestions.push(...fieldSuggestions);
-  }
-
-  // Add function suggestions
-  const functionSuggestions = getFunctionsSuggestions({
-    location: ctx.location,
+  await builder.addFields({
     types: [argType],
-    options: {},
-    context: ctx.context,
-    callbacks: { hasMinimumLicenseRequired: getLicenseCheckerFromCtx(ctx) },
+    ignoredColumns,
   });
-  suggestions.push(...functionSuggestions);
 
-  // Add literal suggestions
-  const literalSuggestions = getLiteralsSuggestions([argType], ctx.location, {
-    includeDateLiterals: true,
-    includeCompatibleLiterals: true,
-    addComma: false,
-    advanceCursorAndOpenSuggestions: false,
-  });
-  suggestions.push(...literalSuggestions);
+  builder
+    .addFunctions({
+      types: [argType],
+    })
+    .addLiterals({
+      types: [argType],
+      includeDateLiterals: true,
+      includeCompatibleLiterals: true,
+    });
 
-  return suggestions;
+  const result = builder.build();
+
+  return result;
 }
 
 // ============================================================================
@@ -147,14 +132,40 @@ export async function handleStringListOperator(
   context: ExpressionContext
 ): Promise<ISuggestionItem[] | null> {
   const fn = context.expressionRoot as ESQLFunction | undefined;
-  if (!fn) return null;
+
+  if (!fn) {
+    return null;
+  }
 
   const operator = fn.name.toLowerCase();
   const rightOperand = getBinaryExpressionOperand(fn, 'right');
+  const leftOperand = getBinaryExpressionOperand(fn, 'left');
 
-  // No list yet or an empty list: suggest opening parenthesis and basic patterns
+  // No list yet: suggest any string expressions (LIKE pattern can be any string expression)
   if (shouldSuggestOpenListForOperand(rightOperand)) {
-    return [listCompleteItem, ...getStringPatternSuggestions(operator)];
+    // LIKE/RLIKE accepts any string pattern, so suggest all string-compatible expressions
+    const builder = new SuggestionBuilder(context);
+
+    const ignoredColumns = isColumn(leftOperand)
+      ? [leftOperand.parts.join('.')].filter(Boolean)
+      : [];
+
+    await builder.addFields({
+      types: ['any'],
+      ignoredColumns,
+    });
+
+    builder
+      .addFunctions({
+        types: ['any'],
+      })
+      .addLiterals({
+        types: ['any'],
+        includeDateLiterals: false,
+        includeCompatibleLiterals: true,
+      });
+
+    return builder.build();
   }
 
   // Only handle list form; otherwise, delegate by returning null

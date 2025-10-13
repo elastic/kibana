@@ -13,7 +13,6 @@ import { getExpressionType, getRightmostNonVariadicOperator } from '../../../exp
 import { getSuggestionsToRightOfOperatorExpression } from '../../../operators';
 import { dispatchOperators } from '../operators/dispatcher';
 import type { ExpressionContext } from '../types';
-import { getColumnsByTypeFromCtx, getLicenseCheckerFromCtx } from '../utils';
 
 /**
  * Suggests completions after an operator
@@ -44,9 +43,9 @@ export async function suggestAfterOperator(ctx: ExpressionContext): Promise<ISug
     rootOperator: rightmostOperator,
     preferredExpressionType: options.preferredExpressionType,
     getExpressionType: (expression) => getExpressionType(expression, ctx.context?.columns),
-    getColumnsByType: (types, ignored, opts) => getColumnsByTypeFromCtx(ctx, types, ignored, opts),
+    getColumnsByType: ctx.callbacks?.getByType ?? (() => Promise.resolve([])),
     context: ctx.context,
-    callbacks: { hasMinimumLicenseRequired: getLicenseCheckerFromCtx(ctx) },
+    callbacks: { hasMinimumLicenseRequired: ctx.callbacks?.hasMinimumLicenseRequired },
     addSpaceAfterOperator: options.addSpaceAfterOperator,
     openSuggestions: options.openSuggestions,
     functionParameterContext: options.functionParameterContext,
