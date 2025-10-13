@@ -163,7 +163,7 @@ const styles = {
       ${euiFontSize(euiThemeContext, 's')}
       color: ${euiThemeContext.euiTheme.colors.textParagraph};
 
-      ${euiShadow(euiThemeContext)}
+      ${euiShadow(euiThemeContext, 'l', { border: 'none' })}
       background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
 
       table {
