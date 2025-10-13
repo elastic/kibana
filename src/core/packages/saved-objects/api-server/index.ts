@@ -62,6 +62,8 @@ export type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteStatus,
   SavedObjectsBulkDeleteResponse,
+  SavedObjectsSearchOptions,
+  SavedObjectsSearchResponse,
 } from './src/apis';
 
 export type {

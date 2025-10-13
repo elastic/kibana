@@ -50,6 +50,8 @@ import type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteResponse,
+  SavedObjectsSearchOptions,
+  SavedObjectsSearchResponse,
 } from './apis';
 
 /**
@@ -177,6 +179,13 @@ export interface ISavedObjectsRepository {
     options: SavedObjectsFindOptions,
     internalOptions?: SavedObjectsFindInternalOptions
   ): Promise<SavedObjectsFindResponse<T, A>>;
+
+  /**
+   * Performs a raw search against the saved objects indices, returning the raw Elasticsearch response
+   * @param options {@link SavedObjectsSearchOptions} - options for the search operation
+   * @returns the {@link SavedObjectsSearchResponse}
+   */
+  search<A = unknown>(options: SavedObjectsSearchOptions): Promise<SavedObjectsSearchResponse<A>>;
 
   /**
    * Returns an array of objects by id
