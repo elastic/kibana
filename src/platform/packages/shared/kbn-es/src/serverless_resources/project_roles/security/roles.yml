@@ -48,6 +48,7 @@ viewer:
         - feature_siemV4.read
         - feature_siemV4.read_alerts
         - feature_siemV4.endpoint_list_read
+        - feature_siemV4.endpoint_exceptions_read
         - feature_securitySolutionCasesV2.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -199,6 +200,7 @@ t1_analyst:
         - feature_siemV4.read
         - feature_siemV4.read_alerts
         - feature_siemV4.endpoint_list_read
+        - feature_siemV4.endpoint_exceptions_read
         - feature_securitySolutionCasesV2.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -261,6 +263,7 @@ t2_analyst:
         - feature_siemV4.read
         - feature_siemV4.read_alerts
         - feature_siemV4.endpoint_list_read
+        - feature_siemV4.endpoint_exceptions_read
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
