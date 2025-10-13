@@ -68,10 +68,7 @@ describe('useBulkAddEventsToCaseActions', () => {
       result.current[0].onClick(events);
     });
     expect(mockOpenNewCase).toHaveBeenCalledWith({
-      attachments: [
-        { type: 'event', eventId: '1', index: 'foo' },
-        { type: 'event', eventId: '2', index: 'bar' },
-      ],
+      attachments: [{ type: 'event', eventId: ['1', '2'], index: ['foo', 'bar'] }],
     });
   });
 
@@ -88,8 +85,7 @@ describe('useBulkAddEventsToCaseActions', () => {
     });
     expect(mockOpenExistingCase).toHaveBeenCalled();
     const mappedEvents = mockOpenExistingCase.mock.lastCall[0].getAttachments();
-    expect(mappedEvents[0].eventId).toEqual('1');
-    expect(mappedEvents[1].eventId).toEqual('2');
+    expect(mappedEvents[0].eventId).toEqual(['1', '2']);
   });
 
   it('returns empty array if permissions are missing', () => {
