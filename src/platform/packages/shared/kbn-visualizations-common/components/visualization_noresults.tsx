@@ -26,7 +26,7 @@ export class VisualizationNoResults extends React.Component<VisualizationNoResul
           data-test-subj="visualization-error"
           body={
             <EuiText size="xs" className="visualization-error-text">
-              {i18n.translate('visualizations.noResultsFoundTitle', {
+              {i18n.translate('visualizationsCommon.noResultsFoundTitle', {
                 defaultMessage: 'No results found',
               })}
             </EuiText>

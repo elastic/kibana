@@ -58,7 +58,7 @@ export function findAccessorOrFail(
 
   if (foundAccessor === undefined) {
     throw new Error(
-      i18n.translate('visualizations.function.findAccessorOrFail.error.accessor', {
+      i18n.translate('chartExpressionsCommon.function.findAccessorOrFail.error.accessor', {
         defaultMessage: 'Provided column name or index is invalid: {accessor}',
         values: { accessor },
       })
