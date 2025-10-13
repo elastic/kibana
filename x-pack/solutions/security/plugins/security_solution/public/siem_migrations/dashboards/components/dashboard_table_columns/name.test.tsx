@@ -13,7 +13,7 @@ describe('createNameColumn', () => {
 
     expect(column).toEqual({
       align: 'left',
-      field: 'elastic_dashboard.title',
+      field: 'original_dashboard.title',
       name: 'Name',
       render: expect.any(Function),
       sortable: true,
