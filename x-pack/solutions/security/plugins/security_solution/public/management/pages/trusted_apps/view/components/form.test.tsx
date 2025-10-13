@@ -589,9 +589,7 @@ describe('Trusted apps form', () => {
           render();
 
           // Click the "Events" button to deselect "Process Descendants"
-          await userEvent.click(
-            renderResult.getByTestId('trustedApps-filterEventsButton')
-          );
+          await userEvent.click(renderResult.getByTestId('trustedApps-filterEventsButton'));
 
           // The tag should be removed from the tags array
           const expectedTags = ['policy:all', 'form_mode:advanced'];
