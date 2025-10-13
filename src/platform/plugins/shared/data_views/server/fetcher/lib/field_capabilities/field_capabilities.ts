@@ -14,7 +14,6 @@ import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import { callFieldCapsApi } from '../es_api';
 import { readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
-import type { FieldDescriptor } from '../../index_patterns_fetcher';
 import type { QueryDslQueryContainer } from '../../../../common/types';
 import { DATA_VIEWS_FIELDS_EXCLUDED_TIERS } from '../../../../common/constants';
 import { getIndexFilterDsl } from '../../../utils';
@@ -77,7 +76,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     abortSignal,
   });
   performance.mark('getFieldCapabilities:responseEnd');
-  const fieldCapsArr = readFieldCapsResponse(esFieldCaps.body);
+  const fieldCapsArr = await readFieldCapsResponse(esFieldCaps.body);
   performance.mark('getFieldCapabilities:readEnd');
 
   const fieldsFromFieldCapsByName = keyBy(fieldCapsArr, 'name');
@@ -117,7 +116,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
       });
       return mergeOverrides(base);
     },
-    1000 // Process 1000 fields at a time before yielding
+    100 // Process 100 fields at a time before yielding
   );
 
   performance.mark('getFieldCapabilities:allFieldsCollectedEnd');

@@ -23,13 +23,13 @@ function setImmediatePromise(): Promise<void> {
  *
  * @param items - Array of items to process
  * @param processor - Function to apply to each item
- * @param chunkSize - Number of items to process before yielding (default: 1000)
+ * @param chunkSize - Number of items to process before yielding (default: 100)
  * @returns Promise resolving to array of processed items
  */
 export async function processInChunks<T, R>(
   items: T[],
   processor: (item: T) => R,
-  chunkSize = 1000
+  chunkSize = 100
 ): Promise<R[]> {
   const result: R[] = [];
 
@@ -37,10 +37,8 @@ export async function processInChunks<T, R>(
     const chunk = items.slice(i, Math.min(i + chunkSize, items.length));
     result.push(...chunk.map(processor));
 
-    // Yield to event loop after each chunk (except the last)
-    if (i + chunkSize < items.length) {
-      await setImmediatePromise();
-    }
+    // Yield to event loop after each chunk to allow other requests to be processed
+    await setImmediatePromise();
   }
 
   return result;

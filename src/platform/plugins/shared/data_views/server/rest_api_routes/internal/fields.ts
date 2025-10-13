@@ -16,46 +16,11 @@ import { FIELDS_PATH as path } from '../../../common/constants';
 import type { IBody, IQuery } from './fields_for';
 import { parseFields, querySchema, validate } from './fields_for';
 import { DEFAULT_FIELD_CACHE_FRESHNESS } from '../../constants';
-import { yieldToEventLoop } from '../../fetcher/lib/async_processing_utils';
 
 export function calculateHash(srcBuffer: Buffer) {
   const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
   hash.update(srcBuffer);
   return hash.digest('hex');
-}
-
-/**
- * Stringify a response object with event loop yielding for large objects
- * This prevents blocking the event loop during JSON serialization
- */
-async function stringifyResponseAsync(obj: {
-  fields: FieldDescriptorRestResponse[];
-  indices: string[];
-}): Promise<string> {
-  // Estimate response size based on a sample of fields
-  const sampleSize = Math.min(10, obj.fields.length);
-  const sampleJson = JSON.stringify(obj.fields.slice(0, sampleSize));
-  const estimatedSize = (sampleJson.length * obj.fields.length) / sampleSize;
-
-  // For smaller responses (< 500KB), stringify directly
-  if (estimatedSize < 500000) {
-    return JSON.stringify(obj);
-  }
-
-  // For large responses, yield to the event loop before stringifying
-  await yieldToEventLoop();
-  return JSON.stringify(obj);
-}
-
-/**
- * Calculate hash asynchronously with event loop yielding
- */
-async function calculateHashAsync(srcBuffer: Buffer): Promise<string> {
-  // For large buffers, yield before hashing
-  if (srcBuffer.length > 100000) {
-    await yieldToEventLoop();
-  }
-  return calculateHash(srcBuffer);
 }
 
 export const createHandler: (
@@ -112,11 +77,11 @@ export const createHandler: (
         indices,
       };
 
-      // Stringify and hash asynchronously to avoid blocking the event loop
-      // This allows other HTTP requests (like static assets) to be served
-      const bodyAsString = await stringifyResponseAsync(body);
+      // Serialize response synchronously to send it in one atomic operation
+      // Field processing already yielded during computation, so other requests had time to start
+      const bodyAsString = JSON.stringify(body);
 
-      const etag = await calculateHashAsync(Buffer.from(bodyAsString));
+      const etag = calculateHash(Buffer.from(bodyAsString));
 
       const headers: Record<string, string> = {
         'content-type': 'application/json',
