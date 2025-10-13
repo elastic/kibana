@@ -160,6 +160,24 @@ export const postActionsConnectorExecuteRoute = (
                 statusCode: 403,
               });
             }
+
+            // Save the user message to the conversation if it exists
+            if (newMessage && conversationsDataClient && conversation) {
+              await conversationsDataClient.appendConversationMessages({
+                existingConversation: conversation,
+                messages: [
+                  {
+                    ...newMessage,
+                    user: {
+                      id: checkResponse.currentUser?.profile_uid,
+                      name: checkResponse.currentUser?.username,
+                    },
+                    timestamp: new Date().toISOString(),
+                  },
+                ],
+                authenticatedUser: checkResponse.currentUser,
+              });
+            }
           }
 
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
@@ -223,6 +241,14 @@ export const postActionsConnectorExecuteRoute = (
 
           // Choose execution method based on feature flag
           const executeFunction = agentBuilderEnabled ? agentBuilderExecute : langChainExecute;
+
+          console.log('🚀 [ROUTE] agentBuilderEnabled:', agentBuilderEnabled);
+          console.log(
+            '🚀 [ROUTE] Using executeFunction:',
+            executeFunction === agentBuilderExecute ? 'agentBuilderExecute' : 'langChainExecute'
+          );
+          console.log('🚀 [ROUTE] isStream:', request.body.subAction !== 'invokeAI');
+          console.log('🚀 [ROUTE] request.body.subAction:', request.body.subAction);
 
           return await Promise.race([
             executeFunction({

@@ -8,11 +8,7 @@
 import { z } from '@kbn/zod';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import {
-  hrefReference,
-  knowledgeBaseReference,
-  contentReferenceString,
-} from '@kbn/elastic-assistant-common';
+// Content references are handled at the agent execution level, not at the tool level
 import type { ContentReference } from '@kbn/elastic-assistant-common';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
 import { getIsKnowledgeBaseInstalled } from '@kbn/elastic-assistant-plugin/server/routes/helpers';
@@ -92,33 +88,12 @@ export const securityLabsKnowledgeInternalTool = (
           }
         }
 
-        // Enrich documents with content references using the same logic as the original tool
+        // Use documents without content references
+        // Content references are handled at the agent execution level, not at the tool level
         const citedDocs = docs.map((doc) => {
-          let reference: ContentReference | undefined;
-          try {
-            const yamlString = doc.pageContent.split('---')[1];
-            const parsed = yaml.load(yamlString) as {
-              slug: string | undefined;
-              title: string | undefined;
-            };
-            const slug = parsed.slug;
-            const title = parsed.title;
-
-            if (!slug || !title) {
-              throw new Error('Slug or title not found in YAML');
-            }
-
-            reference = context.contentReferencesStore.add((p) =>
-              hrefReference(p.id, `${SECURITY_LABS_BASE_URL}${slug}`, `Security Labs: ${title}`)
-            );
-          } catch (_error) {
-            reference = context.contentReferencesStore.add((p) =>
-              knowledgeBaseReference(p.id, 'Elastic Security Labs content', 'securityLabsId')
-            );
-          }
           return new Document({
             id: doc.id,
-            pageContent: `${contentReferenceString(reference)}\n${doc.pageContent}`,
+            pageContent: doc.pageContent,
             metadata: doc.metadata,
           });
         });

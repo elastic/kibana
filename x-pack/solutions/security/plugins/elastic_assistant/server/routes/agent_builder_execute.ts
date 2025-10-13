@@ -7,26 +7,35 @@
 
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { AnalyticsServiceSetup } from '@kbn/core/server';
+import type { SavedObjectsClientContract, AnalyticsServiceSetup } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { RoundInput, ConversationRound } from '@kbn/onechat-common';
-import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
-import { generateChatTitle } from '../lib/langchain/graphs/default_assistant_graph/nodes/generate_chat_title';
-import { getPrompt } from '../lib/prompt/get_prompt';
-import { getModelOrOss } from '../lib/prompt/helpers';
+import { streamFactory } from '@kbn/ml-response-stream/server';
+import { isEmpty } from 'lodash';
 import {
   replaceAnonymizedValuesWithOriginalValues,
   pruneContentReferences,
+  productDocumentationReference,
+  contentReferenceBlock,
   type Replacements,
   type ContentReferencesStore,
   type Message,
 } from '@kbn/elastic-assistant-common';
-import type { ElasticAssistantRequestHandlerContext } from '../types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
+import { getPrompt } from '../lib/prompt/get_prompt';
+import { getModelOrOss } from '../lib/prompt/helpers';
+import type { ElasticAssistantRequestHandlerContext } from '../types';
 import { getLlmType } from './utils';
+
+// Symbol for passing anonymization fields through the request object
+export const ANONYMIZATION_FIELDS_SYMBOL = Symbol('anonymizationFields');
+// Symbol for collecting replacements from onechat tools
+export const REPLACEMENTS_SYMBOL = Symbol('replacements');
+// Symbol for passing tool parameters through the request object
+export const TOOL_PARAMS_SYMBOL = Symbol('toolParams');
 
 export interface AgentBuilderExecuteParams {
   messages: Array<Pick<Message, 'content' | 'role'>>;
@@ -85,12 +94,106 @@ export const agentBuilderExecute = async ({
   systemPrompt,
   timeout,
 }: AgentBuilderExecuteParams) => {
+
+  const startTime = Date.now(); // Track start time for telemetry
+
   const assistantContext = await context.elasticAssistant;
   const onechatAgents = assistantContext.getOnechatAgents();
+
+
+  // Start title generation immediately (non-blocking)
+  let titleGenerationPromise: Promise<void> | undefined;
+  if (conversationId && messages.length > 0) {
+    titleGenerationPromise = (async () => {
+      try {
+
+        const conversationsDataClient =
+          await assistantContext.getAIAssistantConversationsDataClient();
+        if (conversationsDataClient) {
+          // Create a title generation prompt
+          const titlePrompt = `Generate a concise, descriptive title (max 60 characters) for this conversation based on the user's first message: "${
+            messages[0]?.content || 'New conversation'
+          }"`;
+
+          // Use onechat agent to generate title
+          const titleResult = await onechatAgents.execute({
+            request,
+            agentId: 'siem-security-analyst',
+            agentParams: {
+              nextInput: { message: titlePrompt },
+              conversation: [], // No conversation history for title generation
+              capabilities: {},
+            },
+            abortSignal: new AbortController().signal, // Use a new signal for title generation
+            defaultConnectorId: connectorId,
+          });
+
+              const generatedTitle = titleResult.result.round.response.message;
+
+          // Update the conversation with the generated title
+          await conversationsDataClient.updateConversation({
+            conversationUpdateProps: {
+              id: conversationId,
+              title: generatedTitle.slice(0, 60), // Ensure max 60 characters
+            },
+          });
+
+        }
+      } catch (error) {
+        logger.error(`Failed to generate chat title: ${error.message}`);
+      }
+    })();
+  }
 
   // Get data clients for anonymization and conversation handling
   const anonymizationFieldsDataClient =
     await assistantContext.getAIAssistantAnonymizationFieldsDataClient();
+
+  // Fetch anonymization fields exactly like langChainExecute does
+  let anonymizationFields: Array<{
+    id: string;
+    field: string;
+    allowed: boolean;
+    anonymized: boolean;
+    timestamp: string;
+    createdAt: string;
+    updatedAt?: string;
+    namespace: string;
+  }> = [];
+
+  if (anonymizationFieldsDataClient) {
+    try {
+      const anonymizationFieldsRes = await anonymizationFieldsDataClient.findDocuments<
+        import('../ai_assistant_data_clients/anonymization_fields/types').EsAnonymizationFieldsSchema
+      >({
+        perPage: 1000,
+        page: 1,
+      });
+
+      if (anonymizationFieldsRes?.data) {
+        // Transform exactly like langChainExecute does
+        const { transformESSearchToAnonymizationFields } = await import(
+          '../ai_assistant_data_clients/anonymization_fields/helpers'
+        );
+        const transformedFields = transformESSearchToAnonymizationFields(
+          anonymizationFieldsRes.data
+        );
+
+        // Map to the expected format
+        anonymizationFields = transformedFields.map((field) => ({
+          id: field.id,
+          field: field.field,
+          allowed: field.allowed ?? false,
+          anonymized: field.anonymized ?? false,
+          timestamp: field.timestamp ?? new Date().toISOString(),
+          createdAt: field.createdAt ?? new Date().toISOString(),
+          updatedAt: field.updatedAt,
+          namespace: field.namespace ?? 'default',
+        }));
+      }
+    } catch (error) {
+    }
+  }
 
   // Get the last message as the next input
   let nextInput: RoundInput | undefined;
@@ -127,7 +230,11 @@ export const agentBuilderExecute = async ({
     // Resolve model-aware prompts for tools before calling the onechat agent
     // This is similar to how the default assistant graph handles model-aware prompts
     const modelType = getLlmType(actionTypeId);
-    const modelForPrompts = getModelOrOss(modelType, isOssModel, (request.body as any).model);
+    const modelForPrompts = getModelOrOss(
+      modelType,
+      isOssModel,
+      (request.body as { model?: string }).model
+    );
 
     // Resolve prompts for all tools that have prompts defined
     const toolPrompts: Record<string, string> = {};
@@ -189,8 +296,23 @@ export const agentBuilderExecute = async ({
       }
     }
 
+
+    // Attach anonymization fields, existing replacements, and tool parameters to the request in a way that doesn't break user context
+    // We'll use symbols to avoid conflicts with existing request properties
+    (request as any)[ANONYMIZATION_FIELDS_SYMBOL] = anonymizationFields;
+    (request as any)[REPLACEMENTS_SYMBOL] = replacements;
+
+    // Pass tool parameters exactly like langChainExecute does
+    const toolParams = {
+      alertsIndexPattern:
+        (request.body as any).alertsIndexPattern || '.alerts-security.alerts-default',
+      size: (request.body as any).size || 10,
+    };
+    (request as any)[TOOL_PARAMS_SYMBOL] = toolParams;
+
     // Call the onechat agent via agents service
     const agentResult = await onechatAgents.execute({
+      request,
       agentId: 'siem-security-analyst',
       agentParams: {
         nextInput,
@@ -203,11 +325,135 @@ export const agentBuilderExecute = async ({
       defaultConnectorId: connectorId,
     });
 
-    logger.debug('Onechat agent execution completed successfully');
+    // Collect any new replacements that were created by the onechat tools
+    const newReplacements = (request as any)[REPLACEMENTS_SYMBOL] ?? {};
+
+    // If there are new replacements, call onNewReplacements to update the conversation
+    if (Object.keys(newReplacements).length > 0) {
+      await onNewReplacements(newReplacements);
+    }
+
+    logger.debug(
+      `Onechat agent execution completed successfully: ${JSON.stringify(agentResult, null, 2)}`
+    );
 
     // Extract the response content from the agent result
     const agentResponse = agentResult.result.round.response.message;
     accumulatedContent = agentResponse;
+
+    // Process tool results to add content references
+    // The onechat agent execution returns tool results that we need to process
+
+    if (agentResult.result.round.steps && agentResult.result.round.steps.length > 0) {
+      // Process each tool step to extract content references
+      for (const step of agentResult.result.round.steps) {
+
+        if (step.type === 'tool_call' && step.results && step.results.length > 0) {
+          for (const result of step.results) {
+            if (result.type === 'other' && result.data) {
+              // Handle different types of tool results
+              if (
+                step.tool_id === 'core.security.product_documentation' &&
+                result.data.content?.documents
+              ) {
+
+                // Process product documentation results
+                const documents = result.data.content.documents;
+                for (let i = 0; i < documents.length; i++) {
+                  const doc = documents[i];
+                  if (doc.url) {
+                    // Add content reference for product documentation using the same approach as the original tool
+                    const reference = contentReferencesStore.add((p) =>
+                      productDocumentationReference(
+                        p.id,
+                        doc.title || 'Product Documentation',
+                        doc.url
+                      )
+                    );
+
+                    // Add citation to the response content
+                    const citation = contentReferenceBlock(reference);
+                    accumulatedContent += ` ${citation}`;
+                  }
+                }
+              } else if (step.tool_id === 'core.security.alert_counts' && result.data.result) {
+                // Process alert counts results
+                console.log('🚀 [AGENT_BUILDER] Processing alert counts results');
+
+                // Add content reference for alert counts using SecurityAlertsPage type
+                const reference = contentReferencesStore.add((p) => ({
+                  type: 'SecurityAlertsPage' as const,
+                  id: p.id,
+                }));
+
+                console.log('🚀 [AGENT_BUILDER] Created reference:', reference);
+
+                // Add citation to the response content using contentReferenceBlock
+                const citation = contentReferenceBlock(reference);
+                console.log('🚀 [AGENT_BUILDER] Created citation:', citation);
+
+                accumulatedContent += ` ${citation}`;
+                console.log(
+                  '🚀 [AGENT_BUILDER] Created content reference for alert counts:',
+                  reference
+                );
+                console.log('🚀 [AGENT_BUILDER] Updated accumulatedContent:', accumulatedContent);
+              } else if (
+                step.tool_id === 'core.security.open_and_acknowledged_alerts' &&
+                result.data.alerts
+              ) {
+                // Process alert results
+                const alerts = result.data.alerts;
+                for (let i = 0; i < alerts.length; i++) {
+                  const alert = alerts[i];
+                  if (alert._id) {
+                    // Add content reference for alerts
+                    const referenceId = contentReferencesStore.add((p) => ({
+                      type: 'SecurityAlert' as const,
+                      id: p.id,
+                      alertId: alert._id,
+                    }));
+
+                    // Add citation to the response content
+                    const citation = `[${referenceId}]`;
+                    accumulatedContent += ` ${citation}`;
+                    console.log(
+                      '🚀 [AGENT_BUILDER] Created content reference for alert:',
+                      referenceId
+                    );
+                  }
+                }
+              } else {
+                // Generic tool result handling
+                const reference = contentReferencesStore.add((p) => ({
+                  type: 'Href' as const,
+                  id: p.id,
+                  href: `#tool-result-${step.tool_id || 'unknown_tool'}`,
+                }));
+
+                console.log('🚀 [AGENT_BUILDER] Created reference:', reference);
+
+                // Add citation to the response content using contentReferenceBlock
+                const citation = contentReferenceBlock(reference);
+                console.log('🚀 [AGENT_BUILDER] Created citation:', citation);
+
+                accumulatedContent += ` ${citation}`;
+                console.log(
+                  '🚀 [AGENT_BUILDER] Created content reference for generic tool:',
+                  reference
+                );
+                console.log('🚀 [AGENT_BUILDER] Updated accumulatedContent:', accumulatedContent);
+              }
+            }
+          }
+        } else {
+          console.log(
+            '🚀 [AGENT_BUILDER] Skipping step (not a tool_call or no tool results):',
+            step.type
+          );
+        }
+      }
+    }
 
     // Process the final response with content references and anonymization
     let finalResponse = accumulatedContent;
@@ -219,118 +465,101 @@ export const agentBuilderExecute = async ({
     }
 
     // Apply anonymization replacements if needed
-    if (replacements && Object.keys(replacements).length > 0) {
+    // Use the new replacements that were collected from onechat tools
+    if (newReplacements && Object.keys(newReplacements).length > 0) {
       finalResponse = replaceAnonymizedValuesWithOriginalValues({
         messageContent: finalResponse,
-        replacements,
+        replacements: newReplacements,
       });
     }
 
-    // Call onNewReplacements if new replacements were created during agent execution
-    // This ensures anonymization updates are properly handled
-    if (onNewReplacements && replacements && Object.keys(replacements).length > 0) {
-      onNewReplacements(replacements);
-    }
-
     // Call onLlmResponse with the final processed content to ensure conversation updates happen properly
+    console.log(
+      '🚀 [AGENT_BUILDER] About to call onLlmResponse with finalResponse:',
+      finalResponse
+    );
     if (onLlmResponse) {
       await onLlmResponse(finalResponse, finalTraceData, false);
+      console.log('🚀 [AGENT_BUILDER] onLlmResponse completed successfully');
+    } else {
+      console.log('🚀 [AGENT_BUILDER] onLlmResponse is not provided');
     }
 
-    // Generate chat title as a fire-and-forget async call (similar to default assistant graph)
-    if (conversationId && messages.length > 0) {
-      void (async () => {
-        try {
-          const conversationsDataClient =
-            await assistantContext.getAIAssistantConversationsDataClient();
-          if (conversationsDataClient) {
-            // Create a mock LLM instance for title generation
-            // We'll use the same connector that was used for the main request
-            const connectorModel = await actionsClient.get({ id: connectorId });
-            if (connectorModel) {
-              // Convert messages to BaseMessage format for generateChatTitle
-              const baseMessages = messages.map((msg) => ({
-                text: msg.content,
-                role: msg.role,
-                lc_namespace: ['langchain', 'schema', 'messages'],
-                lc_serializable: true,
-                lc_aliases: [],
-                lc_kwargs: { content: msg.content, role: msg.role },
-                id: [],
-                additional_kwargs: {},
-                response_metadata: {},
-                tool_calls: [],
-                invalid_tool_calls: [],
-                tool_call_chunks: [],
-                content: msg.content,
-              }));
+    // Title generation is already running in parallel (started at the beginning)
+    // No need to start it again here
 
-              await generateChatTitle({
-                actionsClient,
-                contentReferencesStore,
-                conversationsDataClient,
-                logger,
-                savedObjectsClient,
-                state: {
-                  conversationId,
-                  connectorId,
-                  llmType: getLlmType(actionTypeId),
-                  responseLanguage: responseLanguage || 'English',
-                },
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                newMessages: baseMessages as any, // Type assertion needed for compatibility
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                model: connectorModel as any, // Type assertion needed for compatibility
-                telemetryParams: {
-                  actionTypeId,
-                  model: (request.body as any).model,
-                  assistantStreamingEnabled: isStream,
-                  isEnabledKnowledgeBase: false,
-                  eventType: INVOKE_ASSISTANT_SUCCESS_EVENT.eventType,
-                },
-                telemetry,
-              });
-            }
-          }
-        } catch (error) {
-          logger.error(`Failed to generate chat title: ${error.message}`);
-        }
-      })();
-    }
+    // Report telemetry with required fields
+    const durationMs = Date.now() - startTime;
 
-    // Report telemetry
+    // For now, we don't have access to tool invocation counts from onechat agent execution
+    // This would need to be tracked by the onechat agent itself
+    const toolsInvoked = {
+      // TODO: Get actual tool invocation counts from onechat agent execution
+      // This would require onechat to expose tool usage statistics
+    };
+
     telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
       actionTypeId,
       model: (request.body as any).model,
       assistantStreamingEnabled: isStream,
       isEnabledKnowledgeBase: false, // Agent builder doesn't use KB directly
+      durationMs,
+      toolsInvoked,
     });
 
-    // For streaming, we've already sent chunks via onLlmResponse
-    // For non-streaming, we need to return the final result
+    // For streaming, we need to return a proper streaming response
     if (isStream) {
-      // Return a streaming response format
+      console.log('🚀 [AGENT_BUILDER] Creating streaming response');
+      console.log('🚀 [AGENT_BUILDER] finalResponse for streaming:', finalResponse);
+
+      // Create a streaming response similar to the langchain execution
+      const {
+        end: streamEnd,
+        push,
+        responseWithHeaders,
+      } = streamFactory<{ type: string; payload: string }>(request.headers, logger, false, false);
+
+      // Push the final response as a content chunk
+      push({ payload: finalResponse, type: 'content' });
+      console.log('🚀 [AGENT_BUILDER] Pushed content to stream');
+
+      // End the stream
+      streamEnd();
+      console.log('🚀 [AGENT_BUILDER] Stream ended, returning responseWithHeaders');
+
+      return responseWithHeaders;
+    } else {
+      console.log('🚀 [AGENT_BUILDER] Creating static response');
+      console.log('🚀 [AGENT_BUILDER] finalResponse for static:', finalResponse);
+      console.log(
+        '🚀 [AGENT_BUILDER] contentReferences being sent:',
+        contentReferencesStore.getStore()
+      );
+
+      // Return static response format (matching langchain execution format)
+      const contentReferences = contentReferencesStore.getStore();
+      const metadata = !isEmpty(contentReferences) ? { contentReferences } : {};
+
       return response.ok({
         body: {
-          response: finalResponse,
           connector_id: connectorId,
-          agent_builder: true, // Flag to indicate this came from agent builder
+          data: finalResponse, // ← Changed from "response" to "data"
+          trace_data: finalTraceData,
+          replacements: newReplacements, // Use the new replacements from onechat tools
+          status: 'ok',
+          ...(conversationId ? { conversationId } : {}),
+          ...(!isEmpty(metadata) ? { metadata } : {}), // ← Content references go in metadata
         },
         headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-    } else {
-      // Return static response format
-      return response.ok({
-        body: {
-          response: finalResponse,
-          connector_id: connectorId,
-          agent_builder: true, // Flag to indicate this came from agent builder
+          'content-type': 'application/json',
         },
       });
     }
   } catch (error) {
+    console.log('🚀 [AGENT_BUILDER] ERROR occurred:', error);
+    console.log('🚀 [AGENT_BUILDER] Error message:', error.message);
+    console.log('🚀 [AGENT_BUILDER] Error stack:', error.stack);
+
     logger.error('Agent builder execution failed:', error);
 
     if (onLlmResponse) {

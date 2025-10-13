@@ -12,13 +12,13 @@
 export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   // Security Solution tools
   'fetch-siem-prompts-tool',
-  'open-and-acknowledged-alerts-internal-tool',
-  'alert-counts-internal-tool',
-  'knowledge-base-retrieval-internal-tool',
-  'product-documentation-internal-tool',
+  'core.security.open_and_acknowledged_alerts',
+  'core.security.alert_counts',
+  'core.security.knowledge_base_retrieval',
+  'core.security.product_documentation',
   'security-labs-knowledge-internal-tool',
-  'knowledge-base-write-internal-tool',
-  'entity-risk-score-tool-internal',
+  'core.security.knowledge_base_write',
+  'core.security.entity_risk_score',
 ];
 
 /**

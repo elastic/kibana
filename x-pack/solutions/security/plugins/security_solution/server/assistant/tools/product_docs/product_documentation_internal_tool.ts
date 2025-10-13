@@ -8,14 +8,12 @@
 import { z } from '@kbn/zod';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import {
-  contentReferenceBlock,
-  productDocumentationReference,
-} from '@kbn/elastic-assistant-common';
+// Content references are handled at the agent execution level, not at the tool level
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { StartServicesAccessor } from '@kbn/core/server';
+import { ToolType } from '@kbn/onechat-common';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 
 const productDocumentationToolSchema = z.object({
@@ -51,11 +49,14 @@ export const productDocumentationInternalTool = (
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>
 ): BuiltinToolDefinition<typeof productDocumentationToolSchema> => {
   return {
-    id: 'product-documentation-internal-tool',
+    id: 'core.security.product_documentation',
+    type: ToolType.builtin,
     description: PRODUCT_DOCUMENTATION_INTERNAL_TOOL_DESCRIPTION,
     schema: productDocumentationToolSchema,
     handler: async ({ query, product, connectorId }, context) => {
       const [, pluginsStart] = await getStartServices();
+
+      // Access llmTasks directly from the start plugins (same as RequestContextFactory does)
       const response = await pluginsStart.llmTasks.retrieveDocumentation({
         searchTerm: query,
         products: product ? [product] : undefined,
@@ -66,10 +67,9 @@ export const productDocumentationInternalTool = (
         inferenceId: defaultInferenceEndpoints.ELSER,
       });
 
-      // Enrich documents with content references
-      const enrichedDocuments = response.documents.map(
-        enrichDocument(context.contentReferencesStore)
-      );
+      // Use documents without content references
+      // Content references are handled at the agent execution level, not at the tool level
+      const enrichedDocuments = response.documents;
 
       // Format the result with references
       const resultWithReference = {

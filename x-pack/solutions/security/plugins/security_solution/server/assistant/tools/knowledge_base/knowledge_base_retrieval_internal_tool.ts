@@ -8,7 +8,6 @@
 import { z } from '@kbn/zod';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { knowledgeBaseReference, contentReferenceBlock } from '@kbn/elastic-assistant-common';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import { Document } from 'langchain/document';
 import type { StartServicesAccessor } from '@kbn/core/server';
@@ -102,15 +101,14 @@ export const knowledgeBaseRetrievalInternalTool = (
           required: false,
         });
 
-        // Enrich documents with content references
-        const enrichedDocs = docs.map(enrichDocument(context.contentReferencesStore));
-
+        // Return documents without content references
+        // Content references will be handled at the agent execution level
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
-                documents: enrichedDocs,
+                documents: docs,
               },
             },
           ],
@@ -133,22 +131,3 @@ export const knowledgeBaseRetrievalInternalTool = (
     tags: ['knowledge-base', 'security'],
   };
 };
-
-function enrichDocument(contentReferencesStore: ContentReferencesStore) {
-  return (document: Document<Record<string, string>>) => {
-    if (document.id == null) {
-      return document;
-    }
-    const documentId = document.id;
-    const reference = contentReferencesStore.add((p) =>
-      knowledgeBaseReference(p.id, document.metadata.name, documentId)
-    );
-    return new Document({
-      ...document,
-      metadata: {
-        ...document.metadata,
-        citation: contentReferenceBlock(reference),
-      },
-    });
-  };
-}
