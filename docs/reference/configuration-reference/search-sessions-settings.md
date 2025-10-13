@@ -27,7 +27,7 @@ If a setting is applicable to {{ech}} environments, its name is followed by this
 :   `false` by default. Set to `true` to enable background searches.
 
 `data.search.sessions.defaultExpiration` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   How long background search results are stored before they are deleted. Extending the validity period of the background search  the expiration by the same value. The default is `7d`.
+:   How long background search results are stored before they expire and are deleted. When users extend the validity period of the background search, this setting also determines by how long. The default is `7d`.
 ::::
 
 ::::{tab-item} 9.1 and earlier
