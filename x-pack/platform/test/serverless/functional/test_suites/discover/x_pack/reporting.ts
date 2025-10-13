@@ -35,7 +35,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await toasts.dismissAll();
 
     await PageObjects.exports.clickExportTopNavButton();
+    await retry.waitFor('the popover to be opened', async () => {
+      return await exports.isExportPopoverOpen();
+    });
     await PageObjects.reporting.selectExportItem('CSV');
+    await retry.waitFor('the flyout to be opened', async () => {
+      return await exports.isExportFlyoutOpen();
+    });
     await PageObjects.reporting.clickGenerateReportButton();
     await PageObjects.exports.closeExportFlyout();
     await PageObjects.exports.clickExportTopNavButton();
@@ -95,6 +101,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('is available if new', async () => {
         await PageObjects.reporting.openExportPopover();
+        await retry.waitFor('the popover to be opened', async () => {
+          return await exports.isExportPopoverOpen();
+        });
         expect(await PageObjects.exports.isPopoverItemEnabled('CSV')).to.be(true);
         await PageObjects.reporting.openExportPopover();
       });
@@ -106,6 +115,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.reporting.openExportPopover();
+        await retry.waitFor('the popover to be opened', async () => {
+          return await exports.isExportPopoverOpen();
+        });
         expect(await PageObjects.exports.isPopoverItemEnabled('CSV')).to.be(true);
         await PageObjects.reporting.openExportPopover();
       });
@@ -233,7 +245,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'x-pack/platform/test/serverless/fixtures/kbn_archives/reporting/logs'
         );
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.loadSavedSearch('Sparse Columns');
+        await PageObjects.discover.waitUntilTabIsLoaded();
       });
 
       after(async () => {

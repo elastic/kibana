@@ -19,14 +19,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const retry = getService('retry');
-  const { reporting, common, discover, timePicker, header, exports } = getPageObjects([
+  const { reporting, common, discover, timePicker, exports } = getPageObjects([
     'reporting',
     'common',
     'discover',
     'timePicker',
     'share',
     'exports',
-    'header',
   ]);
   const monacoEditor = getService('monacoEditor');
   const filterBar = getService('filterBar');
@@ -104,7 +103,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await toasts.dismissAll();
 
     await exports.clickExportTopNavButton();
+    await retry.waitFor('the popover to be opened', async () => {
+      return await exports.isExportPopoverOpen();
+    });
     await reporting.selectExportItem('CSV');
+    await retry.waitFor('the flyout to be opened', async () => {
+      return await exports.isExportFlyoutOpen();
+    });
     await reporting.clickGenerateReportButton();
     await exports.closeExportFlyout();
     await exports.clickExportTopNavButton();
@@ -120,7 +125,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getReportPostUrl = async () => {
     // click 'Copy POST URL'
     await exports.clickExportTopNavButton();
+    await retry.waitFor('the popover to be opened', async () => {
+      return await exports.isExportPopoverOpen();
+    });
     await reporting.selectExportItem('CSV');
+    await retry.waitFor('the flyout to be opened', async () => {
+      return await exports.isExportFlyoutOpen();
+    });
     await reporting.clickGenerateReportButton();
     await reporting.copyReportingPOSTURLValueToClipboard();
 
@@ -149,6 +160,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('is available if new', async () => {
         await reporting.openExportPopover();
+        await retry.waitFor('the popover to be opened', async () => {
+          return await exports.isExportPopoverOpen();
+        });
         expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
         await reporting.openExportPopover();
       });
@@ -157,6 +171,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.saveSearch('my search - expectEnabledGenerateReportButton');
         await discover.waitUntilTabIsLoaded();
         await reporting.openExportPopover();
+        await retry.waitFor('the popover to be opened', async () => {
+          return await exports.isExportPopoverOpen();
+        });
         expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
         await reporting.openExportPopover();
       });
@@ -302,15 +319,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         await timePicker.setCommonlyUsedTime('Last_15 minutes');
+        await discover.waitUntilTabIsLoaded();
         await discover.selectTextBaseLang();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const testQuery = `from ${RECENT_DATA_INDEX_NAME} | sort timestamp | WHERE timestamp >= ?_tstart AND timestamp <= ?_tend | KEEP name, numberValue`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const reportPostUrl = await getReportPostUrl();
         expect(reportPostUrl).to.contain(`timeRange:(from:'2`); // not `from:now-15m`
