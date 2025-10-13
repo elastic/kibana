@@ -36,6 +36,22 @@ jest.mock('elastic-apm-node', () => ({
   },
 }));
 
+const getTask = (overrides = {}): ConcreteTaskInstance => ({
+  id: 'my-foo-id',
+  taskType: 'foo',
+  params: {},
+  state: {},
+  schedule: { interval: '1m' },
+  scheduledAt: new Date(),
+  attempts: 0,
+  startedAt: new Date(),
+  retryAt: new Date(Date.now() + 5 * 60 * 1000),
+  ownerId: '123',
+  status: TaskStatus.Idle,
+  runAt: new Date(),
+  ...overrides,
+});
+
 describe('TaskScheduling', () => {
   beforeAll(() => {
     fakeTimer = sinon.useFakeTimers();
@@ -151,13 +167,7 @@ describe('TaskScheduling', () => {
   });
 
   test('tries to updates schedule for tasks that have already been scheduled', async () => {
-    const task = {
-      id: 'my-foo-id',
-      taskType: 'foo',
-      params: {},
-      state: {},
-      schedule: { interval: '1m' },
-    } as unknown as ConcreteTaskInstance;
+    const task = getTask();
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
     const bulkUpdateScheduleSpy = jest
       .spyOn(taskScheduling, 'bulkUpdateSchedules')
@@ -173,7 +183,7 @@ describe('TaskScheduling', () => {
     expect(result.id).toEqual('my-foo-id');
   });
 
-  test('does not try to update schedule for tasks that have already been scheduled if no schedule', async () => {
+  test('does not try to update schedule for tasks that have already been scheduled if no schedule is provided', async () => {
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
     const bulkUpdateScheduleSpy = jest.spyOn(taskScheduling, 'bulkUpdateSchedules');
     mockTaskStore.schedule.mockRejectedValueOnce({
@@ -193,13 +203,7 @@ describe('TaskScheduling', () => {
   });
 
   test('propagates error when trying to update schedule for tasks that have already been scheduled', async () => {
-    const task = {
-      id: 'my-foo-id',
-      taskType: 'foo',
-      params: {},
-      state: {},
-      schedule: { interval: '1m' },
-    } as unknown as ConcreteTaskInstance;
+    const task = getTask();
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
     const bulkUpdateScheduleSpy = jest
       .spyOn(taskScheduling, 'bulkUpdateSchedules')
@@ -229,13 +233,7 @@ describe('TaskScheduling', () => {
   });
 
   test('handles VERSION_CONFLICT_STATUS errors when trying to update schedule for tasks that have already been scheduled', async () => {
-    const task = {
-      id: 'my-foo-id',
-      taskType: 'foo',
-      params: {},
-      state: {},
-      schedule: { interval: '1m' },
-    } as unknown as ConcreteTaskInstance;
+    const task = getTask();
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
     const bulkUpdateScheduleSpy = jest
       .spyOn(taskScheduling, 'bulkUpdateSchedules')
