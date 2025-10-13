@@ -69,8 +69,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Load saved dashboard with log stream embeddable
       await dashboard.loadSavedDashboard('Logs stream dashboard test with Saves Search Embeddable');
-
-      await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
 
       // Expect things from saved search embeddable to load

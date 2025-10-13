@@ -43,9 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.navigateToApp();
       await header.waitUntilLoadingHasFinished();
       await elasticChart.setNewChartUiDebugFlag();
-      await dashboard.loadSavedDashboard(OPTIONS_LIST_DASHBOARD_NAME);
-      await dashboard.ensureDashboardIsInEditMode();
-      await header.waitUntilLoadingHasFinished();
+      await dashboard.loadDashboardInEditMode(OPTIONS_LIST_DASHBOARD_NAME);
     };
 
     before(async () => {

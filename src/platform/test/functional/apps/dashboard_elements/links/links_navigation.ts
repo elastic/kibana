@@ -73,8 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('adds links panel to top of dashboard', async () => {
-        await dashboard.loadSavedDashboard('links 003');
-        await dashboard.switchToEditMode();
+        await dashboard.loadDashboardInEditMode('links 003');
         await dashboardAddPanel.addEmbeddable('a few horizontal links', 'links');
         const topPanelTitle = (await dashboard.getPanelTitles())[0];
         expect(topPanelTitle).to.equal('a few horizontal links');
@@ -200,7 +199,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('external links', () => {
       before(async () => {
         await dashboard.loadSavedDashboard('dashboard with external links');
-        await header.waitUntilLoadingHasFinished();
       });
 
       afterEach(async () => {

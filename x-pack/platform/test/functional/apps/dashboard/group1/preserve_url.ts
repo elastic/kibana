@@ -44,7 +44,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToApp('home');
       await dashboard.navigateToAppFromAppsMenu();
       await dashboard.loadSavedDashboard('A Dashboard');
-      await header.waitUntilLoadingHasFinished();
       const activeTitle = await globalNav.getLastBreadcrumb();
       expect(activeTitle).to.be('A Dashboard');
     });

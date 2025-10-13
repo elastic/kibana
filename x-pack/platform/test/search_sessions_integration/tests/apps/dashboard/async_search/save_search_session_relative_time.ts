@@ -54,7 +54,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('Saves and restores a session with relative time ranges', async () => {
       await dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
       await dashboard.waitForRenderComplete();
-      await header.waitUntilLoadingHasFinished();
 
       await searchSessions.expectState('completed');
       await searchSessions.save();

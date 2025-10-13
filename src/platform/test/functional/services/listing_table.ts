@@ -188,12 +188,16 @@ export class ListingTableService extends FtrService {
     return visualizationNames;
   }
 
+  public async clickActionButton(actionSelector: string, index: number = 0) {
+    const buttons = await this.testSubjects.findAll(actionSelector);
+    await buttons[index].click();
+  }
+
   /**
    * Open the inspect flyout
    */
   public async inspectVisualization(index: number = 0) {
-    const inspectButtons = await this.testSubjects.findAll('inspect-action');
-    await inspectButtons[index].click();
+    await this.clickActionButton('inspect-action', index);
   }
 
   public async inspectorFieldsReadonly() {
