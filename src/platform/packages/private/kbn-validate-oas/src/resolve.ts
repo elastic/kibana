@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * NOTE: this file was copy-pasted and converted to TS from:
+ *       https://github.com/seriousme/openapi-schema-validator/blob/v2.7.0/resolve.js
+ */
+
 import { isObject } from 'lodash';
 
 const pointerWordsArray = [
