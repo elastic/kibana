@@ -9,9 +9,9 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
-import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { buildStepExecutionId } from '../utils';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 
 /**
  * This function retrieves the current workflow execution and verifies if cancellation requested.
@@ -22,7 +22,7 @@ import { buildStepExecutionId } from '../utils';
 export async function cancelWorkflowIfRequested(
   workflowExecutionRepository: WorkflowExecutionRepository,
   workflowExecutionState: WorkflowExecutionState,
-  monitoredContext: WorkflowContextManager,
+  monitoredStepExecutionRuntime: StepExecutionRuntime,
   monitorAbortController?: AbortController
 ): Promise<void> {
   if (!workflowExecutionState.getWorkflowExecution().cancelRequested) {
@@ -37,8 +37,8 @@ export async function cancelWorkflowIfRequested(
   }
 
   monitorAbortController?.abort();
-  monitoredContext.abortController.abort();
-  let nodeStack = monitoredContext.scopeStack;
+  monitoredStepExecutionRuntime.abortController.abort();
+  let nodeStack = monitoredStepExecutionRuntime.scopeStack;
 
   // mark current step scopes as cancelled
   while (!nodeStack.isEmpty()) {
@@ -59,7 +59,7 @@ export async function cancelWorkflowIfRequested(
   }
 
   workflowExecutionState.upsertStep({
-    id: monitoredContext.stepExecutionId,
+    id: monitoredStepExecutionRuntime.stepExecutionId,
     status: ExecutionStatus.CANCELLED,
   });
   workflowExecutionState.updateWorkflowExecution({
