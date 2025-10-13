@@ -14,7 +14,11 @@ import { FailureStoreInfo } from './failure_store_info';
 import { useUpdateFailureStore } from '../../../../hooks/use_update_failure_store';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { NoPermissionBanner } from './no_permission_banner';
-import { useFailureStoreStats } from '../hooks/use_failure_store_stats';
+import {
+  useFailureStoreStats,
+  type EnhancedFailureStoreStats,
+} from '../hooks/use_failure_store_stats';
+import { useCalculatedFailureStoreStats } from '../hooks/use_calculated_failure_store_stats';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useAggregations } from '../hooks/use_ingestion_rate';
 
@@ -37,6 +41,14 @@ export const StreamDetailFailureStore = ({
   } = useKibana();
 
   const { timeState } = useTimefilter();
+
+  const {
+    data,
+    isLoading: isLoadingStats,
+    error: statsError,
+    refresh,
+  } = useFailureStoreStats({ definition });
+
   const {
     aggregations,
     isLoading: isLoadingAggregations,
@@ -44,8 +56,19 @@ export const StreamDetailFailureStore = ({
   } = useAggregations({
     definition,
     timeState,
+    totalDocs: data?.stats?.count,
     isFailureStore: true,
   });
+
+  const calculatedStats = useCalculatedFailureStoreStats({
+    stats: data?.stats,
+    timeState,
+    aggregations,
+  });
+
+  // Combine stats with calculated values for backward compatibility
+  const enhancedStats: EnhancedFailureStoreStats | undefined =
+    data?.stats && calculatedStats ? { ...data.stats, ...calculatedStats } : undefined;
 
   const {
     privileges: {
@@ -57,13 +80,6 @@ export const StreamDetailFailureStore = ({
   const closeModal = () => {
     setIsFailureStoreModalOpen(false);
   };
-
-  const {
-    data,
-    isLoading: isLoadingStats,
-    error: statsError,
-    refresh,
-  } = useFailureStoreStats({ definition, timeState, aggregations });
 
   const handleSaveModal = async (update: {
     failureStoreEnabled: boolean;
@@ -114,7 +130,7 @@ export const StreamDetailFailureStore = ({
                 definition={definition}
                 statsError={statsError}
                 isLoadingStats={isLoadingStats}
-                stats={data?.stats}
+                stats={enhancedStats}
                 config={data?.config}
                 timeState={timeState}
                 isLoadingAggregations={isLoadingAggregations}

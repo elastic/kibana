@@ -19,12 +19,14 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { EditLifecycleModal } from './modal';
 import { IlmSummary } from './ilm_summary';
 import { IngestionRate } from './ingestion_rate';
-import { useDataStreamStats } from '../hooks/use_data_stream_stats';
+import { useDataStreamStats, type EnhancedDataStreamStats } from '../hooks/use_data_stream_stats';
 import { getFormattedError } from '../../../../util/errors';
 import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
 import { IngestionCard } from './cards/ingestion_card';
 import { useAggregations } from '../hooks/use_ingestion_rate';
+import { useCalculatedStats } from '../hooks/use_calculated_stats';
+
 export const StreamDetailGeneralData = ({
   definition,
   refreshDefinition,
@@ -45,22 +47,29 @@ export const StreamDetailGeneralData = ({
   const { timeState } = useTimefilter();
 
   const {
+    stats,
+    isLoading: isLoadingStats,
+    error: statsError,
+  } = useDataStreamStats({ definition });
+
+  const {
     aggregations,
     isLoading: isLoadingAggregations,
     error: aggregationsError,
   } = useAggregations({
     definition,
     timeState,
+    totalDocs: stats?.totalDocs,
   });
+
+  const calculatedStats = useCalculatedStats({ stats, timeState, aggregations });
+
+  // Combine stats with calculated values for backward compatibility
+  const enhancedStats: EnhancedDataStreamStats | undefined =
+    stats && calculatedStats ? { ...stats, ...calculatedStats } : undefined;
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [updateInProgress, setUpdateInProgress] = useState(false);
-
-  const {
-    stats,
-    isLoading: isLoadingStats,
-    error: statsError,
-  } = useDataStreamStats({ definition, timeState, aggregations });
 
   const { signal } = useAbortController();
 
@@ -135,15 +144,15 @@ export const StreamDetailGeneralData = ({
           <RetentionCard definition={definition} openEditModal={() => setIsEditModalOpen(true)} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <StorageSizeCard definition={definition} stats={stats} statsError={statsError} />
+          <StorageSizeCard definition={definition} stats={enhancedStats} statsError={statsError} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <IngestionCard definition={definition} stats={stats} statsError={statsError} />
+          <IngestionCard definition={definition} stats={enhancedStats} statsError={statsError} />
         </EuiFlexItem>
       </EuiFlexGroup>
       {definition.privileges.lifecycle && isIlmLifecycle(definition.effective_lifecycle) ? (
         <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>
-          <IlmSummary definition={definition} stats={stats} />
+          <IlmSummary definition={definition} stats={enhancedStats} />
         </EuiPanel>
       ) : null}
       <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>

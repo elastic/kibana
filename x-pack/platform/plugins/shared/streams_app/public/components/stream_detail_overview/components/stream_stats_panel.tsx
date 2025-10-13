@@ -28,6 +28,7 @@ import {
 import { useDataStreamStats } from '../../data_management/stream_detail_lifecycle/hooks/use_data_stream_stats';
 import { PrivilegesWarningIconWrapper } from '../../insufficient_privileges/insufficient_privileges';
 import { useAggregations } from '../../data_management/stream_detail_lifecycle/hooks/use_ingestion_rate';
+import { useCalculatedStats } from '../../data_management/stream_detail_lifecycle/hooks/use_calculated_stats';
 
 interface StreamStatsPanelProps {
   definition: Streams.ingest.all.GetResponse;
@@ -96,7 +97,8 @@ export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
     timeState,
     isFailureStore: false,
   });
-  const dataStreamStats = useDataStreamStats({ definition, timeState, aggregations }).stats;
+  const dataStreamStats = useDataStreamStats({ definition }).stats;
+  const calculatedStats = useCalculatedStats({ stats: dataStreamStats, timeState, aggregations });
   const retentionLabel = i18n.translate('xpack.streams.entityDetailOverview.retention', {
     defaultMessage: 'Data retention',
   });
@@ -185,8 +187,8 @@ export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
                     { defaultMessage: 'Ingestion rate' }
                   )}
                 >
-                  {dataStreamStats
-                    ? formatIngestionRate(dataStreamStats.bytesPerDay || 0, true)
+                  {calculatedStats
+                    ? formatIngestionRate(calculatedStats.bytesPerDay || 0, true)
                     : '-'}
                 </PrivilegesWarningIconWrapper>
               }

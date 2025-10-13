@@ -14,12 +14,33 @@ import { lastValueFrom } from 'rxjs';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import type { DataStreamStats } from './use_data_stream_stats';
-import type { FailureStoreStats } from './use_failure_store_stats';
+import type { CalculatedStats } from './use_calculated_stats';
 import { useIlmPhasesColorAndDescription } from './use_ilm_phases_color_and_description';
 import { getFailureStoreIndexName } from '../helpers/failure_store_index_name';
+import type { FailureStoreStats } from './use_failure_store_stats';
 
 const TIMESTAMP_FIELD = '@timestamp';
-const RANDOM_SAMPLER_PROBABILITY = 0.1;
+const DEFAULT_SAMPLER_PROBABILITY = 0.1;
+const STATISTICAL_ERROR_THRESHOLD = 0.01;
+
+// Calculate sampling probability based on total docs to keep statistical error below threshold
+const getSamplingProbability = (totalDocs?: number): number => {
+  if (!totalDocs) {
+    // If it turns out there aren't many docs, we just restart without sampling - it will be fast anyway
+    // If it turns out there are lots of docs then we were right, yay!
+    return DEFAULT_SAMPLER_PROBABILITY;
+  }
+
+  // Calculate required sample size for 1% statistical error (simplified formula)
+  // For large populations, sample size ≈ 1 / (error^2) for 95% confidence
+  const requiredSampleSize = 1 / STATISTICAL_ERROR_THRESHOLD ** 2;
+
+  if (totalDocs <= requiredSampleSize) {
+    return 1; // No sampling needed
+  }
+
+  return DEFAULT_SAMPLER_PROBABILITY;
+};
 
 // some units are not supported for the fixed_interval of the date histogram
 // this function uses the calculateAutoTimeExpression function to determine
@@ -47,12 +68,14 @@ const getIntervalAndType = (
 
 export const useIngestionRate = ({
   stats,
+  calculatedStats,
   timeState,
   isLoading,
   aggregations,
   error,
 }: {
   stats?: DataStreamStats | FailureStoreStats;
+  calculatedStats?: CalculatedStats;
   timeState: TimeState;
   isLoading: boolean;
   aggregations?: ReturnType<typeof useAggregations>['aggregations'];
@@ -78,10 +101,10 @@ export const useIngestionRate = ({
       interval,
       buckets: buckets.map(({ key, doc_count: docCount }) => ({
         key,
-        value: docCount * (stats ? stats.bytesPerDoc : 1),
+        value: docCount * (calculatedStats?.bytesPerDoc || 1),
       })),
     };
-  }, [aggregations, timeState.start, timeState.end, stats]);
+  }, [aggregations, timeState.start, timeState.end, calculatedStats?.bytesPerDoc]);
 
   return {
     ingestionRate,
@@ -95,11 +118,13 @@ type PhaseNameWithoutDelete = Exclude<PhaseName, 'delete'>;
 export const useIngestionRatePerTier = ({
   definition,
   stats,
+  calculatedStats,
   timeState,
   isFailureStore = false,
 }: {
   definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats | FailureStoreStats;
+  calculatedStats?: CalculatedStats;
   timeState: TimeState;
   isFailureStore?: boolean;
 }) => {
@@ -167,7 +192,7 @@ export const useIngestionRatePerTier = ({
                 aggs: {
                   sampler: {
                     random_sampler: {
-                      probability: RANDOM_SAMPLER_PROBABILITY,
+                      probability: DEFAULT_SAMPLER_PROBABILITY,
                       seed: 42,
                     },
                     aggs: {
@@ -231,9 +256,7 @@ export const useIngestionRatePerTier = ({
             const tier = entry[0] as PhaseNameWithoutDelete;
             (acc[tier] = acc[tier] ?? []).push({
               key,
-              value: stats
-                ? entry[1] * (stats && stats.bytesPerDoc > 0 ? stats.bytesPerDoc : 1)
-                : entry[1],
+              value: entry[1] * (calculatedStats?.bytesPerDoc || 1),
             });
           }
 
@@ -246,7 +269,7 @@ export const useIngestionRatePerTier = ({
     },
     [
       definition,
-      stats,
+      calculatedStats,
       timeState,
       core,
       data.search,
@@ -266,10 +289,12 @@ export const useIngestionRatePerTier = ({
 export const useAggregations = ({
   definition,
   timeState,
+  totalDocs,
   isFailureStore = false,
 }: {
   definition: Streams.ingest.all.GetResponse;
   timeState: TimeState;
+  totalDocs?: number;
   isFailureStore?: boolean;
 }) => {
   const {
@@ -278,6 +303,8 @@ export const useAggregations = ({
       start: { data },
     },
   } = useKibana();
+
+  const samplingProbability = getSamplingProbability(totalDocs);
 
   const aggregationsFetch = useStreamsAppFetch(
     async ({ signal }) => {
@@ -328,7 +355,7 @@ export const useAggregations = ({
                 aggs: {
                   sampler: {
                     random_sampler: {
-                      probability: RANDOM_SAMPLER_PROBABILITY,
+                      probability: samplingProbability,
                       seed: 42,
                     },
                     aggs: {
@@ -355,7 +382,7 @@ export const useAggregations = ({
         interval,
       };
     },
-    [timeState, core, isFailureStore, definition, data.search]
+    [timeState, core, isFailureStore, definition, data.search, samplingProbability]
   );
 
   return {

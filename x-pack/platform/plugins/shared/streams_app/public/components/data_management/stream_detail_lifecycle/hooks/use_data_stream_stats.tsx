@@ -5,27 +5,21 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import type { Streams } from '@kbn/streams-schema';
 import type { DataStreamStatServiceResponse } from '@kbn/dataset-quality-plugin/public';
-import type { TimeState } from '@kbn/es-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import type { useAggregations } from './use_ingestion_rate';
+import type { CalculatedStats } from './use_calculated_stats';
 
-export type DataStreamStats = DataStreamStatServiceResponse['dataStreamsStats'][number] & {
-  bytesPerDoc: number;
-  bytesPerDay: number;
-};
+export type DataStreamStats = DataStreamStatServiceResponse['dataStreamsStats'][number];
+
+// Enhanced type that includes calculated values for backward compatibility
+export type EnhancedDataStreamStats = DataStreamStats & CalculatedStats;
 
 export const useDataStreamStats = ({
   definition,
-  timeState,
-  aggregations,
 }: {
   definition: Streams.ingest.all.GetResponse;
-  timeState: TimeState;
-  aggregations: ReturnType<typeof useAggregations>['aggregations'];
 }) => {
   const {
     services: { dataStreamsClient },
@@ -45,22 +39,9 @@ export const useDataStreamStats = ({
         return undefined;
       }
 
-      const rangeInDays = moment(timeState.end).diff(moment(timeState.start), 'days', true);
-
-      const countRange = aggregations?.buckets?.reduce((sum, bucket) => sum + bucket.doc_count, 0);
-
-      const bytesPerDoc =
-        dsStats.totalDocs && dsStats.sizeBytes ? dsStats.sizeBytes / dsStats.totalDocs : 0;
-      const perDayDocs = countRange ? countRange / rangeInDays : 0;
-      const bytesPerDay = bytesPerDoc * perDayDocs;
-
-      return {
-        ...dsStats,
-        bytesPerDay,
-        bytesPerDoc,
-      };
+      return dsStats;
     },
-    [dataStreamsClient, definition, aggregations?.buckets, timeState.end, timeState.start],
+    [dataStreamsClient, definition],
     {
       withTimeRange: false,
       withRefresh: true,
