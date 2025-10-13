@@ -35,12 +35,9 @@ export interface EvaluatorParams<TExample extends Example, TTaskOutput extends T
   output: TTaskOutput;
   expected: TExample['output'];
   metadata: TExample['metadata'];
-  weight?: number;
 }
 
-interface EvaluationResult extends PhoenixEvaluationResult {
-  weight?: number;
-}
+export type EvaluationResult = PhoenixEvaluationResult;
 
 type EvaluatorCallback<TExample extends Example, TTaskOutput extends TaskOutput> = (
   params: EvaluatorParams<TExample, TTaskOutput>
