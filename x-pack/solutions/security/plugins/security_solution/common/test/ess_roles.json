@@ -27,7 +27,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV3": ["read", "read_alerts"],
+          "siemV4": ["read", "read_alerts", "endpoint_exceptions_read"],
           "securitySolutionAssistant": ["none"],
           "securitySolutionAttackDiscovery": ["none"],
           "securitySolutionCasesV2": ["read"],
@@ -78,7 +78,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV3": ["all", "read_alerts", "crud_alerts"],
+          "siemV4": ["all", "read_alerts", "crud_alerts", "global_artifact_management_all", "endpoint_exceptions_all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -129,7 +129,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV3": ["all", "read_alerts", "crud_alerts"],
+          "siemV4": ["all", "read_alerts", "crud_alerts", "global_artifact_management_all", "endpoint_exceptions_all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -152,7 +152,7 @@
     "kibana": [
       {
         "feature": {
-          "siemV3": ["read"]
+          "siemV4": ["read", "endpoint_exceptions_read"]
         },
         "spaces": ["*"],
         "base": []
@@ -202,7 +202,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV3": ["all", "read_alerts", "crud_alerts"],
+          "siemV4": ["all", "read_alerts", "crud_alerts", "global_artifact_management_all", "endpoint_exceptions_all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -258,7 +258,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV3": ["all", "read_alerts", "crud_alerts"],
+          "siemV4": ["all", "read_alerts", "crud_alerts", "global_artifact_management_all", "endpoint_exceptions_all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
