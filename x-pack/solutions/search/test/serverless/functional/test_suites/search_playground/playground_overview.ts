@@ -109,8 +109,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'search_project_nav_footer.project_settings_project_nav'
           );
 
-          await pageObjects.solutionNavigation.sidenav.clickLink({ navId: 'management' });
-          await pageObjects.solutionNavigation.sidenav.expectLinkActive({ navId: 'management' });
+          await pageObjects.solutionNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
           await pageObjects.svlCommonNavigation.sidenav.clickPanelLink(
             'management:triggersActionsConnectors'
           );

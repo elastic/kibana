@@ -60,6 +60,9 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     log.debug(`browser: clearing session & local storages`);
     await browser.clearSessionStorage();
     await browser.clearLocalStorage();
+    log.debug(`browser: force hide non-relevant tours and announcements`);
+    await browser.setLocalStorageItem('solutionNavigationTour:completed', 'true');
+
     await pageObjects.common.sleep(700);
   };
 

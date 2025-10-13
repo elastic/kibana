@@ -22,7 +22,7 @@ export class SolutionNavigationTourManager {
   constructor(
     private deps: {
       navigationTourManager: NavigationTourManager;
-      spacesSolutionViewTourManager: SpacesSolutionViewTourManager;
+      spacesSolutionViewTourManager?: SpacesSolutionViewTourManager;
       userProfile: UserProfileServiceStart;
       capabilities: ApplicationStart['capabilities'];
       featureFlags: FeatureFlagsStart;
@@ -31,9 +31,11 @@ export class SolutionNavigationTourManager {
 
   async startTour(): Promise<void> {
     // first start the spaces tour (if applicable)
-    const spacesTour = await this.deps.spacesSolutionViewTourManager.startTour();
-    if (spacesTour.result === 'started') {
-      await this.deps.spacesSolutionViewTourManager.waitForTourEnd();
+    if (this.deps.spacesSolutionViewTourManager) {
+      const spacesTour = await this.deps.spacesSolutionViewTourManager.startTour();
+      if (spacesTour.result === 'started') {
+        await this.deps.spacesSolutionViewTourManager.waitForTourEnd();
+      }
     }
 
     // when completes, maybe start the navigation tour (if applicable)
