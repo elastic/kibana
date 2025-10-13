@@ -57,6 +57,9 @@ describe('WorkflowYAMLEditor', () => {
   const defaultProps: WorkflowYAMLEditorProps = {
     value: '',
     workflowId: 'test-workflow',
+    onSave: jest.fn(),
+    onRun: jest.fn(),
+    onSaveAndRun: jest.fn(),
   };
 
   const renderWithI18n = (component: React.ReactElement) => {
