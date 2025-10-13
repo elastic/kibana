@@ -10,7 +10,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import pRetry, { AbortError } from 'p-retry';
-import pTimeout, { TimeoutError } from 'p-timeout';
+import pTimeout, { TimeoutError } from 'p-timeout-cjs';
 import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack-platform/functional/services/ml/api';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { setupKnowledgeBase, waitForKnowledgeBaseReady } from './knowledge_base';
