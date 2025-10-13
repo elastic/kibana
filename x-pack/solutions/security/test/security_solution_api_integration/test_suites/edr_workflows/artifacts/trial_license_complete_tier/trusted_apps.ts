@@ -303,7 +303,7 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/invalid policy ids/));
           });
 
-          it('should error on [${trustedAppApiCall.method}] if process descendants is used in basic mode', async () => {
+          it(`should error on [${trustedAppApiCall.method}] if process descendants is used in basic mode`, async () => {
             const body = trustedAppApiCall.getBody();
             body.tags.push(TRUSTED_PROCESS_DESCENDANTS_TAG);
 
@@ -425,7 +425,7 @@ export default function ({ getService }: FtrProviderContext) {
                 .expect(200);
             });
 
-            it('should NOT error on [${trustedAppApiCall.method}] if process descendants is used', async () => {
+            it(`should NOT error on [${trustedAppApiCall.method}] if process descendants is used`, async () => {
               const body = getAdvancedModeBody();
 
               body.tags.push(TRUSTED_PROCESS_DESCENDANTS_TAG);

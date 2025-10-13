@@ -696,7 +696,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     const handleFilterTypeOnChange = useCallback(
       (id: string) => {
         const newTagsForDescendants = id === 'descendants' ? [TRUSTED_PROCESS_DESCENDANTS_TAG] : [];
-        const tags = getTagsUpdatedBy('processDescendantsFiltering', newTagsForDescendants);
+        const tags = getTagsUpdatedBy('trustedProcessDescendants', newTagsForDescendants);
         processChanged({ ...item, tags });
         if (!hasFormChanged) setHasFormChanged(true);
       },
@@ -774,7 +774,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       isProcessDescendantsSelected,
     ]);
 
-    // should this be above or after if statement below
     useEffect(() => {
       processChanged();
     }, [processChanged]);
