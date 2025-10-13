@@ -306,75 +306,87 @@ export class CommonPageObject extends FtrService {
 
     this.log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
-    await this.retry.tryForTime(this.defaultTryTimeout * 2, async () => {
-      let lastUrl = await this.retry.try(async () => {
-        // since we're using hash URLs, always reload first to force re-render
-        this.log.debug('navigate to: ' + appUrl);
-        await this.browser.get(appUrl, insertTimestamp);
-        // accept alert if it pops up
-        const alert = await this.browser.getAlert();
-        await alert?.accept();
+    // Navigate to the app and verify it loaded successfully
+    const finalUrl = await this.retry.tryForTime(this.defaultTryTimeout, async () => {
+      // since we're using hash URLs, always reload first to force re-render
+      this.log.debug('navigate to: ' + appUrl);
+
+      await this.browser.get(appUrl, insertTimestamp);
+
+      // accept alert if it pops up
+      const alert = await this.browser.getAlert();
+
+      if (alert) {
+        this.log.debug('alert found, accepting');
+        await alert.accept();
         await this.sleep(700);
-        this.log.debug('returned from get, calling refresh');
-        await this.browser.refresh();
-        let currentUrl = shouldLoginIfPrompted
-          ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
-          : await this.browser.getCurrentUrl();
+      }
 
-        if (currentUrl.includes('app/kibana')) {
-          await this.testSubjects.find('kibanaChrome');
-        }
+      this.log.debug('returned from get, calling refresh');
 
-        // If navigating to the `home` app, and we want to skip the Welcome page, but the chrome is still hidden,
-        // set the relevant localStorage key to skip the Welcome page and throw an error to try to navigate again.
-        if (
-          appName === 'home' &&
-          currentUrl.includes('app/home') &&
-          disableWelcomePrompt &&
-          (await this.isWelcomeScreen())
-        ) {
-          await this.browser.setLocalStorageItem('home:welcome:show', 'false');
-          const msg = `Failed to skip the Welcome page when navigating the app ${appName}`;
-          this.log.debug(msg);
-          throw new Error(msg);
-        }
+      await this.browser.refresh();
 
-        currentUrl = (await this.browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
-        const decodedAppUrl = decodeURIComponent(appUrl);
-        const decodedCurrentUrl = decodeURIComponent(currentUrl);
+      let currentUrl = shouldLoginIfPrompted
+        ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
+        : await this.browser.getCurrentUrl();
 
-        const navSuccessful = decodedCurrentUrl
-          .replace(':80/', '/')
-          .replace(':443/', '/')
-          .startsWith(decodedAppUrl.replace(':80/', '/').replace(':443/', '/'));
+      if (currentUrl.includes('app/kibana')) {
+        await this.testSubjects.find('kibanaChrome');
+      }
 
-        if (!navSuccessful) {
-          const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${decodedAppUrl} currentUrl=${decodedCurrentUrl}`;
-          this.log.debug(msg);
-          throw new Error(msg);
-        }
+      // If navigating to the `home` app, and we want to skip the Welcome page, but the chrome is still hidden,
+      // set the relevant localStorage key to skip the Welcome page and throw an error to try to navigate again.
+      if (
+        appName === 'home' &&
+        currentUrl.includes('app/home') &&
+        disableWelcomePrompt &&
+        (await this.isWelcomeScreen())
+      ) {
+        await this.browser.setLocalStorageItem('home:welcome:show', 'false');
+        const msg = `Failed to skip the Welcome page when navigating the app ${appName}`;
+        this.log.debug(msg);
+        throw new Error(msg);
+      }
 
-        if (retryOnFatalError && (await this.isFatalErrorScreen())) {
-          const msg = `Fatal error screen shown. Let's try refreshing the page once more.`;
-          this.log.debug(msg);
-          throw new Error(msg);
-        }
+      currentUrl = (await this.browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
+      const decodedAppUrl = decodeURIComponent(appUrl);
+      const decodedCurrentUrl = decodeURIComponent(currentUrl);
 
-        if (appName === 'discover') {
-          await this.browser.setLocalStorageItem('data.autocompleteFtuePopover', 'true');
-        }
-        return currentUrl;
-      });
+      const navSuccessful = decodedCurrentUrl
+        .replace(':80/', '/')
+        .replace(':443/', '/')
+        .startsWith(decodedAppUrl.replace(':80/', '/').replace(':443/', '/'));
 
-      await this.retry.tryForTime(this.defaultFindTimeout, async () => {
-        await this.sleep(501);
-        const currentUrl = await this.browser.getCurrentUrl();
-        this.log.debug('in navigateTo url = ' + currentUrl);
-        if (lastUrl !== currentUrl) {
-          lastUrl = currentUrl;
-          throw new Error('URL changed, waiting for it to settle');
-        }
-      });
+      if (!navSuccessful) {
+        const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${decodedAppUrl} currentUrl=${decodedCurrentUrl}`;
+        this.log.debug(msg);
+        throw new Error(msg);
+      }
+
+      if (retryOnFatalError && (await this.isFatalErrorScreen())) {
+        const msg = `Fatal error screen shown. Let's try refreshing the page once more.`;
+        this.log.debug(msg);
+        throw new Error(msg);
+      }
+
+      if (appName === 'discover') {
+        await this.browser.setLocalStorageItem('data.autocompleteFtuePopover', 'true');
+      }
+
+      return currentUrl;
+    });
+
+    // Wait for URL to stabilize (no more redirects)
+    await this.retry.tryForTime(this.defaultFindTimeout, async () => {
+      await this.sleep(501);
+
+      const currentUrl = await this.browser.getCurrentUrl();
+
+      this.log.debug('in navigateTo url = ' + currentUrl);
+
+      if (finalUrl !== currentUrl) {
+        throw new Error('URL changed, waiting for it to settle');
+      }
     });
   }
 
