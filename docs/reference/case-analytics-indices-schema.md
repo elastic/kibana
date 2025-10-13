@@ -49,7 +49,7 @@ The cases as data feature is in technical preview, meaning the schema for the ca
 | assignees | keyword | The user IDs of the users assigned to the case. |
 | time\_to\_resolve | long | The time in seconds taken to mark the case as **Closed**. It is calculated by measuring how long it took to update the case status from **Open** to **Closed**. |
 | time\_to\_acknowledge | long | The time in seconds taken to mark the case as in progress. It is calculated by measuring how long it took to update the case status to **In progress** after the case was created. |
-| time\_to\_investigate | long | The time in seconds taken to mark the case as **Closed**. It is calculated by measuring how long it took to update the case status to **In progress** to **Closed**.  |
+| time\_to\_investigate | long | The time in seconds taken to mark the case as **Closed**. It is calculated by measuring how long it took to update the case status from **In progress** to **Closed**.  |
 | custom\_fields.type | keyword | The custom field type. |
 | custom\_fields.label | keyword | The custom field label. |
 | custom\_fields.value | keyword | The value of the custom field value. |
