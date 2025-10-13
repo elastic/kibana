@@ -39,13 +39,19 @@ export function transformDashboardOut(
     ? references.filter(({ type }) => type === tagSavedObjectTypeName).map(({ id }) => id)
     : [];
 
+  const timeRange =
+    timeRestore && timeFrom && timeTo
+      ? {
+          from: timeFrom,
+          to: timeTo,
+        }
+      : undefined;
+
   // try to maintain a consistent (alphabetical) order of keys
   return {
     ...(controlGroupInput && { controlGroupInput: transformControlGroupOut(controlGroupInput) }),
     ...(description && { description }),
-    ...(kibanaSavedObjectMeta && {
-      kibanaSavedObjectMeta: transformSearchSourceOut(kibanaSavedObjectMeta, references),
-    }),
+    ...transformSearchSourceOut(kibanaSavedObjectMeta, references),
     ...(optionsJSON && { options: transformOptionsOut(optionsJSON) }),
     ...((panelsJSON || sections) && {
       panels: transformPanelsOut(panelsJSON, sections, references),
@@ -54,9 +60,8 @@ export function transformDashboardOut(
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
     ...(tags && tags.length && { tags }),
-    ...(timeFrom && { timeFrom }),
+    ...(timeRange && { timeRange }),
     timeRestore: timeRestore ?? false,
-    ...(timeTo && { timeTo }),
     title,
     ...(version && { version }),
   };

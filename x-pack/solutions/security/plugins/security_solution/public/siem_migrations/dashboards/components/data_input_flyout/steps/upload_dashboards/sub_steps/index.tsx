@@ -7,15 +7,16 @@
 
 import React, { useMemo, useState, useCallback } from 'react';
 import type { EuiStepProps } from '@elastic/eui';
+import type { DashboardMigrationStats } from '../../../../../types';
 import { getEuiStepStatus } from '../../../../../../common/utils/get_eui_step_status';
-import type { DashboardMigrationTaskStats } from '../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { SubSteps, useMigrationNameStep } from '../../../../../../common/components';
 import { useCopyExportQueryStep } from './copy_export_query';
 import type { OnMigrationCreated, OnMissingResourcesFetched } from '../../../types';
 import { useDashboardsFileUploadStep } from './dashboards_file_upload';
-import { useCheckResourcesStep } from './check_resources';
+import { useKibana } from '../../../../../../../common/lib/kibana/kibana_react';
+import { useCheckResourcesStep } from '../../common/check_resources';
 interface DashboardsUploadSubStepsProps {
-  migrationStats?: DashboardMigrationTaskStats;
+  migrationStats?: DashboardMigrationStats;
   onMissingResourcesFetched: OnMissingResourcesFetched;
   onMigrationCreated: OnMigrationCreated;
 }
@@ -35,6 +36,7 @@ export const DashboardsUploadSubSteps = React.memo(function DashboardsUploadSubS
   onMigrationCreated,
 }: DashboardsUploadSubStepsProps) {
   const [subStep, setSubStep] = useState<SubStep>(migrationStats ? 4 : 1);
+  const { telemetry } = useKibana().services.siemMigrations.dashboards;
 
   const [migrationName, setMigrationName] = useState<string | undefined>(migrationStats?.name);
   const [isDashboardsFileReady, setIsDashboardFileReady] = useState<boolean>(false);
@@ -60,7 +62,8 @@ export const DashboardsUploadSubSteps = React.memo(function DashboardsUploadSubS
   // Copy query step
   const onCopied = useCallback(() => {
     setSubStep((currentSubStep) => (currentSubStep !== 1 ? 3 : currentSubStep)); // Move to the next step only if step 1 was completed
-  }, []);
+    telemetry.reportSetupQueryCopied({ migrationId: migrationStats?.id });
+  }, [telemetry, migrationStats?.id]);
   const copyStep = useCopyExportQueryStep({ status: getEuiStepStatus(2, subStep), onCopied });
 
   // Upload dashboards step

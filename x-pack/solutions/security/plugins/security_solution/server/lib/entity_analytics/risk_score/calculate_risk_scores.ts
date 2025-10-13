@@ -19,10 +19,7 @@ import {
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
 import type { EntityType } from '../../../../common/search_strategy';
 import type { ExperimentalFeatures } from '../../../../common';
-import type {
-  AssetCriticalityRecord,
-  RiskScoresPreviewResponse,
-} from '../../../../common/api/entity_analytics';
+import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type {
   AfterKeys,
   EntityRiskScoreRecord,
@@ -38,12 +35,16 @@ import type { AssetCriticalityService } from '../asset_criticality/asset_critica
 import { applyCriticalityToScore, getCriticalityModifier } from '../asset_criticality/helpers';
 import { getAfterKeyForIdentifierType, getFieldForIdentifier } from './helpers';
 import type {
+  CalculateResults,
   CalculateRiskScoreAggregations,
   CalculateScoresParams,
   RiskScoreBucket,
 } from '../types';
 import { RIEMANN_ZETA_VALUE, RIEMANN_ZETA_S_VALUE } from './constants';
 import { getPainlessScripts, type PainlessScripts } from './painless';
+import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
+
+const max10DecimalPlaces = (num: number) => Math.round(num * 1e10) / 1e10;
 
 const formatForResponse = ({
   bucket,
@@ -70,7 +71,7 @@ const formatForResponse = ({
   const categoryTwoCount = criticalityModifier ? 1 : 0;
 
   const newFields = {
-    category_2_score: categoryTwoScore,
+    category_2_score: max10DecimalPlaces(categoryTwoScore),
     category_2_count: categoryTwoCount,
     criticality_level: criticality?.criticality_level,
     criticality_modifier: criticalityModifier,
@@ -81,9 +82,9 @@ const formatForResponse = ({
     id_field: identifierField,
     id_value: bucket.key[identifierField],
     calculated_level: calculatedLevel,
-    calculated_score: riskDetails.value.score,
-    calculated_score_norm: normalizedScoreWithCriticality,
-    category_1_score: riskDetails.value.category_1_score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
+    calculated_score: max10DecimalPlaces(riskDetails.value.score),
+    calculated_score_norm: max10DecimalPlaces(normalizedScoreWithCriticality),
+    category_1_score: max10DecimalPlaces(riskDetails.value.category_1_score / RIEMANN_ZETA_VALUE), // normalize value to be between 0-100
     category_1_count: riskDetails.value.category_1_count,
     notes: riskDetails.value.notes,
     inputs: riskDetails.value.risk_inputs.map((riskInput) => ({
@@ -229,7 +230,7 @@ export const calculateRiskScores = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
   experimentalFeatures: ExperimentalFeatures;
-} & CalculateScoresParams): Promise<RiskScoresPreviewResponse> =>
+} & CalculateScoresParams): Promise<CalculateResults> =>
   withSecuritySpan('calculateRiskScores', async () => {
     const now = new Date().toISOString();
     const scriptedMetricPainless = await getPainlessScripts();
@@ -297,7 +298,7 @@ export const calculateRiskScores = async ({
       logger.info(`Received Risk Score response:\n${JSON.stringify(response)}`);
     }
 
-    if (response.aggregations == null) {
+    if (!response.aggregations) {
       return {
         ...(debug ? { request, response } : {}),
         after_keys: {},
@@ -306,8 +307,24 @@ export const calculateRiskScores = async ({
           user: [],
           service: [],
         },
+        entities: { user: [], host: [], service: [], generic: [] },
       };
     }
+
+    const hosts =
+      response.aggregations?.host?.buckets.map(
+        ({ key }) => key[EntityTypeToIdentifierField.host]
+      ) || [];
+
+    const users =
+      response.aggregations?.user?.buckets.map(
+        ({ key }) => key[EntityTypeToIdentifierField.user]
+      ) || [];
+
+    const services =
+      response.aggregations?.service?.buckets.map(
+        ({ key }) => key[EntityTypeToIdentifierField.service]
+      ) || [];
 
     const userBuckets = response.aggregations.user?.buckets ?? [];
     const hostBuckets = response.aggregations.host?.buckets ?? [];
@@ -348,6 +365,12 @@ export const calculateRiskScores = async ({
         host: hostScores,
         user: userScores,
         service: serviceScores,
+      },
+      entities: {
+        user: users,
+        host: hosts,
+        service: services,
+        generic: [],
       },
     };
   });

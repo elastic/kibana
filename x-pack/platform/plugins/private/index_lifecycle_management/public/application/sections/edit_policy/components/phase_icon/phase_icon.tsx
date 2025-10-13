@@ -10,14 +10,9 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import type { Phases } from '../../../../../../common/types';
-import './phase_icon.scss';
-interface Props {
-  enabled: boolean;
-  phase: string & keyof Phases;
-}
-export const PhaseIcon: FunctionComponent<Props> = ({ enabled, phase }) => {
-  const { euiTheme } = useEuiTheme();
 
+const useStyles = ({ enabled, phase }: { enabled: boolean; phase: string }) => {
+  const { euiTheme } = useEuiTheme();
   const isBorealis = euiTheme.themeName === 'EUI_THEME_BOREALIS';
 
   const phaseIconColors = {
@@ -34,20 +29,41 @@ export const PhaseIcon: FunctionComponent<Props> = ({ enabled, phase }) => {
     delete: euiTheme.colors.darkShade,
   };
 
+  return {
+    container: css`
+      width: ${enabled ? euiTheme.size.xl : euiTheme.size.base};
+      height: ${enabled ? euiTheme.size.xl : euiTheme.size.base};
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      background-color: ${phase === 'delete'
+        ? euiTheme.colors.lightShade
+        : euiTheme.colors.lightestShade};
+      ${!enabled && `margin: ${euiTheme.size.s};`}
+    `,
+    icon: css`
+      fill: ${phaseIconColors[phase as keyof typeof phaseIconColors]};
+    `,
+  };
+};
+interface Props {
+  enabled: boolean;
+  phase: string & keyof Phases;
+}
+export const PhaseIcon: FunctionComponent<Props> = ({ enabled, phase }) => {
+  const styles = useStyles({ enabled, phase });
+
   return (
-    <div
-      className={`ilmPhaseIcon ilmPhaseIcon--${phase} ${enabled ? '' : 'ilmPhaseIcon--disabled'}`}
-    >
+    <div css={styles.container}>
       {enabled ? (
         <EuiIcon
-          css={css`
-            fill: ${phaseIconColors[phase]};
-          `}
+          css={styles.icon}
           type={phase === 'delete' ? 'trash' : 'checkInCircleFilled'}
           size={phase === 'delete' ? 'm' : 'l'}
         />
       ) : (
-        <EuiIcon className="ilmPhaseIcon__inner--disabled" type={'dot'} size={'s'} />
+        <EuiIcon type={'dot'} size={'s'} />
       )}
     </div>
   );

@@ -187,6 +187,7 @@ export class AlertsClient<
 
     // No need to fetch the tracked alerts for the non-lifecycle rules
     if (this.ruleType.autoRecoverAlerts) {
+      const maxAlertLimit = this.legacyAlertsClient.getMaxAlertLimit();
       const getTrackedAlerts = async () => {
         // We can use inner_hits to get the alerts for the most recent executions
         // but this may return too many alerts, therefore we make two queries:
@@ -214,7 +215,7 @@ export class AlertsClient<
           .flat();
 
         const alerts = await this.search({
-          size: (opts.maxAlerts || DEFAULT_MAX_ALERTS) * 2,
+          size: (maxAlertLimit || DEFAULT_MAX_ALERTS) * 2,
           seq_no_primary_term: true,
           query: {
             bool: {
@@ -356,6 +357,10 @@ export class AlertsClient<
 
   public hasReachedAlertLimit(): boolean {
     return this.legacyAlertsClient.hasReachedAlertLimit();
+  }
+
+  public getMaxAlertLimit(): number {
+    return this.legacyAlertsClient.getMaxAlertLimit();
   }
 
   public checkLimitUsage() {

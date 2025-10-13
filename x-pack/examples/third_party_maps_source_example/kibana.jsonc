@@ -3,6 +3,8 @@
   "id": "@kbn/maps-custom-raster-source-plugin",
   "owner": "@elastic/kibana-presentation",
   "description": "An example plugin for creating a custom raster source for Elastic Maps",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "mapsCustomRasterSource",
     "server": false,

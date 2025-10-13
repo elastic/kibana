@@ -490,12 +490,15 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     if (!dataStreamDetails || Object.keys(dataStreamDetails).length === 0) {
       return {} as DataStreamDetails;
     }
+    const details = { ...dataStreamDetails };
 
-    const defaultRetentionPeriod = await getDataStreamDefaultRetentionPeriod({
-      esClient: esClient.asSecondaryAuthUser,
-    });
+    if (!isServerless && details.defaultRetentionPeriod === undefined) {
+      details.defaultRetentionPeriod = await getDataStreamDefaultRetentionPeriod({
+        esClient: esClient.asCurrentUser,
+      });
+    }
 
-    return { ...dataStreamDetails, defaultRetentionPeriod };
+    return details;
   },
 });
 

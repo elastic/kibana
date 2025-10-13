@@ -14,6 +14,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { get, getOr } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { flattenObject } from '@kbn/object-utils';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../common/components/header_actions';
 import { isActiveTimeline } from '../../../../helpers';
@@ -96,8 +97,17 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const ruleRuleId = get(0, ecsRowData?.kibana?.alert?.rule?.rule_id);
   const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
 
+  const flattenedEcsData = useMemo(() => {
+    const flattened = flattenObject(ecsRowData);
+    return Object.entries(flattened).map(([key, value]) => ({
+      field: key,
+      value: value as string[],
+    }));
+  }, [ecsRowData]);
+
   const { addToCaseActionItems } = useAddToCaseActions({
     ecsData: ecsRowData,
+    nonEcsData: flattenedEcsData,
     onMenuItemClick,
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
     refetch,

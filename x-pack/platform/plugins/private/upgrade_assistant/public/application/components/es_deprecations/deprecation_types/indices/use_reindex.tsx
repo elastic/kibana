@@ -219,6 +219,8 @@ export const useReindex = ({
       return;
     }
 
+    data.meta.reindexName = generateNewIndexName(indexName, kibanaVersion);
+
     setReindexState((prevValue: ReindexState) => {
       return getReindexState(prevValue, data);
     });
@@ -229,7 +231,7 @@ export const useReindex = ({
     } else if (data.reindexOp && data.reindexOp.status === ReindexStatus.completed) {
       simulateExtraSteps();
     }
-  }, [clearPollInterval, api, indexName, simulateExtraSteps]);
+  }, [clearPollInterval, api, indexName, simulateExtraSteps, kibanaVersion]);
 
   const startReindex = useCallback(async () => {
     setReindexState((prevValue: ReindexState) => {

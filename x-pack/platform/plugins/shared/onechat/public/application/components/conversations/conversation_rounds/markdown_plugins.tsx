@@ -8,9 +8,9 @@ import type { Code, InlineCode, Parent, Text } from 'mdast';
 import type { Node } from 'unist';
 import { css } from '@emotion/css';
 import React from 'react';
-import type { VisualizationElementAttributes } from '@kbn/onechat-common/tools/tool_result';
 import {
   visualizationElement,
+  type VisualizationElementAttributes,
   type TabularDataResult,
 } from '@kbn/onechat-common/tools/tool_result';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
@@ -160,6 +160,7 @@ export function createVisualizationRenderer({
       <VisualizeESQL
         lens={startDependencies.lens}
         dataViews={startDependencies.dataViews}
+        uiActions={startDependencies.uiActions}
         esqlQuery={query}
         esqlColumns={columns}
         preferredChartType={chartType}
