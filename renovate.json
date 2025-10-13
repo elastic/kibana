@@ -4744,6 +4744,26 @@
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
+    },
+    {
+      "groupName": "colors",
+      "matchDepNames": [
+        "colors",
+        "colors/safe"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:current-major"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
     }
   ],
   "customManagers": [
