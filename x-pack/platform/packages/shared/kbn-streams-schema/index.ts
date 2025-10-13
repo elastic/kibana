@@ -118,4 +118,4 @@ export type {
 
 export { emptyAssets } from './src/helpers/empty_assets';
 
-export { type System, systemSchema } from './src/system';
+export { type Feature, featureSchema } from './src/feature';
