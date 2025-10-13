@@ -25,7 +25,6 @@ import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
 import { IngestionCard } from './cards/ingestion_card';
 import { useAggregations } from '../hooks/use_ingestion_rate';
-import { useFailureStoreStats } from '../hooks/use_failure_store_stats';
 export const StreamDetailGeneralData = ({
   definition,
   refreshDefinition,
