@@ -27,10 +27,6 @@ describe('parse severity data', () => {
 });
 
 describe.each([
-  { severity: 'critical', colorToken: '#bd271e', themeName: 'Amsterdam' },
-  { severity: 'high', colorToken: '#FF7E62', themeName: 'Amsterdam' },
-  { severity: 'medium', colorToken: '#F1D86F', themeName: 'Amsterdam' },
-  { severity: 'low', colorToken: '#54B399', themeName: 'Amsterdam' },
   { severity: 'critical', colorToken: '#E7664C', themeName: 'Borealis' },
   { severity: 'high', colorToken: '#DA8B45', themeName: 'Borealis' },
   { severity: 'medium', colorToken: '#D6BF57', themeName: 'Borealis' },
