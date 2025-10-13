@@ -53,13 +53,13 @@ pageLoadAssetSize:
   eventAnnotation: 22361
   eventAnnotationListing: 13164
   exploratoryView: 45177
-  expressionGauge: 15748
-  expressionHeatmap: 17563
-  expressionLegacyMetricVis: 11834
-  expressionMetricVis: 17490
-  expressionPartitionVis: 29826
+  expressionGauge: 23650
+  expressionHeatmap: 25160
+  expressionLegacyMetricVis: 20806
+  expressionMetricVis: 25910
+  expressionPartitionVis: 35668
   expressions: 105121
-  expressionTagcloud: 12643
+  expressionTagcloud: 21447
   expressionXY: 45000
   features: 4341
   fieldFormats: 64634
@@ -99,7 +99,7 @@ pageLoadAssetSize:
   logsShared: 101273
   logstash: 15882
   management: 12951
-  maps: 45917
+  maps: 50197
   mapsEms: 6767
   metricsDataAccess: 49711
   metricsExperience: 10000
@@ -184,17 +184,17 @@ pageLoadAssetSize:
   visDefaultEditor: 35092
   visTypeGauge: 13006
   visTypeHeatmap: 12457
-  visTypeMarkdown: 8817
+  visTypeMarkdown: 16854
   visTypeMetric: 11966
   visTypePie: 9939
-  visTypeTable: 18999
+  visTypeTable: 26763
   visTypeTagcloud: 7876
-  visTypeTimelion: 12580
-  visTypeTimeseries: 19668
-  visTypeVega: 38540
-  visTypeVislib: 14694
+  visTypeTimelion: 20317
+  visTypeTimeseries: 26762
+  visTypeVega: 44105
+  visTypeVislib: 22125
   visTypeXy: 32342
-  visualizations: 41000
+  visualizations: 43017
   watcher: 16031
   workchatApp: 12411
   workflowsManagement: 6555
