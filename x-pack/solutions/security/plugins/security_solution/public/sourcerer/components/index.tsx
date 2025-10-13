@@ -425,6 +425,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                     options={dataViewSelectOptions}
                     placeholder={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}
                     valueOfSelected={dataViewId}
+                    aria-label={i18n.INDEX_PATTERNS_CHOOSE_DATA_VIEW_LABEL}
                   />
                 </StyledFormRow>
               )}
@@ -454,6 +455,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
                   placeholder={i18n.PICK_INDEX_PATTERNS}
                   renderOption={renderOption}
                   selectedOptions={selectedOptions}
+                  aria-label={i18n.INDEX_PATTERNS_LABEL}
                 />
               </FormRow>
 
