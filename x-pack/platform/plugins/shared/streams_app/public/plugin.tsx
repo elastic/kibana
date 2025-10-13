@@ -139,6 +139,7 @@ export class StreamsAppPlugin
             .getClient(),
           telemetryClient: this.telemetry.getClient(),
           version: this.version,
+          discover: pluginsStart.discover,
         };
 
         // Trigger fetch to ensure the time filter has an up-to-date time range when the app mounts.

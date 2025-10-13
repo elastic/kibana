@@ -13,11 +13,13 @@ import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStreamFeatureEventsData } from './hooks/use_stream_feature_events_data';
+import { useStreamFeatureDiscoverUrl } from './hooks/use_stream_feature_discover_url';
 
 export const FeatureEventsData = ({ feature }: { feature: Feature }) => {
   const chartBaseTheme = useElasticChartsTheme();
 
   const events = useStreamFeatureEventsData(feature);
+  const url = useStreamFeatureDiscoverUrl({ filter: feature.filter });
 
   return (
     <>
@@ -30,19 +32,23 @@ export const FeatureEventsData = ({ feature }: { feature: Feature }) => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            aria-label={i18n.translate(
-              'xpack.streams.identifiedFeatureEvents.viewAllLinkAriaLabel',
-              {
-                defaultMessage: 'Open in Discover',
-              }
-            )}
-          >
-            {i18n.translate('xpack.streams.identifiedFeatureEvents.viewAllLinkText', {
-              defaultMessage: 'Open in discover',
-            })}
-          </EuiButtonEmpty>
+          {url ? (
+            <EuiButtonEmpty
+              size="s"
+              href={url}
+              target="_blank"
+              aria-label={i18n.translate(
+                'xpack.streams.identifiedFeatureEvents.viewAllLinkAriaLabel',
+                {
+                  defaultMessage: 'Open in Discover',
+                }
+              )}
+            >
+              {i18n.translate('xpack.streams.identifiedFeatureEvents.viewAllLinkText', {
+                defaultMessage: 'Open in discover',
+              })}
+            </EuiButtonEmpty>
+          ) : null}
         </EuiFlexItem>
       </EuiFlexGroup>
       <Chart size={{ height: 64 }}>
