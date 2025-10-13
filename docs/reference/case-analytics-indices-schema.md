@@ -25,7 +25,7 @@ The cases as data features is in technical preview, meaning the schema for the c
 | tags | keyword | Tags added to case. |
 | category | keyword | The case category. |
 | status | keyword | The case status. Possible values are: `open`, `in-progress`, `closed` |
-| status\_sort | long | The status of the case. Possible values are: `0`, `10`, `20` |
+| status\_sort | long | The status of the case. Possible values are `0`, `10`, `20`, where `0` corresponds to the `open` status, `10` corresponds to the `in-progress` status, and `20` corresponds to the `closed` status.|
 | severity | keyword | The case severity. Possible values are: `low`, `medium`, `high`, `critical` |
 | severity\_sort | long | The severity of the case. Possible values: `0`, `10`, `20`, `30` |
 | created\_at | date | The date of when the case was created, provided in ISO 8601 \[2\] format |
