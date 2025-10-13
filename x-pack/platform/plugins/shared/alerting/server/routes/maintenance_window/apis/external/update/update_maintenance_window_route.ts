@@ -23,6 +23,7 @@ import {
 } from '../../../../../../common/routes/maintenance_window/external/apis/update';
 import { maintenanceWindowResponseSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/response';
 import { transformInternalMaintenanceWindowToExternalV1 } from '../common/transforms';
+import { getDurationInMilliseconds } from '../../../../../../common/routes/schedule';
 
 import { transformUpdateBodyV1 } from './transform_update_body';
 
@@ -91,6 +92,26 @@ export const updateMaintenanceWindowRoute = (
         const response: UpdateMaintenanceWindowResponseV1 =
           transformInternalMaintenanceWindowToExternalV1(maintenanceWindow);
 
+        // Return request duration in response when both are same otherwise throw an error
+        const requestDurationInMilliseconds = customSchedule?.duration
+          ? getDurationInMilliseconds(customSchedule.duration)
+          : undefined;
+
+        const responseDurationInMilliseconds = getDurationInMilliseconds(
+          response.schedule.custom.duration
+        );
+
+        if (
+          requestDurationInMilliseconds &&
+          requestDurationInMilliseconds !== responseDurationInMilliseconds
+        ) {
+          throw new Error('Request duration does not match response duration.');
+        }
+
+        const responseDuration = customSchedule?.duration
+          ? customSchedule.duration
+          : response.schedule.custom.duration;
+
         return res.ok({
           body: {
             ...response,
@@ -98,9 +119,7 @@ export const updateMaintenanceWindowRoute = (
               custom: {
                 ...response.schedule.custom,
                 ...{
-                  duration: customSchedule?.duration
-                    ? customSchedule.duration
-                    : response.schedule.custom.duration,
+                  duration: responseDuration,
                 },
               },
             },
