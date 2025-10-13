@@ -112,7 +112,7 @@ export const createExternalService = (
     config,
     secrets,
   }: {
-    config?: { allowedChannels?: Array<{ id: string; name: string }> };
+    config?: { allowedChannels?: Array<{ id?: string; name: string }> };
     secrets: { token: string };
   },
   logger: Logger,
@@ -122,6 +122,7 @@ export const createExternalService = (
   const { token } = secrets;
   const { allowedChannels } = config || { allowedChannels: [] };
   const allowedChannelIds = allowedChannels?.map((ac) => ac.id);
+  const allowedChannelNames = allowedChannels?.map((ac) => ac.name);
 
   if (!token) {
     throw Error(`[Action][${SLACK_CONNECTOR_NAME}]: Wrong configuration.`);
@@ -166,45 +167,64 @@ export const createExternalService = (
   };
 
   const getChannelToUse = ({
-    channels,
+    channels, // legacy, deprecated
     channelIds = [],
+    channelNames = [],
   }: {
     channels?: string[];
     channelIds?: string[];
+    channelNames?: string[];
   }): string => {
-    if (
-      channelIds.length > 0 &&
-      allowedChannelIds &&
-      allowedChannelIds.length > 0 &&
-      !channelIds.every((cId) => allowedChannelIds.includes(cId))
-    ) {
-      throw new Error(
-        `One of channel ids "${channelIds.join()}" is not included in the allowed channels list "${allowedChannelIds.join()}"`
-      );
+    let channelToUse = '';
+
+    // allowedChannels.name -> must start with # -> here maybe we should add an UI validation to enforce starting with #
+    // channelNames -> must start with #
+    const mappedChannelNames = channelNames.length ? channelNames : channels ?? [];
+
+    // priority: channelNames > channelIds
+
+    if (mappedChannelNames.length > 0) {
+      if (
+        allowedChannelNames &&
+        allowedChannelNames.length > 0 &&
+        !mappedChannelNames.every(
+          (name) => allowedChannelNames?.includes(name) || allowedChannelIds?.includes(name)
+        )
+      ) {
+        throw new Error(
+          `One or more provided channel names are not included in the allowed channels list`
+        );
+      }
+      channelToUse = mappedChannelNames[0]; // for now, post in only 1 channel
+    } else if (channelIds.length > 0) {
+      if (
+        allowedChannelIds &&
+        allowedChannelIds.length > 0 &&
+        !channelIds.every((cId) => allowedChannelIds?.includes(cId))
+      ) {
+        throw new Error(
+          `One of channel ids "${channelIds.join()}" is not included in the allowed channels list "${allowedChannelIds?.join()}"`
+        );
+      }
+      channelToUse = channelIds[0];
+    } else {
+      throw new Error(`The channel is empty`);
     }
 
-    // For now, we only allow one channel but we wanted
-    // to have a array in case we need to allow multiple channels
-    // in one actions
-    let channelToUse = channelIds.length > 0 ? channelIds[0] : '';
-    if (channelToUse.length === 0 && channels && channels.length > 0 && channels[0].length > 0) {
-      channelToUse = channels[0];
-    }
-
-    if (channelToUse.length === 0) {
-      throw new Error(`The channel is empty"`);
-    }
-
-    return channelToUse;
+    return channelToUse; // if we have channelNames: #general, if not -> id, GEFRU2382
+    // should we return #general or general???
   };
 
   const postMessage = async ({
     channels,
     channelIds = [],
+    channelNames = [],
     text,
-  }: PostMessageSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
+  }: PostMessageSubActionParams & { channelNames?: string[] }): Promise<
+    ConnectorTypeExecutorResult<unknown>
+  > => {
     try {
-      const channelToUse = getChannelToUse({ channels, channelIds });
+      const channelToUse = getChannelToUse({ channels, channelIds, channelNames });
 
       const result: AxiosResponse<PostMessageResponse> = await request({
         axios: axiosInstance,
@@ -226,10 +246,13 @@ export const createExternalService = (
   const postBlockkit = async ({
     channels,
     channelIds = [],
+    channelNames = [],
     text,
-  }: PostBlockkitSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
+  }: PostBlockkitSubActionParams & { channelNames?: string[] }): Promise<
+    ConnectorTypeExecutorResult<unknown>
+  > => {
     try {
-      const channelToUse = getChannelToUse({ channels, channelIds });
+      const channelToUse = getChannelToUse({ channels, channelIds, channelNames });
       const blockJson = JSON.parse(text);
 
       const result: AxiosResponse<PostMessageResponse> = await request({
