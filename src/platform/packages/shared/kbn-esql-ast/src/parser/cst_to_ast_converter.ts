@@ -145,7 +145,31 @@ export class CstToAstConverter {
 
   // -------------------------------------------------------------------- query
 
+  fromStatements(ctx: cst.StatementsContext): ast.ESQLAstQueryExpression | undefined {
+    const setCommandCtxs = ctx.setCommand_list();
+    const singleStatement = ctx.singleStatement();
+
+    // Get the main query from singleStatement
+    const query = this.fromSingleStatement(singleStatement);
+
+    if (!query) {
+      return undefined;
+    }
+
+    // Process SET instructions and create header if they exist
+    if (setCommandCtxs && setCommandCtxs.length > 0) {
+      const header = this.fromSetCommands(setCommandCtxs);
+
+      if (header && header.length > 0) {
+        query.header = header;
+      }
+    }
+
+    return query;
+  }
+
   fromSingleStatement(ctx: cst.SingleStatementContext): ast.ESQLAstQueryExpression | undefined {
+    if (!ctx) return undefined;
     return this.fromAnyQuery(ctx.query());
   }
 
@@ -232,6 +256,46 @@ export class CstToAstConverter {
     } else {
       return undefined;
     }
+  }
+
+  // ------------------------------------------------------------- query header
+
+  private fromSetCommands(setCommandCtxs: cst.SetCommandContext[]): ast.ESQLAstSetHeaderCommand[] {
+    const setCommands: ast.ESQLAstSetHeaderCommand[] = setCommandCtxs
+      .map((setCommandCtx) => this.fromSetCommand(setCommandCtx))
+      .filter(nonNullable);
+    return setCommands;
+  }
+
+  // ---------------------------------------------------------------------- SET
+
+  private fromSetCommand(ctx: cst.SetCommandContext): ast.ESQLAstSetHeaderCommand {
+    const setFieldCtx = ctx.setField();
+    const arg = this.fromSetFieldContext(setFieldCtx);
+    const command = Builder.header.command.set([arg], {}, this.getParserFields(ctx));
+
+    return command;
+  }
+
+  private fromSetFieldContext(ctx: cst.SetFieldContext): ast.ESQLBinaryExpression<'='> {
+    const leftCtx = ctx.identifier();
+    const rightCtx = ctx.constant();
+    const left = this.toIdentifierFromContext(leftCtx);
+    const right = this.fromConstant(rightCtx) as ast.ESQLLiteral;
+    const expression = this.toBinaryExpression('=', ctx, [left, right]);
+
+    return expression;
+  }
+
+  private toIdentifierFromContext(ctx: cst.IdentifierContext): ast.ESQLIdentifier {
+    const identifierToken = ctx.UNQUOTED_IDENTIFIER() || ctx.QUOTED_IDENTIFIER();
+
+    if (identifierToken) {
+      return this.toIdentifierFromTerminalNode(identifierToken);
+    }
+
+    // Fallback: create identifier from the full context text
+    return Builder.identifier({ name: ctx.getText() }, this.getParserFields(ctx));
   }
 
   // ----------------------------------------------------------------- commands
@@ -1459,15 +1523,17 @@ export class CstToAstConverter {
 
   // --------------------------------------------------------------------- FUSE
 
-  private fromFuseCommand(ctx: cst.FuseCommandContext): ast.ESQLCommand<'fuse'> {
+  private fromFuseCommand(ctx: cst.FuseCommandContext): ast.ESQLAstFuseCommand {
     const fuseTypeCtx = ctx.identifier();
 
     const args: ast.ESQLAstItem[] = [];
     let incomplete = false;
 
+    const fuseType = fuseTypeCtx ? this.fromIdentifier(fuseTypeCtx) : undefined;
+
     // FUSE <fuse_method>
-    if (fuseTypeCtx) {
-      args.push(this.fromIdentifier(fuseTypeCtx));
+    if (fuseType) {
+      args.push(fuseType);
     }
 
     // FUSE SCORE BY <score_column> GROUP BY <group_column> KEY BY <key_columns> WITH <options>
@@ -1479,7 +1545,16 @@ export class CstToAstConverter {
       incomplete ||= configurationItemCommandOption?.incomplete ?? true;
     }
 
-    return this.createCommand('fuse', ctx, { args, incomplete });
+    const fuseCommand = this.createCommand<'fuse', ast.ESQLAstFuseCommand>('fuse', ctx, {
+      args,
+      incomplete,
+    });
+
+    if (fuseType) {
+      fuseCommand.fuseType = fuseType;
+    }
+
+    return fuseCommand;
   }
 
   private fromFuseConfigurationItem(
@@ -1505,7 +1580,7 @@ export class CstToAstConverter {
     const keyCtx = configCtx.KEY();
     if (keyCtx && byContext) {
       const args = this.fromFields(configCtx.fields());
-      const incomplete = args.length === 0;
+      const incomplete = args.length === 0 || args.some((arg) => arg.incomplete);
       return this.toOption('key by', configCtx, args, incomplete);
     }
 
@@ -1534,7 +1609,8 @@ export class CstToAstConverter {
         args.push(map);
       }
 
-      const incomplete = args.length === 0 || map.incomplete;
+      const incomplete =
+        args.length === 0 || map.incomplete || !textExistsAndIsValid(configCtx.getText());
       return this.toOption('with', configCtx, args, incomplete);
     }
 
@@ -2453,11 +2529,13 @@ export class CstToAstConverter {
     return node;
   }
 
-  private toBinaryExpression(
-    operator: ast.BinaryExpressionOperator,
+  private toBinaryExpression<
+    Operator extends ast.BinaryExpressionOperator = ast.BinaryExpressionOperator
+  >(
+    operator: Operator,
     ctx: antlr.ParserRuleContext,
     args: ast.ESQLBinaryExpression['args']
-  ): ast.ESQLBinaryExpression {
+  ): ast.ESQLBinaryExpression<Operator> {
     return Builder.expression.func.binary(
       operator,
       args,
@@ -2467,7 +2545,7 @@ export class CstToAstConverter {
         location: getPosition(ctx.start, ctx.stop),
         incomplete: Boolean(ctx.exception),
       }
-    ) as ast.ESQLBinaryExpression;
+    ) as ast.ESQLBinaryExpression<Operator>;
   }
 
   // -------------------------------------------------------- expression: "map"
