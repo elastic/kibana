@@ -8,11 +8,14 @@
  */
 
 import { format } from 'util';
+import Path from 'path';
 
 import Mocha from 'mocha';
 import { ToolingLogTextWriter } from '@kbn/tooling-log';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
+import { REPO_ROOT } from '@kbn/repo-info';
 import moment from 'moment';
+import Table from 'cli-table3';
 
 import { recordLog, snapshotLogsForRunnable, setupJUnitReportGeneration } from '../../../../mocha';
 import * as colors from './colors';
@@ -21,6 +24,103 @@ import { ms } from './ms';
 import { writeEpilogue } from './write_epilogue';
 import { setupCiStatsFtrTestGroupReporter } from './ci_stats_ftr_reporter';
 import { ScoutFTRReporter } from './scout_ftr_reporter';
+
+/**
+ * Simplify verbose hook titles for better readability
+ */
+function simplifyHookTitle(hookTitle) {
+  // Remove redundant "hook:" text and suite names for cleaner output
+  let simplified = hookTitle
+    .replace(/^"before all" hook: /, '⚙ Setup: ')
+    .replace(/^"before each" hook: /, '→ Before: ')
+    .replace(/^"after all" hook: /, '⚙ Teardown: ')
+    .replace(/^"after each" hook: /, '← After: ')
+    .replace(/^"before all" hook$/, '⚙ Setup')
+    .replace(/^"before each" hook$/, '→ Before')
+    .replace(/^"after all" hook$/, '⚙ Teardown')
+    .replace(/^"after each" hook$/, '← After');
+
+  // Remove the redundant " for <test name>" or " in <suite name>" suffixes
+  simplified = simplified.replace(/ for ".*?"$/, '').replace(/ in ".*?"$/, '');
+
+  return simplified;
+}
+
+/**
+ * Extract the first meaningful error line and the file where it occurred from the stack trace
+ */
+function extractErrorInfo(errorMessage) {
+  const lines = errorMessage.split('\n');
+
+  // Find the first line with "Error:"
+  let errorLine = lines.find((line) => line.trim().startsWith('Error:'));
+  if (!errorLine) {
+    errorLine = lines[0] || 'Unknown error';
+  }
+
+  // Clean up the error line (remove leading whitespace and color codes)
+  errorLine = errorLine.replace(/^\s+/, '').replace(/\x1b\[\d+m/g, '');
+
+  // Find the first stack frame that's not from node_modules or node internals
+  let errorFile = 'Unknown file';
+  for (const line of lines) {
+    // Match file paths with better regex to capture full paths
+    const match = line.match(/at\s+.*?\(?([^\s()]+\.(?:ts|js|tsx|jsx)):\d+:\d+\)?/);
+    if (
+      match &&
+      !line.includes('node_modules') &&
+      !line.includes('node:internal') &&
+      !line.includes('retry_for_success')
+    ) {
+      const fullPath = match[1];
+      // Convert to path relative to REPO_ROOT
+      try {
+        errorFile = Path.relative(REPO_ROOT, Path.resolve(fullPath));
+      } catch (e) {
+        // If path resolution fails, use the matched path as-is
+        errorFile = fullPath;
+      }
+      break;
+    }
+  }
+
+  return { errorLine, errorFile };
+}
+
+/**
+ * Create a formatted error summary table
+ */
+function createErrorSummary(runnable, errorMessage) {
+  const testFile = runnable.file || 'Unknown file';
+  const testName = runnable.fullTitle();
+  const { errorLine, errorFile } = extractErrorInfo(errorMessage);
+
+  // Get path relative to REPO_ROOT
+  let relativeTestFile;
+  try {
+    relativeTestFile = Path.relative(REPO_ROOT, testFile);
+  } catch (e) {
+    relativeTestFile = testFile;
+  }
+
+  const table = new Table({
+    style: {
+      head: [],
+      border: ['red'],
+    },
+    colWidths: [18, 80],
+    wordWrap: true,
+  });
+
+  table.push(
+    [colors.fail('Test file'), relativeTestFile],
+    [colors.fail(`Failing test`), testName],
+    [colors.fail('Error'), errorLine],
+    [colors.fail('Thrown from'), errorFile]
+  );
+
+  return '\n' + table.toString() + '\n';
+}
 
 export function MochaReporterProvider({ getService }) {
   const log = getService('log');
@@ -119,7 +219,8 @@ export function MochaReporterProvider({ getService }) {
     };
 
     onHookStart = (hook) => {
-      log.write(`-> ${colors.suite(hook.title)}`);
+      const simplifiedTitle = simplifyHookTitle(hook.title);
+      log.write(`  ${colors.suite(simplifiedTitle)}`);
       log.indent(2);
     };
 
@@ -129,7 +230,7 @@ export function MochaReporterProvider({ getService }) {
 
     onSuiteStart = (suite) => {
       if (!suite.root) {
-        log.write('-: ' + colors.suite(suite.title));
+        log.write(`${colors.suite('▶')} ${colors.suite(suite.title)}`);
       }
 
       log.indent(2);
@@ -142,7 +243,7 @@ export function MochaReporterProvider({ getService }) {
     };
 
     onTestStart = (test) => {
-      log.write(`-> ${test.title}`);
+      log.write(`  ○ ${test.title}`);
       log.indent(2);
     };
 
@@ -152,14 +253,14 @@ export function MochaReporterProvider({ getService }) {
     };
 
     onPending = (test) => {
-      log.write('-> ' + colors.pending(test.title));
+      log.write(`  ${colors.pending('○ ' + test.title)}`);
       log.indent(2);
     };
 
     onPass = (test) => {
       const time = colors.speed(test.speed, ` (${ms(test.duration)})`);
       const pass = colors.pass(`${symbols.ok} pass`);
-      log.write(`- ${pass} ${time}`);
+      log.write(`    ${pass} ${time}`);
     };
 
     onFail = (runnable) => {
@@ -196,8 +297,16 @@ export function MochaReporterProvider({ getService }) {
         .map((line) => ` ${line}`)
         .join('\n');
 
+      // Create a cleaner error summary table
+      const errorSummary = createErrorSummary(runnable, errorMessage);
+
       log.write(
-        `- ${colors.fail(`${symbols.err} fail: ${runnable.fullTitle()}`)}` + '\n' + errorMessage
+        `    ${colors.fail(`${symbols.err} fail`)}` +
+          errorSummary +
+          '\n' +
+          colors.fail('Full Error Details:') +
+          '\n' +
+          errorMessage
       );
 
       // Prefer to reuse the nice Mocha nested title format for final summary
@@ -209,7 +318,7 @@ export function MochaReporterProvider({ getService }) {
 
       failuresOverTime.push({
         title: nestedTitleFormat,
-        error: errorMessage,
+        error: `"${errorMessage}"`,
       });
 
       // failed hooks trigger the `onFail(runnable)` callback, so we snapshot the logs for
