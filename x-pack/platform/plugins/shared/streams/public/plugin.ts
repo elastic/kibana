@@ -109,6 +109,7 @@ const createStreamsNavigationStatusObservable = once(
   ): Observable<StreamsNavigationStatus> => {
     const hasCapabilities = application.capabilities?.streams?.show;
     const isServerlessObservability = deps.cloud?.serverless.projectType === 'observability';
+    const isServerlessSecurity = deps.cloud?.serverless.projectType === 'security';
 
     if (!hasCapabilities) {
       return of({ status: 'disabled' });
@@ -117,7 +118,7 @@ const createStreamsNavigationStatusObservable = once(
     if (isServerless) {
       // For serverless, only check cloud project type
       return of({
-        status: isServerlessObservability ? 'enabled' : 'disabled',
+        status: isServerlessObservability || isServerlessSecurity ? 'enabled' : 'disabled',
       });
     }
 
@@ -130,7 +131,10 @@ const createStreamsNavigationStatusObservable = once(
       map((space) => {
         const spaceSolution = space?.solution;
         const isValidSolution =
-          !spaceSolution || spaceSolution === 'classic' || spaceSolution === 'oblt';
+          !spaceSolution ||
+          spaceSolution === 'classic' ||
+          spaceSolution === 'oblt' ||
+          spaceSolution === 'security';
         return { status: isValidSolution ? 'enabled' : 'disabled' } as const;
       }),
       catchError(() => {

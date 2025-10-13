@@ -9,7 +9,7 @@ import type { JsonSchema7ObjectType } from 'zod-to-json-schema';
 import zodToJsonSchema from 'zod-to-json-schema';
 import type { ZodObject } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolDefinitionWithSchema, ToolDefinition } from '@kbn/onechat-common';
+import type { ToolDefinitionWithSchema, ToolDefinition, ToolType } from '@kbn/onechat-common';
 import type { Runner, ExecutableTool } from '@kbn/onechat-server';
 import type { InternalToolDefinition } from '../tool_provider';
 
@@ -22,15 +22,14 @@ export const toExecutableTool = <
   runner,
   request,
 }: {
-  tool: InternalToolDefinition<TConfig, RunInput>;
+  tool: InternalToolDefinition<ToolType, TConfig, RunInput>;
   runner: Runner;
   request: KibanaRequest;
 }): ExecutableTool<TConfig, RunInput> => {
-  const { handler, schema, ...toolParts } = tool;
+  const { getHandler, ...toolParts } = tool;
 
   return {
     ...toolParts,
-    schema: typeof schema === 'function' ? schema : () => Promise.resolve(schema),
     execute: (params) => {
       return runner.runTool({ ...params, toolId: tool.id, request });
     },
@@ -45,10 +44,10 @@ export const toExecutableTool = <
 export const toDescriptorWithSchema = async (
   tool: InternalToolDefinition
 ): Promise<ToolDefinitionWithSchema> => {
-  const { id, type, description, tags, configuration, readonly } = tool;
-  const schema = typeof tool.schema === 'function' ? await tool.schema() : tool.schema;
+  const descriptor = toDescriptor(tool);
+  const schema = await tool.getSchema();
   const jsonSchema = zodToJsonSchema(schema) as JsonSchema7ObjectType;
-  return { id, type, description, tags, configuration, readonly, schema: jsonSchema };
+  return { ...descriptor, schema: jsonSchema };
 };
 
 export const toDescriptor = (tool: InternalToolDefinition): ToolDefinition => {

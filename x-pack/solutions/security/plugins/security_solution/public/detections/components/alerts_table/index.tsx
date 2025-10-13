@@ -133,7 +133,7 @@ interface AlertTableProps
   disableAdditionalToolbarControls?: boolean;
 }
 
-const initialSort: GetSecurityAlertsTableProp<'initialSort'> = [
+const sort: GetSecurityAlertsTableProp<'sort'> = [
   {
     '@timestamp': {
       order: 'desc',
@@ -144,7 +144,7 @@ const casesConfiguration = {
   featureId: CASES_FEATURE_ID,
   owner: [APP_ID],
   syncAlerts: true,
-  extractObservables: false,
+  extractObservables: true,
 };
 const emptyInputFilters: Filter[] = [];
 
@@ -473,7 +473,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
               ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}
               consumers={ALERT_TABLE_CONSUMERS}
               query={finalBoolQuery}
-              initialSort={initialSort}
+              sort={sort}
               casesConfiguration={casesConfiguration}
               gridStyle={gridStyle}
               shouldHighlightRow={shouldHighlightRow}
@@ -484,7 +484,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
               onLoaded={onLoaded}
               additionalContext={additionalContext}
               height={alertTableHeight}
-              initialPageSize={50}
+              pageSize={50}
               runtimeMappings={runtimeMappings}
               toolbarVisibility={toolbarVisibility}
               renderCellValue={CellValue}

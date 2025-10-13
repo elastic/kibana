@@ -10,19 +10,16 @@
 import { APP } from '.';
 
 describe('Sessions management - APP', () => {
-  describe.each([
-    { backgroundSearchEnabled: true, expectedName: 'Background Search' },
-    { backgroundSearchEnabled: false, expectedName: 'Search Sessions' },
-  ])(
+  describe.each([{ expectedName: 'Background Search' }])(
     'when background search is $backgroundSearchEnabled',
-    ({ backgroundSearchEnabled, expectedName }) => {
+    ({ expectedName }) => {
       it('should return the id', () => {
         expect(APP.id).toBe('search_sessions');
       });
 
       describe('when background search is disabled', () => {
         it('should return the correct i18n name', () => {
-          expect(APP.getI18nName(backgroundSearchEnabled)).toBe(expectedName);
+          expect(APP.getI18nName()).toBe(expectedName);
         });
       });
     }
