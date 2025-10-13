@@ -1751,6 +1751,24 @@ class AgentPolicyService {
       );
     }
 
+    for (const agentPolicy of policies) {
+      if (!agentPolicy.supports_agentless) {
+        continue;
+      }
+      try {
+        await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
+        logger.debug(
+          `[Agentless API] Successfully deployed agentless deployment for single agent policy id ${agentPolicy.id}`
+        );
+      } catch (error) {
+        // Swallow errors
+        logger.error(
+          `[Agentless API] Error deploying agentless deployment for single agent policy id ${agentPolicy.id}`,
+          { error }
+        );
+      }
+    }
+
     const filteredFleetServerPolicies = fleetServerPolicies.filter((fleetServerPolicy) => {
       const policy = policiesMap[fleetServerPolicy.policy_id];
       return (

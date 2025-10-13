@@ -99,7 +99,12 @@ async function getSyncIntegrationsEnabled(
 
 async function installPackageIfNotInstalled(
   savedObjectsClient: SavedObjectsClientContract,
-  pkg: { package_name: string; package_version: string; install_source?: InstallSource },
+  pkg: {
+    package_name: string;
+    package_version: string;
+    install_source?: InstallSource;
+    rolled_back?: boolean;
+  },
   packageClient: PackageClient,
   logger: Logger,
   abortController: AbortController
@@ -107,7 +112,8 @@ async function installPackageIfNotInstalled(
   const installation = await packageClient.getInstallation(pkg.package_name);
   if (
     installation?.install_status === 'installed' &&
-    semverGte(installation.version, pkg.package_version)
+    semverGte(installation.version, pkg.package_version) &&
+    !pkg.rolled_back
   ) {
     logger.debug(`installPackageIfNotInstalled - ${pkg.package_name} already installed`);
     return;
@@ -140,6 +146,24 @@ async function installPackageIfNotInstalled(
       logger.debug(`installPackageIfNotInstalled - Max retry attempts reached`);
       return;
     }
+  }
+
+  try {
+    if (pkg.rolled_back) {
+      const rollbackResult = await packageClient.rollbackPackage({
+        pkgName: pkg.package_name,
+      });
+      if (rollbackResult.success) {
+        logger.info(
+          `Package ${pkg.package_name} rolled back to previous version ${rollbackResult.version}`
+        );
+      } else {
+        logger.warn(`Package ${pkg.package_name} rollback not successful`);
+      }
+      return;
+    }
+  } catch (error) {
+    logger.error(`Failed to rollback package ${pkg.package_name}, error: ${error}`);
   }
 
   try {
