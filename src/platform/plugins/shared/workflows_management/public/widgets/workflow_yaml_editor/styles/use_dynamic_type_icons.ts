@@ -81,8 +81,14 @@ export function useDynamicTypeIcons(connectorsData: ConnectorsResponse | undefin
       actionTypeId: connector.actionTypeId.slice(1), // remove the leading dot
       displayName: connector.displayName,
     }));
-    injectDynamicConnectorIcons([...predefinedStepTypes, ...connectorTypes]);
-    injectDynamicShadowIcons([...predefinedStepTypes, ...connectorTypes]);
+
+    // Run async functions
+    (async () => {
+      await Promise.all([
+        injectDynamicConnectorIcons([...predefinedStepTypes, ...connectorTypes]),
+        injectDynamicShadowIcons([...predefinedStepTypes, ...connectorTypes]),
+      ]);
+    })();
   }, [connectorsData?.connectorTypes]);
 }
 
@@ -90,7 +96,7 @@ export function useDynamicTypeIcons(connectorsData: ConnectorsResponse | undefin
  * Inject dynamic CSS for connector icons in Monaco autocompletion
  * This creates CSS rules for each connector type to show custom icons
  */
-function injectDynamicConnectorIcons(connectorTypes: ConnectorTypeInfoMinimal[]) {
+async function injectDynamicConnectorIcons(connectorTypes: ConnectorTypeInfoMinimal[]) {
   const styleId = 'dynamic-connector-icons';
 
   // Remove existing dynamic styles
@@ -108,7 +114,7 @@ function injectDynamicConnectorIcons(connectorTypes: ConnectorTypeInfoMinimal[])
 
     try {
       // Generate CSS rule for this connector
-      const iconBase64 = getStepIconBase64(connectorType);
+      const iconBase64 = await getStepIconBase64(connectorType);
 
       // Only inject CSS if we successfully generated an icon
       if (iconBase64) {
@@ -154,7 +160,7 @@ function injectDynamicConnectorIcons(connectorTypes: ConnectorTypeInfoMinimal[])
  * Inject dynamic CSS for connector shadow icons (::after pseudo-elements)
  * This creates CSS rules for each connector type to show custom icons in the editor
  */
-function injectDynamicShadowIcons(connectorTypes: ConnectorTypeInfoMinimal[]) {
+async function injectDynamicShadowIcons(connectorTypes: ConnectorTypeInfoMinimal[]) {
   const styleId = 'dynamic-shadow-icons';
 
   // Remove existing dynamic shadow styles
@@ -170,7 +176,7 @@ function injectDynamicShadowIcons(connectorTypes: ConnectorTypeInfoMinimal[]) {
     const connectorType = connector.actionTypeId;
     try {
       // Generate CSS rule for this connector shadow icon
-      const iconBase64 = getStepIconBase64(connectorType);
+      const iconBase64 = await getStepIconBase64(connectorType);
 
       // Only inject CSS if we successfully generated an icon
       if (iconBase64) {

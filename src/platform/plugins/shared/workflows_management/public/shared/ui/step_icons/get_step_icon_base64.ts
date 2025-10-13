@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { STACK_CONNECTOR_LOGOS } from '@kbn/stack-connectors-plugin/public/common/logos';
+import { getStackConnectorLogo } from '@kbn/stack-connectors-plugin/public/common/logos';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { HARDCODED_ICONS } from './icons/hardcoded_icons';
@@ -25,13 +25,12 @@ const DEFAULT_CONNECTOR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16
 /**
  * Get base64 encoded SVG icon for a connector type
  */
-export function getStepIconBase64(connectorType: string): string {
+export async function getStepIconBase64(connectorType: string): Promise<string> {
   try {
     const dotConnectorType = `.${connectorType}`;
     // First, try to get the logo directly from stack connectors
-    if (dotConnectorType in STACK_CONNECTOR_LOGOS) {
-      const LogoComponent =
-        STACK_CONNECTOR_LOGOS[dotConnectorType as keyof typeof STACK_CONNECTOR_LOGOS];
+    const LogoComponent = await getStackConnectorLogo(dotConnectorType);
+    if (LogoComponent) {
       return getBase64FromReactComponent(LogoComponent);
     }
 
@@ -64,47 +63,51 @@ export function getStepIconBase64(connectorType: string): string {
 function getBase64FromReactComponent(
   component: React.ComponentType<{ width: number; height: number }>
 ): string {
-  // Render the actual logo component to HTML string
-  const logoElement = React.createElement(component, { width: 16, height: 16 });
-  let htmlString = renderToStaticMarkup(logoElement);
+  try {
+    const logoElement = React.createElement(component, { width: 16, height: 16 });
+    let htmlString = renderToStaticMarkup(logoElement);
 
-  // Check if it's an <img> tag (imported SVG) or direct <svg>
-  const isImgTag = htmlString.includes('<img');
+    // Check if it's an <img> tag (imported SVG) or direct <svg>
+    const isImgTag = htmlString.includes('<img');
 
-  if (isImgTag) {
-    // Extract the src attribute from the img tag
-    const srcMatch = htmlString.match(/src="([^"]+)"/);
-    if (srcMatch && srcMatch[1]) {
-      const srcValue = srcMatch[1];
+    if (isImgTag) {
+      // Extract the src attribute from the img tag
+      const srcMatch = htmlString.match(/src="([^"]+)"/);
+      if (srcMatch && srcMatch[1]) {
+        const srcValue = srcMatch[1];
 
-      // If it's already a data URL, extract the base64 part
-      if (srcValue.startsWith('data:image/svg+xml;base64,')) {
-        const base64 = srcValue.replace('data:image/svg+xml;base64,', '');
-        return base64;
+        // If it's already a data URL, extract the base64 part
+        if (srcValue.startsWith('data:image/svg+xml;base64,')) {
+          const base64 = srcValue.replace('data:image/svg+xml;base64,', '');
+          return base64;
+        }
+
+        // If it's a different data URL format, return it as is
+        if (srcValue.startsWith('data:')) {
+          // Convert to base64 if needed
+          const base64 = btoa(srcValue);
+          return base64;
+        }
+
+        // If it's a regular URL/path, we can't easily convert it here
       }
+    } else {
+      // It's a direct SVG - handle as before
+      const hasFillNone = /fill="none"/i.test(htmlString);
 
-      // If it's a different data URL format, return it as is
-      if (srcValue.startsWith('data:')) {
-        // Convert to base64 if needed
-        const base64 = btoa(srcValue);
-        return base64;
+      if (hasFillNone) {
+        // Remove fill="none" and add currentColor fill
+        htmlString = htmlString
+          .replace(/fill="none"/gi, '')
+          .replace(/fill='none'/gi, '')
+          .replace(/<svg([^>]*?)>/, '<svg$1 fill="currentColor">');
       }
-
-      // If it's a regular URL/path, we can't easily convert it here
     }
-  } else {
-    // It's a direct SVG - handle as before
-    const hasFillNone = /fill="none"/i.test(htmlString);
 
-    if (hasFillNone) {
-      // Remove fill="none" and add currentColor fill
-      htmlString = htmlString
-        .replace(/fill="none"/gi, '')
-        .replace(/fill='none'/gi, '')
-        .replace(/<svg([^>]*?)>/, '<svg$1 fill="currentColor">');
-    }
+    const base64 = btoa(htmlString);
+    return base64;
+  } catch (error) {
+    // Fallback to default SVG on any error
+    return btoa(DEFAULT_CONNECTOR_SVG);
   }
-
-  const base64 = btoa(htmlString);
-  return base64;
 }
