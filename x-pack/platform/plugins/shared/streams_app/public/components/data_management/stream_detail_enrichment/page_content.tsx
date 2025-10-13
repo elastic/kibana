@@ -85,6 +85,9 @@ export function StreamDetailEnrichmentContentImpl() {
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
   const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
+  const hasDefinitionError = useSimulatorSelector((snapshot) =>
+    Boolean(snapshot.context.simulation?.definition_error)
+  );
 
   const canManage = useStreamEnrichmentSelector(
     (state) => state.context.definition.privileges.manage
@@ -175,6 +178,7 @@ export function StreamDetailEnrichmentContentImpl() {
           isLoading={isSavingChanges}
           disabled={!hasChanges}
           insufficientPrivileges={!canManage}
+          isInvalid={hasDefinitionError}
         />
       )}
     </EuiSplitPanel.Outer>
@@ -188,7 +192,7 @@ const StepsEditor = React.memo(() => {
 
   const errors = useMemo(() => {
     if (!simulation) {
-      return { ignoredFields: [], mappingFailures: [] };
+      return { ignoredFields: [], mappingFailures: [], definition_error: undefined };
     }
 
     const ignoredFieldsSet = new Set<string>();
@@ -211,6 +215,7 @@ const StepsEditor = React.memo(() => {
     return {
       ignoredFields: Array.from(ignoredFieldsSet),
       mappingFailures: Array.from(mappingFailuresSet),
+      definition_error: simulation.definition_error,
     };
   }, [simulation]);
 
@@ -219,8 +224,23 @@ const StepsEditor = React.memo(() => {
   return (
     <>
       {hasSteps ? <RootSteps stepRefs={stepRefs} /> : <NoStepsEmptyPrompt />}
-      {(!isEmpty(errors.ignoredFields) || !isEmpty(errors.mappingFailures)) && (
+      {(!isEmpty(errors.ignoredFields) ||
+        !isEmpty(errors.mappingFailures) ||
+        errors.definition_error) && (
         <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
+          {errors.definition_error && (
+            <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
+              <EuiText size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.streams.streamDetailView.managementTab.enrichment.definitionError"
+                    defaultMessage="Please fix this error before saving: {error}"
+                    values={{ error: errors.definition_error.message }}
+                  />
+                </p>
+              </EuiText>
+            </EuiPanel>
+          )}
           {!isEmpty(errors.ignoredFields) && (
             <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
               <EuiAccordion
