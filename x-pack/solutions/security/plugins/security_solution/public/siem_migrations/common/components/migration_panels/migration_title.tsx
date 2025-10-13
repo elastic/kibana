@@ -9,7 +9,7 @@
  * Generic MigrationTitle component for SIEM migrations (rules & dashboards)
  * Wraps inline rename + delete actions. Preserves existing data-test-subj values used by rule panels.
  */
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -57,6 +57,13 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
   } = useIsOpenState(false);
 
   const confirmModalTitleId = useGeneratedHtmlId();
+
+  useEffect(() => {
+    if (migrationStats.id) {
+      setName(migrationStats.name);
+      setIsEditing(false);
+    }
+  }, [migrationStats.id, migrationStats.name]);
 
   const onRenameError = useCallback(() => {
     setName(migrationStats.name); // revert visual name; toast handled in hook
