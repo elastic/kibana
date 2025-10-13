@@ -50135,15 +50135,7 @@ paths:
                                       - title
                                   - type: object
                                     properties:
-                                      kql:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          query:
-                                            type: string
-                                        required:
-                                          - query
-                                      system:
+                                      feature:
                                         additionalProperties: false
                                         type: object
                                         properties:
@@ -50283,6 +50275,14 @@ paths:
                                         required:
                                           - name
                                           - filter
+                                      kql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            type: string
+                                        required:
+                                          - query
                                     required:
                                       - kql
                               type: array
@@ -52019,15 +52019,7 @@ paths:
                                       - title
                                   - type: object
                                     properties:
-                                      kql:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          query:
-                                            type: string
-                                        required:
-                                          - query
-                                      system:
+                                      feature:
                                         additionalProperties: false
                                         type: object
                                         properties:
@@ -52167,6 +52159,14 @@ paths:
                                         required:
                                           - name
                                           - filter
+                                      kql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            type: string
+                                        required:
+                                          - query
                                     required:
                                       - kql
                               type: array
@@ -53679,15 +53679,7 @@ paths:
                                       - title
                                   - type: object
                                     properties:
-                                      kql:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          query:
-                                            type: string
-                                        required:
-                                          - query
-                                      system:
+                                      feature:
                                         additionalProperties: false
                                         type: object
                                         properties:
@@ -53827,6 +53819,14 @@ paths:
                                         required:
                                           - name
                                           - filter
+                                      kql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            type: string
+                                        required:
+                                          - query
                                     required:
                                       - kql
                               type: array
@@ -55413,15 +55413,7 @@ paths:
                                       - title
                                   - type: object
                                     properties:
-                                      kql:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          query:
-                                            type: string
-                                        required:
-                                          - query
-                                      system:
+                                      feature:
                                         additionalProperties: false
                                         type: object
                                         properties:
@@ -55561,6 +55553,14 @@ paths:
                                         required:
                                           - name
                                           - filter
+                                      kql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            type: string
+                                        required:
+                                          - query
                                     required:
                                       - kql
                               type: array
@@ -57073,15 +57073,7 @@ paths:
                                   - title
                               - type: object
                                 properties:
-                                  kql:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      query:
-                                        type: string
-                                    required:
-                                      - query
-                                  system:
+                                  feature:
                                     additionalProperties: false
                                     type: object
                                     properties:
@@ -57221,6 +57213,14 @@ paths:
                                     required:
                                       - name
                                       - filter
+                                  kql:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      query:
+                                        type: string
+                                    required:
+                                      - query
                                 required:
                                   - kql
                           type: array
@@ -61130,15 +61130,7 @@ paths:
                                   - title
                               - type: object
                                 properties:
-                                  kql:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      query:
-                                        type: string
-                                    required:
-                                      - query
-                                  system:
+                                  feature:
                                     additionalProperties: false
                                     type: object
                                     properties:
@@ -61278,6 +61270,14 @@ paths:
                                     required:
                                       - name
                                       - filter
+                                  kql:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      query:
+                                        type: string
+                                    required:
+                                      - query
                                 required:
                                   - kql
                         required:
@@ -61376,15 +61376,7 @@ paths:
               additionalProperties: false
               type: object
               properties:
-                kql:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    query:
-                      type: string
-                  required:
-                    - query
-                system:
+                feature:
                   additionalProperties: false
                   type: object
                   properties:
@@ -61524,6 +61516,14 @@ paths:
                   required:
                     - name
                     - filter
+                kql:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    query:
+                      type: string
+                  required:
+                    - query
                 title:
                   minLength: 1
                   type: string
@@ -61740,7 +61740,7 @@ paths:
               additionalProperties: false
               type: object
               properties:
-                system:
+                feature:
                   additionalProperties: false
                   type: object
                   properties:
@@ -61934,15 +61934,7 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
-                    kql:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        query:
-                          type: string
-                      required:
-                        - query
-                    system:
+                    feature:
                       additionalProperties: false
                       type: object
                       properties:
@@ -62082,6 +62074,14 @@ paths:
                       required:
                         - name
                         - filter
+                    kql:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        query:
+                          type: string
+                      required:
+                        - query
                   required:
                     - kql
               required:

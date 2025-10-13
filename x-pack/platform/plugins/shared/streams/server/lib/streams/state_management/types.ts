@@ -12,7 +12,7 @@ import type { AssetClient } from '../assets/asset_client';
 import type { StreamsClient } from '../client';
 import type { StreamsStorageClient } from '../storage/streams_storage_client';
 import type { QueryClient } from '../assets/query/query_client';
-import type { SystemClient } from '../system/system_client';
+import type { FeatureClient } from '../feature/feature_client';
 
 interface StreamUpsertChange {
   type: 'upsert';
@@ -33,7 +33,7 @@ export interface StateDependencies {
   storageClient: StreamsStorageClient;
   scopedClusterClient: IScopedClusterClient;
   assetClient: AssetClient;
-  systemClient: SystemClient;
+  featureClient: FeatureClient;
   queryClient: QueryClient;
   isServerless: boolean;
   isDev: boolean;
