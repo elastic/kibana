@@ -76,7 +76,7 @@ export const DiscoverMainRoute = ({
         ...withNotifyOnErrors(services.core.notifications.toasts),
       })
   );
-  const { internalState, runtimeStateManager } = useStateManagers({
+  const { internalState, runtimeStateManager, searchSessionManager } = useStateManagers({
     services,
     urlStateStorage,
     customizationContext,
@@ -92,6 +92,7 @@ export const DiscoverMainRoute = ({
         urlStateStorage={urlStateStorage}
         internalState={internalState}
         runtimeStateManager={runtimeStateManager}
+        searchSessionManager={searchSessionManager}
       />
     </InternalStateProvider>
   );
@@ -251,7 +252,11 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     <rootProfileState.AppWrapper>
       <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
         <DiscoverTopNavMenuProvider>
-          {tabsEnabled ? <TabsView {...props} /> : <SingleTabView {...props} />}
+          {tabsEnabled && customizationContext.displayMode !== 'embedded' ? (
+            <TabsView {...props} />
+          ) : (
+            <SingleTabView {...props} />
+          )}
         </DiscoverTopNavMenuProvider>
       </ChartPortalsRenderer>
     </rootProfileState.AppWrapper>
