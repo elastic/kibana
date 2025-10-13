@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiPageHeaderSection, useEuiTheme } from '@elastic/eui';
+import { EuiPageHeaderSection, EuiButton, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -29,7 +29,18 @@ export const HeaderRightActions: React.FC<{}> = () => {
 
   return (
     <EuiPageHeaderSection css={actionsContainerStyles} aria-label={labels.container}>
-      right
+      <EuiButton
+        fill
+        size="m"
+        onClick={() => {
+          // TODO: Implement run evaluation functionality
+          console.log('Run evaluation clicked');
+        }}
+      >
+        {i18n.translate('xpack.onechat.evaluations.runEval', {
+          defaultMessage: 'Run Evaluations',
+        })}
+      </EuiButton>
     </EuiPageHeaderSection>
   );
 };
