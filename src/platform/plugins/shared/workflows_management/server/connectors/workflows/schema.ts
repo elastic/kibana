@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod';
 import { schema } from '@kbn/config-schema';
 
-const RunSubActionParamsSchema = schema.object({
-  workflowId: schema.string(),
-  inputs: schema.maybe(schema.any()),
-  alerts: schema.arrayOf(schema.any()),
-  spaceId: schema.string(),
-});
+const RunSubActionParamsSchema = z
+  .object({
+    workflowId: z.string(),
+    inputs: z.any().optional(),
+    alerts: z.array(z.any()),
+    spaceId: z.string(),
+  })
+  .strict();
 
 // Schema for rule configuration (what the UI saves)
 export const WorkflowsRuleActionParamsSchema = schema.object({
@@ -26,9 +29,11 @@ export const WorkflowsRuleActionParamsSchema = schema.object({
 });
 
 // Schema for execution (what the executor receives)
-export const ExecutorParamsSchema = schema.object({
-  subAction: schema.literal('run'),
-  subActionParams: RunSubActionParamsSchema,
-});
+export const ExecutorParamsSchema = z
+  .object({
+    subAction: z.literal('run'),
+    subActionParams: RunSubActionParamsSchema,
+  })
+  .strict();
 
 export const ExecutorSubActionRunParamsSchema = RunSubActionParamsSchema;

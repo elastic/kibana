@@ -263,6 +263,41 @@ export const SentinelOneGetActivitiesParamsSchema = z
   .strict()
   .optional();
 
+export const SentinelOneGetActivitiesResponseDataSchema = z
+  .object({
+    accountId: z.string(),
+    accountName: z.string(),
+    activityType: z.coerce.number(),
+    activityUuid: z.string(),
+    agentId: z.string().nullable().default(null),
+    agentUpdatedVersion: z.string().nullable().default(null),
+    comments: z.string().nullable().default(null),
+    createdAt: z.string(),
+    data: z
+      .object({
+        // Empty by design.
+        // The SentinelOne Activity Log can place any (unknown) data here
+      })
+      .passthrough(),
+    description: z.string().nullable().default(null),
+    groupId: z.string().nullable().default(null),
+    groupName: z.string().nullable().default(null),
+    hash: z.string().nullable().default(null),
+    id: z.string(),
+    osFamily: z.string().nullable().default(null),
+    primaryDescription: z.string().nullable().default(null),
+    secondaryDescription: z.string().nullable().default(null),
+    siteId: z.string(),
+    siteName: z.string(),
+    threatId: z.string().nullable().default(null),
+    updatedAt: z.string(),
+    userId: z.string().nullable().default(null),
+  })
+  .passthrough();
+
+export const SentinelOneGetActivitiesResponseNoDataSchema =
+  SentinelOneGetActivitiesResponseDataSchema.omit({ data: true });
+
 export const SentinelOneGetActivitiesResponseSchema = z
   .object({
     errors: z.array(z.string()).optional(),
@@ -272,39 +307,7 @@ export const SentinelOneGetActivitiesResponseSchema = z
         totalItems: z.coerce.number(),
       })
       .strict(),
-    data: z.array(
-      z
-        .object({
-          accountId: z.string(),
-          accountName: z.string(),
-          activityType: z.coerce.number(),
-          activityUuid: z.string(),
-          agentId: z.string().nullable().default(null),
-          agentUpdatedVersion: z.string().nullable().default(null),
-          comments: z.string().nullable().default(null),
-          createdAt: z.string(),
-          data: z
-            .object({
-              // Empty by design.
-              // The SentinelOne Activity Log can place any (unknown) data here
-            })
-            .passthrough(),
-          description: z.string().nullable().default(null),
-          groupId: z.string().nullable().default(null),
-          groupName: z.string().nullable().default(null),
-          hash: z.string().nullable().default(null),
-          id: z.string(),
-          osFamily: z.string().nullable().default(null),
-          primaryDescription: z.string().nullable().default(null),
-          secondaryDescription: z.string().nullable().default(null),
-          siteId: z.string(),
-          siteName: z.string(),
-          threatId: z.string().nullable().default(null),
-          updatedAt: z.string(),
-          userId: z.string().nullable().default(null),
-        })
-        .passthrough()
-    ),
+    data: z.array(SentinelOneGetActivitiesResponseDataSchema),
   })
   .passthrough();
 

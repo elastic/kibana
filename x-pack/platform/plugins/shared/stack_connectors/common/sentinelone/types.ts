@@ -27,6 +27,7 @@ import type {
   SentinelOneExecuteScriptResponseSchema,
   SentinelOneGetRemoteScriptResultsParamsSchema,
   SentinelOneDownloadRemoteScriptResultsParamsSchema,
+  SentinelOneGetActivitiesResponseNoDataSchema,
 } from './schema';
 
 interface SentinelOnePagination {
@@ -149,10 +150,10 @@ export type SentinelOneDownloadAgentFileParams = Mutable<
   z.infer<typeof SentinelOneDownloadAgentFileParamsSchema>
 >;
 
-export type SentinelOneActivityRecord<TData = unknown> = Omit<
-  z.infer<typeof SentinelOneGetActivitiesResponseSchema>['data'][number],
-  'data'
-> & {
+export type SentinelOneGetActivitiesResponseData = z.infer<
+  typeof SentinelOneGetActivitiesResponseNoDataSchema
+>;
+export type SentinelOneActivityRecord<TData = unknown> = SentinelOneGetActivitiesResponseData & {
   data: TData;
 };
 
