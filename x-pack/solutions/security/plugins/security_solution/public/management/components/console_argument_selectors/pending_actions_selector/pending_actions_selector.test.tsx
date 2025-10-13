@@ -649,9 +649,9 @@ describe('PendingActionsSelector', () => {
     const callArgs = mockUseGetEndpointActionList.mock.calls[0][0];
     const commandsArray = callArgs.commands;
 
+    expect(commandsArray).toBeDefined();
     expect(commandsArray).not.toContain('cancel');
-
-    expect(commandsArray.length).toBeGreaterThan(0);
+    expect(commandsArray!.length).toBeGreaterThan(0);
   });
 
   describe('Unified tooltip for disabled options', () => {
