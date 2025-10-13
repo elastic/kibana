@@ -1218,6 +1218,7 @@
     "chroma-js": "^2.1.0",
     "chrome-remote-interface": "^0.33.3",
     "classnames": "^2.5.1",
+    "colors": "^1.4.0",
     "commander": "^4.1.1",
     "constate": "^3.3.3",
     "copy-to-clipboard": "^3.3.3",
