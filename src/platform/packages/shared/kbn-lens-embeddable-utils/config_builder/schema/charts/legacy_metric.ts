@@ -9,23 +9,12 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import {
-  countMetricOperationSchema,
-  formulaOperationDefinitionSchema,
-  lastValueOperationSchema,
-  metricOperationSchema,
-  percentileOperationSchema,
-  percentileRanksOperationSchema,
-  staticOperationDefinitionSchema,
-  uniqueCountMetricOperationSchema,
-  sumMetricOperationSchema,
-  esqlColumnSchema,
-  genericOperationOptionsSchema,
-} from '../metric_ops';
+import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { layerSettingsSchema, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } from '../shared';
 import { applyColorToSchema, colorByValueSchema } from '../color';
 import { horizontalAlignmentSchema, verticalAlignmentSchema } from '../alignments';
+import { mergeAllMetricsWithChartDimensionSchema } from './shared';
 
 const legacyMetricStateMetricOptionsSchema = schema.object({
   /**
@@ -92,22 +81,7 @@ export const legacyMetricStateSchemaNoESQL = schema.object({
   /**
    * Metric configuration, must define operation.
    */
-  metric: schema.oneOf([
-    // no reference-based metrics for legacy metric
-    schema.oneOf([
-      schema.allOf([legacyMetricStateMetricOptionsSchema, countMetricOperationSchema]),
-      schema.allOf([legacyMetricStateMetricOptionsSchema, uniqueCountMetricOperationSchema]),
-      schema.allOf([legacyMetricStateMetricOptionsSchema, metricOperationSchema]),
-      schema.allOf([legacyMetricStateMetricOptionsSchema, sumMetricOperationSchema]),
-      schema.allOf([legacyMetricStateMetricOptionsSchema, lastValueOperationSchema]),
-      schema.allOf([legacyMetricStateMetricOptionsSchema, percentileOperationSchema]),
-      schema.allOf([legacyMetricStateMetricOptionsSchema, percentileRanksOperationSchema]),
-    ]),
-    schema.oneOf([
-      schema.allOf([legacyMetricStateMetricOptionsSchema, staticOperationDefinitionSchema]),
-      schema.allOf([legacyMetricStateMetricOptionsSchema, formulaOperationDefinitionSchema]),
-    ]),
-  ]),
+  metric: mergeAllMetricsWithChartDimensionSchema(legacyMetricStateMetricOptionsSchema),
 });
 
 const esqlLegacyMetricState = schema.object({
