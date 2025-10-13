@@ -6988,6 +6988,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-nav-icons@link:x-pack/solutions/observability/packages/nav-icons":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-onboarding-plugin@link:x-pack/solutions/observability/plugins/observability_onboarding":
   version "0.0.0"
   uid ""
