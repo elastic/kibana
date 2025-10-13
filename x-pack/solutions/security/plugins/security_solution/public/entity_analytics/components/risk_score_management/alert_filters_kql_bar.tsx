@@ -16,10 +16,14 @@ import {
   EuiButtonIcon,
   EuiPanel,
   EuiSpacer,
-  EuiButton,
+  EuiTextColor,
 } from '@elastic/eui';
 import type { Query, Filter } from '@kbn/es-query';
-import { KqlFieldSuggestions } from './kql_field_suggestions';
+import { fromKueryExpression } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { useSourcererDataView } from '../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from '../../translations';
 
 // Define the types of entities for the combobox
@@ -31,7 +35,8 @@ const ENTITY_OPTIONS = [
 
 interface AlertFiltersKqlBarProps {
   onQueryChange?: (query: Query) => void;
-  onSave?: (filters: Array<{ id: string; text: string }>) => void;
+  onFiltersChange?: (filters: Array<{ id: string; text: string }>) => void;
+  filters?: Array<{ id: string; text: string }>;
   placeholder?: string;
   compressed?: boolean;
   'data-test-subj'?: string;
@@ -124,87 +129,138 @@ const CustomFilterChip: React.FC<CustomFilterChipProps> = ({ filter, onRemove })
 
 export const AlertFiltersKqlBar: React.FC<AlertFiltersKqlBarProps> = ({
   onQueryChange,
-  onSave,
+  onFiltersChange,
+  filters = [],
   placeholder = i18n.ALERT_FILTERS_PLACEHOLDER,
   compressed = true,
   'data-test-subj': dataTestSubj = 'alertFiltersKqlBar',
 }) => {
-  const [query, setQuery] = useState<string>('');
-  const [filters, setFilters] = useState<Array<{ id: string; text: string }>>([]);
+  const { sourcererDataView } = useSourcererDataView(SourcererScopeName.explore);
+  const {
+    unifiedSearch: {
+      ui: { SearchBar },
+    },
+    data,
+  } = useKibana().services;
 
-  // Storage key for persisting filters
-  const STORAGE_KEY = 'entity-analytics-alert-filters';
+  const [query, setQuery] = useState<Query>({
+    query: '',
+    language: 'kuery',
+  });
 
-  // Load filters from localStorage on component mount
+  const [dataView, setDataView] = useState<DataView | null>(null);
+  const [validationError, setValidationError] = useState<string | undefined>();
+
+  // Create DataView asynchronously to ensure fields are properly populated
   useEffect(() => {
-    try {
-      const savedFilters = localStorage.getItem(STORAGE_KEY);
-      if (savedFilters) {
-        const parsedFilters = JSON.parse(savedFilters);
-        setFilters(parsedFilters);
+    let dv: DataView;
+    const createDataView = async () => {
+      if (sourcererDataView) {
+        dv = await data.dataViews.create(sourcererDataView);
+        setDataView(dv);
       }
-    } catch (error) {
-      // Silently handle localStorage errors
-    }
-  }, []);
+    };
+    createDataView();
 
-  // Save filters to localStorage whenever filters change
-  useEffect(() => {
-    try {
-      if (filters.length > 0) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(filters));
+    return () => {
+      if (dv?.id) {
+        data.dataViews.clearInstanceCache(dv.id);
+      }
+    };
+  }, [data.dataViews, sourcererDataView]);
+
+  const handleQueryChange = useCallback((payload: { query?: Query }) => {
+    if (payload.query) {
+      setQuery(payload.query);
+
+      // Validate KQL syntax in real-time
+      const queryText =
+        typeof payload.query.query === 'string' ? payload.query.query : String(payload.query.query);
+      if (queryText.trim() && payload.query.language === 'kuery') {
+        try {
+          fromKueryExpression(queryText);
+          setValidationError(undefined);
+        } catch (error) {
+          setValidationError(error instanceof Error ? error.message : 'Invalid KQL syntax');
+        }
       } else {
-        localStorage.removeItem(STORAGE_KEY);
+        setValidationError(undefined);
       }
-    } catch (error) {
-      // Silently handle localStorage errors
     }
-  }, [filters]);
-
-  const handleQueryChange = useCallback(
-    (newQuery: string) => {
-      setQuery(newQuery);
-      onQueryChange?.({ query: newQuery, language: 'kuery' });
-    },
-    [onQueryChange]
-  );
-
-  const handleKeyPress = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter' && query.trim()) {
-        const newFilter = {
-          id: Date.now().toString(),
-          text: query.trim(),
-        };
-        setFilters((prev) => [...prev, newFilter]);
-        setQuery('');
-      }
-    },
-    [query]
-  );
-
-  const onRemoveFilter = useCallback((filterToRemove: { id: string; text: string }) => {
-    setFilters((prev) => prev.filter((f) => f.id !== filterToRemove.id));
   }, []);
 
-  const handleSave = useCallback(() => {
-    onSave?.(filters);
-    // Clear localStorage after successful save (assuming save was successful)
-    // In a real implementation, you might want to wait for the API response
-    localStorage.removeItem(STORAGE_KEY);
-  }, [filters, onSave, STORAGE_KEY]);
+  const handleQuerySubmit = useCallback(
+    (payload: { query?: Query }) => {
+      if (payload.query) {
+        const queryText =
+          typeof payload.query.query === 'string'
+            ? payload.query.query
+            : String(payload.query.query);
+
+        // Validate before submitting
+        if (queryText.trim() && payload.query.language === 'kuery') {
+          try {
+            fromKueryExpression(queryText);
+            setValidationError(undefined);
+
+            // Add the query as a filter
+            const newFilter = {
+              id: Date.now().toString(),
+              text: queryText,
+            };
+            const updatedFilters = [...filters, newFilter];
+            onFiltersChange?.(updatedFilters);
+
+            onQueryChange?.(payload.query);
+
+            // Clear the query input
+            setQuery({ query: '', language: 'kuery' });
+          } catch (error) {
+            setValidationError(error instanceof Error ? error.message : 'Invalid KQL syntax');
+          }
+        }
+      }
+    },
+    [onQueryChange, onFiltersChange, filters]
+  );
+
+  const onRemoveFilter = useCallback(
+    (filterToRemove: { id: string; text: string }) => {
+      const updatedFilters = filters.filter((f) => f.id !== filterToRemove.id);
+      onFiltersChange?.(updatedFilters);
+    },
+    [filters, onFiltersChange]
+  );
+
+  if (!dataView) {
+    return null;
+  }
 
   return (
     <EuiFormRow label={i18n.ALERT_FILTERS_LABEL} display="rowCompressed" fullWidth>
       <div>
-        <KqlFieldSuggestions
-          value={query}
-          onChange={handleQueryChange}
-          onKeyPress={handleKeyPress}
+        <SearchBar
+          appName="siem"
+          showFilterBar={false}
+          showQueryInput={true}
+          showDatePicker={false}
+          showQueryMenu={false}
+          showSubmitButton={false}
+          indexPatterns={[dataView]}
+          onQueryChange={handleQueryChange}
+          onQuerySubmit={handleQuerySubmit}
+          query={query}
           placeholder={placeholder}
-          compressed={compressed}
-          data-test-subj={dataTestSubj}
+          dataTestSubj={dataTestSubj}
         />
+        {validationError ? (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiTextColor color="danger" data-test-subj="alertFiltersKqlBarError">
+              {validationError}
+            </EuiTextColor>
+          </>
+        ) : null}
         <EuiSpacer size="s" />
         <EuiFlexGroup direction="column" gutterSize="s">
           {filters.map((filter) => (
@@ -216,24 +272,6 @@ export const AlertFiltersKqlBar: React.FC<AlertFiltersKqlBarProps> = ({
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
-        {filters.length > 0 && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  fill
-                  iconType="save"
-                  onClick={handleSave}
-                  data-test-subj="saveAlertFilters"
-                >
-                  {i18n.SAVE_FILTERS}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
       </div>
     </EuiFormRow>
   );

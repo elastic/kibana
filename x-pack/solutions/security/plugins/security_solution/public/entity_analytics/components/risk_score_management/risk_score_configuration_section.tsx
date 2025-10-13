@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiFormRow,
+  EuiIconTip,
 } from '@elastic/eui';
 import * as i18n from '../../translations';
 import type { RiskScoreConfiguration } from './hooks/risk_score_configurable_risk_engine_settings_hooks';
@@ -23,12 +24,12 @@ export const RiskScoreConfigurationSection = ({
   selectedRiskEngineSettings,
   setSelectedDateSetting,
   toggleSelectedClosedAlertsSetting,
-  onSaveAlertFilters,
+  onAlertFiltersChange,
 }: {
   selectedRiskEngineSettings: RiskScoreConfiguration | undefined;
   setSelectedDateSetting: ({ start, end }: { start: string; end: string }) => void;
   toggleSelectedClosedAlertsSetting: () => void;
-  onSaveAlertFilters?: (filters: Array<{ id: string; text: string }>) => void;
+  onAlertFiltersChange?: (filters: Array<{ id: string; text: string }>) => void;
 }) => {
   if (!selectedRiskEngineSettings) {
     return (
@@ -63,31 +64,42 @@ export const RiskScoreConfigurationSection = ({
         />
       </EuiFormRow>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="xl" />
 
       {/* Closed alerts checkbox */}
-      <EuiSwitch
-        label={i18n.INCLUDE_CLOSED_ALERTS_LABEL}
-        checked={selectedRiskEngineSettings.includeClosedAlerts}
-        onChange={toggleSelectedClosedAlertsSetting}
-        data-test-subj="includeClosedAlertsSwitch"
-      />
+      <EuiFormRow
+        label={
+          <span>
+            {i18n.CLOSED_ALERTS_TEXT}{' '}
+            <EuiIconTip
+              type="info"
+              content={i18n.RISK_ENGINE_INCLUDE_CLOSED_ALERTS_DESCRIPTION}
+              position="right"
+            />
+          </span>
+        }
+        display="rowCompressed"
+      >
+        <EuiSwitch
+          label={i18n.INCLUDE_CLOSED_ALERTS_LABEL}
+          checked={selectedRiskEngineSettings.includeClosedAlerts}
+          onChange={toggleSelectedClosedAlertsSetting}
+          data-test-subj="includeClosedAlertsSwitch"
+        />
+      </EuiFormRow>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="xl" />
 
       {/* Alert filters section */}
       <AlertFiltersKqlBar
         placeholder={i18n.ALERT_FILTERS_PLACEHOLDER}
         compressed={true}
         data-test-subj="alertFiltersKqlBar"
-        onSave={onSaveAlertFilters}
+        onFiltersChange={onAlertFiltersChange}
+        filters={selectedRiskEngineSettings.alertFilters}
       />
 
       <EuiSpacer size="m" />
-
-      <EuiText size="s">
-        <p>{i18n.RISK_ENGINE_INCLUDE_CLOSED_ALERTS_DESCRIPTION}</p>
-      </EuiText>
     </>
   );
 };

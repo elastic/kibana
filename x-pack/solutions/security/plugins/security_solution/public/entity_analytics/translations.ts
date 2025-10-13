@@ -160,10 +160,17 @@ export const RISK_SCORE_ALERT_CONFIG = i18n.translate(
   }
 );
 
+export const CLOSED_ALERTS_TEXT = i18n.translate(
+  'xpack.securitySolution.riskScore.closedAlertsText',
+  {
+    defaultMessage: 'Closed Alerts',
+  }
+);
+
 export const INCLUDE_CLOSED_ALERTS_LABEL = i18n.translate(
   'xpack.securitySolution.riskScore.includeClosedAlertsLabel',
   {
-    defaultMessage: 'Include closed alerts for risk scoring',
+    defaultMessage: 'Include closed alerts in calculation',
   }
 );
 
@@ -196,14 +203,14 @@ export const RUN_RISK_SCORE_ENGINE = i18n.translate('xpack.securitySolution.risk
 export const SAVE_CHANGES = i18n.translate(
   'xpack.securitySolution.riskScore.engineSavedObjectsaveChanges',
   {
-    defaultMessage: 'Save',
+    defaultMessage: 'Save Changes',
   }
 );
 
 export const DISCARD_CHANGES = i18n.translate(
   'xpack.securitySolution.riskScore.engineSavedObject.discardChanges',
   {
-    defaultMessage: 'Discard',
+    defaultMessage: 'Discard Changes',
   }
 );
 
