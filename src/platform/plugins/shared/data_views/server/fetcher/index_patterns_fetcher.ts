@@ -102,6 +102,8 @@ export class IndexPatternsFetcher {
 
     const expandWildcards = allowHidden ? 'all' : 'open';
 
+    performance.mark('getFieldsForWildcard:start');
+
     const fieldCapsResponse = await getFieldCapabilities({
       callCluster: this.elasticsearchClient,
       uiSettingsClient: this.uiSettingsClient,
@@ -119,6 +121,8 @@ export class IndexPatternsFetcher {
       runtimeMappings,
       abortSignal,
     });
+
+    performance.mark('getFieldsForWildcard:getFieldCapsEnd');
 
     if (this.rollupsEnabled && type === DataViewType.ROLLUP && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
@@ -152,6 +156,29 @@ export class IndexPatternsFetcher {
         indices: fieldCapsResponse.indices,
       };
     }
+
+    performance.mark('getFieldsForWildcard:end');
+
+    // add measures and print all measures
+    performance.measure('getFieldsForWildcard:total', 'getFieldsForWildcard:start');
+    performance.measure(
+      'getFieldsForWildcard:getFieldCaps',
+      'getFieldsForWildcard:start',
+      'getFieldsForWildcard:getFieldCapsEnd'
+    );
+    performance.measure(
+      'getFieldsForWildcard:rollupProcessing',
+      'getFieldsForWildcard:getFieldCapsEnd',
+      'getFieldsForWildcard:end'
+    );
+
+    performance.getEntriesByType('measure').forEach((m) => {
+      // eslint-disable-next-line no-console
+      console.log(`${m.name}: ${m.duration}`);
+    });
+    performance.clearMarks();
+    performance.clearMeasures();
+
     return fieldCapsResponse;
   }
 

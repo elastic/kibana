@@ -60,7 +60,9 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     abortSignal,
   } = params;
 
+  performance.mark('getFieldCapabilities:start');
   const excludedTiers = await uiSettingsClient?.get<string>(DATA_VIEWS_FIELDS_EXCLUDED_TIERS);
+  performance.mark('getFieldCapabilities:uiSettingsEnd');
   const esFieldCaps = await callFieldCapsApi({
     callCluster,
     indices,
@@ -73,7 +75,10 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     runtimeMappings,
     abortSignal,
   });
-  const fieldCapsArr = readFieldCapsResponse(esFieldCaps.body);
+  performance.mark('getFieldCapabilities:responseEnd');
+  const fieldCapsArr = await readFieldCapsResponse(esFieldCaps.body);
+  performance.mark('getFieldCapabilities:readEnd');
+
   const fieldsFromFieldCapsByName = keyBy(fieldCapsArr, 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
@@ -104,6 +109,30 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
       })
     )
     .map(mergeOverrides);
+
+  performance.mark('getFieldCapabilities:allFieldsCollectedEnd');
+
+  // add measures and print all measures
+  performance.measure(
+    'getFieldCapabilities:uiSettings',
+    'getFieldCapabilities:start',
+    'getFieldCapabilities:uiSettingsEnd'
+  );
+  performance.measure(
+    'getFieldCapabilities:response',
+    'getFieldCapabilities:uiSettingsEnd',
+    'getFieldCapabilities:responseEnd'
+  );
+  performance.measure(
+    'getFieldCapabilities:read',
+    'getFieldCapabilities:responseEnd',
+    'getFieldCapabilities:readEnd'
+  );
+  performance.measure(
+    'getFieldCapabilities:allFieldsCollected',
+    'getFieldCapabilities:readEnd',
+    'getFieldCapabilities:allFieldsCollectedEnd'
+  );
 
   return {
     fields: sortBy(allFieldsUnsorted, 'name'),
