@@ -22,8 +22,6 @@ export const D3SecurityRunActionParamsSchema = z.object({
   eventType: z.string().default('').optional(),
 });
 
-export const D3SecurityRunActionResponseSchema = z
-  .object({
-    refid: z.string(),
-  })
-  .passthrough();
+export const D3SecurityRunActionResponseSchema = z.object({
+  refid: z.string(),
+});

@@ -27,7 +27,7 @@ export const MicrosoftDefenderEndpointSecretsSchema = z.object({
 // ----------------------------------
 export const MicrosoftDefenderEndpointDoNotValidateResponseSchema = z.any();
 
-export const MicrosoftDefenderEndpointBaseApiResponseSchema = z.object({}).optional();
+export const MicrosoftDefenderEndpointBaseApiResponseSchema = z.object({}).passthrough().optional();
 
 export const MicrosoftDefenderEndpointEmptyParamsSchema = z.object({});
 

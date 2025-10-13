@@ -13,12 +13,6 @@ export const TelemetryMetadataSchema = z.object({
   aggregateBy: z.string().optional(),
 });
 
-// due to https://github.com/colinhacks/zod/issues/2491
-export type ConfigSchemaType = z.ZodSchema<
-  z.output<typeof ConfigSchema>,
-  z.ZodTypeDef,
-  z.input<typeof ConfigSchema>
->;
 export const ConfigSchema = z.object({
   apiUrl: z.string(),
   defaultModel: z.string().default(DEFAULT_GEMINI_MODEL),

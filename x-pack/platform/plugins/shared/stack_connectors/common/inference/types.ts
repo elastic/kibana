@@ -16,7 +16,6 @@ import type {
   RerankParamsSchema,
   RerankResponseSchema,
   SparseEmbeddingParamsSchema,
-  SparseEmbeddingResponseSchema,
   TextEmbeddingParamsSchema,
   TextEmbeddingResponseSchema,
   UnifiedChatCompleteParamsSchema,
@@ -38,7 +37,10 @@ export type RerankParams = z.infer<typeof RerankParamsSchema>;
 export type RerankResponse = z.infer<typeof RerankResponseSchema>;
 
 export type SparseEmbeddingParams = z.infer<typeof SparseEmbeddingParamsSchema>;
-export type SparseEmbeddingResponse = z.infer<typeof SparseEmbeddingResponseSchema>;
+
+export type SparseEmbeddingResponse = Array<{}>;
+// cannot directly infer type due to https://github.com/colinhacks/zod/issues/2938
+// export type SparseEmbeddingResponse = TypeOf<typeof SparseEmbeddingResponseSchema>;
 
 export type TextEmbeddingParams = z.infer<typeof TextEmbeddingParamsSchema>;
 export type TextEmbeddingResponse = z.infer<typeof TextEmbeddingResponseSchema>;

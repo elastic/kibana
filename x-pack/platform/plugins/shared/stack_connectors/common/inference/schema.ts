@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
-
 export const TelemetryMetadataSchema = z.object({
   pluginId: z.string().optional(),
   aggregateBy: z.string().optional(),
@@ -226,7 +225,7 @@ export const SparseEmbeddingParamsSchema = z.object({
   input: z.string(),
 });
 
-export const SparseEmbeddingResponseSchema = z.array(z.object({})).default([]);
+export const SparseEmbeddingResponseSchema = z.array(z.object({}).passthrough()).default([]);
 
 export const TextEmbeddingParamsSchema = z.object({
   input: z.string(),

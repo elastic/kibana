@@ -139,13 +139,11 @@ export const RunApiLatestResponseSchema = z
   })
   .passthrough();
 
-export const RunActionResponseSchema = z
-  .object({
-    completion: z.string(),
-    stop_reason: z.string().optional(),
-    usage: BedrockUsageSchema,
-  })
-  .passthrough();
+export const RunActionResponseSchema = z.object({
+  completion: z.string(),
+  stop_reason: z.string().optional(),
+  usage: BedrockUsageSchema,
+});
 
 export const StreamingResponseSchema = z.any();
 
@@ -166,7 +164,7 @@ export const BedrockClientSendParamsSchema = z.object({
   telemetryMetadata: TelemetryMetadataSchema.optional(),
 });
 
-export const BedrockClientSendResponseSchema = z.object({});
+export const BedrockClientSendResponseSchema = z.object({}).passthrough();
 
 export const ConverseActionParamsSchema = z
   .object({

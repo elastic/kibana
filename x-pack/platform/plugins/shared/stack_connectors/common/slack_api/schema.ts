@@ -21,7 +21,6 @@ export const SlackApiConfigSchema = z.object({
     )
     .max(25)
     .optional(),
-  defaultChannel: z.string().min(1).optional(),
 });
 
 export const ValidChannelIdSubActionParamsSchema = z.object({
@@ -39,38 +38,28 @@ export const PostMessageSubActionParamsSchema = z.object({
   text: z.string().min(1),
 });
 
-export function validateBlockkit(text: string) {
+export function validateBlockkit(text: string, ctx: z.RefinementCtx) {
   try {
     const parsedText = JSON.parse(text);
 
     if (!Object.hasOwn(parsedText, 'blocks')) {
-      return 'block kit body must contain field "blocks"';
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'block kit body must contain field "blocks"',
+      });
     }
   } catch (err) {
-    return `block kit body is not valid JSON - ${err.message}`;
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `block kit body is not valid JSON - ${err.message}`,
+    });
   }
 }
 
 export const PostBlockkitSubActionParamsSchema = z.object({
   channels: z.array(z.string()).max(1).optional(),
   channelIds: z.array(z.string()).max(1).optional(),
-  text: z.string().superRefine((text, ctx) => {
-    try {
-      const parsedText = JSON.parse(text);
-
-      if (!Object.hasOwn(parsedText, 'blocks')) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'block kit body must contain field "blocks"',
-        });
-      }
-    } catch (err) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `block kit body is not valid JSON - ${err.message}`,
-      });
-    }
-  }),
+  text: z.string().superRefine(validateBlockkit),
 });
 
 export const PostMessageParamsSchema = z.object({

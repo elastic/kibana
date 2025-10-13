@@ -22,7 +22,6 @@ import type {
   BedrockMessageSchema,
   BedrockToolChoiceSchema,
   BedrockClientSendParamsSchema,
-  BedrockClientSendResponseSchema,
   ConverseActionParamsSchema,
   ConverseStreamActionParamsSchema,
 } from './schema';
@@ -42,7 +41,10 @@ export type DashboardActionResponse = z.infer<typeof DashboardActionResponseSche
 export type BedrockMessage = z.infer<typeof BedrockMessageSchema>;
 export type BedrockToolChoice = z.infer<typeof BedrockToolChoiceSchema>;
 export type ConverseActionParams = z.infer<typeof BedrockClientSendParamsSchema>;
-export type ConverseActionResponse = z.infer<typeof BedrockClientSendResponseSchema>;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ConverseActionResponse {}
+// cannot directly infer type due to https://github.com/colinhacks/zod/issues/2938
+// export type ConverseActionResponse = z.infer<typeof BedrockClientSendResponseSchema>;
 // New types for Bedrock's converse and converse-stream APIs
 export type ConverseParams = z.infer<typeof ConverseActionParamsSchema>;
 export type ConverseStreamParams = z.infer<typeof ConverseStreamActionParamsSchema>;
