@@ -236,6 +236,16 @@ describe('mappingFromFieldMap', () => {
                 flapping_history: {
                   type: 'boolean',
                 },
+                last_scheduled_actions: {
+                  properties: {
+                    date: {
+                      type: 'keyword',
+                    },
+                    group: {
+                      type: 'keyword',
+                    },
+                  },
+                },
                 maintenance_window_ids: {
                   type: 'keyword',
                 },

@@ -90,6 +90,16 @@ it('matches snapshot', () => {
         "required": false,
         "type": "date",
       },
+      "kibana.alert.last_scheduled_actions.date": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.last_scheduled_actions.group": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.maintenance_window_ids": Object {
         "array": true,
         "required": false,
