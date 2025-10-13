@@ -23,6 +23,15 @@ interface ToolResultMixin<TType extends ToolResultType, TData extends Object> {
   data: TData;
 }
 
+export type DashboardResult = ToolResultMixin<
+  ToolResultType.dashboard,
+  {
+    id: string;
+    title?: string;
+    content: Record<string, unknown>;
+  }
+>;
+
 export type ResourceResult = ToolResultMixin<
   ToolResultType.resource,
   {
@@ -63,6 +72,7 @@ export type ToolResult =
   | ResourceResult
   | TabularDataResult
   | QueryResult
+  | DashboardResult
   | OtherResult
   | ErrorResult;
 

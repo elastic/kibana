@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import type { SavedObjectsServiceStart } from '@kbn/core/server';
+import type { RequestHandlerContext, SavedObjectsServiceStart } from '@kbn/core/server';
 import type { CreateResult } from '@kbn/content-management-plugin/common';
 import type { DashboardItem } from '@kbn/dashboard-plugin/server/content_management';
 import { ToolType } from '@kbn/onechat-common';
@@ -68,7 +68,7 @@ This tool will:
               client: esClient,
             },
           }),
-        } as any;
+        } as unknown as RequestHandlerContext;
 
         const dashboardClient = dashboardContentClient.getForRequest({
           request,
@@ -99,10 +99,9 @@ This tool will:
         return {
           results: [
             {
-              type: ToolResultType.resource,
+              type: ToolResultType.dashboard,
               tool_result_id: getToolResultId(),
               data: {
-                resourceType: 'dashboard',
                 reference: {
                   id: dashboardId,
                 },
