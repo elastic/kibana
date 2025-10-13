@@ -212,9 +212,19 @@ describe('SubActionConnector', () => {
       requestMock.mockReturnValue({ data: { invalidField: 'test' } });
       await expect(async () =>
         service.testUrl({ url: 'https://example.com' }, connectorUsageCollector)
-      ).rejects.toThrow(
-        'Response validation failed (Error: [status]: expected value of type [string] but got [undefined])'
-      );
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`
+        "Response validation failed ([
+          {
+            \\"code\\": \\"invalid_type\\",
+            \\"expected\\": \\"string\\",
+            \\"received\\": \\"undefined\\",
+            \\"path\\": [
+              \\"status\\"
+            ],
+            \\"message\\": \\"Required\\"
+          }
+        ])"
+      `);
     });
 
     it('formats the response error correctly', async () => {
