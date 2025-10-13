@@ -66,7 +66,7 @@ export class ExportPageObject extends FtrService {
   async closeExportFlyout() {
     const isExportFlyoutOpen = await this.isExportFlyoutOpen();
 
-    if (!isExportFlyoutOpen || !(await this.testSubjects.exists('exportFlyoutCloseButton'))) {
+    if (!isExportFlyoutOpen) {
       return; // It was already closed
     }
 
