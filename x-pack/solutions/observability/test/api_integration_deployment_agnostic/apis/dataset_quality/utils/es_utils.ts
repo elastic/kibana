@@ -6,7 +6,10 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesIndexSettings,
+  IndicesIndexTemplate,
+} from '@elastic/elasticsearch/lib/api/types';
 
 function getCurrentDateFormatted() {
   const date = new Date();

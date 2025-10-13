@@ -316,7 +316,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       after(async () => {
         await saml.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-        saml.deleteCustomRole();
+        await saml.deleteCustomRole();
         await synthtraceLogsEsClient.clean();
         await syntheticsSynthrace.clean();
       });
@@ -361,11 +361,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
         expect(
           resp.body.dataStreamsStats
-            .map(({ name, userPrivileges: { canMonitor: hasPrivilege } }) => ({
-              name,
-              hasPrivilege,
-            }))
-            .filter(({ name }) => name.includes('test'))
+            .map(
+              ({
+                name,
+                userPrivileges: { canMonitor: hasPrivilege },
+              }: {
+                name: string;
+                userPrivileges: { canMonitor: boolean };
+              }) => ({
+                name,
+                hasPrivilege,
+              })
+            )
+            .filter(({ name }: { name: string }) => name.includes('test'))
         ).to.eql([
           { name: 'logs-test.1-default', hasPrivilege: true },
           { name: 'logs-test.2-default', hasPrivilege: true },
