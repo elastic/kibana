@@ -70,6 +70,22 @@ steps:
     );
   });
 
+  it('should have duration near timeout specified for timeouted step', async () => {
+    const timeoutStepExecutions = Array.from(
+      workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+    ).filter(
+      (se) =>
+        se.stepId === 'timeoutStep' &&
+        se.stepType === FakeConnectors.slow_3sec_inference.actionTypeId
+    );
+
+    expect(timeoutStepExecutions.length).toBe(1);
+    const timeoutStepExecution = timeoutStepExecutions[0];
+
+    expect(timeoutStepExecution.executionTimeMs).toBeGreaterThan(1999);
+    expect(timeoutStepExecution.executionTimeMs).toBeLessThan(2100);
+  });
+
   it('should not execute final step after timeout', async () => {
     const finalStepExecutions = Array.from(
       workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
