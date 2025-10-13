@@ -24,12 +24,11 @@ import { runAndValidateEsqlQuery } from './validate_esql_query';
 export const QUERY_FUNCTION_NAME = 'query';
 export const EXECUTE_QUERY_NAME = 'execute_query';
 
-export function registerQueryFunction({
+export const registerExecuteQueryFunction = ({
   functions,
   resources,
-  pluginsStart,
   signal,
-}: FunctionRegistrationParameters) {
+}: FunctionRegistrationParameters) => {
   functions.registerInstruction(({ availableFunctionNames }) => {
     if (!availableFunctionNames.includes(QUERY_FUNCTION_NAME)) {
       return;
@@ -102,6 +101,11 @@ export function registerQueryFunction({
       };
     }
   );
+};
+
+export function registerQueryFunction(params: FunctionRegistrationParameters) {
+  const { functions, resources, pluginsStart } = params;
+  registerExecuteQueryFunction(params);
   functions.registerFunction(
     {
       name: QUERY_FUNCTION_NAME,
