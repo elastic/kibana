@@ -21,10 +21,7 @@ import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
 import type { AnomalySwimlaneEmbeddableUserInput, MlEmbeddableBaseApi } from '../types';
-import type {
-  anomalySwimLaneEmbeddableStateSchema,
-  anomalySwimlaneEmbeddableStateViewBySchema,
-} from '../../../server/embeddable/schemas';
+import type { anomalySwimLaneEmbeddableStateSchema } from '../../../server/embeddable/schemas';
 
 export interface AnomalySwimLaneComponentApi {
   jobIds: PublishingSubject<JobId[]>;
@@ -61,9 +58,6 @@ export function isSwimLaneEmbeddableContext(arg: unknown): arg is AnomalySwimLan
  * Persisted state for the Anomaly Swim Lane Embeddable.
  */
 export type AnomalySwimLaneEmbeddableState = TypeOf<typeof anomalySwimLaneEmbeddableStateSchema>;
-export type AnomalySwimlaneEmbeddableStateViewBy = TypeOf<
-  typeof anomalySwimlaneEmbeddableStateViewBySchema
->;
 
 /**
  * The subset of the Anomaly Swim Lane Embeddable state that is actually used by the swimlane embeddable.

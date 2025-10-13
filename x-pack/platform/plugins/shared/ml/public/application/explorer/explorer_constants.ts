@@ -10,6 +10,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { SWIMLANE_TYPE } from '../../../server/embeddable/schemas';
 
 export const FILTER_ACTION = {
   ADD: '+',
@@ -17,11 +18,6 @@ export const FILTER_ACTION = {
 } as const;
 
 export type FilterAction = (typeof FILTER_ACTION)[keyof typeof FILTER_ACTION];
-
-export const SWIMLANE_TYPE = {
-  OVERALL: 'overall',
-  VIEW_BY: 'viewBy',
-} as const;
 
 export type SwimlaneType = (typeof SWIMLANE_TYPE)[keyof typeof SWIMLANE_TYPE];
 

@@ -12,11 +12,7 @@ import type { AnomalySwimlaneEmbeddableUserInput } from '..';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../application/explorer/explorer_constants';
-import type {
-  AnomalySwimLaneComponentApi,
-  AnomalySwimLaneEmbeddableState,
-  AnomalySwimlaneEmbeddableStateViewBy,
-} from './types';
+import type { AnomalySwimLaneComponentApi, AnomalySwimLaneEmbeddableState } from './types';
 import type { anomalySwimLaneControlsStateSchema } from '../../../server/embeddable/schemas';
 
 type AnomalySwimLaneControlsState = TypeOf<typeof anomalySwimLaneControlsStateSchema>;
@@ -35,7 +31,7 @@ export const initializeSwimLaneControls = (
   const jobIds = new BehaviorSubject<JobId[]>(rawState.jobIds);
   const swimlaneType = new BehaviorSubject<SwimlaneType>(rawState.swimlaneType);
   const viewBy = new BehaviorSubject<string | undefined>(
-    (rawState as AnomalySwimlaneEmbeddableStateViewBy).viewBy
+    rawState.swimlaneType === 'viewBy' ? rawState.viewBy : undefined
   );
   const fromPage = new BehaviorSubject<number>(1);
   const perPage = new BehaviorSubject<number | undefined>(

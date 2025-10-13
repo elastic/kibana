@@ -9,10 +9,15 @@ import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { filterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { serializedTitlesSchema } from '../common/serialized_titles';
 
-const SWIMLANE_TYPE = {
+export const SWIMLANE_TYPE = {
   OVERALL: 'overall',
   VIEW_BY: 'viewBy',
 } as const;
+
+const swimlaneTypeSchema = schema.oneOf([
+  schema.literal(SWIMLANE_TYPE.OVERALL),
+  schema.literal(SWIMLANE_TYPE.VIEW_BY),
+]);
 
 const commonUserInputProps = schema.object({
   jobIds: schema.arrayOf(schema.string()),
@@ -38,12 +43,12 @@ const anomalySwimlaneEmbeddableCustomInputCommonSchema = schema.object({
   refreshConfig: schema.maybe(refreshIntervalSchema),
 });
 
-const anomalySwimlaneEmbeddableCustomInputViewBySchema = schema.object({
+export const anomalySwimlaneEmbeddableCustomInputViewBySchema = schema.object({
   ...anomalySwimlaneViewBySchema.getPropSchemas(),
   ...anomalySwimlaneEmbeddableCustomInputCommonSchema.getPropSchemas(),
 });
 
-const anomalySwimlaneEmbeddableCustomInputOverallSchema = schema.object({
+export const anomalySwimlaneEmbeddableCustomInputOverallSchema = schema.object({
   ...anomalySwimlaneOverallSchema.getPropSchemas(),
   ...anomalySwimlaneEmbeddableCustomInputCommonSchema.getPropSchemas(),
 });
@@ -55,19 +60,19 @@ export const anomalySwimlaneEmbeddableCustomInputSchema = schema.oneOf([
 
 export const anomalySwimlaneEmbeddableUserInputSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),
-  swimlaneType: schema.oneOf([
-    schema.literal(SWIMLANE_TYPE.OVERALL),
-    schema.literal(SWIMLANE_TYPE.VIEW_BY),
-  ]),
+  swimlaneType: swimlaneTypeSchema,
   viewBy: schema.maybe(schema.string()),
   panelTitle: schema.maybe(schema.string()),
 });
 
+export const anomalySwimlanePropsSchema = schema.object({
+  ...anomalySwimlaneEmbeddableCustomInputCommonSchema.getPropSchemas(),
+  ...anomalySwimlaneEmbeddableUserInputSchema.getPropSchemas(),
+});
+
 export const anomalySwimlaneInitialInputSchema = schema.object({
   jobIds: schema.maybe(schema.arrayOf(schema.string())),
-  swimlaneType: schema.maybe(
-    schema.oneOf([schema.literal(SWIMLANE_TYPE.OVERALL), schema.literal(SWIMLANE_TYPE.VIEW_BY)])
-  ),
+  swimlaneType: schema.maybe(swimlaneTypeSchema),
   viewBy: schema.maybe(schema.string()),
   title: schema.maybe(schema.string()),
   perPage: schema.maybe(schema.number()),
@@ -75,15 +80,12 @@ export const anomalySwimlaneInitialInputSchema = schema.object({
 
 export const anomalySwimLaneControlsStateSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),
-  swimlaneType: schema.oneOf([
-    schema.literal(SWIMLANE_TYPE.OVERALL),
-    schema.literal(SWIMLANE_TYPE.VIEW_BY),
-  ]),
+  swimlaneType: swimlaneTypeSchema,
   viewBy: schema.maybe(schema.string()),
   perPage: schema.maybe(schema.number()),
 });
 
-export const anomalySwimlaneEmbeddableStateViewBySchema = schema.object({
+const anomalySwimlaneEmbeddableStateViewBySchema = schema.object({
   ...serializedTitlesSchema.getPropSchemas(),
   ...anomalySwimlaneEmbeddableCustomInputViewBySchema.getPropSchemas(),
 });

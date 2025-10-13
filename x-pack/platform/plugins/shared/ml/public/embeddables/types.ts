@@ -44,7 +44,9 @@ import type {
   MlEmbeddableTypes,
 } from './constants';
 import type {
+  anomalySwimlaneEmbeddableCustomInputOverallSchema,
   anomalySwimlaneEmbeddableCustomInputSchema,
+  anomalySwimlaneEmbeddableCustomInputViewBySchema,
   anomalySwimlaneEmbeddableUserInputSchema,
   anomalySwimlaneInitialInputSchema,
 } from '../../server/embeddable/schemas';
@@ -69,6 +71,14 @@ export type AnomalySwimlaneEmbeddableUserInput = TypeOf<
 >;
 
 export type AnomalySwimlaneInitialInput = TypeOf<typeof anomalySwimlaneInitialInputSchema>;
+
+export type AnomalySwimlaneEmbeddableCustomInputViewBy = TypeOf<
+  typeof anomalySwimlaneEmbeddableCustomInputViewBySchema
+>;
+
+export type AnomalySwimlaneEmbeddableCustomInputOverall = TypeOf<
+  typeof anomalySwimlaneEmbeddableCustomInputOverallSchema
+>;
 
 export type AnomalySwimlaneEmbeddableCustomInput = TypeOf<
   typeof anomalySwimlaneEmbeddableCustomInputSchema
