@@ -13,11 +13,9 @@ import type { Streams, PhaseName } from '@kbn/streams-schema';
 import { lastValueFrom } from 'rxjs';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import type { DataStreamStats } from './use_data_stream_stats';
 import type { CalculatedStats } from './use_calculated_stats';
 import { useIlmPhasesColorAndDescription } from './use_ilm_phases_color_and_description';
 import { getFailureStoreIndexName } from '../helpers/failure_store_index_name';
-import type { FailureStoreStats } from './use_failure_store_stats';
 
 const TIMESTAMP_FIELD = '@timestamp';
 const DEFAULT_SAMPLER_PROBABILITY = 0.1;
@@ -67,14 +65,12 @@ const getIntervalAndType = (
 };
 
 export const useIngestionRate = ({
-  stats,
   calculatedStats,
   timeState,
   isLoading,
   aggregations,
   error,
 }: {
-  stats?: DataStreamStats | FailureStoreStats;
   calculatedStats?: CalculatedStats;
   timeState: TimeState;
   isLoading: boolean;
@@ -117,13 +113,11 @@ type PhaseNameWithoutDelete = Exclude<PhaseName, 'delete'>;
 
 export const useIngestionRatePerTier = ({
   definition,
-  stats,
   calculatedStats,
   timeState,
   isFailureStore = false,
 }: {
   definition: Streams.ingest.all.GetResponse;
-  stats?: DataStreamStats | FailureStoreStats;
   calculatedStats?: CalculatedStats;
   timeState: TimeState;
   isFailureStore?: boolean;
