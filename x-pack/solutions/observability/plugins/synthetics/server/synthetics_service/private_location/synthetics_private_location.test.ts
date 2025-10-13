@@ -72,6 +72,7 @@ describe('SyntheticsPrivateLocation', () => {
         bulkCreate: jest.fn(),
         getByIDs: jest.fn(),
       },
+      runWithCache: async (cb: any) => await cb(),
     },
     spaces: {
       spacesService: {
