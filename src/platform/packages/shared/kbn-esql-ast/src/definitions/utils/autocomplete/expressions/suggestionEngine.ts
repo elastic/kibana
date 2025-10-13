@@ -17,70 +17,74 @@ import type {
   SuggestForExpressionParams,
 } from './types';
 import { isNullCheckOperator } from './utils';
-import {
-  OperatorDetectorRegistry,
-  ListDetector,
-  LikePatternDetector,
-  NullCheckDetector,
-} from './operators/partial';
+import { dispatchPartialOperators } from './operators/partial/dispatcher';
+import { detectIn, detectLike, detectNullCheck } from './operators/partial/utils';
+import { nullCheckOperators, inOperators, patternMatchOperators } from '../../../all_operators';
 
 const WHITESPACE_REGEX = /\s/;
 const LAST_WORD_BOUNDARY_REGEX = /\b\w(?=\w*$)/;
-
-// Initialize the operator detector registry (singleton)
-let operatorDetectorRegistry: OperatorDetectorRegistry | null = null;
-
-// Get or create the registry instance
-function getOperatorDetectorRegistry(): OperatorDetectorRegistry {
-  if (!operatorDetectorRegistry) {
-    operatorDetectorRegistry = new OperatorDetectorRegistry();
-    // Register detectors in priority order
-    operatorDetectorRegistry.register(new ListDetector());
-    operatorDetectorRegistry.register(new LikePatternDetector());
-    operatorDetectorRegistry.register(new NullCheckDetector());
-  }
-
-  return operatorDetectorRegistry;
-}
 
 /** Coordinates position detection, handler selection, and range attachment */
 export async function suggestForExpression(
   params: SuggestForExpressionParams
 ): Promise<ISuggestionItem[]> {
   const baseCtx = buildContext(params);
-  // Pre-pass: handle partial operators (IN/NOT IN, LIKE/RLIKE/NOT LIKE, IS/IS NOT)
   const preSuggestions = await trySuggestForPartialOperators(baseCtx);
-  if (preSuggestions?.length) {
+
+  if (preSuggestions !== null) {
     return attachRanges(baseCtx, preSuggestions);
   }
+
   const position: ExpressionPosition = getPosition(baseCtx.innerText, baseCtx.expressionRoot);
 
   const ctx = { ...baseCtx, position };
   const suggestions = await dispatchStates(ctx, position);
-
   return attachRanges(ctx, suggestions);
 }
 
 /**
- * Pre-pass for partial operator tokens.
- * Uses the detector registry pattern to handle IN/NOT IN, LIKE/RLIKE, and IS/IS NOT operators.
+ * Pre-pass for partial operator tokens before the AST exists.
+ * Handles IN/NOT IN, LIKE/RLIKE, and IS/IS NOT operators.
  * Purpose: provide operator-specific suggestions even inside function args
- * (e.g. CASE(field IN ▌), CASE(field IS ▌)) when the user is typing a partial operator.
+ * (e.g. CASE(field IN ▌), CASE(field IS ▌)) when the user is typing a partial operator
+ * and the parser hasn't formed the operator node yet.
  *
- * Runs for both cases:
- * - When AST doesn't exist yet (e.g., deep inside CASE without full expression)
- * - When AST exists but user is typing a partial operator (e.g., "field IS ")
+ * Only runs when AST doesn't have a complete operator node (e.g., deep inside CASE).
+ * For complete expressions (e.g., WHERE field IN), the normal flow handles it.
  */
 async function trySuggestForPartialOperators(
   ctx: ExpressionContext
 ): Promise<ISuggestionItem[] | null> {
-  const { query, cursorPosition, innerText } = ctx;
+  const { innerText, expressionRoot } = ctx;
 
-  // Use the full text before cursor for detection
-  const textBeforeCursor = query ? query.substring(0, cursorPosition) : innerText;
-  const registry = getOperatorDetectorRegistry();
+  // Skip if we already have a complete operator function node (e.g., WHERE field LIKE)
+  // In that case, the normal flow should handle it
+  if (expressionRoot?.type === 'function') {
+    const operatorName = (expressionRoot as any).name?.toLowerCase();
 
-  return await registry.detectAndSuggest(textBeforeCursor, ctx);
+    // Combine all partial operators from definitions
+    const partialOperatorNames = [
+      ...nullCheckOperators.map((op) => op.name),
+      ...inOperators.map((op) => op.name),
+      ...patternMatchOperators.map((op) => op.name),
+    ];
+
+    if (partialOperatorNames.includes(operatorName)) {
+      return null;
+    }
+  }
+
+  // Try each detector in sequence
+  const detection = detectNullCheck(innerText) || detectLike(innerText) || detectIn(innerText);
+
+  if (!detection) {
+    return null;
+  }
+
+  // Dispatch to appropriate handler
+  const result = await dispatchPartialOperators(detection.operatorName, detection, ctx);
+
+  return result;
 }
 
 /** Derives innerText and option flags from the incoming params.*/

@@ -24,7 +24,7 @@ import type { FunctionDefinition } from '../../../types';
 /**
  * Centralizes signature analysis using getValidSignaturesAndTypesToSuggestNext API.
  *
- * Purpose: Eliminate duplicated homogeneity checks and signature analysis
+ * Eliminate duplicated homogeneity checks and signature analysis
  * scattered across multiple files. This class wraps the existing
  * getValidSignaturesAndTypesToSuggestNext helper and adds homogeneity/variadic logic.
  */
@@ -54,11 +54,6 @@ export class SignatureAnalyzer {
   /**
    * Creates SignatureAnalyzer directly from an AST node using getValidSignaturesAndTypesToSuggestNext.
    * This is the preferred factory method as it uses the existing API.
-   *
-   * @param node - The function node from the AST
-   * @param context - Command context with columns info
-   * @param fnDefinition - Function definition
-   * @returns SignatureAnalyzer or null if invalid
    */
   public static fromNode(
     node: ESQLFunction,
@@ -108,10 +103,6 @@ export class SignatureAnalyzer {
       hasMoreMandatoryArgs
     );
   }
-
-  // ============================================================================
-  // Public API: Signature Characteristics
-  // ============================================================================
 
   /**
    * Returns true if function requires type homogeneity (COALESCE, CONCAT, etc.)
@@ -271,8 +262,6 @@ export class SignatureAnalyzer {
       return isTextual ? ['text', 'keyword'] : [this.firstArgumentType as FunctionParameterType];
     }
 
-    // Get types from param definitions
-    // Note: Include constantOnly parameters because functions CAN return those types
     // (e.g., BUCKET accepts date_period as constantOnly, but TO_DATEPERIOD() returns date_period)
     if (this.paramDefinitions.length > 0) {
       const types = this.paramDefinitions.map(({ type }) => type);
@@ -280,13 +269,11 @@ export class SignatureAnalyzer {
       return this.ensureKeywordAndText(types);
     }
 
-    // Fallback: accept any type (non-homogeneous variadic functions)
     return ['any'];
   }
 
   /**
    * Checks if an expression type matches accepted parameter types.
-   * Uses argMatchesParamType for proper type checking logic.
    */
   public typeMatches(expressionType: SupportedDataType | 'unknown', isLiteral: boolean): boolean {
     // If no param definitions, check against firstArgumentType for variadic functions
@@ -308,10 +295,6 @@ export class SignatureAnalyzer {
       argMatchesParamType(expressionType, def.type, isLiteral, false)
     );
   }
-
-  // ============================================================================
-  // Private Helpers
-  // ============================================================================
 
   private ensureKeywordAndText(types: FunctionParameterType[]): FunctionParameterType[] {
     const hasKeyword = types.includes('keyword');

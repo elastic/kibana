@@ -22,7 +22,7 @@ import type { ESQLAstItem, ESQLFunction } from '../../../types';
 import { EDITOR_MARKER } from '../../constants';
 import type { FunctionDefinition } from '../../types';
 import type { SupportedDataType } from '../../types';
-import { argMatchesParamType, getExpressionType } from '../expressions';
+import { argMatchesParamType, getExpressionType, getParamAtPosition } from '../expressions';
 import { filterFunctionDefinitions, getAllFunctions, getFunctionSuggestion } from '../functions';
 import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
 import { getColumnByName } from '../shared';
@@ -397,8 +397,12 @@ function getCompatibleParamDefs(
 
   // Then, get the compatible types to suggest for the next argument
   const compatibleTypesToSuggestForArg = uniqBy(
-    relevantFuncSignatures.map((f) => f.params[argIndex]).filter((d) => d),
-    (o) => `${o.type}-${o.constantOnly}`
+    relevantFuncSignatures
+      .map((signature) => getParamAtPosition(signature, argIndex))
+      .filter(
+        (param): param is NonNullable<ReturnType<typeof getParamAtPosition>> => param != null
+      ),
+    (param) => `${param.type}-${param.constantOnly}`
   );
   return compatibleTypesToSuggestForArg;
 }

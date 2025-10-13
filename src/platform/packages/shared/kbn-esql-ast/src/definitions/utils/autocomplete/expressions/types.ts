@@ -74,3 +74,8 @@ export interface FunctionParameterContext {
   // Signaturres that match the already-given arguments
   validSignatures?: Signature[];
 }
+
+export interface PartialOperatorDetection {
+  operatorName: string;
+  textBeforeCursor?: string;
+}
