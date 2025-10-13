@@ -8,23 +8,23 @@
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type {
-  AutomaticImportPluginApiRequestHandlerContext,
-  AutomaticImportPluginCoreSetupDependencies,
-  AutomaticImportPluginRequestHandlerContext,
-  AutomaticImportPluginSetupDependencies,
+  AutomaticImportV2PluginApiRequestHandlerContext,
+  AutomaticImportV2PluginCoreSetupDependencies,
+  AutomaticImportV2PluginRequestHandlerContext,
+  AutomaticImportV2PluginSetupDependencies,
 } from './types';
 
 export interface IRequestContextFactory {
   create(
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<AutomaticImportPluginApiRequestHandlerContext>;
+  ): Promise<AutomaticImportV2PluginApiRequestHandlerContext>;
 }
 
 interface ConstructorOptions {
   logger: Logger;
-  core: AutomaticImportPluginCoreSetupDependencies;
-  plugins: AutomaticImportPluginSetupDependencies;
+  core: AutomaticImportV2PluginCoreSetupDependencies;
+  plugins: AutomaticImportV2PluginSetupDependencies;
   kibanaVersion: string;
 }
 
@@ -36,9 +36,9 @@ export class RequestContextFactory implements IRequestContextFactory {
   }
 
   public async create(
-    context: Omit<AutomaticImportPluginRequestHandlerContext, 'automaticImportv2'>,
+    context: Omit<AutomaticImportV2PluginRequestHandlerContext, 'automaticImportv2'>,
     request: KibanaRequest
-  ): Promise<AutomaticImportPluginApiRequestHandlerContext> {
+  ): Promise<AutomaticImportV2PluginApiRequestHandlerContext> {
     const { options } = this;
     const { core } = options;
 

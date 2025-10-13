@@ -29,13 +29,13 @@ import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/se
 export const PLUGIN_ID = 'automaticImportV2' as const;
 
 /** The plugin setup interface */
-export interface AutomaticImportPluginSetup {
+export interface AutomaticImportV2PluginSetup {
   actions: ActionsPluginSetup;
   spaces?: SpacesPluginSetup;
 }
 
 /** The plugin start interface */
-export interface AutomaticImportPluginStart {
+export interface AutomaticImportV2PluginStart {
   actions: ActionsPluginStart;
   inference: InferenceServerStart;
   licensing: LicensingPluginStart;
@@ -43,11 +43,11 @@ export interface AutomaticImportPluginStart {
   security: SecurityPluginStart;
 }
 
-export interface AutomaticImportPluginSetupDependencies {
+export interface AutomaticImportV2PluginSetupDependencies {
   actions: ActionsPluginSetup;
   spaces?: SpacesPluginSetup;
 }
-export interface AutomaticImportPluginStartDependencies {
+export interface AutomaticImportV2PluginStartDependencies {
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
   inference: InferenceServerStart;
@@ -55,7 +55,7 @@ export interface AutomaticImportPluginStartDependencies {
   security: SecurityPluginStart;
 }
 
-export interface AutomaticImportPluginApiRequestHandlerContext {
+export interface AutomaticImportV2PluginApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
   logger: Logger;
@@ -70,14 +70,14 @@ export interface AutomaticImportPluginApiRequestHandlerContext {
 /**
  * @internal
  */
-export type AutomaticImportPluginRequestHandlerContext = CustomRequestHandlerContext<{
-  automaticImportv2: AutomaticImportPluginApiRequestHandlerContext;
+export type AutomaticImportV2PluginRequestHandlerContext = CustomRequestHandlerContext<{
+  automaticImportv2: AutomaticImportV2PluginApiRequestHandlerContext;
   licensing: LicensingApiRequestHandlerContext;
 }>;
 
-export type AutomaticImportPluginRouter = IRouter<AutomaticImportPluginRequestHandlerContext>;
+export type AutomaticImportV2PluginRouter = IRouter<AutomaticImportV2PluginRequestHandlerContext>;
 
-export type AutomaticImportPluginCoreSetupDependencies = CoreSetup<
-  AutomaticImportPluginStartDependencies,
-  AutomaticImportPluginStart
+export type AutomaticImportV2PluginCoreSetupDependencies = CoreSetup<
+  AutomaticImportV2PluginStartDependencies,
+  AutomaticImportV2PluginStart
 >;

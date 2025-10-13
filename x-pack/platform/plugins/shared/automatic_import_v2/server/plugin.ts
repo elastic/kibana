@@ -5,44 +5,26 @@
  * 2.0.
  */
 
-import type {
-  PluginInitializerContext,
-  CoreStart,
-  Plugin,
-  Logger,
-  FeatureFlagsStart,
-} from '@kbn/core/server';
+import type { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
-import { ReplaySubject, type Subject, exhaustMap, takeWhile, takeUntil } from 'rxjs';
+import { ReplaySubject, type Subject } from 'rxjs';
 import type {
-  AutomaticImportPluginCoreSetupDependencies,
-  AutomaticImportPluginSetup,
-  AutomaticImportPluginSetupDependencies,
-  AutomaticImportPluginStart,
-  AutomaticImportPluginStartDependencies,
-  AutomaticImportPluginRequestHandlerContext,
+  AutomaticImportV2PluginCoreSetupDependencies,
+  AutomaticImportV2PluginSetup,
+  AutomaticImportV2PluginSetupDependencies,
+  AutomaticImportV2PluginStart,
+  AutomaticImportV2PluginStartDependencies,
+  AutomaticImportV2PluginRequestHandlerContext,
 } from './types';
 import { RequestContextFactory } from './request_context_factory';
-import { FeatureFlagAutomaticImportV2Enabled } from '../common/feature_flags';
 
-interface FeatureFlagDefinition {
-  featureFlagName: string;
-  fallbackValue: boolean;
-  /**
-   * Function to execute when the feature flag is evaluated.
-   * @param enabled If the feature flag is enabled or not.
-   * @return `true` if susbscription needs to stay active, `false` if it can be unsubscribed.
-   */
-  fn: (enabled: boolean) => boolean | Promise<boolean>;
-}
-
-export class AutomaticImportPlugin
+export class AutomaticImportV2Plugin
   implements
     Plugin<
-      AutomaticImportPluginSetup,
-      AutomaticImportPluginStart,
-      AutomaticImportPluginSetupDependencies,
-      AutomaticImportPluginStartDependencies
+      AutomaticImportV2PluginSetup,
+      AutomaticImportV2PluginStart,
+      AutomaticImportV2PluginSetupDependencies,
+      AutomaticImportV2PluginStartDependencies
     >
 {
   private readonly logger: Logger;
@@ -62,28 +44,10 @@ export class AutomaticImportPlugin
    * @returns AutomaticImportPluginSetup
    */
   public setup(
-    core: AutomaticImportPluginCoreSetupDependencies,
-    plugins: AutomaticImportPluginSetupDependencies
+    core: AutomaticImportV2PluginCoreSetupDependencies,
+    plugins: AutomaticImportV2PluginSetupDependencies
   ) {
     this.logger.debug('automaticImportV2: Setup');
-
-    const featureFlagDefinitions: FeatureFlagDefinition[] = [
-      {
-        featureFlagName: FeatureFlagAutomaticImportV2Enabled,
-        fallbackValue: false,
-        fn: (enabled) => {
-          return enabled;
-        },
-      },
-    ];
-
-    core
-      .getStartServices()
-      .then(([{ featureFlags }]) => this.evaluateFeatureFlags(featureFlagDefinitions, featureFlags))
-      .catch((error) => {
-        this.logger.error(`error in automatic import v2 plugin setup: ${error}`);
-      });
-
     const requestContextFactory = new RequestContextFactory({
       logger: this.logger,
       core,
@@ -92,7 +56,7 @@ export class AutomaticImportPlugin
     });
 
     core.http.registerRouteHandlerContext<
-      AutomaticImportPluginRequestHandlerContext,
+      AutomaticImportV2PluginRequestHandlerContext,
       'automaticImportv2'
     >('automaticImportv2', (context, request) => requestContextFactory.create(context, request));
 
@@ -110,8 +74,8 @@ export class AutomaticImportPlugin
    */
   public start(
     core: CoreStart,
-    plugins: AutomaticImportPluginStartDependencies
-  ): AutomaticImportPluginStart {
+    plugins: AutomaticImportV2PluginStartDependencies
+  ): AutomaticImportV2PluginStart {
     this.logger.debug('automaticImportV2: Started');
     return {
       actions: plugins.actions,
@@ -127,31 +91,5 @@ export class AutomaticImportPlugin
   public stop() {
     this.pluginStop$.next();
     this.pluginStop$.complete();
-  }
-
-  private evaluateFeatureFlags(
-    featureFlagDefinitions: FeatureFlagDefinition[],
-    featureFlags: FeatureFlagsStart
-  ) {
-    featureFlagDefinitions.forEach(({ featureFlagName, fallbackValue, fn }) => {
-      featureFlags
-        .getBooleanValue$(featureFlagName, fallbackValue)
-        .pipe(
-          takeUntil(this.pluginStop$),
-          exhaustMap(async (enabled) => {
-            let continueSubscription = true;
-            try {
-              continueSubscription = await fn(enabled);
-            } catch (error) {
-              this.logger.error(
-                `Error during setup based on feature flag ${featureFlagName}: ${error}`
-              );
-            }
-            return continueSubscription;
-          }),
-          takeWhile((continueSubscription) => continueSubscription)
-        )
-        .subscribe();
-    });
   }
 }

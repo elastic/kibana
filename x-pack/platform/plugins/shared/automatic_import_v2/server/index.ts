@@ -7,14 +7,16 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 
+export { config } from './config';
+
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { AutomaticImportPlugin } = await import('./plugin');
-  return new AutomaticImportPlugin(initializerContext);
+  const { AutomaticImportV2Plugin: AutomaticImportV2Plugin } = await import('./plugin');
+  return new AutomaticImportV2Plugin(initializerContext);
 }
 
 export type {
-  AutomaticImportPluginSetup,
-  AutomaticImportPluginStart,
-  AutomaticImportPluginSetupDependencies,
-  AutomaticImportPluginStartDependencies,
+  AutomaticImportV2PluginSetup,
+  AutomaticImportV2PluginStart,
+  AutomaticImportV2PluginSetupDependencies,
+  AutomaticImportV2PluginStartDependencies,
 } from './types';
