@@ -91,36 +91,69 @@ export class EnterForeachNodeImpl implements NodeImplementation {
   }
 
   private getItems(): any[] {
-    let items: any[] = [];
-
     if (!this.node.configuration.foreach) {
-      throw new Error('Foreach configuration is required');
+      throw new Error(
+        `Foreach configuration is required for step "${this.node.stepId}". Please specify an array or expression that evaluates to an array.`
+      );
     }
 
-    try {
-      items = JSON.parse(this.node.configuration.foreach);
-    } catch (error) {
-      const { value, pathExists } = this.stepExecutionRuntime.contextManager.readContextPath(
+    const renderedForeachExpression =
+      this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
         this.node.configuration.foreach
       );
 
-      if (!pathExists) {
-        throw new Error(
-          `Foreach configuration path "${this.node.configuration.foreach}" does not exist in the workflow context.`
-        );
+    const parsingResult = this.tryParseJSON(renderedForeachExpression);
+
+    if (parsingResult) {
+      if (Array.isArray(parsingResult)) {
+        return parsingResult;
       }
 
-      if (Array.isArray(value)) {
-        items = value;
-      } else if (typeof value === 'string') {
-        items = JSON.parse(value);
-      }
+      throw new Error(
+        `Foreach expression must evaluate to an array. ` +
+          `Got ${typeof parsingResult}: ${JSON.stringify(parsingResult).substring(0, 100)}${
+            JSON.stringify(parsingResult).length > 100 ? '...' : ''
+          }. `
+      );
     }
 
-    if (!Array.isArray(items)) {
-      throw new Error('Foreach configuration must be an array');
+    const result =
+      this.stepExecutionRuntime.contextManager.readContextPath(renderedForeachExpression);
+
+    if (!result.pathExists) {
+      throw new Error(
+        `Expression "${renderedForeachExpression}" could not be found in the context. ` +
+          `Please ensure the expression references an array variable or update the configuration.`
+      );
     }
 
-    return items;
+    if (!Array.isArray(result.value)) {
+      throw new Error(
+        `Foreach expression must evaluate to an array. ` +
+          `Expression "${renderedForeachExpression}" resolved to ${typeof result.value}${
+            result.value === null
+              ? ' (null)'
+              : result.value === undefined
+              ? ' (undefined)'
+              : `: ${JSON.stringify(result.value).substring(0, 100)}${
+                  JSON.stringify(result.value).length > 100 ? '...' : ''
+                }`
+          }. ` +
+          `Please ensure the expression references an array variable or update the configuration.`
+      );
+    }
+
+    return result.value;
+  }
+
+  private tryParseJSON(value: string): any[] | undefined {
+    let parsed;
+    try {
+      parsed = JSON.parse(value);
+    } catch (error) {
+      return undefined;
+    }
+
+    return parsed;
   }
 }
