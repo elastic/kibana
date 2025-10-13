@@ -20,6 +20,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ReportingCore } from '../..';
 import type { ListScheduledReportApiJSON, ReportingUser, ScheduledReportType } from '../../types';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import type { ScheduledReportAuditEventParams } from '../audit_events/audit_events';
 import {
   ScheduledReportAuditAction,
   scheduledReportAuditEvent,
@@ -155,16 +156,7 @@ export class ScheduledReportsClient {
       }
 
       scheduledReportIdsAndName.forEach(({ id, name }) =>
-        this.auditLogger.log(
-          scheduledReportAuditEvent({
-            action: ScheduledReportAuditAction.LIST,
-            savedObject: {
-              type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
-              id,
-              name,
-            },
-          })
-        )
+        this.auditLog({ action: ScheduledReportAuditAction.LIST, id, name })
       );
 
       const scheduledReportIds = scheduledReportIdsAndName.map(({ id }) => id);
@@ -254,32 +246,22 @@ export class ScheduledReportsClient {
             this.logger.warn(
               `User "${username}" attempted to disable scheduled report "${so.id}" created by "${so.attributes.createdBy}" without sufficient privileges.`
             );
-            this.auditLogger.log(
-              scheduledReportAuditEvent({
-                action: ScheduledReportAuditAction.DISABLE,
-                savedObject: {
-                  type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
-                  id: so.id,
-                  name: so?.attributes?.title,
-                },
-                error: new Error(`Not found.`),
-              })
-            );
+            this.auditLog({
+              action: ScheduledReportAuditAction.DISABLE,
+              id: so.id,
+              name: so?.attributes?.title,
+              error: new Error('Not found.'),
+            });
           } else if (so.attributes.enabled === false) {
             this.logger.debug(`Scheduled report ${so.id} is already disabled`);
             disabledScheduledReportIds.add(so.id);
           } else {
-            this.auditLogger.log(
-              scheduledReportAuditEvent({
-                action: ScheduledReportAuditAction.DISABLE,
-                savedObject: {
-                  type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
-                  id: so.id,
-                  name: so.attributes.title,
-                },
-                outcome: 'unknown',
-              })
-            );
+            this.auditLog({
+              action: ScheduledReportAuditAction.DISABLE,
+              id: so.id,
+              name: so.attributes.title,
+              outcome: 'unknown',
+            });
             scheduledReportSavedObjectsToUpdate.push(so);
           }
         }
@@ -304,17 +286,12 @@ export class ScheduledReportsClient {
               status: so.error.statusCode,
               id: so.id,
             });
-            this.auditLogger.log(
-              scheduledReportAuditEvent({
-                action: ScheduledReportAuditAction.DISABLE,
-                savedObject: {
-                  type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
-                  id: so.id,
-                  name: so?.attributes?.title,
-                },
-                error: new Error(so.error.message),
-              })
-            );
+            this.auditLog({
+              action: ScheduledReportAuditAction.DISABLE,
+              id: so.id,
+              name: so?.attributes?.title,
+              error: new Error(so.error.message),
+            });
           } else {
             taskIdsToDisable.push(so.id);
           }
@@ -359,9 +336,6 @@ export class ScheduledReportsClient {
   }
 
   private async canManageReporting(request: KibanaRequest) {
-    // if user has Manage Reporting privileges, we can list
-    // scheduled reports for all users in this space, otherwise
-    // we will filter only to the scheduled reports created by the user
     return await this.reportingCore.canManageReportingForSpace(request);
   }
 
@@ -376,5 +350,26 @@ export class ScheduledReportsClient {
       total: 0,
       data: [],
     };
+  }
+
+  private auditLog({
+    action,
+    id,
+    name,
+    outcome,
+    error,
+  }: ScheduledReportAuditEventParams & { id: string; name: string | undefined }) {
+    this.auditLogger.log(
+      scheduledReportAuditEvent({
+        action,
+        savedObject: {
+          type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+          id,
+          name,
+        },
+        outcome,
+        error,
+      })
+    );
   }
 }
