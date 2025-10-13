@@ -11,7 +11,7 @@ import Path from 'node:path';
 import Fs from 'node:fs';
 import chalk from 'chalk';
 import { run } from '@kbn/dev-cli-runner';
-import { REPO_ROOT } from '@kbn/repo-info';
+import { validate } from './src/validate';
 
 const kibanaYamlRelativePath = './oas_docs/output/kibana.yaml';
 const kibanaServerlessYamlRelativePath = './oas_docs/output/kibana.serverless.yaml';
@@ -45,10 +45,6 @@ run(
       }
     }
 
-    // Load CommonJS version
-    const { Validator } = await import('@seriousme/openapi-schema-validator');
-    const validator = new Validator({ strict: false, allErrors: true });
-
     let invalidSpec = false;
     const errorCounts: Record<string, number> = {};
 
@@ -64,9 +60,7 @@ run(
     for (const yamlPath of yamlPaths) {
       log.info(`About to validate spec at ${chalk.underline(yamlPath)}`);
       await log.indent(4, async () => {
-        const result = await validator.validate(
-          Fs.readFileSync(Path.resolve(REPO_ROOT, yamlPath)).toString('utf-8')
-        );
+        const result = validate(yamlPath);
         if (!result.valid) {
           log.warning(`${chalk.underline(yamlPath)} is NOT valid`);
 
