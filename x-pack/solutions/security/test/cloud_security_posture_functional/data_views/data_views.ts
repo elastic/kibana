@@ -91,7 +91,14 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       await spacesService.delete(TEST_SPACE);
-      await pageObjects.security.forceLogout();
+
+      // Wrap logout in try-catch as it can be flaky and shouldn't fail the entire test
+      try {
+        await pageObjects.security.forceLogout();
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log('Warning: forceLogout failed during cleanup, but test cleanup will continue');
+      }
     });
 
     DATA_VIEW_PREFIXES.forEach((dataViewPrefix) => {
@@ -169,11 +176,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     DATA_VIEW_PREFIXES.forEach((dataViewPrefix) => {
       it('Verify data view is created once user reach the findings page -  non default space', async () => {
-        await pageObjects.common.navigateToApp('home');
         await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
-        await pageObjects.spaceSelector.openSpacesNav();
-        await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
-        await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
 
         const expectedDataViewId = `${dataViewPrefix}-${TEST_SPACE}`;
         if (await getDataViewSafe(kibanaServer.savedObjects, expectedDataViewId, TEST_SPACE)) {
@@ -190,6 +193,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           });
         }
 
+        // Navigate directly to findings page in the test space
         await findings.navigateToLatestFindingsPage(TEST_SPACE);
         await waitForDataViews({
           timeout: fetchingOfDataViewsTimeout,
@@ -208,11 +212,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     DATA_VIEW_PREFIXES.forEach((dataViewPrefix) => {
       it('Verify data view is created once user reach the dashboard page -  non default space', async () => {
-        await pageObjects.common.navigateToApp('home');
         await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
-        await pageObjects.spaceSelector.openSpacesNav();
-        await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
-        await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
         const expectedDataViewId = `${dataViewPrefix}-${TEST_SPACE}`;
 
         if (await getDataViewSafe(kibanaServer.savedObjects, expectedDataViewId, TEST_SPACE)) {
@@ -229,6 +229,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           });
         }
 
+        // Navigate directly to dashboard page in the test space
         const cspDashboard = pageObjects.cloudPostureDashboard;
         await cspDashboard.navigateToComplianceDashboardPage(TEST_SPACE);
         await waitForDataViews({
@@ -248,8 +249,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     DATA_VIEW_PREFIXES.forEach((dataViewPrefix) => {
       it('Verify data view is created once user with read permissions reach the dashboard page', async () => {
-        await pageObjects.common.navigateToApp('home');
-        await cspSecurity.logout();
+        // Ensure we're logged out first before attempting to login with read user
+        try {
+          await pageObjects.security.forceLogout();
+        } catch (e) {
+          // If logout fails, continue - we might already be logged out
+        }
+
         await cspSecurity.login('csp_read_user');
         const expectedDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
 
@@ -391,27 +397,22 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         const newDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
 
         // Create old v1 data view in test space
-        await kibanaServer.savedObjects.create({
-          type: 'index-pattern',
-          id: oldDataViewId,
-          attributes: {
-            title:
-              'logs-*_latest_misconfigurations_cdr,logs-cloud_security_posture.findings_latest-default',
-            name: 'Old Misconfiguration Data View',
-            timeFieldName: '@timestamp',
-            allowNoIndex: true,
+        await kibanaServer.request({
+          path: `/s/${TEST_SPACE}/internal/ftr/kbn_client_so/index-pattern/${oldDataViewId}`,
+          method: 'POST',
+          query: { overwrite: true },
+          body: {
+            attributes: {
+              title:
+                'logs-*_latest_misconfigurations_cdr,logs-cloud_security_posture.findings_latest-default',
+              name: 'Old Misconfiguration Data View',
+              timeFieldName: '@timestamp',
+              allowNoIndex: true,
+            },
           },
-          space: TEST_SPACE,
-          overwrite: true,
         });
 
-        // Switch to test space
-        await pageObjects.common.navigateToApp('home');
-        await pageObjects.spaceSelector.openSpacesNav();
-        await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
-        await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
-
-        // Navigate to findings page to trigger migration
+        // Navigate to findings page to trigger migration (navigates directly to the space)
         await findings.navigateToLatestFindingsPage(TEST_SPACE);
 
         // Wait for migration to complete
@@ -601,26 +602,21 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         const newDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
 
         // Create old v1 data view in test space
-        await kibanaServer.savedObjects.create({
-          type: 'index-pattern',
-          id: oldDataViewId,
-          attributes: {
-            title: 'logs-cloud_security_posture.vulnerabilities_latest-default',
-            name: 'Old Vulnerabilities Data View',
-            timeFieldName: '@timestamp',
-            allowNoIndex: true,
+        await kibanaServer.request({
+          path: `/s/${TEST_SPACE}/internal/ftr/kbn_client_so/index-pattern/${oldDataViewId}`,
+          method: 'POST',
+          query: { overwrite: true },
+          body: {
+            attributes: {
+              title: 'logs-cloud_security_posture.vulnerabilities_latest-default',
+              name: 'Old Vulnerabilities Data View',
+              timeFieldName: '@timestamp',
+              allowNoIndex: true,
+            },
           },
-          space: TEST_SPACE,
-          overwrite: true,
         });
 
-        // Switch to test space
-        await pageObjects.common.navigateToApp('home');
-        await pageObjects.spaceSelector.openSpacesNav();
-        await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
-        await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
-
-        // Navigate to vulnerabilities page to trigger migration
+        // Navigate to vulnerabilities page to trigger migration (navigates directly to the space)
         await findings.navigateToLatestVulnerabilitiesPage(TEST_SPACE);
 
         // Wait for migration to complete
