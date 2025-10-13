@@ -59,7 +59,9 @@ export const createAgentGraph = ({
   });
 
   const callModel = async (state: StateType) => {
-    events.emit(createReasoningEvent(getRandomThinkingMessage(), { transient: true }));
+    if (state.addedMessages.length === 0) {
+      events.emit(createReasoningEvent(getRandomThinkingMessage(), { transient: true }));
+    }
     const response = await model.invoke(
       getActPrompt({
         customInstructions: configuration.research.instructions,
