@@ -11,6 +11,7 @@ import { ruleMetricsSchema } from './schemas/prebuilt_rule_detail';
 import { ruleStatusMetricsSchema } from './schemas/detection_rule_status';
 import { ruleUpgradeStatusSchema } from './schemas/detection_rule_upgrade_status';
 import type { RuleAdoption } from './types';
+import { ruleCustomizedFieldsCounts } from './schemas/detection_rule_customization_status';
 
 export const rulesMetricsSchema: MakeSchemaFrom<RuleAdoption> = {
   spaces_usage: {
@@ -33,4 +34,5 @@ export const rulesMetricsSchema: MakeSchemaFrom<RuleAdoption> = {
   },
   detection_rule_status: ruleStatusMetricsSchema,
   elastic_detection_rule_upgrade_status: ruleUpgradeStatusSchema,
+  elastic_detection_rule_customization_status: ruleCustomizedFieldsCounts,
 };
