@@ -3403,9 +3403,9 @@
       "enabled": true
     },
     {
-      "groupName": "p-timeout",
+      "groupName": "p-timeout-cjs",
       "matchDepNames": [
-        "p-timeout"
+        "p-timeout-cjs"
       ],
       "reviewers": [
         "team:obs-ai-assistant"
