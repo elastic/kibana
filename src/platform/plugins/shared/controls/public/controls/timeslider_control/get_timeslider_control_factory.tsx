@@ -14,7 +14,6 @@ import { EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
 import {
-  apiHasParentApi,
   apiPublishesDataLoading,
   getViewModeSubject,
   useBatchedPublishingSubjects,
@@ -22,11 +21,7 @@ import {
 
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
-import {
-  defaultControlComparators,
-  initializeDefaultControlManager,
-} from '../default_control_manager';
-import type { ControlFactory } from '../types';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { TimeSliderPopoverButton } from './components/time_slider_popover_button';
 import { TimeSliderPopoverContent } from './components/time_slider_popover_content';
 import { TimeSliderPrepend } from './components/time_slider_prepend';
@@ -48,24 +43,25 @@ const displayName = i18n.translate('controls.timesliderControl.displayName', {
   defaultMessage: 'Time slider',
 });
 
-export const getTimesliderControlFactory = (): ControlFactory<
+export const getTimesliderControlFactory = (): EmbeddableFactory<
   TimesliderControlState,
   TimesliderControlApi
 > => {
   return {
     type: TIME_SLIDER_CONTROL,
-    getIconType: () => 'search',
-    getDisplayName: () => displayName,
-    buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
+    // getIconType: () => 'search',
+    // getDisplayName: () => displayName,
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      const state = initialState.rawState;
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
-        initTimeRangeSubscription(controlGroupApi);
+        initTimeRangeSubscription(parentApi);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
-      const isAnchored$ = new BehaviorSubject<boolean | undefined>(initialState.isAnchored);
+      const isAnchored$ = new BehaviorSubject<boolean | undefined>(state.isAnchored);
       const isPopoverOpen$ = new BehaviorSubject(false);
       const hasTimeSliceSelection$ = new BehaviorSubject<boolean>(Boolean(timeslice$));
 
       const timeRangePercentage = initTimeRangePercentage(
-        initialState,
+        state,
         syncTimesliceWithTimeRangePercentage
       );
 
@@ -192,17 +188,11 @@ export const getTimesliderControlFactory = (): ControlFactory<
       }
 
       const viewModeSubject =
-        getViewModeSubject(controlGroupApi) ?? new BehaviorSubject('view' as ViewMode);
+        getViewModeSubject(parentApi) ?? new BehaviorSubject('view' as ViewMode);
 
-      const defaultControlManager = initializeDefaultControlManager({
-        ...initialState,
-        width: 'large',
-      });
-
-      const dashboardDataLoading$ =
-        apiHasParentApi(controlGroupApi) && apiPublishesDataLoading(controlGroupApi.parentApi)
-          ? controlGroupApi.parentApi.dataLoading$
-          : new BehaviorSubject<boolean | undefined>(false);
+      const dashboardDataLoading$ = apiPublishesDataLoading(parentApi)
+        ? parentApi.dataLoading$
+        : new BehaviorSubject<boolean | undefined>(false);
       const waitForDashboardPanelsToLoad$ = dashboardDataLoading$.pipe(
         // debounce to give time for panels to start loading if they are going to load from time changes
         debounceTime(300),
@@ -219,7 +209,6 @@ export const getTimesliderControlFactory = (): ControlFactory<
       function serializeState() {
         return {
           rawState: {
-            ...defaultControlManager.getLatestState(),
             ...timeRangePercentage.getLatestState(),
             isAnchored: isAnchored$.value,
           },
@@ -229,23 +218,20 @@ export const getTimesliderControlFactory = (): ControlFactory<
 
       const unsavedChangesApi = initializeUnsavedChanges<TimesliderControlState>({
         uuid,
-        parentApi: controlGroupApi,
+        parentApi,
         serializeState,
         anyStateChange$: merge(
-          defaultControlManager.anyStateChange$,
           timeRangePercentage.anyStateChange$,
           isAnchored$.pipe(map(() => undefined))
         ),
         getComparators: () => {
           return {
-            ...defaultControlComparators,
             ...timeRangePercentageComparators,
             width: 'skip',
             isAnchored: 'skip',
           };
         },
         onReset: (lastSaved) => {
-          defaultControlManager.reinitializeState(lastSaved?.rawState);
           timeRangePercentage.reinitializeState(lastSaved?.rawState);
           setIsAnchored(lastSaved?.rawState?.isAnchored);
         },
@@ -253,7 +239,6 @@ export const getTimesliderControlFactory = (): ControlFactory<
 
       const api = finalizeApi({
         ...unsavedChangesApi,
-        ...defaultControlManager.api,
         defaultTitle$: new BehaviorSubject<string | undefined>(displayName),
         timeslice$,
         serializeState,
@@ -263,10 +248,8 @@ export const getTimesliderControlFactory = (): ControlFactory<
         },
         hasSelections$: hasTimeSliceSelection$ as PublishingSubject<boolean | undefined>,
         CustomPrependComponent: () => {
-          const [autoApplySelections, viewMode] = useBatchedPublishingSubjects(
-            controlGroupApi.autoApplySelections$,
-            viewModeSubject
-          );
+          const autoApplySelections = true; // TODO Reimplement or remove
+          const [viewMode] = useBatchedPublishingSubjects(viewModeSubject);
 
           return (
             <TimeSliderPrepend

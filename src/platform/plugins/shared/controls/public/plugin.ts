@@ -38,7 +38,7 @@ export class ControlsPlugin
 
     registerOptionsListControl(embeddable);
     registerRangeSliderControl(embeddable);
-    registerTimeSliderControl();
+    registerTimeSliderControl(embeddable);
     registerESQLControl(embeddable);
   }
 
