@@ -20,6 +20,10 @@
       "security",
       "triggersActionsUi",
       "spaces",
+      "data",
+      "dataViews",
+      "fieldFormats",
+      "unifiedSearch",
       "embeddable"
     ],
     "optionalPlugins": [

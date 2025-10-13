@@ -23,8 +23,8 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { deduplicateAttackDiscoveries } from '../../../lib/attack_discovery/persistence/deduplication';
-import { reportAttackDiscoverySuccessTelemetry } from './helpers';
-import { handleGraphError } from '../post/helpers/handle_graph_error';
+import { reportAttackDiscoverySuccessTelemetry } from './report_attack_discovery_success_telemetry';
+import { handleGraphError } from '../public/post/helpers/handle_graph_error';
 import type { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
 import { generateAttackDiscoveries } from './generate_discoveries';
 
@@ -33,11 +33,13 @@ export interface GenerateAndUpdateAttackDiscoveriesParams {
   authenticatedUser: AuthenticatedUser;
   config: AttackDiscoveryGenerationConfig;
   dataClient: AttackDiscoveryDataClient;
+  enableFieldRendering: boolean;
   esClient: ElasticsearchClient;
   executionUuid: string;
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
+  withReplacements: boolean;
 }
 
 export const generateAndUpdateAttackDiscoveries = async ({
@@ -45,11 +47,13 @@ export const generateAndUpdateAttackDiscoveries = async ({
   authenticatedUser,
   config,
   dataClient,
+  enableFieldRendering,
   esClient,
   executionUuid,
   logger,
   savedObjectsClient,
   telemetry,
+  withReplacements,
 }: GenerateAndUpdateAttackDiscoveriesParams) => {
   const startTime = moment(); // start timing the generation
 
@@ -120,8 +124,10 @@ export const generateAndUpdateAttackDiscoveries = async ({
       apiConfig,
       attackDiscoveries: dedupedDiscoveries,
       connectorName: connectorName ?? apiConfig.connectorId,
+      enableFieldRendering,
       generationUuid: executionUuid,
       replacements: latestReplacements,
+      withReplacements,
     };
     await dataClient.createAttackDiscoveryAlerts({
       authenticatedUser,

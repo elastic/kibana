@@ -20,11 +20,18 @@ export interface BaseSchemaField extends Omit<FieldDefinitionConfig, 'type'> {
   parent: string;
   alias_for?: string;
   format?: string;
+  source?: string;
+  description?: string;
+  streamSource?: 'template' | 'stream';
 }
 
 export interface MappedSchemaField extends BaseSchemaField {
   status: 'inherited' | 'mapped';
   type: SchemaFieldType;
+  /**
+   * Elasticsearch-level type of the field - available when field exists in ES but may not be directly supported by streams schema
+   */
+  esType?: string;
   additionalParameters?: FieldDefinitionConfigAdvancedParameters;
 }
 

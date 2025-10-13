@@ -16,7 +16,7 @@ interface NavigationState {
   actualActiveItemId: string | undefined;
   visuallyActivePageId: string | undefined;
   visuallyActiveSubpageId: string | undefined;
-  sidePanelContent: MenuItem | null;
+  openerNode: MenuItem | null;
   isCollapsed: boolean;
   isSidePanelOpen: boolean;
 }
@@ -35,14 +35,14 @@ export const useNavigation = (
   const actualActiveItemId = activeItemId;
   const visuallyActivePageId = isLogoActive ? logoId : primaryItem?.id;
   const visuallyActiveSubpageId = secondaryItem?.id;
-  const sidePanelContent = primaryItem;
-  const isSidePanelOpen = !isCollapsed && !!sidePanelContent?.sections;
+  const openerNode = primaryItem;
+  const isSidePanelOpen = !isCollapsed && !!openerNode?.sections;
 
   const state: NavigationState = {
     actualActiveItemId,
     visuallyActivePageId,
     visuallyActiveSubpageId,
-    sidePanelContent,
+    openerNode,
     isCollapsed,
     isSidePanelOpen,
   };
