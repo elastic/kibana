@@ -49,7 +49,6 @@
     "@kbn/esql-ast",
     "@kbn/background-search",
     "@kbn/split-button",
-    "@kbn/cloud-plugin"
   ],
   "exclude": ["target/**/*"]
 }
