@@ -34,9 +34,9 @@ import {
   getIsKnowledgeBaseInstalled,
   getSystemPromptFromUserConversation,
   langChainExecute,
-  agentBuilderExecute,
   performChecks,
 } from './helpers';
+import { agentBuilderExecute } from './agent_builder_execute';
 import { isOpenSourceModel } from './utils';
 import type { ConfigSchema } from '../config_schema';
 
