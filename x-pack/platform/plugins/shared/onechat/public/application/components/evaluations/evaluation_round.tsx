@@ -9,7 +9,6 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiText,
-  EuiBadge,
   EuiButtonIcon,
   EuiSplitPanel,
   useEuiTheme,
@@ -21,6 +20,7 @@ import type { ConversationRound } from '@kbn/onechat-common';
 import { ChatMessageText } from '../conversations/conversation_rounds/chat_message_text';
 import { useEvaluations } from '../../context/evaluations/evaluations_context';
 import { RoundSteps } from '../conversations/conversation_rounds/round_thinking/steps/round_steps';
+import { EvaluatorBadgesGroup } from './evaluator_badges_group';
 
 interface EvaluationRoundProps {
   round: ConversationRound;
@@ -32,9 +32,6 @@ const MOCK_EVALUATION_DATA = {
   precision: 0.74,
   completeness: 0.35,
 };
-
-const getBadgeColor = (score: number) => (score > 0.7 ? 'success' : 'danger');
-const getBadgeIcon = (score: number) => (score > 0.7 ? 'check' : 'alert');
 
 const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text);
@@ -66,26 +63,11 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({ round, roundNu
               <strong>Round {roundNumber}</strong>
             </EuiText>
           </EuiFlexGroup>
-          <div style={{ display: 'flex', gap: euiTheme.size.s }}>
-            <EuiBadge
-              color={getBadgeColor(MOCK_EVALUATION_DATA.relevance)}
-              iconType={getBadgeIcon(MOCK_EVALUATION_DATA.relevance)}
-            >
-              Relevance: {MOCK_EVALUATION_DATA.relevance.toFixed(2)}/1
-            </EuiBadge>
-            <EuiBadge
-              color={getBadgeColor(MOCK_EVALUATION_DATA.precision)}
-              iconType={getBadgeIcon(MOCK_EVALUATION_DATA.precision)}
-            >
-              Precision: {MOCK_EVALUATION_DATA.precision.toFixed(2)}/1
-            </EuiBadge>
-            <EuiBadge
-              color={getBadgeColor(MOCK_EVALUATION_DATA.completeness)}
-              iconType={getBadgeIcon(MOCK_EVALUATION_DATA.completeness)}
-            >
-              Completeness: {MOCK_EVALUATION_DATA.completeness.toFixed(2)}/1
-            </EuiBadge>
-          </div>
+          <EvaluatorBadgesGroup
+            relevance={MOCK_EVALUATION_DATA.relevance}
+            precision={MOCK_EVALUATION_DATA.precision}
+            completeness={MOCK_EVALUATION_DATA.completeness}
+          />
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
 
@@ -141,7 +123,7 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({ round, roundNu
                   <strong>AGENT THINKING</strong>
                 </EuiText>
               </EuiFlexGroup>
-              <EuiSpacer size="s" />
+              <EuiSpacer size="m" />
               <EuiPanel paddingSize="l" hasShadow={false} hasBorder={false} color="subdued">
                 <RoundSteps steps={round.steps} />
               </EuiPanel>
