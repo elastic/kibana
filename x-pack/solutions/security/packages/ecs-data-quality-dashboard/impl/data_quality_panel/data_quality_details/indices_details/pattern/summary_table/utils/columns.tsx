@@ -83,7 +83,9 @@ export const getSummaryTableSizeInBytesColumn = ({
           render: (_, { sizeInBytes }) =>
             Number.isInteger(sizeInBytes) ? (
               <EuiToolTip content={INDEX_SIZE_TOOLTIP}>
-                <span data-test-subj="sizeInBytes">{formatBytes(sizeInBytes)}</span>
+                <span data-test-subj="sizeInBytes" tabIndex={0}>
+                  {formatBytes(sizeInBytes)}
+                </span>
               </EuiToolTip>
             ) : null,
           sortable: true,
@@ -162,7 +164,9 @@ export const getSummaryTableColumns = ({
         <IndexResultBadge incompatible={incompatible} data-test-subj="resultBadge" />
       ) : (
         <EuiToolTip content={getIndexResultToolTip(incompatible)}>
-          <span data-test-subj="incompatiblePlaceholder">{EMPTY_STAT}</span>
+          <span data-test-subj="incompatiblePlaceholder" tabIndex={0}>
+            {EMPTY_STAT}
+          </span>
         </EuiToolTip>
       ),
     sortable: true,
@@ -174,7 +178,7 @@ export const getSummaryTableColumns = ({
     name: INDEX,
     render: (_, { indexName }) => (
       <EuiToolTip content={i18n.INDEX_TOOL_TIP(pattern)}>
-        <span aria-roledescription={i18n.INDEX_NAME_LABEL} data-test-subj="indexName">
+        <span aria-roledescription={i18n.INDEX_NAME_LABEL} data-test-subj="indexName" tabIndex={0}>
           {indexName}
         </span>
       </EuiToolTip>
@@ -210,6 +214,7 @@ export const getSummaryTableColumns = ({
           size="xs"
           data-test-subj="incompatibleStat"
           color={getIncompatibleStatColor(incompatible, dangerColor)}
+          tabIndex={0}
         >
           {incompatible ?? EMPTY_STAT}
         </EuiText>
