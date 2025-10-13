@@ -75,35 +75,42 @@ export const FleetProxiesTable: React.FunctionComponent<FleetProxiesTableProps> 
         width: '68px',
         render: (fleetProxy: FleetProxy) => {
           const isDeleteVisible = authz.fleet.allSettings && !fleetProxy.is_preconfigured;
+          const deleteButtonLabel = i18n.translate(
+            'xpack.fleet.settings.fleetProxiesTable.deleteButtonTitle',
+            {
+              defaultMessage: 'Delete',
+            }
+          );
+          const editButtonLabel = i18n.translate(
+            'xpack.fleet.settings.fleetProxiesTable.editButtonTitle',
+            {
+              defaultMessage: 'Edit',
+            }
+          );
 
           return (
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 {isDeleteVisible && (
                   <EuiButtonIcon
+                    aria-label={deleteButtonLabel}
                     color="text"
                     iconType="trash"
                     onClick={() => deleteFleetProxy(fleetProxy)}
-                    title={i18n.translate(
-                      'xpack.fleet.settings.fleetProxiesTable.deleteButtonTitle',
-                      {
-                        defaultMessage: 'Delete',
-                      }
-                    )}
+                    title={deleteButtonLabel}
                     data-test-subj="fleetProxiesTable.delete.btn"
                   />
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
+                  aria-label={editButtonLabel}
                   color="text"
                   iconType="pencil"
                   href={getHref('settings_edit_fleet_proxy', {
                     itemId: fleetProxy.id,
                   })}
-                  title={i18n.translate('xpack.fleet.settings.fleetProxiesTable.editButtonTitle', {
-                    defaultMessage: 'Edit',
-                  })}
+                  title={editButtonLabel}
                   data-test-subj="fleetProxiesTable.edit.btn"
                 />
               </EuiFlexItem>
