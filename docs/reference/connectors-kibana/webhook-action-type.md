@@ -46,13 +46,13 @@ Authentication
     :   If you choose OAuth 2.0 authentication, you must provide an access token URL, client ID, and client secret. Specifying the [access token scope](https://datatracker.ietf.org/doc/html/rfc6749#section-3.3) is optional. You also have the option to specify additional parameters that your authentication provider might require. 
 
 HTTP headers (optional)
-:   A custom set of HTTP headers that will be sent with API requests.
+:   A custom set of HTTP headers that you can send with API requests.
 
     Config
-    :   If you choose the **Config** type, you must provide a key value pair.
+    :   Choose this type to send values in headers in plain text.   
 
     Secret {applies_to}`stack: ga 9.2` 
-    :   If you choose the **Secret** type, the value of the header will be encrypted and won't be displayed. 
+    :   Choose this type to encrypt values in your headers. 
 
 Certificate authority (optional)
 :   A certificate authority (CA) that the connector can trust, for example to sign and validate server certificates. This option is available for all authentication types.
