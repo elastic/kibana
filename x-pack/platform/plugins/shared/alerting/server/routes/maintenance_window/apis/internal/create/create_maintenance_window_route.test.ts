@@ -132,4 +132,52 @@ describe('createMaintenanceWindowRoute', () => {
     const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
+
+  test('should create the maintenance window with hourly frequency', async () => {
+    const createParamsV2 = {
+      ...createParams,
+      r_rule: { ...mockMaintenanceWindow.rRule, freq: 4 },
+    } as CreateMaintenanceWindowRequestBody;
+    const mockMaintenanceWindow2 = {
+      ...mockMaintenanceWindow,
+      rRule: { ...mockMaintenanceWindow.rRule, freq: 4 },
+    } as MaintenanceWindow;
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    createMaintenanceWindowRoute(router, licenseState);
+
+    maintenanceWindowClient.create.mockResolvedValueOnce(mockMaintenanceWindow2);
+    const [config, handler] = router.post.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments(
+      { maintenanceWindowClient },
+      { body: createParamsV2 }
+    );
+
+    expect(config.path).toEqual('/internal/alerting/rules/maintenance_window');
+    expect(config.options).toMatchInlineSnapshot(`
+      Object {
+        "access": "internal",
+      }
+    `);
+
+    expect(config.security).toMatchInlineSnapshot(`
+      Object {
+        "authz": Object {
+          "requiredPrivileges": Array [
+            "write-maintenance-window",
+          ],
+        },
+      }
+    `);
+
+    await handler(context, req, res);
+
+    expect(maintenanceWindowClient.create).toHaveBeenLastCalledWith({
+      data: transformCreateBody(createParamsV2),
+    });
+    expect(res.ok).toHaveBeenLastCalledWith({
+      body: transformInternalMaintenanceWindowToExternal(mockMaintenanceWindow2),
+    });
+  });
 });
