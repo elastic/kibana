@@ -20,7 +20,7 @@ interface Props {
   api: ReturnType<typeof useComponentTemplatesContext>['api'];
 }
 
-export const MappingsDatastreamRolloverModal: React.FunctionComponent<Props> = ({
+export const MappingsDsRolloverModal: React.FunctionComponent<Props> = ({
   componentTemplatename,
   dataStreams,
   onClose,
