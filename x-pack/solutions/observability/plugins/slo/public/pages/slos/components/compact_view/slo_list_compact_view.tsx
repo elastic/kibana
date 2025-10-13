@@ -335,7 +335,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         );
         return (
           <EuiToolTip position="top" content={slo.name} display="block">
-            <EuiText size="s">
+            <EuiText size="s" tabIndex={0}>
               <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
                 {slo.name}
               </a>

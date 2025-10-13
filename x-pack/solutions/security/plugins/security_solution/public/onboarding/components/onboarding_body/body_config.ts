@@ -72,8 +72,8 @@ export const siemMigrationsBodyConfig: OnboardingGroupConfig[] = [
     }),
     cards: [
       startRuleMigrationCardConfig,
-      startDashboardMigrationCardConfig,
       siemMigrationIntegrationsCardConfig,
+      startDashboardMigrationCardConfig,
     ],
   },
 ];
