@@ -296,7 +296,7 @@ const runCli: RunFn = async ({ log, flags }) => {
   const debugExec = async (command: string) => {
     log.debug(`Executing command: ${command}`);
     try {
-      const result = await crowdStrikeVm.exec(command);
+      const result = await crowdStrikeVm.exec(command, { silent: true });
       log.debug(`Command succeeded. stdout: ${result.stdout}, stderr: ${result.stderr}`);
       return result;
     } catch (err) {
@@ -326,7 +326,7 @@ const runCli: RunFn = async ({ log, flags }) => {
 
   if (detectionCount > 0) {
     log.info(
-      `🎉 CrowdStrike successfully blocked ${detectionCount} out of ${crowdStrikeTestCommands.length} malicious test commands!`
+      `🎉 CrowdStrike successfully detected ${detectionCount} out of ${crowdStrikeTestCommands.length} malicious test commands!`
     );
     log.info(
       '   This indicates CrowdStrike is actively protecting the host. Check CrowdStrike console for detection alerts.'
