@@ -35,6 +35,7 @@ interface CreateTestConfigOptions<T> {
   testFiles: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
+  indexRefreshInterval?: string | false;
 }
 
 export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServices>(
@@ -168,6 +169,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           ...(options?.kbnTestServer?.serverArgs ?? []),
         ],
       },
+      indexRefreshInterval: options.indexRefreshInterval,
     };
   };
 }

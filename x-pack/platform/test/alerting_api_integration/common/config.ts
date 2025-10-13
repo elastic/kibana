@@ -40,6 +40,7 @@ interface CreateTestConfigOptions {
   disabledRuleTypes?: string[];
   enabledRuleTypes?: string[];
   maxAlerts?: number;
+  indexRefreshInterval?: string | false;
 }
 
 // test.not-enabled is specifically not enabled
@@ -227,6 +228,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     maxScheduledPerMinute,
     experimentalFeatures = [],
     maxAlerts = 20,
+    indexRefreshInterval,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -395,6 +397,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.uptime.service.manifestUrl=mockDevUrl',
         ],
       },
+      indexRefreshInterval,
     };
   };
 }
