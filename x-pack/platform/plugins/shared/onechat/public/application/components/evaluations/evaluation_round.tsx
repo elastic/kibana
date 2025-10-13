@@ -14,10 +14,13 @@ import {
   EuiSplitPanel,
   useEuiTheme,
   EuiSpacer,
+  EuiPanel,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ConversationRound } from '@kbn/onechat-common';
 import { ChatMessageText } from '../conversations/conversation_rounds/chat_message_text';
+import { useEvaluations } from '../../context/evaluations/evaluations_context';
+import { RoundSteps } from '../conversations/conversation_rounds/round_thinking/steps/round_steps';
 
 interface EvaluationRoundProps {
   round: ConversationRound;
@@ -39,6 +42,7 @@ const copyToClipboard = (text: string) => {
 
 export const EvaluationRound: React.FC<EvaluationRoundProps> = ({ round, roundNumber }) => {
   const { euiTheme } = useEuiTheme();
+  const { showThinking } = useEvaluations();
 
   const inputPanelStyles = css`
     border-radius: ${euiTheme.border.radius.small};
@@ -126,6 +130,24 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({ round, roundNu
             <ChatMessageText content={round.response.message} steps={round.steps} />
           </div>
         </div>
+
+        {/* Agent Thinking Section - Only show when toggle is enabled */}
+        {showThinking && round.steps && round.steps.length > 0 && (
+          <>
+            <EuiSpacer size="l" />
+            <div>
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiText size="xs">
+                  <strong>AGENT THINKING</strong>
+                </EuiText>
+              </EuiFlexGroup>
+              <EuiSpacer size="s" />
+              <EuiPanel paddingSize="l" hasShadow={false} hasBorder={false} color="subdued">
+                <RoundSteps steps={round.steps} />
+              </EuiPanel>
+            </div>
+          </>
+        )}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );

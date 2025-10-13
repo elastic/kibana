@@ -15,6 +15,7 @@ import { useConversationList } from '../../hooks/use_conversation_list';
 import { EvaluationsHeader } from './header/evaluations_header';
 import { Evaluation } from './evaluation';
 import { SendMessageProvider } from '../../context/send_message/send_message_context';
+import { EvaluationsProvider } from '../../context/evaluations/evaluations_context';
 
 export const OnechatEvaluationsView: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -64,47 +65,49 @@ export const OnechatEvaluationsView: React.FC = () => {
 
   return (
     <SendMessageProvider>
-      <KibanaPageTemplate
-        offset={0}
-        restrictWidth={false}
-        data-test-subj="onechatPageEvaluations"
-        grow={false}
-        panelled={false}
-        mainProps={{
-          css: mainStyles,
-        }}
-        responsive={[]}
-      >
-        {isSidebarOpen && (
-          <KibanaPageTemplate.Sidebar data-test-subj="evaluationsSidebar" css={sidebarStyles}>
-            <EvaluationsSidebar conversations={conversations} isLoading={isLoading} />
-          </KibanaPageTemplate.Sidebar>
-        )}
-
-        <KibanaPageTemplate.Header
-          css={headerStyles}
-          bottomBorder={false}
-          aria-label={labels.header}
-          paddingSize="m"
-        >
-          <EvaluationsHeader
-            isSidebarOpen={isSidebarOpen}
-            onToggleSidebar={() => {
-              setIsSidebarOpen((open) => !open);
-            }}
-          />
-        </KibanaPageTemplate.Header>
-        <KibanaPageTemplate.Section
-          paddingSize="none"
-          grow
-          contentProps={{
-            css: contentStyles,
+      <EvaluationsProvider>
+        <KibanaPageTemplate
+          offset={0}
+          restrictWidth={false}
+          data-test-subj="onechatPageEvaluations"
+          grow={false}
+          panelled={false}
+          mainProps={{
+            css: mainStyles,
           }}
-          aria-label={labels.content}
+          responsive={[]}
         >
-          <Evaluation />
-        </KibanaPageTemplate.Section>
-      </KibanaPageTemplate>
+          {isSidebarOpen && (
+            <KibanaPageTemplate.Sidebar data-test-subj="evaluationsSidebar" css={sidebarStyles}>
+              <EvaluationsSidebar conversations={conversations} isLoading={isLoading} />
+            </KibanaPageTemplate.Sidebar>
+          )}
+
+          <KibanaPageTemplate.Header
+            css={headerStyles}
+            bottomBorder={false}
+            aria-label={labels.header}
+            paddingSize="m"
+          >
+            <EvaluationsHeader
+              isSidebarOpen={isSidebarOpen}
+              onToggleSidebar={() => {
+                setIsSidebarOpen((open) => !open);
+              }}
+            />
+          </KibanaPageTemplate.Header>
+          <KibanaPageTemplate.Section
+            paddingSize="none"
+            grow
+            contentProps={{
+              css: contentStyles,
+            }}
+            aria-label={labels.content}
+          >
+            <Evaluation />
+          </KibanaPageTemplate.Section>
+        </KibanaPageTemplate>
+      </EvaluationsProvider>
     </SendMessageProvider>
   );
 };

@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
-import { EuiPageHeaderSection, useEuiTheme } from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiPageHeaderSection, EuiSwitch, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useEvaluations } from '../../../context/evaluations/evaluations_context';
 
-export const HeaderLeftActions: React.FC<{}> = () => {
+export const HeaderLeftActions: React.FC = () => {
   const { euiTheme } = useEuiTheme();
+  const { showThinking, setShowThinking } = useEvaluations();
 
   const actionsContainerStyles = css`
     display: flex;
@@ -25,11 +28,22 @@ export const HeaderLeftActions: React.FC<{}> = () => {
     container: i18n.translate('xpack.onechat.conversationActions.container', {
       defaultMessage: 'Header actions',
     }),
+    showThinking: i18n.translate('xpack.onechat.evaluations.showThinking', {
+      defaultMessage: 'Show Thinking',
+    }),
+  };
+
+  const handleShowThinkingChange = (e: EuiSwitchEvent) => {
+    setShowThinking(e.target.checked);
   };
 
   return (
     <EuiPageHeaderSection css={actionsContainerStyles} aria-label={labels.container}>
-      left
+      <EuiSwitch
+        label={labels.showThinking}
+        checked={showThinking}
+        onChange={handleShowThinkingChange}
+      />
     </EuiPageHeaderSection>
   );
 };
