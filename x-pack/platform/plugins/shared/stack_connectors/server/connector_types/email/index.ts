@@ -79,7 +79,7 @@ const ConfigSchemaProps = {
   oauthTokenUrl: z.string().nullable(),
 };
 
-const ConfigSchema = z.object(ConfigSchemaProps);
+const ConfigSchema = z.object(ConfigSchemaProps).strict();
 
 function validateConfig(
   configObject: ConnectorTypeConfigType,
@@ -179,12 +179,12 @@ function validateConfig(
 export type ConnectorTypeSecretsType = z.infer<typeof SecretsSchema>;
 
 const SecretsSchemaProps = {
-  user: z.string().nullable().default(null),
-  password: z.string().nullable().default(null),
-  clientSecret: z.string().nullable(),
+  user: z.string().nullable().optional(),
+  password: z.string().nullable().optional(),
+  clientSecret: z.string().nullable().optional(),
 };
 
-const SecretsSchema = z.object(SecretsSchemaProps);
+const SecretsSchema = z.object(SecretsSchemaProps).strict();
 
 // params definition
 export type ActionParamsType = z.infer<typeof ParamsSchema>;
@@ -195,7 +195,7 @@ const AttachmentSchemaProps = {
   filename: z.string(),
   encoding: z.string().optional(),
 };
-export const AttachmentSchema = z.object(AttachmentSchemaProps);
+export const AttachmentSchema = z.object(AttachmentSchemaProps).strict();
 export type Attachment = z.infer<typeof AttachmentSchema>;
 
 const defaultFooterText = i18n.translate('xpack.stackConnectors.email.kibanaFooterLinkText', {
@@ -216,6 +216,7 @@ export const ParamsSchemaProps = {
       path: z.string().default('/'),
       text: z.string().default(defaultFooterText),
     })
+    .strict()
     .default({
       path: '/',
       text: defaultFooterText,
@@ -223,7 +224,7 @@ export const ParamsSchemaProps = {
   attachments: z.array(AttachmentSchema).optional(),
 };
 
-export const ParamsSchema = z.object(ParamsSchemaProps);
+export const ParamsSchema = z.object(ParamsSchemaProps).strict();
 
 function validateParams(paramsObject: unknown, validatorServices: ValidatorServices) {
   const { configurationUtilities } = validatorServices;

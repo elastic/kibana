@@ -33,7 +33,7 @@ const configSchemaProps = {
   configUrl: z.string().nullable(),
   usesBasic: z.boolean().default(true),
 };
-const ConfigSchema = z.object(configSchemaProps);
+const ConfigSchema = z.object(configSchemaProps).strict();
 export type ConnectorTypeConfigType = z.infer<typeof ConfigSchema>;
 
 // secrets definition
@@ -43,19 +43,21 @@ const secretSchemaProps = {
   password: z.string().nullable(),
   secretsUrl: z.string().nullable(),
 };
-const SecretsSchema = z.object(secretSchemaProps);
+const SecretsSchema = z.object(secretSchemaProps).strict();
 
 // params definition
 export type ActionParamsType = z.infer<typeof ParamsSchema>;
-const ParamsSchema = z.object({
-  alertActionGroupName: z.string().optional(),
-  signalId: z.string().optional(),
-  ruleName: z.string().optional(),
-  date: z.string().optional(),
-  severity: z.string(),
-  spaceId: z.string().optional(),
-  tags: z.string().optional(),
-});
+const ParamsSchema = z
+  .object({
+    alertActionGroupName: z.string().optional(),
+    signalId: z.string().optional(),
+    ruleName: z.string().optional(),
+    date: z.string().optional(),
+    severity: z.string(),
+    spaceId: z.string().optional(),
+    tags: z.string().optional(),
+  })
+  .strict();
 
 export const ConnectorTypeId = '.xmatters';
 // connector type definition

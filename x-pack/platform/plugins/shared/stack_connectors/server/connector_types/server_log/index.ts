@@ -32,19 +32,12 @@ export type ServerLogConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions
 
 export type ActionParamsType = z.infer<typeof ParamsSchema>;
 
-const ParamsSchema = z.object({
-  message: z.string(),
-  level: z
-    .union([
-      z.literal('trace'),
-      z.literal('debug'),
-      z.literal('info'),
-      z.literal('warn'),
-      z.literal('error'),
-      z.literal('fatal'),
-    ])
-    .default('info'),
-});
+const ParamsSchema = z
+  .object({
+    message: z.string(),
+    level: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
+  })
+  .strict();
 
 export const ConnectorTypeId = '.server-log';
 // connector type definition
@@ -61,8 +54,8 @@ export function getConnectorType(): ServerLogConnectorType {
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: { schema: z.object({}).default({}) },
-      secrets: { schema: z.object({}).default({}) },
+      config: { schema: z.object({}).strict().default({}) },
+      secrets: { schema: z.object({}).strict().default({}) },
       params: {
         schema: ParamsSchema,
       },

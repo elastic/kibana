@@ -13,18 +13,18 @@ export const ExternalIncidentServiceConfiguration = {
   orgId: z.string(),
 };
 
-export const ExternalIncidentServiceConfigurationSchema = z.object(
-  ExternalIncidentServiceConfiguration
-);
+export const ExternalIncidentServiceConfigurationSchema = z
+  .object(ExternalIncidentServiceConfiguration)
+  .strict();
 
 export const ExternalIncidentServiceSecretConfiguration = {
   apiKeyId: z.string(),
   apiKeySecret: z.string(),
 };
 
-export const ExternalIncidentServiceSecretConfigurationSchema = z.object(
-  ExternalIncidentServiceSecretConfiguration
-);
+export const ExternalIncidentServiceSecretConfigurationSchema = z
+  .object(ExternalIncidentServiceSecretConfiguration)
+  .strict();
 
 const MAX_ADDITIONAL_FIELDS_LENGTH = 50;
 
@@ -34,14 +34,15 @@ const AdditionalFields = {
       z.string().superRefine((value, ctx) => {
         validateOtherFieldsKeys(value, ctx);
       }),
-      z.any().superRefine((val, ctx) =>
-        validateRecordMaxKeys({
-          record: val,
-          ctx,
-          maxNumberOfFields: MAX_ADDITIONAL_FIELDS_LENGTH,
-          fieldName: 'additionalFields',
-        })
-      )
+      z.any()
+    )
+    .superRefine((val, ctx) =>
+      validateRecordMaxKeys({
+        record: val,
+        ctx,
+        maxNumberOfFields: MAX_ADDITIONAL_FIELDS_LENGTH,
+        fieldName: 'additionalFields',
+      })
     )
     .nullable(),
 };
@@ -67,15 +68,19 @@ const validateOtherFieldsKeys = (key: string, ctx: z.RefinementCtx) => {
 };
 
 export const ExecutorSubActionPushParamsSchema = z.object({
-  incident: z.object({
-    ...CommonIncidentAttributes,
-  }),
+  incident: z
+    .object({
+      ...CommonIncidentAttributes,
+    })
+    .strict(),
   comments: z
     .array(
-      z.object({
-        comment: z.string(),
-        commentId: z.string(),
-      })
+      z
+        .object({
+          comment: z.string(),
+          commentId: z.string(),
+        })
+        .strict()
     )
     .nullable(),
 });
@@ -89,9 +94,9 @@ export const PushToServiceIncidentSchema = {
 };
 
 // Reserved for future implementation
-export const ExecutorSubActionCommonFieldsParamsSchema = z.object({});
-export const ExecutorSubActionGetIncidentTypesParamsSchema = z.object({});
-export const ExecutorSubActionGetSeverityParamsSchema = z.object({});
+export const ExecutorSubActionCommonFieldsParamsSchema = z.object({}).strict();
+export const ExecutorSubActionGetIncidentTypesParamsSchema = z.object({}).strict();
+export const ExecutorSubActionGetSeverityParamsSchema = z.object({}).strict();
 
 const ArrayOfValuesSchema = z.array(
   z
@@ -140,12 +145,14 @@ export type ResilientFieldMeta = z.infer<typeof ExternalServiceFieldsSchema>;
 
 export const GetCommonFieldsResponseSchema = z.array(ExternalServiceFieldsSchema);
 
-export const ExternalServiceIncidentResponseSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  url: z.string(),
-  pushedDate: z.string(),
-});
+export const ExternalServiceIncidentResponseSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    url: z.string(),
+    pushedDate: z.string(),
+  })
+  .strict();
 
 export const GetIncidentResponseSchema = z
   .object({

@@ -47,14 +47,16 @@ export type ConnectorTypeConfigType = z.infer<typeof ConfigSchema>;
 const configSchemaProps = {
   apiUrl: z.string().nullable(),
 };
-const ConfigSchema = z.object(configSchemaProps);
+const ConfigSchema = z.object(configSchemaProps).strict();
 // secrets definition
 
 export type ConnectorTypeSecretsType = z.infer<typeof SecretsSchema>;
 
-const SecretsSchema = z.object({
-  routingKey: z.string(),
-});
+const SecretsSchema = z
+  .object({
+    routingKey: z.string(),
+  })
+  .strict();
 
 // params definition
 
@@ -68,20 +70,15 @@ const EVENT_ACTIONS_WITH_REQUIRED_DEDUPKEY = new Set([
   EVENT_ACTION_ACKNOWLEDGE,
 ]);
 
-const EventActionSchema = z.union([
-  z.literal(EVENT_ACTION_TRIGGER),
-  z.literal(EVENT_ACTION_RESOLVE),
-  z.literal(EVENT_ACTION_ACKNOWLEDGE),
+const EventActionSchema = z.enum([
+  EVENT_ACTION_TRIGGER,
+  EVENT_ACTION_RESOLVE,
+  EVENT_ACTION_ACKNOWLEDGE,
 ]);
 
-const PayloadSeveritySchema = z.union([
-  z.literal('critical'),
-  z.literal('error'),
-  z.literal('warning'),
-  z.literal('info'),
-]);
+const PayloadSeveritySchema = z.enum(['critical', 'error', 'warning', 'info']);
 
-const LinksSchema = z.array(z.object({ href: z.string(), text: z.string() }));
+const LinksSchema = z.array(z.object({ href: z.string(), text: z.string() }).strict());
 const customDetailsSchema = z.record(z.string(), z.any());
 
 export const ParamsSchema = z
@@ -98,6 +95,7 @@ export const ParamsSchema = z
     links: LinksSchema.optional(),
     customDetails: customDetailsSchema.optional(),
   })
+  .strict()
   .superRefine((paramsObject, ctx) => {
     const { timestamp, eventAction, dedupKey } = paramsObject as ActionParamsType;
     const convertedTimestamp = convertTimestamp(timestamp);

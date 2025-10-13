@@ -50,15 +50,17 @@ export type ConnectorTypeSecretsType = z.infer<typeof SecretsSchema>;
 const secretsSchemaProps = {
   webhookUrl: z.string(),
 };
-const SecretsSchema = z.object(secretsSchemaProps);
+const SecretsSchema = z.object(secretsSchemaProps).strict();
 
 // params definition
 
 export type ActionParamsType = z.infer<typeof ParamsSchema>;
 
-const ParamsSchema = z.object({
-  message: z.string().min(1),
-});
+const ParamsSchema = z
+  .object({
+    message: z.string().min(1),
+  })
+  .strict();
 
 export const ConnectorTypeId = '.teams';
 // connector type definition
@@ -75,7 +77,7 @@ export function getConnectorType(): TeamsConnectorType {
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: { schema: z.object({}).default({}) },
+      config: { schema: z.object({}).strict().default({}) },
       secrets: {
         schema: SecretsSchema,
         customValidator: validateConnectorTypeConfig,

@@ -15,18 +15,18 @@ export const ExternalIncidentServiceConfiguration = {
   projectKey: z.string(),
 };
 
-export const ExternalIncidentServiceConfigurationSchema = z.object(
-  ExternalIncidentServiceConfiguration
-);
+export const ExternalIncidentServiceConfigurationSchema = z
+  .object(ExternalIncidentServiceConfiguration)
+  .strict();
 
 export const ExternalIncidentServiceSecretConfiguration = {
   email: z.string(),
   apiToken: z.string(),
 };
 
-export const ExternalIncidentServiceSecretConfigurationSchema = z.object(
-  ExternalIncidentServiceSecretConfiguration
-);
+export const ExternalIncidentServiceSecretConfigurationSchema = z
+  .object(ExternalIncidentServiceSecretConfiguration)
+  .strict();
 
 const incidentSchemaObject = {
   summary: z.string(),
@@ -64,64 +64,86 @@ const incidentSchemaObject = {
 export const incidentSchemaObjectProperties = Object.keys(incidentSchemaObject);
 
 export const ExecutorSubActionPushParamsSchema = z.object({
-  incident: z.object(incidentSchemaObject),
+  incident: z.object(incidentSchemaObject).strict(),
   comments: z
     .array(
-      z.object({
-        comment: z.string(),
-        commentId: z.string(),
-      })
+      z
+        .object({
+          comment: z.string(),
+          commentId: z.string(),
+        })
+        .strict()
     )
     .nullable()
     .default(null),
 });
 
-export const ExecutorSubActionGetIncidentParamsSchema = z.object({
-  externalId: z.string(),
-});
+export const ExecutorSubActionGetIncidentParamsSchema = z
+  .object({
+    externalId: z.string(),
+  })
+  .strict();
 
 // Reserved for future implementation
-export const ExecutorSubActionCommonFieldsParamsSchema = z.object({});
-export const ExecutorSubActionHandshakeParamsSchema = z.object({});
-export const ExecutorSubActionGetCapabilitiesParamsSchema = z.object({});
-export const ExecutorSubActionGetIssueTypesParamsSchema = z.object({});
-export const ExecutorSubActionGetFieldsByIssueTypeParamsSchema = z.object({
-  id: z.string(),
-});
-export const ExecutorSubActionGetIssuesParamsSchema = z.object({ title: z.string() });
-export const ExecutorSubActionGetIssueParamsSchema = z.object({ id: z.string() });
+export const ExecutorSubActionCommonFieldsParamsSchema = z.object({}).strict();
+export const ExecutorSubActionHandshakeParamsSchema = z.object({}).strict();
+export const ExecutorSubActionGetCapabilitiesParamsSchema = z.object({}).strict();
+export const ExecutorSubActionGetIssueTypesParamsSchema = z.object({}).strict();
+export const ExecutorSubActionGetFieldsByIssueTypeParamsSchema = z
+  .object({
+    id: z.string(),
+  })
+  .strict();
+export const ExecutorSubActionGetIssuesParamsSchema = z.object({ title: z.string() }).strict();
+export const ExecutorSubActionGetIssueParamsSchema = z.object({ id: z.string() }).strict();
 
 export const ExecutorParamsSchema = z.discriminatedUnion('subAction', [
-  z.object({
-    subAction: z.literal('getFields'),
-    subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
-  }),
-  z.object({
-    subAction: z.literal('getIncident'),
-    subActionParams: ExecutorSubActionGetIncidentParamsSchema,
-  }),
-  z.object({
-    subAction: z.literal('handshake'),
-    subActionParams: ExecutorSubActionHandshakeParamsSchema,
-  }),
-  z.object({
-    subAction: z.literal('pushToService'),
-    subActionParams: ExecutorSubActionPushParamsSchema,
-  }),
-  z.object({
-    subAction: z.literal('issueTypes'),
-    subActionParams: ExecutorSubActionGetIssueTypesParamsSchema,
-  }),
-  z.object({
-    subAction: z.literal('fieldsByIssueType'),
-    subActionParams: ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
-  }),
-  z.object({
-    subAction: z.literal('issues'),
-    subActionParams: ExecutorSubActionGetIssuesParamsSchema,
-  }),
-  z.object({
-    subAction: z.literal('issue'),
-    subActionParams: ExecutorSubActionGetIssueParamsSchema,
-  }),
+  z
+    .object({
+      subAction: z.literal('getFields'),
+      subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('getIncident'),
+      subActionParams: ExecutorSubActionGetIncidentParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('handshake'),
+      subActionParams: ExecutorSubActionHandshakeParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('pushToService'),
+      subActionParams: ExecutorSubActionPushParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('issueTypes'),
+      subActionParams: ExecutorSubActionGetIssueTypesParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('fieldsByIssueType'),
+      subActionParams: ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('issues'),
+      subActionParams: ExecutorSubActionGetIssuesParamsSchema,
+    })
+    .strict(),
+  z
+    .object({
+      subAction: z.literal('issue'),
+      subActionParams: ExecutorSubActionGetIssueParamsSchema,
+    })
+    .strict(),
 ]);

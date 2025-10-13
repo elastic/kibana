@@ -41,11 +41,13 @@ export type ESIndexConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
 
 export type ConnectorTypeConfigType = z.infer<typeof ConfigSchema>;
 
-const ConfigSchema = z.object({
-  index: z.string(),
-  refresh: z.boolean().default(false),
-  executionTimeField: z.string().nullable(),
-});
+const ConfigSchema = z
+  .object({
+    index: z.string(),
+    refresh: z.boolean().default(false),
+    executionTimeField: z.string().nullable(),
+  })
+  .strict();
 
 // params definition
 
@@ -54,18 +56,20 @@ export type ActionParamsType = z.infer<typeof ParamsSchema>;
 // see: https://www.elastic.co/guide/en/elasticsearch/reference/current/actions-index.html
 // - timeout not added here, as this seems to be a generic thing we want to do
 //   eventually: https://github.com/elastic/kibana/projects/26#card-24087404
-const ParamsSchema = z.object({
-  documents: z.array(z.record(z.string(), z.any())),
-  indexOverride: z
-    .string()
-    .nullable()
-    .refine(
-      (pattern) => pattern === null || (pattern && pattern.startsWith(ALERT_HISTORY_PREFIX)),
-      {
-        message: `index must start with "${ALERT_HISTORY_PREFIX}"`,
-      }
-    ),
-});
+const ParamsSchema = z
+  .object({
+    documents: z.array(z.record(z.string(), z.any())),
+    indexOverride: z
+      .string()
+      .nullable()
+      .refine(
+        (pattern) => pattern === null || (pattern && pattern.startsWith(ALERT_HISTORY_PREFIX)),
+        {
+          message: `index must start with "${ALERT_HISTORY_PREFIX}"`,
+        }
+      ),
+  })
+  .strict();
 
 export const ConnectorTypeId = '.index';
 // connector type definition
@@ -82,7 +86,7 @@ export function getConnectorType(): ESIndexConnectorType {
       SecurityConnectorFeatureId,
     ],
     validate: {
-      secrets: { schema: z.object({}).default({}) },
+      secrets: { schema: z.object({}).strict().default({}) },
       config: {
         schema: ConfigSchema,
       },

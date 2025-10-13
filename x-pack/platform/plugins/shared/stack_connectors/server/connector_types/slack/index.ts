@@ -52,15 +52,17 @@ export type ConnectorTypeSecretsType = z.infer<typeof SecretsSchema>;
 const secretsSchemaProps = {
   webhookUrl: z.string(),
 };
-const SecretsSchema = z.object(secretsSchemaProps);
+const SecretsSchema = z.object(secretsSchemaProps).strict();
 
 // params definition
 
 export type ActionParamsType = z.infer<typeof ParamsSchema>;
 
-export const ParamsSchema = z.object({
-  message: z.string().min(1),
-});
+export const ParamsSchema = z
+  .object({
+    message: z.string().min(1),
+  })
+  .strict();
 
 // connector type definition
 
@@ -83,7 +85,7 @@ export function getConnectorType({
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: { schema: z.object({}).default({}) },
+      config: { schema: z.object({}).strict().default({}) },
       secrets: {
         schema: SecretsSchema,
         customValidator: validateConnectorTypeConfig,

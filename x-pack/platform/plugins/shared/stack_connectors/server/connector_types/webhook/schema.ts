@@ -14,12 +14,12 @@ export const HeadersSchema = z.record(z.string(), z.string());
 const configSchemaProps = {
   url: z.string(),
   method: z
-    .union([
-      z.literal(WebhookMethods.POST),
-      z.literal(WebhookMethods.PUT),
-      z.literal(WebhookMethods.PATCH),
-      z.literal(WebhookMethods.GET),
-      z.literal(WebhookMethods.DELETE),
+    .enum([
+      WebhookMethods.POST,
+      WebhookMethods.PUT,
+      WebhookMethods.PATCH,
+      WebhookMethods.GET,
+      WebhookMethods.DELETE,
     ])
     .default(WebhookMethods.POST),
   headers: HeadersSchema.nullable(),
@@ -34,9 +34,11 @@ const configSchemaProps = {
   additionalFields: AuthConfiguration.additionalFields,
 };
 
-export const ConfigSchema = z.object(configSchemaProps);
+export const ConfigSchema = z.object(configSchemaProps).strict();
 
 // params definition
-export const ParamsSchema = z.object({
-  body: z.string().optional(),
-});
+export const ParamsSchema = z
+  .object({
+    body: z.string().optional(),
+  })
+  .strict();

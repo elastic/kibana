@@ -42,7 +42,7 @@ export type TorqActionTypeExecutorOptions = ActionTypeExecutorOptions<
 const configSchemaProps = {
   webhookIntegrationUrl: z.string(),
 };
-const ConfigSchema = z.object(configSchemaProps);
+const ConfigSchema = z.object(configSchemaProps).strict();
 export type ActionTypeConfigType = z.infer<typeof ConfigSchema>;
 
 // secrets definition
@@ -50,13 +50,15 @@ export type ActionTypeSecretsType = z.infer<typeof SecretsSchema>;
 const secretSchemaProps = {
   token: z.string(),
 };
-const SecretsSchema = z.object(secretSchemaProps);
+const SecretsSchema = z.object(secretSchemaProps).strict();
 
 // params definition
 export type ActionParamsType = z.infer<typeof ParamsSchema>;
-const ParamsSchema = z.object({
-  body: z.string(),
-});
+const ParamsSchema = z
+  .object({
+    body: z.string(),
+  })
+  .strict();
 
 export const ActionTypeId = '.torq';
 // action type definition
@@ -74,7 +76,7 @@ export function getActionType(): TorqActionType {
     ],
     validate: {
       config: {
-        schema: z.object(configSchemaProps),
+        schema: ConfigSchema,
         customValidator: validateActionTypeConfig,
       },
       secrets: {

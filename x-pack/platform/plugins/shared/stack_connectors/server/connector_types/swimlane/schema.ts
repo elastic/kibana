@@ -14,7 +14,7 @@ export const ConfigMap = {
   fieldType: z.string(),
 };
 
-export const ConfigMapSchema = z.object(ConfigMap);
+export const ConfigMapSchema = z.object(ConfigMap).strict();
 
 export const ConfigMapping = {
   ruleNameConfig: ConfigMapSchema.nullable(),
@@ -26,22 +26,22 @@ export const ConfigMapping = {
   descriptionConfig: ConfigMapSchema.nullable(),
 };
 
-export const ConfigMappingSchema = z.object(ConfigMapping);
+export const ConfigMappingSchema = z.object(ConfigMapping).strict();
 
 export const SwimlaneServiceConfiguration = {
   apiUrl: z.string(),
   appId: z.string(),
-  connectorType: z.union([z.literal('all'), z.literal('alerts'), z.literal('cases')]),
+  connectorType: z.enum(['all', 'alerts', 'cases']),
   mappings: ConfigMappingSchema,
 };
 
-export const SwimlaneServiceConfigurationSchema = z.object(SwimlaneServiceConfiguration);
+export const SwimlaneServiceConfigurationSchema = z.object(SwimlaneServiceConfiguration).strict();
 
 export const SwimlaneSecretsConfiguration = {
   apiToken: z.string(),
 };
 
-export const SwimlaneSecretsConfigurationSchema = z.object(SwimlaneSecretsConfiguration);
+export const SwimlaneSecretsConfigurationSchema = z.object(SwimlaneSecretsConfiguration).strict();
 
 const SwimlaneFields = {
   alertId: z.string().nullable(),
@@ -52,17 +52,23 @@ const SwimlaneFields = {
   description: z.string().nullable(),
 };
 
-export const ExecutorSubActionPushParamsSchema = z.object({
-  incident: z.object({
-    ...SwimlaneFields,
-    externalId: z.string().nullable(),
-  }),
-  comments: z.array(z.object({ comment: z.string(), commentId: z.string() })).nullable(),
-});
+export const ExecutorSubActionPushParamsSchema = z
+  .object({
+    incident: z
+      .object({
+        ...SwimlaneFields,
+        externalId: z.string().nullable(),
+      })
+      .strict(),
+    comments: z.array(z.object({ comment: z.string(), commentId: z.string() }).strict()).nullable(),
+  })
+  .strict();
 
 export const ExecutorParamsSchema = z.discriminatedUnion('subAction', [
-  z.object({
-    subAction: z.literal('pushToService'),
-    subActionParams: ExecutorSubActionPushParamsSchema,
-  }),
+  z
+    .object({
+      subAction: z.literal('pushToService'),
+      subActionParams: ExecutorSubActionPushParamsSchema,
+    })
+    .strict(),
 ]);
