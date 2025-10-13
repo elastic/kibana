@@ -45,7 +45,7 @@ export const FeatureEventsData = ({ feature }: { feature: Feature }) => {
               )}
             >
               {i18n.translate('xpack.streams.identifiedFeatureEvents.viewAllLinkText', {
-                defaultMessage: 'Open in discover',
+                defaultMessage: 'Open in Discover',
               })}
             </EuiButtonEmpty>
           ) : null}
