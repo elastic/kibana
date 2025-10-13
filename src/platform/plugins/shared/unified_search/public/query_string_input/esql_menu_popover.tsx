@@ -14,6 +14,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenu,
   useEuiScrollBar,
+  useEuiTheme,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { css } from '@emotion/react';
@@ -44,6 +45,8 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
 }) => {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { docLinks, http, chrome } = kibana.services;
+
+  const { euiTheme } = useEuiTheme();
 
   const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
@@ -255,6 +258,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
 
   const esqlMenuPopoverStyles = css`
     width: 240px;
+    padding: ${euiTheme.size.s};
     max-height: 350px;
     overflow-y: auto;
     ${useEuiScrollBar()};
@@ -277,14 +281,15 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
         }
         panelProps={{
           ['data-test-subj']: 'esql-menu-popover',
-          css: esqlMenuPopoverStyles,
         }}
         isOpen={isESQLMenuPopoverOpen}
         closePopover={() => setIsESQLMenuPopoverOpen(false)}
-        panelPaddingSize="s"
+        panelPaddingSize="none"
         display="block"
       >
-        <EuiContextMenu initialPanelId={0} panels={esqlContextMenuPanels} />
+        <div css={esqlMenuPopoverStyles}>
+          <EuiContextMenu initialPanelId={0} panels={esqlContextMenuPanels} />
+        </div>
       </EuiPopover>
       <LanguageDocumentationFlyout
         searchInDescription
