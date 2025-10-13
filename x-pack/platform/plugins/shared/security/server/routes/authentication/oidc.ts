@@ -255,7 +255,6 @@ export function defineOIDCRoutes({
     response: KibanaResponseFactory,
     loginAttempt: ProviderLoginAttempt
   ) {
-
     try {
       // We handle the fact that the user might get redirected to Kibana while already having a session
       // Return an error notifying the user they are already logged in.
