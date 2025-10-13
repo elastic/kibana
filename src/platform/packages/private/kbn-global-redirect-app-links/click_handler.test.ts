@@ -168,6 +168,100 @@ describe('createClickHandler', () => {
 
       expect(navigateToUrl).not.toHaveBeenCalled();
     });
+
+    it('when href is empty string', () => {
+      const link = document.createElement('a');
+      getClosestLink.mockReturnValue(link);
+
+      clickHandler(event);
+
+      expect(navigateToUrl).not.toHaveBeenCalled();
+    });
+
+    it('when href starts with "#" (hash fragment)', () => {
+      const link = document.createElement('a');
+      link.href = '#section';
+      getClosestLink.mockReturnValue(link);
+
+      clickHandler(event);
+
+      expect(navigateToUrl).not.toHaveBeenCalled();
+    });
+
+    it('when URL constructor throws (invalid URL)', () => {
+      const link = document.createElement('a');
+      // Use an href that has invalid characters that would cause URL constructor to throw
+      // Setting it to a string that will pass the string checks but fail URL parsing
+      Object.defineProperty(link, 'href', {
+        value: 'http://[invalid',
+        writable: true,
+      });
+      getClosestLink.mockReturnValue(link);
+
+      clickHandler(event);
+
+      expect(navigateToUrl).not.toHaveBeenCalled();
+    });
+
+    it('when protocol is not http or https (ftp)', () => {
+      const link = document.createElement('a');
+      link.href = 'ftp://example.com/file.txt';
+      getClosestLink.mockReturnValue(link);
+
+      clickHandler(event);
+
+      expect(navigateToUrl).not.toHaveBeenCalled();
+    });
+
+    it('when protocol is not http or https (mailto)', () => {
+      const link = document.createElement('a');
+      link.href = 'mailto:user@example.com';
+      getClosestLink.mockReturnValue(link);
+
+      clickHandler(event);
+
+      expect(navigateToUrl).not.toHaveBeenCalled();
+    });
+
+    it('when protocol is not http or https (tel)', () => {
+      const link = document.createElement('a');
+      link.href = 'tel:+1234567890';
+      getClosestLink.mockReturnValue(link);
+
+      clickHandler(event);
+
+      expect(navigateToUrl).not.toHaveBeenCalled();
+    });
+
+    it('when origin is different (cross-origin)', () => {
+      const link = document.createElement('a');
+      link.href = 'http://other-domain.com/path';
+      getClosestLink.mockReturnValue(link);
+
+      clickHandler(event);
+
+      expect(navigateToUrl).not.toHaveBeenCalled();
+    });
+
+    it('when only hash changes on same document (path and search match)', () => {
+      // Set up current location
+      delete (window as any).location;
+      (window as any).location = {
+        href: 'http://example.com/path?query=1#old',
+        origin: 'http://example.com',
+        pathname: '/path',
+        search: '?query=1',
+        hash: '#old',
+      };
+
+      const link = document.createElement('a');
+      link.href = 'http://example.com/path?query=1#new';
+      getClosestLink.mockReturnValue(link);
+
+      clickHandler(event);
+
+      expect(navigateToUrl).not.toHaveBeenCalled();
+    });
   });
 
   describe('should intercept clicks', () => {
@@ -231,6 +325,81 @@ describe('createClickHandler', () => {
 
       expect(preventDefault).toHaveBeenCalled();
       expect(navigateToUrl).toHaveBeenCalledWith('http://example.com/path');
+    });
+
+    it('when navigating to different path on same origin', () => {
+      // Set up current location
+      delete (window as any).location;
+      (window as any).location = {
+        href: 'http://example.com/current',
+        origin: 'http://example.com',
+        pathname: '/current',
+        search: '',
+        hash: '',
+      };
+
+      const link = document.createElement('a');
+      link.href = 'http://example.com/new-path';
+      getClosestLink.mockReturnValue(link);
+
+      const preventDefault = jest.fn();
+      const interceptedEvent = new MouseEvent('click', { button: 0, cancelable: true });
+      Object.defineProperty(interceptedEvent, 'preventDefault', { value: preventDefault });
+
+      clickHandler(interceptedEvent);
+
+      expect(preventDefault).toHaveBeenCalled();
+      expect(navigateToUrl).toHaveBeenCalledWith('http://example.com/new-path');
+    });
+
+    it('when navigating to same path with different query params', () => {
+      // Set up current location
+      delete (window as any).location;
+      (window as any).location = {
+        href: 'http://example.com/path?old=1',
+        origin: 'http://example.com',
+        pathname: '/path',
+        search: '?old=1',
+        hash: '',
+      };
+
+      const link = document.createElement('a');
+      link.href = 'http://example.com/path?new=2';
+      getClosestLink.mockReturnValue(link);
+
+      const preventDefault = jest.fn();
+      const interceptedEvent = new MouseEvent('click', { button: 0, cancelable: true });
+      Object.defineProperty(interceptedEvent, 'preventDefault', { value: preventDefault });
+
+      clickHandler(interceptedEvent);
+
+      expect(preventDefault).toHaveBeenCalled();
+      expect(navigateToUrl).toHaveBeenCalledWith('http://example.com/path?new=2');
+    });
+
+    it('when navigating with https protocol', () => {
+      // Set up current location with https
+      delete (window as any).location;
+      (window as any).location = {
+        href: 'https://example.com/current',
+        origin: 'https://example.com',
+        pathname: '/current',
+        search: '',
+        hash: '',
+      };
+
+      const link = document.createElement('a');
+      link.href = 'https://example.com/new-path';
+      getClosestLink.mockReturnValue(link);
+
+      const preventDefault = jest.fn();
+      const interceptedEvent = new MouseEvent('click', { button: 0, cancelable: true });
+      Object.defineProperty(interceptedEvent, 'preventDefault', { value: preventDefault });
+
+      clickHandler(interceptedEvent);
+
+      expect(preventDefault).toHaveBeenCalled();
+      expect(navigateToUrl).toHaveBeenCalledWith('https://example.com/new-path');
     });
   });
 });

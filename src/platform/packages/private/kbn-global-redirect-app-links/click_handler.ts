@@ -31,6 +31,32 @@ export function createClickHandler(navigateToUrl: (url: string) => Promise<void>
 
     if (link.hasAttribute('download') || /\bexternal\b/i.test(link.rel)) return;
 
+    const href = link.href;
+
+    // No href, or just a hash fragment (could be added to current URL by browser)
+    if (!href || href === '#') return;
+
+    // Parse and validate URL
+    let url: URL;
+    try {
+      url = new URL(href, window.location.href);
+    } catch {
+      // Bad URL or non-standard scheme – let the browser handle it
+      return;
+    }
+
+    // Only http(s)
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
+
+    // Same-origin only
+    if (url.origin !== window.location.origin) return;
+
+    // Hash-only changes on the same doc: let browser do native scroll/history
+    const samePathAndSearch =
+      url.pathname === window.location.pathname && url.search === window.location.search;
+    const hashChanged = url.hash !== '' && url.hash !== window.location.hash;
+    if (samePathAndSearch && hashChanged) return;
+
     event.preventDefault();
     navigateToUrl(link.href);
   };
