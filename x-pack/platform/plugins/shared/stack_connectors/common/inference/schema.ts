@@ -65,11 +65,13 @@ const AIMessage = z
 const AITool = z
   .object({
     type: z.string(),
-    function: z.object({
-      name: z.string(),
-      description: z.string().optional(),
-      parameters: z.record(z.string(), z.any()).optional(),
-    }),
+    function: z
+      .object({
+        name: z.string(),
+        description: z.string().optional(),
+        parameters: z.record(z.string(), z.any()).optional(),
+      })
+      .strict(),
   })
   .strict();
 
@@ -135,12 +137,16 @@ export const UnifiedChatCompleteParamsSchema = z
         tool_choice: z
           .union([
             z.string(),
-            z.object({
-              type: z.string(),
-              function: z.object({
-                name: z.string(),
-              }),
-            }),
+            z
+              .object({
+                type: z.string(),
+                function: z
+                  .object({
+                    name: z.string(),
+                  })
+                  .strict(),
+              })
+              .strict(),
           ])
           .optional(),
         /**
@@ -183,27 +189,32 @@ export const UnifiedChatCompleteResponseSchema = z
               .nullable()
               .optional(),
             index: z.number().optional(),
-            message: z.object({
-              content: z.string().optional().nullable(),
-              refusal: z.string().optional().nullable(),
-              role: z.string().optional(),
-              tool_calls: z
-                .array(
-                  z.object({
-                    id: z.string().optional(),
-                    index: z.number().optional(),
-                    function: z
+            message: z
+              .object({
+                content: z.string().optional().nullable(),
+                refusal: z.string().optional().nullable(),
+                role: z.string().optional(),
+                tool_calls: z
+                  .array(
+                    z
                       .object({
-                        arguments: z.string().optional(),
-                        name: z.string().optional(),
+                        id: z.string().optional(),
+                        index: z.number().optional(),
+                        function: z
+                          .object({
+                            arguments: z.string().optional(),
+                            name: z.string().optional(),
+                          })
+                          .strict()
+                          .optional(),
+                        type: z.string().optional(),
                       })
-                      .optional(),
-                    type: z.string().optional(),
-                  })
-                )
-                .default([])
-                .optional(),
-            }),
+                      .strict()
+                  )
+                  .default([])
+                  .optional(),
+              })
+              .strict(),
           })
           .strict()
       )

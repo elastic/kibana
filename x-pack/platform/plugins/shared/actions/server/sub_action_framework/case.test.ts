@@ -28,6 +28,7 @@ describe('CaseConnector', () => {
       .object({
         check: z.number().nullable(),
       })
+      .strict()
       .optional(),
   };
 

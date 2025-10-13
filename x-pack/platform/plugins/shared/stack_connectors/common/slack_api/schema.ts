@@ -7,18 +7,22 @@
 
 import { z } from '@kbn/zod';
 
-export const SlackApiSecretsSchema = z.object({
-  token: z.string().min(1),
-});
+export const SlackApiSecretsSchema = z
+  .object({
+    token: z.string().min(1),
+  })
+  .strict();
 
 export const SlackApiConfigSchema = z
   .object({
     allowedChannels: z
       .array(
-        z.object({
-          id: z.string().min(1),
-          name: z.string().min(1),
-        })
+        z
+          .object({
+            id: z.string().min(1),
+            name: z.string().min(1),
+          })
+          .strict()
       )
       .max(25)
       .optional(),

@@ -59,13 +59,16 @@ export abstract class CaseConnector<Config, Secrets, Incident, GetIncidentRespon
       schema: z.object({
         incident: z
           .object(pushToServiceIncidentParamsSchema)
-          .extend({ externalId: z.string().nullable().default(null) }),
+          .extend({ externalId: z.string().nullable().default(null) })
+          .strict(),
         comments: z
           .array(
-            z.object({
-              comment: z.string(),
-              commentId: z.string(),
-            })
+            z
+              .object({
+                comment: z.string(),
+                commentId: z.string(),
+              })
+              .strict()
           )
           .nullable()
           .default(null),

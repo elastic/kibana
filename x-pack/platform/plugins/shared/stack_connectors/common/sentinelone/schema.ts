@@ -384,27 +384,29 @@ export const SentinelOneExecuteScriptParamsSchema = z
         ids: z.string().min(1).optional(),
       })
       .strict(),
-    script: z.object({
-      apiKey: z.string().optional(),
-      inputParams: z.string().optional(),
-      outputDirectory: z.string().optional(),
-      outputDestination: z.enum(['Local', 'None', 'SentinelCloud', 'SingularityXDR']).optional(),
-      passwordFromScope: z
-        .object({
-          scopeLevel: z.string().optional(),
-          scopeId: z.string().optional(),
-        })
-        .strict()
-        .optional(),
-      password: z.string().optional(),
-      requiresApproval: z.boolean().optional(),
-      scriptId: z.string(),
-      scriptName: z.string().optional(),
-      scriptRuntimeTimeoutSeconds: z.number().optional(),
-      singularityxdrKeyword: z.string().optional(),
-      singularityxdrUrl: z.string().optional(),
-      taskDescription: z.string().optional(),
-    }),
+    script: z
+      .object({
+        apiKey: z.string().optional(),
+        inputParams: z.string().optional(),
+        outputDirectory: z.string().optional(),
+        outputDestination: z.enum(['Local', 'None', 'SentinelCloud', 'SingularityXDR']).optional(),
+        passwordFromScope: z
+          .object({
+            scopeLevel: z.string().optional(),
+            scopeId: z.string().optional(),
+          })
+          .strict()
+          .optional(),
+        password: z.string().optional(),
+        requiresApproval: z.boolean().optional(),
+        scriptId: z.string(),
+        scriptName: z.string().optional(),
+        scriptRuntimeTimeoutSeconds: z.number().optional(),
+        singularityxdrKeyword: z.string().optional(),
+        singularityxdrUrl: z.string().optional(),
+        taskDescription: z.string().optional(),
+      })
+      .strict(),
     alertIds: AlertIds,
   })
   .strict();

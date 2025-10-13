@@ -95,11 +95,13 @@ export const InvokeAIActionParamsSchema = z
     anthropicVersion: z.string().optional(),
     tools: z
       .array(
-        z.object({
-          name: z.string(),
-          description: z.string(),
-          input_schema: z.object({}).passthrough(),
-        })
+        z
+          .object({
+            name: z.string(),
+            description: z.string(),
+            input_schema: z.object({}).passthrough(),
+          })
+          .strict()
       )
       .optional(),
     toolChoice: BedrockToolChoiceSchema.optional(),
@@ -117,10 +119,12 @@ export const InvokeAIActionResponseSchema = z
 export const InvokeAIRawActionParamsSchema = z
   .object({
     messages: z.array(
-      z.object({
-        role: z.string(),
-        content: z.any(),
-      })
+      z
+        .object({
+          role: z.string(),
+          content: z.any(),
+        })
+        .strict()
     ),
     model: z.string().optional(),
     temperature: z.number().optional(),
@@ -133,11 +137,13 @@ export const InvokeAIRawActionParamsSchema = z
     timeout: z.number().optional(),
     tools: z
       .array(
-        z.object({
-          name: z.string(),
-          description: z.string(),
-          input_schema: z.object({}).passthrough(),
-        })
+        z
+          .object({
+            name: z.string(),
+            description: z.string(),
+            input_schema: z.object({}).passthrough(),
+          })
+          .strict()
       )
       .optional(),
     toolChoice: BedrockToolChoiceSchema.optional(),

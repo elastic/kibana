@@ -89,10 +89,12 @@ const AIMessage = z
         z
           .object({
             id: z.string(),
-            function: z.object({
-              arguments: z.string(),
-              name: z.string(),
-            }),
+            function: z
+              .object({
+                arguments: z.string(),
+                name: z.string(),
+              })
+              .strict(),
             type: z.string(),
           })
           .strict()
