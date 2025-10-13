@@ -46,7 +46,7 @@ const legacyMetricStateMetricOptionsSchema = schema.object({
       schema.literal('xl'),
       schema.literal('xxl'),
     ],
-    { defaultValue: 'm' }
+    { meta: { description: 'Font size for the label and value' }, defaultValue: 'm' }
   ),
   /**
    * Alignment of the label and value for the legacy metric.
@@ -58,14 +58,20 @@ const legacyMetricStateMetricOptionsSchema = schema.object({
      * - 'top': Align label to the top of the value (default)
      * - 'bottom': Align label to the bottom of the value
      */
-    labels: verticalAlignmentSchema({ defaultValue: 'top' }),
+    labels: verticalAlignmentSchema({
+      meta: { description: 'Label alignment' },
+      defaultValue: 'top',
+    }),
     /**
      * Alignment for value. Possible values:
      * - 'left': Align value to the left (default)
      * - 'center': Align value to the center
      * - 'right': Align value to the right
      */
-    value: horizontalAlignmentSchema({ defaultValue: 'left' }),
+    value: horizontalAlignmentSchema({
+      meta: { description: 'Value alignment' },
+      defaultValue: 'left',
+    }),
   }),
   /**
    * Where to apply the color (background or value)
