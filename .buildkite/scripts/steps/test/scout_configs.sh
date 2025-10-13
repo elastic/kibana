@@ -127,6 +127,8 @@ while read -r config_path; do
     fi
 
     if [[ $EXIT_CODE -eq 2 ]]; then
+      # No tests found - mark as executed so we don't retry it
+      buildkite-agent meta-data set "$CONFIG_MODE_EXECUTION_KEY" "true"
       configWithoutTests+=("$config_path ($mode)")
     elif [[ $EXIT_CODE -ne 0 ]]; then
       failedConfigs+=("$config_path ($mode)")
