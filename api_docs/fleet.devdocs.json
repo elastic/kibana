@@ -416,7 +416,7 @@
         "label": "SetupTechnologySelector",
         "description": [],
         "signature": [
-          "({ disabled, allowedSetupTechnologies, setupTechnology, onSetupTechnologyChange, isAgentlessDefault, showBetaBadge, showLimitationsMessage, useDescribedFormGroup, }: SetupTechnologySelectorProps) => React.JSX.Element"
+          "({ disabled, allowedSetupTechnologies, setupTechnology, onSetupTechnologyChange, isAgentlessDefault, showBetaBadge, useDescribedFormGroup, }: SetupTechnologySelectorProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/public/services/setup_technology_selector.tsx",
         "deprecated": false,
@@ -427,7 +427,7 @@
             "id": "def-public.SetupTechnologySelector.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  disabled,\n  allowedSetupTechnologies = [SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS],\n  setupTechnology,\n  onSetupTechnologyChange,\n  isAgentlessDefault = false,\n  showBetaBadge = true,\n  showLimitationsMessage = false,\n  useDescribedFormGroup = true,\n}",
+            "label": "{\n  disabled,\n  allowedSetupTechnologies = [SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS],\n  setupTechnology,\n  onSetupTechnologyChange,\n  isAgentlessDefault = false,\n  showBetaBadge = true,\n  useDescribedFormGroup = true,\n}",
             "description": [],
             "signature": [
               "SetupTechnologySelectorProps"
@@ -24867,15 +24867,9 @@
             "label": "meta",
             "description": [],
             "signature": [
-              "{ [key: string]: unknown; package?: Pick<",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.PackagePolicyPackage",
-                "text": "PackagePolicyPackage"
-              },
-              ", \"version\" | \"name\"> | undefined; } | undefined"
+              "{ [key: string]: unknown; package?: ",
+              "FullAgentPolicyMetaPackage",
+              " | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -31860,6 +31854,17 @@
             "type": "string",
             "tags": [],
             "label": "PRIVILEGE_LEVEL_CHANGE_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AGENT_API_ROUTES.BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
             "deprecated": false,

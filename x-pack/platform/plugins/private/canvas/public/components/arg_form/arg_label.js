@@ -21,7 +21,7 @@ export const ArgLabel = (props) => {
           className="canvasSidebar__accordion"
           buttonContent={
             <EuiToolTip content={help} position="left" className="canvasArg__tooltip">
-              <span>{label}</span>
+              <span tabIndex={0}>{label}</span>
             </EuiToolTip>
           }
           extraAction={simpleArg}
@@ -34,7 +34,7 @@ export const ArgLabel = (props) => {
           display="columnCompressed"
           label={
             <EuiToolTip content={help}>
-              <span>
+              <span tabIndex={0}>
                 {label} <EuiIcon type="info" color="subdued" />
               </span>
             </EuiToolTip>

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { SavedObjectReference } from '@kbn/core/server';
@@ -30,8 +31,8 @@ export function transformPanelsIn(widgets: DashboardAttributes['panels'] | undef
 
   widgets?.forEach((widget) => {
     if (isDashboardSection(widget)) {
-      const { panels: sectionPanels, grid, ...restOfSection } = widget as DashboardSection;
-      const idx = grid.i ?? uuidv4();
+      const { panels: sectionPanels, grid, uid, ...restOfSection } = widget as DashboardSection;
+      const idx = uid ?? uuidv4();
       sections.push({ ...restOfSection, gridData: { ...grid, i: idx } });
       (sectionPanels as DashboardPanel[]).forEach((panel) => {
         const { storedPanel, references } = transformPanelIn(panel);
@@ -43,7 +44,7 @@ export function transformPanelsIn(widgets: DashboardAttributes['panels'] | undef
       });
     } else {
       // widget is a panel
-      const { storedPanel, references } = transformPanelIn(widget);
+      const { storedPanel, references } = transformPanelIn(widget as DashboardPanel);
       panels.push(storedPanel);
       panelReferences.push(...references);
     }
@@ -59,12 +60,23 @@ function transformPanelIn(panel: DashboardPanel): {
   const idx = uid ?? uuidv4();
 
   const transforms = embeddableService?.getTransforms(panel.type);
+
+  if (transforms?.schema) {
+    try {
+      transforms.schema.validate(config);
+    } catch (error) {
+      throw Boom.badRequest(
+        `Panel config validation failed. Panel uid: ${uid}, type: ${restPanel.type}, validation error: ${error.message}`
+      );
+    }
+  }
+
   let transformedPanelConfig = config;
   let references: undefined | SavedObjectReference[];
   try {
     if (transforms?.transformIn) {
       const transformed = transforms.transformIn(config);
-      transformedPanelConfig = transformed.state;
+      transformedPanelConfig = transformed.state as Record<string, unknown>;
       references = transformed.references;
     }
   } catch (transformInError) {

@@ -30,6 +30,7 @@ export interface PackageUpdateEvent {
 export enum UpdateEventType {
   PACKAGE_POLICY_UPGRADE = 'package-policy-upgrade',
   PACKAGE_INSTALL = 'package-install',
+  PACKAGE_ROLLBACK = 'package-rollback',
 }
 
 export interface UpgradeError {

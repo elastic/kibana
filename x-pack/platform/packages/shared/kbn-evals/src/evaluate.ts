@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { times } from 'lodash';
 import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inference-common';
 import {
   getConnectorModel,
@@ -69,11 +68,15 @@ export const evaluate = base.extend<
   ],
   evaluationConnector: [
     async ({ fetch, log, connector }, use, testInfo) => {
-      const predefinedConnector = (testInfo.project.use as Pick<EvaluationTestOptions, 'connector'>)
-        .connector;
+      const predefinedConnector = (
+        testInfo.project.use as Pick<EvaluationTestOptions, 'evaluationConnector'>
+      ).evaluationConnector;
 
       if (predefinedConnector.id !== connector.id) {
         await createConnectorFixture({ predefinedConnector, fetch, log, use });
+      } else {
+        // If the evaluation connector is the same as the main connector, reuse it
+        await use(connector);
       }
     },
     {
@@ -121,21 +124,10 @@ export const evaluate = base.extend<
         log,
         model,
         runId: process.env.TEST_RUN_ID!,
+        repetitions,
       });
 
-      // Temporary: wraps Phoenix client to handle repetitions until native support is added (see https://github.com/Arize-ai/phoenix/issues/3584)
-      const repetitionAwarePhoenixClient = {
-        ...phoenixClient,
-        runExperiment: async (experimentConfig: any, evaluators: any) => {
-          const experiments = await Promise.all(
-            times(repetitions, () => phoenixClient.runExperiment(experimentConfig, evaluators))
-          );
-
-          return repetitions === 1 ? experiments[0] : experiments;
-        },
-      } as KibanaPhoenixClient;
-
-      await use(repetitionAwarePhoenixClient);
+      await use(phoenixClient);
 
       await reportModelScore({
         phoenixClient,
