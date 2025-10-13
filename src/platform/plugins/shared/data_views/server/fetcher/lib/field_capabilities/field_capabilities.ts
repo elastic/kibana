@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaults, keyBy, sortBy } from 'lodash';
+import { defaults, keyBy } from 'lodash';
 
 import type { ExpandWildcard, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
@@ -18,6 +18,7 @@ import type { FieldDescriptor } from '../../index_patterns_fetcher';
 import type { QueryDslQueryContainer } from '../../../../common/types';
 import { DATA_VIEWS_FIELDS_EXCLUDED_TIERS } from '../../../../common/constants';
 import { getIndexFilterDsl } from '../../../utils';
+import { processInChunks, sortByAsync } from '../async_processing_utils';
 
 interface FieldCapabilitiesParams {
   callCluster: ElasticsearchClient;
@@ -76,39 +77,48 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     abortSignal,
   });
   performance.mark('getFieldCapabilities:responseEnd');
-  const fieldCapsArr = await readFieldCapsResponse(esFieldCaps.body);
+  const fieldCapsArr = readFieldCapsResponse(esFieldCaps.body);
   performance.mark('getFieldCapabilities:readEnd');
 
   const fieldsFromFieldCapsByName = keyBy(fieldCapsArr, 'name');
 
-  const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
-    // not all meta fields are provided, so remove and manually add
-    .filter((name) => !fieldsFromFieldCapsByName[name].metadata_field)
-    .concat(fieldCapsArr.length ? metaFields : []) // empty field lists should stay empty
-    .reduce<{ names: string[]; map: Map<string, string> }>(
-      (agg, value) => {
-        // This is intentionally using a Map to be highly optimized with very large indexes AND be safe for user provided data
-        if (agg.map.get(value) != null) {
-          return agg;
-        } else {
-          agg.map.set(value, value);
-          agg.names.push(value);
-          return agg;
-        }
-      },
-      { names: [], map: new Map<string, string>() }
-    )
-    .names.map<FieldDescriptor>((name) =>
-      defaults({}, fieldsFromFieldCapsByName[name], {
+  // Extract field keys and filter out metadata fields
+  const fieldKeys = Object.keys(fieldsFromFieldCapsByName).filter(
+    (name) => !fieldsFromFieldCapsByName[name].metadata_field
+  );
+
+  // Combine with meta fields
+  const allFieldNames = fieldKeys.concat(fieldCapsArr.length ? metaFields : []);
+
+  // Deduplicate field names using a Map (efficient for large datasets)
+  const uniqueNames: string[] = [];
+  const seen = new Map<string, string>();
+  for (const value of allFieldNames) {
+    if (!seen.has(value)) {
+      seen.set(value, value);
+      uniqueNames.push(value);
+    }
+  }
+
+  performance.mark('getFieldCapabilities:deduplicatedEnd');
+
+  // Process field descriptors in chunks to avoid blocking the event loop
+  // This allows other HTTP requests to be processed during long operations
+  const allFieldsUnsorted = await processInChunks(
+    uniqueNames,
+    (name) => {
+      const base = defaults({}, fieldsFromFieldCapsByName[name], {
         name,
         type: 'string',
         searchable: false,
         aggregatable: false,
         readFromDocValues: false,
         metadata_field: metaFields.includes(name),
-      })
-    )
-    .map(mergeOverrides);
+      });
+      return mergeOverrides(base);
+    },
+    1000 // Process 1000 fields at a time before yielding
+  );
 
   performance.mark('getFieldCapabilities:allFieldsCollectedEnd');
 
@@ -129,13 +139,21 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     'getFieldCapabilities:readEnd'
   );
   performance.measure(
-    'getFieldCapabilities:allFieldsCollected',
+    'getFieldCapabilities:deduplicated',
     'getFieldCapabilities:readEnd',
+    'getFieldCapabilities:deduplicatedEnd'
+  );
+  performance.measure(
+    'getFieldCapabilities:allFieldsCollected',
+    'getFieldCapabilities:deduplicatedEnd',
     'getFieldCapabilities:allFieldsCollectedEnd'
   );
 
+  // Sort fields asynchronously to avoid blocking for large field sets
+  const sortedFields = await sortByAsync(allFieldsUnsorted, 'name');
+
   return {
-    fields: sortBy(allFieldsUnsorted, 'name'),
+    fields: sortedFields,
     indices: esFieldCaps.body.indices as string[],
   };
 }
