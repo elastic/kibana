@@ -43,7 +43,7 @@ The cases as data feature is in technical preview, meaning the schema for the ca
 | closed\_at | date | The date of case closure, provided in ISO 8601 \[2\] format and set to the servers' timezone. |
 | closed\_at\_ms | long | The case closure timestamp in milliseconds. |
 | closed\_by.username | keyword | The username of the user who closed the case. |
-| closed\_by.profile\_uid | keyword | The User ID of the user who closed the case. |
+| closed\_by.profile\_uid | keyword | The user ID of the user who closed the case. |
 | closed\_by.full\_name | keyword | The full name of the user who closed the case. |
 | closed\_by.email | keyword | The email address of the user who closed the case. |
 | assignees | keyword | The user IDs of the users assigned to the case. |
