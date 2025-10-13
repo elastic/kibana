@@ -40,7 +40,7 @@ const STREAM_DESCRIPTION_HELP = i18n.translate(
   'xpack.streams.streamDetailView.streamDescription.helpText',
   {
     defaultMessage:
-      'A description of the data in the stream. This will be used for AI features like system identification and significant events.',
+      'This is a natural language description of your data. This will be used in AI workflows like feature identification and significant event generation.',
   }
 );
 
@@ -193,7 +193,9 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition }) => {
       </EuiPanel>
       <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
         <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiText size="s">{STREAM_DESCRIPTION_HELP}</EuiText>
+          <EuiText size="s" color="subdued">
+            {STREAM_DESCRIPTION_HELP}
+          </EuiText>
           <EuiMarkdownEditor
             value={description}
             onChange={(next) => {
