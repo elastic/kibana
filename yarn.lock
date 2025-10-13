@@ -7140,6 +7140,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/presentation-publishing-schemas@link:src/platform/packages/shared/presentation/presentation_publishing_schemas":
+  version "0.0.0"
+  uid ""
+
 "@kbn/presentation-publishing@link:src/platform/packages/shared/presentation/presentation_publishing":
   version "0.0.0"
   uid ""
