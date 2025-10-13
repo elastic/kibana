@@ -112,7 +112,7 @@ export const createExternalService = (
     config,
     secrets,
   }: {
-    config?: { allowedChannels?: Array<{ id: string; name: string }> };
+    config?: { allowedChannels?: Array<{ id?: string; name: string }> };
     secrets: { token: string };
   },
   logger: Logger,
@@ -122,6 +122,7 @@ export const createExternalService = (
   const { token } = secrets;
   const { allowedChannels } = config || { allowedChannels: [] };
   const allowedChannelIds = allowedChannels?.map((ac) => ac.id);
+  const allowedChannelNames = allowedChannels?.map((ac) => ac.name);
 
   if (!token) {
     throw Error(`[Action][${SLACK_CONNECTOR_NAME}]: Wrong configuration.`);
@@ -131,6 +132,27 @@ export const createExternalService = (
   const headers = {
     Authorization: `Bearer ${token}`,
     'Content-type': 'application/json; charset=UTF-8',
+  };
+
+  const validateChannelNames = (channelNames?: string[]): void => {
+    if (!channelNames || channelNames.length === 0) {
+      return;
+    }
+
+    // validate against allowed channel list
+    if (allowedChannelNames && allowedChannelNames.length > 0) {
+      const notAllowedChannelNames = channelNames.filter(
+        (channel) => !allowedChannelNames.includes(channel)
+      );
+
+      if (notAllowedChannelNames.length > 0) {
+        throw new Error(
+          `One or more channel names ${notAllowedChannelNames.join(
+            ', '
+          )} are not included in the allowed channel list`
+        );
+      }
+    }
   };
 
   const validChannelId = async (
@@ -201,9 +223,11 @@ export const createExternalService = (
   const postMessage = async ({
     channels,
     channelIds = [],
+    channelNames = [],
     text,
   }: PostMessageSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
+      validateChannelNames(channelNames);
       const channelToUse = getChannelToUse({ channels, channelIds });
 
       const result: AxiosResponse<PostMessageResponse> = await request({
@@ -226,9 +250,11 @@ export const createExternalService = (
   const postBlockkit = async ({
     channels,
     channelIds = [],
+    channelNames = [],
     text,
   }: PostBlockkitSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
+      validateChannelNames(channelNames);
       const channelToUse = getChannelToUse({ channels, channelIds });
       const blockJson = JSON.parse(text);
 

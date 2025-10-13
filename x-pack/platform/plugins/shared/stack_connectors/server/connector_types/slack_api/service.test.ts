@@ -388,4 +388,67 @@ describe('Slack API service', () => {
       });
     });
   });
+
+  describe('channel names validation', () => {
+    const allowedChannels = [{ id: 'C024BE91L', name: '#channel-1' }];
+    let serviceWithAllowedChannels: SlackApiService;
+
+    beforeAll(() => {
+      serviceWithAllowedChannels = createExternalService(
+        {
+          config: { allowedChannels },
+          secrets: { token: 'token' },
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+    });
+
+    test('should not throw an error if channelNames are included in allowedChannel.name', async () => {
+      requestMock.mockImplementation(() => postMessageResponse);
+
+      await expect(
+        serviceWithAllowedChannels.postMessage({
+          channelNames: ['#channel-1'],
+          channelIds: ['C024BE91L'],
+          text: 'hello',
+        })
+      ).resolves.not.toThrow();
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock).toHaveBeenNthCalledWith(1, {
+        axios,
+        headers: {
+          Authorization: 'Bearer token',
+          'Content-type': 'application/json; charset=UTF-8',
+        },
+        logger,
+        configurationUtilities,
+        method: 'post',
+        url: 'https://slack.com/api/chat.postMessage',
+        data: { channel: 'C024BE91L', text: 'hello' },
+        connectorUsageCollector,
+      });
+    });
+
+    test('should throw an error if channelNames is not in allowedChannels', async () => {
+      requestMock.mockImplementation(() => postMessageResponse);
+      await expect(
+        serviceWithAllowedChannels.postMessage({
+          channelNames: ['#channel-2'],
+          channelIds: ['B564BH93M'],
+          text: 'hello',
+        })
+      ).resolves.toEqual({
+        actionId: SLACK_API_CONNECTOR_ID,
+        message: 'error posting slack message',
+        serviceMessage:
+          'One or more channel names #channel-2 are not included in the allowed channel list',
+        status: 'error',
+      });
+
+      expect(requestMock).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -15,7 +15,7 @@ export const SlackApiConfigSchema = schema.object({
   allowedChannels: schema.maybe(
     schema.arrayOf(
       schema.object({
-        id: schema.string({ minLength: 1 }),
+        id: schema.maybe(schema.string({ minLength: 1 })),
         name: schema.string({ minLength: 1 }),
       }),
       { maxSize: 25 }
@@ -35,6 +35,7 @@ export const ValidChannelIdParamsSchema = schema.object({
 export const PostMessageSubActionParamsSchema = schema.object({
   channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
   channelIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
+  channelNames: schema.maybe(schema.arrayOf(schema.string({ validate: validateChannelName }))),
   text: schema.string({ minLength: 1 }),
 });
 
@@ -50,9 +51,16 @@ export function validateBlockkit(text: string) {
   }
 }
 
+export function validateChannelName(value: string) {
+  if (value && value.length && !value.startsWith('#')) {
+    return 'Channel name must start with #';
+  }
+}
+
 export const PostBlockkitSubActionParamsSchema = schema.object({
   channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
   channelIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
+  channelNames: schema.maybe(schema.arrayOf(schema.string({ validate: validateChannelName }))),
   text: schema.string({ validate: validateBlockkit }),
 });
 
