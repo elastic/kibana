@@ -44,53 +44,98 @@ steps:
       
 `;
 
-  beforeAll(() => {
-    runWorkflowPromise = workflowRunFixture.runWorkflow({
-      workflowYaml,
+  describe('cancellation triggered by user', () => {
+    beforeAll(() => {
+      runWorkflowPromise = workflowRunFixture.runWorkflow({
+        workflowYaml,
+      });
+
+      requestCancellationPromise = (async function () {
+        while (true) {
+          const outerForeachStep = Array.from(
+            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+          ).find((se) => se.stepId === 'outerForeachStep');
+          if (outerForeachStep?.state?.index === 2) {
+            const workflowExecutionDoc =
+              workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+                'fake_workflow_execution_id'
+              )!;
+            workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.set(
+              workflowExecutionDoc.id,
+              {
+                ...workflowExecutionDoc,
+                cancelRequested: true,
+              }
+            );
+
+            break;
+          }
+
+          await new Promise<void>((resolve) => setTimeout(() => resolve(), 100));
+        }
+      })();
     });
 
-    requestCancellationPromise = (async function () {
-      while (true) {
-        const outerForeachStep = Array.from(
-          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-        ).find((se) => se.stepId === 'outerForeachStep');
-        if (outerForeachStep?.state?.index === 2) {
-          const workflowExecutionDoc =
-            workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
-              'fake_workflow_execution_id'
-            )!;
-          workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.set(
-            workflowExecutionDoc.id,
-            {
-              ...workflowExecutionDoc,
-              cancelRequested: true,
-            }
-          );
+    it('should successfully execute workflow', async () => {
+      await Promise.all([runWorkflowPromise, requestCancellationPromise]);
+      const workflowExecutionDoc =
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          'fake_workflow_execution_id'
+        );
+      expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.CANCELLED);
+      expect(workflowExecutionDoc?.error).toBe(undefined);
+      expect(workflowExecutionDoc?.scopeStack).not.toEqual([]);
+    });
 
-          break;
+    it('should have correct amount of outerForeachChildConnectorStep executions', async () => {
+      await Promise.all([runWorkflowPromise, requestCancellationPromise]);
+      const outerForeachChildConnectorStepExecutions = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      ).filter((se) => se.stepId === 'outerForeachChildConnectorStep');
+      expect(outerForeachChildConnectorStepExecutions.length).toBe(3);
+    });
+  });
+
+  describe('cancellation triggered by task', () => {
+    beforeAll(() => {
+      runWorkflowPromise = workflowRunFixture.runWorkflow({
+        workflowYaml,
+      });
+
+      requestCancellationPromise = (async function () {
+        while (true) {
+          const outerForeachStep = Array.from(
+            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+          ).find((se) => se.stepId === 'outerForeachStep');
+          if (outerForeachStep?.state?.index === 2) {
+            workflowRunFixture.taskAbortController.abort();
+            break;
+          }
+
+          await new Promise<void>((resolve) => setTimeout(() => resolve(), 100));
         }
+      })();
+    });
 
-        await new Promise<void>((resolve) => setTimeout(() => resolve(), 100));
-      }
-    })();
-  });
+    it('should successfully execute workflow', async () => {
+      await Promise.all([runWorkflowPromise, requestCancellationPromise]);
+      const workflowExecutionDoc =
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          'fake_workflow_execution_id'
+        );
+      expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.CANCELLED);
+      expect(workflowExecutionDoc?.cancelRequested).toBe(true);
+      expect(workflowExecutionDoc?.cancellationReason).toBe('Task aborted');
+      expect(workflowExecutionDoc?.error).toBe(undefined);
+      expect(workflowExecutionDoc?.scopeStack).not.toEqual([]);
+    });
 
-  it('should successfully execute workflow', async () => {
-    await Promise.all([runWorkflowPromise, requestCancellationPromise]);
-    const workflowExecutionDoc =
-      workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
-        'fake_workflow_execution_id'
-      );
-    expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.CANCELLED);
-    expect(workflowExecutionDoc?.error).toBe(undefined);
-    expect(workflowExecutionDoc?.scopeStack).not.toEqual([]);
-  });
-
-  it('should have correct amount of outerForeachChildConnectorStep executions', async () => {
-    await Promise.all([runWorkflowPromise, requestCancellationPromise]);
-    const outerForeachChildConnectorStepExecutions = Array.from(
-      workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-    ).filter((se) => se.stepId === 'outerForeachChildConnectorStep');
-    expect(outerForeachChildConnectorStepExecutions.length).toBe(3);
+    it('should have correct amount of outerForeachChildConnectorStep executions', async () => {
+      await Promise.all([runWorkflowPromise, requestCancellationPromise]);
+      const outerForeachChildConnectorStepExecutions = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      ).filter((se) => se.stepId === 'outerForeachChildConnectorStep');
+      expect(outerForeachChildConnectorStepExecutions.length).toBe(3);
+    });
   });
 });
