@@ -86,7 +86,7 @@ while read -r config_path; do
     continue
   fi
 
-  Run config for each mode
+  # Run config for each mode
   for mode in $RUN_MODE_LIST; do
     # If we're retrying specific failed pairs, check if this config+mode pair should be retried
     if [[ -n "$RETRY_FAILED_PAIRS" ]]; then
