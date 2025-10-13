@@ -129,6 +129,7 @@ editor:
         - feature_siemV4.event_filters_all
         - feature_siemV4.host_isolation_exceptions_all
         - feature_siemV4.blocklist_all
+        - feature_siemV4.endpoint_exceptions_all
         - feature_siemV4.policy_management_read # Elastic Defend Policy Management
         - feature_siemV4.host_isolation_all
         - feature_siemV4.process_operations_all
@@ -325,6 +326,7 @@ t3_analyst:
         - feature_siemV4.event_filters_all
         - feature_siemV4.host_isolation_exceptions_all
         - feature_siemV4.blocklist_all
+        - feature_siemV4.endpoint_exceptions_all
         - feature_siemV4.policy_management_read # Elastic Defend Policy Management
         - feature_siemV4.host_isolation_all
         - feature_siemV4.process_operations_all
@@ -396,6 +398,7 @@ threat_intelligence_analyst:
         - feature_siemV4.endpoint_list_read
         - feature_siemV4.global_artifact_management_all
         - feature_siemV4.blocklist_all
+        - feature_siemV4.endpoint_exceptions_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -473,6 +476,7 @@ rule_author:
         - feature_siemV4.event_filters_all
         - feature_siemV4.host_isolation_exceptions_read
         - feature_siemV4.blocklist_all # Elastic Defend Policy Management
+        - feature_siemV4.endpoint_exceptions_all
         - feature_siemV4.actions_log_management_read
         - feature_siemV4.workflow_insights_all
         - feature_securitySolutionCases.all
@@ -553,6 +557,7 @@ soc_manager:
         - feature_siemV4.event_filters_all
         - feature_siemV4.host_isolation_exceptions_all
         - feature_siemV4.blocklist_all
+        - feature_siemV4.endpoint_exceptions_all
         - feature_siemV4.host_isolation_all
         - feature_siemV4.process_operations_all
         - feature_siemV4.actions_log_management_all
@@ -631,6 +636,7 @@ detections_admin:
         - feature_siemV4.read_alerts
         - feature_siemV4.crud_alerts
         - feature_siemV4.global_artifact_management_all
+        - feature_siemV4.endpoint_exceptions_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -698,6 +704,7 @@ platform_engineer:
         - feature_siemV4.event_filters_all
         - feature_siemV4.host_isolation_exceptions_all
         - feature_siemV4.blocklist_all # Elastic Defend Policy Management
+        - feature_siemV4.endpoint_exceptions_all
         - feature_siemV4.actions_log_management_read
         - feature_siemV4.workflow_insights_all
         - feature_securitySolutionCases.all
@@ -775,6 +782,7 @@ endpoint_operations_analyst:
         - feature_siemV4.event_filters_all
         - feature_siemV4.host_isolation_exceptions_all
         - feature_siemV4.blocklist_all
+        - feature_siemV4.endpoint_exceptions_all
         - feature_siemV4.host_isolation_all
         - feature_siemV4.process_operations_all
         - feature_siemV4.actions_log_management_all # Response History
@@ -858,6 +866,7 @@ endpoint_policy_manager:
         - feature_siemV4.event_filters_all
         - feature_siemV4.host_isolation_exceptions_all
         - feature_siemV4.blocklist_all # Elastic Defend Policy Management
+        - feature_siemV4.endpoint_exceptions_all
         - feature_siemV4.workflow_insights_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
