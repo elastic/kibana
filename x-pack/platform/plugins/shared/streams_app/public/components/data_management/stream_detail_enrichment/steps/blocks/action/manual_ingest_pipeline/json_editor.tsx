@@ -11,6 +11,7 @@ import { EuiFormRow, EuiLink } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
+import { useAbortController } from '@kbn/react-hooks';
 import type { ElasticsearchProcessorType } from '@kbn/streams-schema';
 import { elasticsearchProcessorTypes } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,8 +28,14 @@ import {
 } from '../../../../helpers';
 
 export const JsonEditor = () => {
+  const { signal } = useAbortController();
   const {
-    core: { docLinks, http },
+    core: { docLinks },
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
   } = useKibana();
   const { field, fieldState } = useController<ProcessorFormState, 'processors'>({
     name: 'processors',
@@ -139,7 +146,7 @@ export const JsonEditor = () => {
 
         let terms: ProcessorSuggestion[] = [];
         try {
-          terms = await fetchProcessorSuggestions(http);
+          terms = await fetchProcessorSuggestions(streamsRepositoryClient, signal);
         } catch {
           terms = [];
         }
@@ -160,7 +167,7 @@ export const JsonEditor = () => {
         return { suggestions };
       },
     };
-  }, [http]);
+  }, [streamsRepositoryClient]);
 
   React.useEffect(() => {
     const disposable = monaco.languages.registerCompletionItemProvider('xjson', suggestionProvider);

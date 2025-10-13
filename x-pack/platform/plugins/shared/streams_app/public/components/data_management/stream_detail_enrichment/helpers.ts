@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpStart } from '@kbn/core/public';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import type { JsonValue } from '@kbn/utility-types';
 import type { ProcessorSuggestion } from '@kbn/streams-plugin/common';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 
-const PROCESSOR_SUGGESTIONS_API = '/internal/streams/ingest/processor_suggestions';
 let suggestionsPromise: Promise<ProcessorSuggestion[]> | null = null;
 
 export const serializeXJson = (v: unknown, defaultVal: string = '{}') => {
@@ -43,11 +42,16 @@ export const parseXJsonOrString = (input: string): unknown => {
   }
 };
 
-export const fetchProcessorSuggestions = (http: HttpStart): Promise<ProcessorSuggestion[]> => {
+export const fetchProcessorSuggestions = (
+  streamsRepositoryClient: StreamsRepositoryClient,
+  signal: AbortSignal
+): Promise<ProcessorSuggestion[]> => {
   if (suggestionsPromise) return suggestionsPromise;
 
-  const fetchPromise = http
-    .get<ProcessorSuggestion[]>(PROCESSOR_SUGGESTIONS_API)
+  const fetchPromise = streamsRepositoryClient
+    .fetch('GET /internal/streams/ingest/processor_suggestions', {
+      signal,
+    })
     .then((result) => result ?? [])
     .catch(() => []);
 
