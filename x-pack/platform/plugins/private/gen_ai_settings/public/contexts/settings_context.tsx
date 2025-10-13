@@ -172,7 +172,11 @@ const Settings = ({ settingsKeys }: { settingsKeys: string[] }) => {
         title: i18n.translate('xpack.gen_ai_settings.save.error', {
           defaultMessage: 'Failed to save settings',
         }),
-        text: error.message ?? 'Unknown error',
+        text:
+          error.message ??
+          i18n.translate('xpack.gen_ai_settings.save.error.text', {
+            defaultMessage: 'Unknown error',
+          }),
       });
     },
   });
