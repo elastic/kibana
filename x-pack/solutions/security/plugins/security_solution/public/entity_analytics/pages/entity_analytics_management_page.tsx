@@ -49,6 +49,7 @@ export const EntityAnalyticsManagementPage = () => {
     toggleSelectedClosedAlertsSetting,
     isLoadingRiskEngineSettings,
     toggleScoreRetainment,
+    setAlertFilters,
   } = useConfigurableRiskEngineSettings();
   const { data: riskEngineStatus } = useRiskEngineStatus({
     refetchInterval: TEN_SECONDS,
@@ -80,11 +81,6 @@ export const EntityAnalyticsManagementPage = () => {
     } finally {
       setIsLoadingRunRiskEngine(false);
     }
-  };
-
-  const handleSaveAlertFilters = (filters: Array<{ id: string; text: string }>) => {
-    // TODO: Implement API call to save filters to Risk Score SO object
-    addSuccess('Alert filters saved successfully!');
   };
 
   const { status, runAt } = riskEngineStatus?.risk_engine_task_status || {};
@@ -170,7 +166,7 @@ export const EntityAnalyticsManagementPage = () => {
                 selectedRiskEngineSettings={selectedRiskEngineSettings}
                 setSelectedDateSetting={setSelectedDateSetting}
                 toggleSelectedClosedAlertsSetting={toggleSelectedClosedAlertsSetting}
-                onSaveAlertFilters={handleSaveAlertFilters}
+                onAlertFiltersChange={setAlertFilters}
               />
               <EuiHorizontalRule />
               <RiskScoreUsefulLinksSection />

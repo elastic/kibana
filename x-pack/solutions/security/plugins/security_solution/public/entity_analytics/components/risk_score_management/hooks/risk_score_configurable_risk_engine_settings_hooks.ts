@@ -19,17 +19,22 @@ export interface RiskScoreConfiguration {
     end: string;
   };
   enableResetToZero: boolean;
+  alertFilters: Array<{ id: string; text: string }>;
 }
 
 const settingsAreEqual = (
   first?: Partial<RiskScoreConfiguration>,
   second?: Partial<RiskScoreConfiguration>
 ) => {
+  const alertFiltersEqual =
+    JSON.stringify(first?.alertFilters || []) === JSON.stringify(second?.alertFilters || []);
+
   return (
     first?.includeClosedAlerts === second?.includeClosedAlerts &&
     first?.range?.start === second?.range?.start &&
     first?.range?.end === second?.range?.end &&
-    first?.enableResetToZero === second?.enableResetToZero
+    first?.enableResetToZero === second?.enableResetToZero &&
+    alertFiltersEqual
   );
 };
 
@@ -43,6 +48,7 @@ const riskEngineSettingsWithDefaults = (riskEngineSettings?: Partial<RiskScoreCo
     riskEngineSettings?.enableResetToZero === undefined
       ? true
       : riskEngineSettings.enableResetToZero,
+  alertFilters: riskEngineSettings?.alertFilters ?? [],
 });
 
 const FETCH_RISK_ENGINE_SETTINGS = ['GET', 'FETCH_RISK_ENGINE_SETTINGS'];
@@ -146,6 +152,13 @@ export const useConfigurableRiskEngineSettings = () => {
     });
   };
 
+  const setAlertFilters = (filters: Array<{ id: string; text: string }>) => {
+    setSelectedRiskEngineSettings((prevState) => {
+      if (!prevState) return undefined;
+      return { ...prevState, ...{ alertFilters: filters } };
+    });
+  };
+
   return {
     savedRiskEngineSettings,
     selectedRiskEngineSettings,
@@ -156,5 +169,6 @@ export const useConfigurableRiskEngineSettings = () => {
     saveSelectedSettingsMutation,
     isLoadingRiskEngineSettings,
     toggleScoreRetainment,
+    setAlertFilters,
   };
 };
