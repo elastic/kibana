@@ -15,6 +15,7 @@ import {
   locationRenderer,
   whoisRenderer,
   reputationRenderer,
+  hostIdRenderer,
 } from './field_renderers';
 import { mockData } from '../../../explore/network/components/details/mock';
 import type { AutonomousSystem } from '../../../../common/search_strategy';
@@ -142,7 +143,6 @@ describe('Field Renderers', () => {
           {hostIdRenderer({
             scopeId,
             host: { ...emptyIdHost, id: ['test1', 'test2'] },
-            isFlyoutOpen: false,
           })}
         </TestProviders>
       );
