@@ -3,20 +3,15 @@
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
-      "jest",
-      "node"
+      "node",
+      "react"
     ]
   },
   "include": [
     "**/*.ts",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
-  ],
-  "kbn_references": [
-    "@kbn/inference-tracing",
-    "@kbn/std",
-    "@kbn/tracing-config",
-    "@kbn/cleanup-before-exit",
   ]
 }

@@ -4360,6 +4360,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cleanup-before-exit@link:src/platform/packages/shared/kbn-cleanup-before-exit":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cli-dev-mode@link:packages/kbn-cli-dev-mode":
   version "0.0.0"
   uid ""
@@ -6981,6 +6985,10 @@
   uid ""
 
 "@kbn/observability-logs-explorer-plugin@link:x-pack/solutions/observability/plugins/observability_logs_explorer":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-nav-icons@link:x-pack/solutions/observability/packages/nav-icons":
   version "0.0.0"
   uid ""
 
