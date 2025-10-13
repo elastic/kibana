@@ -78,7 +78,7 @@ export const TriggerComponent: FC<Props> = ({
       <Button
         aria-label={i18n.DATA_VIEW}
         data-test-subj={isTimelineSourcerer ? 'timeline-sourcerer-trigger' : 'sourcerer-trigger'}
-        color="primary"
+        color="text"
         iconSide="right"
         iconType="arrowDown"
         disabled={disabled}

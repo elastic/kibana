@@ -318,7 +318,6 @@ const DatasetQualityLink = React.memo(
     return (
       <EuiHeaderLink
         {...datasetQualityLinkProps}
-        color="primary"
         data-test-subj="unifiedDocViewLogsOverviewDegradedFieldDatasetLink"
         iconType="popout"
         target="_blank"

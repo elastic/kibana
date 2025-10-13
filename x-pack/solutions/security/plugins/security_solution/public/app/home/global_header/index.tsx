@@ -108,7 +108,6 @@ export const GlobalHeader = React.memo(() => {
           <EuiHeaderLinks>
             {!hasSearchAILakeConfigurations && (
               <EuiHeaderLink
-                color="primary"
                 data-test-subj="add-data"
                 href={href}
                 iconType="indexOpen"
