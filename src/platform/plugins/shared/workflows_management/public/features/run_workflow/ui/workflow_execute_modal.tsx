@@ -21,7 +21,7 @@ import {
   useEuiTheme,
   EuiText,
 } from '@elastic/eui';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Global, css } from '@emotion/react';
@@ -52,7 +52,7 @@ export function WorkflowExecuteModal({
   onClose,
   onSubmit,
 }: {
-  definition: WorkflowYaml | null;
+  definition: WorkflowYaml;
   onClose: () => void;
   onSubmit: (data: Record<string, any>) => void;
 }) {
@@ -66,15 +66,47 @@ export function WorkflowExecuteModal({
 
   const { euiTheme } = useEuiTheme();
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     onSubmit(JSON.parse(executionInput));
     onClose();
-  };
+  }, [onSubmit, onClose, executionInput]);
 
-  const handleChangeTrigger = (trigger: TriggerType): void => {
-    setExecutionInput('');
-    setSelectedTrigger(trigger);
-  };
+  const handleChangeTrigger = useCallback(
+    (trigger: TriggerType): void => {
+      setExecutionInput('');
+      setSelectedTrigger(trigger);
+    },
+    [setExecutionInput, setSelectedTrigger]
+  );
+
+  const shouldAutoRun = useMemo(() => {
+    if (definition.triggers?.some((trigger) => trigger.type === 'alert') || definition.inputs) {
+      return false;
+    }
+    return true;
+  }, [definition]);
+
+  useEffect(() => {
+    if (shouldAutoRun) {
+      onSubmit({});
+      onClose();
+      return;
+    }
+    // Default trigger selection
+    if (definition.triggers?.some((trigger) => trigger.type === 'alert')) {
+      setSelectedTrigger('alert');
+      return;
+    }
+    if (definition.inputs) {
+      setSelectedTrigger('manual');
+      return;
+    }
+  }, [shouldAutoRun, onSubmit, onClose, definition]);
+
+  if (shouldAutoRun) {
+    // Not rendered if the workflow should auto run, will close the modal automatically
+    return null;
+  }
 
   return (
     <>
