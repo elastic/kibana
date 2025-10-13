@@ -121,11 +121,7 @@ export const hostIdRenderer = ({
           idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
           scopeId={scopeId}
           render={(id) =>
-            noLink ? (
-              <>{id}</>
-            ) : (
-              <HostDetailsLink hostName={hostName}>{id}</HostDetailsLink>
-            )
+            noLink ? <>{id}</> : <HostDetailsLink hostName={hostName}>{id}</HostDetailsLink>
           }
         />
       ) : (
