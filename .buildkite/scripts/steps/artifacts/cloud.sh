@@ -43,7 +43,13 @@ else
 fi
 
 echo "--- Create deployment"
-CLOUD_DEPLOYMENT_NAME="kibana-artifacts-$TAG"
+BASE_DEPLOYMENT_NAME="kibana-artifacts"
+
+if [[ $KIBANA_MEMORY_SIZE -ne 2048 ]]; then
+  CLOUD_DEPLOYMENT_NAME="$BASE_DEPLOYMENT_NAME-${KIBANA_MEMORY_SIZE}mb-$TAG"
+else
+  CLOUD_DEPLOYMENT_NAME="$BASE_DEPLOYMENT_NAME-$TAG"
+fi
 
 LOGS=$(mktemp --suffix ".json")
 DEPLOYMENT_SPEC=$(mktemp --suffix ".json")
