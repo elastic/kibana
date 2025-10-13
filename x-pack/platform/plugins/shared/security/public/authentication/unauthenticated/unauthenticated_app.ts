@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type {
   ApplicationSetup,
-  StartServicesAccessor,
   AppMountParameters,
   HttpSetup,
+  StartServicesAccessor,
 } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+
 import type { PluginStartDependencies } from '../../plugin';
 
 interface CreateDeps {
@@ -26,8 +27,8 @@ export const unauthenticatedApp = Object.freeze({
     http.anonymousPaths.register('/security/unauthenticated');
     application.register({
       id: this.id,
-      title: i18n.translate('xpack.security.unauthenticatedAppTitle', { 
-        defaultMessage: 'Authentication Error' 
+      title: i18n.translate('xpack.security.unauthenticatedAppTitle', {
+        defaultMessage: 'Authentication Error',
       }),
       chromeless: true,
       appRoute: '/security/unauthenticated',
@@ -36,19 +37,17 @@ export const unauthenticatedApp = Object.freeze({
           getStartServices(),
           import('./unauthenticated_page'),
         ]);
-        
+
         // Get the original URL from query parameters
         const urlParams = new URLSearchParams(window.location.search);
         const originalURL = urlParams.get('next') || '/';
-        const loginUrl = http.basePath.prepend(
-            `/login?next=${encodeURIComponent(originalURL)}`
-        );
-        
+        const loginUrl = http.basePath.prepend(`/login?next=${encodeURIComponent(originalURL)}`);
+
         return renderUnauthenticatedPage(
           coreStart,
           { element },
-          { 
-            loginUrl
+          {
+            loginUrl,
           }
         );
       },

@@ -18,7 +18,7 @@ export function defineResetSessionRoutes({ httpResources }: RouteDefinitionParam
       path: '/security/reset_session',
       validate: {
         query: schema.object({
-          next: schema.maybe(schema.string())
+          next: schema.maybe(schema.string()),
         }),
       },
       options: { excludeFromOAS: true },
@@ -37,8 +37,10 @@ export function defineResetSessionRoutes({ httpResources }: RouteDefinitionParam
     },
     (context, request, response) => {
       // Check if request has an sid cookie, if not redirect to the home page
-      const cookies = Array.isArray(request.headers.cookie) ? request.headers.cookie : [request.headers.cookie || ''];
-      if (!cookies.find(c => c.includes('sid='))) {
+      const cookies = Array.isArray(request.headers.cookie)
+        ? request.headers.cookie
+        : [request.headers.cookie || ''];
+      if (!cookies.find((c) => c.includes('sid='))) {
         const next = request.query.next ? `?next=${encodeURIComponent(request.query.next)}` : '';
         return response.redirected({
           headers: {

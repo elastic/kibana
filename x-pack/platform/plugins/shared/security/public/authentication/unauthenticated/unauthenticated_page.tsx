@@ -8,8 +8,8 @@
 import { EuiButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { CoreStart } from '@kbn/core/public';
-import type { AppMountParameters } from '@kbn/core/public';
+
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -17,9 +17,7 @@ interface Props {
   loginUrl: string;
 }
 
-export function UnauthenticatedPage({
-  loginUrl,
-}: Props) {
+export function UnauthenticatedPage({ loginUrl }: Props) {
   return (
     <EuiEmptyPrompt
       iconType="securityApp"

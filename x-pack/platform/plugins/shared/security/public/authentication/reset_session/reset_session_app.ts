@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type {
   ApplicationSetup,
-  StartServicesAccessor,
   AppMountParameters,
   HttpSetup,
+  StartServicesAccessor,
 } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+
 import type { PluginStartDependencies } from '../../plugin';
 
 interface CreateDeps {
@@ -26,8 +27,8 @@ export const resetSessionApp = Object.freeze({
     http.anonymousPaths.register('/security/reset_session');
     application.register({
       id: this.id,
-      title: i18n.translate('xpack.security.resetSessionAppTitle', { 
-        defaultMessage: 'Access Denied' 
+      title: i18n.translate('xpack.security.resetSessionAppTitle', {
+        defaultMessage: 'Access Denied',
       }),
       chromeless: true,
       appRoute: '/security/reset_session',
@@ -36,19 +37,19 @@ export const resetSessionApp = Object.freeze({
           getStartServices(),
           import('./reset_session_page'),
         ]);
-        
+
         // Get the next URL and logoutUrl from query parameters
         const urlParams = new URLSearchParams(window.location.search);
         const next = urlParams.get('next') || '/';
         const logoutUrl = http.basePath.prepend(
-            `/api/security/logout?next=${encodeURIComponent(next)}`
+          `/api/security/logout?next=${encodeURIComponent(next)}`
         );
-        
+
         return renderResetSessionPage(
           coreStart,
           { element },
-          { 
-            logoutUrl
+          {
+            logoutUrl,
           }
         );
       },
