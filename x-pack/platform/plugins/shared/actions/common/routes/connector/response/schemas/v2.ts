@@ -15,7 +15,7 @@ export const connectorResponseSchema = schema.object({
   }),
   name: schema.string({
     meta: {
-      description: ' The name of the rule.',
+      description: ' The name of the connector.',
     },
   }),
   config: schema.maybe(schema.recordOf(schema.string(), schema.any())),
@@ -51,7 +51,7 @@ export const allConnectorsResponseSchema = connectorResponseSchema.extends({
   }),
 });
 
-export const connectorTypesResponseSchema = schema.object({
+export const connectorTypeResponseSchema = schema.object({
   id: schema.string({
     meta: {
       description: 'The identifier for the connector.',
@@ -59,7 +59,7 @@ export const connectorTypesResponseSchema = schema.object({
   }),
   name: schema.string({
     meta: {
-      description: ' The name of the rule.',
+      description: ' The name of the connector type.',
     },
   }),
   enabled: schema.boolean({
@@ -94,7 +94,7 @@ export const connectorTypesResponseSchema = schema.object({
   ),
   supported_feature_ids: schema.arrayOf(schema.string(), {
     meta: {
-      description: 'The minimum license required to enable the connector.',
+      description: 'The list of supported features',
     },
   }),
   is_system_action_type: schema.boolean({
@@ -149,7 +149,7 @@ export const connectorExecuteResponseSchema = schema.object({
       schema.oneOf([schema.boolean(), schema.string()], {
         meta: {
           description:
-            'When the status is error, identifies whether the connector execution will retry .',
+            'When the status is error, identifies whether the connector execution will be retried.',
         },
       })
     )

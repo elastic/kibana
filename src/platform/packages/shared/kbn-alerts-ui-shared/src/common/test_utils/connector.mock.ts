@@ -26,12 +26,12 @@ export function createMockActionConnector<
   overrides: Partial<UserConfiguredActionConnector<Secrets, Config>>
 ): UserConfiguredActionConnector<Secrets, Config>;
 
-export function createMockActionConnector(
+export function createMockActionConnector<
+  Config = Record<string, unknown>,
+  Secrets = Record<string, unknown>
+>(
   overrides: Partial<ActionConnector> = {}
-):
-  | PreConfiguredActionConnector
-  | SystemAction
-  | UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>> {
+): PreConfiguredActionConnector | SystemAction | UserConfiguredActionConnector<Secrets, Config> {
   if (overrides.isPreconfigured === true) {
     return {
       id: 'test',
@@ -68,5 +68,5 @@ export function createMockActionConnector(
     isSystemAction: false,
     isConnectorTypeDeprecated: false,
     ...overrides,
-  } as UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>;
+  } as UserConfiguredActionConnector<Secrets, Config>;
 }

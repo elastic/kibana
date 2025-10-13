@@ -7,5 +7,5 @@
 
 export { connectorResponseSchema } from './v2';
 export { allConnectorsResponseSchema } from './v2';
-export { connectorTypesResponseSchema } from './v2';
+export { connectorTypeResponseSchema } from './v2';
 export { connectorExecuteResponseSchema } from './v2';
