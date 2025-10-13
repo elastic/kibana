@@ -31,5 +31,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./bulk_create_jobs'));
     loadTestFile(require.resolve('./all_jobs_and_group_ids'));
     loadTestFile(require.resolve('./force_stop_and_close_job'));
+    loadTestFile(require.resolve('./job_for_cloning'));
   });
 }

@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   async function forceStopAndCloseJob(
-    { jobId }: { jobId: string },
+    jobId: string,
     user: USER,
     expectedStatusCode: number,
     space?: string
@@ -75,29 +75,19 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should not stop and close the job by ml viewer user', async () => {
-      await forceStopAndCloseJob({ jobId: jobIdSpace1 }, USER.ML_VIEWER_ALL_SPACES, 403, idSpace1);
+      await forceStopAndCloseJob(jobIdSpace1, USER.ML_VIEWER_ALL_SPACES, 403, idSpace1);
     });
 
     it('should not stop and close the job with incorrect space', async () => {
       await ml.api.waitForJobState(jobIdSpace1, JOB_STATE.OPENED);
 
-      await forceStopAndCloseJob(
-        { jobId: jobIdSpace1 },
-        USER.ML_POWERUSER_ALL_SPACES,
-        404,
-        idSpace2
-      );
+      await forceStopAndCloseJob(jobIdSpace1, USER.ML_POWERUSER_ALL_SPACES, 404, idSpace2);
     });
 
     it('should force stop and close the job with correct space', async () => {
       await ml.api.waitForJobState(jobIdSpace1, JOB_STATE.OPENED);
 
-      await forceStopAndCloseJob(
-        { jobId: jobIdSpace1 },
-        USER.ML_POWERUSER_ALL_SPACES,
-        200,
-        idSpace1
-      );
+      await forceStopAndCloseJob(jobIdSpace1, USER.ML_POWERUSER_ALL_SPACES, 200, idSpace1);
 
       await ml.api.waitForJobState(jobIdSpace1, JOB_STATE.CLOSED);
     });
