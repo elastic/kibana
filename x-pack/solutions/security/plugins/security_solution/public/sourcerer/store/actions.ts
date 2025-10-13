@@ -20,16 +20,7 @@ export const setDataViewLoading = actionCreator<{
   loading: boolean;
 }>('SET_DATA_VIEW_LOADING');
 
-export const setSignalIndexName = actionCreator<{ signalIndexName: string }>(
-  'SET_SIGNAL_INDEX_NAME'
-);
-
 export const setSourcererDataViews = actionCreator<SecurityDataView>('SET_SOURCERER_DATA_VIEWS');
-
-export const setSourcererScopeLoading = actionCreator<{
-  id?: PageScope;
-  loading: boolean;
-}>('SET_SOURCERER_SCOPE_LOADING');
 
 export interface SelectedDataViewPayload {
   id: PageScope;

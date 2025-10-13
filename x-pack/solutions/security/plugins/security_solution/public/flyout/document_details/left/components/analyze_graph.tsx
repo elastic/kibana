@@ -26,8 +26,6 @@ import { isActiveTimeline } from '../../../../helpers';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { AnalyzerPreviewNoDataMessage } from '../../right/components/analyzer_preview_container';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export const ANALYZE_GRAPH_ID = 'analyze_graph';
 export const DATA_VIEW_LOADING_TEST_ID = 'analyzer-data-view-loading';
@@ -47,41 +45,13 @@ export const AnalyzeGraph: FC = () => {
   const { from, to, shouldUpdate } = useTimelineDataFilters(isActiveTimeline(scopeId));
   const filters = useMemo(() => ({ from, to }), [from, to]);
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { selectedPatterns: oldAnalyzerPatterns } = useSourcererDataView(PageScope.analyzer);
-  const experimentalAnalyzerPatterns = useSelectedPatterns(PageScope.analyzer);
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalAnalyzerPatterns
-    : oldAnalyzerPatterns;
+  const selectedPatterns = useSelectedPatterns(PageScope.analyzer);
 
-  const { dataView: experimentalDataView, status: experimentalDataViewStatus } = useDataView(
-    PageScope.analyzer
-  );
-  const { sourcererDataView: oldSourcererDataViewSpec, loading: oldSourcererDataViewIsLoading } =
-    useSourcererDataView(PageScope.analyzer);
-
-  const isLoading: boolean = useMemo(
-    () =>
-      newDataViewPickerEnabled
-        ? experimentalDataViewStatus === 'loading' || experimentalDataViewStatus === 'pristine'
-        : oldSourcererDataViewIsLoading,
-    [experimentalDataViewStatus, newDataViewPickerEnabled, oldSourcererDataViewIsLoading]
-  );
-
+  const { dataView, status } = useDataView(PageScope.analyzer);
+  const isLoading: boolean = useMemo(() => status === 'loading' || status === 'pristine', [status]);
   const isDataViewInvalid: boolean = useMemo(
-    () =>
-      newDataViewPickerEnabled
-        ? experimentalDataViewStatus === 'error' ||
-          (experimentalDataViewStatus === 'ready' && !experimentalDataView.hasMatchedIndices())
-        : !oldSourcererDataViewSpec ||
-          !oldSourcererDataViewSpec.id ||
-          !oldSourcererDataViewSpec.title,
-    [
-      experimentalDataView,
-      experimentalDataViewStatus,
-      newDataViewPickerEnabled,
-      oldSourcererDataViewSpec,
-    ]
+    () => status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices()),
+    [dataView, status]
   );
 
   if (!isEnabled) {

@@ -98,13 +98,11 @@ import { SecurityPageName } from '../../../../app/types';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../../../../explore/hosts/pages/display';
-
 import {
   focusUtilityBarAction,
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
 } from '../../../../timelines/components/timeline/helpers';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import {
   canEditRuleWithActions,
   explainLackOfPermission,
@@ -119,9 +117,7 @@ import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
 import { RuleGaps } from '../../../rule_gaps/components/rule_gaps';
-
 import * as ruleI18n from '../../../common/translations';
-
 import { RuleDetailsContextProvider } from './rule_details_context';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyUrlConflictCallOut } from './legacy_url_conflict_callout';
@@ -280,13 +276,7 @@ export const RuleDetailsPage = connector(
     const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
       useListsConfig();
 
-    const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
-      useSourcererDataView(PageScope.alerts);
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-    const { dataView: experimentalDataView, status } = useDataView(PageScope.alerts);
-    const isLoadingIndexPattern = newDataViewPickerEnabled
-      ? status !== 'ready'
-      : oldIsLoadingIndexPattern;
+    const { dataView, status } = useDataView(PageScope.alerts);
 
     const loading = userInfoLoading || listsConfigLoading;
     const { detailName: ruleId } = useParams<{
@@ -369,8 +359,8 @@ export const RuleDetailsPage = connector(
     useLegacyUrlRedirect({ rule, spacesApi });
 
     const showUpdating = useMemo(
-      () => isLoadingIndexPattern || isAlertsLoading || loading,
-      [isLoadingIndexPattern, isAlertsLoading, loading]
+      () => status !== 'ready' || isAlertsLoading || loading,
+      [status, isAlertsLoading, loading]
     );
 
     const title = useMemo(
@@ -850,10 +840,9 @@ export const RuleDetailsPage = connector(
                     <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                       <>
                         <SiemSearchBar
-                          dataView={experimentalDataView}
-                          pollForSignalIndex={pollForSignalIndex}
+                          dataView={dataView}
                           id={InputsModelId.global}
-                          sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
+                          pollForSignalIndex={pollForSignalIndex}
                         />
                         <EuiSpacer />
                         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -879,8 +868,7 @@ export const RuleDetailsPage = connector(
                           <GroupedAlertsTable
                             accordionButtonContent={defaultGroupTitleRenderers}
                             accordionExtraActionGroupStats={accordionExtraActionGroupStats}
-                            dataViewSpec={oldSourcererDataViewSpec} // TODO: newDataViewPickerEnabled Should be removed after migrating to new data view picker
-                            dataView={experimentalDataView}
+                            dataView={dataView}
                             defaultFilters={alertMergedFilters}
                             defaultGroupingOptions={defaultGroupingOptions}
                             from={from}

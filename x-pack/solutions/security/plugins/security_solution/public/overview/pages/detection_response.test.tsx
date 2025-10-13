@@ -50,16 +50,6 @@ jest.mock('../../common/components/filters_global', () => ({
 
 jest.mock('../../common/components/empty_prompt');
 
-const defaultUseSourcererReturn = {
-  indicesExist: true,
-  loading: false,
-  indexPattern: '',
-};
-const mockUseSourcererDataView = jest.fn(() => defaultUseSourcererReturn);
-jest.mock('../../sourcerer/containers', () => ({
-  useSourcererDataView: () => mockUseSourcererDataView(),
-}));
-
 const defaultUseAlertsPrivilegesReturn = {
   hasAlertsRead: true,
   hasIndexRead: true,
@@ -103,7 +93,6 @@ jest.mock('../../common/lib/kibana', () => {
 describe('DetectionResponse', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseSourcererDataView.mockReturnValue(defaultUseSourcererReturn);
     mockUseAlertsPrivileges.mockReturnValue(defaultUseAlertsPrivilegesReturn);
     mockUseSignalIndex.mockReturnValue(defaultUseSignalIndexReturn);
     mockCanUseCases.mockReturnValue(defaultUseCasesPermissionsReturn);
@@ -129,10 +118,6 @@ describe('DetectionResponse', () => {
   });
 
   it('should render landing page if index not exist', () => {
-    mockUseSourcererDataView.mockReturnValue({
-      ...defaultUseSourcererReturn,
-      indicesExist: false,
-    });
     jest.mocked(useDataView).mockImplementation(defaultImplementation);
 
     const result = render(
@@ -148,11 +133,7 @@ describe('DetectionResponse', () => {
     expect(result.queryByTestId('mock_globalSearchBar')).not.toBeInTheDocument();
   });
 
-  it('should render loader if sourcerer is loading', () => {
-    mockUseSourcererDataView.mockReturnValue({
-      ...defaultUseSourcererReturn,
-      loading: true,
-    });
+  it('should render loader if dataview is loading', () => {
     jest
       .mocked(useDataView)
       .mockReturnValue({ dataView: getMockDataViewWithMatchedIndices(), status: 'loading' });

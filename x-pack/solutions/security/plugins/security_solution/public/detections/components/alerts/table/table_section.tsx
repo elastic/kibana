@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
 import {
   defaultGroupingOptions,
@@ -43,11 +43,6 @@ export interface TableSectionProps {
    * DataView used to fetch the alerts data
    */
   dataView: DataView;
-  // TODO remove when we remove the newDataViewPickerEnabled feature flag
-  /**
-   * DataViewSpec used to fetch the alerts data when newDataViewPickerEnabled is false
-   */
-  dataViewSpec: DataViewSpec;
   /**
    * The page filters retrieved from the FiltersSection component to filter the table
    */
@@ -63,7 +58,7 @@ export interface TableSectionProps {
  * Renders the alerts table with grouping functionality in the alerts page.
  */
 export const TableSection = memo(
-  ({ assignees, dataView, dataViewSpec, pageFilters, statusFilter }: TableSectionProps) => {
+  ({ assignees, dataView, pageFilters, statusFilter }: TableSectionProps) => {
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
       []
@@ -130,7 +125,6 @@ export const TableSection = memo(
           accordionButtonContent={defaultGroupTitleRenderers}
           accordionExtraActionGroupStats={accordionExtraActionGroupStats}
           dataView={dataView}
-          dataViewSpec={dataViewSpec}
           defaultFilters={defaultFilters}
           defaultGroupingOptions={defaultGroupingOptions}
           from={from}

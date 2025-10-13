@@ -14,6 +14,7 @@ import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_f
 import { DocumentDetailsContext } from '../../shared/context';
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+
 import * as mock from '../mocks/mock_analyzer_data';
 
 jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({

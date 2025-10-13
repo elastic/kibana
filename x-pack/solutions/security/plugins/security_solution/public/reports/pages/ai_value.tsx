@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useState, useRef, useMemo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
@@ -15,9 +16,7 @@ import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { SuperDatePicker } from '../../common/components/super_date_picker';
 import { AIValueMetrics } from '../components/ai_value';
 import { InputsModelId } from '../../common/store/inputs/constants';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { HeaderPage } from '../../common/components/header_page';
 import * as i18n from './translations';
 import { NoPrivileges } from '../../common/components/no_privileges';
@@ -49,14 +48,10 @@ import {
 const BaseComponent = () => {
   const exportContext = useAIValueExportContext();
   const isExportMode = exportContext?.isExportMode === true;
-  const { loading: oldIsSourcererLoading } = useSourcererDataView();
   const timerange = useDeepEqualSelector(inputsSelectors.valueReportTimeRangeSelector);
   const { from, to } = timerange;
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { status } = useDataView();
-
-  const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
 
   const hasSocManagementCapability = useHasSecurityCapability('socManagement');
 
@@ -110,7 +105,7 @@ const BaseComponent = () => {
     return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
   }
 
-  if (newDataViewPickerEnabled && status === 'pristine') {
+  if (status === 'pristine') {
     return <PageLoader />;
   }
 
@@ -140,7 +135,7 @@ const BaseComponent = () => {
           ]}
         />
       )}
-      {isSourcererLoading ? (
+      {status !== 'ready' ? (
         <EuiLoadingSpinner size="l" data-test-subj="aiValueLoader" />
       ) : (
         <EuiFlexGroup direction="column" data-test-subj="aiValueSections">

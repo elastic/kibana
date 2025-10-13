@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { ENTITY_ANALYTICS } from '../../app/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
@@ -29,30 +28,19 @@ import { PageLoader } from '../../common/components/page_loader';
 const EntityAnalyticsComponent = () => {
   const [skipEmptyPrompt, setSkipEmptyPrompt] = React.useState(false);
   const onSkip = React.useCallback(() => setSkipEmptyPrompt(true), [setSkipEmptyPrompt]);
-  const {
-    indicesExist: oldIndicesExist,
-    loading: oldIsSourcererLoading,
-    sourcererDataView: oldSourcererDataViewSpec,
-  } = useSourcererDataView();
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { dataView, status } = useDataView();
-
   const indicesExist = useMemo(
-    () => (newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist),
-    [dataView?.matchedIndices?.length, newDataViewPickerEnabled, oldIndicesExist]
+    () => !!dataView?.matchedIndices?.length,
+    [dataView?.matchedIndices?.length]
   );
-  const isSourcererLoading = useMemo(
-    () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
-    [newDataViewPickerEnabled, oldIsSourcererLoading, status]
-  );
+  const isDataViewLoading = useMemo(() => status !== 'ready', [status]);
 
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
   const showEmptyPrompt = !indicesExist && !skipEmptyPrompt;
-  const entityTypes = useEntityAnalyticsTypes();
 
-  if (newDataViewPickerEnabled && status === 'pristine') {
+  const entityTypes = useEntityAnalyticsTypes();
+  if (status === 'pristine') {
     return <PageLoader />;
   }
 
@@ -63,17 +51,13 @@ const EntityAnalyticsComponent = () => {
       ) : (
         <>
           <FiltersGlobal>
-            <SiemSearchBar
-              dataView={dataView}
-              id={InputsModelId.global}
-              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
-            />
+            <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
             <HeaderPage title={ENTITY_ANALYTICS} />
 
-            {isSourcererLoading ? (
+            {isDataViewLoading ? (
               <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
             ) : (
               <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">

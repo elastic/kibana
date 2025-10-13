@@ -12,9 +12,9 @@ import { i18n } from '@kbn/i18n';
 import { getAccountSwitchesEsqlCount } from './esql_query';
 import { KeyInsightsTile } from '../common/key_insights_tile';
 
-export const AccountSwitchesTile: React.FC<{ spaceId: string; sourcerDataView: DataViewSpec }> = ({
+export const AccountSwitchesTile: React.FC<{ spaceId: string; dataViewSpec: DataViewSpec }> = ({
   spaceId,
-  sourcerDataView,
+  dataViewSpec,
 }) => {
   return (
     <KeyInsightsTile
@@ -24,7 +24,7 @@ export const AccountSwitchesTile: React.FC<{ spaceId: string; sourcerDataView: D
       label={i18n.translate('xpack.securitySolution.privmon.accountSwitches.label', {
         defaultMessage: 'Account switches',
       })}
-      getEsqlQuery={(namespace) => getAccountSwitchesEsqlCount(namespace, sourcerDataView)}
+      getEsqlQuery={(namespace) => getAccountSwitchesEsqlCount(namespace, dataViewSpec)}
       id="privileged-user-monitoring-account-switches"
       spaceId={spaceId}
       inspectTitle={

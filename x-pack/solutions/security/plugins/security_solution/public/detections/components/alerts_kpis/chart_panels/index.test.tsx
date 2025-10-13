@@ -12,8 +12,6 @@ import { useAlertsLocalStorage } from './alerts_local_storage';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { RESET_GROUP_BY_FIELDS } from './chart_settings_popover/configurations/default/translations';
 import { CHART_SETTINGS_POPOVER_ARIA_LABEL } from './chart_settings_popover/translations';
-import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { TestProviders } from '../../../../common/mock';
 import { ChartPanels } from '.';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
@@ -21,7 +19,6 @@ import { LensEmbeddable } from '../../../../common/components/visualization_acti
 import { createResetGroupByFieldAction } from '../alerts_histogram_panel/helpers';
 
 jest.mock('./alerts_local_storage');
-jest.mock('../../../../sourcerer/containers');
 
 jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
 jest.mock('../../../../common/components/page/use_refetch_by_session', () => ({
@@ -151,13 +148,6 @@ describe('ChartPanels', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
-
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      indicesExist: true,
-      indexPattern: {},
-      browserFields: mockBrowserFields,
-      sourcererDataView: {},
-    });
 
     (useAlertsLocalStorage as jest.Mock).mockReturnValue({
       ...defaultAlertSettings,

@@ -10,14 +10,12 @@ import { EuiLink, EuiMark, EuiSkeletonText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { useNavigateToAnalyzer } from '../../shared/hooks/use_navigate_to_analyzer';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
@@ -47,12 +45,7 @@ export const AnalyzerPreviewContainer: React.FC = () => {
     [isEnabled, isRulePreview]
   );
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { selectedPatterns: oldAnalyzerPatterns } = useSourcererDataView(PageScope.analyzer);
-  const experimentalAnalyzerPatterns = useSelectedPatterns(PageScope.analyzer);
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalAnalyzerPatterns
-    : oldAnalyzerPatterns;
+  const selectedPatterns = useSelectedPatterns(PageScope.analyzer);
   const { dataView, status } = useDataView(PageScope.analyzer);
   const dataViewLoading = status === 'loading' || status === 'pristine';
   const dataViewError = status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices());
