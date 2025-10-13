@@ -30,7 +30,7 @@ export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig
       },
       read: {
         ui: ['detections'],
-        api: ['cloud-security-posture-read', 'cloud-defend-read'],
+        api: ['cloud-security-posture-read'],
       },
     },
   },

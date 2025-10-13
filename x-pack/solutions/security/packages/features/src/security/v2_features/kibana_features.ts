@@ -109,6 +109,7 @@ export const getSecurityV2BaseKibanaFeature = ({
         minimal: [
           // note: overriden by product feature endpointArtifactManagement when enabled
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_all'] },
+          { feature: RULES_FEATURE_ID, privileges: ['minimal_all'] },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],

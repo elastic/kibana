@@ -345,7 +345,7 @@ t3_analyst:
         - feature_siemV5.file_operations_all
         - feature_siemV5.scan_operations_all
         - feature_siemV5.workflow_insights_all
-        - feature_securitySolutionRulesV1.read
+        - feature_securitySolutionRulesV1.all
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
