@@ -53,16 +53,7 @@ while read -r config; do
   fi
 
   FULL_COMMAND="node scripts/functional_tests --bail --config $config $EXTRA_ARGS"
-
-  CONFIG_EXECUTION_KEY="${config}_executed"
-  IS_CONFIG_EXECUTION=$(buildkite-agent meta-data get "$CONFIG_EXECUTION_KEY" --default "false" --log-level error)
-
-  if [[ "${IS_CONFIG_EXECUTION}" == "true" ]]; then
-    echo "--- [ already-tested ] $FULL_COMMAND"
-    continue
-  else
-    echo "--- $ $FULL_COMMAND"
-  fi
+  echo "--- $ $FULL_COMMAND"
 
   start=$(date +%s)
 
@@ -89,27 +80,6 @@ while read -r config; do
   lastCode=$?
   set -e;
 
-  # Scout reporter
-  REPORT_DIR=$(ls -td .scout/reports/scout-ftr-*/ 2>/dev/null | head -n 1)
-  if [ -n "$REPORT_DIR" ]; then
-    EVENT_LOG_FILE="${REPORT_DIR}event-log.ndjson"
-    if [ -f "$EVENT_LOG_FILE" ]; then
-      # Upload events after running each config
-      echo "Upload Scout reporter events to AppEx QA's team cluster for config $config"
-      if [[ "${SCOUT_REPORTER_ENABLED:-}" == "true" ]]; then
-        node scripts/scout upload-events --dontFailOnError --eventLogPath "$EVENT_LOG_FILE"
-      else
-        echo "⚠️ The SCOUT_REPORTER_ENABLED environment variable is not 'true'. Skipping event upload."
-      fi
-    else
-      echo "❌ Could not find event log file '$EVENT_LOG_FILE' for config $config"
-      buildkite-agent annotate --style 'warning' --context 'scout-reporter' "Could not find event log file for config \`$config\`."
-    fi
-  else
-    echo "❌ Could not find any scout report directory '$REPORT_DIR'."
-    buildkite-agent annotate --style 'warning' --context 'scout-reporter' "Could not find any scout report directory \`$REPORT_DIR\`."
-  fi
-
   timeSec=$(($(date +%s)-start))
   if [[ $timeSec -gt 60 ]]; then
     min=$((timeSec/60))
@@ -123,10 +93,7 @@ while read -r config; do
     duration: ${duration}
     result: ${lastCode}")
 
-  if [ $lastCode -eq 0 ]; then
-    # Test was successful, so mark it as executed
-    buildkite-agent meta-data set "$CONFIG_EXECUTION_KEY" "true"
-  else
+  if [ $lastCode -ne 0 ]; then
     exitCode=10
     echo "FTR exited with code $lastCode"
     echo "^^^ +++"
@@ -146,5 +113,8 @@ fi
 echo "--- FTR configs complete"
 printf "%s\n" "${results[@]}"
 echo ""
+
+# Scout reporter
+source .buildkite/scripts/steps/test/scout_upload_report_events.sh
 
 exit $exitCode
