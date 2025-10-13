@@ -18,12 +18,12 @@ import type { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { createMockReportingCore } from '../../test_helpers';
-import type { CreatedAtSearchResponse } from './scheduled_query';
-import { scheduledQueryFactory } from './scheduled_query';
 import type { ReportingCore } from '../..';
 import type { ScheduledReportType } from '../../types';
 import { TaskStatus, type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { BulkGetResult } from '@kbn/task-manager-plugin/server/task_store';
+import type { CreatedAtSearchResponse } from './scheduled_reports_client';
+import { ScheduledReportsClient } from './scheduled_reports_client';
 
 const fakeRawRequest = {
   headers: {
@@ -215,13 +215,13 @@ const nextRunResponse: BulkGetResult = [
 
 const mockLogger = loggingSystemMock.createLogger();
 
-describe('scheduledQueryFactory', () => {
+describe('ScheduledReportsClient', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let core: ReportingCore;
   let auditLogger: AuditLogger;
   let soClient: SavedObjectsClientContract;
   let taskManager: TaskManagerStartContract;
-  let scheduledQuery: ReturnType<typeof scheduledQueryFactory>;
+  let scheduledReportsClient: ScheduledReportsClient;
   let mockResponseFactory: ReturnType<typeof getMockResponseFactory>;
 
   beforeEach(async () => {
@@ -254,10 +254,15 @@ describe('scheduledQueryFactory', () => {
       errors: [],
     }));
     taskManager.bulkGet = jest.fn().mockResolvedValue(nextRunResponse);
-    scheduledQuery = scheduledQueryFactory(core);
+    mockResponseFactory = getMockResponseFactory();
+    scheduledReportsClient = await ScheduledReportsClient.build({
+      logger: mockLogger,
+      reportingCore: core,
+      responseFactory: mockResponseFactory,
+      request: fakeRawRequest,
+    });
     jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValue(true);
 
-    mockResponseFactory = getMockResponseFactory();
     (mockResponseFactory.ok as jest.Mock) = jest.fn((args: unknown) => args);
     (mockResponseFactory.forbidden as jest.Mock) = jest.fn((args: unknown) => args);
     (mockResponseFactory.badRequest as jest.Mock) = jest.fn((args: unknown) => args);
@@ -265,14 +270,12 @@ describe('scheduledQueryFactory', () => {
 
   describe('list', () => {
     it('should pass parameters in the request body', async () => {
-      const result = await scheduledQuery.list(
-        mockLogger,
-        fakeRawRequest,
-        mockResponseFactory,
-        { username: 'somebody' },
-        1,
-        10
-      );
+      const result = await scheduledReportsClient.list({
+        request: fakeRawRequest,
+        user: { username: 'somebody' },
+        page: 1,
+        size: 10,
+      });
 
       expect(soClient.find).toHaveBeenCalledTimes(1);
       expect(soClient.find).toHaveBeenCalledWith({
@@ -401,14 +404,12 @@ describe('scheduledQueryFactory', () => {
 
     it('should filter by username when user does not have manage reporting permissions', async () => {
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
-      await scheduledQuery.list(
-        mockLogger,
-        fakeRawRequest,
-        mockResponseFactory,
-        { username: 'somebody' },
-        1,
-        10
-      );
+      await scheduledReportsClient.list({
+        request: fakeRawRequest,
+        user: { username: 'somebody' },
+        page: 1,
+        size: 10,
+      });
 
       expect(soClient.find).toHaveBeenCalledTimes(1);
       expect(soClient.find).toHaveBeenCalledWith({
@@ -448,14 +449,12 @@ describe('scheduledQueryFactory', () => {
         total: 0,
         saved_objects: [],
       }));
-      const result = await scheduledQuery.list(
-        mockLogger,
-        fakeRawRequest,
-        mockResponseFactory,
-        { username: 'somebody' },
-        1,
-        10
-      );
+      const result = await scheduledReportsClient.list({
+        request: fakeRawRequest,
+        user: { username: 'somebody' },
+        page: 1,
+        size: 10,
+      });
       expect(soClient.find).toHaveBeenCalledTimes(1);
       expect(soClient.find).toHaveBeenCalledWith({
         type: 'scheduled_report',
@@ -473,14 +472,12 @@ describe('scheduledQueryFactory', () => {
       });
 
       await expect(
-        scheduledQuery.list(
-          mockLogger,
-          fakeRawRequest,
-          mockResponseFactory,
-          { username: 'somebody' },
-          1,
-          10
-        )
+        scheduledReportsClient.list({
+          request: fakeRawRequest,
+          user: { username: 'somebody' },
+          page: 1,
+          size: 10,
+        })
       ).rejects.toMatchInlineSnapshot(`
         Object {
           "body": "Error listing scheduled reports: Some error",
@@ -497,14 +494,12 @@ describe('scheduledQueryFactory', () => {
         throw new Error('Some other error');
       });
 
-      const result = await scheduledQuery.list(
-        mockLogger,
-        fakeRawRequest,
-        mockResponseFactory,
-        { username: 'somebody' },
-        1,
-        10
-      );
+      const result = await scheduledReportsClient.list({
+        request: fakeRawRequest,
+        user: { username: 'somebody' },
+        page: 1,
+        size: 10,
+      });
 
       expect(taskManager.bulkGet).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkGet).toHaveBeenCalledWith([
@@ -572,14 +567,12 @@ describe('scheduledQueryFactory', () => {
       taskManager.bulkGet = jest.fn().mockImplementationOnce(() => {
         throw new Error('task manager error');
       });
-      const result = await scheduledQuery.list(
-        mockLogger,
-        fakeRawRequest,
-        mockResponseFactory,
-        { username: 'somebody' },
-        1,
-        10
-      );
+      const result = await scheduledReportsClient.list({
+        request: fakeRawRequest,
+        user: { username: 'somebody' },
+        page: 1,
+        size: 10,
+      });
 
       expect(soClient.find).toHaveBeenCalledTimes(1);
       expect(client.search).toHaveBeenCalledTimes(1);
@@ -645,14 +638,12 @@ describe('scheduledQueryFactory', () => {
       taskManager.bulkGet = jest.fn().mockImplementationOnce(() => {
         return [nextRunResponse[0], { tag: 'error', error: new Error('not found') }];
       });
-      const result = await scheduledQuery.list(
-        mockLogger,
-        fakeRawRequest,
-        mockResponseFactory,
-        { username: 'somebody' },
-        1,
-        10
-      );
+      const result = await scheduledReportsClient.list({
+        request: fakeRawRequest,
+        user: { username: 'somebody' },
+        page: 1,
+        size: 10,
+      });
 
       expect(soClient.find).toHaveBeenCalledTimes(1);
       expect(client.search).toHaveBeenCalledTimes(1);
@@ -717,13 +708,11 @@ describe('scheduledQueryFactory', () => {
 
   describe('bulkDisable', () => {
     it('should pass parameters in the request body', async () => {
-      const result = await scheduledQuery.bulkDisable(
-        mockLogger,
-        fakeRawRequest,
-        mockResponseFactory,
-        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        { username: 'somebody' }
-      );
+      const result = await scheduledReportsClient.bulkDisable({
+        request: fakeRawRequest,
+        user: { username: 'elastic' },
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
 
       expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
       expect(soClient.bulkGet).toHaveBeenCalledWith([
@@ -811,13 +800,11 @@ describe('scheduledQueryFactory', () => {
         tasks: [{ id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca' }],
         errors: [],
       }));
-      const result = await scheduledQuery.bulkDisable(
-        mockLogger,
-        fakeRawRequest,
-        mockResponseFactory,
-        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        { username: 'elastic' }
-      );
+      const result = await scheduledReportsClient.bulkDisable({
+        request: fakeRawRequest,
+        user: { username: 'elastic' },
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
 
       expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
       expect(soClient.bulkGet).toHaveBeenCalledWith([
@@ -922,13 +909,11 @@ describe('scheduledQueryFactory', () => {
         tasks: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4' }],
         errors: [],
       }));
-      const result = await scheduledQuery.bulkDisable(
-        mockLogger,
-        fakeRawRequest,
-        mockResponseFactory,
-        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        { username: 'elastic' }
-      );
+      const result = await scheduledReportsClient.bulkDisable({
+        request: fakeRawRequest,
+        user: { username: 'elastic' },
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
 
       expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
       expect(soClient.bulkGet).toHaveBeenCalledWith([
@@ -1001,13 +986,11 @@ describe('scheduledQueryFactory', () => {
           },
         ],
       }));
-      const result = await scheduledQuery.bulkDisable(
-        mockLogger,
-        fakeRawRequest,
-        mockResponseFactory,
-        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        { username: 'elastic' }
-      );
+      const result = await scheduledReportsClient.bulkDisable({
+        request: fakeRawRequest,
+        user: { username: 'elastic' },
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
 
       expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
       expect(soClient.bulkGet).toHaveBeenCalledWith([
@@ -1056,13 +1039,11 @@ describe('scheduledQueryFactory', () => {
           },
         ],
       }));
-      const result = await scheduledQuery.bulkDisable(
-        mockLogger,
-        fakeRawRequest,
-        mockResponseFactory,
-        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        { username: 'somebody' }
-      );
+      const result = await scheduledReportsClient.bulkDisable({
+        request: fakeRawRequest,
+        user: { username: 'elastic' },
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
 
       expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
       expect(soClient.bulkGet).toHaveBeenCalledWith([
@@ -1135,13 +1116,11 @@ describe('scheduledQueryFactory', () => {
         tasks: [{ id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4' }],
         errors: [],
       }));
-      const result = await scheduledQuery.bulkDisable(
-        mockLogger,
-        fakeRawRequest,
-        mockResponseFactory,
-        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        { username: 'elastic' }
-      );
+      const result = await scheduledReportsClient.bulkDisable({
+        request: fakeRawRequest,
+        user: { username: 'elastic' },
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
 
       expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
       expect(soClient.bulkGet).toHaveBeenCalledWith([
@@ -1216,13 +1195,11 @@ describe('scheduledQueryFactory', () => {
           },
         ],
       }));
-      const result = await scheduledQuery.bulkDisable(
-        mockLogger,
-        fakeRawRequest,
-        mockResponseFactory,
-        ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-        { username: 'elastic' }
-      );
+      const result = await scheduledReportsClient.bulkDisable({
+        request: fakeRawRequest,
+        user: { username: 'elastic' },
+        ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+      });
 
       expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
       expect(soClient.bulkGet).toHaveBeenCalledWith([
@@ -1268,13 +1245,11 @@ describe('scheduledQueryFactory', () => {
       });
 
       await expect(
-        scheduledQuery.bulkDisable(
-          mockLogger,
-          fakeRawRequest,
-          mockResponseFactory,
-          ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
-          { username: 'somebody' }
-        )
+        scheduledReportsClient.bulkDisable({
+          request: fakeRawRequest,
+          user: { username: 'somebody' },
+          ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
+        })
       ).rejects.toMatchInlineSnapshot(`
         Object {
           "body": "Error disabling scheduled reports: Some error",
