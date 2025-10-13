@@ -8,21 +8,24 @@
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 
+import type { LicenseService } from '../../../../../../../common/services';
+
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { Agent, AgentPolicy } from '../../../../types';
-import { ExperimentalFeaturesService } from '../../../../services';
 import { useAuthz } from '../../../../../../hooks/use_authz';
 import { useAgentVersion } from '../../../../../../hooks/use_agent_version';
+import { useLicense } from '../../../../../../hooks/use_license';
 
 import { TableRowActions } from './table_row_actions';
 
 jest.mock('../../../../../../services/experimental_features');
 jest.mock('../../../../../../hooks/use_authz');
 jest.mock('../../../../../../hooks/use_agent_version');
+jest.mock('../../../../../../hooks/use_license');
 
-const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 const mockedUseAuthz = jest.mocked(useAuthz);
 const mockedUseAgentVersion = jest.mocked(useAgentVersion);
+const mockedUseLicense = useLicense as jest.MockedFunction<typeof useLicense>;
 
 function renderTableRowActions({
   agent,
@@ -53,7 +56,10 @@ function renderTableRowActions({
 }
 describe('TableRowActions', () => {
   beforeEach(() => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({ enableAgentMigrations: true } as any); // mock the flag as true so the test runs and the table action item renders
+    mockedUseLicense.mockReturnValue({
+      hasAtLeast: () => false,
+    } as unknown as LicenseService);
+
     mockedUseAuthz.mockReturnValue({
       fleet: {
         all: true,
@@ -82,6 +88,10 @@ describe('TableRowActions', () => {
     }
 
     it('should render an active action button when agent isnt protected', async () => {
+      mockedUseLicense.mockReturnValue({
+        hasAtLeast: () => true,
+      } as unknown as LicenseService);
+
       const res = renderAndGetMigrateButton({
         agent: {
           active: true,
@@ -125,24 +135,6 @@ describe('TableRowActions', () => {
           is_managed: true,
           is_protected: false,
           package_policies: [{ package: { name: 'fleet_server' } }],
-        } as AgentPolicy,
-      });
-
-      expect(res).toBe(null);
-    });
-    it('should not render an active action button when feature flag is disabled', async () => {
-      mockedExperimentalFeaturesService.get.mockReturnValue({
-        enableAgentMigrations: false,
-      } as any);
-      const res = renderAndGetMigrateButton({
-        agent: {
-          active: true,
-          status: 'online',
-          local_metadata: { elastic: { agent: { version: '8.8.0' } } },
-        } as any,
-        agentPolicy: {
-          is_managed: false,
-          is_protected: false,
         } as AgentPolicy,
       });
 

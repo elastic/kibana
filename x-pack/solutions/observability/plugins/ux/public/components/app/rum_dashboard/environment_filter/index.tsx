@@ -82,14 +82,15 @@ export function EnvironmentFilter({
   const minWidth = 200;
 
   const options = getOptions(environments);
+  const environmentLabel = i18n.translate('xpack.ux.filter.environment.label', {
+    defaultMessage: 'Environment',
+  });
 
   return (
     <EuiSelect
       data-test-subj="uxEnvironmentFilterSelect"
       fullWidth
-      prepend={i18n.translate('xpack.ux.filter.environment.label', {
-        defaultMessage: 'Environment',
-      })}
+      prepend={environmentLabel}
       options={options}
       value={environment}
       onChange={(event) => {
@@ -97,6 +98,7 @@ export function EnvironmentFilter({
       }}
       isLoading={loading}
       style={{ minWidth }}
+      aria-label={environmentLabel}
     />
   );
 }
