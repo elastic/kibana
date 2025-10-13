@@ -17,15 +17,21 @@ export const FakeConnectors = {
     actionTypeId: 'slack',
     name: 'fake_slack_connector_1',
   },
-  constantlyFailing: {
-    id: 'b2c3d4e5-f6a7-8901-bc23-de45fa678901',
-    actionTypeId: 'slack',
-    name: 'fake_slack_failing_connector',
-  },
   slack2: {
     id: 'c3d4e5f6-a7b8-9012-cd34-ef56ab789012',
     actionTypeId: 'slack',
     name: 'fake_slack_connector_2',
+  },
+  /** Returns input value as connector result */
+  echo_inference: {
+    id: 'b2c3d4e5-f6a7-8901-bc23-de45fa678902',
+    actionTypeId: 'inference',
+    name: 'inference_connector',
+  },
+  constantlyFailing: {
+    id: 'b2c3d4e5-f6a7-8901-bc23-de45fa678901',
+    actionTypeId: 'slack',
+    name: 'fake_slack_failing_connector',
   },
   slow_3sec_inference: {
     id: 'd4e5f6a7-b8c9-0123-de45-fa67bc890123',
@@ -53,6 +59,7 @@ export class UnsecuredActionsClientMock implements IUnsecuredActionsClient {
 
   private async returnMockedConnectorResult({
     id,
+    params,
   }: {
     id: string;
     params: Record<string, any>;
@@ -68,6 +75,17 @@ export class UnsecuredActionsClientMock implements IUnsecuredActionsClient {
           status: 'ok',
           actionId: id,
           data: { text: 'ok' },
+        };
+      }
+      case FakeConnectors.echo_inference.name: {
+        return {
+          status: 'ok',
+          actionId: id,
+          data: [
+            {
+              result: params?.text,
+            },
+          ],
         };
       }
       case FakeConnectors.constantlyFailing.name: {

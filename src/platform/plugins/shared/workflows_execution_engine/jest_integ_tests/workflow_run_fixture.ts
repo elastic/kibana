@@ -133,6 +133,55 @@ export class WorkflowRunFixture {
       fakeRequest: this.fakeKibanaRequest,
     });
   }
+
+  public runSingleStep({
+    workflowYaml,
+    stepId,
+    contextOverride,
+  }: {
+    workflowYaml: string;
+    stepId: string;
+    contextOverride?: Record<string, any>;
+  }) {
+    // clean up before running workflow
+    this.cleanup();
+    const workflowDefinition = YAML.parseDocument(workflowYaml).toJSON() as WorkflowYaml;
+    const workflowExecution: Partial<EsWorkflowExecution> = {
+      id: 'fake_workflow_execution_id',
+      spaceId: 'fake_space_id',
+      stepId,
+      workflowId: 'fake_foreach_id',
+      isTestRun: false,
+      workflowDefinition,
+      context: {
+        contextOverride,
+      },
+      status: ExecutionStatus.PENDING,
+      createdAt: new Date().toISOString(),
+      createdBy: 'system',
+      triggeredBy: 'system', // <-- new field for scheduled workflows
+    };
+    this.workflowExecutionRepositoryMock.workflowExecutions.set(
+      'fake_workflow_execution_id',
+      workflowExecution as EsWorkflowExecution
+    );
+    return runWorkflow({
+      workflowRunId: 'fake_workflow_execution_id',
+      spaceId: 'fake_space_id',
+      workflowExecutionRepository: this.workflowExecutionRepositoryMock as unknown as any,
+      stepExecutionRepository: this.stepExecutionRepositoryMock as unknown as any,
+      logsRepository: this.logsRepositoryMock as unknown as any,
+      taskAbortController: new AbortController(),
+      coreStart: this.coreStartMock,
+      esClient: this.esClientMock,
+      actions: this.actionsClientMock,
+      taskManager: this.taskManagerMock,
+      logger: this.loggerMock,
+      config: this.configMock,
+      fakeRequest: this.fakeKibanaRequest,
+    });
+  }
+
   private cleanup() {
     jest.clearAllMocks();
     this.workflowExecutionRepositoryMock.workflowExecutions.clear();

@@ -86,8 +86,8 @@ export class WorkflowContextManager {
       }
     });
 
-    this.enrichStepContextWithMockedData(stepContext);
     this.enrichStepContextAccordingToStepScope(stepContext);
+    this.enrichStepContextWithMockedData(stepContext);
     return stepContext;
   }
 

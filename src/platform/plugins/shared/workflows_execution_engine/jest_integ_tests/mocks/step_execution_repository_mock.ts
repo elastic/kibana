@@ -16,7 +16,7 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
     executionId: string
   ): Promise<EsWorkflowStepExecution[]> {
     return Promise.resolve(
-      Array.from(this.stepExecutions.values()).filter((step) => step.id === executionId)
+      Array.from(this.stepExecutions.values()).filter((step) => step.workflowRunId === executionId)
     );
   }
 
