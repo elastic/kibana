@@ -16,12 +16,9 @@ import {
   CAI_ATTACHMENTS_SOURCE_INDEX,
   getAttachmentsSourceQuery,
   getCAIAttachmentsBackfillTaskId,
-  getCAIAttachmentsSynchronizationTaskId,
-  CAI_ATTACHMENTS_SYNC_TYPE,
 } from './constants';
 import { CAI_ATTACHMENTS_INDEX_MAPPINGS } from './mappings';
 import { CAI_ATTACHMENTS_INDEX_SCRIPT, CAI_ATTACHMENTS_INDEX_SCRIPT_ID } from './painless_scripts';
-import { scheduleCAISynchronizationTask } from '../tasks/synchronization_task';
 
 export const createAttachmentsAnalyticsIndex = ({
   esClient,
@@ -53,29 +50,3 @@ export const createAttachmentsAnalyticsIndex = ({
     sourceIndex: CAI_ATTACHMENTS_SOURCE_INDEX,
     sourceQuery: getAttachmentsSourceQuery(spaceId, owner),
   });
-
-export const scheduleAttachmentsAnalyticsSyncTask = ({
-  taskManager,
-  logger,
-  spaceId,
-  owner,
-}: {
-  taskManager: TaskManagerStartContract;
-  logger: Logger;
-  spaceId: string;
-  owner: Owner;
-}) => {
-  const taskId = getCAIAttachmentsSynchronizationTaskId(spaceId, owner);
-  scheduleCAISynchronizationTask({
-    taskId,
-    sourceIndex: CAI_ATTACHMENTS_SOURCE_INDEX,
-    destIndex: getAttachmentsDestinationIndexName(spaceId, owner),
-    taskManager,
-    spaceId,
-    owner,
-    syncType: CAI_ATTACHMENTS_SYNC_TYPE,
-    logger,
-  }).catch((e) => {
-    logger.error(`Error scheduling ${taskId} task, received ${e.message}`);
-  });
-};
