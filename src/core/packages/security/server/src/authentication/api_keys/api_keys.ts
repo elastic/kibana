@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 
+import type { SecurityApiKey } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from '../../roles';
 
 /**
@@ -58,6 +59,8 @@ export interface APIKeys {
     request: KibanaRequest,
     updateParams: UpdateAPIKeyParams
   ): Promise<UpdateAPIKeyResult | null>;
+
+  getAPIKey(request: KibanaRequest, id: string): Promise<SecurityApiKey | null>;
 
   /**
    * Tries to grant an API key for the current user.
