@@ -179,6 +179,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
                 status,
               },
             })}
+            tabIndex={0}
           >
             {status}
           </EuiHealth>
@@ -226,7 +227,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
               position="bottom"
               content={tail.join(', ')}
             >
-              <EuiBadge>+{tail.length}</EuiBadge>
+              <EuiBadge tabIndex={0}>+{tail.length}</EuiBadge>
             </EuiToolTip>
           )}
         </EuiBadgeGroup>
