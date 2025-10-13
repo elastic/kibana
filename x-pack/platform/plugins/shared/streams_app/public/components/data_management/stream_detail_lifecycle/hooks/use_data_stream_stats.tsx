@@ -12,6 +12,7 @@ import type { TimeState } from '@kbn/es-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import type { useAggregations } from './use_ingestion_rate';
+import { formatBytes } from '../helpers/format_bytes';
 
 export type DataStreamStats = DataStreamStatServiceResponse['dataStreamsStats'][number] & {
   bytesPerDoc: number;
@@ -29,28 +30,44 @@ export const useDataStreamStats = ({
 }) => {
   const {
     services: { dataStreamsClient },
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
   } = useKibana();
 
   const statsFetch = useStreamsAppFetch(
-    async () => {
+    async ({ signal }) => {
       const client = await dataStreamsClient;
-      const {
-        dataStreamsStats: [dsStats],
-      } = await client.getDataStreamsStats({
-        datasetQuery: definition.stream.name,
-        includeCreationDate: true,
-      });
+      const [
+        {
+          dataStreamsStats: [dsStats],
+        },
+        { stats: fsStats },
+      ] = await Promise.all([
+        client.getDataStreamsStats({
+          datasetQuery: definition.stream.name,
+        }),
+        streamsRepositoryClient.fetch('GET /internal/streams/{name}/failure_store/stats', {
+          signal,
+          params: {
+            path: { name: definition.stream.name },
+          },
+        }),
+      ]);
 
-      if (!dsStats || !dsStats.creationDate) {
-        return undefined;
+      if (!dsStats) {
+        return;
       }
 
       const rangeInDays = moment(timeState.end).diff(moment(timeState.start), 'days', true);
 
       const countRange = aggregations?.buckets?.reduce((sum, bucket) => sum + bucket.doc_count, 0);
 
-      const bytesPerDoc =
-        dsStats.totalDocs && dsStats.sizeBytes ? dsStats.sizeBytes / dsStats.totalDocs : 0;
+      const sizeBytes = Math.max(0, (dsStats.sizeBytes ?? 0) - (fsStats?.size ?? 0));
+
+      const bytesPerDoc = dsStats.totalDocs && sizeBytes ? sizeBytes / dsStats.totalDocs : 0;
       const perDayDocs = countRange ? countRange / rangeInDays : 0;
       const bytesPerDay = bytesPerDoc * perDayDocs;
 
@@ -58,9 +75,17 @@ export const useDataStreamStats = ({
         ...dsStats,
         bytesPerDay,
         bytesPerDoc,
+        sizeBytes,
+        size: formatBytes(sizeBytes),
       };
     },
-    [dataStreamsClient, definition, aggregations?.buckets, timeState.end, timeState.start],
+    [
+      dataStreamsClient,
+      definition.stream.name,
+      aggregations?.buckets,
+      timeState.end,
+      timeState.start,
+    ],
     {
       withTimeRange: false,
       withRefresh: true,

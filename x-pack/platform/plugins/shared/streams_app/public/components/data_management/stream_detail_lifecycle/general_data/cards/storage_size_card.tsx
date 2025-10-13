@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { formatNumber } from '@elastic/eui';
+import { EuiIconTip, formatNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { BaseMetricCard } from '../../common/base_metric_card';
 import { formatBytes } from '../../helpers/format_bytes';
 import type { DataStreamStats } from '../../hooks/use_data_stream_stats';
@@ -18,10 +19,12 @@ export const StorageSizeCard = ({
   definition,
   stats,
   statsError,
+  failureStoreEnabled,
 }: {
   definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
   statsError?: Error;
+  failureStoreEnabled: boolean;
 }) => {
   const hasPrivileges = definition.privileges?.monitor ?? false;
   const metric = [
@@ -45,10 +48,24 @@ export const StorageSizeCard = ({
       'data-test-subj': 'storageSize',
     },
   ];
+  const inaccurateMetric = failureStoreEnabled && !definition.privileges?.manage_failure_store;
 
-  const title = i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.title', {
-    defaultMessage: 'Storage size',
-  });
+  const title = (
+    <FormattedMessage
+      id="xpack.streams.streamDetailLifecycle.storageSize.title"
+      defaultMessage="Storage size {tooltipIcon}"
+      values={{
+        tooltipIcon: inaccurateMetric && (
+          <EuiIconTip
+            type="question"
+            content={i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.tooltip', {
+              defaultMessage: 'The storage size includes the failure store.',
+            })}
+          />
+        ),
+      }}
+    />
+  );
 
   return <BaseMetricCard title={title} metrics={metric} />;
 };
