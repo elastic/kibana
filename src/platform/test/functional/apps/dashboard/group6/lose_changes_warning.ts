@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clickCancelOutOfEditMode(false);
 
         await common.clickCancelOnModal();
-        
+
         const time = await timePicker.getTimeConfig();
 
         expect(time.start).to.equal('Sep 19, 2013 @ 06:31:44.000');
@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardSettings.toggleStoreTimeWithDashboard(false);
         await dashboardSettings.clickApplyButton();
         await dashboard.saveDashboard(dashboardName, {
-          saveAsNew: false
+          saveAsNew: false,
         });
         await timePicker.setAbsoluteRange(
           'Oct 19, 2014 @ 06:31:44.000',

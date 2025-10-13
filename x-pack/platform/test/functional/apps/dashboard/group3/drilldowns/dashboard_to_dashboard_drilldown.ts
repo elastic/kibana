@@ -46,7 +46,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
 
   const createDrilldown = async () => {
-    await dashboard.loadDashboardInEditMode(dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME);
+    await dashboard.loadDashboardInEditMode(
+      dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
+    );
     await toasts.dismissAll(); // toasts get in the way of bottom "Create drilldown" button in flyout
 
     // create drilldown
