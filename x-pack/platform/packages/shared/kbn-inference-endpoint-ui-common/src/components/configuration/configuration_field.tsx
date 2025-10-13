@@ -231,14 +231,7 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
     }
   };
 
-  const convertToHeadersObject = (headersArray: Array<Array<string>>) => {
-    return headersArray.reduce((acc, [k, v]) => {
-      acc[k] = v;
-      return acc;
-    }, {} as Map);
-  };
-
-  const iterableHeaders = useMemo(
+  const iterableHeaders: [string, string][] = useMemo(
     () => Object.entries(headers),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [JSON.stringify(headers)]
@@ -264,7 +257,7 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
                           setHeaders((prevHeaders) => {
                             const newHeaders = [...Object.entries(prevHeaders)];
                             newHeaders[index][0] = e.target.value;
-                            const headersObj = convertToHeadersObject(newHeaders);
+                            const headersObj = Object.fromEntries(newHeaders);
                             validateAndSetConfigValue(headersObj);
                             return headersObj;
                           });
@@ -282,7 +275,7 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
                           setHeaders((prevHeaders) => {
                             const newHeaders = [...Object.entries(prevHeaders)];
                             newHeaders[index][1] = e.target.value;
-                            const headersObj = convertToHeadersObject(newHeaders);
+                            const headersObj = Object.fromEntries(newHeaders);
                             validateAndSetConfigValue(headersObj);
                             return headersObj;
                           });
@@ -299,7 +292,7 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
                       css={{ marginTop: '22px' }}
                       onClick={() => {
                         const newHeaders = iterableHeaders.toSpliced(index, 1);
-                        const headersObj = convertToHeadersObject(newHeaders);
+                        const headersObj = Object.fromEntries(newHeaders);
                         setHeaders(headersObj);
                         validateAndSetConfigValue(headersObj);
                       }}
@@ -320,15 +313,14 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
                 (isEdit && !updatable) ||
                 (!isEdit &&
                   iterableHeaders.length === 1 &&
-                  iterableHeaders[0][0] === '' &&
-                  iterableHeaders[0][1] === '')
+                  (iterableHeaders[0][0] === '' || iterableHeaders[0][1] === ''))
               }
               iconType="plusInCircle"
               onClick={() => {
                 const newHeaders = [...iterableHeaders, ['', '']];
-                setHeaders(convertToHeadersObject(newHeaders));
+                setHeaders(Object.fromEntries(newHeaders));
               }}
-              data-test-subj="openAIAddHeaderButton"
+              data-test-subj="add-header-button"
               aria-label={ADD_LABEL}
             >
               {ADD_LABEL}
