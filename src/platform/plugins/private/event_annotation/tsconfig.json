@@ -34,7 +34,6 @@
     "@kbn/content-management-utils",
     "@kbn/logging",
     "@kbn/core-plugins-server",
-    "@kbn/chart-expressions-common",
     "@kbn/visualizations-common"
   ],
   "exclude": [

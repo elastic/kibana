@@ -99,6 +99,7 @@
     "@kbn/licensing-types",
     "@kbn/es-query-server",
     "@kbn/data-service-server",
+    "@kbn/visualizations-common",
   ],
   "exclude": [
     "target/**/*",
