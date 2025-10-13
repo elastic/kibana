@@ -228,7 +228,7 @@ export class AuthenticationService {
           headers: {
             'Content-Security-Policy': http.csp.header,
             'Content-Security-Policy-Report-Only': http.csp.reportOnlyHeader,
-            Location: location,
+            location,
           },
         });
       }

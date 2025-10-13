@@ -67,6 +67,8 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
    */
   public getCurrent<D extends UserProfileData>(params?: UserProfileGetCurrentParams) {
     if (this.http.anonymousPaths.isAnonymous(window.location.pathname)) {
+      this._enabled$.next(false);
+      this._userProfileLoaded$.next(true);
       return Promise.reject(new Error('Unable to retrieve user profile for anonymous paths'));
     }
     return this.http
