@@ -55,50 +55,14 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
     const { url, method = 'GET', headers = {}, body } = this.step.with;
 
     return {
-      url: typeof url === 'string' ? this.templatingEngine.render(url, context) : url,
+      url:
+        typeof url === 'string'
+          ? this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(url)
+          : url,
       method,
-      headers: this.renderHeaders(headers, context),
-      body: this.renderBody(body, context),
+      headers: this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(headers),
+      body: this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(body),
     };
-  }
-
-  private renderHeaders(headers: HttpHeaders, context: any): HttpHeaders {
-    return Object.entries(headers).reduce((acc, [key, value]) => {
-      acc[key] = typeof value === 'string' ? this.templatingEngine.render(value, context) : value;
-      return acc;
-    }, {} as HttpHeaders);
-  }
-
-  private renderBody(body: any, context: any): any {
-    if (typeof body === 'string') {
-      return this.templatingEngine.render(body, context);
-    }
-    if (body && typeof body === 'object') {
-      return this.renderObjectTemplate(body, context);
-    }
-    return body;
-  }
-
-  /**
-   * Recursively render the object template.
-   * @param obj - The object to render.
-   * @param context - The context to use for rendering.
-   * @returns The rendered object.
-   */
-  private renderObjectTemplate(obj: any, context: any): any {
-    if (Array.isArray(obj)) {
-      return obj.map((item) => this.renderObjectTemplate(item, context));
-    }
-    if (obj && typeof obj === 'object') {
-      return Object.entries(obj).reduce((acc, [key, value]) => {
-        acc[key] = this.renderObjectTemplate(value, context);
-        return acc;
-      }, {} as any);
-    }
-    if (typeof obj === 'string') {
-      return this.templatingEngine.render(obj, context);
-    }
-    return obj;
   }
 
   protected async _run(input: any): Promise<RunStepResult> {
