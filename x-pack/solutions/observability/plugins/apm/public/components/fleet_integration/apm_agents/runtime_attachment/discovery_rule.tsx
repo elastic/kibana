@@ -102,6 +102,10 @@ export function DiscoveryRule({
                     data-test-subj="apmDiscoveryRuleButton"
                     iconType="pencil"
                     color="primary"
+                    aria-label={i18n.translate(
+                      'xpack.apm.fleetIntegration.apmAgent.discoveryRule.editButtonAriaLabel',
+                      { defaultMessage: 'Edit rule' }
+                    )}
                     onClick={() => {
                       onEdit(id);
                     }}
@@ -112,6 +116,10 @@ export function DiscoveryRule({
                     data-test-subj="apmDiscoveryRuleButton"
                     iconType="trash"
                     color="danger"
+                    aria-label={i18n.translate(
+                      'xpack.apm.fleetIntegration.apmAgent.discoveryRule.deleteButtonAriaLabel',
+                      { defaultMessage: 'Delete rule' }
+                    )}
                     onClick={() => {
                       onDelete(id);
                     }}
