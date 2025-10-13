@@ -169,13 +169,12 @@ describe('AnalyticsService', () => {
   it('does not report authentication type if the page is anonymous', async () => {
     const mockCore = coreMock.createStart();
     mockCore.http.post.mockResolvedValue({ signature: 'some-signature', timestamp: 1234 });
+    mockCore.http.anonymousPaths.isAnonymous.mockReturnValue(true);
 
     const authc = authenticationMock.createSetup();
     authc.getCurrentUser.mockResolvedValue(securityMock.createMockAuthenticatedUser());
 
     const { analytics, http } = coreMock.createSetup();
-
-    http.anonymousPaths.isAnonymous.mockReturnValue(true);
 
     analyticsService.setup({
       authc,
