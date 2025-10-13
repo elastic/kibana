@@ -72,6 +72,8 @@ import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '../common/constants';
 
+import { runWithCache } from './services/epm/packages/cache';
+
 import { getFilesClientFactory } from './services/files/get_files_client_factory';
 
 import type { MessageSigningServiceInterface } from './services/security';
@@ -239,6 +241,7 @@ export interface FleetStartContract {
    * Services for Fleet's package policies
    */
   packagePolicyService: typeof packagePolicyService;
+  runWithCache: typeof runWithCache;
   agentPolicyService: AgentPolicyServiceInterface;
   /**
    * Register callbacks for inclusion in fleet API processing
@@ -869,6 +872,7 @@ export class FleetPlugin
         const authz = await getAuthzFromRequest(request);
         return new OutputClient(soClient, authz);
       },
+      runWithCache,
     };
   }
 
