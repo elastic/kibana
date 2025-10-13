@@ -58,7 +58,7 @@ The cases as data feature is in technical preview, meaning the schema for the ca
 | observables.value | keyword | The observable value. |
 | total\_comments | integer | The total number of comments in a case. |
 | total\_alerts | integer | The total number of alerts attached to a case. |
-| total\_assigness | integer | The total number of assignees to a case. |
+| total\_assignees | integer | The total number of assignees to a case. |
 | owner | keyword | The case owner. |
 | space\_ids | keyword | A list of spaces where the case is visible. |
 
