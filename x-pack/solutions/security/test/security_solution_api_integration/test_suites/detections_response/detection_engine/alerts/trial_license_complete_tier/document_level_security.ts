@@ -30,7 +30,7 @@ const roleToAccessSecuritySolution = {
       {
         feature: {
           [SECURITY_FEATURE_ID]: ['all'],
-          [RULES_FEATURE_ID]: ['all']
+          [RULES_FEATURE_ID]: ['all'],
         },
         spaces: ['*'],
       },
@@ -54,7 +54,7 @@ const roleToAccessSecuritySolutionWithDls = {
       {
         feature: {
           [SECURITY_FEATURE_ID]: ['all'],
-          [RULES_FEATURE_ID]: ['all']
+          [RULES_FEATURE_ID]: ['all'],
         },
         spaces: ['*'],
       },
