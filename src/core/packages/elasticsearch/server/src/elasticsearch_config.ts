@@ -29,11 +29,6 @@ export interface IElasticsearchConfig {
   readonly healthCheckRetry: number;
 
   /**
-   * Timeout after which health check request will be aborted and retried.
-   */
-  readonly healthCheckRequestTimeout: Duration;
-
-  /**
    * Whether to allow kibana to connect to a non-compatible elasticsearch node.
    */
   readonly ignoreVersionMismatch: boolean;

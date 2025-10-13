@@ -35,6 +35,7 @@ import {
   esVersionCompatibleWithKibana,
   esVersionEqualsKibana,
 } from './es_kibana_version_compatability';
+import { HEALTH_CHECK_REQUEST_TIMEOUT } from './constants';
 
 /** @public */
 export interface PollEsNodesVersionOptions {
@@ -45,7 +46,6 @@ export interface PollEsNodesVersionOptions {
   healthCheckInterval: number; // 2500ms
   healthCheckStartupInterval?: number; // 500ms
   healthCheckRetry: number; // 3
-  healthCheckRequestTimeout: number; // 120000ms
 }
 
 /** @public */
@@ -171,7 +171,6 @@ export const pollEsNodesVersion = ({
   healthCheckInterval,
   healthCheckStartupInterval,
   healthCheckRetry,
-  healthCheckRequestTimeout,
 }: PollEsNodesVersionOptions): Observable<NodesVersionCompatibility> => {
   log.debug('Checking Elasticsearch version');
 
@@ -189,7 +188,7 @@ export const pollEsNodesVersion = ({
 
   const tick$ = checkInterval$.pipe(
     switchMap((checkInterval) => interval(checkInterval).pipe(startWith(0))), // restart interval when checkInterval changes. Emits immediately
-    shareReplay(1) // allows late subscribers to get the last emitted interval value (so they don't have to wait for the next interval to elapse
+    shareReplay({ refCount: true, bufferSize: 1 }) // allows late subscribers to get the last emitted interval value, and cleans up when no subscribers remain
   );
 
   return tick$.pipe(
@@ -203,7 +202,7 @@ export const pollEsNodesVersion = ({
             metric: '_none',
             filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
           },
-          { requestTimeout: healthCheckRequestTimeout }
+          { requestTimeout: HEALTH_CHECK_REQUEST_TIMEOUT }
         )
       ).pipe(
         retry({ count: healthCheckRetry, delay: () => tick$.pipe(take(1)) }), // if error, prevent propagation and retry the request

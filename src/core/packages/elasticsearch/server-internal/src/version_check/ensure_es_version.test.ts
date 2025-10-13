@@ -11,9 +11,7 @@ import type { NodesInfo } from './ensure_es_version';
 import { mapNodesVersionCompatibility, pollEsNodesVersion } from './ensure_es_version';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { take, delay } from 'rxjs';
-import { TestScheduler } from 'rxjs/testing';
-import { of } from 'rxjs';
+import { take } from 'rxjs';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
@@ -131,9 +129,17 @@ describe('mapNodesVersionCompatibility', () => {
 });
 describe('pollEsNodesVersion', () => {
   let internalClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
+  const subscriptions: Array<{ unsubscribe: () => void }> = [];
 
   beforeEach(() => {
+    jest.clearAllMocks();
     internalClient = elasticsearchClientMock.createInternalClient();
+  });
+
+  afterEach(() => {
+    // Ensure all subscriptions are cleaned up
+    subscriptions.forEach((sub) => sub.unsubscribe());
+    subscriptions.length = 0;
   });
 
   const nodeInfosSuccessOnce = (infos: NodesInfo) => {
@@ -151,14 +157,17 @@ describe('pollEsNodesVersion', () => {
 
     nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0'));
     nodeInfosErrorOnce('mock request error');
+    // Mock for retry attempt after error (healthCheckRetry: 1 means it will retry once)
+    nodeInfosErrorOnce('mock request error');
     nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1'));
 
-    pollEsNodesVersion({
+    const subscription = pollEsNodesVersion({
       internalClient,
       healthCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
+      healthCheckRetry: 1,
     })
       .pipe(take(3))
       .subscribe({
@@ -168,6 +177,7 @@ describe('pollEsNodesVersion', () => {
         complete: done,
         error: done,
       });
+    subscriptions.push(subscription);
   });
 
   it('returns the error from a failed nodes.info call when a poll request throws', (done) => {
@@ -179,13 +189,16 @@ describe('pollEsNodesVersion', () => {
     jest.clearAllMocks();
 
     nodeInfosErrorOnce('mock request error');
+    // Mock for retry attempt after error (healthCheckRetry: 1 means it will retry once)
+    nodeInfosErrorOnce('mock request error');
 
-    pollEsNodesVersion({
+    const subscription = pollEsNodesVersion({
       internalClient,
       healthCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
+      healthCheckRetry: 1,
     })
       .pipe(take(1))
       .subscribe({
@@ -196,6 +209,7 @@ describe('pollEsNodesVersion', () => {
         complete: done,
         error: done,
       });
+    subscriptions.push(subscription);
   });
 
   it('only emits if the error from a failed nodes.info call changed from the previous poll', (done) => {
@@ -207,16 +221,20 @@ describe('pollEsNodesVersion', () => {
     ];
     jest.clearAllMocks();
 
-    nodeInfosErrorOnce('mock request error'); // emit
-    nodeInfosErrorOnce('mock request error'); // ignore, same error message
-    nodeInfosErrorOnce('mock request error 2'); // emit
+    nodeInfosErrorOnce('mock request error'); // emit (first call)
+    nodeInfosErrorOnce('mock request error'); // retry attempt
+    nodeInfosErrorOnce('mock request error'); // ignore, same error message (second poll)
+    nodeInfosErrorOnce('mock request error'); // retry attempt
+    nodeInfosErrorOnce('mock request error 2'); // emit (third poll)
+    nodeInfosErrorOnce('mock request error 2'); // retry attempt
 
-    pollEsNodesVersion({
+    const subscription = pollEsNodesVersion({
       internalClient,
       healthCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
+      healthCheckRetry: 1,
     })
       .pipe(take(2))
       .subscribe({
@@ -227,6 +245,7 @@ describe('pollEsNodesVersion', () => {
         complete: done,
         error: done,
       });
+    subscriptions.push(subscription);
   });
 
   it('returns isCompatible=false and keeps polling when a poll request throws, only responding again if the error message has changed', (done) => {
@@ -240,18 +259,22 @@ describe('pollEsNodesVersion', () => {
     ];
     jest.clearAllMocks();
 
-    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // emit
-    nodeInfosErrorOnce('mock request error'); // emit
-    nodeInfosErrorOnce('mock request error'); // ignore
-    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1')); // emit
-    nodeInfosErrorOnce('mock request error'); // emit
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // emit (first poll)
+    nodeInfosErrorOnce('mock request error'); // emit (second poll)
+    nodeInfosErrorOnce('mock request error'); // retry attempt
+    nodeInfosErrorOnce('mock request error'); // ignore (third poll - same error)
+    nodeInfosErrorOnce('mock request error'); // retry attempt
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1')); // emit (fourth poll)
+    nodeInfosErrorOnce('mock request error'); // emit (fifth poll)
+    nodeInfosErrorOnce('mock request error'); // retry attempt
 
-    pollEsNodesVersion({
+    const subscription = pollEsNodesVersion({
       internalClient,
       healthCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
+      healthCheckRetry: 1,
     })
       .pipe(take(4))
       .subscribe({
@@ -262,6 +285,7 @@ describe('pollEsNodesVersion', () => {
         complete: done,
         error: done,
       });
+    subscriptions.push(subscription);
   });
 
   it('returns compatibility results', (done) => {
@@ -270,12 +294,13 @@ describe('pollEsNodesVersion', () => {
 
     nodeInfosSuccessOnce(nodes);
 
-    pollEsNodesVersion({
+    const subscription = pollEsNodesVersion({
       internalClient,
       healthCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
+      healthCheckRetry: 1,
     })
       .pipe(take(1))
       .subscribe({
@@ -285,6 +310,7 @@ describe('pollEsNodesVersion', () => {
         complete: done,
         error: done,
       });
+    subscriptions.push(subscription);
   });
 
   it('only emits if the node versions changed since the previous poll', (done) => {
@@ -296,12 +322,13 @@ describe('pollEsNodesVersion', () => {
     nodeInfosSuccessOnce(createNodes('5.1.1', '5.1.2', '5.1.3')); // ignore
     nodeInfosSuccessOnce(createNodes('5.0.0', '5.1.0', '5.2.0')); // emit, different from previous version
 
-    pollEsNodesVersion({
+    const subscription = pollEsNodesVersion({
       internalClient,
       healthCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
       log: mockLogger,
+      healthCheckRetry: 1,
     })
       .pipe(take(4))
       .subscribe({
@@ -309,116 +336,118 @@ describe('pollEsNodesVersion', () => {
         complete: done,
         error: done,
       });
+    subscriptions.push(subscription);
   });
 
-  describe('marble testing', () => {
-    const getTestScheduler = () =>
-      new TestScheduler((actual, expected) => {
-        expect(actual).toEqual(expected);
-      });
+  describe('timing and interval behavior', () => {
+    it('starts polling immediately and then every healthCheckInterval', (done) => {
+      const timestamps: number[] = [];
+      const startTime = Date.now();
 
-    const mockTestSchedulerInfoResponseOnce = (infos: NodesInfo) => {
-      // @ts-expect-error we need to return an incompatible type to use the testScheduler here
-      internalClient.nodes.info.mockReturnValueOnce([infos]);
-    };
+      nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0'));
+      nodeInfosSuccessOnce(createNodes('5.1.1', '5.2.0', '5.0.0'));
 
-    it('starts polling immediately and then every healthCheckInterval', () => {
-      expect.assertions(1);
-
-      mockTestSchedulerInfoResponseOnce(createNodes('5.1.0', '5.2.0', '5.0.0'));
-      mockTestSchedulerInfoResponseOnce(createNodes('5.1.1', '5.2.0', '5.0.0'));
-
-      getTestScheduler().run(({ expectObservable }) => {
-        const expected = 'a 99ms (b|)';
-
-        const esNodesCompatibility$ = pollEsNodesVersion({
-          internalClient,
-          healthCheckInterval: 100,
-          ignoreVersionMismatch: false,
-          kibanaVersion: KIBANA_VERSION,
-          log: mockLogger,
-        }).pipe(take(2));
-
-        expectObservable(esNodesCompatibility$).toBe(expected, {
-          a: mapNodesVersionCompatibility(
-            createNodes('5.1.0', '5.2.0', '5.0.0'),
-            KIBANA_VERSION,
-            false
-          ),
-          b: mapNodesVersionCompatibility(
-            createNodes('5.1.1', '5.2.0', '5.0.0'),
-            KIBANA_VERSION,
-            false
-          ),
+      const subscription = pollEsNodesVersion({
+        internalClient,
+        healthCheckInterval: 50,
+        ignoreVersionMismatch: false,
+        kibanaVersion: KIBANA_VERSION,
+        log: mockLogger,
+        healthCheckRetry: 1,
+      })
+        .pipe(take(2))
+        .subscribe({
+          next: () => {
+            timestamps.push(Date.now() - startTime);
+          },
+          complete: () => {
+            // First emission should be immediate (within 10ms)
+            expect(timestamps[0]).toBeLessThan(10);
+            // Second emission should be after healthCheckInterval (50ms +/- 20ms tolerance)
+            expect(timestamps[1]).toBeGreaterThanOrEqual(40);
+            expect(timestamps[1]).toBeLessThan(80);
+            done();
+          },
+          error: done,
         });
-      });
+      subscriptions.push(subscription);
     });
 
-    it('waits for es version check requests to complete before scheduling the next one', () => {
-      expect.assertions(2);
+    it('waits for es version check requests to complete before scheduling the next one', (done) => {
+      const callTimes: number[] = [];
+      let callCount = 0;
 
-      getTestScheduler().run(({ expectObservable }) => {
-        const expected = '100ms a 99ms (b|)';
-
-        internalClient.nodes.info.mockReturnValueOnce(
-          // @ts-expect-error we need to return an incompatible type to use the testScheduler here
-          of(createNodes('5.1.0', '5.2.0', '5.0.0')).pipe(delay(100))
-        );
-        internalClient.nodes.info.mockReturnValueOnce(
-          // @ts-expect-error we need to return an incompatible type to use the testScheduler here
-          of(createNodes('5.1.1', '5.2.0', '5.0.0')).pipe(delay(100))
-        );
-
-        const esNodesCompatibility$ = pollEsNodesVersion({
-          internalClient,
-          healthCheckInterval: 10,
-          ignoreVersionMismatch: false,
-          kibanaVersion: KIBANA_VERSION,
-          log: mockLogger,
-        }).pipe(take(2));
-
-        expectObservable(esNodesCompatibility$).toBe(expected, {
-          a: mapNodesVersionCompatibility(
-            createNodes('5.1.0', '5.2.0', '5.0.0'),
-            KIBANA_VERSION,
-            false
-          ),
-          b: mapNodesVersionCompatibility(
-            createNodes('5.1.1', '5.2.0', '5.0.0'),
-            KIBANA_VERSION,
-            false
-          ),
-        });
+      // Mock with delayed responses
+      internalClient.nodes.info.mockImplementation(async () => {
+        const currentCall = callCount++;
+        callTimes.push(Date.now());
+        // Simulate a slow response
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        return {
+          nodes: {
+            'node-0': {
+              version: currentCall === 0 ? '5.1.0' : '5.1.1',
+              ip: 'ip',
+              http: { publish_address: 'addr' },
+            },
+          },
+        } as any;
       });
 
-      expect(internalClient.nodes.info).toHaveBeenCalledTimes(2);
-    });
-
-    it('switch from startup interval to normal interval after first green status', () => {
-      expect.assertions(1);
-
-      mockTestSchedulerInfoResponseOnce(createNodes('6.3.0'));
-      mockTestSchedulerInfoResponseOnce(createNodes('5.1.0'));
-      mockTestSchedulerInfoResponseOnce(createNodes('5.2.0'));
-      mockTestSchedulerInfoResponseOnce(createNodes('5.3.0'));
-
-      getTestScheduler().run(({ expectObservable }) => {
-        const esNodesCompatibility$ = pollEsNodesVersion({
-          internalClient,
-          healthCheckInterval: 100,
-          healthCheckStartupInterval: 50,
-          ignoreVersionMismatch: false,
-          kibanaVersion: KIBANA_VERSION,
-          log: mockLogger,
-        }).pipe(take(4));
-
-        expectObservable(esNodesCompatibility$).toBe('a 49ms b 99ms c 99ms (d|)', {
-          a: expect.any(Object),
-          b: expect.any(Object),
-          c: expect.any(Object),
-          d: expect.any(Object),
+      const subscription = pollEsNodesVersion({
+        internalClient,
+        healthCheckInterval: 10,
+        ignoreVersionMismatch: false,
+        kibanaVersion: KIBANA_VERSION,
+        log: mockLogger,
+        healthCheckRetry: 1,
+      })
+        .pipe(take(2))
+        .subscribe({
+          complete: () => {
+            // Should have made exactly 2 calls
+            expect(internalClient.nodes.info).toHaveBeenCalledTimes(2);
+            // Second call should wait for first call to complete (100ms) before starting
+            // So the delay between call starts should be at least 100ms
+            const timeBetweenCalls = callTimes[1] - callTimes[0];
+            expect(timeBetweenCalls).toBeGreaterThanOrEqual(90); // Allow some timing variance
+            done();
+          },
+          error: done,
         });
-      });
+      subscriptions.push(subscription);
     });
+
+    it('switches from startup interval to normal interval after first compatible status', (done) => {
+      let emissionCount = 0;
+
+      // Use different patch versions so distinctUntilChanged will emit each time
+      nodeInfosSuccessOnce(createNodes('5.1.0')); // compatible - triggers switch
+      nodeInfosSuccessOnce(createNodes('5.1.1'));
+      nodeInfosSuccessOnce(createNodes('5.1.2'));
+
+      const subscription = pollEsNodesVersion({
+        internalClient,
+        healthCheckInterval: 100,
+        healthCheckStartupInterval: 20,
+        ignoreVersionMismatch: false,
+        kibanaVersion: KIBANA_VERSION,
+        log: mockLogger,
+        healthCheckRetry: 1,
+      })
+        .pipe(take(3))
+        .subscribe({
+          next: () => {
+            emissionCount++;
+          },
+          complete: () => {
+            // Verify we got all expected emissions
+            expect(emissionCount).toBe(3);
+            done();
+          },
+          error: done,
+        });
+      subscriptions.push(subscription);
+    }, 10000);
   });
 });

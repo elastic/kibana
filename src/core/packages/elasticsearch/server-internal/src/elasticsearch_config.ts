@@ -157,7 +157,6 @@ export const configSchema = schema.object({
     delay: schema.duration({ defaultValue: 2500 }),
     startupDelay: schema.duration({ defaultValue: 500 }),
     retry: schema.number({ defaultValue: 3, min: 1 }),
-    requestTimeout: schema.duration({ defaultValue: 120000 }),
   }),
   ignoreVersionMismatch: offeringBasedSchema({
     serverless: schema.boolean({ defaultValue: true }),
@@ -324,10 +323,6 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    */
   public readonly healthCheckRetry: number;
   /**
-   * Timeout after which health checks will be aborted and retried.
-   */
-  public readonly healthCheckRequestTimeout: Duration;
-  /**
    * Whether to allow kibana to connect to a non-compatible elasticsearch node.
    */
   public readonly ignoreVersionMismatch: boolean;
@@ -478,7 +473,6 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.healthCheckDelay = rawConfig.healthCheck.delay;
     this.healthCheckStartupDelay = rawConfig.healthCheck.startupDelay;
     this.healthCheckRetry = rawConfig.healthCheck.retry ? rawConfig.healthCheck.retry : 3;
-    this.healthCheckRequestTimeout = rawConfig.healthCheck.requestTimeout;
     this.username = rawConfig.username;
     this.password = rawConfig.password;
     this.serviceAccountToken = rawConfig.serviceAccountToken;

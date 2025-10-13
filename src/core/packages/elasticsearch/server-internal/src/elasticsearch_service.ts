@@ -106,7 +106,6 @@ export class ElasticsearchService
       healthCheckInterval: config.healthCheckDelay.asMilliseconds(),
       healthCheckStartupInterval: config.healthCheckStartupDelay.asMilliseconds(),
       healthCheckRetry: config.healthCheckRetry,
-      healthCheckRequestTimeout: config.healthCheckRequestTimeout.asMilliseconds(),
       log: this.log,
       internalClient: this.client.asInternalUser,
     }).pipe(takeUntil(this.stop$));
