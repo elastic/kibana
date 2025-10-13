@@ -9,33 +9,14 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import {
-  countMetricOperationSchema,
-  counterRateOperationSchema,
-  cumulativeSumOperationSchema,
-  differencesOperationSchema,
-  formulaOperationDefinitionSchema,
-  lastValueOperationSchema,
-  metricOperationSchema,
-  movingAverageOperationSchema,
-  percentileOperationSchema,
-  percentileRanksOperationSchema,
-  staticOperationDefinitionSchema,
-  uniqueCountMetricOperationSchema,
-  sumMetricOperationSchema,
-  esqlColumnSchema,
-  genericOperationOptionsSchema,
-} from '../metric_ops';
+import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
 import { colorByValueSchema, colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
-import {
-  bucketDateHistogramOperationSchema,
-  bucketTermsOperationSchema,
-  bucketHistogramOperationSchema,
-  bucketRangesOperationSchema,
-  bucketFiltersOperationSchema,
-} from '../bucket_ops';
 import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import {
+  mergeAllBucketsWithChartDimensionSchema,
+  mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
+} from './shared';
 
 const partitionStateSharedOptionsSchema = {
   legend: schema.maybe(
@@ -137,44 +118,16 @@ export const pieStateSchemaNoESQL = schema.object({
    * Primary value configuration, must define operation.
    */
   metrics: schema.arrayOf(
-    schema.oneOf([
-      // oneOf allows only 12 items
-      // so break down metrics based on the type: field-based, reference-based, formula-like
-      schema.oneOf([
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, countMetricOperationSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, uniqueCountMetricOperationSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, metricOperationSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, sumMetricOperationSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, lastValueOperationSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, percentileOperationSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, percentileRanksOperationSchema]),
-      ]),
-      schema.oneOf([
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, differencesOperationSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, movingAverageOperationSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, cumulativeSumOperationSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, counterRateOperationSchema]),
-      ]),
-      schema.oneOf([
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, staticOperationDefinitionSchema]),
-        schema.allOf([partitionStatePrimaryMetricOptionsSchema, formulaOperationDefinitionSchema]),
-      ]),
-    ]),
+    mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+      partitionStatePrimaryMetricOptionsSchema
+    ),
     { minSize: 1 }
   ),
   /**
    * Configure how to break down the metric (e.g. show one metric per term).
    */
   group_by: schema.arrayOf(
-    schema.maybe(
-      schema.oneOf([
-        schema.allOf([partitionStateBreakdownByOptionsSchema, bucketDateHistogramOperationSchema]),
-        schema.allOf([partitionStateBreakdownByOptionsSchema, bucketTermsOperationSchema]),
-        schema.allOf([partitionStateBreakdownByOptionsSchema, bucketHistogramOperationSchema]),
-        schema.allOf([partitionStateBreakdownByOptionsSchema, bucketRangesOperationSchema]),
-        schema.allOf([partitionStateBreakdownByOptionsSchema, bucketFiltersOperationSchema]),
-      ])
-    ),
+    schema.maybe(mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema)),
     { minSize: 1 }
   ),
 });
