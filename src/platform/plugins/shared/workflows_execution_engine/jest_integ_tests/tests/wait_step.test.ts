@@ -246,5 +246,30 @@ steps:
       expect(workflowExecutionDoc?.finishedAt).toBeUndefined();
       expect(workflowExecutionDoc?.duration).toBeUndefined();
     });
+
+    describe('should resume and complete workflow after wait', () => {
+      beforeAll(async () => {
+        await workflowRunFixture.resumeWorkflow();
+      });
+
+      it('should successfully complete workflow after resume', async () => {
+        const workflowExecutionDoc =
+          workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            'fake_workflow_execution_id'
+          );
+        expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
+        expect(workflowExecutionDoc?.error).toBe(undefined);
+        expect(workflowExecutionDoc?.scopeStack).toEqual([]);
+      });
+
+      it('should execute lastConnectorStep successfully after resume', async () => {
+        const lastStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter((se) => se.stepId === 'lastConnectorStep');
+        expect(lastStepExecutions.length).toBe(1);
+        expect(lastStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
+        expect(lastStepExecutions[0].error).toBe(undefined);
+      });
+    });
   });
 });

@@ -30,6 +30,7 @@ import {
 } from './mocks';
 import { runWorkflow } from '../server/execution_functions/run_workflow';
 import { TaskManagerMock } from './mocks/task_manager_mock';
+import { resumeWorkflow } from '../server/execution_functions';
 
 export class WorkflowRunFixture {
   /** This prop is just to satisfy runWorkflow function params. Consider having real mock once needed. */
@@ -115,6 +116,23 @@ export class WorkflowRunFixture {
     });
   }
 
+  public resumeWorkflow() {
+    return resumeWorkflow({
+      workflowRunId: 'fake_workflow_execution_id',
+      spaceId: 'fake_space_id',
+      workflowExecutionRepository: this.workflowExecutionRepositoryMock as unknown as any,
+      stepExecutionRepository: this.stepExecutionRepositoryMock as unknown as any,
+      logsRepository: this.logsRepositoryMock as unknown as any,
+      taskAbortController: new AbortController(),
+      coreStart: this.coreStartMock,
+      esClient: this.esClientMock,
+      actions: this.actionsClientMock,
+      taskManager: this.taskManagerMock,
+      logger: this.loggerMock,
+      config: this.configMock,
+      fakeRequest: this.fakeKibanaRequest,
+    });
+  }
   private cleanup() {
     jest.clearAllMocks();
     this.workflowExecutionRepositoryMock.workflowExecutions.clear();
