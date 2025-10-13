@@ -41,6 +41,8 @@ function getDatafeedConfig(): Datafeed {
   } as Datafeed;
 }
 
+const AAD_INDEX_NAME = '.alerts-ml.anomaly-detection.alerts-default';
+
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -48,13 +50,10 @@ function sleep(ms: number) {
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
-  // const retry = getService('retry');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  // const supertest = getService('supertest');
   const pageObjects = getPageObjects(['triggersActionsUI', 'timePicker']);
   const elasticChart = getService('elasticChart');
-  // const retry = getService('retry');
-  // const find = getService('find');
 
   async function createSourceIndex() {
     await ml.api.createIndex(BASIC_TEST_DATA_INDEX, {
@@ -105,6 +104,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
+  async function waitForAlertsInIndex(minCount: number = 1): Promise<any[]> {
+    return await retry.try(async () => {
+      const searchResult = await es.search({
+        index: AAD_INDEX_NAME,
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  'kibana.alert.rule.rule_type_id': 'xpack.ml.anomaly_detection_alert',
+                },
+              },
+              {
+                term: {
+                  'kibana.alert.job_id': AD_JOB_ID,
+                },
+              },
+            ],
+          },
+        },
+        size: 1000,
+      });
+
+      const total = searchResult.hits.total as { value: number };
+      if (total.value < minCount) {
+        throw new Error(
+          `Expected at least ${minCount} alert(s) for job ${AD_JOB_ID} but found ${total.value}.`
+        );
+      }
+      return searchResult.hits.hits;
+    });
+  }
+
   describe('ML app - anomaly explorer alerts table', function () {
     this.tags(['ml']);
 
@@ -147,6 +179,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ingestAnomalousDoc(BASIC_TEST_DATA_INDEX);
       // Wait for bucket to finalize
       await sleep(60 * 1000);
+
+      // Wait for alert to be created before checking the UI
+      await waitForAlertsInIndex(1);
 
       await ml.navigation.navigateToAnomalyExplorer(AD_JOB_ID, { from: 'now-24h', to: 'now' }, () =>
         elasticChart.setNewChartUiDebugFlag(true)
