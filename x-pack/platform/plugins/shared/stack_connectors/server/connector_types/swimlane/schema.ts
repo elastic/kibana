@@ -5,75 +5,64 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
 export const ConfigMap = {
-  id: schema.string(),
-  key: schema.string(),
-  name: schema.string(),
-  fieldType: schema.string(),
+  id: z.string(),
+  key: z.string(),
+  name: z.string(),
+  fieldType: z.string(),
 };
 
-export const ConfigMapSchema = schema.object(ConfigMap);
+export const ConfigMapSchema = z.object(ConfigMap);
 
 export const ConfigMapping = {
-  ruleNameConfig: schema.nullable(ConfigMapSchema),
-  alertIdConfig: schema.nullable(ConfigMapSchema),
-  caseIdConfig: schema.nullable(ConfigMapSchema),
-  caseNameConfig: schema.nullable(ConfigMapSchema),
-  commentsConfig: schema.nullable(ConfigMapSchema),
-  severityConfig: schema.nullable(ConfigMapSchema),
-  descriptionConfig: schema.nullable(ConfigMapSchema),
+  ruleNameConfig: ConfigMapSchema.nullable(),
+  alertIdConfig: ConfigMapSchema.nullable(),
+  caseIdConfig: ConfigMapSchema.nullable(),
+  caseNameConfig: ConfigMapSchema.nullable(),
+  commentsConfig: ConfigMapSchema.nullable(),
+  severityConfig: ConfigMapSchema.nullable(),
+  descriptionConfig: ConfigMapSchema.nullable(),
 };
 
-export const ConfigMappingSchema = schema.object(ConfigMapping);
+export const ConfigMappingSchema = z.object(ConfigMapping);
 
 export const SwimlaneServiceConfiguration = {
-  apiUrl: schema.string(),
-  appId: schema.string(),
-  connectorType: schema.oneOf([
-    schema.literal('all'),
-    schema.literal('alerts'),
-    schema.literal('cases'),
-  ]),
+  apiUrl: z.string(),
+  appId: z.string(),
+  connectorType: z.union([z.literal('all'), z.literal('alerts'), z.literal('cases')]),
   mappings: ConfigMappingSchema,
 };
 
-export const SwimlaneServiceConfigurationSchema = schema.object(SwimlaneServiceConfiguration);
+export const SwimlaneServiceConfigurationSchema = z.object(SwimlaneServiceConfiguration);
 
 export const SwimlaneSecretsConfiguration = {
-  apiToken: schema.string(),
+  apiToken: z.string(),
 };
 
-export const SwimlaneSecretsConfigurationSchema = schema.object(SwimlaneSecretsConfiguration);
+export const SwimlaneSecretsConfigurationSchema = z.object(SwimlaneSecretsConfiguration);
 
 const SwimlaneFields = {
-  alertId: schema.nullable(schema.string()),
-  ruleName: schema.nullable(schema.string()),
-  caseId: schema.nullable(schema.string()),
-  caseName: schema.nullable(schema.string()),
-  severity: schema.nullable(schema.string()),
-  description: schema.nullable(schema.string()),
+  alertId: z.string().nullable(),
+  ruleName: z.string().nullable(),
+  caseId: z.string().nullable(),
+  caseName: z.string().nullable(),
+  severity: z.string().nullable(),
+  description: z.string().nullable(),
 };
 
-export const ExecutorSubActionPushParamsSchema = schema.object({
-  incident: schema.object({
+export const ExecutorSubActionPushParamsSchema = z.object({
+  incident: z.object({
     ...SwimlaneFields,
-    externalId: schema.nullable(schema.string()),
+    externalId: z.string().nullable(),
   }),
-  comments: schema.nullable(
-    schema.arrayOf(
-      schema.object({
-        comment: schema.string(),
-        commentId: schema.string(),
-      })
-    )
-  ),
+  comments: z.array(z.object({ comment: z.string(), commentId: z.string() })).nullable(),
 });
 
-export const ExecutorParamsSchema = schema.oneOf([
-  schema.object({
-    subAction: schema.literal('pushToService'),
+export const ExecutorParamsSchema = z.discriminatedUnion('subAction', [
+  z.object({
+    subAction: z.literal('pushToService'),
     subActionParams: ExecutorSubActionPushParamsSchema,
   }),
 ]);

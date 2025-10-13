@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { z } from '@kbn/zod';
 import {
   validateCommonConfig,
   validateCommonSecrets,
@@ -438,7 +439,10 @@ describe('validateCommonConnector', () => {
 
   describe('validateOtherFieldsKeys', () => {
     it('returns an error if the keys are not allowed', () => {
-      expect(validateOtherFieldsKeys('short_description')).toEqual(
+      const ctx = {
+        addIssue: jest.fn(),
+      } as unknown as z.RefinementCtx;
+      expect(validateOtherFieldsKeys('short_description', ctx)).toEqual(
         'The following properties cannot be defined inside additional_fields: short_description.'
       );
     });

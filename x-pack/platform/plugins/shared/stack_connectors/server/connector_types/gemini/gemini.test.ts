@@ -149,7 +149,7 @@ describe('GeminiConnector', () => {
             ...defaultResponse.data,
           };
 
-          expect(RunApiResponseSchema.validate(onlyKnownProperties)).toEqual(onlyKnownProperties);
+          expect(RunApiResponseSchema.parse(onlyKnownProperties)).toEqual(onlyKnownProperties);
         });
 
         it('fails validation when the response does NOT conform to the schema', () => {
@@ -157,7 +157,7 @@ describe('GeminiConnector', () => {
             // missing candidates and usageMetadata
           };
 
-          expect(() => RunApiResponseSchema.validate(missingRequiredFields)).toThrowError();
+          expect(() => RunApiResponseSchema.parse(missingRequiredFields)).toThrowError();
         });
 
         it('removes unknown properties, but does NOT fail validation when they are present', () => {
@@ -166,7 +166,7 @@ describe('GeminiConnector', () => {
             modelVersion: '1.0.0', // <-- an unknown property
           };
 
-          expect(RunApiResponseSchema.validate(hasUnknownProperties)).toEqual({
+          expect(RunApiResponseSchema.parse(hasUnknownProperties)).toEqual({
             ...defaultResponse.data,
           });
         });

@@ -10,8 +10,7 @@ import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/core/server';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { IncomingWebhookResult } from '@slack/webhook';
 import { IncomingWebhook } from '@slack/webhook';
 import { pipe } from 'fp-ts/pipeable';
@@ -48,19 +47,19 @@ export type SlackConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
 
 // secrets definition
 
-export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
+export type ConnectorTypeSecretsType = z.infer<typeof SecretsSchema>;
 
 const secretsSchemaProps = {
-  webhookUrl: schema.string(),
+  webhookUrl: z.string(),
 };
-const SecretsSchema = schema.object(secretsSchemaProps);
+const SecretsSchema = z.object(secretsSchemaProps);
 
 // params definition
 
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
+export type ActionParamsType = z.infer<typeof ParamsSchema>;
 
-export const ParamsSchema = schema.object({
-  message: schema.string({ minLength: 1 }),
+export const ParamsSchema = z.object({
+  message: z.string().min(1),
 });
 
 // connector type definition
@@ -84,7 +83,7 @@ export function getConnectorType({
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: { schema: schema.object({}, { defaultValue: {} }) },
+      config: { schema: z.object({}).default({}) },
       secrets: {
         schema: SecretsSchema,
         customValidator: validateConnectorTypeConfig,

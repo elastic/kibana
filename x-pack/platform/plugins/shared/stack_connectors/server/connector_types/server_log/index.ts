@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
 import type { Logger, LogMeta } from '@kbn/core/server';
 import type {
@@ -31,21 +30,20 @@ export type ServerLogConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions
 
 // params definition
 
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
+export type ActionParamsType = z.infer<typeof ParamsSchema>;
 
-const ParamsSchema = schema.object({
-  message: schema.string(),
-  level: schema.oneOf(
-    [
-      schema.literal('trace'),
-      schema.literal('debug'),
-      schema.literal('info'),
-      schema.literal('warn'),
-      schema.literal('error'),
-      schema.literal('fatal'),
-    ],
-    { defaultValue: 'info' }
-  ),
+const ParamsSchema = z.object({
+  message: z.string(),
+  level: z
+    .union([
+      z.literal('trace'),
+      z.literal('debug'),
+      z.literal('info'),
+      z.literal('warn'),
+      z.literal('error'),
+      z.literal('fatal'),
+    ])
+    .default('info'),
 });
 
 export const ConnectorTypeId = '.server-log';
@@ -63,8 +61,8 @@ export function getConnectorType(): ServerLogConnectorType {
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: { schema: schema.object({}, { defaultValue: {} }) },
-      secrets: { schema: schema.object({}, { defaultValue: {} }) },
+      config: { schema: z.object({}).default({}) },
+      secrets: { schema: z.object({}).default({}) },
       params: {
         schema: ParamsSchema,
       },
