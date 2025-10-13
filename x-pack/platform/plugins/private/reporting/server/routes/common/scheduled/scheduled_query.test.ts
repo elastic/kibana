@@ -1336,7 +1336,7 @@ describe('scheduledQueryFactory', () => {
           action: 'scheduled_report_delete',
           category: ['database'],
           outcome: 'unknown',
-          type: ['change'],
+          type: ['deletion'],
         },
         kibana: {
           saved_object: {
@@ -1354,7 +1354,7 @@ describe('scheduledQueryFactory', () => {
           action: 'scheduled_report_delete',
           category: ['database'],
           outcome: 'unknown',
-          type: ['change'],
+          type: ['deletion'],
         },
         kibana: {
           saved_object: {
@@ -1434,7 +1434,7 @@ describe('scheduledQueryFactory', () => {
           action: 'scheduled_report_delete',
           category: ['database'],
           outcome: 'unknown',
-          type: ['change'],
+          type: ['deletion'],
         },
         kibana: {
           saved_object: {
@@ -1455,7 +1455,7 @@ describe('scheduledQueryFactory', () => {
           action: 'scheduled_report_delete',
           category: ['database'],
           outcome: 'failure',
-          type: ['change'],
+          type: ['deletion'],
         },
         kibana: {
           saved_object: {
@@ -1526,7 +1526,7 @@ describe('scheduledQueryFactory', () => {
           action: 'scheduled_report_delete',
           category: ['database'],
           outcome: 'unknown',
-          type: ['change'],
+          type: ['deletion'],
         },
         kibana: {
           saved_object: {
@@ -1664,7 +1664,7 @@ describe('scheduledQueryFactory', () => {
           action: 'scheduled_report_delete',
           category: ['database'],
           outcome: 'failure',
-          type: ['change'],
+          type: ['deletion'],
         },
         kibana: {
           saved_object: {
