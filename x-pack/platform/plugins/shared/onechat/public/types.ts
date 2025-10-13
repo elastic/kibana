@@ -15,6 +15,7 @@ import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { ToolServiceStartContract } from '@kbn/onechat-browser';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { CustomElementConfig } from './services/element_registry';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -36,7 +37,18 @@ export interface OnechatStartDependencies {
   uiActions: UiActionsStart;
 }
 
-export interface OnechatPluginSetup {}
+export interface OnechatPluginSetup {
+  /**
+   * Element registry for custom markdown elements
+   */
+  elementRegistry: {
+    /**
+     * Register a custom markdown element that can be rendered in AI responses
+     * @param config - Element configuration including tag name, attributes, and renderer
+     */
+    registerCustomElement: (config: CustomElementConfig) => void;
+  };
+}
 
 /**
  * Public start contract for the browser-side onechat plugin.

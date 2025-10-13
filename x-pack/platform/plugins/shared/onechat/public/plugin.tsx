@@ -13,11 +13,17 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
+
 import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 import { docLinks } from '../common/doc_links';
+import { createVisualizationRenderer } from './application/components/conversations/conversation_rounds/markdown_plugins';
+import { registerLocators } from './locator/register_locators';
 import { registerAnalytics, registerApp, registerManagementSection } from './register';
 import type { OnechatInternalService } from './services';
 import { AgentService, ChatService, ConversationsService, ToolsService } from './services';
+import { ElementRegistry } from './services/element_registry';
+import { createPublicToolContract } from './services/tools';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -25,9 +31,6 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
-import { createPublicToolContract } from './services/tools';
-
-import { registerLocators } from './locator/register_locators';
 
 export class OnechatPlugin
   implements
@@ -40,9 +43,11 @@ export class OnechatPlugin
 {
   logger: Logger;
   private internalServices?: OnechatInternalService;
+  private elementRegistry: ElementRegistry;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
+    this.elementRegistry = new ElementRegistry(this.logger);
   }
   setup(
     core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
@@ -79,7 +84,23 @@ export class OnechatPlugin
       this.logger.error('Error registering Agent Builder management section', error);
     }
 
-    return {};
+    // Register built-in visualization element
+    this.elementRegistry.register({
+      tagName: visualizationElement.tagName,
+      attributes: visualizationElement.attributes,
+      rendererFactory: (context) =>
+        createVisualizationRenderer({
+          startDependencies: context.startDependencies,
+          stepsFromCurrentRound: context.stepsFromCurrentRound,
+          stepsFromPrevRounds: context.stepsFromPrevRounds,
+        }),
+    });
+
+    return {
+      elementRegistry: {
+        registerCustomElement: (config) => this.elementRegistry.register(config),
+      },
+    };
   }
 
   start(core: CoreStart, startDependencies: OnechatStartDependencies): OnechatPluginStart {
@@ -96,6 +117,7 @@ export class OnechatPlugin
       chatService,
       conversationsService,
       toolsService,
+      elementRegistry: this.elementRegistry,
       startDependencies,
     };
 

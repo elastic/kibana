@@ -22,15 +22,8 @@ import {
 } from '@elastic/eui';
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
-import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
-import {
-  Cursor,
-  esqlLanguagePlugin,
-  createVisualizationRenderer,
-  loadingCursorPlugin,
-  visualizationTagParser,
-} from './markdown_plugins';
+import { Cursor, esqlLanguagePlugin, loadingCursorPlugin } from './markdown_plugins';
 import { useStepsFromPrevRounds } from '../../../hooks/use_conversation';
 
 interface Props {
@@ -58,7 +51,7 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
     }
   `;
 
-  const { startDependencies } = useOnechatServices();
+  const { startDependencies, elementRegistry } = useOnechatServices();
   const stepsFromPrevRounds = useStepsFromPrevRounds();
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
@@ -72,6 +65,20 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
       [remarkToRehypePlugin, remarkToRehypeOptions],
       [rehypeToReactPlugin, rehypeToReactOptions],
     ] as PluggableList;
+
+    // Get all registered custom element renderers from the registry
+    const customRenderers = elementRegistry.getAllRenderers();
+    const rendererContext = {
+      startDependencies,
+      stepsFromCurrentRound,
+      stepsFromPrevRounds,
+    };
+
+    // Create renderer components from factories
+    const customComponents: Record<string, any> = {};
+    for (const [tagName, rendererFactory] of Object.entries(customRenderers)) {
+      customComponents[tagName] = rendererFactory(rendererContext);
+    }
 
     rehypeToReactOptions.components = {
       ...rehypeToReactOptions.components,
@@ -118,23 +125,23 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
           </EuiTableRowCell>
         );
       },
-      [visualizationElement.tagName]: createVisualizationRenderer({
-        startDependencies,
-        stepsFromCurrentRound,
-        stepsFromPrevRounds,
-      }),
+      // Add all custom element renderers from the registry
+      ...customComponents,
     };
+
+    // Get all registered custom element parsers from the registry
+    const customParsers = elementRegistry.getAllParsers();
 
     return {
       parsingPluginList: [
         loadingCursorPlugin,
         esqlLanguagePlugin,
-        visualizationTagParser,
+        ...customParsers,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,
     };
-  }, [startDependencies, stepsFromCurrentRound, stepsFromPrevRounds]);
+  }, [startDependencies, stepsFromCurrentRound, stepsFromPrevRounds, elementRegistry]);
 
   return (
     <EuiText size="s" className={containerClassName}>

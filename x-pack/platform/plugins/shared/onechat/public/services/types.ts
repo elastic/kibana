@@ -10,11 +10,13 @@ import type { AgentService } from './agents';
 import type { ChatService } from './chat';
 import type { ConversationsService } from './conversations';
 import type { ToolsService } from './tools';
+import type { ElementRegistry } from './element_registry';
 
 export interface OnechatInternalService {
   agentService: AgentService;
   chatService: ChatService;
   conversationsService: ConversationsService;
   toolsService: ToolsService;
+  elementRegistry: ElementRegistry;
   startDependencies: OnechatStartDependencies;
 }
