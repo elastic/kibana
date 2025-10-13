@@ -60,10 +60,15 @@ export function ExternalLinkDisplayText({
             responsive={false}
           >
             <EuiFlexItem grow={false}>
-              <EuiIcon type="inspect" color="subdued" />
+              <EuiIcon type="refresh" color="subdued" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size={textSize} color="subdued" onClick={handleReset}>
+              <EuiText
+                size={textSize}
+                color="subdued"
+                onClick={handleReset}
+                css={{ cursor: 'pointer' }}
+              >
                 <FormattedMessage
                   id="xpack.slo.sloDetails.healthCallout.buttonTransformMissingLabel"
                   defaultMessage="Reset"
