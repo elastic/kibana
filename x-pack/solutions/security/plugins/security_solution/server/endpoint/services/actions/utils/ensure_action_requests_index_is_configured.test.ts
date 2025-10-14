@@ -110,6 +110,48 @@ describe('ensureActionRequestsIndexIsConfigured()', () => {
       });
     });
 
+    it('should add mappings to DS index if any backing index is missing mappings', async () => {
+      esClientMock.indices.getMapping.mockResolvedValue({
+        '.ds-.logs-endpoint.actions-default-2025.06.13-000001': {
+          mappings: {
+            properties: {
+              tags: { type: 'keyword' },
+              originSpaceId: { ignore_above: 1024, type: 'keyword' },
+              agent: { properties: { policy: {} } },
+            },
+          },
+        },
+        // Should cover case where upgrade was done from a 7x release all the way up to 9.1
+        '.migrated.ds-.logs-endpoint.actions-default-2025.06.13-000001': {
+          mappings: { properties: {} },
+        },
+      });
+
+      await expect(
+        ensureActionRequestsIndexIsConfigured(endpointServiceMock)
+      ).resolves.toBeUndefined();
+
+      expect(esClientMock.indices.putMapping).toHaveBeenCalledWith({
+        index: ENDPOINT_ACTIONS_INDEX,
+        properties: {
+          agent: {
+            properties: {
+              policy: {
+                properties: {
+                  agentId: { ignore_above: 1024, type: 'keyword' },
+                  agentPolicyId: { ignore_above: 1024, type: 'keyword' },
+                  elasticAgentId: { ignore_above: 1024, type: 'keyword' },
+                  integrationPolicyId: { ignore_above: 1024, type: 'keyword' },
+                },
+              },
+            },
+          },
+          originSpaceId: { ignore_above: 1024, type: 'keyword' },
+          tags: { type: 'keyword', ignore_above: 1024 },
+        },
+      });
+    });
+
     it('should not add mappings to DS index if they already exist', async () => {
       esClientMock.indices.getMapping.mockResolvedValue({
         '.ds-.logs-endpoint.actions-default-2025.06.13-000001': {

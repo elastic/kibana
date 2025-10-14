@@ -24,7 +24,6 @@ export const ManagementSettings = React.memo(() => {
     data: { dataViews },
     chrome: { docTitle, setBreadcrumbs },
     serverless,
-    settings,
     docLinks,
     featureFlags,
     notifications,
@@ -111,7 +110,6 @@ export const ManagementSettings = React.memo(() => {
         featureFlags={featureFlags}
       >
         <AssistantSettingsManagement
-          settings={settings}
           dataViews={dataViews}
           onTabChange={handleTabChange}
           currentTab={currentTab}

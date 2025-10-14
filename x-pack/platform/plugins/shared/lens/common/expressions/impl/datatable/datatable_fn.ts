@@ -20,12 +20,19 @@ export const datatableFn =
     getFormatFactory: (context: ExecutionContext) => FormatFactory | Promise<FormatFactory>
   ): DatatableExpressionFunction['fn'] =>
   async (table, args, context) => {
+    const columnSortMap = args.columns.reduce((acc, c, i) => acc.set(c.columnId, i), new Map());
+    const getColumnSort = (id: string) => columnSortMap.get(id) ?? -1;
+    const sortedTable: Datatable = {
+      ...table,
+      columns: table.columns.slice().sort((a, b) => getColumnSort(a.id) - getColumnSort(b.id)),
+    };
+
     if (context?.inspectorAdapters?.tables) {
       context.inspectorAdapters.tables.reset();
       context.inspectorAdapters.tables.allowCsvExport = true;
 
       const logTable = prepareLogTable(
-        table,
+        sortedTable,
         [
           [
             args.columns.map((column) => column.columnId),
@@ -45,20 +52,20 @@ export const datatableFn =
     const formatters: Record<string, ReturnType<FormatFactory>> = {};
     const formatFactory = await getFormatFactory(context);
 
-    table.columns.forEach((column) => {
+    sortedTable.columns.forEach((column) => {
       formatters[column.id] = formatFactory(column.meta?.params);
     });
 
     const hasTransposedColumns = args.columns.some((c) => c.isTransposed);
     if (hasTransposedColumns) {
       // store original shape of data separately
-      untransposedData = cloneDeep(table);
+      untransposedData = cloneDeep(sortedTable);
       // transposes table and args in-place
-      transposeTable(args, table, formatters);
+      transposeTable(args, sortedTable, formatters);
 
       if (context?.inspectorAdapters?.tables) {
         const logTransposedTable = prepareLogTable(
-          table,
+          sortedTable,
           [
             [
               args.columns.map((column) => column.columnId),
@@ -82,7 +89,7 @@ export const datatableFn =
     for (const column of columnsWithSummary) {
       column.summaryRowValue = computeSummaryRowForColumn(
         column,
-        table,
+        sortedTable,
         formatters,
         formatFactory({ id: 'number' })
       );
@@ -92,7 +99,7 @@ export const datatableFn =
       type: 'render',
       as: 'lens_datatable_renderer',
       value: {
-        data: table,
+        data: sortedTable,
         untransposedData,
         syncColors: context.isSyncColorsEnabled?.() ?? false,
         args: {

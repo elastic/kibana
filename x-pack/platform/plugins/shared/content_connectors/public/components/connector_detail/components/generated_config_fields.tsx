@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+
+import { defer } from 'lodash';
 
 import {
   EuiButtonIcon,
@@ -90,10 +92,23 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   generateApiKey,
   isGenerateLoading,
 }) => {
+  const apiKeyContainerRef = useRef<HTMLDivElement>(null);
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const refreshButtonClick = () => {
+    restoreFocusRef.current = document.activeElement as HTMLElement;
     setIsModalVisible(true);
   };
+  const restoreFocus = () => {
+    if (!restoreFocusRef.current || (restoreFocusRef.current as HTMLButtonElement).disabled) {
+      apiKeyContainerRef.current?.focus();
+      return;
+    } else {
+      restoreFocusRef.current?.focus();
+    }
+    restoreFocusRef.current = null;
+  };
+
   const onCancel = () => {
     setIsModalVisible(false);
   };
@@ -101,6 +116,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   const onConfirm = () => {
     if (generateApiKey) generateApiKey();
     setIsModalVisible(false);
+    defer(restoreFocus);
   };
 
   const showApiKeyInfoForSelfManagedConnector = !connector.is_native;
@@ -226,6 +242,8 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                   gutterSize="xs"
                   justifyContent="flexEnd"
                   alignItems="center"
+                  ref={apiKeyContainerRef}
+                  tabIndex={-1}
                 >
                   {apiKey?.encoded ? (
                     <EuiFlexItem>
@@ -277,6 +295,10 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                           isLoading={isGenerateLoading}
                           onClick={refreshButtonClick}
                           disabled={!connector.index_name}
+                          aria-label={i18n.translate(
+                            'xpack.contentConnectors.connectorDeployment.generateAPIKey',
+                            { defaultMessage: 'Generate an Elasticsearch API key' }
+                          )}
                         />
                       </EuiFlexItem>
                     )
