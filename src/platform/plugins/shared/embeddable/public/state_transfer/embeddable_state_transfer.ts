@@ -69,6 +69,11 @@ export class EmbeddableStateTransfer {
         keysToRemoveAfterFetch: removeAfterFetch ? [EMBEDDABLE_EDITOR_STATE_KEY] : undefined,
       }
     );
+    // warn if states are longer than 1
+    if (states && states.length > 1) {
+      // eslint-disable-next-line no-console
+      console.warn(`Multiple incoming editor states found for appId ${appId}:`, states);
+    }
     return states?.[0];
   }
 
@@ -191,7 +196,6 @@ export class EmbeddableStateTransfer {
       return undefined;
     }
 
-    // Handle array case: collect all valid states that pass the guard
     if (Array.isArray(incomingState)) {
       const validStates = incomingState.filter((item) => guard(item));
       if (validStates.length > 0) {
@@ -199,12 +203,6 @@ export class EmbeddableStateTransfer {
         return validStates.map((item) => cloneDeep(item) as IncomingStateType);
       }
       return undefined;
-    }
-
-    // Handle single item case
-    if (guard(incomingState)) {
-      this.removeKeysFromStorage(embeddableState, options);
-      return [cloneDeep(incomingState)];
     }
 
     return undefined;
