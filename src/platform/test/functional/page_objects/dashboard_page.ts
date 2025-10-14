@@ -379,7 +379,7 @@ export class DashboardPageObject extends FtrService {
   public async clearUnsavedChanges() {
     this.log.debug('clearUnsavedChanges');
     let switchMode = false;
-    if (await this.getIsInViewMode()) {
+    if (!(await this.getIsInEditMode())) {
       await this.switchToEditMode();
       switchMode = true;
     }

@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
 
   const { dashboardControls, discover, timePicker, dashboard } = getPageObjects([
     'dashboardControls',
@@ -115,6 +116,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(valueBefore).to.not.equal(valueAfter);
 
         await dashboard.clickCancelOutOfEditMode();
+
+        // valueNow maybe grabbed before timeslider has reset
+        await retry.try(async () => {
+          const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
+          expect(valueNow).to.equal(valueBefore);
+        });
+
         const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
         expect(valueNow).to.equal(valueBefore);
       });
