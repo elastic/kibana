@@ -10,15 +10,17 @@
 import { EuiFlexGroup, EuiFlexItem, EuiHighlight } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
 import React from 'react';
+import { Draggable } from '@kbn/dom-drag-drop';
+import type { JSONDataTableRecord } from './types';
 
 interface FieldNameProps {
-  fieldName: string;
-  fieldType: string;
+  row: JSONDataTableRecord;
   highlight?: string;
 }
 
-export function FieldName({ fieldName, fieldType, highlight = '' }: FieldNameProps) {
-  const fieldDisplayName = fieldName;
+export function FieldName({ row, highlight = '' }: FieldNameProps) {
+  const fieldName = row.flattened.field;
+  const fieldType = row.flattened.fieldType;
 
   return (
     <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
@@ -44,7 +46,14 @@ export function FieldName({ fieldName, fieldType, highlight = '' }: FieldNamePro
             grow={false}
             data-test-subj={`tableDocViewRow-${fieldName}-name`}
           >
-            <EuiHighlight search={highlight}>{fieldDisplayName}</EuiHighlight>
+            <Draggable
+              key={row.id}
+              dragType="move"
+              order={[0]}
+              value={{ id: row.id, humanData: { label: fieldName } }}
+            >
+              <EuiHighlight search={highlight}>{fieldName}</EuiHighlight>
+            </Draggable>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
