@@ -15,6 +15,7 @@ import {
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { GROUPED_ITEM_TITLE_TEST_ID } from '../../../test_ids';
 import type { EntityOrEventItem } from '../types';
+import { emitGroupedItemClick } from '../../../events';
 import { displayEntityName, displayEventName } from '../utils';
 
 export interface HeaderRowProps {
@@ -63,7 +64,10 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
         {/* truncated title */}
         <EuiToolTip content={title}>
           <EuiLink
-            href="#" // TODO Wire up entity/event details link
+            onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+              e.preventDefault();
+              emitGroupedItemClick(item);
+            }}
             color="primary"
             css={css`
               display: block;

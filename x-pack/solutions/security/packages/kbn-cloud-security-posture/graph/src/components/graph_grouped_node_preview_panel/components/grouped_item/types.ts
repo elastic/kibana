@@ -13,6 +13,8 @@ import type {
 
 export interface BaseGroupedItemCommonFields {
   id?: string;
+  /** source index (used for opening single document previews) */
+  index?: string;
   /** raw timestamp */
   timestamp?: string | number | Date;
   /** optional ip address */
@@ -22,6 +24,8 @@ export interface BaseGroupedItemCommonFields {
 }
 
 export interface EventOrAlertSpecificFields extends BaseGroupedItemCommonFields {
+  /** document id - used to open flyout preview */
+  docId?: string;
   /** action becomes the title */
   action?: string; // if missing we fallback to '-')
   /** actor entity descriptor */
