@@ -291,6 +291,7 @@ const getEuiProps = (
     ? {
         href,
         external: isExternal,
+        target: isExternal ? '_blank' : undefined,
         'aria-label': navNode.title,
         onClick: (e) => {
           if (href) {
@@ -312,8 +313,10 @@ const getEuiProps = (
           }
 
           if (href) {
-            e.preventDefault();
-            navigateToUrl(href);
+            if (!isExternal) {
+              e.preventDefault();
+              navigateToUrl(href);
+            }
           }
         },
       }
@@ -431,7 +434,12 @@ function nodeToEuiCollapsibleNavProps(
       // NavItemProp declarations are handled by us, rendering is handled by EUI.
       ...(hasVisibleSubItems
         ? { items: subItems, isCollapsible }
-        : { href, ...linkProps, external: isExternalLink }),
+        : {
+            href,
+            ...linkProps,
+            external: isExternalLink,
+            target: isExternalLink ? '_blank' : undefined,
+          }),
     },
   ];
 
