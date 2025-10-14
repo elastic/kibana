@@ -31,7 +31,6 @@ export const SnapshotContainer = React.memo(() => {
   const {
     loading,
     nodes,
-    reload,
     interval = '60s',
   } = useSnapshot(
     {
@@ -51,7 +50,7 @@ export const SnapshotContainer = React.memo(() => {
   return (
     <>
       <FilterBar interval={interval} />
-      <LayoutView loading={loading} nodes={nodes} reload={reload} interval={interval} />
+      <LayoutView loading={loading} nodes={nodes} interval={interval} />
     </>
   );
 });
