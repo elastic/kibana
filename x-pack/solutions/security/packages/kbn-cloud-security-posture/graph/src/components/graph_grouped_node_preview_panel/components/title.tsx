@@ -9,7 +9,13 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const Title = ({ icon, count, text }: { icon?: string; count?: number; text: string }) => {
+export interface TitleProps {
+  icon?: string;
+  count: number;
+  text: string;
+}
+
+export const Title = ({ icon, count, text }: TitleProps) => {
   return (
     <EuiFlexGroup
       gutterSize="s"

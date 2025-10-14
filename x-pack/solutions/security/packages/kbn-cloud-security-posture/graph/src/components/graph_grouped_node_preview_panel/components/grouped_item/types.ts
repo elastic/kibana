@@ -52,4 +52,4 @@ export interface EntityItem extends EntitySpecificFields {
 }
 
 export type EntityOrEventItem = EventItem | AlertItem | EntityItem;
-export type PanelItems = EntityItem[] | Array<EventItem | AlertItem>;
+export type PanelItems = EntityItem[] | (EventItem | AlertItem)[];

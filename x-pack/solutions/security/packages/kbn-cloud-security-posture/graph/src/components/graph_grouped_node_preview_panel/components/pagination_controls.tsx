@@ -69,7 +69,7 @@ export const PaginationControls = ({
       iconType="arrowDown"
       iconSide="right"
       onClick={onButtonClick}
-      aria-label="Rows per page"
+      aria-label={rowsPerPageLabel}
     >
       {`${rowsPerPageLabel}: ${rowSize}`}
     </EuiButtonEmpty>
@@ -95,7 +95,6 @@ export const PaginationControls = ({
     <EuiFlexGroup
       justifyContent="spaceBetween"
       alignItems="center"
-      responsive={false}
       wrap
       css={css`
         flex-grow: 0;
