@@ -3517,7 +3517,7 @@ export function updatePackageInputs(
     // take the override value from the new package as-is. This case typically
     // occurs when inputs or package policy templates are added/removed between versions.
     if (originalInput === undefined) {
-      // Do not new inputs for limited packages
+      // Do not enable new inputs for limited packages
       if (limitedPackage) {
         update.enabled = false;
       }
