@@ -8,17 +8,15 @@
 import React, { createContext, useContext, type ReactNode } from 'react';
 import type { DatasourceMap, VisualizationMap } from '../types';
 
-interface EditorFrameServiceValue {
+export interface EditorFrameServiceValue {
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
 }
 
 const EditorFrameServiceContext = createContext<EditorFrameServiceValue | undefined>(undefined);
 
-export interface EditorFrameServiceProviderProps {
-  visualizationMap: VisualizationMap;
-  datasourceMap: DatasourceMap;
-  children: ReactNode;
+export interface EditorFrameServiceProviderProps extends EditorFrameServiceValue {
+  children?: ReactNode;
 }
 
 /**
