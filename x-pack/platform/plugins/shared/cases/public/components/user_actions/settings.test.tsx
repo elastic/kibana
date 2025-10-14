@@ -54,7 +54,7 @@ describe('createSettingsUserActionBuilder ', () => {
       expect(screen.getByTestId('settings-update-action-settings-update')).toBeTruthy();
       expect(
         screen.getByText(
-          `${syncAlertsLabel} sync alerts and ${extractObservablesLabel} extract observables`
+          `${syncAlertsLabel} sync alerts, ${extractObservablesLabel} extract observables`
         )
       ).toBeTruthy();
     }

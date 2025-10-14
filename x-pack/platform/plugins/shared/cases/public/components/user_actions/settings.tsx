@@ -37,8 +37,8 @@ function getSettingsLabel(userAction: SnakeToCamelCase<SettingsUserAction>): Rea
     (config) => (settings[config.key] ? config.enabledLabel : config.disabledLabel)
   );
 
-  // Join labels with "and" if multiple, or return single label
-  return labels.length > 1 ? labels.join(' and ') : labels[0] || '';
+  // Join labels if multiple, or return single label
+  return labels.length > 1 ? labels.join(', ') : labels[0] || '';
 }
 
 export const createSettingsUserActionBuilder: UserActionBuilder = ({
