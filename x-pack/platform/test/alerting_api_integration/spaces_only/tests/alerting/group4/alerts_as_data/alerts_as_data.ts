@@ -56,10 +56,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const objectRemover = new ObjectRemover(supertestWithoutAuth);
 
-  type PatternFiringAlert = Alert & {
-    patternIndex: number;
-    instancePattern: boolean[];
-  };
+  type PatternFiringAlert = Alert & { patternIndex: number; instancePattern: boolean[] };
 
   const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
   const timestampPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
