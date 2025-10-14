@@ -89,7 +89,7 @@ function setupTest({
               featureFlags={
                 {
                   getBooleanValue: jest.fn().mockImplementation((flag) => {
-                    if (flag === AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED && enabled) {
+                  if (flag === AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED && enabled) {
                       return true;
                     }
                     return false;

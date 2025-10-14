@@ -178,6 +178,9 @@ export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as con
 export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED =
   'aiAssistant.defaultLlmSettingEnabled' as const;
 
+/** The default value for the default AI connector setting */
+export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE = true as const;
+
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;

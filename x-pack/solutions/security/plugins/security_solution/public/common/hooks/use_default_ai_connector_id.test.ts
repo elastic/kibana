@@ -13,6 +13,7 @@ import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpe
 import {
   AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
   DEFAULT_AI_CONNECTOR,
+  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE,
 } from '../../../common/constants';
 
 jest.mock('../lib/kibana');
@@ -96,7 +97,7 @@ describe('useDefaultAIConnectorId', () => {
 
     expect(mockFeatureFlags.getBooleanValue).toHaveBeenCalledWith(
       AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-      false
+      AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE
     );
   });
 
