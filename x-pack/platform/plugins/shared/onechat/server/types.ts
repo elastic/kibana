@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { RunToolFn } from '@kbn/onechat-server';
+import type { RunToolFn, RunAgentFn } from '@kbn/onechat-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
@@ -88,6 +88,6 @@ export interface OnechatPluginStart {
    * Agents service, to execute agents.
    */
   agents: {
-    execute: (args: any) => Promise<any>;
+    execute: RunAgentFn;
   };
 }
