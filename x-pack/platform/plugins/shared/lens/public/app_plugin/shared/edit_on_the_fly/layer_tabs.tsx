@@ -17,6 +17,7 @@ import {
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { TabItem } from '@kbn/unified-tabs';
 import { TabStatus, UnifiedTabs, useNewTabProps } from '@kbn/unified-tabs';
 
 import {
@@ -210,14 +211,7 @@ export function LayerTabs(
     [layerConfigs]
   );
 
-  const managedItems = useMemo(() => {
-    return visibleLayerConfigs.map((layer) => ({
-      id: layer.layerId,
-      label: layerLabels.get(layer.layerId) || 'Unknown',
-    }));
-  }, [visibleLayerConfigs, layerLabels]);
-
-  const manageItemMenus = useCallback(() => {
+  const managedItems: TabItem[] = useMemo(() => {
     const updateVisualization = (newState: unknown) => {
       dispatchLens(
         updateVisualizationState({
@@ -229,7 +223,7 @@ export function LayerTabs(
 
     const visualizationState = visualization.state;
 
-    const layerTabs = visibleLayerConfigs.map((layerConfig, layerIndex) => {
+    return visibleLayerConfigs.map((layerConfig, layerIndex) => {
       const compatibleActions: LayerAction[] = [
         ...(activeVisualization
           .getSupportedActionsForLayer?.(
@@ -277,16 +271,19 @@ export function LayerTabs(
           ),
         }),
       ].filter((i) => i.isCompatible);
-      return (
-        <LayerActions
-          actions={compatibleActions}
-          layerIndex={layerIndex}
-          mountingPoint={layerActionsFlyoutRef.current}
-        />
-      );
-    });
 
-    return layerTabs;
+      return {
+        id: layerConfig.layerId,
+        label: layerLabels.get(layerConfig.layerId) || 'Unknown',
+        customMenuButton: (
+          <LayerActions
+            actions={compatibleActions}
+            layerIndex={layerIndex}
+            mountingPoint={layerActionsFlyoutRef.current}
+          />
+        ),
+      };
+    });
   }, [
     activeVisualization,
     coreStart,
@@ -294,6 +291,7 @@ export function LayerTabs(
     isSaveable,
     isTextBasedLanguage,
     layerIds.length,
+    layerLabels,
     onRemoveLayer,
     registerLibraryAnnotationGroupFunction,
     selectedLayerId,
@@ -369,7 +367,6 @@ export function LayerTabs(
       <EuiSpacer size="s" />
       <UnifiedTabs
         items={managedItems}
-        itemMenus={manageItemMenus()}
         selectedItemId={selectedLayerId ?? undefined}
         recentlyClosedItems={[]}
         onClearRecentlyClosed={() => {}} // not implemented in this example
