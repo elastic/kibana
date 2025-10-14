@@ -57,7 +57,8 @@ describe('getMenuItemGroups', () => {
       openOverlay: () => {},
       clearOverlays: () => {},
     };
-    const groups = await getMenuItemGroups(api);
+    const { groups$ } = await getMenuItemGroups(api);
+    const groups = groups$.getValue();
     expect(groups.length).toBe(2);
 
     expect(groups[0].title).toBe('Visualizations');
