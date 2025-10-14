@@ -50099,19 +50099,7 @@
                                     },
                                     {
                                       "properties": {
-                                        "kql": {
-                                          "additionalProperties": false,
-                                          "properties": {
-                                            "query": {
-                                              "type": "string"
-                                            }
-                                          },
-                                          "required": [
-                                            "query"
-                                          ],
-                                          "type": "object"
-                                        },
-                                        "system": {
+                                        "feature": {
                                           "additionalProperties": false,
                                           "properties": {
                                             "filter": {
@@ -50398,6 +50386,18 @@
                                           "required": [
                                             "name",
                                             "filter"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "kql": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "query": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "query"
                                           ],
                                           "type": "object"
                                         }
@@ -53744,19 +53744,7 @@
                                     },
                                     {
                                       "properties": {
-                                        "kql": {
-                                          "additionalProperties": false,
-                                          "properties": {
-                                            "query": {
-                                              "type": "string"
-                                            }
-                                          },
-                                          "required": [
-                                            "query"
-                                          ],
-                                          "type": "object"
-                                        },
-                                        "system": {
+                                        "feature": {
                                           "additionalProperties": false,
                                           "properties": {
                                             "filter": {
@@ -54043,6 +54031,18 @@
                                           "required": [
                                             "name",
                                             "filter"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "kql": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "query": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "query"
                                           ],
                                           "type": "object"
                                         }
@@ -56946,19 +56946,7 @@
                                     },
                                     {
                                       "properties": {
-                                        "kql": {
-                                          "additionalProperties": false,
-                                          "properties": {
-                                            "query": {
-                                              "type": "string"
-                                            }
-                                          },
-                                          "required": [
-                                            "query"
-                                          ],
-                                          "type": "object"
-                                        },
-                                        "system": {
+                                        "feature": {
                                           "additionalProperties": false,
                                           "properties": {
                                             "filter": {
@@ -57245,6 +57233,18 @@
                                           "required": [
                                             "name",
                                             "filter"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "kql": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "query": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "query"
                                           ],
                                           "type": "object"
                                         }
@@ -60287,19 +60287,7 @@
                                     },
                                     {
                                       "properties": {
-                                        "kql": {
-                                          "additionalProperties": false,
-                                          "properties": {
-                                            "query": {
-                                              "type": "string"
-                                            }
-                                          },
-                                          "required": [
-                                            "query"
-                                          ],
-                                          "type": "object"
-                                        },
-                                        "system": {
+                                        "feature": {
                                           "additionalProperties": false,
                                           "properties": {
                                             "filter": {
@@ -60586,6 +60574,18 @@
                                           "required": [
                                             "name",
                                             "filter"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "kql": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "query": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "query"
                                           ],
                                           "type": "object"
                                         }
@@ -63491,19 +63491,7 @@
                                 },
                                 {
                                   "properties": {
-                                    "kql": {
-                                      "additionalProperties": false,
-                                      "properties": {
-                                        "query": {
-                                          "type": "string"
-                                        }
-                                      },
-                                      "required": [
-                                        "query"
-                                      ],
-                                      "type": "object"
-                                    },
-                                    "system": {
+                                    "feature": {
                                       "additionalProperties": false,
                                       "properties": {
                                         "filter": {
@@ -63790,6 +63778,18 @@
                                       "required": [
                                         "name",
                                         "filter"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    "kql": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "query": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "query"
                                       ],
                                       "type": "object"
                                     }
@@ -71093,19 +71093,7 @@
                                 },
                                 {
                                   "properties": {
-                                    "kql": {
-                                      "additionalProperties": false,
-                                      "properties": {
-                                        "query": {
-                                          "type": "string"
-                                        }
-                                      },
-                                      "required": [
-                                        "query"
-                                      ],
-                                      "type": "object"
-                                    },
-                                    "system": {
+                                    "feature": {
                                       "additionalProperties": false,
                                       "properties": {
                                         "filter": {
@@ -71394,6 +71382,18 @@
                                         "filter"
                                       ],
                                       "type": "object"
+                                    },
+                                    "kql": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "query": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "query"
+                                      ],
+                                      "type": "object"
                                     }
                                   },
                                   "required": [
@@ -71551,19 +71551,7 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
-                  "kql": {
-                    "additionalProperties": false,
-                    "properties": {
-                      "query": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "query"
-                    ],
-                    "type": "object"
-                  },
-                  "system": {
+                  "feature": {
                     "additionalProperties": false,
                     "properties": {
                       "filter": {
@@ -71850,6 +71838,18 @@
                     "required": [
                       "name",
                       "filter"
+                    ],
+                    "type": "object"
+                  },
+                  "kql": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "query": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "query"
                     ],
                     "type": "object"
                   },
@@ -72179,7 +72179,7 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
-                  "system": {
+                  "feature": {
                     "additionalProperties": false,
                     "properties": {
                       "description": {
@@ -72544,19 +72544,7 @@
                   "query": {
                     "additionalProperties": false,
                     "properties": {
-                      "kql": {
-                        "additionalProperties": false,
-                        "properties": {
-                          "query": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "query"
-                        ],
-                        "type": "object"
-                      },
-                      "system": {
+                      "feature": {
                         "additionalProperties": false,
                         "properties": {
                           "filter": {
@@ -72843,6 +72831,18 @@
                         "required": [
                           "name",
                           "filter"
+                        ],
+                        "type": "object"
+                      },
+                      "kql": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "query": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "query"
                         ],
                         "type": "object"
                       }
