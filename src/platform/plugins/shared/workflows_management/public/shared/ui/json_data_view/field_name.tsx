@@ -15,10 +15,11 @@ import type { JSONDataTableRecord } from './types';
 
 interface FieldNameProps {
   row: JSONDataTableRecord;
+  pathPrefix: string;
   highlight?: string;
 }
 
-export function FieldName({ row, highlight = '' }: FieldNameProps) {
+export function FieldName({ row, pathPrefix, highlight = '' }: FieldNameProps) {
   const fieldName = row.flattened.field;
   const fieldType = row.flattened.fieldType;
 
@@ -50,7 +51,7 @@ export function FieldName({ row, highlight = '' }: FieldNameProps) {
               key={row.id}
               dragType="move"
               order={[0]}
-              value={{ id: row.id, humanData: { label: fieldName } }}
+              value={{ id: row.id, humanData: { label: `${pathPrefix}.${fieldName}` } }}
             >
               <EuiHighlight search={highlight}>{fieldName}</EuiHighlight>
             </Draggable>

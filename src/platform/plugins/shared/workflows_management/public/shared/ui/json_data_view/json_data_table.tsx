@@ -38,12 +38,13 @@ const CopyFieldPathText = i18n.translate('workflows.jsonDataTable.copyFieldPath'
   defaultMessage: 'Copy field path',
 });
 const getCopyCellActionComponent = (
-  filteredDataTableRecords: JSONDataTableRecord[]
+  filteredDataTableRecords: JSONDataTableRecord[],
+  pathPrefix: string
 ): EuiDataGridColumnCellAction =>
   React.memo(({ rowIndex, Component }) => {
     const row = filteredDataTableRecords[rowIndex];
     const copy = useCallback(() => {
-      copyToClipboard(row.flattened.field);
+      copyToClipboard(`${pathPrefix}.${row.flattened.field}`);
     }, [row.flattened.field]);
 
     return (
@@ -80,6 +81,7 @@ export function JSONDataTable({
   title = 'JSON Data',
   columns,
   searchTerm,
+  pathPrefix,
   'data-test-subj': dataTestSubj = 'jsonDataTable',
 }: JSONDataTableProps) {
   const styles = useMemoCss(componentStyles);
@@ -138,8 +140,8 @@ export function JSONDataTable({
   });
 
   const cellActions: EuiDataGridColumnCellAction[] = useMemo(() => {
-    return [getCopyCellActionComponent(filteredDataTableRecords)];
-  }, [filteredDataTableRecords]);
+    return [getCopyCellActionComponent(filteredDataTableRecords, pathPrefix)];
+  }, [filteredDataTableRecords, pathPrefix]);
 
   // Grid columns configuration
   const gridColumns: EuiDataGridProps['columns'] = useMemo(
@@ -170,7 +172,7 @@ export function JSONDataTable({
       if (!row) return null;
 
       if (columnId === 'name') {
-        return <FieldName row={row} highlight={searchTerm} />;
+        return <FieldName row={row} pathPrefix={pathPrefix} highlight={searchTerm} />;
       }
 
       if (columnId === 'value') {
@@ -188,7 +190,7 @@ export function JSONDataTable({
 
       return null;
     };
-  }, [filteredDataTableRecords, searchTerm]);
+  }, [filteredDataTableRecords, searchTerm, pathPrefix]);
 
   if (filteredDataTableRecords.length === 0) {
     return (

@@ -392,15 +392,13 @@ export const WorkflowYAMLEditor = ({
       const editor = editorRef.current;
       if (!editor) return;
 
-      // Extract the field path from the dropped item
-      const fieldPath = droppedItem.humanData?.label || droppedItem.id;
-
       // Get the current cursor position
       const position = editor.getPosition();
       if (position) {
-        // Insert the field reference at the cursor position with template syntax
-        const textToInsert = `{{${fieldPath}}}`;
+        // Extract the field path from the dropped item
+        const textToInsert = droppedItem.humanData?.label || droppedItem.id;
 
+        // Insert the field reference at the cursor position with template syntax
         editor.executeEdits('drop-field', [
           {
             range: new monaco.Range(

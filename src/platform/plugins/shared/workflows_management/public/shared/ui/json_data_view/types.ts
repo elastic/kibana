@@ -21,6 +21,11 @@ export interface JSONDataTableProps {
   data: Record<string, unknown>;
 
   /**
+   * The path prefix to use for the data paths.
+   */
+  pathPrefix: string;
+
+  /**
    * Optional title for the data view. Defaults to 'JSON Data'
    */
   title?: string;
