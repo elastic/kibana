@@ -144,6 +144,9 @@ export const postActionsConnectorExecuteRoute = (
 
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient();
+
+          // Get conversation messages for agent builder BEFORE saving the new message
+          let conversationMessages: Array<Pick<Message, 'content' | 'role'>> = [];
           if (conversationId) {
             const conversation = await conversationsDataClient?.getConversation({
               id: conversationId,
@@ -159,6 +162,18 @@ export const postActionsConnectorExecuteRoute = (
                 body: `Updating a conversation is only allowed for the owner of the conversation.`,
                 statusCode: 403,
               });
+            }
+
+            if (conversation && conversation.messages) {
+              conversationMessages = conversation.messages.map((msg) => ({
+                content: msg.content,
+                role: msg.role,
+              }));
+            }
+
+            // Add the new message to the conversation messages
+            if (newMessage) {
+              conversationMessages.push(newMessage);
             }
 
             // Save the user message to the conversation if it exists
@@ -178,25 +193,11 @@ export const postActionsConnectorExecuteRoute = (
                 authenticatedUser: checkResponse.currentUser,
               });
             }
-          }
-
-          // Get conversation messages for agent builder
-          let conversationMessages: Array<Pick<Message, 'content' | 'role'>> = [];
-          if (conversationId && conversationsDataClient) {
-            const conversation = await conversationsDataClient.getConversation({
-              id: conversationId,
-            });
-            if (conversation && conversation.messages) {
-              conversationMessages = conversation.messages.map((msg) => ({
-                content: msg.content,
-                role: msg.role,
-              }));
+          } else {
+            // No conversation exists, just use the new message
+            if (newMessage) {
+              conversationMessages.push(newMessage);
             }
-          }
-
-          // Add the new message to the conversation messages
-          if (newMessage) {
-            conversationMessages.push(newMessage);
           }
 
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();

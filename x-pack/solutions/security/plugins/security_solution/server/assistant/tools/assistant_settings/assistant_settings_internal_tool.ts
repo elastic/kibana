@@ -22,16 +22,22 @@ interface ExtendedKibanaRequest {
   };
 }
 
-// Empty schema for A2A compatibility - no parameters needed
-const assistantSettingsToolSchema = z.object({});
+// Schema to specify which tool settings to retrieve
+const assistantSettingsToolSchema = z.object({
+  toolId: z
+    .string()
+    .describe(
+      'The ID of the tool that needs settings (e.g., "core.security.alert_counts", "core.security.open_and_acknowledged_alerts")'
+    ),
+});
 
 const ASSISTANT_SETTINGS_INTERNAL_TOOL_ID = 'core.security.assistant_settings';
 export const ASSISTANT_SETTINGS_INTERNAL_TOOL_DESCRIPTION =
-  'Call this tool to retrieve current assistant settings including anonymization fields, default index patterns, and other configuration. Use this when other tools need to know the current assistant configuration. ' +
-  'This tool requires NO parameters. It provides real-time configuration that should be confirmed with the user ONCE before proceeding. ' +
-  'The tool dynamically fetches the current alertsIndexPattern from the request, size defaults, and real anonymization fields from the data client. ' +
-  'IMPORTANT: Ask the user to confirm these settings ONCE, then proceed immediately to call the appropriate tool. Do not ask for confirmation multiple times. ' +
-  'CRITICAL: After user confirms, IMMEDIATELY call the next tool to answer their original question. Do NOT ask for more information.';
+  'Call this tool to retrieve current assistant settings for a specific tool. Use this when you need to get configuration parameters for a specific tool before calling it. ' +
+  'This tool requires a toolId parameter specifying which tool you need settings for. It provides only the relevant configuration for that specific tool. ' +
+  'The tool dynamically fetches the current settings from the request and data client. ' +
+  'IMPORTANT: Ask the user to confirm these settings ONCE, then proceed immediately to call the specified tool. Do not ask for confirmation multiple times. ' +
+  'CRITICAL: After user confirms, IMMEDIATELY call the tool specified in toolId to answer their original question. Do NOT ask for more information.';
 
 /**
  * Returns a tool for retrieving assistant settings using the InternalToolDefinition pattern.
@@ -45,7 +51,7 @@ export const assistantSettingsInternalTool = (
     type: ToolType.builtin,
     description: ASSISTANT_SETTINGS_INTERNAL_TOOL_DESCRIPTION,
     schema: assistantSettingsToolSchema,
-    handler: async (params, context) => {
+    handler: async ({ toolId }, context) => {
       try {
         // Get access to the elastic-assistant plugin through start services
         const [, pluginsStart] = await getStartServices();
@@ -140,34 +146,50 @@ export const assistantSettingsInternalTool = (
           requestBody?.alertsIndexPattern || '.alerts-security.alerts-default';
         const size = requestBody?.size || 100;
 
-        // Return comprehensive assistant settings with real configuration
+        // Return settings specific to the requested tool
+        let toolSpecificSettings: Record<string, unknown> = {};
+        let toolName = '';
+
+        switch (toolId) {
+          case 'core.security.alert_counts':
+            toolSpecificSettings = {
+              alertsIndexPattern,
+            };
+            toolName = 'Alert Counts';
+            break;
+          case 'core.security.open_and_acknowledged_alerts':
+            toolSpecificSettings = {
+              alertsIndexPattern,
+              size,
+              anonymizationFields,
+            };
+            toolName = 'Open and Acknowledged Alerts';
+            break;
+          case 'core.security.entity_risk_score':
+            toolSpecificSettings = {
+              anonymizationFields,
+            };
+            toolName = 'Entity Risk Score';
+            break;
+          default:
+            // For unknown tools, return basic settings
+            toolSpecificSettings = {
+              alertsIndexPattern,
+              anonymizationFields,
+            };
+            toolName = 'Unknown Tool';
+        }
+
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
-                message:
-                  'Assistant settings retrieved successfully. Please confirm these settings before proceeding:',
-                settings: {
-                  anonymizationFields,
-                  defaults: {
-                    openAndAcknowledgedAlertsInternalTool: {
-                      alertsIndexPattern,
-                      size,
-                      description:
-                        'Index pattern for security alerts and number of alerts to retrieve',
-                    },
-                    alertCountsInternalTool: {
-                      alertsIndexPattern,
-                      description: 'Index pattern for security alerts',
-                    },
-                  },
-                },
-                guidance: {
-                  userConfirmation: `Ask the user: "I will use these settings: alertsIndexPattern='${alertsIndexPattern}', size=${size}, and anonymize sensitive fields like host names and IP addresses. Is this okay, or would you like to modify any settings?" After getting confirmation, proceed immediately to call the appropriate tool.`,
-                  nextStep:
-                    'CRITICAL: After user confirms, IMMEDIATELY call the appropriate tool (e.g., open_and_acknowledged_alerts) to answer their original question. Do NOT ask for more information or clarification. The user\'s confirmation means "proceed with the analysis using these settings".',
-                },
+                message: `Current settings for ${toolName} tool retrieved successfully. Please confirm these settings before proceeding:`,
+                toolId,
+                toolName,
+                settings: toolSpecificSettings,
+                guidance: `These are the current settings for the ${toolName} tool. Please confirm if these settings are correct for your analysis. After confirmation, I will proceed with your original question using these settings.`,
               },
             },
           ],
