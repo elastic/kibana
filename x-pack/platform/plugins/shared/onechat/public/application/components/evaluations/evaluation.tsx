@@ -11,18 +11,15 @@ import { EuiSpacer, useEuiTheme, EuiText, EuiFlexGroup, EuiFlexItem, EuiPanel } 
 import { useConversationRounds, useConversationTitle } from '../../hooks/use_conversation';
 import { EvaluationRound } from './evaluation_round';
 import { EvaluatorBadgesGroup } from './evaluator_badges_group';
-
-// Mock average evaluation data - in real implementation, this would be calculated from all rounds
-const MOCK_AVERAGE = {
-  relevance: 0.89,
-  precision: 0.76,
-  completeness: 0.42,
-};
+import { useEvaluations } from './hooks/use_evaluations';
+import { calculateAverages } from './utils/calculateEvaluationAverages';
 
 export const Evaluation: React.FC = () => {
   const conversationRounds = useConversationRounds();
   const { euiTheme } = useEuiTheme();
   const { title: conversationTitle } = useConversationTitle();
+  const { evaluationData } = useEvaluations();
+  const averages = calculateAverages(evaluationData);
 
   const evaluationContainerStyles = css`
     padding: ${euiTheme.size.base};
@@ -56,31 +53,35 @@ export const Evaluation: React.FC = () => {
         </EuiText>
       </div>
 
-      {/* Conversation Average Section */}
-      <EuiPanel
-        color="subdued"
-        paddingSize="l"
-        borderRadius="none"
-        css={css`
-          border-bottom: ${euiTheme.border.thin};
-        `}
-      >
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>Conversation Average</strong>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EvaluatorBadgesGroup
-              relevance={MOCK_AVERAGE.relevance}
-              precision={MOCK_AVERAGE.precision}
-              completeness={MOCK_AVERAGE.completeness}
-              variant="conversation-average"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+      {/* Conversation Average Section - only show if there are averages */}
+      {Object.keys(averages).length > 0 && (
+        <EuiPanel
+          color="subdued"
+          paddingSize="l"
+          borderRadius="none"
+          css={css`
+            border-bottom: ${euiTheme.border.thin};
+          `}
+        >
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>Conversation Average</strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EvaluatorBadgesGroup
+                relevance={averages.relevance_score || undefined}
+                precision={averages.precision_score || undefined}
+                recall={averages.recall_score || undefined}
+                groundedness={averages.groundedness_score || undefined}
+                regex={averages.regex_score || undefined}
+                variant="conversation-average"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      )}
 
       {/* Individual Rounds */}
       <div
@@ -91,7 +92,13 @@ export const Evaluation: React.FC = () => {
       >
         {conversationRounds.map((round, index) => (
           <React.Fragment key={round.id || index}>
-            <EvaluationRound round={round} roundNumber={index + 1} />
+            <EvaluationRound
+              round={round}
+              roundNumber={index + 1}
+              roundEvaluation={evaluationData?.results.find(
+                (result) => result.roundId === round.id
+              )}
+            />
             {index < conversationRounds.length - 1 && <EuiSpacer size="l" />}
           </React.Fragment>
         ))}

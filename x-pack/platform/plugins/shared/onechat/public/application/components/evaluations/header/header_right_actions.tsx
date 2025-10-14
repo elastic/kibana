@@ -10,10 +10,13 @@ import { EuiPageHeaderSection, EuiButton, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EvaluatorSelectionModal } from '../modal/evaluator_selection_modal';
+import { useEvaluations } from '../../../context/evaluations/evaluations_context';
+import type { Evaluator } from '../modal/types';
 
 export const HeaderRightActions: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { triggerEvaluation } = useEvaluations();
 
   const actionsContainerStyles = css`
     display: flex;
@@ -37,9 +40,8 @@ export const HeaderRightActions: React.FC<{}> = () => {
     setIsModalOpen(false);
   };
 
-  const handleEvaluatorsConfirm = (selectedEvaluators: any[]) => {
-    // TODO: Update context with selected evaluators
-    console.log('Selected evaluators:', selectedEvaluators);
+  const handleEvaluatorsConfirm = async (evaluators: Evaluator[]) => {
+    await triggerEvaluation(evaluators);
     setIsModalOpen(false);
   };
 

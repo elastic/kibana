@@ -29,7 +29,7 @@ import type { Evaluator } from './types';
 interface EvaluatorSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (selectedEvaluators: Evaluator[]) => void;
+  onConfirm: (selectedEvaluators: Evaluator[]) => Promise<void>;
 }
 
 const AVAILABLE_EVALUATORS: Evaluator[] = [
@@ -74,6 +74,7 @@ export const EvaluatorSelectionModal: React.FC<EvaluatorSelectionModalProps> = (
   const [selectedEvaluators, setSelectedEvaluators] = useState<Evaluator[]>([]);
   const [selectedEvaluator, setSelectedEvaluator] = useState<Evaluator | null>(null);
   const [customInstructions, setCustomInstructions] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleEvaluatorSelect = (evaluator: Evaluator) => {
     setSelectedEvaluator(evaluator);
@@ -99,12 +100,14 @@ export const EvaluatorSelectionModal: React.FC<EvaluatorSelectionModalProps> = (
     }));
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const evaluatorsWithInstructions = selectedEvaluators.map((evaluator) => ({
       ...evaluator,
       customInstructions: customInstructions[evaluator.id] || undefined,
     }));
-    onConfirm(evaluatorsWithInstructions);
+    setIsLoading(true);
+    await onConfirm(evaluatorsWithInstructions);
+    setIsLoading(false);
     onClose();
   };
 
@@ -186,7 +189,12 @@ export const EvaluatorSelectionModal: React.FC<EvaluatorSelectionModalProps> = (
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
-        <EuiButton fill onClick={handleConfirm} disabled={selectedEvaluators.length === 0}>
+        <EuiButton
+          isLoading={isLoading}
+          fill
+          onClick={handleConfirm}
+          disabled={selectedEvaluators.length === 0}
+        >
           {i18n.translate('xpack.onechat.evaluations.confirmSelection', {
             defaultMessage: 'Confirm Selection',
           })}

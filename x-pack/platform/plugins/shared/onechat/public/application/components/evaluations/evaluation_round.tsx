@@ -18,6 +18,7 @@ import {
 import { css } from '@emotion/react';
 import type { ConversationRound } from '@kbn/onechat-common';
 import { ChatMessageText } from '../conversations/conversation_rounds/chat_message_text';
+import type { ConversationRoundEvaluation } from '../../context/evaluations/evaluations_context';
 import { useEvaluations } from '../../context/evaluations/evaluations_context';
 import { RoundSteps } from '../conversations/conversation_rounds/round_thinking/steps/round_steps';
 import { EvaluatorBadgesGroup } from './evaluator_badges_group';
@@ -25,19 +26,18 @@ import { EvaluatorBadgesGroup } from './evaluator_badges_group';
 interface EvaluationRoundProps {
   round: ConversationRound;
   roundNumber: number;
+  roundEvaluation?: ConversationRoundEvaluation;
 }
-
-const MOCK_EVALUATION_DATA = {
-  relevance: 0.96,
-  precision: 0.74,
-  completeness: 0.35,
-};
 
 const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text);
 };
 
-export const EvaluationRound: React.FC<EvaluationRoundProps> = ({ round, roundNumber }) => {
+export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
+  round,
+  roundNumber,
+  roundEvaluation,
+}) => {
   const { euiTheme } = useEuiTheme();
   const { showThinking } = useEvaluations();
 
@@ -64,9 +64,11 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({ round, roundNu
             </EuiText>
           </EuiFlexGroup>
           <EvaluatorBadgesGroup
-            relevance={MOCK_EVALUATION_DATA.relevance}
-            precision={MOCK_EVALUATION_DATA.precision}
-            completeness={MOCK_EVALUATION_DATA.completeness}
+            relevance={roundEvaluation?.scores.relevance_score}
+            precision={roundEvaluation?.scores.precision_score}
+            recall={roundEvaluation?.scores.recall_score}
+            groundedness={roundEvaluation?.scores.groundedness_score}
+            regex={roundEvaluation?.scores.regex_score}
           />
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>

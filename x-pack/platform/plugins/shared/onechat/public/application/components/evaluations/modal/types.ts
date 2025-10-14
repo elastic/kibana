@@ -10,4 +10,5 @@ export interface Evaluator {
   name: string;
   description: string;
   type: 'text' | 'number';
+  customInstructions?: string;
 }
