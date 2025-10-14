@@ -12,9 +12,9 @@ import { EuiComboBoxWrapper } from '../../../../src/playwright/eui_components';
 import { navigateToEuiTestPage } from '../../fixtures/eui_helpers';
 
 test.describe('EUI testing wrapper: EuiComboBox', { tag: ['@svlSecurity', '@ess'] }, () => {
-  test(`with multiple selections (pills)`, async ({ page }) => {
+  test(`with multiple selections (pills)`, async ({ page, log }) => {
     const dataTestSubj = 'demoComboBox';
-    await navigateToEuiTestPage(page, 'docs/components/forms/selection/combo-box/');
+    await navigateToEuiTestPage(page, 'docs/components/forms/selection/combo-box/', log);
 
     await test.step('read selected options', async () => {
       const comboBox = new EuiComboBoxWrapper(page, dataTestSubj);
@@ -57,7 +57,7 @@ test.describe('EUI testing wrapper: EuiComboBox', { tag: ['@svlSecurity', '@ess'
     });
   });
 
-  test(`with the single selection`, async ({ page }) => {
+  test(`with the single selection`, async ({ page, log }) => {
     // Selects the first .euiComboBox after the heading ID #single-selection-with-custom-options
     const selector = {
       locator:
@@ -65,7 +65,8 @@ test.describe('EUI testing wrapper: EuiComboBox', { tag: ['@svlSecurity', '@ess'
     };
     await navigateToEuiTestPage(
       page,
-      'docs/components/forms/selection/combo-box/#single-selection-with-custom-options'
+      'docs/components/forms/selection/combo-box/#single-selection-with-custom-options',
+      log
     );
 
     await test.step('should select option from dropdown', async () => {

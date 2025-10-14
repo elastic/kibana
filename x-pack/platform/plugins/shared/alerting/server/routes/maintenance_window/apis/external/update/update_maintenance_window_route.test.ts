@@ -30,6 +30,7 @@ const mockMaintenanceWindow = {
   eventStartTime: new Date().toISOString(),
   eventEndTime: new Date().toISOString(),
   status: MaintenanceWindowStatus.Running,
+  duration: 864000000,
   id: 'test-id',
 } as MaintenanceWindow;
 
@@ -132,7 +133,7 @@ describe('updateMaintenanceWindowRoute', () => {
         id: 'test-id',
         schedule: {
           custom: {
-            duration: '60m',
+            duration: '10d',
             recurring: {
               occurrences: 2,
             },
@@ -146,6 +147,30 @@ describe('updateMaintenanceWindowRoute', () => {
         updated_by: 'test-user',
       },
     });
+  });
+
+  test('throws error if request duration does not match response duration', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    updateMaintenanceWindowRoute(router, licenseState);
+
+    maintenanceWindowClient.update.mockResolvedValueOnce({
+      ...getMockMaintenanceWindow(), // it has 60m duration
+      eventStartTime: new Date().toISOString(),
+      eventEndTime: new Date().toISOString(),
+      status: MaintenanceWindowStatus.Running,
+      id: 'test-id',
+    });
+    const [, handler] = router.patch.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments(
+      { maintenanceWindowClient },
+      { params: updateRequestParams, body: updateRequestBody }
+    );
+
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(
+      `[Error: Request duration does not match response duration.]`
+    );
   });
 
   test('ensures the license allows for creating maintenance windows', async () => {
