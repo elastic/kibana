@@ -1320,6 +1320,8 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/functional/page_objects/reporting_page.ts @elastic/response-ops
 /x-pack/platform/test/upgrade/apps/reporting @elastic/response-ops
 /x-pack/platform/test/serverless/fixtures/kbn_archives/reporting @elastic/response-ops
+/x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture @elastic/response-ops
+/x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes @elastic/response-ops
 
 ### Global Experience Tagging
 /x-pack/platform/test/saved_object_tagging/ @elastic/appex-sharedux
