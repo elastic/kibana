@@ -337,7 +337,6 @@ export const ProjectPicker = () => {
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   content={strings.getManageCrossProjectSearchLabel()}
-                  delay="long"
                   repositionOnScroll
                 >
                   <EuiButtonIcon
