@@ -81,7 +81,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -770,7 +770,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
