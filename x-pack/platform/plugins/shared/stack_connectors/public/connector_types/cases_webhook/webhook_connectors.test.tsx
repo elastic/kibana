@@ -295,6 +295,61 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       expect(await screen.findByTestId('horizontalStep2-current')).toBeInTheDocument();
     });
 
+    it('includes dynamic __internal__.headers fields in step1 validation', async () => {
+      const incompleteActionConnector = {
+        ...actionConnector,
+        secrets: {
+          user: 'user',
+          password: 'pass',
+        },
+        __internal__: {
+          headers: [
+            {
+              key: 'configKey',
+              value: 'configValue',
+              type: 'config',
+            },
+          ],
+        },
+      };
+      render(
+        <ConnectorFormTestProvider connector={incompleteActionConnector}>
+          <CasesWebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
+      );
+      expect(await screen.findByTestId('horizontalStep1-current')).toBeInTheDocument();
+      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      expect(await screen.findByTestId('horizontalStep1-complete')).toBeInTheDocument();
+    });
+
+    it('marks step 1 as danger if the header fields are invalid', async () => {
+      useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
+
+      render(
+        <ConnectorFormTestProvider connector={actionConnector}>
+          <CasesWebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
+      );
+
+      const headersToggle = await screen.findByTestId('webhookViewHeadersSwitch');
+      if (headersToggle.getAttribute('aria-checked') === 'false') {
+        await userEvent.click(headersToggle);
+      }
+
+      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      expect(await screen.findByTestId('horizontalStep1-danger')).toBeInTheDocument();
+    });
+
     // Flaky - https://github.com/elastic/kibana/issues/205708
     it.skip('Step 2 is properly validated', async () => {
       const incompleteActionConnector = {
