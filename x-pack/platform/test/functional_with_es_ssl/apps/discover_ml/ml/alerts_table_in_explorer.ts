@@ -7,7 +7,6 @@
 
 import { duration } from 'moment';
 import type { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import { ML_ALERT_TYPES } from '@kbn/ml-plugin/common/constants/alerts';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const AD_JOB_ID = 'rt-anomaly-mean-value-ui';
@@ -48,8 +47,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const supertest = getService('supertest');
   const elasticChart = getService('elasticChart');
+  const pageObjects = getPageObjects(['triggersActionsUI']);
 
   async function createSourceIndex() {
     await ml.api.createIndex(BASIC_TEST_DATA_INDEX, {
@@ -104,32 +103,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  async function createAnomalyDetectionRule() {
-    const { body: createdRule } = await supertest
-      .post(`/api/alerting/rule`)
-      .set('kbn-xsrf', 'foo')
-      .send({
-        name: 'ml-explorer-alert-ui',
-        consumer: 'alerts',
-        enabled: true,
-        rule_type_id: ML_ALERT_TYPES.ANOMALY_DETECTION,
-        schedule: { interval: '1m' },
-        actions: [],
-        notify_when: 'onActiveAlert',
-        params: {
-          includeInterim: true,
-          jobSelection: {
-            jobIds: [AD_JOB_ID],
-          },
-          severity: 0,
-          resultType: 'bucket',
-          topNBuckets: 3,
-          lookbackInterval: undefined,
-        },
-      })
-      .expect(200);
+  async function createAnomalyDetectionRuleViaUI() {
+    // Navigate to alerts and actions page
+    await ml.navigation.navigateToAlertsAndAction();
 
-    return createdRule;
+    // Click create alert button
+    await pageObjects.triggersActionsUI.clickCreateAlertButton();
+
+    // Select ML anomaly detection alert type
+    await ml.alerting.selectAnomalyDetectionAlertType();
+
+    // Configure alert parameters
+    await ml.alerting.selectJobs([AD_JOB_ID]);
+    await ml.alerting.selectResultType('bucket');
+    await ml.alerting.setSeverity(0);
+
+    // Set advanced settings
+    await ml.alerting.setTopNBuckets(3);
+
+    // Set alert name and interval
+    await pageObjects.triggersActionsUI.setAlertName('ml-explorer-alert-ui');
+    await pageObjects.triggersActionsUI.setAlertInterval(1, 'm');
+
+    // Save the alert
+    await pageObjects.triggersActionsUI.saveAlert();
+
+    // Navigate back to alerts page to confirm creation
+    await ml.navigation.navigateToAlertsAndAction();
   }
 
   async function waitForAlertsInIndex(minCount: number = 1): Promise<any[]> {
@@ -196,7 +196,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('shows alerts table in explorer after rule fires', async () => {
       // Create alert
-      await createAnomalyDetectionRule();
+      await createAnomalyDetectionRuleViaUI();
 
       // Ingest anomalous data to trigger the alert
       await ingestAnomalousDoc(BASIC_TEST_DATA_INDEX);
