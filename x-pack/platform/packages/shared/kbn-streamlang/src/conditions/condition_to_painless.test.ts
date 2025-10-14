@@ -100,18 +100,18 @@ describe('conditionToPainless', () => {
         );
       });
 
-      test.skip('boolean eq operator should compare against boolean values directly', () => {
+      test('boolean eq operator should compare against boolean values directly', () => {
         const condition = {
           field: 'should_process',
           eq: true,
         };
         // This test expects the field to be compared against boolean literal `true`
         expect(conditionToStatement(condition)).toEqual(
-          "($('should_process', null) !== null && $('should_process', null) == true)"
+          "($('should_process', null) !== null && (($('should_process', null) instanceof Number && $('should_process', null).toString() == \"true\") || $('should_process', null) == true))"
         );
       });
 
-      test.skip('boolean neq operator should compare against boolean values directly', () => {
+      test('boolean neq operator should compare against boolean values directly', () => {
         const condition = {
           field: 'is_active',
           neq: false,
@@ -119,11 +119,11 @@ describe('conditionToPainless', () => {
 
         // This test expects the field to be compared against boolean literal `false`
         expect(conditionToStatement(condition)).toEqual(
-          "($('is_active', null) !== null && $('is_active', null) != false)"
+          "($('is_active', null) !== null && (($('is_active', null) instanceof Number && $('is_active', null).toString() != \"false\") || $('is_active', null) != false))"
         );
       });
 
-      test.skip('boolean eq with false should work correctly', () => {
+      test('boolean eq with false should work correctly', () => {
         const condition = {
           field: 'is_disabled',
           eq: false,
@@ -131,11 +131,11 @@ describe('conditionToPainless', () => {
 
         // This test expects the field to be compared against boolean literal `false`
         expect(conditionToStatement(condition)).toEqual(
-          "($('is_disabled', null) !== null && $('is_disabled', null) == false)"
+          "($('is_disabled', null) !== null && (($('is_disabled', null) instanceof Number && $('is_disabled', null).toString() == \"false\") || $('is_disabled', null) == false))"
         );
       });
 
-      test.skip('boolean neq with true should work correctly', () => {
+      test('boolean neq with true should work correctly', () => {
         const condition = {
           field: 'should_skip',
           neq: true,
@@ -143,7 +143,7 @@ describe('conditionToPainless', () => {
 
         // This test expects the field to be compared against boolean literal `true`
         expect(conditionToStatement(condition)).toEqual(
-          "($('should_skip', null) !== null && $('should_skip', null) != true)"
+          "($('should_skip', null) !== null && (($('should_skip', null) instanceof Number && $('should_skip', null).toString() != \"true\") || $('should_skip', null) != true))"
         );
       });
     });
