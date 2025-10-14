@@ -1409,9 +1409,16 @@ describe('Lens App', () => {
         },
       };
 
-      props.datasourceMap.testDatasource.isEqual = jest.fn().mockReturnValue(true); // if this returns false, the documents won't be accounted equal
-
-      await renderApp({ preloadedState });
+      await renderApp({
+        preloadedState,
+        datasourceMapOverride: {
+          ...datasourceMap,
+          testDatasource: {
+            ...datasourceMap.testDatasource,
+            isEqual: jest.fn().mockReturnValue(true), // if this returns false, the documents won't be accounted equal
+          },
+        },
+      });
 
       const lastCallArg = props.onAppLeave.mock.lastCall![0];
       lastCallArg?.({ default: defaultLeave, confirm: confirmLeave });
