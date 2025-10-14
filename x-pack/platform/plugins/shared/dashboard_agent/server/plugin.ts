@@ -38,13 +38,12 @@ export class DashboardAgentPlugin
     this.logger.debug('Setting up Dashboard Agent plugin');
 
     // Register dashboard-specific tools during start lifecycle when dashboard plugin is available
-    coreSetup.getStartServices().then(([coreStart, startDeps]) => {
+    void coreSetup.getStartServices().then(([coreStart, startDeps]) => {
       setupDeps.onechat.tools.register(
         createDashboardTool(startDeps.dashboard, coreStart.savedObjects)
       );
     });
 
-    // Register the dashboard agent with onechat
     registerDashboardAgent(setupDeps.onechat);
 
     return {};
