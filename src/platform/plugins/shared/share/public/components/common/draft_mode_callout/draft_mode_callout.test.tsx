@@ -37,4 +37,19 @@ describe('DraftModeCallout', () => {
       expect(callout).toMatchSnapshot();
     });
   });
+
+  describe('Node override case', () => {
+    it('renders a component override when a node prop is provided', () => {
+      render(
+        <I18nProvider>
+          <DraftModeCallout
+            node={<p data-test-subj="overriddenDraftModeCallOut">Component override</p>}
+          />
+        </I18nProvider>
+      );
+      const callout = screen.getByTestId('overriddenDraftModeCallOut');
+      expect(screen.getByText('Component override')).toBeInTheDocument();
+      expect(callout).toMatchSnapshot();
+    });
+  });
 });

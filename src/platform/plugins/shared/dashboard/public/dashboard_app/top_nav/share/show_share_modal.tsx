@@ -12,11 +12,12 @@ import moment from 'moment';
 import type { ReactElement } from 'react';
 import React, { useState } from 'react';
 
-import { EuiCheckboxGroup } from '@elastic/eui';
+import { EuiCallOut, EuiCheckboxGroup } from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
 import type { QueryState } from '@kbn/data-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 
@@ -163,22 +164,42 @@ export function ShowShareModal({
       }),
       config: {
         link: {
-          draftModeCallOut: {
-            message: hasPanelChanges
-              ? allowShortUrl
-                ? shareModalStrings.getDraftSharePanelChangesWarning()
-                : shareModalStrings.getSnapshotShareWarning()
-              : shareModalStrings.getDraftShareWarning('link'),
-            'data-test-subj': 'DashboardDraftModeCopyLinkCallOut',
-          },
+          draftModeCallOut: (
+            <EuiCallOut
+              color="warning"
+              data-test-subj="DashboardDraftModeCopyLinkCallOut"
+              title={
+                <FormattedMessage
+                  id="dashboard.share.shareModal.draftModeCallout.title"
+                  defaultMessage="Unsaved changes"
+                />
+              }
+            >
+              {hasPanelChanges
+                ? allowShortUrl
+                  ? shareModalStrings.getDraftSharePanelChangesWarning()
+                  : shareModalStrings.getSnapshotShareWarning()
+                : shareModalStrings.getDraftShareWarning('link')}
+            </EuiCallOut>
+          ),
         },
         embed: {
-          draftModeCallOut: {
-            message: hasPanelChanges
-              ? shareModalStrings.getEmbedSharePanelChangesWarning()
-              : shareModalStrings.getDraftShareWarning('embed'),
-            'data-test-subj': 'DashboardDraftModeEmbedCallOut',
-          },
+          draftModeCallOut: (
+            <EuiCallOut
+              color="warning"
+              data-test-subj="DashboardDraftModeEmbedCallOut"
+              title={
+                <FormattedMessage
+                  id="dashboard.share.shareModal.draftModeCallout.title"
+                  defaultMessage="Unsaved changes"
+                />
+              }
+            >
+              {hasPanelChanges
+                ? shareModalStrings.getEmbedSharePanelChangesWarning()
+                : shareModalStrings.getDraftShareWarning('embed')}
+            </EuiCallOut>
+          ),
           embedUrlParamExtensions: [
             {
               paramName: 'embed',
@@ -190,10 +211,42 @@ export function ShowShareModal({
         integration: {
           export: {
             pdfReports: {
-              draftModeCallOut: true,
+              draftModeCallOut: (
+                <EuiCallOut
+                  color="warning"
+                  iconType="warning"
+                  title={
+                    <FormattedMessage
+                      id="dashboard.exports.pdfReports.warning.title"
+                      defaultMessage="Unsaved changes"
+                    />
+                  }
+                >
+                  <FormattedMessage
+                    id="dashboard.exports.pdfReports.postURLWatcherMessage.unsavedChanges"
+                    defaultMessage="URL may change if you upgrade Kibana."
+                  />
+                </EuiCallOut>
+              ),
             },
             imageReports: {
-              draftModeCallOut: true,
+              draftModeCallOut: (
+                <EuiCallOut
+                  color="warning"
+                  iconType="warning"
+                  title={
+                    <FormattedMessage
+                      id="dashboard.exports.imageReports.warning.title"
+                      defaultMessage="Unsaved changes"
+                    />
+                  }
+                >
+                  <FormattedMessage
+                    id="dashboard.exports.imageReports.postURLWatcherMessage.unsavedChanges"
+                    defaultMessage="URL may change if you upgrade Kibana."
+                  />
+                </EuiCallOut>
+              ),
             },
           },
         },

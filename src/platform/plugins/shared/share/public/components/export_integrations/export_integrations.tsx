@@ -35,6 +35,7 @@ import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { ShareProvider, type IShareContext, useShareTypeContext } from '../context';
 import type { ExportShareConfig, ExportShareDerivativesConfig } from '../../types';
+import type { DraftModeCalloutProps } from '../common/draft_mode_callout';
 import { DraftModeCallout } from '../common/draft_mode_callout';
 
 export const ExportMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
@@ -144,7 +145,16 @@ function ManagedFlyout({
   }, [exportIntegration.config, intl, onCloseFlyout, usePrintLayout]);
 
   const draftModeCallout = shareObjectTypeMeta.config?.[exportIntegration.id]?.draftModeCallOut;
-  const draftModeCalloutContent = typeof draftModeCallout === 'object' ? draftModeCallout : {};
+  // TODO Remove node override logic https://github.com/elastic/kibana/issues/238877
+  const isValidCalloutOverride = React.isValidElement(draftModeCallout);
+  const draftModeCalloutContent = isValidCalloutOverride
+    ? // Retro-compatible case
+      { node: draftModeCallout }
+    : typeof draftModeCallout === 'object'
+    ? // Custom content callout
+      (draftModeCallout as DraftModeCalloutProps)
+    : // Default content callout
+      {};
 
   return (
     <React.Fragment>

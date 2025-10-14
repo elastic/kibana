@@ -15,6 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface DraftModeCalloutProps extends CommonProps {
   message?: React.ReactNode;
+  node?: React.ReactNode;
 }
 
 const defaultCalloutMessage = (
@@ -28,11 +29,15 @@ const defaultCalloutMessage = (
  * A warning callout to indicate the user has unsaved changes.
  */
 export const DraftModeCallout = ({
+  node,
   message = defaultCalloutMessage,
   ['data-test-subj']: dataTestSubj = 'unsavedChangesDraftModeCallOut',
 }: DraftModeCalloutProps) => {
-  return (
+  return node ? (
+    node
+  ) : (
     <EuiCallOut
+      announceOnMount
       data-test-subj={dataTestSubj}
       color="warning"
       iconType="warning"

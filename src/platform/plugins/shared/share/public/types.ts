@@ -42,7 +42,9 @@ type ShareActionUserInputBase<E extends Record<string, unknown> = Record<string,
    * - `DraftModeCalloutProps`:
    *   - `message`: callout message custom content
    */
-  draftModeCallOut?: boolean | DraftModeCalloutProps;
+
+  // TODO Remove ReactNode type https://github.com/elastic/kibana/issues/238877
+  draftModeCallOut?: boolean | DraftModeCalloutProps | ReactNode;
   helpText?: ReactNode;
   CTAButtonConfig?: {
     id: string;

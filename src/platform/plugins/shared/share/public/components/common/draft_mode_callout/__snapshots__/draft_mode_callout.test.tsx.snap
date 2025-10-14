@@ -28,6 +28,12 @@ exports[`DraftModeCallout Custom content case renders a callout with custom cont
       Custom message
     </p>
   </div>
+  <div
+    aria-atomic="true"
+    aria-live="polite"
+    class="emotion-euiScreenReaderOnly"
+    role="status"
+  />
 </div>
 `;
 
@@ -59,5 +65,19 @@ exports[`DraftModeCallout Default case renders a default callout when custom pro
       This link might not be permanent. Save your changes to ensure it works as expected.
     </p>
   </div>
+  <div
+    aria-atomic="true"
+    aria-live="polite"
+    class="emotion-euiScreenReaderOnly"
+    role="status"
+  />
 </div>
+`;
+
+exports[`DraftModeCallout Node override case renders a callout with custom content when custom props are present 1`] = `
+<p
+  data-test-subj="overriddenDraftModeCallOut"
+>
+  Component override
+</p>
 `;
