@@ -79,11 +79,13 @@ export const getLogRateAnalysisEmbeddableFactory = (
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
-        await pluginStart.data.dataViews.get(
-          runtimeState.dataViewId ?? (await pluginStart.data.dataViews.getDefaultId())
-        ),
-      ]);
+      const dataViewId = runtimeState.dataViewId ?? (await pluginStart.data.dataViews.getDefaultId());
+      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
+        dataViewId ?
+          [
+            await pluginStart.data.dataViews.get(dataViewId),
+          ]
+        : undefined);
 
       const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
 
