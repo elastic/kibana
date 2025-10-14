@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DashboardLayout, DashboardLayoutPanel } from './types';
+export type { DashboardLayout, DashboardLayoutPanel, PublishesLayout } from './types';
+export { apiPublishesLayout } from './types';
 export { areLayoutsEqual } from './are_layouts_equal';
 export { initializeLayoutManager } from './layout_manager';

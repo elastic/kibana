@@ -55,7 +55,7 @@ import type {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
-import type { DashboardLayout } from './layout_manager/types';
+import type { PublishesLayout } from './layout_manager';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -117,7 +117,8 @@ export type DashboardApi = CanExpandPanels &
   PublishesViewMode &
   PublishesWritableViewMode &
   TrackContentfulRender &
-  TracksOverlays & {
+  TracksOverlays &
+  PublishesLayout & {
     asyncResetToLastSavedState: () => Promise<void>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
@@ -160,7 +161,6 @@ export type DashboardApi = CanExpandPanels &
     unpublishedChildFilters$: PublishingSubject<Filter[] | undefined>;
     publishFilters: () => void;
 
-    layout$: BehaviorSubject<DashboardLayout>;
     registerChildApi: (api: DefaultEmbeddableApi) => void;
   };
 

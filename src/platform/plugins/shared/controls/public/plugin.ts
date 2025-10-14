@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQL_CONTROL, OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
+import {
+  ESQL_CONTROL,
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
+} from '@kbn/controls-constants';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
 
@@ -53,6 +58,9 @@ export class ControlsPlugin
       return CONTROL_PANEL_PLACEMENT;
     });
     startPlugins.dashboard.registerDashboardPanelSettings(ESQL_CONTROL, () => {
+      return CONTROL_PANEL_PLACEMENT;
+    });
+    startPlugins.dashboard.registerDashboardPanelSettings(TIME_SLIDER_CONTROL, () => {
       return CONTROL_PANEL_PLACEMENT;
     });
   }

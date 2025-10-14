@@ -10,6 +10,7 @@
 import type { StickyControlLayoutState } from '@kbn/controls-schemas/src/types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
+import type { BehaviorSubject } from 'rxjs';
 import type { DashboardPanel, DashboardSection } from '../../../server';
 
 export interface DashboardChildren {
@@ -34,3 +35,10 @@ export interface DashboardLayout {
 export interface DashboardChildState {
   [uuid: string]: SerializedPanelState<object>;
 }
+
+export interface PublishesLayout {
+  layout$: BehaviorSubject<DashboardLayout>;
+}
+
+export const apiPublishesLayout = (api: unknown): api is PublishesLayout =>
+  Boolean((api as PublishesLayout).layout$);

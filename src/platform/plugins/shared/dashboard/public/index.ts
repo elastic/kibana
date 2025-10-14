@@ -34,3 +34,5 @@ export { getDashboardLocatorParamsFromEmbeddable } from '../common/locator/get_d
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);
 }
+
+export { apiPublishesLayout } from './dashboard_api/layout_manager';

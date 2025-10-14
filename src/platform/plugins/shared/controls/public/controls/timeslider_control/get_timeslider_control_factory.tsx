@@ -238,6 +238,7 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
 
       const api = finalizeApi({
         ...unsavedChangesApi,
+        isPinnable: false, // Disable the user-facing unpin action; panel can still be pinned programatically when it's created
         defaultTitle$: new BehaviorSubject<string | undefined>(displayName),
         timeslice$,
         serializeState,

@@ -69,6 +69,29 @@ export async function getMenuItemGroups(
     });
   });
 
+  (
+    await uiActionsService.getFrequentlyChangingActionsForTrigger(ADD_PANEL_TRIGGER, {
+      embeddable: api,
+    })
+  ).forEach((action) => {
+    const actionGroups = Array.isArray(action.grouping) ? action.grouping : [ADD_PANEL_OTHER_GROUP];
+    actionGroups.forEach((group) => {
+      if (groups[group.id].items.find((item) => item.id === action.id)) return;
+      const actionName = action.getDisplayName(addPanelContext);
+      pushItem(group, {
+        id: action.id,
+        name: actionName,
+        icon: action.getIconType?.(addPanelContext) ?? 'empty',
+        isDisabled: true,
+        onClick: () => {},
+        'data-test-subj': `create-action-${actionName}`,
+        description: action?.getDisplayNameTooltip?.(addPanelContext),
+        order: action.order ?? 0,
+        MenuItem: action.MenuItem ? action.MenuItem({ context: addPanelContext }) : undefined,
+      });
+    });
+  });
+
   return Object.values(groups)
     .map((group) => {
       group.items.sort((itemA, itemB) => {
