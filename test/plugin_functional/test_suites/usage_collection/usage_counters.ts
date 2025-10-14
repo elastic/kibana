@@ -38,7 +38,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
   }
 
-  describe('Usage Counters service', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/238414
+  describe.skip('Usage Counters service', () => {
     before(async () => {
       const key = serializeCounterKey({
         domainId: 'usageCollectionTestPlugin',
