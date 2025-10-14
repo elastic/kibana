@@ -26885,6 +26885,8 @@ paths:
                 description: A summary of the agent setup status. `isReady` indicates whether the setup is ready. If the setup is not ready, `missing_requirements` lists which requirements are missing.
                 type: object
                 properties:
+                  is_action_secrets_storage_enabled:
+                    type: boolean
                   is_secrets_storage_enabled:
                     type: boolean
                   is_space_awareness_enabled:
