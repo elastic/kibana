@@ -32,6 +32,7 @@ export const OnechatToolsTable = memo(() => {
 
   return (
     <EuiInMemoryTable
+      data-test-subj="agentBuilderToolsTable"
       css={css`
         border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
         table {
@@ -63,6 +64,9 @@ export const OnechatToolsTable = memo(() => {
         pageSize: 10,
         showPerPageOptions: false,
       }}
+      rowProps={(tool) => ({
+        'data-test-subj': `agentBuilderToolsTableRow-${tool.id}`,
+      })}
       selection={{
         selectable: (tool) => !tool.readonly,
         onSelectionChange: (selectedItems: ToolDefinition[]) => {

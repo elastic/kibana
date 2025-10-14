@@ -53,10 +53,6 @@ export const getCAICasesBackfillTaskId = (spaceId: string, owner: Owner): string
   return `${CAI_CASES_BACKFILL_TASK_ID}-${spaceId}-${owner}`;
 };
 
-const CAI_CASES_SYNCHRONIZATION_TASK_ID_BASE = 'cai_cases_synchronization_task';
-export const getCAICasesSynchronizationTaskId = (spaceId: string, owner: Owner) =>
-  `${CAI_CASES_SYNCHRONIZATION_TASK_ID_BASE}-${spaceId}-${owner}`;
-
 export const getCasesSynchronizationSourceQuery = (
   lastSyncAt: Date,
   spaceId: string,

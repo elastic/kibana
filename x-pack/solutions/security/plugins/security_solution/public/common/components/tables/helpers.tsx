@@ -207,7 +207,7 @@ export const OverflowFieldComponent = ({
   <span>
     {showToolTip ? (
       <EuiToolTip data-test-subj={'message-tooltip'} content={'message'}>
-        <>{value.substring(0, overflowLength)}</>
+        <span tabIndex={0}>{value.substring(0, overflowLength)}</span>
       </EuiToolTip>
     ) : (
       <>{value.substring(0, overflowLength)}</>
