@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elasti
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import type { TimeState } from '@kbn/es-query';
-import type { FailureStoreStats } from '../hooks/use_failure_store_stats';
+import type { EnhancedFailureStoreStats } from '../hooks/use_failure_store_stats';
 import { FailureStoreChartBarSeries } from '../common/chart_components';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 import type { useAggregations } from '../hooks/use_ingestion_rate';
@@ -24,7 +24,7 @@ export function FailureStoreIngestionRate({
   aggregationsError,
 }: {
   definition: Streams.ingest.all.GetResponse;
-  stats?: FailureStoreStats;
+  stats?: EnhancedFailureStoreStats;
   isLoadingStats: boolean;
   timeState: TimeState;
   isLoadingAggregations: boolean;
