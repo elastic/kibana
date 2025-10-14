@@ -141,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       after(async () => {
         // Some test cases switch out of edit mode
         // If there are test failures in these cases then after hook runs in view mode
-        if(!await dashboard.getIsInEditMode()) {
+        if (!(await dashboard.getIsInEditMode())) {
           await dashboard.switchToEditMode();
         }
         await dashboardControls.clearAllControls();
