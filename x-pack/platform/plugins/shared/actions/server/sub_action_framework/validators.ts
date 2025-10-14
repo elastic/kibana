@@ -42,7 +42,7 @@ export const buildValidators = <
          * we allow all unknowns at this level of validation as they are not known at this
          * time of execution.
          */
-        subActionParams: z.object({}).passthrough().nullish(),
+        subActionParams: z.object({}).passthrough().default({}),
       }),
     },
   };
