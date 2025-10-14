@@ -640,7 +640,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'I want to see a list of services with APM data. My data is in `traces-apm*`. I want to show the average transaction duration, the success rate (by dividing event.outcome:failure by event.outcome:failure+success), and total amount of requests. As a time range, select the last 24 hours.',
+                  'I want to see a list of services with APM data. My data is in `traces-apm*`. I want to show the average transaction duration, the success rate, and total amount of requests. As a time range, select the last 24 hours.',
               },
               output: {
                 criteria: createEsqlCriteria({
