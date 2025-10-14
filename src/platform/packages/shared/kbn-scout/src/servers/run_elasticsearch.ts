@@ -13,12 +13,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
 import { isServerlessProjectType } from '@kbn/es/src/utils';
-import {
-  createTestEsCluster,
-  esTestConfig,
-  cleanupElasticsearch,
-  createEsClientForTesting,
-} from '@kbn/test';
+import { createTestEsCluster, esTestConfig, cleanupElasticsearch } from '@kbn/test';
 import type { Config } from '../config';
 
 interface RunElasticsearchOptions {
