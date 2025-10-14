@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   type UserIdAndName,
   type Conversation,
   createConversationNotFoundError,
 } from '@kbn/onechat-common';
+import type { ModelProvider } from '@kbn/onechat-server';
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import type { ConversationStorage } from './storage';
-import {
-  fromEs,
-  fromEsWithoutRounds,
-  toEs,
-  createRequestToEs,
-  updateConversation,
-  type Document,
-} from './converters';
+import { createStorage } from './storage';
+import { fromEs, toEs, createConversationSummary, type Document } from './converters';
 import type { ConversationSummary } from './types';
+import { summarizeConversation } from './summarizer';
 
-export interface ConversationClient {
+export interface ConversationSummaryService {
   get(conversationId: string): Promise<ConversationSummary>;
   exists(conversationId: string): Promise<boolean>;
   create(conversation: Conversation): Promise<ConversationSummary>;
@@ -32,65 +31,54 @@ export interface ConversationClient {
   delete(conversationId: string): Promise<boolean>;
 }
 
-export const createClient = ({
-  space,
-  storage,
-  user,
+export const createService = async ({
+  spaceId,
+  security,
+  esClient,
+  request,
+  modelProvider,
+  logger,
 }: {
-  space: string;
-  storage: ConversationStorage;
-  user: UserIdAndName;
-}): ConversationClient => {
-  return new ConversationClientImpl({ storage, user, space });
+  spaceId: string;
+  logger: Logger;
+  security: SecurityServiceStart;
+  request: KibanaRequest;
+  esClient: ElasticsearchClient;
+  modelProvider: ModelProvider;
+}): Promise<ConversationSummaryService> => {
+  const authUser = security.authc.getCurrentUser(request);
+  if (!authUser) {
+    throw new Error('No user bound to the provided request');
+  }
+  const user = { id: authUser.profile_uid!, username: authUser.username };
+  const storage = createStorage({ logger, esClient });
+  return new ConversationSummaryServiceImpl({ storage, modelProvider, spaceId, user });
 };
 
-class ConversationClientImpl implements ConversationClient {
-  private readonly space: string;
+class ConversationSummaryServiceImpl implements ConversationSummaryService {
+  private readonly spaceId: string;
+  private readonly modelProvider: ModelProvider;
   private readonly storage: ConversationStorage;
   private readonly user: UserIdAndName;
 
   constructor({
     storage,
     user,
-    space,
+    spaceId,
+    modelProvider,
   }: {
     storage: ConversationStorage;
     user: UserIdAndName;
-    space: string;
+    spaceId: string;
+    modelProvider: ModelProvider;
   }) {
+    this.spaceId = spaceId;
     this.storage = storage;
+    this.modelProvider = modelProvider;
     this.user = user;
-    this.space = space;
   }
 
-  async list(options: ConversationListOptions = {}): Promise<ConversationWithoutRounds[]> {
-    const { agentId } = options;
-
-    const response = await this.storage.getClient().search({
-      track_total_hits: false,
-      size: 1000,
-      _source: {
-        excludes: ['rounds'],
-      },
-      query: {
-        bool: {
-          filter: [createSpaceDslFilter(this.space)],
-          must: [
-            {
-              term: this.user.username
-                ? { user_name: this.user.username }
-                : { user_id: this.user.id },
-            },
-            ...(agentId ? [{ term: { agent_id: agentId } }] : []),
-          ],
-        },
-      },
-    });
-
-    return response.hits.hits.map((hit) => fromEsWithoutRounds(hit as Document));
-  }
-
-  async get(conversationId: string): Promise<Conversation> {
+  async get(conversationId: string): Promise<ConversationSummary> {
     const document = await this._get(conversationId);
     if (!document) {
       throw createConversationNotFoundError({ conversationId });
@@ -111,15 +99,21 @@ class ConversationClientImpl implements ConversationClient {
     return hasAccess({ conversation: document, user: this.user });
   }
 
-  async create(conversation: ConversationCreateRequest): Promise<Conversation> {
+  async create(conversation: Conversation): Promise<ConversationSummary> {
     const now = new Date();
-    const id = conversation.id ?? uuidv4();
+    const id = conversation.id;
 
-    const attributes = createRequestToEs({
+    const summary = await summarizeConversation({
       conversation,
-      currentUser: this.user,
-      creationDate: now,
-      space: this.space,
+      model: await this.modelProvider.getDefaultModel(),
+    });
+
+    const attributes = createConversationSummary({
+      conversation,
+      summary,
+      user: this.user,
+      spaceId: this.spaceId,
+      createdAt: now,
     });
 
     await this.storage.getClient().index({
@@ -130,10 +124,10 @@ class ConversationClientImpl implements ConversationClient {
     return this.get(id);
   }
 
-  async update(conversationUpdate: ConversationUpdateRequest): Promise<Conversation> {
-    const { id: conversationId } = conversationUpdate;
+  async update(conversation: Conversation): Promise<ConversationSummary> {
+    const { id: conversationId } = conversation;
     const now = new Date();
-    const document = await this._get(conversationUpdate.id);
+    const document = await this._get(conversation.id);
     if (!document) {
       throw createConversationNotFoundError({ conversationId });
     }
@@ -145,18 +139,48 @@ class ConversationClientImpl implements ConversationClient {
     const storedConversation = fromEs(document);
     const updatedConversation = updateConversation({
       conversation: storedConversation,
-      update: conversationUpdate,
+      update: conversation,
       updateDate: now,
       space: this.space,
     });
     const attributes = toEs(updatedConversation, this.space);
 
     await this.storage.getClient().index({
-      id: conversationUpdate.id,
+      id: conversation.id,
       document: attributes,
     });
 
-    return this.get(conversationUpdate.id);
+    return this.get(conversation.id);
+  }
+
+  async search(term: string): Promise<ConversationSummary[]> {
+    const response = await this.storage.getClient().search({
+      track_total_hits: false,
+      size: 1000,
+      _source: {
+        excludes: ['rounds'],
+      },
+      query: {
+        bool: {
+          filter: [createSpaceDslFilter(this.space)],
+          must: [
+            {
+              term: this.user.username
+                ? { user_name: this.user.username }
+                : { user_id: this.user.id },
+            },
+            {
+              multi_match: {
+                query: term,
+                fields: ['title', 'description'],
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    return response.hits.hits.map((hit) => fromEsWithoutRounds(hit as Document));
   }
 
   async delete(conversationId: string): Promise<boolean> {
@@ -180,7 +204,7 @@ class ConversationClientImpl implements ConversationClient {
       terminate_after: 1,
       query: {
         bool: {
-          filter: [createSpaceDslFilter(this.space), { term: { _id: conversationId } }],
+          filter: [createSpaceDslFilter(this.spaceId), { term: { _id: conversationId } }],
         },
       },
     });

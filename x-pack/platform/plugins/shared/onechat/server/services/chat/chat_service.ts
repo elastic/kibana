@@ -25,7 +25,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { AgentCapabilities } from '@kbn/onechat-common';
+import type { AgentCapabilities, Conversation } from '@kbn/onechat-common';
 import {
   type RoundInput,
   type ChatEvent,
@@ -167,6 +167,9 @@ class ChatServiceImpl implements ChatService {
             conversationClient: defer(async () =>
               this.conversationService.getScopedClient({ request })
             ),
+            summarizationService: defer(async () => {
+              return this.conversationService.getSummarizationService({ request });
+            }),
             agent: defer(async () => {
               const agentRegistry = await this.agentService.getRegistry({ request });
               return agentRegistry.get(agentId);
@@ -180,105 +183,122 @@ class ChatServiceImpl implements ChatService {
             selectedConnectorId: of(selectedConnectorId),
           });
         }),
-        switchMap(({ conversationClient, chatModel, agent, selectedConnectorId }) => {
-          const shouldCreateNewConversation$ = isNewConversation
-            ? of(true)
-            : autoCreateConversationWithId
-            ? conversationExists$({ conversationId, conversationClient }).pipe(
-                switchMap((exists) => of(!exists))
+        switchMap(
+          ({ conversationClient, summarizationService, chatModel, agent, selectedConnectorId }) => {
+            const shouldCreateNewConversation$ = isNewConversation
+              ? of(true)
+              : autoCreateConversationWithId
+              ? conversationExists$({ conversationId, conversationClient }).pipe(
+                  switchMap((exists) => of(!exists))
+                )
+              : of(false);
+
+            const conversation$ = getConversation$({
+              agentId,
+              conversationId,
+              autoCreateConversationWithId,
+              conversationClient,
+            });
+
+            // Extract the ID from the conversation and emit the event ONLY for new conversations
+            const conversationIdSetEvent$ = shouldCreateNewConversation$.pipe(
+              switchMap((shouldCreate) =>
+                shouldCreate
+                  ? conversation$.pipe(
+                      map((conversation) => createConversationIdSetEvent(conversation.id)),
+                      take(1)
+                    )
+                  : EMPTY
               )
-            : of(false);
+            );
 
-          const conversation$ = getConversation$({
-            agentId,
-            conversationId,
-            autoCreateConversationWithId,
-            conversationClient,
-          });
+            const agentEvents$ = executeAgent$({
+              agentId,
+              request,
+              conversation$,
+              nextInput,
+              capabilities,
+              abortSignal,
+              agentService: this.agentService,
+              defaultConnectorId: selectedConnectorId,
+            });
 
-          // Extract the ID from the conversation and emit the event ONLY for new conversations
-          const conversationIdSetEvent$ = shouldCreateNewConversation$.pipe(
-            switchMap((shouldCreate) =>
-              shouldCreate
-                ? conversation$.pipe(
-                    map((conversation) => createConversationIdSetEvent(conversation.id)),
-                    take(1)
-                  )
-                : EMPTY
-            )
-          );
-
-          const agentEvents$ = executeAgent$({
-            agentId,
-            request,
-            conversation$,
-            nextInput,
-            capabilities,
-            abortSignal,
-            agentService: this.agentService,
-            defaultConnectorId: selectedConnectorId,
-          });
-
-          const title$ = shouldCreateNewConversation$.pipe(
-            switchMap((shouldCreate) =>
-              shouldCreate
-                ? generateTitle$({ chatModel, conversation$, nextInput })
-                : conversation$.pipe(
-                    switchMap((conversation) => {
-                      return of(conversation.title);
-                    })
-                  )
-            )
-          );
-
-          const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
-
-          const saveOrUpdateAndEmit$ = shouldCreateNewConversation$.pipe(
-            switchMap((shouldCreate) =>
-              shouldCreate
-                ? conversation$.pipe(
-                    switchMap((conversation) =>
-                      createConversation$({
-                        agentId,
-                        conversationClient,
-                        conversationId: conversationId || conversation.id,
-                        title$,
-                        roundCompletedEvents$,
+            const title$ = shouldCreateNewConversation$.pipe(
+              switchMap((shouldCreate) =>
+                shouldCreate
+                  ? generateTitle$({ chatModel, conversation$, nextInput })
+                  : conversation$.pipe(
+                      switchMap((conversation) => {
+                        return of(conversation.title);
                       })
                     )
-                  )
-                : updateConversation$({
-                    conversationClient,
-                    conversation$,
-                    title$,
-                    roundCompletedEvents$,
-                  })
-            )
-          );
+              )
+            );
 
-          return merge(conversationIdSetEvent$, agentEvents$, saveOrUpdateAndEmit$).pipe(
-            handleCancellation(abortSignal),
-            catchError((err) => {
-              this.logger.error(`Error executing agent: ${err.stack}`);
-              return throwError(() => {
-                const traceId = getCurrentTraceId();
-                if (isOnechatError(err)) {
-                  err.meta = {
-                    ...err.meta,
-                    traceId,
-                  };
-                  return err;
-                } else {
-                  return createInternalError(`Error executing agent: ${err.message}`, {
-                    statusCode: 500,
-                    traceId,
-                  });
-                }
-              });
-            }),
-            shareReplay()
-          );
-        })
+            const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
+
+            // create or update summary on round complete
+            forkJoin({ conversation: conversation$, roundEvent: roundCompletedEvents$ }).subscribe({
+              next: ({ conversation, roundEvent }) => {
+                const updatedConversation: Conversation = {
+                  ...conversation,
+                  id: conversationId || conversation.id,
+                  rounds: [...conversation.rounds, roundEvent.data.round],
+                };
+                summarizationService.create(updatedConversation);
+              },
+              error: (err) => {
+                // trap
+              },
+            });
+
+            const saveOrUpdateAndEmit$ = shouldCreateNewConversation$.pipe(
+              switchMap((shouldCreate) =>
+                shouldCreate
+                  ? conversation$.pipe(
+                      switchMap((conversation) =>
+                        createConversation$({
+                          agentId,
+                          conversationClient,
+                          conversationId: conversationId || conversation.id,
+                          title$,
+                          roundCompletedEvents$,
+                        })
+                      )
+                    )
+                  : updateConversation$({
+                      conversationClient,
+                      conversation$,
+                      title$,
+                      roundCompletedEvents$,
+                    })
+              )
+            );
+
+            return merge(conversationIdSetEvent$, agentEvents$, saveOrUpdateAndEmit$).pipe(
+              handleCancellation(abortSignal),
+              catchError((err) => {
+                this.logger.error(`Error executing agent: ${err.stack}`);
+                return throwError(() => {
+                  const traceId = getCurrentTraceId();
+                  if (isOnechatError(err)) {
+                    err.meta = {
+                      ...err.meta,
+                      traceId,
+                    };
+                    return err;
+                  } else {
+                    return createInternalError(`Error executing agent: ${err.message}`, {
+                      statusCode: 500,
+                      traceId,
+                    });
+                  }
+                });
+              }),
+              shareReplay()
+            );
+          }
+        )
       );
     });
   }
