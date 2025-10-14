@@ -46,7 +46,7 @@ type SignificantEventsPreviewResponse = Pick<
 interface GeneratedSignificantEventQuery {
   title: string;
   kql: string;
-  system?: {
+  feature?: {
     name: string;
     filter: Condition;
   };
