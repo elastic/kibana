@@ -50,6 +50,7 @@ const isValidConnectionMock = isValidConnection as jest.Mock;
 
 const TICK = 10;
 const tick = (ticks = 1) => jest.advanceTimersByTime(TICK * ticks);
+const tickAsync = (ticks = 1) => jest.advanceTimersByTimeAsync(TICK * ticks);
 
 const configService = configServiceMock.create();
 
@@ -76,6 +77,7 @@ beforeEach(() => {
     healthCheck: {
       delay: duration(TICK), // default unit ms, configured default is 2500ms = 2.5s
       startupDelay: duration(TICK), // default unit ms≈
+      retry: 1,
     },
     ssl: {
       verificationMode: 'none',
@@ -189,8 +191,8 @@ describe('#preboot', () => {
 
       expect(config).toMatchInlineSnapshot(`
         Object {
-          "healthCheckRetry": 3,
           "healthCheckDelay": "PT0.01S",
+          "healthCheckRetry": 1,
           "healthCheckStartupDelay": "PT0.01S",
           "hosts": Array [
             "http://8.8.8.8",
@@ -225,41 +227,94 @@ describe('#setup', () => {
 
   it('esNodeVersionCompatibility$ only starts polling when subscribed to', async () => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
-    mockedClient.nodes.info.mockImplementation(() =>
-      elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
-    );
+    // With retry: 1, each poll makes 2 attempts (initial + 1 retry)
+    // Mock 4 total error responses: 2 for first poll + 2 for second poll
+    mockedClient.nodes.info
+      .mockImplementationOnce(() =>
+        elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
+      )
+      .mockImplementationOnce(() =>
+        elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
+      )
+      .mockImplementationOnce(() =>
+        elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
+      )
+      .mockImplementationOnce(() =>
+        elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
+      );
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
     const setupContract = await elasticsearchService.setup(setupDeps);
 
+    // Initial call should happen synchronously
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
 
-    tick();
+    // Advance timers to trigger interval emission (this allows retry delay to emit)
+    await jest.advanceTimersByTimeAsync(TICK);
 
+    // After retry completes (triggered by interval emission)
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
 
+    // Wait for the observable to emit (it should have cached value from shareReplay)
     await firstValueFrom(setupContract.esNodesCompatibility$);
-    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2); // shares the last value
+
+    // Advance timers to trigger next poll
+    await jest.advanceTimersByTimeAsync(TICK);
+
+    // Advance timers again to allow the second poll's retry to complete
+    await jest.advanceTimersByTimeAsync(TICK);
+
+    // Wait for second poll to complete
+    await firstValueFrom(setupContract.esNodesCompatibility$);
+    // Second poll: initial + 1 retry = 2 more calls (total 4)
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(4);
   });
 
   it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async () => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
-    mockedClient.nodes.info.mockImplementation(() =>
-      elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
-    );
+    // With retry: 1, each poll makes 2 attempts (initial + 1 retry)
+    // Mock 4 total error responses: 2 for first poll + 2 for second poll
+    mockedClient.nodes.info
+      .mockImplementationOnce(() =>
+        elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
+      )
+      .mockImplementationOnce(() =>
+        elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
+      )
+      .mockImplementationOnce(() =>
+        elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
+      )
+      .mockImplementationOnce(() =>
+        elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
+      );
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
     const setupContract = await elasticsearchService.setup(setupDeps);
 
+    // Initial call should happen synchronously
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
 
+    // Advance timers to trigger interval emission (this allows retry delay to emit)
+    await jest.advanceTimersByTimeAsync(TICK);
+
+    // After retry completes (triggered by interval emission)
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
+
+    // Wait for first poll to complete
     await firstValueFrom(setupContract.esNodesCompatibility$);
 
-    tick();
+    // Advance timers to trigger next poll
+    await jest.advanceTimersByTimeAsync(TICK);
 
-    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
+    // Advance timers again to allow the second poll's retry to complete
+    await jest.advanceTimersByTimeAsync(TICK);
+
+    // Wait for second poll to complete
+    await firstValueFrom(setupContract.esNodesCompatibility$);
+    // Second poll: initial + 1 retry = 2 more calls (total 4)
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(4);
   });
 });
 
@@ -461,8 +516,8 @@ describe('#start', () => {
 
       expect(config).toMatchInlineSnapshot(`
         Object {
-          "healthCheckRetry": 3,
           "healthCheckDelay": "PT0.01S",
+          "healthCheckRetry": 1,
           "healthCheckStartupDelay": "PT0.01S",
           "hosts": Array [
             "http://8.8.8.8",
@@ -489,6 +544,7 @@ describe('#stop', () => {
 
     expect(mockClusterClientInstance.close).toHaveBeenCalledTimes(1);
   });
+
   it('stops pollEsNodeVersions even if there are active subscriptions', async () => {
     expect.assertions(3);
 
@@ -503,11 +559,11 @@ describe('#stop', () => {
       setupContract.esNodesCompatibility$.pipe(
         concatMap(async () => {
           expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-          tick();
+          await tickAsync();
           expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
 
           await elasticsearchService.stop();
-          tick(10);
+          await tickAsync();
           expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
         })
       )
