@@ -12,5 +12,3 @@ export const config = {
     enabled: schema.boolean({ defaultValue: false }),
   }),
 };
-
-export type SearchGettingStartedConfigType = ReturnType<typeof config.schema.validate>;

@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import type {
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/public';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { QueryClient } from '@tanstack/react-query';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
@@ -32,10 +26,6 @@ export class SearchGettingStartedPlugin
       SearchGettingStartedAppPluginStartDependencies
     >
 {
-  constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<SearchGettingStartedConfigType>();
-  }
-
   public setup(
     core: CoreSetup<
       SearchGettingStartedAppPluginStartDependencies,

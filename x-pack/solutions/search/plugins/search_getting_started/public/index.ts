@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
 import { SearchGettingStartedPlugin } from './plugin';
 
-export const plugin = (initContext: PluginInitializerContext) =>
-  new SearchGettingStartedPlugin(initContext);
+export const plugin = () => new SearchGettingStartedPlugin();
