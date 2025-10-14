@@ -22,12 +22,18 @@ import { fromEs, toEs, createConversationSummary, type Document } from './conver
 import type { ConversationSummary } from './types';
 import { summarizeConversation } from './summarizer';
 
+export interface SummarySearchParams {
+  term: string;
+  keywords?: string[];
+  questions?: string[];
+}
+
 export interface ConversationSummaryService {
   get(conversationId: string): Promise<ConversationSummary>;
   exists(conversationId: string): Promise<boolean>;
   create(conversation: Conversation): Promise<ConversationSummary>;
   update(conversation: Conversation): Promise<ConversationSummary>;
-  search(term: string): Promise<ConversationSummary[]>;
+  search(params: SummarySearchParams): Promise<ConversationSummary[]>;
   delete(conversationId: string): Promise<boolean>;
 }
 
@@ -141,9 +147,9 @@ class ConversationSummaryServiceImpl implements ConversationSummaryService {
       conversation: storedConversation,
       update: conversation,
       updateDate: now,
-      space: this.space,
+      space: this.spaceId,
     });
-    const attributes = toEs(updatedConversation, this.space);
+    const attributes = toEs(updatedConversation, this.spaceId);
 
     await this.storage.getClient().index({
       id: conversation.id,
@@ -153,34 +159,49 @@ class ConversationSummaryServiceImpl implements ConversationSummaryService {
     return this.get(conversation.id);
   }
 
-  async search(term: string): Promise<ConversationSummary[]> {
+  async search(options: SummarySearchParams): Promise<ConversationSummary[]> {
+    const { term, keywords = [], questions = [] } = options;
+
     const response = await this.storage.getClient().search({
       track_total_hits: false,
-      size: 1000,
-      _source: {
-        excludes: ['rounds'],
-      },
+      size: 5,
       query: {
         bool: {
-          filter: [createSpaceDslFilter(this.space)],
-          must: [
+          filter: [
+            createSpaceDslFilter(this.spaceId),
             {
               term: this.user.username
                 ? { user_name: this.user.username }
                 : { user_id: this.user.id },
             },
+          ],
+          must: [
             {
-              multi_match: {
-                query: term,
-                fields: ['title', 'description'],
+              match: {
+                summary: {
+                  query: term,
+                  boost: 2,
+                },
               },
             },
+            ...(keywords.length > 0
+              ? [
+                  {
+                    match: {
+                      summary: {
+                        query: keywords.join(' '),
+                        boost: 1,
+                      },
+                    },
+                  },
+                ]
+              : []),
           ],
         },
       },
     });
 
-    return response.hits.hits.map((hit) => fromEsWithoutRounds(hit as Document));
+    return response.hits.hits.map((hit) => fromEs(hit as Document));
   }
 
   async delete(conversationId: string): Promise<boolean> {

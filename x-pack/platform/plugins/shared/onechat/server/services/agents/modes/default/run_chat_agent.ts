@@ -45,7 +45,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     agentId,
     abortSignal,
   },
-  { logger, request, modelProvider, toolProvider, events }
+  { logger, request, modelProvider, memoryProvider, toolProvider, events }
 ) => {
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -76,10 +76,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const agentGraph = createAgentGraph({
     logger,
+    memoryProvider,
     chatModel: model.chatModel,
     tools: langchainTools,
     capabilities: resolvedCapabilities,
     customInstructions,
+    conversation,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);

@@ -28,25 +28,6 @@ const structuredMemorySchema = z.object({
     .describe(
       "An array of strings representing the primary subjects discussed, e.g., 'API authentication', 'data visualization', 'bug fixing'."
     ),
-
-  /*
-  entities: z
-    .object({
-      files: z
-        .array(z.string())
-        .describe("List any filenames or paths mentioned, e.g., 'src/index.js', 'report.docx'."),
-      people: z
-        .array(z.string())
-        .describe("List any names of people mentioned, e.g., 'Alice', 'Dr. Evans'."),
-      organizations: z
-        .array(z.string())
-        .describe("List any company or team names, e.g., 'Elastic', 'Marketing Team'."),
-      dates: z
-        .array(z.string())
-        .describe("List any specific dates or timeframes, e.g., '2024-10-29', 'next quarter'."),
-    })
-    .describe('A collection of named entities mentioned in the conversation.'),
-   */
   user_intent: z
     .string()
     .nullable()
@@ -135,13 +116,13 @@ export const summarizeConversation = async ({
       } = response;
 
       const summary = `
-  ### Title: ${title}
-  ### Overall Summary: ${overallSummary}
-  ### User Intent: ${userIntent}
-  ### Agent Actions: ${agentActions.join('\n')}
-  ### Key Topics: ${keyTopics.join(', ')}
-  ### Outcomes and Decisions: ${outcomesAndDecisions.join('\n')}
-  ### Unanswered Questions: ${unansweredQuestions.join('\n')}
+Title: ${title}
+Overall Summary: ${overallSummary}
+User Intent: ${userIntent}
+Agent Actions: ${agentActions.join('\n')}
+Key Topics: ${keyTopics.join(', ')}
+Outcomes and Decisions: ${outcomesAndDecisions.join('\n')}
+Unanswered Questions: ${unansweredQuestions.join('\n')}
   `;
 
       return summary;

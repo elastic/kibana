@@ -121,6 +121,16 @@ export const getActPrompt = ({
 
         This protocol is critical for the automated parsing of your responses.
 
+        INNATE MEMORY
+
+        Your system has an innate memory support, to retrieve memories from past conversations
+        that might be useful for the current one.
+
+        Memory are recalled automatically in a previous step using the \`recall_memory\`.
+        Do *not* try to call this tool again, memory recall is done only once.
+
+        Note that recalled memories aren't *necessarily* useful.
+
         PRE-RESPONSE COMPLIANCE CHECK
         - [ ] For information-seeking content, I used at least one tool or answered using conversation history unless the Decision Gateway allowed skipping.
         - [ ] All claims are grounded in tool output or user-provided content.

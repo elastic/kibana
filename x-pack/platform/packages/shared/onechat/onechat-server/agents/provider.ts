@@ -56,6 +56,10 @@ export interface AgentHandlerContext {
    */
   toolProvider: ToolProvider;
   /**
+   * Memory provider for recall
+   */
+  memoryProvider: AgentMemoryProvider;
+  /**
    * Onechat runner scoped to the current execution.
    * Can be used to run other workchat primitive as part of the tool execution.
    */
@@ -72,6 +76,14 @@ export interface AgentHandlerContext {
    * Logger scoped to this execution
    */
   logger: Logger;
+}
+
+export interface AgentMemory {
+  content: string;
+}
+
+export interface AgentMemoryProvider {
+  recall(opts: { message: string; previousRounds?: ConversationRound[] }): Promise<AgentMemory[]>;
 }
 
 /**
