@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import fileSaver from 'file-saver';
 import { i18n } from '@kbn/i18n';
+import { getCanvasWorkpadService } from '../../../services/canvas_workpad_service';
 import { useNotifyService } from '../../../services';
 import { CanvasWorkpad } from '../../../../types';
 
