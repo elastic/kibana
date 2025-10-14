@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { test, apmAuth } from '../../fixtures';
+import { test } from '../../fixtures';
 
 test.describe('Agent Configuration - Viewer', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -25,7 +25,7 @@ test.describe(
   { tag: ['@ess'] },
   () => {
     test.beforeEach(async ({ browserAuth }) => {
-      await apmAuth.loginAsApmAllPrivilegesWithoutWriteSettings(browserAuth);
+      await browserAuth.loginAsApmAllPrivilegesWithoutWriteSettings();
     });
 
     test('shows create button as disabled', async ({

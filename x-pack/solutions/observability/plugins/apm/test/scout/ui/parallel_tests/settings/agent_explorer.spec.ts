@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { test, apmAuth } from '../../fixtures';
+import { test } from '../../fixtures';
 
 test.describe('Agent Explorer - Viewer', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -44,7 +44,7 @@ test.describe('Agent Explorer - Editor', { tag: ['@ess', '@svlOblt'] }, () => {
 
 test.describe('Agent Explorer - APM Read Privileges With Write Settings', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
-    await apmAuth.loginAsApmReadPrivilegesWithWriteSettings(browserAuth);
+    await browserAuth.loginAsApmReadPrivilegesWithWriteSettings();
   });
 
   test('should be able to access agent explorer', async ({
@@ -70,7 +70,7 @@ test.describe(
   { tag: ['@ess'] },
   () => {
     test.beforeEach(async ({ browserAuth }) => {
-      await apmAuth.loginAsApmAllPrivilegesWithoutWriteSettings(browserAuth);
+      await browserAuth.loginAsApmAllPrivilegesWithoutWriteSettings();
     });
 
     test('should be able to view agent explorer but with limited functionality', async ({

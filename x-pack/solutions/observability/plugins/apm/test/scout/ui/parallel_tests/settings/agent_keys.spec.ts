@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { test, apmAuth } from '../../fixtures';
+import { test } from '../../fixtures';
 
 test.describe('Agent Keys - Viewer', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -21,7 +21,7 @@ test.describe('Agent Keys - Viewer', { tag: ['@ess', '@svlOblt'] }, () => {
 
 test.describe('Agent Keys - APM All Privileges Without Write Settings', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
-    await apmAuth.loginAsApmAllPrivilegesWithoutWriteSettings(browserAuth);
+    await browserAuth.loginAsApmAllPrivilegesWithoutWriteSettings();
   });
 
   test('should not be able to modify settings', async ({ pageObjects: { agentKeysPage } }) => {

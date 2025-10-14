@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { test, apmAuth } from '../../fixtures';
+import { test } from '../../fixtures';
 
 test.describe('Anomaly Detection - Viewer', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -67,7 +67,7 @@ test.describe(
   { tag: ['@ess'] },
   () => {
     test.beforeEach(async ({ browserAuth }) => {
-      await apmAuth.loginAsApmReadPrivilegesWithWriteSettings(browserAuth);
+      await browserAuth.loginAsApmReadPrivilegesWithWriteSettings();
     });
 
     test('should be able to modify settings', async ({
@@ -95,7 +95,7 @@ test.describe(
   { tag: ['@ess'] },
   () => {
     test.beforeEach(async ({ browserAuth }) => {
-      await apmAuth.loginAsApmAllPrivilegesWithoutWriteSettings(browserAuth);
+      await browserAuth.loginAsApmAllPrivilegesWithoutWriteSettings();
     });
 
     test('should not be able to modify settings', async ({
