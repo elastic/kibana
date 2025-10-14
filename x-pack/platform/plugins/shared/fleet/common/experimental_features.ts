@@ -37,17 +37,32 @@ type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ExperimentalConfigKeys>;
 
 /**
- * Parses the string value used in `xpack.fleet.enableExperimental` kibana configuration,
- * which should be a string of values delimited by a comma (`,`)
+ * Parses two settings in kibana configuration:
+ * 1. xpack.fleet.enableExperimental: an array of experimental values to enable
+ * 2. xpack.fleet.experimentalFeatures: an object that associates a boolean to experimental values to enable or disable them
  *
- * @param configValue
+ * The objective is to make xpack.fleet.experimentalFeatures the source of truth, while keeping
+ * xpack.fleet.enableExperimental for backward compatibility.
+ * In case of conflict, xpack.fleet.experimentalFeatures takes precedence over xpack.fleet.enableExperimental.
+ *
+ * @param enableExperimentalConfigValue the value of xpack.fleet.enableExperimental
+ * @param experimentalFeaturesConfigValue the value of xpack.fleet.experimentalFeatures
  */
-export const parseExperimentalConfigValue = (configValue: string[]): ExperimentalFeatures => {
+export const parseExperimentalConfigValue = (
+  enableExperimentalConfigValue: string[],
+  experimentalFeaturesConfigValue: { [k: string]: boolean }
+): ExperimentalFeatures => {
   const enabledFeatures: Mutable<ExperimentalFeatures> = { ...allowedExperimentalValues };
 
-  for (const value of configValue) {
+  for (const value of enableExperimentalConfigValue) {
     if (isValidExperimentalValue(value)) {
       enabledFeatures[value] = true;
+    }
+  }
+
+  for (const [key, value] of Object.entries(experimentalFeaturesConfigValue)) {
+    if (isValidExperimentalValue(key) && typeof value === 'boolean') {
+      enabledFeatures[key] = value;
     }
   }
 

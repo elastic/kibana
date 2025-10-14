@@ -162,7 +162,10 @@ export const registerRoutes = (
   config: FleetConfigType,
   isServerless?: boolean
 ) => {
-  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
+  const experimentalFeatures = parseExperimentalConfigValue(
+    config.enableExperimental || [],
+    config.experimentalFeatures || {}
+  );
   router.versioned
     .get({
       path: '/internal/fleet/telemetry/usage',

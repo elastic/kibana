@@ -4,12 +4,11 @@ Fleet is in the process to become space aware. This means that different Fleet o
 
 ## How to enable the feature
 
-The feature is behind a feature flag `useSpaceAwareness`.
-
-In your `kibana.yml` config
+The feature is behind a feature flag `useSpaceAwareness`. This flag is enabled by default, but if not you can explicitly enable it in your `kibana.yml` config:
 
 ```yaml
-xpack.fleet.enableExperimental: ['useSpaceAwareness']
+  xpack.fleet.experimentalFeatures:
+    useSpaceAwareness: true
 ```
 
 After the feature flag is enabled you will have to do another step to opt-in for the feature, that call will migrate the current space agnostic saved objects to new space aware saved objects.

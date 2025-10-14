@@ -12,17 +12,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   const serverArgs: string[] = [...baseFleetApiConfig.get('kbnTestServer.serverArgs')];
 
-  const enableExperimentalIndex = serverArgs.findIndex((val) =>
-    val.includes('xpack.fleet.enableExperimental')
+  // Specifically enable space awareness for this config.
+  const experimentalFeaturesIndex = serverArgs.findIndex((val) =>
+    val.includes('xpack.fleet.experimentalFeatures')
   );
-  serverArgs[enableExperimentalIndex] = `--xpack.fleet.enableExperimental=${JSON.stringify([
-    'outputSecretsStorage',
-    'agentTamperProtectionEnabled',
-    'enableStrictKQLValidation',
-    'subfeaturePrivileges',
-    'useSpaceAwareness',
-    'enablePackageRollback',
-  ])}`;
+  serverArgs[experimentalFeaturesIndex] = `--xpack.fleet.experimentalFeatures=${JSON.stringify({
+    useSpaceAwareness: true,
+  })}`;
 
   return {
     ...baseFleetApiConfig.getAll(),

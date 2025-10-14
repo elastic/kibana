@@ -143,7 +143,7 @@ describe('Config schema', () => {
   });
 
   describe('deprecations', () => {
-    it('should add a depreciations when trying to enable a non existing experimental feature', () => {
+    it('should add two deprecations when trying to enable a non existing experimental feature with enableExperimental', () => {
       const res = applyConfigDeprecations({
         enableExperimental: ['notvalid'],
       });
@@ -151,13 +151,42 @@ describe('Config schema', () => {
       expect(res.messages).toMatchInlineSnapshot(`
         Array [
           "[notvalid] is not a valid fleet experimental feature [xpack.fleet.fleet.enableExperimental].",
+          "Config key [xpack.fleet.fleet.enableExperimental] is deprecated. Please use [xpack.fleet.fleet.experimentalFeatures] instead.",
         ]
       `);
     });
 
-    it('should not add a depreciations when enabling an existing experimental feature', () => {
+    it('should only add one deprecation when enabling an existing experimental feature with enableExperimental', () => {
       const res = applyConfigDeprecations({
         enableExperimental: ['useSpaceAwareness'],
+      });
+
+      expect(res.messages).toMatchInlineSnapshot(`
+        Array [
+          "Config key [xpack.fleet.fleet.enableExperimental] is deprecated. Please use [xpack.fleet.fleet.experimentalFeatures] instead.",
+        ]
+      `);
+    });
+
+    it('should add a deprecation when trying to enable a non existing experimental feature with experimentalFeatures', () => {
+      const res = applyConfigDeprecations({
+        experimentalFeatures: {
+          notvalid: true,
+        },
+      });
+
+      expect(res.messages).toMatchInlineSnapshot(`
+        Array [
+          "[notvalid] is not a valid fleet experimental feature [xpack.fleet.fleet.experimentalFeatures].",
+        ]
+      `);
+    });
+
+    it('should not add a deprecation when enabling an existing experimental feature with experimentalFeatures', () => {
+      const res = applyConfigDeprecations({
+        experimentalFeatures: {
+          useSpaceAwareness: true,
+        },
       });
 
       expect(res.messages).toMatchInlineSnapshot(`Array []`);
