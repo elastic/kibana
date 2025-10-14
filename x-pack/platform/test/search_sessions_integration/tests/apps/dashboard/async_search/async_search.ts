@@ -13,11 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
-  const { common, dashboard, visChart } = getPageObjects([
-    'common',
-    'dashboard',
-    'visChart',
-  ]);
+  const { common, dashboard, visChart } = getPageObjects(['common', 'dashboard', 'visChart']);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
