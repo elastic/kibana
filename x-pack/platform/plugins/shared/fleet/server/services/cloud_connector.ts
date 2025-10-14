@@ -80,24 +80,18 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     cloudProvider: string
   ): Record<string, any> {
     if (cloudProvider === 'aws') {
-      const awsVars = vars as AwsCloudConnectorVars;
       return {
-        ...(awsVars.role_arn?.value && { role_arn: awsVars.role_arn }),
-        ...(awsVars.external_id?.value && { external_id: awsVars.external_id }),
+        ...(vars.role_arn?.value && { role_arn: vars.role_arn }),
+        ...(vars.external_id?.value && { external_id: vars.external_id }),
       };
     }
 
     if (cloudProvider === 'azure') {
-      const azureVars = vars as AzureCloudConnectorVars;
       return {
-        ...(azureVars['azure.credentials.tenant_id']?.value && {
-          'azure.credentials.tenant_id': azureVars['azure.credentials.tenant_id'],
-        }),
-        ...(azureVars['azure.credentials.client_id']?.value && {
-          'azure.credentials.client_id': azureVars['azure.credentials.client_id'],
-        }),
-        ...(azureVars.azure_credentials_cloud_connector_id?.value && {
-          azure_credentials_cloud_connector_id: azureVars.azure_credentials_cloud_connector_id,
+        ...(vars.tenant_id?.value && { tenant_id: vars.tenant_id }),
+        ...(vars.client_id?.value && { client_id: vars.client_id }),
+        ...(vars.azure_credentials_cloud_connector_id?.value && {
+          azure_credentials_cloud_connector_id: vars.azure_credentials_cloud_connector_id,
         }),
       };
     }
@@ -127,19 +121,24 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       let name = cloudConnector.name;
 
       // Type-safe name generation
-      if (this.isAwsCloudConnectorVars(vars, cloudProvider) && vars.role_arn?.value) {
+      if (this.isAwsCloudConnectorVars(vars, cloudProvider)) {
         name = vars.role_arn.value;
-      } else if (
-        this.isAzureCloudConnectorVars(vars, cloudProvider) &&
-        vars['azure.credentials.tenant_id']?.value
-      ) {
-        const tenantIdValue = vars['azure.credentials.tenant_id'].value;
+      } else if (this.isAzureCloudConnectorVars(vars, cloudProvider)) {
+        const tenantIdValue = vars.tenant_id.value;
+        const clientIdValue = vars.client_id.value;
         // Handle both string values and CloudConnectorSecretReference objects
         const tenantIdString =
           typeof tenantIdValue === 'string'
             ? tenantIdValue
             : (tenantIdValue as CloudConnectorSecretReference).id || 'unknown';
-        name = `azure-connector-${tenantIdString.substring(0, 8)}`;
+        const clientIdString =
+          typeof clientIdValue === 'string'
+            ? clientIdValue
+            : (clientIdValue as CloudConnectorSecretReference).id || 'unknown';
+        name = `azure-connector-${clientIdString.substring(0, 8)}-${tenantIdString.substring(
+          0,
+          8
+        )}`;
       }
 
       // Check if space awareness is enabled for namespace handling
@@ -168,7 +167,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       return {
         id: savedObject.id,
         ...savedObject.attributes,
-      } as CloudConnector;
+      };
     } catch (error) {
       logger.error('Failed to create cloud connector', error.message);
       throw new CloudConnectorCreateError(
@@ -198,7 +197,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       return cloudConnectors.saved_objects.map((savedObject) => ({
         id: savedObject.id,
         ...savedObject.attributes,
-      })) as CloudConnector[];
+      }));
     } catch (error) {
       logger.error('Failed to get cloud connectors list', error.message);
       throw new CloudConnectorGetListError(
@@ -226,7 +225,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       return {
         id: cloudConnector.id,
         ...cloudConnector.attributes,
-      } as CloudConnector;
+      };
     } catch (error) {
       logger.error('Failed to get cloud connector', error.message);
       throw new CloudConnectorGetListError(
@@ -389,20 +388,24 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       cloudConnector.cloudProvider === 'azure' &&
       this.isAzureCloudConnectorVars(vars, 'azure')
     ) {
-      const tenantId = vars['azure.credentials.tenant_id']?.value;
-      const clientId = vars['azure.credentials.client_id']?.value;
+      const tenantId = vars.tenant_id?.value;
+      const clientId = vars.client_id?.value;
+      const cloudConnectorId = vars.azure_credentials_cloud_connector_id?.value;
 
       if (!tenantId) {
-        logger.error('Package policy must contain azure.credentials.tenant_id variable');
-        throw new CloudConnectorInvalidVarsError(
-          'Package policy must contain azure.credentials.tenant_id variable'
-        );
+        logger.error('Package policy must contain tenant_id variable');
+        throw new CloudConnectorInvalidVarsError('Package policy must contain tenant_id variable');
       }
 
       if (!clientId) {
-        logger.error('Package policy must contain azure.credentials.client_id variable');
+        logger.error('Package policy must contain client_id variable');
+        throw new CloudConnectorInvalidVarsError('Package policy must contain client_id variable');
+      }
+
+      if (!cloudConnectorId) {
+        logger.error('Package policy must contain azure_credentials_cloud_connector_id variable');
         throw new CloudConnectorInvalidVarsError(
-          'Package policy must contain azure.credentials.client_id variable'
+          'Package policy must contain azure_credentials_cloud_connector_id variable'
         );
       }
     } else {

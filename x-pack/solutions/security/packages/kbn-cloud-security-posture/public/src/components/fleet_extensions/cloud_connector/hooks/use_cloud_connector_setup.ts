@@ -47,27 +47,26 @@ const getFieldNamesIfExists = (inputVars: PackagePolicyConfigRecord) => {
 
   // AWS field names - use constants first, fallback to string search
   const roleArnFieldName = findFieldName(AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN, [
-    'role_arn',
     AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN,
   ]);
 
   const externalIdFieldName = findFieldName(AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID, [
-    'external_id',
     AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID,
   ]);
 
   // Azure field names - use constants first, fallback to string search
-  const tenantIdFieldName = findFieldName(AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID, [
-    'tenant_id',
+  const tenantIdFieldName = findFieldName(AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID, [
+    AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID,
   ]);
 
-  const clientIdFieldName = findFieldName(AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID, [
-    'client_id',
+  const clientIdFieldName = findFieldName(AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID, [
+    AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID,
   ]);
 
+  // Azure Cloud Connector ID field name has no current fallback
   const azureCloudConnectorIdFieldName = findFieldName(
     AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID,
-    ['azure_credentials_cloud_connector_id']
+    [AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID]
   );
 
   return {

@@ -9,14 +9,15 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
-import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import type { CloudConnectorFormProps } from '../types';
 import { AzureArmTemplateGuide } from './azure_arm_template_guide';
 import {
+  type AzureCloudConnectorFieldNames,
   getCloudConnectorRemoteRoleTemplate,
   getElasticStackId,
   isAzureCredentials,
   updateInputVarsWithCredentials,
+  updatePolicyWithAzureCloudConnectorCredentials,
 } from '../utils';
 import { AZURE_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
 import { getAzureCloudConnectorsCredentialsFormOptions } from './azure_cloud_connector_options';
@@ -58,52 +59,6 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   const azureFormConfig = getAzureCloudConnectorsCredentialsFormOptions(updatedInputVars);
   const fields = azureFormConfig?.fields;
 
-  // Helper function to update Azure policy with credentials
-  const updatePolicyWithAzureCredentials = (
-    policy: NewPackagePolicy,
-    inputData: NewPackagePolicyInput,
-    credentialUpdate: Record<string, string>
-  ) => {
-    const updatedPolicy = { ...policy };
-
-    // Find the input to update
-    const updatedInputs = updatedPolicy.inputs?.map((policyInput: NewPackagePolicyInput) => {
-      if (
-        policyInput.policy_template === inputData.policy_template &&
-        policyInput.type === inputData.type
-      ) {
-        const updatedStreams = policyInput.streams?.map(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (stream: any) => {
-            if (stream.data_stream.dataset === inputData.streams[0].data_stream.dataset) {
-              return {
-                ...stream,
-                vars: {
-                  ...stream.vars,
-                  ...Object.entries(credentialUpdate).reduce((acc, [key, value]) => {
-                    acc[key] = { value };
-                    return acc;
-                  }, {} as Record<string, { value: string }>),
-                },
-              };
-            }
-            return stream;
-          }
-        );
-        return {
-          ...policyInput,
-          streams: updatedStreams,
-        };
-      }
-      return policyInput;
-    });
-
-    return {
-      ...updatedPolicy,
-      inputs: updatedInputs,
-    };
-  };
-
   return (
     <>
       <EuiAccordion
@@ -142,9 +97,15 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
             // Update local credentials state if available
             if (credentials && isAzureCredentials(credentials) && setCredentials) {
               const updatedCredentials = { ...credentials };
-              if (key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID) {
+              if (
+                key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID ||
+                key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID
+              ) {
                 updatedCredentials.tenantId = value;
-              } else if (key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID) {
+              } else if (
+                key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID ||
+                key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID
+              ) {
                 updatedCredentials.clientId = value;
               } else if (
                 key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID
@@ -154,10 +115,16 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
               setCredentials(updatedCredentials);
             } else {
               // Fallback to old method
-              updatePolicy({
-                updatedPolicy: updatePolicyWithAzureCredentials(newPolicy, input, {
+              const updatedPolicyWithCredentials = updatePolicyWithAzureCloudConnectorCredentials(
+                newPolicy,
+                input,
+                {
                   [key]: value,
-                }),
+                } as Record<AzureCloudConnectorFieldNames, string | undefined>
+              );
+
+              updatePolicy({
+                updatedPolicy: updatedPolicyWithCredentials,
               });
             }
           }}

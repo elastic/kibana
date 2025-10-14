@@ -309,18 +309,15 @@ const extractPackagePolicyVars = (
   }
 
   if (packagePolicy.supports_cloud_connector && cloudProvider === 'azure') {
-    const tenantId: string =
-      vars['azure.credentials.tenant_id']?.value || vars[AZURE_TENANT_ID_VAR_NAME]?.value;
-    const clientId: string =
-      vars['azure.credentials.client_id']?.value || vars[AZURE_CLIENT_ID_VAR_NAME]?.value;
+    const tenantId: string = vars.tenant_id?.value || vars[AZURE_TENANT_ID_VAR_NAME]?.value;
+    const clientId: string = vars.client_id?.value || vars[AZURE_CLIENT_ID_VAR_NAME]?.value;
     const cloudConnectorId: string =
-      vars.azure_credentials_cloud_connector_id?.value ||
-      vars[AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME]?.value;
+      vars.cloud_connector_id?.value || vars[AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME]?.value;
 
     if (tenantId && clientId && cloudConnectorId) {
       const azureCloudConnectorVars: AzureCloudConnectorVars = {
-        'azure.credentials.tenant_id': { type: 'text', value: tenantId },
-        'azure.credentials.client_id': { type: 'text', value: clientId },
+        tenant_id: { type: 'text', value: tenantId },
+        client_id: { type: 'text', value: clientId },
         azure_credentials_cloud_connector_id: { type: 'text', value: cloudConnectorId },
       };
 

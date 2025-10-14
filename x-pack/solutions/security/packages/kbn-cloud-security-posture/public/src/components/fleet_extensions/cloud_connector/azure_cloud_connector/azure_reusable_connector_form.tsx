@@ -34,8 +34,8 @@ export const AzureReusableConnectorForm: React.FC<{
           label: connector.name,
           value: connector.id,
           id: connector.id,
-          tenantId: azureVars['azure.credentials.tenant_id'],
-          clientId: azureVars['azure.credentials.client_id'],
+          tenantId: azureVars.tenant_id,
+          clientId: azureVars.client_id,
           azure_credentials_cloud_connector_id: azureVars.azure_credentials_cloud_connector_id,
         };
       });

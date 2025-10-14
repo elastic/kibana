@@ -16,6 +16,7 @@ import {
   getCloudConnectorRemoteRoleTemplate,
   updateInputVarsWithCredentials,
   isAwsCredentials,
+  type AwsCloudConnectorFieldNames,
 } from '../utils';
 import { AWS_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
 import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
@@ -102,7 +103,7 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
               updatePolicy({
                 updatedPolicy: updatePolicyWithAwsCloudConnectorCredentials(newPolicy, input, {
                   [key]: value,
-                }),
+                } as Record<AwsCloudConnectorFieldNames, string | undefined>),
               });
             }
           }}

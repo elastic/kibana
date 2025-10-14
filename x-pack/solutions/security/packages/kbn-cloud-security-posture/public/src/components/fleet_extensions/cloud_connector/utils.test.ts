@@ -23,7 +23,7 @@ import type {
   AwsCloudConnectorVars,
   AzureCloudConnectorVars,
 } from '@kbn/fleet-plugin/common/types';
-import { type CloudConnectorCredentials } from './types';
+import type { CloudConnectorCredentials } from './types';
 
 describe('updateInputVarsWithCredentials', () => {
   let mockInputVars: PackagePolicyConfigRecord;
@@ -565,8 +565,8 @@ describe('Cloud Connector Type Guards', () => {
 
     it('should return false for Azure cloud connector vars', () => {
       const azureVars: AzureCloudConnectorVars = {
-        'azure.credentials.tenant_id': { value: 'tenant-id' },
-        'azure.credentials.client_id': { value: 'client-id' },
+        tenant_id: { value: 'tenant-id' },
+        client_id: { value: 'client-id' },
         azure_credentials_cloud_connector_id: { value: 'connector-id' },
       };
 
@@ -577,8 +577,8 @@ describe('Cloud Connector Type Guards', () => {
   describe('isAzureCloudConnectorVars', () => {
     it('should return true for Azure cloud connector vars with azure provider', () => {
       const azureVars: AzureCloudConnectorVars = {
-        'azure.credentials.tenant_id': { value: 'tenant-id' },
-        'azure.credentials.client_id': { value: 'client-id' },
+        tenant_id: { value: 'tenant-id' },
+        client_id: { value: 'client-id' },
         azure_credentials_cloud_connector_id: { value: 'connector-id' },
       };
 
@@ -586,13 +586,12 @@ describe('Cloud Connector Type Guards', () => {
     });
 
     it('should return false for Azure cloud connector vars with non-azure provider', () => {
-      const azureVars: AzureCloudConnectorVars = {
-        'azure.credentials.tenant_id': { value: 'tenant-id' },
-        'azure.credentials.client_id': { value: 'client-id' },
-        azure_credentials_cloud_connector_id: { value: 'connector-id' },
+      const awsVars: AwsCloudConnectorVars = {
+        role_arn: { value: 'arn:aws:iam::123456789012:role/MyRole' },
+        external_id: { value: { isSecretRef: true, id: 'secret-id' }, type: 'password' },
       };
 
-      expect(isAzureCloudConnectorVars(azureVars, 'aws')).toBe(false);
+      expect(isAzureCloudConnectorVars(awsVars, 'aws')).toBe(false);
     });
 
     it('should return false for AWS cloud connector vars', () => {

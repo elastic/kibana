@@ -24,25 +24,22 @@ export interface CloudConnectorSecretVar {
   frozen?: boolean;
 }
 
-export interface AwsCloudConnectorVars {
+interface BaseCloudConnectorVars {
+  [key: string]: CloudConnectorVar | CloudConnectorSecretVar | undefined;
+}
+
+export interface AwsCloudConnectorVars extends BaseCloudConnectorVars {
   role_arn: CloudConnectorVar;
   external_id: CloudConnectorSecretVar;
 }
 
-export interface AzureCloudConnectorVars {
-  'azure.credentials.tenant_id': CloudConnectorVar;
-  'azure.credentials.client_id': CloudConnectorVar;
+export interface AzureCloudConnectorVars extends BaseCloudConnectorVars {
+  tenant_id: CloudConnectorVar;
+  client_id: CloudConnectorVar;
   azure_credentials_cloud_connector_id: CloudConnectorVar;
 }
 
-export interface CloudConnectorVars {
-  role_arn?: CloudConnectorVar;
-  external_id?: CloudConnectorSecretVar;
-  // Azure variables
-  'azure.credentials.tenant_id'?: CloudConnectorVar;
-  'azure.credentials.client_id'?: CloudConnectorVar;
-  azure_credentials_cloud_connector_id?: CloudConnectorSecretVar;
-}
+type CloudConnectorVars = AwsCloudConnectorVars | AzureCloudConnectorVars;
 
 export interface CloudConnector {
   id: string;

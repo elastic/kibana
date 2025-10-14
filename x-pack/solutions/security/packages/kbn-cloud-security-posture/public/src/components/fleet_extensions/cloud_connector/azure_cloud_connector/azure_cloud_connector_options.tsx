@@ -47,7 +47,9 @@ interface AzureCloudConnectorOptions {
 // Define field sequence order
 const FIELD_SEQUENCE = [
   AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID,
+  AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID,
   AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID,
+  AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID,
   AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID,
 ] as const;
 
@@ -72,6 +74,17 @@ export const getAzureCloudConnectorsCredentialsFormOptions = (
     });
   }
 
+  if (inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID]) {
+    availableFields.set(AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID, {
+      id: AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID,
+      label: AZURE_CLOUD_CONNECTOR_FIELD_LABELS.tenant_id,
+      type: 'text' as const,
+      dataTestSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
+      isSecret: true,
+      value: inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID].value,
+    });
+  }
+
   if (inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID]) {
     availableFields.set(AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID, {
       id: AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID,
@@ -80,6 +93,17 @@ export const getAzureCloudConnectorsCredentialsFormOptions = (
       dataTestSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
       isSecret: true,
       value: inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID].value,
+    });
+  }
+
+  if (inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID]) {
+    availableFields.set(AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID, {
+      id: AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID,
+      label: AZURE_CLOUD_CONNECTOR_FIELD_LABELS.client_id,
+      type: 'text' as const,
+      dataTestSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
+      isSecret: true,
+      value: inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID].value,
     });
   }
 

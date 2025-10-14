@@ -37,8 +37,10 @@ export const AWS_CLOUD_CONNECTOR_FIELD_NAMES = {
 } as const;
 
 export const AZURE_CLOUD_CONNECTOR_FIELD_NAMES = {
-  TENANT_ID: 'azure.credentials.tenant_id',
-  CLIENT_ID: 'azure.credentials.client_id',
+  TENANT_ID: 'tenant_id',
+  CLIENT_ID: 'client_id',
+  AZURE_TENANT_ID: 'azure.credentials.tenant_id',
+  AZURE_CLIENT_ID: 'azure.credentials.client_id',
   AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID: 'azure_credentials_cloud_connector_id',
 } as const;
 
