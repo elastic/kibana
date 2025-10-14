@@ -41,6 +41,7 @@ import type {
   FleetRequestHandler,
 } from '../../types';
 import { FleetNotFoundError } from '../../errors';
+import { isESClientError } from '../../errors/utils';
 import * as AgentService from '../../services/agents';
 import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
 import { getAgentStatusForAgentPolicy } from '../../services/agents';
@@ -200,43 +201,74 @@ export const getAgentsHandler: FleetRequestHandler<
     }
   }
 
-  const agentRes = await agentClient.asCurrentUser.listAgents({
-    page: request.query.page,
-    perPage: request.query.perPage,
-    showAgentless: request.query.showAgentless,
-    showInactive: request.query.showInactive,
-    showUpgradeable: request.query.showUpgradeable,
-    kuery: request.query.kuery,
-    sortField: request.query.sortField,
-    sortOrder: request.query.sortOrder,
-    searchAfter,
-    openPit: request.query.openPit,
-    pitId: request.query.pitId,
-    pitKeepAlive: request.query.pitKeepAlive,
-    getStatusSummary: request.query.getStatusSummary,
-  });
+  try {
+    const agentRes = await agentClient.asCurrentUser.listAgents({
+      page: request.query.page,
+      perPage: request.query.perPage,
+      showAgentless: request.query.showAgentless,
+      showInactive: request.query.showInactive,
+      showUpgradeable: request.query.showUpgradeable,
+      kuery: request.query.kuery,
+      sortField: request.query.sortField,
+      sortOrder: request.query.sortOrder,
+      searchAfter,
+      openPit: request.query.openPit,
+      pitId: request.query.pitId,
+      pitKeepAlive: request.query.pitKeepAlive,
+      getStatusSummary: request.query.getStatusSummary,
+    });
 
-  const { total, page, perPage, statusSummary, pit } = agentRes;
-  let { agents } = agentRes;
+    const { total, page, perPage, statusSummary, pit } = agentRes;
+    let { agents } = agentRes;
 
-  // Assign metrics
-  if (request.query.withMetrics) {
-    agents = await fetchAndAssignAgentMetrics(esClientCurrentUser, agents);
+    // Assign metrics
+    if (request.query.withMetrics) {
+      agents = await fetchAndAssignAgentMetrics(esClientCurrentUser, agents);
+    }
+
+    // Retrieve last agent to use for nextSearchAfter
+    const lastAgent = agents.length > 0 ? agents[agents.length - 1] : undefined;
+
+    const body: GetAgentsResponse = {
+      items: agents,
+      total,
+      page,
+      perPage,
+      ...(lastAgent && lastAgent.sort ? { nextSearchAfter: JSON.stringify(lastAgent.sort) } : {}),
+      ...(pit ? { pit } : {}),
+      ...(statusSummary ? { statusSummary } : {}),
+    };
+    return response.ok({ body });
+  } catch (error) {
+    // Transform Elasticsearch validation errors into 400-level responses
+    if (isESClientError(error)) {
+      const errorBody = error.meta.body as any;
+
+      // Extract the most specific error message (try root_cause first)
+      let errorMessage = errorBody?.error?.reason || error.message;
+      if (errorBody?.error?.root_cause?.[0]?.reason) {
+        errorMessage = errorBody.error.root_cause[0].reason;
+      }
+
+      // Check if this looks like a validation error (invalid parameters)
+      const errorType = errorBody?.error?.type;
+      const isValidationError =
+        errorType === 'parsing_exception' ||
+        errorType === 'illegal_argument_exception' ||
+        errorType === 'search_phase_execution_exception' ||
+        errorMessage.includes('No mapping found for') ||
+        errorMessage.includes('Unknown field');
+
+      if (isValidationError) {
+        return response.badRequest({
+          body: { message: `Invalid search parameter: ${errorMessage}` },
+        });
+      }
+    }
+
+    // Re-throw other errors to be handled by the global error handler
+    throw error;
   }
-
-  // Retrieve last agent to use for nextSearchAfter
-  const lastAgent = agents.length > 0 ? agents[agents.length - 1] : undefined;
-
-  const body: GetAgentsResponse = {
-    items: agents,
-    total,
-    page,
-    perPage,
-    ...(lastAgent && lastAgent.sort ? { nextSearchAfter: JSON.stringify(lastAgent.sort) } : {}),
-    ...(pit ? { pit } : {}),
-    ...(statusSummary ? { statusSummary } : {}),
-  };
-  return response.ok({ body });
 };
 
 export const getAgentTagsHandler: RequestHandler<
