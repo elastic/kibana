@@ -22,7 +22,7 @@ import { getRuleIdFromQueryLink } from './helpers/query';
 function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): boolean {
   return (
     currentQuery.kql.query !== nextQuery.kql.query ||
-    !isEqual(currentQuery.system, nextQuery.system)
+    !isEqual(currentQuery.feature, nextQuery.feature)
   );
 }
 

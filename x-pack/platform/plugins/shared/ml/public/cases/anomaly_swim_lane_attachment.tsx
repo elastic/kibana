@@ -42,7 +42,7 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
           ),
           description: inputProps.jobIds.join(', '),
         },
-        ...(inputProps.viewBy
+        ...(inputProps.swimlaneType === 'viewBy' && inputProps.viewBy
           ? [
               {
                 title: (
