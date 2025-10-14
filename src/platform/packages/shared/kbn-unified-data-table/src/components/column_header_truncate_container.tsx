@@ -14,15 +14,18 @@ import { css } from '@emotion/react';
 const ColumnHeaderTruncateContainer = ({
   headerRowHeight,
   children,
+  wordBreak = 'break-all',
 }: {
   headerRowHeight?: number;
   children: React.ReactNode;
+  wordBreak?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
 
   const headerCss = css`
     overflow-wrap: anywhere;
     white-space: normal;
+    word-break: ${wordBreak};
     line-height: ${euiTheme.size.base};
     text-align: left;
     .euiDataGridHeaderCell--numeric & {

@@ -258,7 +258,9 @@ export function PreviewTable({
       return {
         id: column,
         display: (
-          <ColumnHeaderTruncateContainer>{interleavedColumnParts}</ColumnHeaderTruncateContainer>
+          <ColumnHeaderTruncateContainer wordBreak="normal">
+            {interleavedColumnParts}
+          </ColumnHeaderTruncateContainer>
         ),
         actions:
           Boolean(setVisibleColumns) || Boolean(setSorting)
