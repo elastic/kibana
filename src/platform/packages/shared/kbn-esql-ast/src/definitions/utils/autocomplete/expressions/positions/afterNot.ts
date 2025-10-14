@@ -9,9 +9,10 @@
 
 import { isFunctionExpression } from '../../../../../ast/is';
 import type { ISuggestionItem } from '../../../../../commands_registry/types';
-import { getOperatorsSuggestionsAfterNot } from '../../../operators';
+import { getOperatorSuggestion } from '../../../operators';
 import type { ExpressionContext } from '../types';
 import { SuggestionBuilder } from '../SuggestionBuilder';
+import { operatorsDefinitions } from '../../../../all_operators';
 
 /**
  * Suggests completions after the NOT keyword
@@ -38,6 +39,8 @@ export async function suggestAfterNot(ctx: ExpressionContext): Promise<ISuggesti
     return builder.build();
   }
 
-  // Case 2: NOT as part of binary operator - suggest NOT IN, NOT LIKE, NOT RLIKE
-  return getOperatorsSuggestionsAfterNot();
+  // Case 2: NOT as part of binary operator - suggest IN, LIKE, RLIKE
+  return operatorsDefinitions
+    .filter(({ name }) => name === 'like' || name === 'rlike' || name === 'in')
+    .map(getOperatorSuggestion);
 }

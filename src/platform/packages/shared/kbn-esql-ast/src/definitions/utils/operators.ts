@@ -94,41 +94,6 @@ export const getOperatorSuggestions = (
   ).map(getOperatorSuggestion);
 };
 
-export const getOperatorsSuggestionsAfterNot = (): ISuggestionItem[] => {
-  return operatorsDefinitions
-    .filter(({ name }) => name === 'like' || name === 'rlike' || name === 'in')
-    .map(getOperatorSuggestion);
-};
-
-const getNullCheckOperators = () => {
-  return operatorsDefinitions.filter(({ name }) => name === 'is null' || name === 'is not null');
-};
-
-/** Suggest complete "IS [NOT] NULL" operators when the user has started typing "IS ..." */
-export const getNullCheckOperatorSuggestions = (
-  queryText: string,
-  location: Location,
-  leftParamType: FunctionParameterType
-): ISuggestionItem[] => {
-  const candidates = getNullCheckOperators().map(({ name }) => name);
-  const queryLower = queryText.toLowerCase();
-  const queryNormalized = queryLower.replace(/\s+/g, ' ').replace(/\s+$/, ' ');
-  const allowedOperators = candidates.filter((candidate) => {
-    const candidateLower = candidate.toLowerCase();
-    // - "... is " matches candidate "is null" (prefix: "is ")
-    // - "... is n" matches candidate "is not null" (prefix: "is n")
-    return [...candidateLower].some((_, i) =>
-      queryNormalized.endsWith(candidateLower.slice(0, i + 1))
-    );
-  });
-
-  return getOperatorSuggestions({
-    location,
-    leftParamType,
-    allowed: allowedOperators,
-  });
-};
-
 function getSupportedTypesForBinaryOperators(
   fnDef: FunctionDefinition | undefined,
   previousType: SupportedDataType | 'unknown'
@@ -233,69 +198,55 @@ export async function getSuggestionsToRightOfOperatorExpression({
       if (fnDef?.signatures.every(({ params }) => params.some(({ type }) => isArrayType(type)))) {
         suggestions.push(listCompleteItem);
       } else {
-        const couldBeNullCheck = getNullCheckOperators().some(({ name }) =>
-          name.startsWith(operator.name.toLowerCase())
+        // this is a special case with AND/OR
+        // <COMMAND> expression AND/OR <suggest>
+        // technically another boolean value should be suggested, but it is a better experience
+        // to actually suggest a wider set of fields/functions
+        const isAndOrWithBooleanLeft =
+          leftArgType === 'boolean' &&
+          (operator.name === 'and' || operator.name === 'or') &&
+          getFunctionDefinition(operator.name)?.type === FunctionDefinitionTypes.OPERATOR;
+
+        const typeToUse = isAndOrWithBooleanLeft
+          ? (['any'] as (SupportedDataType | 'unknown' | 'any')[])
+          : getSupportedTypesForBinaryOperators(fnDef, leftArgType);
+
+        const useValueType = Boolean(operator.subtype === 'binary-expression');
+
+        // Fields/columns suggestions
+        suggestions.push(
+          ...(await getFieldsSuggestions(typeToUse, getColumnsByType, {
+            values: useValueType,
+            addSpaceAfterField: addSpaceAfterOperator ?? false,
+            openSuggestions: openSuggestions ?? false,
+            promoteToTop: true,
+          }))
         );
 
-        if (couldBeNullCheck) {
-          suggestions.push(
-            ...getNullCheckOperatorSuggestions(
-              queryText,
-              location,
-              leftArgType === 'unknown' || leftArgType === 'unsupported' ? 'any' : leftArgType
-            )
-          );
-        } else {
-          // this is a special case with AND/OR
-          // <COMMAND> expression AND/OR <suggest>
-          // technically another boolean value should be suggested, but it is a better experience
-          // to actually suggest a wider set of fields/functions
-          const isAndOrWithBooleanLeft =
-            leftArgType === 'boolean' &&
-            (operator.name === 'and' || operator.name === 'or') &&
-            getFunctionDefinition(operator.name)?.type === FunctionDefinitionTypes.OPERATOR;
+        // Date literals (policy-gated in helpers) with consistent advance/comma behavior
+        suggestions.push(
+          ...getLiteralsSuggestions(typeToUse, location, {
+            includeDateLiterals: true,
+            includeCompatibleLiterals: false,
+            addComma: false,
+            advanceCursorAndOpenSuggestions: openSuggestions ?? false,
+          })
+        );
 
-          const typeToUse = isAndOrWithBooleanLeft
-            ? (['any'] as (SupportedDataType | 'unknown' | 'any')[])
-            : getSupportedTypesForBinaryOperators(fnDef, leftArgType);
-
-          const useValueType = Boolean(operator.subtype === 'binary-expression');
-
-          // Fields/columns suggestions
-          suggestions.push(
-            ...(await getFieldsSuggestions(typeToUse, getColumnsByType, {
-              values: useValueType,
-              addSpaceAfterField: addSpaceAfterOperator ?? false,
+        // Function suggestions
+        suggestions.push(
+          ...getFunctionsSuggestions({
+            location,
+            types: typeToUse,
+            options: {
+              ignored: [],
+              addSpaceAfterFunction: addSpaceAfterOperator ?? false,
               openSuggestions: openSuggestions ?? false,
-              promoteToTop: true,
-            }))
-          );
-
-          // Date literals (policy-gated in helpers) with consistent advance/comma behavior
-          suggestions.push(
-            ...getLiteralsSuggestions(typeToUse, location, {
-              includeDateLiterals: true,
-              includeCompatibleLiterals: false,
-              addComma: false,
-              advanceCursorAndOpenSuggestions: openSuggestions ?? false,
-            })
-          );
-
-          // Function suggestions
-          suggestions.push(
-            ...getFunctionsSuggestions({
-              location,
-              types: typeToUse,
-              options: {
-                ignored: [],
-                addSpaceAfterFunction: addSpaceAfterOperator ?? false,
-                openSuggestions: openSuggestions ?? false,
-              },
-              context,
-              callbacks,
-            })
-          );
-        }
+            },
+            context,
+            callbacks,
+          })
+        );
       }
     }
 
