@@ -2070,6 +2070,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           )
         );
 
+      // delete previous versions
+      const response = await soClient
+        .bulkDelete(
+          idsToDelete.map((id) => ({ id: `${id}:prev`, type: savedObjectType })),
+          {
+            force: true, // need to delete through multiple space
+          }
+        )
+        .catch((error) => logger.error(`Error deleting previous versions: ${error}`));
+      logger.debug(`Attempted to delete previous versions ${JSON.stringify(response)}`);
+
       statuses.forEach(({ id, success, error }) => {
         const packagePolicy = packagePolicies.find((p) => p.id === id);
         if (success && packagePolicy) {

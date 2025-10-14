@@ -507,6 +507,9 @@ export const postEvaluateRoute = (
                   {
                     runName,
                     tags: ['evaluation'],
+                    configurable: {
+                      thread_id: uuidv4(),
+                    },
                   }
                 );
                 const lastMessage = result.messages[result.messages.length - 1];

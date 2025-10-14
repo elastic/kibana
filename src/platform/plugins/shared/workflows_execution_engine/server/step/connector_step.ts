@@ -8,11 +8,11 @@
  */
 
 import type { ConnectorExecutor } from '../connector_executor';
-import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { RunStepResult, BaseStep } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 
 // Extend BaseStep for connector-specific properties
 export interface ConnectorStep extends BaseStep {
@@ -23,17 +23,17 @@ export interface ConnectorStep extends BaseStep {
 export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorStep> {
   constructor(
     step: ConnectorStep,
-    contextManager: WorkflowContextManager,
+    stepExecutionRuntime: StepExecutionRuntime,
     connectorExecutor: ConnectorExecutor,
     workflowState: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
-    super(step, contextManager, connectorExecutor, workflowState);
+    super(step, stepExecutionRuntime, connectorExecutor, workflowState);
   }
 
   public getInput() {
     // Get current context for templating
-    const context = this.contextManager.getContext();
+    const context = this.stepExecutionRuntime.contextManager.getContext();
     // Render inputs from 'with'
     return Object.entries(this.step.with ?? {}).reduce((acc: Record<string, any>, [key, value]) => {
       if (typeof value === 'string') {

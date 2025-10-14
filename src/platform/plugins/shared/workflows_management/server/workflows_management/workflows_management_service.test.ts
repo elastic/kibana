@@ -12,6 +12,7 @@ import type { ElasticsearchClient, SecurityServiceStart } from '@kbn/core/server
 import { loggerMock } from '@kbn/logging-mocks';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { WorkflowsService } from './workflows_management_service';
+import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 describe('WorkflowsService', () => {
   let service: WorkflowsService;
@@ -84,14 +85,7 @@ describe('WorkflowsService', () => {
 
     const mockEsClientPromise = Promise.resolve(mockEsClient);
 
-    service = new WorkflowsService(
-      mockEsClientPromise,
-      mockLogger,
-      'workflows-executions',
-      'workflows-steps',
-      'workflows-logs',
-      false
-    );
+    service = new WorkflowsService(mockEsClientPromise, mockLogger, false);
 
     mockSecurity = {
       authc: {
@@ -417,7 +411,7 @@ describe('WorkflowsService', () => {
         // Verify execution history query
         expect(mockEsClient.search).toHaveBeenCalledTimes(2);
         expect(mockEsClient.search).toHaveBeenNthCalledWith(2, {
-          index: 'workflows-executions',
+          index: WORKFLOWS_EXECUTIONS_INDEX,
           size: 0,
           query: {
             bool: {
@@ -991,7 +985,7 @@ describe('WorkflowsService', () => {
       expect(mockEsClient.search).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
-          index: 'workflows-executions',
+          index: WORKFLOWS_EXECUTIONS_INDEX,
           size: 0,
         })
       );
@@ -1096,14 +1090,14 @@ describe('WorkflowsService', () => {
           },
         ],
         _pagination: {
-          limit: 1,
+          limit: 20,
           page: 1,
           total: 1,
         },
       });
 
       expect(mockEsClient.search).toHaveBeenCalledWith({
-        index: 'workflows-executions',
+        index: WORKFLOWS_EXECUTIONS_INDEX,
         query: {
           bool: {
             must: expect.arrayContaining([
@@ -1121,7 +1115,10 @@ describe('WorkflowsService', () => {
             ]),
           },
         },
+        size: 20,
+        from: 0,
         sort: [{ createdAt: 'desc' }],
+        track_total_hits: true,
       });
     });
 
@@ -1241,7 +1238,7 @@ describe('WorkflowsService', () => {
       expect(result).toEqual({
         results: [],
         _pagination: {
-          limit: 0,
+          limit: 20,
           page: 1,
           total: 0,
         },
@@ -1293,7 +1290,7 @@ describe('WorkflowsService', () => {
 
       expect(result).toEqual(stepExecution);
       expect(mockEsClient.search).toHaveBeenCalledWith({
-        index: 'workflows-steps',
+        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
         query: {
           bool: {
             must: [
@@ -1383,7 +1380,7 @@ describe('WorkflowsService', () => {
 
       // Verify the execution search call
       expect(mockEsClient.search).toHaveBeenNthCalledWith(1, {
-        index: 'workflows-executions',
+        index: WORKFLOWS_EXECUTIONS_INDEX,
         query: {
           bool: {
             must: [{ ids: { values: ['execution-1'] } }, { term: { spaceId: 'default' } }],
@@ -1393,7 +1390,7 @@ describe('WorkflowsService', () => {
 
       // Verify the step executions search call
       expect(mockEsClient.search).toHaveBeenNthCalledWith(2, {
-        index: 'workflows-steps',
+        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
         query: {
           bool: {
             must: [{ match: { workflowRunId: 'execution-1' } }, { term: { spaceId: 'default' } }],

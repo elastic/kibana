@@ -55,13 +55,14 @@ export const getNavigationTreeDefinition = ({
                   title,
                   icon,
                   renderAs: 'home',
-                  getIsActive: ({ pathNameSerialized, prepend }) => {
-                    return (
-                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/overview')) ||
-                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/start')) ||
-                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/home'))
-                    );
-                  },
+                  sideNavVersion: 'v2',
+                },
+                {
+                  link: SEARCH_HOMEPAGE,
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.home', {
+                    defaultMessage: 'Home',
+                  }),
+                  sideNavVersion: 'v1',
                 },
                 {
                   link: 'discover',

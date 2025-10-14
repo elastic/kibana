@@ -10,7 +10,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IWorkflowEventLogger, WorkflowEventLoggerContext } from './workflow_event_logger';
 import { WorkflowEventLogger } from './workflow_event_logger';
-import { createIndexWithMappings } from './create_index';
+import { createIndexWithMappings } from '../../common/create_index';
 import { WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS } from './index_mappings';
 
 export interface WorkflowEventLoggerServiceOptions {
