@@ -7,7 +7,7 @@
 
 import React, { useState, useMemo } from 'react';
 
-import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexItem } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps, UseEuiTheme, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
