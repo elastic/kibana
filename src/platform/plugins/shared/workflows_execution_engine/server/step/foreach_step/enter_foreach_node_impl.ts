@@ -32,11 +32,11 @@ export class EnterForeachNodeImpl implements NodeImplementation {
 
   private async enterForeach(): Promise<void> {
     let foreachState = this.stepExecutionRuntime.getCurrentStepState();
-    const foreachExpression = this.getForeachExpression();
+    const renderedForeachExpression = this.getForeachExpression();
     await this.stepExecutionRuntime.startStep({
-      foreach: foreachExpression,
+      foreach: renderedForeachExpression,
     });
-    const evaluatedItems = this.getItems(foreachExpression);
+    const evaluatedItems = this.getItems(renderedForeachExpression);
 
     if (evaluatedItems.length === 0) {
       this.workflowLogger.logDebug(
