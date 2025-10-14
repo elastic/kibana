@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cross-project-search-plugin",
+  "owner": [
+    "@elastic/kibana-data-discovery"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "This plugin exposes the cpsEnabled setting to enable/disable cross project search in serverless.",
+  "plugin": {
+    "id": "crossProjectSearch",
+    "browser": false,
+    "server": true,
+    "configPath": [
+      "cross_project_search"
+    ],
+    "requiredPlugins": [],
+    "requiredBundles": []
+  }
+}

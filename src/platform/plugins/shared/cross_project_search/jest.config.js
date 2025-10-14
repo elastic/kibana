@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const SharedGlobalConfigKeys = {
-  // We can add more if really needed
-  elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
-  path: ['data'] as const,
-  savedObjects: ['maxImportPayloadBytes'] as const,
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/shared/cross_project_search'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/cross_project_search',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/plugins/shared/cross_project_search/{common,public,server}/**/*.{js,ts,tsx}',
+  ],
 };

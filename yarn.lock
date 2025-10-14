@@ -5512,6 +5512,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cross-project-search-plugin@link:src/platform/plugins/shared/cross_project_search":
+  version "0.0.0"
+  uid ""
+
 "@kbn/crypto-browser@link:src/platform/packages/shared/kbn-crypto-browser":
   version "0.0.0"
   uid ""

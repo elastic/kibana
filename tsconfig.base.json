@@ -760,6 +760,8 @@
       "@kbn/core-user-settings-server-mocks/*": ["src/core/packages/user-settings/server-mocks/*"],
       "@kbn/cross-cluster-replication-plugin": ["x-pack/platform/plugins/private/cross_cluster_replication"],
       "@kbn/cross-cluster-replication-plugin/*": ["x-pack/platform/plugins/private/cross_cluster_replication/*"],
+      "@kbn/cross-project-search-plugin": ["src/platform/plugins/shared/cross_project_search"],
+      "@kbn/cross-project-search-plugin/*": ["src/platform/plugins/shared/cross_project_search/*"],
       "@kbn/crypto": ["src/platform/packages/shared/kbn-crypto"],
       "@kbn/crypto/*": ["src/platform/packages/shared/kbn-crypto/*"],
       "@kbn/crypto-browser": ["src/platform/packages/shared/kbn-crypto-browser"],
