@@ -105,7 +105,7 @@ export const colorByValueSchema = schema.object({
   ),
 });
 
-const staticColorSchema = schema.object({
+export const staticColorSchema = schema.object({
   type: schema.literal('static'), // Specifies that the color assignment is static (single color for all values). Possible value: 'static'
   /**
    * The static color to be used for all values.
@@ -113,7 +113,7 @@ const staticColorSchema = schema.object({
   color: schema.string({ meta: { description: 'The static color to be used for all values.' } }),
 });
 
-const colorDefinitionSchema = schema.object({
+export const colorDefinitionSchema = schema.object({
   /**
    * Optional. Defines a categorical color assignment.
    */
@@ -135,7 +135,7 @@ const colorDefinitionSchema = schema.object({
   static: schema.maybe(schema.string()), // The static color value to use.
 });
 
-const colorMappingSchema = schema.oneOf([
+export const colorMappingSchema = schema.oneOf([
   /**
    * Categorical color mapping: assigns colors from a palette to specific values.
    */
