@@ -9,7 +9,6 @@
 
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import {
   APM_DISPLAY_NAME,
   INFRASTRUCTURE_DISPLAY_NAME,
@@ -22,7 +21,7 @@ import {
   STACK_MONITORING_DISPLAY_NAME,
   UPTIME_DISPLAY_NAME,
 } from './translations';
-import type { AlertsTableSupportedConsumers } from './types';
+import type { AlertsTableSupportedConsumers, AlertsTableSortCombinations } from './types';
 
 interface AlertProducerData {
   displayName: string;
@@ -102,7 +101,7 @@ export const alertProducersData: Record<AlertsTableSupportedConsumers, AlertProd
   },
 };
 
-export const defaultSort: SortCombinations[] = [
+export const defaultSortCombinations: AlertsTableSortCombinations[] = [
   {
     '@timestamp': {
       order: 'desc',

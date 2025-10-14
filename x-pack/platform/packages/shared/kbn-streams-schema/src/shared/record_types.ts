@@ -34,3 +34,12 @@ export const flattenRecord: z.ZodType<FlattenRecord> = z.record(
 export const sampleDocument = recursiveRecord;
 
 export type SampleDocument = RecursiveRecord;
+
+export interface IgnoredField {
+  field: string;
+}
+
+export interface DocumentWithIgnoredFields {
+  values?: SampleDocument;
+  ignored_fields: IgnoredField[];
+}

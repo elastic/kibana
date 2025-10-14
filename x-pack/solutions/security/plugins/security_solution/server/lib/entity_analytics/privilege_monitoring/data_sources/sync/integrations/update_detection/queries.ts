@@ -6,10 +6,13 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { Matcher } from '../../../constants';
+import type {
+  Matcher,
+  MonitoringEntitySource,
+} from '../../../../../../../../common/api/entity_analytics';
 import type { PrivilegeMonitoringDataClient } from '../../../../engine/data_client';
 import type { AfterKey } from './privileged_status_match';
-import type { PrivMonIntegrationsUser } from '../../../../types';
+import type { PrivMonBulkUser } from '../../../../types';
 import { makeIntegrationOpsBuilder } from '../../../bulk/upsert';
 import { errorsMsg, getErrorFromBulkResponse } from '../../utils';
 
@@ -47,13 +50,14 @@ export const buildMatcherScript = (matcher?: Matcher): estypes.Script => {
  */
 export const buildPrivilegedSearchBody = (
   script: estypes.Script,
-  timeGte: string = 'now-10y',
+  timeGte: string,
+  matchersField: string,
   afterKey?: AfterKey,
   pageSize: number = 100
 ): Omit<estypes.SearchRequest, 'index'> => ({
   size: 0,
   query: {
-    range: { '@timestamp': { gte: timeGte } },
+    range: { '@timestamp': { gte: timeGte, lte: 'now' } },
   },
   aggs: {
     privileged_user_status_since_last_run: {
@@ -68,7 +72,7 @@ export const buildPrivilegedSearchBody = (
             size: 1,
             sort: [{ '@timestamp': { order: 'desc' as estypes.SortOrder } }],
             script_fields: { 'user.is_privileged': { script } },
-            _source: { includes: ['user', 'roles', '@timestamp'] },
+            _source: { includes: ['user', matchersField, '@timestamp'] },
           },
         },
       },
@@ -79,9 +83,11 @@ export const buildPrivilegedSearchBody = (
 export const applyPrivilegedUpdates = async ({
   dataClient,
   users,
+  source,
 }: {
   dataClient: PrivilegeMonitoringDataClient;
-  users: PrivMonIntegrationsUser[];
+  users: PrivMonBulkUser[];
+  source: MonitoringEntitySource;
 }) => {
   if (users.length === 0) return;
 
@@ -91,13 +97,15 @@ export const applyPrivilegedUpdates = async ({
   try {
     for (let start = 0; start < users.length; start += chunkSize) {
       const chunk = users.slice(start, start + chunkSize);
-      const operations = opsForIntegration(chunk); // get some response logging and errors here
-      const resp = await esClient.bulk({
-        refresh: 'wait_for',
-        body: operations,
-      });
-      const errors = getErrorFromBulkResponse(resp);
-      dataClient.log('error', errorsMsg(errors));
+      const operations = opsForIntegration(chunk, source);
+      if (operations.length > 0) {
+        const resp = await esClient.bulk({
+          refresh: 'wait_for',
+          body: operations,
+        });
+        const errors = getErrorFromBulkResponse(resp);
+        dataClient.log('error', errorsMsg(errors));
+      }
     }
   } catch (error) {
     dataClient.log('error', `Error applying privileged updates: ${error.message}`);
