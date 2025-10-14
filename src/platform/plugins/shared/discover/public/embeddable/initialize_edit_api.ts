@@ -87,15 +87,13 @@ export function initializeEditApi<
 
       await stateTransfer.navigateToEditor(appTarget.app, {
         path: appTarget.path,
-        state: [
-          {
-            embeddableId: uuid,
-            valueInput: partialApi.savedSearch$.getValue(),
-            originatingApp: parentApiContext.currentAppId,
-            searchSessionId: partialApi.fetchContext$.getValue()?.searchSessionId,
-            originatingPath: parentApiContext.getCurrentPath?.(),
-          },
-        ],
+        state: {
+          embeddableId: uuid,
+          valueInput: partialApi.savedSearch$.getValue(),
+          originatingApp: parentApiContext.currentAppId,
+          searchSessionId: partialApi.fetchContext$.getValue()?.searchSessionId,
+          originatingPath: parentApiContext.getCurrentPath?.(),
+        },
       });
     },
     isEditingEnabled: isEditable,

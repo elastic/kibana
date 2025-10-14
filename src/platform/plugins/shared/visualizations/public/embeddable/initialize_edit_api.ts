@@ -53,20 +53,18 @@ export function initializeEditApi({
 
           await stateTransferService.navigateToEditor('visualize', {
             path: editPath,
-            state: [
-              {
-                embeddableId: uuid,
-                valueInput: {
-                  savedVis: vis$.getValue().serialize(),
-                  title: title$.getValue(),
-                  description: description$.getValue(),
-                  timeRange: customTimeRange ?? parentTimeRange,
-                },
-                originatingApp: parentApiContext?.currentAppId,
-                searchSessionId: searchSessionId$.getValue() || undefined,
-                originatingPath: parentApiContext?.getCurrentPath?.(),
+            state: {
+              embeddableId: uuid,
+              valueInput: {
+                savedVis: vis$.getValue().serialize(),
+                title: title$.getValue(),
+                description: description$.getValue(),
+                timeRange: customTimeRange ?? parentTimeRange,
               },
-            ],
+              originatingApp: parentApiContext?.currentAppId,
+              searchSessionId: searchSessionId$.getValue() || undefined,
+              originatingPath: parentApiContext?.getCurrentPath?.(),
+            },
           });
         },
         isEditingEnabled: () => {

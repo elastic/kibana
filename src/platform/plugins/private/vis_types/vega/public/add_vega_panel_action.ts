@@ -23,17 +23,15 @@ export function getAddVegaPanelAction(deps: VegaPluginStartDependencies) {
       const stateTransferService = deps.embeddable.getStateTransfer();
       stateTransferService.navigateToEditor('visualize', {
         path: '#/create?type=vega',
-        state: [
-          {
-            originatingApp: apiHasAppContext(embeddable)
-              ? embeddable.getAppContext().currentAppId
-              : '',
-            originatingPath: apiHasAppContext(embeddable)
-              ? embeddable.getAppContext().getCurrentPath?.()
-              : undefined,
-            searchSessionId: deps.data.search.session.getSessionId(),
-          },
-        ],
+        state: {
+          originatingApp: apiHasAppContext(embeddable)
+            ? embeddable.getAppContext().currentAppId
+            : '',
+          originatingPath: apiHasAppContext(embeddable)
+            ? embeddable.getAppContext().getCurrentPath?.()
+            : undefined,
+          searchSessionId: deps.data.search.session.getSessionId(),
+        },
       });
     },
     grouping: [ADD_PANEL_VISUALIZATION_GROUP],

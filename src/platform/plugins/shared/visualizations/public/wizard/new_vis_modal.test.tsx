@@ -166,7 +166,7 @@ describe('NewVisModal', () => {
       await userEvent.click(screen.getByText('Vis with alias Url'));
       expect(stateTransfer.navigateToEditor).toBeCalledWith('otherApp', {
         path: '#/aliasUrl',
-        state: [{ originatingApp: 'coolJestTestApp' }],
+        state: { originatingApp: 'coolJestTestApp' },
       });
       expect(onClose).toHaveBeenCalled();
     });

@@ -125,12 +125,13 @@ export class EmbeddableStateTransfer {
       path?: string;
       openInNewTab?: boolean;
       skipAppLeave?: boolean;
-      state: EmbeddableEditorState[];
+      state: EmbeddableEditorState;
     }
   ): Promise<void> {
     this.isTransferInProgress = true;
     await this.navigateToWithState<EmbeddableEditorState[]>(appId, EMBEDDABLE_EDITOR_STATE_KEY, {
       ...options,
+      state: options?.state ? [options.state] : undefined,
     });
   }
 

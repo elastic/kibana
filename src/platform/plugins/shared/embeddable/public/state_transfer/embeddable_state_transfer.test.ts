@@ -83,7 +83,7 @@ describe('embeddable state transfer', () => {
   });
 
   it('can send an outgoing editor state', async () => {
-    await stateTransfer.navigateToEditor(destinationApp, { state: [{ originatingApp }] });
+    await stateTransfer.navigateToEditor(destinationApp, { state: { originatingApp } });
     expect(store.set).toHaveBeenCalledWith(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
       [EMBEDDABLE_EDITOR_STATE_KEY]: {
         [destinationApp]: [
@@ -103,7 +103,7 @@ describe('embeddable state transfer', () => {
       kibanaIsNowForSports: 'extremeSportsKibana',
     });
     await stateTransfer.navigateToEditor(destinationApp, {
-      state: [{ originatingApp }],
+      state: { originatingApp },
     });
     expect(store.set).toHaveBeenCalledWith(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
       kibanaIsNowForSports: 'extremeSportsKibana',
@@ -121,7 +121,7 @@ describe('embeddable state transfer', () => {
   });
 
   it('sets isTransferInProgress to true when sending an outgoing editor state', async () => {
-    await stateTransfer.navigateToEditor(destinationApp, { state: [{ originatingApp }] });
+    await stateTransfer.navigateToEditor(destinationApp, { state: { originatingApp } });
     expect(stateTransfer.isTransferInProgress).toEqual(true);
     currentAppId$.next(destinationApp);
     expect(stateTransfer.isTransferInProgress).toEqual(false);

@@ -190,13 +190,11 @@ describe('initialize edit api', () => {
     expect(mockedNavigate).toBeCalledTimes(1);
     expect(mockedNavigate).toBeCalledWith('discover', {
       path: '/mock-url-for-onedit',
-      state: expect.arrayContaining([
-        expect.objectContaining({
-          embeddableId: 'test',
-          originatingApp: 'dashboard',
-          originatingPath: '/current-parent-path',
-        }),
-      ]),
+      state: expect.objectContaining({
+        embeddableId: 'test',
+        originatingApp: 'dashboard',
+        originatingPath: '/current-parent-path',
+      }),
     });
   });
 });

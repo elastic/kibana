@@ -21,17 +21,15 @@ export function getAddMapPanelAction(deps: MapsPluginStartDependencies) {
       const stateTransferService = deps.embeddable.getStateTransfer();
       stateTransferService.navigateToEditor(mapsVisTypeAlias.alias.app, {
         path: mapsVisTypeAlias.alias.path,
-        state: [
-          {
-            originatingApp: apiHasAppContext(embeddable)
-              ? embeddable.getAppContext().currentAppId
-              : '',
-            originatingPath: apiHasAppContext(embeddable)
-              ? embeddable.getAppContext().getCurrentPath?.()
-              : undefined,
-            searchSessionId: deps.data.search.session.getSessionId(),
-          },
-        ],
+        state: {
+          originatingApp: apiHasAppContext(embeddable)
+            ? embeddable.getAppContext().currentAppId
+            : '',
+          originatingPath: apiHasAppContext(embeddable)
+            ? embeddable.getAppContext().getCurrentPath?.()
+            : undefined,
+          searchSessionId: deps.data.search.session.getSessionId(),
+        },
       });
     },
     grouping: [ADD_PANEL_VISUALIZATION_GROUP],
