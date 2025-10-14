@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { Spaces } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import { Spaces } from '../../scenarios';
 
 export default function getAllConnectorsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -186,6 +186,15 @@ export default function getAllConnectorsTests({ getService }: FtrProviderContext
           name: 'TestEmail#xyz',
           referenced_by_count: 0,
         },
+        {
+          connector_type_id: '.workflows',
+          id: 'system-connector-.workflows',
+          is_deprecated: false,
+          is_preconfigured: false,
+          is_system_action: true,
+          name: 'Workflows',
+          referenced_by_count: 0,
+        },
       ]);
     });
 
@@ -341,6 +350,15 @@ export default function getAllConnectorsTests({ getService }: FtrProviderContext
           is_system_action: false,
           connector_type_id: '.email',
           name: 'TestEmail#xyz',
+          referenced_by_count: 0,
+        },
+        {
+          connector_type_id: '.workflows',
+          id: 'system-connector-.workflows',
+          is_deprecated: false,
+          is_preconfigured: false,
+          is_system_action: true,
+          name: 'Workflows',
           referenced_by_count: 0,
         },
       ]);

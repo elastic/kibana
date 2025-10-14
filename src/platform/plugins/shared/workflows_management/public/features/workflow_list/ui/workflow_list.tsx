@@ -9,7 +9,6 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiBadge,
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,7 +22,7 @@ import {
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -35,6 +34,7 @@ import { StatusBadge, WorkflowStatus, getRunWorkflowTooltipContent } from '../..
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import type { WorkflowsSearchParams } from '../../../types';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
+import { WorkflowTags } from '../../../widgets/workflow_tags/workflow_tags';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
@@ -213,16 +213,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         field: 'tags',
         name: 'Tags',
         width: '15%',
-        render: (value: any, item: WorkflowListItemDto) => {
-          const tags = item.definition?.tags;
-          if (!tags || tags.length === 0) {
-            return null;
-          }
-          return tags.map((tag: string) => (
-            <EuiBadge key={tag} color="hollow">
-              {tag}
-            </EuiBadge>
-          ));
+        render: (value: any, workflow: WorkflowListItemDto) => {
+          return <WorkflowTags tags={workflow.definition?.tags} />;
         },
       },
       {
@@ -230,10 +222,9 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         name: 'Trigger',
         width: '16%',
         render: (value: any, item: WorkflowListItemDto) => (
-          <EuiFlexGroup direction="column" gutterSize="xs">
+          <NextExecutionTime triggers={item.definition?.triggers ?? []} history={item.history}>
             <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
-            <NextExecutionTime triggers={item.definition?.triggers ?? []} />
-          </EuiFlexGroup>
+          </NextExecutionTime>
         ),
       },
       {
@@ -244,19 +235,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           if (!item.history || item.history.length === 0) return;
           const lastRun = item.history[0];
           return (
-            <EuiText size="s">
-              <FormattedRelative value={lastRun.finishedAt} />
-            </EuiText>
+            <StatusBadge status={lastRun.status} date={lastRun.finishedAt || lastRun.startedAt} />
           );
-        },
-      },
-      {
-        name: 'Last run status',
-        field: 'runHistory',
-        width: '12%',
-        render: (value, item) => {
-          if (!item.history || item.history.length === 0) return;
-          return <StatusBadge status={item.history[0].status} />;
         },
       },
       {
@@ -383,15 +363,15 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       },
     ],
     [
+      canUpdateWorkflow,
+      handleToggleWorkflow,
+      canExecuteWorkflow,
       application,
       canCreateWorkflow,
-      canDeleteWorkflow,
-      canExecuteWorkflow,
-      canUpdateWorkflow,
       handleCloneWorkflow,
+      canDeleteWorkflow,
       handleDeleteWorkflow,
       setExecuteWorkflow,
-      handleToggleWorkflow,
     ]
   );
 
@@ -469,7 +449,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           pageIndex: search.page - 1,
         }}
       />
-      {executeWorkflow && (
+      {executeWorkflow?.definition && (
         <WorkflowExecuteModal
           definition={executeWorkflow.definition}
           onClose={() => setExecuteWorkflow(null)}

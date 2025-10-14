@@ -73,9 +73,9 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
       snapshot.can({ type: 'step.reorder', stepId: stepRef.id, direction: 'up' }) ||
       snapshot.can({ type: 'step.reorder', stepId: stepRef.id, direction: 'down' })
   );
-  const canDelete = useSelector(stepRef, (snapshot) => {
-    return snapshot.can({ type: 'step.delete' });
-  });
+  const canDelete = useStreamEnrichmentSelector((snapshot) =>
+    snapshot.can({ type: 'step.delete', id: stepRef.id })
+  );
 
   const stepRefs = useStreamEnrichmentSelector((snapshot) => snapshot.context.stepRefs);
 
