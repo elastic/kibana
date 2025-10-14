@@ -30,7 +30,7 @@ import React, { useMemo } from 'react';
 import {
   alwaysToEmptyEquals,
   emptyEqualsToAlways,
-  isConditionEditableInUI,
+  isConditionEditableInUi,
 } from '../../../util/condition';
 import type { FieldSuggestion } from './field_selector';
 import { FieldSelector } from './field_selector';
@@ -51,9 +51,9 @@ export function ConditionEditor(props: ConditionEditorProps) {
 
   const condition = alwaysToEmptyEquals(props.condition);
 
-  const isUIRepresentable = useMemo(() => isConditionEditableInUI(condition), [condition]);
+  const conditionEditableInUi = useMemo(() => isConditionEditableInUi(condition), [condition]);
 
-  const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!isUIRepresentable);
+  const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!conditionEditableInUi);
 
   const handleConditionChange = (updatedCondition: Condition) => {
     onConditionChange(emptyEqualsToAlways(updatedCondition));
@@ -103,7 +103,7 @@ export function ConditionEditor(props: ConditionEditorProps) {
             automaticLayout: true,
           }}
         />
-      ) : isUIRepresentable ? (
+      ) : conditionEditableInUi ? (
         <FilterConditionForm
           disabled={status === 'disabled'}
           condition={condition as FilterCondition}

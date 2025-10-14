@@ -64,7 +64,7 @@ function isOperatorUiSupported(
   return operator in UI_SUPPORTED_OPERATORS_AND_VALUE_TYPES;
 }
 
-export const isConditionEditableInUI = (
+export const isConditionEditableInUi = (
   condition: Condition
 ): condition is FilterCondition | AlwaysCondition => {
   if (isPlainObject(condition) && isFilterConditionObject(condition)) {
