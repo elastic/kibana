@@ -26,6 +26,7 @@ import type { ReindexServiceInternalApi } from './src/lib/reindex_service_wrappe
 import { ReindexServiceWrapper } from './src/lib/reindex_service_wrapper';
 import { credentialStoreFactory } from './src/lib/credential_store';
 import { registerBatchReindexIndicesRoutes, registerReindexIndicesRoutes } from './src/routes';
+import type { ReindexConfig } from './config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface PluginsSetup {}
@@ -41,11 +42,15 @@ export class ReindexServiceServerPlugin
   private reindexService: ReindexServiceInternalApi | null = null;
   private readonly logger: Logger;
   private version: Version;
+  private rollupsEnabled: boolean = false;
 
-  constructor({ logger, env }: PluginInitializerContext) {
+  constructor({ logger, env, config }: PluginInitializerContext) {
     this.logger = logger.get();
     this.version = new Version();
     this.version.setup(env.packageInfo.version);
+    if (config.get<ReindexConfig>().rollupsEnabled) {
+      this.rollupsEnabled = true;
+    }
   }
 
   public setup({
@@ -95,6 +100,7 @@ export class ReindexServiceServerPlugin
       licensing,
       security,
       version: this.version,
+      rollupsEnabled: this.rollupsEnabled,
     });
 
     this.reindexService = service.getInternalApis();
