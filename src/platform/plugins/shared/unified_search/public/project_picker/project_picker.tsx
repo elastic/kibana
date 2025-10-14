@@ -382,6 +382,7 @@ export const ProjectPicker = () => {
               setCrossProjectSearchScope(value);
             }}
             css={{ margin: '8px' }}
+            buttonSize="compressed"
           />
           <EuiHorizontalRule margin="none" />
         </EuiFlexItem>
