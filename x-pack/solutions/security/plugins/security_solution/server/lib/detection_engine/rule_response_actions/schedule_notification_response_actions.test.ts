@@ -13,6 +13,7 @@ import { createMockEndpointAppContextService } from '../../../endpoint/mocks';
 import { responseActionsClientMock } from '../../../endpoint/services/actions/clients/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { Logger } from '@kbn/logging';
+
 describe('ScheduleNotificationResponseActions', () => {
   const getSignals = () => [
     {
@@ -42,8 +43,6 @@ describe('ScheduleNotificationResponseActions', () => {
   (endpointServiceMock.getInternalResponseActionsClient as jest.Mock).mockImplementation(() => {
     return mockedResponseActionsClient;
   });
-  // @ts-expect-error assignment to readonly property
-  endpointServiceMock.experimentalFeatures.automatedProcessActionsEnabled = true;
 
   const scheduleNotificationResponseActions = getScheduleNotificationResponseActionsService({
     osqueryCreateActionService: osqueryActionMock,

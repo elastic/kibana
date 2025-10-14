@@ -24,15 +24,6 @@ describe(
   'Automated Response Actions',
   {
     tags: ['@ess', '@serverless'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'automatedProcessActionsEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;

@@ -7,13 +7,13 @@
 
 import {
   addEndpointResponseAction,
+  fillUpNewEsqlRule,
   fillUpNewRule,
   focusAndOpenCommandDropdown,
+  selectIsolateAndSaveWithoutEnabling,
   tryAddingDisabledResponseAction,
   validateAvailableCommands,
   visitRuleActions,
-  selectIsolateAndSaveWithoutEnabling,
-  fillUpNewEsqlRule,
 } from '../../tasks/response_actions';
 import { cleanupRule, generateRandomStringName, loadRule } from '../../tasks/api_fixtures';
 import { ResponseActionTypesEnum } from '../../../../../common/api/detection_engine';
@@ -25,15 +25,6 @@ describe(
   'Form',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'automatedProcessActionsEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     describe('User with no access can not create an endpoint response action', () => {

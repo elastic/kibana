@@ -11,6 +11,7 @@ import { loadPage, request } from './common';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import {
   ACTION_DETAILS_ROUTE,
+  CANCEL_ROUTE,
   EXECUTE_ROUTE,
   GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
@@ -21,24 +22,17 @@ import {
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
-  CANCEL_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type { ActionDetails, ActionDetailsApiResponse } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
 
+const enabledActions = [
+  ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
+  ...['kill-process', 'suspend-process'],
+];
+
 export const validateAvailableCommands = () => {
-  // TODO: TC- use ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS when we go GA with automated process actions
-  const config = Cypress.config();
-  const automatedActionsPAttern = /automatedProcessActionsEnabled/;
-  const automatedProcessActionsEnabled =
-    config.env.ftrConfig.kbnServerArgs[0].match(automatedActionsPAttern);
-
-  const enabledActions = [
-    ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
-    ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
-  ];
-
   cy.get('[data-test-subj^="command-type"]').should('have.length', enabledActions.length);
   enabledActions.forEach((command) => {
     cy.getByTestSubj(`command-type-${command}`);
