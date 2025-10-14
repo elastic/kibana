@@ -89,7 +89,7 @@ const NoViewsTip = () => {
         <>
           <FormattedMessage
             id="contentManagement.contentEditor.viewsStats.noViewsTip"
-            defaultMessage="Views are counted every time someone opens a dashboard"
+            defaultMessage="Views are counted every time someone opens a Discover session"
           />
           {isKibanaVersioningEnabled && (
             <>
