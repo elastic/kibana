@@ -294,7 +294,7 @@ export const ProjectPicker = () => {
                         defaultMessage: 'Custom tags',
                       })}
                       content={tags.map((tag) => (
-                        <EuiThemeProvider colorMode="inverse">
+                        <EuiThemeProvider colorMode="dark">
                           <EuiBadge css={{ margin: `${euiTheme.size.xs}` }}>{tag}</EuiBadge>
                         </EuiThemeProvider>
                       ))}
