@@ -388,7 +388,7 @@ export const ProjectPicker = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}>
           <EuiTitle size="xxxs">
-            <p css={{ padding: `${euiTheme.size.s}` }}>
+            <h6 css={{ padding: `${euiTheme.size.s}` }}>
               <FormattedMessage
                 id="unifiedSearch.projectPicker.numberOfProjectsDescription"
                 defaultMessage="Searching across {numberOfProjects, plural, one {# project} other {# projects}}"
@@ -397,7 +397,7 @@ export const ProjectPicker = () => {
                     crossProjectSearchScope === 'origin' ? 1 : linkedProjects.length + 1,
                 }}
               />
-            </p>
+            </h6>
           </EuiTitle>
           <EuiHorizontalRule margin="none" />
         </EuiFlexItem>
