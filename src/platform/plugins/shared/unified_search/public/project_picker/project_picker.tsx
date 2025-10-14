@@ -272,7 +272,7 @@ export const ProjectPicker = () => {
                 </EuiFlexItem>
                 {project._id === originProject._id ? (
                   <EuiFlexItem grow={false}>
-                    <EuiIconTip size="s" type="flag" content={strings.getOriginProjectLabel()} />
+                    <EuiIconTip size="m" type="flag" content={strings.getOriginProjectLabel()} />
                   </EuiFlexItem>
                 ) : null}
               </EuiFlexGroup>
