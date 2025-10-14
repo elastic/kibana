@@ -75,7 +75,7 @@ interface OnCascadeGroupNodeExpandedArgs<G extends GroupNode> {
 }
 
 export interface CascadeRowActionProps {
-  hideOver?: number;
+  maxActionCount?: number;
   headerRowActions: Array<
     Pick<EuiButtonIconProps, 'iconType' | 'aria-label' | 'data-test-subj'> & {
       onClick: (e: React.MouseEvent<Element>) => void;
