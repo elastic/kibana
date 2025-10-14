@@ -35,6 +35,8 @@ import {
   getOnlyConnectorsFilter,
   getReferencesAggregationQuery,
   getSolutionValues,
+  getObservablesTotalsByType,
+  getTotalWithMaxObservables,
 } from './utils';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { CasePersistedStatus } from '../../common/types/case';
@@ -91,7 +93,7 @@ export const getCasesTelemetryData = async ({
 
     const aggregationsBuckets = getAggregationsBuckets({
       aggs: casesRes.aggregations,
-      keys: ['counts', 'syncAlerts', 'status', 'users', 'totalAssignees'],
+      keys: ['counts', 'syncAlerts', 'extractObservables', 'status', 'users', 'totalAssignees'],
     });
 
     const allAttachmentFrameworkStats = getAttachmentsFrameworkStats({
@@ -114,6 +116,12 @@ export const getCasesTelemetryData = async ({
         },
         syncAlertsOn: findValueInBuckets(aggregationsBuckets.syncAlerts, 1),
         syncAlertsOff: findValueInBuckets(aggregationsBuckets.syncAlerts, 0),
+        extractObservablesOn: findValueInBuckets(aggregationsBuckets.extractObservables, 1),
+        extractObservablesOff: findValueInBuckets(aggregationsBuckets.extractObservables, 0),
+        observables: getObservablesTotalsByType(casesRes.aggregations?.observables),
+        totalWithMaxObservables: getTotalWithMaxObservables(
+          casesRes.aggregations?.totalWithMaxObservables
+        ),
         totalUsers: casesRes.aggregations?.users?.value ?? 0,
         totalParticipants: commentsRes.aggregations?.participants?.value ?? 0,
         totalTags: casesRes.aggregations?.tags?.value ?? 0,
@@ -173,6 +181,7 @@ const getCasesSavedObjectTelemetry = async (
         aggs: {
           ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
           ...getAssigneesAggregations(),
+          ...getObservablesAggregations(),
           ...getStatusAggregation(),
         },
       },
@@ -190,11 +199,15 @@ const getCasesSavedObjectTelemetry = async (
       ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
       ...getAssigneesAggregations(),
       ...getStatusAggregation(),
+      ...getObservablesAggregations(),
       totalsByOwner: {
         terms: { field: `${CASE_SAVED_OBJECT}.attributes.owner` },
       },
       syncAlerts: {
         terms: { field: `${CASE_SAVED_OBJECT}.attributes.settings.syncAlerts` },
+      },
+      extractObservables: {
+        terms: { field: `${CASE_SAVED_OBJECT}.attributes.settings.extractObservables` },
       },
       users: {
         cardinality: {
@@ -246,6 +259,29 @@ const getStatusAggregation = () => ({
   status: {
     terms: {
       field: `${CASE_SAVED_OBJECT}.attributes.status`,
+    },
+  },
+});
+
+const getObservablesAggregations = () => ({
+  observables: {
+    terms: { field: `${CASE_SAVED_OBJECT}.attributes.observables.description` },
+    aggs: {
+      byType: {
+        terms: { field: `${CASE_SAVED_OBJECT}.attributes.observables.typeKey` },
+      },
+    },
+  },
+  totalWithMaxObservables: {
+    terms: {
+      field: `${CASE_SAVED_OBJECT}.id`,
+    },
+    aggs: {
+      cardinality: {
+        cardinality: {
+          field: `${CASE_SAVED_OBJECT}.attributes.observables.typeKey`,
+        },
+      },
     },
   },
 });

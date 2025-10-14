@@ -17,6 +17,7 @@ import type {
   AttachmentFrameworkSchema,
   AttachmentItemsSchema,
   CustomFieldsSolutionTelemetrySchema,
+  ObservablesSchema,
 } from './types';
 
 const long: TypeLong = { type: 'long' };
@@ -74,12 +75,20 @@ const statusSchema: StatusSchema = {
   closed: long,
 };
 
+const observablesSchema: ObservablesSchema = {
+  auto: { default: long, custom: long },
+  manual: { default: long, custom: long },
+  total: long,
+};
+
 const solutionTelemetry: SolutionTelemetrySchema = {
   ...countSchema,
   assignees: assigneesSchema,
   attachmentFramework: attachmentFrameworkSchema,
   totalWithAlerts: long,
   status: statusSchema,
+  observables: observablesSchema,
+  totalWithMaxObservables: long,
 };
 
 const customFieldsSolutionTelemetrySchema: CustomFieldsSolutionTelemetrySchema = {
@@ -107,6 +116,10 @@ export const casesSchema: CasesTelemetrySchema = {
       status: statusSchema,
       syncAlertsOn: long,
       syncAlertsOff: long,
+      extractObservablesOn: long,
+      extractObservablesOff: long,
+      observables: observablesSchema,
+      totalWithMaxObservables: long,
       totalUsers: long,
       totalParticipants: long,
       totalTags: long,

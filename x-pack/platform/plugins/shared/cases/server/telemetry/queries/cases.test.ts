@@ -17,6 +17,7 @@ import type {
 } from '../types';
 import { getCasesTelemetryData } from './cases';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
+import { OBSERVABLE_TYPE_IPV4 } from '../../../common/constants';
 
 const MOCK_FIND_TOTAL = 5;
 const SOLUTION_TOTAL = 1;
@@ -74,8 +75,46 @@ describe('getCasesTelemetryData', () => {
         totalAssignees: { value: 5 },
       };
 
+      const observables = {
+        observables: {
+          buckets: [
+            {
+              key: 'Auto extract observables',
+              doc_count: 1,
+              byType: {
+                buckets: [
+                  {
+                    key: OBSERVABLE_TYPE_IPV4.key,
+                    doc_count: 1,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        totalWithMaxObservables: {
+          buckets: [
+            {
+              key: '1',
+              doc_count: 1,
+              cardinality: {
+                value: 1,
+              },
+            },
+            {
+              key: '2',
+              doc_count: 1,
+              cardinality: {
+                value: 50,
+              },
+            },
+          ],
+        },
+      };
+
       const solutionValues = {
         counts,
+        ...observables,
         ...assignees,
       };
 
@@ -87,7 +126,20 @@ describe('getCasesTelemetryData', () => {
         securitySolution: { ...solutionValues },
         observability: { ...solutionValues },
         cases: { ...solutionValues },
+        ...observables,
         syncAlerts: {
+          buckets: [
+            {
+              key: 0,
+              doc_count: 1,
+            },
+            {
+              key: 1,
+              doc_count: 1,
+            },
+          ],
+        },
+        extractObservables: {
           buckets: [
             {
               key: 0,
@@ -400,6 +452,14 @@ describe('getCasesTelemetryData', () => {
           },
           syncAlertsOff: 1,
           syncAlertsOn: 1,
+          extractObservablesOff: 1,
+          extractObservablesOn: 1,
+          observables: {
+            auto: { default: 1, custom: 0 },
+            manual: { default: 0, custom: 0 },
+            total: 1,
+          },
+          totalWithMaxObservables: 1,
           totalParticipants: 2,
           totalTags: 2,
           totalUsers: 1,
@@ -429,6 +489,12 @@ describe('getCasesTelemetryData', () => {
             open: 0,
           },
           totalWithAlerts: 10,
+          observables: {
+            auto: { default: 1, custom: 0 },
+            manual: { default: 0, custom: 0 },
+            total: 1,
+          },
+          totalWithMaxObservables: 1,
         },
         obs: {
           assignees: {
@@ -436,6 +502,12 @@ describe('getCasesTelemetryData', () => {
             totalWithZero: 100,
             totalWithAtLeastOne: 0,
           },
+          observables: {
+            auto: { default: 1, custom: 0 },
+            manual: { default: 0, custom: 0 },
+            total: 1,
+          },
+          totalWithMaxObservables: 1,
           ...solutionAttachmentFrameworkStats,
           total: 1,
           daily: 3,
@@ -454,6 +526,12 @@ describe('getCasesTelemetryData', () => {
             totalWithZero: 100,
             totalWithAtLeastOne: 0,
           },
+          observables: {
+            auto: { default: 1, custom: 0 },
+            manual: { default: 0, custom: 0 },
+            total: 1,
+          },
+          totalWithMaxObservables: 1,
           ...solutionAttachmentFrameworkStats,
           total: 1,
           daily: 3,
@@ -547,6 +625,18 @@ describe('getCasesTelemetryData', () => {
                     ],
                   },
                 },
+                "observables": Object {
+                  "aggs": Object {
+                    "byType": Object {
+                      "terms": Object {
+                        "field": "cases.attributes.observables.typeKey",
+                      },
+                    },
+                  },
+                  "terms": Object {
+                    "field": "cases.attributes.observables.description",
+                  },
+                },
                 "status": Object {
                   "terms": Object {
                     "field": "cases.attributes.status",
@@ -555,6 +645,19 @@ describe('getCasesTelemetryData', () => {
                 "totalAssignees": Object {
                   "value_count": Object {
                     "field": "cases.attributes.assignees.uid",
+                  },
+                },
+                "totalWithMaxObservables": Object {
+                  "aggs": Object {
+                    "cardinality": Object {
+                      "cardinality": Object {
+                        "field": "cases.attributes.observables.typeKey",
+                      },
+                    },
+                  },
+                  "terms": Object {
+                    "field": "_id",
+                    "size": 10000,
                   },
                 },
               },
@@ -582,6 +685,11 @@ describe('getCasesTelemetryData', () => {
                     "to": "now",
                   },
                 ],
+              },
+            },
+            "extractObservables": Object {
+              "terms": Object {
+                "field": "cases.attributes.settings.extractObservables",
               },
             },
             "observability": Object {
@@ -630,6 +738,18 @@ describe('getCasesTelemetryData', () => {
                     ],
                   },
                 },
+                "observables": Object {
+                  "aggs": Object {
+                    "byType": Object {
+                      "terms": Object {
+                        "field": "cases.attributes.observables.typeKey",
+                      },
+                    },
+                  },
+                  "terms": Object {
+                    "field": "cases.attributes.observables.description",
+                  },
+                },
                 "status": Object {
                   "terms": Object {
                     "field": "cases.attributes.status",
@@ -640,11 +760,36 @@ describe('getCasesTelemetryData', () => {
                     "field": "cases.attributes.assignees.uid",
                   },
                 },
+                "totalWithMaxObservables": Object {
+                  "aggs": Object {
+                    "cardinality": Object {
+                      "cardinality": Object {
+                        "field": "cases.attributes.observables.typeKey",
+                      },
+                    },
+                  },
+                  "terms": Object {
+                    "field": "_id",
+                    "size": 10000,
+                  },
+                },
               },
               "filter": Object {
                 "term": Object {
                   "cases.attributes.owner": "observability",
                 },
+              },
+            },
+            "observables": Object {
+              "aggs": Object {
+                "byType": Object {
+                  "terms": Object {
+                    "field": "cases.attributes.observables.typeKey",
+                  },
+                },
+              },
+              "terms": Object {
+                "field": "cases.attributes.observables.description",
               },
             },
             "securitySolution": Object {
@@ -693,6 +838,18 @@ describe('getCasesTelemetryData', () => {
                     ],
                   },
                 },
+                "observables": Object {
+                  "aggs": Object {
+                    "byType": Object {
+                      "terms": Object {
+                        "field": "cases.attributes.observables.typeKey",
+                      },
+                    },
+                  },
+                  "terms": Object {
+                    "field": "cases.attributes.observables.description",
+                  },
+                },
                 "status": Object {
                   "terms": Object {
                     "field": "cases.attributes.status",
@@ -701,6 +858,19 @@ describe('getCasesTelemetryData', () => {
                 "totalAssignees": Object {
                   "value_count": Object {
                     "field": "cases.attributes.assignees.uid",
+                  },
+                },
+                "totalWithMaxObservables": Object {
+                  "aggs": Object {
+                    "cardinality": Object {
+                      "cardinality": Object {
+                        "field": "cases.attributes.observables.typeKey",
+                      },
+                    },
+                  },
+                  "terms": Object {
+                    "field": "_id",
+                    "size": 10000,
                   },
                 },
               },
@@ -728,6 +898,19 @@ describe('getCasesTelemetryData', () => {
             "totalAssignees": Object {
               "value_count": Object {
                 "field": "cases.attributes.assignees.uid",
+              },
+            },
+            "totalWithMaxObservables": Object {
+              "aggs": Object {
+                "cardinality": Object {
+                  "cardinality": Object {
+                    "field": "cases.attributes.observables.typeKey",
+                  },
+                },
+              },
+              "terms": Object {
+                "field": "_id",
+                "size": 10000,
               },
             },
             "totalsByOwner": Object {

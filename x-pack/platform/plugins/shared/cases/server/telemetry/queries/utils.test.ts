@@ -7,6 +7,10 @@
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { CustomFieldTypes } from '../../../common/types/domain';
+import {
+  OBSERVABLE_TYPE_IPV4,
+  OBSERVABLE_TYPE_HOSTNAME,
+} from '../../../common/constants/observables';
 import type {
   AttachmentAggregationResult,
   AttachmentFrameworkAggsResult,
@@ -33,6 +37,7 @@ import {
   getSolutionValues,
   getUniqueAlertCommentsCountQuery,
   processWithAlertsByOwner,
+  getObservablesTotalsByType,
 } from './utils';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 
@@ -60,9 +65,40 @@ describe('utils', () => {
       totalAssignees: { value: 5 },
     };
 
+    const observables = {
+      observables: {
+        buckets: [
+          {
+            key: 'Auto extract observables',
+            doc_count: 1,
+            byType: {
+              buckets: [
+                {
+                  key: OBSERVABLE_TYPE_IPV4.key,
+                  doc_count: 1,
+                },
+              ],
+            },
+          },
+        ],
+      },
+      totalWithMaxObservables: {
+        buckets: [
+          {
+            key: '1',
+            doc_count: 1,
+            cardinality: {
+              value: 1,
+            },
+          },
+        ],
+      },
+    };
+
     const caseSolutionValues = {
       counts,
       ...assignees,
+      ...observables,
     };
 
     const caseAggsResult: CaseAggregationResult = {
@@ -73,6 +109,7 @@ describe('utils', () => {
       securitySolution: { ...caseSolutionValues },
       observability: { ...caseSolutionValues },
       cases: { ...caseSolutionValues },
+      ...observables,
       syncAlerts: {
         buckets: [
           {
@@ -81,6 +118,14 @@ describe('utils', () => {
           },
           {
             key: 1,
+            doc_count: 1,
+          },
+        ],
+      },
+      extractObservables: {
+        buckets: [
+          {
+            key: 0,
             doc_count: 1,
           },
         ],
@@ -339,6 +384,17 @@ describe('utils', () => {
           },
           "daily": 3,
           "monthly": 1,
+          "observables": Object {
+            "auto": Object {
+              "custom": 0,
+              "default": 1,
+            },
+            "manual": Object {
+              "custom": 0,
+              "default": 0,
+            },
+            "total": 1,
+          },
           "status": Object {
             "closed": 0,
             "inProgress": 0,
@@ -346,6 +402,7 @@ describe('utils', () => {
           },
           "total": 5,
           "totalWithAlerts": 20,
+          "totalWithMaxObservables": 0,
           "weekly": 2,
         }
       `);
@@ -412,6 +469,17 @@ describe('utils', () => {
           },
           "daily": 3,
           "monthly": 1,
+          "observables": Object {
+            "auto": Object {
+              "custom": 0,
+              "default": 1,
+            },
+            "manual": Object {
+              "custom": 0,
+              "default": 0,
+            },
+            "total": 1,
+          },
           "status": Object {
             "closed": 0,
             "inProgress": 0,
@@ -419,6 +487,7 @@ describe('utils', () => {
           },
           "total": 1,
           "totalWithAlerts": 10,
+          "totalWithMaxObservables": 0,
           "weekly": 2,
         }
       `);
@@ -485,6 +554,17 @@ describe('utils', () => {
           },
           "daily": 3,
           "monthly": 1,
+          "observables": Object {
+            "auto": Object {
+              "custom": 0,
+              "default": 1,
+            },
+            "manual": Object {
+              "custom": 0,
+              "default": 0,
+            },
+            "total": 1,
+          },
           "status": Object {
             "closed": 0,
             "inProgress": 0,
@@ -492,6 +572,7 @@ describe('utils', () => {
           },
           "total": 1,
           "totalWithAlerts": 5,
+          "totalWithMaxObservables": 0,
           "weekly": 2,
         }
       `);
@@ -1740,6 +1821,57 @@ describe('utils', () => {
         securitySolution: 20,
         observability: 5,
         cases: 10,
+      });
+    });
+  });
+
+  describe('getObservablesTotalsByType', () => {
+    it('returns the correct observables totals by type', () => {
+      expect(
+        getObservablesTotalsByType({
+          buckets: [
+            {
+              key: 'Auto extract observables',
+              doc_count: 1,
+              byType: {
+                buckets: [
+                  {
+                    key: OBSERVABLE_TYPE_IPV4.key,
+                    doc_count: 2,
+                  },
+                ],
+              },
+            },
+            {
+              key: 'Bad host',
+              doc_count: 1,
+              byType: {
+                buckets: [
+                  {
+                    key: OBSERVABLE_TYPE_HOSTNAME.key,
+                    doc_count: 3,
+                  },
+                ],
+              },
+            },
+            {
+              key: 'User added',
+              doc_count: 1,
+              byType: {
+                buckets: [
+                  {
+                    key: 'key1',
+                    doc_count: 1,
+                  },
+                ],
+              },
+            },
+          ],
+        })
+      ).toEqual({
+        manual: { default: 3, custom: 1 },
+        auto: { default: 2, custom: 0 },
+        total: 6,
       });
     });
   });

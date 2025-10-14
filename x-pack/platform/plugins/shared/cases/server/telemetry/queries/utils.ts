@@ -12,7 +12,9 @@ import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   FILE_ATTACHMENT_TYPE,
+  MAX_OBSERVABLES_PER_CASE,
 } from '../../../common/constants';
+import { OBSERVABLE_TYPES_BUILTIN_KEYS } from '../../../common/constants/observables';
 import type {
   CaseAggregationResult,
   Buckets,
@@ -29,6 +31,9 @@ import type {
   CustomFieldsTelemetry,
   AlertBuckets,
   CasesTelemetryWithAlertsAggsByOwnerResults,
+  ObservablesAggregationResult,
+  ObservablesTelemetry,
+  TotalWithMaxObservablesAggregationResult,
 } from '../types';
 import { buildFilter } from '../../client/utils';
 import type { Owner } from '../../../common/constants/types';
@@ -199,6 +204,53 @@ export const getAlertsCountsFromBuckets = (buckets: AlertBuckets['buckets']) => 
   weekly: buckets?.[1]?.topAlertsPerBucket?.value ?? 0,
   monthly: buckets?.[0]?.topAlertsPerBucket?.value ?? 0,
 });
+
+export const getObservablesTotalsByType = (
+  observablesAggs?: ObservablesAggregationResult
+): ObservablesTelemetry => {
+  const result: ObservablesTelemetry = {
+    manual: { default: 0, custom: 0 },
+    auto: { default: 0, custom: 0 },
+    total: 0,
+  };
+
+  if (!observablesAggs || !observablesAggs.buckets) {
+    return result;
+  }
+
+  observablesAggs.buckets.forEach((bucket) => {
+    const description = bucket.key;
+
+    bucket.byType.buckets.forEach((typeBucket) => {
+      const type = OBSERVABLE_TYPES_BUILTIN_KEYS.includes(typeBucket.key) ? 'default' : 'custom';
+      const count = typeBucket.doc_count;
+
+      if (description === 'Auto extract observables') {
+        result.auto[type] += count;
+      } else {
+        result.manual[type] += count;
+      }
+      result.total += count;
+    });
+  });
+  return result;
+};
+
+export const getTotalWithMaxObservables = (
+  totalWithMaxObservables?: TotalWithMaxObservablesAggregationResult
+) => {
+  if (!totalWithMaxObservables || !totalWithMaxObservables.buckets) {
+    return 0;
+  }
+
+  return totalWithMaxObservables.buckets.reduce((acc, bucket) => {
+    if (bucket.cardinality.value >= MAX_OBSERVABLES_PER_CASE) {
+      return acc + 1;
+    }
+    return acc;
+  }, 0);
+};
+
 interface CountsAndMaxAlertsAggRes {
   by_owner: {
     buckets: Array<{
@@ -386,6 +438,10 @@ export const getSolutionValues = ({
       filesAggregations: fileAttachmentsForOwner,
       totalCasesForOwner,
     }),
+    observables: getObservablesTotalsByType(caseAggregations?.[owner]?.observables),
+    totalWithMaxObservables: getTotalWithMaxObservables(
+      caseAggregations?.[owner]?.totalWithMaxObservables
+    ),
     totalWithAlerts: totalWithAlerts[owner],
     assignees: {
       total: caseAggregations?.[owner].totalAssignees.value ?? 0,
