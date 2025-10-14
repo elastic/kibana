@@ -18,8 +18,10 @@ import { PartitionTitlesAndTextSettings } from './titles_and_text_setttings';
 import { PartitionChartsMeta } from '../partition_charts_meta';
 
 export function PartitionFlyoutToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
+  const { isDisabled: hasDisabledSytleSettings } =
+    PartitionChartsMeta[props.state.shape].toolbarPopover;
   const datatableToolbarContentMap: ContentMap<PieVisualizationState> = {
-    style: PartitionStyleSettings,
+    style: hasDisabledSytleSettings ? undefined : PartitionStyleSettings,
   };
   return <FlyoutToolbar {...props} contentMap={datatableToolbarContentMap} />;
 }
@@ -41,7 +43,7 @@ function PartitionStyleSettings(props: VisualizationToolbarProps<PieVisualizatio
 
   return (
     <>
-      {showAppearanceSettings && (
+      {showAppearanceSettings ? (
         <>
           <EuiAccordion
             id={''}
@@ -54,20 +56,22 @@ function PartitionStyleSettings(props: VisualizationToolbarProps<PieVisualizatio
             <PartitionAppearanceSettings {...props} />
           </EuiAccordion>
           <EuiHorizontalRule margin="m" />
+          <EuiAccordion
+            id={''}
+            buttonContent={i18n.translate('xpack.lens.visualization.toolbar.titlesAndText', {
+              defaultMessage: 'Titles and text',
+            })}
+            paddingSize="s"
+            initialIsOpen
+            isDisabled={!!isDisabled}
+            {...(!!isDisabled && { forceState: 'closed' })}
+          >
+            <PartitionTitlesAndTextSettings {...props} />
+          </EuiAccordion>
         </>
-      )}
-      <EuiAccordion
-        id={''}
-        buttonContent={i18n.translate('xpack.lens.visualization.toolbar.titlesAndText', {
-          defaultMessage: 'Titles and text',
-        })}
-        paddingSize="s"
-        initialIsOpen
-        isDisabled={!!isDisabled}
-        {...(!!isDisabled && { forceState: 'closed' })}
-      >
+      ) : (
         <PartitionTitlesAndTextSettings {...props} />
-      </EuiAccordion>
+      )}
     </>
   );
 }
