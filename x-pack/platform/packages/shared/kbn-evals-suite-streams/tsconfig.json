@@ -11,5 +11,17 @@
     "@kbn/sse-utils-client",
     "@kbn/object-utils",
     "@kbn/grok-heuristics",
+    "@kbn/tooling-log",
+    "@kbn/sample-log-parser",
+    "@kbn/repo-info",
+    "@kbn/streams-ai",
+    "@kbn/datemath",
+    "@kbn/scout",
+    "@kbn/ai-tools",
+    "@kbn/streamlang",
+    "@kbn/streams-schema",
+    "@kbn/kibana-api-cli",
+    "@kbn/dev-cli-runner",
+    "@kbn/core",
   ]
 }

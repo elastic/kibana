@@ -1427,7 +1427,7 @@
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^12.0.0",
-    "@arizeai/phoenix-client": "^4.0.3",
+    "@arizeai/phoenix-client": "^4.2.0",
     "@babel/cli": "^7.24.7",
     "@babel/core": "^7.24.7",
     "@babel/eslint-parser": "^7.24.7",
@@ -1575,7 +1575,7 @@
     "@kbn/evals": "link:x-pack/platform/packages/shared/kbn-evals",
     "@kbn/evals-suite-obs-ai-assistant": "link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant",
     "@kbn/evals-suite-onechat": "link:x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat",
-    "@kbn/evals-suite-streams": "link:x-pack/platform/packages/private/kbn-evals-suite-streams",
+    "@kbn/evals-suite-streams": "link:x-pack/platform/packages/shared/kbn-evals-suite-streams",
     "@kbn/expect": "link:src/platform/packages/shared/kbn-expect",
     "@kbn/extract-plugin-translations": "link:packages/kbn-extract-plugin-translations",
     "@kbn/failed-test-reporter-cli": "link:packages/kbn-failed-test-reporter-cli",

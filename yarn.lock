@@ -212,10 +212,10 @@
     "@arizeai/openinference-semantic-conventions" "2.1.0"
     "@opentelemetry/core" "^1.30.1"
 
-"@arizeai/phoenix-client@^4.0.3":
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/@arizeai/phoenix-client/-/phoenix-client-4.0.3.tgz#b018dad9952bdf666c9d86a6cc5fd653a52329c2"
-  integrity sha512-8f8qmAXLNAKaEvHM89UfALel3AI0ssZCRMC2sz6qKmAG+ei3KVrLuwjkkz+T1PzuUiUjxS9pGo0Bw4QYTCm7JA==
+"@arizeai/phoenix-client@^4.2.0":
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/@arizeai/phoenix-client/-/phoenix-client-4.2.0.tgz#d6d57fb499c8cc5d84517d9111a4d28af171f479"
+  integrity sha512-RPkYlRsHRkCbrv3Vb8TeakaW+FSpOSJD6tHEY70BcWYccX04oD8+VXcPrv1LskOze4Te1NdAq2kwR26Mop9TsQ==
   dependencies:
     "@arizeai/openinference-semantic-conventions" "^1.1.0"
     "@arizeai/openinference-vercel" "^2.3.1"
@@ -6217,7 +6217,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/evals-suite-streams@link:x-pack/platform/packages/private/kbn-evals-suite-streams":
+"@kbn/evals-suite-streams@link:x-pack/platform/packages/shared/kbn-evals-suite-streams":
   version "0.0.0"
   uid ""
 
@@ -26720,9 +26720,9 @@ openai@^4.72.0, openai@^4.77.0:
     node-fetch "^2.6.7"
 
 openai@^5.12.1:
-  version "5.12.2"
-  resolved "https://registry.yarnpkg.com/openai/-/openai-5.12.2.tgz#512ab6b80eb8414837436e208f1b951442b97761"
-  integrity sha512-xqzHHQch5Tws5PcKR2xsZGX9xtch+JQFz5zb14dGqlshmmDAFBFEWmeIpf7wVqWV+w7Emj7jRgkNJakyKE0tYQ==
+  version "5.23.1"
+  resolved "https://registry.yarnpkg.com/openai/-/openai-5.23.1.tgz#5e12847cca116a36c03a97d818f182ab3eaa39dc"
+  integrity sha512-APxMtm5mln4jhKhAr0d5zP9lNsClx4QwJtg8RUvYSSyxYCTHLNJnLEcSHbJ6t0ori8Pbr9HZGfcPJ7LEy73rvQ==
 
 openapi-fetch@^0.12.5:
   version "0.12.5"

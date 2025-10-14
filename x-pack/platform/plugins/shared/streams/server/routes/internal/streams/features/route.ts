@@ -315,19 +315,44 @@ export const identifyFeaturesRoute = createServerRoute({
       streamsClient.getStream(name),
     ]);
 
+    const esClient = scopedClusterClient.asCurrentUser;
+
+    const boundInferenceClient = inferenceClient.bindTo({ connectorId });
+
     const { features } = await runFeatureIdentification({
       start: start.getTime(),
       end: end.getTime(),
-      esClient: scopedClusterClient.asCurrentUser,
-      inferenceClient: inferenceClient.bindTo({ connectorId }),
+      esClient,
+      inferenceClient: boundInferenceClient,
       logger,
       stream,
       features: hits,
     });
 
+    const featuresWithDescriptions = await Promise.all(
+      features.map(async (feature) => {
+        const description = await generateStreamDescription({
+          stream,
+          start: start.getTime(),
+          end: end.getTime(),
+          esClient: scopedClusterClient.asCurrentUser,
+          inferenceClient: boundInferenceClient,
+          feature: {
+            ...feature,
+            description: '',
+          },
+        });
+
+        return {
+          ...feature,
+          description,
+        };
+      })
+    );
+
     return {
       type: 'identified_features',
-      features,
+      features: featuresWithDescriptions,
     };
   },
 });
