@@ -136,5 +136,28 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.clickPanelLink('management:maintenanceWindows');
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Maintenance Windows']);
     });
+
+    it('renders a feedback callout', async () => {
+      await svlCommonNavigation.sidenav.feedbackCallout.reset();
+      await svlCommonNavigation.sidenav.openPanel('applications');
+      await svlCommonNavigation.sidenav.feedbackCallout.expectExists();
+      await svlCommonNavigation.sidenav.feedbackCallout.dismiss();
+      await svlCommonNavigation.sidenav.feedbackCallout.expectMissing();
+      await browser.refresh();
+      await svlCommonNavigation.sidenav.feedbackCallout.expectMissing();
+    });
+
+    it('renders tour', async () => {
+      await svlCommonNavigation.sidenav.tour.reset();
+      await svlCommonNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
+      await svlCommonNavigation.sidenav.tour.nextStep();
+      await svlCommonNavigation.sidenav.tour.expectTourStepVisible('sidenav-more');
+      await svlCommonNavigation.sidenav.tour.nextStep();
+      await svlCommonNavigation.sidenav.tour.expectTourStepVisible('sidenav-manage-data');
+      await svlCommonNavigation.sidenav.tour.nextStep();
+      await svlCommonNavigation.sidenav.tour.expectHidden();
+      await browser.refresh();
+      await svlCommonNavigation.sidenav.tour.expectHidden();
+    });
   });
 }
