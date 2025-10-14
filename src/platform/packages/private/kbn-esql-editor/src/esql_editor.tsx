@@ -198,7 +198,7 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   const onQuerySubmit = useCallback(
-    async (
+    (
       source: TelemetryQuerySubmittedProps['exec_source'],
       sourceUI: TelemetryQuerySubmittedProps['exec_source_ui']
     ) => {
@@ -220,7 +220,7 @@ const ESQLEditorInternal = function ESQLEditor({
           exec_source: source,
           exec_source_ui: sourceUI,
         });
-        await onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
+        onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
       }
     },
     [isQueryLoading, isLoading, allowQueryCancellation, abortController, onTextLangQuerySubmit]
