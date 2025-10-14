@@ -76,7 +76,7 @@ export const mockFindingsHit: CspFinding = {
     architecture: 'x86_64',
   },
   rule: {
-    references:
+    reference:
       '1. [https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/)\n',
     impact:
       'All workloads which require access to the Kubernetes API will require an explicit service account to be created.\n',
