@@ -144,5 +144,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/presentation-util",
     "@kbn/licensing-types",
+    "@kbn/data-service-server",
+    "@kbn/es-query-server",
   ]
 }

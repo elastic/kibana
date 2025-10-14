@@ -24,12 +24,11 @@ import { convertMessagesForInference } from '@kbn/observability-ai-assistant-plu
 import { runAndValidateEsqlQuery } from './validate_esql_query';
 import type { FunctionRegistrationParameters } from '..';
 
-export function registerQueryFunction({
+export const registerExecuteQueryFunction = ({
   functions,
   resources,
-  pluginsStart,
   signal,
-}: FunctionRegistrationParameters) {
+}: FunctionRegistrationParameters) => {
   functions.registerFunction(
     {
       name: EXECUTE_QUERY_FUNCTION_NAME,
@@ -81,7 +80,11 @@ export function registerQueryFunction({
       };
     }
   );
+};
 
+export function registerQueryFunction(params: FunctionRegistrationParameters) {
+  const { functions, resources, pluginsStart } = params;
+  registerExecuteQueryFunction(params);
   functions.registerFunction(
     {
       name: QUERY_FUNCTION_NAME,
