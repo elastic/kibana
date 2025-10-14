@@ -8,9 +8,33 @@
  */
 
 import type { DataViewLazy } from '@kbn/data-views-plugin/common';
-import { fromKueryExpression, getKqlFieldNames, isFilter, isOfQueryType } from '@kbn/es-query';
+import {
+  fromKueryExpression,
+  getKqlFieldNames,
+  isCombinedFilter,
+  isFilter,
+  isOfQueryType,
+  type Filter,
+} from '@kbn/es-query';
 import type { SearchRequest } from './fetch';
 import type { EsQuerySortValue } from '../..';
+
+const collectFilterFields = (filter: Filter, acc: string[]) => {
+  if (!isFilter(filter) || filter.meta?.disabled === true) {
+    return;
+  }
+
+  if (isCombinedFilter(filter)) {
+    for (const nested of filter.meta.params ?? []) {
+      collectFilterFields(nested, acc);
+    }
+    return;
+  }
+
+  if (filter.meta?.key) {
+    acc.push(filter.meta.key);
+  }
+};
 
 export async function queryToFields({
   dataView,
@@ -33,14 +57,10 @@ export async function queryToFields({
       fields = fields.concat(queryFields);
     }
   }
+
   const { filters = [] } = request;
-  for (const f of typeof filters === 'function' ? filters() : filters) {
-    // unified search bar filters have meta object and key (regular filters)
-    // unified search bar "custom" filters ("Edit as query DSL", where meta.key is not present but meta is)
-    // Any other Elasticsearch query DSL filter that gets passed in by consumers (not coming from unified search, and these probably won't have a meta key at all)
-    if (isFilter(f) && f?.meta?.key && f.meta.disabled !== true) {
-      fields.push(f.meta.key);
-    }
+  for (const filter of typeof filters === 'function' ? filters() : filters) {
+    collectFilterFields(filter, fields);
   }
 
   // if source filtering is enabled, we need to fetch all the fields
