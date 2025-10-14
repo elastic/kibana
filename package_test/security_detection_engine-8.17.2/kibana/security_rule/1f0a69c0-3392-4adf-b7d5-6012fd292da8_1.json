@@ -1,0 +1,100 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the execution of PowerShell script with keywords related to different Antimalware Scan Interface (AMSI) bypasses. An adversary may attempt first to disable AMSI before executing further malicious powershell scripts to evade detection.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-windows.*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Potential Antimalware Scan Interface Bypass via PowerShell",
+    "query": "event.category :\"process\" and \n (\n  powershell.file.script_block_text : \n        (System.Management.Automation.AmsiUtils or \n\t\t\t\t amsiInitFailed or \n\t\t\t\t Invoke-AmsiBypass or \n\t\t\t\t Bypass.AMSI or \n\t\t\t\t amsi.dll or \n\t\t\t\t AntimalwareProvider  or \n\t\t\t\t amsiSession or \n\t\t\t\t amsiContext or \n\t\t\t\t System.Management.Automation.ScriptBlock or \n\t\t\t\t AmsiInitialize or \n\t\t\t\t unloadobfuscated or \n\t\t\t\t unloadsilent or \n\t\t\t\t AmsiX64 or \n\t\t\t\t AmsiX32 or \n\t\t\t\t FindAmsiFun) or \n\t\n  powershell.file.script_block_text : (\"[System.Runtime.InteropServices.Marshal]::Copy\" and \"VirtualProtect\") or \n\n  powershell.file.script_block_text : (\"[Ref].Assembly.GetType(('System.Management.Automation\" and \".SetValue(\") \n )\n",
+    "references": [
+      "https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell"
+    ],
+    "related_integrations": [
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "powershell.file.script_block_text",
+        "type": "unknown"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "1f0a69c0-3392-4adf-b7d5-6012fd292da8",
+    "severity": "high",
+    "tags": [
+      "Elastic",
+      "Host",
+      "Windows",
+      "Threat Detection",
+      "Defense Evasion",
+      "PowerShell"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1562",
+            "name": "Impair Defenses",
+            "reference": "https://attack.mitre.org/techniques/T1562/",
+            "subtechnique": [
+              {
+                "id": "T1562.001",
+                "name": "Disable or Modify Tools",
+                "reference": "https://attack.mitre.org/techniques/T1562/001/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1059",
+            "name": "Command and Scripting Interpreter",
+            "reference": "https://attack.mitre.org/techniques/T1059/",
+            "subtechnique": [
+              {
+                "id": "T1059.001",
+                "name": "PowerShell",
+                "reference": "https://attack.mitre.org/techniques/T1059/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 1
+  },
+  "id": "1f0a69c0-3392-4adf-b7d5-6012fd292da8",
+  "type": "security-rule"
+}

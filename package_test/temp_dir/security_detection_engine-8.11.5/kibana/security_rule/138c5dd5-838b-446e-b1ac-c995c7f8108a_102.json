@@ -1,0 +1,65 @@
+{
+    "attributes": {
+        "anomaly_threshold": 75,
+        "author": [
+            "Elastic"
+        ],
+        "description": "A machine learning job found an unusual user name in the authentication logs. An unusual user name is one way of detecting credentialed access by means of a new or dormant user account. An inactive user account (because the user has left the organization) that becomes active may be due to credentialed access using a compromised account password. Threat actors will sometimes also create new users as a means of persisting in a compromised web application.",
+        "false_positives": [
+            "User accounts that are rarely active, such as a site reliability engineer (SRE) or developer logging into a production server for troubleshooting, may trigger this alert. Under some conditions, a newly created user account may briefly trigger this alert while the model is learning."
+        ],
+        "from": "now-30m",
+        "interval": "15m",
+        "license": "Elastic License v2",
+        "machine_learning_job_id": "auth_rare_user",
+        "name": "Rare User Logon",
+        "note": "## Triage and analysis\n\n### Investigating Rare User Logon\n\nThis rule uses a machine learning job to detect an unusual user name in authentication logs, which could detect new accounts created for persistence.\n\n#### Possible investigation steps\n\n- Check if the user was newly created and if the company policies were followed.\n  - Identify the user account that performed the action and whether it should perform this kind of action.\n- Investigate other alerts associated with the involved users during the past 48 hours.\n- Investigate any abnormal account behavior, such as command executions, file creations or modifications, and network connections.\n\n### False positive analysis\n\n- Accounts that are used for specific purposes \u2014 and therefore not normally active \u2014 may trigger the alert.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+        "references": [
+            "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+        ],
+        "risk_score": 21,
+        "rule_id": "138c5dd5-838b-446e-b1ac-c995c7f8108a",
+        "severity": "low",
+        "tags": [
+            "Elastic",
+            "Authentication",
+            "Threat Detection",
+            "ML",
+            "Machine Learning",
+            "Initial Access"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0001",
+                    "name": "Initial Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0001/"
+                },
+                "technique": [
+                    {
+                        "id": "T1078",
+                        "name": "Valid Accounts",
+                        "reference": "https://attack.mitre.org/techniques/T1078/",
+                        "subtechnique": [
+                            {
+                                "id": "T1078.002",
+                                "name": "Domain Accounts",
+                                "reference": "https://attack.mitre.org/techniques/T1078/002/"
+                            },
+                            {
+                                "id": "T1078.003",
+                                "name": "Local Accounts",
+                                "reference": "https://attack.mitre.org/techniques/T1078/003/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "type": "machine_learning",
+        "version": 102
+    },
+    "id": "138c5dd5-838b-446e-b1ac-c995c7f8108a_102",
+    "type": "security-rule"
+}

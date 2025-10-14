@@ -1,0 +1,80 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies access attempts to the LSASS handle, which may indicate an attempt to dump credentials from LSASS memory.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "LSASS Process Access via Windows API",
+        "query": "api where host.os.type == \"windows\" and \n process.Ext.api.name in (\"OpenProcess\", \"OpenThread\") and Target.process.name : \"lsass.exe\"\n",
+        "references": [
+            "https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1003.001/T1003.001.md"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": false,
+                "name": "Target.process.name",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "process.Ext.api.name",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "ff4599cb-409f-4910-a239-52e4e6f532ff",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Credential Access"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1003",
+                        "name": "OS Credential Dumping",
+                        "reference": "https://attack.mitre.org/techniques/T1003/",
+                        "subtechnique": [
+                            {
+                                "id": "T1003.001",
+                                "name": "LSASS Memory",
+                                "reference": "https://attack.mitre.org/techniques/T1003/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "ff4599cb-409f-4910-a239-52e4e6f532ff_2",
+    "type": "security-rule"
+}

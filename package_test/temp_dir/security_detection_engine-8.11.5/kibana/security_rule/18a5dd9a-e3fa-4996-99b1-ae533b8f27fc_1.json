@@ -1,0 +1,56 @@
+{
+    "attributes": {
+        "anomaly_threshold": 70,
+        "author": [
+            "Elastic"
+        ],
+        "description": "A machine learning job has detected a high count of source IPs establishing an RDP connection with a single destination IP. Attackers might use multiple compromised systems to attack a target to ensure redundancy in case a source IP gets detected and blocked.",
+        "from": "now-12h",
+        "interval": "15m",
+        "license": "Elastic License v2",
+        "machine_learning_job_id": "lmd_high_rdp_distinct_count_source_ip_for_destination",
+        "name": "Spike in Number of Connections Made to a Destination IP",
+        "note": "",
+        "references": [
+            "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html",
+            "https://docs.elastic.co/en/integrations/lmd"
+        ],
+        "related_integrations": [
+            {
+                "package": "lmd",
+                "version": "^2.0.0"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "18a5dd9a-e3fa-4996-99b1-ae533b8f27fc",
+        "setup": "The Lateral Movement Detection integration must be enabled and related ML jobs configured for this rule to be effective. Please refer to this rule's references for more information.",
+        "severity": "low",
+        "tags": [
+            "Use Case: Lateral Movement Detection",
+            "Rule Type: ML",
+            "Rule Type: Machine Learning",
+            "Tactic: Lateral Movement"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0008",
+                    "name": "Lateral Movement",
+                    "reference": "https://attack.mitre.org/tactics/TA0008/"
+                },
+                "technique": [
+                    {
+                        "id": "T1210",
+                        "name": "Exploitation of Remote Services",
+                        "reference": "https://attack.mitre.org/techniques/T1210/"
+                    }
+                ]
+            }
+        ],
+        "type": "machine_learning",
+        "version": 1
+    },
+    "id": "18a5dd9a-e3fa-4996-99b1-ae533b8f27fc_1",
+    "type": "security-rule"
+}

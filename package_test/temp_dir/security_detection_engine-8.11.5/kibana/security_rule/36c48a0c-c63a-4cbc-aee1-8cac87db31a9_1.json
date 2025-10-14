@@ -1,0 +1,56 @@
+{
+    "attributes": {
+        "anomaly_threshold": 70,
+        "author": [
+            "Elastic"
+        ],
+        "description": "A machine learning job has detected unusually high number of process arguments in an RDP session. Executing sophisticated attacks such as lateral movement can involve the use of complex commands, obfuscation mechanisms, redirection and piping, which in turn increases the number of arguments in a command.",
+        "from": "now-12h",
+        "interval": "15m",
+        "license": "Elastic License v2",
+        "machine_learning_job_id": "lmd_high_mean_rdp_process_args",
+        "name": "High Mean of Process Arguments in an RDP Session",
+        "note": "",
+        "references": [
+            "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html",
+            "https://docs.elastic.co/en/integrations/lmd"
+        ],
+        "related_integrations": [
+            {
+                "package": "lmd",
+                "version": "^2.0.0"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "36c48a0c-c63a-4cbc-aee1-8cac87db31a9",
+        "setup": "The Lateral Movement Detection integration must be enabled and related ML jobs configured for this rule to be effective. Please refer to this rule's references for more information.",
+        "severity": "low",
+        "tags": [
+            "Use Case: Lateral Movement Detection",
+            "Rule Type: ML",
+            "Rule Type: Machine Learning",
+            "Tactic: Lateral Movement"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0008",
+                    "name": "Lateral Movement",
+                    "reference": "https://attack.mitre.org/tactics/TA0008/"
+                },
+                "technique": [
+                    {
+                        "id": "T1210",
+                        "name": "Exploitation of Remote Services",
+                        "reference": "https://attack.mitre.org/techniques/T1210/"
+                    }
+                ]
+            }
+        ],
+        "type": "machine_learning",
+        "version": 1
+    },
+    "id": "36c48a0c-c63a-4cbc-aee1-8cac87db31a9_1",
+    "type": "security-rule"
+}

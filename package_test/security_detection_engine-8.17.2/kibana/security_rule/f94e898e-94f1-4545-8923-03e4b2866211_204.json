@@ -1,0 +1,95 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "A new PAT was used for a GitHub user not previously seen in the last 14 days.",
+    "from": "now-9m",
+    "history_window_start": "now-14d",
+    "index": [
+      "logs-github.audit-*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "First Occurrence of Personal Access Token (PAT) Use For a GitHub User",
+    "new_terms_fields": [
+      "user.name",
+      "github.hashed_token"
+    ],
+    "query": "event.dataset:\"github.audit\" and event.category:\"configuration\" and\ngithub.hashed_token:* and user.name:* and\ngithub.programmatic_access_type:(\"OAuth access token\" or \"Fine-grained personal access token\")\n",
+    "related_integrations": [
+      {
+        "package": "github",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "github.hashed_token",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "github.programmatic_access_type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "user.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "f94e898e-94f1-4545-8923-03e4b2866211",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Use Case: Threat Detection",
+      "Use Case: UEBA",
+      "Tactic: Persistence",
+      "Rule Type: BBR",
+      "Data Source: Github"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1098",
+            "name": "Account Manipulation",
+            "reference": "https://attack.mitre.org/techniques/T1098/",
+            "subtechnique": [
+              {
+                "id": "T1098.001",
+                "name": "Additional Cloud Credentials",
+                "reference": "https://attack.mitre.org/techniques/T1098/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 204
+  },
+  "id": "f94e898e-94f1-4545-8923-03e4b2866211_204",
+  "type": "security-rule"
+}

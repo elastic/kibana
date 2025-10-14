@@ -1,0 +1,90 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule identifies a UID change event via `nsenter`. The `nsenter` command is used to enter a namespace, which is a way to isolate processes and resources. Attackers can use `nsenter` to escape from a container to the host, which can lead to privilege escalation and lateral movement.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.process*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Docker Escape via Nsenter",
+    "query": "process where host.os.type == \"linux\" and event.type == \"change\" and event.action == \"uid_change\" and\nprocess.entry_leader.entry_meta.type == \"container\" and process.args == \"nsenter\" and\nprocess.args in (\"-t\", \"--target\") and process.args_count >= 4\n",
+    "references": [
+      "https://www.cyberark.com/resources/threat-research-blog/the-route-to-root-container-escape-using-kernel-exploitation"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args_count",
+        "type": "long"
+      },
+      {
+        "ecs": true,
+        "name": "process.entry_leader.entry_meta.type",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "5f3ab3ce-7b41-4168-a06a-68d2af8ebc88",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "Domain: Container",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Privilege Escalation",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1611",
+            "name": "Escape to Host",
+            "reference": "https://attack.mitre.org/techniques/T1611/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "5f3ab3ce-7b41-4168-a06a-68d2af8ebc88_1",
+  "type": "security-rule"
+}

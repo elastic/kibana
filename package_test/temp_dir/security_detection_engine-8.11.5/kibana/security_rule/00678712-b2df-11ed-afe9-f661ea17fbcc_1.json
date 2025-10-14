@@ -1,0 +1,89 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects when a previously suspended user's account is renewed in Google Workspace. An adversary may renew a suspended user account to maintain access to the Google Workspace organization with a valid account.",
+        "false_positives": [
+            "Google Workspace administrators may renew a suspended user account if the user is expected to continue employment at the organization after temporary leave. Suspended user accounts are typically used by administrators to remove access to the user while actions is taken to transfer important documents and roles to other users, prior to deleting the user account and removing the license."
+        ],
+        "from": "now-130m",
+        "index": [
+            "filebeat-*",
+            "logs-google_workspace*"
+        ],
+        "interval": "10m",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Google Workspace Suspended User Account Renewed",
+        "note": "### Important Information Regarding Google Workspace Event Lag Times\n- As per Google's documentation, Google Workspace administrators may observe lag times ranging from minutes up to 3 days between the time of an event's occurrence and the event being visible in the Google Workspace admin/audit logs.\n- This rule is configured to run every 10 minutes with a lookback time of 130 minutes.\n- To reduce the risk of false negatives, consider reducing the interval that the Google Workspace (formerly G Suite) Filebeat module polls Google's reporting API for new events.\n- By default, `var.interval` is set to 2 hours (2h). Consider changing this interval to a lower value, such as 10 minutes (10m).\n- See the following references for further information:\n  - https://support.google.com/a/answer/7061566\n  - https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-google_workspace.html",
+        "query": "event.dataset:google_workspace.admin and event.category:iam and event.action:UNSUSPEND_USER\n",
+        "references": [
+            "https://support.google.com/a/answer/1110339"
+        ],
+        "related_integrations": [
+            {
+                "package": "google_workspace",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "00678712-b2df-11ed-afe9-f661ea17fbcc",
+        "setup": "The Google Workspace Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "low",
+        "tags": [
+            "Elastic",
+            "Cloud",
+            "Google Workspace",
+            "Continuous Monitoring",
+            "SecOps",
+            "Identity and Access"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0001",
+                    "name": "Initial Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0001/"
+                },
+                "technique": [
+                    {
+                        "id": "T1078",
+                        "name": "Valid Accounts",
+                        "reference": "https://attack.mitre.org/techniques/T1078/",
+                        "subtechnique": [
+                            {
+                                "id": "T1078.004",
+                                "name": "Cloud Accounts",
+                                "reference": "https://attack.mitre.org/techniques/T1078/004/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 1
+    },
+    "id": "00678712-b2df-11ed-afe9-f661ea17fbcc_1",
+    "type": "security-rule"
+}

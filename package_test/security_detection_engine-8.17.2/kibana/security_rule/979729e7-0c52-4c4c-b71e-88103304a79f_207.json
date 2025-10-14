@@ -1,0 +1,95 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic",
+      "Austin Songer"
+    ],
+    "description": "Identifies when a user has updated a SAML provider in AWS. SAML providers are used to enable federated access to the AWS Management Console. This activity could be an indication of an attacker attempting to escalate privileges.",
+    "false_positives": [
+      "SAML Provider could be updated by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. SAML Provider updates by unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    ],
+    "from": "now-9m",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "AWS IAM SAML Provider Updated",
+    "note": "",
+    "query": "event.dataset:aws.cloudtrail\n    and event.provider: iam.amazonaws.com\n    and event.action: UpdateSAMLProvider\n    and event.outcome:success\n",
+    "references": [
+      "https://docs.aws.amazon.com/IAM/latest/APIReference/API_UpdateSAMLProvider.html"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "979729e7-0c52-4c4c-b71e-88103304a79f",
+    "setup": "The AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS IAM",
+      "Use Case: Identity and Access Audit",
+      "Tactic: Privilege Escalation"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1484",
+            "name": "Domain or Tenant Policy Modification",
+            "reference": "https://attack.mitre.org/techniques/T1484/",
+            "subtechnique": [
+              {
+                "id": "T1484.002",
+                "name": "Trust Modification",
+                "reference": "https://attack.mitre.org/techniques/T1484/002/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 207
+  },
+  "id": "979729e7-0c52-4c4c-b71e-88103304a79f_207",
+  "type": "security-rule"
+}
