@@ -13,7 +13,6 @@
     "@kbn/dashboard-plugin",
     "@kbn/zod",
     "@kbn/content-management-plugin",
-    "@kbn/management-settings-ids"
   ],
   "exclude": ["target/**/*"]
 }
