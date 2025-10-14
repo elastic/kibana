@@ -230,11 +230,11 @@ export default ({ getService }: FtrProviderContext): void => {
             const expectedRule = await createRule(
               supertest,
               log,
-              getCustomQueryRuleParams({ rule_id: 'rule-2', name: 'rule-2' })
+              getCustomQueryRuleParams({ rule_id: 'rule-2', name: 'rule2' })
             );
 
             const body = await getCoverageOverview(supertest, {
-              search_term: 'rule-2',
+              search_term: 'rule2',
             });
 
             expect(body).to.eql({
@@ -243,9 +243,103 @@ export default ({ getService }: FtrProviderContext): void => {
               rules_data: {
                 [expectedRule.id]: {
                   activity: 'disabled',
-                  name: 'rule-2',
+                  name: 'rule2',
                 },
               },
+            });
+          });
+
+          it('returns partial matches on rule name', async () => {
+            await createRule(supertest, log, getCustomQueryRuleParams({ rule_id: 'rule-1' }));
+            const expectedRule1 = await createRule(
+              supertest,
+              log,
+              getCustomQueryRuleParams({ rule_id: 'rule-2', name: 'windows 10 x64' })
+            );
+            const expectedRule2 = await createRule(
+              supertest,
+              log,
+              // here
+              getCustomQueryRuleParams({ rule_id: 'rule-3', name: 'iOS darwin x64' })
+            );
+
+            const body = await getCoverageOverview(supertest, {
+              search_term: 'win',
+            });
+
+            expect(body).to.eql({
+              coverage: {},
+              unmapped_rule_ids: [expectedRule1.id, expectedRule2.id],
+              rules_data: {
+                [expectedRule1.id]: {
+                  activity: 'disabled',
+                  name: 'windows 10 x64',
+                },
+                [expectedRule2.id]: {
+                  activity: 'disabled',
+                  name: 'iOS darwin x64',
+                },
+              },
+            });
+          });
+
+          it('returns multiple matches on rule name by treating reserved characters as spaces', async () => {
+            const expectedRule1 = await createRule(
+              supertest,
+              log,
+              getCustomQueryRuleParams({
+                rule_id: 'rule-1',
+                name: 'User-Agent rule1',
+              })
+            );
+
+            const expectedRule2 = await createRule(
+              supertest,
+              log,
+              getCustomQueryRuleParams({
+                rule_id: 'rule-2',
+                name: 'User Agent rule2',
+              })
+            );
+
+            const body = await getCoverageOverview(supertest, {
+              search_term: 'User-Agent',
+            });
+
+            expect(body).to.eql({
+              coverage: {},
+              unmapped_rule_ids: [expectedRule1.id, expectedRule2.id],
+              rules_data: {
+                [expectedRule1.id]: {
+                  activity: 'disabled',
+                  name: 'User-Agent rule1',
+                },
+                [expectedRule2.id]: {
+                  activity: 'disabled',
+                  name: 'User Agent rule2',
+                },
+              },
+            });
+          });
+
+          it('does not return other special character matches on rule name', async () => {
+            await createRule(
+              supertest,
+              log,
+              getCustomQueryRuleParams({
+                rule_id: 'rule-1',
+                name: 'Rule name with an & apersand',
+              })
+            );
+
+            const body = await getCoverageOverview(supertest, {
+              search_term: '&',
+            });
+
+            expect(body).to.eql({
+              coverage: {},
+              unmapped_rule_ids: [],
+              rules_data: {},
             });
           });
 

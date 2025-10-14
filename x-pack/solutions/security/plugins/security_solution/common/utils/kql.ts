@@ -46,10 +46,38 @@ export function prepareKQLStringParam(value: string): string {
 export function escapeKQLStringParam(value = ''): string {
   return escapeStringValue(value);
 }
+/**
+ * Cleans up special characters to improve matching on KQL.
+ * Instead of escaping them, we replace them with spaces to improve search results,
+ * since the underlying reverse index does not contain special characters to match against.
+ * (they get stripped out automatically during indexing and tokenization)
+ *
+ * This is intended to be used on KQL search terms WITHOUT quotes.
+ *
+ * @example "a \"user-agent+ \t }with \n a *\:(surprise)" => "a user agent with a surprise"
+ *
+ * @see https://www.elastic.co/docs/reference/query-languages/kql
+ */
+export function cleanupKQLStringParam(value = ''): string {
+  return cleanupStringValue(value);
+}
+
+const SPECIAL_KQL_CHARACTERS = '\\(){}:<>"*-+';
+
+const removeSpecialCharacters = (val: string) =>
+  val.replace(new RegExp(`[${SPECIAL_KQL_CHARACTERS.split('').join('\\')}]`, 'g'), ' ');
+
+const simplifyWhitespace = (val: string) => val.replace(/\s+|\t+|\r+|\n+/g, ' ');
+
+const trim = (val: string) => val.trim();
+
+const cleanupStringValue = flow(removeSpecialCharacters, simplifyWhitespace, trim);
 
 const escapeQuotes = (val: string) => val.replace(/["]/g, '\\$&'); // $& means the whole matched string
+
+const removeEndingBackslash = (val: string) => val.replace(/\\$/, '');
 
 const escapeTabs = (val: string) =>
   val.replace(/\t/g, '\\t').replace(/\r/g, '\\r').replace(/\n/g, '\\n');
 
-const escapeStringValue = flow(escapeQuotes, escapeTabs);
+const escapeStringValue = flow(escapeQuotes, removeEndingBackslash, escapeTabs);

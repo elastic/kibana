@@ -8,7 +8,7 @@
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { RuleExecutionStatus } from '../../api/detection_engine';
 import { RuleCustomizationStatus, RuleExecutionStatusEnum } from '../../api/detection_engine';
-import { escapeKQLStringParam, prepareKQLStringParam } from '../../utils/kql';
+import { cleanupKQLStringParam, prepareKQLStringParam } from '../../utils/kql';
 import {
   ENABLED_FIELD,
   IS_CUSTOMIZED_FIELD,
@@ -126,7 +126,7 @@ const SEARCHABLE_RULE_PARAMS = [
  * @returns KQL String
  */
 export function convertRuleSearchTermToKQL(searchTerm: string): string {
-  const ruleNameCondition = `${RULE_NAME_FIELD}: *${escapeKQLStringParam(searchTerm)}*`;
+  const ruleNameCondition = `${RULE_NAME_FIELD}: *${cleanupKQLStringParam(searchTerm)}*`;
   const remainingConditions = SEARCHABLE_RULE_PARAMS.map(
     (param) => `${param}: ${prepareKQLStringParam(searchTerm)}`
   );
