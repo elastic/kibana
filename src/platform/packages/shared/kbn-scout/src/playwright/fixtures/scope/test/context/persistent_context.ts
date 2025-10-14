@@ -18,7 +18,7 @@ import { coreWorkerFixtures } from '../../worker';
  * E.g. Lighthouse launches a new browser window and the authentication state
  * is not persisted between windows by default, so we can't do page audit without persistent context.
  */
-export const persistentContext = coreWorkerFixtures.extend<
+export const persistentContextFixture = coreWorkerFixtures.extend<
   {
     context: BrowserContext;
   },
