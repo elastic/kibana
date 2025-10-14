@@ -12,13 +12,26 @@ import {
   EuiScreenReaderOnly,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import { v4 as uuidv4 } from 'uuid';
 import { type Streams, type Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { ConditionPanel } from '../../shared';
 import { FeatureEventsSparkline } from './feature_events_sparkline';
 import { FeatureDetailExpanded } from './feature_detail_expanded';
 import { TableTitle } from './table_title';
+
+// Helper function to generate unique copy name
+const generateCopyName = (originalName: string, existingFeatures: Feature[]) => {
+  const existingNames = new Set(existingFeatures.map((f) => f.name));
+  let copyNumber = 1;
+  let copyName = `${originalName}-copy-${copyNumber}`;
+
+  while (existingNames.has(copyName)) {
+    copyNumber++;
+    copyName = `${originalName}-copy-${copyNumber}`;
+  }
+
+  return copyName;
+};
 
 export function StreamFeaturesTable({
   definition,
@@ -113,7 +126,9 @@ export function StreamFeaturesTable({
           type: 'icon',
           icon: 'copy',
           onClick: (feature) => {
-            setFeatures((prev) => prev.concat({ ...feature, name: `${feature.name}-${uuidv4()}` }));
+            setFeatures((prev) =>
+              prev.concat({ ...feature, name: generateCopyName(feature.name, features) })
+            );
           },
         },
         {
