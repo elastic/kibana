@@ -231,15 +231,8 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         children: [
           {
             id: 'getting_started',
-            title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-              defaultMessage: 'Getting started',
-            }),
             icon: 'launch',
-            iconV2: 'launch',
             link: 'searchGettingStarted',
-            getIsActive: ({ pathNameSerialized, prepend }) => {
-              return pathNameSerialized.startsWith(prepend('/app/elasticsearch/getting_started'));
-            },
           },
           {
             id: 'dev_tools',

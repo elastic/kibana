@@ -31,15 +31,13 @@ export function SvlSearchNavigationServiceProvider({
         await testSubjects.existOrFail('search-homepage', { timeout: 2000 });
       });
     },
-    async navigateToGettingStartedPage(expectRedirect: boolean = false) {
+    async navigateToGettingStartedPage() {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('searchGettingStarted', {
           shouldLoginIfPrompted: false,
         });
       });
-      if (!expectRedirect) {
-        await testSubjects.existOrFail('search-getting-started', { timeout: 2000 });
-      }
+      await testSubjects.existOrFail('search-getting-started', { timeout: 2000 });
     },
     async navigateToIndexDetailPage(indexName: string) {
       await retry.tryForTime(60 * 1000, async () => {

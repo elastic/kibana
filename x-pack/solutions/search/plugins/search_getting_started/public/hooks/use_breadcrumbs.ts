@@ -11,10 +11,11 @@ import { PLUGIN_NAME } from '../../common';
 import { useKibana } from './use_kibana';
 
 export const useGettingStartedBreadcrumbs = () => {
-  const { cloud, http, searchNavigation } = useKibana().services;
+  const { cloud, http, searchNavigation, chrome } = useKibana().services;
   const isServerless = cloud?.isServerlessEnabled ?? false;
 
   useEffect(() => {
+    chrome.docTitle.change(PLUGIN_NAME);
     searchNavigation?.breadcrumbs.setSearchBreadCrumbs(
       isServerless
         ? []
@@ -29,5 +30,5 @@ export const useGettingStartedBreadcrumbs = () => {
       // Clear breadcrumbs on unmount;
       searchNavigation?.breadcrumbs.clearBreadcrumbs();
     };
-  }, [http, searchNavigation, isServerless]);
+  }, [http, searchNavigation, isServerless, chrome]);
 };

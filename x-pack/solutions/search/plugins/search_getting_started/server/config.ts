@@ -8,9 +8,6 @@
 import { schema } from '@kbn/config-schema';
 
 export const config = {
-  exposeToBrowser: {
-    enabled: true,
-  },
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),

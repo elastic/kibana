@@ -13,21 +13,16 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { QueryClient } from '@tanstack/react-query';
+import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 
 import type {
   SearchGettingStartedPluginSetup,
   SearchGettingStartedPluginStart,
   SearchGettingStartedAppPluginStartDependencies,
   SearchGettingStartedServicesContextDeps,
-  SearchGettingStartedConfigType,
 } from './types';
 
-const appInfo = {
-  appRoute: '/app/elasticsearch/getting_started',
-  id: PLUGIN_ID,
-  title: PLUGIN_NAME,
-};
 export class SearchGettingStartedPlugin
   implements
     Plugin<
@@ -37,7 +32,6 @@ export class SearchGettingStartedPlugin
       SearchGettingStartedAppPluginStartDependencies
     >
 {
-  private config: SearchGettingStartedConfigType;
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<SearchGettingStartedConfigType>();
   }
@@ -49,24 +43,16 @@ export class SearchGettingStartedPlugin
     >,
     deps: {}
   ): SearchGettingStartedPluginSetup {
-    if (!this.config?.enabled) return {};
-
+    const queryClient = new QueryClient({});
     core.application.register({
       id: PLUGIN_ID,
-      appRoute: appInfo.appRoute,
-      title: appInfo.title,
+      appRoute: PLUGIN_PATH,
+      title: PLUGIN_NAME,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: 'logoElasticsearch',
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
-
-        coreStart.chrome.docTitle.change(appInfo.title);
-        depsStart.searchNavigation?.handleOnAppMount();
-        // Create a QueryClient for the app
-        const { QueryClient } = await import('@tanstack/react-query');
-        const queryClient = new QueryClient();
-
         const services: SearchGettingStartedServicesContextDeps = {
           ...depsStart,
           history,
@@ -75,18 +61,14 @@ export class SearchGettingStartedPlugin
 
         return renderApp(coreStart, services, element, queryClient);
       },
-      order: 0,
+      order: 1,
       visibleIn: ['globalSearch', 'sideNav'],
     });
 
-    return {
-      app: appInfo,
-    };
+    return {};
   }
 
   public start(core: CoreStart) {
-    return {
-      app: appInfo,
-    };
+    return {};
   }
 }

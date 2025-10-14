@@ -30,8 +30,6 @@ export interface SearchGettingStartedAppPluginStartDependencies {
   serverless?: ServerlessPluginStart;
 }
 
-export type { SearchGettingStartedConfigType } from '../server/config';
-
 export type SearchGettingStartedServicesContextDeps =
   SearchGettingStartedAppPluginStartDependencies & {
     history: AppMountParameters['history'];
