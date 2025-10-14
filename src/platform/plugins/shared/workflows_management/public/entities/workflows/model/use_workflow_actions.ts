@@ -18,17 +18,25 @@ import type {
   TestWorkflowCommand,
 } from '@kbn/workflows';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { useKibana } from '../../../hooks/use_kibana';
+
+type HttpError = IHttpFetchError<ResponseErrorBody>;
+
+export interface UpdateWorkflowParams {
+  id: string;
+  workflow: Partial<EsWorkflow>;
+}
 
 export function useWorkflowActions() {
   const queryClient = useQueryClient();
   const { http } = useKibana().services;
 
-  const createWorkflow = useMutation<WorkflowDetailDto, Error, CreateWorkflowCommand>({
+  const createWorkflow = useMutation<WorkflowDetailDto, HttpError, CreateWorkflowCommand>({
     networkMode: 'always',
     mutationKey: ['POST', 'workflows'],
     mutationFn: (workflow) => {
-      return http!.post('/api/workflows', {
+      return http.post<WorkflowDetailDto>('/api/workflows', {
         body: JSON.stringify(workflow),
       });
     },
@@ -37,10 +45,10 @@ export function useWorkflowActions() {
     },
   });
 
-  const updateWorkflow = useMutation({
+  const updateWorkflow = useMutation<void, HttpError, UpdateWorkflowParams>({
     mutationKey: ['PUT', 'workflows', 'id'],
-    mutationFn: ({ id, workflow }: { id: string; workflow: Partial<EsWorkflow> }) => {
-      return http!.put(`/api/workflows/${id}`, {
+    mutationFn: ({ id, workflow }: UpdateWorkflowParams) => {
+      return http.put<void>(`/api/workflows/${id}`, {
         body: JSON.stringify(workflow),
       });
     },
@@ -52,7 +60,7 @@ export function useWorkflowActions() {
   const deleteWorkflows = useMutation({
     mutationKey: ['DELETE', 'workflows'],
     mutationFn: ({ ids }: { ids: string[] }) => {
-      return http!.delete(`/api/workflows`, {
+      return http.delete(`/api/workflows`, {
         body: JSON.stringify({ ids }),
       });
     },
@@ -63,12 +71,12 @@ export function useWorkflowActions() {
 
   const runWorkflow = useMutation<
     RunWorkflowResponseDto,
-    Error,
+    HttpError,
     RunWorkflowCommand & { id: string }
   >({
     mutationKey: ['POST', 'workflows', 'id', 'run'],
     mutationFn: ({ id, inputs }) => {
-      return http!.post(`/api/workflows/${id}/run`, {
+      return http.post(`/api/workflows/${id}/run`, {
         body: JSON.stringify({ inputs }),
       });
     },
@@ -80,10 +88,10 @@ export function useWorkflowActions() {
     },
   });
 
-  const runIndividualStep = useMutation<RunWorkflowResponseDto, Error, RunStepCommand>({
+  const runIndividualStep = useMutation<RunWorkflowResponseDto, HttpError, RunStepCommand>({
     mutationKey: ['POST', 'workflows', 'stepId', 'run'],
     mutationFn: ({ stepId, contextOverride, workflowYaml }) => {
-      return http!.post(`/api/workflows/testStep`, {
+      return http.post(`/api/workflows/testStep`, {
         body: JSON.stringify({ stepId, contextOverride, workflowYaml }),
       });
     },
@@ -95,14 +103,14 @@ export function useWorkflowActions() {
   const cloneWorkflow = useMutation({
     mutationKey: ['POST', 'workflows', 'id', 'clone'],
     mutationFn: ({ id }: { id: string }) => {
-      return http!.post(`/api/workflows/${id}/clone`);
+      return http.post(`/api/workflows/${id}/clone`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
     },
   });
 
-  const testWorkflow = useMutation<TestWorkflowResponseDto, Error, TestWorkflowCommand>({
+  const testWorkflow = useMutation<TestWorkflowResponseDto, HttpError, TestWorkflowCommand>({
     mutationKey: ['POST', 'workflows', 'test'],
     mutationFn: ({
       workflowYaml,
@@ -111,7 +119,7 @@ export function useWorkflowActions() {
       workflowYaml: string;
       inputs: Record<string, any>;
     }) => {
-      return http!.post(`/api/workflows/test`, {
+      return http.post(`/api/workflows/test`, {
         body: JSON.stringify({ workflowYaml, inputs }),
       });
     },
