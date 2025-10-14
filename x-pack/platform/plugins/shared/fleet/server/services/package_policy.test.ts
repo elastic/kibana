@@ -6753,7 +6753,7 @@ describe('Package policy service', () => {
     });
 
     describe('when updating a limited package', () => {
-      it('should no add new inputs', () => {
+      it('should not add new inputs', () => {
         const basePackagePolicy: NewPackagePolicy = {
           name: 'base-package-policy',
           description: 'Base Package Policy',
