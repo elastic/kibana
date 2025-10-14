@@ -403,6 +403,7 @@ export function LayerTabs(
         disableInlineLabelEditing={true}
         disablePreview={true}
         disableDragAndDrop={true}
+        disableTabsBarMenu={true}
       />
       <div ref={layerActionsFlyoutRef} />
     </>
