@@ -29,16 +29,20 @@ import { SiemMigrationsServiceBase } from '../../common/service';
 import type { GetMigrationsStatsAllParams, GetMigrationStatsParams } from '../../common/types';
 import { START_STOP_POLLING_SLEEP_SECONDS } from '../../common/constants';
 import type { DashboardMigrationStats } from '../types';
+import { SiemDashboardMigrationsTelemetry } from './telemetry';
 
 export const CREATE_MIGRATION_BODY_BATCH_SIZE = 50;
 
 export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<DashboardMigrationStats> {
+  public telemetry: SiemDashboardMigrationsTelemetry;
+
   constructor(
     core: CoreStart,
     plugins: StartPluginsDependencies,
-    _telemetryService: TelemetryServiceStart
+    telemetryService: TelemetryServiceStart
   ) {
     super(core, plugins);
+    this.telemetry = new SiemDashboardMigrationsTelemetry(telemetryService);
   }
 
   /** Accessor for the dashboard migrations API client */
@@ -77,10 +81,12 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
     }
 
     // Batching creation to avoid hitting the max payload size limit of the API
+    const batches = [];
     for (let i = 0; i < dashboardsCount; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
       const dashboardsBatch = dashboards.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
-      await api.addDashboardsToDashboardMigration({ migrationId, body: dashboardsBatch });
+      batches.push(api.addDashboardsToDashboardMigration({ migrationId, body: dashboardsBatch }));
     }
+    await Promise.all(batches);
   }
 
   /** Creates a dashboard migration with a name and adds the dashboards to it, returning the migration ID */
@@ -113,10 +119,12 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
       throw new Error(i18n.EMPTY_DASHBOARDS_ERROR);
     }
     // Batching creation to avoid hitting the max payload size limit of the API
+    const batches = [];
     for (let i = 0; i < count; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
       const bodyBatch = body.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
-      await api.upsertDashboardMigrationResources({ migrationId, body: bodyBatch });
+      batches.push(api.upsertDashboardMigrationResources({ migrationId, body: bodyBatch }));
     }
+    await Promise.all(batches);
   }
 
   /** Starts a dashbaord migration task and waits for the task to start running */

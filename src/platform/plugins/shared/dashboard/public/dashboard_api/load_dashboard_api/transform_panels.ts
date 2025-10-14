@@ -35,16 +35,16 @@ export async function transformPanels(
       };
     }
 
-    return await transformPanel(panel, filterReferences(panel.uid));
+    return await transformPanel(panel as DashboardPanel, filterReferences(panel.uid));
   });
 }
 
 async function transformPanel(panel: DashboardPanel, references?: Reference[]) {
-  const transforms = await embeddableService.getTransforms(panel.type);
-  if (!transforms?.transformOut) return panel;
+  const transformOut = await embeddableService.getLegacyURLTransform(panel.type);
+  if (!transformOut) return panel;
 
   try {
-    const transformedPanelConfig = transforms.transformOut(panel.config, references);
+    const transformedPanelConfig = transformOut(panel.config, references);
     return {
       ...panel,
       config: transformedPanelConfig,

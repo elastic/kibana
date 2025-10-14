@@ -82,23 +82,68 @@ tags:
       url: https://www.elastic.co/docs/reference/kibana/connectors-kibana
     x-displayName: Connectors
   - name: Data streams
+    description: |
+      Data stream APIs enable you to manage data streams, which are collections of indices that share the same index template and are managed as a single unit for time-series data.
+    x-displayName: Data streams
   - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
     name: data views
     x-displayName: Data views
   - name: Elastic Agent actions
+    description: |
+      Elastic Agent actions APIs enable you to manage actions performed on Elastic Agents, including agent reassignment, diagnostics collection, enrollment management, upgrades, and bulk operations for agent lifecycle management.
+    x-displayName: Elastic Agent actions
   - name: Elastic Agent binary download sources
+    description: |
+      Elastic Agent binary download sources APIs enable you to manage download sources for Elastic Agent binaries, including creating, updating, and deleting custom download sources for agent binaries.
+    x-displayName: Elastic Agent binary download sources
   - name: Elastic Agent policies
+    description: |
+      Elastic Agent policies APIs enable you to manage agent policies, including creating, updating, and deleting policies, as well as to retrieve agent policy outputs, manifests, and auto-upgrade status information.
+    x-displayName: Elastic Agent policies
   - name: Elastic Agent status
+    description: |
+      Enables you to retrieve status information about Elastic Agents, including health summaries and operational status.
+    x-displayName: Elastic Agent status
   - name: Elastic Agents
+    description: |
+      Elastic Agents APIs enable you to manage Elastic Agents, including retrieving agent information, managing agent lifecycle, handling file uploads, and initiating agent setup.
+    x-displayName: Elastic Agents
   - name: Elastic Package Manager (EPM)
+    description: |
+      Elastic Package Manager (EPM) APIs enable you to manage packages and integrations, including installing, updating, and uninstalling packages, managing custom integrations, and handling package assets.
+    x-displayName: Elastic Package Manager (EPM)
   - name: Fleet cloud connectors
+    description: |
+      Fleet cloud connectors APIs enable you to manage Fleet cloud connectors, including creating, updating, and deleting cloud connector configurations for Fleet integrations.
+    x-displayName: Fleet cloud connectors
   - name: Fleet enrollment API keys
+    description: |
+      Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking API keys used for agent enrollment.
+    x-displayName: Fleet enrollment API keys
   - name: Fleet internals
+    description: |
+      Fleet internals APIs enable you to manage Fleet internal operations, including checking permissions, monitoring Fleet Server health, managing settings, and initiating Fleet setup.
+    x-displayName: Fleet internals
   - name: Fleet outputs
+    description: |
+      Fleet outputs APIs enable you to manage Fleet outputs, including creating, updating, and deleting output configurations, generating Logstash API keys, and monitoring output health.
+    x-displayName: Fleet outputs
   - name: Fleet package policies
+    description: |
+      Fleet package policies APIs enable you to manage Fleet package policies, including creating, updating, and deleting policies, performing bulk operations, and managing policy upgrades.
+    x-displayName: Fleet package policies
   - name: Fleet proxies
+    description: |
+      Fleet proxies APIs enable you to manage Fleet proxies, including creating, updating, and deleting proxy configurations for Fleet agent communication.
+    x-displayName: Fleet proxies
   - name: Fleet Server hosts
+    description: |
+      Fleet Server hosts APIs enable you to manage Fleet Server hosts, including creating, updating, and deleting Fleet Server host configurations.
+    x-displayName: Fleet Server hosts
   - name: Fleet uninstall tokens
+    description: |
+      Fleet uninstall tokens APIs enable you to manage Fleet uninstall tokens, including retrieving metadata and decrypted tokens for agent uninstallation.
+    x-displayName: Fleet uninstall tokens
   - name: maintenance-window
     description: |
       You can schedule single or recurring maintenance windows to temporarily reduce rule notifications. For example, a maintenance window prevents false alarms during planned outages.
@@ -107,7 +152,11 @@ tags:
       url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts/maintenance-windows
     x-displayName: Maintenance windows
   - name: Message Signing Service
-  - description: Machine learning
+    description: |
+      Enables you to rotate message signing key pairs for secure Fleet communication.
+    x-displayName: Fleet Message Signing Service
+  - description: |
+      Enables you to synchronize machine learning saved objects.
     name: ml
     x-displayName: Machine learning
   - description: Interact with the Observability AI Assistant resources.
@@ -158,7 +207,8 @@ tags:
   - description: Interact with and manage endpoints running the Elastic Defend integration.
     name: Security Endpoint Management API
     x-displayName: Security endpoint management
-  - description: ''
+  - description: |
+      Use the Security entity analytics APIs to manage entity analytics and risk scoring, including asset criticality, privileged user monitoring, and entity engines.
     name: Security Entity Analytics API
     x-displayName: Security entity analytics
   - description: |
@@ -236,15 +286,19 @@ tags:
   - name: spaces
     x-displayName: Spaces
     description: Manage your Kibana spaces.
+    externalDocs:
+      url: https://www.elastic.co/docs/deploy-manage/manage-spaces
+      description: Space overview
   - name: streams
     description: |
-      Streams is a new and experimental way to manage your data in the Elastic stack. The API is currently not considered stable and will most likely change significantly before becoming GA. If you consume this API, please take into account that it may break without additional notice period.
+      Streams is a new and experimental way to manage your data in Kibana (currently experimental - expect changes).
     x-displayName: Streams
   - name: system
     x-displayName: System
     description: |
-      Get information about the system status, resource usage, and installed plugins.
-  - externalDocs:
+      Get information about the system status, resource usage, features, and installed plugins.
+  - description: Task manager APIs enable you to check the health of the Kibana task manager, which is used by features such as alerting, actions, and reporting to run mission critical work as persistent background tasks.
+    externalDocs:
       description: Task manager
       url: https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management
     name: task manager
@@ -13783,10 +13837,7 @@ paths:
   /api/endpoint/action/{action_id}/file/{file_id}:
     get:
       description: |
-        Get information for the specified file using the file ID.
-        > info
-        > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
-        > {`file_id`} = {`action_id`}`.`{`agent_id`}
+        Get information for the specified response action file download.
       operationId: EndpointFileInfo
       parameters:
         - in: path
@@ -13794,7 +13845,12 @@ paths:
           required: true
           schema:
             type: string
-        - in: path
+        - description: |
+            The file identifier is constructed in one of two ways:
+            - For Elastic Defend agents (`agentType` of `endpoint`): combine the `action_id` and `agent_id` values using a dot (`.`) separator:
+            `{file_id}` = `{action_id}.{agent_id}`
+            - For all other agent types: the `file_id` is the `agent_id` for which the response action was sent to.
+          in: path
           name: file_id
           required: true
           schema:
@@ -13804,7 +13860,35 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Management_API_SuccessResponse'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                      agentId:
+                        type: string
+                      agentType:
+                        type: string
+                      created:
+                        format: date-time
+                        type: string
+                      id:
+                        type: string
+                      mimeType:
+                        type: string
+                      name:
+                        type: string
+                      size:
+                        type: number
+                      status:
+                        enum:
+                          - AWAITING_UPLOAD
+                          - UPLOADING
+                          - READY
+                          - UPLOAD_ERROR
+                          - DELETED
+                        type: string
           description: OK
       summary: Get file information
       tags:
@@ -13815,10 +13899,7 @@ paths:
   /api/endpoint/action/{action_id}/file/{file_id}/download:
     get:
       description: |
-        Download a file from an endpoint. 
-        > info
-        > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
-        > {`file_id`} = {`action_id`}`.`{`agent_id`}
+        Download a file associated with a response action.
       operationId: EndpointFileDownload
       parameters:
         - in: path
@@ -13826,7 +13907,12 @@ paths:
           required: true
           schema:
             type: string
-        - in: path
+        - description: |
+            The file identifier is constructed in one of two ways:
+            - For Elastic Defend agents (`agentType` of `endpoint`): combine the `action_id` and `agent_id` values using a dot (`.`) separator:
+            `{file_id}` = `{action_id}.{agent_id}`
+            - For all other agent types: the `file_id` is the `agent_id` for which the response action was sent to.
+          in: path
           name: file_id
           required: true
           schema:
@@ -13834,9 +13920,10 @@ paths:
       responses:
         '200':
           content:
-            application/json:
+            application/octet-stream:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Management_API_SuccessResponse'
+                format: binary
+                type: string
           description: OK
       summary: Download a file
       tags:
@@ -15163,6 +15250,40 @@ paths:
         '503':
           description: Operation on an uninitialized Engine or in a cluster without CRUD API Enabled
       summary: Upsert an entity in Entity Store
+      tags:
+        - Security Entity Analytics API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/entity_store/entities/bulk:
+    put:
+      description: |
+        Update or create many entities in Entity Store.
+        If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created.
+        The creation is asynchronous. The time for a document to be present in the  final index depends on the entity store transform and usually takes more than 1 minute.
+      operationId: UpsertEntitiesBulk
+      parameters:
+        - in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntitiesContainer'
+        description: Schema for the updating many entities
+        required: true
+      responses:
+        '200':
+          description: Entities updated or created
+        '403':
+          description: Operation on a restricted field
+        '503':
+          description: Operation on an uninitialized Engine or in a cluster without CRUD API Enabled
+      summary: Upsert many entities in Entity Store
       tags:
         - Security Entity Analytics API
       x-metaTags:
@@ -25419,6 +25540,114 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/fleet/agents/{agentId}/migrate:
+    post:
+      description: 'Migrate a single agent to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.'
+      operationId: post-fleet-agents-agentid-migrate
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                enrollment_token:
+                  type: string
+                settings:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    ca_sha256:
+                      type: string
+                    certificate_authorities:
+                      type: string
+                    elastic_agent_cert:
+                      type: string
+                    elastic_agent_cert_key:
+                      type: string
+                    elastic_agent_cert_key_passphrase:
+                      type: string
+                    headers:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    insecure:
+                      type: boolean
+                    proxy_disabled:
+                      type: boolean
+                    proxy_headers:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    proxy_url:
+                      type: string
+                    replace_token:
+                      type: string
+                    staging:
+                      type: string
+                    tags:
+                      items:
+                        type: string
+                      type: array
+                uri:
+                  format: uri
+                  type: string
+              required:
+                - uri
+                - enrollment_token
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  actionId:
+                    type: string
+                required:
+                  - actionId
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Migrate a single agent
+      tags:
+        - Elastic Agents
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/fleet/agents/{agentId}/reassign:
     post:
       description: '[Required authorization] Route required privileges: fleet-agents-all.'
@@ -26041,6 +26270,116 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/fleet/agents/bulk_migrate:
+    post:
+      description: 'Bulk migrate agents to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.'
+      operationId: post-fleet-agents-bulk-migrate
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                agents:
+                  anyOf:
+                    - items:
+                        type: string
+                      type: array
+                    - type: string
+                batchSize:
+                  type: number
+                enrollment_token:
+                  type: string
+                settings:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    ca_sha256:
+                      type: string
+                    certificate_authorities:
+                      type: string
+                    elastic_agent_cert:
+                      type: string
+                    elastic_agent_cert_key:
+                      type: string
+                    elastic_agent_cert_key_passphrase:
+                      type: string
+                    headers:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    insecure:
+                      type: boolean
+                    proxy_disabled:
+                      type: boolean
+                    proxy_headers:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    proxy_url:
+                      type: string
+                    staging:
+                      type: string
+                    tags:
+                      items:
+                        type: string
+                      type: array
+                uri:
+                  format: uri
+                  type: string
+              required:
+                - agents
+                - uri
+                - enrollment_token
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  actionId:
+                    type: string
+                required:
+                  - actionId
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Migrate multiple agents
+      tags:
+        - Elastic Agents
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/fleet/agents/bulk_reassign:
     post:
       description: '[Required authorization] Route required privileges: fleet-agents-all.'
@@ -26546,6 +26885,8 @@ paths:
                 description: A summary of the agent setup status. `isReady` indicates whether the setup is ready. If the setup is not ready, `missing_requirements` lists which requirements are missing.
                 type: object
                 properties:
+                  is_action_secrets_storage_enabled:
+                    type: boolean
                   is_secrets_storage_enabled:
                     type: boolean
                   is_space_awareness_enabled:
@@ -47002,7 +47343,7 @@ paths:
                   description: Includes all of the referenced objects in the exported objects.
                   type: boolean
                 objects:
-                  description: 'A list of objects to export. NOTE: this optiona cannot be combined with `types` option'
+                  description: 'A list of objects to export. NOTE: this optional parameter cannot be combined with the `types` option'
                   items:
                     additionalProperties: false
                     type: object
@@ -47025,7 +47366,7 @@ paths:
                     - items:
                         type: string
                       type: array
-                  description: The saved object types to include in the export. Use `*` to export all the types.
+                  description: The saved object types to include in the export. Use `*` to export all the types. Valid options depend on enabled plugins, but may include `visualization`, `dashboard`, `search`, `index-pattern`, `tag`, `config`, `config-global`, `lens`, `map`, `event-annotation-group`, `query`, `url`, `action`, `alert`, `alerting_rule_template`, `apm-indices`, `cases-user-actions`, `cases`, `cases-comments`, `infrastructure-monitoring-log-view`, `ml-trained-model`, `osquery-saved-query`, `osquery-pack`, `osquery-pack-asset`.
       responses:
         '200':
           content:
@@ -49828,15 +50169,7 @@ paths:
                                       - title
                                   - type: object
                                     properties:
-                                      kql:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          query:
-                                            type: string
-                                        required:
-                                          - query
-                                      system:
+                                      feature:
                                         additionalProperties: false
                                         type: object
                                         properties:
@@ -49976,6 +50309,14 @@ paths:
                                         required:
                                           - name
                                           - filter
+                                      kql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            type: string
+                                        required:
+                                          - query
                                     required:
                                       - kql
                               type: array
@@ -51712,15 +52053,7 @@ paths:
                                       - title
                                   - type: object
                                     properties:
-                                      kql:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          query:
-                                            type: string
-                                        required:
-                                          - query
-                                      system:
+                                      feature:
                                         additionalProperties: false
                                         type: object
                                         properties:
@@ -51860,6 +52193,14 @@ paths:
                                         required:
                                           - name
                                           - filter
+                                      kql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            type: string
+                                        required:
+                                          - query
                                     required:
                                       - kql
                               type: array
@@ -53372,15 +53713,7 @@ paths:
                                       - title
                                   - type: object
                                     properties:
-                                      kql:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          query:
-                                            type: string
-                                        required:
-                                          - query
-                                      system:
+                                      feature:
                                         additionalProperties: false
                                         type: object
                                         properties:
@@ -53520,6 +53853,14 @@ paths:
                                         required:
                                           - name
                                           - filter
+                                      kql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            type: string
+                                        required:
+                                          - query
                                     required:
                                       - kql
                               type: array
@@ -55106,15 +55447,7 @@ paths:
                                       - title
                                   - type: object
                                     properties:
-                                      kql:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          query:
-                                            type: string
-                                        required:
-                                          - query
-                                      system:
+                                      feature:
                                         additionalProperties: false
                                         type: object
                                         properties:
@@ -55254,6 +55587,14 @@ paths:
                                         required:
                                           - name
                                           - filter
+                                      kql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            type: string
+                                        required:
+                                          - query
                                     required:
                                       - kql
                               type: array
@@ -56766,15 +57107,7 @@ paths:
                                   - title
                               - type: object
                                 properties:
-                                  kql:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      query:
-                                        type: string
-                                    required:
-                                      - query
-                                  system:
+                                  feature:
                                     additionalProperties: false
                                     type: object
                                     properties:
@@ -56914,6 +57247,14 @@ paths:
                                     required:
                                       - name
                                       - filter
+                                  kql:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      query:
+                                        type: string
+                                    required:
+                                      - query
                                 required:
                                   - kql
                           type: array
@@ -60823,15 +61164,7 @@ paths:
                                   - title
                               - type: object
                                 properties:
-                                  kql:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      query:
-                                        type: string
-                                    required:
-                                      - query
-                                  system:
+                                  feature:
                                     additionalProperties: false
                                     type: object
                                     properties:
@@ -60971,6 +61304,14 @@ paths:
                                     required:
                                       - name
                                       - filter
+                                  kql:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      query:
+                                        type: string
+                                    required:
+                                      - query
                                 required:
                                   - kql
                         required:
@@ -61069,15 +61410,7 @@ paths:
               additionalProperties: false
               type: object
               properties:
-                kql:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    query:
-                      type: string
-                  required:
-                    - query
-                system:
+                feature:
                   additionalProperties: false
                   type: object
                   properties:
@@ -61217,6 +61550,14 @@ paths:
                   required:
                     - name
                     - filter
+                kql:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    query:
+                      type: string
+                  required:
+                    - query
                 title:
                   minLength: 1
                   type: string
@@ -61433,7 +61774,7 @@ paths:
               additionalProperties: false
               type: object
               properties:
-                system:
+                feature:
                   additionalProperties: false
                   type: object
                   properties:
@@ -61627,15 +61968,7 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
-                    kql:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        query:
-                          type: string
-                      required:
-                        - query
-                    system:
+                    feature:
                       additionalProperties: false
                       type: object
                       properties:
@@ -61775,6 +62108,14 @@ paths:
                       required:
                         - name
                         - filter
+                    kql:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        query:
+                          type: string
+                      required:
+                        - query
                   required:
                     - kql
               required:
@@ -77293,6 +77634,15 @@ components:
         - updating
         - error
       type: string
+    Security_Entity_Analytics_API_EntitiesContainer:
+      type: object
+      properties:
+        entities:
+          items:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityContainer'
+          type: array
+      required:
+        - entities
     Security_Entity_Analytics_API_Entity:
       oneOf:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_UserEntity'
@@ -77333,6 +77683,16 @@ components:
       required:
         - has_all_required
         - privileges
+    Security_Entity_Analytics_API_EntityContainer:
+      type: object
+      properties:
+        record:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_Entity'
+        type:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
+      required:
+        - type
+        - record
     Security_Entity_Analytics_API_EntityField:
       additionalProperties: false
       type: object

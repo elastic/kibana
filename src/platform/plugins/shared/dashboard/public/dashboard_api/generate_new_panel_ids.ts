@@ -47,7 +47,7 @@ export function generateNewPanelIds(panels: DashboardState['panels'], references
         }),
       });
     } else {
-      newPanels.push(generateNewPanelId(panel));
+      newPanels.push(generateNewPanelId(panel as DashboardPanel));
     }
   }
   return { newPanels, newPanelReferences };
