@@ -12,12 +12,12 @@ You will be given the code for an FTR test. Your goal is to analyze it, extract 
 
 ## Guiding Principles for Page Object creation
 
-- **Locators**: Prefer user-facing Playwright locators like `page.getByRole()`, `page.getByLabel()`, and `page.getByText()`. Use data-test-subj selectors (e.g., `page.getByTestId()`) as a reliable fallback.
+- **Locators**: Prefer data-test-subj selectors (e.g., `page.getByTestId()`). Use Playwright locators like `page.getByRole()`, `page.getByLabel()`, and `page.getByText()` as a fallback.
+  - Prefer `this.page.testSubj.locator('savedObjectFinderSearchInput');` to `this.page.locator('[data-test-subj="savedObjectFinderSearchInput"]');`
 - **Method naming**: Method names should clearly represent user actions (e.g., `MapsToLoginPage()`, `fillUsernameField(username)`, `clickSubmitButton()`).
 - **Encapsulation**: The Page Object should expose high-level actions, not low-level Playwright details. For example, a `login()` method is better than separate `fillUsername()`, `fillPassword()`, and `clickSubmit()` methods if they are always called together.
-
-Single Responsibility: If the FTR test interacts with multiple distinct pages or complex components (like a header and a data grid), consider creating a separate Page Object for each.
-
+- **Leverage Playwright's auto-waiting philosophy**: Playwright's actions, such as `click()`, are designed to auto-wait for a set of conditions to be met before performing the action. Therefore with most actions there's NO need to explicitly wait for an element to be `visibile`.
+- **Single Responsibility**: If the FTR test interacts with multiple distinct pages or complex components (like a header and a data grid), consider creating a separate Page Object for each.
 - The `context` and `page` fixtures are not supported in `beforeAll` since they are created on a per-test basis. If you would like to configure your page before each test, do that in `beforeEach` hook instead.
 - Ensure you're logging into Kibana! In most cases, and unless otherwise mentioned, you'll need to `await browserAuth.loginAsAdmin()` in the `beforeEach` hook
 - Create as many page objects as the Kibana pages (instead of creating a single page object for everything), but do so within reason.
