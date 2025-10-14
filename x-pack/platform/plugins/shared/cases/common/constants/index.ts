@@ -167,7 +167,7 @@ export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
   alerts: { sync: true, enabled: true, isExperimental: false },
   metrics: [],
   observables: { enabled: true, autoExtract: false },
-  events: { enabled: true },
+  events: { enabled: false },
 });
 
 /**

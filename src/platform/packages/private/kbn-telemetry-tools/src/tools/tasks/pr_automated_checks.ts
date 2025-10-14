@@ -117,12 +117,12 @@ function validateSchemaDiff(
       }
 
       // Modified field. Make sure that the description is present
-      if (!newSchema._meta?.description) {
+      if (newSchema.type !== 'array' && !newSchema._meta?.description) {
         errors.push(`The _meta.description of ${fullKey} is missing. Please add it.`);
       }
     } else {
       // New field. Make sure that the description is present
-      if (!newSchema._meta?.description) {
+      if (newSchema.type !== 'array' && !newSchema._meta?.description) {
         errors.push(`The _meta.description of ${fullKey} is missing. Please add it.`);
       }
     }
