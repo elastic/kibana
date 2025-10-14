@@ -117,7 +117,7 @@ describe('DashboardMigrationsUploadMissingPanel', () => {
     // Description
     expect(getByTestId('uploadMissingPanelDescription')).toBeInTheDocument();
     expect(getByTestId('uploadMissingPanelDescription')).toHaveTextContent(
-      'Click Upload to continue translating 1 dashboards'
+      'Click Upload to continue translating 1 dashboard'
     );
     // Upload button
     expect(getByTestId('uploadMissingPanelButton')).toBeInTheDocument();

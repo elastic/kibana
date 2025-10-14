@@ -51,7 +51,8 @@ export const DASHBOARD_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION = (
   i18n.translate(
     'xpack.securitySolution.siemMigrations.dashboards.panel.uploadMissingResourcesDescription',
     {
-      defaultMessage: 'Click Upload to continue translating {partialDashboardsCount} dashboards',
+      defaultMessage:
+        'Click Upload to continue translating {partialDashboardsCount, plural, one {# dashboard} other {# dashboards} }',
       values: { partialDashboardsCount },
     }
   );

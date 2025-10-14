@@ -102,6 +102,22 @@ describe('RuleMigrationsUploadMissingPanel', () => {
       </TestProviders>
     );
 
+    mockUseGetMigrationTranslationStats.mockReturnValue({
+      data: {
+        rules: {
+          failed: 1,
+          success: {
+            result: {
+              partial: 2,
+              untranslatable: 1,
+              success: 1,
+            },
+          },
+        },
+      },
+      isLoading: false,
+    });
+
     act(() => {
       setMissingResourcesCallback(missingResourcesMock);
     });
@@ -116,7 +132,7 @@ describe('RuleMigrationsUploadMissingPanel', () => {
     // Description
     expect(getByTestId('uploadMissingPanelDescription')).toBeInTheDocument();
     expect(getByTestId('uploadMissingPanelDescription')).toHaveTextContent(
-      'Click Upload to continue translating 1 rules'
+      'Click Upload to continue translating 2 rules'
     );
     // Upload button
     expect(getByTestId('uploadMissingPanelButton')).toBeInTheDocument();

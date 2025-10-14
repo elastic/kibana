@@ -83,7 +83,8 @@ export const RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION = (partialRules
   i18n.translate(
     'xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResourcesDescription',
     {
-      defaultMessage: 'Click Upload to continue translating {partialRulesCount} rules',
+      defaultMessage:
+        'Click Upload to continue translating {partialRulesCount, plural, one {# rule} other {# rules}}',
       values: { partialRulesCount },
     }
   );
