@@ -37,6 +37,12 @@ import type { DeepMutable, DeepPartial } from '../utils';
 import { generateLayer } from '../utils';
 import type { MetricStateESQL, MetricStateNoESQL } from '../../schema/charts/metric';
 import { getSharedChartLensStateToAPI, getSharedChartAPIToLensState } from './utils';
+import {
+  fromColorByValueAPIToLensState,
+  fromColorByValueLensStateToAPI,
+  fromStaticColorAPIToLensState,
+  fromStaticColorLensStateToAPI,
+} from '../coloring';
 
 type MetricApiCompareType = Extract<
   Required<MetricState['secondary_metric']>,
@@ -81,10 +87,11 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
     metricAccessor: ACCESSOR,
-    // todo: handle all color configs
-    ...(layer.metric.color?.type === 'static' ? { color: layer.metric.color.color } : {}),
-    ...(layer.metric.color?.type === 'gradient'
-      ? { palette: { type: 'palette', name: layer.metric.color.palette! } }
+    ...(layer.metric.color?.type === 'static'
+      ? fromStaticColorAPIToLensState(layer.metric.color)
+      : {}),
+    ...(layer.metric.color?.type === 'dynamic'
+      ? { palette: fromColorByValueAPIToLensState(layer.metric.color) }
       : {}),
     ...(layer.metric.apply_color_to ? { applyColorTo: layer.metric.apply_color_to } : {}),
     subtitle: layer.metric.sub_label ?? '',
@@ -283,17 +290,14 @@ function reverseBuildVisualizationState(
     }
 
     if (visualization.color) {
-      props.metric.color = {
-        type: 'static',
-        color: visualization.color,
-      };
+      props.metric.color = fromStaticColorLensStateToAPI(visualization.color);
     }
 
     if (visualization.palette) {
-      props.metric.color = {
-        type: 'gradient',
-        palette: visualization.palette.name,
-      };
+      const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
+      if (colorByValue?.range === 'absolute') {
+        props.metric.color = colorByValue;
+      }
     }
 
     if (visualization.applyColorTo) {
