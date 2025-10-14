@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiSuperSelect } from '@elastic/eui';
+import { i18n as i18nTranslate } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
 import { EsFieldSelector } from '@kbn/securitysolution-autocomplete';
@@ -107,6 +108,12 @@ export const EntryItem: React.FC<EntryItemProps> = ({
           options={options}
           valueOfSelected={entry.negate ? 'DOES_NOT_MATCH' : 'MATCHES'}
           onChange={(value) => handleMatchChange(value === 'DOES_NOT_MATCH')}
+          aria-label={i18nTranslate.translate(
+            'xpack.securitySolution.threatMapping.entryItem.matchOperatorAriaLabel',
+            {
+              defaultMessage: 'Match operator',
+            }
+          )}
         />
       </EuiFormRow>
     );
