@@ -15,6 +15,7 @@ type AllMappingPropertyType = Required<MappingProperty>['type'];
 type StorageMappingPropertyType = AllMappingPropertyType &
   (
     | 'text'
+    | 'semantic_text'
     | 'match_only_text'
     | 'keyword'
     | 'boolean'
@@ -66,6 +67,7 @@ const types = {
   keyword: createFactory('keyword', { ignore_above: 1024 }),
   match_only_text: createFactory('match_only_text'),
   text: createFactory('text'),
+  semantic_text: createFactory('semantic_text'),
   double: createFactory('double'),
   long: createFactory('long'),
   boolean: createFactory('boolean'),
@@ -85,6 +87,7 @@ type PrimitiveOf<TProperty extends StorageMappingProperty> = {
     : string;
   match_only_text: string;
   text: string;
+  semantic_text: string;
   boolean: boolean;
   date: TProperty extends { format: 'strict_date_optional_time' } ? string : string | number;
   double: number;
