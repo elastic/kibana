@@ -158,7 +158,9 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
     useFieldSettingsContext(fieldNames);
 
   const { services } = useKibana();
-  const { notifications } = services;
+  const { notifications, application } = services;
+
+  const canEditAdvancedSettings = application.capabilities.advancedSettings?.save;
 
   // Calculate and set validation errors automatically
   React.useEffect(() => {
@@ -246,6 +248,7 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
           selectedOptions={selectedOptions}
           onChange={onChangeDefaultLlm}
           isLoading={connectors.loading}
+          isDisabled={!canEditAdvancedSettings}
           isInvalid={
             (selectedOptions.length === 0 && !connectors.loading) ||
             (defaultLlmOnlyValue && selectedOptions[0]?.value === NO_DEFAULT_CONNECTOR)
@@ -267,6 +270,7 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
               }
               checked={defaultLlmOnlyValue}
               onChange={(e) => onChangeDefaultOnly(e.target.checked)}
+              disabled={!canEditAdvancedSettings}
             />
           </EuiFlexItem>
 

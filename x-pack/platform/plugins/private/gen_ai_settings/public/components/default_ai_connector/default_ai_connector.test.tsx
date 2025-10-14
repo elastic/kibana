@@ -47,8 +47,41 @@ const mockConnectors = {
   ],
 };
 
-function setupTest() {
+interface TestWrapperProps {
+  children: React.ReactNode;
+  canSaveAdvancedSettings?: boolean;
+}
+
+function TestWrapper({ children, canSaveAdvancedSettings = true }: TestWrapperProps) {
   const queryClient = new QueryClient();
+
+  return (
+    <KibanaContextProvider
+      services={{
+        application: {
+          capabilities: {
+            advancedSettings: {
+              save: canSaveAdvancedSettings,
+            },
+          },
+        },
+        notifications: {
+          toasts: {
+            addDanger: jest.fn(),
+          },
+        },
+      }}
+    >
+      <I18nProvider>
+        <QueryClientProvider client={queryClient}>
+          <SettingsContextProvider>{children}</SettingsContextProvider>
+        </QueryClientProvider>
+      </I18nProvider>
+    </KibanaContextProvider>
+  );
+}
+
+function setupTest(canSaveAdvancedSettings = true) {
   let settingsValue: ReturnType<typeof useSettingsContext> | undefined;
 
   const utils = render(
@@ -58,21 +91,9 @@ function setupTest() {
     </>,
     {
       wrapper: ({ children }) => (
-        <KibanaContextProvider
-          services={{
-            notifications: {
-              toasts: {
-                addDanger: jest.fn(),
-              },
-            },
-          }}
-        >
-          <I18nProvider>
-            <QueryClientProvider client={queryClient}>
-              <SettingsContextProvider>{children}</SettingsContextProvider>
-            </QueryClientProvider>
-          </I18nProvider>
-        </KibanaContextProvider>
+        <TestWrapper canSaveAdvancedSettings={canSaveAdvancedSettings}>
+          {children}
+        </TestWrapper>
       ),
     }
   );
@@ -119,14 +140,14 @@ describe('DefaultAIConnector', () => {
         screen
           .getByText('Pre-configured')
           .compareDocumentPosition(screen.getByText('Pre configured Connector')) &
-          Node.DOCUMENT_POSITION_FOLLOWING
+        Node.DOCUMENT_POSITION_FOLLOWING
       ).toBeTruthy();
       expect(
         // eslint-disable-next-line no-bitwise
         screen
           .getByText('Custom connectors')
           .compareDocumentPosition(screen.getByText('Custom Connector 1')) &
-          Node.DOCUMENT_POSITION_FOLLOWING
+        Node.DOCUMENT_POSITION_FOLLOWING
       ).toBeTruthy();
 
       expect(
@@ -134,7 +155,7 @@ describe('DefaultAIConnector', () => {
         screen
           .getByText('Pre configured Connector')
           .compareDocumentPosition(screen.getByText('Custom connectors')) &
-          Node.DOCUMENT_POSITION_FOLLOWING
+        Node.DOCUMENT_POSITION_FOLLOWING
       ).toBeTruthy();
     });
 
@@ -213,6 +234,28 @@ describe('DefaultAIConnector', () => {
     });
   });
 
+  describe('permissions', () => {
+    it('disables components when user cannot save advanced settings', () => {
+      setupTest(false);
+
+      const comboBoxInput = screen.getByTestId('comboBoxSearchInput');
+      const checkbox = screen.getByTestId('defaultAiConnectorCheckbox');
+
+      expect(comboBoxInput).toBeDisabled();
+      expect(checkbox).toBeDisabled();
+    });
+
+    it('enables components when user can save advanced settings', () => {
+      setupTest(true);
+
+      const comboBoxInput = screen.getByTestId('comboBoxSearchInput');
+      const checkbox = screen.getByTestId('defaultAiConnectorCheckbox');
+
+      expect(comboBoxInput).not.toBeDisabled();
+      expect(checkbox).not.toBeDisabled();
+    });
+  });
+
   describe('validation functionality', () => {
     it('sets validation errors when "disallow all other connectors" is checked but no default connector is selected', async () => {
       const { settingsValue } = setupTest();
@@ -245,16 +288,8 @@ describe('DefaultAIConnector', () => {
         ],
       };
 
-      const queryClient = new QueryClient();
-
       render(<DefaultAIConnector connectors={mockConnectorsWithMissingSelected} />, {
-        wrapper: ({ children }) => (
-          <I18nProvider>
-            <QueryClientProvider client={queryClient}>
-              <SettingsContextProvider>{children}</SettingsContextProvider>
-            </QueryClientProvider>
-          </I18nProvider>
-        ),
+        wrapper: ({ children }) => <TestWrapper>{children}</TestWrapper>,
       });
 
       // Should show the component rendered correctly even if validation might occur
