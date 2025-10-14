@@ -20,6 +20,10 @@ describe('useRequest hook', () => {
     helpers = createUseRequestHelpers();
   });
 
+  afterEach(async () => {
+    await helpers.teardown();
+  });
+
   describe('parameters', () => {
     describe('path, method, body', () => {
       it('is used to send the request', async () => {

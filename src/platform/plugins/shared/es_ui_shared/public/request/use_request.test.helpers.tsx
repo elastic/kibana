@@ -28,6 +28,7 @@ export interface UseRequestHelpers {
   setErrorResponse: (overrides?: {}) => void;
   setupErrorWithBodyRequest: (overrides?: {}) => void;
   getErrorWithBodyResponse: () => SendRequestResponse;
+  teardown: () => Promise<void>;
 }
 
 // Each request will take 1s to resolve.
@@ -50,25 +51,30 @@ const errorWithBodyResponse = { body: errorValue };
 export const createUseRequestHelpers = (): UseRequestHelpers => {
   // The behavior we're testing involves state changes over time, so we need finer control over
   // timing.
-  jest.useFakeTimers({ legacyFakeTimers: true });
-
-  const flushPromiseJobQueue = async () => {
-    // See https://stackoverflow.com/questions/52177631/jest-timer-and-promise-dont-work-well-settimeout-and-async-function
-    await Promise.resolve();
-  };
+  jest.useFakeTimers();
 
   const completeRequest = async () => {
     await act(async () => {
-      jest.runAllTimers();
-      await flushPromiseJobQueue();
+      await jest.runAllTimersAsync();
     });
   };
 
   const advanceTime = async (ms: number) => {
-    await act(async () => {
-      jest.advanceTimersByTime(ms);
-      await flushPromiseJobQueue();
-    });
+    // Split advancement into two separate act() phases so that effects scheduled
+    // by the first phase (e.g. scheduling the next poll) have a chance to run
+    // before we advance the second phase.
+    const first = Math.floor(ms / 2);
+    const second = ms - first;
+    if (first > 0) {
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(first);
+      });
+    }
+    if (second > 0) {
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(second);
+      });
+    }
   };
 
   let hookReturn: ReturnType<
@@ -173,6 +179,14 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
     error: errorWithBodyResponse.body,
   });
 
+  const teardown = async () => {
+    hookReturn?.unmount();
+    await jest.runOnlyPendingTimersAsync();
+    jest.clearAllTimers();
+    jest.useRealTimers();
+    sendRequestSpy.resetHistory();
+  };
+
   return {
     advanceTime,
     completeRequest,
@@ -185,5 +199,6 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
     setErrorResponse,
     setupErrorWithBodyRequest,
     getErrorWithBodyResponse,
+    teardown,
   };
 };
