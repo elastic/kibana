@@ -218,7 +218,9 @@ export const ProjectPicker = () => {
 
   useEffect(() => {
     // TODO: replace with fetch linked projects from cross project API
-    setProjects(Object.values(response.linked_projects));
+    setProjects(
+      Object.values(response.linked_projects).sort((a, b) => a._alias.localeCompare(b._alias))
+    );
   }, []);
 
   const button = (
@@ -335,10 +337,7 @@ export const ProjectPicker = () => {
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={strings.getManageCrossProjectSearchLabel()}
-                  repositionOnScroll
-                >
+                <EuiToolTip content={strings.getManageCrossProjectSearchLabel()} repositionOnScroll>
                   <EuiButtonIcon
                     display="empty"
                     iconType="gear"
