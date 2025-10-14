@@ -102,7 +102,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await retry.tryForTime(300000, async () => {
         const caseAnalytics = await esClient.get({
-          index: '.internal.cases.default-securitysolution',
+          index: '.internal.cases.securitysolution-default',
           id: `cases:${caseToBackfill.id}`,
         });
 
@@ -220,7 +220,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await retry.try(async () => {
         const commentAnalytics = await esClient.get({
-          index: '.internal.cases-comments.default-securitysolution',
+          index: '.internal.cases-comments.securitysolution-default',
           id: `cases-comments:${patchedCase.comments![0].id}`,
         });
 
@@ -280,7 +280,7 @@ export default ({ getService }: FtrProviderContext): void => {
       let activityArray: any[] = [];
       await retry.try(async () => {
         const activityAnalytics = await esClient.search({
-          index: '.internal.cases-activity.default-securitysolution',
+          index: '.internal.cases-activity.securitysolution-default',
         });
 
         // @ts-ignore
