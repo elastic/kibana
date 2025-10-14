@@ -18,7 +18,6 @@ You will be given the code for an FTR test. Your goal is to analyze it, extract 
 
 Single Responsibility: If the FTR test interacts with multiple distinct pages or complex components (like a header and a data grid), consider creating a separate Page Object for each.
 
-- Always add tags to the test suite. Figure out the tag by inspecting the existing FTR tests. If unclear, use "@ess"
 - The `context` and `page` fixtures are not supported in `beforeAll` since they are created on a per-test basis. If you would like to configure your page before each test, do that in `beforeEach` hook instead.
 - Ensure you're logging into Kibana! In most cases, and unless otherwise mentioned, you'll need to `await browserAuth.loginAsAdmin()` in the `beforeEach` hook
 - Create as many page objects as the Kibana pages (instead of creating a single page object for everything), but do so within reason.
