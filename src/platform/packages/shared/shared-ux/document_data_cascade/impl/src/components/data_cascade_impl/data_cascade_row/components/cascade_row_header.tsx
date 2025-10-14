@@ -27,7 +27,7 @@ import {
 } from '../../../../store_provider';
 import type { CascadeRowHeaderPrimitiveProps } from '../../types';
 import { CascadeRowActions } from './cascade_row_actions';
-import { styles as cascadeRowHeaderStyles } from './cascade_row_header.styles';
+import { styles as cascadeRowHeaderStyles, flexHelper } from './cascade_row_header.styles';
 
 /**
  * @internal
@@ -126,7 +126,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
         direction="row"
         alignItems="center"
         justifyContent="spaceBetween"
-        css={{ minWidth: 0, maxWidth: '100%' }}
+        css={flexHelper}
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -173,8 +173,8 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
             </React.Fragment>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem css={{ minWidth: 0, maxWidth: '100%' }}>
-          <EuiFlexGroup justifyContent="spaceBetween" direction="row">
+        <EuiFlexItem css={flexHelper}>
+          <EuiFlexGroup justifyContent="spaceBetween" direction="row" responsive={false}>
             <EuiFlexItem grow={4} css={styles.rowHeaderTitleWrapper}>
               <RowTitleSlot rowData={rowInstance.original} nodePath={nodePath} />
             </EuiFlexItem>

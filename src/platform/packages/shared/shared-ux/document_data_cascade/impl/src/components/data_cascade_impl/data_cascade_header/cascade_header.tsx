@@ -20,6 +20,7 @@ import { SelectionDropdown } from './group_selection_combobox';
 import { styles as cascadeHeaderStyles } from './cascade_header.styles';
 
 export function CascadeHeaderPrimitive<G extends GroupNode, L extends LeafNode>({
+  id,
   customTableHeader,
   tableTitleSlot: TableTitleSlot,
   onCascadeGroupingChange,
@@ -72,7 +73,7 @@ export function CascadeHeaderPrimitive<G extends GroupNode, L extends LeafNode>(
         },
       ]}
     >
-      <EuiFlexItem id="treegrid-label">
+      <EuiFlexItem id={id}>
         <TableTitleSlot />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

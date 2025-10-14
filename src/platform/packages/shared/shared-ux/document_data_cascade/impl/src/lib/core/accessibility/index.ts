@@ -15,13 +15,17 @@ import type { GroupNode } from '../../../store_provider';
  * Helper hook to get the ARIA attributes for the tree grid container to ensure a proper accessibility tree gets generated,
  * see {@link https://www.w3.org/WAI/ARIA/apg/patterns/treegrid/#wai-ariaroles,states,andproperties | TreeGrid WAI ARIA spec}
  */
-export function useTreeGridContainerARIAAttributes() {
-  return {
-    role: 'treegrid',
-    'aria-readonly': true,
-    'aria-multiselectable': false,
-    'aria-rowcount': -1,
-  };
+export function useTreeGridContainerARIAAttributes(labelId: string) {
+  return useMemo(
+    () => ({
+      role: 'treegrid',
+      'aria-readonly': true,
+      'aria-multiselectable': false,
+      'aria-rowcount': -1,
+      'aria-labelledby': labelId,
+    }),
+    [labelId]
+  );
 }
 
 /**
