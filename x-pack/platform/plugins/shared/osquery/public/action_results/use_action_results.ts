@@ -77,7 +77,6 @@ export const useActionResults = ({
           sortOrder: direction,
           ...(kuery && { kuery }),
           ...(startDate && { startDate }),
-          ...(agentIds?.length && { agentIds: agentIds.join(',') }),
         },
       }),
     {

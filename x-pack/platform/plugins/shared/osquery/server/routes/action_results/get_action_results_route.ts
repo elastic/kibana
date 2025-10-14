@@ -9,6 +9,7 @@ import { lastValueFrom } from 'rxjs';
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 
 import { flatten, reverse, uniqBy } from 'lodash/fp';
 import type { estypes } from '@elastic/elasticsearch';
@@ -64,6 +65,9 @@ export const getActionResultsRoute = (
       },
       async (context, request, response) => {
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+        const spaceId = osqueryContext?.service?.getActiveSpace
+          ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
+          : DEFAULT_SPACE_ID;
 
         try {
           let integrationNamespaces: Record<string, string[]> = {};
@@ -88,9 +92,31 @@ export const getActionResultsRoute = (
 
           const search = await context.search;
 
-          const agentIds = request.query.agentIds
-            ? request.query.agentIds.split(',').map((id) => id.trim())
-            : undefined;
+          // Fetch action details - searches for both direct action_id match and queries.action_id match
+          const { actionDetails } = await lastValueFrom(
+            search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
+              {
+                actionId: request.params.actionId,
+                factoryQueryType: OsqueryQueries.actionDetails,
+                spaceId,
+              },
+              { abortSignal, strategy: 'osquerySearchStrategy' }
+            )
+          );
+
+          if (!actionDetails) {
+            return response.notFound({
+              body: { message: 'Action not found' },
+            });
+          }
+
+          // The actionId might be a query action_id (child) rather than parent action_id.
+          // Check if we need to extract agents from a specific query in the queries array.
+          const queries = actionDetails._source?.queries || [];
+          const matchingQuery = queries.find((q) => q.action_id === request.params.actionId);
+
+          // Use query-specific agents if this is a query action_id, otherwise use parent action's agents
+          const agentIds = matchingQuery?.agents || actionDetails._source?.agents || [];
 
           const res = await lastValueFrom(
             search.search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(

@@ -16,7 +16,6 @@ export const getActionResultsRequestQuerySchema = t.type({
   sort: t.union([t.string, t.undefined]),
   sortOrder: t.union([t.literal(Direction.asc), t.literal(Direction.desc), t.undefined]),
   kuery: t.union([t.string, t.undefined]),
-  agentIds: t.union([t.string, t.undefined]),
 });
 
 export type GetActionResultsRequestQuerySchema = t.OutputOf<

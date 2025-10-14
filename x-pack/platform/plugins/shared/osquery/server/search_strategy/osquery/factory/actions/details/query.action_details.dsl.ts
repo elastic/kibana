@@ -18,17 +18,25 @@ export const buildActionDetailsQuery = ({
   componentTemplateExists,
   spaceId,
 }: ActionDetailsRequestOptions): ISearchRequestParams => {
-  const actionIdQuery = `action_id: ${actionId}`;
-  let filter = actionIdQuery;
-  if (!isEmpty(kuery)) {
-    filter = filter + ` AND ${kuery}`;
-  }
+  // Build filter for kuery if provided
+  const kueryFilters = !isEmpty(kuery)
+    ? getQueryFilter({ filter: kuery }).bool.filter
+    : [];
 
-  const {
-    bool: { filter: baseFilter },
-  } = getQueryFilter({ filter });
+  // Search for either:
+  // 1. Parent action where action_id matches (direct match)
+  // 2. Parent action where queries.action_id matches (query action_id)
+  const actionIdFilter = {
+    bool: {
+      should: [
+        { term: { action_id: actionId } },
+        { term: { 'queries.action_id': actionId } },
+      ],
+      minimum_should_match: 1,
+    },
+  };
 
-  let extendedFilter = baseFilter;
+  let extendedFilter = [actionIdFilter, ...kueryFilters];
 
   if (spaceId === 'default') {
     // For default space, include docs where space_id matches 'default' OR where space_id field does not exist
@@ -41,11 +49,11 @@ export const buildActionDetailsQuery = ({
           ],
         },
       },
-      ...baseFilter,
+      ...extendedFilter,
     ];
   } else {
     // For other spaces, only include docs where space_id matches the current spaceId
-    extendedFilter = [...baseFilter, { term: { space_id: spaceId } }];
+    extendedFilter = [...extendedFilter, { term: { space_id: spaceId } }];
   }
 
   const dslQuery = {
