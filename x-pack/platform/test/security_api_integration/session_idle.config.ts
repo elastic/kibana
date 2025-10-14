@@ -29,7 +29,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     servers: xPackAPITestsConfig.get('servers'),
     esTestCluster: {
       ...xPackAPITestsConfig.get('esTestCluster'),
-      esJavaOpts: '-Djaxp.debug=true -Dorg.apache.xerces.debug=true',
       serverArgs: [
         ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
         'xpack.security.authc.token.enabled=true',

@@ -88,28 +88,24 @@ export async function runElasticsearch(
   });
 
   // Enable it to debug why SAML callback randomly returns 401
-  log.info('Enable authc trace logs for ES');
-  const clientUrl = new URL(
-    Url.format({
-      protocol: options.config.get('servers.elasticsearch.protocol'),
-      hostname: options.config.get('servers.elasticsearch.hostname'),
-      port: options.config.get('servers.elasticsearch.port'),
-    })
-  );
-  clientUrl.username = options.config.get('servers.kibana.username');
-  clientUrl.password = options.config.get('servers.kibana.password');
-  const esClient = createEsClientForTesting({
-    esUrl: clientUrl.toString(),
-  });
-  await esClient.cluster.putSettings({
-    persistent: {
-      'logger.org.elasticsearch.xpack.security.authc': 'trace',
-      'logger.com.sun.org.apache.xerces': 'trace',
-      'logger.org.apache.xerces': 'trace',
-      'logger.com.sun.org.apache.xerces.internal': 'trace',
-      'logger.org.apache.xerces.internal': 'trace',
-    },
-  });
+  // log.info('Enable authc debug logs for ES');
+  // const clientUrl = new URL(
+  //   Url.format({
+  //     protocol: options.config.get('servers.elasticsearch.protocol'),
+  //     hostname: options.config.get('servers.elasticsearch.hostname'),
+  //     port: options.config.get('servers.elasticsearch.port'),
+  //   })
+  // );
+  // clientUrl.username = options.config.get('servers.kibana.username');
+  // clientUrl.password = options.config.get('servers.kibana.password');
+  // const esClient = createEsClientForTesting({
+  //   esUrl: clientUrl.toString(),
+  // });
+  // await esClient.cluster.putSettings({
+  //   persistent: {
+  //     'logger.org.elasticsearch.xpack.security.authc': 'debug',
+  //   },
+  // });
 
   return async () => {
     await cleanupElasticsearch(node, config.serverless, logsDir, log);
