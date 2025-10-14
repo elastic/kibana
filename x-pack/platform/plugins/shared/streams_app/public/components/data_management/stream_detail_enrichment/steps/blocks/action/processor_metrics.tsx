@@ -12,6 +12,7 @@ import {
   EuiBadge,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiTextBlockTruncate,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -29,6 +30,51 @@ import type { ProcessorMetrics } from '../../../state_management/simulation_stat
 type ProcessorMetricBadgesProps = ProcessorMetrics;
 
 const formatter = getPercentageFormatter();
+
+const CLAMP_LINES = 4;
+const LONG_MESSAGE_CHARACTER_THRESHOLD = 300;
+
+const messageStyles = css`
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+`;
+
+const ProcessorErrorMessage = ({ message }: { message: string }) => {
+  const [expanded, toggleExpanded] = useToggle(false);
+  const shouldTruncate =
+    message.length > LONG_MESSAGE_CHARACTER_THRESHOLD || message.includes('\n');
+
+  return (
+    <>
+      {expanded || !shouldTruncate ? (
+        <div css={messageStyles}>{message}</div>
+      ) : (
+        <EuiTextBlockTruncate lines={CLAMP_LINES} cloneElement>
+          <span css={messageStyles}>{message}</span>
+        </EuiTextBlockTruncate>
+      )}
+
+      {shouldTruncate && (
+        <EuiButtonEmpty
+          size="xs"
+          onClick={toggleExpanded}
+          data-test-subj="streamsAppProcessorErrorMessageToggle"
+        >
+          {expanded
+            ? i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.processorErrors.message.showLess',
+                { defaultMessage: 'Show less' }
+              )
+            : i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.processorErrors.message.showMore',
+                { defaultMessage: 'Show full message' }
+              )}
+        </EuiButtonEmpty>
+      )}
+    </>
+  );
+};
 
 export const ProcessorMetricBadges = ({
   detected_fields,
@@ -162,7 +208,7 @@ export const ProcessorErrors = ({ metrics }: { metrics: ProcessorMetrics }) => {
             size="s"
             title={errorTitle}
           >
-            {error.message}
+            <ProcessorErrorMessage message={error.message} />
           </EuiCallOut>
         ))}
       </EuiFlexGroup>
