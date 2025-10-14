@@ -228,6 +228,13 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           context,
         });
 
+        const hostInventoryModel = findInventoryModel('host');
+        const hostIntegration =
+          typeof hostInventoryModel?.requiredIntegration !== 'object' ||
+          !('otel' in hostInventoryModel?.requiredIntegration)
+            ? undefined
+            : hostInventoryModel.requiredIntegration;
+
         const hasDataResponse = await infraMetricsClient.search({
           track_total_hits: true,
           terminate_after: 1,
@@ -237,7 +244,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
               should:
                 source === 'all'
                   ? [
-                      ...existsQuery(findInventoryFields('host').id),
+                      ...existsQuery(hostInventoryModel.fields.id),
                       ...existsQuery(findInventoryFields('container').id),
                       ...existsQuery(findInventoryFields('pod').id),
                       ...existsQuery(findInventoryFields('awsEC2').id),
@@ -245,8 +252,12 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
                       ...existsQuery(findInventoryFields('awsRDS').id),
                       ...existsQuery(findInventoryFields('awsSQS').id),
                     ]
-                  : source === 'host'
-                  ? [...existsQuery(findInventoryFields('host').id)]
+                  : source === 'host' && hostIntegration
+                  ? [
+                      ...termQuery(EVENT_MODULE, hostIntegration.beats),
+                      ...termQuery(METRICSET_MODULE, hostIntegration.beats),
+                      ...termQuery(DATASTREAM_DATASET, hostIntegration.otel),
+                    ]
                   : [],
               minimum_should_match: 1,
             },
