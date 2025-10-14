@@ -118,13 +118,6 @@ export function LayerTabs(
 
   const hideAddLayerButton = query && isOfAggregateQueryType(query);
 
-  const onSelectedTabChanged = useCallback(
-    (layerId: string) => {
-      dispatchLens(setSelectedLayerId({ layerId }));
-    },
-    [dispatchLens]
-  );
-
   const layerConfigs = useMemo(() => {
     return layerIds.map((layerId) => ({
       layerId,
@@ -212,18 +205,19 @@ export function LayerTabs(
     ]
   );
 
+  const visibleLayerConfigs = useMemo(
+    () => layerConfigs.filter((layer) => !layer.config.hidden),
+    [layerConfigs]
+  );
+
   const managedItems = useMemo(() => {
-    return layerConfigs
-      .filter((layer) => !layer.config.hidden)
-      .map((layer) => ({
-        id: layer.layerId,
-        label: layerLabels.get(layer.layerId) || 'Unknown',
-      }));
-  }, [layerConfigs, layerLabels]);
+    return visibleLayerConfigs.map((layer) => ({
+      id: layer.layerId,
+      label: layerLabels.get(layer.layerId) || 'Unknown',
+    }));
+  }, [visibleLayerConfigs, layerLabels]);
 
-  const renderTabs = useCallback(() => {
-    const visibleLayerConfigs = layerConfigs.filter((layer) => !layer.config.hidden);
-
+  const manageItemMenus = useCallback(() => {
     const updateVisualization = (newState: unknown) => {
       dispatchLens(
         updateVisualizationState({
@@ -299,11 +293,11 @@ export function LayerTabs(
     dispatchLens,
     isSaveable,
     isTextBasedLanguage,
-    layerConfigs,
     layerIds.length,
     onRemoveLayer,
     registerLibraryAnnotationGroupFunction,
     selectedLayerId,
+    visibleLayerConfigs,
     visualization,
   ]);
 
@@ -375,6 +369,7 @@ export function LayerTabs(
       <EuiSpacer size="s" />
       <UnifiedTabs
         items={managedItems}
+        itemMenus={manageItemMenus()}
         selectedItemId={selectedLayerId ?? undefined}
         recentlyClosedItems={[]}
         onClearRecentlyClosed={() => {}} // not implemented in this example
@@ -383,6 +378,19 @@ export function LayerTabs(
           core: { chrome: coreStart.chrome },
         }}
         onChanged={(updatedState) => {
+          console.log('onChanged', updatedState);
+
+          // Create a set of the updated item ids for easy lookup
+          const updatedItemIds = new Set(updatedState.items.map((item) => item.id));
+
+          // Handle removed layers
+          managedItems
+            .filter((item) => !updatedItemIds.has(item.id))
+            .forEach((item) => {
+              onRemoveLayer(item.id);
+            });
+
+          // Update selected layer
           dispatchLens(setSelectedLayerId({ layerId: updatedState.selectedItem?.id ?? null }));
         }}
         createItem={getNewTabDefaultProps}
