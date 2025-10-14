@@ -9,6 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { metricStateSchema } from './charts/metric';
+import { legacyMetricStateSchema } from './charts/legacy_metric';
 import type { LensApiAllMetricOperations } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
 
