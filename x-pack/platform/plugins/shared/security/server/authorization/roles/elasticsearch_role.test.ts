@@ -276,12 +276,12 @@ describe('#transformElasticsearchRoleToRole', () => {
     { name: 'global-base-read', _transform_error: [] },
     { name: 'global-foo-all', _transform_error: [] },
     { name: 'global-foo-read', _transform_error: [] },
-    { name: 'global-malformed', _transform_error: ['kibana'] },
+    { name: 'global-malformed', _transform_error: ['kibana:transformation_exception'] },
     { name: 'default-base-all', _transform_error: [] },
     { name: 'default-base-read', _transform_error: [] },
-    { name: 'default-foo-all', _transform_error: ['kibana'] },
+    { name: 'default-foo-all', _transform_error: ['kibana:feature_requires_all_spaces'] },
     { name: 'default-foo-read', _transform_error: [] },
-    { name: 'default-malformed', _transform_error: ['kibana'] },
+    { name: 'default-malformed', _transform_error: ['kibana:transformation_exception'] },
   ]);
 
   testRoles(
@@ -292,13 +292,13 @@ describe('#transformElasticsearchRoleToRole', () => {
       { name: 'global-base-all', _transform_error: [] },
       { name: 'global-base-read', _transform_error: [] },
       { name: 'global-foo-all', _transform_error: [] },
-      { name: 'global-foo-read', _transform_error: ['kibana'] },
-      { name: 'global-malformed', _transform_error: ['kibana'] },
+      { name: 'global-foo-read', _transform_error: ['kibana:disabled_feature_privileges'] },
+      { name: 'global-malformed', _transform_error: ['kibana:transformation_exception'] },
       { name: 'default-base-all', _transform_error: [] },
       { name: 'default-base-read', _transform_error: [] },
       { name: 'default-foo-all', _transform_error: [] },
-      { name: 'default-foo-read', _transform_error: ['kibana'] },
-      { name: 'default-malformed', _transform_error: ['kibana'] },
+      { name: 'default-foo-read', _transform_error: ['kibana:disabled_feature_privileges'] },
+      { name: 'default-malformed', _transform_error: ['kibana:transformation_exception'] },
     ]
   );
 

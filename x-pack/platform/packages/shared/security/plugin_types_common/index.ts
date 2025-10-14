@@ -47,3 +47,4 @@ export type {
   CategorizedApiKey,
   ApiKeyAggregations,
 } from './src/api_keys/api_key';
+export { RoleTransformErrorReason } from './src/roles';
