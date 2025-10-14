@@ -179,7 +179,7 @@ const FlyoutSessionFromComponents: React.FC<FlyoutSessionFromComponents> = React
 
 FlyoutSessionFromComponents.displayName = 'FlyoutSessionFromComponents';
 
-export const FlyoutFromComponents: React.FC = () => {
+export const FlyoutWithComponent: React.FC = () => {
   return (
     <EuiDescriptionList
       type="column"
@@ -202,4 +202,4 @@ export const FlyoutFromComponents: React.FC = () => {
   );
 };
 
-FlyoutFromComponents.displayName = 'FlyoutFromComponents';
+FlyoutWithComponent.displayName = 'FlyoutFromComponents';

@@ -164,7 +164,7 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
 
 FlyoutSession.displayName = 'FlyoutSession';
 
-export const FlyoutFromOverlays: React.FC<FlyoutFromOverlaysProps> = (props) => {
+export const FlyoutWithOverlays: React.FC<FlyoutFromOverlaysProps> = (props) => {
   const { overlays, rendering } = props;
 
   return (
@@ -212,4 +212,4 @@ export const FlyoutFromOverlays: React.FC<FlyoutFromOverlaysProps> = (props) => 
   );
 };
 
-FlyoutFromOverlays.displayName = 'FlyoutFromOverlays';
+FlyoutWithOverlays.displayName = 'FlyoutFromOverlays';

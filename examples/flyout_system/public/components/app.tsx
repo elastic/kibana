@@ -22,8 +22,8 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 import { useHistory, useLocation } from 'react-router-dom';
 
-import { FlyoutFromOverlays } from '_flyout_with_component';
-import { FlyoutFromComponents } from './_flyout_without_isopen';
+import { FlyoutWithOverlays } from './_flyout_with_overlays';
+import { FlyoutWithComponent } from './_flyout_with_component';
 
 interface AppDeps {
   basename: string;
@@ -69,9 +69,9 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
   const renderTabContent = () => {
     switch (selectedTabId) {
       case FLYOUT_FROM_COMPONENTS:
-        return <FlyoutFromComponents />;
+        return <FlyoutWithComponent />;
       case FLYOUT_WITH_OVERLAYS:
-        return <FlyoutFromOverlays overlays={overlays} rendering={rendering} />;
+        return <FlyoutWithOverlays overlays={overlays} rendering={rendering} />;
       default:
         return null;
     }
