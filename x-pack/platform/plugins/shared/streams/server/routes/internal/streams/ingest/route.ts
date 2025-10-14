@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import type { ProcessorSuggestion } from '../../../../../common';
+import type {  ProcessorSuggestionsResponse } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 
@@ -21,8 +21,8 @@ const processorSuggestionsRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({ processorSuggestions }): Promise<ProcessorSuggestion[]> => {
-    return processorSuggestions.getSuggestions();
+  handler: async ({ processorSuggestions }): Promise<ProcessorSuggestionsResponse> => {
+    return processorSuggestions.getAllSuggestions();
   },
 });
 

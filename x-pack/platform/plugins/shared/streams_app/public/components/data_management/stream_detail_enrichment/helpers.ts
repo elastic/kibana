@@ -5,11 +5,12 @@
  * 2.0.
  */
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import { monaco } from '@kbn/monaco';
 import type { JsonValue } from '@kbn/utility-types';
-import type { ProcessorSuggestion } from '@kbn/streams-plugin/common';
+import type { ProcessorSuggestionsResponse } from '@kbn/streams-plugin/common';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 
-let suggestionsPromise: Promise<ProcessorSuggestion[]> | null = null;
+let suggestionsPromise: Promise<ProcessorSuggestionsResponse> | null = null;
 
 export const serializeXJson = (v: unknown, defaultVal: string = '{}') => {
   if (!v) {
@@ -42,27 +43,31 @@ export const parseXJsonOrString = (input: string): unknown => {
   }
 };
 
-export const fetchProcessorSuggestions = (
+export const fetchProcessorSuggestions = async (
   streamsRepositoryClient: StreamsRepositoryClient,
   signal: AbortSignal
-): Promise<ProcessorSuggestion[]> => {
+): Promise<ProcessorSuggestionsResponse> => {
   if (suggestionsPromise) return suggestionsPromise;
 
-  const fetchPromise = streamsRepositoryClient
-    .fetch('GET /internal/streams/ingest/processor_suggestions', {
-      signal,
-    })
-    .then((result) => result ?? [])
-    .catch(() => []);
-
-  suggestionsPromise = fetchPromise.then((result) => {
-    if (result.length === 0) {
-      suggestionsPromise = null;
+  const fetchPromise = (async (): Promise<ProcessorSuggestionsResponse> => {
+    try {
+      const result = await streamsRepositoryClient.fetch(
+        'GET /internal/streams/ingest/processor_suggestions',
+        { signal }
+      );
+      return result ?? { processors: [], propertiesByProcessor: {} };
+    } catch {
+      return { processors: [], propertiesByProcessor: {} };
     }
-    return result;
-  });
+  })();
 
-  return suggestionsPromise;
+  suggestionsPromise = fetchPromise;
+
+  const resolved = await fetchPromise;
+  if (!resolved || resolved.processors.length === 0) {
+    suggestionsPromise = null;
+  }
+  return resolved;
 };
 
 /**
@@ -106,8 +111,9 @@ export const buildProcessorInsertText = (
 ): string => {
   let insertText = alreadyOpenedQuote ? `${name}"` : `"${name}"`;
 
-  if (template) {
-    const json = typeof template === 'string' ? template : JSON.stringify(template, null, 2);
+  if (template !== undefined) {
+    const json =
+      typeof template === 'string' ? JSON.stringify(template) : JSON.stringify(template, null, 2);
     insertText += `: ${json}`;
   } else {
     insertText += ': {}';
@@ -117,6 +123,109 @@ export const buildProcessorInsertText = (
   if (insertText.endsWith('[]')) insertText = insertText.slice(0, -2) + '[$0]';
 
   return insertText;
+};
+
+export const buildPropertyInsertText = (
+  propertyName: string,
+  propertyTemplate: JsonValue | undefined,
+  isQuoteOpen: boolean
+): string => {
+  let insertText = isQuoteOpen ? `${propertyName}"` : `"${propertyName}"`;
+
+  if (propertyTemplate !== undefined) {
+    const json =
+      typeof propertyTemplate === 'string'
+        ? JSON.stringify(propertyTemplate)
+        : JSON.stringify(propertyTemplate, null, 2);
+    insertText += `: ${json}`;
+  } else {
+    insertText += ': {}';
+  }
+
+  if (insertText.endsWith('{}')) insertText = insertText.slice(0, -2) + '{$0}';
+  if (insertText.endsWith('[]')) insertText = insertText.slice(0, -2) + '[$0]';
+
+  return insertText;
+};
+
+export const detectProcessorContext = (
+  model: monaco.editor.ITextModel,
+  position: monaco.Position,
+  knownProcessors: string[]
+): { kind: 'processorKey' | 'processorProperty'; processorName?: string } => {
+  // Limit the scan window for performance
+  const startLineNumber = Math.max(1, position.lineNumber - 120);
+  const text = model.getValueInRange({
+    startLineNumber,
+    startColumn: 1,
+    endLineNumber: position.lineNumber,
+    endColumn: position.column,
+  });
+
+  // If inside triple-quoted string, only suggest processor keys
+  if ((text.match(/"""/g) || []).length % 2 === 1) {
+    return { kind: 'processorKey' };
+  }
+
+  type Frame = { type: '{' | '['; owner?: string };
+  const stack: Frame[] = [];
+  let pendingOwner: string | undefined;
+
+  const readString = (from: number): { end: number; content: string } => {
+    for (let i = from + 1; i < text.length; i++) {
+      if (text[i] === '"' && text[i - 1] !== '\\') {
+        return { end: i, content: text.slice(from + 1, i) };
+      }
+    }
+    return { end: text.length, content: text.slice(from + 1) };
+  };
+
+  const skipWs = (from: number): number => {
+    let i = from;
+    while (i < text.length && /\s/.test(text[i])) i++;
+    return i;
+  };
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+
+    if (ch === '"') {
+      const { end, content } = readString(i);
+      const afterString = skipWs(end + 1);
+      if (text[afterString] === ':') {
+        const afterColon = skipWs(afterString + 1);
+        pendingOwner = text[afterColon] === '{' ? content : undefined;
+      }
+      i = end;
+      continue;
+    }
+
+    if (ch === '{') {
+      const owner = pendingOwner && knownProcessors.includes(pendingOwner) ? pendingOwner : undefined;
+      stack.push({ type: '{', owner });
+      pendingOwner = undefined;
+      continue;
+    }
+
+    if (ch === '[') {
+      stack.push({ type: '[' });
+      pendingOwner = undefined;
+      continue;
+    }
+
+    if (ch === '}' || ch === ']') {
+      stack.pop();
+      pendingOwner = undefined;
+      continue;
+    }
+  }
+
+  const top = stack[stack.length - 1];
+  if (top?.type === '{' && top.owner && knownProcessors.includes(top.owner)) {
+    return { kind: 'processorProperty', processorName: top.owner };
+  }
+
+  return { kind: 'processorKey' };
 };
 
 export const shouldSuggestProcessorKey = (

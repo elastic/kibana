@@ -76,9 +76,7 @@ export class StreamsPlugin
     this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
-    this.processorSuggestionsService = new ProcessorSuggestionsService({
-      logger: this.logger.get('processor_suggestions'),
-    });
+    this.processorSuggestionsService = new ProcessorSuggestionsService();
   }
 
   public setup(

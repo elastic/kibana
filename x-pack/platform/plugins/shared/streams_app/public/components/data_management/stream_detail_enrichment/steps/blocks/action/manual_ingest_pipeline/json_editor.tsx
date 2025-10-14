@@ -12,19 +12,22 @@ import { CodeEditor } from '@kbn/code-editor';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
+import type { JsonValue } from '@kbn/utility-types';
 import type { ElasticsearchProcessorType } from '@kbn/streams-schema';
 import { elasticsearchProcessorTypes } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ProcessorSuggestion } from '@kbn/streams-plugin/common';
+import type { ProcessorSuggestionsResponse } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
 import type { ProcessorFormState } from '../../../../types';
 import {
   serializeXJson,
   parseXJsonOrString,
   buildProcessorInsertText,
+  buildPropertyInsertText,
   hasOddQuoteCount,
   shouldSuggestProcessorKey,
   fetchProcessorSuggestions,
+  detectProcessorContext,
 } from '../../../../helpers';
 
 export const JsonEditor = () => {
@@ -118,8 +121,11 @@ export const JsonEditor = () => {
         model: monaco.editor.ITextModel,
         position: monaco.Position
       ): Promise<monaco.languages.CompletionList> => {
-        if (!isProcessorTypeKeyContext(model, position)) {
-          return { suggestions: [] };
+        let response: ProcessorSuggestionsResponse = { processors: [], propertiesByProcessor: {} };
+        try {
+          response = await fetchProcessorSuggestions(streamsRepositoryClient, signal);
+        } catch {
+          response = { processors: [], propertiesByProcessor: {} };
         }
 
         const lineContentAfter = model.getValueInRange({
@@ -144,26 +150,58 @@ export const JsonEditor = () => {
         });
         const alreadyOpenedQuote = hasOddQuoteCount(linePrefix);
 
-        let terms: ProcessorSuggestion[] = [];
-        try {
-          terms = await fetchProcessorSuggestions(streamsRepositoryClient, signal);
-        } catch {
-          terms = [];
+        const ctx = detectProcessorContext(
+          model,
+          position,
+          (response.processors || []).map((p) => p.name)
+        );
+
+        if (ctx.kind === 'processorProperty' && ctx.processorName) {
+          const props = response.propertiesByProcessor[ctx.processorName] || [];
+          const suggestions: monaco.languages.CompletionItem[] = props.map(
+            (propertySuggestion: { name: string; template?: JsonValue | undefined }) => {
+              const label = String(propertySuggestion.name);
+              const insertText = buildPropertyInsertText(
+                label,
+                propertySuggestion.template,
+                alreadyOpenedQuote
+              );
+              return {
+                label,
+                kind: monaco.languages.CompletionItemKind.Property,
+                detail: 'Property',
+                insertText,
+                range,
+                sortText: label,
+                insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              };
+            }
+          );
+          return { suggestions };
         }
 
-        const suggestions: monaco.languages.CompletionItem[] = (terms || []).map((t) => {
-          const label = String(t.name);
-          const insertText = buildProcessorInsertText(label, t.template, alreadyOpenedQuote);
-          return {
-            label,
-            kind: monaco.languages.CompletionItemKind.Property,
-            detail: 'Processor',
-            insertText,
-            range,
-            sortText: label,
-            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-          };
-        });
+        if (!isProcessorTypeKeyContext(model, position)) {
+          return { suggestions: [] };
+        }
+        const suggestions: monaco.languages.CompletionItem[] = (response.processors || []).map(
+          (processorSuggestion: { name: string; template?: JsonValue | undefined }) => {
+            const label = String(processorSuggestion.name);
+            const insertText = buildProcessorInsertText(
+              label,
+              processorSuggestion.template,
+              alreadyOpenedQuote
+            );
+            return {
+              label,
+              kind: monaco.languages.CompletionItemKind.Property,
+              detail: 'Processor',
+              insertText,
+              range,
+              sortText: label,
+              insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+            };
+          }
+        );
         return { suggestions };
       },
     };

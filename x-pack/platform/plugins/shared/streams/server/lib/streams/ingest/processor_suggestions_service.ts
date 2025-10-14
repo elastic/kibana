@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import type { ConsoleStart } from '@kbn/console-plugin/server';
-import type { ProcessorSuggestion } from '../../../../common';
+import type {
+  ProcessorSuggestion,
+  ProcessorPropertySuggestion,
+  ProcessorSuggestionsResponse,
+} from '../../../../common';
+import type { JsonValue } from '@kbn/utility-types';
 
 type SpecJsonFetcher = () => ReturnType<ConsoleStart['getSpecJson']>;
 
@@ -18,12 +22,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 interface ProcessorDefinition {
-  __template?: unknown;
+  __template?: JsonValue;
+  [key: string]: unknown;
 }
 
-interface ProcessorEntry {
-  [name: string]: ProcessorDefinition;
-}
+type ProcessorEntry = Record<string, ProcessorDefinition>;
+
 
 function isProcessorEntry(value: unknown): value is ProcessorEntry {
   return (
@@ -34,40 +38,27 @@ function isProcessorEntry(value: unknown): value is ProcessorEntry {
 
 function extractProcessorEntries(spec: ReturnType<ConsoleStart['getSpecJson']>): ProcessorEntry[] {
   const endpoints = spec.endpoints;
-  if (!isRecord(endpoints)) {
-    return [];
-  }
+  if (!isRecord(endpoints)) return [];
 
   const ingestEndpoint = endpoints[PROCESSOR_ENDPOINT_ID];
-  if (!isRecord(ingestEndpoint)) {
-    return [];
-  }
+  if (!isRecord(ingestEndpoint)) return [];
 
-  const rules = (ingestEndpoint as { data_autocomplete_rules?: unknown }).data_autocomplete_rules;
-  if (!isRecord(rules)) {
-    return [];
-  }
+  const rules = ingestEndpoint.data_autocomplete_rules;
+  if (!isRecord(rules)) return [];
 
-  const processors = (rules as { processors?: unknown }).processors;
-  if (!Array.isArray(processors) || processors.length === 0) {
-    return [];
-  }
+  const processorArray = rules.processors;
+  if (!Array.isArray(processorArray) || processorArray.length === 0) return [];
 
-  const entries = processors[0]?.__one_of;
-  if (!Array.isArray(entries)) {
-    return [];
-  }
+  const oneOf = processorArray[0]?.__one_of;
+  if (!Array.isArray(oneOf)) return [];
 
-  return entries.filter(isProcessorEntry);
+  return oneOf.filter(isProcessorEntry);
 }
 
 export class ProcessorSuggestionsService {
-  private readonly logger: Logger;
   private fetcher: SpecJsonFetcher | undefined;
 
-  constructor({ logger }: { logger: Logger }) {
-    this.logger = logger;
-  }
+  constructor() {}
 
   public setConsoleStart(consoleStart: ConsoleStart) {
     this.fetcher = () => consoleStart.getSpecJson();
@@ -75,21 +66,13 @@ export class ProcessorSuggestionsService {
 
   public async getSuggestions(): Promise<ProcessorSuggestion[]> {
     if (!this.fetcher) {
-      this.logger.debug(
-        'Console spec fetcher not available; returning empty processor suggestions'
-      );
       return [];
     }
 
     try {
       const spec = this.fetcher();
       return this.buildSuggestions(spec);
-    } catch (error) {
-      this.logger.warn(
-        `Failed to retrieve ingest processor suggestions from Console spec: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+    } catch {
       return [];
     }
   }
@@ -104,9 +87,94 @@ export class ProcessorSuggestionsService {
           return undefined;
         }
         const def = entry[name];
-        const template = def?.__template as ProcessorSuggestion['template'];
+        const template = def?.__template;
         return { name, template } as ProcessorSuggestion;
       })
       .filter((suggestion): suggestion is ProcessorSuggestion => suggestion !== undefined);
+  }
+
+  private buildPropertiesByProcessor(
+    spec: ReturnType<ConsoleStart['getSpecJson']>
+  ): Record<string, ProcessorPropertySuggestion[]> {
+    const processorEntries = extractProcessorEntries(spec);
+    const propertiesByProcessorMap: Record<string, ProcessorPropertySuggestion[]> = {};
+
+    for (const entry of processorEntries) {
+      const processorName = Object.keys(entry)[0];
+      if (!processorName) continue;
+      const processorDefinition = entry[processorName];
+      if (!processorDefinition || typeof processorDefinition !== 'object') continue;
+
+      const propertySuggestions: ProcessorPropertySuggestion[] = [];
+      for (const [propertyName, propertyRule] of Object.entries(processorDefinition)) {
+        // Filter out metadata keys like __template, __one_of, __doc, etc.
+        if (propertyName.startsWith('__')) continue;
+        const rawTemplate = this.extractTemplateFromRule(propertyRule);
+        const normalizedTemplate = this.normalizeToJsonValue(rawTemplate as JsonValue | undefined);
+        propertySuggestions.push({ name: propertyName, template: normalizedTemplate });
+      }
+      propertiesByProcessorMap[processorName] = propertySuggestions;
+    }
+
+    return propertiesByProcessorMap;
+  }
+
+  private extractTemplateFromRule(rule: unknown): unknown {
+    if (rule === null) return null;
+
+    const primitiveType = typeof rule;
+    if (primitiveType === 'string' || primitiveType === 'number' || primitiveType === 'boolean') {
+      return rule;
+    }
+    if (Array.isArray(rule)) return [];
+
+    if (isRecord(rule)) {
+      const explicitTemplate = rule.__template;
+      if (explicitTemplate !== undefined) return explicitTemplate;
+
+      const oneOf = rule.__one_of;
+      if (Array.isArray(oneOf) && oneOf.length > 0) {
+        const firstOption = oneOf[0];
+        if (isRecord(firstOption) && '__template' in firstOption) {
+          return firstOption.__template;
+        }
+        const firstType = typeof firstOption;
+        if (firstType === 'string' || firstType === 'number' || firstType === 'boolean') return firstOption;
+        if (Array.isArray(firstOption)) return [];
+        if (isRecord(firstOption)) return firstOption;
+      }
+
+      return {};
+    }
+
+    return undefined;
+  }
+
+  private normalizeToJsonValue(template: JsonValue | undefined): JsonValue | undefined {
+    if (template === undefined) return undefined;
+    if (template === null) return null;
+
+    const t = typeof template;
+    if (t === 'string' || t === 'number' || t === 'boolean') return template;
+    if (Array.isArray(template)) return template;
+    if (isRecord(template)) return template;
+    return undefined;
+  }
+
+
+  public async getAllSuggestions(): Promise<ProcessorSuggestionsResponse> {
+    if (!this.fetcher) {
+      return { processors: [], propertiesByProcessor: {} };
+    }
+
+    try {
+      const spec = this.fetcher();
+      return {
+        processors: this.buildSuggestions(spec),
+        propertiesByProcessor: this.buildPropertiesByProcessor(spec),
+      };
+    } catch {
+      return { processors: [], propertiesByProcessor: {} };
+    }
   }
 }
