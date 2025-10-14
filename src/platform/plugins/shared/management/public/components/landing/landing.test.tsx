@@ -42,7 +42,7 @@ const sectionsMock = [
       },
     ],
   },
-];
+] as AppDependencies['sections'];
 
 const renderLandingPage = async (overrides: Partial<AppDependencies> = {}) => {
   const coreStart = coreMock.createStart();
@@ -50,7 +50,7 @@ const renderLandingPage = async (overrides: Partial<AppDependencies> = {}) => {
     appBasePath: 'http://localhost:9001',
     kibanaVersion: '8.10.0',
     cardsNavigationConfig: { enabled: true },
-    sections: sectionsMock as any,
+    sections: sectionsMock,
     chromeStyle: 'classic',
     coreStart,
     hasEnterpriseLicense: false,
