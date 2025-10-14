@@ -2134,6 +2134,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 
 # Kibana Platform Security
 /scripts/uiam_dev.js
+/src/setup_node_env/harden @elastic/kibana-security
 
 /x-pack/platform/test/fixtures/es_archives/security @elastic/kibana-security
 /x-pack/platform/test/functional/fixtures/kbn_archives/spaces @elastic/kibana-security
