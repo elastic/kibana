@@ -139,6 +139,7 @@ export const EvaluatorSelectionModal: React.FC<EvaluatorSelectionModalProps> = (
             <EvaluatorList
               evaluators={AVAILABLE_EVALUATORS}
               selectedEvaluators={selectedEvaluators}
+              selectedEvaluator={selectedEvaluator}
               onEvaluatorSelect={handleEvaluatorSelect}
               onEvaluatorToggle={handleEvaluatorToggle}
             />

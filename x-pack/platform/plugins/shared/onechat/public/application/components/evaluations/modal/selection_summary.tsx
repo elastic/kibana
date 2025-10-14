@@ -9,13 +9,7 @@ import React from 'react';
 import { EuiPanel, EuiText, EuiBadge, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-
-interface Evaluator {
-  id: string;
-  name: string;
-  description: string;
-  type: 'text' | 'number';
-}
+import type { Evaluator } from './types';
 
 interface SelectionSummaryProps {
   selectedEvaluators: Evaluator[];
@@ -89,11 +83,6 @@ export const SelectionSummary: React.FC<SelectionSummaryProps> = ({
           </strong>
         </EuiText>
         <EuiSpacer size="s" />
-
-        <EuiText size="xs" color="subdued">
-          {Object.keys(customInstructions).length} of {selectedEvaluators.length} evaluators have
-          custom instructions
-        </EuiText>
       </EuiPanel>
     </div>
   );
