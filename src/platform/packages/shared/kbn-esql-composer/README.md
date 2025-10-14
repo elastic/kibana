@@ -315,17 +315,13 @@ import { from, stats, evaluate, drop } from '@kbn/esql-composer';
 const query = from('metrics-*')
   .pipe(
     stats('AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.name')
-  )
-  .pipe(
     evaluate(
       '__DIMENSIONS__ = CONCAT(host.name)',
       undefined,
       { 
         comment: 'Technical preview: This command will be removed in GA' 
       }
-    )
-  )
-  .pipe(
+    ),
     drop(
       'host.name',
       { comment: 'Clean up original dimension field' }
