@@ -73,16 +73,29 @@ export const PromoItem = ({ promoItem }: { promoItem: 'serverless' | 'hosted' })
     width: euiTheme.size.xxxxl,
     height: euiTheme.size.xxxxl,
   });
+  const logoContainerStyle = css({
+    borderRadius: euiTheme.border.radius.medium,
+    padding: euiTheme.size.base,
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    width: `${euiTheme.base * 6}px`,
+    height: `${euiTheme.base * 6}px`,
+    justifyContent: 'center',
+    alignItems: 'center',
+  });
   const { logoPath, logoAltText, promoTitle, description, externalLink } = PROMO_ITEMS[promoItem];
 
   return (
-    <EuiFlexGroup justifyContent="flexStart" gutterSize="xl">
-      <EuiFlexItem grow={false} css={logoStyle}>
-        <EuiImage size="xs" src={logoPath(assetBasePath)} alt={logoAltText} />
+    <EuiFlexGroup justifyContent="flexStart" gutterSize="l">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="center" alignItems="flexStart">
+          <EuiFlexItem css={logoContainerStyle} grow={false}>
+            <EuiImage size="xs" src={logoPath(assetBasePath)} alt={logoAltText} css={logoStyle} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiTitle size="s">
               <h3>{promoTitle}</h3>
             </EuiTitle>
