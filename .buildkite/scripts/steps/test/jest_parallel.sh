@@ -30,6 +30,13 @@ fi
 
 export TEST_TYPE
 
+# Pointer compression builds are limited to 4GB of memory
+# We're seeing certain test suites OOM under these constraints,
+# so parallelism is reduced to 1
+if [[ "${CI_FORCE_NODE_POINTER_COMPRESSION:-}" = "true" ]]; then
+  JEST_MAX_OLD_SPACE_MB=4096
+  JEST_MAX_PARALLEL=1
+fi
 
 # Added section for tracking and retrying failed configs
 FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${TEST_TYPE}${JOB}"
