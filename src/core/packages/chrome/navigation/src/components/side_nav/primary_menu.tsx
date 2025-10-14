@@ -21,10 +21,14 @@ import { updateTabIndices } from '../../utils/update_tab_indices';
 export interface SideNavPrimaryMenuProps {
   children: ReactNode;
   isCollapsed: boolean;
+  'data-test-subj'?: string;
 }
 
 export const SideNavPrimaryMenu = forwardRef<HTMLElement, SideNavPrimaryMenuProps>(
-  ({ children, isCollapsed }, ref: ForwardedRef<HTMLElement>): JSX.Element => {
+  (
+    { children, isCollapsed, 'data-test-subj': dataTestSubj },
+    ref: ForwardedRef<HTMLElement>
+  ): JSX.Element => {
     const { euiTheme } = useEuiTheme();
 
     const styles = css`
@@ -44,6 +48,7 @@ export const SideNavPrimaryMenu = forwardRef<HTMLElement, SideNavPrimaryMenuProp
           defaultMessage: 'Main',
         })}
         css={styles}
+        data-test-subj={dataTestSubj}
         id={PRIMARY_NAVIGATION_ID}
         onKeyDown={handleRovingIndex}
         ref={(node) => {

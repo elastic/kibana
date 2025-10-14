@@ -107,7 +107,13 @@ export const Navigation = ({
           {...logo}
         />
 
-        <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isCollapsed}>
+        <SideNav.PrimaryMenu
+          ref={primaryMenuRef}
+          isCollapsed={isCollapsed}
+          data-test-subj={
+            rest['data-test-subj'] ? `${rest['data-test-subj']}-primaryMenu` : undefined
+          }
+        >
           {visibleMenuItems.map((item) => {
             const { sections, ...itemProps } = item;
             return (
