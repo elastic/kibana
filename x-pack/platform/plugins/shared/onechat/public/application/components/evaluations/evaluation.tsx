@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiSpacer, useEuiTheme, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSpacer, useEuiTheme, EuiText, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { useConversationRounds, useConversationTitle } from '../../hooks/use_conversation';
 import { EvaluationRound } from './evaluation_round';
 import { EvaluatorBadgesGroup } from './evaluator_badges_group';
@@ -28,14 +28,47 @@ export const Evaluation: React.FC = () => {
     padding: ${euiTheme.size.base};
   `;
 
+  const titleSectionStyles = css`
+    background-color: ${euiTheme.colors.backgroundBasePrimary};
+    padding: ${euiTheme.size.l};
+  `;
+
+  const titleStyles = css`
+    color: ${euiTheme.colors.primaryText};
+    margin: 0;
+  `;
+
+  const subtitleStyles = css`
+    color: ${euiTheme.colors.subduedText};
+    opacity: 0.8;
+    margin: ${euiTheme.size.xs} 0 0 0;
+  `;
+
   return (
     <div css={evaluationContainerStyles}>
-      {/* Conversation Header with Title and Average Badges */}
-      <div>
+      {/* Conversation Title Section */}
+      <div css={titleSectionStyles}>
+        <EuiText>
+          <h1 css={titleStyles}>{conversationTitle}</h1>
+        </EuiText>
+        <EuiText size="s" css={subtitleStyles}>
+          {conversationRounds.length} conversation rounds
+        </EuiText>
+      </div>
+
+      {/* Conversation Average Section */}
+      <EuiPanel
+        color="subdued"
+        paddingSize="l"
+        borderRadius="none"
+        css={css`
+          border-bottom: ${euiTheme.border.thin};
+        `}
+      >
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiText>
-              <h2>{conversationTitle}</h2>
+            <EuiText size="s">
+              <strong>Conversation Average</strong>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -43,20 +76,26 @@ export const Evaluation: React.FC = () => {
               relevance={MOCK_AVERAGE.relevance}
               precision={MOCK_AVERAGE.precision}
               completeness={MOCK_AVERAGE.completeness}
+              variant="conversation-average"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </div>
-
-      <EuiSpacer size="l" />
+      </EuiPanel>
 
       {/* Individual Rounds */}
-      {conversationRounds.map((round, index) => (
-        <React.Fragment key={round.id || index}>
-          <EvaluationRound round={round} roundNumber={index + 1} />
-          {index < conversationRounds.length - 1 && <EuiSpacer size="l" />}
-        </React.Fragment>
-      ))}
+      <div
+        css={css`
+          padding: ${euiTheme.size.l};
+          background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        `}
+      >
+        {conversationRounds.map((round, index) => (
+          <React.Fragment key={round.id || index}>
+            <EvaluationRound round={round} roundNumber={index + 1} />
+            {index < conversationRounds.length - 1 && <EuiSpacer size="l" />}
+          </React.Fragment>
+        ))}
+      </div>
     </div>
   );
 };
