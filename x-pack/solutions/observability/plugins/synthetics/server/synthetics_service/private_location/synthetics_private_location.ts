@@ -148,7 +148,7 @@ export class SyntheticsPrivateLocation {
     }
     return this.runWithCache(async () => {
       const newPolicies: NewPackagePolicyWithId[] = [];
-      const newPolicyTemplate = await this.buildNewPolicy();
+      const newPolicyTemplate = await this.buildNewPolicy(spaceId);
 
       for (const { config, globalParams } of configs) {
         try {
@@ -202,14 +202,19 @@ export class SyntheticsPrivateLocation {
         throw new Error('Failed to build package policies for all monitors');
       }
 
-    try {
-      const result = await this.packagePolicyService.bulkCreate({
-        newPolicies,
-        spaceId,
-      });
-      if (result?.created && result?.created?.length > 0 && testRunId) {
-        // ignore await here, we don't want to wait for this to finish
-        void scheduleCleanUpTask(this.server);
+      try {
+        const result = await this.packagePolicyService.bulkCreate({
+          newPolicies,
+          spaceId,
+        });
+        if (result?.created && result?.created?.length > 0 && testRunId) {
+          // ignore await here, we don't want to wait for this to finish
+          void scheduleCleanUpTask(this.server);
+        }
+        return result;
+      } catch (e) {
+        this.server.logger.error(e);
+        throw e;
       }
     });
   }
@@ -276,7 +281,7 @@ export class SyntheticsPrivateLocation {
 
     return this.runWithCache(async () => {
       const [newPolicyTemplate, existingPolicies] = await Promise.all([
-        this.buildNewPolicy(),
+        this.buildNewPolicy(spaceId),
         this.getExistingPolicies(
           configs.map(({ config }) => config),
           allPrivateLocations,
@@ -331,20 +336,20 @@ export class SyntheticsPrivateLocation {
         `[editingMonitors] Creating ${policiesToCreate.length} policies, updating ${policiesToUpdate.length} policies, and deleting ${policiesToDelete.length} policies`
       );
 
-    const [_createResponse, failedUpdatesRes, _deleteResponse] = await Promise.all([
-      this.packagePolicyService.bulkCreate({
-        newPolicies: policiesToCreate,
-        spaceId,
-      }),
-      this.packagePolicyService.bulkUpdate({
-        policiesToUpdate,
-        spaceId,
-      }),
-      this.packagePolicyService.bulkDelete({
-        policyIdsToDelete: policiesToDelete,
-        spaceId,
-      }),
-    ]);
+      const [_createResponse, failedUpdatesRes, _deleteResponse] = await Promise.all([
+        this.packagePolicyService.bulkCreate({
+          newPolicies: policiesToCreate,
+          spaceId,
+        }),
+        this.packagePolicyService.bulkUpdate({
+          policiesToUpdate,
+          spaceId,
+        }),
+        this.packagePolicyService.bulkDelete({
+          policyIdsToDelete: policiesToDelete,
+          spaceId,
+        }),
+      ]);
 
       const failedUpdates = failedUpdatesRes?.map(({ packagePolicy, error }) => {
         const policyConfig = configs.find(({ config }) => {
@@ -390,9 +395,6 @@ export class SyntheticsPrivateLocation {
 
   async deleteMonitors(configs: HeartbeatConfig[], spaceId: string) {
     return this.runWithCache(async () => {
-      const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-      const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
-
       const policyIdsToDelete = [];
       for (const config of configs) {
         const { locations } = config;
@@ -403,17 +405,18 @@ export class SyntheticsPrivateLocation {
           policyIdsToDelete.push(this.getPolicyId(config, privateLocation.id, spaceId));
         }
       }
-    }
-    if (policyIdsToDelete.length > 0) {
-      const result = await this.packagePolicyService.bulkDelete({
-        policyIdsToDelete,
-        spaceId,
-      });
-      const failedPolicies = result?.filter((policy) => {
-        return !policy.success && policy?.statusCode !== 404;
-      });
-      if (failedPolicies?.length === policyIdsToDelete.length) {
-        throw new Error(deletePolicyError(configs[0][ConfigKey.NAME]));
+      if (policyIdsToDelete.length > 0) {
+        const result = await this.packagePolicyService.bulkDelete({
+          policyIdsToDelete,
+          spaceId,
+        });
+        const failedPolicies = result?.filter((policy) => {
+          return !policy.success && policy?.statusCode !== 404;
+        });
+        if (failedPolicies?.length === policyIdsToDelete.length) {
+          throw new Error(deletePolicyError(configs[0][ConfigKey.NAME]));
+        }
+        return result;
       }
     });
   }
