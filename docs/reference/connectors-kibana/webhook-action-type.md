@@ -49,10 +49,10 @@ HTTP headers (optional)
 :   A custom set of HTTP headers that you can send with API requests.
 
     Config
-    :   Choose this type to send values in headers in plain text.   
+    :   If you choose the config type, values in headers will be sent as plain text in requests.   
 
     Secret {applies_to}`stack: ga 9.2` 
-    :   Choose this type to encrypt values in your headers. 
+    :   If you choose the secret type, values in your headers will be encrypted in requests. 
 
 Certificate authority (optional)
 :   A certificate authority (CA) that the connector can trust, for example to sign and validate server certificates. This option is available for all authentication types.
