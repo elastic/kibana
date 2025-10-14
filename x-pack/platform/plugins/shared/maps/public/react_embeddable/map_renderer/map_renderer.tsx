@@ -76,7 +76,7 @@ export function MapRenderer(props: Props) {
               rawState: {
                 attributes: {
                   title: props.title ?? '',
-                  layerListJSON: JSON.stringify(getLayers(props.layerList)),
+                  layers: getLayers(props.layerList),
                 },
                 hidePanelTitles: !Boolean(props.title),
                 isLayerTOCOpen:

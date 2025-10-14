@@ -226,8 +226,6 @@ export function ESQLControlsFlyout({
         {formBody}
       </EuiFlyoutBody>
       <Footer
-        isControlInEditMode={isControlInEditMode}
-        variableName={variableName}
         onCancelControl={onCancelControl}
         isSaveDisabled={formIsInvalid}
         closeFlyout={closeFlyout}

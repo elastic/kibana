@@ -12,12 +12,10 @@ import {
   getFilterOperator,
   getFilterValue,
   isCondition,
-  isFilterConditionObject,
   type OperatorKeys,
   operatorToHumanReadableNameMap,
 } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
-import { isPlainObject } from 'lodash';
 import useToggle from 'react-use/lib/useToggle';
 import {
   EuiCodeBlock,
@@ -32,7 +30,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import React, { useMemo } from 'react';
-import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
+import {
+  alwaysToEmptyEquals,
+  emptyEqualsToAlways,
+  isConditionRepresentableInUI,
+} from '../../../util/condition';
 import type { FieldSuggestion } from './field_selector';
 import { FieldSelector } from './field_selector';
 
@@ -57,9 +59,9 @@ export function ConditionEditor(props: ConditionEditorProps) {
 
   const condition = alwaysToEmptyEquals(props.condition);
 
-  const isFilterCondition = isPlainObject(condition) && isFilterConditionObject(condition);
+  const isUIRepresentable = useMemo(() => isConditionRepresentableInUI(condition), [condition]);
 
-  const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!isFilterCondition);
+  const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!isUIRepresentable);
 
   const handleConditionChange = (updatedCondition: Condition) => {
     onConditionChange(emptyEqualsToAlways(updatedCondition));
@@ -109,10 +111,10 @@ export function ConditionEditor(props: ConditionEditorProps) {
             automaticLayout: true,
           }}
         />
-      ) : isFilterCondition ? (
+      ) : isUIRepresentable ? (
         <FilterForm
           disabled={status === 'disabled'}
-          condition={condition}
+          condition={condition as FilterCondition}
           onConditionChange={handleConditionChange}
           fieldSuggestions={fieldSuggestions}
         />
@@ -183,7 +185,6 @@ function FilterForm(props: {
           compressed
           disabled={disabled}
           dataTestSubj="streamsAppConditionEditorFieldText"
-          autoFocus={true}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={1}>

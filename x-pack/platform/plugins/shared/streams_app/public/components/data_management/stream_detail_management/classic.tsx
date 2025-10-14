@@ -117,7 +117,7 @@ export function ClassicStreamDetailManagement({
               'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
           })}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
               defaultMessage: 'Retention',
             })}
@@ -128,6 +128,15 @@ export function ClassicStreamDetailManagement({
     tabs.processing = processing;
   }
 
+  tabs.schema = {
+    content: (
+      <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
+    ),
+    label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
+      defaultMessage: 'Schema',
+    }),
+  };
+
   tabs.dataQuality = {
     content: <StreamDetailDataQuality definition={definition} />,
     label: (
@@ -136,7 +145,7 @@ export function ClassicStreamDetailManagement({
           defaultMessage: 'View details about this classic stream’s data quality',
         })}
       >
-        <span>
+        <span data-test-subj="dataQualityTab" tabIndex={0}>
           {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
             defaultMessage: 'Data quality',
           })}
@@ -144,6 +153,10 @@ export function ClassicStreamDetailManagement({
       </EuiToolTip>
     ),
   };
+
+  if (otherTabs.significantEvents) {
+    tabs.significantEvents = otherTabs.significantEvents;
+  }
 
   if (definition.privileges.manage) {
     tabs.advanced = {
@@ -168,7 +181,7 @@ export function ClassicStreamDetailManagement({
               'View technical details about this classic stream’s underlying index setup',
           })}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.streams.streamDetailView.advancedTab', {
               defaultMessage: 'Advanced',
             })}
@@ -176,19 +189,8 @@ export function ClassicStreamDetailManagement({
         </EuiToolTip>
       ),
     };
-    tabs.schema = {
-      content: (
-        <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
-        defaultMessage: 'Schema',
-      }),
-    };
   }
 
-  if (otherTabs.significantEvents) {
-    tabs.significantEvents = otherTabs.significantEvents;
-  }
   if (isValidManagementSubTab(tab)) {
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
