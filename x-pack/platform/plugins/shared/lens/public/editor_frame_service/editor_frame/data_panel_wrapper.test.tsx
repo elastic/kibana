@@ -35,8 +35,8 @@ describe('Data Panel Wrapper', () => {
       };
       const renderResult = renderWithReduxStore(
         <EditorFrameServiceProvider
-          visualizationMap={{} as VisualizationMap}
           datasourceMap={datasourceMap}
+          visualizationMap={{} as VisualizationMap}
         >
           <DataPanelWrapper
             showNoDataPopover={() => {}}

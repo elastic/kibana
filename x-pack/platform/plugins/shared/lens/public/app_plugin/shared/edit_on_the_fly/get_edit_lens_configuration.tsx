@@ -247,8 +247,8 @@ export async function getEditLensConfiguration(
           <KibanaRenderContextProvider {...coreStart}>
             <KibanaContextProvider services={lensServices}>
               <EditorFrameServiceProvider
-                visualizationMap={visualizationMap}
                 datasourceMap={datasourceMap}
+                visualizationMap={visualizationMap}
               >
                 <RootDragDropProvider>
                   <LensEditConfigurationFlyout {...configPanelProps} />

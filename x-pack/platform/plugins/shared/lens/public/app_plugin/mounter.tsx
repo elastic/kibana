@@ -358,8 +358,8 @@ export async function mountApp(
       return (
         <Provider store={lensStore}>
           <EditorFrameServiceProvider
-            visualizationMap={visualizationMap}
             datasourceMap={datasourceMap}
+            visualizationMap={visualizationMap}
           >
             <App
               incomingState={embeddableEditorIncomingState}
