@@ -76,6 +76,7 @@ export type TabsBarProps = Pick<
   onReorder: (items: TabItem[], movedTabId: string) => void;
   onEBTEvent: (event: TabsEBTEvent) => void;
   onClearRecentlyClosed: TabsBarMenuProps['onClearRecentlyClosed'];
+  createItemElement?: React.ReactElement;
 };
 
 export interface TabsBarApi {
@@ -102,6 +103,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       onClose,
       getPreviewData,
       onEBTEvent,
+      createItemElement,
     },
     componentRef
   ) => {
@@ -318,15 +320,18 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
             {!!scrollRightButton && <EuiFlexItem grow={false}>{scrollRightButton}</EuiFlexItem>}
             {!hasReachedMaxItemsCount && (
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={addButtonLabel} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    data-test-subj="unifiedTabs_tabsBar_newTabBtn"
-                    iconType="plus"
-                    color="text"
-                    aria-label={addButtonLabel}
-                    onClick={onAdd}
-                  />
-                </EuiToolTip>
+                {!createItemElement && (
+                  <EuiToolTip content={addButtonLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      data-test-subj="unifiedTabs_tabsBar_newTabBtn"
+                      iconType="plus"
+                      color="text"
+                      aria-label={addButtonLabel}
+                      onClick={onAdd}
+                    />
+                  </EuiToolTip>
+                )}
+                {createItemElement ?? null}
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

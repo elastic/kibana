@@ -65,6 +65,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   onClearRecentlyClosed,
   getPreviewData,
   onEBTEvent,
+  createItemElement,
 }) => {
   const tabsBarApi = useRef<TabsBarApi | null>(null);
   const [tabContentId] = useState(() => htmlIdGenerator()());
@@ -333,6 +334,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
             onClose={onClose}
             getPreviewData={getPreviewData}
             onEBTEvent={onEBTEvent}
+            createItemElement={createItemElement}
           />
         </EuiFlexItem>
       )}
