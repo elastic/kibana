@@ -52,16 +52,14 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
     // TODO handle getDashboardPanelFromId throw
     const panelToCopy = api.parentApi.getDashboardPanelFromId(api.uuid);
 
-    const state: EmbeddablePackageState[] = [
-      {
-        type: panelToCopy.type,
-        serializedState: panelToCopy.serializedState,
-        size: {
-          width: panelToCopy.grid.w,
-          height: panelToCopy.grid.h,
-        },
+    const state: EmbeddablePackageState = {
+      type: panelToCopy.type,
+      serializedState: panelToCopy.serializedState,
+      size: {
+        width: panelToCopy.grid.w,
+        height: panelToCopy.grid.h,
       },
-    ];
+    };
 
     const path =
       dashboardOption === 'existing' && selectedDashboard
@@ -70,7 +68,7 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
 
     closeModal();
     stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
-      state,
+      state: [state],
       path,
     });
   }, [api, dashboardOption, selectedDashboard, closeModal, stateTransfer]);

@@ -38,17 +38,15 @@ export function useSloListActions({
         remoteName: slo.remote?.remoteName,
       };
 
-      const state = [
-        {
-          serializedState: { rawState: embeddableInput },
-          type: SLO_OVERVIEW_EMBEDDABLE_ID,
-        },
-      ];
+      const state = {
+        serializedState: { rawState: embeddableInput },
+        type: SLO_OVERVIEW_EMBEDDABLE_ID,
+      };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
       stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
-        state,
+        state: [state],
         path,
       });
     },

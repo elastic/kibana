@@ -496,20 +496,18 @@ const FieldPanel: FC<FieldPanelProps> = ({
         ...(selectedChangePoints[panelIndex]?.length ? { partitions: selectedPartitions } : {}),
       };
 
-      const state = [
-        {
-          serializedState: {
-            rawState: embeddableInput,
-            references: getDataviewReferences(dataView.id, CHANGE_POINT_CHART_DATA_VIEW_REF_NAME),
-          },
-          type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+      const state = {
+        serializedState: {
+          rawState: embeddableInput,
+          references: getDataviewReferences(dataView.id, CHANGE_POINT_CHART_DATA_VIEW_REF_NAME),
         },
-      ];
+        type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+      };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
       stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
-        state,
+        state: [state],
         path,
       });
     },
