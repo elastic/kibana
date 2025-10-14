@@ -24,6 +24,7 @@ import {
   EuiIconTip,
   useEuiTheme,
   useEuiOverflowScroll,
+  EuiThemeProvider,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -293,7 +294,9 @@ export const ProjectPicker = () => {
                         defaultMessage: 'Custom tags',
                       })}
                       content={tags.map((tag) => (
-                        <EuiBadge>{tag}</EuiBadge>
+                        <EuiThemeProvider colorMode="inverse">
+                          <EuiBadge css={{ margin: `${euiTheme.size.xs}` }}>{tag}</EuiBadge>
+                        </EuiThemeProvider>
                       ))}
                     >
                       <EuiBadge iconType="tag">{tags.length}</EuiBadge>
