@@ -401,6 +401,8 @@ export function LayerTabs(
         }}
         customNewTabButton={addLayerButton || undefined}
         disableInlineLabelEditing={true}
+        disablePreview={true}
+        disableDragAndDrop={true}
       />
       <div ref={layerActionsFlyoutRef} />
     </>
