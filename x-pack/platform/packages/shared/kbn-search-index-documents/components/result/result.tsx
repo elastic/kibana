@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import {
   EuiButtonIcon,
@@ -68,6 +68,7 @@ export const Result: React.FC<ResultProps> = ({
 
   const showResultsFields = isExpanded ? fields.length > 0 : defaultVisibleFields > 0;
 
+  const tooltipRef = useRef<EuiToolTip>(null);
   return (
     <>
       <EuiSplitPanel.Outer hasBorder={true} data-test-subj="search-index-documents-result">
@@ -107,7 +108,7 @@ export const Result: React.FC<ResultProps> = ({
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip position="left" content={toolTipContent}>
+              <EuiToolTip position="left" content={toolTipContent} ref={tooltipRef}>
                 <EuiButtonIcon
                   size="xs"
                   iconType={isExpanded ? 'fold' : 'unfold'}
@@ -116,6 +117,7 @@ export const Result: React.FC<ResultProps> = ({
                   onClick={(e: React.MouseEvent<HTMLElement>) => {
                     e.stopPropagation();
                     setIsExpanded(!isExpanded);
+                    tooltipRef.current?.showToolTip();
                   }}
                   aria-label={tooltipText}
                 />

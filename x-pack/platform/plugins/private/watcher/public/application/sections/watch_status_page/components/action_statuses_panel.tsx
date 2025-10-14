@@ -87,7 +87,7 @@ export const ActionStatusesPanel = () => {
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.watcher.sections.watchDetail.watchTable.stateHeader', {
               defaultMessage: 'State',
             })}{' '}
@@ -110,7 +110,7 @@ export const ActionStatusesPanel = () => {
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate(
               'xpack.watcher.sections.watchHistory.watchActionStatusTable.lastExecuted',
               {
