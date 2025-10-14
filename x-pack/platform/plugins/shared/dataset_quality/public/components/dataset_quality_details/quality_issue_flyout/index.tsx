@@ -51,6 +51,7 @@ export default function QualityIssueFlyout() {
     renderedItems,
     isAnalysisInProgress,
     degradedFieldAnalysisFormattedResult,
+    isDegradedFieldsValueLoading,
   } = useQualityIssues();
   const { dataStreamSettings, datasetDetails, timeRange } = useDatasetQualityDetailsState();
   const pushedFlyoutTitleId = useGeneratedHtmlId({
@@ -133,7 +134,8 @@ export default function QualityIssueFlyout() {
           isUserViewingTheIssueOnLatestBackingIndex &&
           !isAnalysisInProgress &&
           degradedFieldAnalysisFormattedResult &&
-          !degradedFieldAnalysisFormattedResult.identifiedUsingHeuristics && (
+          !degradedFieldAnalysisFormattedResult.identifiedUsingHeuristics &&
+          !isDegradedFieldsValueLoading && (
             <>
               <EuiSpacer size="s" />
               <EuiTextColor

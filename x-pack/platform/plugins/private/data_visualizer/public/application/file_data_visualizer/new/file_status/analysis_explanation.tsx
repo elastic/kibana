@@ -45,7 +45,7 @@ export const AnalysisExplanation: FC<Props> = ({ fileStatus, index }) => {
         iconType="inspect"
         size="xs"
         color="text"
-        data-test-subj={`mlFileUploadAnalysisExplanationButton_${index}`}
+        data-test-subj={`mlFileUploadAnalysisExplanationButton-${index}`}
         aria-label={i18n.translate('xpack.dataVisualizer.file.analysisSummary.inspectButtonLabel', {
           defaultMessage: 'Analysis explanation',
         })}

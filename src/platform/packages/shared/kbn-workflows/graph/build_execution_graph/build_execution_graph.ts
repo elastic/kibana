@@ -595,6 +595,7 @@ function createFallback(
   const enterTryBlockNodeId = `enterTryBlock_${stepId}`;
   const exitTryBlockNodeId = `exitTryBlock_${stepId}`;
   const enterNormalPathNodeId = `enterNormalPath_${stepId}`;
+  const enterFallbackPathNodeId = `enterFallbackPath_${stepId}`;
 
   const enterTryBlockNode: EnterTryBlockNode = {
     id: enterTryBlockNodeId,
@@ -603,6 +604,7 @@ function createFallback(
     stepType: 'fallback',
     type: 'enter-try-block',
     enterNormalPathNodeId,
+    enterFallbackPathNodeId,
   };
   graph.setNode(enterTryBlockNodeId, enterTryBlockNode);
   const exitTryBlockNode: ExitTryBlockNode = {

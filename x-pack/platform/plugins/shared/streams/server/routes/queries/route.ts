@@ -99,7 +99,7 @@ const upsertQueryRoute = createServerRoute({
     await queryClient.upsert(streamName, {
       id: queryId,
       title: body.title,
-      system: body.system,
+      feature: body.feature,
       kql: {
         query: body.kql.query,
       },

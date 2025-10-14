@@ -35,13 +35,7 @@ describe('EnterContinueNodeImpl', () => {
 
   describe('run', () => {
     beforeEach(() => {
-      workflowRuntime.enterScope = jest.fn();
       workflowRuntime.navigateToNextNode = jest.fn();
-    });
-
-    it('should enter scope', async () => {
-      await underTest.run();
-      expect(workflowRuntime.enterScope).toHaveBeenCalled();
     });
 
     it('should go to next node', async () => {

@@ -3382,6 +3382,23 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.runJestAll",
+        "type": "Function",
+        "tags": [],
+        "label": "runJestAll",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_all.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.runKbnArchiverCli",
         "type": "Function",
         "tags": [],

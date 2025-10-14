@@ -45,9 +45,6 @@ export class PolicyWatcher {
       this.endpointServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
     const fleetServices = this.endpointServices.getInternalFleetServices();
     const esClient = this.endpointServices.getInternalEsClient();
-    const soClient = isSpacesEnabled
-      ? this.endpointServices.savedObjects.createInternalUnscopedSoClient(false)
-      : this.endpointServices.savedObjects.createInternalScopedSoClient({ readonly: false });
 
     this.logger.debug(
       `Checking endpoint policies for compliance with license level [${license.type}]`
@@ -65,6 +62,12 @@ export class PolicyWatcher {
       try {
         await pRetry(
           async () => {
+            const soClient = isSpacesEnabled
+              ? this.endpointServices.savedObjects.createInternalUnscopedSoClient(false)
+              : this.endpointServices.savedObjects.createInternalScopedSoClient({
+                  readonly: false,
+                });
+
             response = await fleetServices.packagePolicy.list(soClient, {
               page: page++,
               perPage: 100,
@@ -117,7 +120,9 @@ export class PolicyWatcher {
                   spaceId: policy.spaceIds?.at(0) ?? DEFAULT_SPACE_ID,
                   readonly: false,
                 })
-              : soClient;
+              : this.endpointServices.savedObjects.createInternalScopedSoClient({
+                  readonly: false,
+                });
 
             await pRetry(
               async () => {

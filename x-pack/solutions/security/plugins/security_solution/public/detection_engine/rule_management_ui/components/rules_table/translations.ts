@@ -42,10 +42,3 @@ export const RULE_UPDATES_TAB = i18n.translate(
     defaultMessage: 'Rule Updates',
   }
 );
-
-export const ADD_RULES_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.allRules.tabs.addRules',
-  {
-    defaultMessage: 'Add Rules',
-  }
-);

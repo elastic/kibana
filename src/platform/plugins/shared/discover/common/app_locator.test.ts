@@ -19,6 +19,7 @@ import { DISCOVER_APP_LOCATOR } from './app_locator';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
 import { appLocatorGetLocationCommon } from './app_locator_get_location';
+import { NEW_TAB_ID } from './constants';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
 const savedSearchId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';
@@ -248,7 +249,7 @@ describe('Discover url generator', () => {
   test('can specify to open in a new tab', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({
-      tab: { id: 'new', label: 'My new tab' },
+      tab: { id: NEW_TAB_ID, label: 'My new tab' },
       query: {
         esql: 'SELECT * FROM test',
       },
@@ -257,6 +258,21 @@ describe('Discover url generator', () => {
 
     expect(path).toMatchInlineSnapshot(
       `"#/?searchSessionId=__test__&_a=(dataSource:(type:esql),query:(esql:'SELECT%20*%20FROM%20test'))&_tab=(tabId:new,tabLabel:'My%20new%20tab')"`
+    );
+  });
+
+  test('can create a shared link with a selected tab and the fallback label', async () => {
+    const { locator } = await setup();
+    const { path } = await locator.getLocation({
+      tab: { id: 'tab_test_id', label: 'My new tab' },
+      query: {
+        esql: 'SELECT * FROM test',
+      },
+      savedSearchId: 'saved_search_test_id',
+    });
+
+    expect(path).toMatchInlineSnapshot(
+      `"#/view/saved_search_test_id?_a=(dataSource:(type:esql),query:(esql:'SELECT%20*%20FROM%20test'))&_tab=(tabId:tab_test_id,tabLabel:'My%20new%20tab')"`
     );
   });
 

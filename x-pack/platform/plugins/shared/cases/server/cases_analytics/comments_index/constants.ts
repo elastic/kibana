@@ -58,11 +58,6 @@ export const getCAICommentsBackfillTaskId = (spaceId: string, owner: Owner): str
   return `${CAI_COMMENTS_BACKFILL_TASK_ID}-${spaceId}-${owner}`;
 };
 
-const CAI_COMMENTS_SYNCHRONIZATION_TASK_ID = 'cai_cases_comments_synchronization_task';
-export const getCAICommentsSynchronizationTaskId = (spaceId: string, owner: Owner): string => {
-  return `${CAI_COMMENTS_SYNCHRONIZATION_TASK_ID}-${spaceId}-${owner}`;
-};
-
 export const getCommentsSynchronizationSourceQuery = (
   lastSyncAt: Date,
   spaceId: string,

@@ -75,6 +75,9 @@ export const useBulkGetAgentPoliciesQuery = (
   );
 };
 
+/**
+ * @deprecated use sendBulkGetAgentPoliciesForRq instead
+ */
 export const sendBulkGetAgentPolicies = (
   ids: string[],
   options?: { full?: boolean; ignoreMissing?: boolean }

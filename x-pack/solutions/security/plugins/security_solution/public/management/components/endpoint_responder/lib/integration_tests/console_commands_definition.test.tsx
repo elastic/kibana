@@ -44,9 +44,7 @@ describe('When displaying Endpoint Response Actions', () => {
 
   describe('for agent type endpoint', () => {
     beforeEach(() => {
-      (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
-        responseActionUploadEnabled: true,
-      });
+      (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({});
       commands = getEndpointConsoleCommands({
         agentType: 'endpoint',
         endpointAgentId: '123',
@@ -92,7 +90,6 @@ describe('When displaying Endpoint Response Actions', () => {
       (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
         responseActionsCrowdstrikeManualHostIsolationEnabled: true,
         responseActionsSentinelOneV1Enabled: true,
-        responseActionsSentinelOneGetFileEnabled: true,
         responseActionsSentinelOneKillProcessEnabled: true,
         responseActionsSentinelOneProcessesEnabled: true,
         responseActionsSentinelOneRunScriptEnabled: true,

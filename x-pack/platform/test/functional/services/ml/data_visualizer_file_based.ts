@@ -40,7 +40,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
 
     async assertFileTitle(expectedTitle: string, index: number) {
       const actualTitle = await testSubjects.getVisibleText(
-        `dataVisualizerFileResultsTitle_${index}`
+        `dataVisualizerFileResultsTitle-${index}`
       );
       expect(actualTitle).to.eql(
         expectedTitle,
@@ -49,11 +49,11 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async assertFilePreviewPanelExists(index: number) {
-      await testSubjects.existOrFail(`dataVisualizerFilePreviewPanel_${index}`);
+      await testSubjects.existOrFail(`dataVisualizerFilePreviewPanel-${index}`);
     },
 
     async assertFileContentsPanelExists(index: number) {
-      await testSubjects.existOrFail(`dataVisualizerFileContentsPanel_${index}`);
+      await testSubjects.existOrFail(`dataVisualizerFileContentsPanel-${index}`);
     },
 
     async assertFileContentHighlightingSwitchExists(exist: boolean) {
@@ -83,7 +83,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async selectAnalysisExplanationButton(index: number) {
-      await testSubjects.click(`mlFileUploadAnalysisExplanationButton_${index}`);
+      await testSubjects.click(`mlFileUploadAnalysisExplanationButton-${index}`);
       await testSubjects.existOrFail('mlFileUploadAnalysisExplanationModal');
     },
 
@@ -100,7 +100,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async assertFileStatsPanelExists(index: number) {
-      await testSubjects.existOrFail(`dataVisualizerFileStatsPanel_${index}`);
+      await testSubjects.existOrFail(`dataVisualizerFileStatsPanel-${index}`);
     },
 
     async assertNumberOfFieldCards(number: number) {
@@ -124,8 +124,8 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async selectFieldStatsTab(index: number) {
-      await testSubjects.click(`mlFileUploadFileStatusStatsTab_${index}`);
-      await testSubjects.existOrFail(`dataVisualizerFileStatsPanel_${index}`);
+      await testSubjects.click(`mlFileUploadFileStatusStatsTab-${index}`);
+      await testSubjects.existOrFail(`dataVisualizerFileStatsPanel-${index}`);
     },
 
     async assertImportSettingsPanelExists() {

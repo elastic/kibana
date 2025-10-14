@@ -84,6 +84,10 @@ const startDependenciesMock = {
   fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   coreStart: {
     ...embeddableServices.coreStart,
+    application: {
+      ...embeddableServices.coreStart.application,
+      currentAppId$: new BehaviorSubject('dashboards'),
+    },
     overlays: {
       ...embeddableServices.coreStart.overlays,
       openFlyout: jest.fn((a) => a),

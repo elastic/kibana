@@ -111,8 +111,6 @@ describe('caseSavedObjectType model version transformations', () => {
           },
           overrides: {
             severity: 10, // Severity value that matches v1 schema (10, 20, 30, 40)
-            // @ts-expect-error: total_events is not defined in the attributes
-            total_events: 1,
           },
         }),
         fromVersion: 5,

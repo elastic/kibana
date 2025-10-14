@@ -126,14 +126,14 @@ export function registerAnomalyDetectionRule(
 '{{#context.topInfluencers.length}}'
   Top influencers:
   '{{#context.topInfluencers}}'
-    '{{influencer_field_name}}' = '{{influencer_field_value}}' ['{{score}}']
+    '{{influencer_field_name}}-' '{{influencer_field_value}}' ['{{score}}']
   '{{/context.topInfluencers}}'
 '{{/context.topInfluencers.length}}'
 
 '{{#context.topRecords.length}}'
   Top records:
   '{{#context.topRecords}}'
-    '{{function}}'('{{field_name}}') '{{by_field_value}}''{{over_field_value}}''{{partition_field_value}}' ['{{score}}']. Typical: '{{typical}}', Actual: '{{actual}}'
+    '{{function}}' '{{field_name}}-' '{{by_field_value}}{{over_field_value}}{{partition_field_value}}' ['{{score}}']. Typical: '{{typical}}', Actual: '{{actual}}'.
   '{{/context.topRecords}}'
 '{{/context.topRecords.length}}'
 

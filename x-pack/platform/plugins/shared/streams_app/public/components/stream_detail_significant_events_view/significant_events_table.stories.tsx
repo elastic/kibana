@@ -72,8 +72,8 @@ export const SomeThings: StoryFn<{}> = () => {
             kql: {
               query: '*',
             },
-            system: {
-              name: 'System',
+            feature: {
+              name: 'Feature',
               filter: {
                 always: {},
               },

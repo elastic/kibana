@@ -115,6 +115,7 @@ mapped_pages:
 | [apmDataAccess](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm_data_access) | WARNING: Missing or empty README. |
 | [apmSourcesAccess](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/apm_sources_access/README.md) | Exposes services to access APM sources. |
 | [automaticImport](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/automatic_import/README.md) | Team owner: Security Integrations Scalability |
+| [automaticImportVTwo](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/automatic_import_v2/README.md) | Team owner: Security Integration Experience |
 | [banners](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/banners/README.md) | Allow to add a header banner that will be displayed on every page of the Kibana application |
 | [canvas](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/canvas/README.md) | "Never look back. The past is done. The future is a blank canvas." ― Suzy Kassem, Rise Up and Salute the Sun |
 | [cases](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/cases/README.md) | This plugin provides cases management in Kibana |
@@ -185,7 +186,7 @@ mapped_pages:
 | [observabilityLogsExplorer](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability_logs_explorer/README.md) | This plugin provides an app based on the LogsExplorer component from the logs_explorer plugin, but adds observability-specific affordances. |
 | [observabilityOnboarding](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability_onboarding/README.md) | This plugin provides an onboarding framework for observability solutions: Logs and APM. |
 | [observabilityShared](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability_shared/README.md) | A plugin that contains components and utilities shared by all Observability plugins. |
-| [onechat](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/onechat/README.md) | Home of the workchat framework. |
+| [onechat](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/onechat/README.md) | Home of the Agent Builder framework. |
 | [osquery](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/osquery/README.md) | This plugin adds extended support to Security Solution Fleet Osquery integration |
 | [painlessLab](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/painless_lab/README.md) | This plugin helps users learn how to use the Painless scripting language. |
 | [productDocBase](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ai_infra/product_doc_base/README.md) | We expose several APIs to install, update, and uninstall product docs artifacts. Currently, for every Kibana version, we support product docs for 2 Inference IDs: .multilingual-e5-small-elasticsearch \| .elser-2-elasticsearch. |

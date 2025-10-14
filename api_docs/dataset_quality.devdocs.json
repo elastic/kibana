@@ -136,7 +136,7 @@
         "label": "DatasetQualityIndicator",
         "description": [],
         "signature": [
-          "({ isLoading, quality, verbose, }: { isLoading: boolean; quality: ",
+          "({ isLoading, quality, verbose, dataTestSubj, }: { isLoading: boolean; quality: ",
           {
             "pluginId": "datasetQuality",
             "scope": "common",
@@ -144,7 +144,7 @@
             "section": "def-common.QualityIndicators",
             "text": "QualityIndicators"
           },
-          "; verbose?: boolean | undefined; }) => React.JSX.Element"
+          "; verbose?: boolean | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
         "deprecated": false,
@@ -155,7 +155,7 @@
             "id": "def-public.DatasetQualityIndicator.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  isLoading,\n  quality,\n  verbose = false,\n}",
+            "label": "{\n  isLoading,\n  quality,\n  verbose = false,\n  dataTestSubj,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
             "deprecated": false,
@@ -195,6 +195,20 @@
                 "description": [],
                 "signature": [
                   "boolean | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "datasetQuality",
+                "id": "def-public.DatasetQualityIndicator.$1.dataTestSubj",
+                "type": "string",
+                "tags": [],
+                "label": "dataTestSubj",
+                "description": [],
+                "signature": [
+                  "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
                 "deprecated": false,

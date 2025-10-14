@@ -55,7 +55,7 @@ export const ResultsPreview: FC<ResultsPreviewProps> = ({ sampleDocs, mappings, 
     <>
       {sampleDocs?.length ? (
         <EuiBasicTable
-          data-test-subj={`dataVisualizerFilePreviewPanel_${index}`}
+          data-test-subj={`dataVisualizerFilePreviewPanel-${index}`}
           tableLayout="auto"
           columns={columns}
           items={items}

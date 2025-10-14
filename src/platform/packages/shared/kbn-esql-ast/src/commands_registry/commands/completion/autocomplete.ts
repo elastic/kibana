@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type * as ast from '../../../types';
+import type { MapParameters } from '../../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { EDITOR_MARKER } from '../../../definitions/constants';
 import type { ESQLCommand, ESQLAstCompletionCommand } from '../../../types';
@@ -203,8 +204,11 @@ export async function autocomplete(
     }
 
     case CompletionPosition.WITHIN_MAP_EXPRESSION:
-      const availableParameters = {
-        inference_id: endpoints?.map(createInferenceEndpointToCompletionItem) || [],
+      const availableParameters: MapParameters = {
+        inference_id: {
+          type: 'string',
+          suggestions: endpoints?.map(createInferenceEndpointToCompletionItem) || [],
+        },
       };
 
       return getCommandMapExpressionSuggestions(innerText, availableParameters);

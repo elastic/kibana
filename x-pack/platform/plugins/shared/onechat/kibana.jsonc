@@ -21,6 +21,7 @@
       "inference",
       "kibanaUtils",
       "lens",
+      "licensing",
       "management",
       "share",
       "licensing"
@@ -30,6 +31,7 @@
     ],
     "optionalPlugins": [
       "cloud",
+      "licenseManagement",
       "spaces",
       "workflowsManagement"
     ],

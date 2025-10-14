@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
+import moment from 'moment-timezone';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -38,7 +39,9 @@ export const WorkflowOnFailureSchema = z.object({
   fallback: z.array(BaseStepSchema).min(1).optional(),
   continue: z.boolean().optional(),
 });
+
 export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
+
 export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
   const schema = WorkflowOnFailureSchema.extend({
     fallback: z.array(stepSchema).optional(),
@@ -85,11 +88,24 @@ export const ScheduledTriggerSchema = z.object({
   type: z.literal('scheduled'),
   enabled: z.boolean().optional().default(true),
   with: z.union([
+    // New format: every: "5m", "2h", "1d", "30s"
     z.object({
-      every: z.string().min(1),
-      unit: z.enum(['second', 'minute', 'hour', 'day', 'week', 'month', 'year']),
+      every: z
+        .string()
+        .regex(/^\d+[smhd]$/, 'Invalid interval format. Use format like "5m", "2h", "1d", "30s"'),
     }),
-    z.object({ cron: z.string().min(1) }),
+    z.object({
+      rrule: z.object({
+        freq: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
+        interval: z.number().int().positive(),
+        tzid: z.enum(moment.tz.names() as [string, ...string[]]).default('UTC'),
+        dtstart: z.string().optional(),
+        byhour: z.array(z.number().int().min(0).max(23)).optional(),
+        byminute: z.array(z.number().int().min(0).max(59)).optional(),
+        byweekday: z.array(z.enum(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'])).optional(),
+        bymonthday: z.array(z.number().int().min(1).max(31)).optional(),
+      }),
+    }),
   ]),
 });
 

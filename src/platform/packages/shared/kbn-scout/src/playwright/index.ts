@@ -32,7 +32,10 @@ export type {
 } from './test/ui';
 
 // API services (can be extended with solution specific API services)
+export { apiServicesFixture } from './fixtures/scope/worker/apis';
 export type { ApiServicesFixture } from './fixtures/scope/worker/apis';
+
+export { synthtraceFixture } from './fixtures/scope/worker/synthtrace';
 
 // Other worker types
 export type { SamlAuth, SynthtraceFixture } from './fixtures/scope/worker';

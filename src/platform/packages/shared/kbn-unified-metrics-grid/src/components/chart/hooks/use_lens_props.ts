@@ -25,9 +25,7 @@ import {
   distinctUntilChanged,
 } from 'rxjs';
 import type { TimeRange } from '@kbn/data-plugin/common';
-import type { MetricUnit } from '@kbn/metrics-experience-plugin/common/types';
 import { useEuiTheme } from '@elastic/eui';
-import { useChartLayers } from './use_chart_layers';
 export type LensProps = Pick<
   EmbeddableComponentProps,
   | 'id'
@@ -43,37 +41,21 @@ export type LensProps = Pick<
 export const useLensProps = ({
   title,
   query,
-  seriesType,
   services,
   getTimeRange,
-  unit,
-  color,
   searchSessionId,
   discoverFetch$,
-  abortController,
   chartRef,
+  chartLayers,
 }: {
   title: string;
   query: string;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
-  color?: string;
-  unit?: MetricUnit;
   getTimeRange: () => TimeRange;
-  seriesType: LensSeriesLayer['seriesType'];
   chartRef?: React.RefObject<HTMLDivElement>;
-  abortController?: AbortController;
+  chartLayers: LensSeriesLayer[];
 } & Pick<ChartSectionProps, 'services' | 'searchSessionId'>) => {
   const { euiTheme } = useEuiTheme();
-  const chartLayers = useChartLayers({
-    query,
-    seriesType,
-    services,
-    getTimeRange,
-    unit,
-    color,
-    abortController,
-  });
-
   const attributes$ = useRef(new BehaviorSubject<LensAttributes | undefined>(undefined));
   const lensParams = useMemo<LensConfig | undefined>(
     () =>

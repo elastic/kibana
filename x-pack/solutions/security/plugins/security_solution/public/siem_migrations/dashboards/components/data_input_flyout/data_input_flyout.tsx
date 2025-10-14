@@ -14,7 +14,6 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFlyoutResizable,
-  EuiText,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -47,13 +46,17 @@ interface MissingResourcesIndexed {
   lookups: string[];
 }
 
+const DASHBOARDS_MIGRATION_DATA_INPUT_FLYOUT_TITLE = 'dashboardsMigrationDataInputFlyoutTitle';
+
 export const DashboardMigrationDataInputFlyout = React.memo(
   function DashboardMigrationDataInputFlyout({
     onClose,
     migrationStats,
     setFlyoutMigrationStats,
   }: DashboardMigrationDataInputFlyoutProps) {
-    const modalTitleId = useGeneratedHtmlId();
+    const modalTitleId = useGeneratedHtmlId({
+      prefix: DASHBOARDS_MIGRATION_DATA_INPUT_FLYOUT_TITLE,
+    });
 
     const { closeFlyout } = useMigrationDataInputContext();
     const [missingResourcesIndexed, setMissingResourcesIndexed] = useState<
@@ -109,7 +112,7 @@ export const DashboardMigrationDataInputFlyout = React.memo(
         if (migrationStats?.id) {
           startMigration(
             migrationStats.id,
-            isRetry ? SiemMigrationRetryFilter.FAILED : undefined,
+            isRetry ? SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED : undefined,
             settings
           );
         }
@@ -142,8 +145,10 @@ export const DashboardMigrationDataInputFlyout = React.memo(
           aria-labelledby={modalTitleId}
         >
           <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m" id="dashboardMigrationDataInputFlyoutTitle">
-              <EuiText>{i18n.DATA_INPUT_FLYOUT_TITLE}</EuiText>
+            <EuiTitle size="m">
+              <h2 id={modalTitleId} aria-label={DASHBOARDS_MIGRATION_DATA_INPUT_FLYOUT_TITLE}>
+                {i18n.DATA_INPUT_FLYOUT_TITLE}
+              </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
@@ -177,7 +182,7 @@ export const DashboardMigrationDataInputFlyout = React.memo(
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onClose}>
+                <EuiButtonEmpty onClick={onClose} data-test-subj="dataFlyoutCloseButton">
                   <FormattedMessage
                     id="xpack.securitySolution.siemMigrations.dashboards.dataInputFlyout.closeButton"
                     defaultMessage="Close"

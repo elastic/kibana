@@ -26,8 +26,7 @@ export const getIndexPatternMetadata = async ({
     esClient: esClient.client,
     indexPattern,
     fields: ['*'],
-    from,
-    to,
+    timerange: { from, to },
   });
 
   const indexPatternMetadata = new Map<string, { hasTimeSeriesFields: boolean }>();

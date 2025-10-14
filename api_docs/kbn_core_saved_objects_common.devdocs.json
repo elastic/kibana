@@ -1033,14 +1033,6 @@
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/platform/plugins/private/canvas/shareable_runtime/types.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/platform/plugins/private/canvas/shareable_runtime/types.ts"
-          },
-          {
-            "plugin": "canvas",
             "path": "x-pack/platform/plugins/private/canvas/public/components/home/hooks/use_upload_workpad.ts"
           },
           {
@@ -1352,14 +1344,6 @@
           {
             "plugin": "visualizations",
             "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/visualize_embeddable.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/platform/plugins/private/canvas/shareable_runtime/types.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/platform/plugins/private/canvas/shareable_runtime/types.ts"
           },
           {
             "plugin": "@kbn/core",

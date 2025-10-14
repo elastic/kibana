@@ -28,7 +28,10 @@ import {
   transformRawScheduledReportToReport,
   transformRawScheduledReportToTaskParams,
 } from './lib';
-import { ScheduledReportAuditAction, scheduledReportAuditEvent } from '../audit_events';
+import {
+  ScheduledReportAuditAction,
+  scheduledReportAuditEvent,
+} from '../../../services/audit_events/audit_events';
 
 // Using the limit specified in the cloud email service limits
 // https://www.elastic.co/docs/explore-analyze/alerts-cases/watcher/enable-watcher#cloud-email-service-limits

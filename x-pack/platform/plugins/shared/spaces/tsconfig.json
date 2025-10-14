@@ -21,8 +21,6 @@
     "@kbn/utility-types",
     "@kbn/std",
     "@kbn/core-saved-objects-server",
-    "@kbn/core-test-helpers-kbn-server",
-    "@kbn/test",
     "@kbn/utils",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/core-saved-objects-common",

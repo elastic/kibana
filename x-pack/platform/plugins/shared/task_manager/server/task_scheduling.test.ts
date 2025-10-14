@@ -10,6 +10,7 @@ import moment from 'moment';
 
 import { TaskScheduling } from './task_scheduling';
 import { asOk } from './lib/result_type';
+import type { ConcreteTaskInstance } from './task';
 import { TaskStatus } from './task';
 import { createInitialMiddleware } from './lib/middleware';
 import { taskStoreMock } from './task_store.mock';
@@ -34,6 +35,22 @@ jest.mock('elastic-apm-node', () => ({
     type: 'taskManager run',
   },
 }));
+
+const getTask = (overrides = {}): ConcreteTaskInstance => ({
+  id: 'my-foo-id',
+  taskType: 'foo',
+  params: {},
+  state: {},
+  schedule: { interval: '1m' },
+  scheduledAt: new Date(),
+  attempts: 0,
+  startedAt: new Date(),
+  retryAt: new Date(Date.now() + 5 * 60 * 1000),
+  ownerId: '123',
+  status: TaskStatus.Idle,
+  runAt: new Date(),
+  ...overrides,
+});
 
 describe('TaskScheduling', () => {
   beforeAll(() => {
@@ -146,6 +163,101 @@ describe('TaskScheduling', () => {
       state: {},
     });
 
+    expect(result.id).toEqual('my-foo-id');
+  });
+
+  test('tries to updates schedule for tasks that have already been scheduled', async () => {
+    const task = getTask();
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const bulkUpdateScheduleSpy = jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({ tasks: [task], errors: [] });
+    mockTaskStore.schedule.mockRejectedValueOnce({
+      statusCode: 409,
+    });
+
+    const result = await taskScheduling.ensureScheduled(task);
+
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(['my-foo-id'], { interval: '1m' });
+
+    expect(result.id).toEqual('my-foo-id');
+  });
+
+  test('does not try to update schedule for tasks that have already been scheduled if no schedule is provided', async () => {
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const bulkUpdateScheduleSpy = jest.spyOn(taskScheduling, 'bulkUpdateSchedules');
+    mockTaskStore.schedule.mockRejectedValueOnce({
+      statusCode: 409,
+    });
+
+    const result = await taskScheduling.ensureScheduled({
+      id: 'my-foo-id',
+      taskType: 'foo',
+      params: {},
+      state: {},
+    });
+
+    expect(bulkUpdateScheduleSpy).not.toHaveBeenCalled();
+
+    expect(result.id).toEqual('my-foo-id');
+  });
+
+  test('propagates error when trying to update schedule for tasks that have already been scheduled', async () => {
+    const task = getTask();
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const bulkUpdateScheduleSpy = jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({
+        tasks: [],
+        errors: [
+          {
+            id: 'my-foo-id',
+            type: 'task',
+            error: {
+              error: 'error',
+              message: 'Failed to update schedule for reasons',
+              statusCode: 500,
+            },
+          },
+        ],
+      });
+    mockTaskStore.schedule.mockRejectedValueOnce({
+      statusCode: 409,
+    });
+
+    await expect(taskScheduling.ensureScheduled(task)).rejects.toMatchInlineSnapshot(
+      `[Error: Tried to update schedule for existing task "my-foo-id" but failed with error: Failed to update schedule for reasons]`
+    );
+
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(['my-foo-id'], { interval: '1m' });
+  });
+
+  test('handles VERSION_CONFLICT_STATUS errors when trying to update schedule for tasks that have already been scheduled', async () => {
+    const task = getTask();
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const bulkUpdateScheduleSpy = jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({
+        tasks: [],
+        errors: [
+          {
+            id: 'my-foo-id',
+            type: 'task',
+            error: {
+              error: 'error',
+              message: 'Failed to update schedule due to version conflict',
+              statusCode: 409,
+            },
+          },
+        ],
+      });
+    mockTaskStore.schedule.mockRejectedValueOnce({
+      statusCode: 409,
+    });
+
+    const result = await taskScheduling.ensureScheduled(task);
+
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(['my-foo-id'], { interval: '1m' });
     expect(result.id).toEqual('my-foo-id');
   });
 

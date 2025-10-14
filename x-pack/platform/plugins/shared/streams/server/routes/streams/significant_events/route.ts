@@ -31,7 +31,7 @@ const previewSignificantEventsRoute = createServerRoute({
     query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
     body: z.object({
       query: z.object({
-        system: z
+        feature: z
           .object({
             name: NonEmptyString,
             filter: conditionSchema,
@@ -156,7 +156,7 @@ const generateSignificantEventsRoute = createServerRoute({
       to: dateFromString,
     }),
     body: z.object({
-      system: z
+      feature: z
         .object({
           name: NonEmptyString,
           filter: conditionSchema,
@@ -198,7 +198,7 @@ const generateSignificantEventsRoute = createServerRoute({
       generateSignificantEventDefinitions(
         {
           definition,
-          system: params.body?.system,
+          feature: params.body?.feature,
           connectorId: params.query.connectorId,
           start: params.query.from.valueOf(),
           end: params.query.to.valueOf(),

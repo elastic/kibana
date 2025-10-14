@@ -319,6 +319,71 @@
       },
       {
         "parentPluginId": "@kbn/esql-composer",
+        "id": "def-common.replaceParameters",
+        "type": "Function",
+        "tags": [],
+        "label": "replaceParameters",
+        "description": [],
+        "signature": [
+          "(queryAst: ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstQueryExpression",
+            "text": "ESQLAstQueryExpression"
+          },
+          ", params: ",
+          "Params",
+          "<string> | undefined) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-composer/src/pipeline/replace_parameters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.replaceParameters.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "queryAst",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLAstQueryExpression",
+                "text": "ESQLAstQueryExpression"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/pipeline/replace_parameters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.replaceParameters.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Params",
+              "<string> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/pipeline/replace_parameters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-composer",
         "id": "def-common.sort",
         "type": "Function",
         "tags": [],

@@ -16,6 +16,7 @@ import {
   cleanFleetAgents,
   cleanFleetIndices,
   createFleetAgent,
+  createTestSpace,
   makeAgentsUpgradeable,
 } from './helpers';
 import { pollResult } from '../agents/update_agent_tags';
@@ -50,7 +51,7 @@ export default function (providerContext: FtrProviderContext) {
         space: TEST_SPACE_1,
       });
       await cleanFleetIndices(esClient);
-      await spaces.createTestSpace(TEST_SPACE_1);
+      await createTestSpace(providerContext, TEST_SPACE_1);
 
       await apiClient.postEnableSpaceAwareness();
 

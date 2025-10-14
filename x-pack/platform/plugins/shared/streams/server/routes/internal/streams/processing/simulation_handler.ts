@@ -19,6 +19,7 @@ import type {
   SimulateIngestResponse,
   SimulateIngestSimulateIngestDocumentResult,
   FieldCapsResponse,
+  IngestSimulateResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
@@ -252,7 +253,7 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
               field: '_errors',
               value: {
                 message: '{{{ _ingest.on_failure_message }}}',
-                processor_id: '{{{ _ingest.on_failure_processor_tag }}}',
+                processor_id: processorConfig.tag,
                 type: 'generic_processor_failure',
               },
             },
@@ -355,8 +356,10 @@ const executePipelineSimulation = async (
   simulationBody: IngestSimulateRequest
 ): Promise<PipelineSimulationResult> => {
   try {
-    const simulation = await scopedClusterClient.asCurrentUser.ingest.simulate(simulationBody);
-
+    const originalSimulation = await scopedClusterClient.asCurrentUser.ingest.simulate(
+      simulationBody
+    );
+    const simulation = sanitiseSimulationResult(originalSimulation);
     return {
       status: 'success',
       simulation: simulation as SuccessfulPipelineSimulateResponse,
@@ -384,6 +387,81 @@ const executePipelineSimulation = async (
     };
   }
 };
+
+// When dealing with a manual_ingest_pipeline action it is possible to have nested pipelines in the configuration,
+// as in, using the actual pipeline processor type. The problem is these results are a little bit different, e.g:
+// {
+//   "processor_type": "pipeline",
+//   "status": "success",
+//   "tag": "id5ded880-a555-11f0-94f6-45fc383ca38e",
+//   "if": {
+//     "condition": "ctx['data_stream.type'] == 'logs'",
+//     "result": true
+//   }
+// },
+// {
+//   "processor_type": "set",
+//   "status": "success",
+//   "doc": {
+//     "_index": "logs-synth-default",
+//     "_version": "-3",
+//     "_id": "99",
+//     "_source": {
+//       "host.name": test,
+//     },
+//   "_ingest": {
+//     "pipeline": "network_subpipeline",
+//     "timestamp": "2025-10-09T23:40:40.710774Z"
+//   }
+// }
+// We use sanitiseSimulationResult and propagateProcessorResultsPipelineTags to
+// propagate the pipeline processor tag (taken from the manual_ingest_pipeline action) to all nested
+// pipeline processor results.
+const sanitiseSimulationResult = (simulationResult: IngestSimulateResponse) => {
+  return {
+    docs: simulationResult.docs.map((doc) => {
+      return {
+        ...doc,
+        processor_results: propagateProcessorResultsPipelineTags(doc.processor_results)?.filter(
+          (result) => {
+            return result.processor_type !== 'pipeline';
+          }
+        ),
+      };
+    }),
+  };
+};
+
+function propagateProcessorResultsPipelineTags(
+  processorResults: IngestSimulateDocumentResult['processor_results']
+): IngestSimulateDocumentResult['processor_results'] {
+  if (!processorResults) return undefined;
+
+  let lastPipelineTag: string | undefined;
+  let applyTag = false;
+
+  return processorResults.map((result) => {
+    // If this is a pipeline processor, store its tag and start applying
+    if (result.processor_type === 'pipeline' && result.tag) {
+      lastPipelineTag = result.tag;
+      applyTag = true;
+      return result;
+    }
+
+    // If 1. we should apply the tag 2. this result is not from the root simulated pipeline 3. has no tag set
+    if (applyTag && !result.tag && result.doc?._ingest?.pipeline !== '_simulate_pipeline') {
+      // Apply the last pipeline tag
+      return { ...result, tag: lastPipelineTag };
+    }
+
+    // If this result has its own tag, stop applying the pipeline tag
+    if (result.tag) {
+      applyTag = false;
+    }
+
+    return result;
+  });
+}
 
 const executeIngestSimulation = async (
   scopedClusterClient: IScopedClusterClient,
@@ -626,10 +704,12 @@ const computeSimulationDocDiff = (
 
   const comparisonDocs = [
     { processor_id: 'base', value: base },
-    ...successfulProcessors.map((proc) => ({
-      processor_id: proc.tag,
-      value: omit(proc.doc._source, ['_errors']),
-    })),
+    ...successfulProcessors.map((proc) => {
+      return {
+        processor_id: proc.tag,
+        value: omit(proc.doc._source, ['_errors']),
+      };
+    }),
   ];
 
   const diffResult: Pick<SimulationDocReport, 'detected_fields' | 'errors'> = {
@@ -718,6 +798,7 @@ const prepareSimulationResponse = async (
     detected_fields: detectedFields,
     documents: docReports,
     processors_metrics: processorsMetrics,
+    definition_error: undefined,
     documents_metrics: {
       failed_rate: parseFloat(failureRate.toFixed(3)),
       partially_parsed_rate: parseFloat(partiallyParsedRate.toFixed(3)),
@@ -728,6 +809,7 @@ const prepareSimulationResponse = async (
 };
 
 const prepareSimulationFailureResponse = (error: SimulationError) => {
+  const failedBecauseNoSampleDocs = error.message.includes('must specify at least one document');
   return {
     detected_fields: [],
     documents: [],
@@ -743,6 +825,9 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
           },
         }),
     },
+    // failure to simulate is considered a definition error, which will be displayed prominently in the UI
+    // The simulate API returns a generic error when no documents are provided, which is not useful in this context
+    definition_error: !failedBecauseNoSampleDocs ? error : undefined,
     documents_metrics: {
       failed_rate: 1,
       partially_parsed_rate: 0,

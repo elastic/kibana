@@ -12,11 +12,11 @@ import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import type { ReportingCore } from '../../..';
 import { authorizedUserPreRouting, getCounters } from '../../common';
 import { handleUnavailable } from '../../common/request_handler';
-import { scheduledQueryFactory } from '../../common/scheduled';
 import {
   DEFAULT_SCHEDULED_REPORT_LIST_SIZE,
   MAX_SCHEDULED_REPORT_LIST_SIZE,
-} from '../../common/scheduled/scheduled_query';
+  scheduledQueryFactory,
+} from '../../../services/scheduled_reports';
 
 const { SCHEDULED } = INTERNAL_ROUTES;
 

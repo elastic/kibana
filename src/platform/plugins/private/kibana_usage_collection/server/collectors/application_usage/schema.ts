@@ -141,7 +141,6 @@ export const applicationUsageSchema = {
   searchSynonyms: commonSchema,
   searchQueryRules: commonSchema,
   elasticsearchIndices: commonSchema,
-  elasticsearchStart: commonSchema,
   elasticsearchIndexManagement: commonSchema,
   enterpriseSearchAnalytics: commonSchema,
   enterpriseSearchApplications: commonSchema,

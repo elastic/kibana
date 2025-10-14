@@ -124,6 +124,9 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
         options={FIELD_TYPE_OPTIONS}
         valueOfSelected={mvtFieldConfig.type}
         onChange={(value) => onChange(value)}
+        aria-label={i18n.translate('xpack.maps.mvtSource.fieldTypeSelectAriaLabel', {
+          defaultMessage: 'Field type',
+        })}
         compressed
       />
     );

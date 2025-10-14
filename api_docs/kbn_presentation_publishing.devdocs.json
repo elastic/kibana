@@ -2250,23 +2250,23 @@
         "signature": [
           "(initialTitlesState: ",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedTitles",
-            "text": "SerializedTitles"
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          ") => ",
+          "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>>) => ",
           "StateManager",
           "<",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedTitles",
-            "text": "SerializedTitles"
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          "> & { api: { hideTitle$: ",
+          "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>>> & { api: { hideTitle$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2289,12 +2289,13 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.SerializedTitles",
-                "text": "SerializedTitles"
-              }
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Writable",
+                "text": "Writable"
+              },
+              "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
             "deprecated": false,
@@ -2545,12 +2546,13 @@
         "signature": [
           "(state: unknown) => state is ",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedTitles",
-            "text": "SerializedTitles"
-          }
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
         "deprecated": false,
@@ -8230,62 +8232,6 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-public.SerializedTitles",
-        "type": "Interface",
-        "tags": [],
-        "label": "SerializedTitles",
-        "description": [],
-        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-public.SerializedTitles.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-public.SerializedTitles.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-public.SerializedTitles.hidePanelTitles",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hidePanelTitles",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-public.TitlesApi",
         "type": "Interface",
         "tags": [],
@@ -8873,6 +8819,21 @@
           "\"savedObjectRef\""
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/saved_object_ref.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.SerializedTitles",
+        "type": "Type",
+        "tags": [],
+        "label": "SerializedTitles",
+        "description": [],
+        "signature": [
+          "{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing_schemas/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

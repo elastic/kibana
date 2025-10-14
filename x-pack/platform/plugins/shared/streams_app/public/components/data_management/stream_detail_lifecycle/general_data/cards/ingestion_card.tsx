@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BaseMetricCard } from '../../common/base_metric_card';
 import { formatBytes } from '../../helpers/format_bytes';
@@ -24,23 +24,24 @@ export const IngestionCard = ({
   statsError?: Error;
 }) => {
   const title = (
-    <EuiToolTip
-      title={i18n.translate('xpack.streams.ingestionCard.tooltipTitle', {
-        defaultMessage: 'How we calculate ingestion averages',
-      })}
-      content={i18n.translate('xpack.streams.ingestionCard.tooltip', {
-        defaultMessage:
-          'Approximate average (stream total size divided by the number of days since creation)',
-      })}
-    >
-      <FormattedMessage
-        id="xpack.streams.streamDetailLifecycle.ingestion.title"
-        defaultMessage="Ingestion averages {tooltipIcon}"
-        values={{
-          tooltipIcon: <EuiIcon type="question" />,
-        }}
-      />
-    </EuiToolTip>
+    <FormattedMessage
+      id="xpack.streams.streamDetailLifecycle.ingestion.title"
+      defaultMessage="Ingestion averages {tooltipIcon}"
+      values={{
+        tooltipIcon: (
+          <EuiIconTip
+            type="question"
+            title={i18n.translate('xpack.streams.ingestionCard.tooltipTitle', {
+              defaultMessage: 'How we calculate ingestion averages',
+            })}
+            content={i18n.translate('xpack.streams.ingestionCard.tooltip', {
+              defaultMessage:
+                'Approximate average, calculated by extrapolating the ingestion rate from the documents on the selected time range and the average document size.',
+            })}
+          />
+        ),
+      }}
+    />
   );
 
   const metrics = [
