@@ -255,14 +255,17 @@ export const ProjectPicker = () => {
         .map(([key, value]) => `${key}: ${value}`);
 
       return (
-        <>
-          {index > 0 && <EuiHorizontalRule margin="xs" />}
-          <EuiFlexGroup
-            responsive={false}
-            alignItems="center"
-            justifyContent="spaceBetween"
-            css={{ padding: `0 ${euiTheme.size.s}` }}
-          >
+        <EuiFlexItem
+          key={project._id}
+          css={{
+            borderTop:
+              index > 0
+                ? `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`
+                : undefined,
+            padding: `${euiTheme.size.s}`,
+          }}
+        >
+          <EuiFlexGroup responsive={false} alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiFlexGroup responsive={false} gutterSize="s">
                 <EuiFlexItem grow={false}>
@@ -306,7 +309,7 @@ export const ProjectPicker = () => {
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </>
+        </EuiFlexItem>
       );
     });
 
@@ -388,7 +391,13 @@ export const ProjectPicker = () => {
           />
           <EuiHorizontalRule margin="none" />
         </EuiFlexItem>
-        <EuiFlexItem grow={false} css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}>
+        <EuiFlexItem
+          grow={false}
+          css={{
+            backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+            borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+          }}
+        >
           <EuiTitle size="xxxs">
             <h6 css={{ padding: `${euiTheme.size.s}` }}>
               <FormattedMessage
@@ -401,16 +410,16 @@ export const ProjectPicker = () => {
               />
             </h6>
           </EuiTitle>
-          <EuiHorizontalRule margin="none" />
         </EuiFlexItem>
         <EuiFlexItem
           css={css`
             ${useEuiOverflowScroll('y', true)}
             background-color: ${euiTheme.colors.backgroundBaseSubdued};
-            padding: ${euiTheme.size.s} 0;
           `}
         >
-          {renderProjectsList()}
+          <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
+            {renderProjectsList()}
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopover>
