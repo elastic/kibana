@@ -11,6 +11,7 @@ import type { TimeState } from '@kbn/es-query';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import type { Streams, PhaseName } from '@kbn/streams-schema';
 import { ISearchStart } from '@kbn/data-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 import { lastValueFrom } from 'rxjs';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
@@ -299,7 +300,7 @@ export const getAggregations = async ({
   timeState: TimeState;
   totalDocs?: number;
   isFailureStore?: boolean;
-  core: { uiSettings: { get: (key: string) => any } };
+  core: CoreStart;
   search: ISearchStart;
   signal: AbortSignal;
 }) => {

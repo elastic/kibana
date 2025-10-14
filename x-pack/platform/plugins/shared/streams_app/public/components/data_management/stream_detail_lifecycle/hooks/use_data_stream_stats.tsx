@@ -112,7 +112,7 @@ export const useDataStreamStats = ({
         },
       };
     },
-    [dataStreamsClient, definition, streamsRepositoryClient],
+    [dataStreamsClient, definition, streamsRepositoryClient, core, search, timeState],
     {
       withTimeRange: false,
       withRefresh: true,
