@@ -181,7 +181,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
               grow={6}
               css={styles.rowHeaderSlotContainer}
               style={{
-                maxWidth: `${Math.min(10 + Math.max(headerMetaSlots?.length ?? 0, 1) * 10, 60)}%`,
+                maxWidth: `${Math.min(10 + Math.max(headerMetaSlots?.length ?? 0, 1) * 15, 60)}%`,
               }}
             >
               <EuiFlexGroup
