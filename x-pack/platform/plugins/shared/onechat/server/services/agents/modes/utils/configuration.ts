@@ -15,7 +15,7 @@ export const resolveConfiguration = (configuration: AgentConfiguration): Resolve
     researchInstructions = researchInstructions
       ? `${researchInstructions}\n${configuration.instructions}`
       : configuration.instructions;
-    answerInstructions += answerInstructions
+    answerInstructions = answerInstructions
       ? `${answerInstructions}\n${configuration.instructions}`
       : configuration.instructions;
   }
