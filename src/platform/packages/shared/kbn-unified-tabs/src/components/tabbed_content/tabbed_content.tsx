@@ -39,6 +39,7 @@ export interface TabbedContentProps
     | 'enableInlineLabelEditing'
     | 'enablePreview'
     | 'enableDragAndDrop'
+    | 'enableTabsBarMenu'
   > {
   items: TabItem[];
   selectedItemId?: string;
@@ -77,6 +78,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   enableInlineLabelEditing = true,
   enablePreview = true,
   enableDragAndDrop = true,
+  enableTabsBarMenu = true,
 }) => {
   const tabsBarApi = useRef<TabsBarApi | null>(null);
   const [tabContentId] = useState(() => htmlIdGenerator()());
@@ -349,6 +351,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
             enableInlineLabelEditing={enableInlineLabelEditing}
             enablePreview={enablePreview}
             enableDragAndDrop={enableDragAndDrop}
+            enableTabsBarMenu={enableTabsBarMenu}
           />
         </EuiFlexItem>
       )}

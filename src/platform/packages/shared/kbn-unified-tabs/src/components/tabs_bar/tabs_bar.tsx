@@ -85,6 +85,7 @@ export type TabsBarProps = Pick<
   onEBTEvent: (event: TabsEBTEvent) => void;
   onClearRecentlyClosed: TabsBarMenuProps['onClearRecentlyClosed'];
   createItemElement?: React.ReactElement;
+  enableTabsBarMenu?: boolean; // defaults to `true`
 };
 
 export interface TabsBarApi {
@@ -115,6 +116,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       enableInlineLabelEditing = true,
       enablePreview = true,
       enableDragAndDrop = true,
+      enableTabsBarMenu = true,
     },
     componentRef
   ) => {
@@ -375,16 +377,18 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <TabsBarMenu
-            items={items}
-            selectedItem={selectedItem}
-            recentlyClosedItems={recentlyClosedItems}
-            onSelect={onSelect}
-            onSelectRecentlyClosed={onSelectRecentlyClosed}
-            onClearRecentlyClosed={onClearRecentlyClosed}
-          />
-        </EuiFlexItem>
+        {enableTabsBarMenu && (
+          <EuiFlexItem grow={false}>
+            <TabsBarMenu
+              items={items}
+              selectedItem={selectedItem}
+              recentlyClosedItems={recentlyClosedItems}
+              onSelect={onSelect}
+              onSelectRecentlyClosed={onSelectRecentlyClosed}
+              onClearRecentlyClosed={onClearRecentlyClosed}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
 
