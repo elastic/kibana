@@ -75,7 +75,7 @@ describe('useChartLayers', () => {
     getESQLQueryColumnsMock.mockResolvedValue([
       { name: '@timestamp', meta: { type: 'date' }, id: '@timestamp' },
       { name: 'value', meta: { type: 'number' }, id: 'value' },
-      { name: 'service.name', meta: { type: 'keyword' }, id: 'service.name' },
+      { name: 'service.name', meta: { type: 'string' }, id: 'service.name' },
     ]);
     useEsqlQueryInfoMock.mockReturnValue({
       dimensions: ['service.name'],
@@ -112,7 +112,7 @@ describe('useChartLayers', () => {
     getESQLQueryColumnsMock.mockResolvedValue([
       { name: '@timestamp', meta: { type: 'date' }, id: '@timestamp' },
       { name: 'value', meta: { type: 'number' }, id: 'value' },
-      { name: DIMENSIONS_COLUMN, meta: { type: 'keyword' }, id: DIMENSIONS_COLUMN },
+      { name: DIMENSIONS_COLUMN, meta: { type: 'string' }, id: DIMENSIONS_COLUMN },
     ]);
     useEsqlQueryInfoMock.mockReturnValue({
       dimensions: ['service.name', 'host.name'],
