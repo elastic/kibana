@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { sloDataFixture } from './slo_data';
-export type { SloDataFixture } from './slo_data';
-export { profilingClientFixture } from './profiling';
-export type { ProfilingClientFixture } from './profiling';
+import { createPlaywrightConfig } from '@kbn/scout-oblt';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

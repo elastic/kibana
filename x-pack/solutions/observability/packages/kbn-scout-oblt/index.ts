@@ -17,6 +17,7 @@ export type {
 
 // re-export from @kbn/scout
 export {
+  apiTest,
   expect,
   globalSetupHook,
   tags,
