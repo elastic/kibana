@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getDataTestSubjectSelector } from '../helpers/common';
+import { getDataTestSubjectSelectorMatch } from '../helpers/common';
+
+export const FOOTER_LAUNCHPAD = getDataTestSubjectSelectorMatch(
+  'nav-item-security_solution_nav_footer.launchpad'
+);
 
 // main panels links
 export const INVESTIGATIONS_PANEL_BTN =
@@ -73,8 +77,8 @@ export const EXCEPTIONS = '[data-test-subj~="panelNavItem-id-exceptions"]';
 export const ONBOARDING = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:get_started"]';
 
 // Siem Migrations
-export const TRANSLATED_RULES_PAGE = getDataTestSubjectSelector(
-  'panelNavItem panelNavItem-id-siem_migrations-rules'
+export const TRANSLATED_RULES_PAGE = getDataTestSubjectSelectorMatch(
+  'nav-item-id-siem_migrations-rules'
 );
 
 // opens the navigation panel for a given nested link
