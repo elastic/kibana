@@ -565,7 +565,7 @@ export async function pickTestGroupRunOrder() {
                 ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 90,
+                  timeout_in_minutes: 120,
                   agents: expandAgentQueue(queue),
                   env: {
                     SCOUT_TARGET_TYPE: 'local',
