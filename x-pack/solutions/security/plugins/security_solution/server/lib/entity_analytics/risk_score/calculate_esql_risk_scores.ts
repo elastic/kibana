@@ -243,7 +243,7 @@ const getFilters = (options: CalculateScoresParams, entityType?: EntityType) => 
     });
   }
 
-  // Apply entity-specific custom filters
+  // Apply entity-specific custom filters (EXCLUSIVE - exclude matching alerts)
   if (customFilters && customFilters.length > 0 && entityType) {
     customFilters
       .filter((customFilter) => customFilter.entity_types.includes(entityType))
@@ -252,7 +252,9 @@ const getFilters = (options: CalculateScoresParams, entityType?: EntityType) => 
           const kqlQuery = fromKueryExpression(customFilter.filter);
           const esQuery = toElasticsearchQuery(kqlQuery);
           if (esQuery) {
-            filters.push(esQuery);
+            filters.push({
+              bool: { must_not: esQuery },
+            });
           }
         } catch (error) {
           // Silently ignore invalid KQL filters to prevent query failures
