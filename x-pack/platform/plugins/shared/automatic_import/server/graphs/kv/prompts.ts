@@ -85,7 +85,7 @@ Also look for special characters around the timestamp in Custom Format, Like a t
  - Pattern Efficiency: Ensure that both the regex and the grok pattern are as efficient as possible while still accurately capturing the header components. Avoid overly complex or overly broad patterns that could capture unintended data.
  - Make sure to map the remaining message body to \'message\' in grok pattern.
  - If there are special characters between header and message body like space character, make sure to include that character in the header grok pattern
- - Make sure to add \`{packageName}.{dataStreamName}\` as a prefix to each field in the pattern. Refer to example response.
+ - Make sure to add \'{packageName}.{dataStreamName}\' as a prefix to each field in the pattern. Refer to example response.
  - Do not respond with anything except the processor as a JSON object enclosed with 3 backticks (\`), see example response above. Use strict JSON response format.
  </guidelines>
 
@@ -136,7 +136,7 @@ You ALWAYS follow these guidelines when writing your response:
  <guidelines>
  - Do not parse the message part in the regex. Just the header part should be in regex and grok_pattern.
  - Make sure to map the remaining message body to \'message\' in grok pattern.
- - Make sure to add \`{packageName}.{dataStreamName}\` as a prefix to each field in the pattern. Refer to example response.
+ - Make sure to add \'{packageName}.{dataStreamName}\' as a prefix to each field in the pattern. Refer to example response.
  - Do not respond with anything except the processor as a JSON object enclosed with 3 backticks (\`), see example response above. Use strict JSON response format.
  </guidelines>
 
