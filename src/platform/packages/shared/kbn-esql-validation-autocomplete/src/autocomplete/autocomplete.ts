@@ -34,7 +34,7 @@ import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import { getAstContext } from '../shared/context';
-import { isSourceCommand } from '../shared/helpers';
+import { isHeaderCommand, isSourceCommand } from '../shared/helpers';
 import { QueryColumns, getSourcesHelper } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { getCommandContext } from './get_command_context';
@@ -134,10 +134,15 @@ export async function suggest(
         );
       }
       const sourceCommandsSuggestions = suggestions.filter(isSourceCommand);
-      return [...sourceCommandsSuggestions, ...recommendedQueriesSuggestions];
+      const headerCommandsSuggestions = suggestions.filter(isHeaderCommand);
+      return [
+        ...headerCommandsSuggestions,
+        ...sourceCommandsSuggestions,
+        ...recommendedQueriesSuggestions,
+      ];
     }
 
-    return suggestions.filter((def) => !isSourceCommand(def));
+    return suggestions.filter((def) => !isSourceCommand(def) && !isHeaderCommand(def));
   }
 
   // ToDo: Reconsider where it belongs when this is resolved https://github.com/elastic/kibana/issues/216492

@@ -34,6 +34,10 @@ export function isSourceCommand({ label }: { label: string }) {
   return ['FROM', 'ROW', 'SHOW', 'TS'].includes(label);
 }
 
+export function isHeaderCommand({ label }: { label: string }) {
+  return label === 'SET';
+}
+
 export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
   const arrMap = new Map<string, T>();
   for (const item of arr) {
