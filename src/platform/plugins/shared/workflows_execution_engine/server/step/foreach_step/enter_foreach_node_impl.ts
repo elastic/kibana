@@ -109,10 +109,11 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     return renderedForeachExpression;
   }
 
-  private getItems(renderedForeachExpression: string): any[] {
+  private getItems(renderedForeachExpression: string): unknown[] {
     if (isPropertyAccess(renderedForeachExpression)) {
       const result =
         this.stepExecutionRuntime.contextManager.readContextPath(renderedForeachExpression);
+
       if (!result.pathExists) {
         throw new Error(
           `Expression "${renderedForeachExpression}" could not be found in the context. ` +
@@ -160,7 +161,7 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     );
   }
 
-  private tryParseJSON(value: string): any[] | undefined {
+  private tryParseJSON(value: string): unknown | undefined {
     let parsed;
     try {
       parsed = JSON.parse(value);
