@@ -113,8 +113,11 @@ export const Default: Story = {
         total: 8,
       },
     },
+    isInitialLoading: false,
+    isLoadingMore: false,
     onExecutionClick: () => {},
     selectedId: '2',
+    setPaginationObserver: () => {},
   },
 };
 
@@ -128,28 +131,78 @@ export const Empty: Story = {
         total: 0,
       },
     },
+    isInitialLoading: false,
+    isLoadingMore: false,
     selectedId: null,
     filters: mockFilters,
     onFiltersChange: () => {},
+    onExecutionClick: () => {},
+    setPaginationObserver: () => {},
   },
 };
 
 export const Loading: Story = {
   args: {
-    isLoading: true,
+    isInitialLoading: true,
+    isLoadingMore: false,
     error: null,
     selectedId: null,
     filters: mockFilters,
     onFiltersChange: () => {},
+    onExecutionClick: () => {},
+    setPaginationObserver: () => {},
   },
 };
 
 export const ErrorStory: Story = {
   args: {
-    isLoading: false,
+    isInitialLoading: false,
+    isLoadingMore: false,
     error: new Error('Internal server error'),
     selectedId: null,
     filters: mockFilters,
     onFiltersChange: () => {},
+    onExecutionClick: () => {},
+    setPaginationObserver: () => {},
+  },
+};
+
+export const LoadingMore: Story = {
+  args: {
+    executions: {
+      results: [
+        {
+          id: '1',
+          status: ExecutionStatus.COMPLETED,
+          startedAt: new Date().toISOString(),
+          finishedAt: new Date().toISOString(),
+          spaceId: 'default',
+          duration: parseDuration('1h2m'),
+          stepId: 'my_first_step',
+        },
+        {
+          id: '2',
+          status: ExecutionStatus.FAILED,
+          startedAt: new Date().toISOString(),
+          finishedAt: new Date().toISOString(),
+          spaceId: 'default',
+          duration: parseDuration('1d2h'),
+          stepId: 'my_first_step',
+        },
+      ],
+      _pagination: {
+        page: 1,
+        limit: 10,
+        total: 20,
+      },
+    },
+    isInitialLoading: false,
+    isLoadingMore: true,
+    error: null,
+    selectedId: null,
+    filters: mockFilters,
+    onFiltersChange: () => {},
+    onExecutionClick: () => {},
+    setPaginationObserver: () => {},
   },
 };
