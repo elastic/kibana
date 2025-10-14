@@ -10,7 +10,7 @@
     "server/**/*",
     "../../../../../typings/**/*",
     ".storybook/**/*",
-    "jest_integ_tests/**/*"
+    "integration_tests/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
