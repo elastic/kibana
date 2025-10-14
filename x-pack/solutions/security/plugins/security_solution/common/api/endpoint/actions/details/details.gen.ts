@@ -47,24 +47,10 @@ export const KillProcess = ResponseActionDetails.merge(
       .object({})
       .catchall(
         z.object({
-          content: z
-            .object({
-              code: z.string().optional(),
-              command: z.string().optional(),
-            })
-            .merge(
-              z.union([
-                z.object({
-                  pid: z.number().optional(),
-                }),
-                z.object({
-                  entity_id: z.string().optional(),
-                }),
-                z.object({
-                  process_name: z.string().optional(),
-                }),
-              ])
-            ),
+          content: z.object({
+            code: z.string().optional(),
+            command: z.string().optional(),
+          }),
         })
       )
       .optional(),
@@ -73,10 +59,10 @@ export const KillProcess = ResponseActionDetails.merge(
 
 export type DownloadUri = z.infer<typeof DownloadUri>;
 export const DownloadUri = z.object({
-  /** 
+  /**
       * The server relative URI to download the file associated with the output of the response action.
 URI does **not** include the space prefix
- 
+
       */
   downloadUri: z.string().optional(),
 });
@@ -173,13 +159,6 @@ export const RunscriptParamsSentinelOne = z.object({
 export type Runscript = z.infer<typeof Runscript>;
 export const Runscript = ResponseActionDetails.merge(
   z.object({
-    parameters: z
-      .discriminatedUnion('agentType', [
-        RunscriptParamsCrowdStrike,
-        RunscriptParamsMicrosoft,
-        RunscriptParamsSentinelOne,
-      ])
-      .optional(),
     outputs: z
       .object({})
       .catchall(
@@ -200,10 +179,10 @@ export const Runscript = ResponseActionDetails.merge(
 export type Upload = z.infer<typeof Upload>;
 export const Upload = ResponseActionDetails.merge(
   z.object({
-    /** 
+    /**
       * The parameters for upload returned on the details are derived via the API from the file that
 was uploaded at the time that the response action was submitted
- 
+
       */
     parameters: z
       .object({
@@ -305,21 +284,10 @@ export const SuspendProcess = ResponseActionDetails.merge(
       .object({})
       .catchall(
         z.object({
-          content: z
-            .object({
-              code: z.string().optional(),
-              command: z.string().optional(),
-            })
-            .merge(
-              z.union([
-                z.object({
-                  pid: z.number().optional(),
-                }),
-                z.object({
-                  entity_id: z.string().optional(),
-                }),
-              ])
-            ),
+          content: z.object({
+            code: z.string().optional(),
+            command: z.string().optional(),
+          }),
         })
       )
       .optional(),
@@ -353,11 +321,9 @@ export const RunningProcesses = ResponseActionDetails.merge(
       .object({})
       .catchall(
         z.object({
-          content: z
-            .object({
-              code: z.string().optional(),
-            })
-            .merge(z.union([RunningProcessesOutputEndpoint, RunningProcessesOutputSentinelOne])),
+          content: z.object({
+            code: z.string().optional(),
+          }),
         })
       )
       .optional(),
