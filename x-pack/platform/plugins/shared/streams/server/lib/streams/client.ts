@@ -32,7 +32,7 @@ import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
-import type { SystemClient } from './system/system_client';
+import type { FeatureClient } from './feature/feature_client';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -69,7 +69,7 @@ export class StreamsClient {
       assetClient: AssetClient;
       queryClient: QueryClient;
       storageClient: StreamsStorageClient;
-      systemClient: SystemClient;
+      featureClient: FeatureClient;
       logger: Logger;
       request: KibanaRequest;
       isServerless: boolean;
