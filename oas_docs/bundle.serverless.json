@@ -20669,6 +20669,9 @@
                     "isReady": {
                       "type": "boolean"
                     },
+                    "is_action_secrets_storage_enabled": {
+                      "type": "boolean"
+                    },
                     "is_secrets_storage_enabled": {
                       "type": "boolean"
                     },
@@ -48269,7 +48272,7 @@
                     "type": "boolean"
                   },
                   "objects": {
-                    "description": "A list of objects to export. NOTE: this optiona cannot be combined with `types` option",
+                    "description": "A list of objects to export. NOTE: this optional parameter cannot be combined with the `types` option",
                     "items": {
                       "additionalProperties": false,
                       "properties": {
@@ -48305,7 +48308,7 @@
                         "type": "array"
                       }
                     ],
-                    "description": "The saved object types to include in the export. Use `*` to export all the types."
+                    "description": "The saved object types to include in the export. Use `*` to export all the types. Valid options depend on enabled plugins, but may include `visualization`, `dashboard`, `search`, `index-pattern`, `tag`, `config`, `config-global`, `lens`, `map`, `event-annotation-group`, `query`, `url`, `action`, `alert`, `alerting_rule_template`, `apm-indices`, `cases-user-actions`, `cases`, `cases-comments`, `infrastructure-monitoring-log-view`, `ml-trained-model`, `osquery-saved-query`, `osquery-pack`, `osquery-pack-asset`."
                   }
                 },
                 "type": "object"
