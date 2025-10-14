@@ -8,7 +8,9 @@
  */
 
 import { groups } from './groups.json';
-import { BuildkiteStep, expandAgentQueue } from '#pipeline-utils';
+import { TestSuiteType } from './constants';
+import type { BuildkiteStep } from '#pipeline-utils';
+import { expandAgentQueue } from '#pipeline-utils';
 
 const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
 if (!configJson) {
@@ -80,8 +82,8 @@ function getTestSuitesFromJson(json: string) {
     }
 
     const type = item.type;
-    if (type !== 'ftrConfig' && type !== 'group') {
-      fail(`testSuite.type must be either "ftrConfig" or "group"`);
+    if (type !== 'ftrConfig' && type !== 'scoutConfig' && type !== 'group') {
+      fail(`testSuite.type must be either "ftrConfig" or "scoutConfig" or "group"`);
     }
 
     if (item.type === 'ftrConfig') {
@@ -93,6 +95,20 @@ function getTestSuitesFromJson(json: string) {
       testSuites.push({
         type: 'ftrConfig',
         ftrConfig,
+        count,
+      });
+      continue;
+    }
+
+    if (item.type === 'scoutConfig') {
+      const scoutConfig = item.scoutConfig;
+      if (typeof scoutConfig !== 'string') {
+        fail(`testSuite.scoutConfig must be a string`);
+      }
+
+      testSuites.push({
+        type: 'scoutConfig',
+        scoutConfig,
         count,
       });
       continue;
@@ -154,7 +170,7 @@ for (const testSuite of testSuites) {
       env: {
         FTR_CONFIG: testSuite.ftrConfig,
       },
-      key: `ftr-suite-${suiteIndex++}`,
+      key: `${TestSuiteType.FTR}-${suiteIndex++}`,
       label: `${testSuite.ftrConfig}`,
       parallelism: testSuite.count,
       concurrency,
@@ -181,7 +197,7 @@ for (const testSuite of testSuites) {
         SCOUT_CONFIG: testSuite.scoutConfig,
         SCOUT_CONFIG_GROUP_TYPE: scoutConfigGroupType!,
       },
-      key: `scout-suite-${suiteIndex++}`,
+      key: `${TestSuiteType.SCOUT}-${suiteIndex++}`,
       label: `${testSuite.scoutConfig}`,
       parallelism: testSuite.count,
       concurrency,
@@ -189,7 +205,7 @@ for (const testSuite of testSuites) {
       concurrency_method: 'eager',
       agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
       depends_on: 'build',
-      timeout_in_minutes: 30,
+      timeout_in_minutes: 60,
       cancel_on_build_failing: true,
       retry: {
         automatic: [{ exit_status: '-1', limit: 3 }],
@@ -212,7 +228,7 @@ for (const testSuite of testSuites) {
         command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
         label: group.name,
         agents: expandAgentQueue(agentQueue),
-        key: `cypress-suite-${suiteIndex++}`,
+        key: `${TestSuiteType.CYPRESS}-${suiteIndex++}`,
         depends_on: 'build',
         timeout_in_minutes: 150,
         parallelism: testSuite.count,

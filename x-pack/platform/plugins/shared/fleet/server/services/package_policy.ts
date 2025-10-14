@@ -73,6 +73,7 @@ import type {
   PolicySecretReference,
   AssetsMap,
   AgentPolicy,
+  PreconfiguredInputs,
 } from '../../common/types';
 import {
   FleetError,
@@ -926,7 +927,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean }
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      skipUniqueNameVerification?: boolean;
+      bumpRevision?: boolean;
+    }
   ): Promise<PackagePolicy> {
     const savedObjectType = await getPackagePolicySavedObjectType();
     auditLoggingService.writeCustomSoAuditLog({
@@ -1126,13 +1132,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         isEndpointPolicy &&
         ((assignedInOldPolicy && !assignedInNewPolicy) ||
           (!assignedInOldPolicy && assignedInNewPolicy));
-
-      bumpPromises.push(
-        agentPolicyService.bumpRevision(soClient, esClient, policyId, {
-          user: options?.user,
-          removeProtection,
-        })
-      );
+      if (options?.bumpRevision !== false) {
+        bumpPromises.push(
+          agentPolicyService.bumpRevision(soClient, esClient, policyId, {
+            user: options?.user,
+            removeProtection,
+          })
+        );
+      }
     }
 
     const assetRemovePromise = removeOldAssets({
@@ -1415,8 +1422,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting package policies ${ids}`);
 
-    const packagePolicies = await this.getByIDs(soClient, ids, { ignoreMissing: true });
-    if (!packagePolicies) {
+    const packagePolicies = await this.getByIDs(soClient, ids, {
+      ignoreMissing: true,
+    });
+
+    if (!packagePolicies || packagePolicies.length === 0) {
+      logger.debug(`No package policies to delete`);
       return [];
     }
 
@@ -1457,7 +1468,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           agentlessAgentPolicies.push(agentPolicyId);
         }
       } catch (e) {
-        hostedAgentPolicies.push(agentPolicyId);
+        logger.error(
+          `An error occurred while checking if policies are hosted: ${e?.output?.payload?.message}`
+        );
+        // in case of orphaned policies don't add the id to the hostedAgentPolicies array
+        if (e?.output?.statusCode !== 404) hostedAgentPolicies.push(agentPolicyId);
       }
     }
 
@@ -2962,7 +2977,7 @@ export function updatePackageInputs(
 export function preconfigurePackageInputs(
   basePackagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo,
-  preconfiguredInputs?: InputsOverride[]
+  preconfiguredInputs?: PreconfiguredInputs[]
 ): NewPackagePolicy {
   if (!preconfiguredInputs) return basePackagePolicy;
 
