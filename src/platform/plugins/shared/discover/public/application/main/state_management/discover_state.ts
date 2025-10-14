@@ -204,10 +204,10 @@ export interface DiscoverStateContainer {
      */
     undoSavedSearchChanges: () => Promise<SavedSearch>;
     /**
-     * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
+     * When editing an ad hoc data view, a new id needs to be generated for the data view
      * This is to prevent duplicate ids messing with our system
      */
-    updateAdHocDataViewId: () => Promise<DataView | undefined>;
+    updateAdHocDataViewId: (editedDataView: DataView) => Promise<DataView | undefined>;
     /**
      * Updates the ES|QL query string
      */
@@ -287,12 +287,10 @@ export function getDiscoverStateContainer({
   });
 
   /**
-   * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
+   * When editing an ad hoc data view, a new id needs to be generated for the data view
    * This is to prevent duplicate ids messing with our system
    */
-  const updateAdHocDataViewId = async () => {
-    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-    const prevDataView = currentDataView$.getValue();
+  const updateAdHocDataViewId = async (prevDataView: DataView) => {
     if (!prevDataView || prevDataView.isPersisted()) return;
 
     const nextDataView = await services.dataViews.create({
@@ -300,17 +298,13 @@ export function getDiscoverStateContainer({
       id: uuidv4(),
     });
 
-    services.dataViews.clearInstanceCache(prevDataView.id);
-
     await updateFiltersReferences({
       prevDataView,
       nextDataView,
       services,
     });
 
-    internalState.dispatch(
-      internalStateActions.replaceAdHocDataViewWithId(prevDataView.id!, nextDataView)
-    );
+    internalState.dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
 
     if (isDataSourceType(appStateContainer.get().dataSource, DataSourceType.DataView)) {
       await appStateContainer.replaceUrlState({
@@ -412,7 +406,7 @@ export function getDiscoverStateContainer({
       services.dataViews.clearInstanceCache(editedDataView.id);
       setDataView(await services.dataViews.create(editedDataView.toSpec(), true));
     } else {
-      await updateAdHocDataViewId();
+      await updateAdHocDataViewId(editedDataView);
     }
     void internalState.dispatch(internalStateActions.loadDataViewList());
     addLog('[getDiscoverStateContainer] onDataViewEdited triggers data fetching');

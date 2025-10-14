@@ -108,7 +108,7 @@ function DiscoverDocumentsComponent({
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
   stateContainer: DiscoverStateContainer;
-  onFieldEdited?: () => void;
+  onFieldEdited?: (editedDataView: DataView) => void;
 }) {
   const styles = useMemoCss(componentStyles);
   const services = useDiscoverServices();

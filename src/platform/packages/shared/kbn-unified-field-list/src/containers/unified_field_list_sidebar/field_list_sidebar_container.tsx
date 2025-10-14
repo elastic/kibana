@@ -240,7 +240,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
               fieldName,
               onSave: async () => {
                 if (onFieldEdited) {
-                  await onFieldEdited({ editedFieldName: fieldName });
+                  await onFieldEdited({ editedFieldName: fieldName }); // TODO: update with editedDataView
                 }
               },
             });
@@ -270,7 +270,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
               fieldName,
               onDelete: async () => {
                 if (onFieldEdited) {
-                  await onFieldEdited({ removedFieldName: fieldName });
+                  await onFieldEdited({ removedFieldName: fieldName }); // TODO: update with editedDataView
                 }
               },
             });

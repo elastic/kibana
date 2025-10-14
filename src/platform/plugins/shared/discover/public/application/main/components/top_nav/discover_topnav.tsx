@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { DataViewType } from '@kbn/data-views-plugin/public';
+import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
@@ -40,7 +40,10 @@ export interface DiscoverTopNavProps {
   stateContainer: DiscoverStateContainer;
   esqlModeErrors?: Error;
   esqlModeWarning?: string;
-  onFieldEdited: () => Promise<void>;
+  onFieldEdited: (options: {
+    editedDataView: DataView;
+    removedFieldName?: string;
+  }) => Promise<void>;
   isLoading?: boolean;
   onCancelClick?: () => void;
 }
@@ -109,14 +112,20 @@ export const DiscoverTopNav = ({
       canEditDataView
         ? async (fieldName?: string) => {
             if (dataView?.id) {
-              const dataViewInstance = await data.dataViews.get(dataView.id);
+              let dataViewInstance = await data.dataViews.get(dataView.id);
+
+              if (!dataViewInstance.isPersisted()) {
+                // Creating a "clean" copy of the data view to avoid side effects
+                dataViewInstance = await data.dataViews.create(dataViewInstance.toSpec());
+              }
+
               closeFieldEditor.current = await dataViewFieldEditor.openEditor({
                 ctx: {
                   dataView: dataViewInstance,
                 },
                 fieldName,
                 onSave: async () => {
-                  await onFieldEdited();
+                  await onFieldEdited({ editedDataView: dataViewInstance });
                 },
               });
             }
