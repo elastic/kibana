@@ -287,6 +287,10 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.2.0
    */
   microsoftDefenderEndpointCancelEnabled: true,
+  /**
+   * Protects all the work related to the attacks and alert alignment effort
+   */
+  attacksAlertAlignment: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
