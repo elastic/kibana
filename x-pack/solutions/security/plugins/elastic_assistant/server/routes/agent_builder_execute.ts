@@ -14,7 +14,6 @@ import type { RoundInput, ConversationRound } from '@kbn/onechat-common';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { isEmpty } from 'lodash';
 import {
-  replaceAnonymizedValuesWithOriginalValues,
   pruneContentReferences,
   productDocumentationReference,
   contentReferenceBlock,
@@ -30,12 +29,13 @@ import { getModelOrOss } from '../lib/prompt/helpers';
 import type { ElasticAssistantRequestHandlerContext } from '../types';
 import { getLlmType } from './utils';
 
-// Symbol for passing anonymization fields through the request object
-export const ANONYMIZATION_FIELDS_SYMBOL = Symbol('anonymizationFields');
-// Symbol for collecting replacements from onechat tools
-export const REPLACEMENTS_SYMBOL = Symbol('replacements');
-// Symbol for passing tool parameters through the request object
-export const TOOL_PARAMS_SYMBOL = Symbol('toolParams');
+// Extended request type to store tool replacements temporarily
+interface ExtendedKibanaRequest {
+  __toolReplacements?: Replacements;
+}
+
+// Note: Removed hacky symbol-based parameter passing approach
+// Tools now use proper parameters and defaults that work for A2A interactions
 
 export interface AgentBuilderExecuteParams {
   messages: Array<Pick<Message, 'content' | 'role'>>;
@@ -56,12 +56,12 @@ export interface AgentBuilderExecuteParams {
   request: KibanaRequest;
   logger: Logger;
   conversationId?: string;
-  onLlmResponse?: (content: string, traceData: any, isError: boolean) => Promise<void>;
+  onLlmResponse?: (content: string, traceData: unknown, isError: boolean) => Promise<void>;
   response: KibanaResponseFactory;
   responseLanguage?: string;
   isStream?: boolean;
   savedObjectsClient: SavedObjectsClientContract;
-  screenContext?: any;
+  screenContext?: unknown;
   systemPrompt?: string;
   timeout?: number;
 }
@@ -100,9 +100,8 @@ export const agentBuilderExecute = async ({
   const onechatAgents = assistantContext.getOnechatAgents();
 
   // Start title generation immediately (non-blocking)
-  let titleGenerationPromise: Promise<void> | undefined;
   if (conversationId && messages.length > 0) {
-    titleGenerationPromise = (async () => {
+    (async () => {
       try {
         const conversationsDataClient =
           await assistantContext.getAIAssistantConversationsDataClient();
@@ -141,54 +140,15 @@ export const agentBuilderExecute = async ({
     })();
   }
 
-  // Get data clients for anonymization and conversation handling
-  const anonymizationFieldsDataClient =
-    await assistantContext.getAIAssistantAnonymizationFieldsDataClient();
+  // Note: anonymizationFields are now handled by individual tools
 
-  // Fetch anonymization fields exactly like langChainExecute does
-  let anonymizationFields: Array<{
-    id: string;
-    field: string;
-    allowed: boolean;
-    anonymized: boolean;
-    timestamp: string;
-    createdAt: string;
-    updatedAt?: string;
-    namespace: string;
-  }> = [];
-
-  if (anonymizationFieldsDataClient) {
-    try {
-      const anonymizationFieldsRes = await anonymizationFieldsDataClient.findDocuments<
-        import('../ai_assistant_data_clients/anonymization_fields/types').EsAnonymizationFieldsSchema
-      >({
-        perPage: 1000,
-        page: 1,
-      });
-
-      if (anonymizationFieldsRes?.data) {
-        // Transform exactly like langChainExecute does
-        const { transformESSearchToAnonymizationFields } = await import(
-          '../ai_assistant_data_clients/anonymization_fields/helpers'
-        );
-        const transformedFields = transformESSearchToAnonymizationFields(
-          anonymizationFieldsRes.data
-        );
-
-        // Map to the expected format
-        anonymizationFields = transformedFields.map((field) => ({
-          id: field.id,
-          field: field.field,
-          allowed: field.allowed ?? false,
-          anonymized: field.anonymized ?? false,
-          timestamp: field.timestamp ?? new Date().toISOString(),
-          createdAt: field.createdAt ?? new Date().toISOString(),
-          updatedAt: field.updatedAt,
-          namespace: field.namespace ?? 'default',
-        }));
-      }
-    } catch (error) {}
-  }
+  logger.debug(
+    `🚀 [AGENT_BUILDER] Messages received: ${JSON.stringify(
+      messages.map((m) => ({ role: m.role, content: m.content })),
+      null,
+      2
+    )}`
+  );
 
   // Get the last message as the next input
   let nextInput: RoundInput | undefined;
@@ -200,12 +160,9 @@ export const agentBuilderExecute = async ({
       // Apply anonymization to the user message if needed
       let messageContent = lastMessage.content;
 
-      // If we have anonymization fields, we need to apply them
-      if (anonymizationFieldsDataClient && replacements) {
-        // For now, we'll pass the message as-is since onechat will handle anonymization
-        // through its own tools. The SIEM agent has access to anonymization tools.
-        messageContent = lastMessage.content;
-      }
+      // For now, we'll pass the message as-is since onechat will handle anonymization
+      // through its own tools. The SIEM agent has access to anonymization tools.
+      messageContent = lastMessage.content;
 
       nextInput = {
         message: messageContent,
@@ -219,7 +176,8 @@ export const agentBuilderExecute = async ({
 
   // Initialize variables for response processing
   let accumulatedContent = '';
-  const finalTraceData: any = {};
+  const finalTraceData: unknown = {};
+  let collectedReplacements: Replacements = {};
 
   try {
     // Resolve model-aware prompts for tools before calling the onechat agent
@@ -291,18 +249,21 @@ export const agentBuilderExecute = async ({
       }
     }
 
-    // Attach anonymization fields, existing replacements, and tool parameters to the request in a way that doesn't break user context
-    // We'll use symbols to avoid conflicts with existing request properties
-    (request as any)[ANONYMIZATION_FIELDS_SYMBOL] = anonymizationFields;
-    (request as any)[REPLACEMENTS_SYMBOL] = replacements;
+    logger.debug(
+      `🚀 [AGENT_BUILDER] Conversation history: ${JSON.stringify(
+        conversationRounds.map((r) => ({
+          id: r.id,
+          input: r.input.message,
+          response: r.response.message,
+        })),
+        null,
+        2
+      )}`
+    );
+    logger.debug(`🚀 [AGENT_BUILDER] Next input: ${JSON.stringify(nextInput, null, 2)}`);
 
-    // Pass tool parameters exactly like langChainExecute does
-    const toolParams = {
-      alertsIndexPattern:
-        (request.body as any).alertsIndexPattern || '.alerts-security.alerts-default',
-      size: (request.body as any).size || 10,
-    };
-    (request as any)[TOOL_PARAMS_SYMBOL] = toolParams;
+    // Note: Removed hacky parameter passing through request symbols
+    // Tools now handle their own parameters and defaults for A2A compatibility
 
     // Call the onechat agent via agents service
     const agentResult = await onechatAgents.execute({
@@ -319,13 +280,8 @@ export const agentBuilderExecute = async ({
       defaultConnectorId: connectorId,
     });
 
-    // Collect any new replacements that were created by the onechat tools
-    const newReplacements = (request as any)[REPLACEMENTS_SYMBOL] ?? {};
-
-    // If there are new replacements, call onNewReplacements to update the conversation
-    if (Object.keys(newReplacements).length > 0) {
-      await onNewReplacements(newReplacements);
-    }
+    // Note: Removed hacky replacements collection from request symbols
+    // Replacements should be handled at the agent level for A2A compatibility
 
     logger.debug(
       `Onechat agent execution completed successfully: ${JSON.stringify(agentResult, null, 2)}`
@@ -341,13 +297,32 @@ export const agentBuilderExecute = async ({
     if (agentResult.result.round.steps && agentResult.result.round.steps.length > 0) {
       // Process each tool step to extract content references
       for (const step of agentResult.result.round.steps) {
-        if (step.type === 'tool_call' && step.results && step.results.length > 0) {
+        if (
+          step.type === 'tool_call' &&
+          'results' in step &&
+          step.results &&
+          step.results.length > 0
+        ) {
           for (const result of step.results) {
             if (result.type === 'other' && result.data) {
+              // Skip content references for assistant_settings tool - it's just configuration
+              if ('tool_id' in step && step.tool_id === 'core.security.assistant_settings') {
+                // Skip content reference for assistant_settings tool
+                // eslint-disable-next-line no-continue
+                continue;
+              }
+
               // Handle different types of tool results
               if (
+                'tool_id' in step &&
                 step.tool_id === 'core.security.product_documentation' &&
-                result.data.content?.documents
+                result.data &&
+                typeof result.data === 'object' &&
+                'content' in result.data &&
+                result.data.content &&
+                typeof result.data.content === 'object' &&
+                'documents' in result.data.content &&
+                Array.isArray(result.data.content.documents)
               ) {
                 // Process product documentation results
                 const documents = result.data.content.documents;
@@ -368,7 +343,13 @@ export const agentBuilderExecute = async ({
                     accumulatedContent += ` ${citation}`;
                   }
                 }
-              } else if (step.tool_id === 'core.security.alert_counts' && result.data.result) {
+              } else if (
+                'tool_id' in step &&
+                step.tool_id === 'core.security.alert_counts' &&
+                result.data &&
+                typeof result.data === 'object' &&
+                'result' in result.data
+              ) {
                 // Process alert counts results
                 // Add content reference for alert counts using SecurityAlertsPage type
                 const reference = contentReferencesStore.add((p) => ({
@@ -380,8 +361,12 @@ export const agentBuilderExecute = async ({
                 const citation = contentReferenceBlock(reference);
                 accumulatedContent += ` ${citation}`;
               } else if (
+                'tool_id' in step &&
                 step.tool_id === 'core.security.open_and_acknowledged_alerts' &&
-                result.data.alerts
+                result.data &&
+                typeof result.data === 'object' &&
+                'alerts' in result.data &&
+                Array.isArray(result.data.alerts)
               ) {
                 // Process alert results
                 const alerts = result.data.alerts;
@@ -400,12 +385,28 @@ export const agentBuilderExecute = async ({
                     accumulatedContent += ` ${citation}`;
                   }
                 }
+
+                // Note: replacements are not collected from tool result data
+                // to prevent them from being passed to the LLM
+                // They should be collected at the conversation level instead
               } else {
-                // Generic tool result handling
+                // Generic tool result handling - skip for configuration tools
+                if (
+                  'tool_id' in step &&
+                  step.tool_id &&
+                  step.tool_id.includes('assistant_settings')
+                ) {
+                  // Skip content reference for configuration tool
+                  // eslint-disable-next-line no-continue
+                  continue;
+                }
+
                 const reference = contentReferencesStore.add((p) => ({
                   type: 'Href' as const,
                   id: p.id,
-                  href: `#tool-result-${step.tool_id || 'unknown_tool'}`,
+                  href: `#tool-result-${
+                    ('tool_id' in step ? step.tool_id : 'unknown_tool') || 'unknown_tool'
+                  }`,
                 }));
 
                 // Add citation to the response content using contentReferenceBlock
@@ -427,13 +428,16 @@ export const agentBuilderExecute = async ({
       finalResponse = prunedContent;
     }
 
-    // Apply anonymization replacements if needed
-    // Use the new replacements that were collected from onechat tools
-    if (newReplacements && Object.keys(newReplacements).length > 0) {
-      finalResponse = replaceAnonymizedValuesWithOriginalValues({
-        messageContent: finalResponse,
-        replacements: newReplacements,
-      });
+    // Collect replacements from tools that stored them in request context
+    // This is a temporary solution until onechat provides a proper way to pass replacements
+    const toolReplacements = (request as ExtendedKibanaRequest).__toolReplacements;
+    if (toolReplacements && typeof toolReplacements === 'object') {
+      collectedReplacements = { ...collectedReplacements, ...toolReplacements };
+    }
+
+    // Pass collected replacements to the conversation
+    if (Object.keys(collectedReplacements).length > 0) {
+      onNewReplacements(collectedReplacements);
     }
 
     // Call onLlmResponse with the final processed content to ensure conversation updates happen properly
@@ -449,14 +453,14 @@ export const agentBuilderExecute = async ({
 
     // For now, we don't have access to tool invocation counts from onechat agent execution
     // This would need to be tracked by the onechat agent itself
-    const toolsInvoked = {
+    const toolsInvoked: Record<string, number> = {
       // TODO: Get actual tool invocation counts from onechat agent execution
       // This would require onechat to expose tool usage statistics
     };
 
     telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
       actionTypeId,
-      model: (request.body as any).model,
+      model: (request.body as { model?: string }).model,
       assistantStreamingEnabled: isStream,
       isEnabledKnowledgeBase: false, // Agent builder doesn't use KB directly
       durationMs,
@@ -489,7 +493,7 @@ export const agentBuilderExecute = async ({
           connector_id: connectorId,
           data: finalResponse, // ← Changed from "response" to "data"
           trace_data: finalTraceData,
-          replacements: newReplacements, // Use the new replacements from onechat tools
+          replacements: collectedReplacements, // Include collected replacements
           status: 'ok',
           ...(conversationId ? { conversationId } : {}),
           ...(!isEmpty(metadata) ? { metadata } : {}), // ← Content references go in metadata

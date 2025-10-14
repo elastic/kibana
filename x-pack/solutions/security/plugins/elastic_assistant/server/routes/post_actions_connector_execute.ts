@@ -180,6 +180,25 @@ export const postActionsConnectorExecuteRoute = (
             }
           }
 
+          // Get conversation messages for agent builder
+          let conversationMessages: Array<Pick<Message, 'content' | 'role'>> = [];
+          if (conversationId && conversationsDataClient) {
+            const conversation = await conversationsDataClient.getConversation({
+              id: conversationId,
+            });
+            if (conversation && conversation.messages) {
+              conversationMessages = conversation.messages.map((msg) => ({
+                content: msg.content,
+                role: msg.role,
+              }));
+            }
+          }
+
+          // Add the new message to the conversation messages
+          if (newMessage) {
+            conversationMessages.push(newMessage);
+          }
+
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
           const contentReferencesStore = newContentReferencesStore({
             disabled: request.query.content_references_disabled,
@@ -242,13 +261,14 @@ export const postActionsConnectorExecuteRoute = (
           // Choose execution method based on feature flag
           const executeFunction = agentBuilderEnabled ? agentBuilderExecute : langChainExecute;
 
-          console.log('🚀 [ROUTE] agentBuilderEnabled:', agentBuilderEnabled);
-          console.log(
-            '🚀 [ROUTE] Using executeFunction:',
-            executeFunction === agentBuilderExecute ? 'agentBuilderExecute' : 'langChainExecute'
+          logger.debug(`🚀 [ROUTE] agentBuilderEnabled: ${agentBuilderEnabled}`);
+          logger.debug(
+            `🚀 [ROUTE] Using executeFunction: ${
+              executeFunction === agentBuilderExecute ? 'agentBuilderExecute' : 'langChainExecute'
+            }`
           );
-          console.log('🚀 [ROUTE] isStream:', request.body.subAction !== 'invokeAI');
-          console.log('🚀 [ROUTE] request.body.subAction:', request.body.subAction);
+          logger.debug(`🚀 [ROUTE] isStream: ${request.body.subAction !== 'invokeAI'}`);
+          logger.debug(`🚀 [ROUTE] request.body.subAction: ${request.body.subAction}`);
 
           return await Promise.race([
             executeFunction({
@@ -265,7 +285,7 @@ export const postActionsConnectorExecuteRoute = (
               context: ctx,
               logger,
               inference,
-              messages: newMessage ? [newMessage] : [],
+              messages: conversationMessages,
               onLlmResponse,
               onNewReplacements,
               replacements: latestReplacements,

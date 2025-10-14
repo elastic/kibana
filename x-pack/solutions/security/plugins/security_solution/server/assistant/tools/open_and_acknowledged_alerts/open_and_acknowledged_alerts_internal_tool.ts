@@ -17,88 +17,165 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-// No specific tool params needed since all parameters come from the request object
 import { ToolType } from '@kbn/onechat-common';
 import type { StartServicesAccessor } from '@kbn/core/server';
-import {
-  ANONYMIZATION_FIELDS_SYMBOL,
-  REPLACEMENTS_SYMBOL,
-  TOOL_PARAMS_SYMBOL,
-} from '@kbn/elastic-assistant-plugin/server/routes/agent_builder_execute';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 
-/**
- * Extended request interface that includes additional data passed from agentBuilderExecute.
- *
- * WHY THIS APPROACH:
- * Onechat tools don't have direct access to the same parameter passing mechanism as langchain tools.
- * The original OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL receives parameters through the AssistantToolParams
- * object, but onechat tools use a different architecture. To maintain the same functionality and
- * ensure proper anonymization, replacements, and parameter handling, we pass this data through
- * the request object using symbols to avoid conflicts with existing request properties.
- *
- * This approach ensures:
- * - Real anonymization fields are used (not hardcoded defaults)
- * - Replacements flow back to the conversation properly
- * - Tool parameters (alertsIndexPattern, size) are respected
- * - The implementation matches the original tool's behavior exactly
- */
+// Extended request type to store tool replacements temporarily
 interface ExtendedKibanaRequest {
-  [ANONYMIZATION_FIELDS_SYMBOL]?: Array<{
-    id: string;
-    field: string;
-    allowed: boolean;
-    anonymized: boolean;
-    timestamp: string;
-    createdAt: string;
-    updatedAt?: string;
-    namespace: string;
-  }>;
-  [REPLACEMENTS_SYMBOL]?: Replacements;
-  [TOOL_PARAMS_SYMBOL]?: {
-    alertsIndexPattern: string;
-    size: number;
-  };
+  __toolReplacements?: Replacements;
 }
 
-// No schema needed - all parameters come from the request object via ExtendedKibanaRequest
+// Type for anonymization fields
+interface AnonymizationField {
+  id: string;
+  field: string;
+  allowed: boolean;
+  anonymized: boolean;
+  timestamp: string;
+  createdAt: string;
+  updatedAt?: string;
+  namespace: string;
+}
+
+// Empty schema for A2A compatibility - all configuration comes from assistant settings tool
+const openAndAcknowledgedAlertsToolSchema = z.object({});
+
+// Default anonymization fields
+const DEFAULT_ANONYMIZATION_FIELDS: AnonymizationField[] = [
+  {
+    id: 'host-name',
+    field: 'host.name',
+    allowed: true,
+    anonymized: true,
+    timestamp: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    namespace: 'default',
+  },
+  {
+    id: 'user-name',
+    field: 'user.name',
+    allowed: true,
+    anonymized: true,
+    timestamp: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    namespace: 'default',
+  },
+  {
+    id: 'source-ip',
+    field: 'source.ip',
+    allowed: true,
+    anonymized: true,
+    timestamp: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    namespace: 'default',
+  },
+  {
+    id: 'destination-ip',
+    field: 'destination.ip',
+    allowed: true,
+    anonymized: true,
+    timestamp: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    namespace: 'default',
+  },
+];
+
+// Helper function to parse assistant settings and extract configuration
+const parseAssistantSettings = (settingsData: unknown) => {
+  const result = {
+    anonymizationFields: DEFAULT_ANONYMIZATION_FIELDS,
+    alertsIndexPattern: '.alerts-security.alerts-default',
+    size: 100,
+  };
+
+  if (
+    settingsData &&
+    typeof settingsData === 'object' &&
+    'settings' in settingsData &&
+    settingsData.settings &&
+    typeof settingsData.settings === 'object'
+  ) {
+    // Get anonymization fields
+    if (
+      'anonymizationFields' in settingsData.settings &&
+      Array.isArray(settingsData.settings.anonymizationFields)
+    ) {
+      result.anonymizationFields = settingsData.settings.anonymizationFields;
+    }
+
+    // Get defaults for this tool
+    if (
+      'defaults' in settingsData.settings &&
+      settingsData.settings.defaults &&
+      typeof settingsData.settings.defaults === 'object' &&
+      'openAndAcknowledgedAlertsInternalTool' in settingsData.settings.defaults
+    ) {
+      const toolDefaults = settingsData.settings.defaults.openAndAcknowledgedAlertsInternalTool;
+      if (toolDefaults && typeof toolDefaults === 'object') {
+        if (
+          'alertsIndexPattern' in toolDefaults &&
+          typeof toolDefaults.alertsIndexPattern === 'string'
+        ) {
+          result.alertsIndexPattern = toolDefaults.alertsIndexPattern;
+        }
+        if ('size' in toolDefaults && typeof toolDefaults.size === 'number') {
+          result.size = toolDefaults.size;
+        }
+      }
+    }
+  }
+
+  return result;
+};
 
 const OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_ID = 'core.security.open_and_acknowledged_alerts';
 export const OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_DESCRIPTION =
-  'Call this for knowledge about the latest n open and acknowledged alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts. Do not call this tool for alert count or quantity. The output is an array of the latest n open and acknowledged alerts.';
+  'Call this for knowledge about the latest n open and acknowledged alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts. Do not call this tool for alert count or quantity. The output is an array of the latest n open and acknowledged alerts. ' +
+  'IMPORTANT: This tool requires NO parameters. All configuration (alertsIndexPattern, size, anonymizationFields) is automatically retrieved from the assistant_settings tool. ' +
+  'Always call the assistant_settings tool first to get current configuration and confirm with the user before calling this tool.';
 
 /**
  * Returns a tool for querying open and acknowledged alerts using the InternalToolDefinition pattern.
  */
 export const openAndAcknowledgedAlertsInternalTool = (
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>
-): BuiltinToolDefinition<z.ZodObject<{}>> => {
+): BuiltinToolDefinition<typeof openAndAcknowledgedAlertsToolSchema> => {
   return {
     id: OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_ID,
     type: ToolType.builtin,
     description: OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_DESCRIPTION,
-    schema: z.object({}), // Empty schema - all parameters come from request object
+    schema: openAndAcknowledgedAlertsToolSchema,
     handler: async (params, context) => {
-      // Get anonymization fields, existing replacements, and tool parameters from the request (passed from agentBuilderExecute)
-      // This matches exactly how the original OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL works
-      const extendedRequest = context.request as ExtendedKibanaRequest;
-      const anonymizationFields = extendedRequest[ANONYMIZATION_FIELDS_SYMBOL] ?? [];
-      const existingReplacements = extendedRequest[REPLACEMENTS_SYMBOL] ?? {};
-      const toolParams = extendedRequest[TOOL_PARAMS_SYMBOL];
+      // Get configuration from assistant settings tool (with fallback defaults)
+      let settingsData: unknown = null;
 
-      // Use the actual parameters from the request (no schema defaults needed)
-      const actualAlertsIndexPattern = toolParams?.alertsIndexPattern;
-      const actualSize = toolParams?.size;
+      try {
+        const [, pluginsStart] = await getStartServices();
+        const toolRegistry = await pluginsStart.onechat.tools.getRegistry({
+          request: context.request,
+        });
+        const assistantSettingsResult = await toolRegistry.execute({
+          toolId: 'core.security.assistant_settings',
+          toolParams: {},
+        });
 
-      // Validate that we have the required parameters
-      if (!actualAlertsIndexPattern) {
-        throw new Error('alertsIndexPattern is required but not provided');
+        if (assistantSettingsResult.results && assistantSettingsResult.results.length > 0) {
+          settingsData = assistantSettingsResult.results[0].data;
+        }
+      } catch (error) {
+        // Use defaults if assistant settings fails
       }
-      if (!actualSize) {
-        throw new Error('size is required but not provided');
-      }
 
-      // Validate size is within range (use actual size from request)
+      // Always use parseAssistantSettings to get configuration (with fallbacks)
+      const parsed = parseAssistantSettings(settingsData);
+      const {
+        alertsIndexPattern: actualAlertsIndexPattern,
+        size: actualSize,
+        anonymizationFields,
+      } = parsed;
+
+      // Validate size is within range
       if (sizeIsOutOfRange(actualSize)) {
         throw new Error(`Size ${actualSize} is out of range`);
       }
@@ -111,14 +188,11 @@ export const openAndAcknowledgedAlertsInternalTool = (
 
       const result = await context.esClient.asCurrentUser.search<SearchResponse>(query);
 
-      // Process the alerts with anonymization but without content references
-      // Content references will be handled at the agent execution level
-      // Start with existing replacements from the conversation (like the original tool does)
-      let localReplacements: Replacements = { ...existingReplacements };
+      // Process the alerts with anonymization
+      // For A2A compatibility, we don't handle replacements here - they should be handled at the agent level
+      let localReplacements: Replacements = {};
       const localOnNewReplacements = (newReplacements: Replacements) => {
         localReplacements = { ...localReplacements, ...newReplacements };
-        // Store the new replacements in the request so agentBuilderExecute can collect them
-        (context.request as ExtendedKibanaRequest)[REPLACEMENTS_SYMBOL] = localReplacements;
         return Promise.resolve(localReplacements);
       };
 
@@ -136,16 +210,24 @@ export const openAndAcknowledgedAlertsInternalTool = (
         return transformed;
       });
 
-      return {
+      const toolResult = {
         results: [
           {
             type: ToolResultType.other,
             data: {
               alerts: content,
+              // Note: replacements are NOT included in the data sent to LLM
+              // They are collected separately and used at the conversation level
             },
           },
         ],
       };
+
+      // Store replacements in request context for agent execution to access
+      // This is a temporary solution until onechat provides a proper way to pass replacements
+      (context.request as ExtendedKibanaRequest).__toolReplacements = localReplacements;
+
+      return toolResult;
     },
     tags: ['alerts', 'open-and-acknowledged-alerts', 'security'],
   };

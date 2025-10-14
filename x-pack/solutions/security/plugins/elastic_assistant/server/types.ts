@@ -126,6 +126,16 @@ export interface ElasticAssistantPluginStart {
    * @param callback
    */
   registerCallback: (callbackId: CallbackIds, callback: Function) => void;
+  /**
+   * Get the anonymization fields data client for the given request.
+   * @param request The Kibana request to get the data client for
+   */
+  getAIAssistantAnonymizationFieldsDataClient: (request: KibanaRequest) => Promise<AIAssistantDataClient | null>;
+  /**
+   * Get the knowledge base data client for the given request.
+   * @param request The Kibana request to get the data client for
+   */
+  getAIAssistantKnowledgeBaseDataClient: (request: KibanaRequest) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
 }
 
 export interface ElasticAssistantPluginSetupDependencies {

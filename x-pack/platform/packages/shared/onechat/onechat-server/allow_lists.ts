@@ -11,7 +11,7 @@
  */
 export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   // Security Solution tools
-  'fetch-siem-prompts-tool',
+  'core.security.assistant_settings', // New assistant settings tool
   'core.security.open_and_acknowledged_alerts',
   'core.security.alert_counts',
   'core.security.knowledge_base_retrieval',

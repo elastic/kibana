@@ -103,6 +103,7 @@ import { siemAgentCreator } from './assistant/siem_agent_creator';
 import { knowledgeBaseRetrievalInternalTool } from './assistant/tools/knowledge_base/knowledge_base_retrieval_internal_tool';
 import { knowledgeBaseWriteInternalTool } from './assistant/tools/knowledge_base/knowledge_base_write_internal_tool';
 import { securityLabsKnowledgeInternalTool } from './assistant/tools/security_labs/security_labs_knowledge_internal_tool';
+import { assistantSettingsInternalTool } from './assistant/tools/assistant_settings/assistant_settings_internal_tool';
 import type {
   ISecuritySolutionPlugin,
   PluginInitializerContext,
@@ -257,6 +258,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.ruleMonitoringService.setup(core, plugins);
 
     // Register onechat tools
+    plugins.onechat.tools.register(assistantSettingsInternalTool(core.getStartServices));
     plugins.onechat.tools.register(openAndAcknowledgedAlertsInternalTool(core.getStartServices));
     plugins.onechat.tools.register(alertCountsInternalTool(core.getStartServices));
     plugins.onechat.tools.register(productDocumentationInternalTool(core.getStartServices));
