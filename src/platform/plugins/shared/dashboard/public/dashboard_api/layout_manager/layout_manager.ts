@@ -43,6 +43,7 @@ import {
 import { asyncForEach } from '@kbn/std';
 import type { StickyControlLayoutState } from '@kbn/controls-schemas/src/types';
 
+import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { DashboardState } from '../../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/content_management';
 import type { DashboardPanel } from '../../../server';
@@ -60,7 +61,6 @@ import { areLayoutsEqual } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
 import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from './types';
-import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
