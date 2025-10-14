@@ -68,7 +68,7 @@ function handleYamlError(err: any, yaml: string): string {
   if (err?.reason === 'duplicated mapping key') {
     let position = err.mark?.position;
     let key = 'unknown';
-    // Read key if prosition is available
+    // Read key if position is available
     if (position) {
       key = '';
       while (position < yaml.length && yaml.charAt(position) !== ':') {
