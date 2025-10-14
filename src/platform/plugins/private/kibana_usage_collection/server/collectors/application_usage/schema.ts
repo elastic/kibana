@@ -141,12 +141,10 @@ export const applicationUsageSchema = {
   searchSynonyms: commonSchema,
   searchQueryRules: commonSchema,
   elasticsearchIndices: commonSchema,
-  elasticsearchStart: commonSchema,
   elasticsearchIndexManagement: commonSchema,
   enterpriseSearchAnalytics: commonSchema,
   enterpriseSearchApplications: commonSchema,
   enterpriseSearchRedirect: commonSchema,
-  searchExperiences: commonSchema,
   searchHomepage: commonSchema,
   graph: commonSchema,
   logs: commonSchema,
@@ -186,5 +184,4 @@ export const applicationUsageSchema = {
   uptime: commonSchema,
   synthetics: commonSchema,
   ux: commonSchema,
-  metricsExperience: commonSchema,
 };

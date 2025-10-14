@@ -14,15 +14,15 @@ import { replaceParams } from '@kbn/openapi-common/shared';
 import type {
   AttackDiscoveryScheduleCreateProps,
   AttackDiscoveryScheduleUpdateProps,
-  FindAttackDiscoverySchedulesRequestQuery,
 } from '@kbn/elastic-assistant-common';
+import type { FindAttackDiscoverySchedulesInternalRequestQuery } from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
-  ATTACK_DISCOVERY_SCHEDULES,
-  ATTACK_DISCOVERY_SCHEDULES_BY_ID,
-  ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
-  ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
-  ATTACK_DISCOVERY_SCHEDULES_FIND,
+  ATTACK_DISCOVERY_INTERNAL_SCHEDULES,
+  ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID,
+  ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_DISABLE,
+  ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_ENABLE,
+  ATTACK_DISCOVERY_INTERNAL_SCHEDULES_FIND,
 } from '@kbn/elastic-assistant-common';
 
 import type { User } from '../../../utils/auth/types';
@@ -61,7 +61,7 @@ export const getAttackDiscoverySchedulesApis = ({
       kibanaSpace?: string;
       expectedHttpCode?: number;
     }) => {
-      const route = routeWithNamespace(ATTACK_DISCOVERY_SCHEDULES, kibanaSpace);
+      const route = routeWithNamespace(ATTACK_DISCOVERY_INTERNAL_SCHEDULES, kibanaSpace);
       const configuredTest = configureTest(supertest.post(route), user);
       const response = await configuredTest.send(schedule).expect(expectedHttpCode);
 
@@ -78,11 +78,11 @@ export const getAttackDiscoverySchedulesApis = ({
       kibanaSpace = 'default',
       expectedHttpCode = 200,
     }: {
-      query: FindAttackDiscoverySchedulesRequestQuery;
+      query: FindAttackDiscoverySchedulesInternalRequestQuery;
       kibanaSpace?: string;
       expectedHttpCode?: number;
     }) => {
-      const route = routeWithNamespace(ATTACK_DISCOVERY_SCHEDULES_FIND, kibanaSpace);
+      const route = routeWithNamespace(ATTACK_DISCOVERY_INTERNAL_SCHEDULES_FIND, kibanaSpace);
       const configuredTest = configureTest(supertest.get(route), user);
       const response = await configuredTest.query(query).expect(expectedHttpCode);
 
@@ -102,7 +102,7 @@ export const getAttackDiscoverySchedulesApis = ({
       expectedHttpCode?: number;
     }) => {
       const route = routeWithNamespace(
-        replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id }),
+        replaceParams(ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID, { id }),
         kibanaSpace
       );
       const configuredTest = configureTest(supertest.get(route), user);
@@ -126,7 +126,7 @@ export const getAttackDiscoverySchedulesApis = ({
       expectedHttpCode?: number;
     }) => {
       const route = routeWithNamespace(
-        replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id }),
+        replaceParams(ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID, { id }),
         kibanaSpace
       );
       const configuredTest = configureTest(supertest.put(route), user);
@@ -148,7 +148,7 @@ export const getAttackDiscoverySchedulesApis = ({
       expectedHttpCode?: number;
     }) => {
       const route = routeWithNamespace(
-        replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id }),
+        replaceParams(ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID, { id }),
         kibanaSpace
       );
       const configuredTest = configureTest(supertest.delete(route), user);
@@ -170,7 +170,7 @@ export const getAttackDiscoverySchedulesApis = ({
       expectedHttpCode?: number;
     }) => {
       const route = routeWithNamespace(
-        replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE, { id }),
+        replaceParams(ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_ENABLE, { id }),
         kibanaSpace
       );
       const configuredTest = configureTest(supertest.post(route), user);
@@ -192,7 +192,7 @@ export const getAttackDiscoverySchedulesApis = ({
       expectedHttpCode?: number;
     }) => {
       const route = routeWithNamespace(
-        replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE, { id }),
+        replaceParams(ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_DISABLE, { id }),
         kibanaSpace
       );
       const configuredTest = configureTest(supertest.post(route), user);

@@ -21,5 +21,7 @@ export const Primary: Story = {
     onCloseModal: () => {},
     onConvert: () => {},
     sourceIndexName: 'my-index',
+    isConverting: false,
+    errorMessage: '',
   },
 };

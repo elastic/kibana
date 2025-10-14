@@ -6,17 +6,39 @@
  */
 
 import { useMemo } from 'react';
-import type { TableColumn } from '../components/dashboard_table_columns';
+import type {
+  CreateActionsColumnParams,
+  CreateNameColumnParams,
+  TableColumn,
+} from '../components/dashboard_table_columns';
 import {
+  createActionsColumn,
   createNameColumn,
   createStatusColumn,
   createTagsColumn,
   createUpdatedColumn,
 } from '../components/dashboard_table_columns';
 
-export const useMigrationDashboardsTableColumns = (): TableColumn[] => {
+type UseMigrationDashboardsTableColumnsParams = CreateActionsColumnParams & CreateNameColumnParams;
+
+export const useMigrationDashboardsTableColumns = ({
+  installDashboard,
+  openDashboardDetailsFlyout,
+  shouldDisableActions,
+}: UseMigrationDashboardsTableColumnsParams): TableColumn[] => {
   return useMemo(
-    () => [createNameColumn(), createUpdatedColumn(), createStatusColumn(), createTagsColumn()],
-    []
+    () => [
+      createNameColumn({
+        openDashboardDetailsFlyout,
+      }),
+      createUpdatedColumn(),
+      createStatusColumn(),
+      createTagsColumn(),
+      createActionsColumn({
+        shouldDisableActions,
+        installDashboard,
+      }),
+    ],
+    [installDashboard, openDashboardDetailsFlyout, shouldDisableActions]
   );
 };

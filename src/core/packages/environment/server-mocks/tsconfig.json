@@ -12,7 +12,8 @@
   ],
   "kbn_references": [
     "@kbn/utility-types",
-    "@kbn/core-environment-server-internal"
+    "@kbn/core-environment-server-internal",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

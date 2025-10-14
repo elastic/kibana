@@ -170,6 +170,7 @@ const EsQueryRuleParamsSchemaProperties = {
       }),
       {
         maxSize: MAX_SELECTABLE_SOURCE_FIELDS,
+        meta: { description: 'The sourceFields param is ignored.' },
       }
     )
   ),

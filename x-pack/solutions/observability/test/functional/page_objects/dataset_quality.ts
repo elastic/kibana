@@ -164,7 +164,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityNoPrivilegesEmptyState: 'datasetQualityNoPrivilegesEmptyState',
     datasetQualityNoDataEmptyState: 'datasetQualityTableNoData',
     superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
-    superDatePickerApplyTimeButton: 'superDatePickerApplyTimeButton',
+    superDatePickerApplyTimeButton: 'querySubmitButton',
     superDatePickerQuickMenu: 'superDatePickerQuickMenu',
     unifiedHistogramBreakdownSelectorButton: 'unifiedHistogramBreakdownSelectorButton',
     unifiedHistogramBreakdownSelectorSelectorSearch:
@@ -179,7 +179,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityDetailsSummaryCardFailedDocuments:
       'datasetQualityDetailsSummaryKpiCard-Failed documents',
     datasetQualityDetailsSummaryCardNoFailureStore:
-      'datasetQualityDetailsSummaryKpiCard-No failure store',
+      'datasetQualityDetailsSummaryKpiCard-noFailureStore',
     datasetQualityDetailsEnableFailureStoreButton: 'datasetQualityDetailsEnableFailureStoreButton',
     editFailureStoreModal: 'editFailureStoreModal',
     enableFailureStoreToggle: 'enableFailureStoreToggle',

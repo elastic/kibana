@@ -15,7 +15,7 @@ export async function setupProfilingResources({
   // eslint-disable-next-line no-console
   console.log('Setting up Universal profiling resources...');
   await axios.post(
-    `${kibanaUrlWithAuth}/internal/profiling/setup/es_resources`,
+    `${kibanaUrlWithAuth}/api/profiling/setup/es_resources`,
     {},
     { headers: { 'kbn-xsrf': true, 'x-elastic-internal-origin': 'Kibana' } }
   );

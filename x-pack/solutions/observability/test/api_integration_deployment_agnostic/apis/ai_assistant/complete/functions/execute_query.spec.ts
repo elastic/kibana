@@ -143,7 +143,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         it('contains user message with information about how to request ESQL documentation', () => {
           expect(last(secondRequestBody.messages)?.content).to.contain(
-            'Based on the previous conversation, request documentation'
+            'Now, based on the previous conversation, request documentation'
           );
         });
       });
@@ -155,11 +155,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             (message) => message.tool_calls?.[0]?.function?.name === 'request_documentation'
           );
           expect(hasToolCall).to.be(true);
-        });
-
-        it('contains ESQL documentation', () => {
-          const parsed = JSON.parse(last(thirdRequestBody.messages)?.content as string);
-          expect(parsed.documentation.OPERATORS).to.contain('Binary Operators');
         });
 
         it('allows the LLM to call the tools execute_query, visualize_query and request_documentation', () => {

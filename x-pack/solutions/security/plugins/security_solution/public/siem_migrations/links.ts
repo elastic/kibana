@@ -15,7 +15,8 @@ import {
   SIEM_MIGRATIONS_LANDING_PATH,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
-import { SiemMigrationsIcon } from '../common/icons/siem_migrations';
+import { IconDashboards } from '../common/icons/dashboards';
+import { IconRules } from '../common/icons/rules';
 
 const subLinks: LinkItem[] = [
   {
@@ -27,7 +28,7 @@ const subLinks: LinkItem[] = [
       defaultMessage:
         'Our generative AI powered Automatic migration tool automates some of the most time consuming migrations tasks and processes.',
     }),
-    landingIcon: SiemMigrationsIcon,
+    landingIcon: IconRules,
     path: SIEM_MIGRATIONS_RULES_PATH,
     capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
     skipUrlState: true,
@@ -46,7 +47,7 @@ const subLinks: LinkItem[] = [
           'Our generative AI powered Automatic migration tool automates some of the most time consuming migrations tasks and processes.',
       }
     ),
-    landingIcon: SiemMigrationsIcon,
+    landingIcon: IconDashboards,
     path: SIEM_MIGRATIONS_DASHBOARDS_PATH,
     capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
     skipUrlState: true,
@@ -71,7 +72,7 @@ export const links: LinkItem = {
   capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.migrations', {
-      defaultMessage: 'DashboardMigrations',
+      defaultMessage: 'Migrations',
     }),
   ],
   links: subLinks,

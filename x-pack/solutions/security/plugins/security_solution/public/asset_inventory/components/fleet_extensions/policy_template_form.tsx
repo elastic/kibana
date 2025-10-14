@@ -35,7 +35,8 @@ export const CloudAssetInventoryPolicyTemplateForm =
       isAgentlessEnabled,
       defaultSetupTechnology,
     }) => {
-      const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '0.18.0';
+      const CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AWS = '0.18.0';
+      const CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AZURE = '1.1.3';
       const { cloud, uiSettings } = useKibana().services;
       const isValidFormState = !hasErrors(validationResults);
 
@@ -54,12 +55,12 @@ export const CloudAssetInventoryPolicyTemplateForm =
         ),
         overviewPath: `https://ela.st/cloud-asset-discovery-overview`,
         getStartedPath: `https://ela.st/cloud-asset-discovery-get-started`,
-        cloudConnectorEnabledVersion: CLOUD_CONNECTOR_VERSION_ENABLED_ESS,
         showCloudTemplates: true,
         providers: {
           aws: {
             type: CLOUDBEAT_AWS,
             enableOrganization: true,
+            cloudConnectorEnabledVersion: CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AWS,
             getStartedPath: `https://ela.st/cloud-asset-discovery-get-started-aws.html`,
             inputFieldMapping: {
               access_key_id: 'aws.access_key_id',
@@ -82,6 +83,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
             enableOrganization: true,
             getStartedPath: `https://ela.st/cloud-asset-discovery-get-started-azure.html`,
             manualFieldsEnabled: true,
+            cloudConnectorEnabledVersion: CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AZURE,
           },
         },
       };

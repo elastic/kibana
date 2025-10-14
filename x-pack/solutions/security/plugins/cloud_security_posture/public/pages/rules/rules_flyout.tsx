@@ -17,8 +17,7 @@ import {
   EuiFlexGroup,
   EuiSwitch,
   EuiFlyoutFooter,
-  EuiIcon,
-  EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -177,13 +176,14 @@ const ruleState = (rule: CspBenchmarkRulesWithStates, switchRuleStates: () => Pr
             },
           }}
         >
-          <EuiToolTip
+          <EuiIconTip
             content={i18n.translate('xpack.csp.rules.rulesFlyout.ruleStateSwitchTooltip', {
               defaultMessage: `Disabling a rule will also disable its associated detection rules and alerts. Enabling it again does not automatically re-enable them`,
             })}
-          >
-            <EuiIcon size="m" color="subdued" type="info" />
-          </EuiToolTip>
+            type="info"
+            size="m"
+            color="subdued"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

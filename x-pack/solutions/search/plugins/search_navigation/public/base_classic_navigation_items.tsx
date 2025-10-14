@@ -49,14 +49,6 @@ export const BaseClassicNavItems: ClassicNavItem[] = [
         id: 'playground',
       },
       {
-        'data-test-subj': 'searchSideNav-Connectors',
-        deepLink: {
-          link: 'enterpriseSearchContent:connectors',
-          shouldShowActiveForSubroutes: true,
-        },
-        id: 'connectors',
-      },
-      {
         'data-test-subj': 'searchSideNav-SearchApplications',
         deepLink: {
           link: 'enterpriseSearchApplications:searchApplications',

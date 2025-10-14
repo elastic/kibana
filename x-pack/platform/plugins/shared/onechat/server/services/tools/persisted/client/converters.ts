@@ -28,14 +28,17 @@ export const fromEs = <TConfig extends object = {}>(
 
 export const createAttributes = ({
   createRequest,
+  space,
   creationDate = new Date(),
 }: {
   createRequest: ToolCreateParams;
+  space: string;
   creationDate?: Date;
 }): ToolProperties => {
   return {
     id: createRequest.id,
     type: createRequest.type,
+    space,
     description: createRequest.description ?? '',
     tags: createRequest.tags ?? [],
     configuration: createRequest.configuration,

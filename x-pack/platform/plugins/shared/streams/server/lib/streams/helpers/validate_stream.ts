@@ -167,3 +167,16 @@ export function validateBracketsInFieldNames(definition: Streams.ingest.all.Defi
     validateSteps(definition.ingest.processing.steps);
   }
 }
+
+export function validateSettings(definition: Streams.ingest.all.Definition, isServerless: boolean) {
+  if (!isServerless) {
+    return;
+  }
+
+  const serverlessAllowList = ['index.refresh_interval'];
+  Object.keys(definition.ingest.settings).forEach((setting) => {
+    if (!serverlessAllowList.includes(setting)) {
+      throw new Error(`Setting [${setting}] is not allowed in serverless`);
+    }
+  });
+}

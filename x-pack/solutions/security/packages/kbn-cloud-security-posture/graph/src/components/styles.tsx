@@ -43,15 +43,29 @@ const PopoverListItemIcon = ({ color, ...rest }: PopoverListItemIconProps) => (
 );
 
 export const ExpandPopoverListItem = (
-  props: CommonProps & Pick<EuiListGroupItemProps, 'iconType' | 'label' | 'onClick'>
+  props: CommonProps &
+    Pick<
+      EuiListGroupItemProps,
+      'iconType' | 'label' | 'onClick' | 'disabled' | 'showToolTip' | 'toolTipText' | 'toolTipProps'
+    >
 ) => {
-  const { iconType, label, onClick, ...rest } = props;
+  const { iconType, label, onClick, disabled, showToolTip, toolTipText, toolTipProps, ...rest } =
+    props;
+
   return (
     <EuiListGroupItem
       {...rest}
-      icon={iconType ? <PopoverListItemIcon color="text" type={iconType} size="m" /> : undefined}
+      icon={
+        iconType ? (
+          <PopoverListItemIcon color={disabled ? 'textSubdued' : 'text'} type={iconType} size="m" />
+        ) : undefined
+      }
       label={<EuiText>{label}</EuiText>}
       onClick={onClick}
+      isDisabled={disabled}
+      showToolTip={showToolTip}
+      toolTipText={toolTipText}
+      toolTipProps={toolTipProps}
     />
   );
 };

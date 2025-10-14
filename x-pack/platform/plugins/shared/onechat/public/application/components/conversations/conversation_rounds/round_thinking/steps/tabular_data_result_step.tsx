@@ -40,34 +40,34 @@ export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
   return (
     <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
       <EuiText size="s">
-        {i18n.translate(
-          'xpack.onechat.conversation.thinking.tabularDataResultStep.foundRecordsMessagePrefix',
-          {
-            defaultMessage: 'Found',
-          }
-        )}
+        <FormattedMessage
+          id="xpack.onechat.conversation.thinking.tabularDataResultStep.foundRecordsMessage"
+          defaultMessage="Found {results}"
+          values={{
+            results: (
+              <EuiLink
+                href={discoverUrl}
+                data-test-subj="onechat-esql-data-result-see-in-discover"
+                aria-label={i18n.translate(
+                  'xpack.onechat.conversation.thinking.tabularDataResultStep.seeInDiscoverAriaLabel',
+                  {
+                    defaultMessage: 'Explore results in Discover',
+                  }
+                )}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.onechat.conversation.thinking.tabularDataResultStep.foundRecordsMessage"
+                  defaultMessage="{totalResults, plural, one {{totalResults, number} result} other {{totalResults, number} results}}"
+                  values={{
+                    totalResults: data.values.length,
+                  }}
+                />
+              </EuiLink>
+            ),
+          }}
+        />
       </EuiText>
-      {discoverUrl && (
-        <EuiLink
-          href={discoverUrl}
-          data-test-subj="onechat-esql-data-result-see-in-discover"
-          aria-label={i18n.translate(
-            'xpack.onechat.conversation.thinking.tabularDataResultStep.seeInDiscoverAriaLabel',
-            {
-              defaultMessage: 'See documents in Discover',
-            }
-          )}
-          target="_blank"
-        >
-          <FormattedMessage
-            id="xpack.onechat.conversation.thinking.tabularDataResultStep.foundRecordsMessage"
-            defaultMessage="{totalDocuments, plural, one {{totalDocuments, number} document} other {{totalDocuments, number} documents}}"
-            values={{
-              totalDocuments: data.values.length,
-            }}
-          />
-        </EuiLink>
-      )}
     </EuiFlexGroup>
   );
 };

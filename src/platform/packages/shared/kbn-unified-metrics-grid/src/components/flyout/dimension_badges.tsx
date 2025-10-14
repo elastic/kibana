@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiToken, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiToken, EuiText, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
@@ -41,7 +41,18 @@ export const DimensionBadges = ({
         const isAttributes = dimension.name.startsWith('attributes.');
         const isTopLevel = dimension.name.startsWith(topLevelNamespace);
         const badgeColor = isAttributes || isTopLevel ? 'default' : 'hollow';
-        const isKeyword = dimension.type === 'keyword';
+        const iconMap = new Map<string, string>([
+          ['boolean', 'tokenBoolean'],
+          ['ip', 'tokenIP'],
+          ['keyword', 'tokenKeyword'],
+          ['long', 'tokenNumber'],
+          ['integer', 'tokenNumber'],
+          ['short', 'tokenNumber'],
+          ['byte', 'tokenNumber'],
+          ['unsigned_long', 'tokenNumber'],
+        ]);
+
+        const hasIcon = iconMap.has(dimension.type);
 
         const badgeContent = (
           <EuiBadge
@@ -49,26 +60,17 @@ export const DimensionBadges = ({
             color={badgeColor}
             style={{ marginRight: euiTheme.size.xs, marginBottom: euiTheme.size.xxs }}
           >
-            {isKeyword && (
+            {hasIcon && (
               <EuiToken
-                iconType="tokenKeyword"
+                iconType={iconMap.get(dimension.type)!}
                 size="xs"
                 style={{ marginRight: euiTheme.size.xs }}
               />
             )}
             {dimension.name}
-            {!isKeyword && ` (${dimension.type})`}
+            {!hasIcon && ` (${dimension.type})`}
           </EuiBadge>
         );
-
-        // Show tooltip only if description is available
-        if (dimension.description) {
-          return (
-            <EuiToolTip key={dimension.name} content={dimension.description}>
-              {badgeContent}
-            </EuiToolTip>
-          );
-        }
 
         return badgeContent;
       })}

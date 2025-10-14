@@ -12,9 +12,10 @@ import type {
   GrokProcessor,
   ManualIngestPipelineProcessor,
   SetProcessor,
+  StreamlangWhereBlockWithUIAttributes,
 } from '@kbn/streamlang';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
-import type { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
+import type { ConfigDrivenProcessorFormState } from './steps/blocks/action/config_driven/types';
 
 /**
  * Processors' types
@@ -38,6 +39,7 @@ export type SpecialisedFormState =
   | SetFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
+export type WhereBlockFormState = StreamlangWhereBlockWithUIAttributes;
 
 export type ExtractBooleanFields<TInput> = NonNullable<
   TInput extends Record<string, unknown>

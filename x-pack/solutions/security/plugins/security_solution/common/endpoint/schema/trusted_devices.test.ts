@@ -189,6 +189,9 @@ describe('When invoking Trusted Devices Schema', () => {
           TrustedDeviceConditionEntryField.DEVICE_ID,
           TrustedDeviceConditionEntryField.MANUFACTURER,
           TrustedDeviceConditionEntryField.PRODUCT_ID,
+          TrustedDeviceConditionEntryField.PRODUCT_NAME,
+          TrustedDeviceConditionEntryField.DEVICE_TYPE,
+          TrustedDeviceConditionEntryField.MANUFACTURER_ID,
         ].forEach((field) => {
           const bodyMsg = createNewTrustedDevice({
             entries: [createConditionEntry({ field, value: 'test-value' })],

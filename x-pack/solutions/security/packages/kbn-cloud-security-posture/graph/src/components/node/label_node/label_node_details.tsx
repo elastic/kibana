@@ -19,7 +19,9 @@ export interface LabelNodeDetailsProps {
 
 export const LabelNodeDetails = ({ ips, countryCodes }: LabelNodeDetailsProps) => {
   const { euiTheme } = useEuiTheme();
-  return (
+  const shouldRenderIps = ips && ips.length > 0;
+  const shouldRenderCountryFlags = countryCodes && countryCodes.length > 0;
+  return shouldRenderIps || shouldRenderCountryFlags ? (
     <div
       css={css`
         display: flex;
@@ -29,8 +31,8 @@ export const LabelNodeDetails = ({ ips, countryCodes }: LabelNodeDetailsProps) =
         margin-top: ${euiTheme.size.xs};
       `}
     >
-      {ips && ips.length > 0 && <Ips ips={ips} />}
-      {countryCodes && countryCodes.length > 0 && <CountryFlags countryCodes={countryCodes} />}
+      {shouldRenderIps && <Ips ips={ips} />}
+      {shouldRenderCountryFlags && <CountryFlags countryCodes={countryCodes} />}
     </div>
-  );
+  ) : null;
 };

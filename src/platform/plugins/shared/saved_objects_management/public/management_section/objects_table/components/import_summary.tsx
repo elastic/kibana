@@ -17,8 +17,6 @@ import {
   EuiFlexItem,
   EuiCallOut,
   EuiButton,
-  EuiToolTip,
-  EuiIcon,
   EuiIconTip,
   EuiHorizontalRule,
   EuiTitle,
@@ -298,9 +296,7 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
             data-test-subj="importSavedObjectsRow"
           >
             <EuiFlexItem grow={false}>
-              <EuiToolTip position="top" content={typeLabel}>
-                <EuiIcon aria-label={typeLabel} type={icon} size="s" />
-              </EuiToolTip>
+              <EuiIconTip content={typeLabel} position="top" aria-label={typeLabel} type={icon} />
             </EuiFlexItem>
             <EuiFlexItem css={styles.title} data-test-subj="importSavedObjectsTitle">
               <EuiText size="s">

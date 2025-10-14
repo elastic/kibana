@@ -6,6 +6,9 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
+// important to use css from @emotion/css, as @emotion/react version returns
+// serialized styles instead of pure class names
+import { css } from '@emotion/css';
 
 import { useKibana } from '../../../../../..';
 import { useForm } from '../../../../shared_imports';
@@ -19,7 +22,7 @@ import { useUpdateField } from './use_update_field';
 export const defaultFlyoutProps = {
   'data-test-subj': 'mappingsEditorFieldEdit',
   'aria-labelledby': 'mappingsEditorFieldEditTitle',
-  className: 'mappingsEditor__editField',
+  className: css({ minWidth: '680px' }),
   maxWidth: 720,
 };
 

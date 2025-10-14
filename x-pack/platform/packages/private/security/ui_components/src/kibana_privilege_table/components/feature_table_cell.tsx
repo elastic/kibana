@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import './feature_table_cell.scss';
-
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 
 import type { SecuredFeature } from '@kbn/security-role-management-model';
 
 interface Props {
   feature: SecuredFeature;
-  className?: string;
+  hasSubFeaturePrivileges?: boolean;
 }
 
-export const FeatureTableCell = ({ feature, className }: Props) => {
+export const FeatureTableCell = ({ feature, hasSubFeaturePrivileges }: Props) => {
+  const { euiTheme } = useEuiTheme();
   let tooltipElement = null;
   if (feature.getPrivilegesTooltip()) {
     const tooltipContent = (
@@ -38,10 +38,28 @@ export const FeatureTableCell = ({ feature, className }: Props) => {
   }
 
   return (
-    <EuiFlexGroup className={className} direction="column" gutterSize="none" component="span">
+    <EuiFlexGroup
+      css={
+        !hasSubFeaturePrivileges &&
+        css`
+          margin-left: calc(${euiTheme.size.l} + ${euiTheme.size.xs});
+        `
+      }
+      direction="column"
+      gutterSize="none"
+      component="span"
+    >
       <EuiFlexItem data-test-subj={`featureTableCell`} component="span">
         <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem className="featurePrivilegeName" grow={false}>
+          <EuiFlexItem
+            css={css`
+              &:hover,
+              &:focus {
+                text-decoration: underline;
+              }
+            `}
+            grow={false}
+          >
             {feature.name}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{tooltipElement}</EuiFlexItem>

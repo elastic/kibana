@@ -20,9 +20,8 @@ const streams: StreamPutItem[] = [
       description: '',
       ingest: {
         lifecycle: { dsl: {} },
-        processing: {
-          steps: [],
-        },
+        processing: { steps: [] },
+        settings: {},
         wired: {
           fields: {
             '@timestamp': {
@@ -96,9 +95,8 @@ const streams: StreamPutItem[] = [
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: {
-          steps: [],
-        },
+        processing: { steps: [] },
+        settings: {},
         wired: {
           routing: [],
           fields: {
@@ -117,6 +115,7 @@ const streams: StreamPutItem[] = [
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
+        settings: {},
         processing: {
           steps: [
             {
@@ -145,9 +144,8 @@ const streams: StreamPutItem[] = [
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: {
-          steps: [],
-        },
+        settings: {},
+        processing: { steps: [] },
         wired: {
           fields: {
             'attributes.field2': {

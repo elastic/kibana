@@ -27,6 +27,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { lazyObject } from '@kbn/lazy-object';
 import type { CasesSearchRequest } from '../../common/types/api';
 import type { CasesClient, CasesClientInternal } from '.';
 import type { AttachmentsSubClient } from './attachments/client';
@@ -57,7 +58,7 @@ import {
 type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 
 const createCasesSubClientMock = (): CasesSubClientMock => {
-  return {
+  return lazyObject({
     create: jest.fn(),
     bulkCreate: jest.fn(),
     search: jest.fn(),
@@ -76,23 +77,24 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     addObservable: jest.fn(),
     updateObservable: jest.fn(),
     deleteObservable: jest.fn(),
-  };
+    bulkAddObservables: jest.fn(),
+  });
 };
 
 type MetricsSubClientMock = jest.Mocked<MetricsSubClient>;
 
 const createMetricsSubClientMock = (): MetricsSubClientMock => {
-  return {
+  return lazyObject({
     getCaseMetrics: jest.fn(),
     getCasesMetrics: jest.fn(),
     getStatusTotalsByType: jest.fn(),
-  };
+  });
 };
 
 type AttachmentsSubClientMock = jest.Mocked<AttachmentsSubClient>;
 
 const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
-  return {
+  return lazyObject({
     bulkGet: jest.fn(),
     add: jest.fn(),
     addFile: jest.fn(),
@@ -105,40 +107,40 @@ const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
     get: jest.fn(),
     update: jest.fn(),
     getAllAlertsAttachToCase: jest.fn(),
-  };
+  });
 };
 
 type UserActionsSubClientMock = jest.Mocked<UserActionsSubClient>;
 
 const createUserActionsSubClientMock = (): UserActionsSubClientMock => {
-  return {
+  return lazyObject({
     find: jest.fn(),
     getAll: jest.fn(),
     getConnectors: jest.fn(),
     stats: jest.fn(),
     getUsers: jest.fn(),
-  };
+  });
 };
 
 type ConfigureSubClientMock = jest.Mocked<ConfigureSubClient>;
 
 const createConfigureSubClientMock = (): ConfigureSubClientMock => {
-  return {
+  return lazyObject({
     get: jest.fn(),
     getConnectors: jest.fn(),
     update: jest.fn(),
     create: jest.fn(),
-  };
+  });
 };
 
 type InternalConfigureSubClientMock = jest.Mocked<InternalConfigureSubClient>;
 
 const createInternalConfigureSubClientMock = (): InternalConfigureSubClientMock => {
-  return {
+  return lazyObject({
     getMappings: jest.fn(),
     createMappings: jest.fn(),
     updateMappings: jest.fn(),
-  };
+  });
 };
 
 export interface CasesClientMock extends CasesClient {
@@ -148,22 +150,22 @@ export interface CasesClientMock extends CasesClient {
 }
 
 export const createCasesClientMock = (): CasesClientMock => {
-  const client: PublicContract<CasesClient> = {
+  const client: PublicContract<CasesClient> = lazyObject({
     cases: createCasesSubClientMock(),
     attachments: createAttachmentsSubClientMock(),
     userActions: createUserActionsSubClientMock(),
     configure: createConfigureSubClientMock(),
     metrics: createMetricsSubClientMock(),
-  };
+  });
   return client as unknown as CasesClientMock;
 };
 
 type CasesClientInternalMock = jest.Mocked<CasesClientInternal>;
 
 export const createCasesClientInternalMock = (): CasesClientInternalMock => {
-  const client: PublicContract<CasesClientInternal> = {
+  const client: PublicContract<CasesClientInternal> = lazyObject({
     configuration: createInternalConfigureSubClientMock(),
-  };
+  });
 
   return client as unknown as CasesClientInternalMock;
 };
@@ -260,7 +262,7 @@ export const createCasesClientMockSearchRequest = (
   overwrites?: CasesSearchRequest
 ): CasesSearchRequest => ({
   search: '',
-  searchFields: ['title', 'description'],
+  searchFields: ['title', 'description', 'incremental_id.text'],
   severity: CaseSeverity.LOW,
   assignees: [],
   reporters: [],

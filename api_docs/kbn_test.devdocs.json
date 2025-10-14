@@ -3349,9 +3349,11 @@
         "type": "Function",
         "tags": [],
         "label": "runJest",
-        "description": [],
+        "description": [
+          "\nRuns Jest tests with automatic config discovery and argument forwarding.\n\nSearches for jest.config.js files starting from the working directory\nand walking up the directory tree until reaching the repo root.\n"
+        ],
         "signature": [
-          "(configName: string) => void"
+          "(configName: string) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-test/src/jest/run.ts",
         "deprecated": false,
@@ -3363,7 +3365,9 @@
             "type": "string",
             "tags": [],
             "label": "configName",
-            "description": [],
+            "description": [
+              "- Name of the Jest config file to search for"
+            ],
             "signature": [
               "string"
             ],
@@ -3373,6 +3377,23 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.runJestAll",
+        "type": "Function",
+        "tags": [],
+        "label": "runJestAll",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_all.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },

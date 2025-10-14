@@ -79,12 +79,9 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
           description: '',
           ingest: {
             classic: {},
-            lifecycle: {
-              inherit: {},
-            },
-            processing: {
-              steps: [],
-            },
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
           },
         },
       }));
@@ -250,6 +247,18 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
     return [
       {
         type: 'delete_dot_streams_document',
+        request: {
+          name: this._definition.name,
+        },
+      },
+      {
+        type: 'unlink_assets',
+        request: {
+          name: this._definition.name,
+        },
+      },
+      {
+        type: 'unlink_features',
         request: {
           name: this._definition.name,
         },
