@@ -21,6 +21,7 @@ export function useTreeGridContainerARIAAttributes() {
     'aria-readonly': true,
     'aria-multiselectable': false,
     'aria-rowcount': -1,
+    'aria-labelledby': 'treegrid-label',
   };
 }
 

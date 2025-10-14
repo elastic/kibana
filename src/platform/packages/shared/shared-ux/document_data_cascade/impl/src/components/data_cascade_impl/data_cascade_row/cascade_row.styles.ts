@@ -19,26 +19,25 @@ export const styles = (
   isExpandedChildRow: boolean,
   rowDepth: number,
   size: CascadeSizing
-) => ({
-  rowStickyHeaderInner: css({
-    padding: euiTheme.size[size],
-    position: 'absolute',
-    width: '100%',
-    backgroundColor: euiTheme.colors.backgroundBasePlain,
-    borderWidth: `0 ${euiTheme.border.width.thin} ${euiTheme.border.width.thin} 0`,
-    borderStyle: 'solid',
-    borderColor: euiTheme.border.color,
-  }),
-  rowWrapper: css({
-    display: 'flex',
-    position: 'absolute',
-    width: '100%',
-    padding: euiTheme.size[size],
-    backgroundColor: euiTheme.colors.backgroundBasePlain,
-    [`&[data-row-type="${childRowAttribute}"]`]: {
-      paddingTop: 0,
-      paddingBottom: 0,
-    },
+) => {
+  const { border, size: euiSizing, colors } = euiTheme;
+
+  /**
+   * Styles applied to the inner wrapper of an expanded child row
+   * that contains all of the child row content
+   */
+  const expandedRow = css({
+    ...(rowDepth % 2 === 1
+      ? {
+          backgroundColor: colors.backgroundBaseSubdued,
+        }
+      : {
+          paddingTop: 0,
+          paddingBottom: 0,
+        }),
+
+    padding: euiSizing[size],
+
     '&:before': {
       content: '""',
       display: 'block',
@@ -47,110 +46,118 @@ export const styles = (
       left: 0,
       width: '100%',
       height: '100%',
+      borderTop: `${border.width.thin} solid ${border.color}`,
+      borderLeft: `${border.width.thin} solid ${border.color}`,
+      borderRight: `${border.width.thin} solid ${border.color}`,
+    },
+
+    [`[data-row-type="${rootRowAttribute}"] + [data-row-type="${childRowAttribute}"] &:before`]: {
+      borderTopLeftRadius: border.radius.small,
+      borderTopRightRadius: border.radius.small,
+    },
+
+    [`[data-row-type="${childRowAttribute}"]:has(+ [data-row-type="${rootRowAttribute}"]) &`]: {
+      marginBottom: euiSizing[size],
+    },
+
+    [`[data-row-type="${childRowAttribute}"]:has(+ [data-row-type="${rootRowAttribute}"]) &:before`]:
+      {
+        borderBottomLeftRadius: border.radius.small,
+        borderBottomRightRadius: border.radius.small,
+        borderBottom: `${border.width.thin} solid ${border.color}`,
+      },
+
+    [`[data-row-type="${childRowAttribute}"][aria-level="3"] &`]: {
+      gap: 0,
+    },
+
+    [`[data-row-type="${childRowAttribute}"][aria-level="3"] & > *`]: {
+      padding: euiSizing[size],
+      backgroundColor: colors.backgroundBasePlain,
+    },
+
+    [`[data-row-type="${childRowAttribute}"][aria-level="3"] &:before`]: {
+      backgroundColor: colors.backgroundBaseSubdued,
       zIndex: -1,
-      borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+      borderTop: 0,
     },
-    [`&[data-row-type="${rootRowAttribute}"]:not(:first-of-type):before`]: {
-      borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+
+    [`[data-row-type="${childRowAttribute}"][aria-level="3"] &:after`]: {
+      content: '""',
+      display: 'block',
+      position: 'absolute',
+      top: 0,
+      left: euiSizing[size],
+      width: `calc(100% - ${euiSizing[size]} * 2)`,
+      height: '100%',
+      pointerEvents: 'none',
+      borderTop: `${border.width.thin} solid ${border.color}`,
+      borderLeft: `${border.width.thin} solid ${border.color}`,
+      borderRight: `${border.width.thin} solid ${border.color}`,
     },
-    [`&[data-row-type="${rootRowAttribute}"]:last-of-type:before`]: {
-      borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-    },
-  }),
-  rowInner: css({
-    width: '100%',
-    position: 'relative',
-    ...(isExpandedChildRow
-      ? {
-          padding: euiTheme.size[size],
-          ...(rowDepth % 2 === 1
-            ? {
-                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-              }
-            : {
-                paddingTop: 0,
-                paddingBottom: 0,
-              }),
 
-          '&:before': {
-            content: '""',
-            display: 'block',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-            borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-            borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-          },
+    [`[data-row-type="${childRowAttribute}"]:not([aria-level="3"]) + [data-row-type="${childRowAttribute}"][aria-level="3"]  &:after`]:
+      {
+        borderTopLeftRadius: border.radius.small,
+        borderTopRightRadius: border.radius.small,
+      },
 
-          [`[data-row-type="${rootRowAttribute}"] + [data-row-type="${childRowAttribute}"] &:before`]:
-            {
-              borderTopLeftRadius: euiTheme.border.radius.small,
-              borderTopRightRadius: euiTheme.border.radius.small,
-            },
+    [`[data-row-type="${childRowAttribute}"][aria-level="3"]:has(+ [data-row-type="${rootRowAttribute}"]:not([aria-level="3"]), + [data-row-type="${childRowAttribute}"]:not([aria-level="3"])) & > *:last-child`]:
+      {
+        marginBottom: euiSizing[size],
+      },
 
-          [`[data-row-type="${childRowAttribute}"]:has(+ [data-row-type="${rootRowAttribute}"]) &`]:
-            {
-              marginBottom: euiTheme.size[size],
-            },
+    [`[data-row-type="${childRowAttribute}"][aria-level="3"]:has(+ [data-row-type="${rootRowAttribute}"]:not([aria-level="3"]), + [data-row-type="${childRowAttribute}"]:not([aria-level="3"])) &:after`]:
+      {
+        height: `calc(100% - ${euiSizing[size]})`,
+        borderBottomLeftRadius: border.radius.small,
+        borderBottomRightRadius: border.radius.small,
+        borderBottom: `${border.width.thin} solid ${border.color}`,
+      },
+  });
 
-          [`[data-row-type="${childRowAttribute}"]:has(+ [data-row-type="${rootRowAttribute}"]) &:before`]:
-            {
-              borderBottomLeftRadius: euiTheme.border.radius.small,
-              borderBottomRightRadius: euiTheme.border.radius.small,
-              borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-            },
-
-          [`[data-row-type="${childRowAttribute}"][aria-level="3"] &`]: {
-            gap: 0,
-          },
-
-          [`[data-row-type="${childRowAttribute}"][aria-level="3"] & > *`]: {
-            padding: euiTheme.size[size],
-            backgroundColor: euiTheme.colors.backgroundBasePlain,
-          },
-
-          [`[data-row-type="${childRowAttribute}"][aria-level="3"] &:before`]: {
-            backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-            zIndex: -1,
-            borderTop: 0,
-          },
-
-          [`[data-row-type="${childRowAttribute}"][aria-level="3"] &:after`]: {
-            content: '""',
-            display: 'block',
-            position: 'absolute',
-            top: 0,
-            left: euiTheme.size[size],
-            width: `calc(100% - ${euiTheme.size[size]} * 2)`,
-            height: '100%',
-            pointerEvents: 'none',
-            borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-            borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-            borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-          },
-
-          [`[data-row-type="${childRowAttribute}"]:not([aria-level="3"]) + [data-row-type="${childRowAttribute}"][aria-level="3"]  &:after`]:
-            {
-              borderTopLeftRadius: euiTheme.border.radius.small,
-              borderTopRightRadius: euiTheme.border.radius.small,
-            },
-
-          [`[data-row-type="${childRowAttribute}"][aria-level="3"]:has(+ [data-row-type="${rootRowAttribute}"]:not([aria-level="3"]), + [data-row-type="${childRowAttribute}"]:not([aria-level="3"])) & > *:last-child`]:
-            {
-              marginBottom: euiTheme.size[size],
-            },
-
-          [`[data-row-type="${childRowAttribute}"][aria-level="3"]:has(+ [data-row-type="${rootRowAttribute}"]:not([aria-level="3"]), + [data-row-type="${childRowAttribute}"]:not([aria-level="3"])) &:after`]:
-            {
-              height: `calc(100% - ${euiTheme.size[size]})`,
-              borderBottomLeftRadius: euiTheme.border.radius.small,
-              borderBottomRightRadius: euiTheme.border.radius.small,
-              borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-            },
-        }
-      : {}),
-  }),
-});
+  return {
+    rowStickyHeaderInner: css({
+      padding: euiSizing[size],
+      position: 'absolute',
+      width: '100%',
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      borderWidth: `0 ${border.width.thin} ${border.width.thin} 0`,
+      borderStyle: 'solid',
+      borderColor: border.color,
+    }),
+    rowWrapper: css({
+      display: 'flex',
+      position: 'absolute',
+      width: '100%',
+      padding: euiSizing[size],
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      [`&[data-row-type="${childRowAttribute}"]`]: {
+        paddingTop: 0,
+        paddingBottom: 0,
+      },
+      '&:before': {
+        content: '""',
+        display: 'block',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: -1,
+        borderRight: `${border.width.thin} solid ${border.color}`,
+      },
+      [`&[data-row-type="${rootRowAttribute}"]:not(:first-of-type):before`]: {
+        borderTop: `${border.width.thin} solid ${border.color}`,
+      },
+      [`&[data-row-type="${rootRowAttribute}"]:last-of-type:before`]: {
+        borderBottom: `${border.width.thin} solid ${border.color}`,
+      },
+    }),
+    rowInner: css({
+      width: '100%',
+      position: 'relative',
+      ...(isExpandedChildRow ? expandedRow : {}),
+    }),
+  };
+};

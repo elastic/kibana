@@ -184,19 +184,15 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                   ...scrollContainerSize,
                 }}
               >
-                <React.Fragment>
+                <>
                   {activeStickyIndex !== null && enableStickyGroupHeader && (
                     <div css={styles.cascadeTreeGridHeaderStickyRenderSlot}>
                       <div ref={activeStickyRenderSlotRef} />
                     </div>
                   )}
-                </React.Fragment>
+                </>
                 <div css={styles.cascadeTreeGridWrapper} style={{ height: getTotalSize() }}>
-                  <div
-                    {...treeGridContainerARIAAttributes}
-                    aria-labelledby="treegrid-label"
-                    css={relativePosition}
-                  >
+                  <div {...treeGridContainerARIAAttributes} css={relativePosition}>
                     <VirtualizedCascadeRowList<G>
                       {...{
                         activeStickyIndex,

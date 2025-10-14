@@ -16,23 +16,29 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  useEuiTheme,
   useGeneratedHtmlId,
   type EuiButtonIconProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CascadeRowActionProps } from '../../types';
+import { styles as cascadeRowActionsStyles } from './cascade_row_actions.styles';
 
 const MAX_ACTIONS_VISIBLE = 2;
 
 export const CascadeRowActions = function RowActions({
   headerRowActions,
-  hideOver = MAX_ACTIONS_VISIBLE,
+  maxActionCount = MAX_ACTIONS_VISIBLE,
 }: CascadeRowActionProps) {
+  const { euiTheme } = useEuiTheme();
+
   const id = useGeneratedHtmlId({
     prefix: 'dataCascadeRowActions',
   });
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const styles = useMemo(() => cascadeRowActionsStyles(euiTheme), [euiTheme]);
 
   const defaultActionProps = useMemo<Pick<EuiButtonIconProps, 'color' | 'size'>>(
     () => ({
@@ -62,7 +68,7 @@ export const CascadeRowActions = function RowActions({
 
   const visibleActions = useMemo(
     () =>
-      headerRowActions.slice(0, hideOver).map(({ label, ...props }, index) => (
+      headerRowActions.slice(0, maxActionCount).map(({ label, ...props }, index) => (
         <EuiFlexItem key={index} grow={false}>
           {label ? (
             <EuiButtonEmpty {...defaultActionProps} {...props}>
@@ -73,33 +79,23 @@ export const CascadeRowActions = function RowActions({
           )}
         </EuiFlexItem>
       )),
-    [defaultActionProps, headerRowActions, hideOver]
+    [defaultActionProps, headerRowActions, maxActionCount]
   );
 
   const hiddenActions = useMemo(
     () =>
-      headerRowActions.slice(hideOver).map(({ label, iconType, ...props }, index) => (
+      headerRowActions.slice(maxActionCount).map(({ label, iconType, ...props }, index) => (
         <EuiContextMenuItem key={index} icon={iconType} {...props}>
           {label}
         </EuiContextMenuItem>
       )),
-    [headerRowActions, hideOver]
+    [headerRowActions, maxActionCount]
   );
 
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="s"
-      css={({ euiTheme }) => ({
-        '& > *:not(:first-child)': {
-          borderLeft: `${euiTheme.border.width.thin} solid`,
-          borderColor: euiTheme.border.color,
-          paddingLeft: euiTheme.size.s,
-        },
-      })}
-    >
-      <React.Fragment>{visibleActions}</React.Fragment>
-      {headerRowActions.length > hideOver && (
+    <EuiFlexGroup alignItems="center" gutterSize="s" css={styles.cascadeRowActions}>
+      <>{visibleActions}</>
+      {headerRowActions.length > maxActionCount && (
         <EuiFlexItem grow={false}>
           <EuiPopover
             isOpen={isPopoverOpen}
