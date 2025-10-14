@@ -23,6 +23,7 @@ import {
 import type { Streams, Feature } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import useToggle from 'react-use/lib/useToggle';
 import { EditableConditionPanel } from '../../shared';
 import { FeatureEventsData } from './feature_events_data';
 import { useStreamFeaturesApi } from '../../../../hooks/use_stream_features_api';
@@ -42,11 +43,7 @@ export const StreamFeatureDetailsFlyout = ({
   const { upsertQuery } = useStreamFeaturesApi(definition);
   const [isUpdating, setIsUpdating] = React.useState(false);
   const [featureFilter, setFeatureFilter] = React.useState(feature.filter);
-  const [isEditingCondition, setIsEditingCondition] = React.useState(false);
-
-  const toggleIsEditingCondition = () => {
-    setIsEditingCondition((v) => !v);
-  };
+  const [isEditingCondition, toggleIsEditingCondition] = useToggle(false);
 
   const updateFeature = () => {
     setIsUpdating(true);

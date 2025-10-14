@@ -23,7 +23,6 @@ import { merge } from 'lodash';
 import React, { useMemo } from 'react';
 import { Subject } from 'rxjs';
 import type { DeepPartial } from 'utility-types';
-import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 import { StreamsTelemetryService } from '../public/telemetry/service';
 import type { StreamsAppStartDependencies } from '../public/types';
@@ -142,7 +141,6 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
       dataStreamsClient: Promise.resolve({} as unknown as DataStreamsStatsClient),
       telemetryClient: telemetryService.getClient(),
       version: '1.0.0',
-      discover: discoverPluginMock.createStartContract(),
     },
     isServerless: false,
   };

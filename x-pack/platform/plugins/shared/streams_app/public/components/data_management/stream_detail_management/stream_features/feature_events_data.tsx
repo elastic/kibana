@@ -36,7 +36,6 @@ export const FeatureEventsData = ({ feature }: { feature: Feature }) => {
             <EuiButtonEmpty
               size="s"
               href={url}
-              target="_blank"
               aria-label={i18n.translate(
                 'xpack.streams.identifiedFeatureEvents.viewAllLinkAriaLabel',
                 {

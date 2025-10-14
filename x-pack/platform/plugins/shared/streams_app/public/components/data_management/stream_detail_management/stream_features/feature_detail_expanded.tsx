@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiMarkdownEditor, EuiTitle, EuiSpacer, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
 import type { Condition } from '@kbn/streamlang';
 import type { Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
+import useToggle from 'react-use/lib/useToggle';
 import { EditableConditionPanel } from '../../shared/condition_display';
 
 export const FeatureDetailExpanded = ({
@@ -18,10 +19,7 @@ export const FeatureDetailExpanded = ({
   feature: Feature;
   setFeatures: React.Dispatch<React.SetStateAction<Feature[]>>;
 }) => {
-  const [isEditingCondition, setIsEditingCondition] = useState(false);
-  const toggleIsEditingCondition = () => {
-    setIsEditingCondition((v) => !v);
-  };
+  const [isEditingCondition, toggleIsEditingCondition] = useToggle(false);
 
   const setFeature = (updated: Feature) => {
     setFeatures((prev) => prev.map((s) => (s.name === updated.name ? updated : s)));
