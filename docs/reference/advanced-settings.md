@@ -182,6 +182,14 @@ $$$timepicker-timedefaults$$$`timepicker:timeDefaults`
 $$$enableESQL$$$`enableESQL`
 :   This setting enables ES|QL in Kibana.
 
+$$$aiAssistant:preferredAIAssistantType$$$`aiAssistant:preferredAIAssistantType` {applies_to}`stack: ga 9.1`
+:   This setting allows you to choose which AI Assistants are available to use and where. You can choose to only show the AI Assistants in their solutions, in other Kibana applications (for example, Discover, Dashboards, and Stack Management pages), or nowhere.
+
+      ::::{note}
+      :applies_to: stack: ga 9.2
+      Configure the `aiAssistant:preferredAIAssistantType` setting from the **GenAI Settings** page, which you can find using the Classic navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md). Note that this setting is unavailable from the **GenAI Settings** page when using a [solution view](docs-content://deploy-manage/manage-spaces.md). 
+      ::::
+
 
 ### Presentation Labs [presentation-labs]
 
