@@ -43,6 +43,7 @@ export const PresentationPanelInternal = <
 
   setDragHandles,
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
+  const panelRef = useRef(null); // Initialize the ref with null
   const panelErrorCss = usePanelErrorCss();
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
@@ -88,10 +89,15 @@ export const PresentationPanelInternal = <
     !Boolean(panelTitle ?? defaultPanelTitle);
 
   const contentAttrs = useMemo(() => {
-    const attrs: { [key: string]: boolean } = {};
+    const attrs: { [key: string]: unknown } = {
+      'data-shared-item': ''
+    };
     if (dataLoading) {
       attrs['data-loading'] = true;
     } else {
+      if (panelRef.current) {
+        dispatchEvent(new CustomEvent('renderComplete', { bubbles: true }));
+      } 
       attrs['data-render-complete'] = true;
     }
     if (blockingError) attrs['data-error'] = true;
@@ -130,6 +136,7 @@ export const PresentationPanelInternal = <
         data-test-subj="embeddablePanel"
         {...contentAttrs}
         css={styles.embPanel}
+        panelRef={panelRef}
       >
         {!hideHeader && api && (
           <PresentationPanelHeader

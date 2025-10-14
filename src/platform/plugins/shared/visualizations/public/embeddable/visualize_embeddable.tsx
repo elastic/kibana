@@ -17,7 +17,6 @@ import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
 import { apiPublishesSettings, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
   apiHasDisableTriggers,
@@ -474,12 +473,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
           };
         }, []);
 
-        useEffect(() => {
-          if (hasRendered && domNode.current) {
-            dispatchRenderComplete(domNode.current);
-          }
-        }, [hasRendered]);
-
         return (
           <div
             css={{ width: '100%', height: '100%' }}
@@ -489,7 +482,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
             data-render-complete={hasRendered}
             data-title={dataTitle}
             data-description={api.description$?.getValue() ?? ''}
-            data-shared-item
           >
             {/* Replicate the loading state for the expression renderer to avoid FOUC  */}
             <EuiFlexGroup css={{ height: '100%' }} justifyContent="center" alignItems="center">
