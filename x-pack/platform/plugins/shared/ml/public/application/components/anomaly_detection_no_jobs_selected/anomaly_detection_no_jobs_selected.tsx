@@ -6,26 +6,26 @@
  */
 
 /*
- * React component for rendering EuiEmptyPrompt when no jobs were found.
+ * React component for rendering EuiEmptyPrompt when no jobs were selected.
  */
 import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-export const ExplorerNoJobsSelected: FC = () => {
+export const AnomalyDetectionNoJobsSelected: FC = () => {
   return (
     <EuiEmptyPrompt
       iconType="warning"
       title={
         <h2>
           <FormattedMessage
-            id="xpack.ml.explorer.noJobSelectedLabel"
+            id="xpack.ml.anomalyDetection.noJobSelectedLabel"
             defaultMessage="No jobs selected"
           />
         </h2>
       }
-      data-test-subj="mlNoJobsFound"
+      data-test-subj="mlNoJobsSelected"
     />
   );
 };
