@@ -21,7 +21,7 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
 
@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should not support export action', async () => {
       await createRule(supertest, log, getSimpleRule());
 
-      const { body } = await securitySolutionApi
+      const { body } = await detectionsApi
         .performRulesBulkAction({
           query: { dry_run: true },
           body: { action: BulkActionTypeEnum.export },
@@ -56,7 +56,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const testRule = getSimpleRule(ruleId);
       await createRule(supertest, log, testRule);
 
-      const { body } = await securitySolutionApi
+      const { body } = await detectionsApi
         .performRulesBulkAction({
           query: { dry_run: true },
           body: { action: BulkActionTypeEnum.delete },
@@ -73,14 +73,14 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Check that rule wasn't deleted
-      await securitySolutionApi.readRule({ query: { rule_id: ruleId } }).expect(200);
+      await detectionsApi.readRule({ query: { rule_id: ruleId } }).expect(200);
     });
 
     it('should handle enable action', async () => {
       const ruleId = 'ruleId';
       await createRule(supertest, log, getSimpleRule(ruleId));
 
-      const { body } = await securitySolutionApi
+      const { body } = await detectionsApi
         .performRulesBulkAction({
           query: { dry_run: true },
           body: { action: BulkActionTypeEnum.enable },
@@ -97,7 +97,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Check that the updates have not been persisted
-      const { body: ruleBody } = await securitySolutionApi
+      const { body: ruleBody } = await detectionsApi
         .readRule({ query: { rule_id: ruleId } })
         .expect(200);
       expect(ruleBody.enabled).toBe(false);
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const ruleId = 'ruleId';
       await createRule(supertest, log, getSimpleRule(ruleId, true));
 
-      const { body } = await securitySolutionApi
+      const { body } = await detectionsApi
         .performRulesBulkAction({
           query: { dry_run: true },
           body: { action: BulkActionTypeEnum.disable },
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Check that the updates have not been persisted
-      const { body: ruleBody } = await securitySolutionApi
+      const { body: ruleBody } = await detectionsApi
         .readRule({ query: { rule_id: ruleId } })
         .expect(200);
       expect(ruleBody.enabled).toBe(true);
@@ -135,7 +135,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const ruleToDuplicate = getSimpleRule(ruleId);
       await createRule(supertest, log, ruleToDuplicate);
 
-      const { body } = await securitySolutionApi
+      const { body } = await detectionsApi
         .performRulesBulkAction({
           query: { dry_run: true },
           body: { action: BulkActionTypeEnum.disable },
@@ -152,9 +152,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Check that the rule wasn't duplicated
-      const { body: rulesResponse } = await securitySolutionApi
-        .findRules({ query: {} })
-        .expect(200);
+      const { body: rulesResponse } = await detectionsApi.findRules({ query: {} }).expect(200);
 
       expect(rulesResponse.total).toBe(1);
     });
@@ -165,7 +163,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const tags = ['tag1', 'tag2'];
         await createRule(supertest, log, { ...getSimpleRule(ruleId), tags });
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: true },
             body: {
@@ -190,7 +188,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         // Check that the updates have not been persisted
-        const { body: ruleBody } = await securitySolutionApi
+        const { body: ruleBody } = await detectionsApi
           .readRule({ query: { rule_id: ruleId } })
           .expect(200);
         expect(ruleBody.tags).toEqual(tags);
@@ -207,7 +205,7 @@ export default ({ getService }: FtrProviderContext): void => {
           it(`should return error if ${editAction} action is applied to machine learning rule`, async () => {
             const mlRule = await createRule(supertest, log, getSimpleMlRule());
 
-            const { body } = await securitySolutionApi
+            const { body } = await detectionsApi
               .performRulesBulkAction({
                 query: { dry_run: true },
                 body: {
@@ -274,7 +272,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const endDate = moment();
         const startDate = endDate.clone().subtract(1, 'h');
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: true },
             body: {
@@ -313,7 +311,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const endDate = moment();
         const startDate = endDate.clone().subtract(1, 'h');
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: true },
             body: {
@@ -371,7 +369,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const endDate = moment();
         const startDate = endDate.clone().subtract(1, 'h');
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: true },
             body: {

@@ -52,7 +52,7 @@ export const Anomalies = () => {
           kibanaVersion={kibanaVersion}
           isCloudEnv={isCloudEnv}
           isServerlessEnv={isServerlessEnv}
-          nodeType={'host'}
+          nodeType="host"
         />
       </div>
     </div>

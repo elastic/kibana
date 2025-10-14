@@ -42,5 +42,6 @@
     "@kbn/storybook",
     "@kbn/ai-assistant-icon",
     "@kbn/datemath",
+    "@kbn/ai-assistant-connector-selector-action",
   ]
 }

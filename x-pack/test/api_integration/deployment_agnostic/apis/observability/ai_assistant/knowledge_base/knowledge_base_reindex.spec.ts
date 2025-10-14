@@ -26,8 +26,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const retry = getService('retry');
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/233242
-  describe.skip('when the knowledge base index was created before 8.11', function () {
+  describe('when the knowledge base index was created before 8.11', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
     this.tags(['skipServerless']);
