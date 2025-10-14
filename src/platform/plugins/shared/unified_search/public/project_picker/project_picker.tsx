@@ -266,7 +266,7 @@ export const ProjectPicker = () => {
                   <EuiIcon type={getSolutionIcon(project._type)} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="text">
+                  <EuiText size="s" color="text">
                     {project._alias || project._id}
                   </EuiText>
                 </EuiFlexItem>
