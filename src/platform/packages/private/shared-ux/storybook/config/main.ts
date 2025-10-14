@@ -9,12 +9,17 @@
 
 import { defaultConfig } from '@kbn/storybook';
 
-module.exports = {
+const modifiedConfig = {
   ...defaultConfig,
+  addons: [...(defaultConfig.addons ?? []), '@storybook/addon-docs'],
+};
+
+module.exports = {
+  ...modifiedConfig,
   stories: [
     '../../**/*.stories.+(tsx|mdx)',
     '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/doc.mdx',
+    '../../../../shared/shared-ux/**/guide.mdx',
     '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
   ],
 };

@@ -37,7 +37,7 @@ import {
 } from '.';
 import type { MockGroupData } from './src/__fixtures__/types';
 import { getESQLStatsQueryMeta } from './src/lib/parse_esql';
-import mdx from './doc.mdx';
+import mdx from './guide.mdx';
 
 /**
  * @description story for data document cascade component which allows rendering of data in a quasi tree structure',

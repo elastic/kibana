@@ -49,7 +49,6 @@ export const defaultConfig: StorybookConfig = {
     // https://storybook.js.org/docs/essentials
     '@storybook/addon-essentials',
     '@storybook/addon-jest',
-    '@storybook/addon-docs',
     {
       /**
        * This addon replaces rules in the default SB webpack config
