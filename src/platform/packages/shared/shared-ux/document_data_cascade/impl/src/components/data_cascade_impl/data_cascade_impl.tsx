@@ -8,7 +8,13 @@
  */
 
 import React, { Children, isValidElement, useRef, useMemo, useCallback } from 'react';
-import { EuiAutoSizer, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  EuiAutoSizer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { CascadeHeaderPrimitive } from './data_cascade_header';
 import { CascadeRowPrimitive } from './data_cascade_row';
 import { CascadeRowCellPrimitive } from './data_cascade_row_cell';
@@ -70,7 +76,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   }
 
   const { euiTheme } = useEuiTheme();
-
+  const headerId = useGeneratedHtmlId({ prefix: 'dataCascade' });
   const scrollElementRef = useRef<HTMLDivElement | null>(null);
   const cascadeWrapperRef = useRef<HTMLDivElement | null>(null);
   const activeStickyRenderSlotRef = useRef<HTMLDivElement | null>(null);
@@ -87,6 +93,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     ({ table }: { table: Table<G> }) => {
       return (
         <CascadeHeaderPrimitive<G, L>
+          id={headerId}
           tableInstance={table}
           customTableHeader={customTableHeader}
           tableTitleSlot={TableTitleSlot!}
@@ -94,7 +101,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
         />
       );
     },
-    [TableTitleSlot, customTableHeader, onCascadeGroupingChange]
+    [TableTitleSlot, customTableHeader, headerId, onCascadeGroupingChange]
   );
 
   const cascadeRowCell = useCallback(
@@ -166,7 +173,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     [size, enableRowSelection, rowElement.props, measureElement]
   );
 
-  const treeGridContainerARIAAttributes = useTreeGridContainerARIAAttributes();
+  const treeGridContainerARIAAttributes = useTreeGridContainerARIAAttributes(headerId);
 
   return (
     <div ref={cascadeWrapperRef} data-test-subj="data-cascade" css={styles.container}>
@@ -184,19 +191,15 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                   ...scrollContainerSize,
                 }}
               >
-                <React.Fragment>
+                <>
                   {activeStickyIndex !== null && enableStickyGroupHeader && (
                     <div css={styles.cascadeTreeGridHeaderStickyRenderSlot}>
                       <div ref={activeStickyRenderSlotRef} />
                     </div>
                   )}
-                </React.Fragment>
+                </>
                 <div css={styles.cascadeTreeGridWrapper} style={{ height: getTotalSize() }}>
-                  <div
-                    {...treeGridContainerARIAAttributes}
-                    aria-labelledby="treegrid-label"
-                    css={relativePosition}
-                  >
+                  <div {...treeGridContainerARIAAttributes} css={relativePosition}>
                     <VirtualizedCascadeRowList<G>
                       {...{
                         activeStickyIndex,

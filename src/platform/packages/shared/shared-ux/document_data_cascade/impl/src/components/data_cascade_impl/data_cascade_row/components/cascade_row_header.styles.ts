@@ -11,6 +11,8 @@ import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 import type { CascadeSizing } from '../../types';
 
+export const flexHelper = css({ minWidth: 0, maxWidth: '100%' });
+
 export const styles = (euiTheme: UseEuiTheme['euiTheme'], size: CascadeSizing) => ({
   rowHeaderTitleWrapper: css({
     minWidth: 0,
