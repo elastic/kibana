@@ -47,6 +47,9 @@ module.exports = (api) => ({
             version: '^7.12.5',
           },
         ],
+
+        // Enables import-attributes syntax on imports
+        require.resolve('@babel/plugin-syntax-import-attributes'),
       ],
     },
 
