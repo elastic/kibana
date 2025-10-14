@@ -15,12 +15,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { FailureStoreStatsResponse } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import type { TimeState } from '@kbn/es-query';
 import { FailureStoreChartBarSeries } from '../common/chart_components';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 import type { StreamAggregations } from '../hooks/use_ingestion_rate';
-import { CalculatedStats } from '../helpers/get_calculated_stats';
+import { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
 
 export function FailureStoreIngestionRate({
   definition,
@@ -31,7 +30,7 @@ export function FailureStoreIngestionRate({
   statsError,
 }: {
   definition: Streams.ingest.all.GetResponse;
-  stats?: FailureStoreStatsResponse & CalculatedStats;
+  stats?: EnhancedFailureStoreStats;
   isLoadingStats: boolean;
   timeState: TimeState;
   aggregations?: StreamAggregations;

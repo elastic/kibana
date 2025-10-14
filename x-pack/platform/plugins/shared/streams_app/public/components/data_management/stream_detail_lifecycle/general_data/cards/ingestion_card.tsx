@@ -12,8 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { BaseMetricCard } from '../../common/base_metric_card';
 import { formatBytes } from '../../helpers/format_bytes';
 import { PrivilegesWarningIconWrapper } from '../../../../insufficient_privileges/insufficient_privileges';
-import { CalculatedStats } from '../../helpers/get_calculated_stats';
-import { DataStreamStats } from '../../hooks/use_data_stream_stats';
+import { EnhancedDataStreamStats } from '../../hooks/use_data_stream_stats';
 
 export const IngestionCard = ({
   definition,
@@ -21,7 +20,7 @@ export const IngestionCard = ({
   statsError,
 }: {
   definition: Streams.ingest.all.GetResponse;
-  stats?: CalculatedStats & DataStreamStats;
+  stats?: EnhancedDataStreamStats;
   statsError?: Error;
 }) => {
   const inaccurateMetric = Boolean(
