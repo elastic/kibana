@@ -5,32 +5,19 @@
  * 2.0.
  */
 
-import type {
-  KibanaRequest,
-  KibanaResponseFactory,
-  SavedObject,
-  SavedObjectsFindResponse,
-  SavedObjectsFindResult,
-} from '@kbn/core/server';
+import type { KibanaRequest, KibanaResponseFactory, SavedObject } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { RRule } from '@kbn/rrule';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
-import type { ReportApiJSON } from '@kbn/reporting-common/types';
-import type { BulkGetResult } from '@kbn/task-manager-plugin/server/task_store';
-import { isOk } from '@kbn/task-manager-plugin/server/lib/result_type';
-import type { ReportingCore } from '../../..';
-import type {
-  ListScheduledReportApiJSON,
-  ReportingUser,
-  ScheduledReportType,
-} from '../../../types';
-import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { ScheduledReportAuditAction, scheduledReportAuditEvent } from '../audit_events';
-
-export const MAX_SCHEDULED_REPORT_LIST_SIZE = 100;
-export const DEFAULT_SCHEDULED_REPORT_LIST_SIZE = 10;
+import type { ReportingCore } from '../..';
+import type { ListScheduledReportApiJSON, ReportingUser, ScheduledReportType } from '../../types';
+import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import {
+  ScheduledReportAuditAction,
+  scheduledReportAuditEvent,
+} from '../audit_events/audit_events';
+import { DEFAULT_SCHEDULED_REPORT_LIST_SIZE } from './constants';
+import { transformResponse } from './transforms';
 
 const SCHEDULED_REPORT_ID_FIELD = 'scheduled_report_id';
 const CREATED_AT_FIELD = 'created_at';
@@ -63,87 +50,6 @@ interface BulkDisableResult {
 }
 
 export type CreatedAtSearchResponse = SearchResponse<{ created_at: string }>;
-
-export function transformSingleResponse(
-  logger: Logger,
-  so: SavedObjectsFindResult<ScheduledReportType>,
-  lastResponse?: CreatedAtSearchResponse,
-  nextRunResponse?: BulkGetResult
-) {
-  const id = so.id;
-  const lastRunForId = (lastResponse?.hits.hits ?? []).find(
-    (hit) => hit.fields?.[SCHEDULED_REPORT_ID_FIELD]?.[0] === id
-  );
-  const nextRunForId = (nextRunResponse ?? []).find(
-    (taskOrError) => isOk(taskOrError) && taskOrError.value.id === id
-  );
-
-  let nextRun: string | undefined;
-  if (!nextRunForId) {
-    // try to calculate dynamically if we were not able to get from the task
-    const schedule = so.attributes.schedule;
-
-    // get start date
-    let dtstart = new Date();
-    const rruleStart = schedule.rrule.dtstart;
-    if (rruleStart) {
-      try {
-        // if start date is provided and in the future, use it, otherwise use current time
-        const startDateValue = new Date(rruleStart).valueOf();
-        const now = Date.now();
-        if (startDateValue > now) {
-          dtstart = new Date(startDateValue + 60000); // add 1 minute to ensure it's in the future
-        }
-      } catch (e) {
-        logger.debug(
-          `Failed to parse rrule.dtstart for scheduled report next run calculation - default to now ${id}: ${e.message}`
-        );
-      }
-    }
-    const _rrule = new RRule({ ...schedule.rrule, dtstart });
-    nextRun = _rrule.after(new Date())?.toISOString();
-  } else {
-    nextRun = isOk(nextRunForId) ? nextRunForId.value.runAt.toISOString() : undefined;
-  }
-
-  let payload: ReportApiJSON['payload'] | undefined;
-  try {
-    payload = JSON.parse(so.attributes.payload);
-  } catch (e) {
-    logger.warn(`Failed to parse payload for scheduled report ${id}: ${e.message}`);
-  }
-
-  return {
-    id,
-    created_at: so.attributes.createdAt,
-    created_by: so.attributes.createdBy,
-    enabled: so.attributes.enabled,
-    jobtype: so.attributes.jobType,
-    last_run: lastRunForId?._source?.[CREATED_AT_FIELD],
-    next_run: nextRun,
-    notification: so.attributes.notification,
-    payload,
-    schedule: so.attributes.schedule,
-    space_id: so.namespaces?.[0] ?? DEFAULT_SPACE_ID,
-    title: so.attributes.title,
-  };
-}
-
-export function transformResponse(
-  logger: Logger,
-  result: SavedObjectsFindResponse<ScheduledReportType>,
-  lastResponse?: CreatedAtSearchResponse,
-  nextRunResponse?: BulkGetResult
-): ApiResponse {
-  return {
-    page: result.page,
-    per_page: result.per_page,
-    total: result.total,
-    data: result.saved_objects.map((so) =>
-      transformSingleResponse(logger, so, lastResponse, nextRunResponse)
-    ),
-  };
-}
 
 export interface ScheduledQueryFactory {
   list(
