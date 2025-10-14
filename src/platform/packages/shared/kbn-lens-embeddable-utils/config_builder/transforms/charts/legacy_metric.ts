@@ -37,6 +37,7 @@ import type {
   LegacyMetricStateNoESQL,
 } from '../../schema/charts/legacy_metric';
 import { getSharedChartLensStateToAPI, getSharedChartAPIToLensState } from './utils';
+import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '../coloring';
 
 const ACCESSOR = 'metric_formula_accessor';
 const LENS_DEFAULT_LAYER_ID = 'layer_0';
@@ -57,7 +58,7 @@ function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisuali
         ? { colorMode: 'Background' }
         : { colorMode: 'Labels' }
       : { colorMode: 'None' }),
-    // palette: colorConfig,
+    ...(layer.metric.color ? { palette: fromColorByValueAPIToLensState(layer.metric.color) } : {}),
   };
 }
 
@@ -101,12 +102,6 @@ function reverseBuildVisualizationState(
   }
 
   if (props.metric) {
-    if (visualization.colorMode && visualization.colorMode !== 'None') {
-      props.metric.apply_color_to =
-        visualization.colorMode === 'Background' ? 'background' : 'value';
-      // toDo: handle more color configs
-    }
-
     if (visualization.size) {
       props.metric.size = visualization.size as LegacyMetricState['metric']['size'];
     }
@@ -116,6 +111,18 @@ function reverseBuildVisualizationState(
         ...(visualization.titlePosition ? { labels: visualization.titlePosition } : {}),
         ...(visualization.textAlign ? { value: visualization.textAlign } : {}),
       };
+    }
+
+    if (visualization.colorMode && visualization.colorMode !== 'None') {
+      props.metric.apply_color_to =
+        visualization.colorMode === 'Background' ? 'background' : 'value';
+    }
+
+    if (visualization.palette) {
+      const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
+      if (colorByValue?.range === 'absolute') {
+        props.metric.color = colorByValue;
+      }
     }
   }
 

@@ -22,16 +22,6 @@ type InputTypeLegacyMetricChart = Omit<
     Partial<Pick<LegacyMetricState['metric'], 'size' | 'alignments'>>;
 };
 
-const defaultValues = {
-  metric: {
-    size: 'm',
-    alignments: {
-      labels: 'top',
-      value: 'left',
-    },
-  },
-};
-
 /**
  * Mind that this won't include query/filters validation/defaults
  */
@@ -42,16 +32,18 @@ function validateAndApiToApiTransforms(originalObject: InputTypeLegacyMetricChar
 }
 
 function mergeWithDefaults(originalObject: InputTypeLegacyMetricChart) {
-  const defaults = [
-    {
-      sampling: 1,
-      ignore_global_filters: false,
+  const defaults = {
+    sampling: 1,
+    ignore_global_filters: false,
+    metric: {
+      size: 'm',
+      alignments: {
+        labels: 'top',
+        value: 'left',
+      },
     },
-  ];
-  // @ts-expect-error - Need to figure out how to type this better
-  defaults.push(defaultValues);
-  // @ts-expect-error - Need to figure out how to type this better
-  return merge(...structuredClone(defaults), structuredClone(originalObject));
+  };
+  return merge(structuredClone(defaults), structuredClone(originalObject));
 }
 
 describe('legacy metric chart transformations', () => {
@@ -133,9 +125,15 @@ describe('legacy metric chart transformations', () => {
           // @ts-expect-error - Need to figure out how get the right input type
           field: 'response_time',
           apply_color_to: 'value',
-          // color: {
-          //   // more color configs to be added
-          // },
+          color: {
+            type: 'dynamic',
+            steps: [
+              { type: 'from', from: 0, color: '#00FF00' },
+              { type: 'exact', value: 300, color: '#FFFF00' },
+              { type: 'to', to: 300, color: '#FF0000' },
+            ],
+            range: 'absolute',
+          },
           empty_as_null: false,
         },
       };
@@ -163,10 +161,15 @@ describe('legacy metric chart transformations', () => {
             value: 'right',
           },
           apply_color_to: 'value',
-          // color: {
-          //
-          //   // more color configs to be added
-          // },
+          color: {
+            type: 'dynamic',
+            steps: [
+              { type: 'from', from: 0, color: '#00FF00' },
+              { type: 'exact', value: 300, color: '#FFFF00' },
+              { type: 'to', to: 300, color: '#FF0000' },
+            ],
+            range: 'absolute',
+          },
           size: 'l',
         },
       };
@@ -200,4 +203,6 @@ describe('legacy metric chart transformations', () => {
       expect(mergeWithDefaults(esqlLegacyMetricConfig)).toEqual(finalAPIState);
     });
   });
+
+  describe('from lens state to api', () => {});
 });
