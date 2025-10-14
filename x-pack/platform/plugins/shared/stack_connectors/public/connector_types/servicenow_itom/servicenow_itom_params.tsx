@@ -186,7 +186,7 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
                 className="eui-alignTop"
                 data-test-subj="otherFieldsHelpTooltip"
                 aria-label={i18n.ADDITIONAL_INFO_HELP}
-                content={i18n.ADDITIONAL_INFO_HELP_TEXT}
+                content={i18n.ADDITIONAL_FIELDS_HELP_SERVICENOW_TEXT}
               />
             </>
           }

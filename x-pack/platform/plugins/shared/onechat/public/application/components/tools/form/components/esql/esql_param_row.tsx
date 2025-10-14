@@ -7,6 +7,7 @@
 
 import {
   EuiButtonIcon,
+  EuiCheckbox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -237,6 +238,23 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
                 </EuiText>
               )}
             </EuiFlexGroup>
+          )}
+        />
+      </EuiTableRowCell>
+      <EuiTableRowCell align="center">
+        <Controller
+          control={control}
+          name={`params.${index}.optional`}
+          render={({ field: { ref, onChange, value, ...field } }) => (
+            <EuiCheckbox
+              id={`params.${index}.optional`}
+              inputRef={ref}
+              onChange={(e) => {
+                onChange(e.target.checked);
+              }}
+              checked={value}
+              {...field}
+            />
           )}
         />
       </EuiTableRowCell>

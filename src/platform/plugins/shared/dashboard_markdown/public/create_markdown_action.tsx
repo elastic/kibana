@@ -13,8 +13,10 @@ import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { ADD_MARKDOWN_ACTION_ID, MARKDOWN_ID } from './constants';
-import type { MarkdownEditorApi, MarkdownEditorSerializedState } from './types';
+import type { MarkdownEmbeddableState } from '../server';
+import { ADD_MARKDOWN_ACTION_ID } from './constants';
+import type { MarkdownEditorApi } from './types';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 
 export const createMarkdownAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ADD_MARKDOWN_ACTION_ID,
@@ -25,11 +27,11 @@ export const createMarkdownAction = (): ActionDefinition<EmbeddableApiContext> =
   execute: async ({ embeddable }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
     const newMarkdownEmbeddable = await embeddable.addNewPanel<
-      MarkdownEditorSerializedState,
+      MarkdownEmbeddableState,
       MarkdownEditorApi
     >(
       {
-        panelType: MARKDOWN_ID,
+        panelType: MARKDOWN_EMBEDDABLE_TYPE,
         serializedState: {
           rawState: {
             content: '',

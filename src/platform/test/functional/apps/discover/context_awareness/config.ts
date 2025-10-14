@@ -35,6 +35,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           __dirname,
           '../../../../analytics/plugins/analytics_ftr_helpers'
         )}`,
+        '--feature_flags.overrides.discover.tabsEnabled=true',
       ],
     },
     services: {

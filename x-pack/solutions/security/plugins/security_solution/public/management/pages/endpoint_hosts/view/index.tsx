@@ -210,6 +210,7 @@ const getEndpointListColumns = ({
         return (
           <EuiToolTip content={POLICY_STATUS_TO_TEXT[status]} anchorClassName="eui-textTruncate">
             <EuiHealth
+              tabIndex={0}
               color={POLICY_STATUS_TO_HEALTH_COLOR[status]}
               className="eui-textTruncate eui-fullWidth"
               data-test-subj="rowPolicyStatus"
@@ -235,7 +236,7 @@ const getEndpointListColumns = ({
       render: (os: string) => {
         return (
           <EuiToolTip content={os} anchorClassName="eui-textTruncate">
-            <EuiText size="s" className="eui-textTruncate eui-fullWidth">
+            <EuiText tabIndex={0} size="s" className="eui-textTruncate eui-fullWidth">
               <p className="eui-displayInline eui-TextTruncate">{os}</p>
             </EuiText>
           </EuiToolTip>
@@ -252,7 +253,7 @@ const getEndpointListColumns = ({
       render: (ip: string[]) => {
         return (
           <EuiToolTip content={ip.toString().replace(',', ', ')} anchorClassName="eui-textTruncate">
-            <EuiText size="s" className="eui-textTruncate eui-fullWidth">
+            <EuiText tabIndex={0} size="s" className="eui-textTruncate eui-fullWidth">
               <p className="eui-displayInline eui-textTruncate">
                 {ip.toString().replace(',', ', ')}
               </p>
@@ -271,7 +272,7 @@ const getEndpointListColumns = ({
       render: (version: string) => {
         return (
           <EuiToolTip content={version} anchorClassName="eui-textTruncate">
-            <EuiText size="s" className="eui-textTruncate eui-fullWidth">
+            <EuiText tabIndex={0} size="s" className="eui-textTruncate eui-fullWidth">
               <p className="eui-displayInline eui-TextTruncate">{version}</p>
             </EuiText>
           </EuiToolTip>

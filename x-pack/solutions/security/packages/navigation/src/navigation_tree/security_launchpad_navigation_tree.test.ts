@@ -47,6 +47,8 @@ describe('createLaunchpadNavigationTree', () => {
         link: securityLink(SecurityPageName.landing),
         renderAs: 'item',
         icon: 'launch',
+        iconV2: 'launch',
+        sideNavVersion: 'v1',
       });
     });
 
@@ -58,6 +60,8 @@ describe('createLaunchpadNavigationTree', () => {
         link: securityLink(SecurityPageName.landing),
         renderAs: 'item',
         icon: 'launch',
+        iconV2: 'launch',
+        sideNavVersion: 'v1',
       });
     });
 
@@ -69,6 +73,8 @@ describe('createLaunchpadNavigationTree', () => {
         link: securityLink(SecurityPageName.landing),
         renderAs: 'item',
         icon: 'launch',
+        iconV2: 'launch',
+        sideNavVersion: 'v1',
       });
     });
   });
@@ -80,18 +86,24 @@ describe('createLaunchpadNavigationTree', () => {
       expect(result).toEqual({
         id: SecurityGroupName.launchpad,
         title: SecurityLinkGroup[SecurityGroupName.launchpad].title,
+        sideNavVersion: 'v1',
         renderAs: 'panelOpener',
         icon: 'launch',
+        iconV2: 'launch',
         children: [
           {
-            id: SecurityPageName.landing,
-            link: securityLink(SecurityPageName.landing),
-            renderAs: 'item',
-          },
-          {
-            id: SecurityPageName.aiValue,
-            link: securityLink(SecurityPageName.aiValue),
-            renderAs: 'item',
+            children: [
+              {
+                id: SecurityPageName.landing,
+                link: securityLink(SecurityPageName.landing),
+                renderAs: 'item',
+              },
+              {
+                id: SecurityPageName.aiValue,
+                link: securityLink(SecurityPageName.aiValue),
+                renderAs: 'item',
+              },
+            ],
           },
         ],
       });

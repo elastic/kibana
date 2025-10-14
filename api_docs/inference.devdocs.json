@@ -305,17 +305,42 @@
           },
           {
             "parentPluginId": "inference",
-            "id": "def-server.EsqlDocumentBase.getSystemMessage",
+            "id": "def-server.EsqlDocumentBase.getPrompts",
             "type": "Function",
             "tags": [],
+            "label": "getPrompts",
+            "description": [],
+            "signature": [
+              "() => ",
+              "EsqlPrompts"
+            ],
+            "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inference",
+            "id": "def-server.EsqlDocumentBase.getSystemMessage",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
             "label": "getSystemMessage",
             "description": [],
             "signature": [
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/ai-tools",
+                "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts"
+              }
+            ],
             "children": [],
             "returnComment": []
           },
@@ -327,7 +352,7 @@
             "label": "getDocumentation",
             "description": [],
             "signature": [
-              "(rawKeywords: string[], { generateMissingKeywordDoc, addSuggestions, addOverview, resolveAliases, }?: ",
+              "(rawKeywords: string[], { generateMissingKeywordDoc, addSuggestions, resolveAliases, }?: ",
               "GetDocsOptions",
               ") => Record<string, string>"
             ],
@@ -355,7 +380,7 @@
                 "id": "def-server.EsqlDocumentBase.getDocumentation.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      generateMissingKeywordDoc = true,\n      addSuggestions = true,\n      addOverview = true,\n      resolveAliases = true,\n    }",
+                "label": "{\n      generateMissingKeywordDoc = true,\n      addSuggestions = true,\n      resolveAliases = true,\n    }",
                 "description": [],
                 "signature": [
                   "GetDocsOptions"

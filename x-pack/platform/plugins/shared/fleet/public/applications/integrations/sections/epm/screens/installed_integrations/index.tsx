@@ -26,7 +26,8 @@ const InstalledIntegrationsPageContent: React.FunctionComponent = () => {
   const filters = useUrlFilters();
   const { selectedPackageViewPolicies } = useViewPolicies();
   const pagination = useUrlPagination();
-  const { upgradingIntegrations, uninstallingIntegrations } = useInstalledIntegrationsActions();
+  const { upgradingIntegrations, uninstallingIntegrations, rollingbackIntegrations } =
+    useInstalledIntegrationsActions();
   const {
     installedPackages,
     countPerStatus,
@@ -38,7 +39,8 @@ const InstalledIntegrationsPageContent: React.FunctionComponent = () => {
     filters,
     pagination.pagination,
     upgradingIntegrations,
-    uninstallingIntegrations
+    uninstallingIntegrations,
+    rollingbackIntegrations
   );
 
   const [selectedItems, setSelectedItems] = useState<InstalledPackageUIPackageListItem[]>([]);

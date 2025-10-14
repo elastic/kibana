@@ -10,7 +10,6 @@ import type {
   IScopedClusterClient,
   AuditLogger,
   Logger,
-  AuditEvent,
   SavedObjectsServiceStart,
   SavedObjectsClientProviderOptions,
   KibanaRequest,
@@ -20,16 +19,19 @@ import type { ExperimentalFeatures } from '../../../../../common';
 import type { MonitoringEngineComponentResource } from '../../../../../common/api/entity_analytics';
 import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { ApiKeyManager } from '../auth/api_key';
-import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
-import { AUDIT_OUTCOME, AUDIT_TYPE, AUDIT_CATEGORY } from '../../audit';
+import type { PrivilegeMonitoringEngineActions } from '../auditing/actions';
 import { monitoringEntitySourceType } from '../saved_objects';
+import type { PrivMonLogLevel, PrivMonLogger } from '../logger';
+import { createPrivMonLogger } from '../logger';
+import type { PrivMonAuditLogger } from '../audit_logger';
+import { createPrivMonAuditLogger } from '../audit_logger';
 
 export interface PrivilegeMonitoringGlobalDependencies {
   namespace: string;
   kibanaVersion: string;
 
   logger: Logger;
-  auditLogger: AuditLogger;
+  auditLogger?: AuditLogger;
   telemetry: AnalyticsServiceSetup;
 
   clusterClient: IScopedClusterClient;
@@ -46,10 +48,14 @@ export interface PrivilegeMonitoringGlobalDependencies {
  */
 export class PrivilegeMonitoringDataClient {
   public index: string;
+  public logger: PrivMonLogger;
+  public auditLogger: PrivMonAuditLogger;
 
   constructor(public readonly deps: PrivilegeMonitoringGlobalDependencies) {
     this.index = getPrivilegedMonitorUsersIndex(deps.namespace);
     this.deps.experimentalFeatures = deps.experimentalFeatures;
+    this.logger = createPrivMonLogger(this.deps.logger, this.deps.namespace);
+    this.auditLogger = createPrivMonAuditLogger(this.deps.auditLogger);
   }
 
   public getScopedSoClient(request: KibanaRequest, options?: SavedObjectsClientProviderOptions) {
@@ -57,10 +63,8 @@ export class PrivilegeMonitoringDataClient {
     return this.deps.savedObjects.getScopedClient(request, { ...options, includedHiddenTypes });
   }
 
-  public log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {
-    this.deps.logger[level](
-      `[Privileged Monitoring Engine][namespace: ${this.deps.namespace}] ${msg}`
-    );
+  public log(level: PrivMonLogLevel, msg: string) {
+    this.logger.log(level, msg);
   }
 
   public audit(
@@ -69,30 +73,6 @@ export class PrivilegeMonitoringDataClient {
     msg: string,
     error?: Error
   ) {
-    // NOTE: Excluding errors, all auditing events are currently WRITE events, meaning the outcome is always UNKNOWN.
-    // This may change in the future, depending on the audit action.
-    const outcome = error ? AUDIT_OUTCOME.FAILURE : AUDIT_OUTCOME.UNKNOWN;
-
-    const type =
-      action === PrivilegeMonitoringEngineActions.CREATE
-        ? AUDIT_TYPE.CREATION
-        : PrivilegeMonitoringEngineActions.DELETE
-        ? AUDIT_TYPE.DELETION
-        : AUDIT_TYPE.CHANGE;
-
-    const category = AUDIT_CATEGORY.DATABASE;
-
-    const message = error ? `${msg}: ${error.message}` : msg;
-    const event: AuditEvent = {
-      message: `[Privilege Monitoring] ${message}`,
-      event: {
-        action: `${action}_${resource}`,
-        category,
-        outcome,
-        type,
-      },
-    };
-
-    return this.deps.auditLogger?.log(event);
+    this.auditLogger.log(action, resource, msg, error);
   }
 }

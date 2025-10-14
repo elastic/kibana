@@ -59,6 +59,7 @@ export const SettingsResponseSchema = schema.object({
     preconfigured_fields: schema.maybe(schema.arrayOf(schema.literal('fleet_server_hosts'))),
     secret_storage_requirements_met: schema.maybe(schema.boolean()),
     output_secret_storage_requirements_met: schema.maybe(schema.boolean()),
+    action_secret_storage_requirements_met: schema.maybe(schema.boolean()),
     use_space_awareness_migration_status: schema.maybe(
       schema.oneOf([schema.literal('pending'), schema.literal('success'), schema.literal('error')])
     ),

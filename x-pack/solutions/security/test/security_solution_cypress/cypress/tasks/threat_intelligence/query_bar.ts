@@ -21,7 +21,6 @@ import {
   FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_OUT_BUTTON,
   FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_IN_BUTTON,
   FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON,
-  FLYOUT_TABLE_TAB_ROW_FILTER_IN_BUTTON,
   FLYOUT_TABLE_TAB_ROW_FILTER_OUT_BUTTON,
   FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM,
 } from '../../screens/threat_intelligence/indicators';
@@ -46,14 +45,14 @@ export const filterOutFromBarChartLegend = () => {
  * Filter in value by clicking on the menu item within an indicators table cell
  */
 export const filterInFromTableCell = () => {
-  clickAction(INDICATOR_TYPE_CELL, 10, INDICATORS_TABLE_CELL_FILTER_IN_BUTTON);
+  clickAction(INDICATOR_TYPE_CELL, 15, INDICATORS_TABLE_CELL_FILTER_IN_BUTTON);
 };
 
 /**
  * Filter out value by clicking on the menu item within an indicators table cell
  */
 export const filterOutFromTableCell = () => {
-  clickAction(INDICATOR_TYPE_CELL, 10, INDICATORS_TABLE_CELL_FILTER_OUT_BUTTON);
+  clickAction(INDICATOR_TYPE_CELL, 15, INDICATORS_TABLE_CELL_FILTER_OUT_BUTTON);
 };
 
 /**
@@ -90,26 +89,36 @@ export const filterOutFromFlyoutBlockItem = () => {
  * Filter in value from indicators flyout overview tab table
  */
 export const filterInFromFlyoutOverviewTable = () => {
-  cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_IN_BUTTON).first().click();
+  cy.get(`[data-test-subj^="cellActions-renderContent-"]`).first().trigger('mouseover');
+  cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_IN_BUTTON).click();
 };
 
 /**
  * Filter out value from indicators flyout overview tab table
  */
 export const filterOutFromFlyoutOverviewTable = () => {
-  cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON).first().click();
+  cy.get(`[data-test-subj^="cellActions-renderContent-"]`).first().trigger('mouseover');
+  cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON).click();
 };
 
 /**
  * Filter in value from indicators flyout overview tab table
  */
 export const filterInFromFlyoutTableTab = () => {
-  cy.get(FLYOUT_TABLE_TAB_ROW_FILTER_IN_BUTTON).first().click();
+  clickAction(
+    '[data-test-subj^="cellActions-renderContent-"]',
+    0,
+    FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_IN_BUTTON
+  );
 };
 
 /**
  * Filter out value from indicators flyout overview tab table
  */
 export const filterOutFromFlyoutTableTab = () => {
-  cy.get(FLYOUT_TABLE_TAB_ROW_FILTER_OUT_BUTTON).first().click();
+  clickAction(
+    '[data-test-subj^="cellActions-renderContent-"]',
+    0,
+    FLYOUT_TABLE_TAB_ROW_FILTER_OUT_BUTTON
+  );
 };

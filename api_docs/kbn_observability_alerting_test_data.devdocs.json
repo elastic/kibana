@@ -29,7 +29,7 @@
         "signature": [
           "(actionId: string) => Promise<",
           "AxiosResponse",
-          "<any, any>>"
+          "<any, any, {}>>"
         ],
         "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_apm_error_count_threshold_rule.ts",
         "deprecated": false,
@@ -64,7 +64,7 @@
         "signature": [
           "(actionId: string) => Promise<",
           "AxiosResponse",
-          "<any, any>>"
+          "<any, any, {}>>"
         ],
         "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_apm_failed_transaction_rate_rule.ts",
         "deprecated": false,
@@ -99,7 +99,7 @@
         "signature": [
           "(actionId: string, dataViewId: string, ruleParams: { consumer?: string | undefined; name?: string | undefined; params?: { criteria: any[]; groupBy?: string[] | undefined; searchConfiguration: { query: { query?: string | undefined; }; }; } | undefined; }) => Promise<",
           "AxiosResponse",
-          "<any, any>>"
+          "<any, any, {}>>"
         ],
         "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_custom_threshold_rule.ts",
         "deprecated": false,
@@ -204,7 +204,7 @@
         "signature": [
           "({ indexPattern, id, }: { indexPattern: string; id: string; }) => Promise<",
           "AxiosResponse",
-          "<any, any>>"
+          "<any, any, {}>>"
         ],
         "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_data_view.ts",
         "deprecated": false,
@@ -259,7 +259,7 @@
         "signature": [
           "() => Promise<",
           "AxiosResponse",
-          "<any, any>>"
+          "<any, any, {}>>"
         ],
         "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_index_connector.ts",
         "deprecated": false,
@@ -278,7 +278,7 @@
         "signature": [
           "(ruleParams: any) => Promise<",
           "AxiosResponse",
-          "<any, any>>"
+          "<any, any, {}>>"
         ],
         "path": "x-pack/solutions/observability/packages/alerting-test-data/src/create_rule.ts",
         "deprecated": false,

@@ -88,7 +88,7 @@ describe('Navigation Tree Role-Based Access', () => {
   const findLaunchpadNode = (navigationTree: NavigationTreeDefinition) => {
     const footer = navigationTree.footer?.[0];
     if (footer && 'children' in footer) {
-      return footer.children?.find(
+      return footer.children.find(
         (child) => 'id' in child && child.id === SecurityPageName.landing
       );
     }
@@ -101,8 +101,8 @@ describe('Navigation Tree Role-Based Access', () => {
       const launchpadGroup = footer.children?.find(
         (child) => 'id' in child && child.id === SecurityGroupName.launchpad
       );
-      if (launchpadGroup && 'children' in launchpadGroup) {
-        return launchpadGroup.children?.find(
+      if (launchpadGroup && launchpadGroup.children) {
+        return launchpadGroup.children[0]?.children?.find(
           (child) => 'id' in child && child.id === SecurityPageName.aiValue
         );
       }

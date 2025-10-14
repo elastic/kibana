@@ -14,11 +14,10 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiLink,
-  EuiIcon,
+  EuiIconTip,
   EuiCallOut,
   EuiLoadingElastic,
   EuiInMemoryTable,
-  EuiToolTip,
   EuiText,
   EuiSpacer,
   EuiLoadingSpinner,
@@ -102,9 +101,13 @@ export class RelationshipsClass extends Component<
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 id={modalTitleId}>
-              <EuiToolTip position="top" content={typeLabel}>
-                <EuiIcon aria-label={typeLabel} size="m" type={savedObject.meta.icon || 'apps'} />
-              </EuiToolTip>
+              <EuiIconTip
+                position="top"
+                content={typeLabel}
+                type={savedObject.meta.icon || 'apps'}
+                size="m"
+                aria-label={typeLabel}
+              />
               &nbsp;&nbsp;
               {savedObject.meta.title || getDefaultTitle(savedObject)}
             </h2>
@@ -286,14 +289,16 @@ export class RelationshipsClass extends Component<
         render: (type: string, object: SavedObjectWithMetadata) => {
           const typeLabel = getSavedObjectLabel(type, allowedTypes);
           return (
-            <EuiToolTip position="top" content={typeLabel}>
-              <EuiIcon
-                aria-label={typeLabel}
-                type={object.meta.icon || 'apps'}
-                size="s"
-                data-test-subj="relationshipsObjectType"
-              />
-            </EuiToolTip>
+            <EuiIconTip
+              position="top"
+              content={typeLabel}
+              type={object.meta.icon || 'apps'}
+              size="s"
+              aria-label={typeLabel}
+              iconProps={{
+                'data-test-subj': 'relationshipsObjectType',
+              }}
+            />
           );
         },
       },

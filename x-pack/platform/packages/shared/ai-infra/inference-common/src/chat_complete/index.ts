@@ -49,6 +49,7 @@ export {
   type ToolChoice,
   type CustomToolChoice,
   type ToolCallArguments,
+  type ToolCallbackResult,
 } from './tools';
 
 export type {
@@ -58,6 +59,7 @@ export type {
   ToolCallbacksOfToolOptions,
   ToolNamesOf,
   ToolsOfChoice,
+  ToolCallsOfToolOptions,
 } from './tools_of';
 
 export type { ChatCompleteMetadata, ConnectorTelemetryMetadata } from './metadata';

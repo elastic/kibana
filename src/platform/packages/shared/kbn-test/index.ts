@@ -71,6 +71,8 @@ export { runCheckJestConfigsCli } from './src/jest/run_check_jest_configs_cli';
 
 export { runJest } from './src/jest/run';
 
+export { runJestAll } from './src/jest/run_all';
+
 export * from './src/kbn_archiver_cli';
 
 export * from './src/kbn_client';

@@ -6,8 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { i18n } from '@kbn/i18n';
-import type { ESQLAstQueryExpression } from '../../../types';
 import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
 import { Walker } from '../../../walker';
 import type { ICommandContext, ICommandCallbacks } from '../../types';
@@ -27,25 +25,11 @@ export const validate = (
   const messages: ESQLMessage[] = [];
 
   if (command.args.length < MIN_BRANCHES) {
-    messages.push({
-      location: command.location,
-      text: i18n.translate('kbn-esql-ast.esql.validation.forkTooFewBranches', {
-        defaultMessage: '[FORK] Must include at least two branches.',
-      }),
-      type: 'error',
-      code: 'forkTooFewBranches',
-    });
+    messages.push(errors.forkTooFewBranches(command));
   }
 
   if (command.args.length > MAX_BRANCHES) {
-    messages.push({
-      location: (command.args.at(-1) as ESQLAstQueryExpression)?.location,
-      text: i18n.translate('kbn-esql-ast.esql.validation.forkTooManyBranches', {
-        defaultMessage: '[FORK] Supports a maximum of 8 branches.',
-      }),
-      type: 'error',
-      code: 'forkTooManyBranches',
-    });
+    messages.push(errors.forkTooManyBranches(command));
   }
 
   messages.push(...validateCommandArguments(command, ast, context, callbacks));

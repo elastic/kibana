@@ -64,3 +64,6 @@ export const ActiveAgentStatuses = [
 // Privileged is `not` because the metadata field can be undefined
 export const UNPRIVILEGED_AGENT_KUERY = `${AGENTS_PREFIX}.local_metadata.elastic.agent.unprivileged: true`;
 export const PRIVILEGED_AGENT_KUERY = `not ${AGENTS_PREFIX}.local_metadata.elastic.agent.unprivileged: true`;
+
+// Kuery to find fips agents
+export const FIPS_AGENT_KUERY = `${AGENTS_PREFIX}.local_metadata.elastic.agent.fips: true`;

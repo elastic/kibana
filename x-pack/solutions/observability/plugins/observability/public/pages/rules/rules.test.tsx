@@ -79,6 +79,7 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
         observability: { enabled: false },
       },
     },
+    managedOtlpServiceUrl: '',
   },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,

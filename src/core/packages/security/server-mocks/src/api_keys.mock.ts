@@ -8,16 +8,18 @@
  */
 
 import type { APIKeysService } from '@kbn/core-security-server';
+import { lazyObject } from '@kbn/lazy-object';
 
 export const apiKeysMock = {
-  create: (): jest.MockedObjectDeep<APIKeysService> => ({
-    areAPIKeysEnabled: jest.fn(),
-    areCrossClusterAPIKeysEnabled: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    grantAsInternalUser: jest.fn(),
-    validate: jest.fn(),
-    invalidate: jest.fn(),
-    invalidateAsInternalUser: jest.fn(),
-  }),
+  create: (): jest.MockedObjectDeep<APIKeysService> =>
+    lazyObject({
+      areAPIKeysEnabled: jest.fn(),
+      areCrossClusterAPIKeysEnabled: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      grantAsInternalUser: jest.fn(),
+      validate: jest.fn(),
+      invalidate: jest.fn(),
+      invalidateAsInternalUser: jest.fn(),
+    }),
 };

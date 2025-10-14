@@ -4433,13 +4433,12 @@ components:
         - type: string
         - additionalProperties: true
           type: object
-    AlertStatus:
+    AlertStatusExceptClosed:
       description: >-
         The status of an alert, which can be `open`, `acknowledged`,
         `in-progress`, or `closed`.
       enum:
         - open
-        - closed
         - acknowledged
         - in-progress
       type: string
@@ -5155,6 +5154,49 @@ components:
       required:
         - action
         - run
+    CloseAlertsByIds:
+      type: object
+      properties:
+        reason:
+          $ref: '#/components/schemas/ReasonEnum'
+        signal_ids:
+          description: >-
+            List of alert ids. Use field `_id` on alert document or
+            `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
+          items:
+            format: nonempty
+            minLength: 1
+            type: string
+          minItems: 1
+          type: array
+        status:
+          enum:
+            - closed
+          type: string
+      required:
+        - signal_ids
+        - status
+    CloseAlertsByQuery:
+      type: object
+      properties:
+        conflicts:
+          default: abort
+          enum:
+            - abort
+            - proceed
+          type: string
+        query:
+          additionalProperties: true
+          type: object
+        reason:
+          $ref: '#/components/schemas/ReasonEnum'
+        status:
+          enum:
+            - closed
+          type: string
+      required:
+        - query
+        - status
     ConcurrentSearches:
       minimum: 1
       type: integer
@@ -6273,12 +6315,36 @@ components:
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
       type: string
+    ExternalRuleCustomizedFields:
+      description: >-
+        An array of customized field names — that is, fields that the user has
+        modified from their base value. Defaults to an empty array.
+      items:
+        type: object
+        properties:
+          field_name:
+            description: Name of a user-modified field in the rule object.
+            type: string
+        required:
+          - field_name
+      type: array
+    ExternalRuleHasBaseVersion:
+      description: >-
+        Determines whether an external/prebuilt rule has its original,
+        unmodified version present when the calculation of its customization
+        status is performed (`rule_source.is_customized` and
+        `rule_source.customized_fields`).
+      type: boolean
     ExternalRuleSource:
       description: >-
         Type of rule source for externally sourced rules, i.e. rules that have
         an external source, such as the Elastic Prebuilt rules repo.
       type: object
       properties:
+        customized_fields:
+          $ref: '#/components/schemas/ExternalRuleCustomizedFields'
+        has_base_version:
+          $ref: '#/components/schemas/ExternalRuleHasBaseVersion'
         is_customized:
           $ref: '#/components/schemas/IsExternalRuleCustomized'
         type:
@@ -6288,6 +6354,8 @@ components:
       required:
         - type
         - is_customized
+        - has_base_version
+        - customized_fields
     FindRulesSortField:
       enum:
         - created_at
@@ -8248,6 +8316,16 @@ components:
             - risk_score
             - severity
         - $ref: '#/components/schemas/QueryRuleCreateFields'
+    ReasonEnum:
+      description: The reason for closing the alerts
+      enum:
+        - false_positive
+        - duplicate
+        - true_positive
+        - benign_positive
+        - automated_closure
+        - other
+      type: string
     RelatedIntegration:
       description: >
         Related integration is a potential dependency of a rule. It's assumed
@@ -9548,6 +9626,14 @@ components:
             - severity
         - $ref: '#/components/schemas/SavedQueryRuleCreateFields'
     SetAlertsStatusByIds:
+      discriminator:
+        mapping:
+          closed: '#/components/schemas/CloseAlertsByIds'
+        propertyName: status
+      oneOf:
+        - $ref: '#/components/schemas/CloseAlertsByIds'
+        - $ref: '#/components/schemas/SetAlertsStatusByIdsBase'
+    SetAlertsStatusByIdsBase:
       type: object
       properties:
         signal_ids:
@@ -9561,11 +9647,19 @@ components:
           minItems: 1
           type: array
         status:
-          $ref: '#/components/schemas/AlertStatus'
+          $ref: '#/components/schemas/AlertStatusExceptClosed'
       required:
         - signal_ids
         - status
     SetAlertsStatusByQuery:
+      discriminator:
+        mapping:
+          closed: '#/components/schemas/CloseAlertsByQuery'
+        propertyName: status
+      oneOf:
+        - $ref: '#/components/schemas/CloseAlertsByQuery'
+        - $ref: '#/components/schemas/SetAlertsStatusByQueryBase'
+    SetAlertsStatusByQueryBase:
       type: object
       properties:
         conflicts:
@@ -9578,7 +9672,7 @@ components:
           additionalProperties: true
           type: object
         status:
-          $ref: '#/components/schemas/AlertStatus'
+          $ref: '#/components/schemas/AlertStatusExceptClosed'
       required:
         - query
         - status

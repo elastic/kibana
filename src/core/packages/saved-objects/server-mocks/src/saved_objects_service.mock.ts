@@ -31,88 +31,72 @@ import {
 } from '@kbn/core-saved-objects-import-export-server-mocks';
 import { migrationMocks } from '@kbn/core-saved-objects-migration-server-mocks';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { lazyObject } from '@kbn/lazy-object';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
 const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegistry>) => {
-  const startContrat: jest.Mocked<SavedObjectsServiceStart> = {
-    getScopedClient: jest.fn(),
-    getUnsafeInternalClient: jest.fn(),
-    createInternalRepository: jest.fn(),
-    createScopedRepository: jest.fn(),
+  const startContrat: jest.Mocked<SavedObjectsServiceStart> = lazyObject({
+    getScopedClient: jest.fn().mockReturnValue(savedObjectsClientMock.create()),
+    getUnsafeInternalClient: jest.fn().mockReturnValue(savedObjectsClientMock.create()),
+    createInternalRepository: jest.fn().mockReturnValue(savedObjectsRepositoryMock.create()),
+    createScopedRepository: jest.fn().mockReturnValue(savedObjectsRepositoryMock.create()),
     createSerializer: jest.fn(),
-    createExporter: jest.fn(),
-    createImporter: jest.fn(),
-    getTypeRegistry: jest.fn(),
-    getDefaultIndex: jest.fn(),
-    getIndexForType: jest.fn(),
-    getIndicesForTypes: jest.fn(),
-    getAllIndices: jest.fn(),
-  };
-
-  startContrat.getScopedClient.mockReturnValue(savedObjectsClientMock.create());
-  startContrat.getUnsafeInternalClient.mockReturnValue(savedObjectsClientMock.create());
-  startContrat.createInternalRepository.mockReturnValue(savedObjectsRepositoryMock.create());
-  startContrat.createScopedRepository.mockReturnValue(savedObjectsRepositoryMock.create());
-  startContrat.getTypeRegistry.mockReturnValue(typeRegistry ?? typeRegistryMock.create());
-  startContrat.createExporter.mockReturnValue(savedObjectsExporterMock.create());
-  startContrat.createImporter.mockReturnValue(savedObjectsImporterMock.create());
-  startContrat.getDefaultIndex.mockReturnValue(MAIN_SAVED_OBJECT_INDEX);
-  startContrat.getIndexForType.mockReturnValue(MAIN_SAVED_OBJECT_INDEX);
-  startContrat.getIndicesForTypes.mockReturnValue([MAIN_SAVED_OBJECT_INDEX]);
-  startContrat.getAllIndices.mockReturnValue([MAIN_SAVED_OBJECT_INDEX]);
+    createExporter: jest.fn().mockReturnValue(savedObjectsExporterMock.create()),
+    createImporter: jest.fn().mockReturnValue(savedObjectsExporterMock.create()),
+    getTypeRegistry: jest.fn().mockReturnValue(typeRegistry ?? typeRegistryMock.create()),
+    getDefaultIndex: jest.fn().mockReturnValue(MAIN_SAVED_OBJECT_INDEX),
+    getIndexForType: jest.fn().mockReturnValue(MAIN_SAVED_OBJECT_INDEX),
+    getIndicesForTypes: jest.fn().mockReturnValue([MAIN_SAVED_OBJECT_INDEX]),
+    getAllIndices: jest.fn().mockReturnValue([MAIN_SAVED_OBJECT_INDEX]),
+  });
 
   return startContrat;
 };
 
 const createInternalStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegistry>) => {
-  const internalStartContract: jest.Mocked<InternalSavedObjectsServiceStart> = {
+  const internalStartContract: jest.Mocked<InternalSavedObjectsServiceStart> = lazyObject({
     ...createStartContractMock(typeRegistry),
     metrics: {
       migrationDuration: 0,
     },
-  };
+  });
 
   return internalStartContract;
 };
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<SavedObjectsServiceSetup> = {
+  const setupContract: jest.Mocked<SavedObjectsServiceSetup> = lazyObject({
     setClientFactoryProvider: jest.fn(),
     setEncryptionExtension: jest.fn(),
     setSecurityExtension: jest.fn(),
     setSpacesExtension: jest.fn(),
     registerType: jest.fn(),
-    getDefaultIndex: jest.fn(),
-  };
-
-  setupContract.getDefaultIndex.mockReturnValue(MAIN_SAVED_OBJECT_INDEX);
+    getDefaultIndex: jest.fn().mockReturnValue(MAIN_SAVED_OBJECT_INDEX),
+  });
 
   return setupContract;
 };
 
 const createInternalSetupContractMock = () => {
-  const internalSetupContract: jest.Mocked<InternalSavedObjectsServiceSetup> = {
+  const internalSetupContract: jest.Mocked<InternalSavedObjectsServiceSetup> = lazyObject({
     ...createSetupContractMock(),
     status$: new BehaviorSubject({
       level: ServiceStatusLevels.available,
       summary: `SavedObjects is available`,
     }),
     getTypeRegistry: jest.fn(),
-  };
+  });
   return internalSetupContract;
 };
 
 const createSavedObjectsServiceMock = () => {
-  const mocked: jest.Mocked<SavedObjectsServiceContract> = {
-    setup: jest.fn(),
-    start: jest.fn(),
-    stop: jest.fn(),
-  };
+  const mocked: jest.Mocked<SavedObjectsServiceContract> = lazyObject({
+    setup: jest.fn().mockResolvedValue(createInternalSetupContractMock()),
+    start: jest.fn().mockResolvedValue(createInternalStartContractMock()),
+    stop: jest.fn().mockResolvedValue(void 0),
+  });
 
-  mocked.setup.mockResolvedValue(createInternalSetupContractMock());
-  mocked.start.mockResolvedValue(createInternalStartContractMock());
-  mocked.stop.mockResolvedValue();
   return mocked;
 };
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
+import { z } from '@kbn/zod';
 import type { StructuredTool } from '@langchain/core/tools';
 import { tool as toTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
@@ -16,10 +18,10 @@ import type {
   ExecutableTool,
   OnechatToolEvent,
   RunToolReturn,
-  ToolProvider,
   ToolEventHandlerFn,
+  ToolProvider,
 } from '@kbn/onechat-server';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { createErrorResult } from '@kbn/onechat-server';
 import type { ToolCall } from './messages';
 
 export type ToolIdMapping = Map<string, string>;
@@ -40,11 +42,13 @@ export const toolsToLangchain = async ({
   tools,
   logger,
   sendEvent,
+  addReasoningParam = true,
 }: {
   request: KibanaRequest;
   tools: ToolProvider | ExecutableTool[];
   logger: Logger;
   sendEvent?: AgentEventEmitterFn;
+  addReasoningParam?: boolean;
 }): Promise<ToolsAndMappings> => {
   const allTools = Array.isArray(tools) ? tools : await tools.list({ request });
   const onechatToLangchainIdMap = createToolIdMappings(allTools);
@@ -52,7 +56,7 @@ export const toolsToLangchain = async ({
   const convertedTools = await Promise.all(
     allTools.map((tool) => {
       const toolId = onechatToLangchainIdMap.get(tool.id);
-      return toolToLangchain({ tool, logger, toolId, sendEvent });
+      return toolToLangchain({ tool, logger, toolId, sendEvent, addReasoningParam });
     })
   );
 
@@ -90,23 +94,27 @@ export const createToolIdMappings = <T extends { id: string }>(tools: T[]): Tool
   return mapping;
 };
 
-export const toolToLangchain = ({
+export const toolToLangchain = async ({
   tool,
   toolId,
   logger,
   sendEvent,
+  addReasoningParam = true,
 }: {
   tool: ExecutableTool;
   toolId?: string;
   logger: Logger;
   sendEvent?: AgentEventEmitterFn;
-}): StructuredTool => {
-  const description = tool.llmDescription
-    ? tool.llmDescription({ description: tool.description, config: tool.configuration })
+  addReasoningParam?: boolean;
+}): Promise<StructuredTool> => {
+  const description = tool.getLlmDescription
+    ? await tool.getLlmDescription({ description: tool.description, config: tool.configuration })
     : tool.description;
 
+  const schema = await tool.getSchema();
+
   return toTool(
-    async (input, config): Promise<[string, RunToolReturn]> => {
+    async (rawInput: Record<string, unknown>, config): Promise<[string, RunToolReturn]> => {
       let onEvent: ToolEventHandlerFn | undefined;
       if (sendEvent) {
         const toolCallId = config.configurable?.tool_call_id ?? config.toolCall?.id ?? 'unknown';
@@ -115,6 +123,9 @@ export const toolToLangchain = ({
           sendEvent(convertEvent(event));
         };
       }
+
+      // remove internal parameters before calling tool handler.
+      const input = omit(rawInput, ['_reasoning']);
 
       try {
         logger.debug(`Calling tool ${tool.id} with params: ${JSON.stringify(input, null, 2)}`);
@@ -127,12 +138,7 @@ export const toolToLangchain = ({
         logger.debug(e.stack);
 
         const errorToolReturn: RunToolReturn = {
-          results: [
-            {
-              type: ToolResultType.error,
-              data: { message: e.message },
-            },
-          ],
+          results: [createErrorResult(e.message)],
         };
 
         return [`${e}`, errorToolReturn];
@@ -140,7 +146,15 @@ export const toolToLangchain = ({
     },
     {
       name: toolId ?? tool.id,
-      schema: tool.schema,
+      schema: addReasoningParam
+        ? z.object({
+            _reasoning: z
+              .string()
+              .optional()
+              .describe('Brief reasoning of why you are calling this tool'),
+            ...schema.shape,
+          })
+        : schema,
       description,
       verboseParsingErrors: true,
       responseFormat: 'content_and_artifact',

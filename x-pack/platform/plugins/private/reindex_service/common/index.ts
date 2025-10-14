@@ -14,7 +14,7 @@ export type {
   ReindexOperation,
   ReindexOperationCancelResponse,
 } from './types';
-export { ReindexStep, ReindexStatus } from './types';
+export { ReindexStep } from './types';
 
 import type { IndicesIndexSettingsKeys } from '@elastic/elasticsearch/lib/api/types';
 

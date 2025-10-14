@@ -58,6 +58,7 @@ const EsqlParamActions: React.FC<EsqlParamActionsProps> = ({ onAppend, onReplace
               description: '',
               type: ES_FIELD_TYPES.TEXT,
               source: EsqlParamSource.Inferred,
+              optional: false,
             };
       }
     );
@@ -74,6 +75,7 @@ const EsqlParamActions: React.FC<EsqlParamActionsProps> = ({ onAppend, onReplace
     <>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
+          aria-label={i18nMessages.inferParamsButtonLabel}
           iconType="sparkles"
           color="primary"
           size="s"
@@ -88,7 +90,8 @@ const EsqlParamActions: React.FC<EsqlParamActionsProps> = ({ onAppend, onReplace
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          iconType="plus"
+          aria-label={i18nMessages.addParamButtonLabel}
+          iconType="plusInCircle"
           color="primary"
           size="s"
           onClick={() => {
@@ -157,6 +160,7 @@ export const EsqlParams = () => {
         description: '',
         type: ES_FIELD_TYPES.TEXT,
         source: EsqlParamSource.Custom,
+        optional: false,
       });
     },
     [appendParamField]
@@ -200,6 +204,9 @@ export const EsqlParams = () => {
                   </EuiTableHeaderCell>
                   <EuiTableHeaderCell width="128px">
                     {i18nMessages.paramTypeLabel}
+                  </EuiTableHeaderCell>
+                  <EuiTableHeaderCell width="64px" align="center">
+                    {i18nMessages.optionalParamLabel}
                   </EuiTableHeaderCell>
                   <EuiTableHeaderCell width="36px" />
                 </EuiTableHeader>

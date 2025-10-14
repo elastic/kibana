@@ -8,16 +8,15 @@
 import type { Server } from '@hapi/hapi';
 import type { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
-import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { GetMetricIndicesOptions } from '@kbn/metrics-data-access-plugin/server';
+import { type AlertsLocatorParams, alertsLocatorID } from '@kbn/observability-plugin/common';
 import {
   AssetDetailsLocatorDefinition,
   InventoryLocatorDefinition,
   MetricsExplorerLocatorDefinition,
 } from '@kbn/observability-shared-plugin/common';
-import { type AlertsLocatorParams, alertsLocatorID } from '@kbn/observability-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { mapValues } from 'lodash';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { getMetricsFeature } from './features';
@@ -36,8 +35,8 @@ import {
 } from './lib/alerting/register_rule_types';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import type { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
-import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
+import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import {
   infraCustomDashboardsSavedObjectType,
   inventoryViewSavedObjectType,
@@ -59,10 +58,6 @@ import { mapSourceToLogView } from './utils/map_source_to_log_view';
 export interface KbnServer extends Server {
   usage: any;
 }
-
-const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
-  defaultMessage: 'Logs',
-});
 
 export class InfraServerPlugin
   implements
@@ -193,15 +188,6 @@ export class InfraServerPlugin
     plugins.logsShared.registerUsageCollectorActions({
       countLogs: () => UsageCollector.countLogs(),
     });
-
-    plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
-      {
-        sampleObject: null, // indicates that there is no sample object associated with this app link's path
-        getPath: () => `/app/logs`,
-        label: logsSampleDataLinkLabel,
-        icon: 'logsApp',
-      },
-    ]);
 
     registerRuleTypes(plugins.alerting, this.libs, this.config, {
       alertsLocator,

@@ -48,6 +48,7 @@ export const toSavedSearchAttributes = (
     headerRowHeight: savedSearch.headerRowHeight,
     isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
     usesAdHocDataView: savedSearch.usesAdHocDataView,
+    controlGroupJson: savedSearch.controlGroupJson,
     timeRestore: savedSearch.timeRestore ?? false,
     timeRange: savedSearch.timeRange ? pick(savedSearch.timeRange, ['from', 'to']) : undefined,
     refreshInterval: savedSearch.refreshInterval,
@@ -56,4 +57,4 @@ export const toSavedSearchAttributes = (
     density: savedSearch.density,
     breakdownField: savedSearch.breakdownField,
     visContext: savedSearch.visContext,
-  }) as SavedSearchAttributes;
+  });

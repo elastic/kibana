@@ -2,26 +2,30 @@
 
 exports[`OverwrittenSessionPage renders as expected 1`] = `
 <div
-  class="secAuthenticationStatePage  css-1mxql93-kbnFullScreenBgCss"
+  class="css-1mxql93-kbnFullScreenBgCss"
+  data-test-subj="secAuthenticationStatePage"
 >
   <header
-    class="secAuthenticationStatePage__header"
+    class="css-8720cn-AuthenticationStatePage"
+    data-test-subj="secAuthenticationStatePageHeader"
   >
     <div
-      class="secAuthenticationStatePage__content eui-textCenter"
+      class="css-1a7zelw-AuthenticationStatePage"
+      data-test-subj="secAuthenticationStatePageContent"
     >
       <div
         class="euiSpacer euiSpacer--xxl emotion-euiSpacer-xxl"
       />
       <span
-        class="secAuthenticationStatePage__logo"
+        class="css-18y6396-AuthenticationStatePage"
+        data-test-subj="secAuthenticationStatePageLogo"
       >
         <span
           data-euiicon-type="logoElastic"
         />
       </span>
       <h1
-        class="euiTitle secAuthenticationStatePage__title emotion-euiTitle-l"
+        class="euiTitle emotion-euiTitle-l"
       >
         You previously logged in as a different user.
       </h1>
@@ -31,7 +35,7 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
     </div>
   </header>
   <div
-    class="secAuthenticationStatePage__content eui-textCenter"
+    class="css-1a7zelw-AuthenticationStatePage"
   >
     <a
       class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"

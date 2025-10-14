@@ -150,9 +150,6 @@ const SCHEMA_DISCOVER_SESSION_TAB = schema.object({
   attributes: DISCOVER_SESSION_TAB_ATTRIBUTES,
 });
 
-export type DiscoverSessionTabAttributes = TypeOf<typeof DISCOVER_SESSION_TAB_ATTRIBUTES>;
-export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB>;
-
 export const SCHEMA_SEARCH_MODEL_VERSION_6 = SCHEMA_SEARCH_MODEL_VERSION_5.extends({
   tabs: schema.maybe(schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 })),
 });
@@ -171,3 +168,39 @@ export const SCHEMA_SEARCH_MODEL_VERSION_7 = SCHEMA_SEARCH_MODEL_VERSION_6.exten
   sort: schema.maybe(sort),
   tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 }),
 });
+
+const CONTROL_GROUP_JSON_SCHEMA = {
+  controlGroupJson: schema.maybe(schema.string()),
+};
+
+const DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8 =
+  DISCOVER_SESSION_TAB_ATTRIBUTES.extends(CONTROL_GROUP_JSON_SCHEMA);
+
+const SCHEMA_DISCOVER_SESSION_TAB_VERSION_8 = SCHEMA_DISCOVER_SESSION_TAB.extends({
+  attributes: DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8,
+});
+
+export const SCHEMA_SEARCH_MODEL_VERSION_8 = SCHEMA_SEARCH_MODEL_VERSION_7.extends({
+  ...CONTROL_GROUP_JSON_SCHEMA,
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_8, { minSize: 1 }),
+});
+
+// We need to flatten the schema type here to avoid this error:
+// "Type instantiation is excessively deep and possibly infinite",
+// since each `extends()` call wraps the previous type until we hit the depth limit.
+const { tabs: tabsV8, ...restV8Props } = SCHEMA_SEARCH_MODEL_VERSION_8.getPropSchemas();
+
+// This schema temporarily makes `tabs` optional again, to work around an issue
+// where saved objects created via the deprecated saved objects API without a
+// specified version would fail validation if `tabs` was not provided, which
+// broke existing API usages after SCHEMA_SEARCH_MODEL_VERSION_8 was added.
+// It should not be relied on in application code or used for the content
+// management validation schema, and `tabs` should be required again once Core
+// provides a way to fix the underlying issue at the saved objects API level.
+export const SCHEMA_SEARCH_MODEL_VERSION_9_SO_API_WORKAROUND = schema.object({
+  ...restV8Props,
+  tabs: schema.maybe(tabsV8),
+});
+
+export type DiscoverSessionTabAttributes = TypeOf<typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8>;
+export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_8>;

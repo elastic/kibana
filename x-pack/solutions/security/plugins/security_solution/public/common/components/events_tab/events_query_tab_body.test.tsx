@@ -47,6 +47,13 @@ jest.mock('../../lib/kibana', () => {
           ui: {
             getCasesContext: jest.fn(),
           },
+          helpers: {
+            canUseCases: () => [],
+          },
+          hooks: {
+            useCasesAddToNewCaseFlyout: () => () => {},
+            useCasesAddToExistingCaseModal: () => () => {},
+          },
         },
       },
     }),

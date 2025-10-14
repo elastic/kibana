@@ -7,10 +7,11 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiCodeBlock } from '@elastic/eui';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IndicatorEmptyPrompt } from './empty_prompt';
-import { CODE_BLOCK_TEST_ID } from './test_ids';
+import { JsonTab } from '../../../../../flyout/shared/components/json_tab';
+
+export const FLYOUT_JSON_TEST_ID = 'indicators-flyout';
 
 export interface IndicatorsFlyoutJsonProps {
   /**
@@ -27,8 +28,10 @@ export const IndicatorsFlyoutJson: FC<IndicatorsFlyoutJsonProps> = ({ indicator 
   return Object.keys(indicator).length === 0 ? (
     <IndicatorEmptyPrompt />
   ) : (
-    <EuiCodeBlock language="json" lineNumbers data-test-subj={CODE_BLOCK_TEST_ID}>
-      {JSON.stringify(indicator, null, 2)}
-    </EuiCodeBlock>
+    <JsonTab
+      value={indicator as unknown as Record<string, unknown>}
+      showFooterOffset={false}
+      data-test-subj={FLYOUT_JSON_TEST_ID}
+    />
   );
 };

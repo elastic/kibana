@@ -208,11 +208,29 @@ const DeviceControlAccessRadio = React.memo(
         newPayload.mac.device_control.usb_storage = accessLevel;
       }
 
+      // Manage notifications based on access level
+      if (accessLevel === DeviceControlAccessLevelEnum.deny_all) {
+        if (newPayload.windows.popup.device_control) {
+          newPayload.windows.popup.device_control.enabled = true;
+        }
+        if (newPayload.mac.popup.device_control) {
+          newPayload.mac.popup.device_control.enabled = true;
+        }
+      } else {
+        if (newPayload.windows.popup.device_control) {
+          newPayload.windows.popup.device_control.enabled = false;
+        }
+        if (newPayload.mac.popup.device_control) {
+          newPayload.mac.popup.device_control.enabled = false;
+        }
+      }
+
       onChange({ isValid: true, updatedPolicy: newPayload });
     }, [accessLevel, onChange, policy]);
 
     return (
       <EuiRadio
+        name={radioId}
         label={label}
         id={radioId}
         checked={selected === accessLevel}

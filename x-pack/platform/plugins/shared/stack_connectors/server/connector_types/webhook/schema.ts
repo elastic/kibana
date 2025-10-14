@@ -13,15 +13,28 @@ export const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 
 const configSchemaProps = {
   url: schema.string(),
-  method: schema.oneOf([schema.literal(WebhookMethods.POST), schema.literal(WebhookMethods.PUT)], {
-    defaultValue: WebhookMethods.POST,
-  }),
+  method: schema.oneOf(
+    [
+      schema.literal(WebhookMethods.POST),
+      schema.literal(WebhookMethods.PUT),
+      schema.literal(WebhookMethods.PATCH),
+      schema.literal(WebhookMethods.GET),
+      schema.literal(WebhookMethods.DELETE),
+    ],
+    {
+      defaultValue: WebhookMethods.POST,
+    }
+  ),
   headers: schema.nullable(HeadersSchema),
   hasAuth: AuthConfiguration.hasAuth,
   authType: AuthConfiguration.authType,
   certType: AuthConfiguration.certType,
   ca: AuthConfiguration.ca,
   verificationMode: AuthConfiguration.verificationMode,
+  accessTokenUrl: AuthConfiguration.accessTokenUrl,
+  clientId: AuthConfiguration.clientId,
+  scope: AuthConfiguration.scope,
+  additionalFields: AuthConfiguration.additionalFields,
 };
 
 export const ConfigSchema = schema.object(configSchemaProps);

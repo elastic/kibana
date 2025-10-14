@@ -179,4 +179,38 @@ describe('Tab', () => {
       expect(onLabelEdited).not.toHaveBeenCalled();
     });
   });
+
+  it('can finish editing of tab label on blur', async () => {
+    const onLabelEdited = jest.fn();
+    const onSelect = jest.fn();
+    const onClose = jest.fn();
+
+    render(
+      <Tab
+        tabContentId={tabContentId}
+        tabsSizeConfig={tabsSizeConfig}
+        item={tabItem}
+        isSelected
+        services={servicesMock}
+        getPreviewData={getPreviewDataMock}
+        onLabelEdited={onLabelEdited}
+        onSelect={onSelect}
+        onClose={onClose}
+      />
+    );
+
+    expect(screen.queryByText(tabItem.label)).toBeInTheDocument();
+    await userEvent.dblClick(screen.getByTestId(tabButtonTestSubj));
+    expect(screen.queryByText(tabItem.label)).not.toBeInTheDocument();
+
+    const input = screen.getByRole('textbox');
+    await userEvent.clear(input);
+    await userEvent.type(input, 'label2   ');
+    expect(input).toHaveValue('label2   ');
+    await userEvent.keyboard('{tab}');
+    expect(onLabelEdited).toHaveBeenCalledWith(tabItem, 'label2');
+
+    expect(screen.queryByTestId(tabButtonTestSubj)).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  });
 });

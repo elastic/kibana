@@ -10,19 +10,19 @@
 import { EsqlQuery } from '../../query';
 import { Walker } from '../../walker';
 
-describe('INLINESTATS', () => {
+describe('INLINE STATS', () => {
   describe('correctly formatted', () => {
     it('smoke test', () => {
       const src = `
         FROM index
-        | INLINESTATS a BY b`;
+        | INLINE STATS a BY b`;
       const { ast, errors } = EsqlQuery.fromSrc(src);
-      const inlinestats = Walker.match(ast, { type: 'command', name: 'inlinestats' });
+      const inlinestats = Walker.match(ast, { type: 'command', name: 'inline stats' });
 
       expect(errors.length).toBe(0);
       expect(inlinestats).toMatchObject({
         type: 'command',
-        name: 'inlinestats',
+        name: 'inline stats',
         args: [{ name: 'a' }, { type: 'option', name: 'by' }],
       });
     });

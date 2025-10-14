@@ -16,17 +16,22 @@ import { MenuItem } from '../menu_item';
 import type { SideNavLogo } from '../../../types';
 import { useTooltip } from '../../hooks/use_tooltip';
 
-export interface SideNavLogoProps extends HTMLAttributes<HTMLAnchorElement>, SideNavLogo {
+export interface SideNavLogoProps
+  extends Omit<HTMLAttributes<HTMLAnchorElement>, 'onClick'>,
+    SideNavLogo {
   id: string;
-  isActive: boolean;
+  isHighlighted: boolean;
+  isCurrent?: boolean;
   isCollapsed: boolean;
+  onClick?: () => void;
 }
 
 /**
  * It's used to communicate what solution the user is currently in.
  */
 export const SideNavLogoComponent = ({
-  isActive,
+  isHighlighted,
+  isCurrent,
   isCollapsed,
   label,
   ...props
@@ -35,13 +40,20 @@ export const SideNavLogoComponent = ({
   const { tooltipRef, handleMouseOut } = useTooltip();
 
   /**
+   * **Icon size**
+   *
    * In Figma, the logo icon is 20x20.
    * `EuiIcon` supports `l` which is 24x24 and `m` which is 16x16.
+   *
+   * **Padding**
+   *
+   * 7px aligns better with other elements in the layout.
+   * We cannot use `euiTheme.size.s` because it's 8px.
    */
   const wrapperStyles = css`
     border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
     padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
-    padding-bottom: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
+    padding-bottom: ${isCollapsed ? '7px' : euiTheme.size.m};
 
     .euiText {
       font-weight: ${euiTheme.font.weight.bold};
@@ -54,11 +66,13 @@ export const SideNavLogoComponent = ({
   `;
 
   const menuItem = (
-    <div css={wrapperStyles}>
+    <div data-test-subj="side-nav-logo-wrapper" css={wrapperStyles}>
       <MenuItem
         aria-label={`${label} homepage`}
+        // TODO: Change to `side-nav-logo`, might affect tests
         data-test-subj="sideNavLogo"
-        isActive={isActive}
+        isHighlighted={isHighlighted}
+        isCurrent={isCurrent}
         isLabelVisible={!isCollapsed}
         isTruncated={false}
         {...props}

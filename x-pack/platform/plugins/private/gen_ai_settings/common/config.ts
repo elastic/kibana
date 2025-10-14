@@ -15,6 +15,7 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 const configSchema = schema.object({
   showAiBreadcrumb: schema.boolean({ defaultValue: true }),
   showSpacesIntegration: schema.boolean({ defaultValue: true }),
+  showAiAssistantsVisibilitySetting: schema.boolean({ defaultValue: true }),
 });
 
 export type GenAiSettingsConfigType = TypeOf<typeof configSchema>;
@@ -27,5 +28,6 @@ export const config: PluginConfigDescriptor<GenAiSettingsConfigType> = {
   exposeToBrowser: {
     showAiBreadcrumb: true,
     showSpacesIntegration: true,
+    showAiAssistantsVisibilitySetting: true,
   },
 };

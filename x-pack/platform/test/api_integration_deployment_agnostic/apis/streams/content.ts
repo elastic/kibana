@@ -8,11 +8,14 @@
 import expect from '@kbn/expect';
 import { generateArchive, parseArchive } from '@kbn/streams-plugin/server/lib/content';
 import { Readable } from 'stream';
-import type { ContentPackStream } from '@kbn/content-packs-schema';
+import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
 import type { FieldDefinition, RoutingDefinition, StreamQuery } from '@kbn/streams-schema';
 import { Streams, emptyAssets } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import {
+  OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
+  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+} from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -39,9 +42,8 @@ const upsertRequest = ({
   stream: {
     description: 'Test stream',
     ingest: {
-      processing: {
-        steps: [],
-      },
+      processing: { steps: [] },
+      settings: {},
       wired: { fields, routing },
       lifecycle: { inherit: {} },
     },
@@ -57,6 +59,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
+        [OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS]: true,
       });
 
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
@@ -179,21 +182,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           version: '1.0.0',
           include: {
             objects: {
+              mappings: true,
               queries: [],
               routing: [
                 {
                   destination: 'branch_a',
                   objects: {
+                    mappings: true,
                     queries: [],
                     routing: [
                       {
                         destination: 'branch_a.child1',
                         objects: {
+                          mappings: true,
                           queries: [],
                           routing: [
                             {
                               destination: 'branch_a.child1.nested',
-                              objects: { queries: [{ id: 'my-error-query' }], routing: [] },
+                              objects: {
+                                mappings: true,
+                                queries: [{ id: 'my-error-query' }],
+                                routing: [],
+                              },
                             },
                           ],
                         },
@@ -246,6 +256,92 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
       });
 
+      const expectMappings = (contentPack: ContentPack, fields: FieldDefinition) => {
+        expect(contentPack.entries).to.have.length(1);
+
+        const rootEntry = contentPack.entries.find(
+          (entry): entry is ContentPackStream =>
+            entry.type === 'stream' && entry.name === ROOT_STREAM_ID
+        )!;
+        expect(rootEntry.request.stream.ingest.wired.fields).to.eql(fields);
+      };
+
+      it('respects mappings inclusion', async () => {
+        const contentPackWithoutMappings = await parseArchive(
+          Readable.from(
+            await exportContent(apiClient, 'logs.branch_a', {
+              name: 'check-mappings',
+              description: '',
+              version: '1.0.0',
+              include: {
+                objects: {
+                  mappings: false,
+                  queries: [],
+                  routing: [],
+                },
+              },
+            })
+          )
+        );
+        expectMappings(contentPackWithoutMappings, {});
+
+        const contentPackWithMappings = await parseArchive(
+          Readable.from(
+            await exportContent(apiClient, 'logs.branch_a', {
+              name: 'check-mappings',
+              description: '',
+              version: '1.0.0',
+              include: {
+                objects: {
+                  mappings: true,
+                  queries: [],
+                  routing: [],
+                },
+              },
+            })
+          )
+        );
+
+        expectMappings(contentPackWithMappings, {
+          'resource.attributes.foo.bar': { type: 'keyword' },
+        });
+      });
+
+      it('pulls inherited mappings in the exported root', async () => {
+        // mapping is set on logs.branch_a parent
+        const contentPack = await parseArchive(
+          Readable.from(
+            await exportContent(apiClient, 'logs.branch_a.child1', {
+              name: 'check-mappings',
+              description: '',
+              version: '1.0.0',
+              include: {
+                objects: { mappings: true, queries: [], routing: [] },
+              },
+            })
+          )
+        );
+
+        expectMappings(contentPack, { 'resource.attributes.foo.bar': { type: 'keyword' } });
+      });
+
+      it('does not export base fields', async () => {
+        const contentPack = await parseArchive(
+          Readable.from(
+            await exportContent(apiClient, 'logs', {
+              name: 'check-mappings',
+              description: '',
+              version: '1.0.0',
+              include: {
+                objects: { mappings: true, queries: [], routing: [] },
+              },
+            })
+          )
+        );
+
+        expectMappings(contentPack, {});
+      });
+
       it('fails when trying to export a stream thats not a descendant', async () => {
         const exportBody = {
           name: 'nonexistent_stream_pack',
@@ -253,14 +349,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           version: '1.0.0',
           include: {
             objects: {
+              mappings: true,
               queries: [],
               routing: [
                 {
                   destination: 'branch_b',
                   objects: {
+                    mappings: true,
                     queries: [],
                     routing: [
-                      { destination: 'branch_b.child1', objects: { queries: [], routing: [] } },
+                      {
+                        destination: 'branch_b.child1',
+                        objects: { mappings: true, queries: [], routing: [] },
+                      },
                     ],
                   },
                 },
@@ -290,9 +391,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: 'ok',
                   ingest: {
-                    processing: {
-                      steps: [],
-                    },
+                    processing: { steps: [] },
+                    settings: {},
                     wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
                   },
@@ -307,9 +407,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: 'a'.repeat(twoMB),
                   ingest: {
-                    processing: {
-                      steps: [],
-                    },
+                    processing: { steps: [] },
+                    settings: {},
                     wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
                   },
@@ -343,11 +442,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           version: '1.0.0',
           include: {
             objects: {
+              mappings: true,
               queries: [],
               routing: [
                 {
                   destination: 'nested',
-                  objects: { queries: [{ id: 'my-error-query' }], routing: [] },
+                  objects: { mappings: true, queries: [{ id: 'my-error-query' }], routing: [] },
                 },
               ],
             },
@@ -412,14 +512,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const importResponse = await importContent(apiClient, 'logs.branch_d', {
           include: {
             objects: {
+              mappings: true,
               queries: [],
               routing: [
                 {
                   destination: 'branch_b',
                   objects: {
+                    mappings: true,
                     queries: [],
                     routing: [
-                      { destination: 'branch_b.child1', objects: { queries: [], routing: [] } },
+                      {
+                        destination: 'branch_b.child1',
+                        objects: { mappings: true, queries: [], routing: [] },
+                      },
                     ],
                   },
                 },
@@ -465,9 +570,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   stream: {
                     description: '',
                     ingest: {
-                      processing: {
-                        steps: [],
-                      },
+                      processing: { steps: [] },
+                      settings: {},
                       wired: {
                         fields,
                         routing: [],
@@ -558,9 +662,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: '',
                   ingest: {
-                    processing: {
-                      steps: [],
-                    },
+                    processing: { steps: [] },
+                    settings: {},
                     wired: {
                       fields: {},
                       routing: [
@@ -584,9 +687,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: '',
                   ingest: {
-                    processing: {
-                      steps: [],
-                    },
+                    processing: { steps: [] },
+                    settings: {},
                     wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
                   },
@@ -628,9 +730,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 stream: {
                   description: '',
                   ingest: {
-                    processing: {
-                      steps: [],
-                    },
+                    processing: { steps: [] },
+                    settings: {},
                     wired: {
                       fields: {},
                       routing: [],
@@ -642,7 +743,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 queries: [
                   { id: 'my-error-query', title: 'error query', kql: { query: 'message: ERROR' } },
                 ],
-                rules: [],
               },
             },
           ]

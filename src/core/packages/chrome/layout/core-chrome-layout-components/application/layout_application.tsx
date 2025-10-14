@@ -10,6 +10,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 
+import { css } from '@emotion/react';
 import { useEuiOverflowScroll } from '@elastic/eui';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 
@@ -30,7 +31,12 @@ export const LayoutApplication = ({
   topBar?: ReactNode;
   bottomBar?: ReactNode;
 }) => {
-  const overflow = useEuiOverflowScroll('y');
+  // only restrict overflow scroll on screen (not print) to allow for full page printing
+  const overflow = css`
+    @media screen {
+      ${useEuiOverflowScroll('y')};
+    }
+  `;
 
   return (
     <div

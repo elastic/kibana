@@ -21,6 +21,7 @@ import type {
   Attachment,
   AttachmentAttributes,
   Case,
+  EventAttachmentPayload,
   User,
   UserCommentAttachmentPayload,
 } from '../../common/types/domain';
@@ -123,17 +124,20 @@ export const flattenCaseSavedObject = ({
   comments = [],
   totalComment = comments.length,
   totalAlerts = 0,
+  totalEvents = 0,
 }: {
   savedObject: CaseSavedObjectTransformed;
   comments?: Array<SavedObject<AttachmentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
+  totalEvents?: number;
 }): Case => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
   totalComment,
   totalAlerts,
+  totalEvents,
   ...savedObject.attributes,
 });
 
@@ -163,10 +167,17 @@ export const flattenCommentSavedObject = (
 });
 
 export const getIDsAndIndicesAsArrays = (
-  comment: AlertAttachmentPayload
+  comment: AlertAttachmentPayload | EventAttachmentPayload
 ): { ids: string[]; indices: string[] } => {
+  if (comment.type === AttachmentType.alert) {
+    return {
+      ids: Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId],
+      indices: Array.isArray(comment.index) ? comment.index : [comment.index],
+    };
+  }
+
   return {
-    ids: Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId],
+    ids: Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId],
     indices: Array.isArray(comment.index) ? comment.index : [comment.index],
   };
 };
@@ -260,6 +271,15 @@ export const isCommentRequestTypeAlert = (
 };
 
 /**
+ * A type narrowing function for event comments.
+ */
+export const isCommentRequestTypeEvent = (
+  context: AttachmentRequest
+): context is EventAttachmentPayload => {
+  return context.type === AttachmentType.event;
+};
+
+/**
  * Returns true if a Comment Request is trying to create either a persistableState or an
  * externalReference attachment.
  */
@@ -347,6 +367,23 @@ export const countAlertsForID = ({
   id: string;
 }): number | undefined => {
   return groupTotalAlertsByID({ comments }).get(id);
+};
+
+/**
+ * Counts total events in a single case.
+ */
+export const countEventsForID = ({
+  comments,
+}: {
+  comments: SavedObjectsFindResponse<AttachmentAttributes>;
+}): number | undefined => {
+  return comments.saved_objects.reduce((sum, current) => {
+    if (current.attributes.type === AttachmentType.event) {
+      return sum + [current.attributes.eventId].flat().length;
+    }
+
+    return sum;
+  }, 0);
 };
 
 /**

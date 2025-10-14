@@ -300,7 +300,7 @@ Deprecated connectors will continue to function with the rules they were added t
 
 To update a deprecated connector:
 
-1. Go to the **{{connectors-ui}}** page using the navigation menu or the [global search field](docs-content://get-started/the-stack.md#kibana-navigation-search).
+1. Go to the **{{connectors-ui}}** page using the navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md).
 2. Select the deprecated connector to open the **Edit connector** flyout.
 3. In the warning message, click **Update this connector**.
 4. Complete the guided steps in the **Edit connector** flyout.

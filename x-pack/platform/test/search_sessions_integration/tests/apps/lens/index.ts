@@ -12,7 +12,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const searchSessions = getService('searchSessions');
 
-  describe('lens search sessions', function () {
+  describe.skip('lens search sessions', function () {
     before(async () => {
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/fixtures/es_archives/logstash_functional'

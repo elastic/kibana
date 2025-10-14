@@ -10,22 +10,22 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { OverlayFlyoutStart } from '@kbn/core-overlays-browser';
 import type { FlyoutService } from '@kbn/core-overlays-browser-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<OverlayFlyoutStart> = {
+  const startContract: jest.Mocked<OverlayFlyoutStart> = lazyObject({
     open: jest.fn().mockReturnValue({
       close: jest.fn(),
       onClose: Promise.resolve(),
     }),
-  };
+  });
   return startContract;
 };
 
 const createMock = () => {
-  const mocked: jest.Mocked<PublicMethodsOf<FlyoutService>> = {
-    start: jest.fn(),
-  };
-  mocked.start.mockReturnValue(createStartContractMock());
+  const mocked: jest.Mocked<PublicMethodsOf<FlyoutService>> = lazyObject({
+    start: jest.fn().mockReturnValue(createStartContractMock()),
+  });
   return mocked;
 };
 

@@ -8,8 +8,8 @@
  */
 
 import type { ChangeEvent } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { EuiFieldText, keys, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
+import { EuiFieldText, keys, mathWithUnits, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { TabItem } from '../../types';
 import { MAX_TAB_LABEL_LENGTH } from '../../constants';
@@ -26,11 +26,21 @@ export interface EditTabLabelProps {
   onExit: () => void;
 }
 
-export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited, onExit }) => {
+export const EditTabLabel: React.FC<EditTabLabelProps> = ({
+  item,
+  onLabelEdited,
+  onExit: onExitOriginal,
+}) => {
   const { euiTheme } = useEuiTheme();
   const [value, setValue] = useState<string>(item.label);
   const [submitState, setSubmitState] = useState<SubmitState>(SubmitState.initial);
   const [inputNode, setInputNode] = useState<HTMLInputElement | null>(null);
+  const isFinishedRef = useRef<boolean>(false);
+
+  const onExit = useCallback(() => {
+    isFinishedRef.current = true;
+    onExitOriginal();
+  }, [onExitOriginal]);
 
   const onChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -40,8 +50,9 @@ export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited,
   );
 
   const onSubmit = useCallback(
-    async (newLabel: string) => {
-      if (!newLabel) {
+    async (nextLabel: string) => {
+      const newLabel = nextLabel.trim();
+      if (!newLabel || newLabel.length > MAX_TAB_LABEL_LENGTH) {
         return;
       }
 
@@ -69,11 +80,22 @@ export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited,
       }
 
       if (event.key === keys.ENTER) {
-        await onSubmit(value.trim());
+        await onSubmit(value);
       }
     },
     [value, onSubmit, onExit]
   );
+
+  const onBlur = useCallback(async () => {
+    if (isFinishedRef.current) {
+      return;
+    }
+    if (submitState !== SubmitState.initial) {
+      onExit();
+      return;
+    }
+    return onSubmit(value);
+  }, [value, submitState, onSubmit, onExit]);
 
   useEffect(() => {
     if (inputNode) {
@@ -86,17 +108,19 @@ export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited,
       inputRef={setInputNode}
       data-test-subj={`unifiedTabs_editTabLabelInput_${item.id}`}
       css={css`
-        block-size: 28px;
+        block-size: ${mathWithUnits([euiTheme.size.xl, euiTheme.size.xs], (xl, xs) => xl - xs)};
         margin-top: ${euiTheme.size.xxs};
       `}
       compressed
       value={value}
       maxLength={MAX_TAB_LABEL_LENGTH}
       isLoading={submitState === SubmitState.submitting}
-      isInvalid={submitState === SubmitState.error || !value.trim()}
+      isInvalid={
+        submitState === SubmitState.error || !value.trim() || value.length > MAX_TAB_LABEL_LENGTH
+      }
       onChange={onChange}
       onKeyDown={onKeyDown}
-      onBlur={submitState !== SubmitState.submitting ? onExit : undefined}
+      onBlur={submitState !== SubmitState.submitting ? onBlur : undefined}
     />
   );
 };

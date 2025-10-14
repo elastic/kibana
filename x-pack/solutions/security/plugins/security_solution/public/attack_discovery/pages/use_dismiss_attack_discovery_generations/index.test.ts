@@ -5,16 +5,39 @@
  * 2.0.
  */
 
+import {
+  ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS,
+  ATTACK_DISCOVERY_INTERNAL_GENERATIONS_BY_ID_DISMISS,
+  API_VERSIONS,
+} from '@kbn/elastic-assistant-common';
 import { type PostAttackDiscoveryGenerationsDismissResponse } from '@kbn/elastic-assistant-common';
+import { replaceParams } from '@kbn/openapi-common/shared';
 import { renderHook, act, waitFor } from '@testing-library/react';
+import * as ReactQuery from '@tanstack/react-query';
 
 import { useDismissAttackDiscoveryGeneration } from '.';
 import { TestProviders } from '../../../common/mock/test_providers';
 
-const mockHttpFetch = jest.fn();
 const mockAddSuccessToast = jest.fn();
 const mockAddError = jest.fn();
+jest.mock('../../../common/hooks/use_app_toasts', () => ({
+  useAppToasts: (): MockUseAppToasts => ({
+    addSuccessToast: (...args: unknown[]) => mockAddSuccessToast(...args),
+    addError: (...args: unknown[]) => mockAddError(...args),
+  }),
+}));
+
 const mockInvalidateGenerations = jest.fn();
+jest.mock('../use_get_attack_discovery_generations', () => ({
+  useInvalidateGetAttackDiscoveryGenerations: () => mockInvalidateGenerations,
+}));
+
+const mockUseKibanaFeatureFlags = jest.fn().mockReturnValue({
+  attackDiscoveryPublicApiEnabled: true,
+});
+jest.mock('../use_kibana_feature_flags', () => ({
+  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
+}));
 
 jest.mock('@kbn/i18n', () => ({
   i18n: {
@@ -51,6 +74,7 @@ interface MockUseKibanaReturn {
   };
 }
 
+const mockHttpFetch = jest.fn();
 jest.mock(
   '../../../common/lib/kibana',
   (): {
@@ -103,6 +127,107 @@ describe('useDismissAttackDiscoveryGeneration', () => {
 
     // Default successful response for http.fetch
     mockHttpFetch.mockResolvedValue({} as PostAttackDiscoveryGenerationsDismissResponse);
+  });
+
+  describe('when attackDiscoveryPublicApiEnabled is false', () => {
+    const spy = jest.spyOn(ReactQuery, 'useMutation');
+
+    beforeEach(() => {
+      mockUseKibanaFeatureFlags.mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
+      mockHttpFetch.mockResolvedValue({});
+
+      const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), {
+        wrapper: TestProviders,
+      });
+
+      act(() => {
+        result.current.mutate({ executionUuid: 'gen1' });
+      });
+    });
+
+    afterEach(() => spy.mockClear());
+
+    it('calls POST with the internal API route', async () => {
+      const expectedInternalUrl = replaceParams(
+        ATTACK_DISCOVERY_INTERNAL_GENERATIONS_BY_ID_DISMISS,
+        {
+          execution_uuid: 'gen1',
+        }
+      );
+
+      await waitFor(() => {
+        expect(mockHttpFetch).toHaveBeenCalledWith(expectedInternalUrl, expect.any(Object));
+      });
+    });
+
+    it('calls POST with the internal API version', async () => {
+      await waitFor(() => {
+        expect(mockHttpFetch).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({
+            version: API_VERSIONS.internal.v1,
+          })
+        );
+      });
+    });
+
+    it('uses the internal route in the mutation key', () => {
+      const calledArgs = spy.mock.calls[0][1] as unknown;
+      expect((calledArgs as { mutationKey: unknown }).mutationKey).toEqual([
+        'POST',
+        ATTACK_DISCOVERY_INTERNAL_GENERATIONS_BY_ID_DISMISS,
+      ]);
+    });
+  });
+
+  describe('when attackDiscoveryPublicApiEnabled is true', () => {
+    const spy = jest.spyOn(ReactQuery, 'useMutation');
+
+    beforeEach(() => {
+      mockUseKibanaFeatureFlags.mockReturnValue({ attackDiscoveryPublicApiEnabled: true });
+      mockHttpFetch.mockResolvedValue({});
+
+      const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), {
+        wrapper: TestProviders,
+      });
+
+      act(() => {
+        result.current.mutate({ executionUuid: 'gen1' });
+      });
+    });
+
+    afterEach(() => spy.mockClear());
+
+    it('calls POST with the public API route', async () => {
+      const expectedPublicUrl = replaceParams(ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS, {
+        execution_uuid: 'gen1',
+      });
+
+      await waitFor(() => {
+        expect(mockHttpFetch).toHaveBeenCalledWith(expectedPublicUrl, expect.any(Object));
+      });
+    });
+
+    it('calls POST with the public API version', async () => {
+      await waitFor(() => {
+        expect(mockHttpFetch).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({ version: API_VERSIONS.public.v1 })
+        );
+      });
+    });
+
+    it('uses the public route in the mutation key', () => {
+      renderHook(() => useDismissAttackDiscoveryGeneration(), {
+        wrapper: TestProviders,
+      });
+
+      const calledArgs = spy.mock.calls[0][1] as unknown;
+      expect((calledArgs as { mutationKey: unknown }).mutationKey).toEqual([
+        'POST',
+        ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS,
+      ]);
+    });
   });
 
   describe('when mutate is called and mutation succeeds', () => {

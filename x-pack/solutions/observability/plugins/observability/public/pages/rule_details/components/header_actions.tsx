@@ -229,6 +229,9 @@ export function HeaderActions({
             onClick={() => {
               setSnoozeModalOpen(true);
             }}
+            aria-label={i18n.translate('xpack.observability.ruleDetails.snoozeButtonAriaLabel', {
+              defaultMessage: 'Manage rule snooze',
+            })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

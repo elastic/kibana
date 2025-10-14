@@ -284,12 +284,26 @@ export class TaskScheduling {
    */
   public async ensureScheduled(
     taskInstance: TaskInstanceWithId,
-    options?: Record<string, unknown>
+    options?: ScheduleOptions
   ): Promise<TaskInstanceWithId> {
     try {
       return await this.schedule(taskInstance, options);
     } catch (err) {
       if (err.statusCode === VERSION_CONFLICT_STATUS) {
+        // check if task specifies a schedule interval
+        // if so,try to update the just the schedule
+        // only works for interval schedule
+        if (taskInstance.schedule && taskInstance.schedule.interval) {
+          const result = await this.bulkUpdateSchedules([taskInstance.id], taskInstance.schedule);
+          if (
+            result.errors.length &&
+            result.errors[0].error.statusCode !== VERSION_CONFLICT_STATUS
+          ) {
+            throw new Error(
+              `Tried to update schedule for existing task "${taskInstance.id}" but failed with error: ${result.errors[0].error.message}`
+            );
+          }
+        }
         return taskInstance;
       }
       throw err;

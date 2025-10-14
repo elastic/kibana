@@ -115,7 +115,8 @@ export type SavedObjectsModelVersionMap = {
     | '17'
     | '18'
     | '19'
-    | '20']?: SavedObjectsModelVersion;
+    | '20'
+    | '21']?: SavedObjectsModelVersion;
 };
 
 /**

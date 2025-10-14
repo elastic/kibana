@@ -8,7 +8,6 @@
 import React from 'react';
 import { getAllCasesSelectorModalNoProviderLazy } from '../../client/ui/get_all_cases_selector_modal';
 import { getCreateCaseFlyoutLazyNoProvider } from '../../client/ui/get_create_case_flyout';
-import { getRemoveAlertFromCaseModal } from '../../client/ui/get_remove_alert_modal';
 
 import { renderWithTestingProviders } from '../../common/mock';
 import { getInitialCasesContextState } from './state/cases_context_reducer';
@@ -16,12 +15,10 @@ import { CasesGlobalComponents } from './cases_global_components';
 
 jest.mock('../../client/ui/get_create_case_flyout');
 jest.mock('../../client/ui/get_all_cases_selector_modal');
-jest.mock('../../client/ui/get_remove_alert_modal');
 
 const getCreateCaseFlyoutLazyNoProviderMock = getCreateCaseFlyoutLazyNoProvider as jest.Mock;
 const getAllCasesSelectorModalNoProviderLazyMock =
   getAllCasesSelectorModalNoProviderLazy as jest.Mock;
-const getRemoveAlertFromCaseModalMock = getRemoveAlertFromCaseModal as jest.Mock;
 
 describe('Cases context UI', () => {
   beforeEach(() => {
@@ -72,41 +69,6 @@ describe('Cases context UI', () => {
       expect(getAllCasesSelectorModalNoProviderLazyMock).toHaveBeenCalledWith({
         attachments: [],
         onRowClick,
-      });
-    });
-
-    it('should not render the select case modal when isModalOpen is false', async () => {
-      const state = {
-        ...getInitialCasesContextState(),
-        selectCaseModal: {
-          isModalOpen: false,
-        },
-      };
-      renderWithTestingProviders(<CasesGlobalComponents state={state} />);
-      expect(getAllCasesSelectorModalNoProviderLazyMock).toHaveBeenCalled();
-    });
-  });
-
-  describe('removeAlertModal', () => {
-    it('should render the remove alert modal when isModalOpen is true', async () => {
-      const state = {
-        ...getInitialCasesContextState(),
-        removeAlertModal: {
-          isModalOpen: true,
-          props: {
-            caseId: 'case-id',
-            alertId: ['alert-id'],
-            onSuccess: jest.fn(),
-            onClose: jest.fn(),
-          },
-        },
-      };
-      renderWithTestingProviders(<CasesGlobalComponents state={state} />);
-      expect(getRemoveAlertFromCaseModalMock).toHaveBeenCalledWith({
-        caseId: 'case-id',
-        alertId: ['alert-id'],
-        onSuccess: expect.any(Function),
-        onClose: expect.any(Function),
       });
     });
 

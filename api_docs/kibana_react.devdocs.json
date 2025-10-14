@@ -1359,20 +1359,20 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "observabilityAiAssistantManagement",
-            "path": "x-pack/platform/plugins/private/observability_ai_assistant_management/public/app.tsx"
-          },
-          {
-            "plugin": "observabilityAiAssistantManagement",
-            "path": "x-pack/platform/plugins/private/observability_ai_assistant_management/public/app.tsx"
-          },
-          {
             "plugin": "aiAssistantManagementSelection",
             "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/management_section/mount_section.tsx"
           },
           {
             "plugin": "aiAssistantManagementSelection",
             "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/management_section/mount_section.tsx"
+          },
+          {
+            "plugin": "observabilityAiAssistantManagement",
+            "path": "x-pack/platform/plugins/private/observability_ai_assistant_management/public/app.tsx"
+          },
+          {
+            "plugin": "observabilityAiAssistantManagement",
+            "path": "x-pack/platform/plugins/private/observability_ai_assistant_management/public/app.tsx"
           }
         ],
         "children": [
@@ -2205,8 +2205,6 @@
           "HttpSetup",
           " | undefined; injection?: ",
           "CoreDiServiceStart",
-          " | undefined; savedObjects?: ",
-          "SavedObjectsStart",
           " | undefined; i18n?: ",
           "I18nStart",
           " | undefined; notifications?: ",

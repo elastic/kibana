@@ -36,7 +36,7 @@ const MINIMUM_RULE_INTERVAL_FOR_LEGACY_ACTION = '1h';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const es = getService('es');
   const log = getService('log');
 
@@ -88,7 +88,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits.length).toBe(1);
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).toBe(rule.id);
 
-      const { body } = await securitySolutionApi
+      const { body } = await detectionsApi
         .performRulesBulkAction({
           body: {
             query: '',
@@ -102,7 +102,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
       // Check that the updates have been persisted
-      const { body: ruleBody } = await securitySolutionApi
+      const { body: ruleBody } = await detectionsApi
         .readRule({ query: { rule_id: ruleId } })
         .expect(200);
 
@@ -155,7 +155,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits.length).toBe(1);
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).toBe(rule.id);
 
-      const { body } = await securitySolutionApi
+      const { body } = await detectionsApi
         .performRulesBulkAction({
           body: { query: '', action: BulkActionTypeEnum.delete },
           query: {},
@@ -172,7 +172,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsPostResults.hits.hits.length).toBe(0);
 
       // Check that the updates have been persisted
-      await securitySolutionApi.readRule({ query: { rule_id: ruleId } }).expect(404);
+      await detectionsApi.readRule({ query: { rule_id: ruleId } }).expect(404);
     });
 
     it('should enable rules and migrate actions', async () => {
@@ -206,7 +206,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits.length).toBe(1);
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).toBe(rule.id);
 
-      const { body } = await securitySolutionApi
+      const { body } = await detectionsApi
         .performRulesBulkAction({
           body: { query: '', action: BulkActionTypeEnum.enable },
           query: {},
@@ -219,7 +219,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.attributes.results.updated[0].enabled).toBeTruthy();
 
       // Check that the updates have been persisted
-      const { body: ruleBody } = await securitySolutionApi
+      const { body: ruleBody } = await detectionsApi
         .readRule({ query: { rule_id: ruleId } })
         .expect(200);
 
@@ -274,7 +274,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits.length).toBe(1);
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).toBe(rule.id);
 
-      const { body } = await securitySolutionApi
+      const { body } = await detectionsApi
         .performRulesBulkAction({
           body: { query: '', action: BulkActionTypeEnum.disable },
           query: {},
@@ -287,7 +287,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.attributes.results.updated[0].enabled).toBeFalsy();
 
       // Check that the updates have been persisted
-      const { body: ruleBody } = await securitySolutionApi
+      const { body: ruleBody } = await detectionsApi
         .readRule({ query: { rule_id: ruleId } })
         .expect(200);
 
@@ -341,7 +341,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ruleToDuplicate.id
       );
 
-      const { body } = await securitySolutionApi
+      const { body } = await detectionsApi
         .performRulesBulkAction({
           body: {
             query: '',
@@ -358,9 +358,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.attributes.results.created[0].name).toBe(`${ruleToDuplicate.name} [Duplicate]`);
 
       // Check that the updates have been persisted
-      const { body: rulesResponse } = await securitySolutionApi
-        .findRules({ query: {} })
-        .expect(200);
+      const { body: rulesResponse } = await detectionsApi.findRules({ query: {} }).expect(200);
 
       expect(rulesResponse.total).toBe(2);
 
@@ -383,7 +381,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should set rule_source to "internal" when duplicating a rule', async () => {
       await createRule(supertest, log, getCustomQueryRuleParams());
 
-      const { body } = await securitySolutionApi
+      const { body } = await detectionsApi
         .performRulesBulkAction({
           body: {
             query: '',
@@ -405,7 +403,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should return error if index patterns action is applied to ES|QL rule', async () => {
           const esqlRule = await createRule(supertest, log, getCreateEsqlRulesSchemaMock());
 
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .performRulesBulkAction({
               body: {
                 ids: [esqlRule.id],
@@ -472,7 +470,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ruleToDuplicate.id
         );
 
-        const { body: setTagsBody } = await securitySolutionApi
+        const { body: setTagsBody } = await detectionsApi
           .performRulesBulkAction({
             body: {
               query: '',
@@ -496,7 +494,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         // Check that the updates have been persisted
-        const { body: setTagsRule } = await securitySolutionApi
+        const { body: setTagsRule } = await detectionsApi
           .readRule({ query: { rule_id: ruleId } })
           .expect(200);
 
@@ -563,7 +561,7 @@ export default ({ getService }: FtrProviderContext): void => {
               createdRule.id
             );
 
-            const { body } = await securitySolutionApi
+            const { body } = await detectionsApi
               .performRulesBulkAction({
                 body: {
                   ids: [createdRule.id],
@@ -601,7 +599,7 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(body.attributes.results.updated[0].actions).toEqual(expectedRuleActions);
 
             // Check that the updates have been persisted
-            const { body: readRule } = await securitySolutionApi
+            const { body: readRule } = await detectionsApi
               .readRule({ query: { rule_id: ruleId } })
               .expect(200);
 
@@ -637,7 +635,7 @@ export default ({ getService }: FtrProviderContext): void => {
           }),
         ]);
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             body: { query: '', action: BulkActionTypeEnum.export },
             query: {},
@@ -723,7 +721,7 @@ export default ({ getService }: FtrProviderContext): void => {
             }),
           ]);
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             body: { query: '', action: BulkActionTypeEnum.delete },
             query: {},
@@ -750,15 +748,15 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         // Check that the updates have been persisted
-        await securitySolutionApi
+        await detectionsApi
           .readRule({ query: { rule_id: ruleWithLegacyInvestigationField.params.ruleId } })
           .expect(404);
-        await securitySolutionApi
+        await detectionsApi
           .readRule({
             query: { rule_id: ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId },
           })
           .expect(404);
-        await securitySolutionApi
+        await detectionsApi
           .readRule({ query: { rule_id: 'rule-with-investigation-field' } })
           .expect(404);
       });
@@ -781,7 +779,7 @@ export default ({ getService }: FtrProviderContext): void => {
             }),
           ]);
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             body: { query: '', action: BulkActionTypeEnum.enable },
             query: {},
@@ -869,7 +867,7 @@ export default ({ getService }: FtrProviderContext): void => {
             }),
           ]);
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             body: { query: '', action: BulkActionTypeEnum.disable },
             query: {},
@@ -963,7 +961,7 @@ export default ({ getService }: FtrProviderContext): void => {
           }),
         ]);
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             body: {
               query: '',
@@ -985,7 +983,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(names.includes('Test investigation fields object [Duplicate]')).toBeTruthy();
 
         // Check that the updates have been persisted
-        const { body: rulesResponse } = await await securitySolutionApi
+        const { body: rulesResponse } = await await detectionsApi
           .findRules({ query: {} })
           .expect(200);
 
@@ -1100,7 +1098,7 @@ export default ({ getService }: FtrProviderContext): void => {
             }),
           ]);
 
-        const { body } = await securitySolutionApi.performRulesBulkAction({
+        const { body } = await detectionsApi.performRulesBulkAction({
           body: {
             query: '',
             action: BulkActionTypeEnum.edit,

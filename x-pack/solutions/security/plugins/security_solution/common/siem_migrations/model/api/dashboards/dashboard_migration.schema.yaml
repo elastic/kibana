@@ -3,6 +3,32 @@ info:
   title: SIEM Dashboard Migration API
   version: '1'
 paths:
+  # Dashboard migrations APIs
+
+  /internal/siem_migrations/dashboards/{migration_id}/translation_stats:
+    get:
+      summary: Retrieves the stats for all dashboard migrations
+      operationId: GetAllTranslationStatsDashboardMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves the translation stats of a SIEM dashboards migration using the migration id provided
+      tags:
+        - SIEM Dashboard Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to fetch translation stats for
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates dashboard migrations translation stats have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                $ref: '../../dashboard_migration.schema.yaml#/components/schemas/DashboardMigrationTranslationStats'
+
   /internal/siem_migrations/dashboards:
     put:
       summary: Creates a new dashboard migration

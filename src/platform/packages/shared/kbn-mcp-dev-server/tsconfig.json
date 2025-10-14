@@ -8,7 +8,7 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts"
   ],
   "exclude": [
     "target/**/*"
@@ -18,7 +18,6 @@
     "@kbn/zod",
     "@kbn/repo-info",
     "@kbn/repo-packages",
-    "@kbn/std",
-    "@kbn/es-query"
+    "@kbn/std"
   ]
 }

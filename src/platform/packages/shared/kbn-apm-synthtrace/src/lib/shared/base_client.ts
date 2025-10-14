@@ -21,13 +21,21 @@ import { Readable } from 'stream';
 import { isGeneratorObject } from 'util/types';
 import type { Logger } from '../utils/create_logger';
 import { sequential } from '../utils/stream_utils';
-import type { KibanaClient } from './base_kibana_client';
+import { KibanaClient } from './base_kibana_client';
 import { getKibanaClient } from '../../cli/utils/get_kibana_client';
 import { FleetClient } from './fleet_client';
 
 export interface SynthtraceEsClientOptions {
   client: Client;
-  kibana?: { target: string; username?: string; password?: string; logger?: Logger } | KibanaClient;
+  kibana?:
+    | {
+        target: string;
+        username?: string;
+        password?: string;
+        apiKey?: string;
+        logger?: Logger;
+      }
+    | KibanaClient;
   fleetClient?: FleetClient;
   logger: Logger;
   concurrency?: number;
@@ -75,7 +83,14 @@ export class SynthtraceEsClientBase<TFields extends Fields> implements Synthtrac
   }
 
   private initKibanaClient(
-    input?: KibanaClient | { target: string; username?: string; password?: string }
+    input?:
+      | KibanaClient
+      | {
+          target: string;
+          username?: string;
+          password?: string;
+          apiKey?: string;
+        }
   ): KibanaClient | undefined {
     if (!input) {
       return undefined;
@@ -87,6 +102,7 @@ export class SynthtraceEsClientBase<TFields extends Fields> implements Synthtrac
         logger: this.logger,
         username: input.username,
         password: input.password,
+        apiKey: input.apiKey,
       });
     }
 
@@ -242,8 +258,11 @@ export class SynthtraceEsClientBase<TFields extends Fields> implements Synthtrac
   }
 }
 
-function isKibanaClientConfig(
-  input: KibanaClient | { target: string }
-): input is { target: string } {
-  return typeof input === 'object' && 'target' in input;
+function isKibanaClientConfig(input: KibanaClient | { target: string }): input is {
+  target: string;
+  username?: string;
+  password?: string;
+  apiKey?: string;
+} {
+  return !(input instanceof KibanaClient);
 }

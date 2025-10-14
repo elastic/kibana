@@ -13,6 +13,7 @@ import type { ESQLColumnData } from '../../commands_registry/types';
 import { Location } from '../../commands_registry/types';
 import { buildPartialMatcher, getExpressionType } from './expressions';
 import { setTestFunctions } from './test_functions';
+import { TIME_SYSTEM_PARAMS } from './literals';
 
 describe('buildPartialMatcher', () => {
   it('should build a partial matcher', () => {
@@ -76,11 +77,19 @@ describe('getExpressionType', () => {
         expression: '?value',
         expectedType: 'param',
       },
+      // time system params are interpreted as keywords... this is not a mistake
+      ...TIME_SYSTEM_PARAMS.map((p) => ({
+        expression: p,
+        expectedType: 'keyword' as SupportedDataType,
+      })),
     ];
-    test.each(cases)('detects a literal of type $expectedType', ({ expression, expectedType }) => {
-      const ast = getASTForExpression(expression);
-      expect(getExpressionType(ast)).toBe(expectedType);
-    });
+    test.each(cases)(
+      "detects literal '$expression' of type $expectedType",
+      ({ expression, expectedType }) => {
+        const ast = getASTForExpression(expression);
+        expect(getExpressionType(ast)).toBe(expectedType);
+      }
+    );
   });
 
   describe('inline casting', () => {
@@ -102,7 +111,6 @@ describe('getExpressionType', () => {
       { expectedType: 'keyword', expression: '1::keyword' },
       { expectedType: 'long', expression: '1::long' },
       { expectedType: 'keyword', expression: '1::string' },
-      { expectedType: 'keyword', expression: '1::text' },
       { expectedType: 'time_duration', expression: '1::time_duration' },
       { expectedType: 'unsigned_long', expression: '1::unsigned_long' },
       { expectedType: 'version', expression: '"1.2.3"::version' },

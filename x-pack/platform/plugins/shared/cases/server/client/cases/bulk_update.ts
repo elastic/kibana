@@ -527,11 +527,14 @@ export const bulkUpdate = async (
         return flattenCases;
       }
 
-      const { userComments: totalComment, alerts: totalAlerts } = commentsMap.get(
-        updatedCase.id
-      ) ?? {
+      const {
+        userComments: totalComment,
+        alerts: totalAlerts,
+        events: totalEvents,
+      } = commentsMap.get(updatedCase.id) ?? {
         userComments: 0,
         alerts: 0,
+        events: 0,
       };
 
       flattenCases.push(
@@ -539,6 +542,7 @@ export const bulkUpdate = async (
           savedObject: mergeOriginalSOWithUpdatedSO(originalCase, updatedCase),
           totalComment,
           totalAlerts,
+          totalEvents,
         })
       );
       return flattenCases;

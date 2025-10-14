@@ -374,7 +374,7 @@ function InternalAlertsPage() {
                       ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
                       consumers={observabilityAlertFeatureIds}
                       query={mergeBoolQueries(esQuery, groupQuery)}
-                      initialPageSize={ALERTS_PER_PAGE}
+                      pageSize={ALERTS_PER_PAGE}
                       onUpdate={onUpdate}
                       columns={tableColumns}
                       renderAdditionalToolbarControls={() => (

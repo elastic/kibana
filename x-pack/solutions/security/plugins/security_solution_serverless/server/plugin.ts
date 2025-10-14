@@ -20,7 +20,7 @@ import {
   getDefaultValueReportSettings,
 } from '@kbn/security-solution-plugin/server/ui_settings';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING } from '@kbn/security-solution-plugin/common/constants';
+import { AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED } from '@kbn/security-solution-plugin/common/constants';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -91,13 +91,7 @@ export class SecuritySolutionServerlessPlugin
     // Register telemetry events
     telemetryEvents.forEach((eventConfig) => coreSetup.analytics.registerEventType(eventConfig));
 
-    let projectSettings = SECURITY_PROJECT_SETTINGS;
-
-    if (!this.config.experimentalFeatures?.continueSuppressionWindowAdvancedSettingEnabled) {
-      projectSettings = projectSettings.filter(
-        (setting) => setting !== SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING
-      );
-    }
+    const projectSettings = SECURITY_PROJECT_SETTINGS;
 
     // Setup project uiSettings whitelisting
     pluginsSetup.serverless.setupProjectSettings(projectSettings);
@@ -105,16 +99,26 @@ export class SecuritySolutionServerlessPlugin
     // Serverless Advanced Settings setup
     coreSetup
       .getStartServices()
-      .then(async ([_, depsStart]) => {
+      .then(async ([coreStart, depsStart]) => {
+        const isNewDefaultConnectorEnabled = await coreStart.featureFlags.getBooleanValue(
+          AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+          false
+        );
         try {
           const unsecuredActionsClient = depsStart.actions.getUnsecuredActionsClient();
           // using "default" space actually forces the api to use undefined space (see getAllUnsecured)
           const aiConnectors = (await unsecuredActionsClient.getAll('default')).filter(
             (connector: Connector) => isSupportedConnector(connector)
           );
-          const defaultAIConnectorSetting = getDefaultAIConnectorSetting(aiConnectors);
+
+          // hide the setting if the new default connector feature is enabled
+          const defaultAIConnectorSetting = getDefaultAIConnectorSetting(
+            aiConnectors,
+            isNewDefaultConnectorEnabled ? 'ui' : undefined
+          );
+
           coreSetup.uiSettings.register({
-            ...(defaultAIConnectorSetting !== null ? defaultAIConnectorSetting : {}),
+            ...defaultAIConnectorSetting,
             ...getDefaultValueReportSettings(),
           });
         } catch (error) {

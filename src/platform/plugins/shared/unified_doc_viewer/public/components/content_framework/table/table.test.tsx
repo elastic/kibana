@@ -80,7 +80,7 @@ const defaultProps: ContentFrameworkTableProps = {
   dataView: mockDataView,
   columnsMeta: {},
   columns: ['fieldA', 'fieldB'],
-  title: 'Test Table',
+  id: 'Test Table',
   filter: jest.fn(),
   onAddColumn: jest.fn(),
   onRemoveColumn: jest.fn(),

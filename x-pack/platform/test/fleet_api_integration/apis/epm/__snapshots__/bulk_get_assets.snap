@@ -105,7 +105,7 @@ Array [
     "type": "component_template",
   },
   Object {
-    "appLink": "",
+    "appLink": "/app/management/insightsAndAlerting/triggersActions/rules/create/template/sample_alerting_rule_template",
     "attributes": Object {
       "title": "Sample alerting rule template",
     },

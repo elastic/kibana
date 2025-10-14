@@ -22,7 +22,8 @@
       "home",
       "serverless",
       "features",
-      "cloud"
+      "cloud",
+      "spaces"
     ],
     "requiredBundles": [
       "kibanaReact"

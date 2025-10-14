@@ -170,6 +170,15 @@ const MOCK_RULE = {
   name: 'ruleName',
   ruleTypeId: MOCK_RULE_TYPE_ID,
   consumer: 'logs',
+  params: {
+    searchConfiguration: {
+      index: 'index',
+      query: {
+        query: 'tags: tag1',
+      },
+    },
+    criteria: [],
+  },
   artifacts: {
     dashboards: [
       {

@@ -6,4 +6,3 @@
  */
 
 export { sendBulkPayload } from './send_bulk_payload';
-export { monitoringBulk } from './monitoring_bulk';

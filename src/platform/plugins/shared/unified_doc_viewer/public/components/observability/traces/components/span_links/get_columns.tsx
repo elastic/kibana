@@ -23,13 +23,7 @@ import {
 import type { SpanLinkType } from '.';
 import { ServiceNameWithIcon } from '../service_name_with_icon';
 import type { GenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
-
-const NOT_AVAILABLE_LABEL = i18n.translate(
-  'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks.na',
-  {
-    defaultMessage: 'N/A',
-  }
-);
+import { NOT_AVAILABLE_LABEL } from '../../common/constants';
 
 export const getColumns = ({
   generateDiscoverLink,

@@ -15,9 +15,9 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
-import { ReindexStatus } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import type { EnrichedDeprecationInfo, ReindexAction } from '../../../../../../common/types';
 import { getReindexProgressLabel } from '../../../../lib/utils';
 import { LoadingState } from '../../../types';
@@ -378,16 +378,13 @@ export const ReindexResolutionCell: React.FunctionComponent<{
       <EuiText size="s" color="subdued">
         <em>
           {i18nTexts.recommendedActionTexts[recommendedAction].text}{' '}
-          <EuiToolTip
+          <EuiIconTip
             position="top"
             content={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
-          >
-            <EuiIcon
-              type="info"
-              aria-label={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
-              size="s"
-            />
-          </EuiToolTip>
+            type="info"
+            aria-label={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
+            size="s"
+          />
         </em>
       </EuiText>
     );

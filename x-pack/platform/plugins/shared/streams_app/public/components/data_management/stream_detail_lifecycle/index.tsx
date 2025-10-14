@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
+import { StreamDetailFailureStore } from './failure_store';
 import { StreamDetailGeneralData } from './general_data';
 
 export function StreamDetailLifecycle({
@@ -20,6 +21,8 @@ export function StreamDetailLifecycle({
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
       <StreamDetailGeneralData definition={definition} refreshDefinition={refreshDefinition} />
+      <EuiSpacer size="m" />
+      <StreamDetailFailureStore definition={definition} />
     </EuiFlexGroup>
   );
 }

@@ -12,12 +12,12 @@ import {
   type Conversation,
   createConversationNotFoundError,
 } from '@kbn/onechat-common';
-import { isNotFoundError } from '@kbn/es-errors';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
   ConversationListOptions,
 } from '../../../common/conversations';
+import { createSpaceDslFilter } from '../../utils/spaces';
 import type { ConversationStorage } from './storage';
 import {
   fromEs,
@@ -34,25 +34,38 @@ export interface ConversationClient {
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
   update(conversation: ConversationUpdateRequest): Promise<Conversation>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
+  delete(conversationId: string): Promise<boolean>;
 }
 
 export const createClient = ({
+  space,
   storage,
   user,
 }: {
+  space: string;
   storage: ConversationStorage;
   user: UserIdAndName;
 }): ConversationClient => {
-  return new ConversationClientImpl({ storage, user });
+  return new ConversationClientImpl({ storage, user, space });
 };
 
 class ConversationClientImpl implements ConversationClient {
+  private readonly space: string;
   private readonly storage: ConversationStorage;
   private readonly user: UserIdAndName;
 
-  constructor({ storage, user }: { storage: ConversationStorage; user: UserIdAndName }) {
+  constructor({
+    storage,
+    user,
+    space,
+  }: {
+    storage: ConversationStorage;
+    user: UserIdAndName;
+    space: string;
+  }) {
     this.storage = storage;
     this.user = user;
+    this.space = space;
   }
 
   async list(options: ConversationListOptions = {}): Promise<ConversationWithoutRounds[]> {
@@ -66,6 +79,7 @@ class ConversationClientImpl implements ConversationClient {
       },
       query: {
         bool: {
+          filter: [createSpaceDslFilter(this.space)],
           must: [
             {
               term: this.user.username
@@ -82,7 +96,10 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async get(conversationId: string): Promise<Conversation> {
-    const document = await this.storage.getClient().get({ id: conversationId });
+    const document = await this._get(conversationId);
+    if (!document) {
+      throw createConversationNotFoundError({ conversationId });
+    }
 
     if (!hasAccess({ conversation: document, user: this.user })) {
       throw createConversationNotFoundError({ conversationId });
@@ -92,16 +109,11 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async exists(conversationId: string): Promise<boolean> {
-    try {
-      const document = await this.storage.getClient().get({ id: conversationId });
-      return hasAccess({ conversation: document, user: this.user });
-    } catch (error) {
-      // Only catch 404 errors (document not found), re-throw all others
-      if (isNotFoundError(error)) {
-        return false;
-      }
-      throw error;
+    const document = await this._get(conversationId);
+    if (!document) {
+      return false;
     }
+    return hasAccess({ conversation: document, user: this.user });
   }
 
   async create(conversation: ConversationCreateRequest): Promise<Conversation> {
@@ -112,6 +124,7 @@ class ConversationClientImpl implements ConversationClient {
       conversation,
       currentUser: this.user,
       creationDate: now,
+      space: this.space,
     });
 
     await this.storage.getClient().index({
@@ -123,11 +136,15 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async update(conversationUpdate: ConversationUpdateRequest): Promise<Conversation> {
+    const { id: conversationId } = conversationUpdate;
     const now = new Date();
-    const document = await this.storage.getClient().get({ id: conversationUpdate.id });
+    const document = await this._get(conversationUpdate.id);
+    if (!document) {
+      throw createConversationNotFoundError({ conversationId });
+    }
 
     if (!hasAccess({ conversation: document, user: this.user })) {
-      throw createConversationNotFoundError({ conversationId: conversationUpdate.id });
+      throw createConversationNotFoundError({ conversationId });
     }
 
     const storedConversation = fromEs(document);
@@ -135,8 +152,9 @@ class ConversationClientImpl implements ConversationClient {
       conversation: storedConversation,
       update: conversationUpdate,
       updateDate: now,
+      space: this.space,
     });
-    const attributes = toEs(updatedConversation);
+    const attributes = toEs(updatedConversation, this.space);
 
     await this.storage.getClient().index({
       id: conversationUpdate.id,
@@ -144,6 +162,38 @@ class ConversationClientImpl implements ConversationClient {
     });
 
     return this.get(conversationUpdate.id);
+  }
+
+  async delete(conversationId: string): Promise<boolean> {
+    const document = await this._get(conversationId);
+    if (!document) {
+      throw createConversationNotFoundError({ conversationId });
+    }
+
+    if (!hasAccess({ conversation: document, user: this.user })) {
+      throw createConversationNotFoundError({ conversationId });
+    }
+
+    const { result } = await this.storage.getClient().delete({ id: conversationId });
+    return result === 'deleted';
+  }
+
+  private async _get(conversationId: string): Promise<Document | undefined> {
+    const response = await this.storage.getClient().search({
+      track_total_hits: false,
+      size: 1,
+      terminate_after: 1,
+      query: {
+        bool: {
+          filter: [createSpaceDslFilter(this.space), { term: { _id: conversationId } }],
+        },
+      },
+    });
+    if (response.hits.hits.length === 0) {
+      return undefined;
+    } else {
+      return response.hits.hits[0] as Document;
+    }
   }
 }
 

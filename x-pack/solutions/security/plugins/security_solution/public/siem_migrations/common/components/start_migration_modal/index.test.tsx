@@ -14,6 +14,7 @@ import { DATA_TEST_SUBJ_PREFIX, StartMigrationModal } from '.';
 import type { AIConnector } from '@kbn/elastic-assistant';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
 jest.mock('../../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -71,6 +72,12 @@ const siemMigrationsServiceMock = {
   },
 };
 
+const settingsServiceMock = {
+  client: {
+    get: jest.fn(),
+  },
+} as unknown as SettingsStart;
+
 describe('StartMigrationModal', () => {
   beforeEach(() => {
     useAIConnectorsMock.mockReturnValue({
@@ -87,6 +94,7 @@ describe('StartMigrationModal', () => {
           },
         },
         siemMigrations: siemMigrationsServiceMock,
+        settings: settingsServiceMock,
       },
     } as unknown as ReturnType<typeof useKibana>);
 
@@ -119,8 +127,8 @@ describe('StartMigrationModal', () => {
     const connectorOptions = screen.queryAllByTestId(/^connector-option-/);
 
     expect(connectorOptions).toHaveLength(availableConnectorsMock.length);
-    expect(connectorOptions[0].textContent).toBe('Connector 1');
-    expect(connectorOptions[1].textContent).toBe('Connector 2Preconfigured');
+    expect(connectorOptions[0].textContent).toBe('Connector 2');
+    expect(connectorOptions[1].textContent).toBe('Connector 1');
   });
 
   it('should trigger Migration with correct settings on confirm', () => {
@@ -145,7 +153,7 @@ describe('StartMigrationModal', () => {
     const connectorOptions = screen.queryAllByTestId(/^connector-option-/);
     expect(connectorOptions).toHaveLength(availableConnectorsMock.length);
 
-    fireEvent.click(connectorOptions[1]); // Select 'Connector 2'
+    fireEvent.click(connectorOptions[0]); // Select 'Connector 2'
     expect(screen.getByTestId(`connector-selector`)).toHaveTextContent('Connector 2');
 
     const confirmButton = screen.getByTestId(`${DATA_TEST_SUBJ_PREFIX}-Translate`);

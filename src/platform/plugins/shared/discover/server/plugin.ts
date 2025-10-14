@@ -76,7 +76,10 @@ export class DiscoverServerPlugin
       {
         id: METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
         description: 'Metrics experience in Discover',
-        products: [{ name: 'observability', tier: 'complete' }],
+        products: [
+          { name: 'observability', tier: 'complete' },
+          { name: 'security', tier: 'complete' },
+        ],
       },
     ]);
 

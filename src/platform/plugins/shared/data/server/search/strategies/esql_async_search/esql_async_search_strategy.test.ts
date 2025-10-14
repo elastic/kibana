@@ -344,7 +344,7 @@ describe('ES|QL async search strategy', () => {
 
       expect(mockApiCaller).toBeCalled();
       const request = mockApiCaller.mock.calls[0][0];
-      expect(request.body).toEqual({ id, keep_alive: keepAlive });
+      expect(request.querystring).toEqual({ id, keep_alive: keepAlive });
     });
 
     it('throws normalized error on ElasticsearchClientError', async () => {

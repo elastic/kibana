@@ -21,6 +21,7 @@ import {
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
+  CANCEL_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type { ActionDetails, ActionDetailsApiResponse } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
@@ -278,6 +279,11 @@ export const ensureResponseActionAuthzAccess = (
     case 'runscript':
       url = RUN_SCRIPT_ROUTE;
       Object.assign(apiPayload, { parameters: { Raw: 'ls' } });
+      break;
+
+    case 'cancel':
+      url = CANCEL_ROUTE;
+      Object.assign(apiPayload, { action_id: 'some-action-id' });
       break;
 
     default:

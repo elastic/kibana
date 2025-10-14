@@ -20,8 +20,15 @@
       "security",
       "triggersActionsUi",
       "spaces",
+      "data",
+      "dataViews",
+      "fieldFormats",
+      "unifiedSearch",
       "embeddable"
     ],
-    "optionalPlugins": ["alerting"]
+    "optionalPlugins": [
+      "alerting",
+      "serverless"
+    ]
   }
 }

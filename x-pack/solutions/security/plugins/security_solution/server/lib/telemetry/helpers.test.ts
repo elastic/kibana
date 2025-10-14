@@ -26,6 +26,7 @@ import {
   setIsElasticCloudDeployment,
   processK8sUsernames,
   unflatten,
+  processDetectionRuleCustomizations,
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
 import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
@@ -1071,5 +1072,143 @@ describe('unflatten', () => {
   test('should leave arrays of primitives untouched', () => {
     const input = { nums: [1, 2, 3] };
     expect(unflatten(input)).toEqual({ nums: [1, 2, 3] });
+  });
+});
+
+describe('processDetectionRuleCustomizations', () => {
+  it("returns undefined if rule_source doesn't exist in alert", () => {
+    const customizationsField = processDetectionRuleCustomizations({});
+    expect(customizationsField).toBeUndefined();
+  });
+
+  it('returns undefined if rule_source is not `external` type', () => {
+    const customizationsField = processDetectionRuleCustomizations({
+      'kibana.alert.rule.parameters': {
+        rule_source: {
+          type: 'internal',
+        },
+      },
+    });
+    expect(customizationsField).toBeUndefined();
+  });
+
+  it('returns undefined if rule is not customized', () => {
+    const customizationsField = processDetectionRuleCustomizations({
+      'kibana.alert.rule.parameters': {
+        rule_source: {
+          type: 'external',
+          is_customized: false,
+          customized_fields: [],
+          has_base_version: true,
+        },
+      },
+    });
+    expect(customizationsField).toBeUndefined();
+  });
+
+  it("returns undefined if rule_source doesn't have `has_base_version` field", () => {
+    const customizationsField = processDetectionRuleCustomizations({
+      'kibana.alert.rule.parameters': {
+        // @ts-expect-error
+        rule_source: {
+          type: 'external',
+          is_customized: true,
+          customized_fields: [],
+        },
+      },
+    });
+    expect(customizationsField).toBeUndefined();
+  });
+
+  it("returns undefined if rule_source doesn't have `customized_fields` field", () => {
+    const customizationsField = processDetectionRuleCustomizations({
+      'kibana.alert.rule.parameters': {
+        // @ts-expect-error
+        rule_source: {
+          type: 'external',
+          is_customized: true,
+          has_base_version: true,
+        },
+      },
+    });
+    expect(customizationsField).toBeUndefined();
+  });
+
+  it("returns undefined if rule_source doesn't have both `customized_fields` and `has_base_version` fields", () => {
+    const customizationsField = processDetectionRuleCustomizations({
+      'kibana.alert.rule.parameters': {
+        // @ts-expect-error
+        rule_source: {
+          type: 'external',
+          is_customized: true,
+        },
+      },
+    });
+    expect(customizationsField).toBeUndefined();
+  });
+
+  it("returns undefined if rule doesn't have a base version", () => {
+    const customizationsField = processDetectionRuleCustomizations({
+      'kibana.alert.rule.parameters': {
+        rule_source: {
+          type: 'external',
+          is_customized: true,
+          customized_fields: [],
+          has_base_version: false,
+        },
+      },
+    });
+    expect(customizationsField).toBeUndefined();
+  });
+
+  it('returns customized fields when rule is customized with non-functional fields', () => {
+    const customizationsField = processDetectionRuleCustomizations({
+      'kibana.alert.rule.parameters': {
+        rule_source: {
+          type: 'external',
+          is_customized: true,
+          customized_fields: [{ field_name: 'tags' }],
+          has_base_version: true,
+        },
+      },
+    });
+    expect(customizationsField).toEqual({
+      customized_fields: ['tags'],
+      num_functional_fields: 0,
+    });
+  });
+
+  it('returns customized fields when rule is customized with functional fields', () => {
+    const customizationsField = processDetectionRuleCustomizations({
+      'kibana.alert.rule.parameters': {
+        rule_source: {
+          type: 'external',
+          is_customized: true,
+          customized_fields: [{ field_name: 'query' }],
+          has_base_version: true,
+        },
+      },
+    });
+    expect(customizationsField).toEqual({
+      customized_fields: ['query'],
+      num_functional_fields: 1,
+    });
+  });
+
+  it('returns customized fields when rule is customized with both functional and non-functional fields', () => {
+    const customizationsField = processDetectionRuleCustomizations({
+      'kibana.alert.rule.parameters': {
+        rule_source: {
+          type: 'external',
+          is_customized: true,
+          customized_fields: [{ field_name: 'query' }, { field_name: 'tags' }],
+          has_base_version: true,
+        },
+      },
+    });
+    expect(customizationsField).toEqual({
+      customized_fields: ['query', 'tags'],
+      num_functional_fields: 1,
+    });
   });
 });

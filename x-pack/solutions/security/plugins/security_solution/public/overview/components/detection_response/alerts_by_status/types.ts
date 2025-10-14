@@ -21,11 +21,6 @@ interface StatusBucket {
   statusBySeverity?: StatusBySeverity;
 }
 
-interface IntegrationPackageBucket {
-  key: string;
-  doc_count: number;
-}
-
 export interface SeverityBucket {
   key: Severity;
   doc_count: number;
@@ -36,9 +31,6 @@ export interface AlertsByStatusAgg {
     doc_count_error_upper_bound: number;
     sum_other_doc_count: number;
     buckets: StatusBucket[];
-  };
-  relatedIntegrationPackage?: {
-    buckets: IntegrationPackageBucket[];
   };
 }
 

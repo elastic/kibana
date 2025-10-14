@@ -27,16 +27,13 @@ beforeAll(() => {
   }
 });
 
-// Temporarily skipped until we enable the frontend part of the JSM connector
-// https://github.com/elastic/kibana/issues/231571
-
-describe.skip('connectorTypeRegistry.get() works', () => {
+describe('connectorTypeRegistry.get() works', () => {
   it('sets the id field in the connector type static data to the correct value', () => {
     expect(connectorTypeModel.id).toEqual(JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID);
   });
 });
 
-describe.skip('jira service management action params validation', () => {
+describe('jira service management action params validation', () => {
   it('results in no errors when the action params are valid for creating an alert', async () => {
     const actionParams = {
       subAction: JiraServiceManagementSubActions.CreateAlert,

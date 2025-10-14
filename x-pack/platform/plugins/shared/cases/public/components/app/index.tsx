@@ -41,7 +41,10 @@ const CasesAppComponent: React.FC<CasesAppProps> = ({
         useFetchAlertData: () => [false, {}],
         permissions: userCapabilities.generalCasesV3,
         basePath: '/',
-        features: { alerts: { enabled: true, sync: false } },
+        features: {
+          alerts: { enabled: true, sync: false },
+          observables: { enabled: true, autoExtract: false },
+        },
       })}
     </div>
   );

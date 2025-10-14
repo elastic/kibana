@@ -281,6 +281,7 @@ describe('FORK Autocomplete', () => {
 
         test('lookup join after command name', async () => {
           await forkExpectSuggestions('FROM a | FORK (LOOKUP JOIN ', [
+            '', // This is the default text that the "Create lookup index" suggestions has if no index name provided.
             'join_index ',
             'join_index_with_alias ',
             'lookup_index ',
@@ -326,7 +327,11 @@ describe('FORK Autocomplete', () => {
               'FROM a | FORK (STATS AVG(',
               [
                 ...getFieldNamesByType(AVG_TYPES),
-                ...getFunctionSignaturesByReturnType(Location.STATS, AVG_TYPES, { scalar: true }),
+                ...getFunctionSignaturesByReturnType(
+                  Location.STATS,
+                  [...AVG_TYPES, 'aggregate_metric_double'],
+                  { scalar: true }
+                ),
               ],
               mockCallbacks
             );

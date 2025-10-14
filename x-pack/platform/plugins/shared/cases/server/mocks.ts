@@ -15,6 +15,7 @@ import type {
   AlertAttachmentPayload,
   AttachmentAttributes,
   ConnectorMappings,
+  EventAttachmentPayload,
   UserActionAttributes,
   UserCommentAttachmentPayload,
 } from '../common/types/domain';
@@ -161,6 +162,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
@@ -205,6 +207,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       observables: [],
       owner: SECURITY_SOLUTION_OWNER,
@@ -250,6 +253,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       observables: [],
       owner: SECURITY_SOLUTION_OWNER,
@@ -299,6 +303,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       observables: [],
       owner: SECURITY_SOLUTION_OWNER,
@@ -669,6 +674,7 @@ export const newCase: CasePostRequest = {
   },
   settings: {
     syncAlerts: true,
+    extractObservables: true,
   },
   owner: SECURITY_SOLUTION_OWNER,
 };
@@ -702,6 +708,13 @@ export const alertComment: AlertAttachmentPayload = {
     name: 'rule-name-1',
   },
   type: AttachmentType.alert as const,
+  owner: SECURITY_SOLUTION_OWNER,
+};
+
+export const eventComment: EventAttachmentPayload = {
+  eventId: 'event-id-1',
+  index: 'mock-index',
+  type: AttachmentType.event as const,
   owner: SECURITY_SOLUTION_OWNER,
 };
 
@@ -749,6 +762,16 @@ export const mockCasesContract = (): CasesServerStart => ({
       index: {
         enabled: true,
       },
+    },
+    resilient: {
+      additionalFields: {
+        enabled: true,
+      },
+    },
+    incrementalId: {
+      enabled: true,
+      taskIntervalMinutes: 10,
+      taskStartDelayMinutes: 10,
     },
   },
 });

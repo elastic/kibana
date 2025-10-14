@@ -17,7 +17,7 @@ import {
   EuiPanel,
   EuiButtonIcon,
   useEuiTheme,
-  EuiIcon,
+  EuiIconTip,
   EuiText,
   EuiTabs,
   EuiTab,
@@ -557,14 +557,15 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     if (!connector || !actionType) {
       return (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={ACTION_UNABLE_TO_LOAD_CONNECTOR_TITLE}>
-            <EuiIcon
-              data-test-subj="action-group-error-icon"
-              type="warning"
-              color="danger"
-              size="l"
-            />
-          </EuiToolTip>
+          <EuiIconTip
+            content={ACTION_UNABLE_TO_LOAD_CONNECTOR_TITLE}
+            type="warning"
+            color="danger"
+            size="l"
+            iconProps={{
+              'data-test-subj': 'action-group-error-icon',
+            }}
+          />
         </EuiFlexItem>
       );
     }
@@ -572,19 +573,18 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     return (
       <EuiFlexItem grow={false}>
         {showActionGroupErrorIcon ? (
-          <EuiToolTip content={ACTION_ERROR_TOOLTIP}>
-            <EuiIcon
-              data-test-subj="action-group-error-icon"
-              type="warning"
-              color="danger"
-              size="l"
-            />
-          </EuiToolTip>
+          <EuiIconTip
+            content={ACTION_ERROR_TOOLTIP}
+            type="warning"
+            color="danger"
+            size="l"
+            iconProps={{
+              'data-test-subj': 'action-group-error-icon',
+            }}
+          />
         ) : (
           <Suspense fallback={null}>
-            <EuiToolTip content={actionType.name}>
-              <EuiIcon size="l" type={actionTypeModel.iconClass} />
-            </EuiToolTip>
+            <EuiIconTip content={actionType.name} type={actionTypeModel.iconClass} size="l" />
           </Suspense>
         )}
       </EuiFlexItem>
@@ -617,7 +617,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
                 : RUN_WHEN_GROUP_TITLE(selectedActionGroup!.name.toLocaleLowerCase())
             }
           >
-            <EuiBadge iconType="clock" />
+            <EuiBadge tabIndex={0} iconType="clock" />
           </EuiToolTip>
         </EuiFlexItem>
       );
@@ -635,7 +635,12 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
       return (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={ACTION_WARNING_TITLE}>
-            <EuiBadge data-test-subj="warning-badge" iconType="warning" color="warning" />
+            <EuiBadge
+              tabIndex={0}
+              data-test-subj="warning-badge"
+              iconType="warning"
+              color="warning"
+            />
           </EuiToolTip>
         </EuiFlexItem>
       );

@@ -79,6 +79,7 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
       data-test-subj="infraMetricsExplorerAggregationPickerSelect"
       aria-label={label}
       fullWidth
+      compressed
       value={options.aggregation}
       options={METRIC_EXPLORER_AGGREGATIONS_WITHOUT_CUSTOM.map((k) => ({
         text: AGGREGATION_LABELS[k],

@@ -104,7 +104,7 @@ const migrateArtifactsToSpaceAware = async (
     return;
   }
 
-  logger.info(`starting migration of endpoint artifacts in support of spaces`);
+  logger.debug(`starting migration of endpoint artifacts in support of spaces`);
 
   migrationState.metadata.status = 'pending';
   migrationState.metadata.started = new Date().toISOString();
@@ -224,7 +224,7 @@ const migrateArtifactsToSpaceAware = async (
   migrationState.metadata.finished = new Date().toISOString();
   await updateMigrationState(refDataClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
 
-  logger.info(
+  logger.debug(
     `migration of endpoint artifacts in support of spaces done.\n${JSON.stringify(
       migrationStats,
       null,
@@ -250,7 +250,7 @@ const migrateResponseActionsToSpaceAware = async (
     return;
   }
 
-  logger.info(`starting migration of endpoint response actions in support of spaces`);
+  logger.debug(`starting migration of endpoint response actions in support of spaces`);
 
   const migrationStats = {
     totalItems: 0,
@@ -421,7 +421,7 @@ const migrateResponseActionsToSpaceAware = async (
   migrationState.metadata.finished = new Date().toISOString();
   await updateMigrationState(refDataClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
 
-  logger.info(
+  logger.debug(
     `migration of endpoint response actions in support of spaces done.\n${JSON.stringify(
       migrationStats,
       null,
@@ -465,8 +465,6 @@ class AgentPolicyInfoBuilder {
   ) {}
 
   public async buildPolicyUpdate(actionRequest: LogsEndpointAction): Promise<ActionPolicyInfo> {
-    // TODO: trigger retrieval of agent records and package polices for those agents in bulk??
-
     const agentsPolicyInfo = (
       Array.isArray(actionRequest.agent.id) ? actionRequest.agent.id : [actionRequest.agent.id]
     ).map((agentId) => {
@@ -803,20 +801,10 @@ const ensureResponseActionsIndexHasRequiredMappings = async (
 
   logger.debug(
     () =>
-      `Index already exists [${indexExists}]. Currently installed endpoint package:${stringify(
+      `Does DS index already exists: ${indexExists}\nCurrently installed endpoint package:${stringify(
         installedEndpointPackages
       )}`
   );
-
-  // If current installed package is 9.1, then nothing to do. Mapping are included in that package version.
-  if (
-    installedEndpointPackages.items.some((endpointPackage) =>
-      endpointPackage.version.startsWith('9.1')
-    )
-  ) {
-    logger.debug(`Endpoint package version 9.1.* already installed. Nothing to do.`);
-    return response;
-  }
 
   // If the index does not exist and Endpoint package is not installed, then this must be an env.
   // where the use of security and/or Fleet is not being utilized.

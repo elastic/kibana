@@ -122,6 +122,28 @@ describe('cacheNonParametrizedAsyncFunction', () => {
     expect(fn.mock.calls.length).toBe(2);
     expect(value2).toBe('value2');
   });
+
+  it('blocks and refreshes the value when forceRefresh flag is set', async () => {
+    let time = 1;
+    let value = 'value1';
+    const now = jest.fn(() => time);
+    const fn = jest.fn(async () => value);
+    const cached = cacheNonParametrizedAsyncFunction(fn, 100, 20, now);
+
+    const value1 = await cached();
+
+    expect(fn.mock.calls.length).toBe(1);
+    expect(value1).toBe('value1');
+
+    time = 5;
+    value = 'value2';
+
+    // Force refresh should call the original function
+    const value2 = await cached({ forceRefresh: true });
+
+    expect(fn.mock.calls.length).toBe(2);
+    expect(value2).toBe('value2');
+  });
 });
 
 describe('cacheParametrizedAsyncFunction', () => {
@@ -244,5 +266,37 @@ describe('cacheParametrizedAsyncFunction', () => {
     const thirdResult = await cachedFn('argC', 3);
     expect(thirdResult).toBe('refreshed_value');
     expect(fn).toHaveBeenCalledTimes(2); // Now fn has been called for refresh
+  });
+
+  it('should bypass and update the cache when function context has force refresh set to true', async () => {
+    const fn = jest.fn().mockResolvedValue('initial_value');
+    const maxCacheDuration = 1000 * 60 * 5; // 5 minutes
+    const refreshAfter = 1000 * 15; // 15 seconds
+
+    const cachedFn = cacheParametrizedAsyncFunction(
+      fn,
+      undefined,
+      maxCacheDuration,
+      refreshAfter,
+      mockNow
+    );
+
+    const firstResult = await cachedFn('argC', 3); // Caches 'initial_value'
+    expect(firstResult).toBe('initial_value');
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    fn.mockResolvedValueOnce('new_value');
+
+    const secondResult = await cachedFn('argC', 3); // Caches 'initial_value'
+    expect(secondResult).toBe('initial_value');
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    const forcedResult = await cachedFn.call({ forceRefresh: true }, 'argC', 3); // Caches 'initial_value'
+    expect(forcedResult).toBe('new_value');
+    expect(fn).toHaveBeenCalledTimes(2);
+
+    const finalResult = await cachedFn('argC', 3);
+    expect(finalResult).toBe('new_value');
+    expect(fn).toHaveBeenCalledTimes(2);
   });
 });

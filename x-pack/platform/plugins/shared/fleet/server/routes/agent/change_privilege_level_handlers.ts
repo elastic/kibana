@@ -7,8 +7,12 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { ChangeAgentPrivilegeLevelRequestSchema, FleetRequestHandler } from '../../types';
-import { changeAgentPrivilegeLevel } from '../../services/agents';
+import type {
+  BulkChangeAgentsPrivilegeLevelRequestSchema,
+  ChangeAgentPrivilegeLevelRequestSchema,
+  FleetRequestHandler,
+} from '../../types';
+import { bulkChangeAgentsPrivilegeLevel, changeAgentPrivilegeLevel } from '../../services/agents';
 
 export const changeAgentPrivilegeLevelHandler: FleetRequestHandler<
   TypeOf<typeof ChangeAgentPrivilegeLevelRequestSchema.params>,
@@ -18,8 +22,29 @@ export const changeAgentPrivilegeLevelHandler: FleetRequestHandler<
   const [coreContext] = await Promise.all([context.core, context.fleet]);
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
-  const options = request.body?.user_info ? { userInfo: request.body.user_info } : {};
+  const body = await changeAgentPrivilegeLevel(
+    esClient,
+    soClient,
+    request.params.agentId,
+    request.body
+  );
+  return response.ok({ body });
+};
 
-  const body = await changeAgentPrivilegeLevel(esClient, soClient, request.params.agentId, options);
+export const bulkChangeAgentsPrivilegeLevelHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof BulkChangeAgentsPrivilegeLevelRequestSchema.body>
+> = async (context, request, response) => {
+  const [coreContext] = await Promise.all([context.core, context.fleet]);
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
+  const { agents, ...options } = request.body;
+  const agentOptions = Array.isArray(agents) ? { agentIds: agents } : { kuery: agents };
+
+  const body = await bulkChangeAgentsPrivilegeLevel(esClient, soClient, {
+    ...options,
+    ...agentOptions,
+  });
   return response.ok({ body });
 };

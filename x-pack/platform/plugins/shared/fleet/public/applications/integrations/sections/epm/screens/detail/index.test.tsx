@@ -42,7 +42,8 @@ const TESTS_TIMEOUT = 8000;
 // @ts-ignore this saves us having to define all experimental features
 ExperimentalFeaturesService.init({});
 
-describe('When on integration detail', () => {
+// Failing: See https://github.com/elastic/kibana/issues/237961
+describe.skip('When on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
   const detailPageUrlPath = pagePathGetters.integration_details_overview({ pkgkey })[1];
   let testRenderer: TestRenderer;

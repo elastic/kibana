@@ -45,6 +45,7 @@ export class DatasetQualityPlugin
 
     const dataStreamDetailsService = new DataStreamDetailsService().start({
       http: core.http,
+      telemetryClient,
     });
 
     const DatasetQuality = createDatasetQuality({

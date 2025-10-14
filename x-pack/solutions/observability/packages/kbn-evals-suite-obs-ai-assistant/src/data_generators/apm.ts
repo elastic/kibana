@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { apm, timerange, log } from '@kbn/apm-synthtrace-client';
+import { apm, timerange, log, serviceMap } from '@kbn/apm-synthtrace-client';
 import type { SynthtraceFixture } from '@kbn/scout-oblt';
 import { faker } from '@faker-js/faker';
 
@@ -86,6 +86,75 @@ export async function generateCustomApmLogs({
           .overrides({
             tags: faker.helpers.arrayElements(tagOptions, faker.number.int({ min: 1, max: 3 })),
           });
+      })
+  );
+}
+
+export async function generateAIAssistantApmScenario({
+  apmSynthtraceEsClient,
+}: {
+  apmSynthtraceEsClient: SynthtraceFixture['apmSynthtraceEsClient'];
+}) {
+  const serviceMapCallback = serviceMap({
+    services: [{ 'ai-assistant-service-front': 'go' }, { 'ai-assistant-service-back': 'python' }],
+    environment: 'test',
+    definePaths([main, reco]) {
+      return [
+        [
+          [main, 'fetchReco'],
+          [reco, 'GET /api'],
+        ],
+        [reco],
+      ];
+    },
+  });
+
+  const aiAssistantService = apm
+    .service('ai-assistant-service', 'test', 'go')
+    .instance('my-instance');
+
+  const aiAssistantServicePython = apm
+    .service('ai-assistant-service-reco', 'test', 'python')
+    .instance('my-instance');
+
+  await apmSynthtraceEsClient.index(
+    timerange(moment().subtract(15, 'minutes'), moment())
+      .interval('1m')
+      .rate(10)
+      .generator((timestamp) => {
+        return [
+          ...serviceMapCallback(timestamp),
+          aiAssistantService
+            .transaction('getReco')
+            .timestamp(timestamp)
+            .duration(50)
+            .outcome('success'),
+          aiAssistantService
+            .transaction('removeReco')
+            .timestamp(timestamp)
+            .duration(50)
+            .failure()
+            .errors(
+              aiAssistantService
+                .error({ message: 'ERROR removeReco not suported', type: 'My Type' })
+                .timestamp(timestamp)
+            ),
+          aiAssistantService
+            .transaction('GET /api_v1')
+            .timestamp(timestamp)
+            .duration(50)
+            .outcome('success'),
+          aiAssistantServicePython
+            .transaction('GET /api_v2')
+            .timestamp(timestamp)
+            .duration(50)
+            .failure()
+            .errors(
+              aiAssistantServicePython
+                .error({ message: 'ERROR api_v2 not supported', type: 'My Type' })
+                .timestamp(timestamp)
+            ),
+        ];
       })
   );
 }

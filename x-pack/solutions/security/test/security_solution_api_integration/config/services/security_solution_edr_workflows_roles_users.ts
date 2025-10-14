@@ -64,8 +64,11 @@ export function RolesUsersProvider({ getService }: FtrProviderContext) {
       if (predefinedRole) {
         const roleConfig = rolesMapping[predefinedRole];
         if (extraPrivileges) {
-          roleConfig.kibana[0].feature[SECURITY_FEATURE_ID] = [
-            ...roleConfig.kibana[0].feature[SECURITY_FEATURE_ID],
+          const actualSiem = Object.keys(roleConfig.kibana[0].feature).find((feature) =>
+            feature.startsWith('siem')
+          );
+          roleConfig.kibana[0].feature[actualSiem!] = [
+            ...roleConfig.kibana[0].feature[actualSiem!],
             ...extraPrivileges,
           ];
         }

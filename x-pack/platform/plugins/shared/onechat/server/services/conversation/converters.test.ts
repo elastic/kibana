@@ -6,13 +6,23 @@
  */
 
 import type { Conversation } from '@kbn/onechat-common';
-import { ConversationRoundStepType, ToolResultType } from '@kbn/onechat-common';
+import { isToolCallStep, ConversationRoundStepType, ToolResultType } from '@kbn/onechat-common';
+import { getToolResultId } from '@kbn/onechat-server/tools/utils';
+
 import { fromEs, toEs, type Document as ConversationDocument } from './converters';
 import { expect } from '@kbn/scout';
+
+jest.mock('@kbn/onechat-server/tools/utils');
+
+const getToolResultIdMock = getToolResultId as jest.MockedFn<typeof getToolResultId>;
 
 describe('conversation model converters', () => {
   const creationDate = '2024-09-04T06:44:17.944Z';
   const updateDate = '2025-08-04T06:44:19.123Z';
+
+  beforeEach(() => {
+    getToolResultIdMock.mockReturnValue('some-result-id');
+  });
 
   describe('fromEs', () => {
     const documentBase = (): ConversationDocument => {
@@ -23,6 +33,7 @@ describe('conversation model converters', () => {
           title: 'conv_title',
           user_id: 'user_id',
           user_name: 'user_name',
+          space: 'space',
           rounds: [
             {
               id: 'round-1',
@@ -56,7 +67,6 @@ describe('conversation model converters', () => {
         },
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
-
         rounds: [
           {
             id: 'round-1',
@@ -103,6 +113,7 @@ describe('conversation model converters', () => {
           progression: [],
           results: [
             {
+              tool_result_id: 'some-result-id',
               type: ToolResultType.other,
               data: { someData: 'someValue' },
             },
@@ -113,6 +124,34 @@ describe('conversation model converters', () => {
           reasoning: 'reasoning',
         },
       ]);
+    });
+
+    it('adds tool_call_id for results without it', () => {
+      const serialized = documentBase();
+      serialized._source!.rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'tool_call_id',
+          tool_id: 'tool_id',
+          params: {
+            param1: 'value1',
+          },
+          results:
+            '[{"tool_result_id": "foo", "type":"other","data":{"someData":"someValue"}}, {"type":"other","data":{"someData":"someValue"}}]',
+        },
+        {
+          type: ConversationRoundStepType.reasoning,
+          reasoning: 'reasoning',
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const results = deserialized.rounds[0].steps
+        .filter(isToolCallStep)
+        .flatMap((step) => step.results);
+
+      expect(results.map((result) => result.tool_result_id)).toEqual(['foo', 'some-result-id']);
     });
   });
 
@@ -142,13 +181,14 @@ describe('conversation model converters', () => {
 
     it('serializes the conversation', () => {
       const conversation = conversationBase();
-      const serialized = toEs(conversation);
+      const serialized = toEs(conversation, 'another-space');
 
       expect(serialized).toEqual({
         agent_id: 'agent_id',
         title: 'conv_title',
         user_id: 'user_id',
         user_name: 'user_name',
+        space: 'another-space',
         rounds: [
           {
             id: 'round-1',
@@ -174,14 +214,16 @@ describe('conversation model converters', () => {
           tool_call_id: 'tool_call_id',
           tool_id: 'tool_id',
           params: { param1: 'value1' },
-          results: [{ type: ToolResultType.other, data: { someData: 'someValue' } }],
+          results: [
+            { tool_result_id: 'foo', type: ToolResultType.other, data: { someData: 'someValue' } },
+          ],
         },
         {
           type: ConversationRoundStepType.reasoning,
           reasoning: 'reasoning',
         },
       ];
-      const serialized = toEs(conversation);
+      const serialized = toEs(conversation, 'space');
 
       expect(serialized.rounds[0].steps).toEqual([
         {
@@ -191,7 +233,7 @@ describe('conversation model converters', () => {
           params: {
             param1: 'value1',
           },
-          results: '[{"type":"other","data":{"someData":"someValue"}}]',
+          results: '[{"tool_result_id":"foo","type":"other","data":{"someData":"someValue"}}]',
         },
         {
           type: ConversationRoundStepType.reasoning,

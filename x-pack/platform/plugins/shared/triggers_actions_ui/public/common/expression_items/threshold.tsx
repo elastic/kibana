@@ -138,6 +138,10 @@ export const ThresholdExpression = ({
               options={Object.values(comparators).map(({ text, value }) => {
                 return { text, value };
               })}
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.common.expressionItems.threshold.comparatorAriaLabel',
+                { defaultMessage: 'Threshold comparator' }
+              )}
             />
           </EuiFlexItem>
           {Array.from(Array(numRequiredThresholds)).map((_notUsed, i) => {

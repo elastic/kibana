@@ -28,7 +28,7 @@ import type {
   IndexWarningType,
   ReindexStatusResponse,
 } from '@kbn/reindex-service-plugin/common';
-import { ReindexStatus } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import type {
   EnrichedDeprecationInfo,
   ReindexAction,

@@ -241,6 +241,19 @@ Running the tests with [Node Inspector](https://nodejs.org/en/learn/getting-star
 node --inspect scripts/jest_integration.js --config x-pack/platform/plugins/shared/fleet/jest.integration.config.js x-pack/platform/plugins/shared/fleet/server/integration_tests/<YOUR_TEST_FILE>
 ```
 
+#### Observability onboarding nightly tests
+
+We have an e2e test that runs nightly to monitor the elastic agent fleet enrollment flow for ECH and serverless. This test uses [ensemble](https://github.com/elastic/ensemble) to orchestrate spinning up a fresh cluster, running a playwright e2e test, and executing the enrollment code snippet provided from the UI on a machine.
+
+The test can be found in:
+
+```
+x-pack/solutions/observability/plugins/observability_onboarding/e2e/playwright/stateful/fleet_ea_enrollment.spec.ts
+```
+
+Instructions for running the test can be found in the [observability onboarding playwright e2e README](x-pack/solutions/observability/plugins/observability_onboarding/e2e/playwright/README.md)
+
+
 ### Storybook
 
 Fleet contains [Storybook](https://storybook.js.org/) stories for developing UI components in isolation. To start the Storybook environment for Fleet, run the following from your `kibana` project root:

@@ -1,0 +1,291 @@
+<documentation>
+    The Elasticsearch Query Language (ES|QL) provides a powerful and flexible way to query,
+    filter, transform, and analyze data stored in Elasticsearch.
+
+    An ES|QL query is composed of a source command followed by a series
+    of processing commands, separated by a pipe character: |.
+
+    For example:
+    ```esql
+    [source-command]
+    | [processing-command1]
+    | [processing-command2]
+    ```
+
+    <source-commands>
+        Source commands select a data source.
+
+        - FROM: Selects one or multiple indices, data streams or aliases to use as source.
+        - ROW: Produces a row with one or more columns with values that you specify.
+        - SHOW: returns information about the deployment.
+    </source-commands>
+
+    <processing-commands>
+        ES|QL processing commands change an input table by adding, removing, or changing rows and columns.
+
+        - DISSECT: extracts structured data out of a string, using a dissect pattern
+        - DROP: drops one or more columns
+        - ENRICH: adds data from existing indices as new columns
+        - EVAL: adds a new column with calculated values, using various type of functions
+        - GROK: extracts structured data out of a string, using a grok pattern
+        - KEEP: keeps one or more columns, drop the ones that are not kept
+        - LIMIT: returns the first n number of rows. The maximum value for this is 10000
+        - MV_EXPAND: expands multi-value columns into a single row per value
+        - RENAME: renames a column
+        - STATS ... BY: groups rows according to a common value and calculates one or more aggregated values over the grouped rows, using aggregation and grouping functions.
+        - SORT: sorts the row in a table by a column. Expressions are not supported.
+        - WHERE: Filters rows based on a boolean condition. WHERE supports the same functions as EVAL.
+        - [preview] RERANK: uses an inference model to compute a new relevance score for an initial set of documents
+        - [preview] SAMPLE: samples a fraction of the table rows
+        - [preview] COMPLETION: send prompts and context to an LLM
+        - [preview] CHANGE_POINT: detects spikes, dips, and change points in a metric.
+    </processing-commands>
+
+    <grouping-functions>
+        BUCKET: Create groups of values out of a datetime or numeric input
+        CATEGORIZE: Organize textual data into groups of similar format
+    </grouping-functions>
+
+    <aggregation-functions>
+        AVG: calculate the average of a numeric field
+        COUNT: return the total number of input values
+        COUNT_DISTINCT: return the number of distinct values in a field
+        MAX: calculate the maximum value of a field
+        MEDIAN: calculate the median value of a numeric field
+        MEDIAN_ABSOLUTE_DEVIATION: calculate the median absolute deviation of a numeric field
+        MIN: calculate the minimum value of a field
+        PERCENTILE: calculate a specified percentile of a numeric field
+        STD_DEV: calculate the standard deviation of a numeric field
+        SUM: calculate the total sum of a numeric expression
+        TOP: collect the top values for a specified field
+        VALUES: return all values in a group as a multivalued field
+        WEIGHTED_AVG: calculate the weighted average of a numeric expression
+    </aggregation-functions>
+
+    <conditional-functions>
+        CASE: accept pairs of conditions and values and return the value for the first true condition
+        COALESCE: return the first non-null argument from the list of provided arguments
+        GREATEST: return the maximum value from multiple columns
+        LEAST: return the smallest value from multiple columns
+    </conditional-functions>
+
+    <search-functions>
+        MATCH: execute a match query on a specified field - equivalent to match query for Elasticsearch Query DSL
+        QSTR: perform a Lucene query string query
+        KQL: perform a KQL query
+    </search-functions>
+
+    <date-time-functions>
+        DATE_DIFF: calculate the difference between two timestamps in a given unit
+        DATE_EXTRACT: extract a specific part of a date
+        DATE_FORMAT: return a string representation of a date using the provided format
+        DATE_PARSE: convert a date string into a date
+        DATE_TRUNC: round down a date to the nearest specified interval
+        NOW: return the current date and time
+    </date-time-functions>
+
+    <string-functions>
+        BIT_LENGTH: calculate the bit length of a string
+        BYTE_LENGTH: calculate the byte length of a string
+        CONCAT: combine two or more strings
+        ENDS_WITH: check if a given string ends with a specified suffix
+        FROM_BASE64: decode a base64 string
+        HASH: compute the hash of a given input using a specified algorithm
+        LEFT: extract a specified number of characters from the start of a string
+        LENGTH: calculate the character length of a given string
+        LOCATE: return the position of a specified substring within a string
+        LTRIM: remove leading whitespaces from a string
+        REPEAT: generate a string by repeating a specified string a certain number of times
+        REPLACE: substitute any match of a regular expression within a string with a replacement string
+        REVERSE: reverse a string
+        RIGHT: extract a specified number of characters from the end of a string
+        RTRIM: remove trailing whitespaces from a string
+        SPACE: create a string composed of a specific number of spaces
+        SPLIT: split a single valued string into multiple strings based on a delimiter
+        STARTS_WITH: check if a given string begins with another specified string
+        SUBSTRING: extract a portion of a string
+        TO_BASE64: encode a string to b64
+        TO_LOWER: convert a string to lowercase
+        TO_UPPER: convert a string to uppercase
+        TRIM: remove leading and trailing whitespaces from a string
+    </string-functions>
+
+    <ip-functions>
+        CIDR_MATCH: checks if an IP address falls within specified network blocks
+        IP_PREFIX: truncates an IP address to a specified prefix length
+    </ip-functions>
+
+    <type-conversion-functions>
+        TO_BOOLEAN
+        TO_CARTESIANPOINT
+        TO_CARTESIANSHAPE
+        TO_DATETIME (prefer DATE_PARSE to convert strings to datetime)
+        TO_DATEPERIOD
+        TO_DEGREES
+        TO_DOUBLE
+        TO_GEOPOINT
+        TO_GEOSHAPE
+        TO_INTEGER
+        TO_IP
+        TO_LONG
+        TO_RADIANS
+        TO_STRING
+        TO_TIMEDURATION
+        TO_UNSIGNED_LONG
+        TO_VERSION
+    </type-conversion-functions>
+
+    <mathematical-functions>
+        ABS
+        ACOS
+        ASIN
+        ATAN
+        ATAN2
+        CBRT
+        CEIL
+        COS
+        COSH
+        E
+        EXP
+        FLOOR
+        HYPOT
+        LOG
+        LOG10
+        PI
+        POW
+        ROUND
+        SIGNUM
+        SIN
+        SINH
+        SQRT
+        TAN
+        TANH
+        TAU
+    </mathematical-functions>
+
+    <multivalue-functions>
+        Multivalue function are used to manipulate and transform multi-value fields.
+
+        MV_APPEND: concatenates the values of two multi-value fields
+        MV_AVG: returns the average of all values in a multivalued field
+        MV_CONCAT: transforms a multivalued string expression into a single valued string
+        MV_COUNT: counts the total number of values in a multivalued expression
+        MV_DEDUPE: eliminates duplicate values from a multivalued field
+        MV_FIRST: returns the first value of a multivalued field
+        MV_LAST: returns the last value of a multivalued field
+        MV_MAX: returns the max value of a multivalued field
+        MV_MEDIAN: returns the median value of a multivalued field
+        MV_MEDIAN_ABSOLUTE_DEVIATION: returns the median absolute deviation of a multivalued field
+        MV_MIN: returns the min value of a multivalued field
+        MV_PERCENTILE: returns the specified percentile of a multivalued field
+        MV_SLIDE: extract a subset of a multivalued field using specified start and end index values
+        MV_SORT: sorts a multivalued field in lexicographical order.
+        MV_SUM: returns the sum of all values of a multivalued field
+        MV_ZIP: combines the values from two multivalued fields with a specified delimiter
+    </multivalue-functions>
+
+    <spatial-functions>
+        ST_CONTAINS: check if the first specified geometry encompasses the second one
+        ST_DISJOINT: check if two geometries or geometry columns are disjoint
+        ST_DISTANCE: calculate the distance between two points
+        ST_ENVELOPE: calculate the minimum bounding box for the provided geometry
+        ST_INTERSECTS: check if two geometries intersect
+        ST_WITHIN: check if the first geometry is located within the second geometry
+        ST_X/ST_Y: extract the x/y coordinate from a given point
+        ST_XMAX/ST_YMAX: extract the maximum value of the x/y coordinates from a geometry
+        ST_XMIN/ST_YMIN: extract the minimum value of the x/y coordinates from a geometry
+        ST_EXTENT_AGG: calculate the spatial extent over a field that has a geometry type
+        ST_CENTROID_AGG: calculate the spatial centroid over a spatial point geometry field
+    </spatial-functions>
+
+    <operators>
+        Binary operators: ==, !=, <, <=, >, >=, +, -, *, /, %
+        Logical operators: AND, OR, NOT
+        Predicates: IS NULL, IS NOT NULL
+        Unary operators: -
+        IN: test if a field or expression is in a list of literals
+        LIKE: filter data based on string patterns using wildcards
+        RLIKE: filter data based on string patterns using regular expressions
+        Cast (`::`): provides a convenient alternative syntax to the `TO_<type>` conversion functions
+    </operators>
+
+
+    <syntax>
+        ### Identifiers
+
+        Identifiers must be quoted with backticks (`` ` ``) if:
+        - They don’t start with a letter, `_`, or `@`.
+        - They contain characters other than letters, numbers, or `_`.
+
+        For example:
+        ```esql
+        FROM index
+        | KEEP `1.field`
+        ```
+
+        ### String Literals
+
+        String literals are enclosed in double quotes (`"`).
+        If the string contains quotes, escape them with `\\` or use triple quotes (`"""`):
+
+        For example:
+        ```esql
+        ROW name = """Indiana "Indy" Jones"""
+        ```
+
+        ### Comments
+
+        ES|QL uses C++ style comments:
+        - double slash // for single line comments
+        - /* and */ for block comments
+
+        ### timespan literals
+
+        Timespan literals represent datetime intervals and are expressed as a combination of a number and a temporal unit (e.g., `1 day`, `24h`, `7 weeks`). They are not whitespace-sensitive:
+        ```esql
+        1day
+        1 day
+        1       day
+        ```
+
+        Supported temporal units:
+
+        | Temporal Units | Valid Abbreviations |
+        |---|---|
+        | year | y, yr, years |
+        | quarter | q, quarters |
+        | month | mo, months |
+        | week | w, weeks |
+        | day | d, days |
+        | hour | h, hours |
+        | minute | min, minutes |
+        | second | s, sec, seconds |
+        | millisecond | ms, milliseconds |
+
+        Example of using temporal units:
+
+        ```esql
+        FROM events
+        | WHERE @timestamp >= NOW() - 1 day
+        | STATS event_count = COUNT(*) BY hour = BUCKET(@timestamp, 1 hour)
+        | SORT hour
+        ```
+
+        ### Named Parameters in Functions
+
+        Some functions, like `MATCH`, support named parameters for additional options:
+
+        ```esql
+        FROM library
+        | WHERE MATCH(author, "Frank Herbert", {"minimum_should_match": 2, "operator": "AND"})
+        | LIMIT 5
+        ```
+    </syntax>
+
+    <limitations>
+      - ES|QL currently does not support pagination
+      - A query will never return more than 10000 rows
+      - Some field types, such as `binary`, `nested`, and `histogram`, are not yet supported.
+    </limitations>
+
+</documentation>

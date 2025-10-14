@@ -204,9 +204,7 @@
                 "section": "def-public.NavigationSection",
                 "text": "NavigationSection"
               },
-              "[]>) => void; }; config: ",
-              "ObservabilitySharedBrowserConfig",
-              "; }"
+              "[]>) => void; }; }"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
@@ -844,9 +842,7 @@
               "AppUpdater",
               ">; pricing: ",
               "PricingServiceStart",
-              "; }) => void; config: ",
-              "ObservabilitySharedBrowserConfig",
-              "; }"
+              "; }) => void; }"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
@@ -1461,7 +1457,7 @@
         "label": "sloPaths",
         "description": [],
         "signature": [
-          "{ slos: string; slosSettings: string; slosWelcome: string; slosManagement: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloEditWithEncodedForm: (sloId: string, encodedParams: string) => string; sloDetails: (sloId: string, instanceId: string, remoteName?: string | undefined, tabId?: string | undefined) => string; sloDetailsHistory: ({ id, instanceId, remoteName, encodedAppState, }: { id: string; instanceId: string; remoteName?: string | undefined; encodedAppState?: string | undefined; }) => string; }"
+          "{ slos: string; slosSettings: string; slosWelcome: string; slosManagement: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloEditWithEncodedForm: (sloId: string, encodedParams: string) => string; sloDetails: (sloId: string, instanceId: string, remoteName?: string | undefined, tabId?: string | undefined) => string; }"
         ],
         "path": "x-pack/solutions/observability/plugins/slo/common/index.ts",
         "deprecated": false,

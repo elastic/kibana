@@ -37,6 +37,8 @@ describe('toPackagePolicy', () => {
           namespace: 'default',
           policy_id: 'policy123',
           policy_ids: ['policy123'],
+          supports_cloud_connector: undefined,
+          cloud_connector_id: undefined,
           output_id: 'output123',
           description: 'Test description',
           inputs: {

@@ -8,7 +8,7 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiText,
   EuiTitle,
@@ -194,9 +194,7 @@ export const BenchmarkDetailsBox = ({
       <EuiFlexItem grow={false} css={{ justifyContent: 'flex-end' }}>
         <EuiFlexGroup gutterSize="m" alignItems="center">
           <CISBenchmarkIcon type={benchmarkId} name={`${benchmarkName}`} />
-          <EuiToolTip content={cisTooltip}>
-            <EuiIcon type={cisLogoIcon} size="xxl" />
-          </EuiToolTip>
+          <EuiIconTip content={cisTooltip} type={cisLogoIcon} size="xxl" />
           <EuiText size="xs" color="subdued">
             {benchmarkVersion}
           </EuiText>

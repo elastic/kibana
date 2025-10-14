@@ -254,9 +254,16 @@ export function getDataStateContainer({
           const scopedProfilesManager = scopedProfilesManager$.getValue();
           const scopedEbtManager = scopedEbtManager$.getValue();
 
-          const searchSessionId =
-            (options.fetchMore && dataRequestParams.searchSessionId) ||
-            searchSessionManager.getNextSearchSessionId();
+          let searchSessionId: string;
+          let isSearchSessionRestored: boolean;
+
+          if (options.fetchMore && dataRequestParams.searchSessionId) {
+            searchSessionId = dataRequestParams.searchSessionId;
+            isSearchSessionRestored = dataRequestParams.isSearchSessionRestored;
+          } else {
+            ({ searchSessionId, isSearchSessionRestored } =
+              searchSessionManager.getNextSearchSessionId());
+          }
 
           const commonFetchParams: Omit<CommonFetchParams, 'abortController'> = {
             dataSubjects,
@@ -301,6 +308,7 @@ export function getDataStateContainer({
                 timeRangeAbsolute: timefilter.getAbsoluteTime(),
                 timeRangeRelative: timefilter.getTime(),
                 searchSessionId,
+                isSearchSessionRestored,
               },
             })
           );
@@ -323,11 +331,12 @@ export function getDataStateContainer({
             disableNextFetchOnStateChange$.next(false);
           }
 
+          abortController = new AbortController();
+
           // Trigger chart fetching after the pre fetch state has been updated
           // to ensure state values that would affect data fetching are set
           fetchChart$.next();
 
-          abortController = new AbortController();
           const prevAutoRefreshDone = autoRefreshDone;
           const fetchAllTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchAll');
 

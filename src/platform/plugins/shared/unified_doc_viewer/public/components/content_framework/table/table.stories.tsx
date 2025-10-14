@@ -66,7 +66,7 @@ export const APMSpan: Story = {
       PARENT_ID,
       TRANSACTION_ID,
     ],
-    title: 'APM Span data',
+    id: 'APM Span data',
     fieldConfigurations: {
       [SPAN_DURATION]: {
         title: 'Duration',
@@ -106,7 +106,7 @@ export const APMTransaction: Story = {
       AGENT_NAME,
       AGENT_VERSION,
     ],
-    title: 'APM Transaction data',
+    id: 'APM Transaction data',
     fieldConfigurations: {
       [TRANSACTION_DURATION]: {
         title: 'Duration',
@@ -130,7 +130,7 @@ export const SpanOtelRedisClient: Story = {
   args: {
     hit: SpanOtelRedisClientFixture,
     fieldNames: [AT_TIMESTAMP, SERVICE_NAME, 'db.system', 'db.statement', DURATION, KIND],
-    title: 'APM Transaction data',
+    id: 'APM Transaction data',
     fieldConfigurations: {
       [DURATION]: {
         title: 'Duration',

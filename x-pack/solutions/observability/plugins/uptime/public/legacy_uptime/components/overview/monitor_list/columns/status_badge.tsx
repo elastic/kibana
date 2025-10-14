@@ -37,7 +37,7 @@ export const StatusBadge = ({
 
   return (
     <EuiToolTip content={errorMessage}>
-      <EuiBadge className="eui-textCenter" color={dangerBehindText}>
+      <EuiBadge tabIndex={0} className="eui-textCenter" color={dangerBehindText}>
         {getHealthMessage(status)}
       </EuiBadge>
     </EuiToolTip>

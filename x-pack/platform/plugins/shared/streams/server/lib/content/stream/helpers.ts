@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { intersectionBy } from 'lodash';
+import { intersectionBy, omit } from 'lodash';
 import type { ContentPackIncludedObjects, ContentPackStream } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID, isIncludeAll } from '@kbn/content-packs-schema';
+import { type FieldDefinition } from '@kbn/streams-schema';
 import { ContentPackIncludeError } from '../error';
+import { baseFields } from '../../streams/component_templates/logs_layer';
 
 export function withoutRootPrefix(root: string, name: string) {
   const prefix = `${root}.`;
@@ -66,6 +68,25 @@ export function filterRouting(entry: ContentPackStream, include: ContentPackIncl
   });
 
   return intersectionBy(routing, include.objects.routing, ({ destination }) => destination);
+}
+
+export function getFields(
+  entry: ContentPackStream,
+  include: ContentPackIncludedObjects
+): FieldDefinition {
+  if (isIncludeAll(include) || include.objects.mappings) {
+    return entry.request.stream.ingest.wired.fields;
+  }
+  return {};
+}
+
+export function withoutBaseFields(fields: FieldDefinition): FieldDefinition {
+  return Object.keys(fields)
+    .filter((key) => !baseFields[key])
+    .reduce((filtered, key) => {
+      filtered[key] = omit(fields[key], 'from');
+      return filtered;
+    }, {} as FieldDefinition);
 }
 
 export function scopeContentPackStreams({

@@ -6,7 +6,7 @@
  */
 
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import type { EsqlToolDefinition, EsqlToolFieldTypes } from '@kbn/onechat-common';
+import type { EsqlToolDefinition, EsqlToolParam } from '@kbn/onechat-common';
 import { ToolType } from '@kbn/onechat-common';
 import { omit } from 'lodash';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../common/http_api/tools';
@@ -26,12 +26,15 @@ export const transformEsqlToolToFormData = (tool: EsqlToolDefinition): EsqlToolF
     description: tool.description,
     esql: tool.configuration.query,
     labels: tool.tags,
-    params: Object.entries(tool.configuration.params).map(([name, { type, description }]) => ({
-      name,
-      type,
-      description,
-      source: EsqlParamSource.Custom,
-    })),
+    params: Object.entries(tool.configuration.params).map(
+      ([name, { type, description, optional }]) => ({
+        name,
+        type,
+        description,
+        source: EsqlParamSource.Custom,
+        optional: optional ?? false,
+      })
+    ),
     type: ToolType.esql,
   };
 };
@@ -55,9 +58,10 @@ export const transformFormDataToEsqlTool = (data: EsqlToolFormData): EsqlToolDef
           paramsMap[param.name] = {
             type: param.type,
             description: param.description,
+            optional: param.optional,
           };
           return paramsMap;
-        }, {} as Record<string, { type: EsqlToolFieldTypes; description: string }>),
+        }, {} as Record<string, EsqlToolParam>),
     },
     type: ToolType.esql,
     tags: data.labels,

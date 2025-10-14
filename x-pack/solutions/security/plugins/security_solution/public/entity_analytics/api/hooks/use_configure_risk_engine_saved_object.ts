@@ -14,6 +14,7 @@ import type { ConfigureRiskEngineSavedObjectResponse } from '../../../../common/
 interface ConfigureRiskEngineParams {
   includeClosedAlerts: boolean;
   range: { start: string; end: string };
+  enableResetToZero: boolean;
 }
 
 export const useConfigureSORiskEngineMutation = (
@@ -33,6 +34,7 @@ export const useConfigureSORiskEngineMutation = (
     await updateSavedObjectConfiguration({
       exclude_alert_statuses: params.includeClosedAlerts ? [] : ['closed'],
       range: params.range,
+      enable_reset_to_zero: params.enableResetToZero,
     });
     return { risk_engine_saved_object_configured: true };
   }, options);

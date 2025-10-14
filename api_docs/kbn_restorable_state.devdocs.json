@@ -19,7 +19,7 @@
             "section": "def-public.RestorableStateProviderProps",
             "text": "RestorableStateProviderProps"
           },
-          "<TState>, \"initialState\" | \"onInitialStateChange\">> & React.RefAttributes<",
+          "<TState>, \"initialState\" | \"onInitialStateChange\">> & React.RefAttributes<React.ElementRef<TComponent> & ",
           {
             "pluginId": "@kbn/restorable-state",
             "scope": "public",

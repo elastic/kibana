@@ -90,7 +90,12 @@ export const RuleTagBadge = <T extends RuleTagBadgeOptions>(props: RuleTagBadgeP
   if (tagsOutPopover) {
     return (
       // Put 0 to fix negative left margin value.
-      <EuiFlexGroup data-test-subj="tagsOutPopover" style={{ marginLeft: 0 }} wrap={true}>
+      <EuiFlexGroup
+        data-test-subj="tagsOutPopover"
+        gutterSize="s"
+        style={{ marginLeft: 0 }}
+        wrap={true}
+      >
         {tagBadges}
       </EuiFlexGroup>
     );

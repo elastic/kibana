@@ -28,7 +28,7 @@ import type {
   FleetServerHost,
   NewFleetServerHost,
   AgentPolicy,
-  PolicySecretReference,
+  SecretReference,
 } from '../types';
 import {
   FleetServerHostUnauthorizedError,
@@ -134,7 +134,8 @@ class FleetServerHostService {
     } else {
       if (
         (!fleetServerHost.ssl?.key && fleetServerHost.secrets?.ssl?.key) ||
-        (!fleetServerHost.ssl?.es_key && fleetServerHost.secrets?.ssl?.es_key)
+        (!fleetServerHost.ssl?.es_key && fleetServerHost.secrets?.ssl?.es_key) ||
+        (!fleetServerHost.ssl?.agent_key && fleetServerHost.secrets?.ssl?.agent_key)
       ) {
         data.ssl = JSON.stringify({ ...fleetServerHost.ssl, ...fleetServerHost.secrets.ssl });
       }
@@ -233,7 +234,7 @@ class FleetServerHostService {
     data: Partial<FleetServerHost>,
     options?: { fromPreconfiguration?: boolean; secretHashes?: Record<string, any> }
   ) {
-    let secretsToDelete: PolicySecretReference[] = [];
+    let secretsToDelete: SecretReference[] = [];
 
     const logger = appContextService.getLogger();
     logger.debug(`Updating fleet server host ${id}`);
@@ -290,7 +291,8 @@ class FleetServerHostService {
     } else {
       if (
         (!data.ssl?.key && data.secrets?.ssl?.key) ||
-        (!data.ssl?.es_key && data.secrets?.ssl?.es_key)
+        (!data.ssl?.es_key && data.secrets?.ssl?.es_key) ||
+        (!data.ssl?.agent_key && data.secrets?.ssl?.agent_key)
       ) {
         updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
       }

@@ -32,14 +32,26 @@ async function sha256(str: string) {
 // as solving the problem described here https://github.com/elastic/kibana/issues/168131
 export async function getESQLAdHocDataview(
   query: string,
-  dataViewsService: DataViewsPublicPluginStart
+  dataViewsService: DataViewsPublicPluginStart,
+  options?: {
+    allowNoIndex?: boolean;
+    createNewInstanceEvenIfCachedOneAvailable?: boolean;
+  }
 ) {
   const timeField = getTimeFieldFromESQLQuery(query);
   const indexPattern = getIndexPatternFromESQLQuery(query);
+  const dataViewId = await sha256(`esql-${indexPattern}`);
+
+  if (options?.createNewInstanceEvenIfCachedOneAvailable) {
+    // overwise it might return a cached data view with a different time field
+    dataViewsService.clearInstanceCache(dataViewId);
+  }
+
   const dataView = await dataViewsService.create({
     title: indexPattern,
     type: ESQL_TYPE,
-    id: await sha256(`esql-${indexPattern}`),
+    id: dataViewId,
+    allowNoIndex: options?.allowNoIndex,
   });
 
   dataView.timeFieldName = timeField;

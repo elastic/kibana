@@ -36,7 +36,10 @@ exports[`ProcessTreeAlerts component When ProcessTreeAlert is mounted should ren
           <span
             color="danger"
             data-euiicon-type="gear"
-          />
+            tabindex="0"
+          >
+            Info
+          </span>
         </span>
       </div>
       <div

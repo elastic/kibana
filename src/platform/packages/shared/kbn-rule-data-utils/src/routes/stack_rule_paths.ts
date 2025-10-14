@@ -10,6 +10,7 @@
 export const ruleDetailsRoute = '/rule/:ruleId' as const;
 export const triggersActionsRoute = '/app/management/insightsAndAlerting/triggersActions' as const;
 export const createRuleRoute = '/rules/create/:ruleTypeId' as const;
+export const createRuleFromTemplateRoute = '/rules/create/template/:templateId' as const;
 export const editRuleRoute = '/rules/edit/:id' as const;
 
 export const getRuleDetailsRoute = (ruleId: string) => ruleDetailsRoute.replace(':ruleId', ruleId);

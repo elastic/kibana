@@ -54,12 +54,6 @@ mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mockReturnValue(
   caseHooksReturnedValue
 );
 
-mockKibana.services.cases.hooks.useRemoveAlertFromCaseModal.mockReturnValue({
-  ...caseHooksReturnedValue,
-  onSuccess: jest.fn(),
-  onClose: jest.fn(),
-});
-
 mockKibana.services.cases.helpers.canUseCases.mockReturnValue(allCasesPermissions());
 const mockLicensing = licensingMock.createStart();
 
@@ -75,6 +69,7 @@ const config: ConfigSchema = {
       uptime: { enabled: false },
     },
   },
+  managedOtlpServiceUrl: '',
 };
 
 const getFormatterMock = jest.fn();
@@ -139,7 +134,6 @@ describe('ObservabilityActions component', () => {
       | 'cveProps'
       | 'clearSelection'
       | 'observabilityRuleTypeRegistry'
-      | 'openAlertInFlyout'
       | 'refresh'
     > = {
       tableId: pageId,
@@ -151,7 +145,6 @@ describe('ObservabilityActions component', () => {
       cveProps: {} as unknown as EuiDataGridCellValueElementProps,
       clearSelection: noop,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-      openAlertInFlyout: jest.fn(),
       refresh,
     };
 

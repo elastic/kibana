@@ -20,3 +20,10 @@ export const SIEM_MIGRATIONS_OPTION_AREAL_LABEL = i18n.translate(
     defaultMessage: 'Select a migration',
   }
 );
+
+export const SIEM_MIGRATIONS_ADD_ANOTHER_MIGRATION_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.common.addAnotherMigration.title',
+  {
+    defaultMessage: 'Add another migration',
+  }
+);

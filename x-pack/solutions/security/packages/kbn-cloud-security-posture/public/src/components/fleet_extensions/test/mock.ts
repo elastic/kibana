@@ -7,16 +7,88 @@
 
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackageInfo, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import type { RegistryRelease, RegistryVarType } from '@kbn/fleet-plugin/common/types';
 import { AWS_PROVIDER, GCP_PROVIDER, AZURE_PROVIDER } from '../constants';
 import type { CloudProviders, CloudSetupConfig } from '../types';
 
-const CLOUDBEAT_AWS = 'cloudbeat/cis_aws';
-const CLOUDBEAT_GCP = 'cloudbeat/cis_gcp';
-const CLOUDBEAT_AZURE = 'cloudbeat/cis_azure';
+export const CLOUDBEAT_AWS = 'cloudbeat/cis_aws';
+export const CLOUDBEAT_GCP = 'cloudbeat/cis_gcp';
+export const CLOUDBEAT_AZURE = 'cloudbeat/cis_azure';
 
 export const TEMPLATE_NAME = 'cspm';
+export const TEMPLATE_INTEGRATION_NAME = 'cloud_security_posture';
+export const CLOUD_CONNECTOR_ENABLED_VERSION = '3.0.0';
+
+const defaultConfig: CloudSetupConfig = {
+  defaultProvider: AWS_PROVIDER,
+  getStartedPath: 'test/getStartedPath',
+  name: TEMPLATE_INTEGRATION_NAME,
+  overviewPath: '/overview/testPath',
+  policyTemplate: TEMPLATE_NAME,
+  shortName: TEMPLATE_NAME,
+  namespaceSupportEnabled: true,
+  showCloudTemplates: true,
+  providers: {
+    aws: {
+      type: CLOUDBEAT_AWS,
+      getStartedPath: '/get-started/aws',
+      cloudConnectorEnabledVersion: CLOUD_CONNECTOR_ENABLED_VERSION,
+      enabled: true,
+      enableOrganization: true,
+    },
+    gcp: {
+      type: CLOUDBEAT_GCP,
+      getStartedPath: '/get-started/gcp',
+      cloudConnectorEnabledVersion: CLOUD_CONNECTOR_ENABLED_VERSION,
+      enabled: true,
+      enableOrganization: true,
+    },
+    azure: {
+      type: CLOUDBEAT_AZURE,
+      getStartedPath: '/get-started/azure',
+      cloudConnectorEnabledVersion: CLOUD_CONNECTOR_ENABLED_VERSION,
+      enabled: true,
+      enableOrganization: true,
+      manualFieldsEnabled: true,
+    },
+  },
+};
+
+export const createCloudServerlessMock = (
+  isServerlessEnabled: boolean,
+  provider: CloudProviders,
+  cloudHost?: CloudProviders
+) => {
+  const mock = cloudMock.createSetup();
+
+  if (isServerlessEnabled) {
+    mock.isServerlessEnabled = true;
+    mock.isCloudEnabled = false;
+    mock.cloudHost = cloudHost || provider;
+    mock.serverless.projectId = 'test-project-id';
+    mock.cloudId = undefined;
+  } else {
+    mock.isServerlessEnabled = false;
+    mock.isCloudEnabled = true;
+    mock.serverless.projectId = undefined;
+    mock.cloudId =
+      'my-deployment:ZXhhbXBsZS5jbG91ZC5lbGFzdGljLmNvJGRlZmF1bHQkY2liYW5hLWNvbXBvbmVudC1pZCRvdGhlcg==';
+    mock.deploymentUrl = 'https://cloud.elastic.co/deployments/abc12345?region=us-west-2';
+  }
+
+  mock.cloudHost = cloudHost || provider;
+
+  return mock;
+};
+
+export const getDefaultCloudSetupConfig = (overrides?: CloudSetupConfig) => {
+  return {
+    ...defaultConfig,
+    ...overrides,
+  };
+};
 
 export const getMockPolicyAWS = (vars?: PackagePolicyConfigRecord) =>
   getPolicyMock(CLOUDBEAT_AWS, TEMPLATE_NAME, AWS_PROVIDER, vars);
@@ -24,7 +96,8 @@ export const getMockPolicyGCP = (vars?: PackagePolicyConfigRecord) =>
   getPolicyMock(CLOUDBEAT_GCP, TEMPLATE_NAME, GCP_PROVIDER, vars);
 export const getMockPolicyAzure = (vars?: PackagePolicyConfigRecord) =>
   getPolicyMock(CLOUDBEAT_AZURE, TEMPLATE_NAME, AZURE_PROVIDER, vars);
-export const getMockPackageInfo = () => getPackageInfoMock();
+export const getMockPackageInfo = () =>
+  getPackageInfoMock({ includeCloudFormationTemplates: false });
 
 export const getMockPackageInfoAWS = (packageVersion = '1.5.0') => {
   return {
@@ -136,6 +209,7 @@ const getPolicyMock = (
     'azure.credentials.client_certificate_password': { type: 'text' },
     'azure.credentials.client_username': { type: 'text' },
     'azure.credentials.client_password': { type: 'text' },
+    azure_credentials_cloud_connector_id: { type: 'text' },
   };
 
   const dataStream = { type: 'logs', dataset: 'cloud_security_posture.findings' };
@@ -196,8 +270,96 @@ const getPolicyMock = (
   };
 };
 
-export const getPackageInfoMock = () => {
+export const getPackageInfoMock = (props?: {
+  includeCloudFormationTemplates?: boolean;
+  includeAzureTemplates?: boolean;
+}) => {
+  const cloudFormationTemplates = props?.includeCloudFormationTemplates
+    ? [
+        {
+          name: 'cloud_formation_template',
+          type: 'text',
+          title: 'CloudFormation Template',
+          multi: false,
+          required: true,
+          show_user: false,
+          description: 'Template URL to Cloud Formation Quick Create Stack',
+          default:
+            'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-8.19.0.yml&stackName=Elastic-Cloud-Security-Posture-Management&param_EnrollmentToken=FLEET_ENROLLMENT_TOKEN&param_FleetUrl=FLEET_URL&param_ElasticAgentVersion=KIBANA_VERSION&param_ElasticArtifactServer=https://artifacts.elastic.co/downloads/beats/elastic-agent',
+        },
+        {
+          name: 'cloud_formation_credentials_template',
+          type: 'text',
+          title: 'CloudFormation Credentials Template',
+          multi: false,
+          required: true,
+          show_user: false,
+          description: 'Template URL to Cloud Formation Cloud Credentials Stack',
+          default:
+            'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-direct-access-key-ACCOUNT_TYPE-8.19.0.yml',
+        },
+        {
+          name: 'cloud_formation_cloud_connectors_template',
+          type: 'text',
+          title: 'CloudFormation Cloud Connectors Template',
+          multi: false,
+          required: true,
+          show_user: false,
+          description: 'Template URL to Cloud Formation Cloud Connectors Stack',
+          default:
+            'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cloud-connectors-ACCOUNT_TYPE-9.1.0.yml&param_ElasticResourceId=RESOURCE_ID',
+        },
+      ]
+    : undefined;
+
+  const azureTemplates = props?.includeAzureTemplates
+    ? [
+        {
+          name: 'arm_template_url',
+          type: 'text',
+          title: 'ARM Template URL',
+          multi: false,
+          required: true,
+          show_user: false,
+          description: 'A URL to the ARM Template for creating a new deployment',
+          default:
+            'https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Felastic%2Fcloudbeat%2F8.19%2Fdeploy%2Fazure%2FARM-for-ACCOUNT_TYPE.json',
+        },
+        {
+          name: 'arm_template_cloud_connectors_url',
+          type: 'text',
+          title: 'ARM Cloud Connectors Template URL',
+          multi: false,
+          required: true,
+          show_user: false,
+          description: 'A URL to the ARM Template for creating a Cloud Connectors managed identity',
+          default:
+            'https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Felastic%2Fcloudbeat%2Fmain%2Fdeploy%2Fazure%2FARM-for-cloud-connectors-ACCOUNT_TYPE.json',
+        },
+      ]
+    : undefined;
+
   return {
+    version: CLOUD_CONNECTOR_ENABLED_VERSION,
+    policy_templates: [
+      {
+        title: '',
+        description: '',
+        name: TEMPLATE_NAME,
+        inputs: [
+          {
+            type: CLOUDBEAT_AWS,
+            title: '',
+            description: '',
+            vars: cloudFormationTemplates,
+          },
+          {
+            type: 'cloudbeat/cis_azure',
+            vars: azureTemplates,
+          },
+        ],
+      },
+    ],
     data_streams: [
       {
         dataset: 'cloud_security_posture.findings',
@@ -210,7 +372,7 @@ export const getPackageInfoMock = () => {
         title: 'Cloud Security Posture Findings',
         streams: [
           {
-            input: 'cloudbeat/cis_aws',
+            input: CLOUDBEAT_AWS,
             template_path: 'aws.yml.hbs',
             title: 'CIS AWS Benchmark',
             vars: [
@@ -236,7 +398,7 @@ export const getPackageInfoMock = () => {
             ],
           },
           {
-            input: 'cloudbeat/cis_azure',
+            input: CLOUDBEAT_AZURE,
             template_path: 'azure.yml.hbs',
             title: 'CIS Azure Benchmark',
             vars: [
@@ -267,13 +429,47 @@ export const getPackageInfoMock = () => {
                 title: 'Client Certificate Password',
                 type: 'text' as RegistryVarType,
               },
+              {
+                name: 'azure_credentials_cloud_connector_id',
+                type: 'text',
+                title: 'Elastic Cloud Connector ID',
+                multi: false,
+                required: false,
+                show_user: true,
+              },
+              {
+                name: 'azure.credentials.client_id',
+                type: 'text',
+                secret: true,
+                title: 'Client ID',
+                multi: false,
+                required: false,
+                show_user: true,
+              },
+              {
+                name: 'azure.credentials.tenant_id',
+                type: 'text',
+                secret: true,
+                title: 'Tenant ID',
+                multi: false,
+                required: false,
+                show_user: true,
+              },
+              {
+                name: 'azure.credentials.client_secret',
+                type: 'password',
+                title: 'Client Secret',
+                multi: false,
+                required: false,
+                show_user: true,
+                secret: true,
+              },
             ],
           },
         ],
       },
     ],
     format_version: '3.0.0',
-    version: '1.9.0-preview109',
     name: 'cloud_security_posture',
     description: 'Identify & remediate configuration risks in your Cloud infrastructure',
     owner: {
@@ -281,7 +477,7 @@ export const getPackageInfoMock = () => {
       type: 'elastic' as 'elastic' | 'partner' | 'community' | undefined,
     },
     title: 'Security Posture Management',
-    latestVersion: '1.9.0',
+    latestVersion: '3.0.0',
     assets: {
       kibana: {},
     },
@@ -335,7 +531,7 @@ export const getAwsPackageInfoMock = () => {
                   'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cloud-connectors-ACCOUNT_TYPE-8.18.0.yml&param_ElasticResourceId=RESOURCE_ID',
               },
             ],
-            type: 'cloudbeat/cis_aws',
+            type: CLOUDBEAT_AWS,
             description: 'CIS Benchmark for Amazon Web Services Foundations',
           },
         ],
@@ -367,29 +563,29 @@ export const getAwsPackageInfoMock = () => {
 };
 
 export const mockConfig: CloudSetupConfig = {
-  policyTemplate: 'test-template',
+  policyTemplate: TEMPLATE_NAME,
   defaultProvider: 'aws',
   namespaceSupportEnabled: true,
   name: 'Test Integration',
   shortName: 'Test',
   overviewPath: '/overview',
   getStartedPath: '/get-started',
-  cloudConnectorEnabledVersion: '3.0.0',
   showCloudTemplates: true,
   providers: {
     aws: {
-      type: 'aws-input-type',
+      type: CLOUDBEAT_AWS,
       enableOrganization: true,
       getStartedPath: '/aws/start',
+      cloudConnectorEnabledVersion: '3.0.0',
     },
     gcp: {
-      type: 'gcp-input-type',
+      type: CLOUDBEAT_GCP,
       enabled: true,
       enableOrganization: true,
       getStartedPath: '/gcp/start',
     },
     azure: {
-      type: 'azure-input-type',
+      type: CLOUDBEAT_AZURE,
       enableOrganization: true,
       getStartedPath: '/azure/start',
     },

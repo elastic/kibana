@@ -175,3 +175,10 @@ export const historySettingsSchema = z
       lookbackPeriod: settings?.lookbackPeriod || durationSchema.parse('1h'),
     };
   });
+
+export enum EntityStoreCapability {
+  HISTORICAL_VIEWS = 'HISTORICAL_VIEWS',
+  CRUD_API = 'CRUD_API',
+}
+
+export const capabilitySchema = z.nativeEnum(EntityStoreCapability);

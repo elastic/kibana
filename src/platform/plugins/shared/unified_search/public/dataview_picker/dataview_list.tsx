@@ -68,7 +68,6 @@ const strings = {
 
 export interface DataViewListItemEnhanced extends DataViewListItem {
   isAdhoc?: boolean;
-  isManaged?: boolean;
 }
 
 export interface DataViewsListProps {
@@ -89,7 +88,7 @@ export function DataViewsList({
   const sortingService = useMemo(
     () =>
       new SortingService<DataViewListItemEnhanced>({
-        alphabetically: (item) => item.name ?? item.title,
+        alphabetically: (item) => item.name || item.title,
       }),
     []
   );
@@ -137,18 +136,18 @@ export function DataViewsList({
       data-test-subj="indexPattern-switcher"
       searchable
       singleSelection="always"
-      options={sortedDataViewsList?.map(({ title, id, name, isAdhoc, isManaged }) => ({
+      options={sortedDataViewsList?.map(({ title, id, name, isAdhoc, managed }) => ({
         key: id,
         label: name ? name : title,
         value: id,
         checked: id === currentDataViewId ? 'on' : undefined,
-        append: isAdhoc ? (
-          <EuiBadge color="hollow" data-test-subj={`dataViewItemTempBadge-${name}`}>
-            {strings.editorAndPopover.adhoc.getTemporaryDataviewLabel()}
-          </EuiBadge>
-        ) : isManaged ? (
+        append: managed ? (
           <EuiBadge color="hollow" data-test-subj={`dataViewItemManagedBadge-${name}`}>
             {strings.editorAndPopover.managed.getManagedDataviewLabel()}
+          </EuiBadge>
+        ) : isAdhoc ? (
+          <EuiBadge color="hollow" data-test-subj={`dataViewItemTempBadge-${name}`}>
+            {strings.editorAndPopover.adhoc.getTemporaryDataviewLabel()}
           </EuiBadge>
         ) : null,
       }))}

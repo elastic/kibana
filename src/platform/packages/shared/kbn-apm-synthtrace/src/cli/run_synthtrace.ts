@@ -38,6 +38,10 @@ function options(y: Argv) {
       describe: 'Kibana target, used to bootstrap datastreams/mappings/templates/settings',
       string: true,
     })
+    .option('apiKey', {
+      describe: 'Kibana API key',
+      string: true,
+    })
     .option('from', {
       description: 'The start of the time window',
     })
@@ -95,7 +99,7 @@ function options(y: Argv) {
         let scenarioOptions: Record<string, unknown> = {};
 
         try {
-          scenarioOptions = JSON.parse(arg);
+          scenarioOptions = typeof arg === 'string' ? JSON.parse(arg) : arg;
         } catch (error) {
           scenarioOptions = Object.fromEntries(
             arg.split(',').map((kv) => {
@@ -126,12 +130,21 @@ function options(y: Argv) {
       describe: 'Assumes passed package version to avoid calling Fleet API to install',
       string: true,
     })
+    .option('insecure', {
+      describe: 'Skip SSL certificate validation (useful for self-signed certificates)',
+      boolean: true,
+      default: false,
+    })
     .example(
       '$0 simple_logs --target=http://admin:changeme@localhost:9200',
       'Ingest data to specific Elasticsearch cluster'
     )
     .example('$0 simple_logs --live', 'Continuously ingest data to local development cluster')
     .example('$0 simple_logs --from=now-24h --to=now', 'Ingest data for a fixed time window')
+    .example(
+      '$0 simple_logs --target=https://elastic:changeme@localhost:9200 --insecure',
+      'Connect to HTTPS Elasticsearch with self-signed certificates'
+    )
     .showHelpOnFail(false)
     .wrap(null);
 }

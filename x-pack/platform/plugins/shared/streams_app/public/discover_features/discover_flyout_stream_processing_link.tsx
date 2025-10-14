@@ -7,11 +7,20 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { EuiLoadingSpinner, EuiLink, EuiIcon, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiLoadingSpinner,
+  EuiLink,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiToolTip,
+  useEuiTheme,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { css } from '@emotion/react';
 import type { StreamsAppLocator } from '../../common/locators';
 import { useResolvedDefinitionName } from './use_resolved_definition_name';
 
@@ -28,6 +37,7 @@ export function DiscoverFlyoutStreamProcessingLink({
   locator,
   coreApplication,
 }: DiscoverFlyoutStreamProcessingLinkProps) {
+  const { euiTheme } = useEuiTheme();
   const { value, loading, error } = useResolvedDefinitionName({
     streamsRepositoryClient,
     doc,
@@ -58,15 +68,32 @@ export function DiscoverFlyoutStreamProcessingLink({
     },
   });
 
+  const message = i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
+    defaultMessage: 'Parse content in Streams',
+  });
+
   return (
-    <RedirectAppLinks coreStart={{ application: coreApplication }}>
+    <RedirectAppLinks
+      coreStart={{ application: coreApplication }}
+      css={css`
+        min-width: 0;
+      `}
+    >
       <EuiLink href={href}>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiIcon type="sparkles" size="s" />
-          {i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
-            defaultMessage: 'Parse content in Streams',
-          })}
-        </EuiFlexGroup>
+        <EuiToolTip content={message} display="block">
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiIcon
+              type="sparkles"
+              size="s"
+              css={css`
+                margin-left: ${euiTheme.size.s};
+              `}
+            />
+            <EuiText size="xs" className="eui-textTruncate">
+              {message}
+            </EuiText>
+          </EuiFlexGroup>
+        </EuiToolTip>
       </EuiLink>
     </RedirectAppLinks>
   );

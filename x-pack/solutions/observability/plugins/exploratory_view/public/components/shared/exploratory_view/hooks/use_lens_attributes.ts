@@ -12,7 +12,6 @@ import { useKibanaSpace } from '@kbn/observability-shared-plugin/public';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
-import { useLensFormulaHelper } from './use_lens_formula_helper';
 import { ALL_VALUES_SELECTED } from '../configurations/constants/url_constants';
 import type { LayerConfig } from '../configurations/lens_attributes';
 import { LensAttributes } from '../configurations/lens_attributes';
@@ -116,14 +115,12 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
 
   const { euiTheme } = useEuiTheme();
 
-  const lensFormulaHelper = useLensFormulaHelper();
-
   return useMemo(() => {
     // we only use the data from url to apply, since that gets updated to apply changes
     const allSeriesT: AllSeries = convertAllShortSeries(storage.get(allSeriesKey) ?? []);
     const reportTypeT: ReportViewType = storage.get(reportTypeKey) as ReportViewType;
 
-    if (isEmpty(dataViews) || isEmpty(allSeriesT) || !reportTypeT || !lensFormulaHelper) {
+    if (isEmpty(dataViews) || isEmpty(allSeriesT) || !reportTypeT) {
       return null;
     }
     const layerConfigs = getLayerConfigs(
@@ -140,29 +137,21 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
     }
 
     if (reportTypeT === 'single-metric') {
-      const lensAttributes = new SingleMetricLensAttributes(
-        layerConfigs,
-        reportTypeT,
-        lensFormulaHelper
-      );
+      const lensAttributes = new SingleMetricLensAttributes(layerConfigs, reportTypeT);
 
       return lensAttributes.getJSON('lnsLegacyMetric', lastRefresh);
     }
 
     if (reportTypeT === 'heatmap') {
-      const lensAttributes = new HeatMapLensAttributes(
-        layerConfigs,
-        reportTypeT,
-        lensFormulaHelper
-      );
+      const lensAttributes = new HeatMapLensAttributes(layerConfigs, reportTypeT);
 
       return lensAttributes.getJSON('lnsHeatmap', lastRefresh);
     }
 
-    const lensAttributes = new LensAttributes(layerConfigs, reportTypeT, lensFormulaHelper);
+    const lensAttributes = new LensAttributes(layerConfigs, reportTypeT);
 
     return lensAttributes.getJSON('lnsXY', lastRefresh);
     // we also want to check the state on allSeries changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViews, reportType, storage, euiTheme, lastRefresh, allSeries, lensFormulaHelper]);
+  }, [dataViews, reportType, storage, euiTheme, lastRefresh, allSeries]);
 };

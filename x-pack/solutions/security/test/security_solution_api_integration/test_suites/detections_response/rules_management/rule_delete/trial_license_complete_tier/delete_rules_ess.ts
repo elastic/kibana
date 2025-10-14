@@ -26,7 +26,7 @@ import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
 
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('deletes rule with investigation fields as array', async () => {
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .deleteRule({ query: { rule_id: ruleWithLegacyInvestigationField.params.ruleId } })
             .expect(200);
 
@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('deletes rule with investigation fields as empty array', async () => {
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .deleteRule({
               query: { rule_id: ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId },
             })
@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('deletes rule with investigation fields as intended object type', async () => {
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .deleteRule({ query: { rule_id: 'rule-with-investigation-field' } })
             .expect(200);
 

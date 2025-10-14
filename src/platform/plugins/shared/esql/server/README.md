@@ -93,6 +93,18 @@ Here's an example of how to register `recommendedQueries`:
           ],
             solutionId
         );
+
+        // --- Unsetting Recommended Queries ---
+        esqlExtensionsRegistry.unsetRecommendedQueries(
+          [
+            {
+              name: 'Logs count by log level',
+              query: 'from logs* | STATS count(*) by log_level',
+            }
+          ],
+          solutionId
+        );
+
         return {};
     }
 

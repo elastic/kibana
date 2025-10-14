@@ -24,10 +24,14 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
       });
     });
 
+    loadTestFile(require.resolve('./converse/simple_conversation.ts'));
+    loadTestFile(require.resolve('./converse/tool_calling.ts'));
     loadTestFile(require.resolve('./esql_tools.ts'));
     loadTestFile(require.resolve('./esql_tools_internal.ts'));
     loadTestFile(require.resolve('./agents.ts'));
+    loadTestFile(require.resolve('./conversations.ts'));
     loadTestFile(require.resolve('./builtin_tools.ts'));
     loadTestFile(require.resolve('./builtin_tools_internal.ts'));
+    loadTestFile(require.resolve('./spaces.ts'));
   });
 }

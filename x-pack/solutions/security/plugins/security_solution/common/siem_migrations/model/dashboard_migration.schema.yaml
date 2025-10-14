@@ -24,6 +24,62 @@ components:
               $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         - $ref: '#/components/schemas/DashboardMigrationData'
 
+    DashboardMigrationTranslationStats:
+      type: object
+      description: The dashboard migration translation stats object.
+      required:
+        - id
+        - dashboards
+      properties:
+        id:
+          description: The migration id
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        dashboards:
+          type: object
+          description: The dashboards migration translation stats.
+          required:
+            - total
+            - success
+            - failed
+          properties:
+            total:
+              type: integer
+              description: The total number of dashboards in the migration.
+            success:
+              type: object
+              description: The number of dashboards that have been successfully translated.
+              required:
+                - total
+                - result
+                - installable
+              properties:
+                total:
+                  type: integer
+                  description: The total number of dashboards that have been successfully translated.
+                result:
+                  type: object
+                  description: The translation results
+                  required:
+                    - full
+                    - partial
+                    - untranslatable
+                  properties:
+                    full:
+                      type: integer
+                      description: The number of dashboards that have been fully translated.
+                    partial:
+                      type: integer
+                      description: The number of dashboards that have been partially translated.
+                    untranslatable:
+                      type: integer
+                      description: The number of dashboards that could not be translated.
+                installable:
+                  type: integer
+                  description: The number of dashboards that have been successfully translated and can be installed.
+            failed:
+              type: integer
+              description: The number of dashboards that have failed translation.
+
     DashboardMigrationData:
       type: object
       description: The dashboard migration object ( without Id ) with its settings.

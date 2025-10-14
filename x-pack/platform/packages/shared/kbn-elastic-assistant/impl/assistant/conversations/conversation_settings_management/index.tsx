@@ -56,6 +56,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const {
     actionTypeRegistry,
     assistantAvailability: { isAssistantEnabled },
+    currentUser,
     http,
     nameSpace,
     toasts,
@@ -250,7 +251,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     onCancelClick();
   }, [closeConfirmModal, handleUnselectAll, onCancelClick]);
 
-  const { getConversationsList, getColumns } = useConversationsTable();
+  const { getConversationsList, getColumns } = useConversationsTable(currentUser);
 
   const conversationOptions = getConversationsList({
     allSystemPrompts,
@@ -372,6 +373,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
               allSystemPrompts={allSystemPrompts}
               conversationSettings={conversations}
               conversationsSettingsBulkActions={conversationsSettingsBulkActions}
+              currentUser={currentUser}
               http={http}
               isDisabled={isDisabled}
               selectedConversation={selectedConversation}

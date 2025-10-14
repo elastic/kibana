@@ -11,6 +11,12 @@ import expect from '@kbn/expect';
 import { CONTEXT_FUNCTION_NAME, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { chatClient, esClient, kibanaClient } from '../../services';
 
+/**
+ * NOTE: This scenario has been migrated from the legacy evaluation framework.
+ * - x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/evals/knowledge_base/knowledge_base.spec.ts
+ * Any changes should be made in both places until the legacy evaluation framework is removed.
+ */
+
 const KB_INDEX = '.kibana-observability-ai-assistant-kb-*';
 
 describe('Knowledge base', () => {

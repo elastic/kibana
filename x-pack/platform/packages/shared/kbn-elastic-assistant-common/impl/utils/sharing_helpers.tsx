@@ -65,8 +65,13 @@ export const getIsConversationOwner = (
   conversation: Pick<ConversationResponse, 'createdBy' | 'users' | 'id'> | undefined,
   user?: User
 ): boolean => {
-  if (user === undefined || conversation === undefined) return false;
-  if (conversation?.id === '') return true;
+  if (
+    user === undefined ||
+    Object.keys(user).length === 0 ||
+    conversation === undefined ||
+    conversation?.id === ''
+  )
+    return true;
   const conversationUser = getCurrentConversationOwner(conversation);
   const hasMatchingId = !!conversationUser?.id && !!user?.id && conversationUser?.id === user?.id;
   const hasMatchingName =

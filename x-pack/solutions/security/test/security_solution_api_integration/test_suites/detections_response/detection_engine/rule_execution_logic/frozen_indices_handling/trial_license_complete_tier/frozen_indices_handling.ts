@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
-import type { CreateRuleProps } from '../../../../../../config/services/security_solution_api.gen';
+import type { CreateRuleProps } from '@kbn/security-solution-test-api-clients/supertest/detections.gen';
 
 import { dataGeneratorFactory } from '../../../../utils';
 import {
@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const retry = getService('retry');
 
   const indexSampleData = async (index: string) => {
@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
       },
     };
 
-    const { body: createdRuleResponse } = await securitySolutionApi
+    const { body: createdRuleResponse } = await detectionsApi
       .createRule(createRuleProps)
       .expect(200);
 

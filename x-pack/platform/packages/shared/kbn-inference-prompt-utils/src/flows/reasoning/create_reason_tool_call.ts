@@ -26,14 +26,18 @@ export function createReasonToolCall(): [AssistantMessage, ToolMessage] {
         },
       ],
     },
-    {
-      role: MessageRole.Tool,
-      toolCallId,
-      name: 'reason',
-      response: {
-        acknowledged: true,
-        instructions: REASON_INSTRUCTIONS,
-      },
-    },
+    createReasonToolCallResponse(toolCallId),
   ];
+}
+
+export function createReasonToolCallResponse(toolCallId: string): ToolMessage {
+  return {
+    role: MessageRole.Tool,
+    toolCallId,
+    name: 'reason',
+    response: {
+      acknowledged: true,
+      instructions: REASON_INSTRUCTIONS,
+    },
+  };
 }

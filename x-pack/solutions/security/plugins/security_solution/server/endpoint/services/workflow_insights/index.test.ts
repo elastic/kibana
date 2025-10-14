@@ -149,7 +149,6 @@ describe('SecurityWorkflowInsightsService', () => {
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
 
@@ -166,7 +165,6 @@ describe('SecurityWorkflowInsightsService', () => {
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
 
@@ -191,7 +189,6 @@ describe('SecurityWorkflowInsightsService', () => {
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
       expect(createDatastreamMock).toHaveBeenCalledTimes(1);
@@ -218,7 +215,6 @@ describe('SecurityWorkflowInsightsService', () => {
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
 
@@ -254,8 +250,12 @@ describe('SecurityWorkflowInsightsService', () => {
         insight, // intentional dupe to confirm de-duping
       ];
 
-      const request = {} as KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
       const workflowInsights: SecurityWorkflowInsight[] = [getDefaultInsight()];
+      const request = { body: { insightType: workflowInsights[0].type } } as KibanaRequest<
+        unknown,
+        unknown,
+        DefendInsightsPostRequestBody
+      >;
 
       const buildWorkflowInsightsMock = buildWorkflowInsights as jest.Mock;
       buildWorkflowInsightsMock.mockResolvedValueOnce(workflowInsights);
@@ -281,8 +281,8 @@ describe('SecurityWorkflowInsightsService', () => {
         request
       );
 
-      // three since it calls securityWorkflowInsightsService.create + fetch
-      expect(isInitializedSpy).toHaveBeenCalledTimes(3);
+      // four since it calls fetch + update + fetch + create
+      expect(isInitializedSpy).toHaveBeenCalledTimes(4);
       expect(buildWorkflowInsightsMock).toHaveBeenCalledWith({
         defendInsights,
         request,
@@ -443,7 +443,7 @@ describe('SecurityWorkflowInsightsService', () => {
               },
               {
                 terms: {
-                  types: ['incompatible_antivirus'],
+                  type: ['incompatible_antivirus'],
                 },
               },
               {
@@ -518,7 +518,6 @@ describe('SecurityWorkflowInsightsService', () => {
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
         logger,
-        isFeatureEnabled: true,
         endpointContext: mockEndpointAppContextService,
       });
 

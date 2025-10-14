@@ -8,10 +8,12 @@
  */
 
 import { z } from '@kbn/zod';
-import { isValidDateMath } from '@kbn/zod-helpers';
 import { createTracedEsClient } from '@kbn/traced-es-client';
+import { isoToEpoch } from '@kbn/zod-helpers';
+import { parse as dateMathParse } from '@kbn/datemath';
 import { createRoute } from '../create_route';
 import { getDimensions } from './get_dimentions';
+import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
 
 export const getDimensionsRoute = createRoute({
   endpoint: 'GET /internal/metrics_experience/dimensions',
@@ -33,13 +35,20 @@ export const getDimensionsRoute = createRoute({
         .union([z.string(), z.array(z.string())])
         .transform((val) => (Array.isArray(val) ? val : [val]))
         .default(['metrics-*']),
-      to: z.string().superRefine(isValidDateMath).default('now'),
-      from: z.string().superRefine(isValidDateMath).default('now-15m'),
+      to: z.string().datetime().default(dateMathParse('now')!.toISOString()).transform(isoToEpoch),
+      from: z
+        .string()
+        .datetime()
+        .default(dateMathParse('now-15m', { roundUp: true })!.toISOString())
+        .transform(isoToEpoch),
     }),
   }),
   handler: async ({ context, params, logger }) => {
+    const { elasticsearch, featureFlags } = await context.core;
+    await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
+
     const { dimensions, indices, from, to } = params.query;
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const esClient = elasticsearch.client.asCurrentUser;
 
     const values = await getDimensions({
       esClient: createTracedEsClient({

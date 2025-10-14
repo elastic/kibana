@@ -10,15 +10,14 @@
 import type { Logger } from '@kbn/core/server';
 import { dateRangeQuery } from '@kbn/es-query';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { parse } from '@kbn/datemath';
 import type { estypes } from '@elastic/elasticsearch';
 
 interface CreateDimensionsParams {
   esClient: TracedElasticsearchClient;
   dimensions: string[];
   indices: string[];
-  from: string;
-  to: string;
+  from: number;
+  to: number;
   logger: Logger;
 }
 
@@ -35,17 +34,13 @@ export const getDimensions = async ({
   }
 
   try {
-    // TODO: we need a zod helper that does what `rangeRt` does
-    const start = parse(from)?.valueOf();
-    const end = parse(to, { roundUp: true })?.valueOf();
-
     const response = await esClient.search('get_dimensions', {
       index: indices.join(','),
       track_total_hits: false,
       size: 0,
       query: {
         bool: {
-          filter: start && end ? [...dateRangeQuery(start, end, '@timestamp')] : [],
+          filter: [...dateRangeQuery(from, to)],
         },
       },
       // Create aggregations for each dimension

@@ -13,7 +13,6 @@ import type { ServerError } from '../types';
 import { patchComment } from './api';
 import { casesMutationsKeys } from './constants';
 import * as i18n from './translations';
-import { AttachmentType } from '../../common/types/domain';
 
 interface UpdateComment {
   caseId: string;
@@ -34,8 +33,9 @@ export const useUpdateComment = () => {
       patchComment({
         caseId,
         commentId,
-        patch: { owner, comment: commentUpdate, type: AttachmentType.user },
+        commentUpdate,
         version,
+        owner,
       }),
     {
       mutationKey: casesMutationsKeys.updateComment,

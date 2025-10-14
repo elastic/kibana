@@ -339,12 +339,8 @@ export class Parser {
 
   public parse(): ParseResult<ESQLAstQueryExpression> {
     try {
-      return this.parseTarget<ESQLAstQueryExpression>(['singleStatement', 'fromSingleStatement']);
+      return this.parseTarget<ESQLAstQueryExpression>(['statements', 'fromStatements']);
     } catch (error) {
-      if (error !== 'Empty Stack')
-        // eslint-disable-next-line no-console
-        console.error(error);
-
       const root = Builder.expression.query();
 
       return {
@@ -358,6 +354,7 @@ export class Parser {
             endColumn: 0,
             message: `Invalid query [${this.src}]`,
             severity: 'error',
+            code: 'parseError',
           },
         ],
         tokens: [],
@@ -366,27 +363,17 @@ export class Parser {
   }
 
   public parseErrors(): EditorError[] {
-    this.parser.singleStatement();
+    this.parser.statements();
 
     return this.errors.getErrors();
   }
 }
 
 /**
- * @deprecated Use `Parser.create` instead.
- */
-export const createParser = Parser.create;
-
-/**
- * @deprecated Use `Parser.parseErrors` instead.
- */
-export const parseErrors = Parser.parseErrors;
-
-/**
  * @deprecated Use `Parser.parse` instead.
  */
 export const parse = (src: string | undefined, options: ParseOptions = {}): ParseResult => {
-  if (src == null) {
+  if (src == null || !src.trim()) {
     const commands: ESQLAstQueryExpression['commands'] = [];
     return { ast: commands, root: Builder.expression.query(commands), errors: [], tokens: [] };
   }

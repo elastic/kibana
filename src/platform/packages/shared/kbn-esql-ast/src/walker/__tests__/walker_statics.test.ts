@@ -15,6 +15,7 @@ import type {
   ESQLAstItem,
   ESQLAstRerankCommand,
   ESQLCommandOption,
+  ESQLIntegerLiteral,
   ESQLMap,
   ESQLStringLiteral,
 } from '../../types';
@@ -180,6 +181,28 @@ describe('Walker static methods', () => {
         },
       ]);
     });
+
+    test('can collect params from function trailing map argument', () => {
+      const query =
+        'FROM a | WHERE MATCH( aws.s3.bucket.name, ?variable, {"minimum_should_match": ?min_should_match})';
+      const { ast } = parse(query);
+      const params = Walker.params(ast);
+
+      expect(params).toMatchObject([
+        {
+          type: 'literal',
+          literalType: 'param',
+          paramType: 'named',
+          value: 'variable',
+        },
+        {
+          type: 'literal',
+          literalType: 'param',
+          paramType: 'named',
+          value: 'min_should_match',
+        },
+      ]);
+    });
   });
 
   describe('Walker.find()', () => {
@@ -317,6 +340,34 @@ describe('Walker static methods', () => {
       expect(res).toMatchObject({
         type: 'column',
         name: 'a.b.c',
+      });
+    });
+
+    test('can find map and inside map', () => {
+      const query = 'ROW F(1, {"b": ?var, "a": 123})';
+      const { root } = parse(query);
+      const map = Walker.match(root, {
+        type: 'map',
+      });
+      const number = Walker.match(root, {
+        type: 'literal',
+        value: 123,
+      });
+      const param = Walker.match(root, {
+        type: 'literal',
+        literalType: 'param',
+      });
+
+      expect(map).toMatchObject({
+        type: 'map',
+      });
+      expect(number).toMatchObject({
+        type: 'literal',
+        value: 123,
+      });
+      expect(param).toMatchObject({
+        type: 'literal',
+        literalType: 'param',
       });
     });
 
@@ -555,6 +606,16 @@ describe('Walker static methods', () => {
       expect(BasicPrettyPrinter.print(ast)).toBe('FROM index | WHERE a == 456');
     });
 
+    test('can replace using a callback', () => {
+      const { ast } = EsqlQuery.fromSrc('FROM index | WHERE a == 123');
+      Walker.replace(ast, { type: 'literal', value: 123 }, (oldNode) => {
+        const node = oldNode as ESQLIntegerLiteral;
+        return Builder.expression.literal.integer(Number(node.value) * 2);
+      });
+
+      expect(BasicPrettyPrinter.print(ast)).toBe('FROM index | WHERE a == 246');
+    });
+
     test('can find node by predicate function', () => {
       const { ast } = EsqlQuery.fromSrc('FROM index | EVAL a = "x" | WHERE a == 123 | LIMIT 10');
       const newNode = Builder.expression.literal.integer(456);
@@ -598,6 +659,16 @@ describe('Walker static methods', () => {
       Walker.replaceAll(ast, { type: 'literal', value: 123 }, newNode);
 
       expect(BasicPrettyPrinter.print(ast)).toBe('FROM index | WHERE a == 456 AND b > 456');
+    });
+
+    test('can replace using a callback all matches', () => {
+      const { ast } = EsqlQuery.fromSrc('FROM index | WHERE a == 123 AND b > 123');
+      Walker.replaceAll(ast, { type: 'literal', value: 123 }, (oldNode) => {
+        const node = oldNode as ESQLIntegerLiteral;
+        return Builder.expression.literal.integer(Number(node.value) * 2);
+      });
+
+      expect(BasicPrettyPrinter.print(ast)).toBe('FROM index | WHERE a == 246 AND b > 246');
     });
 
     test('returns list of updated nodes', () => {

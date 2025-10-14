@@ -7,6 +7,7 @@
 
 import type { IconType } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { isEqual } from 'lodash';
 import type { FC, PropsWithChildren, ReactNode } from 'react';
 import React, { memo } from 'react';
@@ -51,14 +52,21 @@ export const ToolFormSection: FC<PropsWithChildren<ToolFormSectionProps>> = memo
             {content && <EuiFlexItem grow={0}>{content}</EuiFlexItem>}
             {documentation && (
               <EuiFlexItem>
-                <EuiLink href={documentation.href} external>
+                <EuiLink href={documentation.href} target="_blank">
                   {i18nMessages.documentationLinkLabel} - {documentation.title}
                 </EuiLink>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>{children}</EuiFlexItem>
+        <EuiFlexItem
+          grow={2}
+          css={css`
+            overflow-x: auto; /* Fixes a bug where the ES|QL editor misbehaves on horizontal resize */
+          `}
+        >
+          {children}
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   },

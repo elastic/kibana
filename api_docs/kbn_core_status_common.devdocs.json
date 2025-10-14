@@ -287,7 +287,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "\"degraded\" | \"critical\" | \"unavailable\" | \"available\""
+              "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
             ],
             "path": "src/core/packages/status/common/src/status.ts",
             "deprecated": false,
@@ -440,7 +440,7 @@
           "\nPossible values for the ID of a {@link ServiceStatusLevel}\n"
         ],
         "signature": [
-          "\"degraded\" | \"critical\" | \"unavailable\" | \"available\""
+          "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
         ],
         "path": "src/core/packages/status/common/src/service_status.ts",
         "deprecated": false,

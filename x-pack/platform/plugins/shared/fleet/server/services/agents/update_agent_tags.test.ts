@@ -29,7 +29,6 @@ jest.mock('../app_context', () => {
   };
 });
 jest.mock('../audit_logging');
-
 jest.mock('../agent_policy', () => {
   return {
     agentPolicyService: {
@@ -39,6 +38,9 @@ jest.mock('../agent_policy', () => {
     },
   };
 });
+jest.mock('../secrets', () => ({
+  isActionSecretStorageEnabled: jest.fn(),
+}));
 
 const mockRunAsync = jest.fn().mockResolvedValue({});
 jest.mock('./update_agent_tags_action_runner', () => ({

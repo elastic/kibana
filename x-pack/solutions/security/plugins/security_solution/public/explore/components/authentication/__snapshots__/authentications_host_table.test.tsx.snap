@@ -370,6 +370,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <nav
+        aria-label="Table pagination"
         class="euiPagination emotion-euiPagination"
         data-test-subj="numberedPagination"
       >

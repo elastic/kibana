@@ -572,3 +572,7 @@ On merge commits, Scout tests run in a non-blocking mode.
 | 1         | Missing configuration (e.g. SCOUT_CONFIG_GROUP_KEY and SCOUT_CONFIG_GROUP_TYPE environment variables not set) |
 | 2         | No tests in Playwright config                                                                                 |
 | 10        | Tests failed                                                                                                  |
+
+### AI prompts to help you migrate from FTR
+
+The `@kbn/scout-info` package contains [AI prompts](https://github.com/elastic/kibana/tree/main/src/platform/packages/private/kbn-scout-info/llms) to help you migrate FTR test files.

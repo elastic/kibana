@@ -70,12 +70,16 @@ export async function getESQLQueryColumnsRaw({
   esqlQuery,
   search,
   signal,
+  filter,
+  dropNullColumns,
   timeRange,
   variables,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
   signal?: AbortSignal;
+  dropNullColumns?: boolean;
+  filter?: unknown;
   timeRange?: TimeRange;
   variables?: ESQLControlVariable[];
 }): Promise<ESQLColumn[]> {
@@ -85,7 +89,9 @@ export async function getESQLQueryColumnsRaw({
       search(
         {
           params: {
+            ...(filter ? { filter } : {}),
             query: `${esqlQuery} | limit 0`,
+            ...(dropNullColumns ? { dropNullColumns: true } : {}),
             ...(namedParams.length ? { params: namedParams } : {}),
           },
         },
@@ -96,7 +102,20 @@ export async function getESQLQueryColumnsRaw({
       )
     );
 
-    return (response.rawResponse as unknown as ESQLSearchResponse).columns ?? [];
+    const table = response.rawResponse as unknown as ESQLSearchResponse;
+    const hasEmptyColumns = table.all_columns && table.all_columns?.length > table.columns.length;
+    const lookup = new Set(hasEmptyColumns ? table.columns?.map(({ name }) => name) || [] : []);
+
+    const allColumns =
+      (table.all_columns ?? table.columns)?.map(({ name, type }) => {
+        return {
+          name,
+          type,
+          isNull: hasEmptyColumns ? !lookup.has(name) : false,
+        };
+      }) ?? [];
+
+    return allColumns ?? [];
   } catch (error) {
     throw new Error(
       i18n.translate('esqlUtils.columnsErrorMsg', {
@@ -113,12 +132,16 @@ export async function getESQLQueryColumns({
   esqlQuery,
   search,
   signal,
+  filter,
+  dropNullColumns,
   timeRange,
   variables,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
   signal?: AbortSignal;
+  filter?: unknown;
+  dropNullColumns?: boolean;
   timeRange?: TimeRange;
   variables?: ESQLControlVariable[];
 }): Promise<DatatableColumn[]> {
@@ -126,6 +149,8 @@ export async function getESQLQueryColumns({
     const rawColumns = await getESQLQueryColumnsRaw({
       esqlQuery,
       search,
+      filter,
+      dropNullColumns,
       signal,
       timeRange,
       variables,
@@ -181,8 +206,22 @@ export async function getESQLResults({
       }
     )
   );
+
+  const rawResponse = result.rawResponse as unknown as ESQLSearchResponse;
+
+  // Normalize response.values: if all arrays are empty, convert to single empty array
+  const normalizedValues =
+    rawResponse.values && rawResponse.values.every((row) => Array.isArray(row) && row.length === 0)
+      ? []
+      : rawResponse.values;
+
+  const response = {
+    ...rawResponse,
+    values: normalizedValues,
+  };
+
   return {
-    response: result.rawResponse as unknown as ESQLSearchResponse,
+    response,
     params: result.requestParams as unknown as ESQLSearchParams,
   };
 }

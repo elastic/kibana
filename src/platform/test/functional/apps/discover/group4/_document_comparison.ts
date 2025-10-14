@@ -52,6 +52,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.navigateToApp('discover');
         await timePicker.setDefaultAbsoluteRange();
         await discover.waitUntilSearchingHasFinished();
+        if (await discover.isChartVisible()) {
+          await discover.closeHistogramPanel();
+        }
       });
 
       runComparisonTests({
@@ -88,6 +91,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue('from logstash-* | sort @timestamp desc | limit 10');
         await testSubjects.click('querySubmitButton');
         await discover.waitUntilSearchingHasFinished();
+        if (await discover.isChartVisible()) {
+          await discover.closeHistogramPanel();
+        }
       });
 
       runComparisonTests({

@@ -20,7 +20,10 @@ import {
   EuiTextColor,
   EuiButtonEmpty,
   EuiScreenReaderOnly,
+  EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
+import { AutoOpsPromotionCallout } from '@kbn/autoops-promotion-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toggleSetupMode } from '../../lib/setup_mode';
 import { CheckingSettings } from './checking_settings';
@@ -28,6 +31,7 @@ import { ReasonFound, WeTried } from './reasons';
 import { CheckerErrors } from './checker_errors';
 import { CloudDeployment } from './blurbs';
 import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
+import { Legacy } from '../../legacy_shims';
 
 function NoDataMessage(props) {
   const { isLoading, reason, checkMessage, isCollectionEnabledUpdated } = props;
@@ -44,6 +48,7 @@ function NoDataMessage(props) {
 }
 
 export function NoData(props) {
+  const { euiTheme } = useEuiTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [useInternalCollection, setUseInternalCollection] = useState(false);
   const isCloudEnabled = props.isCloudEnabled;
@@ -114,6 +119,12 @@ export function NoData(props) {
           </h1>
         </EuiScreenReaderOnly>
         <EuiPageBody restrictWidth={600}>
+          {Legacy.shims.hasEnterpriseLicense && (
+            <>
+              <AutoOpsPromotionCallout style={{ margin: `0 ${euiTheme.size.l}` }} />
+              <EuiSpacer size="m" />
+            </>
+          )}
           <EuiPageTemplate.EmptyPrompt
             icon={<EuiIcon type="monitoringApp" size="xxl" />}
             body={
@@ -157,6 +168,12 @@ export function NoData(props) {
         </h1>
       </EuiScreenReaderOnly>
       <EuiPageBody restrictWidth={600}>
+        {Legacy.shims.hasEnterpriseLicense && (
+          <>
+            <AutoOpsPromotionCallout style={{ margin: `0 ${euiTheme.size.l}` }} />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <EuiPageTemplate.EmptyPrompt
           icon={<EuiIcon type="monitoringApp" size="xxl" />}
           title={

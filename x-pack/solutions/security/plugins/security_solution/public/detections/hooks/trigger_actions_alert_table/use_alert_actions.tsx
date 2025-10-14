@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
+import type {
+  BulkActionsConfig,
+  BulkActionsPanelConfig,
+} from '@kbn/response-ops-alerts-table/types';
 import { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { TableId } from '@kbn/securitysolution-data-table';
+import type { AlertClosingReason } from '../../../../common/types';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -20,8 +24,9 @@ import * as i18n from '../translations';
 import { buildTimeRangeFilter } from '../../components/alerts_table/helpers';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import { useAlertCloseInfoModal } from '../use_alert_close_info_modal';
+import { useBulkAlertClosingReasonItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_closing_reason_items';
 
-interface UseBulkAlertActionItemsArgs {
+export interface UseBulkAlertActionItemsArgs {
   /* Table ID for which this hook is being used */
   tableId: TableId;
   /* start time being passed to the Events Table */
@@ -91,7 +96,7 @@ export const useBulkAlertActionItems = ({
   );
 
   const getOnAction = useCallback(
-    (status: AlertWorkflowStatus) => {
+    (status: AlertWorkflowStatus, reason?: AlertClosingReason) => {
       const onActionClick: BulkActionsConfig['onClick'] = async (
         items,
         isSelectAllChecked,
@@ -100,10 +105,6 @@ export const useBulkAlertActionItems = ({
         refresh
       ) => {
         try {
-          if (status === 'closed' && !(await promptAlertCloseConfirmation())) {
-            return;
-          }
-
           let ids: string[] | undefined = items.map((item) => item._id);
           let query: Record<string, unknown> | undefined;
 
@@ -111,6 +112,16 @@ export const useBulkAlertActionItems = ({
             const timeFilter = buildTimeRangeFilter(from, to);
             query = buildEsQuery(undefined, [], [...timeFilter, ...filters], undefined);
             ids = undefined;
+          }
+
+          if (
+            status === 'closed' &&
+            !(await promptAlertCloseConfirmation(ids ? { ids } : { query: JSON.stringify(query) }))
+          ) {
+            return;
+          }
+
+          if (isSelectAllChecked) {
             startTransaction({ name: APM_USER_INTERACTIONS.BULK_QUERY_STATUS_UPDATE });
           } else if (items.length > 1) {
             startTransaction({ name: APM_USER_INTERACTIONS.BULK_STATUS_UPDATE });
@@ -123,6 +134,7 @@ export const useBulkAlertActionItems = ({
             status,
             query,
             signalIds: ids,
+            reason,
           });
 
           setAlertLoading(false);
@@ -158,6 +170,26 @@ export const useBulkAlertActionItems = ({
     ]
   );
 
+  const { item: alertClosingReasonItem, panels: alertClosingReasonPanels } =
+    useBulkAlertClosingReasonItems({
+      onSubmitCloseReason({
+        reason,
+        alertItems,
+        setIsBulkActionsLoading,
+        clearSelection,
+        isAllSelected,
+        refresh,
+      }) {
+        getOnAction(FILTER_CLOSED as AlertWorkflowStatus, reason)(
+          alertItems,
+          !!isAllSelected,
+          setIsBulkActionsLoading,
+          () => clearSelection?.(),
+          () => refresh?.()
+        );
+      },
+    });
+
   const getUpdateAlertStatusAction = useCallback(
     (status: AlertWorkflowStatus) => {
       const label =
@@ -167,6 +199,10 @@ export const useBulkAlertActionItems = ({
           ? i18n.BULK_ACTION_CLOSE_SELECTED
           : i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED;
 
+      if (status === FILTER_CLOSED) {
+        return alertClosingReasonItem;
+      }
+
       return {
         label,
         key: `${status}-alert-status`,
@@ -175,14 +211,24 @@ export const useBulkAlertActionItems = ({
         onClick: getOnAction(status),
       };
     },
-    [getOnAction]
+    [alertClosingReasonItem, getOnAction]
   );
 
-  return useMemo(() => {
+  const items = useMemo(() => {
     return hasIndexWrite
-      ? [FILTER_OPEN, FILTER_CLOSED, FILTER_ACKNOWLEDGED].map((status) => {
-          return getUpdateAlertStatusAction(status as AlertWorkflowStatus);
-        })
+      ? ([FILTER_OPEN, FILTER_CLOSED, FILTER_ACKNOWLEDGED]
+          .map((status) => {
+            return getUpdateAlertStatusAction(status as AlertWorkflowStatus);
+          })
+          //  Filter out undefined items
+          .filter((item) => !!item) as BulkActionsConfig[])
       : [];
   }, [getUpdateAlertStatusAction, hasIndexWrite]);
+
+  const panels = useMemo(
+    () => [...alertClosingReasonPanels] as BulkActionsPanelConfig[],
+    [alertClosingReasonPanels]
+  );
+
+  return useMemo(() => ({ items, panels }), [items, panels]);
 };

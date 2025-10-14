@@ -49,31 +49,36 @@ export class SiemMigrationsDataResourcesClient extends SiemMigrationsDataBaseCli
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
 
-    let resourcesSlice: CreateSiemMigrationResourceInput[];
-
     const createdAt = new Date().toISOString();
-    while ((resourcesSlice = resources.splice(0, BULK_MAX_SIZE)).length > 0) {
-      await this.esClient
-        .bulk({
-          refresh: 'wait_for',
-          operations: resourcesSlice.flatMap((resource) => [
-            { update: { _id: this.createId(resource), _index: index } },
-            {
-              doc: {
-                ...resource,
-                '@timestamp': createdAt,
-                updated_by: profileId,
-                updated_at: createdAt,
+    const bulkOperations = [];
+
+    for (let i = 0; i < resources.length; i += BULK_MAX_SIZE) {
+      const resourcesSlice = resources.slice(i, i + BULK_MAX_SIZE);
+      bulkOperations.push(
+        this.esClient
+          .bulk({
+            refresh: 'wait_for',
+            operations: resourcesSlice.flatMap((resource) => [
+              { update: { _id: this.createId(resource), _index: index } },
+              {
+                doc: {
+                  ...resource,
+                  '@timestamp': createdAt,
+                  updated_by: profileId,
+                  updated_at: createdAt,
+                },
+                doc_as_upsert: true,
               },
-              doc_as_upsert: true,
-            },
-          ]),
-        })
-        .catch((error) => {
-          this.logger.error(`Error upsert resources: ${error.message}`);
-          throw error;
-        });
+            ]),
+          })
+          .catch((error) => {
+            this.logger.error(`Error upsert resources: ${error.message}`);
+            throw error;
+          })
+      );
     }
+
+    await Promise.all(bulkOperations);
   }
 
   /** Creates the resources in the index only if they do not exist */
@@ -81,27 +86,33 @@ export class SiemMigrationsDataResourcesClient extends SiemMigrationsDataBaseCli
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
 
-    let resourcesSlice: CreateSiemMigrationResourceInput[];
     const createdAt = new Date().toISOString();
-    while ((resourcesSlice = resources.splice(0, BULK_MAX_SIZE)).length > 0) {
-      await this.esClient
-        .bulk({
-          refresh: 'wait_for',
-          operations: resourcesSlice.flatMap((resource) => [
-            { create: { _id: this.createId(resource), _index: index } },
-            {
-              ...resource,
-              '@timestamp': createdAt,
-              updated_by: profileId,
-              updated_at: createdAt,
-            },
-          ]),
-        })
-        .catch((error) => {
-          this.logger.error(`Error upsert resources: ${error.message}`);
-          throw error;
-        });
+    const bulkOperations = [];
+
+    for (let i = 0; i < resources.length; i += BULK_MAX_SIZE) {
+      const resourcesSlice = resources.slice(i, i + BULK_MAX_SIZE);
+      bulkOperations.push(
+        this.esClient
+          .bulk({
+            refresh: 'wait_for',
+            operations: resourcesSlice.flatMap((resource) => [
+              { create: { _id: this.createId(resource), _index: index } },
+              {
+                ...resource,
+                '@timestamp': createdAt,
+                updated_by: profileId,
+                updated_at: createdAt,
+              },
+            ]),
+          })
+          .catch((error) => {
+            this.logger.error(`Error creating resources: ${error.message}`);
+            throw error;
+          })
+      );
     }
+
+    await Promise.all(bulkOperations);
   }
 
   public async get(

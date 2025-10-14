@@ -26,6 +26,12 @@ import {
   MOCK_IDP_ATTRIBUTE_ROLES,
   MOCK_IDP_ATTRIBUTE_EMAIL,
   MOCK_IDP_ATTRIBUTE_NAME,
+  MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN,
+  MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN_EXPIRES_AT,
+  MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN,
+  MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN_EXPIRES_AT,
+  MOCK_IDP_UIAM_ORGANIZATION_ID,
+  MOCK_IDP_UIAM_PROJECT_ID,
   ensureSAMLRoleMapping,
   createMockIdpMetadata,
 } from '@kbn/mock-idp-utils';
@@ -82,6 +88,13 @@ export type ServerlessProductTier =
   | 'complete'
   | 'search_ai_lake';
 
+export const esServerlessProjectTypes = new Map<string, string>([
+  ['es', 'elasticsearch'],
+  ['oblt', 'observability'],
+  ['security', 'security'],
+  ['chat', 'elasticsearch'],
+]);
+
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
   dockerCmd?: string;
 }
@@ -112,6 +125,8 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
    * (see list of files that can be overwritten under `src/platform/packages/shared/kbn-es/src/serverless_resources/users`)
    */
   resources?: string | string[];
+  /** Configure ES serverless with UIAM support */
+  uiam?: boolean;
 }
 
 interface ServerlessEsNodeArgs {
@@ -613,6 +628,32 @@ export function resolveEsArgs(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail`,
       MOCK_IDP_ATTRIBUTE_EMAIL
     );
+
+    if (options.uiam) {
+      // HACK: A workaround for the Serverless ES metering service, which is enabled automatically after we set
+      // `serverless.project_id`, and, if not configured _explicitly_ with an HTTP URL, expects CA certs in a
+      // fixed location (`http-certs/ca.crt`) that we cannot override. So we just point it to Kibana as if it
+      // were a metering service and use the longest possible interval to reduce noise.
+      esArgs.set('metering.url', options.kibanaUrl);
+      esArgs.set('metering.report_period', '60m');
+
+      esArgs.set(
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.private_attributes`,
+        [
+          MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN,
+          MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN_EXPIRES_AT,
+          MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN,
+          MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN_EXPIRES_AT,
+        ].join(',')
+      );
+
+      esArgs.set('serverless.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
+      esArgs.set('serverless.project_type', esServerlessProjectTypes.get(options.projectType)!);
+      esArgs.set('serverless.project_id', MOCK_IDP_UIAM_PROJECT_ID);
+
+      esArgs.set('serverless.universal_iam_service.enabled', 'true');
+      esArgs.set('serverless.universal_iam_service.url', 'http://uiam-cosmosdb-gateway:8080');
+    }
   }
 
   return Array.from(esArgs).flatMap((e) => ['--env', e.join('=')]);

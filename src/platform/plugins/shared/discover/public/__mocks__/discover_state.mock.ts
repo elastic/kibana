@@ -30,6 +30,7 @@ import { createTabsStorageManager } from '../application/main/state_management/t
 import { internalStateActions } from '../application/main/state_management/redux';
 import { DEFAULT_TAB_STATE } from '../application/main/state_management/redux';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import { DiscoverSearchSessionManager } from '../application/main/state_management/discover_search_session';
 
 export function getDiscoverStateMock({
   isTimeBased = true,
@@ -68,12 +69,17 @@ export function getDiscoverStateMock({
     urlStateStorage: stateStorageContainer,
     storage: services.storage,
   });
+  const searchSessionManager = new DiscoverSearchSessionManager({
+    history: services.history,
+    session: services.data.search.session,
+  });
   const internalState = createInternalStateStore({
     services,
     customizationContext,
     runtimeStateManager,
     urlStateStorage: stateStorageContainer,
     tabsStorageManager,
+    searchSessionManager,
   });
   const finalSavedSearch =
     savedSearch === false
@@ -106,6 +112,19 @@ export function getDiscoverStateMock({
     persistedDiscoverSession,
     defaultTabState: DEFAULT_TAB_STATE,
   });
+  if (!persistedDiscoverSession) {
+    const stableTabId = 'stable-test-initial-tab-id';
+    const selectedTab = initialTabsState.allTabs.find(
+      (t) => t.id === initialTabsState.selectedTabId
+    );
+    if (selectedTab) {
+      selectedTab.id = stableTabId;
+    }
+    initialTabsState.selectedTabId = stableTabId;
+  }
+  // TODO: This should really be called async (or preferably the full `initializeTabs` thunk),
+  // but doing so would make the whole function async, which would require a lot of test refactoring
+  void tabsStorageManager.pushSelectedTabIdToUrl(initialTabsState.selectedTabId);
   internalState.dispatch(internalStateActions.setTabs(initialTabsState));
   internalState.dispatch(
     internalStateActions.initializeTabs.fulfilled(
@@ -125,6 +144,7 @@ export function getDiscoverStateMock({
     stateStorageContainer,
     internalState,
     runtimeStateManager,
+    searchSessionManager,
   });
   const tabRuntimeState = selectTabRuntimeState(
     runtimeStateManager,

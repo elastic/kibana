@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { type TimelineType, TimelineTypeEnum } from '../../../common/api/timeline';
@@ -26,7 +26,7 @@ export const CurrentPatternsMessage = ({
   const tooltip = useMemo(
     () =>
       deadPatterns.length > 0 ? (
-        <EuiToolTip
+        <EuiIconTip
           content={
             <NoMatchDataMessage
               activePatterns={activePatterns}
@@ -34,9 +34,9 @@ export const CurrentPatternsMessage = ({
               timelineType={timelineType}
             />
           }
-        >
-          <EuiIcon type="question" title={i18n.INACTIVE_PATTERNS} />
-        </EuiToolTip>
+          type="question"
+          title={i18n.INACTIVE_PATTERNS}
+        />
       ) : null,
     [activePatterns, deadPatterns.length, selectedPatterns, timelineType]
   );

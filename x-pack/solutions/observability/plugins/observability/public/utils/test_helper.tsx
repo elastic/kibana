@@ -34,6 +34,7 @@ const defaultConfig: ConfigSchema = {
       uptime: { enabled: false },
     },
   },
+  managedOtlpServiceUrl: '',
 };
 
 const queryClient = new QueryClient({

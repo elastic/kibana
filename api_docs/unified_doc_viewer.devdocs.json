@@ -5,6 +5,48 @@
     "functions": [
       {
         "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.ContentFrameworkSection",
+        "type": "Function",
+        "tags": [],
+        "label": "ContentFrameworkSection",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "ContentFrameworkSectionProps",
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/content_framework/lazy_content_framework_section.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.ContentFrameworkSection.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedDocViewer",
         "id": "def-public.JsonCodeEditor",
         "type": "Function",
         "tags": [],
@@ -165,7 +207,7 @@
           },
           ") => JSX.Element) | undefined; indexes: ",
           "TraceIndexes",
-          "; } & React.RefAttributes<",
+          "; showTraceWaterfall?: boolean | undefined; } & React.RefAttributes<",
           {
             "pluginId": "unifiedDocViewer",
             "scope": "public",
@@ -257,10 +299,10 @@
       },
       {
         "parentPluginId": "unifiedDocViewer",
-        "id": "def-public.UnifiedDocViewerObservabilityTracesOverview",
+        "id": "def-public.UnifiedDocViewerObservabilityGenericOverview",
         "type": "Function",
         "tags": [],
-        "label": "UnifiedDocViewerObservabilityTracesOverview",
+        "label": "UnifiedDocViewerObservabilityGenericOverview",
         "description": [],
         "signature": [
           "React.ForwardRefExoticComponent<",
@@ -268,6 +310,48 @@
           " & { indexes: ",
           "TraceIndexes",
           "; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; } & React.RefAttributes<{}>>"
+        ],
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/generic/doc_viewer_overview/lazy_doc_viewer_obs_generic_overview.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerObservabilityGenericOverview.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.UnifiedDocViewerObservabilityTracesOverview",
+        "type": "Function",
+        "tags": [],
+        "label": "UnifiedDocViewerObservabilityTracesOverview",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<Omit<Omit<",
+          "DocViewRenderProps",
+          " & { indexes: ",
+          "TraceIndexes",
+          "; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; } & React.RefAttributes<",
+          "OverviewApi",
+          ">, \"ref\"> & { ref?: ((instance: ",
+          "OverviewApi",
+          " | null) => void) | React.RefObject<",
+          "OverviewApi",
+          "> | null | undefined; }, \"ref\"> & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/doc_viewer_overview/lazy_doc_viewer_obs_traces_overview.tsx",
         "deprecated": false,
@@ -430,7 +514,7 @@
           },
           ") => JSX.Element) | undefined; indexes: ",
           "TraceIndexes",
-          "; }"
+          "; showTraceWaterfall?: boolean | undefined; }"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
         "deprecated": false,

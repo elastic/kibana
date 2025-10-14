@@ -22,17 +22,27 @@ import type {
   UpdateAttackDiscoverySchedulesResponse,
 } from '@kbn/elastic-assistant-common';
 import {
+  transformAttackDiscoveryScheduleCreatePropsToApi,
+  transformAttackDiscoveryScheduleUpdatePropsToApi,
   ATTACK_DISCOVERY_SCHEDULES,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
   ATTACK_DISCOVERY_SCHEDULES_FIND,
+  ATTACK_DISCOVERY_INTERNAL_SCHEDULES,
+  ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID,
+  ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_DISABLE,
+  ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_ENABLE,
+  ATTACK_DISCOVERY_INTERNAL_SCHEDULES_FIND,
+  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { KibanaServices } from '../../../../../common/lib/kibana';
 
 export const ALERTING_RULE_TYPES_URL = `${BASE_ALERTING_API_PATH}/rule_types` as const;
 
 export interface CreateAttackDiscoveryScheduleParams {
+  /** Feature flag that enables the attack discovery public API */
+  attackDiscoveryPublicApiEnabled: boolean;
   /** The body containing the schedule attributes */
   body: AttackDiscoveryScheduleCreateProps;
   /** Optional AbortSignal for cancelling request */
@@ -42,14 +52,30 @@ export interface CreateAttackDiscoveryScheduleParams {
 export const createAttackDiscoverySchedule = async ({
   body,
   signal,
+  attackDiscoveryPublicApiEnabled,
 }: CreateAttackDiscoveryScheduleParams): Promise<CreateAttackDiscoverySchedulesResponse> => {
-  return KibanaServices.get().http.post<CreateAttackDiscoverySchedulesResponse>(
-    ATTACK_DISCOVERY_SCHEDULES,
-    { body: JSON.stringify(body), version: '1', signal }
-  );
+  const route = attackDiscoveryPublicApiEnabled
+    ? ATTACK_DISCOVERY_SCHEDULES
+    : ATTACK_DISCOVERY_INTERNAL_SCHEDULES;
+  const version = attackDiscoveryPublicApiEnabled
+    ? API_VERSIONS.public.v1
+    : API_VERSIONS.internal.v1;
+
+  // Transform body format for public API (snake_case) vs internal API (camelCase)
+  const requestBody = attackDiscoveryPublicApiEnabled
+    ? transformAttackDiscoveryScheduleCreatePropsToApi(body)
+    : body;
+
+  return KibanaServices.get().http.post<CreateAttackDiscoverySchedulesResponse>(route, {
+    body: JSON.stringify(requestBody),
+    version,
+    signal,
+  });
 };
 
 export interface GetAttackDiscoveryScheduleParams {
+  /** Feature flag that enables the attack discovery public API */
+  attackDiscoveryPublicApiEnabled: boolean;
   /** `id` of the attack discovery schedule */
   id: string;
   /** Optional AbortSignal for cancelling request */
@@ -59,14 +85,26 @@ export interface GetAttackDiscoveryScheduleParams {
 export const getAttackDiscoverySchedule = async ({
   id,
   signal,
+  attackDiscoveryPublicApiEnabled,
 }: GetAttackDiscoveryScheduleParams): Promise<GetAttackDiscoverySchedulesResponse> => {
+  const route = attackDiscoveryPublicApiEnabled
+    ? ATTACK_DISCOVERY_SCHEDULES_BY_ID
+    : ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID;
+  const version = attackDiscoveryPublicApiEnabled
+    ? API_VERSIONS.public.v1
+    : API_VERSIONS.internal.v1;
   return KibanaServices.get().http.get<GetAttackDiscoverySchedulesResponse>(
-    replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id }),
-    { version: '1', signal }
+    replaceParams(route, { id }),
+    {
+      version,
+      signal,
+    }
   );
 };
 
 export interface UpdateAttackDiscoveryScheduleParams {
+  /** Feature flag that enables the attack discovery public API */
+  attackDiscoveryPublicApiEnabled: boolean;
   /** `id` of the attack discovery schedule */
   id: string;
   /** The body containing the schedule attributes */
@@ -76,17 +114,36 @@ export interface UpdateAttackDiscoveryScheduleParams {
 }
 /** Updates the attack discovery schedule. */
 export const updateAttackDiscoverySchedule = async ({
+  attackDiscoveryPublicApiEnabled,
   id,
   body,
   signal,
 }: UpdateAttackDiscoveryScheduleParams): Promise<UpdateAttackDiscoverySchedulesResponse> => {
+  const route = attackDiscoveryPublicApiEnabled
+    ? ATTACK_DISCOVERY_SCHEDULES_BY_ID
+    : ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID;
+  const version = attackDiscoveryPublicApiEnabled
+    ? API_VERSIONS.public.v1
+    : API_VERSIONS.internal.v1;
+
+  // Transform body format for public API (snake_case) vs internal API (camelCase)
+  const requestBody = attackDiscoveryPublicApiEnabled
+    ? transformAttackDiscoveryScheduleUpdatePropsToApi(body)
+    : body;
+
   return KibanaServices.get().http.put<UpdateAttackDiscoverySchedulesResponse>(
-    replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id }),
-    { body: JSON.stringify(body), version: '1', signal }
+    replaceParams(route, { id }),
+    {
+      body: JSON.stringify(requestBody),
+      version,
+      signal,
+    }
   );
 };
 
 export interface DeleteAttackDiscoveryScheduleParams {
+  /** Feature flag that enables the attack discovery public API */
+  attackDiscoveryPublicApiEnabled: boolean;
   /** `id` of the attack discovery schedule */
   id: string;
   /** Optional AbortSignal for cancelling request */
@@ -96,14 +153,26 @@ export interface DeleteAttackDiscoveryScheduleParams {
 export const deleteAttackDiscoverySchedule = async ({
   id,
   signal,
+  attackDiscoveryPublicApiEnabled,
 }: DeleteAttackDiscoveryScheduleParams): Promise<DeleteAttackDiscoverySchedulesResponse> => {
+  const route = attackDiscoveryPublicApiEnabled
+    ? ATTACK_DISCOVERY_SCHEDULES_BY_ID
+    : ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID;
+  const version = attackDiscoveryPublicApiEnabled
+    ? API_VERSIONS.public.v1
+    : API_VERSIONS.internal.v1;
   return KibanaServices.get().http.delete<DeleteAttackDiscoverySchedulesResponse>(
-    replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id }),
-    { version: '1', signal }
+    replaceParams(route, { id }),
+    {
+      version,
+      signal,
+    }
   );
 };
 
 export interface EnableAttackDiscoveryScheduleParams {
+  /** Feature flag that enables the attack discovery public API */
+  attackDiscoveryPublicApiEnabled: boolean;
   /** `id` of the attack discovery schedule */
   id: string;
   /** Optional AbortSignal for cancelling request */
@@ -113,14 +182,25 @@ export interface EnableAttackDiscoveryScheduleParams {
 export const enableAttackDiscoverySchedule = async ({
   id,
   signal,
+  attackDiscoveryPublicApiEnabled,
 }: EnableAttackDiscoveryScheduleParams): Promise<EnableAttackDiscoverySchedulesResponse> => {
+  const isPublic = !!attackDiscoveryPublicApiEnabled;
+  const route = isPublic
+    ? ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE
+    : ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_ENABLE;
+  const version = isPublic ? API_VERSIONS.public.v1 : API_VERSIONS.internal.v1;
   return KibanaServices.get().http.post<EnableAttackDiscoverySchedulesResponse>(
-    replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE, { id }),
-    { version: '1', signal }
+    replaceParams(route, { id }),
+    {
+      version,
+      signal,
+    }
   );
 };
 
 export interface DisableAttackDiscoveryScheduleParams {
+  /** Feature flag that enables the attack discovery public API */
+  attackDiscoveryPublicApiEnabled: boolean;
   /** `id` of the attack discovery schedule */
   id: string;
   /** Optional AbortSignal for cancelling request */
@@ -128,16 +208,28 @@ export interface DisableAttackDiscoveryScheduleParams {
 }
 /** Disables the attack discovery schedule. */
 export const disableAttackDiscoverySchedule = async ({
+  attackDiscoveryPublicApiEnabled,
   id,
   signal,
 }: DisableAttackDiscoveryScheduleParams): Promise<DisableAttackDiscoverySchedulesResponse> => {
+  const route = attackDiscoveryPublicApiEnabled
+    ? ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE
+    : ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_DISABLE;
+  const version = attackDiscoveryPublicApiEnabled
+    ? API_VERSIONS.public.v1
+    : API_VERSIONS.internal.v1;
   return KibanaServices.get().http.post<DisableAttackDiscoverySchedulesResponse>(
-    replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE, { id }),
-    { version: '1', signal }
+    replaceParams(route, { id }),
+    {
+      version,
+      signal,
+    }
   );
 };
 
 export interface FindAttackDiscoveryScheduleParams {
+  /** Feature flag that enables the attack discovery public API */
+  attackDiscoveryPublicApiEnabled: boolean;
   /** Optional page number to retrieve */
   page?: number;
   /** Optional number of documents per page to retrieve */
@@ -151,16 +243,31 @@ export interface FindAttackDiscoveryScheduleParams {
 }
 /** Retrieves attack discovery schedules. */
 export const findAttackDiscoverySchedule = async ({
+  attackDiscoveryPublicApiEnabled,
   page,
   perPage,
   sortField,
   sortDirection,
   signal,
 }: FindAttackDiscoveryScheduleParams): Promise<FindAttackDiscoverySchedulesResponse> => {
-  return KibanaServices.get().http.get<FindAttackDiscoverySchedulesResponse>(
-    ATTACK_DISCOVERY_SCHEDULES_FIND,
-    { version: '1', query: { page, perPage, sortField, sortDirection }, signal }
-  );
+  const route = attackDiscoveryPublicApiEnabled
+    ? ATTACK_DISCOVERY_SCHEDULES_FIND
+    : ATTACK_DISCOVERY_INTERNAL_SCHEDULES_FIND;
+  const version = attackDiscoveryPublicApiEnabled
+    ? API_VERSIONS.public.v1
+    : API_VERSIONS.internal.v1;
+
+  const query = attackDiscoveryPublicApiEnabled
+    ? // public API expects snake_case query params
+      { page, per_page: perPage, sort_field: sortField, sort_direction: sortDirection }
+    : // internal API uses camelCase
+      { page, perPage, sortField, sortDirection };
+
+  return KibanaServices.get().http.get<FindAttackDiscoverySchedulesResponse>(route, {
+    version,
+    query,
+    signal,
+  });
 };
 
 /** Retrieves registered rule types. */

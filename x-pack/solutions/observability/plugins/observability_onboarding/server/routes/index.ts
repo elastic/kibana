@@ -9,6 +9,7 @@ import { flowRouteRepository } from './flow/route';
 import { kubernetesOnboardingRouteRepository } from './kubernetes/route';
 import { firehoseOnboardingRouteRepository } from './firehose/route';
 import { otelHostOnboardingRouteRepository } from './otel_host/route';
+import { otelApmOnboardingRouteRepository } from './otel_apm/route';
 
 function getTypedObservabilityOnboardingServerRouteRepository() {
   const repository = {
@@ -16,6 +17,7 @@ function getTypedObservabilityOnboardingServerRouteRepository() {
     ...kubernetesOnboardingRouteRepository,
     ...firehoseOnboardingRouteRepository,
     ...otelHostOnboardingRouteRepository,
+    ...otelApmOnboardingRouteRepository,
   };
 
   return repository;

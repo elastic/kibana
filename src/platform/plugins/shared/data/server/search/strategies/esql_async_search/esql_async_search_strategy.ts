@@ -218,7 +218,11 @@ export const esqlAsyncSearchStrategyProvider = (
       logger.debug(`extend ${id} by ${keepAlive}`);
       try {
         await esClient.asCurrentUser.transport.request(
-          { method: 'GET', path: `/_query/async/${id}`, body: { id, keep_alive: keepAlive } },
+          {
+            method: 'GET',
+            path: `/_query/async/${id}`,
+            querystring: { id, keep_alive: keepAlive },
+          },
           { ...options.transport, signal: options.abortSignal, meta: true }
         );
       } catch (e) {

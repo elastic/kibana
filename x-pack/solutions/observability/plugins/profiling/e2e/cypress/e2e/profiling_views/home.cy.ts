@@ -20,7 +20,7 @@ describe('Home page', () => {
   });
 
   it('opens Profiling UI when user does not have privileges', () => {
-    cy.intercept('GET', '/internal/profiling/setup/es_resources', {
+    cy.intercept('GET', '/api/profiling/setup/es_resources', {
       body: {
         has_setup: true,
         pre_8_9_1_data: false,

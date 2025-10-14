@@ -38,7 +38,7 @@ export const casePayload: CasePostRequest = {
       subcategory: '45',
     },
   },
-  settings: { syncAlerts: true },
+  settings: { syncAlerts: true, extractObservables: true },
   severity: CaseSeverity.LOW,
   owner: SECURITY_SOLUTION_OWNER,
   assignees: [{ uid: '1' }],
@@ -82,7 +82,7 @@ export const patchCasesRequest = {
       updatedAttributes: {
         description: 'updated desc',
         tags: ['one', 'two'],
-        settings: { syncAlerts: false },
+        settings: { syncAlerts: false, extractObservables: false },
         severity: CaseSeverity.CRITICAL,
       },
       originalCase: originalCases[1],
@@ -555,6 +555,7 @@ export const getBuiltUserActions = ({ isMock }: { isMock: boolean }): UserAction
           payload: {
             settings: {
               syncAlerts: false,
+              extractObservables: false,
             },
           },
           type: 'settings',

@@ -247,6 +247,7 @@ export class SyncIntegrationsTask {
         updated_at: item.updated_at ?? new Date().toISOString(),
         install_status: item.attributes.install_status,
         install_source: item.attributes.install_source,
+        rolled_back: item.attributes.rolled_back,
       };
     });
 

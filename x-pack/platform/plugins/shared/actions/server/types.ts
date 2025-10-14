@@ -92,6 +92,7 @@ export interface ActionTypeExecutorOptions<
   source?: ActionExecutionSource<unknown>;
   request?: KibanaRequest;
   connectorUsageCollector: ConnectorUsageCollector;
+  connectorTokenClient?: ConnectorTokenClientContract;
 }
 
 export type ActionResult = Connector;

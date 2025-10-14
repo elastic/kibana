@@ -231,6 +231,12 @@ export const MisconfigurationFindingsDetailsTable = memo(
         width: `${linkWidth}`,
         render: (rule: CspBenchmarkRuleMetadata, finding: MisconfigurationFindingDetailFields) => (
           <EuiButtonIcon
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.left.insights.misconfigurations.previewButtonAriaLabel',
+              {
+                defaultMessage: 'Preview finding details',
+              }
+            )}
             iconType="expand"
             onClick={() => {
               uiMetricService.trackUiMetric(

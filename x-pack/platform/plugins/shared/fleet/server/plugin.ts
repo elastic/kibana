@@ -46,13 +46,12 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
@@ -69,6 +68,8 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '../common/constants';
+
+import { runWithCache } from './services/epm/packages/cache';
 
 import { getFilesClientFactory } from './services/files/get_files_client_factory';
 
@@ -93,6 +94,7 @@ import {
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   FLEET_PROXY_SAVED_OBJECT_TYPE,
   SPACE_SETTINGS_SAVED_OBJECT_TYPE,
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_objects';
 import { registerRoutes } from './routes';
@@ -103,6 +105,7 @@ import type {
   AgentService,
   ArtifactsClientInterface,
   PackageService,
+  CloudConnectorServiceInterface,
 } from './services';
 import {
   agentPolicyService,
@@ -112,6 +115,7 @@ import {
   licenseService,
   packagePolicyService,
   PackageServiceImpl,
+  cloudConnectorService,
 } from './services';
 import {
   fetchAgentsUsage,
@@ -173,6 +177,7 @@ export interface FleetStartDeps {
   savedObjectsTagging: SavedObjectTaggingStart;
   taskManager: TaskManagerStartContract;
   spaces: SpacesPluginStart;
+  alerting: AlertingServerStart;
 }
 
 export interface FleetAppContext {
@@ -210,6 +215,7 @@ export interface FleetAppContext {
   fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   syncIntegrationsTask: SyncIntegrationsTask;
   lockManagerService?: LockManagerService;
+  alertingStart?: AlertingServerStart;
 }
 
 export type FleetSetupContract = void;
@@ -227,6 +233,7 @@ const allSavedObjectTypes = [
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
   FLEET_PROXY_SAVED_OBJECT_TYPE,
   SPACE_SETTINGS_SAVED_OBJECT_TYPE,
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
 ];
 
 /**
@@ -251,7 +258,9 @@ export interface FleetStartContract {
    * Services for Fleet's package policies
    */
   packagePolicyService: typeof packagePolicyService;
+  runWithCache: typeof runWithCache;
   agentPolicyService: AgentPolicyServiceInterface;
+  cloudConnectorService: CloudConnectorServiceInterface;
   /**
    * Register callbacks for inclusion in fleet API processing
    * @param args
@@ -363,7 +372,6 @@ export class FleetPlugin
         id: `fleetv2`,
         name: 'Fleet',
         category: DEFAULT_APP_CATEGORIES.management,
-        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: [PLUGIN_ID],
         catalogue: ['fleet'],
         reserved: {
@@ -518,7 +526,6 @@ export class FleetPlugin
         id: 'fleet', // for BWC
         name: 'Integrations',
         category: DEFAULT_APP_CATEGORIES.management,
-        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: [INTEGRATIONS_PLUGIN_ID],
         catalogue: ['fleet'],
         privileges: {
@@ -709,12 +716,14 @@ export class FleetPlugin
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
     this.spacesPluginsStart = plugins.spaces;
+
     const messageSigningService = new MessageSigningService(
       this.initializerContext.logger,
       plugins.encryptedSavedObjects.getClient({
         includedHiddenTypes: [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE],
       })
     );
+
     const uninstallTokenService = new UninstallTokenService(
       plugins.encryptedSavedObjects.getClient({
         includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
@@ -757,6 +766,7 @@ export class FleetPlugin
       lockManagerService: this.lockManagerService,
       autoInstallContentPackagesTask: this.autoInstallContentPackagesTask!,
       agentStatusChangeTask: this.agentStatusChangeTask,
+      alertingStart: plugins.alerting,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
@@ -917,6 +927,8 @@ export class FleetPlugin
         const authz = await getAuthzFromRequest(request);
         return new OutputClient(soClient, authz);
       },
+      cloudConnectorService,
+      runWithCache,
     };
   }
 

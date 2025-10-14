@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom, of } from 'rxjs';
 import type {
   ActionTypeRegistryContract,
   AlertRuleFromVisUIActionData,
@@ -15,6 +16,7 @@ import type { LensApi } from '@kbn/lens-plugin/public';
 import { apiIsOfType, hasBlockingError } from '@kbn/presentation-publishing';
 import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { css } from '@emotion/react';
 import { type ServiceDependencies } from './rule_flyout_component';
@@ -59,6 +61,15 @@ export class AlertRuleFromVisAction implements Action<Context> {
   public shouldAutoExecute = async () => true;
 
   public async execute({ embeddable, data }: Context) {
+    const currentApp = await firstValueFrom(
+      this.startDependencies.coreStart.application.currentAppId$ ?? of(undefined)
+    );
+
+    // Close all existing flyouts before opening the alert rule flyout
+    if (currentApp === 'discover') {
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.lensAlertRule);
+    }
+
     openLazyFlyout({
       core: this.startDependencies.coreStart,
       parentApi: embeddable.parentApi,

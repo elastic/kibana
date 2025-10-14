@@ -16,18 +16,22 @@ import { getIndexPatternsForStream } from '@kbn/streams-schema';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import { notFound } from '@hapi/boom';
 import type { ChangePointType } from '@kbn/es-types/src';
+import type { Condition } from '@kbn/streamlang';
+import { conditionToQueryDsl } from '@kbn/streamlang';
 
-type PreviewStreamQuery = Pick<StreamQueryKql, 'kql'>;
+type PreviewStreamQuery = Pick<StreamQueryKql, 'kql' | 'feature'>;
 
 function createSearchRequest({
   from,
   to,
-  query,
+  kuery,
+  featureFilter,
   bucketSize,
 }: {
   from: Date;
   to: Date;
-  query: PreviewStreamQuery;
+  kuery: string;
+  featureFilter?: Condition;
   bucketSize: string;
 }) {
   return {
@@ -43,9 +47,10 @@ function createSearchRequest({
               },
             },
           },
+          ...(featureFilter ? [conditionToQueryDsl(featureFilter)] : []),
           {
             kql: {
-              query: query.kql.query,
+              query: kuery,
             },
             // TODO: kql is not in the ES client's types yet (06-2025)
           } as QueryDslQueryContainer,
@@ -91,7 +96,8 @@ export async function previewSignificantEvents(
   const searchRequest = createSearchRequest({
     bucketSize,
     from,
-    query,
+    kuery: query.kql.query,
+    featureFilter: query.feature?.filter,
     to,
   });
 

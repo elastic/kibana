@@ -57,6 +57,7 @@ import { IconDashboards } from '../common/icons/dashboards';
 import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { IconAssetCriticality } from '../common/icons/asset_criticality';
+import { IconDeviceControl } from '../common/icons/device_control';
 
 const categories = [
   {
@@ -163,9 +164,9 @@ export const links: LinkItem = {
       title: TRUSTED_DEVICES,
       description: i18n.translate('xpack.securitySolution.appLinks.trustedDevicesDescription', {
         defaultMessage:
-          'Add a trusted device to improve performance or alleviate compatibility issues.',
+          'Specify which external devices can connect to your endpoints even when Device Control is enabled.',
       }),
-      landingIcon: IconDashboards,
+      landingIcon: IconDeviceControl,
       path: TRUSTED_DEVICES_PATH,
       skipUrlState: true,
       hideTimeline: true,

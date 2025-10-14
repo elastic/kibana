@@ -16,7 +16,10 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/server';
-import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type {
+  ContentManagementServerSetup,
+  ContentStorage,
+} from '@kbn/content-management-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type {
   PluginInitializerContext,
@@ -34,6 +37,7 @@ import {
   TASK_ID,
 } from './usage/dashboard_telemetry_collection_task';
 import { getUISettings } from './ui_settings';
+import type { DashboardItem } from './content_management';
 import { DashboardStorage } from './content_management';
 import { capabilitiesProvider } from './capabilities_provider';
 import type { DashboardPluginSetup, DashboardPluginStart } from './types';
@@ -81,20 +85,17 @@ export class DashboardPlugin
       })
     );
 
-    void core.getStartServices().then(([_, { savedObjectsTagging }]) => {
-      const { contentClient } = plugins.contentManagement.register({
-        id: CONTENT_ID,
-        storage: new DashboardStorage({
-          throwOnResultValidationError: this.initializerContext.env.mode.dev,
-          logger: this.logger.get('storage'),
-          savedObjectsTagging,
-        }),
-        version: {
-          latest: LATEST_VERSION,
-        },
-      });
-      this.contentClient = contentClient;
+    const { contentClient } = plugins.contentManagement.register<ContentStorage<DashboardItem>>({
+      id: CONTENT_ID,
+      storage: new DashboardStorage({
+        throwOnResultValidationError: this.initializerContext.env.mode.dev,
+        logger: this.logger.get('storage'),
+      }),
+      version: {
+        latest: LATEST_VERSION,
+      },
     });
+    this.contentClient = contentClient;
 
     plugins.contentManagement.favorites.registerFavoriteType('dashboard');
 

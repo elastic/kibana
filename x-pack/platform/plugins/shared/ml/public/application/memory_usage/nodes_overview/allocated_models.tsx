@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiToolTip,
   useEuiTheme,
@@ -67,7 +68,9 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
 
         return (
           <EuiToolTip content={reason ? reason : ''}>
-            <EuiBadge color={isFailed ? 'danger' : 'hollow'}>{routingState}</EuiBadge>
+            <EuiBadge tabIndex={0} color={isFailed ? 'danger' : 'hollow'}>
+              {routingState}
+            </EuiBadge>
           </EuiToolTip>
         );
       },
@@ -124,7 +127,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
                 })
           }
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.allocationHeader', {
               defaultMessage: 'Allocation',
             })}
@@ -145,16 +148,17 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
         let adaptiveAllocations = null;
         if (v.adaptive_allocations?.enabled) {
           adaptiveAllocations = (
-            <EuiToolTip
+            <EuiIconTip
               content={i18n.translate(
                 'xpack.ml.trainedModels.nodesList.modelsList.adaptiveAllocationsTooltip',
                 {
                   defaultMessage: 'Adaptive allocations enabled',
                 }
               )}
-            >
-              <EuiIcon size="l" color="warning" type="scale" />
-            </EuiToolTip>
+              size="l"
+              color="warning"
+              type="scale"
+            />
           );
         }
         return (
@@ -178,7 +182,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate(
               'xpack.ml.trainedModels.nodesList.modelsList.throughputLastMinuteHeader',
               {
@@ -211,7 +215,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
             />
           }
         >
-          <EuiFlexGroup gutterSize={'xs'}>
+          <EuiFlexGroup tabIndex={0} gutterSize={'xs'}>
             <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
               <span css={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 <FormattedMessage

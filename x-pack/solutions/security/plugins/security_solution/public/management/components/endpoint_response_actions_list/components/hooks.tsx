@@ -174,14 +174,8 @@ const useTypesFilterInitialState = ({
   agentTypes,
   types,
 }: GetTypesFilterInitialStateArguments): FilterItems => {
-  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-    'responseActionsSentinelOneV1Enabled'
-  );
   const isMicrosoftDefenderEnabled = useIsExperimentalFeatureEnabled(
     'responseActionsMSDefenderEndpointEnabled'
-  );
-  const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled(
-    'responseActionsCrowdstrikeManualHostIsolationEnabled'
   );
 
   const getFilterOptions = useCallback(
@@ -210,36 +204,26 @@ const useTypesFilterInitialState = ({
 
   // v8.13 onwards
   // for showing agent types and action types in the same filter
-  if (isSentinelOneV1Enabled || isCrowdstrikeEnabled || isMicrosoftDefenderEnabled) {
-    if (!isFlyout) {
-      return [
-        {
-          label: FILTER_NAMES.agentTypes,
-          isGroupLabel: true,
-        },
-        ...RESPONSE_ACTION_AGENT_TYPE.filter((agentType) => {
-          switch (agentType) {
-            case 'microsoft_defender_endpoint':
-              return isMicrosoftDefenderEnabled;
-            default:
-              return true;
-          }
-        }).map((type) =>
-          getFilterOptions({
-            key: type,
-            label: getAgentTypeName(type),
-            checked: !isFlyout && agentTypes?.includes(type) ? 'on' : undefined,
-          })
-        ),
-        {
-          label: FILTER_NAMES.actionTypes,
-          isGroupLabel: true,
-        },
-        ...defaultFilterOptions,
-      ];
-    }
-
+  if (!isFlyout) {
     return [
+      {
+        label: FILTER_NAMES.agentTypes,
+        isGroupLabel: true,
+      },
+      ...RESPONSE_ACTION_AGENT_TYPE.filter((agentType) => {
+        switch (agentType) {
+          case 'microsoft_defender_endpoint':
+            return isMicrosoftDefenderEnabled;
+          default:
+            return true;
+        }
+      }).map((type) =>
+        getFilterOptions({
+          key: type,
+          label: getAgentTypeName(type),
+          checked: !isFlyout && agentTypes?.includes(type) ? 'on' : undefined,
+        })
+      ),
       {
         label: FILTER_NAMES.actionTypes,
         isGroupLabel: true,
@@ -248,7 +232,13 @@ const useTypesFilterInitialState = ({
     ];
   }
 
-  return defaultFilterOptions;
+  return [
+    {
+      label: FILTER_NAMES.actionTypes,
+      isGroupLabel: true,
+    },
+    ...defaultFilterOptions,
+  ];
 };
 
 export const useActionsLogFilter = ({
@@ -272,8 +262,6 @@ export const useActionsLogFilter = ({
   setUrlHostsFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlHostsFilters'];
   setUrlStatusesFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlStatusesFilters'];
   setUrlTypesFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlTypesFilters'];
-  // TODO: remove this when `responseActionsSentinelOneV1Enabled` is enabled and removed
-  setUrlTypeFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlTypeFilters'];
 } => {
   const {
     agentTypes = [],
@@ -285,7 +273,6 @@ export const useActionsLogFilter = ({
     setUrlHostsFilters,
     setUrlStatusesFilters,
     setUrlTypesFilters,
-    setUrlTypeFilters,
   } = useActionHistoryUrlParams();
   const isStatusesFilter = filterName === 'statuses';
   const isHostsFilter = filterName === 'hosts';
@@ -339,16 +326,14 @@ export const useActionsLogFilter = ({
       : RESPONSE_ACTION_API_COMMANDS_NAMES.filter((commandName) => {
           const featureFlags = ExperimentalFeaturesService.get();
 
-          // upload - v8.9
-          if (commandName === 'upload' && !featureFlags.responseActionUploadEnabled) {
-            return false;
-          }
-
           if (
             commandName === 'runscript' &&
             !featureFlags.microsoftDefenderEndpointRunScriptEnabled &&
             !featureFlags.crowdstrikeRunScriptEnabled
           ) {
+            return false;
+          }
+          if (commandName === 'cancel' && !featureFlags.microsoftDefenderEndpointCancelEnabled) {
             return false;
           }
 
@@ -402,7 +387,6 @@ export const useActionsLogFilter = ({
     setUrlActionsFilters,
     setUrlHostsFilters,
     setUrlStatusesFilters,
-    setUrlTypeFilters,
     setUrlTypesFilters,
   };
 };

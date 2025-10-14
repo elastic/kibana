@@ -63,7 +63,6 @@ describe('Agent Status API route handler', () => {
 
     apiTestSetup.endpointAppContextMock.experimentalFeatures = {
       ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
-      responseActionsSentinelOneV1Enabled: true,
       responseActionsCrowdstrikeManualHostIsolationEnabled: true,
     };
 
@@ -72,7 +71,6 @@ describe('Agent Status API route handler', () => {
 
   it.each`
     agentType                        | featureFlag
-    ${'sentinel_one'}                | ${'responseActionsSentinelOneV1Enabled'}
     ${'crowdstrike'}                 | ${'responseActionsCrowdstrikeManualHostIsolationEnabled'}
     ${'microsoft_defender_endpoint'} | ${'responseActionsMSDefenderEndpointEnabled'}
   `(

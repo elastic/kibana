@@ -69,6 +69,7 @@ interface DurationDistributionChartProps {
   showAxisTitle?: boolean;
   showLegend?: boolean;
   isOtelData?: boolean;
+  'data-test-subj'?: string;
 }
 
 const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
@@ -112,7 +113,7 @@ export function DurationDistributionChart({
   loading,
   hasError,
   eventType,
-  dataTestSubPrefix,
+  'data-test-subj': dataTestSubj,
   showAxisTitle = true,
   showLegend = true,
   isOtelData = false,
@@ -184,10 +185,7 @@ export function DurationDistributionChart({
   );
 
   return (
-    <div
-      data-test-subj={dataTestSubPrefix + 'CorrelationsChart'}
-      style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
-    >
+    <div data-test-subj={dataTestSubj} style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
       <ChartContainer height={250} hasData={hasData} loading={loading} hasError={hasError}>
         <Chart>
           <Settings
