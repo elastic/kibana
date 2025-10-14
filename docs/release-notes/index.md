@@ -21,8 +21,215 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
-% FEATURES, ENHANCEMENTS, FIXES
-% Paste in index.md
+## 9.2.0 [kibana-9.2.0-release-notes]
+
+### Features and enhancements [kibana-9.2.0-features-enhancements]
+
+**Alerting**:
+* Adds a new Connector for Jira Service Management [#235408]({{kib-pull}}235408).
+* Adds `xpack.actions.email.recipient_allowlist` kibana config [#220058]({{kib-pull}}220058).
+* Adds OAuth2 Client Credentials authentication support to Kibana Webhook connectors [#218442]({{kib-pull}}218442).
+* Allows to add additional fields to IBM resilient connector [#236144]({{kib-pull}}236144).
+* Maintenance windows are now generally available [#233870]({{kib-pull}}233870).
+* Adds support for encrypted headers in the Webhook connector [#233695]({{kib-pull}}233695).
+* Automatically copy source data into the alerts-as-data documents for other ES Query rule types [#230010]({{kib-pull}}230010).
+* You can now add filters to maintenance windows based on alert fields from all solutions, without needing to select a category first [#227888]({{kib-pull}}227888).
+
+**Dashboards and Visualizations**:
+* Adds the ability to configure index settings when importing geospatial files in Maps [#232308]({{kib-pull}}232308).
+* Adds Inline Markdown Visualization [#229191]({{kib-pull}}229191).
+* Updates the appearance popover for metric charts in *Lens* [#233992]({{kib-pull}}233992).
+* Improves ES|QL suggestions logic when an {{esql}} visualization query changes [#231767]({{kib-pull}}231767).
+* Adds Top Nav Add Menu [#230324]({{kib-pull}}230324).
+* Updates @elastic/charts to version 71.0.0 and uses new metric chart in *Lens* [#229815]({{kib-pull}}229815).
+* Improves perceived performance of dashboard flyouts [#226052]({{kib-pull}}226052).
+* Adds bulk select functionality for options list controls [#221010]({{kib-pull}}221010).
+* Reduces element height and aligns Run, Update, and Refresh button widths [#231659]({{kib-pull}}231659).
+
+**Data ingestion and Fleet**:
+* Adds toggle that grants permission to write to `logs` datastream [#233374]({{kib-pull}}233374).
+% !!TODO!! The above PR had a lengthy release note description:
+% Added `write to logs streams` toggle on outputs allowing the user to have greater control of whether agents that use an output have permission to write to the logs stream.
+* Complete OTel configuration pipelines with an exporter [#233090]({{kib-pull}}233090).
+* Enable feature flag `enableAutoInstallContentPackages` [#232668]({{kib-pull}}232668).
+% !!TODO!! The above PR had a lengthy release note description:
+% Enable feature to auto install content packages where data is ingested for the matching datasets defined in the packages' discovery fields.
+* Knowledge base integration support [#230107]({{kib-pull}}230107).
+% !!TODO!! The above PR had a lengthy release note description:
+% Adds support for indexing package knowledge base docs into the .integration_knowledge system index, with per-document updates and automatic removal when a package is deleted. To be utilized by package developers allowing the AI assistants to have greater context relevant to particular packages.
+* Added MIGRATE to signed actions [#228566]({{kib-pull}}228566).
+* Show agentless resources" toggle added to Fleet > Settings for debugging and diagnostics purposes [#237528]({{kib-pull}}237528).
+* Update max version supported of package spec to 3.5 [#235942]({{kib-pull}}235942).
+* Enables installation support of alerting_rule_template kibana assets from packages [#235842]({{kib-pull}}235842).
+* Added new filter to only show agentless integrations [#235686]({{kib-pull}}235686).
+* Adds support for installing alerting_rule_template assets from packages [#233533]({{kib-pull}}233533).
+* Feat(fleet): add support for url variable type [#231062]({{kib-pull}}231062).
+% !!TODO!! The above PR had a lengthy release note description:
+% Adds support for a new url type variable in Fleet packages which provides better input validation of URLs in configurations.
+* Feat(fleet): add support for duration variable type [#231027]({{kib-pull}}231027).
+% !!TODO!! The above PR had a lengthy release note description:
+% Adds support for a new duration variable type in Fleet packages which provides better input validation of duration strings (e.g. 1h30m) in configurations.
+* Integrations overview: render accordion for sample events [#228799]({{kib-pull}}228799).
+* Exclude metrics data streams [#227842]({{kib-pull}}227842).
+* Adds package rollback API [#226754]({{kib-pull}}226754).
+* The remove processor in the ingest pipelines now supports "keep" option [#225638]({{kib-pull}}225638).
+* Adds action to Add tags to Agent details page [#225433]({{kib-pull}}225433).
+
+**Discover**:
+* Enable Discover tabs by default [#235150]({{kib-pull}}235150).
+% !!TODO!! The above PR had a lengthy release note description:
+% You can now manage multiple data explorations simultaneously in Discover using tabs. Navigate between them seamlessly, duplicate them to build on previous queries, and save them into a single Discover session to retrieve your queries, filters, and data configurations untouched at a later time.
+* Interactive LOOKUP JOIN indices with editor flyout [#232686]({{kib-pull}}232686).
+% !!TODO!! The above PR had a lengthy release note description:
+% Improve Discover’s LOOKUP JOIN UX with an index editor flyout supporting inline editing, CSV import, contextual actions based on privileges, and a query bar that opens Discover with a prefilled ES|QL query.
+* Supports controls [#229598]({{kib-pull}}229598).
+* Show related errors count and add failure badge [#227413]({{kib-pull}}227413).
+* Append the casting only when necessary in Discover filtering [#234748]({{kib-pull}}234748).
+* Removes the default limit 10 added on the query [#234349]({{kib-pull}}234349).
+* Improve available column lists [#233221]({{kib-pull}}233221).
+% !!TODO!! The above PR had a lengthy release note description:
+% The ES|QL autocomplete feature has been extended so that fields from the lookup index are suggested after a complete `LOOKUP JOIN` command. The same enhancement has been applied to columns from an enrichment policy after a complete `ENRICH` command.
+* Store more than 20 queries in the history [#232955]({{kib-pull}}232955).
+* Supports remote cluster lookup mode indices in the editor [#232907]({{kib-pull}}232907).
+* Improve function validation [#230139]({{kib-pull}}230139).
+* Support expressions in STATS [#229513]({{kib-pull}}229513).
+* Enhances grok semantics extraction with onigurama regex pattern [#229409]({{kib-pull}}229409).
+* Adds "Prettify" button in the editor and removes the abiity to unwrap [#228159]({{kib-pull}}228159).
+* Adds unsaved changes modal [#225252]({{kib-pull}}225252).
+* Managed data view improvement [#223451]({{kib-pull}}223451).
+* Adds profiles inspector [#222999]({{kib-pull}}222999).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.2.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* 🚨New Solution SideNav by Default (Only Non-Serverless) [#234201]({{kib-pull}}234201).
+
+**Machine Learning**:
+* Redesigns file upload UX [#232923]({{kib-pull}}232923).
+* Adds an `AI` section into `Stack Management` [#227289]({{kib-pull}}227289).
+* AI Connector/Inference endpoints creation UI: Adds icon for Contextual AI [#236951]({{kib-pull}}236951).
+* Inference endpoints UI: Adds tech preview for rerank preconfig endpoint [#235222]({{kib-pull}}235222).
+* Adds a default placeholder icon for future AI connectors [#235166]({{kib-pull}}235166).
+* Inference endpoints UI: Adds tech preview for e5 preconfig endpoint [#234811]({{kib-pull}}234811).
+* Choose which AI Assistant to show in the Elastic Header & Move the `AI Assistant visibility` setting to `GenAI Settings` page [#233727]({{kib-pull}}233727).
+* Data Frame Analytics: Improves layout for custom URLs list [#232575]({{kib-pull}}232575).
+* AI Connector/Inference endpoints creation UI: Adds icon for AI21 labs and Llama Stack [#232098]({{kib-pull}}232098).
+* Adds new update_all endpoint for product docs management [#231884]({{kib-pull}}231884).
+* Anomaly Detection: Improves layout for custom URLs list [#231751]({{kib-pull}}231751).
+* Adds index searchable check to file upload [#231614]({{kib-pull}}231614).
+* Displays document count chart for ES|QL categorize queries [#231459]({{kib-pull}}231459).
+* UX enhancements for editing fields in the AI Connector flyout [#231037]({{kib-pull}}231037).
+* AI Connector: Adds ability to filter providers by solution type [#228116]({{kib-pull}}228116).
+* Updates threads_per_allocation values in VCU ranges for Serverless [#227940]({{kib-pull}}227940).
+* Inference endpoints UI serverless: Enables adaptive allocations and allow user to set max allocations [#222726]({{kib-pull}}222726).
+
+**Management**:
+* Enable the new background search UX [#236818]({{kib-pull}}236818).
+* Manually map new fields from schema editor [#235919]({{kib-pull}}235919).
+* Partitioning: AI-assisted suggestions [#235759]({{kib-pull}}235759).
+* Adds triple quotes support to Manual ingest pipeline processor editor [#236595]({{kib-pull}}236595).
+* Adds an option to convert an index to a lookup index in the manage index dropdown [#233998]({{kib-pull}}233998).
+* Remember mapped fields across simulations [#233799]({{kib-pull}}233799).
+* Disable running onboarding tour by default [#227978]({{kib-pull}}227978).
+% !!TODO!! The above PR had a lengthy release note description:
+% The console onboarding tour is now disabled by default. Users can manually start the tour at any time from the Help popover.
+
+**Platform**:
+* Integrate 9.0.3 Translations [#236903]({{kib-pull}}236903).
+% !!TODO!! The above PR had a lengthy release note description:
+% German Locale now available in Kibana. This is the first release of the German locale released under `Beta`. We did improve our testing of the translations quality, but since this is the first release of the German locale we are releasing it under Beta expecting further enhancements in every future release. To get started set the locale in the kibana settings `i18n.locale: de-DE`. If you find any issues please feel free to raise them on github in the Kibana repo.
+* The Rate-Limiter UX improvements [#227678]({{kib-pull}}227678).
+
+**Search**:
+* Adds the ability to save Playgrounds within a space [#229511]({{kib-pull}}229511).
+* Improve code examples in Synonyms UI [#235944]({{kib-pull}}235944).
+
+**TODO:Other entries to categorize**
+* Enable cases numerical id service [#238555]({{kib-pull}}238555).
+* Adds an advanced option that will disable the filtering of file backed volumes and CD-ROMs in the device_control plugin [#236620]({{kib-pull}}236620).
+* 🌊 Cell-level actions for stream routing conditions [#235560]({{kib-pull}}235560).
+% !!TODO!! The above PR had a lengthy release note description:
+% In Streams, users can now create routing conditions directly from preview table cells. When defining a child stream, cell values in the sample documents table are actionable: clicking them reveals quick actions (such as equals / not equals). This enables faster, more intuitive creation of routing conditions without leaving the preview context.
+* Feature: Add Agents link to view data links [#234679]({{kib-pull}}234679).
+* Create case analytics indexes per solution per space [#234125]({{kib-pull}}234125).
+* Showing Logs in context of the trace [#232784]({{kib-pull}}232784).
+* Set the default retention period for the Logs anomaly detection configurations to 120 days [#231080]({{kib-pull}}231080).
+* Revert incremental id and add multifield [#230278]({{kib-pull}}230278).
+* Adds kibana.alert.grouping field to infra alerts [#229054]({{kib-pull}}229054).
+* Adds table list view to space selector screen [#229046]({{kib-pull}}229046).
+* Adds kibana.alert.grouping field to ES Query rule [#228580]({{kib-pull}}228580).
+* Show image thumbnail [#226004]({{kib-pull}}226004).
+
+
+### Fixes [kibana-9.2.0-fixes]
+
+**Alerting**:
+* Fetch the tracked alerts without depending on the task state [#235253]({{kib-pull}}235253).
+* Fixes loading saved query's query in the rule definition [#229964]({{kib-pull}}229964).
+
+**Dashboards and Visualizations**:
+* Soften validation on filter schema [#237477]({{kib-pull}}237477).
+* Adjust cancel button height in Discover with tabs enabled view [#236118]({{kib-pull}}236118).
+* Fixes resize bug [#233755]({{kib-pull}}233755).
+* Skip automatic scroll when panel is visible [#233226]({{kib-pull}}233226).
+* Fixes panel borders [#232676]({{kib-pull}}232676).
+* Fixes error handling in "Save to library" modal for Links panel [#231168]({{kib-pull}}231168).
+* Log warning if filter and query state are malformed [#230088]({{kib-pull}}230088).
+* Fixes an issue on Firefox where the ESQL inline editor in discover would prevent scrolling [#228849]({{kib-pull}}228849).
+
+**Data ingestion and Fleet**:
+* Fixes "package not found" error when skipping cloud onboarding for a prerelease package [#238629]({{kib-pull}}238629).
+
+**Discover**:
+* This is a serverless feature, so this bug was only affecting serverless. Let's mention it only there [#237575]({{kib-pull}}237575).
+* Fixes controls' trigger across various commands [#236121]({{kib-pull}}236121).
+* Fixes lookup indexes route failures on read permissions [#233282]({{kib-pull}}233282).
+* Incorrect filtering logic when removing comment field [#230116]({{kib-pull}}230116).
+* Displays The Function License Availability In Our Inline Docs [#229961]({{kib-pull}}229961).
+* Fix: Data view creation flyout glitches when the page is accessed from a separate page [#228749]({{kib-pull}}228749).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.2.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Refactor nav_control_popover [#235780]({{kib-pull}}235780).
+
+**Kibana security**:
+* Skipped spaces tests using esArchiver for MKI [#234061]({{kib-pull}}234061).
+
+**Machine Learning**:
+* Adds unique accessible labels for Show top field values buttons [#237972]({{kib-pull}}237972).
+* Single Metric Viewer: fixes partition field settings errors in the dashboard panel [#237046]({{kib-pull}}237046).
+* Alerting: Escape URL-like string from being displayed as links [#226849]({{kib-pull}}226849).
+
+**Management**:
+* Parse in streams button not handling smaller flyout well [#236548]({{kib-pull}}236548).
+* Improve streams badge accessibility [#235625]({{kib-pull}}235625).
+* Always show missing values instead of nulls [#233369]({{kib-pull}}233369).
+% !!TODO!! The above PR had a lengthy release note description:
+% Null buckets and empty string values are now rendered in the UI as `(missing value)` and `(empty)` respectively.  This is now aligned across charts and tables, including Discover and Lens charts.
+* Fixes code area responsiveness in Stream management [#232630]({{kib-pull}}232630).
+
+**Search**:
+* Announce changes when resetting terms in synonyms panel [#237877]({{kib-pull}}237877).
+% !!TODO!! The above PR had a lengthy release note description:
+% Fixes an accessibility issue where resetting changes or removing all terms in the Synonyms panel was not announced by screen readers. VoiceOver users on Safari will now hear updates when terms are reset.
+
+**TODO: Other entries to categorize**
+* Improve performance of clustering [#238394]({{kib-pull}}238394).
+* Enable auto-extraction by default and add user actions for observable actions [#236524]({{kib-pull}}236524).
+* Fixes unresponsive save button during tool creation [#235828]({{kib-pull}}235828).
+* Fix: add default monaco contrib import for cmd+/ comment toggling [#235334]({{kib-pull}}235334).
+* Show full tool traces in a flyout [#234654]({{kib-pull}}234654).
+* Fixes null property being read on Playground [#230729]({{kib-pull}}230729).
+* Update docs around FF toggle via API [#227817]({{kib-pull}}227817).
 
 ## 9.1.5 [kibana-9.1.5-release-notes]
 
@@ -742,7 +949,7 @@ If you're upgrading to version 9.0.0, you first need to upgrade to version 8.18.
   * Ensures 404 is returned only if `screenshot_ref` is truly not present [#215241]({{kib-pull}}215241).
 
 **Elastic Security solution**:
-* For the Elastic Security 9.0.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+For the Elastic Security 9.0.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Kibana security**:
 * Updates `js-yaml` to `4.1.0` [#190678]({{kib-pull}}190678).
@@ -779,7 +986,7 @@ If you're upgrading to version 9.0.0, you first need to upgrade to version 8.18.
   * Ensures that when an SLO is created, its ID is correctly verified to be unique across all spaces [#214496]({{kib-pull}}214496).
 
 **Elastic Security solution**:
-* For the Elastic Security 9.0.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+For the Elastic Security 9.0.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Platform**:
 
