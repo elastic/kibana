@@ -410,9 +410,6 @@ describe.skip('When using the kill-process action from response actions console'
 
   describe('and the agent type is `SentinelOne`', () => {
     beforeEach(() => {
-      mockedContext.setExperimentalFlag({
-        responseActionsSentinelOneKillProcessEnabled: true,
-      });
       setConsoleCommands(undefined, 'sentinel_one');
     });
 
@@ -485,37 +482,6 @@ describe.skip('When using the kill-process action from response actions console'
             }),
           })
         );
-      });
-    });
-
-    describe('and `responseActionsSentinelOneKillProcessEnabled` feature flag is disabled', () => {
-      beforeEach(() => {
-        mockedContext.setExperimentalFlag({ responseActionsSentinelOneKillProcessEnabled: false });
-        setConsoleCommands(undefined, 'sentinel_one');
-      });
-
-      it('should error if kill-process is entered', async () => {
-        await render();
-        await enterConsoleCommand(renderResult, user, 'kill-process --processName=foo');
-
-        await waitFor(() => {
-          expect(renderResult.getByTestId('test-validationError')).toHaveTextContent(
-            'Unsupported actionSupport for kill-process is not currently available for SentinelOne.'
-          );
-        });
-
-        await waitFor(() => {
-          expect(apiMocks.responseProvider.killProcess).not.toHaveBeenCalled();
-        });
-      });
-
-      it('should not display kill-process in help', async () => {
-        await render();
-        consoleSelectors.openHelpPanel();
-
-        expect(
-          renderResult.queryByTestId('test-commandList-Responseactions-kill-process')
-        ).toBeNull();
       });
     });
   });

@@ -612,7 +612,6 @@ const adjustCommandsForSentinelOne = ({
   platform: string;
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
-  const isKillProcessEnabled = featureFlags.responseActionsSentinelOneKillProcessEnabled;
   const isProcessesEnabled = featureFlags.responseActionsSentinelOneProcessesEnabled;
   const isRunscriptEnabled = featureFlags.responseActionsSentinelOneRunScriptEnabled;
 
@@ -637,7 +636,6 @@ const adjustCommandsForSentinelOne = ({
 
     if (
       command.name === 'status' ||
-      (command.name === 'kill-process' && !isKillProcessEnabled) ||
       (command.name === 'processes' && !isProcessesEnabled) ||
       !isAgentTypeAndActionSupported(
         'sentinel_one',

@@ -51,9 +51,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   responseActionsSentinelOneV2Enabled: true,
 
-  /** Enables the `kill-process` response action for SentinelOne */
-  responseActionsSentinelOneKillProcessEnabled: true,
-
   /** Enable the `processes` response actions for SentinelOne */
   responseActionsSentinelOneProcessesEnabled: true,
 
