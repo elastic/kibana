@@ -49,7 +49,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('runs test manually', async () => {
-      const resp = await monitorTestService.addMonitor(newMonitor, editorUser);
+      const resp = await monitorTestService.createMonitor(newMonitor, editorUser);
 
       const res = await supertest
         .post(SYNTHETICS_API_URLS.TRIGGER_MONITOR + `/${resp.id}`)

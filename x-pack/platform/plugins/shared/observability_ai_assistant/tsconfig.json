@@ -57,7 +57,8 @@
     "@kbn/lock-manager",
     "@kbn/i18n-react",
     "@kbn/inference-tracing",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/usage-collection-plugin"
   ],
   "exclude": ["target/**/*"]
 }
