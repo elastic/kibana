@@ -171,7 +171,6 @@ const buildExpectedCompositeQueryPayload = (boolFilters: any, includeInstanceId 
     },
   },
   index: '.slo-observability.summary-*',
-  _source: ['slo.id', 'slo.instanceId'],
   ...(Object.values(boolFilters).some((value: any) => Array.isArray(value) && value.length > 0)
     ? {
         query: {

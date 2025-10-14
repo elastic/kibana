@@ -25,15 +25,6 @@ import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_ge
 
 const ES_PAGESIZE_LIMIT = 5000;
 
-function getAfterKey(
-  agg: AggregationsAggregate | undefined
-): Record<string, FieldValue> | undefined {
-  if (agg && typeof agg === 'object' && 'after_key' in agg && agg.after_key) {
-    return agg.after_key as Record<string, FieldValue>;
-  }
-  return undefined;
-}
-
 export class GetSLOStatsOverview {
   constructor(
     private soClient: SavedObjectsClientContract,
@@ -43,6 +34,15 @@ export class GetSLOStatsOverview {
     private rulesClient: RulesClientApi,
     private racClient: AlertsClient
   ) {}
+
+  private getAfterKey(
+    agg: AggregationsAggregate | undefined
+  ): Record<string, FieldValue> | undefined {
+    if (agg && typeof agg === 'object' && 'after_key' in agg && agg.after_key) {
+      return agg.after_key as Record<string, FieldValue>;
+    }
+    return undefined;
+  }
 
   /*
     This service retrieves stats from alert and rule indices to display on the SLO landing page. 
@@ -59,25 +59,15 @@ export class GetSLOStatsOverview {
     const parsedFilters = parseStringFilters(filters, this.logger);
     const kqlQueriesProvided = !!params?.kqlQuery && params?.kqlQuery?.length > 0;
 
-    const querySLOsForIds = !!(
-      (!!parsedFilters &&
-        Object.keys(parsedFilters).some(
-          (key) => Array.isArray(parsedFilters[key]) && parsedFilters[key].length > 0
-        )) ||
-      kqlQueriesProvided
-    );
-
-    if (params.kqlQuery && parsedFilters.must) {
-      parsedFilters.must.push({
-        kql: { query: params.kqlQuery },
-      });
-    } else if (params.kqlQuery) {
-      parsedFilters.must = [
-        {
-          kql: { query: params.kqlQuery },
-        },
-      ];
-    }
+    /*
+      If there are any filters or KQL queries provided, we need to query for SLO ids and instanceIds to use as filter conditions on the alert and rule searches.
+    */
+    const filtersProvided =
+      !!parsedFilters &&
+      Object.keys(parsedFilters).some(
+        (key) => Array.isArray(parsedFilters[key]) && parsedFilters[key].length > 0
+      );
+    const querySLOsForIds = filtersProvided || kqlQueriesProvided;
 
     const sloRuleQueryKeys: string[] = [];
     const instanceIdIncluded = Object.values(params).find(
@@ -92,6 +82,7 @@ export class GetSLOStatsOverview {
       if (querySLOsForIds) {
         do {
           const sloIdCompositeQueryResponse = await this.scopedClusterClient.asCurrentUser.search({
+            index: '.slo-observability.summary-*',
             size: 0,
             aggs: {
               sloIds: {
@@ -113,20 +104,19 @@ export class GetSLOStatsOverview {
                 },
               },
             },
-            index: '.slo-observability.summary-*',
-            _source: ['slo.id', 'slo.instanceId'],
-            ...(Object.values(parsedFilters).some(
-              (value) => Array.isArray(value) && value.length > 0
-            )
-              ? {
-                  query: {
-                    bool: parsedFilters,
-                  },
-                }
-              : {}),
+            query: {
+              bool: {
+                ...parsedFilters,
+                ...(params.kqlQuery
+                  ? {
+                      must: [...(parsedFilters.must ?? []), { kql: { query: params.kqlQuery } }],
+                    }
+                  : {}),
+              },
+            },
           });
 
-          afterKey = getAfterKey(sloIdCompositeQueryResponse.aggregations?.sloIds);
+          afterKey = this.getAfterKey(sloIdCompositeQueryResponse.aggregations?.sloIds);
 
           const buckets = (
             sloIdCompositeQueryResponse.aggregations?.sloIds as {
