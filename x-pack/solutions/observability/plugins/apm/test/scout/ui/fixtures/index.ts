@@ -10,12 +10,12 @@ import type {
   ObltTestFixtures,
   ObltWorkerFixtures,
   KibanaUrl,
+  BrowserAuthFixture,
 } from '@kbn/scout-oblt';
 import { test as base, createLazyPageObject } from '@kbn/scout-oblt';
-import type { BrowserAuthFixture } from '@kbn/scout/src/playwright/fixtures/scope/test';
-import type { KibanaRole } from '@kbn/scout/src/common/services/custom_role';
 import { ServiceMapPage } from './page_objects/service_map';
 import { ServiceInventoryPage } from './page_objects/service_inventory';
+import { ServiceGroupsPage } from './page_objects/service_groups';
 import { GeneralSettingsPage } from './page_objects/general_settings';
 import { CustomLinksPage } from './page_objects/custom_links';
 import { IndicesPage } from './page_objects/indices';
@@ -23,51 +23,19 @@ import { AgentConfigurationsPage } from './page_objects/agent_configurations';
 import { AgentExplorerPage } from './page_objects/agent_explorer';
 import { AgentKeysPage } from './page_objects/agent_keys';
 import { AnomalyDetectionPage } from './page_objects/anomaly_detection';
+import { APM_ROLES } from './constants';
 
-// APM-specific role definitions matching authentication.ts
-const APM_ROLES = {
-  apmAllPrivilegesWithoutWriteSettings: {
-    elasticsearch: {
-      cluster: ['manage_api_key'],
-      indices: [
-        {
-          names: ['apm-*'],
-          privileges: ['read', 'view_index_metadata'],
-        },
-      ],
-    },
-    kibana: [
-      {
-        base: [],
-        feature: { apm: ['minimal_all'], ml: ['all'] },
-        spaces: ['*'],
-      },
-    ],
-  } as KibanaRole,
-
-  apmReadPrivilegesWithWriteSettings: {
-    elasticsearch: {
-      cluster: ['manage_api_key'],
-    },
-    kibana: [
-      {
-        base: [],
-        feature: {
-          apm: ['minimal_read', 'settings_save'],
-          advancedSettings: ['all'],
-          ml: ['all'],
-          savedObjectsManagement: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  } as KibanaRole,
-};
+export interface ApmBrowserAuthFixture extends BrowserAuthFixture {
+  loginAsApmAllPrivilegesWithoutWriteSettings: () => Promise<void>;
+  loginAsApmReadPrivilegesWithWriteSettings: () => Promise<void>;
+  loginAsApmMonitor: () => Promise<void>;
+}
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
     serviceMapPage: ServiceMapPage;
     serviceInventoryPage: ServiceInventoryPage;
+    serviceGroupsPage: ServiceGroupsPage;
     generalSettingsPage: GeneralSettingsPage;
     agentConfigurationsPage: AgentConfigurationsPage;
     customLinksPage: CustomLinksPage;
@@ -76,6 +44,7 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
     agentKeysPage: AgentKeysPage;
     anomalyDetectionPage: AnomalyDetectionPage;
   };
+  browserAuth: ApmBrowserAuthFixture;
 }
 
 export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
@@ -95,6 +64,7 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
       ...pageObjects,
       serviceMapPage: createLazyPageObject(ServiceMapPage, page, kbnUrl),
       serviceInventoryPage: createLazyPageObject(ServiceInventoryPage, page, kbnUrl),
+      serviceGroupsPage: createLazyPageObject(ServiceGroupsPage, page, kbnUrl),
       generalSettingsPage: createLazyPageObject(GeneralSettingsPage, page, kbnUrl),
       agentConfigurationsPage: createLazyPageObject(AgentConfigurationsPage, page, kbnUrl),
       customLinksPage: createLazyPageObject(CustomLinksPage, page, kbnUrl),
@@ -106,19 +76,23 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
 
     await use(extendedPageObjects);
   },
-});
+  browserAuth: async (
+    { browserAuth }: { browserAuth: BrowserAuthFixture },
+    use: (browserAuth: ApmBrowserAuthFixture) => Promise<void>
+  ) => {
+    const loginAsApmAllPrivilegesWithoutWriteSettings = async () =>
+      browserAuth.loginWithCustomRole(APM_ROLES.apmAllPrivilegesWithoutWriteSettings);
+    const loginAsApmReadPrivilegesWithWriteSettings = async () =>
+      browserAuth.loginWithCustomRole(APM_ROLES.apmReadPrivilegesWithWriteSettings);
+    const loginAsApmMonitor = async () => browserAuth.loginWithCustomRole(APM_ROLES.apmMonitor);
 
-// Export custom APM login methods for direct use in tests
-// These roles match the ones defined in server/test_helpers/create_apm_users/authentication.ts
-//
-// Roles:
-// - apmAllPrivilegesWithoutWriteSettings: Has APM 'minimal_all' + ML 'all', but cannot save settings
-// - apmReadPrivilegesWithWriteSettings: Has APM 'minimal_read' + 'settings_save' + advanced settings access
-export const apmAuth = {
-  loginAsApmAllPrivilegesWithoutWriteSettings: (browserAuth: BrowserAuthFixture) =>
-    browserAuth.loginWithCustomRole(APM_ROLES.apmAllPrivilegesWithoutWriteSettings),
-  loginAsApmReadPrivilegesWithWriteSettings: (browserAuth: BrowserAuthFixture) =>
-    browserAuth.loginWithCustomRole(APM_ROLES.apmReadPrivilegesWithWriteSettings),
-};
+    await use({
+      ...browserAuth,
+      loginAsApmAllPrivilegesWithoutWriteSettings,
+      loginAsApmReadPrivilegesWithWriteSettings,
+      loginAsApmMonitor,
+    });
+  },
+});
 
 export * as testData from './constants';
