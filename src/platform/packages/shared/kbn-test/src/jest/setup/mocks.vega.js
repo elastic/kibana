@@ -30,8 +30,7 @@ const loadVegaAndLite = () => {
   vm.createContext(sandbox);
   vm.runInContext(vegaCode, sandbox);
 
-  sandbox.window.vega = sandbox.globalThis.vega =
-    sandbox.window.vega || sandbox.globalThis.vega;
+  sandbox.window.vega = sandbox.globalThis.vega = sandbox.window.vega || sandbox.globalThis.vega;
 
   // vega-lite
   const litePath = path.resolve('node_modules/vega-lite/build/vega-lite.min.js');
@@ -45,7 +44,7 @@ const loadVegaAndLite = () => {
 
   // both vega nad vega-lite
   return cached;
-}
+};
 
 jest.mock('vega', () => {
   const { vega } = loadVegaAndLite();
