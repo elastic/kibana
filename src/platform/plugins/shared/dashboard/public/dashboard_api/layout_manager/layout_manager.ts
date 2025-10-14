@@ -41,6 +41,7 @@ import {
   logStateDiff,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
+import type { StickyControlLayoutState } from '@kbn/controls-schemas/src/types';
 
 import type { DashboardState } from '../../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/content_management';
@@ -445,6 +446,62 @@ export function initializeLayoutManager(
       getDashboardPanelFromId,
       getPanelCount: () => Object.keys(layout$.value.panels).length,
       canRemovePanels: () => trackPanel.expandedPanelId$.value === undefined,
+
+      /** Pinned panels (only controls can currently be pinned) */
+      panelIsPinned: (uuid: string) => {
+        return Object.keys(layout$.getValue().controls).includes(uuid);
+      },
+      unpinPanel: (uuid: string) => {
+        const controlToUnpin = layout$.getValue().controls[uuid];
+        if (!controlToUnpin) return;
+
+        const newControls = { ...layout$.getValue().controls };
+        const originalOrder = newControls[uuid].order;
+        delete newControls[uuid];
+        // adjust the order of the remaining controls
+        for (const controlId of Object.keys(newControls)) {
+          if (newControls[controlId].order > originalOrder) newControls[controlId].order--;
+        }
+
+        // place the new control panel in the top left corner, bumping other panels down as necessary
+        const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
+          PanelPlacementStrategy.placeAtTop,
+          {
+            currentPanels: layout$.value.panels,
+            height: 2,
+            width: 12,
+          }
+        );
+
+        // update the layout with the pinned control removed and added as a panel
+        layout$.next({
+          ...layout$.getValue(),
+          panels: {
+            ...otherPanels,
+            [uuid]: {
+              type: controlToUnpin.type,
+              grid: { ...newPanelPlacement },
+            },
+          },
+          controls: newControls,
+        });
+      },
+      pinPanel: (uuid: string) => {
+        const controlToPin = layout$.getValue().panels[uuid];
+        if (!controlToPin) return;
+
+        // add control panel to the end of the pinned controls
+        const newControls = { ...layout$.getValue().controls };
+        newControls[uuid] = {
+          type: controlToPin.type as StickyControlLayoutState['type'],
+          order: Object.keys(newControls).length,
+        };
+        const newPanels = { ...layout$.getValue().panels };
+        delete newPanels[uuid];
+
+        // update the layout with the control panel removed and added as a pinned control
+        layout$.next({ ...layout$.getValue(), panels: newPanels, controls: newControls });
+      },
 
       /** Sections */
       addNewSection: () => {

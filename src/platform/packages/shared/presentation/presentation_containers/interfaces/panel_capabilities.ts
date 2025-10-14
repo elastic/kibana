@@ -26,4 +26,11 @@ export interface IsCustomizable {
 export const apiCanBeCustomized = (unknownApi: unknown | null): unknownApi is IsCustomizable =>
   Boolean((unknownApi as IsCustomizable).isCustomizable);
 
-export type HasPanelCapabilities = IsExpandable & IsCustomizable & IsDuplicable;
+export interface IsPinnable {
+  isPinnable: boolean;
+}
+
+export const apiCanBePinned = (unknownApi: unknown | null): unknownApi is IsPinnable =>
+  Boolean((unknownApi as IsPinnable).isPinnable);
+
+export type HasPanelCapabilities = IsExpandable & IsCustomizable & IsDuplicable & IsPinnable;

@@ -9,6 +9,8 @@
 
 export const ACTION_CLEAR_CONTROL = 'clearControl';
 export const ACTION_CREATE_CONTROL = 'createControl';
+export const ACTION_CREATE_ESQL_CONTROL = 'createESQLControl';
+export const ACTION_PIN_CONTROL = 'pinControl';
+
 export const OPTIONS_LIST_ACTION = 'addOptionsList';
 export const RANGE_SLIDER_ACTION = 'addRangeSlider';
-export const ACTION_CREATE_ESQL_CONTROL = 'createESQLControl';

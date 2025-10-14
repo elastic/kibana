@@ -15,6 +15,7 @@ import {
   ACTION_CLEAR_CONTROL,
   ACTION_CREATE_CONTROL,
   ACTION_CREATE_ESQL_CONTROL,
+  ACTION_PIN_CONTROL,
   OPTIONS_LIST_ACTION,
   RANGE_SLIDER_ACTION,
 } from './constants';
@@ -29,6 +30,13 @@ export function registerActions(uiActions: UiActionsStart) {
   });
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_CLEAR_CONTROL);
   uiActions.attachAction(CONTROL_HOVER_TRIGGER_ID, ACTION_CLEAR_CONTROL);
+  uiActions.registerActionAsync(ACTION_PIN_CONTROL, async () => {
+    const { PinControlAction } = await import('../controls_module');
+    return new PinControlAction();
+  });
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_PIN_CONTROL);
+  uiActions.attachAction(CONTROL_HOVER_TRIGGER_ID, ACTION_PIN_CONTROL);
+
   uiActions.attachAction(CONTROL_HOVER_TRIGGER_ID, ACTION_REMOVE_PANEL);
   uiActions.attachAction(CONTROL_HOVER_TRIGGER_ID, ACTION_EDIT_PANEL);
 
