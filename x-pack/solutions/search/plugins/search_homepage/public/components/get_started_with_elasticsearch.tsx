@@ -299,7 +299,7 @@ export const GetStartedWithElasticsearch = () => {
           <p>
             {i18n.translate('xpack.searchHomepage.getStarted.description', {
               defaultMessage:
-                'Use the Dev console to quickly start interacting with the elasticsearch API.',
+                'Use the Dev console to quickly start interacting with the Elasticsearch API.',
             })}
           </p>
         </EuiText>
