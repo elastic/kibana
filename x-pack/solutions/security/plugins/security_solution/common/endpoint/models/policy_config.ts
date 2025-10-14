@@ -440,4 +440,4 @@ export const policyFactoryWithSupportedFeatures = (
  */
 export const DefaultPolicyNotificationMessage = 'Elastic Security {action} {filename}';
 export const DefaultPolicyRuleNotificationMessage = 'Elastic Security {action} {rule}';
-export const DefaultPolicyDeviceNotificationMessage = 'Elastic Security';
+export const DefaultPolicyDeviceNotificationMessage = 'Device Control activity was detected';
