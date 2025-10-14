@@ -202,56 +202,9 @@ export class ElasticAssistantPlugin
       registerCallback: (callbackId: CallbackIds, callback: Function) => {
         return appContextService.registerCallback(callbackId, callback);
       },
-      getAIAssistantAnonymizationFieldsDataClient: async (request: KibanaRequest) => {
-        // Create a request context factory to get the data client
-        const requestContextFactory = new (
-          await import('./routes/request_context_factory')
-        ).RequestContextFactory({
-          assistantService: this.assistantService,
-          logger: this.logger,
-        });
-
-        // Create a minimal context to get the data client
-        const context = await requestContextFactory.create(
-          {
-            core: core,
-            licensing: plugins.licensing,
-            security: plugins.security,
-            spaces: plugins.spaces,
-            savedObjects: core.savedObjects,
-          } as any,
-          request,
-          'event-log-index',
-          {} as any
-        );
-
-        return await context.getAIAssistantAnonymizationFieldsDataClient();
-      },
-      getAIAssistantKnowledgeBaseDataClient: async (request: KibanaRequest) => {
-        // Create a request context factory to get the data client
-        const requestContextFactory = new (
-          await import('./routes/request_context_factory')
-        ).RequestContextFactory({
-          assistantService: this.assistantService,
-          logger: this.logger,
-        });
-
-        // Create a minimal context to get the data client
-        const context = await requestContextFactory.create(
-          {
-            core: core,
-            licensing: plugins.licensing,
-            security: plugins.security,
-            spaces: plugins.spaces,
-            savedObjects: core.savedObjects,
-          } as any,
-          request,
-          'event-log-index',
-          {} as any
-        );
-
-        return await context.getAIAssistantKnowledgeBaseDataClient();
-      },
+      kibanaVersion: this.kibanaVersion,
+      getAnonymizationFieldsResourceName: () =>
+        this.assistantService!.getResourceNames().aliases.anonymizationFields,
     };
   }
 

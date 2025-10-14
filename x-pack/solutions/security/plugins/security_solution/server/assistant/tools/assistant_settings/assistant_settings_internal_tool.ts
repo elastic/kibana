@@ -11,6 +11,7 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
 import { transformESSearchToAnonymizationFields } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/anonymization_fields/helpers';
 import type { EsAnonymizationFieldsSchema } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/anonymization_fields/types';
+import { AIAssistantDataClient } from '@kbn/elastic-assistant-plugin/server';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 
@@ -53,9 +54,6 @@ export const assistantSettingsInternalTool = (
     schema: assistantSettingsToolSchema,
     handler: async ({ toolId }, context) => {
       try {
-        // Get access to the elastic-assistant plugin through start services
-        const [, pluginsStart] = await getStartServices();
-
         // Get real anonymization fields from the data client
         let anonymizationFields: Array<{
           id: string;
@@ -69,34 +67,48 @@ export const assistantSettingsInternalTool = (
         }> = [];
 
         try {
-          // Access the real anonymization fields from the data client
-          const anonymizationFieldsDataClient =
-            await pluginsStart.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient(
-              context.request
+          // Get access to start services
+          const [, pluginsStart] = await getStartServices();
+
+          // Get space ID from request
+          const spaceId =
+            pluginsStart.spaces?.spacesService?.getSpaceId(context.request) || 'default';
+
+          // Get current user
+          const currentUser = await pluginsStart.security.authc.getCurrentUser(context.request);
+
+          // Create the data client directly (bypassing licensing check)
+          const dataClient = new AIAssistantDataClient({
+            logger: context.logger,
+            elasticsearchClientPromise: Promise.resolve(context.esClient.asInternalUser),
+            spaceId,
+            kibanaVersion: pluginsStart.elasticAssistant.kibanaVersion,
+            indexPatternsResourceName:
+              pluginsStart.elasticAssistant.getAnonymizationFieldsResourceName(),
+            currentUser,
+          });
+
+          // Query anonymization fields
+          const anonymizationFieldsRes =
+            await dataClient.findDocuments<EsAnonymizationFieldsSchema>({
+              perPage: 1000,
+              page: 1,
+            });
+
+          if (anonymizationFieldsRes) {
+            const transformedFields = transformESSearchToAnonymizationFields(
+              anonymizationFieldsRes.data
             );
-
-          if (anonymizationFieldsDataClient) {
-            const anonymizationFieldsRes =
-              await anonymizationFieldsDataClient.findDocuments<EsAnonymizationFieldsSchema>({
-                perPage: 1000,
-                page: 1,
-              });
-
-            if (anonymizationFieldsRes) {
-              const transformedFields = transformESSearchToAnonymizationFields(
-                anonymizationFieldsRes.data
-              );
-              anonymizationFields = transformedFields.map((field) => ({
-                id: field.id,
-                field: field.field,
-                allowed: field.allowed ?? false,
-                anonymized: field.anonymized ?? false,
-                timestamp: field.timestamp ?? new Date().toISOString(),
-                createdAt: field.createdAt ?? new Date().toISOString(),
-                updatedAt: field.updatedAt,
-                namespace: field.namespace ?? 'default',
-              }));
-            }
+            anonymizationFields = transformedFields.map((field) => ({
+              id: field.id,
+              field: field.field,
+              allowed: field.allowed ?? false,
+              anonymized: field.anonymized ?? false,
+              timestamp: field.timestamp ?? new Date().toISOString(),
+              createdAt: field.createdAt ?? new Date().toISOString(),
+              updatedAt: field.updatedAt,
+              namespace: field.namespace ?? 'default',
+            }));
           }
         } catch (error) {
           // If we can't fetch real anonymization fields, fall back to defaults

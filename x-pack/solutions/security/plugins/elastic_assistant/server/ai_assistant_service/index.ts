@@ -791,6 +791,10 @@ export class AIAssistantService {
     });
   }
 
+  public getResourceNames() {
+    return this.resourceNames;
+  }
+
   public async createAIAssistantAnonymizationFieldsDataClient(
     opts: CreateAIAssistantClientParams
   ): Promise<AIAssistantDataClient | null> {
