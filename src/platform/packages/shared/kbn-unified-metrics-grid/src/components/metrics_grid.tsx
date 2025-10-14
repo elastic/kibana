@@ -172,7 +172,7 @@ export const MetricsGrid = ({
           outline: 'none',
         }}
       >
-        <EuiFlexGrid columns={columns} gutterSize="s">
+        <EuiFlexGrid columns={columns} gutterSize="s" responsive={false}>
           {rows.map(({ key, metric }, index) => {
             return (
               // Use the index as a key to prevent the charts from unmounting
