@@ -30,7 +30,7 @@ import {
   FlyoutTypeSwitch,
 } from '../utils';
 
-export interface FlyoutWithOverlaysProps {
+export interface FlyoutFromOverlaysProps {
   rendering: RenderingService;
   overlays: OverlayStart;
 }
@@ -53,20 +53,20 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
 
   // Callbacks for state synchronization
   const mainFlyoutOnActive = useCallback(() => {
-    console.log('activate main flyout (overlays service)', title); // eslint-disable-line no-console
+    console.log('activate main flyout', title); // eslint-disable-line no-console
   }, [title]);
 
   const childFlyoutOnActive = useCallback(() => {
-    console.log('activate child flyout (overlays service)', title); // eslint-disable-line no-console
+    console.log('activate child flyout', title); // eslint-disable-line no-console
   }, [title]);
 
   const mainFlyoutOnClose = useCallback(() => {
-    console.log('close main flyout (overlays service)', title); // eslint-disable-line no-console
+    console.log('close main flyout', title); // eslint-disable-line no-console
     setFlyoutSession(null);
   }, [title]);
 
   const childFlyoutOnClose = useCallback(() => {
-    console.log('close child flyout (overlays service)', title); // eslint-disable-line no-console
+    console.log('close child flyout', title); // eslint-disable-line no-console
   }, [title]);
 
   const FlyoutContent: React.FC = () => {
@@ -100,7 +100,7 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
             </EuiButton>
           )}
         </EuiFlyoutBody>
-        {childSize && (
+        {childSize && childFlyoutIsOpen && (
           <EuiFlyout
             aria-label="Child flyout"
             onActive={childFlyoutOnActive}
@@ -110,7 +110,6 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
             }}
             size={childSize}
             maxWidth={childMaxWidth}
-            isOpen={childFlyoutIsOpen}
           >
             <EuiFlyoutBody>
               <EuiText>
@@ -165,7 +164,7 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
 
 FlyoutSession.displayName = 'FlyoutSession';
 
-export const FlyoutWithOverlays: React.FC<FlyoutWithOverlaysProps> = (props) => {
+export const FlyoutFromOverlays: React.FC<FlyoutFromOverlaysProps> = (props) => {
   const { overlays, rendering } = props;
 
   return (
@@ -186,7 +185,7 @@ export const FlyoutWithOverlays: React.FC<FlyoutWithOverlaysProps> = (props) => 
           ),
         },
         {
-          title: 'Session Y: main size = m, child size = s (overlays service)',
+          title: 'Session Y: main size = m, child size = s',
           description: (
             <FlyoutSession
               title="Session Y"
@@ -198,7 +197,7 @@ export const FlyoutWithOverlays: React.FC<FlyoutWithOverlaysProps> = (props) => 
           ),
         },
         {
-          title: 'Session Z: main size = fill (overlays service)',
+          title: 'Session Z: main size = fill',
           description: (
             <FlyoutSession
               title="Session Z"
@@ -213,4 +212,4 @@ export const FlyoutWithOverlays: React.FC<FlyoutWithOverlaysProps> = (props) => 
   );
 };
 
-FlyoutWithOverlays.displayName = 'FlyoutWithOverlays';
+FlyoutFromOverlays.displayName = 'FlyoutFromOverlays';

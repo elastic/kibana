@@ -7,18 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 import {
-  EuiButton,
-  EuiDescriptionList,
-  EuiFlyout,
-  EuiFlyoutBody,
   EuiPageTemplate,
   EuiSpacer,
   EuiTab,
   EuiTabs,
-  EuiText,
   type EuiPageTemplateProps,
 } from '@elastic/eui';
 import type { OverlayStart } from '@kbn/core/public';
@@ -27,9 +22,8 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 import { useHistory, useLocation } from 'react-router-dom';
 
-import { FlyoutWithIsOpen } from './_flyout_with_isopen';
-import { FlyoutWithOverlays } from './_flyout_with_overlays';
-import { FlyoutWithoutIsOpen } from './_flyout_without_isopen';
+import { FlyoutFromOverlays } from '_flyout_with_component';
+import { FlyoutFromComponents } from './_flyout_without_isopen';
 
 interface AppDeps {
   basename: string;
@@ -40,140 +34,8 @@ interface AppDeps {
 
 type AppContentDeps = Pick<AppDeps, 'overlays' | 'rendering'>;
 
-interface FlyoutSessionProps {
-  title: string;
-  mainSize: 's' | 'm' | 'l' | 'fill';
-  mainMaxWidth?: number;
-  childSize?: 's' | 'm' | 'fill';
-  childMaxWidth?: number;
-  flyoutType: 'overlay' | 'push';
-  childBackgroundShaded?: boolean;
-}
-
-const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
-  const { title, mainSize, childSize, mainMaxWidth, childMaxWidth, flyoutType } = props;
-
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [isChildFlyoutVisible, setIsChildFlyoutVisible] = useState(false);
-
-  // Handlers for "Open" buttons
-
-  const handleOpenMainFlyout = () => {
-    setIsFlyoutVisible(true);
-  };
-
-  const handleOpenChildFlyout = () => {
-    setIsChildFlyoutVisible(true);
-  };
-
-  // Callbacks for state synchronization
-
-  const mainFlyoutOnActive = useCallback(() => {
-    console.log('activate main flyout', title); // eslint-disable-line no-console
-  }, [title]);
-
-  const childFlyoutOnActive = useCallback(() => {
-    console.log('activate child flyout', title); // eslint-disable-line no-console
-  }, [title]);
-
-  const mainFlyoutOnClose = useCallback(() => {
-    console.log('close main flyout', title); // eslint-disable-line no-console
-    setIsFlyoutVisible(false);
-    setIsChildFlyoutVisible(false);
-  }, [title]);
-
-  const childFlyoutOnClose = useCallback(() => {
-    console.log('close child flyout', title); // eslint-disable-line no-console
-    setIsChildFlyoutVisible(false);
-  }, [title]);
-
-  // Render
-
-  return (
-    <>
-      <EuiText>
-        <EuiButton disabled={isFlyoutVisible} onClick={handleOpenMainFlyout}>
-          Open {title}
-        </EuiButton>
-      </EuiText>
-      <EuiFlyout
-        id={`mainFlyout-${title}`}
-        session={true}
-        isOpen={isFlyoutVisible}
-        flyoutMenuProps={{ title: `${title} - Main` }}
-        aria-labelledby="flyoutTitle"
-        size={mainSize}
-        maxWidth={mainMaxWidth}
-        type={flyoutType}
-        ownFocus={false}
-        pushAnimation={true}
-        onActive={mainFlyoutOnActive}
-        onClose={mainFlyoutOnClose}
-      >
-        <EuiFlyoutBody>
-          <EuiText>
-            <p>This is the content of {title}.</p>
-            <EuiSpacer size="s" />
-            <EuiDescriptionList
-              type="column"
-              listItems={[
-                { title: 'Flyout type', description: flyoutType },
-                { title: 'Main flyout size', description: mainSize },
-                {
-                  title: 'Main flyout maxWidth',
-                  description: mainMaxWidth ?? 'N/A',
-                },
-              ]}
-            />
-            {childSize && (
-              <EuiButton onClick={handleOpenChildFlyout} disabled={isChildFlyoutVisible}>
-                Open child flyout
-              </EuiButton>
-            )}
-          </EuiText>
-        </EuiFlyoutBody>
-        {childSize && (
-          <EuiFlyout
-            id={`childFlyout-${title}`}
-            isOpen={isChildFlyoutVisible}
-            flyoutMenuProps={{ title: `${title} - Child` }}
-            aria-labelledby="childFlyoutTitle"
-            size={childSize}
-            maxWidth={childMaxWidth}
-            onActive={childFlyoutOnActive}
-            onClose={childFlyoutOnClose}
-          >
-            <EuiFlyoutBody>
-              <EuiText>
-                <p>This is the content of the child flyout of {title}.</p>
-                <EuiSpacer size="s" />
-                <EuiDescriptionList
-                  type="column"
-                  listItems={[
-                    {
-                      title: 'Child flyout size',
-                      description: childSize ?? 'N/A',
-                    },
-                    {
-                      title: 'Child flyout maxWidth',
-                      description: childMaxWidth ?? 'N/A',
-                    },
-                  ]}
-                />
-              </EuiText>
-            </EuiFlyoutBody>
-          </EuiFlyout>
-        )}
-      </EuiFlyout>
-    </>
-  );
-});
-
-FlyoutSession.displayName = 'FlyoutSession';
-
 // Tab constants
-const FLYOUT_WITH_ISOPEN = 'render_with_isopen';
-const FLYOUT_WITHOUT_ISOPEN = 'render_without_isopen';
+const FLYOUT_FROM_COMPONENTS = 'render_from_components';
 const FLYOUT_WITH_OVERLAYS = 'render_with_overlays';
 
 // Component that uses router hooks (must be inside Router context)
@@ -185,16 +47,13 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
   const history = useHistory();
   const location = useLocation();
 
-  const [selectedTabId, setSelectedTabId] = React.useState(FLYOUT_WITH_ISOPEN);
+  const [selectedTabId, setSelectedTabId] = React.useState(FLYOUT_FROM_COMPONENTS);
 
   // Initialize tab from URL on mount
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const tabFromUrl = searchParams.get('tab');
-    if (
-      tabFromUrl &&
-      [FLYOUT_WITH_ISOPEN, FLYOUT_WITHOUT_ISOPEN, FLYOUT_WITH_OVERLAYS].includes(tabFromUrl)
-    ) {
+    if (tabFromUrl && [FLYOUT_FROM_COMPONENTS, FLYOUT_WITH_OVERLAYS].includes(tabFromUrl)) {
       setSelectedTabId(tabFromUrl);
     }
   }, [location.search]);
@@ -209,12 +68,10 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
 
   const renderTabContent = () => {
     switch (selectedTabId) {
-      case FLYOUT_WITH_ISOPEN:
-        return <FlyoutWithIsOpen />;
-      case FLYOUT_WITHOUT_ISOPEN:
-        return <FlyoutWithoutIsOpen />;
+      case FLYOUT_FROM_COMPONENTS:
+        return <FlyoutFromComponents />;
       case FLYOUT_WITH_OVERLAYS:
-        return <FlyoutWithOverlays overlays={overlays} rendering={rendering} />;
+        return <FlyoutFromOverlays overlays={overlays} rendering={rendering} />;
       default:
         return null;
     }
@@ -232,16 +89,10 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
       <EuiPageTemplate.Section>
         <EuiTabs>
           <EuiTab
-            isSelected={selectedTabId === FLYOUT_WITH_ISOPEN}
-            onClick={() => handleTabClick(FLYOUT_WITH_ISOPEN)}
+            isSelected={selectedTabId === FLYOUT_FROM_COMPONENTS}
+            onClick={() => handleTabClick(FLYOUT_FROM_COMPONENTS)}
           >
-            Render EuiFlyout with isOpen prop
-          </EuiTab>
-          <EuiTab
-            isSelected={selectedTabId === FLYOUT_WITHOUT_ISOPEN}
-            onClick={() => handleTabClick(FLYOUT_WITHOUT_ISOPEN)}
-          >
-            Render EuiFlyout without isOpen prop
+            Render EuiFlyout component
           </EuiTab>
           <EuiTab
             isSelected={selectedTabId === FLYOUT_WITH_OVERLAYS}
