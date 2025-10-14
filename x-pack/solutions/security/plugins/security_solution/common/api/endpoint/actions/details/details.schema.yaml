@@ -8,7 +8,7 @@ paths:
       summary: Get action details
       operationId: EndpointGetActionsDetails
       description: Get the details of a response action using the action ID.
-      x-codegen-enabled: true
+      x-codegen-enabled: false
       x-labels: [ ess, serverless ]
       parameters:
         - name: action_id
