@@ -10,3 +10,4 @@ inversify
 canvas-confetti
 @types/canvas-confetti
 undici
+@babel/plugin-syntax-import-attributes
