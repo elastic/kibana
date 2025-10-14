@@ -903,7 +903,7 @@ describe('Actions Plugin', () => {
     describe('listTypes()', () => {
       it('passes through feature ID and sets exposeValidation to true', async () => {
         const actionTypeRegistryListMock = jest.spyOn(ActionTypeRegistry.prototype, 'list');
-        await plugin.setup(coreSetup as any, pluginsSetup);
+        await plugin.setup(coreSetup, pluginsSetup);
         const pluginStart = plugin.start(coreStart, pluginsStart);
 
         pluginStart.listTypes('alerting');
