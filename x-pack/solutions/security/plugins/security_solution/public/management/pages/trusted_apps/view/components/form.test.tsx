@@ -578,6 +578,26 @@ describe('Trusted apps form', () => {
           });
           expect(formProps.onChange).toHaveBeenCalledWith(expected);
         });
+
+        it('should remove the tag "trust_process_descendants" when the button is not selected', async () => {
+          // Start with the tag present
+          const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+            tags: ['policy:all', 'form_mode:advanced', TRUSTED_PROCESS_DESCENDANTS_TAG],
+          };
+
+          formProps.item = { ...formProps.item, ...propsItem };
+          render();
+
+          // Click the "Events" button to deselect "Process Descendants"
+          await userEvent.click(renderResult.getByTestId('trustedApps-filterEventsButton'));
+
+          // The tag should be removed from the tags array
+          const expectedTags = ['policy:all', 'form_mode:advanced'];
+          const expected = createOnChangeArgs({
+            item: createItem({ tags: expectedTags }),
+          });
+          expect(formProps.onChange).toHaveBeenCalledWith(expected);
+        });
       });
     });
   });

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams, Feature } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import {
   EuiButton,
@@ -26,13 +26,13 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
-import { NO_SYSTEM } from '../utils/default_query';
+import { NO_FEATURE } from '../utils/default_query';
 
 interface GeneratedEventPreviewProps {
   definition: Streams.all.Definition;
   query: StreamQueryKql;
   onSave: (query: StreamQueryKql) => void;
-  systems: Omit<System, 'description'>[];
+  features: Omit<Feature, 'description'>[];
   dataViews: DataView[];
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
@@ -44,29 +44,29 @@ export function GeneratedEventPreview({
   isEditing,
   setIsEditing,
   onSave,
-  systems,
+  features,
   dataViews,
 }: GeneratedEventPreviewProps) {
   const { euiTheme } = useEuiTheme();
 
   const [query, setQuery] = useState<StreamQueryKql>(initialQuery);
 
-  const options = systems
-    .map((system) => ({
-      value: system,
-      inputDisplay: system.name,
+  const options = features
+    .map((feature) => ({
+      value: feature,
+      inputDisplay: feature.name,
     }))
     .concat([
       {
-        value: NO_SYSTEM,
+        value: NO_FEATURE,
         inputDisplay: i18n.translate(
-          'xpack.streams.addSignificantEventFlyout.manualFlow.noSystemOptionLabel',
-          { defaultMessage: 'No system' }
+          'xpack.streams.addSignificantEventFlyout.manualFlow.noFeatureOptionLabel',
+          { defaultMessage: 'No feature' }
         ),
       },
     ]);
 
-  const [touched, setTouched] = useState({ title: false, system: false, kql: false });
+  const [touched, setTouched] = useState({ title: false, feature: false, kql: false });
   const validation = validateQuery(query);
 
   return (
@@ -105,7 +105,7 @@ export function GeneratedEventPreview({
                         setQuery(initialQuery);
                         setTouched({
                           title: false,
-                          system: false,
+                          feature: false,
                           kql: false,
                         });
                       }}
@@ -126,7 +126,7 @@ export function GeneratedEventPreview({
                         onSave(query);
                         setTouched({
                           title: false,
-                          system: false,
+                          feature: false,
                           kql: false,
                         });
                       }}
@@ -176,8 +176,8 @@ export function GeneratedEventPreview({
           label={
             <EuiFormLabel>
               {i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldSystemLabel',
-                { defaultMessage: 'System' }
+                'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldFeatureLabel',
+                { defaultMessage: 'Feature' }
               )}
             </EuiFormLabel>
           }
@@ -185,24 +185,24 @@ export function GeneratedEventPreview({
           <EuiSuperSelect
             options={options}
             valueOfSelected={
-              options.find((option) => option.value.name === query.system?.name)?.value
+              options.find((option) => option.value.name === query.feature?.name)?.value
             }
             onBlur={() => {
-              setTouched((prev) => ({ ...prev, system: true }));
+              setTouched((prev) => ({ ...prev, feature: true }));
             }}
             onChange={(value) => {
               setQuery({
                 ...query,
-                system: {
+                feature: {
                   name: value.name,
                   filter: value.filter,
                 },
               });
-              setTouched((prev) => ({ ...prev, system: true }));
+              setTouched((prev) => ({ ...prev, feature: true }));
             }}
             placeholder={i18n.translate(
-              'xpack.streams.addSignificantEventFlyout.generatedEventPreview.systemPlaceholder',
-              { defaultMessage: 'Select system' }
+              'xpack.streams.addSignificantEventFlyout.generatedEventPreview.featurePlaceholder',
+              { defaultMessage: 'Select feature' }
             )}
             disabled={!isEditing}
             fullWidth

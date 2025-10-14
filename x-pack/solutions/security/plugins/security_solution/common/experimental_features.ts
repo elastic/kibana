@@ -12,10 +12,6 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  // FIXME:PT delete?
-  excludePoliciesInFilterEnabled: false,
-
-  kubernetesEnabled: false,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
   /**
@@ -111,12 +107,12 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Disables ESQL-based risk scoring
    */
-  disableESQLRiskScoring: true,
+  disableESQLRiskScoring: false,
 
   /**
    * Enable resetting risk scores to zero for outdated entities
    */
-  enableRiskScoreResetToZero: false,
+  enableRiskScoreResetToZero: true,
 
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
@@ -132,25 +128,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
   protectionUpdatesEnabled: true,
-
-  /**
-   * Disables the timeline save tour.
-   * This flag is used to disable the tour in cypress tests.
-   */
-  disableTimelineSaveTour: false,
-
-  /**
-   * Enables the risk engine privileges route
-   * and associated callout in the UI
-   */
-  riskEnginePrivilegesRouteEnabled: true,
-
-  /**
-   * Enables SentinelOne manual host isolation response actions directly through the connector
-   * sub-actions framework.
-   * v8.12.0
-   */
-  sentinelOneManualHostActionsEnabled: true,
 
   /**
    * Enables Response actions telemetry collection
@@ -196,7 +173,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
    */
-  filterProcessDescendantsForTrustedAppsEnabled: true,
+  filterProcessDescendantsForTrustedAppsEnabled: false,
 
   /**
    * Enables the rule's bulk action to manage alert suppression
@@ -209,22 +186,10 @@ export const allowedExperimentalValues = Object.freeze({
   doesNotMatchForIndicatorMatchRuleEnabled: true,
 
   /**
-   * Enables the new data ingestion hub
-   */
-  dataIngestionHubEnabled: false,
-
-  /**
    * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
    * can be disabled if necessary in a given environment.
    */
   entityStoreDisabled: false,
-
-  /**
-   * Enables the Service Entity Store. The Entity Store feature will install the service engine by default.
-   */
-  serviceEntityStoreEnabled: true,
-  /**
-
 
   /**
    * Disables the siem migrations feature
@@ -302,6 +267,10 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.2.0
    */
   microsoftDefenderEndpointCancelEnabled: true,
+  /**
+   * Protects all the work related to the attacks and alert alignment effort
+   */
+  attacksAlertAlignment: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -123,15 +123,8 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/{action_id}/file/{file_id}:
     get:
-      description: >
-        Get information for the specified file using the file ID.
-
-        > info
-
-        > To construct a `file_id`, combine the `action_id` and `agent_id`
-        values using a dot separator:
-
-        > {`file_id`} = {`action_id`}`.`{`agent_id`}
+      description: |
+        Get information for the specified response action file download.
       operationId: EndpointFileInfo
       parameters:
         - in: path
@@ -139,7 +132,17 @@ paths:
           required: true
           schema:
             type: string
-        - in: path
+        - description: >
+            The file identifier is constructed in one of two ways:
+
+            - For Elastic Defend agents (`agentType` of `endpoint`): combine the
+            `action_id` and `agent_id` values using a dot (`.`) separator:
+
+            `{file_id}` = `{action_id}.{agent_id}`
+
+            - For all other agent types: the `file_id` is the `agent_id` for
+            which the response action was sent to.
+          in: path
           name: file_id
           required: true
           schema:
@@ -149,22 +152,43 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                      agentId:
+                        type: string
+                      agentType:
+                        type: string
+                      created:
+                        format: date-time
+                        type: string
+                      id:
+                        type: string
+                      mimeType:
+                        type: string
+                      name:
+                        type: string
+                      size:
+                        type: number
+                      status:
+                        enum:
+                          - AWAITING_UPLOAD
+                          - UPLOADING
+                          - READY
+                          - UPLOAD_ERROR
+                          - DELETED
+                        type: string
           description: OK
       summary: Get file information
       tags:
         - Security Endpoint Management API
   /api/endpoint/action/{action_id}/file/{file_id}/download:
     get:
-      description: >
-        Download a file from an endpoint. 
-
-        > info
-
-        > To construct a `file_id`, combine the `action_id` and `agent_id`
-        values using a dot separator:
-
-        > {`file_id`} = {`action_id`}`.`{`agent_id`}
+      description: |
+        Download a file associated with a response action.
       operationId: EndpointFileDownload
       parameters:
         - in: path
@@ -172,7 +196,17 @@ paths:
           required: true
           schema:
             type: string
-        - in: path
+        - description: >
+            The file identifier is constructed in one of two ways:
+
+            - For Elastic Defend agents (`agentType` of `endpoint`): combine the
+            `action_id` and `agent_id` values using a dot (`.`) separator:
+
+            `{file_id}` = `{action_id}.{agent_id}`
+
+            - For all other agent types: the `file_id` is the `agent_id` for
+            which the response action was sent to.
+          in: path
           name: file_id
           required: true
           schema:
@@ -180,9 +214,10 @@ paths:
       responses:
         '200':
           content:
-            application/json:
+            application/octet-stream:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                format: binary
+                type: string
           description: OK
       summary: Download a file
       tags:

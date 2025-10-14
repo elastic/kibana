@@ -69,30 +69,26 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
     });
   }
 
-  const dimensionTypeMap = new Map(metricDimensions.map((dim) => [dim.name, dim.type]));
+  const dimensionTypeMap = new Map(metricDimensions?.map((dim) => [dim.name, dim.type]));
 
+  const unfilteredDimensions = (dimensions ?? []).filter((dim) => !valuesByField.has(dim));
   const queryPipeline = source.pipe(
     ...whereConditions,
-    dimensions.length > 0
-      ? where(
-          dimensions
-            .filter((dim) => !valuesByField.has(dim))
-            .map((dim) => `${dim} IS NOT NULL`)
-            .join(' AND ')
-        )
+    unfilteredDimensions.length > 0
+      ? where(unfilteredDimensions.map((dim) => `${dim} IS NOT NULL`).join(' AND '))
       : (query) => query,
     stats(
       `${createMetricAggregation({
         instrument,
         placeholderName: 'metricField',
       })} BY ${createTimeBucketAggregation({})}${
-        dimensions.length > 0 ? `, ${dimensions.join(',')}` : ''
+        (dimensions ?? []).length > 0 ? `, ${dimensions.join(',')}` : ''
       }`,
       {
         metricField,
       }
     ),
-    ...(dimensions.length > 0
+    ...((dimensions ?? []).length > 0
       ? dimensions.length === 1
         ? [rename(`??dim as ${DIMENSIONS_COLUMN}`, { dim: dimensions[0] })]
         : [

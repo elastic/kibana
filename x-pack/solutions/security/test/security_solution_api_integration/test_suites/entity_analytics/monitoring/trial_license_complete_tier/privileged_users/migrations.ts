@@ -65,6 +65,19 @@ export default ({ getService }: FtrProviderContext) => {
       refresh: 'wait_for',
     });
 
+  const expectAllDefaultSourcesToExist = async (namespace: string) => {
+    const sources = await entityAnalyticsApi.listEntitySources({ query: {} }, namespace);
+    const names = (sources.body as ListEntitySourcesResponse).map((s) => s.name);
+
+    expect(names.sort()).toEqual(
+      [
+        `.entity_analytics.monitoring.users-${namespace}`,
+        `.entity_analytics.monitoring.sources.entityanalytics_okta-${namespace}`,
+        `.entity_analytics.monitoring.sources.entityanalytics_ad-${namespace}`,
+      ].sort()
+    );
+  };
+
   const SPACES = ['default', 'space1'];
 
   describe('@ess @serverless @skipInServerlessMKI Entity Analytics Privileged user monitoring Migrations', () => {
@@ -169,13 +182,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           await entityAnalyticsRoutes.runMigrations();
 
-          const sources = await entityAnalyticsApi.listEntitySources({ query: {} }, namespace);
-          const names = (sources.body as ListEntitySourcesResponse).map((s) => s.name);
-
-          expect(names).toEqual([
-            `.entity_analytics.monitoring.users-${namespace}`,
-            `.entity_analytics.monitoring.sources.entityanalytics_okta-${namespace}`,
-          ]);
+          await expectAllDefaultSourcesToExist(namespace);
         });
 
         it(`should create missing entity source when migration runs one entity source doesn't exist`, async () => {
@@ -183,25 +190,13 @@ export default ({ getService }: FtrProviderContext) => {
 
           await entityAnalyticsRoutes.runMigrations();
 
-          const sources = await entityAnalyticsApi.listEntitySources({ query: {} }, namespace);
-          const names = (sources.body as ListEntitySourcesResponse).map((s) => s.name);
-
-          expect(names).toEqual([
-            `.entity_analytics.monitoring.users-${namespace}`,
-            `.entity_analytics.monitoring.sources.entityanalytics_okta-${namespace}`,
-          ]);
+          await expectAllDefaultSourcesToExist(namespace);
         });
 
         it(`should work as expected when migration runs and all entity sources exist`, async () => {
           await entityAnalyticsRoutes.runMigrations();
 
-          const sources = await entityAnalyticsApi.listEntitySources({ query: {} }, namespace);
-          const names = (sources.body as ListEntitySourcesResponse).map((s) => s.name);
-
-          expect(names).toEqual([
-            `.entity_analytics.monitoring.users-${namespace}`,
-            `.entity_analytics.monitoring.sources.entityanalytics_okta-${namespace}`,
-          ]);
+          await expectAllDefaultSourcesToExist(namespace);
         });
       });
     });
