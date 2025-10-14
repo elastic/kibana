@@ -15255,6 +15255,40 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/entity_store/entities/bulk:
+    put:
+      description: |
+        Update or create many entities in Entity Store.
+        If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created.
+        The creation is asynchronous. The time for a document to be present in the  final index depends on the entity store transform and usually takes more than 1 minute.
+      operationId: UpsertEntitiesBulk
+      parameters:
+        - in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntitiesContainer'
+        description: Schema for the updating many entities
+        required: true
+      responses:
+        '200':
+          description: Entities updated or created
+        '403':
+          description: Operation on a restricted field
+        '503':
+          description: Operation on an uninitialized Engine or in a cluster without CRUD API Enabled
+      summary: Upsert many entities in Entity Store
+      tags:
+        - Security Entity Analytics API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/entity_store/entities/list:
     get:
       description: List entities records, paging, sorting and filtering as needed.
@@ -26851,6 +26885,8 @@ paths:
                 description: A summary of the agent setup status. `isReady` indicates whether the setup is ready. If the setup is not ready, `missing_requirements` lists which requirements are missing.
                 type: object
                 properties:
+                  is_action_secrets_storage_enabled:
+                    type: boolean
                   is_secrets_storage_enabled:
                     type: boolean
                   is_space_awareness_enabled:
@@ -47307,7 +47343,7 @@ paths:
                   description: Includes all of the referenced objects in the exported objects.
                   type: boolean
                 objects:
-                  description: 'A list of objects to export. NOTE: this optiona cannot be combined with `types` option'
+                  description: 'A list of objects to export. NOTE: this optional parameter cannot be combined with the `types` option'
                   items:
                     additionalProperties: false
                     type: object
@@ -47330,7 +47366,7 @@ paths:
                     - items:
                         type: string
                       type: array
-                  description: The saved object types to include in the export. Use `*` to export all the types.
+                  description: The saved object types to include in the export. Use `*` to export all the types. Valid options depend on enabled plugins, but may include `visualization`, `dashboard`, `search`, `index-pattern`, `tag`, `config`, `config-global`, `lens`, `map`, `event-annotation-group`, `query`, `url`, `action`, `alert`, `alerting_rule_template`, `apm-indices`, `cases-user-actions`, `cases`, `cases-comments`, `infrastructure-monitoring-log-view`, `ml-trained-model`, `osquery-saved-query`, `osquery-pack`, `osquery-pack-asset`.
       responses:
         '200':
           content:
@@ -50133,15 +50169,7 @@ paths:
                                       - title
                                   - type: object
                                     properties:
-                                      kql:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          query:
-                                            type: string
-                                        required:
-                                          - query
-                                      system:
+                                      feature:
                                         additionalProperties: false
                                         type: object
                                         properties:
@@ -50281,6 +50309,14 @@ paths:
                                         required:
                                           - name
                                           - filter
+                                      kql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            type: string
+                                        required:
+                                          - query
                                     required:
                                       - kql
                               type: array
@@ -52017,15 +52053,7 @@ paths:
                                       - title
                                   - type: object
                                     properties:
-                                      kql:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          query:
-                                            type: string
-                                        required:
-                                          - query
-                                      system:
+                                      feature:
                                         additionalProperties: false
                                         type: object
                                         properties:
@@ -52165,6 +52193,14 @@ paths:
                                         required:
                                           - name
                                           - filter
+                                      kql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            type: string
+                                        required:
+                                          - query
                                     required:
                                       - kql
                               type: array
@@ -53677,15 +53713,7 @@ paths:
                                       - title
                                   - type: object
                                     properties:
-                                      kql:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          query:
-                                            type: string
-                                        required:
-                                          - query
-                                      system:
+                                      feature:
                                         additionalProperties: false
                                         type: object
                                         properties:
@@ -53825,6 +53853,14 @@ paths:
                                         required:
                                           - name
                                           - filter
+                                      kql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            type: string
+                                        required:
+                                          - query
                                     required:
                                       - kql
                               type: array
@@ -55411,15 +55447,7 @@ paths:
                                       - title
                                   - type: object
                                     properties:
-                                      kql:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          query:
-                                            type: string
-                                        required:
-                                          - query
-                                      system:
+                                      feature:
                                         additionalProperties: false
                                         type: object
                                         properties:
@@ -55559,6 +55587,14 @@ paths:
                                         required:
                                           - name
                                           - filter
+                                      kql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            type: string
+                                        required:
+                                          - query
                                     required:
                                       - kql
                               type: array
@@ -57071,15 +57107,7 @@ paths:
                                   - title
                               - type: object
                                 properties:
-                                  kql:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      query:
-                                        type: string
-                                    required:
-                                      - query
-                                  system:
+                                  feature:
                                     additionalProperties: false
                                     type: object
                                     properties:
@@ -57219,6 +57247,14 @@ paths:
                                     required:
                                       - name
                                       - filter
+                                  kql:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      query:
+                                        type: string
+                                    required:
+                                      - query
                                 required:
                                   - kql
                           type: array
@@ -61128,15 +61164,7 @@ paths:
                                   - title
                               - type: object
                                 properties:
-                                  kql:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      query:
-                                        type: string
-                                    required:
-                                      - query
-                                  system:
+                                  feature:
                                     additionalProperties: false
                                     type: object
                                     properties:
@@ -61276,6 +61304,14 @@ paths:
                                     required:
                                       - name
                                       - filter
+                                  kql:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      query:
+                                        type: string
+                                    required:
+                                      - query
                                 required:
                                   - kql
                         required:
@@ -61374,15 +61410,7 @@ paths:
               additionalProperties: false
               type: object
               properties:
-                kql:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    query:
-                      type: string
-                  required:
-                    - query
-                system:
+                feature:
                   additionalProperties: false
                   type: object
                   properties:
@@ -61522,6 +61550,14 @@ paths:
                   required:
                     - name
                     - filter
+                kql:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    query:
+                      type: string
+                  required:
+                    - query
                 title:
                   minLength: 1
                   type: string
@@ -61738,7 +61774,7 @@ paths:
               additionalProperties: false
               type: object
               properties:
-                system:
+                feature:
                   additionalProperties: false
                   type: object
                   properties:
@@ -61932,15 +61968,7 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
-                    kql:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        query:
-                          type: string
-                      required:
-                        - query
-                    system:
+                    feature:
                       additionalProperties: false
                       type: object
                       properties:
@@ -62080,6 +62108,14 @@ paths:
                       required:
                         - name
                         - filter
+                    kql:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        query:
+                          type: string
+                      required:
+                        - query
                   required:
                     - kql
               required:
@@ -77598,6 +77634,15 @@ components:
         - updating
         - error
       type: string
+    Security_Entity_Analytics_API_EntitiesContainer:
+      type: object
+      properties:
+        entities:
+          items:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityContainer'
+          type: array
+      required:
+        - entities
     Security_Entity_Analytics_API_Entity:
       oneOf:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_UserEntity'
@@ -77638,6 +77683,16 @@ components:
       required:
         - has_all_required
         - privileges
+    Security_Entity_Analytics_API_EntityContainer:
+      type: object
+      properties:
+        record:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_Entity'
+        type:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
+      required:
+        - type
+        - record
     Security_Entity_Analytics_API_EntityField:
       additionalProperties: false
       type: object
