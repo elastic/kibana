@@ -52,6 +52,8 @@ export interface TabProps {
   onClose: ((item: TabItem) => Promise<void>) | undefined;
   onSelectedTabKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => Promise<void>;
   enableInlineLabelEditing?: boolean;
+  enablePreview?: boolean;
+  enableDragAndDrop?: boolean;
 }
 
 const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
@@ -79,6 +81,8 @@ export const Tab: React.FC<TabProps> = (props) => {
     onClose,
     onSelectedTabKeyDown,
     enableInlineLabelEditing = true,
+    enablePreview = true,
+    enableDragAndDrop = true,
   } = props;
   const { euiTheme } = useEuiTheme();
   const tabLabelId = useGeneratedHtmlId({ prefix: 'tabLabel' });
@@ -189,7 +193,7 @@ export const Tab: React.FC<TabProps> = (props) => {
     <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, isDragging)}>
       <div
         ref={tabInteractiveElementRef}
-        {...dragHandleProps}
+        {...(enableDragAndDrop ? dragHandleProps : {})}
         {...getTabAttributes(item, tabContentId)}
         data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
         aria-labelledby={tabLabelId}
@@ -268,7 +272,7 @@ export const Tab: React.FC<TabProps> = (props) => {
                 {item.customMenuButton ?? null}
               </EuiFlexItem>
             )}
-            {!!onClose && (
+            {!!onClose && !item.customMenuButton && (
               <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
                 <EuiToolTip content={closeButtonLabel}>
                   <EuiButtonIcon
@@ -291,7 +295,7 @@ export const Tab: React.FC<TabProps> = (props) => {
 
   return (
     <TabPreview
-      showPreview={showPreview}
+      showPreview={enablePreview && showPreview}
       setShowPreview={setShowPreview}
       stopPreviewOnHover={isInlineEditActive || isActionPopoverOpen}
       tabItem={item}

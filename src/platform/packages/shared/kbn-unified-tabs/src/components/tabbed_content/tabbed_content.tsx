@@ -33,7 +33,12 @@ import { TabsEventDataKeys } from '../../event_data_keys';
 export interface TabbedContentProps
   extends Pick<
     TabsBarProps,
-    'unsavedItemIds' | 'maxItemsCount' | 'onClearRecentlyClosed' | 'enableInlineLabelEditing'
+    | 'unsavedItemIds'
+    | 'maxItemsCount'
+    | 'onClearRecentlyClosed'
+    | 'enableInlineLabelEditing'
+    | 'enablePreview'
+    | 'enableDragAndDrop'
   > {
   items: TabItem[];
   selectedItemId?: string;
@@ -70,6 +75,8 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   onEBTEvent,
   createItemElement,
   enableInlineLabelEditing = true,
+  enablePreview = true,
+  enableDragAndDrop = true,
 }) => {
   const tabsBarApi = useRef<TabsBarApi | null>(null);
   const [tabContentId] = useState(() => htmlIdGenerator()());
@@ -340,6 +347,8 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
             onEBTEvent={onEBTEvent}
             createItemElement={createItemElement}
             enableInlineLabelEditing={enableInlineLabelEditing}
+            enablePreview={enablePreview}
+            enableDragAndDrop={enableDragAndDrop}
           />
         </EuiFlexItem>
       )}

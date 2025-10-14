@@ -70,6 +70,8 @@ export type TabsBarProps = Pick<
   | 'onClose'
   | 'tabContentId'
   | 'enableInlineLabelEditing'
+  | 'enablePreview'
+  | 'enableDragAndDrop'
 > & {
   items: TabItem[];
   selectedItem: TabItem | null;
@@ -110,7 +112,9 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       getPreviewData,
       onEBTEvent,
       createItemElement,
-      enableInlineLabelEditing,
+      enableInlineLabelEditing = true,
+      enablePreview = true,
+      enableDragAndDrop = true,
     },
     componentRef
   ) => {
@@ -280,48 +284,75 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false} css={growingFlexItemCss}>
               <div ref={setTabsContainerElement} role="tablist" css={tabsContainerCss}>
-                <EuiDragDropContext onDragEnd={onDragEnd}>
-                  <EuiDroppable
-                    droppableId={DROPPABLE_ID}
-                    direction="horizontal"
-                    css={droppableCss}
-                    grow
-                  >
-                    {() =>
-                      items.map((item, index) => (
-                        <EuiDraggable
-                          key={item.id}
-                          draggableId={item.id}
-                          index={index}
-                          usePortal
-                          hasInteractiveChildren
-                          customDragHandle="custom"
-                        >
-                          {({ dragHandleProps }, { isDragging }) => (
-                            <Tab
-                              key={item.id}
-                              item={item}
-                              isSelected={selectedItem?.id === item.id}
-                              isUnsaved={unsavedItemIds?.includes(item.id)}
-                              isDragging={isDragging}
-                              dragHandleProps={dragHandleProps}
-                              tabContentId={tabContentId}
-                              tabsSizeConfig={tabsSizeConfig}
-                              services={services}
-                              getTabMenuItems={getTabMenuItems}
-                              getPreviewData={getPreviewData}
-                              onLabelEdited={onLabelEdited}
-                              onSelect={onSelect}
-                              onSelectedTabKeyDown={onSelectedTabKeyDown}
-                              onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
-                              enableInlineLabelEditing={enableInlineLabelEditing}
-                            />
-                          )}
-                        </EuiDraggable>
-                      ))
-                    }
-                  </EuiDroppable>
-                </EuiDragDropContext>
+                {enableDragAndDrop ? (
+                  <EuiDragDropContext onDragEnd={onDragEnd}>
+                    <EuiDroppable
+                      droppableId={DROPPABLE_ID}
+                      direction="horizontal"
+                      css={droppableCss}
+                      grow
+                    >
+                      {() =>
+                        items.map((item, index) => (
+                          <EuiDraggable
+                            key={item.id}
+                            draggableId={item.id}
+                            index={index}
+                            usePortal
+                            hasInteractiveChildren
+                            customDragHandle="custom"
+                          >
+                            {({ dragHandleProps }, { isDragging }) => (
+                              <Tab
+                                key={item.id}
+                                item={item}
+                                isSelected={selectedItem?.id === item.id}
+                                isUnsaved={unsavedItemIds?.includes(item.id)}
+                                isDragging={isDragging}
+                                dragHandleProps={dragHandleProps}
+                                tabContentId={tabContentId}
+                                tabsSizeConfig={tabsSizeConfig}
+                                services={services}
+                                getTabMenuItems={getTabMenuItems}
+                                getPreviewData={getPreviewData}
+                                onLabelEdited={onLabelEdited}
+                                onSelect={onSelect}
+                                onSelectedTabKeyDown={onSelectedTabKeyDown}
+                                onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
+                                enableInlineLabelEditing={enableInlineLabelEditing}
+                                enablePreview={enablePreview}
+                                enableDragAndDrop={enableDragAndDrop}
+                              />
+                            )}
+                          </EuiDraggable>
+                        ))
+                      }
+                    </EuiDroppable>
+                  </EuiDragDropContext>
+                ) : (
+                  <div css={droppableCss}>
+                    {items.map((item) => (
+                      <Tab
+                        key={item.id}
+                        item={item}
+                        isSelected={selectedItem?.id === item.id}
+                        isUnsaved={unsavedItemIds?.includes(item.id)}
+                        tabContentId={tabContentId}
+                        tabsSizeConfig={tabsSizeConfig}
+                        services={services}
+                        getTabMenuItems={getTabMenuItems}
+                        getPreviewData={getPreviewData}
+                        onLabelEdited={onLabelEdited}
+                        onSelect={onSelect}
+                        onSelectedTabKeyDown={onSelectedTabKeyDown}
+                        onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
+                        enableInlineLabelEditing={enableInlineLabelEditing}
+                        enablePreview={enablePreview}
+                        enableDragAndDrop={enableDragAndDrop}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </EuiFlexItem>
             {!!scrollLeftButton && <EuiFlexItem grow={false}>{scrollLeftButton}</EuiFlexItem>}
