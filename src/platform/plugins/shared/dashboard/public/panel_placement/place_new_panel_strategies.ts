@@ -85,7 +85,7 @@ export const runPanelPlacementStrategy = (
         }
       });
 
-      for (let y = targetPanel?.gridData.y ?? 0; y < maxY; y++) {
+      for (let y = targetPanel?.grid.y ?? 0; y < maxY; y++) {
         for (let x = 0; x < DASHBOARD_GRID_COLUMN_COUNT; x++) {
           if (grid[y][x] === 1) {
             // Space is filled

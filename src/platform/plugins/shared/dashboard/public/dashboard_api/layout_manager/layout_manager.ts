@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { filter, map as lodashMap, max, pick } from 'lodash';
+import { filter, map as lodashMap, max } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
@@ -41,6 +41,7 @@ import {
   logStateDiff,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
+import type { StickyControlLayoutState } from '@kbn/controls-schemas/src/types';
 
 import type { DashboardState } from '../../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/content_management';
@@ -455,8 +456,14 @@ export function initializeLayoutManager(
         if (!controlToUnpin) return;
 
         const newControls = { ...layout$.getValue().controls };
+        const originalOrder = newControls[uuid].order;
         delete newControls[uuid];
+        // adjust the order of the remaining controls
+        for (const controlId of Object.keys(newControls)) {
+          if (newControls[controlId].order > originalOrder) newControls[controlId].order--;
+        }
 
+        // place the new control panel in the top left corner, bumping other panels down as necessary
         const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
           PanelPlacementStrategy.placeAtTop,
           {
@@ -466,13 +473,14 @@ export function initializeLayoutManager(
           }
         );
 
+        // update the layout with the pinned control removed and added as a panel
         layout$.next({
           ...layout$.getValue(),
           panels: {
             ...otherPanels,
             [uuid]: {
               type: controlToUnpin.type,
-              grid: { i: uuid, ...newPanelPlacement },
+              grid: { ...newPanelPlacement },
             },
           },
           controls: newControls,
@@ -482,16 +490,16 @@ export function initializeLayoutManager(
         const controlToPin = layout$.getValue().panels[uuid];
         if (!controlToPin) return;
 
+        // add control panel to the end of the pinned controls
         const newControls = { ...layout$.getValue().controls };
         newControls[uuid] = {
-          grow: undefined,
-          width: undefined,
-          type: controlToPin.type,
+          type: controlToPin.type as StickyControlLayoutState['type'],
           order: Object.keys(newControls).length,
         };
         const newPanels = { ...layout$.getValue().panels };
         delete newPanels[uuid];
 
+        // update the layout with the control panel removed and added as a pinned control
         layout$.next({ ...layout$.getValue(), panels: newPanels, controls: newControls });
       },
 

@@ -60,11 +60,11 @@ export class PinControlAction
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
     return embeddable.parentApi.panelIsPinned(embeddable.uuid)
-      ? i18n.translate('controls.controlGroup.floatingActions.pinControl', {
-          defaultMessage: 'Unpin control',
+      ? i18n.translate('controls.controlGroup.floatingActions.unpinControl', {
+          defaultMessage: 'Unpin',
         })
       : i18n.translate('controls.controlGroup.floatingActions.pinControl', {
-          defaultMessage: 'Pin control to Dashboard',
+          defaultMessage: 'Pin to Dashboard',
         });
   }
 
