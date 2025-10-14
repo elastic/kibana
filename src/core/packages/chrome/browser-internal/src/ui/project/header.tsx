@@ -235,12 +235,20 @@ export const ProjectHeader = ({
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
 
+  const topBarStyles = css`
+    box-shadow: none !important;
+  `;
+
   return (
     <>
       {observables.headerBanner$ && <HeaderTopBanner headerBanner$={observables.headerBanner$} />}
       <header data-test-subj="kibanaProjectHeader">
         <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
-          <EuiHeader position={isFixed ? 'fixed' : 'static'} className="header__firstBar">
+          <EuiHeader
+            position={isFixed ? 'fixed' : 'static'}
+            className="header__firstBar"
+            css={topBarStyles}
+          >
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
               {children}
 

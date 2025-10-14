@@ -52,6 +52,7 @@ const mockServerSetup: jest.Mocked<SyntheticsServerSetup> = {
   } as any,
   encryptedSavedObjects: mockEncryptedSoClient as any,
   logger: mockLogger,
+  fleet: mockFleet,
 } as any;
 
 const getMockTaskInstance = (state: Record<string, any> = {}): CustomTaskInstance => {
@@ -96,8 +97,8 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           title: 'Synthetics Sync Global Params Task',
           description:
             'This task is executed so that we can sync private location monitors for example when global params are updated',
-          timeout: '3m',
-          maxAttempts: 3,
+          timeout: '5m',
+          maxAttempts: 1,
           createTaskRunner: expect.any(Function),
         }),
       });
@@ -107,18 +108,20 @@ describe('SyncPrivateLocationMonitorsTask', () => {
   describe('start', () => {
     it('should schedule the task correctly', async () => {
       await task.start();
-      expect(mockLogger.debug).toHaveBeenCalledWith('Scheduling private location task');
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        '[SyncPrivateLocationMonitorsTask] Scheduling private location task'
+      );
       expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith({
         id: 'Synthetics:Sync-Private-Location-Monitors-single-instance',
         state: {},
         schedule: {
-          interval: '5m',
+          interval: '10m',
         },
         taskType: 'Synthetics:Sync-Private-Location-Monitors',
         params: {},
       });
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        'Sync private location monitors task scheduled successfully'
+        '[SyncPrivateLocationMonitorsTask] Sync private location monitors task scheduled successfully'
       );
     });
   });
@@ -174,16 +177,16 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.runTask({ taskInstance });
       expect(mockLogger.debug).toHaveBeenNthCalledWith(
         2,
-        '[SyncPrivateLocationMonitorsTask] Starting cleanup of duplicated package policies '
+        '[SyncPrivateLocationMonitorsTask] Starting cleanup of duplicated package policies'
       );
 
       expect(mockLogger.debug).toHaveBeenNthCalledWith(
         3,
-        '[SyncPrivateLocationMonitorsTask] Syncing private location monitors because data has changed '
+        '[SyncPrivateLocationMonitorsTask] Syncing private location monitors because data has changed'
       );
       expect(mockLogger.debug).toHaveBeenNthCalledWith(
         4,
-        '[SyncPrivateLocationMonitorsTask] Sync of private location monitors succeeded '
+        '[SyncPrivateLocationMonitorsTask] Sync of private location monitors succeeded'
       );
       expect(task.syncGlobalParams).toHaveBeenCalled();
       expect(result.error).toBeUndefined();
@@ -210,7 +213,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(getPrivateLocationsModule.getPrivateLocations).toHaveBeenCalled();
       expect(task.syncGlobalParams).not.toHaveBeenCalled();
       expect(mockLogger.debug).toHaveBeenLastCalledWith(
-        '[SyncPrivateLocationMonitorsTask] Sync of private location monitors succeeded '
+        '[SyncPrivateLocationMonitorsTask] Sync of private location monitors succeeded'
       );
     });
 
@@ -533,7 +536,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
       expect(result.performSync).toBe(false);
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        '[SyncPrivateLocationMonitorsTask] Skipping cleanup of duplicated package policies as it has already been done once '
+        '[SyncPrivateLocationMonitorsTask] Skipping cleanup of duplicated package policies as it has already been done once'
       );
     });
 
@@ -544,7 +547,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(state.hasAlreadyDoneCleanup).toBe(true);
       expect(state.maxCleanUpRetries).toBe(3);
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        '[SyncPrivateLocationMonitorsTask] Skipping cleanup of duplicated package policies as max retries have been reached '
+        '[SyncPrivateLocationMonitorsTask] Skipping cleanup of duplicated package policies as max retries have been reached'
       );
     });
 
@@ -560,7 +563,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(state.hasAlreadyDoneCleanup).toBe(true);
       expect(state.maxCleanUpRetries).toBe(3);
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        '[SyncPrivateLocationMonitorsTask] Skipping cleanup of duplicated package policies as max retries have been reached '
+        '[SyncPrivateLocationMonitorsTask] Skipping cleanup of duplicated package policies as max retries have been reached'
       );
     });
   });
