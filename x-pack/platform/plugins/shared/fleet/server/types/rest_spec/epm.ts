@@ -40,6 +40,7 @@ export const GetPackagesRequestSchema = {
 export const KibanaAssetReferenceSchema = schema.object({
   id: schema.string(),
   originId: schema.maybe(schema.string()),
+  deferred: schema.maybe(schema.boolean()),
   type: schema.oneOf([
     schema.oneOf([
       schema.literal('dashboard'),
@@ -129,6 +130,7 @@ export const InstallationInfoSchema = schema.object({
     })
   ),
   previous_version: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
+  rolled_back: schema.maybe(schema.boolean()),
 });
 
 const PackageIconSchema = schema.object({
@@ -394,6 +396,8 @@ export const BulkInstallPackagesFromRegistryResponseSchema = schema.object({
 
 export const BulkUpgradePackagesResponseSchema = schema.object({ taskId: schema.string() });
 
+export const BulkRollbackPackagesResponseSchema = schema.object({ taskId: schema.string() });
+
 export const GetOneBulkOperationPackagesResponseSchema = schema.object({
   status: schema.string(),
   error: schema.maybe(schema.object({ message: schema.string() })),
@@ -632,6 +636,17 @@ export const BulkUninstallPackagesRequestSchema = {
   }),
 };
 
+export const BulkRollbackPackagesRequestSchema = {
+  body: schema.object({
+    packages: schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+      }),
+      { minSize: 1 }
+    ),
+  }),
+};
+
 export const InstallPackageByUploadRequestSchema = {
   query: schema.object({
     ignoreMappingUpdateErrors: schema.boolean({ defaultValue: false }),
@@ -686,6 +701,18 @@ export const InstallKibanaAssetsRequestSchema = {
           },
         })
       ),
+    })
+  ),
+};
+
+export const InstallRuleAssetsRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.string(),
+  }),
+  body: schema.nullable(
+    schema.object({
+      force: schema.maybe(schema.boolean()),
     })
   ),
 };

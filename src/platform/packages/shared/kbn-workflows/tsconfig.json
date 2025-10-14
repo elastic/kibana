@@ -7,6 +7,6 @@
   "include": ["**/*.ts"],
   "kbn_references": [
     "@kbn/zod",
-  ],
+    "@kbn/es-query"  ],
   "exclude": ["target/**/*"]
 }

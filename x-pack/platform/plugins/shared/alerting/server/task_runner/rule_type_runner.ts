@@ -20,12 +20,20 @@ import type { IAlertsClient } from '../alerts_client/types';
 import { ErrorWithReason } from '../lib';
 import { getTimeRange } from '../lib/get_time_range';
 import type { NormalizedRuleType } from '../rule_type_registry';
-import type { RuleAlertData, RuleTypeParams, RuleTypeState, SanitizedRule } from '../types';
+import type {
+  AsyncSearchParams,
+  AsyncSearchStrategies,
+  RuleAlertData,
+  RuleTypeParams,
+  RuleTypeState,
+  SanitizedRule,
+} from '../types';
 import { DEFAULT_FLAPPING_SETTINGS, RuleExecutionStatusErrorReasons } from '../types';
 import type { ExecutorServices } from './get_executor_services';
 import type { TaskRunnerTimer } from './task_runner_timer';
 import { TaskRunnerTimerSpan } from './task_runner_timer';
 import type {
+  AsyncSearchClient,
   RuleRunnerErrorStackTraceLog,
   RuleTypeRunnerContext,
   TaskRunnerContext,
@@ -191,9 +199,10 @@ export class RuleTypeRunner<
       async () => {
         const checkHasReachedAlertLimit = () => {
           const reachedLimit = alertsClient.hasReachedAlertLimit() || false;
+          const maxAlerts = alertsClient.getMaxAlertLimit();
           if (reachedLimit) {
             context.logger.warn(
-              `rule execution generated greater than ${this.options.context.maxAlerts} alerts: ${context.ruleLogPrefix}`
+              `rule execution generated greater than ${maxAlerts} alerts: ${context.ruleLogPrefix}`
             );
             context.ruleRunMetricsStore.setHasReachedAlertLimit(true);
           }
@@ -202,6 +211,7 @@ export class RuleTypeRunner<
 
         let executorResult: { state: RuleState } | undefined;
         let wrappedSearchSourceClient: WrappedSearchSourceClient | undefined;
+        let asyncSearchClient: AsyncSearchClient<AsyncSearchParams> | undefined;
         try {
           const ctx = {
             type: 'alert',
@@ -249,6 +259,12 @@ export class RuleTypeRunner<
                   shouldWriteAlerts: () =>
                     this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout),
                   uiSettingsClient: executorServices.uiSettingsClient,
+                  getAsyncSearchClient: (strategy: AsyncSearchStrategies) => {
+                    if (!asyncSearchClient) {
+                      asyncSearchClient = executorServices.getAsyncSearchClient(strategy);
+                    }
+                    return asyncSearchClient;
+                  },
                 },
                 params: validatedParams,
                 state: ruleTypeState as RuleState,
@@ -327,6 +343,9 @@ export class RuleTypeRunner<
         const metrics = [executorServices.wrappedScopedClusterClient.getMetrics()];
         if (wrappedSearchSourceClient) {
           metrics.push(wrappedSearchSourceClient.getMetrics());
+        }
+        if (asyncSearchClient) {
+          metrics.push(asyncSearchClient.getMetrics());
         }
         context.ruleRunMetricsStore.setSearchMetrics(metrics);
 

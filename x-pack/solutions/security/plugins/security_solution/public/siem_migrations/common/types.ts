@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { SiemMigrationTaskStatus } from '../../../common/siem_migrations/constants';
+import type { MigrationTaskStats } from '../../../common/siem_migrations/model/common.gen';
+
 export interface GetMigrationsStatsAllParams {
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
@@ -31,4 +34,8 @@ export enum StatusFilterBase {
 
 export interface FilterOptionsBase {
   status?: StatusFilterBase;
+}
+
+export interface MigrationStats extends MigrationTaskStats {
+  status: SiemMigrationTaskStatus; // use the native enum instead of the zod enum from the model
 }

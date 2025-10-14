@@ -80,17 +80,9 @@ describe('When using `getActionDetailsById()', () => {
       outputs: {
         'agent-a': {
           content: {
-            code: 'ra_execute_success_done',
-            cwd: '/some/path',
-            output_file_id: 'some-output-file-id',
-            output_file_stderr_truncated: false,
-            output_file_stdout_truncated: true,
-            shell: 'bash',
-            shell_code: 0,
-            stderr: expect.any(String),
-            stderr_truncated: true,
-            stdout: expect.any(String),
-            stdout_truncated: true,
+            code: 'ra_upload_file-success',
+            disk_free_space: 4825566125475,
+            path: '/disk1/file/saved/here',
           },
           type: 'json',
         },

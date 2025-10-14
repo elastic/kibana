@@ -24,7 +24,7 @@ export interface VisualizationListItem {
   error?: string;
   icon: string;
   id: string;
-  stage: VisualizationStage;
+  stage?: VisualizationStage;
   savedObjectType: string;
   title: string;
   description?: string;
@@ -32,7 +32,7 @@ export interface VisualizationListItem {
   typeTitle: string;
   image?: string;
   type?: BaseVisType | string;
-  editor:
+  editor?:
     | { editUrl: string; editApp?: string }
     | { onEdit: (savedObjectId: string) => Promise<void> };
 }
@@ -85,7 +85,7 @@ export interface VisualizationClient<
 export type BasicVisualizationClient<
   ContentType extends string = string,
   Attr extends SerializableAttributes = SerializableAttributes
-> = Pick<VisualizationClient<ContentType, Attr>, 'get' | 'update'>;
+> = Pick<VisualizationClient<ContentType, Attr>, 'get' | 'update' | 'delete'>;
 
 export interface VisualizationsAppExtension {
   docTypes: string[];

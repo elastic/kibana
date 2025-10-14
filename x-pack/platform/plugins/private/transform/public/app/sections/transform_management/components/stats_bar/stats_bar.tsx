@@ -6,9 +6,23 @@
  */
 
 import React, { useMemo, type FC } from 'react';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 
 import type { StatsBarStat } from './stat';
 import { Stat } from './stat';
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    statsBar: css`
+      height: 42px;
+      padding: 14px;
+      background-color: ${euiTheme.colors.lightestShade};
+    `,
+  };
+};
 
 interface Stats {
   total: StatsBarStat;
@@ -30,10 +44,11 @@ interface StatsBarProps {
 }
 
 export const StatsBar: FC<StatsBarProps> = ({ stats, dataTestSub }) => {
+  const styles = useStyles();
   const statsList = useMemo(() => Object.values(stats), [stats]);
 
   return (
-    <div className="transformStatsBar" data-test-subj={dataTestSub}>
+    <div css={styles.statsBar} data-test-subj={dataTestSub}>
       {statsList
         .filter((s: StatsBarStat) => s.show)
         .map((s: StatsBarStat) => (

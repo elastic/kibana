@@ -48,6 +48,7 @@ interface Props {
   dataTestSubj?: string;
   euiCodeEditorProps?: { [key: string]: any };
   isOptionalField?: boolean;
+  readOnly?: boolean;
 }
 
 const { useXJsonMode } = XJson;
@@ -72,6 +73,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   dataTestSubj,
   euiCodeEditorProps = {},
   isOptionalField = false,
+  readOnly = false,
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const editorDisposables = useRef<monaco.IDisposable[]>([]);
@@ -87,6 +89,10 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   }, [inputTargetValue]);
 
   const onSelectMessageVariable = (variable: ActionVariable) => {
+    if (readOnly) {
+      return;
+    }
+
     const editor = editorRef.current;
     if (!editor) {
       setShowErrorMessage(true);
@@ -192,11 +198,12 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
             wordWrap: 'on',
             wrappingIndent: 'indent',
             automaticLayout: true,
+            readOnly,
           }}
           value={xJson}
           width="100%"
           height="200px"
-          data-test-subj={`${paramsProperty}JsonEditor`}
+          data-test-subj={`${paramsProperty}JsonEditor${readOnly ? 'ReadOnly' : ''}`}
           aria-label={ariaLabel}
           {...euiCodeEditorProps}
           editorDidMount={onEditorMount}

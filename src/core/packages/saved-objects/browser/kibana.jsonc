@@ -1,9 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/core-saved-objects-browser",
-  "owner": [
-    "@elastic/kibana-core"
-  ],
-  "group": "platform",
-  "visibility": "shared"
-}

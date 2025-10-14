@@ -89,7 +89,7 @@ describe('ShowShareModal', () => {
       panels: {
         panel_1: {
           type: 'panel_type',
-          gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
+          grid: { w: 0, h: 0, x: 0, y: 0, i: '0' },
           panelRefName: 'superPanel',
           explicitInput: {
             id: 'superPanel',

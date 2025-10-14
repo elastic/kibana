@@ -489,6 +489,40 @@
           },
           {
             "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorProps.onDuplicate",
+            "type": "Function",
+            "tags": [],
+            "label": "onDuplicate",
+            "description": [
+              "\nIf editing a data view and onDuplicate is defined, a duplicate button is shown"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorProps.isDuplicating",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDuplicating",
+            "description": [
+              "\nOptional boolean to indicate if the data view is being duplicated"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViewEditor",
             "id": "def-public.DataViewEditorProps.getDataViewHelpText",
             "type": "Function",
             "tags": [],

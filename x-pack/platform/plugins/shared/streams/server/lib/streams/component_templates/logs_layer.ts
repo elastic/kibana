@@ -58,25 +58,7 @@ export const baseFields: FieldDefinition = {
   'stream.name': {
     type: 'system',
   },
-  'scope.dropped_attributes_count': {
-    type: 'long',
-  },
-  dropped_attributes_count: {
-    type: 'long',
-  },
-  'resource.dropped_attributes_count': {
-    type: 'long',
-  },
-  'resource.schema_url': {
-    type: 'keyword',
-  },
   'scope.name': {
-    type: 'keyword',
-  },
-  'scope.schema_url': {
-    type: 'keyword',
-  },
-  'scope.version': {
     type: 'keyword',
   },
   trace_id: {
@@ -122,13 +104,6 @@ export const baseMappings: Exclude<MappingTypeMapping['properties'], undefined> 
   resource: {
     type: 'object',
     properties: {
-      dropped_attributes_count: {
-        type: 'long',
-      },
-      schema_url: {
-        ignore_above: 1024,
-        type: 'keyword',
-      },
       attributes: {
         type: 'object',
         subobjects: false,

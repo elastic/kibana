@@ -12,7 +12,8 @@ import { fromPromise } from 'xstate5';
 import type { errors as esErrors } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import { convertUIStepsToDSL } from '@kbn/streamlang';
 import { getFormattedError } from '../../../../../util/errors';
 import type { Simulation, SimulationMachineDeps } from './types';
 import type { SchemaField } from '../../../schema_editor/types';
@@ -23,7 +24,7 @@ export interface SimulationRunnerInput {
   streamName: string;
   detectedFields?: SchemaField[];
   documents: FlattenRecord[];
-  processors: StreamlangProcessorDefinition[];
+  steps: StreamlangStepWithUIAttributes[];
 }
 
 export function createSimulationRunnerActor({
@@ -47,15 +48,15 @@ export const simulateProcessing = ({
   input: SimulationRunnerInput;
   signal?: AbortSignal | null;
 }) => {
+  const dsl = convertUIStepsToDSL(input.steps, false);
+
   return streamsRepositoryClient.fetch('POST /internal/streams/{name}/processing/_simulate', {
     signal,
     params: {
       path: { name: input.streamName },
       body: {
         documents: input.documents,
-        processing: {
-          steps: input.processors,
-        },
+        processing: dsl,
         detected_fields:
           input.detectedFields && !isEmpty(input.detectedFields)
             ? getMappedSchemaFields(input.detectedFields).map((field) => ({

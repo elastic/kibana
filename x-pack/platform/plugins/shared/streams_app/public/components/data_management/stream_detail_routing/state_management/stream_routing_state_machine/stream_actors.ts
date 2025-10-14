@@ -13,6 +13,7 @@ import type { APIReturnType } from '@kbn/streams-plugin/public/api';
 import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Condition } from '@kbn/streamlang';
+import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
 import { getFormattedError } from '../../../../../util/errors';
 import type { StreamRoutingServiceDependencies } from './types';
 
@@ -64,8 +65,10 @@ export interface ForkStreamInput {
 export function createForkStreamActor({
   streamsRepositoryClient,
   forkSuccessNofitier,
+  telemetryClient,
 }: Pick<StreamRoutingServiceDependencies, 'streamsRepositoryClient'> & {
   forkSuccessNofitier: (streamName: string) => void;
+  telemetryClient: StreamsTelemetryClient;
 }) {
   return fromPromise<ForkStreamResponse, ForkStreamInput>(async ({ input, signal }) => {
     const response = await streamsRepositoryClient.fetch(
@@ -88,6 +91,9 @@ export function createForkStreamActor({
     );
 
     forkSuccessNofitier(input.destination);
+    telemetryClient.trackChildStreamCreated({
+      name: input.destination,
+    });
 
     return response;
   });

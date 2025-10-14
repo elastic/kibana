@@ -317,7 +317,15 @@
             "signature": [
               "{ (savedObject: ",
               "SavedObject",
-              "<Types[\"Attributes\"]>): Types[\"Item\"]; (savedObject: PartialSavedObject<Types[\"Attributes\"]>, partial: true): Types[\"PartialItem\"]; }"
+              "<Types[\"Attributes\"]>): Types[\"Item\"]; (savedObject: ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.PartialSavedObject",
+                "text": "PartialSavedObject"
+              },
+              "<Types[\"Attributes\"]>, partial: true): Types[\"PartialItem\"]; }"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
@@ -332,7 +340,15 @@
                 "description": [],
                 "signature": [
                   "SavedObject",
-                  "<Types[\"Attributes\"]> | PartialSavedObject<Types[\"Attributes\"]>"
+                  "<Types[\"Attributes\"]> | ",
+                  {
+                    "pluginId": "@kbn/content-management-utils",
+                    "scope": "server",
+                    "docId": "kibKbnContentManagementUtilsPluginApi",
+                    "section": "def-server.PartialSavedObject",
+                    "text": "PartialSavedObject"
+                  },
+                  "<Types[\"Attributes\"]>"
                 ],
                 "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                 "deprecated": false,
@@ -2288,6 +2304,22 @@
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-server.SavedObjectCreateOptions.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [
+              "\nWhether the object is managed by the application."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3271,6 +3303,25 @@
       },
       {
         "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-server.PartialSavedObject",
+        "type": "Type",
+        "tags": [],
+        "label": "PartialSavedObject",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "SavedObject",
+          "<Partial<T>>, \"references\"> & { references: ",
+          "SavedObjectReference",
+          "[] | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
         "id": "def-server.SearchArgsToSOFindOptions",
         "type": "Type",
         "tags": [],
@@ -3555,6 +3606,27 @@
                 "text": "Type"
               },
               "<string[] | undefined>"
+            ],
+            "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-utils",
+            "id": "def-server.createOptionsSchemas.managed",
+            "type": "Object",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<boolean | undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,

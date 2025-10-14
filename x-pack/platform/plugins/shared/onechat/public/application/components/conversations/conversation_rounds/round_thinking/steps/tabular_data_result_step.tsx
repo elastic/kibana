@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiText } from '@elastic/eui';
-import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiLink, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
+import { useOnechatServices } from '../../../../../hooks/use_onechat_service';
 
 interface TabularDataResultStepProps {
   result: TabularDataResult;
@@ -16,17 +18,56 @@ interface TabularDataResultStepProps {
 export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
   result: { data },
 }) => {
+  const {
+    startDependencies: { share },
+  } = useOnechatServices();
+
+  const {
+    url: { locators },
+  } = share;
+
+  const discoverLocator = useMemo(() => locators.get('DISCOVER_APP_LOCATOR'), [locators]);
+
+  const { query: esqlQuery } = data;
+
+  const discoverUrl = useMemo(() => {
+    if (!esqlQuery) return undefined;
+    return discoverLocator?.getRedirectUrl({
+      query: { esql: esqlQuery },
+    });
+  }, [discoverLocator, esqlQuery]);
+
   return (
-    <EuiText size="s">
-      <p>
+    <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+      <EuiText size="s">
         <FormattedMessage
-          id="xpack.onechat.converation.thinking.toolResult.tabularData"
-          defaultMessage={
-            'Found {recordCount, plural, one {{recordCount, number} record} other {{recordCount, number} records}}'
-          }
-          values={{ recordCount: data.values.length }}
+          id="xpack.onechat.conversation.thinking.tabularDataResultStep.foundRecordsMessage"
+          defaultMessage="Found {results}"
+          values={{
+            results: (
+              <EuiLink
+                href={discoverUrl}
+                data-test-subj="onechat-esql-data-result-see-in-discover"
+                aria-label={i18n.translate(
+                  'xpack.onechat.conversation.thinking.tabularDataResultStep.seeInDiscoverAriaLabel',
+                  {
+                    defaultMessage: 'Explore results in Discover',
+                  }
+                )}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.onechat.conversation.thinking.tabularDataResultStep.foundRecordsMessage"
+                  defaultMessage="{totalResults, plural, one {{totalResults, number} result} other {{totalResults, number} results}}"
+                  values={{
+                    totalResults: data.values.length,
+                  }}
+                />
+              </EuiLink>
+            ),
+          }}
         />
-      </p>
-    </EuiText>
+      </EuiText>
+    </EuiFlexGroup>
   );
 };

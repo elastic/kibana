@@ -16,7 +16,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
 import { authz } from '../../common/api/util/authz';
 import { withLicense } from '../../common/api/util/with_license';
-import { withExistingDashboardMigration } from './util/with_existing_dashboard_migration';
+import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 
 export const registerSiemDashboardMigrationsStopRoute = (
   router: SecuritySolutionPluginRouter,
@@ -36,7 +36,7 @@ export const registerSiemDashboardMigrationsStopRoute = (
         },
       },
       withLicense(
-        withExistingDashboardMigration(
+        withExistingMigration(
           async (context, req, res): Promise<IKibanaResponse<StopDashboardsMigrationResponse>> => {
             const migrationId = req.params.migration_id;
             const siemMigrationAuditLogger = new SiemMigrationAuditLogger(

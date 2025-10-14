@@ -25,9 +25,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import type { ConfigType } from './config';
 import { useAuthenticator } from './role_switcher';
 
-export const LoginPage = () => {
+export const LoginPage = ({ config }: { config: ConfigType }) => {
   const { services } = useKibana<CoreStart>();
   const [roles, setRoles] = useState<string[]>([]);
   const isRolesDefined = () => roles.length > 0;
@@ -35,6 +36,8 @@ export const LoginPage = () => {
   const [, switchCurrentUser] = useAuthenticator(true);
   const formik = useFormik({
     initialValues: {
+      // In UIAM we support only numeric usernames.
+      username: config.uiam?.enabled ? '12345' : sanitizeUsername('Test User'),
       full_name: 'Test User',
       role: undefined,
     },
@@ -43,7 +46,7 @@ export const LoginPage = () => {
         return;
       }
       await switchCurrentUser({
-        username: sanitizeUsername(values.full_name),
+        username: values.username,
         full_name: values.full_name,
         email: sanitizeEmail(values.full_name),
         roles: [values.role],
@@ -105,6 +108,39 @@ export const LoginPage = () => {
                     placeholder="Enter your name"
                     css={{ width: 350 }}
                   />
+                  <Field
+                    as={EuiInlineEditTitle}
+                    name="username"
+                    heading="h5"
+                    type={config.uiam?.enabled ? 'number' : 'text'}
+                    inputAriaLabel="Edit username inline"
+                    value={formik.values.username}
+                    onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                      formik.setFieldValue(
+                        'username',
+                        config.uiam?.enabled
+                          ? event.target.value
+                          : sanitizeUsername(event.target.value)
+                      );
+                    }}
+                    onCancel={(previousValue: string) => {
+                      formik.setFieldValue('username', previousValue);
+                    }}
+                    isReadOnly={formik.isSubmitting}
+                    editModeProps={{ formRowProps: { error: formik.errors.username } }}
+                    validate={(value: string) => {
+                      if (config.uiam?.enabled && !/^[1-9][0-9]*$/.test(value)) {
+                        return 'Username should be a positive number';
+                      }
+
+                      if (value.trim().length === 0) {
+                        return 'Username cannot be empty';
+                      }
+                    }}
+                    isInvalid={!!formik.errors.username}
+                    placeholder="Enter your numeric username"
+                    css={{ width: 350 }}
+                  />
                   <EuiSpacer size="m" />
 
                   <EuiFormRow error={formik.errors.role} isInvalid={!!formik.errors.role}>
@@ -150,7 +186,7 @@ export const LoginPage = () => {
                 >
                   Log in
                 </EuiButton>,
-                <EuiButtonEmpty size="xs" href="/login">
+                <EuiButtonEmpty aria-label="Show alternative login methods" size="xs" href="/login">
                   More login options
                 </EuiButtonEmpty>,
               ]}

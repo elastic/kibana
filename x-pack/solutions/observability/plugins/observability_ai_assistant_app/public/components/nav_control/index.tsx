@@ -7,6 +7,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import type { EuiToolTip as EuiToolTipRef } from '@elastic/eui';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -57,6 +58,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
       plugins: {
         start: {
           observabilityAIAssistant: { ObservabilityAIAssistantChatServiceContext },
+          aiAssistantManagementSelection,
         },
       },
     },
@@ -117,6 +119,19 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     };
   }, [service.conversations.predefinedConversation$, setFlyoutSettings]);
 
+  useEffect(() => {
+    const openChatSubscription = aiAssistantManagementSelection.openChat$.subscribe((event) => {
+      if (event.assistant === 'observability') {
+        service.conversations.openNewConversation({ messages: [] });
+        aiAssistantManagementSelection.completeOpenChat();
+      }
+    });
+
+    return () => {
+      openChatSubscription.unsubscribe();
+    };
+  }, [aiAssistantManagementSelection, service.conversations]);
+
   const { messages, title, hideConversationList } = useObservable(
     service.conversations.predefinedConversation$
   ) ?? {
@@ -142,14 +157,19 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
   }, [service.conversations]);
 
   const EuiButtonBasicOrEmpty = isServerless ? EuiButtonEmpty : EuiButton;
+  const tooltipRef = useRef<EuiToolTipRef | null>(null);
+  const hideToolTip = () => tooltipRef.current?.hideToolTip();
 
   return (
     <>
       <EuiToolTip
+        ref={tooltipRef}
         content={i18n.translate(
           'xpack.observabilityAiAssistant.navControl.openTheAIAssistantPopoverLabel',
           { defaultMessage: 'Keyboard shortcut Ctrl ;' }
         )}
+        disableScreenReaderOutput
+        onMouseOut={hideToolTip}
       >
         <EuiButtonBasicOrEmpty
           aria-label={i18n.translate(
@@ -158,6 +178,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
           )}
           data-test-subj="observabilityAiAssistantAppNavControlButton"
           onClick={() => {
+            hideToolTip();
             service.conversations.openNewConversation({
               messages: [],
             });

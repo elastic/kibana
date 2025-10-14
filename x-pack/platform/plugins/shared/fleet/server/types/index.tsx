@@ -89,7 +89,7 @@ export type {
   SecretElasticDoc,
   SecretPath,
   VarSecretReference,
-  PolicySecretReference,
+  SecretReference,
   DeletedSecretResponse,
   DeletedSecretReference,
   PackageListItem,

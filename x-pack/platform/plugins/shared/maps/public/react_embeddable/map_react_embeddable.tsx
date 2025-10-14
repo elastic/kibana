@@ -11,13 +11,8 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import {
-  SAVED_OBJECT_REF_NAME,
-  apiIsOfType,
   areTriggersDisabled,
-  findSavedObjectRef,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
@@ -28,8 +23,7 @@ import { BehaviorSubject, merge } from 'rxjs';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { inject } from '../../common/embeddable';
-import type { MapApi, MapSerializedState } from './types';
+import type { MapApi } from './types';
 import { SavedMap } from '../routes/map_page';
 import { initializeReduxSync, reduxSyncComparators } from './initialize_redux_sync';
 import {
@@ -48,33 +42,18 @@ import {
 import { initializeDataViews } from './initialize_data_views';
 import { initializeFetch } from './initialize_fetch';
 import { initializeEditApi } from './initialize_edit_api';
-import { extractReferences } from '../../common/migrations/references';
 import { isMapRendererApi } from './map_renderer/types';
+import type { MapByReferenceState, MapEmbeddableState } from '../../common';
 
 export function getControlledBy(id: string) {
   return `mapEmbeddablePanel${id}`;
 }
 
-function injectReferences(serializedState?: SerializedPanelState<MapSerializedState>) {
-  if (!serializedState) return {};
-
-  const rawState = { ...serializedState.rawState };
-  const references = serializedState.references ?? [];
-
-  const savedObjectRef = findSavedObjectRef(MAP_SAVED_OBJECT_TYPE, references);
-
-  if (savedObjectRef) {
-    rawState.savedObjectId = savedObjectRef.id;
-  }
-
-  return inject(rawState as EmbeddableStateWithType, references) as unknown as MapSerializedState;
-}
-
-export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi> = {
+export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi> = {
   type: MAP_SAVED_OBJECT_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const state = injectReferences(initialState);
-    const savedMap = new SavedMap({ mapSerializedState: state });
+    const state = initialState.rawState;
+    const savedMap = new SavedMap({ mapEmbeddableState: state });
     await savedMap.whenReady();
 
     // eslint bug, eslint thinks api is never reassigned even though it is
@@ -125,60 +104,16 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
     }
 
     function serializeByReference(libraryId: string) {
-      const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
-        dynamicActionsManager?.serializeState() ?? {};
-      const rawState = {
-        ...getLatestState(),
-        ...dynamicActionsState,
-      };
-
-      if (apiIsOfType(parentApi, 'canvas')) {
-        return {
-          rawState: getByReferenceState(rawState, libraryId),
-          references: [],
-        };
-      }
-
-      const { savedObjectId, ...byRefState } = getByReferenceState(rawState, libraryId);
       return {
-        rawState: byRefState,
-        references: [
-          ...(dynamicActionsReferences ?? []),
-          {
-            name: SAVED_OBJECT_REF_NAME,
-            type: MAP_SAVED_OBJECT_TYPE,
-            id: libraryId,
-          },
-        ],
+        rawState: getByReferenceState(getLatestState(), libraryId),
+        references: [],
       };
     }
 
     function serializeByValue() {
-      const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
-        dynamicActionsManager?.serializeState() ?? {};
-      const rawState = {
-        ...getLatestState(),
-        ...dynamicActionsState,
-      };
-
-      /**
-       * Canvas embeddables do not support references
-       */
-      if (apiIsOfType(parentApi, 'canvas')) {
-        return {
-          rawState: getByValueState(rawState, savedMap.getAttributes()),
-          references: [],
-        };
-      }
-
-      // by-value embeddable
-      const { attributes, references } = extractReferences({
-        attributes: savedMap.getAttributes(),
-      });
-
       return {
-        rawState: getByValueState(rawState, attributes),
-        references: [...references, ...(dynamicActionsReferences ?? [])],
+        rawState: getByValueState(getLatestState(), savedMap.getAttributes()),
+        references: [],
       };
     }
 
@@ -187,7 +122,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
       return savedObjectId ? serializeByReference(savedObjectId) : serializeByValue();
     }
 
-    const unsavedChangesApi = initializeUnsavedChanges<MapSerializedState>({
+    const unsavedChangesApi = initializeUnsavedChanges<MapEmbeddableState>({
       uuid,
       parentApi,
       serializeState,
@@ -205,12 +140,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
           ...reduxSyncComparators,
           ...titleComparators,
           ...timeRangeComparators,
-          attributes:
-            savedMap.getSavedObjectId() !== undefined
-              ? 'skip'
-              : (a, b) => {
-                  return a?.layerListJSON === b?.layerListJSON;
-                },
+          attributes: savedMap.getSavedObjectId() !== undefined ? 'skip' : 'deepEquality',
           mapSettings: 'deepEquality',
           savedObjectId: 'skip',
         };
@@ -220,7 +150,9 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
         timeRangeManager.reinitializeState(lastSaved?.rawState);
         titleManager.reinitializeState(lastSaved?.rawState);
 
-        await savedMap.reset(injectReferences(lastSaved));
+        if (lastSaved) {
+          await savedMap.reset(lastSaved.rawState);
+        }
       },
     });
 
@@ -237,12 +169,12 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
         () => {
           const latestState = getLatestState();
 
-          return latestState.savedObjectId
-            ? getByReferenceState(latestState, latestState.savedObjectId)
+          return (latestState as MapByReferenceState).savedObjectId
+            ? getByReferenceState(latestState, (latestState as MapByReferenceState).savedObjectId)
             : getByValueState(latestState, savedMap.getAttributes());
         },
         parentApi,
-        state.savedObjectId
+        (state as MapByReferenceState).savedObjectId
       ),
       ...initializeLibraryTransforms(
         Boolean(savedMap.getSavedObjectId()),

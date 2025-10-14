@@ -28,7 +28,11 @@ import type {
   EmbeddableStart,
   EmbeddableStartDependencies,
 } from './types';
-import { getTransforms, hasTransforms, registerTransforms } from './transforms_registry';
+import {
+  registerLegacyURLTransform,
+  hasLegacyURLTransform,
+  getLegacyURLTransform,
+} from './transforms_registry';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
@@ -44,7 +48,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       registerReactEmbeddableFactory,
       registerAddFromLibraryType,
-      registerTransforms,
+      registerLegacyURLTransform,
       registerEnhancement: this.enhancementsRegistry.registerEnhancement,
       transformEnhancementsIn: this.enhancementsRegistry.transformIn,
       transformEnhancementsOut: this.enhancementsRegistry.transformOut,
@@ -63,6 +67,10 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     );
 
     const embeddableStart: EmbeddableStart = {
+      getAddFromLibraryComponent: async () => {
+        const { AddFromLibraryFlyout } = await import('./add_from_library/add_from_library_flyout');
+        return AddFromLibraryFlyout;
+      },
       getStateTransfer: (storage?: Storage) =>
         storage
           ? new EmbeddableStateTransfer(
@@ -72,8 +80,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
               storage
             )
           : this.stateTransferService,
-      getTransforms,
-      hasTransforms,
+      hasLegacyURLTransform,
+      getLegacyURLTransform,
       getEnhancement: this.enhancementsRegistry.getEnhancement,
     };
 

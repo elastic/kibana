@@ -9,6 +9,7 @@
 
 import expect from '@kbn/expect';
 import kbnRison from '@kbn/rison';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -48,7 +49,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover esql view', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'test_logstash_reader',
+        'kibana_sample_read',
+      ]);
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
@@ -137,6 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const testQuery = `from kibana_sample_data_flights | limit 10 | where timestamp >= ?_tstart and timestamp <= ?_tend`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
+
         await testSubjects.click('querySubmitButton');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
@@ -220,7 +226,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
-        expect(await cell.getVisibleText()).to.be(' - ');
+        expect(await cell.getVisibleText()).to.be(NULL_LABEL);
         expect((await dataGrid.getHeaders()).slice(-2)).to.eql([
           'Numberbytes',
           'machine.ram_range',
@@ -372,7 +378,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const availableDataViews = await unifiedSearch.getDataViewList(
           'discover-dataView-switch-link'
         );
-        expect(availableDataViews).to.eql(['All logs', 'kibana_sample_data_flights', 'logstash-*']);
+        ['All logs', 'kibana_sample_data_flights', 'logstash-*'].forEach((item) => {
+          expect(availableDataViews).to.contain(item);
+        });
         await dataViews.switchToAndValidate('kibana_sample_data_flights');
       });
     });
@@ -661,7 +669,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.navigateToApp('dashboard');
         await dashboard.clickNewDashboard();
         await timePicker.setDefaultAbsoluteRange();
-        await dashboardAddPanel.clickOpenAddPanel();
+        await dashboardAddPanel.clickAddFromLibrary();
         await dashboardAddPanel.addSavedSearch(savedSearchName);
         await header.waitUntilLoadingHasFinished();
 

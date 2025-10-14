@@ -32,11 +32,10 @@ export const testContentPackEntry = ({
     stream: {
       description: '',
       ingest: {
-        processing: {
-          steps: [],
-        },
+        processing: { steps: [] },
         lifecycle: { inherit: {} },
         wired: { routing, fields },
+        settings: {},
       },
     },
   },

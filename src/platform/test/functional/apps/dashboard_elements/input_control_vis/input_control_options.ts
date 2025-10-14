@@ -86,6 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('input control is clear', async () => {
           return (await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0')) === false;
         });
+        await common.sleep(500); // Wait for DOM to stabilize after clear
         await comboBox.set('listControlSelect0', 'osx', { retryCount: 3 });
         await visEditor.inputControlSubmit();
         await common.sleep(1000);

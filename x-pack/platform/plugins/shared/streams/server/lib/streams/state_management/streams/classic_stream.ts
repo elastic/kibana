@@ -9,7 +9,7 @@ import type {
   IndicesDataStream,
   IngestProcessorContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IngestStreamLifecycle } from '@kbn/streams-schema';
+import type { IngestStreamLifecycle, IngestStreamSettings } from '@kbn/streams-schema';
 import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
 import { isNotFoundError } from '@kbn/es-errors';
@@ -17,7 +17,7 @@ import { isMappingProperties } from '@kbn/streams-schema/src/fields';
 import { StatusError } from '../../errors/status_error';
 import { generateClassicIngestPipelineBody } from '../../ingest_pipelines/generate_ingest_pipeline';
 import { getProcessingPipelineName } from '../../ingest_pipelines/name';
-import { getUnmanagedElasticsearchAssets } from '../../stream_crud';
+import { getDataStreamSettings, getUnmanagedElasticsearchAssets } from '../../stream_crud';
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
 import type { StateDependencies, StreamChange } from '../types';
@@ -28,13 +28,15 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { validateClassicFields } from '../../helpers/validate_fields';
-import { validateBracketsInFieldNames } from '../../helpers/validate_stream';
+import { validateBracketsInFieldNames, validateSettings } from '../../helpers/validate_stream';
 import type { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
+import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
 
 interface ClassicStreamChanges extends StreamChanges {
   processing: boolean;
   field_overrides: boolean;
   lifecycle: boolean;
+  settings: boolean;
 }
 
 export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Definition> {
@@ -42,7 +44,10 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     processing: false,
     field_overrides: false,
     lifecycle: false,
+    settings: false,
   };
+
+  private _effectiveSettings?: IngestStreamSettings;
 
   constructor(definition: Streams.ClassicStream.Definition, dependencies: StateDependencies) {
     super(definition, dependencies);
@@ -86,6 +91,10 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     this._changes.lifecycle =
       !startingStateStreamDefinition ||
       !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
+
+    this._changes.settings =
+      !startingStateStreamDefinition ||
+      !_.isEqual(await this.getEffectiveSettings(), this._definition.ingest.settings);
 
     this._changes.field_overrides =
       !startingStateStreamDefinition ||
@@ -189,6 +198,8 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     validateClassicFields(this._definition);
     validateBracketsInFieldNames(this._definition);
 
+    validateSettings(this._definition, this.dependencies.isServerless);
+
     return { isValid: true, errors: [] };
   }
 
@@ -217,6 +228,26 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         },
       });
     }
+
+    actions.push({
+      type: 'update_ingest_settings',
+      request: {
+        name: this._definition.name,
+        settings: formatSettings(this._definition.ingest.settings, this.dependencies.isServerless),
+      },
+    });
+    if (
+      settingsUpdateRequiresRollover(
+        await this.getEffectiveSettings(),
+        this._definition.ingest.settings
+      )
+    ) {
+      actions.push({
+        type: 'rollover',
+        request: { name: this._definition.name },
+      });
+    }
+
     if (
       this._definition.ingest.classic.field_overrides &&
       isMappingProperties(this._definition.ingest.classic.field_overrides)
@@ -229,6 +260,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         },
       });
     }
+
     actions.push({
       type: 'upsert_dot_streams_document',
       request: this._definition,
@@ -285,6 +317,31 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
           lifecycle: this.getLifecycle(),
         },
       });
+    }
+
+    if (this._changes.settings) {
+      actions.push({
+        type: 'update_ingest_settings',
+        request: {
+          name: this._definition.name,
+          settings: formatSettings(
+            this._definition.ingest.settings,
+            this.dependencies.isServerless
+          ),
+        },
+      });
+
+      if (
+        settingsUpdateRequiresRollover(
+          await this.getEffectiveSettings(),
+          this._definition.ingest.settings
+        )
+      ) {
+        actions.push({
+          type: 'rollover',
+          request: { name: this._definition.name },
+        });
+      }
     }
 
     if (this._changes.field_overrides) {
@@ -369,6 +426,18 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
           name: this._definition.name,
         },
       },
+      {
+        type: 'unlink_assets',
+        request: {
+          name: this._definition.name,
+        },
+      },
+      {
+        type: 'unlink_features',
+        request: {
+          name: this._definition.name,
+        },
+      },
     ];
 
     if (this._definition.ingest.processing.steps.length > 0) {
@@ -414,5 +483,16 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       pipeline: unmanagedAssets.ingestPipeline ?? `${dataStream.template}-pipeline`,
       template: dataStream.template,
     };
+  }
+
+  private async getEffectiveSettings() {
+    if (!this._effectiveSettings) {
+      this._effectiveSettings = getDataStreamSettings(
+        await this.dependencies.scopedClusterClient.asCurrentUser.indices
+          .getDataStreamSettings({ name: this._definition.name })
+          .then((res) => res.data_streams[0])
+      );
+    }
+    return this._effectiveSettings;
   }
 }

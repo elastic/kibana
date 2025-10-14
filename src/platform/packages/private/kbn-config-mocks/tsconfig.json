@@ -16,6 +16,7 @@
     "@kbn/doc-links",
     "@kbn/repo-info",
     "@kbn/repo-packages",
+    "@kbn/lazy-object",
   ],
   "exclude": [
     "target/**/*",

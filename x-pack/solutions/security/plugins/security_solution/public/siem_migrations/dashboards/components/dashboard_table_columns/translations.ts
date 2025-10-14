@@ -21,6 +21,13 @@ export const COLUMN_STATUS = i18n.translate(
   }
 );
 
+export const COLUMN_TAGS = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.tableColumn.tagsLabel',
+  {
+    defaultMessage: 'Tags',
+  }
+);
+
 export const COLUMN_UPDATED = i18n.translate(
   'xpack.securitySolution.siemMigrations.dashboards.tableColumn.updatedLabel',
   {
@@ -39,5 +46,33 @@ export const INSTALLED_STATUS_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.dashboards.tableColumn.installedStatusTitle',
   {
     defaultMessage: 'Installed',
+  }
+);
+
+export const ACTIONS_VIEW_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.tableColumn.actionsViewLabel',
+  {
+    defaultMessage: 'View',
+  }
+);
+
+export const ACTIONS_INSTALL_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.tableColumn.actionsInstallLabel',
+  {
+    defaultMessage: 'Install',
+  }
+);
+
+export const COLUMN_ACTIONS = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.tableColumn.actionsLabel',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
+export const VIEW_DASHBOARD_TRANSLATION_SUMMARY_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.viewDashboardTranslationSummaryTooltip',
+  {
+    defaultMessage: 'View dashboard translation summary',
   }
 );

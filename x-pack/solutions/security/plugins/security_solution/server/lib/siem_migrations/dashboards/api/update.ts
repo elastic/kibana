@@ -16,7 +16,7 @@ import {
   UpdateDashboardMigrationRequestParams,
   UpdateDashboardMigrationRequestBody,
 } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
-import { withExistingDashboardMigration } from './util/with_existing_dashboard_migration';
+import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 
 export const registerSiemDashboardMigrationsUpdateRoute = (
   router: SecuritySolutionPluginRouter,
@@ -39,7 +39,7 @@ export const registerSiemDashboardMigrationsUpdateRoute = (
         },
       },
       withLicense(
-        withExistingDashboardMigration(async (context, req, res): Promise<IKibanaResponse> => {
+        withExistingMigration(async (context, req, res): Promise<IKibanaResponse> => {
           const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
             context.securitySolution,
             'dashboards'

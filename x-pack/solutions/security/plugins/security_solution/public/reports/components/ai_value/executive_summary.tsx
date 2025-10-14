@@ -98,7 +98,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
       data-test-subj="executiveSummaryContainer"
       css={css`
         border-radius: ${size.s};
-        padding: ${size.base};
+        padding: ${size.base} ${size.xl};
         min-height: 200px;
       `}
     >

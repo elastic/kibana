@@ -85,6 +85,7 @@ export const hydrateDataSourceSelection = (
     name: 'All logs',
     title: 'logs-*,dataset-logs-*-*',
     timeFieldName: '@timestamp',
+    managed: true,
   };
 };
 

@@ -59,7 +59,12 @@ export const EqlTabHeader = memo(
                 ))}
             </EuiFlexItem>
             <EuiFlexItem>
-              <SuperDatePicker width="auto" id={InputsModelId.timeline} timelineId={timelineId} />
+              <SuperDatePicker
+                compressed={true}
+                id={InputsModelId.timeline}
+                timelineId={timelineId}
+                width="auto"
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <TimelineDatePickerLock />

@@ -10,8 +10,10 @@
 import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
+import { WorkflowEditorStoreProvider } from '../lib/store';
 
 // Mock the YamlEditor component to avoid Monaco complexity in tests
 jest.mock('../../../shared/ui/yaml_editor', () => ({
@@ -27,7 +29,7 @@ jest.mock('../../../shared/ui/yaml_editor', () => ({
 }));
 
 // Mock the validation hook
-jest.mock('../lib/use_yaml_validation', () => ({
+jest.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', () => ({
   useYamlValidation: () => ({
     error: null,
     validationErrors: [],
@@ -55,10 +57,19 @@ describe('WorkflowYAMLEditor', () => {
   const defaultProps: WorkflowYAMLEditorProps = {
     value: '',
     workflowId: 'test-workflow',
+    onSave: jest.fn(),
+    onRun: jest.fn(),
+    onSaveAndRun: jest.fn(),
   };
 
   const renderWithI18n = (component: React.ReactElement) => {
-    return render(<I18nProviderMock>{component}</I18nProviderMock>);
+    return render(
+      <MemoryRouter>
+        <I18nProviderMock>
+          <WorkflowEditorStoreProvider>{component}</WorkflowEditorStoreProvider>
+        </I18nProviderMock>
+      </MemoryRouter>
+    );
   };
 
   beforeEach(() => {
@@ -68,20 +79,6 @@ describe('WorkflowYAMLEditor', () => {
   it('renders without crashing', () => {
     renderWithI18n(<WorkflowYAMLEditor {...defaultProps} />);
     expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
-  });
-
-  it('shows saved status when no changes', () => {
-    const { getByText } = renderWithI18n(
-      <WorkflowYAMLEditor {...defaultProps} hasChanges={false} />
-    );
-    expect(getByText('Saved')).toBeInTheDocument();
-  });
-
-  it('shows unsaved changes when there are changes', () => {
-    const { getByText } = renderWithI18n(
-      <WorkflowYAMLEditor {...defaultProps} hasChanges={true} />
-    );
-    expect(getByText('Unsaved changes')).toBeInTheDocument();
   });
 
   it('calls onChange when editor content changes', async () => {

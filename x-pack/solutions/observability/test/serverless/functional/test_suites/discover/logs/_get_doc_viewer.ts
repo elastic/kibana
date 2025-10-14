@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await queryBar.setQuery('error.stack_trace : * and _ignored : *');
       await queryBar.submitQuery();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.waitUntilTabIsLoaded();
     });
 
     after(async () => {

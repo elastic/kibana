@@ -29,7 +29,6 @@ type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style'
 
 export interface Props extends DivProps {
   appFixedViewport?: HTMLElement;
-  dashboardContainerRef?: React.MutableRefObject<HTMLElement | null>;
   id: string;
   index?: number;
   type: string;
@@ -42,7 +41,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
   (
     {
       appFixedViewport,
-      dashboardContainerRef,
       id,
       index,
       type,
@@ -63,13 +61,15 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       focusedPanelId,
       useMargins,
       viewMode,
+      dashboardContainerRef,
     ] = useBatchedPublishingSubjects(
       dashboardApi.highlightPanelId$,
       dashboardApi.scrollToPanelId$,
       dashboardApi.expandedPanelId$,
       dashboardApi.focusedPanelId$,
       dashboardApi.settings.useMargins$,
-      dashboardApi.viewMode$
+      dashboardApi.viewMode$,
+      dashboardInternalApi.dashboardContainerRef$
     );
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
@@ -107,7 +107,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       }
     }, [id, dashboardApi, scrollToPanelId, highlightPanelId, ref, blurPanel]);
 
-    const dashboardContainerTopOffset = dashboardContainerRef?.current?.offsetTop || 0;
+    const dashboardContainerTopOffset = dashboardContainerRef?.offsetTop || 0;
     const globalNavTopOffset = appFixedViewport?.offsetTop || 0;
     const styles = useMemoCss(dashboardGridItemStyles);
 

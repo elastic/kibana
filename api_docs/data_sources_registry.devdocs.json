@@ -1,0 +1,305 @@
+{
+  "id": "dataSourcesRegistry",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "dataSourcesRegistry",
+      "id": "def-public.DataSourcesRegistryPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "DataSourcesRegistryPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/data_sources_registry/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "dataSourcesRegistry",
+      "id": "def-public.DataSourcesRegistryPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "DataSourcesRegistryPluginStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/data_sources_registry/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "dataSourcesRegistry",
+        "id": "def-server.DataCatalog",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataCatalog",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-server.DataCatalog.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(dataTypeId: string) => ",
+              {
+                "pluginId": "dataSourcesRegistry",
+                "scope": "server",
+                "docId": "kibDataSourcesRegistryPluginApi",
+                "section": "def-server.DataTypeDefinition",
+                "text": "DataTypeDefinition"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataSourcesRegistry",
+                "id": "def-server.DataCatalog.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "dataTypeId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-server.DataCatalog.list",
+            "type": "Function",
+            "tags": [],
+            "label": "list",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "dataSourcesRegistry",
+                "scope": "server",
+                "docId": "kibDataSourcesRegistryPluginApi",
+                "section": "def-server.DataTypeDefinition",
+                "text": "DataTypeDefinition"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-server.DataCatalog.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [],
+            "signature": [
+              "(dataType: ",
+              {
+                "pluginId": "dataSourcesRegistry",
+                "scope": "server",
+                "docId": "kibDataSourcesRegistryPluginApi",
+                "section": "def-server.DataTypeDefinition",
+                "text": "DataTypeDefinition"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataSourcesRegistry",
+                "id": "def-server.DataCatalog.register.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dataType",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataSourcesRegistry",
+                    "scope": "server",
+                    "docId": "kibDataSourcesRegistryPluginApi",
+                    "section": "def-server.DataTypeDefinition",
+                    "text": "DataTypeDefinition"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataSourcesRegistry",
+        "id": "def-server.DataTypeDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataTypeDefinition",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-server.DataTypeDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-server.DataTypeDefinition.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataSourcesRegistry",
+            "id": "def-server.DataTypeDefinition.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "dataSourcesRegistry",
+      "id": "def-server.DataSourcesRegistryPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "DataSourcesRegistryPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/data_sources_registry/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "dataSourcesRegistry",
+          "id": "def-server.DataSourcesRegistryPluginSetup.register",
+          "type": "Function",
+          "tags": [],
+          "label": "register",
+          "description": [],
+          "signature": [
+            "(dataType: ",
+            {
+              "pluginId": "dataSourcesRegistry",
+              "scope": "server",
+              "docId": "kibDataSourcesRegistryPluginApi",
+              "section": "def-server.DataTypeDefinition",
+              "text": "DataTypeDefinition"
+            },
+            ") => void"
+          ],
+          "path": "x-pack/platform/plugins/shared/data_sources_registry/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "dataSourcesRegistry",
+              "id": "def-server.DataSourcesRegistryPluginSetup.register.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "dataType",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "dataSourcesRegistry",
+                  "scope": "server",
+                  "docId": "kibDataSourcesRegistryPluginApi",
+                  "section": "def-server.DataTypeDefinition",
+                  "text": "DataTypeDefinition"
+                }
+              ],
+              "path": "x-pack/platform/plugins/shared/data_sources_registry/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "dataSourcesRegistry",
+      "id": "def-server.DataSourcesRegistryPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "DataSourcesRegistryPluginStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/data_sources_registry/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

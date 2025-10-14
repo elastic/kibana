@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { deleteRuleById } from '../../../../common/lib/rules';
+import { getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import {
   getUrlPrefix,
@@ -51,6 +53,13 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage('get', 'test.noop', 'alertsFixture'),
+                statusCode: 403,
+              });
+              break;
             case 'global_read at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
@@ -100,9 +109,19 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-            case 'global_read at space1':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage(
+                  'get',
+                  'test.restricted-noop',
+                  'alertsRestrictedFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'global_read at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
@@ -153,6 +172,16 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage(
+                  'get',
+                  'test.unrestricted-noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
             case 'global_read at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
@@ -209,7 +238,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('delete', 'test.noop', 'alerts'),
+                message: getUnauthorizedErrorMessage('get', 'test.noop', 'alerts'),
                 statusCode: 403,
               });
               objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
@@ -305,6 +334,12 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage('get', 'test.noop', 'alertsFixture'),
+                statusCode: 403,
+              });
+              break;
             case 'global_read at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
@@ -335,5 +370,24 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
         });
       });
     }
+
+    describe('internally managed rule types', () => {
+      const rulePayload = getAlwaysFiringInternalRule();
+
+      it('should throw 400 error when trying to delete an internally managed rule type', async () => {
+        const { body: createdRule } = await supertest
+          .post('/api/alerts_fixture/rule/internally_managed')
+          .set('kbn-xsrf', 'foo')
+          .send(rulePayload)
+          .expect(200);
+
+        await supertest
+          .delete(`/api/alerting/rule/${createdRule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(400);
+
+        await deleteRuleById(es, createdRule.id);
+      });
+    });
   });
 }
