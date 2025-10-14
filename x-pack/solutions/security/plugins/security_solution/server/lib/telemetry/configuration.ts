@@ -83,22 +83,7 @@ class TelemetryConfigurationDTO {
     maxResponseSize: 10 * 1024 * 1024, // 10 MB
     maxCompressedResponseSize: 8 * 1024 * 1024, // 8 MB
   };
-  private readonly DEFAULT_ENCRYPTION_PUBLIC_KEYS: Record<string, string> = {
-    'diagnostic-queries-sda-key': `-----BEGIN PUBLIC KEY-----
-MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA5GwrUTWUB+o5NwmADZ4e
-Th5nnmGQSJ7/Dn9x/EnujK1+TLRM/wx2Sk1U0LWvf3X9YYZA9IMsdZmxJPNuZhkr
-bljo1bZW3H3HbSkzY4xcy6xs4TNF5nB2njHnSsvwSFBbAKu2prn/x6PU9/2gyCJ3
-LWQJcBclfbr1YyW0lvvUUT/tGqgerm0FYktuPwNjr/b2AMJJYyRGP9dEMKUGaW4Z
-NZzeWiC+Ruei72kzpKlEWCxmFrIFOeb6RH4nu5Y8zwtLHlQ/1U26+0I7zMyQOgpv
-GBmt4xJTO4UH2hTGq/1uObqd9ZVd14sFvwgjkOcED1B45J0N7oaajldRo4unN2vC
-dAAUczyMl1+Q488+pXBAKxWxYbxXyjZUEZwS3VY7gVqZCM2quee4VgvcG9mfY5qY
-s5C4Wa7+WaZT147C7Un++ll4FITHlrVTNwiH3VCWX8LE92/KBow6CnoS7Y5UIXic
-kSqjdA3KWjhTHNvE4kNyth/p29cBqZ9usfKFRq8J3QC60/HEzvJnAXPoyrFf4Rfv
-pTC842j2lTiy8EKj++95oz3/17jZh4QMpFU07aUPDgpL20w4zyOSLeAugZLOnsbc
-tyHSZi5GqI4r8KuKVyoKL9K50ZS7o+1u1f7uu3fInk/SXVSOf/LDgYqLC7I5yCv6
-2g+g3kzfWNI4x9FalYMUyP8CAwEAAQ==
------END PUBLIC KEY-----`,
-  };
+  private readonly DEFAULT_ENCRYPTION_PUBLIC_KEYS: Record<string, string> = {};
 
   private _telemetry_max_buffer_size = this.DEFAULT_TELEMETRY_MAX_BUFFER_SIZE;
   private _max_security_list_telemetry_batch = this.DEFAULT_MAX_SECURITY_LIST_TELEMETRY_BATCH;

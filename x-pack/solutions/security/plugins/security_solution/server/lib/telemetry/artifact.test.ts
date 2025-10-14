@@ -6,29 +6,9 @@
  */
 
 import { createMockTelemetryReceiver } from './__mocks__';
-import { Artifact, type CdnConfig } from './artifact';
+import { Artifact } from './artifact';
 import axios from 'axios';
 import type { TelemetryConfiguration } from './types';
-
-const CDN_CONFIG: CdnConfig = {
-  url: 'https://artifacts.security.elastic.co',
-  pubKey: `
------BEGIN PUBLIC KEY-----
-MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA6AB2sJ5M1ImN/bkQ7Te6
-uI7vMXjN2yupEmh2rYz4gNzWS351d4JOhuQH3nzxfKdayHgusP/Kq2MXVqALH8Ru
-Yu2AF08GdvYlQXPgEVI+tB/riekwU7PXZHdA1dY5/mEZ8SUSM25kcDJ3vTCzFTlL
-gl2RNAdkR80d9nhvNSWlhWMwr8coQkr6NmujVU/Wa0w0EXbN1arjcG4qzbOCaR+b
-cgQ9LRUoFfK9w+JJHDNjOI7rOmaIDA6Ep4oeDLy5AcGCE8bNmQzxZhRW7NvlNUGS
-NTgU0CZTatVsL9AyP15W3k635Cpmy2SMPX+d/CFgvr8QPxtqdrz3q9iOeU3a1LMY
-gDcFVmSzn5zieQEPfo/FcQID/gnCmkX0ADVMf1Q20ew66H7UCOejGaerbFZXYnTz
-5AgQBWF2taOSSE7gDjGAHereeKp+1PR+tCkoDZIrPEjo0V6+KaTMuYS3oZj1/RZN
-oTjQrdfeDj02mEIL+XkcWKAp03PYlWylVwgTMa178DDVuTWtS5lZL8j5LijlH9+6
-xH8o++ghwfxp6ENLKDZPV5IvHHG7Vth9HScoPTQWQ+s8Bt26QENPUV2AbyxbJykY
-mJfTDke3bEemHZzRbAmwiQ7VpJjJ4OfLGRy8Pp2AHo8kYIvWyM5+aLMxcxUaYdA9
-5SxoDOgcDBA4lLb6XFLYiDUCAwEAAQ==
------END PUBLIC KEY-----
-`,
-};
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -43,7 +23,7 @@ describe('telemetry artifact test', () => {
       'https://artifacts.security.elastic.co/downloads/kibana/manifest/artifacts-8.0.0.zip';
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const artifact = new Artifact();
-    await artifact.start(mockTelemetryReceiver, CDN_CONFIG);
+    await artifact.start(mockTelemetryReceiver);
     expect(mockTelemetryReceiver.fetchClusterInfo).toHaveBeenCalled();
     expect(artifact.getManifestUrl()).toEqual(expectedManifestUrl);
   });
@@ -70,7 +50,7 @@ describe('telemetry artifact test', () => {
     };
     mockTelemetryReceiver.fetchClusterInfo = jest.fn().mockReturnValue(stubClusterInfo);
     const artifact = new Artifact();
-    await artifact.start(mockTelemetryReceiver, CDN_CONFIG);
+    await artifact.start(mockTelemetryReceiver);
     expect(mockTelemetryReceiver.fetchClusterInfo).toHaveBeenCalled();
     expect(artifact.getManifestUrl()).toEqual(expectedManifestUrl);
   });
@@ -83,7 +63,7 @@ describe('telemetry artifact test', () => {
   test('getArtifact should throw an error if relative url is null', async () => {
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const artifact = new Artifact();
-    await artifact.start(mockTelemetryReceiver, CDN_CONFIG);
+    await artifact.start(mockTelemetryReceiver);
     const axiosResponse = {
       status: 200,
       data: 'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/__mocks__/kibana-artifacts.zip',
@@ -97,7 +77,7 @@ describe('telemetry artifact test', () => {
   test('getArtifact should return respective artifact', async () => {
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const artifact = new Artifact();
-    await artifact.start(mockTelemetryReceiver, CDN_CONFIG);
+    await artifact.start(mockTelemetryReceiver);
     const axiosResponse = {
       status: 200,
       data: 'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/__mocks__/kibana-artifacts.zip',
@@ -136,7 +116,7 @@ describe('telemetry artifact test', () => {
     };
     const artifact = new Artifact();
 
-    await artifact.start(createMockTelemetryReceiver(), CDN_CONFIG);
+    await artifact.start(createMockTelemetryReceiver());
 
     mockedAxios.get
       .mockImplementationOnce(() => Promise.resolve(axiosResponse))

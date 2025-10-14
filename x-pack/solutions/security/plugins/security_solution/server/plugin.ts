@@ -454,8 +454,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryReceiver,
       this.isServerless,
       core.docLinks,
-      this.endpointContext,
-      this.healthDiagnosticService
+      this.endpointContext
     );
 
     registerEndpointRoutes(router, this.endpointContext);
