@@ -6,7 +6,6 @@
  */
 
 import { DATAFEED_STATE } from '@kbn/ml-plugin/common';
-import expect from '@kbn/expect';
 import type { estypes } from '@elastic/elasticsearch';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
@@ -134,10 +133,6 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace2
       );
       await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED);
-      const state = await ml.api.getDatafeedState(datafeedIdSpace1);
-      expect(state).not.to.be(DATAFEED_STATE.STARTING);
-      expect(state).not.to.be(DATAFEED_STATE.STARTED);
-      expect(state).to.be(DATAFEED_STATE.STOPPED);
     });
 
     it('should not start datafeed by ml viewer user', async () => {
@@ -148,10 +143,6 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace1
       );
       await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED);
-      const state = await ml.api.getDatafeedState(datafeedIdSpace1);
-      expect(state).not.to.be(DATAFEED_STATE.STARTING);
-      expect(state).not.to.be(DATAFEED_STATE.STARTED);
-      expect(state).to.be(DATAFEED_STATE.STOPPED);
     });
 
     it('should stop datafeed with correct space', async () => {
@@ -181,10 +172,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await stopDatafeed(datafeedIdSpace1, USER.ML_POWERUSER_ALL_SPACES, 404, idSpace2);
 
-      const state = await ml.api.getDatafeedState(datafeedIdSpace1);
-      expect(state).not.to.be(DATAFEED_STATE.STOPPING);
-      expect(state).not.to.be(DATAFEED_STATE.STOPPED);
-      expect(state).to.be(DATAFEED_STATE.STARTED);
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED);
     });
 
     it('should not stop datafeed by ml viewer user', async () => {
@@ -199,10 +187,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await stopDatafeed(datafeedIdSpace1, USER.ML_VIEWER_ALL_SPACES, 403, idSpace1);
 
-      const state = await ml.api.getDatafeedState(datafeedIdSpace1);
-      expect(state).not.to.be(DATAFEED_STATE.STOPPED);
-      expect(state).not.to.be(DATAFEED_STATE.STOPPING);
-      expect(state).to.be(DATAFEED_STATE.STARTED);
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED);
     });
 
     it('should not start with invalid start and stop params', async () => {
@@ -213,10 +198,6 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace1
       );
       await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED);
-      const state = await ml.api.getDatafeedState(datafeedIdSpace1);
-      expect(state).not.to.be(DATAFEED_STATE.STARTED);
-      expect(state).not.to.be(DATAFEED_STATE.STARTING);
-      expect(state).to.be(DATAFEED_STATE.STOPPED);
     });
 
     it('should not start with invalid start param value', async () => {
@@ -227,10 +208,6 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace1
       );
       await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED);
-      const state = await ml.api.getDatafeedState(datafeedIdSpace1);
-      expect(state).not.to.be(DATAFEED_STATE.STARTED);
-      expect(state).not.to.be(DATAFEED_STATE.STARTING);
-      expect(state).to.be(DATAFEED_STATE.STOPPED);
     });
 
     it('should not stop datafeed with only start param', async () => {
@@ -247,10 +224,6 @@ export default ({ getService }: FtrProviderContext) => {
       );
 
       await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED);
-      const state = await ml.api.getDatafeedState(datafeedIdSpace1);
-      expect(state).not.to.be(DATAFEED_STATE.STOPPED);
-      expect(state).not.to.be(DATAFEED_STATE.STOPPING);
-      expect(state).to.be(DATAFEED_STATE.STARTED);
     });
 
     it('should stop datafeed with start and stop params', async () => {
