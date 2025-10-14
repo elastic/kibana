@@ -23,6 +23,28 @@ describe('Settings', () => {
       });
     });
 
+    it('has expected attributes in request with only syncAlerts', () => {
+      const query = SettingsUserActionPayloadRt.decode({
+        settings: { syncAlerts: true },
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { settings: { syncAlerts: true } },
+      });
+    });
+
+    it('has expected attributes in request with only extractObservables', () => {
+      const query = SettingsUserActionPayloadRt.decode({
+        settings: { extractObservables: true },
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { settings: { extractObservables: true } },
+      });
+    });
+
     it('removes foo:bar attributes from request', () => {
       const query = SettingsUserActionPayloadRt.decode({
         settings: { syncAlerts: false, extractObservables: false },
@@ -52,6 +74,36 @@ describe('Settings', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
+      });
+    });
+
+    it('has expected attributes in request with only syncAlerts', () => {
+      const query = SettingsUserActionRt.decode({
+        ...defaultRequest,
+        payload: { ...defaultRequest.payload, settings: { syncAlerts: true } },
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: {
+          ...defaultRequest,
+          payload: { ...defaultRequest.payload, settings: { syncAlerts: true } },
+        },
+      });
+    });
+
+    it('has expected attributes in request with only extractObservables', () => {
+      const query = SettingsUserActionRt.decode({
+        ...defaultRequest,
+        payload: { ...defaultRequest.payload, settings: { extractObservables: true } },
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: {
+          ...defaultRequest,
+          payload: { ...defaultRequest.payload, settings: { extractObservables: true } },
+        },
       });
     });
 
