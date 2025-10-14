@@ -39,7 +39,6 @@ export const selectIsManaged = (state: LensState) => state.lens.managed;
 export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
 export const selectSelectedLayerId = (state: LensState) => state.lens.visualization.selectedLayerId;
-export const selectTabType = (state: LensState) => state.lens.tabType;
 
 let applyChangesCounter: number | undefined;
 export const selectTriggerApplyChanges = (state: LensState) => {
