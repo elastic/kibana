@@ -19,7 +19,6 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
   const es = getService('es');
-  const log = getService('log');
 
   const runSoon = async (id: string) => {
     return retry.try(async () => {
@@ -159,7 +158,7 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
 
       objectRemover.add('space1', createdRule.id, 'rule', 'alerting');
 
-      const events1 = await retry.try(async () => {
+      await retry.try(async () => {
         return await getEventLog({
           getService,
           spaceId: 'space1',
@@ -169,7 +168,6 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
           actions: new Map([['active-instance', { equal: 2 }]]),
         });
       });
-      log.info(`event log events from first run: ${JSON.stringify(events1)}`);
 
       const {
         hits: { hits: activeAlerts },
@@ -181,22 +179,20 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
           },
         },
       });
-      log.info(`active alerts from first run: ${JSON.stringify(activeAlerts)}`);
 
       const ids = activeAlerts.map((activeAlert: any) => activeAlert._source[ALERT_UUID]);
 
-      const response = await supertest
+      await supertest
         .post(`${getUrlPrefix('space1')}/internal/alerting/alerts/_bulk_untrack`)
         .set('kbn-xsrf', 'foo')
         .send({
           indices: [alertAsDataIndex],
           alert_uuids: ids,
         });
-      log.info(`bulk untrack response: ${JSON.stringify(response.body)}`);
 
       await runSoon(createdRule.id);
 
-      const events2 = await retry.try(async () => {
+      await retry.try(async () => {
         return await getEventLog({
           getService,
           spaceId: 'space1',
@@ -206,8 +202,6 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
           actions: new Map([['active-instance', { equal: 4 }]]),
         });
       });
-
-      log.info(`event log events from second run: ${JSON.stringify(events2)}`);
 
       await retry.try(async () => {
         const {
@@ -220,7 +214,6 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
             },
           },
         });
-        log.info(`alerts after first run: ${JSON.stringify(alerts)}`);
 
         const activeAlertsRemaining = [];
         const untrackedAlertsRemaining = [];
