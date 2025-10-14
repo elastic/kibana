@@ -65,7 +65,7 @@ export const useDataStreamStats = ({
         return undefined;
       }
 
-      const [aggregations, failureStoreAggregations] = await Promise.all([
+      const [dsAggregations, fsAggregations] = await Promise.all([
         getAggregations({ definition, timeState, core, search, signal }),
         failureStore.config.enabled
           ? getAggregations({ definition, timeState, core, search, signal, isFailureStore: true })
@@ -90,10 +90,10 @@ export const useDataStreamStats = ({
                 sizeBytes: dsSizeWithoutFs,
               },
               timeState,
-              buckets: aggregations?.buckets,
+              buckets: dsAggregations?.buckets,
             }),
           },
-          aggregations,
+          aggregations: dsAggregations,
         },
         fs: {
           stats:
@@ -107,12 +107,12 @@ export const useDataStreamStats = ({
                       sizeBytes: failureStore.stats.size,
                     },
                     timeState,
-                    buckets: failureStoreAggregations?.buckets,
+                    buckets: fsAggregations?.buckets,
                   }),
                 }
               : undefined,
           config: failureStore.config,
-          aggregations: failureStoreAggregations,
+          aggregations: fsAggregations,
         },
       };
     },
