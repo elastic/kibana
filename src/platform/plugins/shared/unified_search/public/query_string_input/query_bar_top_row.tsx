@@ -151,7 +151,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
-  onSendToBackground: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
+  onSendToBackground: (payload: { dateRange: TimeRange; query?: Query | QT }) => Promise<void>;
   onCancel?: () => void;
   onDraftChange?: (draft: UnifiedSearchDraft | undefined) => void;
   placeholder?: string;
@@ -276,6 +276,7 @@ export const QueryBarTopRow = React.memo(
   ) {
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
+    const [isSendingToBackground, setIsSendingToBackground] = useState(false);
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
       props.submitButtonStyle ?? 'auto';
     const submitButtonIconOnly =
@@ -322,7 +323,8 @@ export const QueryBarTopRow = React.memo(
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
     const backgroundSearchState = useObservable(data.search.session.state$);
-    const canSendToBackground = backgroundSearchState === SearchSessionState.Loading;
+    const canSendToBackground =
+      backgroundSearchState === SearchSessionState.Loading && !isSendingToBackground;
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
@@ -408,12 +410,14 @@ export const QueryBarTopRow = React.memo(
     );
 
     const onClickSendToBackground = useCallback(
-      (event: React.MouseEvent<HTMLButtonElement>) => {
+      async (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
-        props.onSendToBackground({
+        setIsSendingToBackground(true);
+        await props.onSendToBackground({
           query: queryRef.current,
           dateRange: dateRangeRef.current,
         });
+        setIsSendingToBackground(false);
       },
       [props]
     );
@@ -628,6 +632,7 @@ export const QueryBarTopRow = React.memo(
             data-test-subj="queryCancelButton"
             iconType="cross"
             isSecondaryButtonDisabled={!canSendToBackground}
+            isSecondaryButtonLoading={isSendingToBackground}
             onClick={onClickCancelButton}
             onSecondaryButtonClick={onClickSendToBackground}
             secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
@@ -692,6 +697,7 @@ export const QueryBarTopRow = React.memo(
           isDisabled={isDateRangeInvalid || props.isDisabled}
           isLoading={props.isLoading}
           isSecondaryButtonDisabled={!canSendToBackground}
+          isSecondaryButtonLoading={isSendingToBackground}
           onClick={onClickSubmitButton}
           onSecondaryButtonClick={onClickSendToBackground}
           secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}

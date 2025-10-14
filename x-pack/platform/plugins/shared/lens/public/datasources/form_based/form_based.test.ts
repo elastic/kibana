@@ -564,6 +564,9 @@ describe('IndexPattern Data Source', () => {
                           "id": Array [
                             "1",
                           ],
+                          "includeFields": Array [
+                            false,
+                          ],
                         },
                         "function": "indexPatternLoad",
                         "type": "function",
