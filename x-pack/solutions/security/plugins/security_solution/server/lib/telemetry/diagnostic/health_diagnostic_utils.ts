@@ -14,7 +14,7 @@ import {
   type HealthDiagnosticQueryStats,
 } from './health_diagnostic_service.types';
 import { unflatten } from '../helpers';
-import type { AnyObject } from '../types';
+import type { AnyObject, Nullable } from '../types';
 import { generateDEK, encryptDEKWithRSA, encryptField } from './encryption';
 
 export function shouldExecute(startDate: Date, endDate: Date, interval: Interval): boolean {
@@ -74,8 +74,8 @@ export async function applyFilterlist(
   const filteredResult: unknown[] = [];
 
   const hasEncryptAction = Object.values(rules).some((action) => action === Action.ENCRYPT);
-  let dek: Buffer | undefined;
-  let encryptedDEK: Buffer | undefined;
+  let dek: Nullable<Buffer>;
+  let encryptedDEK: Nullable<Buffer>;
   let keyId: string | undefined;
 
   if (hasEncryptAction) {
