@@ -32,7 +32,7 @@ export async function retrieveFieldCaps({
   // First, resolve the index pattern to get data streams
   const resolveResponse = await esClient.indices.resolveIndex({
     name: indexPattern,
-    expand_wildcards: 'all',
+    expand_wildcards: 'open',
   });
 
   // Extract data stream names
