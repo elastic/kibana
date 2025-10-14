@@ -9,7 +9,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { EventEmitter } from 'events';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { i18n } from '@kbn/i18n';
 
 import { getVisualizationInstance } from '../get_visualization_instance';
@@ -58,7 +58,7 @@ export const useSavedVisInstance = (
       try {
         let savedVisInstance: SavedVisInstance;
         if (history.location.pathname === '/create') {
-          const searchParams = parse(history.location.search);
+          const searchParams = queryString.parse(history.location.search);
           const visType = getTypes()
             .all()
             .find(({ name }) => name === searchParams.type);

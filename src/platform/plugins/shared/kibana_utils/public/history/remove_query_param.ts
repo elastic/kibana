@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import type { History, Location } from 'history';
 import { url } from '../../common';
 import { getQueryParams } from './get_query_params';
@@ -18,7 +18,7 @@ export function removeQueryParam(history: History, param: string, replace: boole
 
   delete query[param];
 
-  const newSearch = stringify(url.encodeQuery(query), { sort: false, encode: false });
+  const newSearch = queryString.stringify(url.encodeQuery(query), { sort: false, encode: false });
   const newLocation: Location<any> = {
     ...oldLocation,
     search: newSearch,

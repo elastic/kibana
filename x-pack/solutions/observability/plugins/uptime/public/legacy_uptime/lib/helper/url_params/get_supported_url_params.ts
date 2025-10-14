@@ -46,7 +46,7 @@ const {
  * require further development.
  */
 export const getSupportedUrlParams = (params: {
-  [key: string]: string | string[] | undefined | null;
+  [key: string]: string | (string | null)[] | null | undefined;
 }): UptimeUrlParams => {
   const filteredParams: { [key: string]: string | undefined } = {};
   Object.keys(params).forEach((key) => {
@@ -56,7 +56,7 @@ export const getSupportedUrlParams = (params: {
     } else if (Array.isArray(params[key])) {
       // @ts-ignore this must be an array, and it's ok if the
       // 0th element is undefined
-      value = params[key][0];
+      value = params[key][0] || undefined;
     } else {
       // @ts-ignore this will not be an array because the preceding
       // block tests for that

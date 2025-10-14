@@ -8,7 +8,7 @@ import { pick } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { parse, stringify } from 'query-string';
+import queryString from 'query-string';
 import { isEqual } from 'lodash';
 import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
@@ -177,7 +177,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
 
   useEffect(() => {
     const prevSearchString = urlSearchString;
-    const parsedQueryString = parse(prevSearchString, { sort: false });
+    const parsedQueryString = queryString.parse(prevSearchString, { sort: false });
 
     const getDataView = async () => {
       if (typeof parsedQueryString?.savedSearchId === 'string') {
@@ -222,7 +222,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
     ) => {
       const prevSearchString = urlSearchString;
       const urlState = parseUrlState(prevSearchString);
-      const parsedQueryString = parse(prevSearchString, { sort: false });
+      const parsedQueryString = queryString.parse(prevSearchString, { sort: false });
 
       if (!Object.hasOwn(urlState, accessor)) {
         urlState[accessor] = {};
@@ -242,7 +242,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
       }
 
       try {
-        const oldLocationSearchString = stringify(parsedQueryString, {
+        const oldLocationSearchString = queryString.stringify(parsedQueryString, {
           sort: false,
           encode: false,
         });
@@ -254,13 +254,13 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
             parsedQueryString[a] = urlState[a];
           }
         });
-        const newLocationSearchString = stringify(parsedQueryString, {
+        const newLocationSearchString = queryString.stringify(parsedQueryString, {
           sort: false,
           encode: false,
         });
 
         if (oldLocationSearchString !== newLocationSearchString) {
-          const newSearchString = stringify(parsedQueryString, { sort: false });
+          const newSearchString = queryString.stringify(parsedQueryString, { sort: false });
           if (replaceState) {
             history.replace({ search: newSearchString });
           } else {

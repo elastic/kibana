@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
 import type { SyntheticsUrlParams } from './get_supported_url_params';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
@@ -23,7 +23,7 @@ export const stringifyUrlParams = (params: Partial<SyntheticsUrlParams>, ignoreE
 
     replaceDefaults(params);
   }
-  return `?${stringify(params, { sort: false })}`;
+  return `?${queryString.stringify(params, { sort: false })}`;
 };
 
 const replaceDefaults = (params: Partial<SyntheticsUrlParams>) => {

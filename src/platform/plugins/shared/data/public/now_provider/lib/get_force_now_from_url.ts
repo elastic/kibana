@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from 'query-string';
+import queryString from 'query-string';
 
 /** @internal */
 export function getForceNowFromUrl(): Date | undefined {
@@ -32,5 +32,5 @@ function parseQueryString() {
     return {};
   }
 
-  return parse(hrefSplit[1], { sort: false });
+  return queryString.parse(hrefSplit[1], { sort: false });
 }

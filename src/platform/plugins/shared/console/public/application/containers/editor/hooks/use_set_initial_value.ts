@@ -8,7 +8,7 @@
  */
 
 import { debounce } from 'lodash';
-import { parse } from 'query-string';
+import qs from 'query-string';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 import { i18n } from '@kbn/i18n';
@@ -35,7 +35,7 @@ interface SetInitialValueParams {
 export const readLoadFromParam = () => {
   const [, queryString] = (window.location.hash || window.location.search || '').split('?');
 
-  const queryParams = parse(queryString || '', { sort: false }) as Required<QueryParams>;
+  const queryParams = qs.parse(queryString || '', { sort: false }) as Required<QueryParams>;
   return queryParams.load_from;
 };
 

@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
@@ -99,7 +99,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   // Allow deeplinking to list pre-filtered by repository name or by policy name
   useEffect(() => {
     if (search) {
-      const parsedParams = parse(search.replace(/^\?/, ''), { sort: false });
+      const parsedParams = queryString.parse(search.replace(/^\?/, ''), { sort: false });
       const { repository, policy } = parsedParams;
 
       if (policy) {

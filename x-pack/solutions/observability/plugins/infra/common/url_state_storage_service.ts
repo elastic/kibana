@@ -7,7 +7,7 @@
 
 import { url } from '@kbn/kibana-utils-plugin/common';
 import { encode } from '@kbn/rison';
-import { parse, stringify } from 'query-string';
+import qs from 'query-string';
 
 export const defaultLogViewKey = 'logView';
 
@@ -16,7 +16,7 @@ const encodeRisonUrlState = (state: any) => encode(state);
 export const replaceStateKeyInQueryString =
   <UrlState extends any>(stateKey: string, urlState: UrlState | undefined) =>
   (queryString: string) => {
-    const previousQueryValues = parse(queryString, { sort: false });
+    const previousQueryValues = qs.parse(queryString, { sort: false });
     const newValue =
       typeof urlState === 'undefined'
         ? previousQueryValues
@@ -24,5 +24,5 @@ export const replaceStateKeyInQueryString =
             ...previousQueryValues,
             [stateKey]: encodeRisonUrlState(urlState),
           };
-    return stringify(url.encodeQuery(newValue), { sort: false, encode: false });
+    return qs.stringify(url.encodeQuery(newValue), { sort: false, encode: false });
   };

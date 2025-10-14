@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse, stringify } from 'query-string';
+import queryString from 'query-string';
 import React from 'react';
 
 import { Redirect, useRouteMatch } from 'react-router-dom';
@@ -31,7 +31,7 @@ export const MlNetworkConditionalContainer = React.memo(() => {
         exact
         path={path}
         render={({ location }) => {
-          const queryStringDecoded = parse(location.search.substring(1), {
+          const queryStringDecoded = queryString.parse(location.search.substring(1), {
             sort: false,
           }) as Required<QueryStringType>;
 
@@ -39,7 +39,7 @@ export const MlNetworkConditionalContainer = React.memo(() => {
             queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
           }
 
-          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+          const reEncoded = queryString.stringify(urlUtils.encodeQuery(queryStringDecoded), {
             sort: false,
             encode: false,
           });
@@ -55,7 +55,7 @@ export const MlNetworkConditionalContainer = React.memo(() => {
             params: { ip },
           },
         }) => {
-          const queryStringDecoded = parse(location.search.substring(1), {
+          const queryStringDecoded = queryString.parse(location.search.substring(1), {
             sort: false,
           }) as Required<QueryStringType>;
 
@@ -64,7 +64,7 @@ export const MlNetworkConditionalContainer = React.memo(() => {
           }
 
           if (emptyEntity(ip)) {
-            const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+            const reEncoded = queryString.stringify(urlUtils.encodeQuery(queryStringDecoded), {
               sort: false,
               encode: false,
             });
@@ -77,13 +77,13 @@ export const MlNetworkConditionalContainer = React.memo(() => {
               ips,
               queryStringDecoded.query || ''
             );
-            const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+            const reEncoded = queryString.stringify(urlUtils.encodeQuery(queryStringDecoded), {
               sort: false,
               encode: false,
             });
             return <Redirect to={`${NETWORK_PATH}/flows?${reEncoded}`} />;
           } else {
-            const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+            const reEncoded = queryString.stringify(urlUtils.encodeQuery(queryStringDecoded), {
               sort: false,
               encode: false,
             });

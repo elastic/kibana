@@ -33,8 +33,8 @@ const NewLiveQueryPageComponent = () => {
 
     return queryParams?.agentPolicyId
       ? isArray(queryParams?.agentPolicyId)
-        ? queryParams?.agentPolicyId
-        : [queryParams?.agentPolicyId]
+        ? queryParams?.agentPolicyId.filter((id): id is string => id !== null)
+        : [queryParams?.agentPolicyId].filter((id): id is string => id !== null)
       : undefined;
   }, [location.search]);
 

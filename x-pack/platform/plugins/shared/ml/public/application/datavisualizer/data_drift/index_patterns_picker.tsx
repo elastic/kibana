@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useEffect, useState, useMemo } from 'react';
 import { EuiPageBody, EuiPageSection, EuiButton, EuiPanel } from '@elastic/eui';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
@@ -117,7 +117,7 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
 };
 
 export const DataDriftIndexPatternsPicker: FC = () => {
-  const { reference, comparison } = parse(location.search, {
+  const { reference, comparison } = queryString.parse(location.search, {
     sort: false,
   }) as { reference: string; comparison: string };
 

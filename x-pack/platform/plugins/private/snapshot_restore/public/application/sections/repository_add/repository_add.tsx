@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
@@ -44,7 +44,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
     if (error) {
       setSaveError(error);
     } else {
-      const { redirect } = parse(search.replace(/^\?/, ''), { sort: false });
+      const { redirect } = queryString.parse(search.replace(/^\?/, ''), { sort: false });
 
       history.push(
         redirect
