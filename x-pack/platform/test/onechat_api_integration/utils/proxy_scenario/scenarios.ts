@@ -8,6 +8,7 @@
 import type { LlmProxy } from '../llm_proxy';
 import {
   mockTitleGeneration,
+  mockHandoverToAnswer,
   mockFinalAnswer,
   mockAgentToolCall,
   mockSearchToolCallWithNaturalLanguageGen,
@@ -20,12 +21,17 @@ export const setupAgentDirectAnswer = async ({
   response,
   proxy,
   title = 'New discussion',
+  continueConversation = false,
 }: {
   response: string;
   title?: string;
   proxy: LlmProxy;
+  continueConversation?: boolean;
 }) => {
-  mockTitleGeneration(proxy, title);
+  if (!continueConversation) {
+    mockTitleGeneration(proxy, title);
+  }
+  mockHandoverToAnswer(proxy, 'ready to answer');
   mockFinalAnswer(proxy, response);
 };
 
@@ -63,6 +69,8 @@ export const setupAgentCallSearchToolWithEsqlThenAnswer = async ({
     resource: { name: resourceName, type: resourceType },
   });
 
+  mockHandoverToAnswer(proxy, 'ready to answer');
+
   mockFinalAnswer(proxy, response);
 };
 
@@ -88,8 +96,7 @@ export const setupAgentCallSearchToolWithNoIndexSelectedThenAnswer = async ({
     },
   });
 
-  // no index present -> won't run index explorer
-  // mockInternalIndexExplorerCall({ llmProxy: proxy, resource: null });
+  mockHandoverToAnswer(proxy, 'ready to answer');
 
   mockFinalAnswer(proxy, response);
 };

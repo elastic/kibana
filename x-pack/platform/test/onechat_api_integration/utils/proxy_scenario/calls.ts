@@ -35,6 +35,21 @@ export const mockAgentToolCall = ({
   });
 };
 
+export const mockHandoverToAnswer = (llmProxy: LlmProxy, answer: string) => {
+  void llmProxy
+    .intercept({
+      name: 'final-assistant-response',
+      when: ({ messages }) => {
+        const systemMessage = messages.find((message) => message.role === 'system');
+        return (systemMessage?.content as string).includes(
+          'This response will serve as a handover note for the answering agent'
+        );
+      },
+      responseMock: answer,
+    })
+    .completeAfterIntercept();
+};
+
 export const mockFinalAnswer = (llmProxy: LlmProxy, answer: string) => {
   void llmProxy
     .intercept({
