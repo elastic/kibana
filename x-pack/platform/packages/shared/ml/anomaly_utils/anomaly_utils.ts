@@ -10,13 +10,13 @@
  * to extract information for display in dashboards.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import type { MlSeverityType } from './anomaly_severity';
 import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 import { ML_ANOMALY_SEVERITY_TYPES } from './anomaly_severity_types';
 import type { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from './types';
 import { ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './detector_rule';
-import { mlEntityFieldSchema } from './schemas';
+import type { mlEntityFieldSchema } from './schemas';
 
 /**
  * Enum of entity field types
@@ -44,7 +44,9 @@ export type MlEntityFieldOperation =
 /**
  * Interface of an entity field
  */
-export type MlEntityField = TypeOf<typeof mlEntityFieldSchema>
+export type MlEntityField = TypeOf<typeof mlEntityFieldSchema> & {
+  fieldValue: string | number | undefined;
+};
 
 // List of function descriptions for which actual values from record level results should be displayed.
 const DISPLAY_ACTUAL_FUNCTIONS = [
@@ -97,7 +99,7 @@ export function getSeverityWithLow(normalizedScore: number): MlSeverityType {
     return ML_ANOMALY_SEVERITY_TYPES.major;
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MINOR) {
     return ML_ANOMALY_SEVERITY_TYPES.minor;
-} else if (normalizedScore >= ML_ANOMALY_THRESHOLD.WARNING) {
+  } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.WARNING) {
     return ML_ANOMALY_SEVERITY_TYPES.warning;
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.LOW) {
     return ML_ANOMALY_SEVERITY_TYPES.low;
