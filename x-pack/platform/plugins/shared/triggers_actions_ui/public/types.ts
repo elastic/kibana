@@ -106,6 +106,11 @@ type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   actions: RuleUiAction[];
 };
 type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
+
+type RuleTemplate = Pick<
+  Rule,
+  'id' | 'name' | 'params' | 'tags' | 'alertDelay' | 'schedule' | 'flapping' | 'ruleTypeId'
+>;
 type ResolvedRule = Omit<
   ResolvedSanitizedRule<RuleTypeParams>,
   'alertTypeId' | 'actions' | 'systemActions'
@@ -145,6 +150,7 @@ export type {
   RuleTagBadgeProps,
   RuleTagFilterProps,
   RuleTaskState,
+  RuleTemplate,
   RuleType,
   RuleTypeIndex,
   RuleTypeMetaData,
@@ -241,6 +247,7 @@ export interface RuleTableItem extends Rule {
   isEditable: boolean;
   enabledInLicense: boolean;
   showIntervalWarning?: boolean;
+  isInternallyManaged: boolean;
 }
 
 export interface RuleTypeParamsExpressionProps<
@@ -285,6 +292,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   alertDetailsAppSection?:
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<any>>;
+  isInternallyManaged?: boolean;
 }
 
 export interface IErrorObject {

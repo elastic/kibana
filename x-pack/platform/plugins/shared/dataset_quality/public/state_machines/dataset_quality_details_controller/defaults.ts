@@ -45,5 +45,5 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityDetailsContext = {
   selectedIssueTypes: [],
   selectedFields: [],
   qualityIssuesChart: 'degraded' as QualityIssueType,
-  view: 'classic',
+  view: 'dataQuality',
 };

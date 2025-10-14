@@ -36,6 +36,7 @@ import {
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
+  SLO_DATA_VIEW_ID_FIELD,
 } from '../../../../common/field_names/slo';
 import type { Duration, SLODefinition } from '../../../domain/models';
 import { KibanaSavedObjectsSLORepository } from '../../../services';
@@ -186,6 +187,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
               [SLO_ID_FIELD]: slo.id,
               [SLO_REVISION_FIELD]: slo.revision,
               [SLO_INSTANCE_ID_FIELD]: instanceId,
+              [SLO_DATA_VIEW_ID_FIELD]: slo.indicator.params.dataViewId,
               ...getEcsGroupsFromFlattenGrouping(groupingsFlattened),
             },
           });

@@ -18,6 +18,7 @@ jobs:
           ref: main
           path: ./kibana-operations
           token: ${{secrets.KIBANAMACHINE_TOKEN}}
+          persist-credentials: false
 
       - name: Label failed test issue
         working-directory: ./kibana-operations/triage

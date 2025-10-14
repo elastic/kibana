@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { Position } from '@elastic/charts';
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import type { FormulaPublicApi, LensPublicStart, XYState } from '@kbn/lens-plugin/public';
+import type { LensPublicStart, XYState } from '@kbn/lens-plugin/public';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import styled from '@emotion/styled';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
@@ -59,7 +59,6 @@ export interface ExploratoryEmbeddableProps {
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
   lens: LensPublicStart;
   dataViewState: DataViewState;
-  lensFormulaHelper?: FormulaPublicApi;
   analytics?: AnalyticsServiceSetup;
 }
 

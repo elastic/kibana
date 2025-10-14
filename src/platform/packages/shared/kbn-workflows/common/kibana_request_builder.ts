@@ -23,6 +23,12 @@ export function buildKibanaRequestFromAction(
     return { method, path, body, query, headers };
   }
 
+  // Special case: kibana.request type uses raw API format at top level
+  if (actionType === 'kibana.request') {
+    const { method = 'GET', path, body, query, headers } = params;
+    return { method, path, body, query, headers };
+  }
+
   // Lazy load the generated connectors to avoid main bundle bloat
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { GENERATED_KIBANA_CONNECTORS } = require('./generated_kibana_connectors');

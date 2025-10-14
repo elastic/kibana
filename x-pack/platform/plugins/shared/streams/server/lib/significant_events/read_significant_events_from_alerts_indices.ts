@@ -119,6 +119,7 @@ export async function readSignificantEventsFromAlertsIndices(
       id: queryLink.query.id,
       title: queryLink.query.title,
       kql: queryLink.query.kql,
+      feature: queryLink.query.feature,
       occurrences: [],
       change_points: {
         type: {
@@ -138,6 +139,7 @@ export async function readSignificantEventsFromAlertsIndices(
       id: queryLink.query.id,
       title: queryLink.query.title,
       kql: queryLink.query.kql,
+      feature: queryLink.query.feature,
       occurrences: isArray(occurrences)
         ? occurrences.map((occurrence) => ({
             date: occurrence.key_as_string,
@@ -155,6 +157,7 @@ export async function readSignificantEventsFromAlertsIndices(
       id: queryLink.query.id,
       title: queryLink.query.title,
       kql: queryLink.query.kql,
+      feature: queryLink.query.feature,
       occurrences: [],
       change_points: {
         type: {

@@ -106,8 +106,8 @@ export const JobDetailsFlyout = () => {
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={openJobsList}>
               <FormattedMessage
-                id="xpack.ml.jobDetailsFlyout.openJobsListButton"
-                defaultMessage="Open jobs list"
+                id="xpack.ml.jobDetailsFlyout.manageJobButton"
+                defaultMessage="Manage job"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -119,7 +119,7 @@ export const JobDetailsFlyout = () => {
             <EuiLoadingSpinner size="m" />
           </EuiText>
         ) : (
-          <EuiText>
+          <>
             {jobDetails ? (
               <JobDetails
                 mode="flyout"
@@ -132,7 +132,7 @@ export const JobDetailsFlyout = () => {
                 showClearButton={false}
               />
             ) : null}
-          </EuiText>
+          </>
         )}
       </EuiFlyoutBody>
     </EuiFlyout>

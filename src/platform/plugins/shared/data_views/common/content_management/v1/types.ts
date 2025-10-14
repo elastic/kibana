@@ -20,6 +20,7 @@ interface DataViewCreateOptions {
   id?: SavedObjectCreateOptions['id'];
   initialNamespaces?: SavedObjectCreateOptions['initialNamespaces'];
   overwrite?: SavedObjectCreateOptions['overwrite'];
+  managed?: SavedObjectCreateOptions['managed'];
 }
 
 interface DataViewUpdateOptions {

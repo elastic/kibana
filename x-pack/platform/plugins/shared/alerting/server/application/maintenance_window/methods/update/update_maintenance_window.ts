@@ -99,9 +99,9 @@ async function updateWithOCC(
       throw Boom.badRequest('Cannot edit archived maintenance windows');
     }
 
-    const expirationDate = getMaintenanceWindowExpirationDate({
-      rRule: maintenanceWindow.rRule,
-      duration: maintenanceWindow.duration,
+    const expirationDate: string = getMaintenanceWindowExpirationDate({
+      rRule: rRule ? rRule : maintenanceWindow.rRule,
+      duration: duration ? duration : maintenanceWindow.duration,
     });
 
     const modificationMetadata = await getModificationMetadata();

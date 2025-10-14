@@ -26,9 +26,9 @@ import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { getPercentageFormatter } from '../../../util/formatters';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
+  getAllFieldsInOrder,
   getSourceField,
   getTableColumns,
-  getUniqueDetectedFields,
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
 import {
@@ -50,6 +50,7 @@ import {
 } from './empty_prompts';
 import { PreviewFlyout, MemoPreviewTable } from '../shared';
 import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
+import { RowSelectionContext } from '../shared/preview_table';
 
 export const ProcessorOutcomePreview = () => {
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
@@ -220,18 +221,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   } = useStreamEnrichmentEvents();
 
   const allColumns = useMemo(() => {
-    // Get all fields from the preview documents
-    const fields = new Set<string>();
-    previewDocuments.forEach((doc) => {
-      Object.keys(doc).forEach((key) => {
-        fields.add(key);
-      });
-    });
-    // Keep the detected fields as first columns on the table and sort the rest alphabetically
-    const uniqDetectedFields = getUniqueDetectedFields(detectedFields);
-    const otherFields = Array.from(fields).filter((field) => !uniqDetectedFields.includes(field));
-
-    return [...uniqDetectedFields, ...otherFields.sort()];
+    return getAllFieldsInOrder(previewDocuments, detectedFields);
   }, [detectedFields, previewDocuments]);
 
   const draftProcessor = useStreamEnrichmentSelector((snapshot) =>
@@ -384,23 +374,28 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     }
   }, [docViewerContext, docViewsRegistry, hasSimulatedRecords]);
 
+  const rowSelectionContextValue = useMemo(
+    () => ({ selectedRowIndex, onRowSelected }),
+    [selectedRowIndex, onRowSelected]
+  );
+
   return (
     <>
-      <MemoPreviewTable
-        documents={previewDocuments}
-        originalSamples={originalSamples}
-        showRowSourceAvatars={shouldShowRowSourceAvatars}
-        onRowSelected={onRowSelected}
-        selectedRowIndex={selectedRowIndex}
-        displayColumns={previewColumns}
-        rowHeightsOptions={validGrokField ? staticRowHeightsOptions : undefined}
-        toolbarVisibility
-        setVisibleColumns={setVisibleColumns}
-        sorting={previewColumnsSorting}
-        setSorting={setPreviewColumnsSorting}
-        columnOrderHint={previewColumnsOrder}
-        renderCellValue={renderCellValue}
-      />
+      <RowSelectionContext.Provider value={rowSelectionContextValue}>
+        <MemoPreviewTable
+          documents={previewDocuments}
+          originalSamples={originalSamples}
+          showRowSourceAvatars={shouldShowRowSourceAvatars}
+          displayColumns={previewColumns}
+          rowHeightsOptions={validGrokField ? staticRowHeightsOptions : undefined}
+          toolbarVisibility
+          setVisibleColumns={setVisibleColumns}
+          sorting={previewColumnsSorting}
+          setSorting={setPreviewColumnsSorting}
+          columnOrderHint={previewColumnsOrder}
+          renderCellValue={renderCellValue}
+        />
+      </RowSelectionContext.Provider>
       <DocViewerContext.Provider value={docViewerContext}>
         <PreviewFlyout
           currentDoc={currentDoc}

@@ -82,10 +82,10 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-mocks",
-            "id": "def-server.collectorMock.createProcessMetricsCollector",
+            "id": "def-server.collectorMock.createMockWithRegisterMetrics",
             "type": "Function",
             "tags": [],
-            "label": "createProcessMetricsCollector",
+            "label": "createMockWithRegisterMetrics",
             "description": [],
             "signature": [
               "() => { registerMetrics: jest.Mock<any, any, any>; collect: jest.MockInstance<any, [], unknown> & (() => any); reset: jest.MockInstance<void, [], unknown> & (() => void); }"

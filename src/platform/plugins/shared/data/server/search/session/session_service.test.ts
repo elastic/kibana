@@ -829,7 +829,7 @@ describe('SearchSessionService', () => {
             isStored: false,
           })
         ).rejects.toMatchInlineSnapshot(
-          `[Error: Cannot get search ID from a session that is not stored]`
+          `[Error: Cannot get search ID from a search that is not stored]`
         );
       });
 
@@ -843,7 +843,7 @@ describe('SearchSessionService', () => {
             isRestore: false,
           })
         ).rejects.toMatchInlineSnapshot(
-          `[Error: Get search ID is only supported when restoring a session]`
+          `[Error: Get search ID is only supported when restoring a background search]`
         );
       });
 

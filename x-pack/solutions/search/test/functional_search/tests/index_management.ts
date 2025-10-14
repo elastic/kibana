@@ -13,39 +13,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'indexManagement',
   ]);
   const es = getService('es');
-  const browser = getService('browser');
-  const spaces = getService('spaces');
+  const searchSpace = getService('searchSpace');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   const indexName = 'index_mgmt_search_index';
   describe('Index management', function () {
     describe('Search solution nav', function () {
-      let cleanUpSpace: () => Promise<unknown>;
+      let cleanUp: () => Promise<unknown>;
       let spaceCreated: { id: string } = { id: '' };
       before(async () => {
-        // Navigate to the spaces management page which will log us in Kibana
-        await pageObjects.common.navigateToUrl('management', 'kibana/spaces', {
-          shouldUseHashForSubUrl: false,
-        });
-
-        // Create a space with the search solution and navigate to its home page
-        ({ cleanUp: cleanUpSpace, space: spaceCreated } = await spaces.create({
-          name: 'search-solution-nav-index-management-listpage-ftr',
-          solution: 'es',
-        }));
+        ({ cleanUp, spaceCreated } = await searchSpace.createTestSpace(
+          'search-solution-nav-index-management-listpage-ftr'
+        ));
 
         await es.indices.create({ index: indexName });
       });
 
       after(async () => {
         // Clean up space created
-        await cleanUpSpace();
+        await cleanUp();
         await esDeleteAllIndices(indexName);
       });
       describe('Index list page', () => {
         beforeEach(async () => {
           // Navigate to search solution space
-          await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+          await searchSpace.navigateTo(spaceCreated.id);
           // Navigate to index management app
           await pageObjects.common.navigateToApp('indexManagement', {
             basePath: `s/${spaceCreated.id}`,
@@ -89,32 +81,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
     describe('Classic Nav', function () {
-      let cleanUpSpace: () => Promise<unknown>;
+      let cleanUp: () => Promise<unknown>;
       let spaceCreated: { id: string } = { id: '' };
 
       before(async () => {
-        // Navigate to the spaces management page which will log us in Kibana
-        await pageObjects.common.navigateToUrl('management', 'kibana/spaces', {
-          shouldUseHashForSubUrl: false,
-        });
+        ({ cleanUp, spaceCreated } = await searchSpace.createTestSpace(
+          'classic-nav-index-management-listpage-ftr',
+          'classic'
+        ));
 
-        // Create a space with the classic nav solution and navigate to its home page
-        ({ cleanUp: cleanUpSpace, space: spaceCreated } = await spaces.create({
-          name: 'classic-nav-index-management-listpage-ftr',
-          solution: 'classic',
-        }));
         await es.indices.create({ index: indexName });
       });
 
       after(async () => {
         // Clean up space created
-        await cleanUpSpace();
+        await cleanUp();
         await esDeleteAllIndices(indexName);
       });
       describe('Index list page', () => {
         beforeEach(async () => {
           // Navigate to search solution space
-          await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+          await searchSpace.navigateTo(spaceCreated.id);
           // Navigate to index management app
           await pageObjects.common.navigateToApp('indexManagement', {
             basePath: `s/${spaceCreated.id}`,

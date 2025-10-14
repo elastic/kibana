@@ -67,6 +67,7 @@ describe('SyntheticsPrivateLocation', () => {
         bulkCreate: jest.fn(),
         getByIDs: jest.fn(),
       },
+      runWithCache: async (cb: any) => await cb(),
     },
     spaces: {
       spacesService: {
@@ -184,7 +185,7 @@ describe('SyntheticsPrivateLocation', () => {
       []
     );
 
-    expect(test.formattedPolicy.inputs[0].streams[1]).toStrictEqual({
+    expect(test.formattedPolicy.inputs[3].streams[1]).toStrictEqual({
       data_stream: {
         dataset: 'browser',
         type: 'synthetics',

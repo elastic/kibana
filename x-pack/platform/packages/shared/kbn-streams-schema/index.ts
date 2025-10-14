@@ -20,8 +20,6 @@ export {
   routingDefinitionListSchema,
 } from './src/models/ingest/routing';
 
-export { type ContentPack, contentPackSchema } from './src/content';
-
 export { isRootStreamDefinition } from './src/helpers/is_root';
 export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
 
@@ -76,7 +74,11 @@ export {
   streamQuerySchema,
 } from './src/queries';
 
-export { findInheritedLifecycle, findInheritingStreams } from './src/helpers/lifecycle';
+export {
+  findInheritedLifecycle,
+  findInheritingStreams,
+  effectiveToIngestLifecycle,
+} from './src/helpers/lifecycle';
 
 export { streamObjectNameSchema } from './src/shared/stream_object_name';
 
@@ -87,6 +89,7 @@ export {
   type IlmPolicyPhase,
   type IlmPolicyHotPhase,
   type IlmPolicyDeletePhase,
+  type IngestStreamLifecycleAll,
   type IngestStreamLifecycleILM,
   type IngestStreamLifecycleDSL,
   type IngestStreamLifecycleDisabled,
@@ -115,4 +118,4 @@ export type {
 
 export { emptyAssets } from './src/helpers/empty_assets';
 
-export { type System, systemSchema } from './src/system';
+export { type Feature, featureSchema } from './src/feature';

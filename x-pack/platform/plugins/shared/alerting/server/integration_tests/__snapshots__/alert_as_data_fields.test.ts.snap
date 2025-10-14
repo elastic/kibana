@@ -10563,6 +10563,11 @@ Object {
       "required": false,
       "type": "object",
     },
+    "slo.dataViewId": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "slo.id": Object {
       "array": false,
       "required": false,

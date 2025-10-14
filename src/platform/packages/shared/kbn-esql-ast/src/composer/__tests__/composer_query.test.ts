@@ -540,6 +540,177 @@ describe('high-level helpers', () => {
   });
 });
 
+describe('.inlineParams()', () => {
+  test('can inline single parameter', () => {
+    const param1 = 5.5;
+
+    const query = esql`FROM kibana_ecommerce_index`.pipe`WHERE foo > ${esql.par(param1)}`;
+
+    expect(query.toRequest()).toEqual({
+      query: 'FROM kibana_ecommerce_index | WHERE foo > ?p0',
+      params: [{ p0: param1 }],
+    });
+
+    query.inlineParams();
+
+    expect(query.toRequest()).toEqual({
+      query: 'FROM kibana_ecommerce_index | WHERE foo > 5.5',
+      params: [],
+    });
+
+    expect(query.getParams()).toEqual({});
+  });
+
+  test('can inline multiple parameters', () => {
+    const param1 = 5.5;
+    const param2 = 'asdf';
+    const param3 = 123;
+
+    const query = esql`FROM kibana_ecommerce_index`.pipe`WHERE foo > ${esql.par(
+      param1
+    )} AND bar < ${esql.par(param2)}`.pipe`EVAL a = ${esql.par(param3)}`;
+
+    expect(query.toRequest()).toEqual({
+      query: 'FROM kibana_ecommerce_index | WHERE foo > ?p0 AND bar < ?p1 | EVAL a = ?p2',
+      params: [{ p0: param1 }, { p1: param2 }, { p2: param3 }],
+    });
+
+    query.inlineParams();
+
+    expect(query.toRequest()).toEqual({
+      query: 'FROM kibana_ecommerce_index | WHERE foo > 5.5 AND bar < "asdf" | EVAL a = 123',
+      params: [],
+    });
+
+    expect(query.getParams()).toEqual({});
+  });
+
+  test('no-op when no parameters', () => {
+    const query = esql`FROM kibana_ecommerce_index`.pipe`WHERE foo > 42`;
+
+    expect(query.toRequest()).toEqual({
+      query: 'FROM kibana_ecommerce_index | WHERE foo > 42',
+      params: [],
+    });
+    expect(query.getParams()).toEqual({});
+
+    query.inlineParams();
+
+    expect(query.toRequest()).toEqual({
+      query: 'FROM kibana_ecommerce_index | WHERE foo > 42',
+      params: [],
+    });
+    expect(query.getParams()).toEqual({});
+  });
+
+  describe('identifier params', () => {
+    test('can replace function name', () => {
+      const query = esql({ par: 'myFunction' })`FROM index | WHERE ??par(1, 2, 3) > 123`;
+
+      expect(query.print('basic')).toBe('FROM index | WHERE ??par(1, 2, 3) > 123');
+      expect(query.getParams()).toEqual({
+        par: 'myFunction',
+      });
+
+      query.inlineParams();
+
+      expect(query.print('basic')).toBe('FROM index | WHERE MYFUNCTION(1, 2, 3) > 123');
+      expect(query.getParams()).toEqual({});
+    });
+
+    test('can replace function name (single `?`)', () => {
+      const query = esql({ par: 'myFunction' })`FROM index | WHERE ?par(1, 2, 3) > 123`;
+
+      expect(query.print('basic')).toBe('FROM index | WHERE ?par(1, 2, 3) > 123');
+      expect(query.getParams()).toEqual({
+        par: 'myFunction',
+      });
+
+      query.inlineParams();
+
+      expect(query.print('basic')).toBe('FROM index | WHERE MYFUNCTION(1, 2, 3) > 123');
+      expect(query.getParams()).toEqual({});
+    });
+
+    test('can replace column names', () => {
+      const query = esql({ par1: 'col1', par2: 'nested.col2' })`ROW FN(??par1, ??par2, 3)`;
+
+      expect(query.print('basic')).toBe('ROW FN(??par1, ??par2, 3)');
+      expect(query.getParams()).toEqual({
+        par1: 'col1',
+        par2: 'nested.col2',
+      });
+
+      query.inlineParams();
+
+      expect(query.print('basic')).toBe('ROW FN(col1, nested.col2, 3)');
+      expect(query.getParams()).toEqual({});
+    });
+
+    test('can replace nested column name part', () => {
+      const query = esql({ par1: 'world' })`FROM a | WHERE hello.??par1.\`!\` > 42`;
+
+      expect(query.print('basic')).toBe('FROM a | WHERE hello.??par1.`!` > 42');
+      expect(query.getParams()).toEqual({
+        par1: 'world',
+      });
+      query.inlineParams();
+
+      expect(query.print('basic')).toBe('FROM a | WHERE hello.world.`!` > 42');
+      expect(query.getParams()).toEqual({});
+    });
+
+    test('can replace nested column name part (single `?`)', () => {
+      const query = esql({ par1: 'world' })`FROM a | WHERE hello.?par1.\`!\` > 42`;
+
+      expect(query.print('basic')).toBe('FROM a | WHERE hello.?par1.`!` > 42');
+      expect(query.getParams()).toEqual({
+        par1: 'world',
+      });
+
+      query.inlineParams();
+
+      expect(query.print('basic')).toBe('FROM a | WHERE hello.world.`!` > 42');
+      expect(query.getParams()).toEqual({});
+    });
+  });
+
+  describe('scenarios', () => {
+    test('docs example', () => {
+      const query = esql`FROM logs | WHERE user == ${{ userName: 'admin' }} | LIMIT ${{
+        limit: 100,
+      }}`;
+
+      expect(query.print('basic')).toBe('FROM logs | WHERE user == ?userName | LIMIT ?limit');
+      expect(query.getParams()).toEqual({ userName: 'admin', limit: 100 });
+
+      query.inlineParams();
+
+      expect(query.print('basic')).toBe('FROM logs | WHERE user == "admin" | LIMIT 100');
+      expect(query.getParams()).toEqual({});
+    });
+
+    test('original request', () => {
+      const query = esql(`FROM support_ticket | WHERE priority == ?priority | LIMIT ?limit`, {
+        limit: 100,
+        priority: 'high',
+      });
+
+      expect(query.print('basic')).toBe(
+        'FROM support_ticket | WHERE priority == ?priority | LIMIT ?limit'
+      );
+      expect(query.getParams()).toEqual({ priority: 'high', limit: 100 });
+
+      query.inlineParams();
+
+      expect(query.print('basic')).toBe(
+        'FROM support_ticket | WHERE priority == "high" | LIMIT 100'
+      );
+      expect(query.getParams()).toEqual({});
+    });
+  });
+});
+
 describe('.toRequest()', () => {
   test('can return query as "request" object', () => {
     const query = esql`

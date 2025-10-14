@@ -20,12 +20,7 @@ export const TIMELINE_DATA_PROVIDERS_WRAPPER = getDataTestSubjectSelector(`dataP
 export const TIMELINE_DRAGGABLE_ITEM = getDataTestSubjectSelector(`providerContainer`);
 export const TIMELINE_AND_OR_BADGE = getDataTestSubjectSelector(`and-or-badge`);
 export const CLOSE_TIMELINE_BTN = '[data-test-subj="timeline-modal-header-close-button"]';
-export const FLYOUT_OVERVIEW_TAB_TABLE_ROW_TIMELINE_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutOverviewTableRowTimelineButton'
-);
-export const FLYOUT_OVERVIEW_TAB_BLOCKS_TIMELINE_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutOverviewHighLevelBlocksTimelineButton'
-);
+
 export const FLYOUT_INVESTIGATE_IN_TIMELINE_ITEM = getDataTestSubjectSelector(
   'tiIndicatorFlyoutInvestigateInTimelineContextMenu'
 );

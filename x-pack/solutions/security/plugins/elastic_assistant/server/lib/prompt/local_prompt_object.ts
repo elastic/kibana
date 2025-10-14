@@ -29,6 +29,7 @@ import {
   RULE_ANALYSIS,
   DATA_QUALITY_ANALYSIS,
   ALERT_EVALUATION,
+  ENTITY_ANALYSIS,
   starterPromptTitle1,
   starterPromptDescription1,
   starterPromptIcon1,
@@ -101,6 +102,7 @@ export const promptDictionary = {
     'defendInsights-policyResponseFailureRemediationLink',
   // context prompts
   alertEvaluation: `alertEvaluation`,
+  assetAnalysis: `assetAnalysis`,
   dataQualityAnalysis: 'dataQualityAnalysis',
   ruleAnalysis: 'ruleAnalysis',
   // starter prompts
@@ -414,6 +416,13 @@ export const localPrompts: Prompt[] = [
     promptGroupId: promptGroupId.aiAssistant,
     prompt: {
       default: ALERT_EVALUATION,
+    },
+  },
+  {
+    promptId: promptDictionary.assetAnalysis,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: {
+      default: ENTITY_ANALYSIS,
     },
   },
   {

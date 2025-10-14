@@ -10,10 +10,11 @@
 import React from 'react';
 import { css } from '@emotion/react';
 
+import type { CommonProps } from '@elastic/eui';
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-interface FeedbackButtonProps {
+interface FeedbackButtonProps extends CommonProps {
   feedbackButtonMessage: React.ReactNode;
   feedbackSnippetId: string;
   handleOpenSurvey: () => void;
@@ -35,24 +36,33 @@ export const FeedbackButton = ({
   feedbackButtonMessage,
   feedbackSnippetId,
   handleOpenSurvey,
+  className,
 }: FeedbackButtonProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiButtonEmpty
-      data-test-subj="feedbackSnippetButton"
-      onClick={handleOpenSurvey}
+    <div
+      className={className}
       css={css`
-        margin: ${euiTheme.size.m};
-        padding: ${euiTheme.size.s};
+        padding: ${euiTheme.size.m};
       `}
-      color="text"
-      iconType="popout"
-      iconSide="right"
-      id={`${feedbackSnippetId}ButtonSurveyLink`}
-      aria-label={feedbackButtonAriaLabel}
     >
-      {feedbackButtonMessage}
-    </EuiButtonEmpty>
+      <EuiButtonEmpty
+        data-test-subj="feedbackSnippetButton"
+        onClick={handleOpenSurvey}
+        css={css`
+          width: 100%;
+          padding: ${euiTheme.size.s};
+        `}
+        color="text"
+        iconType="popout"
+        iconSide="right"
+        size="s"
+        id={`${feedbackSnippetId}ButtonSurveyLink`}
+        aria-label={feedbackButtonAriaLabel}
+      >
+        {feedbackButtonMessage}
+      </EuiButtonEmpty>
+    </div>
   );
 };
