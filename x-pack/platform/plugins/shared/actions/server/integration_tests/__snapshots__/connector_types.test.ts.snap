@@ -65,14 +65,20 @@ Object {
           "type": "string",
         },
         "subActionParams": Object {
-          "additionalProperties": true,
-          "properties": Object {},
-          "type": "object",
+          "anyOf": Array [
+            Object {
+              "additionalProperties": true,
+              "properties": Object {},
+              "type": "object",
+            },
+            Object {
+              "type": "null",
+            },
+          ],
         },
       },
       "required": Array [
         "subAction",
-        "subActionParams",
       ],
       "type": "object",
     },
@@ -120,14 +126,20 @@ Object {
           "type": "string",
         },
         "subActionParams": Object {
-          "additionalProperties": true,
-          "properties": Object {},
-          "type": "object",
+          "anyOf": Array [
+            Object {
+              "additionalProperties": true,
+              "properties": Object {},
+              "type": "object",
+            },
+            Object {
+              "type": "null",
+            },
+          ],
         },
       },
       "required": Array [
         "subAction",
-        "subActionParams",
       ],
       "type": "object",
     },
@@ -563,14 +575,20 @@ Object {
           "type": "string",
         },
         "subActionParams": Object {
-          "additionalProperties": true,
-          "properties": Object {},
-          "type": "object",
+          "anyOf": Array [
+            Object {
+              "additionalProperties": true,
+              "properties": Object {},
+              "type": "object",
+            },
+            Object {
+              "type": "null",
+            },
+          ],
         },
       },
       "required": Array [
         "subAction",
-        "subActionParams",
       ],
       "type": "object",
     },
@@ -632,14 +650,20 @@ Object {
           "type": "string",
         },
         "subActionParams": Object {
-          "additionalProperties": true,
-          "properties": Object {},
-          "type": "object",
+          "anyOf": Array [
+            Object {
+              "additionalProperties": true,
+              "properties": Object {},
+              "type": "object",
+            },
+            Object {
+              "type": "null",
+            },
+          ],
         },
       },
       "required": Array [
         "subAction",
-        "subActionParams",
       ],
       "type": "object",
     },
@@ -925,14 +949,20 @@ Object {
           "type": "string",
         },
         "subActionParams": Object {
-          "additionalProperties": true,
-          "properties": Object {},
-          "type": "object",
+          "anyOf": Array [
+            Object {
+              "additionalProperties": true,
+              "properties": Object {},
+              "type": "object",
+            },
+            Object {
+              "type": "null",
+            },
+          ],
         },
       },
       "required": Array [
         "subAction",
-        "subActionParams",
       ],
       "type": "object",
     },
@@ -1122,14 +1152,20 @@ Object {
           "type": "string",
         },
         "subActionParams": Object {
-          "additionalProperties": true,
-          "properties": Object {},
-          "type": "object",
+          "anyOf": Array [
+            Object {
+              "additionalProperties": true,
+              "properties": Object {},
+              "type": "object",
+            },
+            Object {
+              "type": "null",
+            },
+          ],
         },
       },
       "required": Array [
         "subAction",
-        "subActionParams",
       ],
       "type": "object",
     },
@@ -1293,14 +1329,20 @@ Object {
           "type": "string",
         },
         "subActionParams": Object {
-          "additionalProperties": true,
-          "properties": Object {},
-          "type": "object",
+          "anyOf": Array [
+            Object {
+              "additionalProperties": true,
+              "properties": Object {},
+              "type": "object",
+            },
+            Object {
+              "type": "null",
+            },
+          ],
         },
       },
       "required": Array [
         "subAction",
-        "subActionParams",
       ],
       "type": "object",
     },
@@ -1709,14 +1751,20 @@ Object {
           "type": "string",
         },
         "subActionParams": Object {
-          "additionalProperties": true,
-          "properties": Object {},
-          "type": "object",
+          "anyOf": Array [
+            Object {
+              "additionalProperties": true,
+              "properties": Object {},
+              "type": "object",
+            },
+            Object {
+              "type": "null",
+            },
+          ],
         },
       },
       "required": Array [
         "subAction",
-        "subActionParams",
       ],
       "type": "object",
     },
@@ -1800,14 +1848,20 @@ Object {
           "type": "string",
         },
         "subActionParams": Object {
-          "additionalProperties": true,
-          "properties": Object {},
-          "type": "object",
+          "anyOf": Array [
+            Object {
+              "additionalProperties": true,
+              "properties": Object {},
+              "type": "object",
+            },
+            Object {
+              "type": "null",
+            },
+          ],
         },
       },
       "required": Array [
         "subAction",
-        "subActionParams",
       ],
       "type": "object",
     },
@@ -1998,14 +2052,20 @@ Object {
           "type": "string",
         },
         "subActionParams": Object {
-          "additionalProperties": true,
-          "properties": Object {},
-          "type": "object",
+          "anyOf": Array [
+            Object {
+              "additionalProperties": true,
+              "properties": Object {},
+              "type": "object",
+            },
+            Object {
+              "type": "null",
+            },
+          ],
         },
       },
       "required": Array [
         "subAction",
-        "subActionParams",
       ],
       "type": "object",
     },
@@ -2196,14 +2256,20 @@ Object {
           "type": "string",
         },
         "subActionParams": Object {
-          "additionalProperties": true,
-          "properties": Object {},
-          "type": "object",
+          "anyOf": Array [
+            Object {
+              "additionalProperties": true,
+              "properties": Object {},
+              "type": "object",
+            },
+            Object {
+              "type": "null",
+            },
+          ],
         },
       },
       "required": Array [
         "subAction",
-        "subActionParams",
       ],
       "type": "object",
     },
@@ -2265,14 +2331,20 @@ Object {
           "type": "string",
         },
         "subActionParams": Object {
-          "additionalProperties": true,
-          "properties": Object {},
-          "type": "object",
+          "anyOf": Array [
+            Object {
+              "additionalProperties": true,
+              "properties": Object {},
+              "type": "object",
+            },
+            Object {
+              "type": "null",
+            },
+          ],
         },
       },
       "required": Array [
         "subAction",
-        "subActionParams",
       ],
       "type": "object",
     },
@@ -4158,14 +4230,20 @@ Object {
           "type": "string",
         },
         "subActionParams": Object {
-          "additionalProperties": true,
-          "properties": Object {},
-          "type": "object",
+          "anyOf": Array [
+            Object {
+              "additionalProperties": true,
+              "properties": Object {},
+              "type": "object",
+            },
+            Object {
+              "type": "null",
+            },
+          ],
         },
       },
       "required": Array [
         "subAction",
-        "subActionParams",
       ],
       "type": "object",
     },
@@ -4231,14 +4309,20 @@ Object {
           "type": "string",
         },
         "subActionParams": Object {
-          "additionalProperties": true,
-          "properties": Object {},
-          "type": "object",
+          "anyOf": Array [
+            Object {
+              "additionalProperties": true,
+              "properties": Object {},
+              "type": "object",
+            },
+            Object {
+              "type": "null",
+            },
+          ],
         },
       },
       "required": Array [
         "subAction",
-        "subActionParams",
       ],
       "type": "object",
     },
@@ -4728,14 +4812,20 @@ Object {
           "type": "string",
         },
         "subActionParams": Object {
-          "additionalProperties": true,
-          "properties": Object {},
-          "type": "object",
+          "anyOf": Array [
+            Object {
+              "additionalProperties": true,
+              "properties": Object {},
+              "type": "object",
+            },
+            Object {
+              "type": "null",
+            },
+          ],
         },
       },
       "required": Array [
         "subAction",
-        "subActionParams",
       ],
       "type": "object",
     },

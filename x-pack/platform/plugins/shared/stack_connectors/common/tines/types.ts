@@ -15,6 +15,7 @@ import type {
   TinesWebhooksActionResponseSchema,
   TinesWebhooksActionParamsSchema,
   TinesWebhookObjectSchema,
+  TinesWebhookActionConfigSchema,
   TinesStoryObjectSchema,
 } from './schema';
 
@@ -27,4 +28,5 @@ export type TinesStoryObject = z.infer<typeof TinesStoryObjectSchema>;
 export type TinesStoriesActionResponse = z.infer<typeof TinesStoriesActionResponseSchema>;
 export type TinesWebhooksActionParams = z.infer<typeof TinesWebhooksActionParamsSchema>;
 export type TinesWebhooksActionResponse = z.infer<typeof TinesWebhooksActionResponseSchema>;
+export type TinesWebhookActionConfig = z.infer<typeof TinesWebhookActionConfigSchema>;
 export type TinesWebhookObject = z.infer<typeof TinesWebhookObjectSchema>;

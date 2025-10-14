@@ -49,7 +49,11 @@ export async function startServers(): Promise<ServerHandles> {
         [ENABLE_ALL_PLUGINS_CONFIG_PATH]: true,
       },
     },
-    { oss: false }
+    {
+      oss: false,
+      // running in 'dev' mode prevents cloud-experiments plugin to fail due to missing config
+      dev: true,
+    }
   );
   await kibanaRoot.preboot();
   await kibanaRoot.setup();

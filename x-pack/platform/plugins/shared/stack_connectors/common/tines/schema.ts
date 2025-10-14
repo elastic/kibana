@@ -29,15 +29,20 @@ export const TinesStoriesActionResponseSchema = z
 
 // Webhooks action schema
 export const TinesWebhooksActionParamsSchema = z.object({ storyId: z.coerce.number() }).strict();
-export const TinesWebhookObjectSchema = z
+export const TinesWebhookObjectSchema = z.object({
+  id: z.coerce.number(),
+  name: z.string(),
+  storyId: z.coerce.number(),
+});
+
+// Webhooks action configuration schema
+export const TinesWebhookActionConfigSchema = z
   .object({
-    id: z.coerce.number(),
-    name: z.string(),
-    storyId: z.coerce.number(),
     path: z.string(),
     secret: z.string(),
   })
   .strict();
+
 export const TinesWebhooksActionResponseSchema = z
   .object({
     webhooks: z.array(TinesWebhookObjectSchema),
