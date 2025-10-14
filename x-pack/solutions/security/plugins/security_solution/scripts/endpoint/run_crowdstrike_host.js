@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { scheduledQueryFactory } from './scheduled_query';
+require('../../../../../../../src/setup_node_env');
+require('./crowdstrike_host').cli();
