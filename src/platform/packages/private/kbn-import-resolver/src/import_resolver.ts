@@ -159,6 +159,14 @@ export class ImportResolver {
       return Path.resolve(REPO_ROOT, `node_modules/@typescript-eslint/parser/dist/index.js`);
     }
 
+    if (req.startsWith('vega-lite')) {
+      return Path.resolve(REPO_ROOT, `node_modules/vega-lite/build`);
+    }
+
+    if (req.startsWith('vega-tooltip')) {
+      return Path.resolve(REPO_ROOT, `node_modules/vega-tooltip/build`);
+    }
+
     // turn root-relative paths into relative paths
     if (
       req.startsWith('src/') ||
