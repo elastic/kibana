@@ -239,9 +239,14 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
 
   return (
     <>
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={'config-field-map-type'}>
         <EuiFlexItem grow={false}>
-          <EuiSwitch label={HEADERS_SWITCH_LABEL} checked={checked} onChange={(e) => onChange(e)} />
+          <EuiSwitch
+            data-test-subj={`${key}-switch-${checked ? 'checked' : 'unchecked'}`}
+            label={HEADERS_SWITCH_LABEL}
+            checked={checked}
+            onChange={(e) => onChange(e)}
+          />
         </EuiFlexItem>
         {checked
           ? iterableHeaders.map((header, index) => (
@@ -250,6 +255,7 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
                   <EuiFlexItem>
                     <EuiFormRow label={HEADERS_KEY_LABEL}>
                       <EuiFieldText
+                        data-test-subj={`${key}-key-${index}`}
                         isInvalid={!isValid}
                         disabled={isLoading || (isEdit && !updatable)}
                         value={header[0]}
@@ -269,6 +275,7 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
                   <EuiFlexItem>
                     <EuiFormRow label={HEADERS_VALUE_LABEL}>
                       <EuiFieldText
+                        data-test-subj={`${key}-value-${index}`}
                         disabled={isLoading || (isEdit && !updatable)}
                         value={header[1]}
                         onChange={(e) => {
@@ -298,6 +305,7 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
                       }}
                       iconType="minusInCircle"
                       aria-label={DELETE_LABEL}
+                      data-test-subj={`${key}-delete-button-${index}`}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -320,7 +328,7 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
                 const newHeaders = [...iterableHeaders, ['', '']];
                 setHeaders(Object.fromEntries(newHeaders));
               }}
-              data-test-subj="add-header-button"
+              data-test-subj={`${key}-add-button`}
               aria-label={ADD_LABEL}
             >
               {ADD_LABEL}
