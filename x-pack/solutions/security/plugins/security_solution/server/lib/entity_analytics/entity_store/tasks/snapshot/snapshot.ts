@@ -167,10 +167,20 @@ const removeAllFieldsAndResetTimestamp: string = minifyPainless(`
 
     // Reset entity.behaviors fields if they exist
     if (ctx._source.entity?.behaviors != null) {
-      newDoc.entity.behaviors = new HashMap();
-      for (String key : ctx._source.entity.behaviors.keySet()) {
-        if (ctx._source.entity.behaviors[key] instanceof Boolean) {
-          newDoc.entity.behaviors[key] = false;
+      if (params.entityType == 'generic') {
+        newDoc.entity.behaviors = new HashMap();
+        for (String key : ctx._source.entity.behaviors.keySet()) {
+          if (ctx._source.entity.behaviors[key] instanceof Boolean) {
+            newDoc.entity.behaviors[key] = false;
+          }
+        }
+      } else {
+        newDoc[params.entityType].entity = new HashMap();
+        newDoc[params.entityType].entity.behaviors = new HashMap();
+        for (String key : ctx._source.entity.behaviors.keySet()) {
+          if (ctx._source.entity.behaviors[key] instanceof Boolean) {
+            newDoc[params.entityType].entity.behaviors[key] = false;
+          }
         }
       }
     }
