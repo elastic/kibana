@@ -7,9 +7,7 @@
 
 import 'jest-canvas-mock';
 
-import fs from 'fs';
-import vm from 'vm';
-import path from 'path';
+import { compile } from 'vega-lite';
 
 import type { EuiThemeComputed } from '@elastic/eui';
 
@@ -33,33 +31,6 @@ const euiThemeMock = {
     textSubdued: '#6a7170',
   },
 } as unknown as EuiThemeComputed;
-
-function loadVegaLite() {
-  const sandbox = {
-    window: {},
-    globalThis: {},
-    structuredClone: (obj: any) => JSON.parse(JSON.stringify(obj)),
-  };
-  const vegaCode = fs.readFileSync(path.resolve('node_modules/vega/build/vega.min.js'), 'utf8');
-
-  vm.createContext(sandbox);
-  vm.runInContext(vegaCode, sandbox);
-
-  // load vega into the env
-  // @ts-ignore
-  sandbox.window.vega = sandbox.globalThis.vega = sandbox.window.vega || sandbox.globalThis.vega;
-
-  // Load Vega-Lite next
-  const vegaLiteCode = fs.readFileSync(
-    path.resolve('node_modules/vega-lite/build/vega-lite.min.js'),
-    'utf8'
-  );
-  vm.runInContext(vegaLiteCode, sandbox);
-
-  // Vega-Lite is now available
-  // @ts-ignore
-  return sandbox.window.vegaLite || sandbox.globalThis.vegaLite;
-}
 
 describe('getColorSpec()', () => {
   it('should return only user selection conditions and the default color for non-outlier specs', () => {
@@ -172,8 +143,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
     const specForegroundLayer = vegaLiteSpec.spec.layer[0];
 
     // A valid Vega Lite spec shouldn't throw an error when compiled.
-    const vegaLite = loadVegaLite();
-    expect(() => vegaLite.compile(vegaLiteSpec)).not.toThrow();
+    expect(() => compile(vegaLiteSpec)).not.toThrow();
 
     expect(vegaLiteSpec.repeat).toEqual({
       column: ['x', 'y'],
@@ -209,8 +179,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
     const specForegroundLayer = vegaLiteSpec.spec.layer[0];
 
     // A valid Vega Lite spec shouldn't throw an error when compiled.
-    const vegaLite = loadVegaLite();
-    expect(() => vegaLite.compile(vegaLiteSpec)).not.toThrow();
+    expect(() => compile(vegaLiteSpec)).not.toThrow();
 
     expect(vegaLiteSpec.repeat).toEqual({
       column: ['x', 'y'],
@@ -261,8 +230,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
     const specForegroundLayer = vegaLiteSpec.spec.layer[0];
 
     // A valid Vega Lite spec shouldn't throw an error when compiled.
-    const vegaLite = loadVegaLite();
-    expect(() => vegaLite.compile(vegaLiteSpec)).not.toThrow();
+    expect(() => compile(vegaLiteSpec)).not.toThrow();
 
     expect(vegaLiteSpec.repeat).toEqual({
       column: ['x', 'y'],

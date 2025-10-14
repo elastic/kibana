@@ -7,6 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// import fs from 'fs';
+// import vm from 'vm';
+// import path from 'path';
+//
+// const loadVegaAndLite = () => {
+//   const sandbox = {
+//     window: {},
+//     globalThis: {},
+//     structuredClone: (obj: any) => JSON.parse(JSON.stringify(obj)),
+//   };
+//   vm.createContext(sandbox);
+//
+//   const vegaCode = fs.readFileSync(path.resolve('node_modules/vega/build/vega.min.js'), 'utf8');
+//   vm.runInContext(vegaCode, sandbox);
+//
+//   // @ts-ignore
+//   sandbox.window.vega = sandbox.globalThis.vega = sandbox.window.vega || sandbox.globalThis.vega;
+//
+//   const vegaLiteCode = fs.readFileSync(
+//     path.resolve('node_modules/vega-lite/build/vega-lite.min.js'),
+//     'utf8'
+//   );
+//   vm.runInContext(vegaLiteCode, sandbox);
+//
+//   return {
+//     // @ts-ignore
+//     vega: sandbox.window.vega || sandbox.globalThis.vega,
+//     // @ts-ignore
+//     vegaLite: sandbox.window.vegaLite || sandbox.globalThis.vegaLite,
+//   };
+// };
+//
+// jest.mock('vega', () => {
+//   const { vega } = loadVegaAndLite();
+//   return { ...vega };
+// });
+//
+// jest.mock('vega-lite', () => {
+//   const { vegaLite } = loadVegaAndLite();
+//   return { ...vegaLite };
+// });
+
 import 'jest-canvas-mock';
 import { render, screen } from '@testing-library/react';
 
