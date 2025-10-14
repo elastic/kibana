@@ -8,6 +8,7 @@
  */
 
 import type { EnterForeachNode } from '@kbn/workflows/graph';
+import { isPropertyAccess } from '@kbn/workflows/common/utils';
 import type { NodeImplementation } from '../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
@@ -109,6 +110,35 @@ export class EnterForeachNodeImpl implements NodeImplementation {
   }
 
   private getItems(renderedForeachExpression: string): any[] {
+    if (isPropertyAccess(renderedForeachExpression)) {
+      const result =
+        this.stepExecutionRuntime.contextManager.readContextPath(renderedForeachExpression);
+      if (!result.pathExists) {
+        throw new Error(
+          `Expression "${renderedForeachExpression}" could not be found in the context. ` +
+            `Please ensure the expression references an array variable or update the configuration.`
+        );
+      }
+
+      if (!Array.isArray(result.value)) {
+        throw new Error(
+          `Foreach expression must evaluate to an array. ` +
+            `Expression "${renderedForeachExpression}" resolved to ${typeof result.value}${
+              result.value === null
+                ? ' (null)'
+                : result.value === undefined
+                ? ' (undefined)'
+                : `: ${JSON.stringify(result.value).substring(0, 100)}${
+                    JSON.stringify(result.value).length > 100 ? '...' : ''
+                  }`
+            }. ` +
+            `Please ensure the expression references an array variable or update the configuration.`
+        );
+      }
+
+      return result.value;
+    }
+
     const parsingResult = this.tryParseJSON(renderedForeachExpression);
 
     if (parsingResult) {
@@ -124,33 +154,10 @@ export class EnterForeachNodeImpl implements NodeImplementation {
       );
     }
 
-    const result =
-      this.stepExecutionRuntime.contextManager.readContextPath(renderedForeachExpression);
-
-    if (!result.pathExists) {
-      throw new Error(
-        `Expression "${renderedForeachExpression}" could not be found in the context. ` +
-          `Please ensure the expression references an array variable or update the configuration.`
-      );
-    }
-
-    if (!Array.isArray(result.value)) {
-      throw new Error(
-        `Foreach expression must evaluate to an array. ` +
-          `Expression "${renderedForeachExpression}" resolved to ${typeof result.value}${
-            result.value === null
-              ? ' (null)'
-              : result.value === undefined
-              ? ' (undefined)'
-              : `: ${JSON.stringify(result.value).substring(0, 100)}${
-                  JSON.stringify(result.value).length > 100 ? '...' : ''
-                }`
-          }. ` +
-          `Please ensure the expression references an array variable or update the configuration.`
-      );
-    }
-
-    return result.value;
+    throw new Error(
+      `Foreach expression must be a valid JSON array or a context path. ` +
+        `Got: ${renderedForeachExpression}.`
+    );
   }
 
   private tryParseJSON(value: string): any[] | undefined {
