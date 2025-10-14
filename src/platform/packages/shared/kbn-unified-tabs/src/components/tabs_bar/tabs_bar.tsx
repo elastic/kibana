@@ -63,7 +63,13 @@ enum shortcutActions {
 
 export type TabsBarProps = Pick<
   TabProps,
-  'getTabMenuItems' | 'getPreviewData' | 'onLabelEdited' | 'onSelect' | 'onClose' | 'tabContentId'
+  | 'getTabMenuItems'
+  | 'getPreviewData'
+  | 'onLabelEdited'
+  | 'onSelect'
+  | 'onClose'
+  | 'tabContentId'
+  | 'enableInlineLabelEditing'
 > & {
   items: TabItem[];
   selectedItem: TabItem | null;
@@ -104,6 +110,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       getPreviewData,
       onEBTEvent,
       createItemElement,
+      enableInlineLabelEditing,
     },
     componentRef
   ) => {
@@ -307,6 +314,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                               onSelect={onSelect}
                               onSelectedTabKeyDown={onSelectedTabKeyDown}
                               onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
+                              enableInlineLabelEditing={enableInlineLabelEditing}
                             />
                           )}
                         </EuiDraggable>

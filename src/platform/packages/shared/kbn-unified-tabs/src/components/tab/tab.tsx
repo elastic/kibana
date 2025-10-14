@@ -51,6 +51,7 @@ export interface TabProps {
   onSelect: (item: TabItem) => Promise<void>;
   onClose: ((item: TabItem) => Promise<void>) | undefined;
   onSelectedTabKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => Promise<void>;
+  enableInlineLabelEditing?: boolean;
 }
 
 const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
@@ -77,6 +78,7 @@ export const Tab: React.FC<TabProps> = (props) => {
     onSelect,
     onClose,
     onSelectedTabKeyDown,
+    enableInlineLabelEditing = true,
   } = props;
   const { euiTheme } = useEuiTheme();
   const tabLabelId = useGeneratedHtmlId({ prefix: 'tabLabel' });
@@ -129,11 +131,13 @@ export const Tab: React.FC<TabProps> = (props) => {
   const onDoubleClick = useCallback(
     (event?: MouseEvent<HTMLDivElement>) => {
       event?.stopPropagation();
-      hidePreview();
-      setActionPopover(false);
-      setIsInlineEditActive(true);
+      if (enableInlineLabelEditing) {
+        hidePreview();
+        setActionPopover(false);
+        setIsInlineEditActive(true);
+      }
     },
-    [setIsInlineEditActive, hidePreview, setActionPopover]
+    [setIsInlineEditActive, hidePreview, setActionPopover, enableInlineLabelEditing]
   );
 
   const onEnterRenaming = useCallback(async () => {
