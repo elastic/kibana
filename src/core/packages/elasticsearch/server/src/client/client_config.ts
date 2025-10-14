@@ -54,7 +54,6 @@ export interface ElasticsearchClientConfig {
   ssl?: ElasticsearchClientSslConfig;
   apisToRedactInLogs?: ElasticsearchApiToRedactInLogs[];
   dnsCacheTtl: Duration;
-  bufferthreshold?: number;
 }
 
 /**
