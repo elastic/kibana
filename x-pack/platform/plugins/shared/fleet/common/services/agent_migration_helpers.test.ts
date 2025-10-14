@@ -7,7 +7,7 @@
 
 import type { Agent } from '../types';
 
-import { isAgentMigrationSupported } from './is_agent_migrate_supported';
+import { isAgentEligibleForMigration, isAgentMigrationSupported } from './agent_migration_helpers';
 
 describe('isAgentMigrationSupported', () => {
   const createMockAgent = (overrides: Partial<Agent> = {}): Agent => ({
@@ -151,5 +151,67 @@ describe('isAgentMigrationSupported', () => {
     });
 
     expect(isAgentMigrationSupported(agent)).toBe(true);
+  });
+});
+
+describe('isAgentEligibleForMigration', () => {
+  it('should return true for agents that support migration, not on a protected policy, and no fleet server', () => {
+    const agent = {
+      agent: {
+        version: '9.2.0',
+      },
+      local_metadata: {
+        elastic: {
+          agent: {
+            upgradeable: true,
+          },
+        },
+      },
+    } as any;
+    const agentPolicy = {
+      is_protected: false,
+      package_policies: [{ package: { name: 'some-integration' } }],
+    } as any;
+    expect(isAgentEligibleForMigration(agent, agentPolicy)).toBe(true);
+  });
+
+  it('should return false for agents on a protected policy', () => {
+    const agent = {
+      agent: {
+        version: '9.2.0',
+      },
+      local_metadata: {
+        elastic: {
+          agent: {
+            upgradeable: true,
+          },
+        },
+      },
+    } as any;
+    const agentPolicy = {
+      is_protected: true,
+      package_policies: [{ package: { name: 'some-integration' } }],
+    } as any;
+    expect(isAgentEligibleForMigration(agent, agentPolicy)).toBe(false);
+  });
+
+  it('should return false for agents on a policy with Fleet Server', () => {
+    const agent = {
+      agent: {
+        version: '9.2.0',
+      },
+      local_metadata: {
+        elastic: {
+          agent: {
+            upgradeable: true,
+          },
+        },
+      },
+    } as any;
+    const agentPolicy = {
+      is_protected: false,
+      package_policies: [{ package: { name: 'fleet_server' } }],
+    } as any;
+    expect(isAgentEligibleForMigration(agent, agentPolicy)).toBe(false);
   });
 });

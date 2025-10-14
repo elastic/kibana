@@ -59,6 +59,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           pageTestSubject: 'search-homepage',
         },
         {
+          link: { navId: 'agent_builder' },
+          breadcrumbs: [],
+          pageTestSubject: 'agentBuilderWrapper',
+        },
+        {
           link: { deepLinkId: 'discover' },
           breadcrumbs: ['Discover'],
           pageTestSubject: 'queryInput',
@@ -147,6 +152,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           // home:
           'searchHomepage',
           // main;
+          'agent_builder',
           'discover',
           'dashboards',
           'searchPlayground',

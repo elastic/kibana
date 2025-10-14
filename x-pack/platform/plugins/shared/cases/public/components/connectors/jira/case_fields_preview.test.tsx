@@ -41,6 +41,7 @@ describe('Jira Fields: Preview', () => {
     issueType: '10006',
     priority: 'High',
     parent: 'Parent Task',
+    otherFields: '{"testField":"testValue"}',
   };
 
   beforeEach(() => {
@@ -56,5 +57,6 @@ describe('Jira Fields: Preview', () => {
     expect(getByTextWithMarkup('Issue type: Task')).toBeInTheDocument();
     expect(getByTextWithMarkup('Parent issue: Parent Task')).toBeInTheDocument();
     expect(getByTextWithMarkup('Priority: High')).toBeInTheDocument();
+    expect(getByTextWithMarkup('{"testField":"testValue"}')).toBeInTheDocument();
   });
 });
