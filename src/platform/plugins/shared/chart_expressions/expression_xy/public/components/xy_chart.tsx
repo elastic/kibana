@@ -932,13 +932,13 @@ export function XYChart({
               title={xTitle}
               gridLine={gridLineStyle}
               hide={xAxisConfig?.hide || dataLayers[0]?.simpleView || !dataLayers[0]?.xAccessor}
-              tickFormat={(d) => {
-                let value = safeXAccessorLabelRenderer(d) || '';
-                if (xAxisConfig?.truncate && value.length > xAxisConfig.truncate) {
-                  value = `${value.slice(0, xAxisConfig.truncate)}...`;
-                }
-                return value;
-              }}
+              // tickFormat={(d) => {
+              //   let value = safeXAccessorLabelRenderer(d) || '';
+              //   if (xAxisConfig?.truncate && value.length > xAxisConfig.truncate) {
+              //     value = `${value.slice(0, xAxisConfig.truncate)}...`;
+              //   }
+              //   return value;
+              // }}
               style={xAxisStyle}
               showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
               showDuplicatedTicks={xAxisConfig?.showDuplicates}
@@ -963,13 +963,13 @@ export function XYChart({
                     visible: axis.showGridLines,
                   }}
                   hide={axis.hide || dataLayers[0]?.simpleView}
-                  tickFormat={(d) => {
-                    let value = axis.formatter?.convert(d) || '';
-                    if (axis.truncate && value.length > axis.truncate) {
-                      value = `${value.slice(0, axis.truncate)}...`;
-                    }
-                    return value;
-                  }}
+                  // tickFormat={(d) => {
+                  //   let value = axis.formatter?.convert(d) || '';
+                  //   if (axis.truncate && value.length > axis.truncate) {
+                  //     value = `${value.slice(0, axis.truncate)}...`;
+                  //   }
+                  //   return value;
+                  // }}
                   style={getYAxesStyle(axis)}
                   domain={getYAxisDomain(axis)}
                   showOverlappingLabels={axis.showOverlappingLabels}
