@@ -47,7 +47,7 @@ export class ConnectorUsageReportingTask {
   }: {
     logger: Logger;
     eventLogIndex: string;
-    core: CoreSetup<ActionsPluginsStart>;
+    core: ActionsPluginSetupDeps['core'];
     taskManager: TaskManagerSetupContract;
     projectId: string | undefined;
     config: ActionsConfig['usage'];
@@ -112,7 +112,10 @@ export class ConnectorUsageReportingTask {
     }
   };
 
-  private runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
+  private runTask = async (
+    taskInstance: ConcreteTaskInstance,
+    core: CoreSetup<ActionsPluginsStart>
+  ) => {
     const { state } = taskInstance;
 
     if (!this.enabled) {

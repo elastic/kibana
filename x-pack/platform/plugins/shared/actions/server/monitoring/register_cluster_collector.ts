@@ -10,17 +10,16 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { aggregateTaskOverduePercentilesForType } from '@kbn/task-manager-plugin/server';
-import type { CoreSetup } from '@kbn/core/server';
-import type { ActionsPluginsStart } from '../plugin';
 import type { ClusterActionsMetric } from './types';
 import { EMPTY_CLUSTER_ACTIONS_METRICS } from './types';
+import { ActionsPluginSetupDeps } from '../types';
 
 export function registerClusterCollector({
   monitoringCollection,
   core,
 }: {
   monitoringCollection: MonitoringCollectionSetup;
-  core: CoreSetup<ActionsPluginsStart, unknown>;
+  core: ActionsPluginSetupDeps['core'];
 }) {
   monitoringCollection.registerMetric({
     type: 'cluster_actions',
