@@ -804,9 +804,19 @@ export const ChangeAgentPrivilegeLevelRequestSchema = {
     })
   ),
 };
-export const ChangeAgentPrivilegeLevelResponseSchema = schema.object({
-  actionId: schema.string(),
-});
+
+/**
+ * Returns an object with either the actionId (if an action was created),
+ * or an information message (if no action was needed).
+ */
+export const ChangeAgentPrivilegeLevelResponseSchema = schema.oneOf([
+  schema.object({
+    actionId: schema.string(),
+  }),
+  schema.object({
+    message: schema.string(),
+  }),
+]);
 
 export const BulkChangeAgentsPrivilegeLevelRequestSchema = {
   body: schema.object({

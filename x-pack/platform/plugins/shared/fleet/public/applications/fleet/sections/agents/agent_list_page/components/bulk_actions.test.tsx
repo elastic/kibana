@@ -6,11 +6,9 @@
  */
 
 import React from 'react';
-
 import { fireEvent, act } from '@testing-library/react';
 
 import type { Agent } from '../../../../types';
-
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { LicenseService } from '../../../../services';
 import { ExperimentalFeaturesService } from '../../../../services';
@@ -21,19 +19,17 @@ import { useLicense } from '../../../../../../hooks/use_license';
 import { AgentBulkActions } from './bulk_actions';
 
 jest.mock('../../../../../../services/experimental_features');
-const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
-
 jest.mock('../../../../../../hooks/use_license');
 jest.mock('../../../../../../hooks/use_authz');
-const mockedUseLicence = useLicense as jest.MockedFunction<typeof useLicense>;
-
 jest.mock('../../components/agent_reassign_policy_modal');
-
 jest.mock('../hooks/export_csv', () => ({
   useExportCSV: jest.fn().mockReturnValue({
     generateReportingJobCSV: jest.fn(),
   }),
 }));
+
+const mockedUseLicence = useLicense as jest.MockedFunction<typeof useLicense>;
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 const defaultProps = {
   nAgentsInTable: 10,
@@ -50,7 +46,7 @@ const defaultProps = {
 describe('AgentBulkActions', () => {
   beforeAll(() => {
     mockedExperimentalFeaturesService.get.mockReturnValue({
-      enableAgentMigrations: true,
+      enableAgentPrivilegeLevelChange: true,
     } as any);
     jest.mocked(useAuthz).mockReturnValue({
       fleet: {
@@ -69,6 +65,12 @@ describe('AgentBulkActions', () => {
     jest.mocked(AgentReassignAgentPolicyModal).mockReturnValue(null);
   });
 
+  afterEach(() => {
+    mockedUseLicence.mockReturnValue({
+      hasAtLeast: () => false,
+    } as unknown as LicenseService);
+  });
+
   function render(props: any) {
     const renderer = createFleetTestRendererMock();
     return renderer.render(<AgentBulkActions {...props} />);
@@ -76,6 +78,10 @@ describe('AgentBulkActions', () => {
 
   describe('When in manual selection mode', () => {
     it('should show the available actions for the selected agents', async () => {
+      mockedUseLicence.mockReturnValue({
+        hasAtLeast: (licenseType: string) => licenseType === 'enterprise',
+      } as unknown as LicenseService);
+
       const results = render({
         ...defaultProps,
         selectedAgents: [{ id: 'agent1', tags: ['oldTag'] }, { id: 'agent2' }] as Agent[],
@@ -96,6 +102,9 @@ describe('AgentBulkActions', () => {
         results.getByText('Request diagnostics for 2 agents').closest('button')!
       ).toBeEnabled();
       expect(results.getByText('Migrate 2 agents').closest('button')!).toBeEnabled();
+      expect(
+        results.getByText('Remove root privilege for 2 agents').closest('button')!
+      ).toBeEnabled();
     });
 
     it('should allow scheduled upgrades if the license allows it', async () => {
@@ -119,6 +128,10 @@ describe('AgentBulkActions', () => {
 
   describe('When in query selection mode', () => {
     it('should show the available actions for all agents when no managed agents are listed', async () => {
+      mockedUseLicence.mockReturnValue({
+        hasAtLeast: (licenseType: string) => licenseType === 'enterprise',
+      } as unknown as LicenseService);
+
       const results = render({
         ...defaultProps,
         selectionMode: 'query',
@@ -139,9 +152,16 @@ describe('AgentBulkActions', () => {
       ).toBeEnabled();
       expect(results.getByText('Restart upgrade 10 agents').closest('button')!).toBeEnabled();
       expect(results.getByText('Migrate 10 agents').closest('button')!).toBeEnabled();
+      expect(
+        results.getByText('Remove root privilege for 10 agents').closest('button')!
+      ).toBeEnabled();
     });
 
     it('should show the available actions for all agents except managed agents', async () => {
+      mockedUseLicence.mockReturnValue({
+        hasAtLeast: (licenseType: string) => licenseType === 'enterprise',
+      } as unknown as LicenseService);
+
       const results = render({
         ...defaultProps,
         totalManagedAgentIds: ['agentId1', 'agentId2'],
@@ -163,6 +183,9 @@ describe('AgentBulkActions', () => {
       expect(results.getByText('Schedule upgrade for 8 agents').closest('button')!).toBeDisabled();
       expect(results.getByText('Restart upgrade 8 agents').closest('button')!).toBeEnabled();
       expect(results.getByText('Migrate 8 agents').closest('button')!).toBeEnabled();
+      expect(
+        results.getByText('Remove root privilege for 8 agents').closest('button')!
+      ).toBeEnabled();
     });
 
     it('should generate a correct kuery to select agents when no managed agents are listed', async () => {
@@ -216,9 +239,9 @@ describe('AgentBulkActions', () => {
       );
     });
 
-    it('should not show the migrate button when agent migrations flag is disabled', async () => {
+    it('should not show the Remove root privilege button when the feature flag is disabled', async () => {
       mockedExperimentalFeaturesService.get.mockReturnValue({
-        enableAgentMigrations: false,
+        enableAgentPrivilegeLevelChange: false,
       } as any);
 
       const results = render({
@@ -226,7 +249,9 @@ describe('AgentBulkActions', () => {
         selectedAgents: [{ id: 'agent1', tags: ['oldTag'] }, { id: 'agent2' }] as Agent[],
       });
 
-      const bulkActionsButton = results.queryByTestId('agentBulkActionsBulkMigrate');
+      const bulkActionsButton = results.queryByTestId(
+        'agentBulkActionsBulkChangeAgentsPrivilegeLevel'
+      );
       expect(bulkActionsButton).not.toBeInTheDocument();
     });
   });
