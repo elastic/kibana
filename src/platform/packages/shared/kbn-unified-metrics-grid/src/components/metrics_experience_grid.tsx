@@ -33,7 +33,7 @@ import {
   useValueFilters,
 } from '../hooks';
 import { MetricsGridWrapper } from './metrics_grid_wrapper';
-import { ChartLoadingProgress, EmptyState } from './empty_state/empty_state';
+import { MetricsGridLoadingProgress, EmptyState } from './empty_state/empty_state';
 
 export const MetricsExperienceGrid = ({
   dataView,
@@ -161,7 +161,7 @@ export const MetricsExperienceGrid = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow>
-          {isDiscoverLoading && <ChartLoadingProgress />}
+          {isDiscoverLoading && <MetricsGridLoadingProgress />}
           <MetricsGrid
             pivotOn="metric"
             columns={columns}

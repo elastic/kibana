@@ -26,7 +26,7 @@ import type {
   SloLink,
 } from '../../../../common/assets';
 import { ASSET_TYPES } from '../../../../common/assets';
-import { QUERY_KQL_BODY, QUERY_SYSTEM_FILTER, QUERY_SYSTEM_NAME, QUERY_TITLE } from './fields';
+import { QUERY_KQL_BODY, QUERY_FEATURE_FILTER, QUERY_FEATURE_NAME, QUERY_TITLE } from './fields';
 import { ASSET_ID, ASSET_TYPE, ASSET_UUID, STREAM_NAME } from './fields';
 import type { AssetStorageSettings } from './storage_settings';
 import { AssetNotFoundError } from '../errors/asset_not_found_error';
@@ -136,8 +136,8 @@ interface AssetBulkDeleteOperation {
 function fromStorage(link: StoredAssetLink): AssetLink {
   if (link[ASSET_TYPE] === 'query') {
     const storedQueryLink: StoredQueryLink & {
-      [QUERY_SYSTEM_NAME]: string;
-      [QUERY_SYSTEM_FILTER]: string;
+      [QUERY_FEATURE_NAME]: string;
+      [QUERY_FEATURE_FILTER]: string;
     } = link as any;
     return {
       ...storedQueryLink,
@@ -147,10 +147,10 @@ function fromStorage(link: StoredAssetLink): AssetLink {
         kql: {
           query: storedQueryLink[QUERY_KQL_BODY],
         },
-        system: storedQueryLink[QUERY_SYSTEM_NAME]
+        feature: storedQueryLink[QUERY_FEATURE_NAME]
           ? {
-              name: storedQueryLink[QUERY_SYSTEM_NAME],
-              filter: JSON.parse(storedQueryLink[QUERY_SYSTEM_FILTER]),
+              name: storedQueryLink[QUERY_FEATURE_NAME],
+              filter: JSON.parse(storedQueryLink[QUERY_FEATURE_FILTER]),
             }
           : undefined,
       },
@@ -169,8 +169,8 @@ function toStorage(name: string, request: AssetLinkRequest): StoredAssetLink {
       [STREAM_NAME]: name,
       [QUERY_TITLE]: query.title,
       [QUERY_KQL_BODY]: query.kql.query,
-      [QUERY_SYSTEM_NAME]: query.system ? query.system.name : '',
-      [QUERY_SYSTEM_FILTER]: query.system ? JSON.stringify(query.system.filter) : '',
+      [QUERY_FEATURE_NAME]: query.feature ? query.feature.name : '',
+      [QUERY_FEATURE_FILTER]: query.feature ? JSON.stringify(query.feature.filter) : '',
     } as unknown as StoredAssetLink;
   }
 
