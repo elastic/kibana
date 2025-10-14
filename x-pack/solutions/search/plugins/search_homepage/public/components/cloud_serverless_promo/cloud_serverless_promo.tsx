@@ -58,7 +58,7 @@ const PROMO_ITEMS = {
     }),
     description: i18n.translate('xpack.searchHomepage.cloudServerlessPromo.hostedDescription', {
       defaultMessage:
-        'Control Elastic Stack version upgrades, customize deployment configurations, manage sizing and snapshots, and handle other operational aspects.',
+        'Spin up, scale, upgrade, and delete your Elastic Stack products on the cloud provider and regions of your choice without having to manage each one separately. In an Elasatic Cloud Hosted deployment, everything works together.',
     }),
     externalLink: 'https://www.elastic.co/cloud',
   },
