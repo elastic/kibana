@@ -109,16 +109,19 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
             border-top-right-radius: 0 !important;
             border-bottom-right-radius: 0 !important;
             margin-right: -8px !important;
-            min-width: 0 !important;
+            min-width: 80px !important;
+            span {
+              gap: ${euiTheme.size.xs} !important;
+            }
+            .euiIcon {
+              color: ${euiTheme.colors.primary} !important;
+            }
           }
           .dscSplitSaveRight,
           .dashSplitSaveRight {
             border-top-left-radius: 0 !important;
             border-bottom-left-radius: 0 !important;
             margin-left: -1px !important;
-            .euiIcon {
-              color: ${euiTheme.colors.text} !important;
-            }
           }
         `}
         popoverBreakpoints={props.popoverBreakpoints}

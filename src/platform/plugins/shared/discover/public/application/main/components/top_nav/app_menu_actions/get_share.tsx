@@ -156,23 +156,9 @@ export const getShareAppMenuItem = ({
     });
   };
 
-  const menuItems: AppMenuActionSecondary[] = [
-    {
-      id: AppMenuActionId.share,
-      type: AppMenuActionType.secondary,
-      controlProps: {
-        label: i18n.translate('discover.localMenu.shareTitle', {
-          defaultMessage: 'Share',
-        }),
-        description: i18n.translate('discover.localMenu.shareSearchDescription', {
-          defaultMessage: 'Share Discover session',
-        }),
-        testId: 'shareTopNavButton',
-        onClick: ({ anchorElement }) => shareExecutor({ anchorElement }),
-      },
-    },
-  ];
+  const menuItems: AppMenuActionSecondary[] = [];
 
+  // Add Export before Share
   if (Boolean(services.share?.availableIntegrations('search', 'export')?.length)) {
     menuItems.push({
       id: AppMenuActionId.export,
@@ -189,6 +175,21 @@ export const getShareAppMenuItem = ({
       },
     });
   }
+
+  menuItems.push({
+    id: AppMenuActionId.share,
+    type: AppMenuActionType.secondary,
+    controlProps: {
+      label: i18n.translate('discover.localMenu.shareTitle', {
+        defaultMessage: 'Share',
+      }),
+      description: i18n.translate('discover.localMenu.shareSearchDescription', {
+        defaultMessage: 'Share Discover session',
+      }),
+      testId: 'shareTopNavButton',
+      onClick: ({ anchorElement }) => shareExecutor({ anchorElement }),
+    },
+  });
 
   return menuItems;
 };

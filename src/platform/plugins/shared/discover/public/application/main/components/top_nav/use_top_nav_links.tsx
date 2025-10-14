@@ -281,7 +281,7 @@ export const useTopNavLinks = ({
         fill: false,
         color: 'text',
         iconType: hasUnsavedChanges ? 'dot' : undefined,
-        iconSide: hasUnsavedChanges ? 'left' : undefined,
+        iconSide: hasUnsavedChanges ? 'right' : undefined,
         emphasize: true,
         run: (anchorElement: HTMLElement) => {
           onSaveDiscoverSession({

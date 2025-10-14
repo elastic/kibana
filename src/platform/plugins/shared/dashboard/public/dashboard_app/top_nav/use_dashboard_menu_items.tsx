@@ -394,7 +394,7 @@ export const useDashboardMenuItems = ({
         id: 'quick-save',
         // iconType: 'save',
         iconType: hasUnsavedChanges ? 'dot' : undefined,
-        iconSide: hasUnsavedChanges ? 'left' : undefined,
+        iconSide: hasUnsavedChanges ? 'right' : undefined,
         emphasize: true,
         fill: false,
         color: 'text',
