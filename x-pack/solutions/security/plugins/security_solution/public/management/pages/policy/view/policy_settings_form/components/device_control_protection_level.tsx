@@ -70,12 +70,12 @@ export const DeviceControlProtectionLevel = memo<DeviceControlProtectionLevelPro
           label: ALLOW_ALL_LABEL,
         },
         {
-          id: DeviceControlAccessLevelEnum.read_only,
-          label: READ_ONLY_LABEL,
-        },
-        {
           id: DeviceControlAccessLevelEnum.no_execute,
           label: BLOCK_EXECUTE_LABEL,
+        },
+        {
+          id: DeviceControlAccessLevelEnum.read_only,
+          label: READ_ONLY_LABEL,
         },
         {
           id: DeviceControlAccessLevelEnum.deny_all,
