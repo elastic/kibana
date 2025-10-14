@@ -82,790 +82,56 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .cases 1`] = `
 Object {
-  "flags": Object {
-    "default": Object {
-      "special": "deep",
-    },
-    "error": [Function],
-    "presence": "optional",
-  },
-  "keys": Object {
-    "alerts": Object {
-      "flags": Object {
-        "error": [Function],
-      },
-      "items": Array [
-        Object {
-          "flags": Object {
-            "error": [Function],
-            "presence": "optional",
-          },
-          "metas": Array [
-            Object {
-              "x-oas-get-additional-properties": [Function],
-            },
-          ],
-          "rules": Array [
-            Object {
-              "args": Object {
-                "key": Object {
-                  "flags": Object {
-                    "error": [Function],
-                  },
-                  "rules": Array [
-                    Object {
-                      "args": Object {
-                        "method": [Function],
-                      },
-                      "name": "custom",
-                    },
-                  ],
-                  "type": "string",
-                },
-                "value": Object {
-                  "flags": Object {
-                    "error": [Function],
-                  },
-                  "metas": Array [
-                    Object {
-                      "x-oas-any-type": true,
-                    },
-                  ],
-                  "type": "any",
-                },
-              },
-              "name": "entries",
-            },
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "record",
-        },
-      ],
-      "type": "array",
-    },
-    "groupedAlerts": Object {
-      "flags": Object {
-        "default": null,
-        "error": [Function],
-        "presence": "optional",
-      },
-      "matches": Array [
-        Object {
-          "schema": Object {
-            "flags": Object {
-              "default": Array [],
-              "error": [Function],
-              "presence": "optional",
-            },
-            "items": Array [
-              Object {
-                "flags": Object {
-                  "default": Object {
-                    "special": "deep",
-                  },
-                  "error": [Function],
-                  "presence": "optional",
-                },
-                "keys": Object {
-                  "alerts": Object {
-                    "flags": Object {
-                      "error": [Function],
-                    },
-                    "items": Array [
-                      Object {
-                        "flags": Object {
-                          "error": [Function],
-                          "presence": "optional",
-                        },
-                        "metas": Array [
-                          Object {
-                            "x-oas-get-additional-properties": [Function],
-                          },
-                        ],
-                        "rules": Array [
-                          Object {
-                            "args": Object {
-                              "key": Object {
-                                "flags": Object {
-                                  "error": [Function],
-                                },
-                                "rules": Array [
-                                  Object {
-                                    "args": Object {
-                                      "method": [Function],
-                                    },
-                                    "name": "custom",
-                                  },
-                                ],
-                                "type": "string",
-                              },
-                              "value": Object {
-                                "flags": Object {
-                                  "error": [Function],
-                                },
-                                "metas": Array [
-                                  Object {
-                                    "x-oas-any-type": true,
-                                  },
-                                ],
-                                "type": "any",
-                              },
-                            },
-                            "name": "entries",
-                          },
-                          Object {
-                            "args": Object {
-                              "method": [Function],
-                            },
-                            "name": "custom",
-                          },
-                        ],
-                        "type": "record",
-                      },
-                    ],
-                    "rules": Array [
-                      Object {
-                        "args": Object {
-                          "limit": 1000,
-                        },
-                        "name": "max",
-                      },
-                    ],
-                    "type": "array",
-                  },
-                  "comments": Object {
-                    "flags": Object {
-                      "default": [Function],
-                      "error": [Function],
-                      "presence": "optional",
-                    },
-                    "items": Array [
-                      Object {
-                        "flags": Object {
-                          "error": [Function],
-                          "presence": "optional",
-                        },
-                        "rules": Array [
-                          Object {
-                            "args": Object {
-                              "method": [Function],
-                            },
-                            "name": "custom",
-                          },
-                        ],
-                        "type": "string",
-                      },
-                    ],
-                    "metas": Array [
-                      Object {
-                        "x-oas-optional": true,
-                      },
-                    ],
-                    "rules": Array [
-                      Object {
-                        "args": Object {
-                          "limit": 5000,
-                        },
-                        "name": "max",
-                      },
-                    ],
-                    "type": "array",
-                  },
-                  "grouping": Object {
-                    "flags": Object {
-                      "error": [Function],
-                    },
-                    "metas": Array [
-                      Object {
-                        "x-oas-get-additional-properties": [Function],
-                      },
-                    ],
-                    "rules": Array [
-                      Object {
-                        "args": Object {
-                          "key": Object {
-                            "flags": Object {
-                              "error": [Function],
-                            },
-                            "rules": Array [
-                              Object {
-                                "args": Object {
-                                  "method": [Function],
-                                },
-                                "name": "custom",
-                              },
-                            ],
-                            "type": "string",
-                          },
-                          "value": Object {
-                            "flags": Object {
-                              "error": [Function],
-                            },
-                            "metas": Array [
-                              Object {
-                                "x-oas-any-type": true,
-                              },
-                            ],
-                            "type": "any",
-                          },
-                        },
-                        "name": "entries",
-                      },
-                    ],
-                    "type": "record",
-                  },
-                  "title": Object {
-                    "flags": Object {
-                      "default": [Function],
-                      "error": [Function],
-                      "presence": "optional",
-                    },
-                    "metas": Array [
-                      Object {
-                        "x-oas-max-length": 160,
-                      },
-                      Object {
-                        "x-oas-optional": true,
-                      },
-                    ],
-                    "rules": Array [
-                      Object {
-                        "args": Object {
-                          "method": [Function],
-                        },
-                        "name": "custom",
-                      },
-                      Object {
-                        "args": Object {
-                          "method": [Function],
-                        },
-                        "name": "custom",
-                      },
-                    ],
-                    "type": "string",
-                  },
-                },
-                "type": "object",
-              },
-            ],
-            "rules": Array [
-              Object {
-                "args": Object {
-                  "limit": 0,
-                },
-                "name": "min",
-              },
-              Object {
-                "args": Object {
-                  "limit": 20,
-                },
-                "name": "max",
-              },
-            ],
-            "type": "array",
-          },
-        },
-        Object {
-          "schema": Object {
-            "allow": Array [
-              null,
-            ],
-            "flags": Object {
-              "error": [Function],
-              "only": true,
-            },
-            "type": "any",
-          },
-        },
-      ],
-      "type": "alternatives",
-    },
-    "groupingBy": Object {
-      "flags": Object {
-        "error": [Function],
-      },
-      "items": Array [
-        Object {
-          "flags": Object {
-            "error": [Function],
-            "presence": "optional",
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
-      ],
-      "rules": Array [
-        Object {
-          "args": Object {
-            "limit": 0,
-          },
-          "name": "min",
-        },
-        Object {
-          "args": Object {
-            "limit": 1,
-          },
-          "name": "max",
-        },
-      ],
-      "type": "array",
-    },
-    "internallyManagedAlerts": Object {
-      "flags": Object {
-        "default": null,
-        "error": [Function],
-        "presence": "optional",
-      },
-      "matches": Array [
-        Object {
-          "schema": Object {
-            "flags": Object {
-              "default": false,
-              "error": [Function],
-              "presence": "optional",
-            },
-            "type": "boolean",
-          },
-        },
-        Object {
-          "schema": Object {
-            "allow": Array [
-              null,
-            ],
-            "flags": Object {
-              "error": [Function],
-              "only": true,
-            },
-            "type": "any",
-          },
-        },
-      ],
-      "type": "alternatives",
-    },
-    "maximumCasesToOpen": Object {
-      "flags": Object {
-        "default": 5,
-        "error": [Function],
-        "presence": "optional",
-      },
-      "rules": Array [
-        Object {
-          "args": Object {
-            "limit": 1,
-          },
-          "name": "min",
-        },
-        Object {
-          "args": Object {
-            "limit": 20,
-          },
-          "name": "max",
-        },
-      ],
-      "type": "number",
-    },
-    "owner": Object {
-      "flags": Object {
-        "error": [Function],
-      },
-      "rules": Array [
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
-      ],
-      "type": "string",
-    },
-    "reopenClosedCases": Object {
-      "flags": Object {
-        "default": false,
-        "error": [Function],
-        "presence": "optional",
-      },
-      "type": "boolean",
-    },
-    "rule": Object {
-      "flags": Object {
-        "default": Object {
-          "special": "deep",
-        },
-        "error": [Function],
-        "presence": "optional",
-      },
-      "keys": Object {
-        "id": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
-        "name": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
-        "ruleUrl": Object {
-          "flags": Object {
-            "default": null,
-            "error": [Function],
-            "presence": "optional",
-          },
-          "matches": Array [
-            Object {
-              "schema": Object {
-                "flags": Object {
-                  "error": [Function],
-                },
-                "rules": Array [
-                  Object {
-                    "args": Object {
-                      "method": [Function],
-                    },
-                    "name": "custom",
-                  },
-                ],
-                "type": "string",
-              },
-            },
-            Object {
-              "schema": Object {
-                "allow": Array [
-                  null,
-                ],
-                "flags": Object {
-                  "error": [Function],
-                  "only": true,
-                },
-                "type": "any",
-              },
-            },
-          ],
-          "type": "alternatives",
-        },
-        "tags": Object {
-          "flags": Object {
-            "default": Array [],
-            "error": [Function],
-            "presence": "optional",
-          },
-          "items": Array [
-            Object {
-              "flags": Object {
-                "error": [Function],
-                "presence": "optional",
-              },
-              "rules": Array [
-                Object {
-                  "args": Object {
-                    "method": [Function],
-                  },
-                  "name": "custom",
-                },
-              ],
-              "type": "string",
-            },
-          ],
-          "type": "array",
-        },
-      },
+  "$ref": "#/definitions/config",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": Object {
+    "config": Object {
+      "additionalProperties": false,
+      "properties": Object {},
       "type": "object",
     },
-    "templateId": Object {
-      "flags": Object {
-        "default": null,
-        "error": [Function],
-        "presence": "optional",
-      },
-      "matches": Array [
-        Object {
-          "schema": Object {
-            "flags": Object {
-              "error": [Function],
-            },
-            "rules": Array [
-              Object {
-                "args": Object {
-                  "method": [Function],
-                },
-                "name": "custom",
-              },
-            ],
-            "type": "string",
-          },
-        },
-        Object {
-          "schema": Object {
-            "allow": Array [
-              null,
-            ],
-            "flags": Object {
-              "error": [Function],
-              "only": true,
-            },
-            "type": "any",
-          },
-        },
-      ],
-      "type": "alternatives",
-    },
-    "timeWindow": Object {
-      "flags": Object {
-        "default": "7d",
-        "error": [Function],
-        "presence": "optional",
-      },
-      "rules": Array [
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
-      ],
-      "type": "string",
-    },
   },
-  "type": "object",
 }
 `;
 
 exports[`Connector type config checks detect connector type changes for: .cases 2`] = `
 Object {
-  "flags": Object {
-    "default": Object {
-      "special": "deep",
+  "$ref": "#/definitions/secrets",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": Object {
+    "secrets": Object {
+      "additionalProperties": false,
+      "properties": Object {},
+      "type": "object",
     },
-    "error": [Function],
-    "presence": "optional",
   },
-  "keys": Object {},
-  "type": "object",
 }
 `;
 
 exports[`Connector type config checks detect connector type changes for: .cases 3`] = `
 Object {
-  "flags": Object {
-    "default": Object {
-      "special": "deep",
-    },
-    "error": [Function],
-    "presence": "optional",
-  },
-  "keys": Object {},
-  "type": "object",
-}
-`;
-
-exports[`Connector type config checks detect connector type changes for: .cases 4`] = `
-Object {
-  "flags": Object {
-    "default": Object {
-      "special": "deep",
-    },
-    "error": [Function],
-    "presence": "optional",
-  },
-  "keys": Object {
-    "subAction": Object {
-      "flags": Object {
-        "error": [Function],
-      },
-      "rules": Array [
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
+  "$ref": "#/definitions/params",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": Object {
+    "params": Object {
+      "additionalProperties": false,
+      "properties": Object {
+        "subAction": Object {
+          "type": "string",
         },
+        "subActionParams": Object {
+          "additionalProperties": true,
+          "properties": Object {},
+          "type": "object",
+        },
+      },
+      "required": Array [
+        "subAction",
+        "subActionParams",
       ],
-      "type": "string",
-    },
-    "subActionParams": Object {
-      "flags": Object {
-        "default": Object {
-          "special": "deep",
-        },
-        "error": [Function],
-        "presence": "optional",
-        "unknown": true,
-      },
-      "keys": Object {},
-      "preferences": Object {
-        "stripUnknown": Object {
-          "objects": false,
-        },
-      },
       "type": "object",
     },
   },
-  "type": "object",
-}
-`;
-
-exports[`Connector type config checks detect connector type changes for: .workflows 1`] = `
-Object {
-  "flags": Object {
-    "default": Object {
-      "special": "deep",
-    },
-    "error": [Function],
-    "presence": "optional",
-  },
-  "keys": Object {},
-  "type": "object",
-}
-`;
-
-exports[`Connector type config checks detect connector type changes for: .workflows 2`] = `
-Object {
-  "flags": Object {
-    "default": Object {
-      "special": "deep",
-    },
-    "error": [Function],
-    "presence": "optional",
-  },
-  "keys": Object {},
-  "type": "object",
-}
-`;
-
-exports[`Connector type config checks detect connector type changes for: .workflows 3`] = `
-Object {
-  "flags": Object {
-    "default": Object {
-      "special": "deep",
-    },
-    "error": [Function],
-    "presence": "optional",
-  },
-  "keys": Object {
-    "subAction": Object {
-      "allow": Array [
-        "run",
-      ],
-      "flags": Object {
-        "error": [Function],
-        "only": true,
-      },
-      "type": "any",
-    },
-    "subActionParams": Object {
-      "flags": Object {
-        "default": Object {
-          "special": "deep",
-        },
-        "error": [Function],
-        "presence": "optional",
-      },
-      "keys": Object {
-        "alerts": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "items": Array [
-            Object {
-              "flags": Object {
-                "error": [Function],
-                "presence": "optional",
-              },
-              "metas": Array [
-                Object {
-                  "x-oas-any-type": true,
-                },
-              ],
-              "type": "any",
-            },
-          ],
-          "type": "array",
-        },
-        "inputs": Object {
-          "flags": Object {
-            "default": [Function],
-            "error": [Function],
-            "presence": "optional",
-          },
-          "metas": Array [
-            Object {
-              "x-oas-any-type": true,
-            },
-            Object {
-              "x-oas-optional": true,
-            },
-          ],
-          "type": "any",
-        },
-        "spaceId": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
-        "workflowId": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
-      },
-      "type": "object",
-    },
-  },
-  "type": "object",
 }
 `;
 
@@ -913,6 +179,7 @@ Object {
           "type": "string",
         },
         "createCommentJson": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -935,6 +202,7 @@ Object {
           ],
         },
         "createCommentUrl": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -958,6 +226,7 @@ Object {
           "type": "string",
         },
         "getIncidentJson": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -993,6 +262,7 @@ Object {
               "type": "null",
             },
           ],
+          "default": null,
         },
         "scope": Object {
           "type": "string",
@@ -1029,14 +299,10 @@ Object {
         "createIncidentJson",
         "createIncidentResponseKey",
         "getIncidentUrl",
-        "getIncidentJson",
         "getIncidentResponseExternalTitleKey",
         "viewIncidentUrl",
         "updateIncidentUrl",
         "updateIncidentJson",
-        "createCommentUrl",
-        "createCommentJson",
-        "headers",
       ],
       "type": "object",
     },
@@ -1053,30 +319,35 @@ Object {
       "additionalProperties": false,
       "properties": Object {
         "clientSecret": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "crt": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "key": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "password": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "pfx": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -1094,23 +365,16 @@ Object {
               "type": "null",
             },
           ],
+          "default": null,
         },
         "user": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
       },
-      "required": Array [
-        "user",
-        "password",
-        "crt",
-        "key",
-        "pfx",
-        "clientSecret",
-        "secretHeaders",
-      ],
       "type": "object",
     },
   },
@@ -1159,35 +423,41 @@ Object {
                       "type": "null",
                     },
                   ],
+                  "default": null,
                 },
                 "incident": Object {
                   "additionalProperties": false,
                   "properties": Object {
                     "description": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "externalId": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "id": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "severity": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "status": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
@@ -1205,6 +475,7 @@ Object {
                           "type": "null",
                         },
                       ],
+                      "default": null,
                     },
                     "title": Object {
                       "type": "string",
@@ -1212,19 +483,12 @@ Object {
                   },
                   "required": Array [
                     "title",
-                    "description",
-                    "id",
-                    "severity",
-                    "status",
-                    "externalId",
-                    "tags",
                   ],
                   "type": "object",
                 },
               },
               "required": Array [
                 "incident",
-                "comments",
               ],
               "type": "object",
             },
@@ -1392,6 +656,7 @@ Object {
       "additionalProperties": false,
       "properties": Object {
         "clientId": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -1405,12 +670,14 @@ Object {
           "type": "boolean",
         },
         "host": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "oauthTokenUrl": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -1427,8 +694,10 @@ Object {
               "type": "null",
             },
           ],
+          "default": null,
         },
         "secure": Object {
+          "default": null,
           "type": Array [
             "boolean",
             "null",
@@ -1439,6 +708,7 @@ Object {
           "type": "string",
         },
         "tenantId": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -1446,13 +716,7 @@ Object {
         },
       },
       "required": Array [
-        "host",
-        "port",
-        "secure",
         "from",
-        "tenantId",
-        "clientId",
-        "oauthTokenUrl",
       ],
       "type": "object",
     },
@@ -1469,29 +733,27 @@ Object {
       "additionalProperties": false,
       "properties": Object {
         "clientSecret": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "password": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "user": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
       },
-      "required": Array [
-        "user",
-        "password",
-        "clientSecret",
-      ],
       "type": "object",
     },
   },
@@ -1547,6 +809,10 @@ Object {
         },
         "kibanaFooterLink": Object {
           "additionalProperties": false,
+          "default": Object {
+            "path": "/",
+            "text": "Go to Elastic",
+          },
           "properties": Object {
             "path": Object {
               "default": "/",
@@ -1563,6 +829,7 @@ Object {
           "type": "string",
         },
         "messageHTML": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -1582,8 +849,6 @@ Object {
       "required": Array [
         "subject",
         "message",
-        "messageHTML",
-        "kibanaFooterLink",
       ],
       "type": "object",
     },
@@ -1881,6 +1146,7 @@ Object {
       "additionalProperties": false,
       "properties": Object {
         "executionTimeField": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -1896,7 +1162,6 @@ Object {
       },
       "required": Array [
         "index",
-        "executionTimeField",
       ],
       "type": "object",
     },
@@ -1935,6 +1200,7 @@ Object {
           "type": "array",
         },
         "indexOverride": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -1943,7 +1209,6 @@ Object {
       },
       "required": Array [
         "documents",
-        "indexOverride",
       ],
       "type": "object",
     },
@@ -2199,23 +1464,27 @@ Object {
                       "type": "null",
                     },
                   ],
+                  "default": null,
                 },
                 "incident": Object {
                   "additionalProperties": false,
                   "properties": Object {
                     "description": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "externalId": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "issueType": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
@@ -2233,6 +1502,7 @@ Object {
                           "type": "null",
                         },
                       ],
+                      "default": null,
                     },
                     "otherFields": Object {
                       "anyOf": Array [
@@ -2244,14 +1514,17 @@ Object {
                           "type": "null",
                         },
                       ],
+                      "default": null,
                     },
                     "parent": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "priority": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
@@ -2263,20 +1536,12 @@ Object {
                   },
                   "required": Array [
                     "summary",
-                    "description",
-                    "externalId",
-                    "issueType",
-                    "priority",
-                    "labels",
-                    "parent",
-                    "otherFields",
                   ],
                   "type": "object",
                 },
               },
               "required": Array [
                 "incident",
-                "comments",
               ],
               "type": "object",
             },
@@ -2552,345 +1817,130 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .observability-ai-assistant 1`] = `
 Object {
-  "flags": Object {
-    "default": Object {
-      "special": "deep",
+  "$ref": "#/definitions/config",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": Object {
+    "config": Object {
+      "additionalProperties": false,
+      "properties": Object {},
+      "type": "object",
     },
-    "error": [Function],
-    "presence": "optional",
   },
-  "keys": Object {},
-  "type": "object",
 }
 `;
 
 exports[`Connector type config checks detect connector type changes for: .observability-ai-assistant 2`] = `
 Object {
-  "flags": Object {
-    "default": Object {
-      "special": "deep",
+  "$ref": "#/definitions/secrets",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": Object {
+    "secrets": Object {
+      "additionalProperties": false,
+      "properties": Object {},
+      "type": "object",
     },
-    "error": [Function],
-    "presence": "optional",
   },
-  "keys": Object {},
-  "type": "object",
 }
 `;
 
 exports[`Connector type config checks detect connector type changes for: .observability-ai-assistant 3`] = `
 Object {
-  "flags": Object {
-    "default": Object {
-      "special": "deep",
-    },
-    "error": [Function],
-    "presence": "optional",
-  },
-  "keys": Object {
-    "alerts": Object {
-      "flags": Object {
-        "default": Object {
-          "special": "deep",
-        },
-        "error": [Function],
-        "presence": "optional",
-      },
-      "keys": Object {
-        "new": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "items": Array [
-            Object {
-              "flags": Object {
-                "error": [Function],
-                "presence": "optional",
+  "$ref": "#/definitions/params",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": Object {
+    "params": Object {
+      "additionalProperties": false,
+      "properties": Object {
+        "alerts": Object {
+          "additionalProperties": false,
+          "properties": Object {
+            "new": Object {
+              "items": Object {
+                "additionalProperties": Object {},
+                "type": "object",
               },
-              "metas": Array [
-                Object {
-                  "x-oas-get-additional-properties": [Function],
-                },
-              ],
-              "rules": Array [
-                Object {
-                  "args": Object {
-                    "key": Object {
-                      "flags": Object {
-                        "error": [Function],
-                      },
-                      "rules": Array [
-                        Object {
-                          "args": Object {
-                            "method": [Function],
-                          },
-                          "name": "custom",
-                        },
-                      ],
-                      "type": "string",
-                    },
-                    "value": Object {
-                      "flags": Object {
-                        "error": [Function],
-                      },
-                      "metas": Array [
-                        Object {
-                          "x-oas-any-type": true,
-                        },
-                      ],
-                      "type": "any",
-                    },
-                  },
-                  "name": "entries",
-                },
-              ],
-              "type": "record",
+              "type": "array",
             },
-          ],
-          "type": "array",
-        },
-        "recovered": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "items": Array [
-            Object {
-              "flags": Object {
-                "error": [Function],
-                "presence": "optional",
+            "recovered": Object {
+              "items": Object {
+                "additionalProperties": Object {},
+                "type": "object",
               },
-              "metas": Array [
-                Object {
-                  "x-oas-get-additional-properties": [Function],
-                },
-              ],
-              "rules": Array [
-                Object {
-                  "args": Object {
-                    "key": Object {
-                      "flags": Object {
-                        "error": [Function],
-                      },
-                      "rules": Array [
-                        Object {
-                          "args": Object {
-                            "method": [Function],
-                          },
-                          "name": "custom",
-                        },
-                      ],
-                      "type": "string",
-                    },
-                    "value": Object {
-                      "flags": Object {
-                        "error": [Function],
-                      },
-                      "metas": Array [
-                        Object {
-                          "x-oas-any-type": true,
-                        },
-                      ],
-                      "type": "any",
-                    },
-                  },
-                  "name": "entries",
-                },
-              ],
-              "type": "record",
-            },
-          ],
-          "type": "array",
-        },
-      },
-      "type": "object",
-    },
-    "connector": Object {
-      "flags": Object {
-        "error": [Function],
-      },
-      "rules": Array [
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
-      ],
-      "type": "string",
-    },
-    "prompts": Object {
-      "flags": Object {
-        "error": [Function],
-      },
-      "items": Array [
-        Object {
-          "flags": Object {
-            "default": Object {
-              "special": "deep",
-            },
-            "error": [Function],
-            "presence": "optional",
-          },
-          "keys": Object {
-            "message": Object {
-              "flags": Object {
-                "error": [Function],
-              },
-              "metas": Array [
-                Object {
-                  "x-oas-min-length": 1,
-                },
-              ],
-              "rules": Array [
-                Object {
-                  "args": Object {
-                    "method": [Function],
-                  },
-                  "name": "custom",
-                },
-                Object {
-                  "args": Object {
-                    "method": [Function],
-                  },
-                  "name": "custom",
-                },
-              ],
-              "type": "string",
-            },
-            "statuses": Object {
-              "flags": Object {
-                "error": [Function],
-              },
-              "items": Array [
-                Object {
-                  "flags": Object {
-                    "error": [Function],
-                    "presence": "optional",
-                  },
-                  "rules": Array [
-                    Object {
-                      "args": Object {
-                        "method": [Function],
-                      },
-                      "name": "custom",
-                    },
-                  ],
-                  "type": "string",
-                },
-              ],
               "type": "array",
             },
           },
+          "required": Array [
+            "new",
+            "recovered",
+          ],
           "type": "object",
         },
-      ],
-      "type": "array",
-    },
-    "rule": Object {
-      "flags": Object {
-        "default": Object {
-          "special": "deep",
-        },
-        "error": [Function],
-        "presence": "optional",
-      },
-      "keys": Object {
-        "id": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
+        "connector": Object {
           "type": "string",
         },
-        "name": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
-        "ruleUrl": Object {
-          "flags": Object {
-            "default": null,
-            "error": [Function],
-            "presence": "optional",
-          },
-          "matches": Array [
-            Object {
-              "schema": Object {
-                "flags": Object {
-                  "error": [Function],
-                },
-                "rules": Array [
-                  Object {
-                    "args": Object {
-                      "method": [Function],
-                    },
-                    "name": "custom",
-                  },
-                ],
+        "prompts": Object {
+          "items": Object {
+            "additionalProperties": false,
+            "properties": Object {
+              "message": Object {
+                "minLength": 1,
                 "type": "string",
               },
-            },
-            Object {
-              "schema": Object {
-                "allow": Array [
-                  null,
-                ],
-                "flags": Object {
-                  "error": [Function],
-                  "only": true,
+              "statuses": Object {
+                "items": Object {
+                  "type": "string",
                 },
-                "type": "any",
+                "type": "array",
               },
             },
-          ],
-          "type": "alternatives",
-        },
-        "tags": Object {
-          "flags": Object {
-            "default": Array [],
-            "error": [Function],
-            "presence": "optional",
+            "required": Array [
+              "statuses",
+              "message",
+            ],
+            "type": "object",
           },
-          "items": Array [
-            Object {
-              "flags": Object {
-                "error": [Function],
-                "presence": "optional",
-              },
-              "rules": Array [
-                Object {
-                  "args": Object {
-                    "method": [Function],
-                  },
-                  "name": "custom",
-                },
-              ],
-              "type": "string",
-            },
-          ],
           "type": "array",
         },
+        "rule": Object {
+          "additionalProperties": false,
+          "properties": Object {
+            "id": Object {
+              "type": "string",
+            },
+            "name": Object {
+              "type": "string",
+            },
+            "ruleUrl": Object {
+              "default": null,
+              "type": Array [
+                "string",
+                "null",
+              ],
+            },
+            "tags": Object {
+              "default": Array [],
+              "items": Object {
+                "type": "string",
+              },
+              "type": "array",
+            },
+          },
+          "required": Array [
+            "id",
+            "name",
+          ],
+          "type": "object",
+        },
       },
+      "required": Array [
+        "connector",
+        "prompts",
+        "rule",
+        "alerts",
+      ],
       "type": "object",
     },
   },
-  "type": "object",
 }
 `;
 
@@ -2972,15 +2022,13 @@ Object {
       "additionalProperties": false,
       "properties": Object {
         "apiUrl": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
       },
-      "required": Array [
-        "apiUrl",
-      ],
       "type": "object",
     },
   },
@@ -3307,6 +2355,7 @@ Object {
           "type": "string",
         },
         "clientId": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -3317,12 +2366,14 @@ Object {
           "type": "boolean",
         },
         "jwtKeyId": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "userIdentifierValue": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -3335,9 +2386,6 @@ Object {
       },
       "required": Array [
         "apiUrl",
-        "userIdentifierValue",
-        "clientId",
-        "jwtKeyId",
       ],
       "type": "object",
     },
@@ -3354,43 +2402,41 @@ Object {
       "additionalProperties": false,
       "properties": Object {
         "clientSecret": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "password": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "privateKey": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "privateKeyPassword": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "username": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
       },
-      "required": Array [
-        "password",
-        "username",
-        "clientSecret",
-        "privateKey",
-        "privateKeyPassword",
-      ],
       "type": "object",
     },
   },
@@ -3503,6 +2549,7 @@ Object {
                       "type": "null",
                     },
                   ],
+                  "default": null,
                 },
                 "incident": Object {
                   "additionalProperties": false,
@@ -3517,14 +2564,17 @@ Object {
                           "type": "null",
                         },
                       ],
+                      "default": null,
                     },
                     "category": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "correlation_display": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
@@ -3538,24 +2588,28 @@ Object {
                       ],
                     },
                     "description": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "externalId": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "impact": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "severity": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
@@ -3565,12 +2619,14 @@ Object {
                       "type": "string",
                     },
                     "subcategory": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "urgency": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
@@ -3579,22 +2635,12 @@ Object {
                   },
                   "required": Array [
                     "short_description",
-                    "description",
-                    "externalId",
-                    "category",
-                    "subcategory",
-                    "correlation_display",
-                    "additional_fields",
-                    "severity",
-                    "urgency",
-                    "impact",
                   ],
                   "type": "object",
                 },
               },
               "required": Array [
                 "incident",
-                "comments",
               ],
               "type": "object",
             },
@@ -3659,15 +2705,13 @@ Object {
                       ],
                     },
                     "externalId": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                   },
-                  "required": Array [
-                    "externalId",
-                  ],
                   "type": "object",
                 },
               },
@@ -3701,6 +2745,7 @@ Object {
           "type": "string",
         },
         "clientId": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -3711,12 +2756,14 @@ Object {
           "type": "boolean",
         },
         "jwtKeyId": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "userIdentifierValue": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -3725,9 +2772,6 @@ Object {
       },
       "required": Array [
         "apiUrl",
-        "userIdentifierValue",
-        "clientId",
-        "jwtKeyId",
       ],
       "type": "object",
     },
@@ -3744,43 +2788,41 @@ Object {
       "additionalProperties": false,
       "properties": Object {
         "clientSecret": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "password": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "privateKey": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "privateKeyPassword": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "username": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
       },
-      "required": Array [
-        "password",
-        "username",
-        "clientSecret",
-        "privateKey",
-        "privateKeyPassword",
-      ],
       "type": "object",
     },
   },
@@ -3805,18 +2847,21 @@ Object {
               "additionalProperties": false,
               "properties": Object {
                 "additional_info": Object {
+                  "default": null,
                   "type": Array [
                     "string",
                     "null",
                   ],
                 },
                 "description": Object {
+                  "default": null,
                   "type": Array [
                     "string",
                     "null",
                   ],
                 },
                 "event_class": Object {
+                  "default": null,
                   "type": Array [
                     "string",
                     "null",
@@ -3830,60 +2875,55 @@ Object {
                   ],
                 },
                 "metric_name": Object {
+                  "default": null,
                   "type": Array [
                     "string",
                     "null",
                   ],
                 },
                 "node": Object {
+                  "default": null,
                   "type": Array [
                     "string",
                     "null",
                   ],
                 },
                 "resource": Object {
+                  "default": null,
                   "type": Array [
                     "string",
                     "null",
                   ],
                 },
                 "severity": Object {
+                  "default": null,
                   "type": Array [
                     "string",
                     "null",
                   ],
                 },
                 "source": Object {
+                  "default": null,
                   "type": Array [
                     "string",
                     "null",
                   ],
                 },
                 "time_of_event": Object {
+                  "default": null,
                   "type": Array [
                     "string",
                     "null",
                   ],
                 },
                 "type": Object {
+                  "default": null,
                   "type": Array [
                     "string",
                     "null",
                   ],
                 },
               },
-              "required": Array [
-                "source",
-                "event_class",
-                "resource",
-                "node",
-                "metric_name",
-                "type",
-                "severity",
-                "description",
-                "additional_info",
-                "time_of_event",
-              ],
               "type": "object",
             },
           },
@@ -3940,6 +2980,7 @@ Object {
           "type": "string",
         },
         "clientId": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -3950,12 +2991,14 @@ Object {
           "type": "boolean",
         },
         "jwtKeyId": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "userIdentifierValue": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -3968,9 +3011,6 @@ Object {
       },
       "required": Array [
         "apiUrl",
-        "userIdentifierValue",
-        "clientId",
-        "jwtKeyId",
       ],
       "type": "object",
     },
@@ -3987,43 +3027,41 @@ Object {
       "additionalProperties": false,
       "properties": Object {
         "clientSecret": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "password": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "privateKey": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "privateKeyPassword": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "username": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
       },
-      "required": Array [
-        "password",
-        "username",
-        "clientSecret",
-        "privateKey",
-        "privateKeyPassword",
-      ],
       "type": "object",
     },
   },
@@ -4136,6 +3174,7 @@ Object {
                       "type": "null",
                     },
                   ],
+                  "default": null,
                 },
                 "incident": Object {
                   "additionalProperties": false,
@@ -4150,14 +3189,17 @@ Object {
                           "type": "null",
                         },
                       ],
+                      "default": null,
                     },
                     "category": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "correlation_display": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
@@ -4171,6 +3213,7 @@ Object {
                       ],
                     },
                     "description": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
@@ -4179,24 +3222,31 @@ Object {
                     "dest_ip": Object {
                       "anyOf": Array [
                         Object {
+                          "default": null,
                           "type": Array [
                             "string",
                             "null",
                           ],
                         },
                         Object {
-                          "items": Object {
-                            "type": Array [
-                              "string",
-                              "null",
-                            ],
-                          },
-                          "type": "array",
+                          "anyOf": Array [
+                            Object {
+                              "items": Object {
+                                "type": "string",
+                              },
+                              "type": "array",
+                            },
+                            Object {
+                              "type": "null",
+                            },
+                          ],
+                          "default": null,
                         },
                       ],
                       "default": null,
                     },
                     "externalId": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
@@ -4205,19 +3255,25 @@ Object {
                     "malware_hash": Object {
                       "anyOf": Array [
                         Object {
+                          "default": null,
                           "type": Array [
                             "string",
                             "null",
                           ],
                         },
                         Object {
-                          "items": Object {
-                            "type": Array [
-                              "string",
-                              "null",
-                            ],
-                          },
-                          "type": "array",
+                          "anyOf": Array [
+                            Object {
+                              "items": Object {
+                                "type": "string",
+                              },
+                              "type": "array",
+                            },
+                            Object {
+                              "type": "null",
+                            },
+                          ],
+                          "default": null,
                         },
                       ],
                       "default": null,
@@ -4225,24 +3281,31 @@ Object {
                     "malware_url": Object {
                       "anyOf": Array [
                         Object {
+                          "default": null,
                           "type": Array [
                             "string",
                             "null",
                           ],
                         },
                         Object {
-                          "items": Object {
-                            "type": Array [
-                              "string",
-                              "null",
-                            ],
-                          },
-                          "type": "array",
+                          "anyOf": Array [
+                            Object {
+                              "items": Object {
+                                "type": "string",
+                              },
+                              "type": "array",
+                            },
+                            Object {
+                              "type": "null",
+                            },
+                          ],
+                          "default": null,
                         },
                       ],
                       "default": null,
                     },
                     "priority": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
@@ -4254,24 +3317,31 @@ Object {
                     "source_ip": Object {
                       "anyOf": Array [
                         Object {
+                          "default": null,
                           "type": Array [
                             "string",
                             "null",
                           ],
                         },
                         Object {
-                          "items": Object {
-                            "type": Array [
-                              "string",
-                              "null",
-                            ],
-                          },
-                          "type": "array",
+                          "anyOf": Array [
+                            Object {
+                              "items": Object {
+                                "type": "string",
+                              },
+                              "type": "array",
+                            },
+                            Object {
+                              "type": "null",
+                            },
+                          ],
+                          "default": null,
                         },
                       ],
                       "default": null,
                     },
                     "subcategory": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
@@ -4280,20 +3350,12 @@ Object {
                   },
                   "required": Array [
                     "short_description",
-                    "description",
-                    "externalId",
-                    "category",
-                    "subcategory",
-                    "correlation_display",
-                    "additional_fields",
-                    "priority",
                   ],
                   "type": "object",
                 },
               },
               "required": Array [
                 "incident",
-                "comments",
               ],
               "type": "object",
             },
@@ -4426,10 +3488,6 @@ Object {
           },
           "maxItems": 25,
           "type": "array",
-        },
-        "defaultChannel": Object {
-          "minLength": 1,
-          "type": "string",
         },
       },
       "type": "object",
@@ -4632,6 +3690,7 @@ Object {
                   "type": "null",
                 },
               ],
+              "default": null,
             },
             "caseIdConfig": Object {
               "anyOf": Array [
@@ -4663,6 +3722,7 @@ Object {
                   "type": "null",
                 },
               ],
+              "default": null,
             },
             "caseNameConfig": Object {
               "anyOf": Array [
@@ -4694,6 +3754,7 @@ Object {
                   "type": "null",
                 },
               ],
+              "default": null,
             },
             "commentsConfig": Object {
               "anyOf": Array [
@@ -4725,6 +3786,7 @@ Object {
                   "type": "null",
                 },
               ],
+              "default": null,
             },
             "descriptionConfig": Object {
               "anyOf": Array [
@@ -4756,6 +3818,7 @@ Object {
                   "type": "null",
                 },
               ],
+              "default": null,
             },
             "ruleNameConfig": Object {
               "anyOf": Array [
@@ -4787,6 +3850,7 @@ Object {
                   "type": "null",
                 },
               ],
+              "default": null,
             },
             "severityConfig": Object {
               "anyOf": Array [
@@ -4818,17 +3882,9 @@ Object {
                   "type": "null",
                 },
               ],
+              "default": null,
             },
           },
-          "required": Array [
-            "ruleNameConfig",
-            "alertIdConfig",
-            "caseIdConfig",
-            "caseNameConfig",
-            "commentsConfig",
-            "severityConfig",
-            "descriptionConfig",
-          ],
           "type": "object",
         },
       },
@@ -4907,68 +3963,66 @@ Object {
                       "type": "null",
                     },
                   ],
+                  "default": null,
                 },
                 "incident": Object {
                   "additionalProperties": false,
                   "properties": Object {
                     "alertId": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "caseId": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "caseName": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "description": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "externalId": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "ruleName": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                     "severity": Object {
+                      "default": null,
                       "type": Array [
                         "string",
                         "null",
                       ],
                     },
                   },
-                  "required": Array [
-                    "alertId",
-                    "ruleName",
-                    "caseId",
-                    "caseName",
-                    "severity",
-                    "description",
-                    "externalId",
-                  ],
                   "type": "object",
                 },
               },
               "required": Array [
                 "incident",
-                "comments",
               ],
               "type": "object",
             },
@@ -5052,6 +4106,7 @@ Object {
       "additionalProperties": false,
       "properties": Object {
         "organisation": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -5063,7 +4118,6 @@ Object {
       },
       "required": Array [
         "url",
-        "organisation",
       ],
       "type": "object",
     },
@@ -5314,6 +4368,7 @@ Object {
               "type": "null",
             },
           ],
+          "default": null,
         },
         "method": Object {
           "default": "post",
@@ -5343,7 +4398,6 @@ Object {
       },
       "required": Array [
         "url",
-        "headers",
       ],
       "type": "object",
     },
@@ -5360,30 +4414,35 @@ Object {
       "additionalProperties": false,
       "properties": Object {
         "clientSecret": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "crt": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "key": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "password": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "pfx": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -5401,23 +4460,16 @@ Object {
               "type": "null",
             },
           ],
+          "default": null,
         },
         "user": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
       },
-      "required": Array [
-        "user",
-        "password",
-        "crt",
-        "key",
-        "pfx",
-        "clientSecret",
-        "secretHeaders",
-      ],
       "type": "object",
     },
   },
@@ -5442,6 +4494,78 @@ Object {
 }
 `;
 
+exports[`Connector type config checks detect connector type changes for: .workflows 1`] = `
+Object {
+  "$ref": "#/definitions/config",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": Object {
+    "config": Object {
+      "additionalProperties": false,
+      "properties": Object {},
+      "type": "object",
+    },
+  },
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .workflows 2`] = `
+Object {
+  "$ref": "#/definitions/secrets",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": Object {
+    "secrets": Object {
+      "additionalProperties": false,
+      "properties": Object {},
+      "type": "object",
+    },
+  },
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .workflows 3`] = `
+Object {
+  "$ref": "#/definitions/params",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": Object {
+    "params": Object {
+      "additionalProperties": false,
+      "properties": Object {
+        "subAction": Object {
+          "const": "run",
+          "type": "string",
+        },
+        "subActionParams": Object {
+          "additionalProperties": false,
+          "properties": Object {
+            "alerts": Object {
+              "type": "array",
+            },
+            "inputs": Object {},
+            "spaceId": Object {
+              "type": "string",
+            },
+            "workflowId": Object {
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "workflowId",
+            "alerts",
+            "spaceId",
+          ],
+          "type": "object",
+        },
+      },
+      "required": Array [
+        "subAction",
+        "subActionParams",
+      ],
+      "type": "object",
+    },
+  },
+}
+`;
+
 exports[`Connector type config checks detect connector type changes for: .xmatters 1`] = `
 Object {
   "$ref": "#/definitions/config",
@@ -5451,6 +4575,7 @@ Object {
       "additionalProperties": false,
       "properties": Object {
         "configUrl": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -5461,9 +4586,6 @@ Object {
           "type": "boolean",
         },
       },
-      "required": Array [
-        "configUrl",
-      ],
       "type": "object",
     },
   },
@@ -5479,29 +4601,27 @@ Object {
       "additionalProperties": false,
       "properties": Object {
         "password": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "secretsUrl": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
         "user": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
           ],
         },
       },
-      "required": Array [
-        "user",
-        "password",
-        "secretsUrl",
-      ],
       "type": "object",
     },
   },
@@ -5580,6 +4700,7 @@ Object {
           "type": "string",
         },
         "apiKeyID": Object {
+          "default": null,
           "type": Array [
             "string",
             "null",
@@ -5588,7 +4709,6 @@ Object {
       },
       "required": Array [
         "apiKey",
-        "apiKeyID",
       ],
       "type": "object",
     },

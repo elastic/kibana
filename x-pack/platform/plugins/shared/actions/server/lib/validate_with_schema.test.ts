@@ -35,9 +35,9 @@ test('should validate when there are no validators', () => {
     id: 'foo',
     name: 'bar',
     validate: {
-      config: { schema: z.object({ any: z.array(z.string()) }) },
-      secrets: { schema: z.object({}) },
-      params: { schema: z.object({}) },
+      config: { schema: z.object({ any: z.array(z.string()) }).strict() },
+      secrets: { schema: z.object({}).strict() },
+      params: { schema: z.object({}).strict() },
     },
   });
   const testValue = { any: ['old', 'thing'] };
@@ -169,7 +169,7 @@ test('should throw with expected error when validators fail', () => {
 });
 
 test('should work with @kbn/zod', () => {
-  const testSchema = z.object({ foo: z.string() });
+  const testSchema = z.object({ foo: z.string() }).strict();
   const actionType: ActionType = {
     id: 'foo',
     name: 'bar',
@@ -204,6 +204,14 @@ test('should work with @kbn/zod', () => {
           \\"foo\\"
         ],
         \\"message\\": \\"Required\\"
+      },
+      {
+        \\"code\\": \\"unrecognized_keys\\",
+        \\"keys\\": [
+          \\"bar\\"
+        ],
+        \\"path\\": [],
+        \\"message\\": \\"Unrecognized key(s) in object: 'bar'\\"
       }
     ]"
   `);
