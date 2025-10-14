@@ -23,7 +23,10 @@ import { i18n } from '@kbn/i18n';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
 import { useDimensionsQuery } from '../../hooks';
 import { ClearAllSection } from './clear_all_section';
-import { MAX_VALUES_SELECTIONS } from '../../common/constants';
+import {
+  MAX_VALUES_SELECTIONS,
+  METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
+} from '../../common/constants';
 
 interface ValuesFilterProps {
   selectedDimensions: string[];
@@ -171,7 +174,7 @@ export const ValuesSelector = ({
 
   return (
     <ToolbarSelector
-      data-test-subj="metricsExperienceValuesSelector"
+      data-test-subj={METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ}
       data-selected-value={selectedDimensions}
       searchable
       buttonLabel={buttonLabel}

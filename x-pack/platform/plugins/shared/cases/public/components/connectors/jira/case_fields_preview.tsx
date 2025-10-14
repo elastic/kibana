@@ -31,6 +31,7 @@ const JiraFieldsPreviewComponent: React.FunctionComponent<
   });
 
   const issueTypes = issueTypesData?.data;
+  const otherFields = fields?.otherFields ?? '';
 
   const listItems = useMemo(
     () => [
@@ -58,8 +59,17 @@ const JiraFieldsPreviewComponent: React.FunctionComponent<
             },
           ]
         : []),
+      ...(otherFields != null && otherFields.length > 0
+        ? [
+            {
+              title: i18n.OTHER_FIELDS,
+              description: otherFields,
+              displayAsCodeBlock: true,
+            },
+          ]
+        : []),
     ],
-    [issueType, issueTypes, parent, priority]
+    [issueType, issueTypes, parent, priority, otherFields]
   );
 
   return (
