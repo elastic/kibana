@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
 import { css } from '@emotion/css';
@@ -78,7 +78,6 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     onConnectorSelected,
     stats = null,
   }) => {
-    const { euiTheme } = useEuiTheme();
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const { assistantAvailability } = useAssistantContext();
     const { setApiConfig } = useConversation();
