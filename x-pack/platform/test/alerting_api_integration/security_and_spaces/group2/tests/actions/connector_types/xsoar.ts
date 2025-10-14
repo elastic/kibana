@@ -39,7 +39,7 @@ export default function xsoarTest({ getService }: FtrProviderContext) {
     return body.id;
   };
 
-  describe('XSOAR', () => {
+  describe('testtest XSOAR', () => {
     describe('action creation', () => {
       const simulator = new XSOARSimulator({
         returnError: false,
@@ -96,8 +96,7 @@ export default function xsoarTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [url]: expected value of type [string] but got [undefined]',
+              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"url\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -139,8 +138,7 @@ export default function xsoarTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [apiKey]: expected value of type [string] but got [undefined]',
+              message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiKey\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -226,8 +224,7 @@ export default function xsoarTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message:
-              'Request validation failed (Error: [name]: expected value of type [string] but got [undefined])',
+            service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"name\"\n    ],\n    \"message\": \"Required\"\n  }\n])`,
           });
         });
       });

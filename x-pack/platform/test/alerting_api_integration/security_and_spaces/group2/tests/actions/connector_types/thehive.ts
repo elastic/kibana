@@ -117,8 +117,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [url]: expected value of type [string] but got [undefined]',
+              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"url\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -160,8 +159,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [apiKey]: expected value of type [string] but got [undefined]',
+              message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiKey\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -197,8 +195,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: theHiveActionId,
-            message:
-              'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+            message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -377,8 +374,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'error',
               connector_id: theHiveActionId,
-              message:
-                'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+              message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
               retry: false,
               errorSource: TaskErrorSource.USER,
             });

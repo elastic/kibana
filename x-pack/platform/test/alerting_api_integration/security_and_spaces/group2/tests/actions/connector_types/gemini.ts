@@ -114,8 +114,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiUrl\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"gcpRegion\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"gcpProjectID\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -136,8 +135,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [gcpProjectID]: expected value of type [string] but got [undefined]',
+              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"gcpProjectID\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -158,8 +156,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [gcpRegion]: expected value of type [string] but got [undefined]',
+              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"gcpRegion\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -202,8 +199,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [credentialsJson]: expected value of type [string] but got [undefined]',
+              message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"credentialsJson\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -239,8 +235,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: geminiActionId,
-            message:
-              'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+            message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -374,8 +369,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'error',
               connector_id: geminiActionId,
-              message:
-                'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+              message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
               retry: false,
               errorSource: TaskErrorSource.USER,
             });

@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { Coerced } from '../../../common/lib';
 import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
 import { validateRecordMaxKeys } from '../lib/validators';
 import { validateOtherFieldsKeys } from './validators';
@@ -44,23 +45,25 @@ const incidentSchemaObject = {
     .nullable()
     .default(null),
   parent: z.string().nullable().default(null),
-  otherFields: z
-    .record(
-      z.string().superRefine((value, ctx) => {
-        validateOtherFieldsKeys(value, ctx);
-      }),
-      z.any()
-    )
-    .superRefine((val, ctx) =>
-      validateRecordMaxKeys({
-        record: val,
-        ctx,
-        maxNumberOfFields: MAX_OTHER_FIELDS_LENGTH,
-        fieldName: 'otherFields',
-      })
-    )
-    .nullable()
-    .default(null),
+  otherFields: Coerced(
+    z
+      .record(
+        z.string().superRefine((value, ctx) => {
+          validateOtherFieldsKeys(value, ctx);
+        }),
+        z.any()
+      )
+      .superRefine((val, ctx) =>
+        validateRecordMaxKeys({
+          record: val,
+          ctx,
+          maxNumberOfFields: MAX_OTHER_FIELDS_LENGTH,
+          fieldName: 'otherFields',
+        })
+      )
+      .nullable()
+      .default(null)
+  ),
 };
 
 export const incidentSchemaObjectProperties = Object.keys(incidentSchemaObject);
