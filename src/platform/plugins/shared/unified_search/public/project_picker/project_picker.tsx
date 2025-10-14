@@ -261,7 +261,7 @@ export const ProjectPicker = () => {
             css={{ padding: `0 ${euiTheme.size.s}` }}
           >
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false} gutterSize="xs">
+              <EuiFlexGroup responsive={false} gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiIcon type={getSolutionIcon(project._type)} />
                 </EuiFlexItem>
