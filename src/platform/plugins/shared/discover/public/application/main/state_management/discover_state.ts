@@ -46,6 +46,7 @@ import {
   internalStateActions,
   selectTab,
   selectTabRuntimeState,
+  selectIsDataViewUsedInMultipleRuntimeTabStates,
 } from './redux';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { getSavedSearchContainer } from './discover_saved_search_container';
@@ -295,10 +296,19 @@ export function getDiscoverStateContainer({
     const prevDataView = currentDataView$.getValue();
     if (!prevDataView || prevDataView.isPersisted()) return;
 
+    const isUsedInMultipleTabs = selectIsDataViewUsedInMultipleRuntimeTabStates(
+      runtimeStateManager,
+      prevDataView.id!
+    );
+
     const nextDataView = await services.dataViews.create({
       ...editedDataView.toSpec(),
       id: uuidv4(),
     });
+
+    if (!isUsedInMultipleTabs) {
+      services.dataViews.clearInstanceCache(prevDataView.id);
+    }
 
     await updateFiltersReferences({
       prevDataView,
@@ -306,7 +316,13 @@ export function getDiscoverStateContainer({
       services,
     });
 
-    internalState.dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
+    if (isUsedInMultipleTabs) {
+      internalState.dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
+    } else {
+      internalState.dispatch(
+        internalStateActions.replaceAdHocDataViewWithId(prevDataView.id!, nextDataView)
+      );
+    }
 
     if (isDataSourceType(appStateContainer.get().dataSource, DataSourceType.DataView)) {
       await appStateContainer.replaceUrlState({
