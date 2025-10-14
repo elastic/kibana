@@ -40,6 +40,7 @@ export default function ({ loadTestFile, getService }: OneChatUiFtrProviderConte
     describe('agents', function () {
       llmSetup();
       loadTestFile(require.resolve('./agents/agents_list.ts'));
+      loadTestFile(require.resolve('./agents/create_agent.ts'));
     });
   });
 }

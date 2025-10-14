@@ -72,6 +72,7 @@ export const AgentsList: React.FC = () => {
         ) : (
           <AgentAvatar agent={agent} size="m" />
         ),
+      'data-test-subj': 'agentBuilderAgentsListAvatar',
     };
 
     const agentNameAndDescription: EuiTableFieldDataColumnType<AgentDefinition> = {
@@ -93,6 +94,7 @@ export const AgentsList: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
+      'data-test-subj': 'agentBuilderAgentsListNameAndDescription',
     };
 
     const agentLabels: EuiTableFieldDataColumnType<AgentDefinition> = {
@@ -105,6 +107,7 @@ export const AgentsList: React.FC = () => {
 
         return <Labels labels={labels} />;
       },
+      'data-test-subj': 'agentBuilderAgentsListLabels',
     };
 
     const agentActions: EuiTableActionsColumnType<AgentDefinition> = {

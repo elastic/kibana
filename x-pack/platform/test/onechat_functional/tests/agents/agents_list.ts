@@ -9,15 +9,6 @@ import expect from '@kbn/expect';
 import { chatSystemIndex } from '@kbn/onechat-server';
 import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-// data-test-subj selectors
-const selectors = {
-  content: 'agentBuilderAgentsListContent',
-  title: 'agentBuilderAgentsListPageTitle',
-  newAgentButton: 'agentBuilderNewAgentButton',
-  table: 'agentBuilderAgentsListTable',
-  row: 'agentBuilderAgentsListRow',
-};
-
 const agents = [
   { id: 'test_agent_1', name: 'Test Agent 1', labels: ['first'] },
   { id: 'test_agent_2', name: 'Test Agent 2', labels: ['second'] },
@@ -49,15 +40,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('renders', async function () {
       await onechat.navigateToApp('agents');
 
-      expect(await testSubjects.getVisibleText(selectors.title)).to.contain('Agents');
-      await testSubjects.existOrFail(selectors.newAgentButton);
-      await testSubjects.existOrFail(selectors.table);
+      const titleSelector = 'agentBuilderAgentsListPageTitle';
+      const newAgentButtonSelector = 'agentBuilderNewAgentButton';
+      const tableSelector = 'agentBuilderAgentsListTable';
+
+      expect(await testSubjects.getVisibleText(titleSelector)).to.contain('Agents');
+      await testSubjects.existOrFail(newAgentButtonSelector);
+      await testSubjects.existOrFail(tableSelector);
     });
 
     it('lists created agents', async function () {
       expect(await onechat.countAgentsListRows()).to.be.greaterThan(2);
       for (const agent of agents) {
-        await onechat.agentInList(agent.id).existOrFail();
+        await onechat.agentExistsOrFail(agent.id);
       }
     });
 
@@ -65,21 +60,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const search = onechat.agentsListSearch();
       await search.type(agents[0].name);
       expect(await onechat.countAgentsListRows()).to.equal(1);
-      await onechat.agentInList(agents[0].id).existOrFail();
+      await onechat.agentExistsOrFail(agents[0].id);
       await search.clear();
     });
 
     it('filters on labels', async function () {
       await onechat.selectAgentLabel(agents[0].labels[0]);
       expect(await onechat.countAgentsListRows()).to.equal(1);
-      await onechat.agentInList(agents[0].id).existOrFail();
+      await onechat.agentExistsOrFail(agents[0].id);
     });
 
     it('chats with agent', async function () {
-      await onechat.clickAgentChat(agents[0].id);
-      await browser.waitForUrlToBe(`/app/agent_builder/conversations/new?agent_id=${agents[0].id}`);
+      const agent = agents[0];
+      await onechat.clickAgentChat(agent.id);
+      await browser.waitForUrlToBe(`/app/agent_builder/conversations/new?agent_id=${agent.id}`);
       const agentText = await testSubjects.getVisibleText('agentBuilderAgentSelectorButton');
-      expect(agentText).to.contain(agents[0].name);
+      expect(agentText).to.contain(agent.name);
       // go back to agents list
       await onechat.navigateToApp('agents');
     });
@@ -95,15 +91,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('deletes agent', async function () {
-      const agent = onechat.agentInList(agents[1].id);
-      await agent.existOrFail();
+      const agent = agents[1];
+      await onechat.agentExistsOrFail(agent.id);
 
-      const modal = await onechat.openAgentDeleteModal(agents[1].id);
-      const expectedTitle = `Delete ${agents[1].name}`;
+      const modal = await onechat.openAgentDeleteModal(agent.id);
+      const expectedTitle = `Delete ${agent.name}`;
       expect(await modal.getTitle()).to.contain(expectedTitle);
-
       await modal.clickConfirm();
-      await agent.missingOrFail();
+
+      await onechat.agentMissingOrFail(agent.id);
     });
   });
 }

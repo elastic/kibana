@@ -436,44 +436,68 @@ export class OneChatPageObject extends FtrService {
     return rows.length;
   }
 
-  agentInList(agentId: string) {
-    const rowSelector = `agentBuilderAgentsListRow-${agentId}`;
-    const openActions = async () => {
-      const row = await this.testSubjects.find(rowSelector);
-      const actionsMenuButton = await this.testSubjects.findDescendant(
-        'euiCollapsedItemActionsButton',
-        row
-      );
-      await actionsMenuButton.click();
-    };
+  private agentListRowSelector(agentId: string) {
+    return `agentBuilderAgentsListRow-${agentId}`;
+  }
+
+  agentExistsOrFail(agentId: string) {
+    return this.testSubjects.existOrFail(this.agentListRowSelector(agentId));
+  }
+
+  agentMissingOrFail(agentId: string) {
+    return this.testSubjects.missingOrFail(this.agentListRowSelector(agentId));
+  }
+
+  agentAction(agentId: string, actionSubj: string) {
+    const rowSelector = this.agentListRowSelector(agentId);
+    const actionSelector = `.euiBasicTable__collapsedActions ${subj(actionSubj)}`;
+    const openActionsButtonSelector = `${rowSelector} > euiCollapsedItemActionsButton`;
     return {
-      existOrFail: () => this.testSubjects.existOrFail(rowSelector),
-      missingOrFail: () => this.testSubjects.missingOrFail(rowSelector),
-      action: (actionSubj: string) => {
-        const actionSelector = `.euiBasicTable__collapsedActions ${subj(actionSubj)}`;
-        return {
-          click: async () => {
-            await openActions();
-            await this.find.clickByCssSelector(actionSelector);
-          },
-          getHref: async () => {
-            await openActions();
-            const action = await this.find.byCssSelector(actionSelector);
-            return action.getAttribute('href');
-          },
-        };
+      click: async () => {
+        await this.testSubjects.click(openActionsButtonSelector);
+        await this.find.clickByCssSelector(actionSelector);
+      },
+      getHref: async () => {
+        await this.testSubjects.click(openActionsButtonSelector);
+        const action = await this.find.byCssSelector(actionSelector);
+        return action.getAttribute('href');
       },
     };
   }
 
+  async getAgentLabels(agentId: string) {
+    const rowSelector = this.agentListRowSelector(agentId);
+    const labelsTableCellSelector = 'agentBuilderAgentsListLabels';
+    const labelSelector = '^agentBuilderLabel-';
+    const visibleLabelsSelector = `${rowSelector} > ${labelsTableCellSelector} > ${labelSelector}`;
+    const viewMoreButtonSelector = `${rowSelector} > ${labelsTableCellSelector} > agentBuilderLabelsViewMoreButton`;
+
+    const labelTexts = await this.testSubjects.getVisibleTextAll(visibleLabelsSelector);
+    const hasViewMoreButton = await this.testSubjects.exists(viewMoreButtonSelector);
+
+    if (hasViewMoreButton) {
+      const popoverSelector = 'agentBuilderLabelsViewMorePopover';
+      const hiddenLabelsSelector = `${popoverSelector} > ${labelSelector}`;
+
+      await this.testSubjects.click(viewMoreButtonSelector);
+      const hiddenLabelTexts = await this.testSubjects.getVisibleTextAll(hiddenLabelsSelector);
+      labelTexts.push(...hiddenLabelTexts);
+
+      // Close popover
+      await this.testSubjects.click(viewMoreButtonSelector);
+    }
+
+    return labelTexts;
+  }
+
   async clickAgentChat(agentId: string) {
-    await this.agentInList(agentId).action(`agentBuilderAgentsListChat-${agentId}`).click();
+    const chatActionSelector = `agentBuilderAgentsListChat-${agentId}`;
+    await this.agentAction(agentId, chatActionSelector).click();
   }
 
   async hasAgentEditLink(agentId: string) {
-    const href = await this.agentInList(agentId)
-      .action(`agentBuilderAgentsListEdit-${agentId}`)
-      .getHref();
+    const editActionSelector = `agentBuilderAgentsListEdit-${agentId}`;
+    const href = await this.agentAction(agentId, editActionSelector).getHref();
     if (!href) {
       return false;
     }
@@ -481,9 +505,8 @@ export class OneChatPageObject extends FtrService {
   }
 
   async hasAgentCloneLink(agentId: string) {
-    const href = await this.agentInList(agentId)
-      .action(`agentBuilderAgentsListClone-${agentId}`)
-      .getHref();
+    const cloneActionSelector = `agentBuilderAgentsListClone-${agentId}`;
+    const href = await this.agentAction(agentId, cloneActionSelector).getHref();
     if (!href) {
       return false;
     }
@@ -491,10 +514,13 @@ export class OneChatPageObject extends FtrService {
   }
 
   async openAgentDeleteModal(agentId: string) {
-    await this.agentInList(agentId).action(`agentBuilderAgentsListDelete-${agentId}`).click();
+    const deleteActionSelector = `agentBuilderAgentsListDelete-${agentId}`;
     const deleteModalSelector =
       '.euiModal[role="alertdialog"][aria-labelledby^="agentDeleteModalTitle"]';
+
+    await this.agentAction(agentId, deleteActionSelector).click();
     const modal = await this.find.byCssSelector(deleteModalSelector);
+
     return {
       getTitle: async () => {
         const titleSelector = '[id^="agentDeleteModalTitle"]';
@@ -502,10 +528,8 @@ export class OneChatPageObject extends FtrService {
         return titleElement.getVisibleText();
       },
       clickConfirm: async () => {
-        const confirmButton = await this.testSubjects.findDescendant(
-          'onechatAgentDeleteConfirmButton',
-          modal
-        );
+        const confirmButtonSelector = 'onechatAgentDeleteConfirmButton';
+        const confirmButton = await this.testSubjects.findDescendant(confirmButtonSelector, modal);
         await confirmButton.click();
       },
     };
