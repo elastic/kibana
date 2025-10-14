@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { from, filter, shareReplay, merge, Subject, finalize } from 'rxjs';
 import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
 import type { ChatAgentEvent } from '@kbn/onechat-common';
@@ -24,7 +23,9 @@ import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 
 const chatAgentGraphName = 'default-onechat-agent';
 
-export type RunChatAgentParams = Omit<RunAgentParams, 'mode'>;
+export type RunChatAgentParams = Omit<RunAgentParams, 'mode'> & {
+  startTime?: Date;
+};
 
 export type RunChatAgentFn = (
   params: RunChatAgentParams,
@@ -36,20 +37,20 @@ export type RunChatAgentFn = (
  */
 export const runDefaultAgentMode: RunChatAgentFn = async (
   {
+    agentId,
     nextInput,
     conversation = [],
     capabilities,
     toolSelection = allToolsSelection,
+    startTime = new Date(),
     customInstructions,
-    runId = uuidv4(),
-    agentId,
     abortSignal,
   },
   { logger, request, modelProvider, toolProvider, events }
 ) => {
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
-  logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
+  logger.debug(`Running chat agent with connector: ${model.connector.name}`);
 
   const selectedTools = await selectProviderTools({
     provider: toolProvider,
@@ -82,7 +83,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     customInstructions,
   });
 
-  logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
+  logger.debug(`Running chat agent with graph: ${chatAgentGraphName}`);
 
   const eventStream = agentGraph.streamEvents(
     { initialMessages },
@@ -93,7 +94,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       metadata: {
         graphName: chatAgentGraphName,
         agentId,
-        runId,
       },
       recursionLimit: 25,
       callbacks: [],
@@ -111,7 +111,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   );
 
   const events$ = merge(graphEvents$, manualEvents$).pipe(
-    addRoundCompleteEvent({ userInput: nextInput }),
+    addRoundCompleteEvent({ userInput: nextInput, startTime }),
     shareReplay()
   );
 
