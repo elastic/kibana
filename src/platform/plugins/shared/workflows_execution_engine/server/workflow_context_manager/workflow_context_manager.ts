@@ -8,6 +8,7 @@
  */
 
 import type { StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
+import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest, CoreStart } from '@kbn/core/server';
@@ -130,7 +131,7 @@ export class WorkflowContextManager {
   }
 
   public readContextPath(propertyPath: string): { pathExists: boolean; value: any } {
-    const propertyPathSegments = propertyPath.split('.');
+    const propertyPathSegments = parseJsPropertyAccess(propertyPath);
     let result: any = this.getContext();
 
     for (const segment of propertyPathSegments) {
