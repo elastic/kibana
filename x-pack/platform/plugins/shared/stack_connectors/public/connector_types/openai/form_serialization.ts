@@ -1,0 +1,56 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import type { InternalConnectorForm } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/types';
+import { isEmpty } from 'lodash';
+
+export const formDeserializer = (data: ConnectorFormSchema): InternalConnectorForm => {
+  const configHeaders = Object.entries(data?.config.headers ?? {}).map(([key, value]) => ({
+    key,
+    value,
+    type: 'config' as const,
+  }));
+
+  return {
+    ...data,
+    config: {
+      ...data.config,
+      headers: isEmpty(configHeaders) ? undefined : configHeaders,
+    },
+    __internal__: {
+      headers: configHeaders,
+    },
+  };
+};
+
+export const formSerializer = (formData: InternalConnectorForm): ConnectorFormSchema => {
+  const webhookFormData = formData as {
+    config: { headers?: Array<{ key: string; value: string }> };
+  };
+
+  const secretHeaders = {};
+  const configHeaders = (webhookFormData?.config?.headers ?? []).reduce(
+    (acc, header) => ({
+      ...acc,
+      [header.key]: header.value,
+    }),
+    {}
+  );
+
+  return {
+    ...formData,
+    config: {
+      ...formData.config,
+      headers: isEmpty(configHeaders) ? undefined : configHeaders,
+    },
+    secrets: {
+      ...formData.secrets,
+      secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
+    },
+  };
+};

@@ -12,8 +12,11 @@ import type { RuleActionParam, ActionVariable } from '@kbn/alerting-types';
 import type { IconType, RecursivePartial } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionType, SubFeature } from '@kbn/actions-types';
-import type { TypeRegistry } from '../type_registry';
+import type { SerializerFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import type { InternalConnectorForm } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/types';
 import type { RuleFormParamsErrors } from './rule_types';
+import type { TypeRegistry } from '../type_registry';
 
 export interface GenericValidationResult<T> {
   errors: Record<Extract<keyof T, string>, string[] | unknown>;
@@ -133,6 +136,9 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   modalWidth?: number;
   isSystemActionType?: boolean;
   subFeature?: SubFeature;
+  formSerializer?: SerializerFunc<ConnectorFormSchema, InternalConnectorForm>;
+  formDeserializer?: SerializerFunc<InternalConnectorForm, ConnectorFormSchema>;
+  shouldHideConnectorSettingsTitle?: boolean;
 }
 
 export type ActionTypeRegistryContract<Connector = unknown, Params = unknown> = PublicMethodsOf<
