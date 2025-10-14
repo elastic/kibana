@@ -66,21 +66,24 @@ export const resolveAdHocDataView = async ({
   attributes,
 }: PersistedDataView & { attributes: DataViewAttributes }): Promise<ResolvedDataView> => {
   const { name, timeFieldName } = attributes;
-  const dataViewReference = await dataViewsService.create(
-    {
-      id: dataViewId,
-      name,
-      title: dataViewId,
-      timeFieldName,
-    },
-    false,
-    false
-  );
+
+  const dataViewReference = await dataViewsService.get(dataViewId, false, true).catch(() => {
+    return dataViewsService.create(
+      {
+        id: dataViewId,
+        name,
+        title: dataViewId,
+        timeFieldName,
+      },
+      false,
+      false
+    );
+  });
 
   return {
     indices: dataViewId,
-    timeFieldName,
-    fields: dataViewReference.fields,
+    timeFieldName: dataViewReference.timeFieldName ?? TIMESTAMP_FIELD,
+    fields: dataViewReference.fields ?? [],
     dataViewReference,
   };
 };

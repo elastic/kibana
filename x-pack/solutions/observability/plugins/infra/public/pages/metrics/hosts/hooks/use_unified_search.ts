@@ -58,7 +58,7 @@ const buildQuerySubmittedPayload = (
 export const useUnifiedSearch = () => {
   const [error, setError] = useState<Error | null>(null);
   const [searchCriteria, setSearch] = useHostsUrlState();
-  const { metricsView } = useMetricsDataViewContext();
+  const { metricsView, refetch: refetchMetricsView } = useMetricsDataViewContext();
   const { updateReloadRequestTime } = useReloadRequestTimeContext();
   const { updateTopbarMenuVisibilityBySchema } = useInfraMLCapabilitiesContext();
   const { services } = useKibanaContextForPlugin();
@@ -149,8 +149,9 @@ export const useUnifiedSearch = () => {
   const onSubmit = useCallback(
     ({ dateRange }: { dateRange: TimeRange }) => {
       onDateRangeChange(dateRange);
+      refetchMetricsView();
     },
-    [onDateRangeChange]
+    [onDateRangeChange, refetchMetricsView]
   );
 
   const getDateRangeAsTimestamp = useCallback(() => {
