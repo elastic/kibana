@@ -20,6 +20,7 @@ import type { RuleExecutionStatuses } from '../../common';
 import { translations } from '../constants/translations';
 import type { RunRuleResult } from '../task_runner/types';
 import type { RuleRunMetrics } from './rule_run_metrics_store';
+import type { AdHocRunRuleResult } from '../task_runner/ad_hoc_task_runner';
 
 export interface IExecutionStatusAndMetrics {
   status: RuleExecutionStatus;
@@ -31,11 +32,11 @@ export function executionStatusFromState({
   ruleResultService,
   lastExecutionDate,
 }: {
-  runRuleResult: RunRuleResult;
+  runRuleResult: RunRuleResult | AdHocRunRuleResult;
   ruleResultService: RuleResultService;
   lastExecutionDate?: Date;
 }): IExecutionStatusAndMetrics {
-  const alertIds = Object.keys(runRuleResult.state.alertInstances ?? {});
+  const alertIds = Object.keys(runRuleResult.state?.alertInstances ?? {});
 
   let status: RuleExecutionStatuses =
     alertIds.length === 0 ? RuleExecutionStatusValues[0] : RuleExecutionStatusValues[1];
