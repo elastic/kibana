@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type { Datafeed, Job } from '@kbn/ml-plugin/common';
 import { JOB_STATE } from '@kbn/ml-plugin/common';
 import expect from '@kbn/expect';
@@ -17,25 +16,12 @@ export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
   const spacesService = getService('spaces');
   const supertest = getService('supertestWithoutAuth');
+  const esArchiver = getService('esArchiver');
 
   const jobIdSpace1 = 'fq_single_space1';
   const datafeedIdSpace1 = `datafeed-${jobIdSpace1}`;
   const idSpace1 = 'space1';
   const idSpace2 = 'space2';
-
-  const farequoteMappings: estypes.MappingTypeMapping = {
-    properties: {
-      '@timestamp': {
-        type: 'date',
-      },
-      airline: {
-        type: 'keyword',
-      },
-      responsetime: {
-        type: 'float',
-      },
-    },
-  };
 
   async function jobForCloning(
     jobId: string,
@@ -60,7 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
-      await ml.api.createIndex('ft_farequote', farequoteMappings);
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
 
       const jobConfig = ml.commonConfig.getADFqSingleMetricJobConfig(jobIdSpace1);
       jobConfig.custom_settings = { created_by: 'user1' };

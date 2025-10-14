@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import { DATAFEED_STATE } from '@kbn/ml-plugin/common';
+import expect from '@kbn/expect';
+import type { estypes } from '@elastic/elasticsearch';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
@@ -15,28 +16,52 @@ export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
   const spacesService = getService('spaces');
   const supertest = getService('supertestWithoutAuth');
+  const esArchiver = getService('esArchiver');
+  const es = getService('es');
 
   const jobIdSpace1 = 'fq_single_space1';
   const datafeedIdSpace1 = `datafeed-${jobIdSpace1}`;
   const idSpace1 = 'space1';
   const idSpace2 = 'space2';
 
-  const farequoteMappings: estypes.MappingTypeMapping = {
-    properties: {
-      '@timestamp': {
-        type: 'date',
+  interface StartDatafeedConfig {
+    datafeed_id: string;
+    start?: number | string;
+    end?: number | string;
+    timeout?: number;
+  }
+
+  interface FarequoteTimeAggs {
+    min_time: estypes.AggregationsMinAggregate;
+    max_time: estypes.AggregationsMaxAggregate;
+  }
+
+  async function getFarequoteTimeRange() {
+    const { aggregations } = await es.search<unknown, FarequoteTimeAggs>({
+      index: 'ft_farequote',
+      size: 0,
+      track_total_hits: false,
+      aggs: {
+        min_time: { min: { field: '@timestamp' } },
+        max_time: { max: { field: '@timestamp' } },
       },
-      airline: {
-        type: 'keyword',
-      },
-      responsetime: {
-        type: 'float',
-      },
-    },
-  };
+    });
+
+    const minValue = aggregations?.min_time?.value;
+    const maxValue = aggregations?.max_time?.value;
+
+    if (minValue == null || maxValue == null) {
+      throw new Error('ft_farequote has no @timestamp data');
+    }
+
+    return {
+      minTime: minValue,
+      maxTime: maxValue,
+    };
+  }
 
   async function startDatafeed(
-    datafeedConfig: estypes.MlStartDatafeedRequest,
+    datafeedConfig: StartDatafeedConfig,
     user: USER,
     expectedStatusCode: number,
     space?: string
@@ -53,17 +78,16 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   async function stopDatafeed(
-    datafeedConfig: estypes.MlStopDatafeedRequest,
+    datafeedId: string,
     user: USER,
     expectedStatusCode: number,
     space?: string
   ) {
-    const { datafeed_id: datafeedId, ...requestBody } = datafeedConfig;
     const { body, status } = await supertest
       .post(`${space ? `/s/${space}` : ''}/internal/ml/datafeeds/${datafeedId}/_stop`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(getCommonRequestHeader('1'))
-      .send(requestBody);
+      .set(getCommonRequestHeader('1'));
+
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
@@ -73,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
-      await ml.api.createIndex('ft_farequote', farequoteMappings);
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       const jobConfig = ml.commonConfig.getADFqSingleMetricJobConfig(jobIdSpace1);
       await ml.api.createAnomalyDetectionJob(jobConfig, idSpace1);
       const datafeedConfig = ml.commonConfig.getADFqDatafeedConfig(jobIdSpace1);
@@ -89,16 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.testResources.cleanMLSavedObjects();
     });
     afterEach(async () => {
-      try {
-        await stopDatafeed(
-          { datafeed_id: datafeedIdSpace1, force: true },
-          USER.ML_POWERUSER_ALL_SPACES,
-          200,
-          idSpace1
-        );
-      } catch (error) {
-        // ignore
-      }
+      await ml.api.stopDatafeed(datafeedIdSpace1);
     });
 
     it('should start datafeed with correct space', async () => {
@@ -108,6 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
         200,
         idSpace1
       );
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED);
     });
 
     it('should not start datafeed with incorrect space', async () => {
@@ -117,15 +133,25 @@ export default ({ getService }: FtrProviderContext) => {
         404,
         idSpace2
       );
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED);
+      const state = await ml.api.getDatafeedState(datafeedIdSpace1);
+      expect(state).not.to.be(DATAFEED_STATE.STARTING);
+      expect(state).not.to.be(DATAFEED_STATE.STARTED);
+      expect(state).to.be(DATAFEED_STATE.STOPPED);
     });
 
-    it('should not be started by ml viewer user', async () => {
+    it('should not start datafeed by ml viewer user', async () => {
       await startDatafeed(
         { datafeed_id: datafeedIdSpace1 },
         USER.ML_VIEWER_ALL_SPACES,
         403,
         idSpace1
       );
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED);
+      const state = await ml.api.getDatafeedState(datafeedIdSpace1);
+      expect(state).not.to.be(DATAFEED_STATE.STARTING);
+      expect(state).not.to.be(DATAFEED_STATE.STARTED);
+      expect(state).to.be(DATAFEED_STATE.STOPPED);
     });
 
     it('should stop datafeed with correct space', async () => {
@@ -138,32 +164,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED);
 
-      await stopDatafeed(
-        { datafeed_id: datafeedIdSpace1 },
-        USER.ML_POWERUSER_ALL_SPACES,
-        200,
-        idSpace1
-      );
-
-      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED);
-    });
-
-    it('should force stop datafeed with correct space', async () => {
-      await startDatafeed(
-        { datafeed_id: datafeedIdSpace1 },
-        USER.ML_POWERUSER_ALL_SPACES,
-        200,
-        idSpace1
-      );
-
-      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED);
-
-      await stopDatafeed(
-        { datafeed_id: datafeedIdSpace1, force: true },
-        USER.ML_POWERUSER_ALL_SPACES,
-        200,
-        idSpace1
-      );
+      await stopDatafeed(datafeedIdSpace1, USER.ML_POWERUSER_ALL_SPACES, 200, idSpace1);
 
       await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED);
     });
@@ -178,12 +179,12 @@ export default ({ getService }: FtrProviderContext) => {
 
       await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED);
 
-      await stopDatafeed(
-        { datafeed_id: datafeedIdSpace1, force: true },
-        USER.ML_POWERUSER_ALL_SPACES,
-        404,
-        idSpace2
-      );
+      await stopDatafeed(datafeedIdSpace1, USER.ML_POWERUSER_ALL_SPACES, 404, idSpace2);
+
+      const state = await ml.api.getDatafeedState(datafeedIdSpace1);
+      expect(state).not.to.be(DATAFEED_STATE.STOPPING);
+      expect(state).not.to.be(DATAFEED_STATE.STOPPED);
+      expect(state).to.be(DATAFEED_STATE.STARTED);
     });
 
     it('should not stop datafeed by ml viewer user', async () => {
@@ -196,12 +197,78 @@ export default ({ getService }: FtrProviderContext) => {
 
       await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED);
 
-      await stopDatafeed(
-        { datafeed_id: datafeedIdSpace1, force: true },
-        USER.ML_VIEWER_ALL_SPACES,
-        403,
+      await stopDatafeed(datafeedIdSpace1, USER.ML_VIEWER_ALL_SPACES, 403, idSpace1);
+
+      const state = await ml.api.getDatafeedState(datafeedIdSpace1);
+      expect(state).not.to.be(DATAFEED_STATE.STOPPED);
+      expect(state).not.to.be(DATAFEED_STATE.STOPPING);
+      expect(state).to.be(DATAFEED_STATE.STARTED);
+    });
+
+    it('should not start with invalid start and stop params', async () => {
+      await startDatafeed(
+        { datafeed_id: datafeedIdSpace1, start: 100, end: 0 },
+        USER.ML_POWERUSER_ALL_SPACES,
+        400,
         idSpace1
       );
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED);
+      const state = await ml.api.getDatafeedState(datafeedIdSpace1);
+      expect(state).not.to.be(DATAFEED_STATE.STARTED);
+      expect(state).not.to.be(DATAFEED_STATE.STARTING);
+      expect(state).to.be(DATAFEED_STATE.STOPPED);
+    });
+
+    it('should not start with invalid start param value', async () => {
+      await startDatafeed(
+        { datafeed_id: datafeedIdSpace1, start: 9999999999999999 },
+        USER.ML_POWERUSER_ALL_SPACES,
+        400,
+        idSpace1
+      );
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED);
+      const state = await ml.api.getDatafeedState(datafeedIdSpace1);
+      expect(state).not.to.be(DATAFEED_STATE.STARTED);
+      expect(state).not.to.be(DATAFEED_STATE.STARTING);
+      expect(state).to.be(DATAFEED_STATE.STOPPED);
+    });
+
+    it('should not stop datafeed with only start param', async () => {
+      const { minTime: start } = await getFarequoteTimeRange();
+
+      await startDatafeed(
+        {
+          datafeed_id: datafeedIdSpace1,
+          start,
+        },
+        USER.ML_POWERUSER_ALL_SPACES,
+        200,
+        idSpace1
+      );
+
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STARTED);
+      const state = await ml.api.getDatafeedState(datafeedIdSpace1);
+      expect(state).not.to.be(DATAFEED_STATE.STOPPED);
+      expect(state).not.to.be(DATAFEED_STATE.STOPPING);
+      expect(state).to.be(DATAFEED_STATE.STARTED);
+    });
+
+    it('should stop datafeed with start and stop params', async () => {
+      const { minTime: start, maxTime } = await getFarequoteTimeRange();
+      const end = maxTime + 60000; // +1 minute buffer
+
+      await startDatafeed(
+        {
+          datafeed_id: datafeedIdSpace1,
+          start,
+          end,
+        },
+        USER.ML_POWERUSER_ALL_SPACES,
+        200,
+        idSpace1
+      );
+
+      await ml.api.waitForDatafeedState(datafeedIdSpace1, DATAFEED_STATE.STOPPED);
     });
   });
 };
