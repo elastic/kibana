@@ -70,20 +70,24 @@ export const useCascadeVirtualizerRangeExtractor = <G extends GroupNode>({
         return defaultRangeExtractor(range);
       }
 
-      let parentRows;
+      const rangeStartParentRows = rangeStartRow.getParentRows();
 
-      // when it's a group row and there
-      activeStickyIndexRef.current =
-        rangeStartRow.depth === 0 && rangeStartRow.getIsExpanded()
-          ? // select the row as is when it's a root group row
-            rangeStartRow.index
-          : // when its a group that's not of depth 0, it must have a parent row that is already expanded
-          (parentRows = rangeStartRow.getParentRows())?.length
-          ? parentRows.reduce<number | null>((acc, row, idx) => {
-              // because we are exploring the active item to its root, we want to compute the correct index
-              return (acc! += row.index + idx);
-            }, 0)
-          : null;
+      if (!Boolean(rangeStartParentRows.length) && !rangeStartRow.getIsExpanded()) {
+        activeStickyIndexRef.current = null;
+      } else if (!Boolean(rangeStartParentRows.length) && rangeStartRow.getIsExpanded()) {
+        activeStickyIndexRef.current = rangeStartRow.index;
+      } else {
+        const nearestExpandedParentIndex = rangeStartParentRows.reduce<number>((acc, row, idx) => {
+          return (acc! += row.index + idx);
+        }, 0);
+
+        const isExpandedLeafRow =
+          !Boolean(rangeStartRow.subRows.length) && rangeStartRow.getIsExpanded();
+
+        activeStickyIndexRef.current = isExpandedLeafRow
+          ? nearestExpandedParentIndex + rangeStartRow.index
+          : nearestExpandedParentIndex;
+      }
 
       const next = new Set(
         [activeStickyIndexRef.current, ...defaultRangeExtractor(range)].filter(

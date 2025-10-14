@@ -29,6 +29,7 @@ const rowsToRender = (rowCount: number): Row<GroupNode>[] => {
           depth: 0,
           getIsExpanded: () => false,
           getParentRows: () => [] as Row<GroupNode>[],
+          subRows: [] as Row<GroupNode>[],
         } as Row<GroupNode>,
         {
           // escape hatch so we don't have to mock every property on the Row object
