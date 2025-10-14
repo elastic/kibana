@@ -27,7 +27,7 @@ import { EsqlDocumentBase } from '../doc_base';
 import { requestDocumentationSchema } from './shared';
 import type { NlToEsqlTaskEvent } from '../types';
 
-const MAX_CALLS = 5;
+const MAX_CALLS = 8;
 
 export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   chatCompleteApi,
@@ -67,7 +67,13 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
     const requestedDocumentation = docBase.getDocumentation(keywords);
     const fakeRequestDocsToolCall = createFakeTooCall(commands, functions);
 
+<<<<<<< HEAD
     return merge(
+=======
+    const availableTools = Object.keys(tools ?? {});
+
+    const next$ = merge(
+>>>>>>> c495727dd32 ([NaturalLanguage2ESQL] Fix tool calling unavailable tools (#237174))
       of<
         OutputCompleteEvent<
           'request_documentation',
@@ -89,6 +95,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
         retryConfiguration,
         metadata,
         stream: true,
+<<<<<<< HEAD
         system: `${systemMessage}
 
           # Current task
@@ -115,6 +122,14 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
           When converting queries from one language to ES|QL, make sure that the functions are available
           and documented in ES|QL. E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
           ${system ? `## Additional instructions\n\n${system}` : ''}`,
+=======
+        system: generateEsqlPrompt({
+          esqlPrompts: docBase.getPrompts(),
+          additionalSystemInstructions,
+          availableTools,
+          hasTools: !functionLimitReached && Object.keys(tools ?? {}).length > 0,
+        }),
+>>>>>>> c495727dd32 ([NaturalLanguage2ESQL] Fix tool calling unavailable tools (#237174))
         messages: [
           ...messages,
           {
