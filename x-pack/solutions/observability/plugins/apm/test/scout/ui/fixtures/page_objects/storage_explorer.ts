@@ -10,9 +10,13 @@ import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 export class StorageExplorerPage {
   public storageChart: Locator;
   public pageTitle: Locator;
+  public servicesTableLoadedIndicator: Locator;
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.storageChart = this.page.testSubj.locator('storageExplorerTimeseriesChart');
     this.pageTitle = this.page.getByRole('heading', { name: 'Storage explorer', level: 1 });
+    this.servicesTableLoadedIndicator = this.page.testSubj.locator(
+      'storageExplorerServicesTable-loaded'
+    );
   }
 
   async goto() {
@@ -48,5 +52,10 @@ export class StorageExplorerPage {
     const elements = titles.map((title) => this.page.getByText(title));
 
     return elements;
+  }
+
+  // Wait for the services table to finish loading
+  async waitForServicesTableLoaded() {
+    await this.servicesTableLoadedIndicator.waitFor({ state: 'attached' });
   }
 }

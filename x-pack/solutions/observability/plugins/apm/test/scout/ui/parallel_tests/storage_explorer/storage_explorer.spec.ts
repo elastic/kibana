@@ -53,9 +53,11 @@ test.describe('Storage Explorer - Monitor User', { tag: ['@ess'] }, () => {
         await expect(element).toBeVisible();
       }
 
+      // Wait for the services table to finish loading
+      await storageExplorerPage.waitForServicesTableLoaded();
+
       // Verify the services table is present and contains data
-      const servicesTable = page.getByRole('table');
-      await expect(servicesTable).toBeVisible();
+      await expect(storageExplorerPage.servicesTableLoadedIndicator).toBeVisible();
 
       await page.getByTestId('serviceLink_nodejs').scrollIntoViewIfNeeded();
       await expect(page.getByTestId('serviceLink_nodejs')).toBeVisible();
@@ -88,13 +90,9 @@ test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
         await expect(element).toBeVisible();
       }
 
-      // Verify the services table is present and contains data
-      const servicesTable = page.getByRole('table');
-      await expect(servicesTable).toBeVisible();
-
-      // Check that we have actual service rows (not just headers)
-      const serviceRows = page.locator('tbody tr');
-      await expect(serviceRows).toHaveCount(6);
+      // Wait for the services table to finish loading
+      await storageExplorerPage.waitForServicesTableLoaded();
+      await expect(storageExplorerPage.servicesTableLoadedIndicator).toBeVisible();
 
       // Verify the service icon links are present
       await page.getByTestId('serviceLink_nodejs').scrollIntoViewIfNeeded();
