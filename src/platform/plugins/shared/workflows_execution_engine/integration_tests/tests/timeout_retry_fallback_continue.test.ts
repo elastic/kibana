@@ -15,7 +15,7 @@ describe('workflow with timeout, retry, fallback and continue in a step', () => 
   let workflowRunFixture: WorkflowRunFixture;
   let continueExecution: boolean;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     workflowRunFixture = new WorkflowRunFixture();
   });
 
@@ -47,7 +47,7 @@ steps:
   }
 
   describe('when continue is true', () => {
-    beforeEach(async () => {
+    beforeAll(async () => {
       continueExecution = true;
       await workflowRunFixture.runWorkflow({
         workflowYaml: buildYaml(),
@@ -111,7 +111,7 @@ steps:
   });
 
   describe('when continue is false', () => {
-    beforeEach(async () => {
+    beforeAll(async () => {
       continueExecution = false;
       await workflowRunFixture.runWorkflow({
         workflowYaml: buildYaml(),
