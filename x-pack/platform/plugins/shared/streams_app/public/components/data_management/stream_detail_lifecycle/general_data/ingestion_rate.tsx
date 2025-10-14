@@ -92,6 +92,7 @@ export function IngestionRate({
             stats={stats}
             timeState={timeState}
             isLoadingStats={isLoadingStats}
+            statsError={statsError}
           />
         )}
       </EuiFlexGroup>

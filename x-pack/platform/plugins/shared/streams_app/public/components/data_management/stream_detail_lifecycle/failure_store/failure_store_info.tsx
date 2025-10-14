@@ -8,14 +8,17 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import type {
+  FailureStore,
+  FailureStoreStatsResponse,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
 import type { TimeState } from '@kbn/es-query';
 import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
 import { IngestionCard } from './cards/ingestion_card';
 import { FailureStoreIngestionRate } from './ingestion_rate';
-import type { EnhancedFailureStoreStats } from '../hooks/use_failure_store_stats';
 import { StreamAggregations } from '../hooks/use_ingestion_rate';
+import { CalculatedStats } from '../helpers/get_calculated_stats';
 
 export const FailureStoreInfo = ({
   openModal,
@@ -31,7 +34,7 @@ export const FailureStoreInfo = ({
   definition: Streams.ingest.all.GetResponse;
   statsError: Error | undefined;
   isLoadingStats: boolean;
-  stats?: EnhancedFailureStoreStats;
+  stats?: FailureStoreStatsResponse & CalculatedStats;
   config?: FailureStore;
   timeState: TimeState;
   aggregations?: StreamAggregations;

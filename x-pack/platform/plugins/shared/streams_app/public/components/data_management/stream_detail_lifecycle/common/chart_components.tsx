@@ -32,28 +32,14 @@ import { useIngestionRate, useIngestionRatePerTier } from '../hooks/use_ingestio
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import type { CalculatedStats } from '../helpers/get_calculated_stats';
 
-interface BaseChartComponentProps {
+interface ChartComponentProps {
   definition: Streams.ingest.all.GetResponse;
   timeState: TimeState;
   isLoadingStats: boolean;
-}
-
-interface MainStreamChartProps extends BaseChartComponentProps {
   stats?: CalculatedStats;
   aggregations?: StreamAggregations;
   statsError: Error | undefined;
 }
-
-interface FailureStoreChartProps extends BaseChartComponentProps {
-  stats?: CalculatedStats;
-  aggregations?: StreamAggregations;
-  statsError: Error | undefined;
-}
-
-type ChartComponentProps = MainStreamChartProps | FailureStoreChartProps;
-type ChartPhasesComponentProps = BaseChartComponentProps & {
-  stats?: CalculatedStats;
-};
 
 export function ChartBarSeries({
   stats,
@@ -261,7 +247,7 @@ export function ChartBarPhasesSeries({
   stats,
   timeState,
   isLoadingStats,
-}: ChartPhasesComponentProps) {
+}: ChartComponentProps) {
   const { timeState: defaultTimeState } = useTimefilter();
   const currentTimeState = timeState || defaultTimeState;
 
