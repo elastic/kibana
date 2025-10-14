@@ -7,7 +7,9 @@
 
 import semverGte from 'semver/functions/gte';
 
-import type { Agent } from '../types';
+import type { Agent, AgentPolicy } from '../types';
+
+import { policyHasFleetServer } from './agent_policies_helpers';
 
 export const MINIMUM_MIGRATE_AGENT_VERSION = '9.2.0';
 
@@ -20,4 +22,9 @@ export const isAgentMigrationSupported = (agent: Agent) => {
   const isNotContainerized = agent.local_metadata?.elastic?.agent?.upgradeable !== false;
 
   return meetsVersionRequirement && isNotContainerized;
+};
+
+export const isAgentEligibleForMigration = (agent: Agent, agentPolicy?: AgentPolicy) => {
+  const hasFleetServer = agentPolicy && policyHasFleetServer(agentPolicy);
+  return isAgentMigrationSupported(agent) && !agentPolicy?.is_protected && !hasFleetServer;
 };

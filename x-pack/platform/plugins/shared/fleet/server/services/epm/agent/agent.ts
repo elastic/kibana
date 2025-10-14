@@ -59,8 +59,27 @@ export function compileTemplate(variables: PackagePolicyConfigRecord, templateSt
 
     return replaceVariablesInYaml(yamlValues, patchedYamlFromCompiledTemplate);
   } catch (error) {
-    throw new PackagePolicyValidationError(error);
+    const errorMessage = handleYamlError(error, compiledTemplate);
+    throw new PackagePolicyValidationError(errorMessage, error);
   }
+}
+
+function handleYamlError(err: any, yaml: string): string {
+  if (err?.reason === 'duplicated mapping key') {
+    let position = err.mark?.position;
+    let key = 'unknown';
+    // Read key if position is available
+    if (position) {
+      key = '';
+      while (position < yaml.length && yaml.charAt(position) !== ':') {
+        key += yaml.charAt(position);
+        position++;
+      }
+    }
+    return `YAMLException: Duplicated key "${key}" found in agent policy yaml, please check your yaml variables.`;
+  }
+
+  return err.message;
 }
 
 function isValidKey(key: string) {
