@@ -14,7 +14,6 @@ import { AlertSummaryOptionsMenu } from './settings_menu';
 import { useKibana } from '../../../common/lib/kibana';
 import { useEaseDetailsContext } from '../context';
 import { useDefaultAIConnectorId } from '../../../common/hooks/use_default_ai_connector_id';
-export const ALERT_SUMMARY_SECTION_TEST_ID = 'ai-for-soc-alert-flyout-alert-summary-section';
 
 export const ALERT_SUMMARY_SECTION_TEST_ID = 'ease-alert-flyout-alert-summary-section';
 

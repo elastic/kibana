@@ -13,6 +13,7 @@ import type { Connector } from '@kbn/actions-plugin/server/application/connector
 import type { ReadonlyModeType } from '@kbn/core-ui-settings-common';
 import {
   APP_ID,
+  DEFAULT_AI_CONNECTOR,
   DEFAULT_ALERT_TAGS_KEY,
   DEFAULT_ALERT_TAGS_VALUE,
   DEFAULT_ANOMALY_SCORE,
@@ -51,11 +52,6 @@ import {
   SHOW_RELATED_INTEGRATIONS_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
-  DEFAULT_VALUE_REPORT_MINUTES,
-  DEFAULT_VALUE_REPORT_RATE,
-  DEFAULT_VALUE_REPORT_TITLE,
-  ENABLE_ESQL_RISK_SCORING,
-  DEFAULT_AI_CONNECTOR,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
