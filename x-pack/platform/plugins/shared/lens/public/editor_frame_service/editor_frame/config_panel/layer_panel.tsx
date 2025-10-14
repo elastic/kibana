@@ -48,7 +48,7 @@ import { ESQLEditor } from './esql_editor';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 
 export function LayerPanel(props: LayerPanelProps) {
-  const { datasourceMap, visualizationMap } = useEditorFrameService();
+  const { datasourceMap } = useEditorFrameService();
 
   const [openDimension, setOpenDimension] = useState<{
     isComplete?: boolean;

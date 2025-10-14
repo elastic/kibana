@@ -30,6 +30,7 @@ import type { LensAppState, PreviewState, VisualizationState } from '../../state
 import { applyChanges, setState, setToggleFullscreen } from '../../state_management';
 import { setChangesApplied } from '../../state_management/lens_slice';
 import { userEvent } from '@testing-library/user-event';
+import { EditorFrameServiceProvider } from '../editor_frame_service_context';
 
 const SELECTORS = {
   APPLY_CHANGES_BUTTON: 'button[data-test-subj="lnsApplyChanges__suggestions"]',
@@ -95,13 +96,6 @@ describe('suggestion_panel', () => {
     };
 
     defaultProps = {
-      datasourceMap: {
-        testDatasource: mockDatasource,
-      },
-      visualizationMap: {
-        testVis: mockVisualization,
-        vis2: createMockVisualization(),
-      },
       ExpressionRenderer: expressionRendererMock,
       frame: createMockFramePublicAPI(),
       getUserMessages: () => [],
@@ -112,7 +106,17 @@ describe('suggestion_panel', () => {
 
   it('should avoid completely to render SuggestionPanel when in fullscreen mode', async () => {
     const { instance, lensStore } = mountWithReduxStore(
-      <SuggestionPanelWrapper {...defaultProps} />
+      <EditorFrameServiceProvider
+        visualizationMap={{
+          testVis: mockVisualization,
+          vis2: createMockVisualization(),
+        }}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+      >
+        <SuggestionPanelWrapper {...defaultProps} />
+      </EditorFrameServiceProvider>
     );
     expect(instance.find(SuggestionPanel).exists()).toBe(true);
 

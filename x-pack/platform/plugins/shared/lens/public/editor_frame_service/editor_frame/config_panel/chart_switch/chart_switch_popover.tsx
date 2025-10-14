@@ -13,15 +13,17 @@ import { css } from '@emotion/react';
 import { useLensSelector, selectVisualization } from '../../../../state_management';
 import type { ChartSwitchProps } from './chart_switch';
 import { ChartSwitch } from './chart_switch';
+import { useEditorFrameService } from '../../../editor_frame_service_context';
 
 export const ChartSwitchPopover = memo(function ChartSwitchPopover(
   props: Omit<ChartSwitchProps, 'onChartSelect'>
 ) {
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
+  const { visualizationMap } = useEditorFrameService();
   const visualization = useLensSelector(selectVisualization);
 
   const { icon, label } = (visualization.activeId &&
-    props.visualizationMap[visualization.activeId]?.getDescription(
+    visualizationMap[visualization.activeId]?.getDescription(
       visualization.state,
       props.layerId
     )) || {

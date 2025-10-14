@@ -38,6 +38,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { VisualizeEditorContext } from '../types';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
+import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
 
 jest.mock('lodash', () => ({
   ...jest.requireActual('lodash'),
@@ -73,8 +74,6 @@ describe('Lens App', () => {
       redirectToOrigin: jest.fn(),
       onAppLeave: jest.fn(),
       setHeaderActionMenu: jest.fn(),
-      datasourceMap,
-      visualizationMap,
       topNavMenuEntryGenerators: [],
       theme$: new Observable(),
       coreStart: coreMock.createStart(),
@@ -89,11 +88,20 @@ describe('Lens App', () => {
 
   async function renderApp({
     preloadedState,
+    datasourceMapOverride,
   }: {
     preloadedState?: Partial<LensAppState>;
+    datasourceMapOverride?: typeof datasourceMap;
   } = {}) {
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
-      <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+      <KibanaContextProvider services={services}>
+        <EditorFrameServiceProvider
+          visualizationMap={visualizationMap}
+          datasourceMap={datasourceMapOverride ?? datasourceMap}
+        >
+          {children}
+        </EditorFrameServiceProvider>
+      </KibanaContextProvider>
     );
 
     const {
@@ -337,8 +345,15 @@ describe('Lens App', () => {
           async (id) => ({ id, isTimeBased: () => true, isPersisted: () => true } as DataView)
         );
 
-      props.datasourceMap.testDatasource.isTimeBased = () => true;
-      await renderApp();
+      await renderApp({
+        datasourceMapOverride: {
+          ...datasourceMap,
+          testDatasource: {
+            ...datasourceMap.testDatasource,
+            isTimeBased: jest.fn((_state, _indexPatterns) => true),
+          },
+        },
+      });
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({ showDatePicker: true }),
         {}
@@ -351,8 +366,15 @@ describe('Lens App', () => {
           async (id) => ({ id, isTimeBased: () => true, isPersisted: () => true } as DataView)
         );
 
-      props.datasourceMap.testDatasource.isTimeBased = () => false;
-      await renderApp();
+      await renderApp({
+        datasourceMapOverride: {
+          ...datasourceMap,
+          testDatasource: {
+            ...datasourceMap.testDatasource,
+            isTimeBased: jest.fn((_state, _indexPatterns) => false),
+          },
+        },
+      });
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({ showDatePicker: false }),
         {}
