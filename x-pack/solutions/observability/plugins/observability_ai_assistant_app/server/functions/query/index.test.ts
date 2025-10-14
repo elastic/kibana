@@ -8,8 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { ChatFunctionClient } from '@kbn/observability-ai-assistant-plugin/server/service/chat_function_client';
-import { registerExecuteQueryFunction } from '.';
-import { EXECUTE_QUERY_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server';
+import { registerExecuteQueryFunction, EXECUTE_QUERY_NAME } from '.';
 
 describe('executeQuery function', () => {
   const currentUserEsClientMock: DeeplyMockedKeys<ElasticsearchClient> = {
@@ -58,7 +57,7 @@ describe('executeQuery function', () => {
 
     result = await functionClient.executeFunction({
       chat: jest.fn(),
-      name: EXECUTE_QUERY_FUNCTION_NAME,
+      name: EXECUTE_QUERY_NAME,
       args: JSON.stringify({ query: 'FROM logs-* | LIMIT 10' }),
       messages: [],
       signal: new AbortController().signal,
