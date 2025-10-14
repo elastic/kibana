@@ -64,11 +64,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
               pageTestSubject: 'search-homepage',
             },
             {
-              link: { deepLinkId: 'searchGettingStarted' },
-              breadcrumbs: ['Getting Started'],
-              pageTestSubject: 'search-getting-started',
-            },
-            {
               link: { navId: 'agent_builder' },
               breadcrumbs: [],
               pageTestSubject: 'agentBuilderWrapper',
