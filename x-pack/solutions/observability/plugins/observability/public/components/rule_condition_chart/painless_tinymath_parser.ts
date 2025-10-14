@@ -192,7 +192,6 @@ export class PainlessTinyMathParser {
 
   parse(): string {
     const recursiveParseConditions = (expression: string): string => {
-      console.log('expression', expression); // eslint-disable-line no-console --- IGNORE ---
       const condition = this.parseCondition(this.getCondition(expression));
       const trueBranch = this.getTrueBranch(expression);
       const falseBranch = this.getFalseBrach(expression);
