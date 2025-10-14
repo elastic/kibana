@@ -268,6 +268,7 @@ function ChartItem({
 
   return (
     <A11yGridCell
+      id={chartId}
       ref={(element) => setChartRef(chartId, element)}
       rowIndex={rowIndex}
       colIndex={colIndex}
@@ -332,6 +333,7 @@ const A11yGridWrapper = React.forwardRef(
 const A11yGridCell = React.forwardRef(
   (
     {
+      id,
       children,
       rowIndex,
       colIndex,
@@ -339,6 +341,7 @@ const A11yGridCell = React.forwardRef(
       isFocused,
       onFocus,
     }: React.PropsWithChildren<{
+      id: string;
       rowIndex: number;
       colIndex: number;
       index: number;
@@ -356,6 +359,7 @@ const A11yGridCell = React.forwardRef(
 
     return (
       <div
+        id={id}
         ref={ref}
         role="gridcell"
         aria-rowindex={rowIndex + 1}
