@@ -98,8 +98,8 @@ export class EmbeddableStateTransfer {
   public getIncomingEmbeddablePackage(
     appId: string,
     removeAfterFetch?: boolean
-  ): EmbeddablePackageState | undefined {
-    return this.getIncomingState<EmbeddablePackageState>(
+  ): EmbeddablePackageState[] | undefined {
+    return this.getIncomingPackagesState<EmbeddablePackageState>(
       isEmbeddablePackageState,
       appId,
       EMBEDDABLE_PACKAGE_STATE_KEY,
@@ -146,6 +146,39 @@ export class EmbeddableStateTransfer {
     );
   }
 
+  /**
+   * A wrapper around the {@link ApplicationStart.navigateToApp} method which navigates to the specified appId
+   * with multiple {@link EmbeddablePackageState | embeddable package state}
+   */
+  public async navigateToWithMultipleEmbeddablePackage<SerializedStateType extends object = object>(
+    appId: string,
+    options?: { path?: string; state: Array<EmbeddablePackageState<SerializedStateType>> }
+  ): Promise<void> {
+    this.isTransferInProgress = true;
+    await this.navigateToWithState<Array<EmbeddablePackageState<SerializedStateType>>>(
+      appId,
+      EMBEDDABLE_PACKAGE_STATE_KEY,
+      {
+        ...options,
+      }
+    );
+  }
+
+  private removeKeysFromStorage(
+    state: Record<string, any>,
+    options?: {
+      keysToRemoveAfterFetch?: string[];
+    }
+  ): void {
+    if (options?.keysToRemoveAfterFetch?.length) {
+      const stateReplace = { ...state };
+      options.keysToRemoveAfterFetch.forEach((keyToRemove: string) => {
+        delete stateReplace[keyToRemove];
+      });
+      this.storage.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, stateReplace);
+    }
+  }
+
   private getIncomingState<IncomingStateType>(
     guard: (state: unknown) => state is IncomingStateType,
     appId: string,
@@ -165,6 +198,54 @@ export class EmbeddableStateTransfer {
       this.storage.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, stateReplace);
     }
     return castState;
+  }
+
+  /**
+   * Retrieves incoming embeddable package states from session storage, handling both single items and arrays.
+   * Always returns an array format. Filters results using the provided type guard.
+   *
+   * @param guard - Type guard function to validate state items
+   * @param appId - The application ID to fetch state for
+   * @param key - The storage key to retrieve state from
+   * @param options - Optional configuration including keys to remove after fetch
+   * @returns Array of valid package states, or undefined if no valid states found
+   */
+  private getIncomingPackagesState<IncomingStateType>(
+    guard: (state: unknown) => state is IncomingStateType,
+    appId: string,
+    key: string,
+    options?: {
+      keysToRemoveAfterFetch?: string[];
+    }
+  ): IncomingStateType[] | undefined {
+    const embeddableState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY);
+    if (!embeddableState) {
+      return undefined;
+    }
+
+    const incomingState = embeddableState[key]?.[appId];
+
+    if (!incomingState) {
+      return undefined;
+    }
+
+    // Handle array case: collect all valid states that pass the guard
+    if (Array.isArray(incomingState)) {
+      const validStates = incomingState.filter((item) => guard(item));
+      if (validStates.length > 0) {
+        this.removeKeysFromStorage(embeddableState, options);
+        return validStates.map((item) => cloneDeep(item) as IncomingStateType);
+      }
+      return undefined;
+    }
+
+    // Handle single item case
+    if (guard(incomingState)) {
+      this.removeKeysFromStorage(embeddableState, options);
+      return [cloneDeep(incomingState)];
+    }
+
+    return undefined;
   }
 
   private async navigateToWithState<OutgoingStateType = unknown>(
