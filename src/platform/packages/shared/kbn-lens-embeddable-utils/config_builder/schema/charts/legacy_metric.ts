@@ -41,27 +41,30 @@ const legacyMetricStateMetricOptionsSchema = schema.object({
    * Alignment of the label and value for the legacy metric.
    * For example, align the label to the bottom and the value to the right.
    */
-  alignments: schema.object({
-    /**
-     * Alignment for label. Possible values:
-     * - 'top': Align label to the top of the value (default)
-     * - 'bottom': Align label to the bottom of the value
-     */
-    labels: verticalAlignmentSchema({
-      meta: { description: 'Label alignment' },
-      defaultValue: 'top',
-    }),
-    /**
-     * Alignment for value. Possible values:
-     * - 'left': Align value to the left (default)
-     * - 'center': Align value to the center
-     * - 'right': Align value to the right
-     */
-    value: horizontalAlignmentSchema({
-      meta: { description: 'Value alignment' },
-      defaultValue: 'left',
-    }),
-  }),
+  alignments: schema.object(
+    {
+      /**
+       * Alignment for label. Possible values:
+       * - 'top': Align label to the top of the value (default)
+       * - 'bottom': Align label to the bottom of the value
+       */
+      labels: verticalAlignmentSchema({
+        meta: { description: 'Label alignment' },
+        defaultValue: 'top',
+      }),
+      /**
+       * Alignment for value. Possible values:
+       * - 'left': Align value to the left (default)
+       * - 'center': Align value to the center
+       * - 'right': Align value to the right
+       */
+      value: horizontalAlignmentSchema({
+        meta: { description: 'Value alignment' },
+        defaultValue: 'left',
+      }),
+    },
+    { defaultValue: { labels: 'top', value: 'left' } }
+  ),
   /**
    * Where to apply the color (background or value)
    */
