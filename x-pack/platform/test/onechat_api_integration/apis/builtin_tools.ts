@@ -19,6 +19,12 @@ export default function ({ getService }: FtrProviderContext) {
     describe(`DELETE /api/agent_builder/tools/{toolName}`, () => {
       it('should return 400 error when attempting to delete any read-only builtin system tool', async () => {
         for (const toolId of Object.values(platformCoreTools) as string[]) {
+          if (toolId === platformCoreTools.createVisualization) {
+            await supertest
+              .delete(`/api/agent_builder/tools/${toolId}`)
+              .set('kbn-xsrf', 'kibana')
+              .expect(404);
+          }
           const response = await supertest
             .delete(`/api/agent_builder/tools/${toolId}`)
             .set('kbn-xsrf', 'kibana')
