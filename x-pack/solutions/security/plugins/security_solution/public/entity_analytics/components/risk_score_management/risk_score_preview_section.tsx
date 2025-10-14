@@ -56,7 +56,8 @@ export const RiskScorePreviewSection: React.FC<{
   includeClosedAlerts: boolean;
   from: string;
   to: string;
-}> = ({ privileges, includeClosedAlerts, from, to }) => {
+  alertFilters?: Array<{ entity_types: string[]; filter: string }>;
+}> = ({ privileges, includeClosedAlerts, from, to, alertFilters }) => {
   const sectionBody = useMemo(() => {
     if (privileges.isLoading) {
       return (
@@ -68,11 +69,18 @@ export const RiskScorePreviewSection: React.FC<{
       );
     }
     if (userHasRiskEngineReadPermissions(privileges)) {
-      return <RiskEnginePreview includeClosedAlerts={includeClosedAlerts} from={from} to={to} />;
+      return (
+        <RiskEnginePreview
+          includeClosedAlerts={includeClosedAlerts}
+          from={from}
+          to={to}
+          alertFilters={alertFilters}
+        />
+      );
     }
 
     return <MissingPermissionsCallout />;
-  }, [privileges, includeClosedAlerts, from, to]);
+  }, [privileges, includeClosedAlerts, from, to, alertFilters]);
 
   return (
     <>
@@ -139,11 +147,12 @@ const RiskScorePreviewPanel = ({
   );
 };
 
-const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; to: string }> = ({
-  includeClosedAlerts,
-  from,
-  to,
-}) => {
+const RiskEnginePreview: React.FC<{
+  includeClosedAlerts: boolean;
+  from: string;
+  to: string;
+  alertFilters?: Array<{ entity_types: string[]; filter: string }>;
+}> = ({ includeClosedAlerts, from, to, alertFilters }) => {
   const entityTypes = useEntityAnalyticsTypes();
 
   const [filters] = useState<{ bool: BoolQuery }>({
@@ -167,11 +176,13 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
       end: to,
     },
     exclude_alert_statuses: includeClosedAlerts ? [] : ['closed'],
+    filters: alertFilters,
   });
 
   if (isError) {
     return (
       <EuiCallOut
+        announceOnMount
         data-test-subj="risk-preview-error"
         title={i18n.PREVIEW_ERROR_TITLE}
         color="danger"

@@ -12,6 +12,19 @@ import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { useConfigureSORiskEngineMutation } from '../../../api/hooks/use_configure_risk_engine_saved_object';
 import * as i18n from '../../../translations';
 
+// Backend API format
+export interface AlertFilter {
+  entity_types: string[];
+  filter: string;
+}
+
+// UI format (used internally in components)
+export interface UIAlertFilter {
+  id: string;
+  text: string;
+  entityTypes: string[];
+}
+
 export interface RiskScoreConfiguration {
   includeClosedAlerts: boolean;
   range: {
@@ -19,15 +32,43 @@ export interface RiskScoreConfiguration {
     end: string;
   };
   enableResetToZero: boolean;
-  alertFilters: Array<{ id: string; text: string }>;
+  alertFilters: AlertFilter[];
 }
+
+// Transformation utilities
+const transformFiltersForBackend = (uiFilters: UIAlertFilter[]): AlertFilter[] => {
+  return uiFilters.map((f) => ({
+    entity_types: f.entityTypes || ['host', 'user', 'service'],
+    filter: f.text,
+  }));
+};
+
+const transformFiltersFromBackend = (backendFilters: AlertFilter[]): UIAlertFilter[] => {
+  return backendFilters.map((f, idx) => ({
+    id: `filter-${idx}-${Date.now()}`,
+    text: f.filter,
+    entityTypes: f.entity_types,
+  }));
+};
 
 const settingsAreEqual = (
   first?: Partial<RiskScoreConfiguration>,
   second?: Partial<RiskScoreConfiguration>
 ) => {
+  // Compare filters with normalized entity_types for proper comparison
   const alertFiltersEqual =
-    JSON.stringify(first?.alertFilters || []) === JSON.stringify(second?.alertFilters || []);
+    JSON.stringify(
+      first?.alertFilters?.map((f) => ({
+        entity_types: f.entity_types?.sort(),
+        filter: f.filter,
+      })) || []
+    ) ===
+    JSON.stringify(
+      second?.alertFilters?.map((f) => ({
+        entity_types: f.entity_types?.sort(),
+        filter: f.filter,
+      })) || []
+    );
 
   return (
     first?.includeClosedAlerts === second?.includeClosedAlerts &&
@@ -82,10 +123,19 @@ export const useConfigurableRiskEngineSettings = () => {
     FETCH_RISK_ENGINE_SETTINGS,
     async () => {
       const riskEngineSettings = await fetchRiskEngineSettings();
+
+      // Transform filters from backend format to internal format for storage
+      const transformedSettings = riskEngineSettings
+        ? {
+            ...riskEngineSettings,
+            alertFilters: riskEngineSettings.filters || [],
+          }
+        : undefined;
+
       setSelectedRiskEngineSettings((currentValue) => {
-        return currentValue ?? riskEngineSettingsWithDefaults(riskEngineSettings);
+        return currentValue ?? riskEngineSettingsWithDefaults(transformedSettings);
       });
-      return riskEngineSettings;
+      return transformedSettings;
     },
     { retry: false, refetchOnWindowFocus: false }
   );
@@ -113,6 +163,7 @@ export const useConfigurableRiskEngineSettings = () => {
             end: selectedRiskEngineSettings.range.end,
           },
           enableResetToZero: selectedRiskEngineSettings.enableResetToZero,
+          filters: selectedRiskEngineSettings.alertFilters,
         },
         {
           onSuccess: () => {
@@ -152,11 +203,19 @@ export const useConfigurableRiskEngineSettings = () => {
     });
   };
 
-  const setAlertFilters = (filters: Array<{ id: string; text: string }>) => {
+  const setAlertFilters = (filters: UIAlertFilter[]) => {
+    const transformedFilters = transformFiltersForBackend(filters);
     setSelectedRiskEngineSettings((prevState) => {
       if (!prevState) return undefined;
-      return { ...prevState, ...{ alertFilters: filters } };
+      return { ...prevState, ...{ alertFilters: transformedFilters } };
     });
+  };
+
+  // Getter for UI-formatted filters
+  const getUIAlertFilters = (): UIAlertFilter[] => {
+    return selectedRiskEngineSettings?.alertFilters
+      ? transformFiltersFromBackend(selectedRiskEngineSettings.alertFilters)
+      : [];
   };
 
   return {
@@ -170,5 +229,6 @@ export const useConfigurableRiskEngineSettings = () => {
     isLoadingRiskEngineSettings,
     toggleScoreRetainment,
     setAlertFilters,
+    getUIAlertFilters,
   };
 };

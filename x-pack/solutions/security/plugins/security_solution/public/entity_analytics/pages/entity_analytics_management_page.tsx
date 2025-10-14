@@ -50,6 +50,7 @@ export const EntityAnalyticsManagementPage = () => {
     isLoadingRiskEngineSettings,
     toggleScoreRetainment,
     setAlertFilters,
+    getUIAlertFilters,
   } = useConfigurableRiskEngineSettings();
   const { data: riskEngineStatus } = useRiskEngineStatus({
     refetchInterval: TEN_SECONDS,
@@ -167,6 +168,7 @@ export const EntityAnalyticsManagementPage = () => {
                 setSelectedDateSetting={setSelectedDateSetting}
                 toggleSelectedClosedAlertsSetting={toggleSelectedClosedAlertsSetting}
                 onAlertFiltersChange={setAlertFilters}
+                uiAlertFilters={getUIAlertFilters()}
               />
               <EuiHorizontalRule />
               <RiskScoreUsefulLinksSection />
@@ -177,6 +179,7 @@ export const EntityAnalyticsManagementPage = () => {
                 includeClosedAlerts={selectedRiskEngineSettings.includeClosedAlerts}
                 from={selectedRiskEngineSettings.range.start}
                 to={selectedRiskEngineSettings.range.end}
+                alertFilters={selectedRiskEngineSettings.alertFilters}
               />
             </EuiFlexItem>
           </>

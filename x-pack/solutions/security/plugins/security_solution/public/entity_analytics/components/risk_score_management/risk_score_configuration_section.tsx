@@ -17,7 +17,10 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import * as i18n from '../../translations';
-import type { RiskScoreConfiguration } from './hooks/risk_score_configurable_risk_engine_settings_hooks';
+import type {
+  RiskScoreConfiguration,
+  UIAlertFilter,
+} from './hooks/risk_score_configurable_risk_engine_settings_hooks';
 import { AlertFiltersKqlBar } from './alert_filters_kql_bar';
 
 export const RiskScoreConfigurationSection = ({
@@ -25,11 +28,13 @@ export const RiskScoreConfigurationSection = ({
   setSelectedDateSetting,
   toggleSelectedClosedAlertsSetting,
   onAlertFiltersChange,
+  uiAlertFilters,
 }: {
   selectedRiskEngineSettings: RiskScoreConfiguration | undefined;
   setSelectedDateSetting: ({ start, end }: { start: string; end: string }) => void;
   toggleSelectedClosedAlertsSetting: () => void;
-  onAlertFiltersChange?: (filters: Array<{ id: string; text: string }>) => void;
+  onAlertFiltersChange?: (filters: UIAlertFilter[]) => void;
+  uiAlertFilters: UIAlertFilter[];
 }) => {
   if (!selectedRiskEngineSettings) {
     return (
@@ -96,7 +101,7 @@ export const RiskScoreConfigurationSection = ({
         compressed={true}
         data-test-subj="alertFiltersKqlBar"
         onFiltersChange={onAlertFiltersChange}
-        filters={selectedRiskEngineSettings.alertFilters}
+        filters={uiAlertFilters}
       />
 
       <EuiSpacer size="m" />
