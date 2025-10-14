@@ -37,7 +37,6 @@ import { useTabLabelWidth } from './use_tab_label_width';
 
 export interface TabProps {
   item: TabItem;
-  itemMenu?: React.ReactElement;
   isSelected: boolean;
   isUnsaved?: boolean;
   isDragging?: boolean;
@@ -66,7 +65,6 @@ const unsavedChangesIndicatorTitle = i18n.translate('unifiedTabs.unsavedChangesT
 export const Tab: React.FC<TabProps> = (props) => {
   const {
     item,
-    itemMenu = null,
     isSelected,
     isUnsaved,
     isDragging,
@@ -258,7 +256,7 @@ export const Tab: React.FC<TabProps> = (props) => {
           <EuiFlexGroup responsive={false} direction="row" gutterSize="none">
             {!!getTabMenuItems && (
               <EuiFlexItem grow={false} className="unifiedTabs__tabMenuBtn">
-                {!itemMenu && (
+                {!item.customMenuButton && (
                   <TabMenu
                     item={item}
                     getTabMenuItems={getTabMenuItems}
@@ -267,7 +265,7 @@ export const Tab: React.FC<TabProps> = (props) => {
                     onEnterRenaming={onEnterRenaming}
                   />
                 )}
-                {itemMenu}
+                {item.customMenuButton ?? null}
               </EuiFlexItem>
             )}
             {!!onClose && (
