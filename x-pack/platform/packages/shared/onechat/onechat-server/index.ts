@@ -30,18 +30,21 @@ export type {
   ToolEventHandlerFn,
   ToolEventEmitter,
   ToolProgressEmitterFn,
+  ToolResultStore,
+  WritableToolResultStore,
 } from './runner';
 export type {
-  BuiltinToolDefinition,
   ToolHandlerFn,
   ToolHandlerReturn,
   ToolHandlerContext,
+  ToolHandlerResult,
+  BuiltinToolDefinition,
   StaticToolRegistration,
   StaticEsqlTool,
   StaticWorkflowTool,
   StaticIndexSearchTool,
 } from './tools';
-export { getToolResultId } from './tools';
+export { getToolResultId, createErrorResult, isToolResultId } from './tools';
 export type {
   AgentHandlerParams,
   AgentHandlerContext,

@@ -47,6 +47,10 @@ export const sharedPanelInfoSchema = {
     })
   ),
   filters: schema.maybe(schema.arrayOf(filterSchema)),
+};
+
+export const dslOnlyPanelInfoSchema = {
+  // ES|QL chart should not have the ability to define a KQL/Lucene query
   query: schema.maybe(filterSchema),
 };
 

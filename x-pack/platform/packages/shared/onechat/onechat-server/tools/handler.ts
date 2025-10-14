@@ -10,13 +10,24 @@ import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
-import type { ToolEventEmitter, ModelProvider, ScopedRunner, ToolProvider } from '../runner';
+import type {
+  ToolEventEmitter,
+  ModelProvider,
+  ScopedRunner,
+  ToolProvider,
+  ToolResultStore,
+} from '../runner';
+
+/**
+ * Tool result as returned by the tool handler.
+ */
+export type ToolHandlerResult = Omit<ToolResult, 'tool_result_id'> & { tool_result_id?: string };
 
 /**
  * Return value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}
  */
 export interface ToolHandlerReturn {
-  results: ToolResult[];
+  results: ToolHandlerResult[];
 }
 
 /**
@@ -56,6 +67,10 @@ export interface ToolHandlerContext {
    * Can be used to run other workchat primitive as part of the tool execution.
    */
   runner: ScopedRunner;
+  /**
+   * Result store to access tool results during execution.
+   */
+  resultStore: ToolResultStore;
   /**
    * Event emitter that can be used to emits custom events
    */

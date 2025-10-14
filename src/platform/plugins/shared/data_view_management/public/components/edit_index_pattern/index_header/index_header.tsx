@@ -7,10 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
+import type { FC, PropsWithChildren, ReactElement } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiIcon,
+  EuiPageHeader,
+  EuiPopover,
+  EuiText,
+} from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 interface IndexHeaderProps {
@@ -37,7 +47,7 @@ const editAriaLabel = i18n.translate('indexPatternManagement.editDataView.editAr
 });
 
 const editTooltip = i18n.translate('indexPatternManagement.editDataView.editTooltip', {
-  defaultMessage: 'Edit',
+  defaultMessage: 'Edit data view',
 });
 
 const removeAriaLabel = i18n.translate('indexPatternManagement.editDataView.removeAria', {
@@ -45,7 +55,7 @@ const removeAriaLabel = i18n.translate('indexPatternManagement.editDataView.remo
 });
 
 const removeTooltip = i18n.translate('indexPatternManagement.editDataView.removeTooltip', {
-  defaultMessage: 'Delete',
+  defaultMessage: 'Delete data view',
 });
 
 export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
@@ -57,6 +67,54 @@ export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
   children,
   canSave,
 }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const contextMenuItems = [
+    canSave && indexPattern.isPersisted() && deleteIndexPatternClick && (
+      <EuiContextMenuItem
+        color="danger"
+        onClick={() => {
+          setIsOpen(false);
+          deleteIndexPatternClick();
+        }}
+        icon={<EuiIcon color="danger" type="trash" />}
+        aria-label={removeAriaLabel}
+        data-test-subj="deleteIndexPatternButton"
+      >
+        <EuiText size="s" color="danger">
+          {removeTooltip}
+        </EuiText>
+      </EuiContextMenuItem>
+    ),
+  ].filter(Boolean) as ReactElement[];
+
+  const renderMoreActionsButton = () => {
+    return (
+      <EuiPopover
+        isOpen={isOpen}
+        closePopover={() => setIsOpen(false)}
+        panelPaddingSize="none"
+        button={
+          <EuiButtonIcon
+            iconType="boxesVertical"
+            onClick={() => setIsOpen((prevIsOpen) => !prevIsOpen)}
+            size="m"
+            data-test-subj="moreActionsButton"
+            aria-label={i18n.translate(
+              'indexPatternManagement.editDataView.moreActionsButtonAria',
+              {
+                defaultMessage: 'More Actions',
+              }
+            )}
+            color="text"
+          />
+        }
+      >
+        <EuiContextMenuPanel items={contextMenuItems} />
+      </EuiPopover>
+    );
+  };
+
   return (
     <EuiPageHeader
       pageTitle={<span data-test-subj="indexPatternTitle">{indexPattern.getName()}</span>}
@@ -73,25 +131,17 @@ export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
             {editTooltip}
           </EuiButton>
         ),
+        contextMenuItems.length > 0 && renderMoreActionsButton(),
         defaultIndex !== indexPattern.id && setDefault && canSave && indexPattern.isPersisted() && (
-          <EuiButton
+          <EuiButtonEmpty
             onClick={setDefault}
-            iconType="starFilled"
+            iconType="starEmpty"
             aria-label={setDefaultAriaLabel}
             data-test-subj="setDefaultIndexPatternButton"
+            color="text"
+            flush="both"
           >
             {setDefaultTooltip}
-          </EuiButton>
-        ),
-        canSave && indexPattern.isPersisted() && (
-          <EuiButtonEmpty
-            color="danger"
-            onClick={deleteIndexPatternClick}
-            iconType="trash"
-            aria-label={removeAriaLabel}
-            data-test-subj="deleteIndexPatternButton"
-          >
-            {removeTooltip}
           </EuiButtonEmpty>
         ),
       ].filter(Boolean)}

@@ -351,6 +351,13 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               }
             : undefined;
 
+          // Normalize body.values: if all arrays are empty, convert to single empty array
+          const normalizedValues = body.values.every(
+            (row) => Array.isArray(row) && row.length === 0
+          )
+            ? []
+            : body.values;
+
           const allColumns =
             // eslint-disable-next-line @typescript-eslint/naming-convention
             (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
@@ -398,7 +405,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           }
           const columnNames = updatedWithVariablesColumns?.map(({ name }) => name);
 
-          const rows = body.values.map((row) => zipObject(columnNames, row));
+          const rows = normalizedValues.map((row) => zipObject(columnNames, row));
 
           return {
             type: 'datatable',
@@ -406,7 +413,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               type: ESQL_TABLE_TYPE,
               query,
               statistics: {
-                totalCount: body.values.length,
+                totalCount: normalizedValues.length,
               },
             },
             columns: updatedWithVariablesColumns,

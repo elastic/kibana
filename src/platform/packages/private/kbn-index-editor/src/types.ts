@@ -29,6 +29,8 @@ export interface EditLookupIndexContentContext {
     indexName: string | null;
     /** Indicates if the index was created */
     indexCreatedDuringFlyout: boolean;
+    /** Indicates if new fields have been added to the index */
+    indexHasNewFields: boolean;
   }) => void;
 }
 

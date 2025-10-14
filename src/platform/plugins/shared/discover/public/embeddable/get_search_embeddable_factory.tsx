@@ -106,26 +106,6 @@ export const getSearchEmbeddableFactory = ({
       const searchEmbeddable = await initializeSearchEmbeddableApi(runtimeState, {
         discoverServices,
       });
-      const unsubscribeFromFetch = initializeFetch({
-        api: {
-          parentApi,
-          ...titleManager.api,
-          ...timeRangeManager.api,
-          defaultTitle$,
-          savedSearch$: searchEmbeddable.api.savedSearch$,
-          dataViews$: searchEmbeddable.api.dataViews$,
-          savedObjectId$,
-          dataLoading$,
-          blockingError$,
-          fetchContext$,
-          fetchWarnings$,
-        },
-        discoverServices,
-        stateManager: searchEmbeddable.stateManager,
-        scopedProfilesManager,
-        setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
-        setBlockingError: (error: Error | undefined) => blockingError$.next(error),
-      });
 
       const serialize = (savedObjectId?: string) =>
         serializeState({
@@ -239,6 +219,28 @@ export const getSearchEmbeddableFactory = ({
           // compatibilty check and ensure top-level drilldowns (e.g. URL) work as expected
           return [];
         },
+      });
+
+      const unsubscribeFromFetch = initializeFetch({
+        api: {
+          ...api,
+          parentApi,
+          ...titleManager.api,
+          ...timeRangeManager.api,
+          defaultTitle$,
+          savedSearch$: searchEmbeddable.api.savedSearch$,
+          dataViews$: searchEmbeddable.api.dataViews$,
+          savedObjectId$,
+          dataLoading$,
+          blockingError$,
+          fetchContext$,
+          fetchWarnings$,
+        },
+        discoverServices,
+        stateManager: searchEmbeddable.stateManager,
+        scopedProfilesManager,
+        setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
+        setBlockingError: (error: Error | undefined) => blockingError$.next(error),
       });
 
       return {
