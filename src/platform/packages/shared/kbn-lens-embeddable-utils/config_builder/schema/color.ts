@@ -204,3 +204,12 @@ export type ColorMappingCategoricalType = TypeOf<typeof categoricalColorMappingS
 export type ColorMappingGradientType = TypeOf<typeof gradientColorMappingSchema>;
 export type ColorMappingColorDefType = TypeOf<typeof colorDefSchema>;
 export type AllColoringTypes = TypeOf<typeof allColoringTypeSchema>;
+/**
+ * Schema for where to apply the color (to value or background).
+ */
+export const applyColorToSchema = schema.oneOf(
+  [schema.literal('value'), schema.literal('background')],
+  {
+    meta: { description: 'Where to apply the color' },
+  }
+);
