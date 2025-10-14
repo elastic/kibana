@@ -331,7 +331,7 @@ export const ProjectPicker = () => {
             <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
               <EuiFlexItem>
                 <EuiTitle size="xxs">
-                  <p>{strings.getProjectPickerPopoverTitle()}</p>
+                  <h5>{strings.getProjectPickerPopoverTitle()}</h5>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
