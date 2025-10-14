@@ -17,6 +17,7 @@ import type {
 } from '../types';
 import { getCasesTelemetryData } from './cases';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
+import { OBSERVABLE_TYPE_IPV4 } from '../../../common/constants';
 
 const MOCK_FIND_TOTAL = 5;
 const SOLUTION_TOTAL = 1;
@@ -74,8 +75,28 @@ describe('getCasesTelemetryData', () => {
         totalAssignees: { value: 5 },
       };
 
+      const observables = {
+        byDescription: {
+          buckets: [
+            {
+              key: 'Auto extract observables',
+              doc_count: 1,
+              byType: {
+                buckets: [
+                  {
+                    key: OBSERVABLE_TYPE_IPV4.key,
+                    doc_count: 1,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      };
+
       const solutionValues = {
         counts,
+        observables,
         ...assignees,
       };
 
@@ -87,7 +108,20 @@ describe('getCasesTelemetryData', () => {
         securitySolution: { ...solutionValues },
         observability: { ...solutionValues },
         cases: { ...solutionValues },
+        observables,
         syncAlerts: {
+          buckets: [
+            {
+              key: 0,
+              doc_count: 1,
+            },
+            {
+              key: 1,
+              doc_count: 1,
+            },
+          ],
+        },
+        extractObservables: {
           buckets: [
             {
               key: 0,
@@ -400,6 +434,13 @@ describe('getCasesTelemetryData', () => {
           },
           syncAlertsOff: 1,
           syncAlertsOn: 1,
+          extractObservablesOff: 1,
+          extractObservablesOn: 1,
+          observables: {
+            auto: { default: 1, custom: 0 },
+            manual: { default: 0, custom: 0 },
+            total: 1,
+          },
           totalParticipants: 2,
           totalTags: 2,
           totalUsers: 1,
@@ -429,12 +470,22 @@ describe('getCasesTelemetryData', () => {
             open: 0,
           },
           totalWithAlerts: 10,
+          observables: {
+            auto: { default: 1, custom: 0 },
+            manual: { default: 0, custom: 0 },
+            total: 1,
+          },
         },
         obs: {
           assignees: {
             total: 5,
             totalWithZero: 100,
             totalWithAtLeastOne: 0,
+          },
+          observables: {
+            auto: { default: 1, custom: 0 },
+            manual: { default: 0, custom: 0 },
+            total: 1,
           },
           ...solutionAttachmentFrameworkStats,
           total: 1,
@@ -453,6 +504,11 @@ describe('getCasesTelemetryData', () => {
             total: 5,
             totalWithZero: 100,
             totalWithAtLeastOne: 0,
+          },
+          observables: {
+            auto: { default: 1, custom: 0 },
+            manual: { default: 0, custom: 0 },
+            total: 1,
           },
           ...solutionAttachmentFrameworkStats,
           total: 1,
@@ -547,6 +603,26 @@ describe('getCasesTelemetryData', () => {
                     ],
                   },
                 },
+                "observables": Object {
+                  "aggs": Object {
+                    "byDescription": Object {
+                      "aggs": Object {
+                        "byType": Object {
+                          "terms": Object {
+                            "field": "cases.attributes.observables.typeKey",
+                          },
+                        },
+                      },
+                      "terms": Object {
+                        "field": "cases.attributes.observables.description",
+                        "missing": "no_description",
+                      },
+                    },
+                  },
+                  "nested": Object {
+                    "path": "cases.attributes.observables",
+                  },
+                },
                 "status": Object {
                   "terms": Object {
                     "field": "cases.attributes.status",
@@ -630,6 +706,26 @@ describe('getCasesTelemetryData', () => {
                     ],
                   },
                 },
+                "observables": Object {
+                  "aggs": Object {
+                    "byDescription": Object {
+                      "aggs": Object {
+                        "byType": Object {
+                          "terms": Object {
+                            "field": "cases.attributes.observables.typeKey",
+                          },
+                        },
+                      },
+                      "terms": Object {
+                        "field": "cases.attributes.observables.description",
+                        "missing": "no_description",
+                      },
+                    },
+                  },
+                  "nested": Object {
+                    "path": "cases.attributes.observables",
+                  },
+                },
                 "status": Object {
                   "terms": Object {
                     "field": "cases.attributes.status",
@@ -691,6 +787,26 @@ describe('getCasesTelemetryData', () => {
                         "to": "now",
                       },
                     ],
+                  },
+                },
+                "observables": Object {
+                  "aggs": Object {
+                    "byDescription": Object {
+                      "aggs": Object {
+                        "byType": Object {
+                          "terms": Object {
+                            "field": "cases.attributes.observables.typeKey",
+                          },
+                        },
+                      },
+                      "terms": Object {
+                        "field": "cases.attributes.observables.description",
+                        "missing": "no_description",
+                      },
+                    },
+                  },
+                  "nested": Object {
+                    "path": "cases.attributes.observables",
                   },
                 },
                 "status": Object {

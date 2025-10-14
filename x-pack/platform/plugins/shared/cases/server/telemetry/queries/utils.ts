@@ -13,6 +13,7 @@ import {
   CASE_USER_ACTION_SAVED_OBJECT,
   FILE_ATTACHMENT_TYPE,
 } from '../../../common/constants';
+import { OBSERVABLE_TYPES_BUILTIN_KEYS } from '../../../common/constants/observables';
 import type {
   CaseAggregationResult,
   Buckets,
@@ -29,6 +30,8 @@ import type {
   CustomFieldsTelemetry,
   AlertBuckets,
   CasesTelemetryWithAlertsAggsByOwnerResults,
+  ObservablesAggregationResult,
+  ObservablesTelemetry,
 } from '../types';
 import { buildFilter } from '../../client/utils';
 import type { Owner } from '../../../common/constants/types';
@@ -199,6 +202,38 @@ export const getAlertsCountsFromBuckets = (buckets: AlertBuckets['buckets']) => 
   weekly: buckets?.[1]?.topAlertsPerBucket?.value ?? 0,
   monthly: buckets?.[0]?.topAlertsPerBucket?.value ?? 0,
 });
+
+export const getObservablesTotalsByType = (
+  observables?: ObservablesAggregationResult
+): ObservablesTelemetry => {
+  const result: ObservablesTelemetry = {
+    manual: { default: 0, custom: 0 },
+    auto: { default: 0, custom: 0 },
+    total: 0,
+  };
+
+  if (!observables || typeof observables !== 'object' || !observables?.byDescription?.buckets) {
+    return result;
+  }
+
+  observables.byDescription.buckets.forEach((bucket) => {
+    const description = bucket.key;
+
+    bucket.byType.buckets.forEach((typeBucket) => {
+      const type = OBSERVABLE_TYPES_BUILTIN_KEYS.includes(typeBucket.key) ? 'default' : 'custom';
+      const count = typeBucket.doc_count;
+
+      if (description === 'Auto extract observables') {
+        result.auto[type] += count;
+      } else {
+        result.manual[type] += count;
+      }
+      result.total += count;
+    });
+  });
+  return result;
+};
+
 interface CountsAndMaxAlertsAggRes {
   by_owner: {
     buckets: Array<{
@@ -386,6 +421,7 @@ export const getSolutionValues = ({
       filesAggregations: fileAttachmentsForOwner,
       totalCasesForOwner,
     }),
+    observables: getObservablesTotalsByType(caseAggregations?.[owner].observables),
     totalWithAlerts: totalWithAlerts[owner],
     assignees: {
       total: caseAggregations?.[owner].totalAssignees.value ?? 0,
@@ -549,6 +585,14 @@ export const getOnlyConnectorsFilter = () =>
     field: 'type',
     operator: 'or',
     type: CASE_USER_ACTION_SAVED_OBJECT,
+  });
+
+export const getOnlyObservablesFilter = () =>
+  buildFilter({
+    filters: ['observables'],
+    field: 'type',
+    operator: 'or',
+    type: CASE_SAVED_OBJECT,
   });
 
 const emptyAttachmentFramework = (): AttachmentFramework => ({

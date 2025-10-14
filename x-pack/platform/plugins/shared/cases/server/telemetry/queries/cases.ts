@@ -35,6 +35,7 @@ import {
   getOnlyConnectorsFilter,
   getReferencesAggregationQuery,
   getSolutionValues,
+  getObservablesTotalsByType,
 } from './utils';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { CasePersistedStatus } from '../../common/types/case';
@@ -91,7 +92,7 @@ export const getCasesTelemetryData = async ({
 
     const aggregationsBuckets = getAggregationsBuckets({
       aggs: casesRes.aggregations,
-      keys: ['counts', 'syncAlerts', 'status', 'users', 'totalAssignees'],
+      keys: ['counts', 'syncAlerts', 'extractObservables', 'status', 'users', 'totalAssignees'],
     });
 
     const allAttachmentFrameworkStats = getAttachmentsFrameworkStats({
@@ -114,6 +115,9 @@ export const getCasesTelemetryData = async ({
         },
         syncAlertsOn: findValueInBuckets(aggregationsBuckets.syncAlerts, 1),
         syncAlertsOff: findValueInBuckets(aggregationsBuckets.syncAlerts, 0),
+        extractObservablesOn: findValueInBuckets(aggregationsBuckets.extractObservables, 1),
+        extractObservablesOff: findValueInBuckets(aggregationsBuckets.extractObservables, 0),
+        observables: getObservablesTotalsByType(casesRes.aggregations?.observables),
         totalUsers: casesRes.aggregations?.users?.value ?? 0,
         totalParticipants: commentsRes.aggregations?.participants?.value ?? 0,
         totalTags: casesRes.aggregations?.tags?.value ?? 0,
@@ -173,6 +177,7 @@ const getCasesSavedObjectTelemetry = async (
         aggs: {
           ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
           ...getAssigneesAggregations(),
+          ...getObservablesAggregations(),
           ...getStatusAggregation(),
         },
       },
@@ -246,6 +251,29 @@ const getStatusAggregation = () => ({
   status: {
     terms: {
       field: `${CASE_SAVED_OBJECT}.attributes.status`,
+    },
+  },
+});
+
+const getObservablesAggregations = () => ({
+  observables: {
+    nested: {
+      path: `${CASE_SAVED_OBJECT}.attributes.observables`,
+    },
+    aggs: {
+      byDescription: {
+        terms: {
+          field: `${CASE_SAVED_OBJECT}.attributes.observables.description`,
+          missing: 'no_description',
+        },
+        aggs: {
+          byType: {
+            terms: {
+              field: `${CASE_SAVED_OBJECT}.attributes.observables.typeKey`,
+            },
+          },
+        },
+      },
     },
   },
 });

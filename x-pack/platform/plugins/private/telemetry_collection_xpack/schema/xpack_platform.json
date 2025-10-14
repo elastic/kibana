@@ -3512,6 +3512,39 @@
                 "syncAlertsOff": {
                   "type": "long"
                 },
+                "extractObservablesOn": {
+                  "type": "long"
+                },
+                "extractObservablesOff": {
+                  "type": "long"
+                },
+                "observables": {
+                  "properties": {
+                    "auto": {
+                      "properties": {
+                        "default": {
+                          "type": "long"
+                        },
+                        "custom": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "manual": {
+                      "properties": {
+                        "default": {
+                          "type": "long"
+                        },
+                        "custom": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "long"
+                    }
+                  }
+                },
                 "totalUsers": {
                   "type": "long"
                 },
@@ -3655,6 +3688,33 @@
                       "type": "long"
                     }
                   }
+                },
+                "observables": {
+                  "properties": {
+                    "auto": {
+                      "properties": {
+                        "default": {
+                          "type": "long"
+                        },
+                        "custom": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "manual": {
+                      "properties": {
+                        "default": {
+                          "type": "long"
+                        },
+                        "custom": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             },
@@ -3771,6 +3831,33 @@
                       "type": "long"
                     }
                   }
+                },
+                "observables": {
+                  "properties": {
+                    "auto": {
+                      "properties": {
+                        "default": {
+                          "type": "long"
+                        },
+                        "custom": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "manual": {
+                      "properties": {
+                        "default": {
+                          "type": "long"
+                        },
+                        "custom": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             },
@@ -3884,6 +3971,33 @@
                       "type": "long"
                     },
                     "closed": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "observables": {
+                  "properties": {
+                    "auto": {
+                      "properties": {
+                        "default": {
+                          "type": "long"
+                        },
+                        "custom": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "manual": {
+                      "properties": {
+                        "default": {
+                          "type": "long"
+                        },
+                        "custom": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "total": {
                       "type": "long"
                     }
                   }
