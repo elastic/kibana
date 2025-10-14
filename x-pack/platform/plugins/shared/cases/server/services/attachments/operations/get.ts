@@ -311,7 +311,7 @@ export class AttachmentGetter {
                 doc_count: number;
               };
               events: {
-                value: number;
+                doc_count: number;
               };
             };
           }>;
@@ -332,7 +332,7 @@ export class AttachmentGetter {
         acc.set(idBucket.key, {
           userComments: idBucket.reverse.comments.doc_count,
           alerts: idBucket.reverse.alerts.value,
-          events: idBucket.reverse.events.value,
+          events: idBucket.reverse.events.doc_count,
         });
         return acc;
       }, new Map<string, AttachmentTotals>()) ?? new Map()
