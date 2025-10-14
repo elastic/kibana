@@ -18,19 +18,20 @@ import { useBehaviorSubject } from '../hooks/utils/use_behavior_subject';
 import { Form } from './form';
 import { UseField } from './use_field';
 
+const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
+beforeAll(() => {
+  jest.useFakeTimers();
+});
+
+afterAll(() => {
+  jest.useRealTimers();
+});
+
 describe('<UseField />', () => {
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   describe('defaultValue', () => {
     test('should read the default value from the prop and fallback to the config object', () => {
       const onFormData = jest.fn();
-
       const TestComp = ({ onData }: { onData: OnUpdateHandler }) => {
         const { form } = useForm();
         const { subscribe } = form;
@@ -51,19 +52,22 @@ describe('<UseField />', () => {
 
       render(<TestComp onData={onFormData} />);
 
-      const [{ data }] = onFormData.mock.calls[
-        onFormData.mock.calls.length - 1
-      ] as Parameters<OnUpdateHandler>;
+      expect(onFormData).toHaveBeenCalledTimes(1);
 
-      expect(data.internal).toEqual({
-        name: 'John',
-        lastName: 'Snow',
-      });
+      expect(onFormData).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            internal: {
+              name: 'John',
+              lastName: 'Snow',
+            },
+          }),
+        })
+      );
     });
 
     test('should update the form.defaultValue when a field defaultValue is provided through prop', async () => {
       let formHook: FormHook | null = null;
-      const user = userEvent.setup({ delay: null });
 
       const TestComp = () => {
         const [isFieldVisible, setIsFieldVisible] = useState(true);
@@ -167,7 +171,6 @@ describe('<UseField />', () => {
         typeof value === 'string' ? value : JSON.stringify(value);
 
       const setup = async (props: Props) => {
-        const user = userEvent.setup({ delay: null });
         const renderResult = render(<TestComp {...props} />);
         return {
           ...renderResult,
@@ -184,7 +187,7 @@ describe('<UseField />', () => {
         };
       };
 
-      [
+      test.each([
         {
           description: 'should update the state for field without default values',
           initialValue: '',
@@ -221,44 +224,42 @@ describe('<UseField />', () => {
             defaultValue: { initial: 'value' },
           },
         },
-      ].forEach(({ description, fieldProps, initialValue, changedValue }) => {
-        test(description, async () => {
-          const { user } = await setup({ fieldProps });
+      ])('$description', async ({ fieldProps, initialValue, changedValue }) => {
+        await setup({ fieldProps });
 
-          expect(lastFieldState()).toEqual({
-            isPristine: true,
-            isDirty: false,
-            isModified: false,
-            value: initialValue,
-          });
+        expect(lastFieldState()).toEqual({
+          isPristine: true,
+          isDirty: false,
+          isModified: false,
+          value: initialValue,
+        });
 
-          const testField = screen.getByTestId('testField');
-          // For object fields, select all + paste to avoid triggering onChange with empty string
-          await user.click(testField);
+        const testField = screen.getByTestId('testField');
+        // For object fields, select all + paste to avoid triggering onChange with empty string
+        await user.click(testField);
+        await user.keyboard('{Control>}a{/Control}');
+        await user.paste(toString(changedValue));
+
+        expect(lastFieldState()).toEqual({
+          isPristine: false,
+          isDirty: true,
+          isModified: true,
+          value: changedValue,
+        });
+
+        // Put back to the initial value --> isModified should be false
+        if (toString(initialValue)) {
           await user.keyboard('{Control>}a{/Control}');
-          await user.paste(toString(changedValue));
-
-          expect(lastFieldState()).toEqual({
-            isPristine: false,
-            isDirty: true,
-            isModified: true,
-            value: changedValue,
-          });
-
-          // Put back to the initial value --> isModified should be false
-          if (toString(initialValue)) {
-            await user.keyboard('{Control>}a{/Control}');
-            await user.paste(toString(initialValue));
-          } else {
-            // For empty initial value, clear the field
-            await user.clear(testField);
-          }
-          expect(lastFieldState()).toEqual({
-            isPristine: false,
-            isDirty: true,
-            isModified: false,
-            value: initialValue,
-          });
+          await user.paste(toString(initialValue));
+        } else {
+          // For empty initial value, clear the field
+          await user.clear(testField);
+        }
+        expect(lastFieldState()).toEqual({
+          isPristine: false,
+          isDirty: true,
+          isModified: false,
+          value: initialValue,
         });
       });
     });
@@ -325,7 +326,6 @@ describe('<UseField />', () => {
     };
 
     const setup = (fieldConfig?: FieldConfig<string>) => {
-      const user = userEvent.setup({ delay: null });
       const TestComp = getTestComp(fieldConfig);
       render(<TestComp />);
       return {
@@ -371,7 +371,7 @@ describe('<UseField />', () => {
 
       await act(async () => {
         const validatePromise = formHook!.validate(); // ...until we validate the form
-        jest.advanceTimersByTime(0);
+        await jest.runAllTimersAsync();
         await validatePromise;
       });
 
@@ -380,7 +380,9 @@ describe('<UseField />', () => {
 
       // Change to a non empty string to pass validation
       await act(async () => {
-        setInputValue('myField', 'changedValue');
+        const setInputValuePromise = setInputValue('myField', 'changedValue');
+        await jest.runAllTimersAsync();
+        await setInputValuePromise;
       });
 
       ({ isValid } = formHook);
@@ -388,7 +390,9 @@ describe('<UseField />', () => {
 
       // Change back to an empty string to fail validation
       await act(async () => {
-        setInputValue('myField', '');
+        const setInputValuePromise = setInputValue('myField', '');
+        await jest.runAllTimersAsync();
+        await setInputValuePromise;
       });
 
       ({ isValid } = formHook);
@@ -412,7 +416,6 @@ describe('<UseField />', () => {
       };
 
       const {
-        user,
         form: { setInputValue },
       } = setup(fieldConfig);
 
@@ -420,16 +423,12 @@ describe('<UseField />', () => {
 
       // Trigger validation...
       await act(async () => {
-        setInputValue('myField', 'changedValue');
+        const setIinputValuePromise = setInputValue('myField', 'changedValue');
+        await jest.advanceTimersToNextTimerAsync(0);
+        await setIinputValuePromise;
       });
 
       expect(fieldHook?.isValidating).toBe(true);
-
-      // Unmount the field
-      await act(async () => {
-        const unmountBtn = screen.getByTestId('unmountFieldBtn');
-        await user.click(unmountBtn);
-      });
 
       const originalConsoleError = console.error; // eslint-disable-line no-console
       const spyConsoleError = jest.fn((message) => {
@@ -437,14 +436,12 @@ describe('<UseField />', () => {
       });
       console.error = spyConsoleError; // eslint-disable-line no-console
 
-      // Move the timer to resolve the validator
-      await act(async () => {
-        jest.advanceTimersByTime(5000);
-      });
+      const unmountBtn = screen.getByTestId('unmountFieldBtn');
+      await user.click(unmountBtn);
 
       // The test should not display any warning
       // "Can't perform a React state update on an unmounted component."
-      expect(spyConsoleError.mock.calls.length).toBe(0);
+      expect(spyConsoleError).not.toHaveBeenCalled();
 
       console.error = originalConsoleError; // eslint-disable-line no-console
     });
@@ -464,7 +461,6 @@ describe('<UseField />', () => {
       };
 
       const {
-        user,
         form: { setInputValue },
       } = setup(fieldConfig);
 
@@ -602,7 +598,6 @@ describe('<UseField />', () => {
       };
 
       const setupDynamicData = (defaultProps?: Partial<DynamicValidationDataProps>) => {
-        const user = userEvent.setup({ delay: null });
         const { unmount } = render(<TestComp {...defaultProps} />);
         return {
           unmount,
@@ -635,7 +630,9 @@ describe('<UseField />', () => {
         const { form, find } = setupDynamicData();
 
         await act(async () => {
-          form.setInputValue('nameField', 'newValue');
+          const inputValuePromise = form.setInputValue('nameField', 'newValue');
+          await jest.runAllTimersAsync();
+          await inputValuePromise;
         });
         // If the field is validating this will prevent the form from being submitted as
         // it will wait for all the fields to finish validating to return the form validity.
@@ -644,30 +641,28 @@ describe('<UseField />', () => {
         // Let's wait 10 sec to make sure the validation does not complete
         // until the observable receives a value
         await act(async () => {
-          jest.advanceTimersByTime(10000);
+          await jest.advanceTimersByTimeAsync(10000);
         });
         // The field is still validating as the validationDataProvider has not resolved yet
         // (no value has been sent to the observable)
         expect(nameFieldHook?.isValidating).toBe(true);
 
         // We now send a valid value to the observable
-        await act(async () => {
-          find('setValidValueBtn').simulate('click');
-        });
+        await find('setValidValueBtn').simulate('click');
 
         expect(nameFieldHook?.isValidating).toBe(false);
         expect(nameFieldHook?.isValid).toBe(true);
 
         // Let's change the input value to trigger the validation once more
         await act(async () => {
-          form.setInputValue('nameField', 'anotherValue');
+          const inputValuePromise = form.setInputValue('nameField', 'anotherValue');
+          await jest.runAllTimersAsync();
+          await inputValuePromise;
         });
         expect(nameFieldHook?.isValidating).toBe(true);
 
         // And send an invalid value to the observable
-        await act(async () => {
-          find('setInvalidValueBtn').simulate('click');
-        });
+        await find('setInvalidValueBtn').simulate('click');
         expect(nameFieldHook?.isValidating).toBe(false);
         expect(nameFieldHook?.isValid).toBe(false);
         expect(nameFieldHook?.getErrorsMessages()).toBe('Invalid dynamic data');
@@ -677,7 +672,9 @@ describe('<UseField />', () => {
         let result = setupDynamicData({ validationData: 'good' });
 
         await act(async () => {
-          result.form.setInputValue('lastNameField', 'newValue');
+          const setInputValuePromise = result.form.setInputValue('lastNameField', 'newValue');
+          await jest.runAllTimersAsync();
+          await setInputValuePromise;
         });
         // As this is a sync validation it should not be validating anymore at this stage
         expect(lastNameFieldHook?.isValidating).toBe(false);
@@ -689,7 +686,9 @@ describe('<UseField />', () => {
         // Now let's provide invalid dynamic data through props
         result = setupDynamicData({ validationData: 'bad' });
         await act(async () => {
-          result.form.setInputValue('lastNameField', 'newValue');
+          const setInputValuePromise = result.form.setInputValue('lastNameField', 'newValue');
+          await jest.runAllTimersAsync();
+          await setInputValuePromise;
         });
         expect(lastNameFieldHook?.isValidating).toBe(false);
         expect(lastNameFieldHook?.isValid).toBe(false);
@@ -742,7 +741,6 @@ describe('<UseField />', () => {
     };
 
     test('should call each handler at expected lifecycle', async () => {
-      const user = userEvent.setup({ delay: null });
       render(<TestComp onForm={onFormHook} />);
 
       if (!formHook) {
@@ -772,9 +770,15 @@ describe('<UseField />', () => {
       // Make sure that when we reset the form values, we don't serialize the fields
       serializer.mockReset();
 
-      await act(async () => {
+      act(() => {
         formHook!.reset();
       });
+
+      await act(async () => {
+        // Wait for the form to reset
+        await jest.runAllTimersAsync();
+      });
+
       expect(serializer).not.toBeCalled();
     });
   });
@@ -859,7 +863,6 @@ describe('<UseField />', () => {
     };
 
     const setup = (fieldConfig?: FieldConfig) => {
-      const user = userEvent.setup({ delay: null });
       const TestComp = getTestComp(fieldConfig);
       render(<TestComp />);
       return {
@@ -883,7 +886,11 @@ describe('<UseField />', () => {
 
       expect(onChange).toBeCalledTimes(0);
 
-      await setInputValue('myField', 'foo');
+      await act(async () => {
+        const setInputValuePromise = setInputValue('myField', 'foo');
+        await jest.runAllTimersAsync();
+        await setInputValuePromise;
+      });
 
       // userEvent.type triggers onChange for each character
       expect(onChange).toHaveBeenCalled();
@@ -905,19 +912,19 @@ describe('<UseField />', () => {
       await setInputValue('myField', '0');
       // Trigger validation
       let field = screen.getByTestId('myField');
-      await act(async () => {
+      act(() => {
         field.blur();
-        jest.advanceTimersByTime(0);
       });
+
       expect(onError).toHaveBeenCalled();
       expect(onError).toHaveBeenCalledWith(['oops!']);
 
       await setInputValue('myField', '1');
       // Trigger validation
       field = screen.getByTestId('myField');
-      await act(async () => {
+
+      act(() => {
         field.blur();
-        jest.advanceTimersByTime(0);
       });
       expect(onError).toHaveBeenCalledWith(null);
     });

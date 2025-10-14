@@ -17,9 +17,12 @@ import { Form } from './form';
 import { UseField } from './use_field';
 import { UseArray } from './use_array';
 
+const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
 describe('<UseArray />', () => {
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
+    jest.clearAllMocks();
   });
 
   afterAll(() => {
@@ -57,7 +60,6 @@ describe('<UseArray />', () => {
   });
 
   test('it should allow to listen to array item field value change', async () => {
-    const user = userEvent.setup({ delay: null }); // Required for fake timers
     const onFormData = jest.fn();
 
     const TestComp = ({ onData }: { onData: (data: any) => void }) => {

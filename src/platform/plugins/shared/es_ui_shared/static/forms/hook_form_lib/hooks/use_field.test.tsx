@@ -18,7 +18,7 @@ import { VALIDATION_TYPES } from '..';
 
 describe('useField() hook', () => {
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
@@ -57,9 +57,17 @@ describe('useField() hook', () => {
 
       render(<TestForm />);
 
-      const validateResponse: FieldValidateResponse = await fieldHook!.validate({
-        value: EMPTY_VALUE,
-        validationType: VALIDATION_TYPES.ARRAY_ITEM,
+      let validateResponse: FieldValidateResponse;
+
+      await act(async () => {
+        const validatePromise = fieldHook!.validate({
+          value: EMPTY_VALUE,
+          validationType: VALIDATION_TYPES.ARRAY_ITEM,
+        });
+
+        await jest.runAllTimersAsync();
+
+        validateResponse = await validatePromise;
       });
 
       // validation fails for ARRAY_ITEM with a non-blocking validation error
@@ -93,25 +101,31 @@ describe('useField() hook', () => {
 
       render(<TestForm />);
 
+      let validateResponse: FieldValidateResponse;
+
       await act(async () => {
-        const validateResponse: FieldValidateResponse = await fieldHook!.validate({
+        const validatePromise = fieldHook!.validate({
           value: EMPTY_VALUE,
           validationType: VALIDATION_TYPES.ARRAY_ITEM,
         });
 
-        // validation fails for ARRAY_ITEM with a blocking validation error
-        expect(validateResponse!).toEqual({
-          isValid: false,
-          errors: [
-            {
-              code: 'ERR_FIELD_MISSING',
-              path: 'test-path',
-              message: 'error-message',
-              __isBlocking__: true,
-              validationType: 'arrayItem',
-            },
-          ],
-        });
+        await jest.runAllTimersAsync();
+
+        validateResponse = await validatePromise;
+      });
+
+      // validation fails for ARRAY_ITEM with a blocking validation error
+      expect(validateResponse!).toEqual({
+        isValid: false,
+        errors: [
+          {
+            code: 'ERR_FIELD_MISSING',
+            path: 'test-path',
+            message: 'error-message',
+            __isBlocking__: true,
+            validationType: 'arrayItem',
+          },
+        ],
       });
 
       // expect the field to be invalid because the validation error is blocking
@@ -131,11 +145,17 @@ describe('useField() hook', () => {
 
       render(<TestForm />);
 
-      // This should **not** call our validator as it is of type ARRAY_ITEM
-      // and here, as we don't specify the validation type, we validate the default "FIELD" type.
-      fieldHook!.validate({
-        value: 'foo',
-        validationType: undefined, // Although not necessary adding it to be explicit
+      await act(async () => {
+        // This should **not** call our validator as it is of type ARRAY_ITEM
+        // and here, as we don't specify the validation type, we validate the default "FIELD" type.
+        const validatePromise = fieldHook!.validate({
+          value: 'foo',
+          validationType: undefined, // Although not necessary adding it to be explicit
+        });
+
+        await jest.runAllTimersAsync();
+
+        await validatePromise;
       });
 
       expect(validatorFn).toBeCalledTimes(0);
@@ -175,6 +195,10 @@ describe('useField() hook', () => {
       expect(field2ValidatorFn).toBeCalledTimes(0);
 
       rerender(<TestForm showField1={false} showField2={true} />);
+
+      await act(async () => {
+        await jest.runAllTimersAsync();
+      });
 
       expect(field2ValidatorFn).toBeCalledTimes(1);
     });

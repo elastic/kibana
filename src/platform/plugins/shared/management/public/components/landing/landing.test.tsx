@@ -25,10 +25,6 @@ afterAll(() => {
   jest.useRealTimers();
 });
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 const sectionsMock = [
   {
     id: 'data',

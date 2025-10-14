@@ -17,11 +17,15 @@ import { Form } from './form';
 import { UseField } from './use_field';
 import { FormDataProvider } from './form_data_provider';
 
+const user = userEvent.setup();
+const onFormData = jest.fn();
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 describe('<FormDataProvider />', () => {
   test('should listen to changes in the form data and re-render the children with the updated data', async () => {
-    const user = userEvent.setup();
-    const onFormData = jest.fn();
-
     const TestComp = () => {
       const { form } = useForm();
 
@@ -42,46 +46,33 @@ describe('<FormDataProvider />', () => {
 
     render(<TestComp />);
 
-    expect(onFormData.mock.calls.length).toBe(1);
+    expect(onFormData).toBeCalledTimes(1);
 
-    const [formDataInitial] = onFormData.mock.calls[
-      onFormData.mock.calls.length - 1
-    ] as Parameters<OnUpdateHandler>;
-
-    expect(formDataInitial).toEqual({
+    expect(onFormData).toHaveBeenCalledWith({
       name: 'Initial value',
       lastName: 'Initial value',
     });
 
-    onFormData.mockReset(); // Reset the counter at 0
+    onFormData.mockClear();
 
     // Make some changes to the form fields
     const nameField = screen.getByTestId('nameField');
     const lastNameField = screen.getByTestId('lastNameField');
 
     await user.clear(nameField);
-    await user.type(nameField, 'updated value');
+    await user.type(nameField, 'updated name');
     await user.clear(lastNameField);
-    await user.type(lastNameField, 'updated value');
+    await user.type(lastNameField, 'updated lastname');
 
     // userEvent.type() triggers onChange for each character typed
     // The important thing is to verify the final form data is correct
-    expect(onFormData).toHaveBeenCalled();
-
-    const [formDataUpdated] = onFormData.mock.calls[
-      onFormData.mock.calls.length - 1
-    ] as Parameters<OnUpdateHandler>;
-
-    expect(formDataUpdated).toEqual({
-      name: 'updated value',
-      lastName: 'updated value',
+    expect(onFormData).toHaveBeenCalledWith({
+      name: 'updated name',
+      lastName: 'updated lastname',
     });
   });
 
   test('should subscribe to the latest updated form data when mounting late', async () => {
-    const user = userEvent.setup();
-    const onFormData = jest.fn();
-
     const TestComp = () => {
       const { form } = useForm();
       const [isOn, setIsOn] = useState(false);
@@ -117,21 +108,14 @@ describe('<FormDataProvider />', () => {
     const button = screen.getByTestId('btn');
     await user.click(button);
 
-    expect(onFormData.mock.calls.length).toBe(2);
+    expect(onFormData).toHaveBeenCalledTimes(2);
 
-    const [formDataUpdated] = onFormData.mock.calls[
-      onFormData.mock.calls.length - 1
-    ] as Parameters<OnUpdateHandler>;
-
-    expect(formDataUpdated).toEqual({
+    expect(onFormData).toHaveBeenCalledWith({
       name: 'updated value',
     });
   });
 
   test('props.pathsToWatch (string): should not re-render the children when the field that changed is not the one provided', async () => {
-    const user = userEvent.setup();
-    const onFormData = jest.fn();
-
     const TestComp = () => {
       const { form } = useForm();
 
@@ -151,20 +135,17 @@ describe('<FormDataProvider />', () => {
 
     render(<TestComp />);
 
-    onFormData.mockReset(); // Reset the calls counter at 0
+    onFormData.mockClear();
 
     // Make some changes to a field we are **not** interested in
     const lastNameField = screen.getByTestId('lastNameField');
     await user.clear(lastNameField);
     await user.type(lastNameField, 'updated value');
 
-    expect(onFormData).toBeCalledTimes(0);
+    expect(onFormData).toHaveBeenCalledTimes(0);
   });
 
   test('props.pathsToWatch (Array<string>): should not re-render the children when the field that changed is not in the watch list', async () => {
-    const user = userEvent.setup();
-    const onFormData = jest.fn();
-
     const TestComp = () => {
       const { form } = useForm();
 
@@ -185,7 +166,7 @@ describe('<FormDataProvider />', () => {
 
     render(<TestComp />);
 
-    onFormData.mockReset(); // Reset the calls counter at 0
+    onFormData.mockClear();
 
     // Make some changes to fields not in the watch list
     const companyField = screen.getByTestId('companyField');
@@ -203,7 +184,7 @@ describe('<FormDataProvider />', () => {
     // userEvent.type() triggers onChange for each character
     expect(onFormData).toHaveBeenCalled();
 
-    onFormData.mockReset();
+    onFormData.mockClear();
 
     const lastNameField = screen.getByTestId('lastNameField');
     await user.clear(lastNameField);
