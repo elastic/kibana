@@ -15,6 +15,10 @@ interface ConfigureRiskEngineParams {
   includeClosedAlerts: boolean;
   range: { start: string; end: string };
   enableResetToZero: boolean;
+  filters?: Array<{
+    entity_types: string[];
+    filter: string;
+  }>;
 }
 
 export const useConfigureSORiskEngineMutation = (
@@ -35,6 +39,7 @@ export const useConfigureSORiskEngineMutation = (
       exclude_alert_statuses: params.includeClosedAlerts ? [] : ['closed'],
       range: params.range,
       enable_reset_to_zero: params.enableResetToZero,
+      filters: params.filters,
     });
     return { risk_engine_saved_object_configured: true };
   }, options);

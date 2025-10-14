@@ -18,11 +18,12 @@ export const useRiskScorePreview = ({
   range,
   filter,
   exclude_alert_statuses: excludeAlertStatuses,
+  filters,
 }: UseRiskScorePreviewParams) => {
   const { fetchRiskScorePreview } = useEntityAnalyticsRoutes();
 
   return useQuery(
-    ['POST', 'FETCH_PREVIEW_RISK_SCORE', range, filter, excludeAlertStatuses],
+    ['POST', 'FETCH_PREVIEW_RISK_SCORE', range, filter, excludeAlertStatuses, filters],
     async ({ signal }) => {
       if (!dataViewId) {
         return;
@@ -52,6 +53,10 @@ export const useRiskScorePreview = ({
 
       if (excludeAlertStatuses) {
         params.exclude_alert_statuses = excludeAlertStatuses;
+      }
+
+      if (filters && filters.length > 0) {
+        params.filters = filters;
       }
 
       const response = await fetchRiskScorePreview({ signal, params });

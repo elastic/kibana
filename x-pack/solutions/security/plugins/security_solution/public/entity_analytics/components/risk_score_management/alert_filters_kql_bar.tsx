@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiTextColor,
 } from '@elastic/eui';
-import type { Query, Filter } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useSourcererDataView } from '../../../sourcerer/containers';
@@ -35,8 +35,8 @@ const ENTITY_OPTIONS = [
 
 interface AlertFiltersKqlBarProps {
   onQueryChange?: (query: Query) => void;
-  onFiltersChange?: (filters: Array<{ id: string; text: string }>) => void;
-  filters?: Array<{ id: string; text: string }>;
+  onFiltersChange?: (filters: Array<{ id: string; text: string; entityTypes: string[] }>) => void;
+  filters?: Array<{ id: string; text: string; entityTypes: string[] }>;
   placeholder?: string;
   compressed?: boolean;
   'data-test-subj'?: string;
@@ -44,20 +44,51 @@ interface AlertFiltersKqlBarProps {
 
 // Custom component to render each filter chip with a combobox
 interface CustomFilterChipProps {
-  filter: Filter;
-  onRemove: (filter: Filter) => void;
+  filter: { id: string; text: string; entityTypes: string[] };
+  onRemove: () => void;
+  onEntityTypesChange: (entityTypes: string[]) => void;
 }
 
-const CustomFilterChip: React.FC<CustomFilterChipProps> = ({ filter, onRemove }) => {
-  const [selectedEntities, setSelectedEntities] =
-    useState<EuiComboBoxOptionOption<string>[]>(ENTITY_OPTIONS); // Default to all selected
+const CustomFilterChip: React.FC<CustomFilterChipProps> = ({
+  filter,
+  onRemove,
+  onEntityTypesChange,
+}) => {
+  // Map backend entity types to UI options
+  const mapEntityTypesToOptions = (entityTypes: string[]): EuiComboBoxOptionOption<string>[] => {
+    const mapping: Record<string, string> = {
+      user: 'users',
+      host: 'hosts',
+      service: 'services',
+    };
+    return entityTypes
+      .map((et) => ENTITY_OPTIONS.find((opt) => opt.value === (mapping[et] || et)))
+      .filter((opt): opt is { label: string; value: string } => opt !== undefined);
+  };
 
-  const onChange = useCallback((options: EuiComboBoxOptionOption<string>[]) => {
-    setSelectedEntities(options);
-  }, []);
+  const [selectedEntities, setSelectedEntities] = useState<EuiComboBoxOptionOption<string>[]>(() =>
+    mapEntityTypesToOptions(
+      filter.entityTypes.length > 0 ? filter.entityTypes : ['user', 'host', 'service']
+    )
+  );
+
+  const onChange = useCallback(
+    (options: EuiComboBoxOptionOption<string>[]) => {
+      setSelectedEntities(options);
+      // Map UI values back to backend format
+      const mapping: Record<string, string> = {
+        users: 'user',
+        hosts: 'host',
+        services: 'service',
+      };
+      const entityTypes = options.map((opt) => mapping[opt.value || ''] || opt.value || '');
+      onEntityTypesChange(entityTypes);
+    },
+    [onEntityTypesChange]
+  );
 
   // Get the display string for the filter
-  const filterDisplayString = filter.meta?.alias || filter.meta?.key || 'Filter';
+  const filterDisplayString = filter.text;
 
   // Parse the filter string to separate field name and value
   const parseFilterString = (filterStr: string) => {
@@ -117,7 +148,7 @@ const CustomFilterChip: React.FC<CustomFilterChipProps> = ({ filter, onRemove })
           <EuiButtonIcon
             iconType="cross"
             color="text"
-            onClick={() => onRemove(filter)}
+            onClick={onRemove}
             aria-label={i18n.REMOVE_FILTER}
             size="s"
           />
@@ -203,10 +234,11 @@ export const AlertFiltersKqlBar: React.FC<AlertFiltersKqlBarProps> = ({
             fromKueryExpression(queryText);
             setValidationError(undefined);
 
-            // Add the query as a filter
+            // Add the query as a filter with default entity types (all)
             const newFilter = {
               id: Date.now().toString(),
               text: queryText,
+              entityTypes: ['user', 'host', 'service'],
             };
             const updatedFilters = [...filters, newFilter];
             onFiltersChange?.(updatedFilters);
@@ -225,8 +257,16 @@ export const AlertFiltersKqlBar: React.FC<AlertFiltersKqlBarProps> = ({
   );
 
   const onRemoveFilter = useCallback(
-    (filterToRemove: { id: string; text: string }) => {
+    (filterToRemove: { id: string; text: string; entityTypes: string[] }) => {
       const updatedFilters = filters.filter((f) => f.id !== filterToRemove.id);
+      onFiltersChange?.(updatedFilters);
+    },
+    [filters, onFiltersChange]
+  );
+
+  const onEntityTypesChange = useCallback(
+    (filterId: string, entityTypes: string[]) => {
+      const updatedFilters = filters.map((f) => (f.id === filterId ? { ...f, entityTypes } : f));
       onFiltersChange?.(updatedFilters);
     },
     [filters, onFiltersChange]
@@ -266,8 +306,9 @@ export const AlertFiltersKqlBar: React.FC<AlertFiltersKqlBarProps> = ({
           {filters.map((filter) => (
             <EuiFlexItem key={filter.id} grow={false}>
               <CustomFilterChip
-                filter={{ meta: { alias: filter.text, key: 'filter' } } as Filter}
+                filter={filter}
                 onRemove={() => onRemoveFilter(filter)}
+                onEntityTypesChange={(entityTypes) => onEntityTypesChange(filter.id, entityTypes)}
               />
             </EuiFlexItem>
           ))}
