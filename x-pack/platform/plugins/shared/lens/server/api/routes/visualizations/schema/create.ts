@@ -8,36 +8,31 @@
 import { schema } from '@kbn/config-schema';
 
 import {
-  lensResponseItemSchema,
-  lensAPIConfigSchema,
   lensCMCreateOptionsSchema,
+  lensItemDataSchema,
+  lensItemSchema,
 } from '../../../../content_management';
-import { lensItemSchemaV0 } from '../../../../content_management/v0';
+import { lensItemDataSchemaV0 } from '../../../../content_management/v0';
 import { pickFromObjectSchema } from '../../../../utils';
+import { lensResponseItemSchema } from './common';
 
-const apiConfigData = lensAPIConfigSchema.extends({
-  id: undefined,
-});
-
-const v0ConfigData = lensItemSchemaV0.extends({
-  id: undefined,
-});
-
-export const lensCreateRequestBodySchema = schema.object(
+export const lensCreateRequestParamsSchema = schema.object(
   {
-    data: schema.oneOf([
-      apiConfigData,
-      v0ConfigData, // Temporarily permit passing old v0 SO attributes on create
-    ]),
-    // TODO should these options be here or in params?
-    options: schema.object(
-      {
-        ...pickFromObjectSchema(lensCMCreateOptionsSchema.getPropSchemas(), ['overwrite']),
-      },
-      { unknowns: 'forbid' }
-    ),
+    id: schema.maybe(lensItemSchema.getPropSchemas().id),
   },
   { unknowns: 'forbid' }
 );
+
+export const lensCreateRequestQuerySchema = schema.object(
+  {
+    ...pickFromObjectSchema(lensCMCreateOptionsSchema.getPropSchemas(), ['overwrite']),
+  },
+  { unknowns: 'forbid' }
+);
+
+export const lensCreateRequestBodySchema = schema.oneOf([
+  lensItemDataSchema,
+  lensItemDataSchemaV0, // Temporarily permit passing old v0 SO attributes on create
+]);
 
 export const lensCreateResponseBodySchema = lensResponseItemSchema;

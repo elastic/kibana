@@ -5,4 +5,13 @@
  * 2.0.
  */
 
-export { ConfigBuilderStub } from './config_builder_stub';
+import type { LensTransforms } from './types';
+import { getTransformIn } from './transform_in';
+import { getTransformOut } from './transform_out';
+
+export function getLensTransforms(): LensTransforms {
+  return {
+    transformIn: getTransformIn(),
+    transformOut: getTransformOut(),
+  };
+}

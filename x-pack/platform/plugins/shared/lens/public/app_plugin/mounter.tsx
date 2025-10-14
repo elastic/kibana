@@ -19,7 +19,6 @@ import {
   Storage,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
-import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
@@ -37,7 +36,7 @@ import type {
 } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import type { LensPluginStartDependencies } from '../plugin';
-import { extract } from '../../common/embeddable_factory';
+import { extractLensReferences } from '../../common/references';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
 import type { LensAttributesService } from '../lens_attribute_service';
 import type { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
@@ -216,7 +215,7 @@ export async function mountApp(
     }
     if (stateTransfer && props?.state) {
       const { state: rawState, isCopied } = props;
-      const { references } = extract(rawState as unknown as EmbeddableStateWithType);
+      const { references } = extractLensReferences(rawState);
       stateTransfer.navigateToWithEmbeddablePackage<LensSerializedState>(mergedOriginatingApp, {
         path: embeddableEditorIncomingState?.originatingPath,
         state: {

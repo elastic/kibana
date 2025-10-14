@@ -15,10 +15,9 @@ import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
   CONTROLS_GROUP_TYPE,
 } from '@kbn/controls-constants';
-import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type { LensAppServices } from './types';
 import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
-import { extract } from '../../common/embeddable_factory';
+import { extractLensReferences } from '../../common/references';
 import type { LensSerializedState } from '../react_embeddable/types';
 
 /**
@@ -62,7 +61,7 @@ export const redirectToDashboard = ({
   stateTransfer: LensAppServices['stateTransfer'];
   controlsState?: ControlPanelsState;
 }) => {
-  const { references } = extract(rawState as unknown as EmbeddableStateWithType);
+  const { references } = extractLensReferences(rawState);
 
   const appId = originatingApp || 'dashboards';
 

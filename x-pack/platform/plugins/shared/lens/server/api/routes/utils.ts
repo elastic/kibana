@@ -5,41 +5,80 @@
  * 2.0.
  */
 
-import type { LensResponseItem, LensSavedObject } from '../../content_management';
-import { ConfigBuilderStub } from '../../../common/transforms';
+import type { LensSavedObject, LensUpdateIn } from '../../content_management';
+import type {
+  LensCreateRequestBody,
+  LensItemMeta,
+  LensResponseItem,
+  LensUpdateRequestBody,
+} from './types';
+
+/**
+ * Converts Lens request data to Lens Config
+ */
+export function getLensRequestConfig(
+  request: LensCreateRequestBody | LensUpdateRequestBody
+): LensUpdateIn['data'] & LensUpdateIn['options'] {
+  const { visualizationType, ...attributes } = request;
+
+  if (!visualizationType) {
+    throw new Error('Missing visualizationType');
+  }
+
+  return {
+    ...attributes,
+    // TODO: fix these type issues
+    visualizationType,
+    title: attributes.title ?? '',
+    description: attributes.description ?? undefined,
+  } satisfies LensUpdateIn['data'] & LensUpdateIn['options'];
+}
+
+/**
+ * Used to extend the meta of the response item. Needed in Lens GET request.
+ */
+export type ExtendedLensResponseItem<M extends Record<string, string | boolean> = {}> = Omit<
+  LensResponseItem,
+  'meta'
+> & {
+  meta: LensResponseItem['meta'] & M;
+};
 
 /**
  * Converts Lens Saved Object to Lens Response Item
  */
-export function getLensResponseItem({
-  // Data params
-  id,
-  references,
-  attributes,
+export function getLensResponseItem<M extends Record<string, string | boolean>>(
+  item: LensSavedObject,
+  extraMeta: M = {} as M
+): ExtendedLensResponseItem<M> {
+  const { id, references, attributes } = item;
+  const meta = getLensResponseItemMeta<M>(item, extraMeta);
 
-  // Meta params
-  type,
-  createdAt,
-  updatedAt,
-  createdBy,
-  updatedBy,
-  managed,
-  originId,
-}: LensSavedObject): LensResponseItem {
   return {
-    data: ConfigBuilderStub.out({
-      ...attributes,
-      id,
+    id,
+    data: {
       references,
-    }),
-    meta: {
-      type,
-      createdAt,
-      updatedAt,
-      createdBy,
-      updatedBy,
-      managed,
-      originId,
+      ...attributes,
     },
+    meta,
+  } satisfies LensResponseItem;
+}
+
+/**
+ * Converts Lens Saved Object to Lens Response Item
+ */
+function getLensResponseItemMeta<M extends Record<string, string | boolean>>(
+  { type, createdAt, updatedAt, createdBy, updatedBy, managed, originId }: LensSavedObject,
+  extraMeta: M = {} as M
+): LensItemMeta & M {
+  return {
+    type,
+    createdAt,
+    updatedAt,
+    createdBy,
+    updatedBy,
+    managed,
+    originId,
+    ...extraMeta,
   };
 }

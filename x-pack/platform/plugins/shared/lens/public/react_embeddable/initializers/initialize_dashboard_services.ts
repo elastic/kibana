@@ -17,7 +17,7 @@ import { titleComparators } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-containers';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge } from 'rxjs';
-import { isTextBasedLanguage } from '../helper';
+import { isTextBasedLanguage, transformOutputState } from '../helper';
 import type {
   LensComponentProps,
   LensPanelProps,
@@ -131,12 +131,18 @@ export function initializeDashboardServices(
       canUnlinkFromLibrary: async () => Boolean(getLatestState().savedObjectId),
       getSerializedStateByReference: (newId: string) => {
         const currentState = getLatestState();
-        currentState.savedObjectId = newId;
-        return attributeService.extractReferences(currentState);
+        return {
+          rawState: {
+            ...currentState,
+            savedObjectId: newId,
+          },
+        };
       },
       getSerializedStateByValue: () => {
         const { savedObjectId, ...byValueRuntimeState } = getLatestState();
-        return attributeService.extractReferences(byValueRuntimeState);
+        return {
+          rawState: transformOutputState(byValueRuntimeState),
+        };
       },
     },
     anyStateChange$: merge(
