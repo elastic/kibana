@@ -210,6 +210,8 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
           rawState: {
             ...timeRangePercentage.getLatestState(),
             isAnchored: isAnchored$.value,
+            width: 'large',
+            grow: true,
           },
           references: [],
         };

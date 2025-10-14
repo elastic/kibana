@@ -57,6 +57,7 @@ export const ControlPanel = ({
   const initialState = useMemo(() => {
     return parentApi.layout$.getValue().controls[uuid];
   }, [parentApi, uuid]);
+  console.log('INITIAL STATE', initialState);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: uuid,

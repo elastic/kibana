@@ -60,6 +60,7 @@ import { areLayoutsEqual } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
 import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from './types';
+import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
@@ -495,6 +496,9 @@ export function initializeLayoutManager(
         newControls[uuid] = {
           type: controlToPin.type as StickyControlLayoutState['type'],
           order: Object.keys(newControls).length,
+          // TODO Remove this when grow and width settings for pinned controls are implemented
+          // https://github.com/elastic/kibana/issues/234681
+          ...(controlToPin.type === TIME_SLIDER_CONTROL ? { width: 'large', grow: true } : {}),
         };
         const newPanels = { ...layout$.getValue().panels };
         delete newPanels[uuid];

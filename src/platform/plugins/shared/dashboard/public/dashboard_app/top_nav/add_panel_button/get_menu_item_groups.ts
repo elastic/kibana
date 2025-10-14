@@ -51,22 +51,20 @@ export async function getMenuItemGroups(api: HasAppContext & TracksOverlays): Pr
       name: actionName,
       icon: action.getIconType?.(addPanelContext) ?? 'empty',
       isDisabled: !isCompatible,
-      onClick: isCompatible
-        ? (event: React.MouseEvent) => {
-            api.clearOverlays();
-            if (event.currentTarget instanceof HTMLAnchorElement) {
-              if (
-                !event.defaultPrevented && // onClick prevented default
-                event.button === 0 &&
-                (!event.currentTarget.target || event.currentTarget.target === '_self') &&
-                !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
-              ) {
-                event.preventDefault();
-              }
-            }
-            action.execute(addPanelContext);
+      onClick: (event: React.MouseEvent) => {
+        api.clearOverlays();
+        if (event.currentTarget instanceof HTMLAnchorElement) {
+          if (
+            !event.defaultPrevented && // onClick prevented default
+            event.button === 0 &&
+            (!event.currentTarget.target || event.currentTarget.target === '_self') &&
+            !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
+          ) {
+            event.preventDefault();
           }
-        : () => {},
+        }
+        action.execute(addPanelContext);
+      },
       'data-test-subj': `create-action-${actionName}`,
       description: action?.getDisplayNameTooltip?.(addPanelContext),
       order: action.order ?? 0,
