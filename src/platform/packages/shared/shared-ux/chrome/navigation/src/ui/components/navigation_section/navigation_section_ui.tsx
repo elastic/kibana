@@ -346,8 +346,10 @@ const getEuiProps = (
     }
 
     if (href !== undefined) {
-      e.preventDefault();
-      navigateToUrl(href);
+      if (!isExternal) {
+        e.preventDefault();
+        navigateToUrl(href);
+      }
       closePanel();
       return;
     }
