@@ -85,7 +85,7 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
         css={{ display: 'block' }}
         onClick={() => onFilter()}
         title={i18n.translate('expressionLegacyMetricVis.filterTitle', {
-          defaultMessage: 'Click to filter by field',
+          defaultMessage: `Click to filter by field ${metric.description}`,
         })}
       >
         {metricComponent}
