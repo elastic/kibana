@@ -183,7 +183,6 @@ function FilterForm(props: {
           compressed
           disabled={disabled}
           dataTestSubj="streamsAppConditionEditorFieldText"
-          autoFocus={true}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
