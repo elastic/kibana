@@ -133,9 +133,9 @@
     "@kbn/content-management-content-editor",
     "@kbn/saved-objects-tagging-plugin",
     "@kbn/core-http-browser-mocks",
-    "@kbn/management-settings-ids"
     "@kbn/deeplinks-management",
-    "@kbn/observability-nav-icons"
+    "@kbn/observability-nav-icons",
+    "@kbn/management-settings-ids"
   ],
   "exclude": ["target/**/*"]
 }
