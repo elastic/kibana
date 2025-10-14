@@ -38,7 +38,6 @@ interface UpdateTestDefinition {
 }
 
 export function updateTestSuiteFactory(context: DeploymentAgnosticFtrProviderContext) {
-  const esArchiver = context.getService('esArchiver');
   const spacesSupertest = context.getService('spacesSupertest');
 
   const expectRbacForbidden = (resp: { [key: string]: any }) => {
@@ -85,15 +84,10 @@ export function updateTestSuiteFactory(context: DeploymentAgnosticFtrProviderCon
         let supertest: SupertestWithRoleScopeType;
         before(async () => {
           supertest = await spacesSupertest.getSupertestWithRoleScope(user!);
-          await esArchiver.load(
-            'x-pack/platform/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          );
         });
+
         after(async () => {
           await supertest.destroy();
-          await esArchiver.unload(
-            'x-pack/platform/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          );
         });
 
         describe('space_1', () => {
