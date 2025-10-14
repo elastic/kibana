@@ -17,7 +17,8 @@ import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
 import { useActionModal } from '../../../context/action_modal';
 import { getSloHealthStateText } from '../../../lib/slo_health_helpers';
 import { getSLOTransformId, getSLOSummaryTransformId } from '../../../../common/constants';
-import { HealthCalloutContentWithCTA } from './health_callout/content_with_cta';
+import { ContentWithResetCta } from './health_callout/content_with_reset_cta';
+import { ContentWithInspectCta } from './health_callout/content_with_inspect_cta';
 
 export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
   const { isLoading, isError, data } = useFetchSloHealth({ list: [slo] });
@@ -110,37 +111,33 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
           <ul>
             {health.rollup === 'unhealthy' && !!rollupUrl && (
               <li key={`${slo.id}-rollup-unhealthy`}>
-                <HealthCalloutContentWithCTA
+                <ContentWithInspectCta
                   textSize="s"
                   content={unhealthyRollupContent}
                   url={rollupUrl}
-                  isMissing={false}
                 />
               </li>
             )}
             {health.summary === 'unhealthy' && !!summaryUrl && (
-              <HealthCalloutContentWithCTA
+              <ContentWithInspectCta
                 textSize="s"
                 content={unhealthySummaryContent}
                 url={summaryUrl}
-                isMissing={false}
               />
             )}
             {health.rollup === 'missing' && !!rollupUrl && (
               <li key={`${slo.id}-rollup-missing`}>
-                <HealthCalloutContentWithCTA
+                <ContentWithResetCta
                   textSize="s"
                   content={missingRollupContent}
-                  isMissing={true}
                   handleReset={handleReset}
                 />
               </li>
             )}
             {health.summary === 'missing' && !!summaryUrl && (
-              <HealthCalloutContentWithCTA
+              <ContentWithResetCta
                 textSize="s"
                 content={missingSummaryContent}
-                isMissing={true}
                 handleReset={handleReset}
               />
             )}
