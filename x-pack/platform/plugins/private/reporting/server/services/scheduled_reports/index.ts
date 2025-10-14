@@ -7,4 +7,4 @@
 
 export { DEFAULT_SCHEDULED_REPORT_LIST_SIZE, MAX_SCHEDULED_REPORT_LIST_SIZE } from './constants';
 
-export { ScheduledReportsClient } from './scheduled_reports_client';
+export { ScheduledReportsService } from './scheduled_reports_service';

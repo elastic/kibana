@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
-import { ScheduledReportsClient } from '../../../services/scheduled_reports/scheduled_reports_client';
+import { ScheduledReportsService } from '../../../services/scheduled_reports/scheduled_reports_service';
 import type { ReportingCore } from '../../..';
 import { authorizedUserPreRouting, getCounters } from '../../common';
 import { handleUnavailable } from '../../common/request_handler';
@@ -84,14 +84,14 @@ export function registerScheduledRoutesInternal(reporting: ReportingCore, logger
             parseInt(querySize, 10) || DEFAULT_SCHEDULED_REPORT_LIST_SIZE
           );
 
-          const scheduledReportsClient = await ScheduledReportsClient.build({
+          const scheduledReportsService = await ScheduledReportsService.build({
             logger,
             reportingCore: reporting,
             request: req,
             responseFactory: res,
           });
 
-          const results = await scheduledReportsClient.list({ request: req, user, page, size });
+          const results = await scheduledReportsService.list({ request: req, user, page, size });
 
           counters.usageCounter();
 
@@ -145,14 +145,14 @@ export function registerScheduledRoutesInternal(reporting: ReportingCore, logger
 
           const { ids } = req.body;
 
-          const scheduledReportsClient = await ScheduledReportsClient.build({
+          const scheduledReportsService = await ScheduledReportsService.build({
             logger,
             reportingCore: reporting,
             request: req,
             responseFactory: res,
           });
 
-          const results = await scheduledReportsClient.bulkDisable({ request: req, user, ids });
+          const results = await scheduledReportsService.bulkDisable({ request: req, user, ids });
 
           counters.usageCounter();
 

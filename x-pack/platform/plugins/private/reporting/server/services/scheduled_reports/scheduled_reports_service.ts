@@ -52,7 +52,7 @@ interface BulkDisableResult {
 
 export type CreatedAtSearchResponse = SearchResponse<{ created_at: string }>;
 
-export class ScheduledReportsClient {
+export class ScheduledReportsService {
   private auditLogger: AuditLogger;
   private esClient: IClusterClient;
   private logger: Logger;
@@ -103,7 +103,7 @@ export class ScheduledReportsClient {
     const savedObjectsClient = await reportingCore.getScopedSoClient(request);
     const taskManager = await reportingCore.getTaskManager();
 
-    return new ScheduledReportsClient({
+    return new ScheduledReportsService({
       auditLogger,
       esClient,
       logger,
