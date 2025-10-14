@@ -79,6 +79,7 @@ const observablesSchema: ObservablesSchema = {
   auto: { default: long, custom: long },
   manual: { default: long, custom: long },
   total: long,
+  casesWithMaxObservables: long,
 };
 
 const solutionTelemetry: SolutionTelemetrySchema = {

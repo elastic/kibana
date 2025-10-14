@@ -79,6 +79,7 @@ export interface ObservablesAggregationResult {
       };
     }>;
   };
+  casesWithMaxObservables: { doc_count: number };
 }
 
 export interface FileAttachmentAggsResult {
@@ -196,6 +197,7 @@ export interface ObservablesTelemetry {
   manual: { default: number; custom: number };
   auto: { default: number; custom: number };
   total: number;
+  casesWithMaxObservables: number;
 }
 
 export interface CustomFieldsTelemetry {

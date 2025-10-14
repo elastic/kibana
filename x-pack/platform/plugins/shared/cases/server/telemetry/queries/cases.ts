@@ -13,6 +13,7 @@ import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   OWNERS,
+  MAX_OBSERVABLES_PER_CASE,
 } from '../../../common/constants';
 import type {
   CollectTelemetryDataParams,
@@ -271,6 +272,13 @@ const getObservablesAggregations = () => ({
             terms: {
               field: `${CASE_SAVED_OBJECT}.attributes.observables.typeKey`,
             },
+          },
+        },
+      },
+      casesWithMaxObservables: {
+        filter: {
+          script: {
+            source: `doc['${CASE_SAVED_OBJECT}.attributes.observables'].size() >= ${MAX_OBSERVABLES_PER_CASE}`,
           },
         },
       },

@@ -92,6 +92,9 @@ describe('getCasesTelemetryData', () => {
             },
           ],
         },
+        casesWithMaxObservables: {
+          doc_count: 1,
+        },
       };
 
       const solutionValues = {
@@ -440,6 +443,7 @@ describe('getCasesTelemetryData', () => {
             auto: { default: 1, custom: 0 },
             manual: { default: 0, custom: 0 },
             total: 1,
+            casesWithMaxObservables: 1,
           },
           totalParticipants: 2,
           totalTags: 2,
@@ -474,6 +478,7 @@ describe('getCasesTelemetryData', () => {
             auto: { default: 1, custom: 0 },
             manual: { default: 0, custom: 0 },
             total: 1,
+            casesWithMaxObservables: 1,
           },
         },
         obs: {
@@ -486,6 +491,7 @@ describe('getCasesTelemetryData', () => {
             auto: { default: 1, custom: 0 },
             manual: { default: 0, custom: 0 },
             total: 1,
+            casesWithMaxObservables: 1,
           },
           ...solutionAttachmentFrameworkStats,
           total: 1,
@@ -509,6 +515,7 @@ describe('getCasesTelemetryData', () => {
             auto: { default: 1, custom: 0 },
             manual: { default: 0, custom: 0 },
             total: 1,
+            casesWithMaxObservables: 1,
           },
           ...solutionAttachmentFrameworkStats,
           total: 1,
@@ -618,6 +625,13 @@ describe('getCasesTelemetryData', () => {
                         "missing": "no_description",
                       },
                     },
+                    "casesWithMaxObservables": Object {
+                      "filter": Object {
+                        "script": Object {
+                          "source": "doc['cases.attributes.observables'].size() >= 50",
+                        },
+                      },
+                    },
                   },
                   "nested": Object {
                     "path": "cases.attributes.observables",
@@ -721,6 +735,13 @@ describe('getCasesTelemetryData', () => {
                         "missing": "no_description",
                       },
                     },
+                    "casesWithMaxObservables": Object {
+                      "filter": Object {
+                        "script": Object {
+                          "source": "doc['cases.attributes.observables'].size() >= 50",
+                        },
+                      },
+                    },
                   },
                   "nested": Object {
                     "path": "cases.attributes.observables",
@@ -802,6 +823,13 @@ describe('getCasesTelemetryData', () => {
                       "terms": Object {
                         "field": "cases.attributes.observables.description",
                         "missing": "no_description",
+                      },
+                    },
+                    "casesWithMaxObservables": Object {
+                      "filter": Object {
+                        "script": Object {
+                          "source": "doc['cases.attributes.observables'].size() >= 50",
+                        },
                       },
                     },
                   },

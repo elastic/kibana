@@ -82,6 +82,9 @@ describe('utils', () => {
           },
         ],
       },
+      casesWithMaxObservables: {
+        doc_count: 1,
+      },
     };
 
     const caseSolutionValues = {
@@ -378,6 +381,7 @@ describe('utils', () => {
               "custom": 0,
               "default": 1,
             },
+            "casesWithMaxObservables": 1,
             "manual": Object {
               "custom": 0,
               "default": 0,
@@ -462,6 +466,7 @@ describe('utils', () => {
               "custom": 0,
               "default": 1,
             },
+            "casesWithMaxObservables": 1,
             "manual": Object {
               "custom": 0,
               "default": 0,
@@ -546,6 +551,7 @@ describe('utils', () => {
               "custom": 0,
               "default": 1,
             },
+            "casesWithMaxObservables": 1,
             "manual": Object {
               "custom": 0,
               "default": 0,
@@ -1855,11 +1861,15 @@ describe('utils', () => {
               },
             ],
           },
+          casesWithMaxObservables: {
+            doc_count: 1,
+          },
         })
       ).toEqual({
         manual: { default: 3, custom: 1 },
         auto: { default: 2, custom: 0 },
         total: 6,
+        casesWithMaxObservables: 1,
       });
     });
   });

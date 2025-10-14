@@ -210,6 +210,7 @@ export const getObservablesTotalsByType = (
     manual: { default: 0, custom: 0 },
     auto: { default: 0, custom: 0 },
     total: 0,
+    casesWithMaxObservables: observables?.casesWithMaxObservables?.doc_count ?? 0,
   };
 
   if (!observables || typeof observables !== 'object' || !observables?.byDescription?.buckets) {
