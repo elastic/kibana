@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import type { JsonValue } from '@kbn/utility-types';
 import type { ProcessorSuggestionsResponse } from '@kbn/streams-plugin/common';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
@@ -167,7 +167,10 @@ export const detectProcessorContext = (
     return { kind: 'processorKey' };
   }
 
-  type Frame = { type: '{' | '['; owner?: string };
+  interface Frame {
+    type: '{' | '[';
+    owner?: string;
+  }
   const stack: Frame[] = [];
   let pendingOwner: string | undefined;
 
@@ -201,7 +204,8 @@ export const detectProcessorContext = (
     }
 
     if (ch === '{') {
-      const owner = pendingOwner && knownProcessors.includes(pendingOwner) ? pendingOwner : undefined;
+      const owner =
+        pendingOwner && knownProcessors.includes(pendingOwner) ? pendingOwner : undefined;
       stack.push({ type: '{', owner });
       pendingOwner = undefined;
       continue;

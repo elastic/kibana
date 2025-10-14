@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import type {  ProcessorSuggestionsResponse } from '../../../../../common';
+import type { ProcessorSuggestionsResponse } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 

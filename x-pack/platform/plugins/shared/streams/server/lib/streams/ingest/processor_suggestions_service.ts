@@ -6,12 +6,12 @@
  */
 
 import type { ConsoleStart } from '@kbn/console-plugin/server';
+import type { JsonValue } from '@kbn/utility-types';
 import type {
   ProcessorSuggestion,
   ProcessorPropertySuggestion,
   ProcessorSuggestionsResponse,
 } from '../../../../common';
-import type { JsonValue } from '@kbn/utility-types';
 
 type SpecJsonFetcher = () => ReturnType<ConsoleStart['getSpecJson']>;
 
@@ -27,7 +27,6 @@ interface ProcessorDefinition {
 }
 
 type ProcessorEntry = Record<string, ProcessorDefinition>;
-
 
 function isProcessorEntry(value: unknown): value is ProcessorEntry {
   return (
@@ -139,7 +138,8 @@ export class ProcessorSuggestionsService {
           return firstOption.__template;
         }
         const firstType = typeof firstOption;
-        if (firstType === 'string' || firstType === 'number' || firstType === 'boolean') return firstOption;
+        if (firstType === 'string' || firstType === 'number' || firstType === 'boolean')
+          return firstOption;
         if (Array.isArray(firstOption)) return [];
         if (isRecord(firstOption)) return firstOption;
       }
@@ -160,7 +160,6 @@ export class ProcessorSuggestionsService {
     if (isRecord(template)) return template;
     return undefined;
   }
-
 
   public async getAllSuggestions(): Promise<ProcessorSuggestionsResponse> {
     if (!this.fetcher) {
