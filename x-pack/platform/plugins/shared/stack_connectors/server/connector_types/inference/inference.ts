@@ -57,6 +57,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
 
   private inferenceId;
   private taskType;
+  private headers: Record<string, string> | undefined;
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
@@ -65,6 +66,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     this.taskType = this.config.taskType;
     this.inferenceId = this.config.inferenceId;
     this.logger = this.logger;
+    this.headers = this.config.headers;
     this.connectorID = this.connector.id;
     this.connectorTokenClient = params.services.connectorTokenClient;
 
@@ -119,7 +121,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * responsible for making a esClient inference method to perform chat completetion task endpoint and returning the service response data
+   * responsible for making a esClient inference method to perform chat completion task endpoint and returning the service response data
    * @param input the text on which you want to perform the inference task.
    * @signal abort signal
    */
@@ -182,7 +184,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * responsible for making a esClient inference method to perform chat completetion task endpoint and returning the service response data
+   * responsible for making a esClient inference method to perform chat completion task endpoint and returning the service response data
    * @param input the text on which you want to perform the inference task.
    * @signal abort signal
    */
@@ -192,6 +194,20 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     if (parentSpan?.isRecording()) {
       parentSpan.setAttribute('inference.raw_request', JSON.stringify(body));
     }
+
+    const headers = {
+      ...(params.telemetryMetadata?.pluginId
+        ? {
+            'X-Elastic-Product-Use-Case': params.telemetryMetadata?.pluginId,
+          }
+        : {}),
+      ...(this.headers
+        ? {
+            ...this.headers,
+          }
+        : {}),
+    };
+
     const response = await this.esClient.transport.request<UnifiedChatCompleteResponse>(
       {
         method: 'POST',
@@ -202,13 +218,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         asStream: true,
         meta: true,
         signal: params.signal,
-        ...(params.telemetryMetadata?.pluginId
-          ? {
-              headers: {
-                'X-Elastic-Product-Use-Case': params.telemetryMetadata?.pluginId,
-              },
-            }
-          : {}),
+        ...headers,
       }
     );
     // errors should be thrown as it will not be a stream response
