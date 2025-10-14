@@ -40,7 +40,6 @@ export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED =
 /** The default value for the default AI connector setting */
 export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE = true as const;
 
-
 interface ConnectorData {
   connectors?: Array<{
     id: string;
@@ -277,7 +276,12 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors, settings }) =>
     );
   }, [elasticManagedLlmExists, application, docLinks]);
 
-  if (!featureFlags.getBooleanValue(AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED, AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE)) {
+  if (
+    !featureFlags.getBooleanValue(
+      AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+      AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE
+    )
+  ) {
     return null;
   }
 
