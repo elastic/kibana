@@ -43,6 +43,8 @@ xpack.fleet.internal.registry.excludePackages: [
 xpack.features.overrides:
   ### Agent Builder feature is moved from Analytics category to the Search one.
   agentBuilder.category: 'enterpriseSearch'
+  ### Workflows Management should be moved from Analytics category to the Search one.
+  workflowsManagement.category: 'enterpriseSearch'
   ### Dashboards feature is moved from Analytics category to the Search one.
   dashboard_v2.category: "enterpriseSearch"
   ### Dev Tools feature is moved from Analytics category to the Search one.
