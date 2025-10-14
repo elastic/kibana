@@ -21,7 +21,7 @@ Instructions:
 @src/platform/packages/private/kbn-scout-info/llms/what-is-scout.md contains a high-level description of the Scout framework
 ```
 
-**Checkpoint**: you should now see one or multiple Scout test files (one for each FTR test) and a Playwright configuration file. The test cases will contain `// TODO` comments to guide the next steps.
+**Checkpoint**: you should now see one or more Scout test files (one for each FTR test) and a Playwright configuration file. The test cases will contain `// TODO` comments to guide the next steps.
 
 > [!NOTE]
 > A “boilerplate” Scout test file refers to a test file containing test case(s) and test suite(s) with no implementation code. These blocks will include `// TODO` comments to guide the developer or the AI in writing the actual test body.
@@ -41,22 +41,20 @@ Instructions:
 @src/platform/packages/private/kbn-scout-info/llms/scout-page-objects.md contains a high-level overview of page objects in Scout
 ```
 
-**Checkpoint**: the AI will generate or modify Scout page objects. For this step, you may need to manually these files to the correct directory (either you plugin's, or one of the Scout packages), and register them in the `pageObjects` fixture.
-
-should now see new Scout page objects being created (and/or existing Scout page objects being updated). These page objects may not be in the correct place or "registered" to be exposed via the `pageObjects` fixture. We'll be updating the prompt to correctly handle this. In the meantime, make manual changes if necessary.
+**Checkpoint**: the AI will generate or modify Scout page objects. For this step, you may need to manually move these files to the correct directory (either the plugin's page objects folder, or one of the Scout packages), and register them in the `pageObjects` fixture. Refer to the official Scout documentation.
 
 ## Step 3: Implement the test logic
 
-With the boilerplate and page obejcts in place, you can now fill in the test logic. For the best results, run this prompt for **each Scout test file individually** (this way we don't _saturate_ the LLM's context window).
+With the boilerplate and page objects in place, you can now fill in the test logic. For the best results, run this prompt for **each Scout test file individually** (this way we don't _saturate_ the LLM's context window).
 
-Rememebr to update the file paths in the prompt.
+Remember to update the file paths in the prompt.
 
 ```
-This path has Scout boilerplate tests:
+The following path contains Scout boilerplate tests:
 
 @x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests
 
-Please fill out this test:
+Please implement the following test file:
 
 @x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/settings.spec.ts
 
@@ -67,8 +65,8 @@ Use the original FTR test as a reference:
 
 Guidelines:
 - Each test must have assertions.
-- The end-goal should be working tests. Pay special attention to semantics. You MUST use methods that exist. If you need an API helper, import it rather than creating it (unless absolutely necessary).
-- The TODO comments are orientative, not prescriptive.
+- The end goal is to create working tests. Pay special attention to semantics. You MUST use methods that exist. If you need an API helper, import it rather than creating it (unless absolutely necessary).
+- The TODO comments are guides, not prescriptive rules.
 ```
 
 **Checkpoint**: the LLM should now populate the Scout test files from Step 1 with implementation code based on the original FTR tests.
