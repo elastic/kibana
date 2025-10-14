@@ -20669,6 +20669,9 @@
                     "isReady": {
                       "type": "boolean"
                     },
+                    "is_action_secrets_storage_enabled": {
+                      "type": "boolean"
+                    },
                     "is_secrets_storage_enabled": {
                       "type": "boolean"
                     },
