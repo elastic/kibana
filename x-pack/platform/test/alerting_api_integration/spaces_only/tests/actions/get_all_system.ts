@@ -209,6 +209,7 @@ export default function getAllConnectorsTests({ getService }: FtrProviderContext
           is_system_action: true,
           name: 'Workflows',
           referenced_by_count: 0,
+          is_connector_type_deprecated: false,
         },
       ]);
     });
