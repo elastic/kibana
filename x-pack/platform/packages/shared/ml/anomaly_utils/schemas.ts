@@ -24,6 +24,17 @@ export const mlEntityFieldOperationSchema = schema.oneOf([
   schema.literal(ML_ENTITY_FIELD_OPERATIONS.REMOVE),
 ]);
 
+export const influencerSchema = schema.object({
+  fieldName: schema.string(),
+  fieldValue: schema.any(),
+});
+
+export const criteriaFieldSchema = schema.object({
+  fieldName: schema.string(),
+  fieldValue: schema.any(),
+  fieldType: schema.maybe(mlEntityFieldTypeSchema),
+});
+
 export const mlEntityFieldSchema = schema.object({
   fieldName: schema.string(),
   fieldValue: schema.maybe(schema.oneOf([schema.string(), schema.number()])),

@@ -44,9 +44,7 @@ export type MlEntityFieldOperation =
 /**
  * Interface of an entity field
  */
-export type MlEntityField = TypeOf<typeof mlEntityFieldSchema> & {
-  fieldValue: string | number | undefined;
-};
+export type MlEntityField = TypeOf<typeof mlEntityFieldSchema>;
 
 // List of function descriptions for which actual values from record level results should be displayed.
 const DISPLAY_ACTUAL_FUNCTIONS = [
