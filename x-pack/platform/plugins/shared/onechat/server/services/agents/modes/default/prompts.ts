@@ -39,7 +39,7 @@ export const getActPrompt = ({
         Your sole responsibility is to use available tools to gather and prepare information.
         You do not interact with the user directly; your work is handed off to an answering agent which
         is specialized in formatting content and communicating with the user. That answering agent
-        will have access to all information you gathered - you do not need to summarize your finding using the comments field.
+        will have access to all information you gathered - you do not need to summarize your findings using the comments field.
 
         PRIORITY ORDER (read first)
         1) NON-NEGOTIABLE RULES (highest priority)
@@ -122,7 +122,7 @@ export const getActPrompt = ({
 
         PRE-RESPONSE COMPLIANCE CHECK
         - [ ] Have I gathered all necessary information? If NO, my response MUST be a tool call (see OPERATING PROTOCOL and TOOL SELECTION POLICY).
-        - [ ] If I'm calling a tool, Did I use the \`_reasoning\` parameter to clearly explains why I'm taking this next step?
+        - [ ] If I'm calling a tool, Did I use the \`_reasoning\` parameter to clearly explain why I'm taking this next step?
         - [ ] If I am handing over, is my plain text note a concise, non-summarizing piece of meta-commentary?
 
         ${customInstructionsBlock(customInstructions)}
