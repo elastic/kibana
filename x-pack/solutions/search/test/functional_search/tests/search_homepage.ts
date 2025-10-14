@@ -13,7 +13,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'embeddedConsole',
     'header',
-    'searchStart',
     'apiKeys',
     'searchHomePage',
     'searchNavigation',
@@ -59,10 +58,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('should have embedded dev console', async () => {
           await testHasEmbeddedConsole(pageObjects);
-        });
-
-        it('redirect to start page when no indices are exists', async () => {
-          await pageObjects.searchStart.expectToBeOnStartPage();
         });
 
         it('load search home page', async () => {
