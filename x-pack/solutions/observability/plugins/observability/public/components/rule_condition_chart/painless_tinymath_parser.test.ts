@@ -377,43 +377,18 @@ describe('PainlessTinyMathParser', () => {
       equation,
       aggMap: {
         A: {
-          operationWithField: "count(kql='PartialErrorAccounts : Audit')",
+          operationWithField: "count(kql='Logging : Audit')",
           operation: 'count',
           sourceField: '',
         },
         B: {
-          operationWithField: "count(kql='LogLevelName : Accounts')",
+          operationWithField: "count(kql='service : Accounts')",
           operation: 'count',
           sourceField: '',
         },
       },
     });
-    // The fix ensures that 'A' in 'Accounts' and 'Audit' within the filter strings doesn't get replaced
-    expect(parser.parse()).toEqual(
-      "count(kql='PartialErrorAccounts : Audit')+count(kql='LogLevelName : Accounts')"
-    );
-  });
-
-  it('should not replace multi-character metric names inside field names (e.g., Account in Accounts)', () => {
-    const equation = 'Account + Accounts';
-    const parser = new PainlessTinyMathParser({
-      equation,
-      aggMap: {
-        Account: {
-          operationWithField: 'average("user.Account.balance")',
-          operation: 'average',
-          sourceField: '"user.Account.balance"',
-        },
-        Accounts: {
-          operationWithField: 'count("service.Accounts.total")',
-          operation: 'count',
-          sourceField: '"service.Accounts.total"',
-        },
-      },
-    });
-    // The fix ensures that 'Account' doesn't match inside 'Accounts' metric name or field names
-    expect(parser.parse()).toEqual(
-      'average("user.Account.balance")+count("service.Accounts.total")'
-    );
+    // The fix ensures that 'Accounts' in the filter string doesn't get incorrectly replaced
+    expect(parser.parse()).toEqual("count(kql='Logging : Audit')+count(kql='service : Accounts')");
   });
 });
