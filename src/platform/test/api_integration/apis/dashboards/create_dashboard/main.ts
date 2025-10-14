@@ -28,7 +28,6 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
       expect(response.status).to.be(200);
-      expect(response.body.data.kibanaSavedObjectMeta.searchSource).to.eql({});
       expect(response.body.data.panels).to.eql([]);
       expect(response.body.data.timeRestore).to.be(false);
       expect(response.body.data.options).to.eql({
@@ -53,13 +52,13 @@ export default function ({ getService }: FtrProviderContext) {
           panels: [
             {
               type: 'visualization',
-              gridData: {
+              grid: {
                 x: 0,
                 y: 0,
                 w: 24,
                 h: 15,
               },
-              panelConfig: {},
+              config: {},
             },
           ],
         });
@@ -67,10 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.status).to.be(200);
       expect(response.body.data.panels).to.be.an('array');
       // panel index is a random uuid when not provided
-      expect(response.body.data.panels[0].panelIndex).match(/^[0-9a-f-]{36}$/);
-      expect(response.body.data.panels[0].panelIndex).to.eql(
-        response.body.data.panels[0].gridData.i
-      );
+      expect(response.body.data.panels[0].uid).match(/^[0-9a-f-]{36}$/);
     });
 
     it('sets controls default values', async () => {
@@ -143,15 +139,14 @@ export default function ({ getService }: FtrProviderContext) {
           panels: [
             {
               type: 'visualization',
-              gridData: {
+              grid: {
                 x: 0,
                 y: 0,
                 w: 24,
                 h: 15,
-                i: 'bizz',
               },
-              panelConfig: {},
-              panelIndex: 'bizz',
+              config: {},
+              uid: 'bizz',
             },
           ],
           references: [

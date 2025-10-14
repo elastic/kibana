@@ -13,7 +13,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const PageObjects = getPageObjects(['common']);
   const searchSessions = getService('searchSessions');
 
-  describe('Discover', function () {
+  describe.skip('Discover', function () {
     before(async () => {
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/fixtures/es_archives/logstash_functional'

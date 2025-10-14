@@ -10,11 +10,11 @@ import {
   OPEN_FILE_UPLOAD_LITE_ACTION,
   OPEN_FILE_UPLOAD_LITE_TRIGGER,
 } from '@kbn/file-upload-common';
-import {
-  createOpenFileUploadLiteAction,
-  createOpenFileUploadLiteTrigger,
-} from './lite/file_upload_lite_action';
 import type { DataVisualizerStartDependencies } from './application/common/types/data_visualizer_plugin';
+import {
+  createOpenFileUploadLiteTrigger,
+  createOpenFileUploadLiteAction,
+} from './application/file_data_visualizer/new/file_upload_lite_action';
 
 export function registerUiActions(coreStart: CoreStart, plugins: DataVisualizerStartDependencies) {
   const { uiActions } = plugins;
