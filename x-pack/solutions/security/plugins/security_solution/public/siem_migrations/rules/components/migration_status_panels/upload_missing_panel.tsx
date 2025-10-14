@@ -77,11 +77,7 @@ const RuleMigrationsUploadMissingPanelContent =
       }, [migrationStats, openFlyout, missingResources, telemetry]);
 
       const totalRulesToRetry = useMemo(() => {
-        return (
-          (translationStats?.rules.failed ?? 0) +
-          (translationStats?.rules.success.result.partial ?? 0) +
-          (translationStats?.rules.success.result.untranslatable ?? 0)
-        );
+        return translationStats?.rules.success.result.partial ?? 0;
       }, [translationStats]);
 
       return (

@@ -70,13 +70,7 @@ const DashboardMigrationsUploadMissingPanelContent =
       const { openFlyout } = useMigrationDataInputContext();
       const { telemetry } = useKibana().services.siemMigrations.dashboards;
       const totalDashboardsToRetry = useMemo(() => {
-        if (!translationStats) return 0;
-
-        return (
-          (translationStats.dashboards.failed ?? 0) +
-          (translationStats.dashboards.success.result.partial ?? 0) +
-          (translationStats.dashboards.success.result.untranslatable ?? 0)
-        );
+        return translationStats?.dashboards.success.result.partial ?? 0;
       }, [translationStats]);
 
       const onOpenFlyout = useCallback(() => {
