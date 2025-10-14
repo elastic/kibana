@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiPageHeaderSection, EuiButton, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { EvaluatorSelectionModal } from '../modal/evaluator_selection_modal';
 
 export const HeaderRightActions: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const actionsContainerStyles = css`
     display: flex;
@@ -27,20 +29,32 @@ export const HeaderRightActions: React.FC<{}> = () => {
     }),
   };
 
+  const handleSelectEvaluators = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleEvaluatorsConfirm = (selectedEvaluators: any[]) => {
+    // TODO: Update context with selected evaluators
+    console.log('Selected evaluators:', selectedEvaluators);
+    setIsModalOpen(false);
+  };
+
   return (
     <EuiPageHeaderSection css={actionsContainerStyles} aria-label={labels.container}>
-      <EuiButton
-        fill
-        size="m"
-        onClick={() => {
-          // TODO: Implement run evaluation functionality
-          console.log('Run evaluation clicked');
-        }}
-      >
-        {i18n.translate('xpack.onechat.evaluations.runEval', {
-          defaultMessage: 'Run Evaluations',
+      <EuiButton size="m" onClick={handleSelectEvaluators}>
+        {i18n.translate('xpack.onechat.evaluations.selectEvaluators', {
+          defaultMessage: 'Select Evaluators',
         })}
       </EuiButton>
+      <EvaluatorSelectionModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onConfirm={handleEvaluatorsConfirm}
+      />
     </EuiPageHeaderSection>
   );
 };
