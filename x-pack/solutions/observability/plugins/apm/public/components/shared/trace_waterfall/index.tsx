@@ -25,7 +25,7 @@ import { WaterfallLegends } from './waterfall_legends';
 
 const FULL_TRACE_TOGGLE = i18n.translate(
   'xpack.apm.traceWaterfallComponent.euiSwitch.toggleFullTraceLabel',
-  { defaultMessage: 'Show Full Trace' }
+  { defaultMessage: 'Show full trace' }
 );
 
 export interface Props {
