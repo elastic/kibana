@@ -22,20 +22,25 @@ test.describe(
       // Create a test stream with routing rules first
       await apiServices.streams.forkStream('logs', 'logs.child1', {
         field: 'service.name',
+        eq: 'test-logs.child1-service',
       });
       await apiServices.streams.forkStream('logs', 'logs.child2', {
         field: 'service.name',
+        eq: 'test-logs.child2-service',
       });
       await apiServices.streams.forkStream('logs', 'logs.child3', {
         field: 'service.name',
+        eq: 'test-logs.child3-service',
       });
 
       // Create child streams for stream 'logs.child1'
       await apiServices.streams.forkStream('logs.child1', 'logs.child1.child1', {
         field: 'host.name',
+        eq: 'test-logs.child1.child1-host',
       });
       await apiServices.streams.forkStream('logs.child1', 'logs.child1.child2', {
         field: 'host.name',
+        eq: 'test-logs.child1.child2-host',
       });
 
       await pageObjects.streams.gotoStreamMainPage();
