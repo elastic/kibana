@@ -329,9 +329,8 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
     It is available in {{ecloud}} 8.6.0 and later versions.
     From 9.3.0 onwards, use `xpack.fleet.experimentalFeatures` to explicitly enable or disable experimental features.
 
-`xpack.fleet.experimentalFeatures` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+`xpack.fleet.experimentalFeatures` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.3.0`
 :   Set experimental feature flags to `true` or `false` to enable or disable them, respectively.
-    It is available in {{ecloud}} 9.3.0 and later versions.
 
     Example configuration:
 
