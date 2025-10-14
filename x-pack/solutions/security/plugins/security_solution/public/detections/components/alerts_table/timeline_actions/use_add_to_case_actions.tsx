@@ -19,7 +19,7 @@ export interface UseAddToCaseActions {
   onMenuItemClick: () => void;
   ariaLabel?: string;
   ecsData?: Ecs;
-  nonEcsData?: TimelineNonEcsData[];
+  nonEcsData: TimelineNonEcsData[];
   onSuccess?: () => Promise<void>;
   refetch?: (() => void) | undefined;
 }
