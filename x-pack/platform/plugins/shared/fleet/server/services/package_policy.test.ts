@@ -4320,6 +4320,10 @@ describe('Package policy service', () => {
         [{ id: idToDelete, type: 'ingest-package-policies' }],
         { force: true }
       );
+      expect(soClient.bulkDelete).toHaveBeenCalledWith(
+        [{ id: `${idToDelete}:prev`, type: 'ingest-package-policies' }],
+        { force: true }
+      );
     });
     it('should allow to delete orphaned package policies from ES index', async () => {
       const soClient = createSavedObjectClientMock();

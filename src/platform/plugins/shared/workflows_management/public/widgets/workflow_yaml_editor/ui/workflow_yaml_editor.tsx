@@ -427,203 +427,207 @@ export const WorkflowYAMLEditor = ({
     saveAndRunRef.current = onSaveAndRun;
   }, [onSaveAndRun]);
 
-  const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
-    editorRef.current = editor;
+  const handleEditorDidMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      editorRef.current = editor;
 
-    editor.updateOptions({
-      glyphMargin: true,
-    });
-
-    registerKeyboardCommands({
-      editor,
-      openActionsPopover,
-      save: () => saveRef.current(),
-      run: () => runRef.current(),
-      saveAndRun: () => saveAndRunRef.current(),
-    });
-
-    // Listen to content changes to detect typing
-    const model = editor.getModel();
-    if (model) {
-      model.onDidChangeContent((e) => {
-        // Check if this was a simple typing change
-        const isSimpleTyping =
-          e.changes.length === 1 &&
-          e.changes[0].text.length <= 1 && // Single character or deletion
-          !e.changes[0].text.includes('\n'); // No line breaks
-
-        lastChangeWasTypingRef.current = isSimpleTyping;
+      editor.updateOptions({
+        glyphMargin: true,
       });
 
-      // Initial YAML parsing from main
-      const value = model.getValue();
-      if (value && value.trim() !== '') {
-        validateVariables(editor);
-        // Use setTimeout to defer state updates until after the current render cycle
-        // This prevents the flushSync warning while maintaining the correct order
-        setTimeout(() => {
-          dispatch(setYamlString(value));
-          setIsEditorMounted(true);
-        }, 0);
+      registerKeyboardCommands({
+        editor,
+        openActionsPopover,
+        save: () => saveRef.current(),
+        run: () => runRef.current(),
+        saveAndRun: () => saveAndRunRef.current(),
+      });
+
+      // Listen to content changes to detect typing
+      const model = editor.getModel();
+      if (model) {
+        model.onDidChangeContent((e) => {
+          // Check if this was a simple typing change
+          const isSimpleTyping =
+            e.changes.length === 1 &&
+            e.changes[0].text.length <= 1 && // Single character or deletion
+            !e.changes[0].text.includes('\n'); // No line breaks
+
+          lastChangeWasTypingRef.current = isSimpleTyping;
+        });
+
+        // Initial YAML parsing from main
+        const value = model.getValue();
+        if (value && value.trim() !== '') {
+          validateVariables(editor);
+          // Use setTimeout to defer state updates until after the current render cycle
+          // This prevents the flushSync warning while maintaining the correct order
+          setTimeout(() => {
+            dispatch(setYamlString(value));
+            setIsEditorMounted(true);
+          }, 0);
+        } else {
+          // If no content, just set the mounted state
+          setTimeout(() => {
+            setIsEditorMounted(true);
+          }, 0);
+        }
       } else {
-        // If no content, just set the mounted state
+        // If no model, just set the mounted state
         setTimeout(() => {
           setIsEditorMounted(true);
         }, 0);
       }
-    } else {
-      // If no model, just set the mounted state
-      setTimeout(() => {
-        setIsEditorMounted(true);
-      }, 0);
-    }
 
-    // Setup Elasticsearch step providers if we have the required services
-    if (http && notifications) {
-      // Register Elasticsearch connector handler
-      const elasticsearchHandler = new ElasticsearchMonacoConnectorHandler({
-        http,
-        notifications: notifications as any, // Temporary type cast
-        // esHost,
-        // kibanaHost || window.location.origin,
-      });
-      registerMonacoConnectorHandler(elasticsearchHandler);
-
-      // Register Kibana connector handler
-      const kibanaHandler = new KibanaMonacoConnectorHandler({
-        http,
-        notifications: notifications as any, // Temporary type cast
-        kibanaHost: kibanaHost || window.location.origin,
-      });
-      registerMonacoConnectorHandler(kibanaHandler);
-
-      const genericHandler = new GenericMonacoConnectorHandler();
-      registerMonacoConnectorHandler(genericHandler);
-
-      // Create unified providers
-      const providerConfig = {
-        getYamlDocument: () => yamlDocumentRef.current || null,
-        options: {
+      // Setup Elasticsearch step providers if we have the required services
+      if (http && notifications) {
+        // Register Elasticsearch connector handler
+        const elasticsearchHandler = new ElasticsearchMonacoConnectorHandler({
           http,
-          notifications: notifications as any,
-          esHost,
+          notifications: notifications as any, // Temporary type cast
+          // esHost,
+          // kibanaHost || window.location.origin,
+        });
+        registerMonacoConnectorHandler(elasticsearchHandler);
+
+        // Register Kibana connector handler
+        const kibanaHandler = new KibanaMonacoConnectorHandler({
+          http,
+          notifications: notifications as any, // Temporary type cast
           kibanaHost: kibanaHost || window.location.origin,
-        },
-      };
+        });
+        registerMonacoConnectorHandler(kibanaHandler);
 
-      // Intercept and modify markers at the source to fix connector validation messages
-      // This prevents Monaco from ever seeing the problematic numeric enum messages
-      const originalSetModelMarkers = monaco.editor.setModelMarkers;
-      const markerInterceptor = function (editorModel: any, owner: string, markers: any[]) {
-        // Only process YAML validation markers
+        const genericHandler = new GenericMonacoConnectorHandler();
+        registerMonacoConnectorHandler(genericHandler);
 
-        // Only modify YAML validation markers
-        if (owner === 'yaml') {
-          const fixedMarkers = markers.map((marker) => {
-            // Check if this is a validation error that could benefit from dynamic formatting
-            const hasNumericEnumPattern =
-              // Patterns with quotes: Expected "0 | 1 | 2"
-              /Expected "\d+(\s*\|\s*\d+)*"/.test(marker.message || '') ||
-              /Incorrect type\. Expected "\d+(\s*\|\s*\d+)*"/.test(marker.message || '') ||
-              // Patterns with escaped quotes: Expected \"0 | 1\"
-              /Expected \\\\"?\d+(\s*\|\s*\d+)*\\\\"?/.test(marker.message || '') ||
-              // Patterns without quotes: Expected 0 | 1
-              /Expected \d+(\s*\|\s*\d+)*(?!\w)/.test(marker.message || '') ||
-              // Additional patterns for different Monaco YAML error formats
-              /Invalid enum value\. Expected \d+(\s*\|\s*\d+)*/.test(marker.message || '') ||
-              /Value must be one of: \d+(\s*,\s*\d+)*/.test(marker.message || '');
+        // Create unified providers
+        const providerConfig = {
+          getYamlDocument: () => yamlDocumentRef.current || null,
+          options: {
+            http,
+            notifications: notifications as any,
+            esHost,
+            kibanaHost: kibanaHost || window.location.origin,
+          },
+        };
 
-            // Check for field type errors (like "Expected settings", "Expected connector", etc.)
-            const hasFieldTypeError =
-              /Incorrect type\. Expected "[a-zA-Z_][a-zA-Z0-9_]*"/.test(marker.message || '') ||
-              /Expected "[a-zA-Z_][a-zA-Z0-9_]*"/.test(marker.message || '');
+        // Intercept and modify markers at the source to fix connector validation messages
+        // This prevents Monaco from ever seeing the problematic numeric enum messages
+        const originalSetModelMarkers = monaco.editor.setModelMarkers;
+        const markerInterceptor = function (editorModel: any, owner: string, markers: any[]) {
+          // Only process YAML validation markers
 
-            // Also check for the current message pattern we're seeing
-            const hasConnectorEnumPattern = marker.message?.includes(
-              'Expected ".none" | ".cases-webhook"'
-            );
+          // Only modify YAML validation markers
+          if (owner === 'yaml') {
+            const fixedMarkers = markers.map((marker) => {
+              // Check if this is a validation error that could benefit from dynamic formatting
+              const hasNumericEnumPattern =
+                // Patterns with quotes: Expected "0 | 1 | 2"
+                /Expected "\d+(\s*\|\s*\d+)*"/.test(marker.message || '') ||
+                /Incorrect type\. Expected "\d+(\s*\|\s*\d+)*"/.test(marker.message || '') ||
+                // Patterns with escaped quotes: Expected \"0 | 1\"
+                /Expected \\\\"?\d+(\s*\|\s*\d+)*\\\\"?/.test(marker.message || '') ||
+                // Patterns without quotes: Expected 0 | 1
+                /Expected \d+(\s*\|\s*\d+)*(?!\w)/.test(marker.message || '') ||
+                // Additional patterns for different Monaco YAML error formats
+                /Invalid enum value\. Expected \d+(\s*\|\s*\d+)*/.test(marker.message || '') ||
+                /Value must be one of: \d+(\s*,\s*\d+)*/.test(marker.message || '');
 
-            // Process markers that match our patterns
+              // Check for field type errors (like "Expected settings", "Expected connector", etc.)
+              const hasFieldTypeError =
+                /Incorrect type\. Expected "[a-zA-Z_][a-zA-Z0-9_]*"/.test(marker.message || '') ||
+                /Expected "[a-zA-Z_][a-zA-Z0-9_]*"/.test(marker.message || '');
 
-            if (hasNumericEnumPattern || hasConnectorEnumPattern || hasFieldTypeError) {
-              try {
-                // Get the YAML path at this marker position to determine context
-                const currentYamlDocument = yamlDocumentRef.current;
-                let yamlPath: (string | number)[] = [];
+              // Also check for the current message pattern we're seeing
+              const hasConnectorEnumPattern = marker.message?.includes(
+                'Expected ".none" | ".cases-webhook"'
+              );
 
-                if (currentYamlDocument) {
-                  const markerPosition = editorModel.getOffsetAt({
-                    lineNumber: marker.startLineNumber,
-                    column: marker.startColumn,
-                  });
-                  yamlPath = getCurrentPath(currentYamlDocument, markerPosition);
+              // Process markers that match our patterns
+
+              if (hasNumericEnumPattern || hasConnectorEnumPattern || hasFieldTypeError) {
+                try {
+                  // Get the YAML path at this marker position to determine context
+                  const currentYamlDocument = yamlDocumentRef.current;
+                  let yamlPath: (string | number)[] = [];
+
+                  if (currentYamlDocument) {
+                    const markerPosition = editorModel.getOffsetAt({
+                      lineNumber: marker.startLineNumber,
+                      column: marker.startColumn,
+                    });
+                    yamlPath = getCurrentPath(currentYamlDocument, markerPosition);
+                  }
+
+                  // Create a mock Zod error with the path information
+                  const mockZodError = {
+                    issues: [
+                      {
+                        code: 'unknown' as const,
+                        path: yamlPath,
+                        message: marker.message,
+                        received: 'unknown',
+                      },
+                    ],
+                  };
+
+                  // Use the dynamic formatValidationError with schema and YAML document
+                  const { message: formattedMessage } = formatValidationError(
+                    mockZodError as any,
+                    workflowYamlSchemaLoose,
+                    currentYamlDocument
+                  );
+
+                  // Return the marker with the improved message
+
+                  return {
+                    ...marker,
+                    message: formattedMessage,
+                  };
+                } catch (error) {
+                  // Fallback to original message if dynamic formatting fails
+                  return marker;
                 }
-
-                // Create a mock Zod error with the path information
-                const mockZodError = {
-                  issues: [
-                    {
-                      code: 'unknown' as const,
-                      path: yamlPath,
-                      message: marker.message,
-                      received: 'unknown',
-                    },
-                  ],
-                };
-
-                // Use the dynamic formatValidationError with schema and YAML document
-                const { message: formattedMessage } = formatValidationError(
-                  mockZodError as any,
-                  workflowYamlSchemaLoose,
-                  currentYamlDocument
-                );
-
-                // Return the marker with the improved message
-
-                return {
-                  ...marker,
-                  message: formattedMessage,
-                };
-              } catch (error) {
-                // Fallback to original message if dynamic formatting fails
-                return marker;
               }
-            }
-            return marker;
-          });
+              return marker;
+            });
 
-          // Call the original function with fixed markers
-          return originalSetModelMarkers.call(monaco.editor, editorModel, owner, fixedMarkers);
-        }
+            // Call the original function with fixed markers
+            return originalSetModelMarkers.call(monaco.editor, editorModel, owner, fixedMarkers);
+          }
 
-        // For non-YAML markers, call original function unchanged
-        return originalSetModelMarkers.call(monaco.editor, editorModel, owner, markers);
-      };
+          // For non-YAML markers, call original function unchanged
+          return originalSetModelMarkers.call(monaco.editor, editorModel, owner, markers);
+        };
 
-      // Override Monaco's setModelMarkers function
-      monaco.editor.setModelMarkers = markerInterceptor;
+        // Override Monaco's setModelMarkers function
+        monaco.editor.setModelMarkers = markerInterceptor;
 
-      // Store cleanup function to restore original behavior
-      disposablesRef.current.push({
-        dispose: () => {
-          monaco.editor.setModelMarkers = originalSetModelMarkers;
-        },
-      });
+        // Store cleanup function to restore original behavior
+        disposablesRef.current.push({
+          dispose: () => {
+            monaco.editor.setModelMarkers = originalSetModelMarkers;
+          },
+        });
 
-      // Monaco YAML hover is now disabled via configuration (hover: false)
-      // The unified hover provider will handle all hover content including validation errors
+        // Monaco YAML hover is now disabled via configuration (hover: false)
+        // The unified hover provider will handle all hover content including validation errors
 
-      // Register the unified hover provider for API documentation and other content
-      const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
-      disposablesRef.current.push(hoverDisposable);
-    }
+        // Register the unified hover provider for API documentation and other content
+        const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
+        disposablesRef.current.push(hoverDisposable);
+      }
 
-    onMount?.(editor, monaco);
-  };
+      onMount?.(editor, monaco);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
-  const handleEditorWillUnmount = () => {
+  const handleEditorWillUnmount = useCallback(() => {
     unregisterKeyboardCommands();
-  };
+  }, [unregisterKeyboardCommands]);
 
   useEffect(() => {
     // After editor is mounted or workflowId changes, validate the initial content

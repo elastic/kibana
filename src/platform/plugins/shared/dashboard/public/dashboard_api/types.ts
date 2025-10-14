@@ -66,7 +66,7 @@ export interface DashboardCreationOptions {
 
   getPassThroughContext?: PassThroughContext['getPassThroughContext'];
 
-  getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
+  getIncomingEmbeddables?: () => EmbeddablePackageState[] | undefined;
 
   useSearchSessionsIntegration?: boolean;
   searchSessionSettings?: {
