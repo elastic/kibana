@@ -240,7 +240,7 @@ describe('Slack API service', () => {
         configurationUtilities,
         method: 'post',
         url: 'https://slack.com/api/chat.postMessage',
-        data: { channel: 'general', text: 'a message' },
+        data: { channel: 'QWEERTYU987', text: 'a message' },
         connectorUsageCollector,
       });
     });
@@ -327,7 +327,7 @@ describe('Slack API service', () => {
         configurationUtilities,
         method: 'post',
         url: 'https://slack.com/api/chat.postMessage',
-        data: { channel: 'general', blocks: testBlock.blocks },
+        data: { channel: 'QWEERTYU987', blocks: testBlock.blocks },
         connectorUsageCollector,
       });
     });
