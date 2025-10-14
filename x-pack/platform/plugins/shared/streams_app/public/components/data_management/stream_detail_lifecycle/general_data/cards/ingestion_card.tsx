@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { BaseMetricCard } from '../../common/base_metric_card';
 import { formatBytes } from '../../helpers/format_bytes';
 import { PrivilegesWarningIconWrapper } from '../../../../insufficient_privileges/insufficient_privileges';
-import { EnhancedDataStreamStats } from '../../hooks/use_data_stream_stats';
+import type { EnhancedDataStreamStats } from '../../hooks/use_data_stream_stats';
 
 export const IngestionCard = ({
   definition,

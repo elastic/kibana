@@ -21,7 +21,7 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { ChartBarSeries, ChartBarPhasesSeries } from '../common/chart_components';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 import type { StreamAggregations } from '../hooks/use_ingestion_rate';
-import { CalculatedStats } from '../helpers/get_calculated_stats';
+import type { CalculatedStats } from '../helpers/get_calculated_stats';
 
 export function IngestionRate({
   definition,

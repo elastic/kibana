@@ -7,12 +7,13 @@
 
 import type { Streams } from '@kbn/streams-schema';
 import type { DataStreamStatServiceResponse } from '@kbn/dataset-quality-plugin/public';
-import { FailureStoreStatsResponse } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import type { FailureStoreStatsResponse } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import type { TimeState } from '@kbn/es-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import { CalculatedStats, getCalculatedStats } from '../helpers/get_calculated_stats';
+import type { CalculatedStats } from '../helpers/get_calculated_stats';
+import { getCalculatedStats } from '../helpers/get_calculated_stats';
 import { getAggregations } from './use_ingestion_rate';
-import { TimeState } from '@kbn/es-query';
 import { formatBytes } from '../helpers/format_bytes';
 
 export type DataStreamStats = DataStreamStatServiceResponse['dataStreamsStats'][number];
@@ -92,7 +93,7 @@ export const useDataStreamStats = ({
               buckets: aggregations?.buckets,
             }),
           },
-          aggregations: aggregations,
+          aggregations,
         },
         fs: {
           stats:

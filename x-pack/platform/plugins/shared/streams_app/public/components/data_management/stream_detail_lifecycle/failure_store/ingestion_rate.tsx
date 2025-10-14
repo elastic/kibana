@@ -19,7 +19,7 @@ import type { TimeState } from '@kbn/es-query';
 import { FailureStoreChartBarSeries } from '../common/chart_components';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 import type { StreamAggregations } from '../hooks/use_ingestion_rate';
-import { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
+import type { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
 
 export function FailureStoreIngestionRate({
   definition,

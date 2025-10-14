@@ -14,8 +14,8 @@ import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
 import { IngestionCard } from './cards/ingestion_card';
 import { FailureStoreIngestionRate } from './ingestion_rate';
-import { StreamAggregations } from '../hooks/use_ingestion_rate';
-import { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
+import type { StreamAggregations } from '../hooks/use_ingestion_rate';
+import type { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
 
 export const FailureStoreInfo = ({
   openModal,

@@ -15,7 +15,7 @@ import { useUpdateFailureStore } from '../../../../hooks/use_update_failure_stor
 import { useKibana } from '../../../../hooks/use_kibana';
 import { NoPermissionBanner } from './no_permission_banner';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
-import { useDataStreamStats } from '../hooks/use_data_stream_stats';
+import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
 
 // Lazy load the FailureStoreModal to reduce bundle size
 const LazyFailureStoreModal = React.lazy(async () => ({

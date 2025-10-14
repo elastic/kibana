@@ -19,7 +19,7 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { EditLifecycleModal } from './modal';
 import { IlmSummary } from './ilm_summary';
 import { IngestionRate } from './ingestion_rate';
-import { useDataStreamStats } from '../hooks/use_data_stream_stats';
+import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
 import { getFormattedError } from '../../../../util/errors';
 import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
