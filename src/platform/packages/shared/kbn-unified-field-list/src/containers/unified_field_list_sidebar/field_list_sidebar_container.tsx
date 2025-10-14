@@ -19,6 +19,7 @@ import React, {
 } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { v4 as uuidv4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
@@ -146,7 +147,8 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
   /**
    * Callback to execute after editing/deleting a runtime field
    */
-  onFieldEdited?: (options?: {
+  onFieldEdited?: (options: {
+    editedDataView: UnifiedFieldListSidebarContainerProps['dataView'];
     removedFieldName?: string;
     editedFieldName?: string;
   }) => Promise<void>;
@@ -233,14 +235,25 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     () =>
       dataView && dataViewFieldEditor && searchMode === 'documents' && canEditDataView
         ? async (fieldName?: string) => {
+            let dataViewInstance = dataView;
+            if (!dataViewInstance.isPersisted()) {
+              // Creating a "clean" copy of the data view to avoid side effects
+              dataViewInstance = await data.dataViews.create({
+                ...dataViewInstance.toSpec(),
+                id: uuidv4(),
+              });
+            }
             const ref = await dataViewFieldEditor.openEditor({
               ctx: {
-                dataView,
+                dataView: dataViewInstance,
               },
               fieldName,
               onSave: async () => {
                 if (onFieldEdited) {
-                  await onFieldEdited({ editedFieldName: fieldName }); // TODO: update with editedDataView
+                  await onFieldEdited({
+                    editedDataView: dataViewInstance,
+                    editedFieldName: fieldName,
+                  });
                 }
               },
             });
@@ -249,12 +262,13 @@ const UnifiedFieldListSidebarContainer = forwardRef<
           }
         : undefined,
     [
+      dataView,
+      dataViewFieldEditor,
       searchMode,
       canEditDataView,
-      dataViewFieldEditor,
-      dataView,
       setFieldEditorRef,
       closeFieldListFlyout,
+      data.dataViews,
       onFieldEdited,
     ]
   );
@@ -263,14 +277,22 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     () =>
       dataView && dataViewFieldEditor && editField
         ? async (fieldName: string) => {
+            let dataViewInstance = dataView;
+            if (!dataViewInstance.isPersisted()) {
+              // Creating a "clean" copy of the data view to avoid side effects
+              dataViewInstance = await data.dataViews.create(dataViewInstance.toSpec());
+            }
             const ref = await dataViewFieldEditor.openDeleteModal({
               ctx: {
-                dataView,
+                dataView: dataViewInstance,
               },
               fieldName,
               onDelete: async () => {
                 if (onFieldEdited) {
-                  await onFieldEdited({ removedFieldName: fieldName }); // TODO: update with editedDataView
+                  await onFieldEdited({
+                    editedDataView: dataViewInstance,
+                    removedFieldName: fieldName,
+                  });
                 }
               },
             });
@@ -280,10 +302,11 @@ const UnifiedFieldListSidebarContainer = forwardRef<
         : undefined,
     [
       dataView,
-      setFieldEditorRef,
-      editField,
-      closeFieldListFlyout,
       dataViewFieldEditor,
+      editField,
+      setFieldEditorRef,
+      closeFieldListFlyout,
+      data.dataViews,
       onFieldEdited,
     ]
   );

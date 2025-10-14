@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
@@ -116,7 +117,10 @@ export const DiscoverTopNav = ({
 
               if (!dataViewInstance.isPersisted()) {
                 // Creating a "clean" copy of the data view to avoid side effects
-                dataViewInstance = await data.dataViews.create(dataViewInstance.toSpec());
+                dataViewInstance = await data.dataViews.create({
+                  ...dataViewInstance.toSpec(),
+                  id: uuidv4(),
+                });
               }
 
               closeFieldEditor.current = await dataViewFieldEditor.openEditor({

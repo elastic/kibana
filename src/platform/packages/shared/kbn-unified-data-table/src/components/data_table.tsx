@@ -19,6 +19,7 @@ import React, {
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { v4 as uuidv4 } from 'uuid';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
   EuiDataGridSorting,
@@ -308,7 +309,7 @@ interface InternalUnifiedDataTableProps {
   /**
    * Callback to execute on edit runtime field
    */
-  onFieldEdited?: () => void;
+  onFieldEdited?: (options: { editedDataView: DataView }) => void;
   /**
    * Service dependencies
    */
@@ -848,20 +849,30 @@ const InternalUnifiedDataTable = React.forwardRef<
       () =>
         onFieldEdited
           ? async (fieldName: string) => {
+              let dataViewInstance = dataView;
+              if (!dataViewInstance.isPersisted()) {
+                // Creating a "clean" copy of the data view to avoid side effects
+                dataViewInstance = await data.dataViews.create({
+                  ...dataViewInstance.toSpec(),
+                  id: uuidv4(),
+                });
+              }
               closeFieldEditor.current =
                 onFieldEdited &&
                 (await services?.dataViewFieldEditor?.openEditor({
                   ctx: {
-                    dataView,
+                    dataView: dataViewInstance,
                   },
                   fieldName,
                   onSave: async () => {
-                    await onFieldEdited(); // TODO: update with editedDataView
+                    await onFieldEdited({
+                      editedDataView: dataViewInstance,
+                    });
                   },
                 }));
             }
           : undefined,
-      [dataView, onFieldEdited, services?.dataViewFieldEditor]
+      [data.dataViews, dataView, onFieldEdited, services?.dataViewFieldEditor]
     );
 
     const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(

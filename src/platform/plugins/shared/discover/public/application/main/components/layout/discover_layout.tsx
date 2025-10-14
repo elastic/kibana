@@ -283,7 +283,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }) => Promise<void> = useCallback(
     async (options) => {
       // TODO: remove dataView from dependency
-      const { editedDataView, removedFieldName } = options || { editedDataView: dataView };
+      const { editedDataView, removedFieldName } = options || {
+        editedDataView: dataView,
+      };
       if (removedFieldName && currentColumns.includes(removedFieldName)) {
         onRemoveColumn(removedFieldName);
       }

@@ -290,11 +290,13 @@ export function getDiscoverStateContainer({
    * When editing an ad hoc data view, a new id needs to be generated for the data view
    * This is to prevent duplicate ids messing with our system
    */
-  const updateAdHocDataViewId = async (prevDataView: DataView) => {
+  const updateAdHocDataViewId = async (editedDataView: DataView) => {
+    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const prevDataView = currentDataView$.getValue();
     if (!prevDataView || prevDataView.isPersisted()) return;
 
     const nextDataView = await services.dataViews.create({
-      ...prevDataView.toSpec(),
+      ...editedDataView.toSpec(),
       id: uuidv4(),
     });
 
