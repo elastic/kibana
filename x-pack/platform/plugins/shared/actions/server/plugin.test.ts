@@ -903,10 +903,49 @@ describe('Actions Plugin', () => {
     describe('listTypes()', () => {
       it('passes through feature ID and sets exposeValidation to true', async () => {
         const actionTypeRegistryListMock = jest.spyOn(ActionTypeRegistry.prototype, 'list');
-        await plugin.setup(coreSetup, pluginsSetup);
+        const pluginSetup = await plugin.setup(coreSetup, pluginsSetup);
+        pluginSetup.registerType({
+          id: '.server-log',
+          name: 'Server log',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: {
+              schema: schema.object({
+                text: schema.string({ minLength: 1 }),
+              }),
+            },
+          },
+          executor,
+        });
         const pluginStart = plugin.start(coreStart, pluginsStart);
 
-        pluginStart.listTypes('alerting');
+        const result = pluginStart.listTypes('alerting');
+        expect(result).toEqual([
+          {
+            id: '.server-log',
+            name: 'Server log',
+            enabled: true,
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'basic',
+            supportedFeatureIds: ['alerting'],
+            isSystemActionType: false,
+            validate: { params: expect.any(Object) },
+          },
+        ]);
+
+        // check that validation works
+        try {
+          result[0].validate?.params.schema.validate({ text: '' });
+        } catch (err) {
+          expect(err.message).toMatchInlineSnapshot(
+            `"[text]: value has length [0] but it must have a minimum length of [1]."`
+          );
+        }
+
         expect(actionTypeRegistryListMock).toHaveBeenCalledWith({
           exposeValidation: true,
           featureId: 'alerting',
