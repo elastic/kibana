@@ -7,7 +7,7 @@
 
 import { AUTHENTICATION } from '../../../../common/lib/authentication';
 import { createSpaces, deleteSpaces } from '../../../../common/lib/space_test_utils';
-import { SPACES } from '../../../../common/lib/spaces';
+import { SPACE_2, SPACES } from '../../../../common/lib/spaces';
 import { deleteTestSuiteFactory } from '../../../../common/suites/delete.agnostic';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
@@ -45,7 +45,7 @@ export default function deleteSpaceTestSuite(context: DeploymentAgnosticFtrProvi
 
     afterEach(async () => {
       try {
-        await spacesService.create(SPACES.SPACE_2);
+        await spacesService.create(SPACE_2);
         await kbnClient.importExport.load(
           `x-pack/platform/test/spaces_api_integration/common/fixtures/kbn_archiver/space_2_objects.json`,
           { space: 'space_2' }

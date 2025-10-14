@@ -13,12 +13,12 @@ export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProv
     // https://github.com/elastic/kibana/issues/234059
     this.tags('skipMKI');
 
-    // loadTestFile(require.resolve('./resolve_copy_to_space_conflicts'));
-    // loadTestFile(require.resolve('./create'));
-    // loadTestFile(require.resolve('./get_all'));
-    // loadTestFile(require.resolve('./get'));
-    // loadTestFile(require.resolve('./update'));
-    // loadTestFile(require.resolve('./delete'));
+    loadTestFile(require.resolve('./resolve_copy_to_space_conflicts'));
+    loadTestFile(require.resolve('./create'));
+    loadTestFile(require.resolve('./get_all'));
+    loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./delete'));
 
     loadTestFile(require.resolve('./superuser/resolve_copy_to_space_conflicts'));
     loadTestFile(require.resolve('./superuser/create'));

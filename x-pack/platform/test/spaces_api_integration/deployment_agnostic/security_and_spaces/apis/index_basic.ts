@@ -19,12 +19,12 @@ export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProv
       await createUsersAndRoles(es, supertest);
     });
 
-    // loadTestFile(require.resolve('./resolve_copy_to_space_conflicts'));
-    // loadTestFile(require.resolve('./create'));
-    // loadTestFile(require.resolve('./get_all'));
-    // loadTestFile(require.resolve('./get'));
-    // loadTestFile(require.resolve('./update'));
-    // loadTestFile(require.resolve('./delete'));
+    loadTestFile(require.resolve('./resolve_copy_to_space_conflicts'));
+    loadTestFile(require.resolve('./create'));
+    loadTestFile(require.resolve('./get_all'));
+    loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./delete'));
 
     loadTestFile(require.resolve('./superuser/resolve_copy_to_space_conflicts'));
     loadTestFile(require.resolve('./superuser/create'));
