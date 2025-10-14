@@ -59,10 +59,6 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
   const confirmModalTitleId = useGeneratedHtmlId();
 
   useEffect(() => {
-    // This is a temporary (quick) fix to make sure that we render a correct state
-    // of the title panel on switching to another migration.
-    // Since we store `name` and `isEditing` as a state, we never update
-    // those two when user switches to a new migration and passes updated `migrationStats`.
     if (migrationStats.id) {
       setName(migrationStats.name);
       setIsEditing(false);
