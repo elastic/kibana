@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export const filtersJsonEnvArgName = 'CAPTURE_OAS_SNAPSHOT_WORKER_FILTERS_JSON';
 export const buildFlavourEnvArgName = 'CAPTURE_OAS_SNAPSHOT_WORKER_BUILD_FLAVOR';

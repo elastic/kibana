@@ -627,9 +627,10 @@ export class LensVisService {
         ? ` | sort \`${breakdownColumn.name}\` asc`
         : '';
 
+    const timeBuckets = `${TIMESTAMP_COLUMN} = BUCKET(${dataView.timeFieldName}, ${queryInterval})`;
     return appendToESQLQuery(
       normalizedQuery,
-      `| EVAL ${TIMESTAMP_COLUMN}=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by ${TIMESTAMP_COLUMN}${breakdown}${sortBy}`
+      `| STATS results = COUNT(*) BY ${timeBuckets}${breakdown}${sortBy}`
     );
   };
 
