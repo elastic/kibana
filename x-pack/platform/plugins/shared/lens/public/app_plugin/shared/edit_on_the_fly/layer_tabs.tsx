@@ -370,25 +370,6 @@ export function LayerTabs(
 
   console.log('managedItems', managedItems);
 
-  /**
-   * Render layer tabs only if the chart type supports multiple layers.
-   *
-   * Layout behavior:
-   * - Tabs take only the space they need (grow={false})
-   * - Button stays next to tabs when space available
-   * - When tabs overflow, they get hidden while button remains visible
-   *
-   * Normal state (few tabs):
-   * ┌─────────────────────────────────────────────┐
-   * │ [Tab1] [Tab2] [Tab3] [+]                    │
-   * └─────────────────────────────────────────────┘
-   *
-   * Overflow state (many tabs):
-   * ┌─────────────────────────────────────────────┐
-   * │ [Tab1] [Tab2] [Tab3] [Tab4] [Tab5] [T... [+]│
-   * └─────────────────────────────────────────────┘
-   * Hidden tabs are still accessible via horizontal scroll.
-   */
   return !hideAddLayerButton ? (
     <>
       <EuiSpacer size="s" />
@@ -413,6 +394,7 @@ export function LayerTabs(
         renderContent={({ label }) => {
           return null;
         }}
+        customNewTabButton={addLayerButton || undefined}
       />
       <div ref={layerActionsFlyoutRef} />
     </>
