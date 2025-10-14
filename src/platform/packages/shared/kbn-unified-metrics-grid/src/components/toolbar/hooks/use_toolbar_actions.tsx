@@ -22,12 +22,14 @@ interface UseToolbarActionsProps
   extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
   fields: MetricField[];
   indexPattern: string;
+  hideDimensionsSelector?: boolean;
 }
 export const useToolbarActions = ({
   fields,
   requestParams,
   indexPattern,
   renderToggleActions,
+  hideDimensionsSelector = false,
 }: UseToolbarActionsProps) => {
   const {
     dimensions,
@@ -45,12 +47,14 @@ export const useToolbarActions = ({
   const leftSideActions = useMemo(
     () => [
       isFullscreen ? null : renderToggleActions(),
-      <DimensionsSelector
-        fields={fields}
-        onChange={onDimensionsChange}
-        selectedDimensions={dimensions}
-        onClear={onClearAllDimensions}
-      />,
+      hideDimensionsSelector ? null : (
+        <DimensionsSelector
+          fields={fields}
+          onChange={onDimensionsChange}
+          selectedDimensions={dimensions}
+          onClear={onClearAllDimensions}
+        />
+      ),
       dimensions.length > 0 ? (
         <ValuesSelector
           selectedDimensions={dimensions}
@@ -75,6 +79,7 @@ export const useToolbarActions = ({
       requestParams,
       valueFilters,
       isFullscreen,
+      hideDimensionsSelector,
     ]
   );
 

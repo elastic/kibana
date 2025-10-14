@@ -16,11 +16,15 @@ import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unifi
 import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import type { ChartSize } from './chart';
 import { Chart } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
 import { EmptyState } from './empty_state/empty_state';
 import { useGridNavigation } from '../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../context/fields_metadata';
+import { createESQLQuery } from '../common/utils';
+import { useChartLayers } from './chart/hooks/use_chart_layers';
+
 export type MetricsGridProps = Pick<
   ChartSectionProps,
   'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
@@ -56,7 +60,8 @@ export const MetricsGrid = ({
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-  const { euiTheme } = useEuiTheme();
+
+  const chartSize = useMemo(() => (columns === 2 || columns === 4 ? 's' : 'm'), [columns]);
 
   const [expandedMetric, setExpandedMetric] = useState<
     | {
@@ -68,13 +73,6 @@ export const MetricsGrid = ({
       }
     | undefined
   >();
-
-  const chartSize = useMemo(() => (columns === 2 || columns === 4 ? 's' : 'm'), [columns]);
-
-  const colorPalette = useMemo(
-    () => Object.values(euiTheme.colors.vis).slice(0, 10),
-    [euiTheme.colors.vis]
-  );
 
   const rows = useMemo(() => {
     return pivotOn === 'metric'
@@ -93,16 +91,13 @@ export const MetricsGrid = ({
       gridRef,
     });
 
-  const setChartRef = useCallback(
-    (chartId: string) => (element: HTMLDivElement | null) => {
-      if (element) {
-        chartRefs.current.set(chartId, element);
-      } else {
-        chartRefs.current.delete(chartId);
-      }
-    },
-    []
-  );
+  const setChartRef = useCallback((chartId: string, element: HTMLDivElement | null) => {
+    if (element) {
+      chartRefs.current.set(chartId, element);
+    } else {
+      chartRefs.current.delete(chartId);
+    }
+  }, []);
 
   const handleViewDetails = useCallback(
     (esqlQuery: string, metric: MetricField, chartId: string) => {
@@ -175,38 +170,28 @@ export const MetricsGrid = ({
       >
         <EuiFlexGrid columns={columns} gutterSize="s">
           {rows.map(({ key, metric }, index) => {
-            const { rowIndex, colIndex } = getRowColFromIndex(index);
-            const isFocused =
-              focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
-            const chartId = `chart-${key}`;
-
             return (
-              <EuiFlexItem key={key}>
-                <A11yGridCell
-                  ref={setChartRef(chartId)}
-                  rowIndex={rowIndex}
-                  colIndex={colIndex}
+              <EuiFlexItem key={index}>
+                <ChartItem
+                  chartId={key}
+                  metric={metric}
                   index={index}
-                  isFocused={isFocused}
-                  onFocus={handleFocusCell}
-                >
-                  <Chart
-                    chartId={chartId}
-                    metric={metric}
-                    size={chartSize}
-                    color={colorPalette[index % colorPalette.length]}
-                    dimensions={dimensions}
-                    discoverFetch$={discoverFetch$}
-                    requestParams={requestParams}
-                    services={services}
-                    abortController={abortController}
-                    searchSessionId={searchSessionId}
-                    filters={filters}
-                    onBrushEnd={onBrushEnd}
-                    onFilter={onFilter}
-                    onViewDetails={handleViewDetails}
-                  />
-                </A11yGridCell>
+                  getRowColFromIndex={getRowColFromIndex}
+                  focusedCell={focusedCell}
+                  dimensions={dimensions}
+                  filters={filters}
+                  discoverFetch$={discoverFetch$}
+                  handleViewDetails={handleViewDetails}
+                  searchSessionId={searchSessionId}
+                  services={services}
+                  onBrushEnd={onBrushEnd}
+                  onFilter={onFilter}
+                  abortController={abortController}
+                  requestParams={requestParams}
+                  size={chartSize}
+                  setChartRef={setChartRef}
+                  handleFocusCell={handleFocusCell}
+                />
               </EuiFlexItem>
             );
           })}
@@ -224,6 +209,89 @@ export const MetricsGrid = ({
     </FieldsMetadataProvider>
   );
 };
+
+function ChartItem({
+  chartId,
+  metric,
+  index,
+  getRowColFromIndex,
+  focusedCell,
+  dimensions,
+  filters,
+  searchSessionId,
+  services,
+  onBrushEnd,
+  onFilter,
+  abortController,
+  requestParams,
+  discoverFetch$,
+  handleViewDetails,
+  size,
+  setChartRef,
+  handleFocusCell,
+}: {
+  chartId: string;
+  metric: MetricField;
+  index: number;
+  focusedCell: { rowIndex: number; colIndex: number };
+  dimensions: string[];
+  filters: Array<{ field: string; value: string }>;
+  discoverFetch$: Observable<UnifiedHistogramInputMessage>;
+  size: ChartSize;
+  getRowColFromIndex: (index: number) => { rowIndex: number; colIndex: number };
+  handleViewDetails: (esqlQuery: string, metric: MetricField, chartId: string) => void;
+  setChartRef: (chartId: string, element: HTMLDivElement | null) => void;
+  handleFocusCell: (rowIndex: number, colIndex: number) => void;
+} & Pick<
+  ChartSectionProps,
+  'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
+>) {
+  const { euiTheme } = useEuiTheme();
+  const colorPalette = useMemo(
+    () => Object.values(euiTheme.colors.vis).slice(0, 10),
+    [euiTheme.colors.vis]
+  );
+
+  const { rowIndex, colIndex } = getRowColFromIndex(index);
+  const isFocused = focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
+
+  const isSupported = metric.type !== 'unsigned_long' && metric.type !== 'histogram';
+  const esqlQuery = isSupported
+    ? createESQLQuery({
+        metric,
+        dimensions,
+        filters,
+      })
+    : '';
+  const color = colorPalette[index % colorPalette.length];
+  const chartLayers = useChartLayers({ dimensions, metric, color });
+
+  return (
+    <A11yGridCell
+      ref={(element) => setChartRef(chartId, element)}
+      rowIndex={rowIndex}
+      colIndex={colIndex}
+      index={index}
+      isFocused={isFocused}
+      onFocus={handleFocusCell}
+    >
+      <Chart
+        esqlQuery={esqlQuery}
+        size={size}
+        discoverFetch$={discoverFetch$}
+        requestParams={requestParams}
+        services={services}
+        abortController={abortController}
+        searchSessionId={searchSessionId}
+        onBrushEnd={onBrushEnd}
+        onFilter={onFilter}
+        onViewDetails={() => handleViewDetails(esqlQuery, metric, chartId)}
+        title={metric.name}
+        chartLayers={chartLayers}
+      />
+    </A11yGridCell>
+  );
+}
 
 const A11yGridWrapper = React.forwardRef(
   (
