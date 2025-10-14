@@ -280,7 +280,7 @@ export const ProjectPicker = () => {
             <EuiFlexItem grow={false}>
               <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
+                  <EuiText size="s" color="subdued">
                     {`${getCSPLabel(project._csp)}, ${project._region}`}
                   </EuiText>
                 </EuiFlexItem>
