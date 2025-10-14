@@ -163,8 +163,6 @@ export function EditorFrame(props: EditorFrameProps) {
                 plugins={props.plugins}
                 ExpressionRenderer={props.ExpressionRenderer}
                 lensInspector={props.lensInspector}
-                datasourceMap={datasourceMap}
-                visualizationMap={visualizationMap}
                 framePublicAPI={framePublicAPI}
                 getSuggestionForField={getSuggestionForField.current}
                 getUserMessages={props.getUserMessages}
@@ -179,8 +177,6 @@ export function EditorFrame(props: EditorFrameProps) {
             <ErrorBoundary onError={onError}>
               <SuggestionPanelWrapper
                 ExpressionRenderer={props.ExpressionRenderer}
-                datasourceMap={datasourceMap}
-                visualizationMap={visualizationMap}
                 frame={framePublicAPI}
                 getUserMessages={props.getUserMessages}
                 nowProvider={props.plugins.data.nowProvider}

@@ -25,7 +25,7 @@ export function LayerHeader({
   layerConfigProps: VisualizationLayerWidgetProps;
   onlyAllowSwitchToSubtypes?: boolean;
 }) {
-  const { datasourceMap, visualizationMap } = useEditorFrameService();
+  const { visualizationMap } = useEditorFrameService();
 
   const activeVisualization = visualizationMap[activeVisualizationId];
   if (!activeVisualization) {
@@ -58,8 +58,6 @@ export function LayerHeader({
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
         <ChartSwitchPopover
-          datasourceMap={datasourceMap}
-          visualizationMap={availableVisualizationMap}
           framePublicAPI={layerConfigProps.frame}
           layerId={layerConfigProps.layerId}
         />
@@ -70,8 +68,6 @@ export function LayerHeader({
     </EuiFlexGroup>
   ) : (
     <ChartSwitchPopover
-      datasourceMap={datasourceMap}
-      visualizationMap={availableVisualizationMap}
       framePublicAPI={layerConfigProps.frame}
       layerId={layerConfigProps.layerId}
     />

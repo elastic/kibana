@@ -19,6 +19,7 @@ import { LayerHeader } from './layer_header';
 import { renderWithReduxStore } from '../../../mocks';
 import userEvent from '@testing-library/user-event';
 import type { LensAppState } from '../../../state_management';
+import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
 
 describe('LayerHeader', () => {
   const renderLayerSettings = (
@@ -50,19 +51,20 @@ describe('LayerHeader', () => {
       hiddenVis: { ...createMockVisualization('hiddenVis'), hideFromChartSwitch: () => true },
     };
     const rtlRender = renderWithReduxStore(
-      <LayerHeader
-        datasourceMap={datasourceMap}
-        visualizationMap={visualizationMap}
-        activeVisualizationId="testVis"
-        layerConfigProps={{
-          layerId: 'myLayer',
-          state: {},
-          frame: createMockFramePublicAPI(),
-          setState: jest.fn(),
-          onChangeIndexPattern: jest.fn(),
-        }}
-        {...propsOverrides}
-      />,
+      <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
+        <LayerHeader
+          activeVisualizationId="testVis"
+          layerConfigProps={{
+            layerId: 'myLayer',
+            state: {},
+            frame: createMockFramePublicAPI(),
+            setState: jest.fn(),
+            onChangeIndexPattern: jest.fn(),
+          }}
+          {...propsOverrides}
+        />{' '}
+      </EditorFrameServiceProvider>,
+
       {},
       {
         storeDeps: mockStoreDeps({ datasourceMap, visualizationMap }),

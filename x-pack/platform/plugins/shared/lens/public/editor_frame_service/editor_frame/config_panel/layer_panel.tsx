@@ -414,8 +414,6 @@ export function LayerPanel(props: LayerPanelProps) {
                       }),
                   }}
                   activeVisualizationId={activeVisualization.id}
-                  visualizationMap={visualizationMap}
-                  datasourceMap={datasourceMap}
                   onlyAllowSwitchToSubtypes={onlyAllowSwitchToSubtypes}
                 />
               </EuiFlexItem>
@@ -451,9 +449,7 @@ export function LayerPanel(props: LayerPanelProps) {
               uiSettings={core.uiSettings}
               isTextBasedLanguage={isTextBasedLanguage}
               framePublicAPI={framePublicAPI}
-              datasourceMap={datasourceMap}
               layerId={layerId}
-              visualizationMap={visualizationMap}
               {...editorProps}
             />
             {activeVisualization.LayerPanelComponent && (

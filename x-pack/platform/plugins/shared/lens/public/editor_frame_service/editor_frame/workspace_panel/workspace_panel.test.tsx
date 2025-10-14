@@ -41,6 +41,7 @@ import { disableAutoApply, enableAutoApply } from '../../../state_management/len
 import type { Ast } from '@kbn/interpreter';
 import { toExpression } from '@kbn/interpreter';
 import { faker } from '@faker-js/faker';
+import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
 
 const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {
   navLinks: { management: true },
@@ -67,9 +68,10 @@ uiActionsMock.getTrigger.mockReturnValue(trigger);
 
 let instance: ReactWrapper;
 
+const defaultDatasourceMap = {};
+const defaultVisualizationMap = { testVis: mockVisualization };
+
 const defaultProps = {
-  datasourceMap: {},
-  visualizationMap: { testVis: mockVisualization },
   framePublicAPI: createMockFramePublicAPI(),
   ExpressionRenderer: createExpressionRendererMock(),
   core: createCoreStartWithPermissions(),
@@ -120,12 +122,14 @@ describe('workspace_panel', () => {
 
   it('should render an explanatory text if the visualization does not produce an expression', async () => {
     renderWithReduxStore(
-      <WorkspacePanel
-        {...defaultProps}
+      <EditorFrameServiceProvider
         visualizationMap={{
           testVis: { ...mockVisualization, toExpression: () => null },
         }}
-      />,
+        datasourceMap={defaultDatasourceMap}
+      >
+        <WorkspacePanel {...defaultProps} />
+      </EditorFrameServiceProvider>,
       {},
       { preloadedState: { datasourceStates: {} } }
     );
@@ -135,8 +139,7 @@ describe('workspace_panel', () => {
 
   it('should render an explanatory text if the datasource does not produce an expression', async () => {
     renderWithReduxStore(
-      <WorkspacePanel
-        {...defaultProps}
+      <EditorFrameServiceProvider
         visualizationMap={{
           testVis: {
             ...mockVisualization,
@@ -144,7 +147,10 @@ describe('workspace_panel', () => {
               toExpr(datasourceExpressionsByLayers),
           },
         }}
-      />,
+        datasourceMap={defaultDatasourceMap}
+      >
+        <WorkspacePanel {...defaultProps} />
+      </EditorFrameServiceProvider>,
       {},
       { preloadedState: { datasourceStates: {} } }
     );
@@ -161,13 +167,10 @@ describe('workspace_panel', () => {
     mockDatasource.getLayers.mockReturnValue(['first']);
 
     renderWithReduxStore(
-      <WorkspacePanel
-        {...defaultProps}
+      <EditorFrameServiceProvider
         datasourceMap={{
           testDatasource: mockDatasource,
         }}
-        ExpressionRenderer={expressionRendererMock}
-        framePublicAPI={framePublicAPI}
         visualizationMap={{
           testVis: {
             ...mockVisualization,
@@ -175,7 +178,13 @@ describe('workspace_panel', () => {
               toExpr(datasourceExpressionsByLayers),
           },
         }}
-      />
+      >
+        <WorkspacePanel
+          {...defaultProps}
+          ExpressionRenderer={expressionRendererMock}
+          framePublicAPI={framePublicAPI}
+        />
+      </EditorFrameServiceProvider>
     );
     expect(screen.getByText('datasource | testVis')).toBeInTheDocument();
   });
@@ -189,12 +198,10 @@ describe('workspace_panel', () => {
     mockDatasource.getLayers.mockReturnValue(['first']);
 
     const { rerender, store } = renderWithReduxStore(
-      <WorkspacePanel
-        {...defaultProps}
+      <EditorFrameServiceProvider
         datasourceMap={{
           testDatasource: mockDatasource,
         }}
-        framePublicAPI={framePublicAPI}
         visualizationMap={{
           testVis: {
             ...mockVisualization,
@@ -202,8 +209,13 @@ describe('workspace_panel', () => {
               toExpr(datasourceExpressionsByLayers),
           },
         }}
-        ExpressionRenderer={expressionRendererMock}
-      />,
+      >
+        <WorkspacePanel
+          {...defaultProps}
+          framePublicAPI={framePublicAPI}
+          ExpressionRenderer={expressionRendererMock}
+        />
+      </EditorFrameServiceProvider>,
       {},
       {
         preloadedState: {
@@ -216,12 +228,10 @@ describe('workspace_panel', () => {
 
     mockDatasource.toExpression.mockReturnValue('new-datasource');
     rerender(
-      <WorkspacePanel
-        {...defaultProps}
+      <EditorFrameServiceProvider
         datasourceMap={{
           testDatasource: mockDatasource,
         }}
-        framePublicAPI={framePublicAPI}
         visualizationMap={{
           testVis: {
             ...mockVisualization,
@@ -229,8 +239,13 @@ describe('workspace_panel', () => {
               toExpr(datasourceExpressionsByLayers, 'new-vis'),
           },
         }}
-        ExpressionRenderer={expressionRendererMock}
-      />
+      >
+        <WorkspacePanel
+          {...defaultProps}
+          framePublicAPI={framePublicAPI}
+          ExpressionRenderer={expressionRendererMock}
+        />
+      </EditorFrameServiceProvider>
     );
 
     expect(screen.getByText('datasource | testVis')).toBeInTheDocument();
@@ -245,12 +260,10 @@ describe('workspace_panel', () => {
 
     act(() => {
       rerender(
-        <WorkspacePanel
-          {...defaultProps}
+        <EditorFrameServiceProvider
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          framePublicAPI={framePublicAPI}
           visualizationMap={{
             testVis: {
               ...mockVisualization,
@@ -258,8 +271,13 @@ describe('workspace_panel', () => {
                 toExpr(datasourceExpressionsByLayers, 'other-new-vis'),
             },
           }}
-          ExpressionRenderer={expressionRendererMock}
-        />
+        >
+          <WorkspacePanel
+            {...defaultProps}
+            framePublicAPI={framePublicAPI}
+            ExpressionRenderer={expressionRendererMock}
+          />
+        </EditorFrameServiceProvider>
       );
       store.dispatch(enableAutoApply());
     });
@@ -278,13 +296,10 @@ describe('workspace_panel', () => {
     let userMessages: UserMessage[] = [];
 
     const { store } = renderWithReduxStore(
-      <WorkspacePanel
-        {...defaultProps}
-        getUserMessages={() => userMessages}
+      <EditorFrameServiceProvider
         datasourceMap={{
           testDatasource: mockDatasource,
         }}
-        framePublicAPI={framePublicAPI}
         visualizationMap={{
           testVis: {
             ...mockVisualization,
@@ -292,8 +307,14 @@ describe('workspace_panel', () => {
               toExpr(datasourceExpressionsByLayers),
           },
         }}
-        ExpressionRenderer={expressionRendererMock}
-      />
+      >
+        <WorkspacePanel
+          {...defaultProps}
+          getUserMessages={() => userMessages}
+          framePublicAPI={framePublicAPI}
+          ExpressionRenderer={expressionRendererMock}
+        />
+      </EditorFrameServiceProvider>
     );
 
     const isSaveable = () => store.getState().lens.isSaveable;
@@ -369,17 +390,20 @@ describe('workspace_panel', () => {
       const visualizationShowing = () => instance.exists(expressionRendererMock);
 
       const mounted = mountWithReduxStore(
-        <WorkspacePanel
-          {...defaultProps}
+        <EditorFrameServiceProvider
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          framePublicAPI={framePublicAPI}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => null },
           }}
-          ExpressionRenderer={expressionRendererMock}
-        />,
+        >
+          <WorkspacePanel
+            {...defaultProps}
+            framePublicAPI={framePublicAPI}
+            ExpressionRenderer={expressionRendererMock}
+          />
+        </EditorFrameServiceProvider>,
         {
           preloadedState: {
             autoApplyDisabled: true,
@@ -433,18 +457,21 @@ describe('workspace_panel', () => {
       const props = defaultProps;
 
       const mounted = mountWithReduxStore(
-        <WorkspacePanel
-          {...props}
+        <EditorFrameServiceProvider
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          framePublicAPI={framePublicAPI}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
-          ExpressionRenderer={expressionRendererMock}
-          plugins={{ ...props.plugins, uiActions: uiActionsMock }}
-        />
+        >
+          <WorkspacePanel
+            {...props}
+            framePublicAPI={framePublicAPI}
+            ExpressionRenderer={expressionRendererMock}
+            plugins={{ ...props.plugins, uiActions: uiActionsMock }}
+          />
+        </EditorFrameServiceProvider>
       );
       instance = mounted.instance;
 
@@ -469,18 +496,21 @@ describe('workspace_panel', () => {
       const props = defaultProps;
 
       const mounted = mountWithReduxStore(
-        <WorkspacePanel
-          {...props}
+        <EditorFrameServiceProvider
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          framePublicAPI={framePublicAPI}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
-          ExpressionRenderer={expressionRendererMock}
-          plugins={{ ...props.plugins, uiActions: uiActionsMock }}
-        />
+        >
+          <WorkspacePanel
+            {...props}
+            framePublicAPI={framePublicAPI}
+            ExpressionRenderer={expressionRendererMock}
+            plugins={{ ...props.plugins, uiActions: uiActionsMock }}
+          />
+        </EditorFrameServiceProvider>
       );
       instance = mounted.instance;
 
@@ -507,18 +537,21 @@ describe('workspace_panel', () => {
       const props = defaultProps;
 
       const mounted = mountWithReduxStore(
-        <WorkspacePanel
-          {...props}
+        <EditorFrameServiceProvider
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          framePublicAPI={framePublicAPI}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
-          ExpressionRenderer={expressionRendererMock}
-          plugins={{ ...props.plugins, uiActions: uiActionsMock }}
-        />
+        >
+          <WorkspacePanel
+            {...props}
+            framePublicAPI={framePublicAPI}
+            ExpressionRenderer={expressionRendererMock}
+            plugins={{ ...props.plugins, uiActions: uiActionsMock }}
+          />
+        </EditorFrameServiceProvider>
       );
       instance = mounted.instance;
 
@@ -542,17 +575,20 @@ describe('workspace_panel', () => {
       mockDatasource.getLayers.mockReturnValue(['table1']);
 
       const mounted = mountWithReduxStore(
-        <WorkspacePanel
-          {...defaultProps}
+        <EditorFrameServiceProvider
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          framePublicAPI={framePublicAPI}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
-          ExpressionRenderer={expressionRendererMock}
-        />
+        >
+          <WorkspacePanel
+            {...defaultProps}
+            framePublicAPI={framePublicAPI}
+            ExpressionRenderer={expressionRendererMock}
+          />
+        </EditorFrameServiceProvider>
       );
 
       instance = mounted.instance;
@@ -587,17 +623,20 @@ describe('workspace_panel', () => {
       expressionRendererMock = jest.fn((_arg) => <span />);
 
       const mounted = mountWithReduxStore(
-        <WorkspacePanel
-          {...defaultProps}
+        <EditorFrameServiceProvider
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          framePublicAPI={framePublicAPI}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
-          ExpressionRenderer={expressionRendererMock}
-        />
+        >
+          <WorkspacePanel
+            {...defaultProps}
+            framePublicAPI={framePublicAPI}
+            ExpressionRenderer={expressionRendererMock}
+          />
+        </EditorFrameServiceProvider>
       );
       instance = mounted.instance;
       instance.update();
@@ -631,17 +670,20 @@ describe('workspace_panel', () => {
 
       expressionRendererMock = jest.fn((_arg) => <span />);
       const mounted = mountWithReduxStore(
-        <WorkspacePanel
-          {...defaultProps}
+        <EditorFrameServiceProvider
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          framePublicAPI={framePublicAPI}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
-          ExpressionRenderer={expressionRendererMock}
-        />
+        >
+          <WorkspacePanel
+            {...defaultProps}
+            framePublicAPI={framePublicAPI}
+            ExpressionRenderer={expressionRendererMock}
+          />
+        </EditorFrameServiceProvider>
       );
       instance = mounted.instance;
 
@@ -689,13 +731,14 @@ describe('workspace_panel', () => {
       const getUserMessages = jest.fn(() => messages);
 
       const mounted = mountWithReduxStore(
-        <WorkspacePanel
-          {...defaultProps}
-          getUserMessages={getUserMessages}
+        <EditorFrameServiceProvider
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
-        />
+          visualizationMap={defaultVisualizationMap}
+        >
+          <WorkspacePanel {...defaultProps} getUserMessages={getUserMessages} />
+        </EditorFrameServiceProvider>
       );
       instance = mounted.instance;
       instance.update();
@@ -719,16 +762,16 @@ describe('workspace_panel', () => {
       const getUserMessageFn = jest.fn(() => userMessages);
 
       const mounted = mountWithReduxStore(
-        <WorkspacePanel
-          {...defaultProps}
-          getUserMessages={getUserMessageFn}
+        <EditorFrameServiceProvider
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
           visualizationMap={{
             testVis: mockVisualization,
           }}
-        />
+        >
+          <WorkspacePanel {...defaultProps} getUserMessages={getUserMessageFn} />
+        </EditorFrameServiceProvider>
       );
 
       instance = mounted.instance;
@@ -788,18 +831,21 @@ describe('workspace_panel', () => {
       const mockGetUserMessages = jest.fn<UserMessage[], unknown[]>(() => []);
 
       const mounted = mountWithReduxStore(
-        <WorkspacePanel
-          {...defaultProps}
+        <EditorFrameServiceProvider
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          framePublicAPI={framePublicAPI}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
-          addUserMessages={mockAddUserMessages}
-          getUserMessages={mockGetUserMessages}
-        />
+        >
+          <WorkspacePanel
+            {...defaultProps}
+            framePublicAPI={framePublicAPI}
+            addUserMessages={mockAddUserMessages}
+            getUserMessages={mockGetUserMessages}
+          />
+        </EditorFrameServiceProvider>
       );
       instance = mounted.instance;
 
@@ -816,17 +862,20 @@ describe('workspace_panel', () => {
       };
 
       const mounted = mountWithReduxStore(
-        <WorkspacePanel
-          {...defaultProps}
+        <EditorFrameServiceProvider
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          framePublicAPI={framePublicAPI}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
-          ExpressionRenderer={expressionRendererMock}
-        />
+        >
+          <WorkspacePanel
+            {...defaultProps}
+            framePublicAPI={framePublicAPI}
+            ExpressionRenderer={expressionRendererMock}
+          />
+        </EditorFrameServiceProvider>
       );
       instance = mounted.instance;
       instance.update();
@@ -846,17 +895,20 @@ describe('workspace_panel', () => {
         first: mockDatasource.publicAPIMock,
       };
       const mounted = mountWithReduxStore(
-        <WorkspacePanel
-          {...defaultProps}
+        <EditorFrameServiceProvider
           datasourceMap={{
             testDatasource: mockDatasource,
           }}
-          framePublicAPI={framePublicAPI}
           visualizationMap={{
             testVis: { ...mockVisualization, toExpression: () => 'testVis' },
           }}
-          ExpressionRenderer={expressionRendererMock}
-        />
+        >
+          <WorkspacePanel
+            {...defaultProps}
+            framePublicAPI={framePublicAPI}
+            ExpressionRenderer={expressionRendererMock}
+          />
+        </EditorFrameServiceProvider>
       );
       instance = mounted.instance;
       const lensStore = mounted.lensStore;
@@ -890,19 +942,22 @@ describe('workspace_panel', () => {
 
     function renderWithDndAndRedux(propsOverrides = {}, draggingContext = draggedField) {
       return renderWithReduxStore(
-        <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingContext })}>
-          <WorkspacePanel
-            {...defaultProps}
-            datasourceMap={{ testDatasource: mockDatasource }}
-            framePublicAPI={createMockFramePublicAPI()}
-            visualizationMap={{
-              testVis: mockVisualization,
-              vis2: mockVisualization2,
-            }}
-            getSuggestionForField={jest.fn()}
-            {...propsOverrides}
-          />
-        </ChildDragDropProvider>
+        <EditorFrameServiceProvider
+          datasourceMap={{ testDatasource: mockDatasource }}
+          visualizationMap={{
+            testVis: mockVisualization,
+            vis2: mockVisualization2,
+          }}
+        >
+          <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingContext })}>
+            <WorkspacePanel
+              {...defaultProps}
+              framePublicAPI={createMockFramePublicAPI()}
+              getSuggestionForField={jest.fn()}
+              {...propsOverrides}
+            />
+          </ChildDragDropProvider>
+        </EditorFrameServiceProvider>
       );
     }
 
