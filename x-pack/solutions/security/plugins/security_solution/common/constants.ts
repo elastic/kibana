@@ -188,6 +188,7 @@ export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as con
 export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED =
   'aiAssistant.defaultLlmSettingEnabled' as const;
 
+/** The default value for the default AI connector setting */
 export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE = true as const;
 
 /** This Kibana Advanced Setting sets a default AI value report minutes per alert */
