@@ -470,7 +470,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(selectedJobIds)]);
 
-  if (noJobsSelected && !isDataLoading) {
+  if (noJobsSelected) {
     return (
       <ExplorerPage dataViews={dataViews} jobSelectorProps={jobSelectorProps}>
         <ExplorerNoJobsSelected />
