@@ -11,6 +11,14 @@ export {
   protectedNamespaces as toolReservedNamespaces,
   isInProtectedNamespace,
 } from './base/namespaces';
+export type {
+  OAuthTokenSet,
+  OAuthServerMetadata,
+  ProtectedResourceMetadata,
+  McpOAuthConfig,
+  McpApiKeyConfig,
+  McpAuthConfig,
+} from './auth';
 export {
   ToolType,
   type ToolDefinition,

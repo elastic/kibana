@@ -9,4 +9,5 @@ export { AgentService } from './agents';
 export { ChatService } from './chat';
 export { ConversationsService } from './conversations';
 export { ToolsService } from './tools';
+export { OAuthManager } from './oauth';
 export type { OnechatInternalService } from './types';

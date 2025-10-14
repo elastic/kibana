@@ -14,10 +14,16 @@ import { OnechatConversationsPage } from './pages/conversations';
 import { OnechatToolCreatePage } from './pages/tool_create';
 import { OnechatToolDetailsPage } from './pages/tool_details';
 import { OnechatToolsPage } from './pages/tools';
+import { OAuthCallbackPage } from './pages/oauth_callback';
 
 export const OnechatRoutes: React.FC<{}> = () => {
   return (
     <Routes>
+      {/* OAuth callback route - must be before conversation route to avoid conflict */}
+      <Route path="/oauth/callback">
+        <OAuthCallbackPage />
+      </Route>
+
       <Route path="/conversations/:conversationId">
         <OnechatConversationsPage />
       </Route>

@@ -100,6 +100,11 @@ export interface RunToolParams<TParams = Record<string, unknown>> {
    * (EIS if there, otherwise openAI, otherwise any GenAI)
    */
   defaultConnectorId?: string;
+  /**
+   * Optional OAuth access token for MCP tools.
+   * Used for per-user authentication to OAuth-protected MCP servers.
+   */
+  userToken?: string;
 }
 
 /**

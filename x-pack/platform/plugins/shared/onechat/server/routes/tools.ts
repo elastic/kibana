@@ -341,6 +341,14 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
                   },
                 })
               ),
+              user_mcp_tokens: schema.maybe(
+                schema.recordOf(schema.string(), schema.string(), {
+                  meta: {
+                    description:
+                      'Optional OAuth tokens for MCP servers, keyed by server ID. Used for per-user authentication to OAuth-protected MCP servers.',
+                  },
+                })
+              ),
             }),
           },
         },
@@ -353,6 +361,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
           tool_id: id,
           tool_params: toolParams,
           connector_id: defaultConnectorId,
+          user_mcp_tokens: userMcpTokens,
         } = request.body;
         const { tools: toolService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
@@ -367,7 +376,21 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
           });
         }
 
-        const toolResult = await registry.execute({ toolId: id, toolParams, defaultConnectorId });
+        // Extract OAuth token for MCP tools
+        let userToken: string | undefined;
+        if (tool.type === 'mcp' && userMcpTokens) {
+          const mcpConfig = tool.configuration as { serverId?: string };
+          if (mcpConfig.serverId) {
+            userToken = userMcpTokens[mcpConfig.serverId];
+          }
+        }
+
+        const toolResult = await registry.execute({
+          toolId: id,
+          toolParams,
+          defaultConnectorId,
+          userToken,
+        });
 
         return response.ok({
           body: {

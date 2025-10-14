@@ -17,7 +17,13 @@ import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 import { docLinks } from '../common/doc_links';
 import { registerAnalytics, registerApp, registerManagementSection } from './register';
 import type { OnechatInternalService } from './services';
-import { AgentService, ChatService, ConversationsService, ToolsService } from './services';
+import {
+  AgentService,
+  ChatService,
+  ConversationsService,
+  OAuthManager,
+  ToolsService,
+} from './services';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -86,16 +92,24 @@ export class OnechatPlugin
     const { http } = core;
     docLinks.setDocLinks(core.docLinks.links);
 
+    const oauthManager = new OAuthManager(http, () => {
+      // Get current user ID from security plugin
+      // For now, use a placeholder until we integrate with security
+      // TODO: Get actual user ID from core.security.authc.getCurrentUser()
+      return 'default-user';
+    });
+
     const agentService = new AgentService({ http });
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
-    const toolsService = new ToolsService({ http });
+    const toolsService = new ToolsService({ http, oauthManager });
 
     this.internalServices = {
       agentService,
       chatService,
       conversationsService,
       toolsService,
+      oauthManager,
       startDependencies,
     };
 

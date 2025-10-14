@@ -37,6 +37,26 @@ export function validateMcpServerConfigs(servers: McpServerConfig[]): string[] {
       errors.push(`Invalid URL for MCP server "${server.id}" at index ${index}: ${server.url}`);
     }
 
+    // Validate OAuth configuration
+    if (server.auth?.type === 'oauth') {
+      const hasExplicitEndpoints = Boolean(
+        server.auth.authorizationEndpoint && server.auth.tokenEndpoint
+      );
+      const hasDiscoveryUrl = Boolean(server.auth.discoveryUrl);
+
+      if (!hasExplicitEndpoints && !hasDiscoveryUrl) {
+        errors.push(
+          `OAuth configuration for MCP server "${server.id}" at index ${index} must provide either both authorizationEndpoint and tokenEndpoint, OR a discoveryUrl for automatic discovery.`
+        );
+      }
+
+      if (!server.auth.clientId) {
+        errors.push(
+          `OAuth configuration for MCP server "${server.id}" at index ${index} must provide a clientId.`
+        );
+      }
+    }
+
     // Warn if server is enabled but has no auth (optional, not an error)
     if (server.enabled && !server.auth) {
       // This is just a warning - some MCP servers may not require auth

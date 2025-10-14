@@ -80,7 +80,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
   toolExecutionParams: ScopedRunnerRunToolsParams<TParams>;
   manager: RunnerManager;
 }): Promise<ToolHandlerContext> => {
-  const { onEvent } = toolExecutionParams;
+  const { onEvent, userToken } = toolExecutionParams;
   const { request, defaultConnectorId, elasticsearch, modelProviderFactory, toolsService, logger } =
     manager.deps;
   return {
@@ -95,5 +95,6 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
       request,
     }),
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
+    userToken,
   };
 };

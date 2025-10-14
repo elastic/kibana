@@ -11,14 +11,22 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 /**
  * Authentication configuration for MCP servers
  */
-const mcpAuthSchema = schema.object({
-  type: schema.oneOf([schema.literal('apiKey')], {
-    defaultValue: 'apiKey',
+const mcpAuthSchema = schema.oneOf([
+  schema.object({
+    type: schema.literal('apiKey'),
+    headers: schema.recordOf(schema.string(), schema.string(), {
+      defaultValue: {},
+    }),
   }),
-  headers: schema.recordOf(schema.string(), schema.string(), {
-    defaultValue: {},
+  schema.object({
+    type: schema.literal('oauth'),
+    clientId: schema.string(),
+    authorizationEndpoint: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+    tokenEndpoint: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+    scopes: schema.maybe(schema.arrayOf(schema.string())),
+    discoveryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
   }),
-});
+]);
 
 /**
  * Individual MCP server configuration

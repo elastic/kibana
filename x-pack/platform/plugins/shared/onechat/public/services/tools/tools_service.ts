@@ -23,12 +23,15 @@ import type {
   GetToolTypeInfoResponse,
 } from '../../../common/http_api/tools';
 import { publicApiPath, internalApiPath } from '../../../common/constants';
+import type { OAuthManager } from '../oauth';
 
 export class ToolsService {
   private readonly http: HttpSetup;
+  private readonly oauthManager?: OAuthManager;
 
-  constructor({ http }: { http: HttpSetup }) {
+  constructor({ http, oauthManager }: { http: HttpSetup; oauthManager?: OAuthManager }) {
     this.http = http;
+    this.oauthManager = oauthManager;
   }
 
   // public APIs
@@ -59,11 +62,41 @@ export class ToolsService {
   }
 
   async execute({ toolId, toolParams, connectorId }: ExecuteToolParams) {
+    // Get tool definition to check if it's an MCP tool requiring OAuth
+    let userMcpTokens: Record<string, string> | undefined;
+
+    if (this.oauthManager && toolId.startsWith('mcp.')) {
+      // Extract server ID from MCP tool ID (format: mcp.{serverId}.{toolName})
+      const parts = toolId.split('.');
+      if (parts.length >= 3) {
+        const serverId = parts[1];
+
+        try {
+          // Try to get a valid OAuth token for this server
+          const token = await this.oauthManager.getValidToken(serverId);
+
+          if (token) {
+            userMcpTokens = {
+              [serverId]: token,
+            };
+          } else {
+            // No valid token - might need to initiate OAuth flow
+            // For now, continue without token and let backend handle the 401
+            console.warn(`No valid OAuth token found for MCP server: ${serverId}`);
+          }
+        } catch (error) {
+          console.error(`Failed to get OAuth token for MCP server ${serverId}:`, error);
+          // Continue without token
+        }
+      }
+    }
+
     return await this.http.post<ExecuteToolResponse>(`${publicApiPath}/tools/_execute`, {
       body: JSON.stringify({
         tool_id: toolId,
         tool_params: toolParams,
         connector_id: connectorId,
+        user_mcp_tokens: userMcpTokens,
       }),
     });
   }

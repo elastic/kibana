@@ -242,6 +242,106 @@ export class McpConnectionManager {
   }
 
   /**
+   * Check if a server uses OAuth authentication
+   */
+  isOAuthServer(serverId: string): boolean {
+    const serverConfig = this.getServerConfig(serverId);
+    return serverConfig?.auth?.type === 'oauth';
+  }
+
+  /**
+   * Create a temporary OAuth-authenticated MCP client for a specific user
+   * Used for per-request OAuth authentication
+   */
+  async createOAuthClient(serverId: string, accessToken: string): Promise<McpClient> {
+    const serverConfig = this.getServerConfig(serverId);
+    if (!serverConfig) {
+      throw new Error(`Server configuration not found for ID: ${serverId}`);
+    }
+
+    if (serverConfig.auth?.type !== 'oauth') {
+      throw new Error(`Server ${serverId} is not configured for OAuth`);
+    }
+
+    this.logger.debug(`Creating OAuth client for server "${serverId}" with user token`);
+
+    const { url, options } = serverConfig;
+    const timeout = options?.timeout ?? 30000;
+
+    // Create fetch with OAuth bearer token
+    const oauthFetch = this.createAuthenticatedFetch({
+      Authorization: `Bearer ${accessToken}`,
+    });
+
+    // Try StreamableHTTP first, fall back to SSE
+    let transport;
+    let client: Client;
+    let transportType: string;
+
+    try {
+      transport = new StreamableHTTPClientTransport(new URL(url), { fetch: oauthFetch });
+      
+      client = new Client(
+        {
+          name: 'kibana-onechat',
+          version: '1.0.0',
+        },
+        {
+          capabilities: {
+            tools: {},
+            prompts: {},
+            resources: {},
+          },
+        }
+      );
+
+      await Promise.race([
+        client.connect(transport),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Connection timeout')), timeout)
+        ),
+      ]);
+      
+      transportType = 'StreamableHTTP';
+    } catch (streamableError) {
+      this.logger.debug(`StreamableHTTP failed for OAuth client "${serverId}", trying SSE: ${streamableError}`);
+      
+      transport = new SSEClientTransport(new URL(url), { fetch: oauthFetch });
+      
+      client = new Client(
+        {
+          name: 'kibana-onechat',
+          version: '1.0.0',
+        },
+        {
+          capabilities: {
+            tools: {},
+            prompts: {},
+            resources: {},
+          },
+        }
+      );
+
+      await Promise.race([
+        client.connect(transport),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Connection timeout')), timeout)
+        ),
+      ]);
+      
+      transportType = 'SSE';
+    }
+
+    this.logger.debug(`OAuth client created for "${serverId}" using ${transportType} transport`);
+
+    return Object.assign(client, {
+      disconnect: async () => {
+        await client.close();
+      },
+    });
+  }
+
+  /**
    * Disconnect all clients
    */
   async shutdown(): Promise<void> {

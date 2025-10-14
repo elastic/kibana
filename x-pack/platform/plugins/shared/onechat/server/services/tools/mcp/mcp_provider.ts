@@ -83,6 +83,7 @@ const createMcpToolProvider = async ({
           serverId,
           serverName,
           client,
+          connectionManager,
           logger,
           request,
         });
@@ -130,6 +131,7 @@ function convertMcpToolToInternal({
   serverId,
   serverName,
   client,
+  connectionManager,
   logger,
   request,
 }: {
@@ -138,6 +140,7 @@ function convertMcpToolToInternal({
   serverId: string;
   serverName: string;
   client: McpClient;
+  connectionManager: McpConnectionManager;
   logger: Logger;
   request: KibanaRequest;
 }): InternalToolDefinition<'mcp', McpToolConfiguration> {
@@ -172,11 +175,31 @@ function convertMcpToolToInternal({
 
     // Handler to execute the tool via MCP client
     async getHandler() {
-      return async (params: Record<string, unknown>) => {
+      return async (params: Record<string, unknown>, context: any) => {
+        let clientToUse: McpClient;
+        let shouldDisconnect = false;
+
         try {
+          // Check if this is an OAuth server
+          if (connectionManager.isOAuthServer(serverId)) {
+            const userToken = context?.userToken;
+            
+            if (!userToken) {
+              throw new Error(`OAuth authentication required for MCP server "${serverName}". Please connect to the server first.`);
+            }
+
+            // Create per-request OAuth client
+            logger.debug(`Creating OAuth client for tool "${mcpTool.name}" on server "${serverId}"`);
+            clientToUse = await connectionManager.createOAuthClient(serverId, userToken);
+            shouldDisconnect = true;
+          } else {
+            // Use static client for API key / no auth servers
+            clientToUse = client;
+          }
+
           logger.debug(`Executing MCP tool "${mcpTool.name}" on server "${serverId}"`);
 
-          const result = await client.callTool({
+          const result = await clientToUse.callTool({
             name: mcpTool.name,
             arguments: params,
           });
@@ -224,6 +247,16 @@ function convertMcpToolToInternal({
               },
             ],
           };
+        } finally {
+          // Disconnect OAuth clients after use
+          if (shouldDisconnect && clientToUse) {
+            try {
+              await clientToUse.disconnect();
+              logger.debug(`Disconnected OAuth client for "${serverId}"`);
+            } catch (disconnectError) {
+              logger.error(`Error disconnecting OAuth client: ${disconnectError}`);
+            }
+          }
         }
       };
     },
