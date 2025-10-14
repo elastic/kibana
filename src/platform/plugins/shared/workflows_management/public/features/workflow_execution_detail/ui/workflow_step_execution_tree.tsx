@@ -32,27 +32,6 @@ import { StepIcon } from '../../../shared/ui/step_icon';
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree } from './build_step_executions_tree';
 
-// handle special nodes like foreachstep:0, foreachstep:1, if:true, if:false
-function getStepStatus(item: StepExecutionTreeItem, status: ExecutionStatus | null) {
-  const stepType = item.stepType;
-  if (
-    (stepType === 'foreach-iteration' ||
-      stepType === 'foreach' ||
-      stepType === 'if-branch' ||
-      stepType === 'if') &&
-    !item.children.length &&
-    !isInProgressStatus(status ?? ExecutionStatus.PENDING)
-  ) {
-    return ExecutionStatus.SKIPPED;
-  }
-
-  if (status) {
-    return status;
-  }
-
-  return null;
-}
-
 function convertTreeToEuiTreeViewItems(
   treeItems: StepExecutionTreeItem[],
   stepExecutionMap: Map<string, WorkflowStepExecutionDto>,
@@ -63,7 +42,7 @@ function convertTreeToEuiTreeViewItems(
   const onClickFn = onClickHandler;
   return treeItems.map((item) => {
     const stepExecution = stepExecutionMap.get(item.stepExecutionId ?? '');
-    const status = getStepStatus(item, stepExecution?.status ?? null);
+    const status = stepExecution?.status || null;
     return {
       ...item,
       id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
