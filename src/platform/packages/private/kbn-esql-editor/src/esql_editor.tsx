@@ -856,26 +856,6 @@ const ESQLEditorInternal = function ESQLEditor({
     };
   }, []);
 
-  const getErrorType = (error: Error) => {
-    console.log(error);
-    if (error.message.includes('parse')) {
-      return 'parse';
-    }
-    if (error.message.includes('verification_exception')) {
-      return 'validation';
-    }
-
-    return 'unknown';
-  };
-  useEffect(() => {
-    if (serverErrors) {
-      const errorType = getErrorType(serverErrors[0]);
-      telemetryService.trackQueryError(errorType);
-    } else {
-      telemetryService.trackQuerySuccess();
-    }
-  }, [serverErrors]);
-
   // When the layout changes, and the editor is not focused, we want to
   // recalculate the visible code so it fills up the available space. We
   // use a ref because editorDidMount is only called once, and the reference
