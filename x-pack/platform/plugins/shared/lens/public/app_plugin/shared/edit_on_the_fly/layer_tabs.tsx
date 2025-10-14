@@ -257,12 +257,11 @@ export function LayerTabs(
           hasLayerSettings: false,
           openLayerSettings: () => {},
           onCloneLayer: () => {
-            if (selectedLayerId)
-              dispatchLens(
-                cloneLayer({
-                  layerId: selectedLayerId,
-                })
-              );
+            dispatchLens(
+              cloneLayer({
+                layerId: layerConfig.layerId,
+              })
+            );
           },
           onRemoveLayer: () => onRemoveLayer(layerConfig.layerId),
           customRemoveModalText: activeVisualization.getCustomRemoveLayerText?.(
