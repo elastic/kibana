@@ -37,14 +37,12 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Dashboards and Visualizations**:
 * Adds the ability to configure index settings when importing geospatial files in Maps [#232308]({{kib-pull}}232308).
-* Adds Inline Markdown Visualization [#229191]({{kib-pull}}229191).
-* Updates the appearance popover for metric charts in *Lens* [#233992]({{kib-pull}}233992).
+* Adds a new Inline Markdown editor to edit your text while switching between **Editing** and **Preview** mode.[#229191]({{kib-pull}}229191).
+* Updates the toolbar popover for Metric charts, which is now called **Appearance**. [#233992]({{kib-pull}}233992).
 * Improves ES|QL suggestions logic when an {{esql}} visualization query changes [#231767]({{kib-pull}}231767).
-* Adds Top Nav Add Menu [#230324]({{kib-pull}}230324).
-* Updates @elastic/charts to version 71.0.0 and uses new metric chart in *Lens* [#229815]({{kib-pull}}229815).
+* Adds a new **Add** menu to the toolbar.[#230324]({{kib-pull}}230324).
 * Improves perceived performance of dashboard flyouts [#226052]({{kib-pull}}226052).
-* Adds bulk select functionality for options list controls [#221010]({{kib-pull}}221010).
-* Reduces element height and aligns Run, Update, and Refresh button widths [#231659]({{kib-pull}}231659).
+* Adds the **Select all** functionality for Options list controls [#221010]({{kib-pull}}221010).
 
 **Data ingestion and Fleet**:
 * Adds toggle that grants permission to write to `logs` datastream [#233374]({{kib-pull}}233374).
