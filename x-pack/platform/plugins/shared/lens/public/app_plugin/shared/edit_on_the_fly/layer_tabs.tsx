@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 
-import { EuiTabs, EuiTab, EuiSpacer, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getLensLayerTypeDisplayName } from '@kbn/lens-common';
@@ -65,9 +65,8 @@ export function LayerTabs(
 ) {
   const { activeVisualization, coreStart, startDependencies } = props;
   const { datasourceMap } = useEditorFrameService();
-  const { euiTheme } = useEuiTheme();
 
-  const { isSaveable, visualization, datasourceStates, query, tabType } = useLensSelector(
+  const { isSaveable, visualization, datasourceStates, query } = useLensSelector(
     (state) => state.lens
   );
   const selectedLayerId = useLensSelector(selectSelectedLayerId);
@@ -285,24 +284,11 @@ export function LayerTabs(
         }),
       ].filter((i) => i.isCompatible);
       return (
-        <EuiTab
-          key={layerConfig.layerId}
-          onClick={() => onSelectedTabChanged(layerConfig.layerId)}
-          isSelected={layerConfig.layerId === selectedLayerId}
-          disabled={false}
-          data-test-subj={`lnsLayerTab-${layerConfig.layerId}`}
-          append={
-            <>
-              <LayerActions
-                actions={compatibleActions}
-                layerIndex={layerIndex}
-                mountingPoint={layerActionsFlyoutRef.current}
-              />
-            </>
-          }
-        >
-          {layerLabels.get(layerConfig.layerId)}
-        </EuiTab>
+        <LayerActions
+          actions={compatibleActions}
+          layerIndex={layerIndex}
+          mountingPoint={layerActionsFlyoutRef.current}
+        />
       );
     });
 
@@ -315,9 +301,7 @@ export function LayerTabs(
     isTextBasedLanguage,
     layerConfigs,
     layerIds.length,
-    layerLabels,
     onRemoveLayer,
-    onSelectedTabChanged,
     registerLibraryAnnotationGroupFunction,
     selectedLayerId,
     visualization,
@@ -408,42 +392,28 @@ export function LayerTabs(
   return !hideAddLayerButton ? (
     <>
       <EuiSpacer size="s" />
-      {tabType === 'unified' && (
-        <UnifiedTabs
-          items={managedItems}
-          selectedItemId={selectedLayerId ?? undefined}
-          recentlyClosedItems={[]}
-          onClearRecentlyClosed={() => {}} // not implemented in this example
-          maxItemsCount={25}
-          services={{
-            core: { chrome: coreStart.chrome },
-          }}
-          onChanged={(updatedState) => {
-            dispatchLens(setSelectedLayerId({ layerId: updatedState.selectedItem?.id ?? null }));
-          }}
-          createItem={getNewTabDefaultProps}
-          getPreviewData={() => ({
-            query: { esql: 'FROM CAN HAZ' },
-            status: TabStatus.SUCCESS,
-          })}
-          onEBTEvent={() => {}}
-          renderContent={({ label }) => {
-            return null;
-          }}
-        />
-      )}
-      {tabType === 'eui' && (
-        <EuiFlexGroup
-          gutterSize="s"
-          alignItems="center"
-          css={{ padding: `0 ${euiTheme.size.base}` }}
-        >
-          <EuiFlexItem grow={false} style={{ overflow: 'hidden', minWidth: 0 }}>
-            <EuiTabs bottomBorder={false}>{renderTabs()}</EuiTabs>
-          </EuiFlexItem>
-          {addLayerButton && <EuiFlexItem grow={true}>{addLayerButton}</EuiFlexItem>}
-        </EuiFlexGroup>
-      )}
+      <UnifiedTabs
+        items={managedItems}
+        selectedItemId={selectedLayerId ?? undefined}
+        recentlyClosedItems={[]}
+        onClearRecentlyClosed={() => {}} // not implemented in this example
+        maxItemsCount={25}
+        services={{
+          core: { chrome: coreStart.chrome },
+        }}
+        onChanged={(updatedState) => {
+          dispatchLens(setSelectedLayerId({ layerId: updatedState.selectedItem?.id ?? null }));
+        }}
+        createItem={getNewTabDefaultProps}
+        getPreviewData={() => ({
+          query: { esql: 'FROM CAN HAZ' },
+          status: TabStatus.SUCCESS,
+        })}
+        onEBTEvent={() => {}}
+        renderContent={({ label }) => {
+          return null;
+        }}
+      />
       <div ref={layerActionsFlyoutRef} />
     </>
   ) : null;
