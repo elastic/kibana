@@ -14,7 +14,7 @@ export function LoadingObservability() {
   const { ObservabilityPageTemplate } = usePluginContext();
 
   return (
-    <ObservabilityPageTemplate pageSectionProps={{ alignment: 'center' }} showSolutionNav={false}>
+    <ObservabilityPageTemplate pageSectionProps={{ alignment: 'center' }} showSolutionNav={false} style={{height: '100%'}}>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="xl" />
