@@ -50,7 +50,7 @@ const geti18nTexts = (
         description: (
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.fullyMountedSearchableSnapshotField.description"
-            defaultMessage="Convert to a fully-mounted index that contains a complete copy of your data and is backed by a snapshot. You can reduce the number of replicas and rely on the snapshot for resiliency. {learnMoreLink}"
+            defaultMessage="Convert to a fully-mounted index that contains a complete copy of your data and is backed by a snapshot. This disables and removes replicas in this phase, as you rely on snapshots for resiliency. {learnMoreLink}"
             values={{
               learnMoreLink: <LearnMoreLink docPath={fullyMountedSearchableSnapshotLink} />,
             }}
