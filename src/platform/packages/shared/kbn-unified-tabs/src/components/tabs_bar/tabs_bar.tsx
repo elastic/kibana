@@ -72,6 +72,7 @@ export type TabsBarProps = Pick<
   | 'enableInlineLabelEditing'
 > & {
   items: TabItem[];
+  itemMenus?: React.ReactElement[];
   selectedItem: TabItem | null;
   recentlyClosedItems: TabItem[];
   unsavedItemIds?: string[];
@@ -93,6 +94,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
   (
     {
       items,
+      itemMenus,
       selectedItem,
       recentlyClosedItems,
       unsavedItemIds,
@@ -301,6 +303,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                             <Tab
                               key={item.id}
                               item={item}
+                              itemMenu={itemMenus ? itemMenus[index] : undefined}
                               isSelected={selectedItem?.id === item.id}
                               isUnsaved={unsavedItemIds?.includes(item.id)}
                               isDragging={isDragging}

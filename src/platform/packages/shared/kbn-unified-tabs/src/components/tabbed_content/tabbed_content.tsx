@@ -33,7 +33,11 @@ import { TabsEventDataKeys } from '../../event_data_keys';
 export interface TabbedContentProps
   extends Pick<
     TabsBarProps,
-    'unsavedItemIds' | 'maxItemsCount' | 'onClearRecentlyClosed' | 'enableInlineLabelEditing'
+    | 'unsavedItemIds'
+    | 'maxItemsCount'
+    | 'onClearRecentlyClosed'
+    | 'enableInlineLabelEditing'
+    | 'itemMenus'
   > {
   items: TabItem[];
   selectedItemId?: string;
@@ -56,6 +60,7 @@ export interface TabbedContentState {
 
 export const TabbedContent: React.FC<TabbedContentProps> = ({
   items: managedItems,
+  itemMenus,
   selectedItemId: managedSelectedItemId,
   recentlyClosedItems,
   unsavedItemIds,
@@ -322,6 +327,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           <TabsBar
             ref={tabsBarApi}
             items={items}
+            itemMenus={itemMenus}
             selectedItem={selectedItem}
             recentlyClosedItems={recentlyClosedItems}
             unsavedItemIds={unsavedItemIds}
