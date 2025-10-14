@@ -37,6 +37,8 @@ import {
   getMonitorAlertDocument,
   getMonitorSummary,
   getUngroupedReasonMessage,
+  fetchStepInformation,
+  formatStepInformation,
 } from './message_utils';
 import { queryMonitorStatusAlert } from './queries/query_monitor_status_alert';
 import { parseArrayFilters, parseLocationFilter } from '../../routes/common';
@@ -361,7 +363,11 @@ export class StatusRuleExecutor {
     }
   };
 
-  handleDownMonitorThresholdAlert = ({ downConfigs }: { downConfigs: AlertStatusConfigs }) => {
+  handleDownMonitorThresholdAlert = async ({
+    downConfigs,
+  }: {
+    downConfigs: AlertStatusConfigs;
+  }) => {
     const { useTimeWindow, useLatestChecks, downThreshold, locationsThreshold } = getConditionType(
       this.params?.condition
     );
@@ -369,7 +375,7 @@ export class StatusRuleExecutor {
     const groupBy = this.params?.condition?.groupBy ?? 'locationId';
 
     if (groupBy === 'locationId' && locationsThreshold === 1) {
-      Object.entries(downConfigs).forEach(([idWithLocation, statusConfig]) => {
+      for (const [idWithLocation, statusConfig] of Object.entries(downConfigs)) {
         // Skip scheduling if recoveryStrategy is 'firstUp' and latest ping is up
         if (recoveryStrategy === 'firstUp' && (statusConfig.latestPing.summary?.up ?? 0) > 0) {
           return;
@@ -383,7 +389,7 @@ export class StatusRuleExecutor {
         });
         if (doesMonitorMeetLocationThreshold) {
           const alertId = idWithLocation;
-          const monitorSummary = this.getMonitorDownSummary({
+          const monitorSummary = await this.getMonitorDownSummary({
             statusConfig,
           });
 
@@ -398,15 +404,17 @@ export class StatusRuleExecutor {
             locationIds: [statusConfig.latestPing.observer.name!],
           });
         }
-      });
+      }
     } else {
       const downConfigsById = getConfigsByIds(downConfigs);
 
-      for (const [configId, locationConfigs] of downConfigsById) {
+      for (const [configId, locationConfigs] of Object.entries(downConfigsById)) {
         // If recoveryStrategy is 'firstUp', we only consider configs that are not up
         const configs =
           recoveryStrategy === 'firstUp'
-            ? locationConfigs.filter((c) => (c.latestPing.summary?.up ?? 0) === 0)
+            ? locationConfigs.filter(
+                (c: AlertStatusMetaData) => (c.latestPing.summary?.up ?? 0) === 0
+              )
             : locationConfigs;
 
         if (!configs.length) {
@@ -422,7 +430,7 @@ export class StatusRuleExecutor {
 
         if (doesMonitorMeetLocationThreshold) {
           const alertId = configId;
-          const monitorSummary = this.getUngroupedDownSummary({
+          const monitorSummary = await this.getUngroupedDownSummary({
             statusConfigs: configs,
           });
           this.scheduleAlert({
@@ -432,16 +440,27 @@ export class StatusRuleExecutor {
             statusConfig: configs[0],
             downThreshold,
             useLatestChecks,
-            locationNames: configs.map((c) => c.latestPing.observer.geo?.name!),
-            locationIds: configs.map((c) => c.latestPing.observer.name!),
+            locationNames: configs.map(
+              (c: AlertStatusMetaData) => c.latestPing.observer.geo?.name!
+            ),
+            locationIds: configs.map((c: AlertStatusMetaData) => c.latestPing.observer.name!),
           });
         }
       }
     }
   };
 
-  getMonitorDownSummary({ statusConfig }: { statusConfig: AlertStatusMetaData }) {
+  async getMonitorDownSummary({ statusConfig }: { statusConfig: AlertStatusMetaData }) {
     const { latestPing: ping, configId, locationId, checks } = statusConfig;
+
+    // Fetch step information for browser monitors
+    const checkGroup = ping.monitor?.check_group;
+    const stepInfo = await fetchStepInformation(
+      this.esClient,
+      checkGroup,
+      ping.monitor?.type || ''
+    );
+    const formattedStepInfo = formatStepInformation(stepInfo);
 
     return getMonitorSummary({
       monitorInfo: ping,
@@ -452,6 +471,7 @@ export class StatusRuleExecutor {
       tz: this.tz ?? 'UTC',
       checks,
       params: this.params,
+      stepInfo: formattedStepInfo,
     });
   }
 
@@ -469,9 +489,19 @@ export class StatusRuleExecutor {
     });
   }
 
-  getUngroupedDownSummary({ statusConfigs }: { statusConfigs: AlertStatusMetaData[] }) {
+  async getUngroupedDownSummary({ statusConfigs }: { statusConfigs: AlertStatusMetaData[] }) {
     const sampleConfig = statusConfigs[0];
     const { latestPing: ping, configId, checks } = sampleConfig;
+
+    // Fetch step information for browser monitors
+    const checkGroup = ping.monitor?.check_group;
+    const stepInfo = await fetchStepInformation(
+      this.esClient,
+      checkGroup,
+      ping.monitor?.type || ''
+    );
+    const formattedStepInfo = formatStepInformation(stepInfo);
+
     const baseSummary = getMonitorSummary({
       monitorInfo: ping,
       reason: 'down',
@@ -481,6 +511,7 @@ export class StatusRuleExecutor {
       tz: this.tz!,
       checks,
       params: this.params,
+      stepInfo: formattedStepInfo,
     });
     baseSummary.reason = getUngroupedReasonMessage({
       statusConfigs,

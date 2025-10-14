@@ -90,7 +90,7 @@ export const registerSyntheticsStatusCheckRule = (
             ?.pendingConfigs as AlertOverviewStatus['pendingConfigs'],
         });
 
-      statusRule.handleDownMonitorThresholdAlert({
+      await statusRule.handleDownMonitorThresholdAlert({
         downConfigs,
       });
 

@@ -12,7 +12,7 @@ export const SyntheticsMonitorStatusTranslations = {
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultActionMessage',
     {
       // the extra spaces before `\n` are needed to properly convert this from markdown to an HTML email
-      defaultMessage: `Monitor "{monitorName}" is {status} from {locationNames}.{pendingLastRunAt} - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {monitorName}  \n- {monitorUrlLabel}: {monitorUrl}  \n- Monitor type: {monitorType}  \n- Checked at: {checkedAt}  \n- From: {locationNames}  \n- Reason: {reason} \n- Error received: {lastErrorMessage}  \n{linkMessage}`,
+      defaultMessage: `Monitor "{monitorName}" is {status} from {locationNames}.{pendingLastRunAt} - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {monitorName}  \n- {monitorUrlLabel}: {monitorUrl}  \n- Monitor type: {monitorType}  \n- Checked at: {checkedAt}  \n- From: {locationNames}  \n- Reason: {reason} \n- Error received: {lastErrorMessage}  \n{stepInfo}{linkMessage}`,
       values: {
         monitorName: '{{context.monitorName}}',
         monitorType: '{{context.monitorType}}',
@@ -25,6 +25,7 @@ export const SyntheticsMonitorStatusTranslations = {
         linkMessage: '{{{context.linkMessage}}}',
         pendingLastRunAt: '{{{context.pendingLastRunAt}}}',
         reason: '{{{context.reason}}}',
+        stepInfo: '{{{context.stepInfo}}}',
       },
     }
   ),

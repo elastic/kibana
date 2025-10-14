@@ -72,4 +72,5 @@ export interface MonitorSummaryStatusRule {
   lastErrorStack?: string | null;
   timestamp?: string;
   labels?: Record<string, string>;
+  stepInfo?: string;
 }

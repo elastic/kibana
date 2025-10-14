@@ -33,6 +33,78 @@ import {
 } from '../../../common/field_names';
 import type { OverviewPing } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
+import type { SyntheticsEsClient } from '../../lib';
+
+interface StepInformation {
+  stepName?: string;
+  stepAction?: string;
+  scriptSource?: string;
+}
+
+/**
+ * Fetches detailed step information from Elasticsearch for failed browser monitors
+ */
+export const fetchStepInformation = async (
+  esClient: SyntheticsEsClient,
+  checkGroup: string,
+  monitorType: string
+): Promise<StepInformation | null> => {
+  // Only fetch for browser monitors
+  if (monitorType !== 'browser' || !checkGroup) {
+    return null;
+  }
+
+  try {
+    // First query: Get the failed step details
+    const failedStepResponse = await esClient.search({
+      index: 'synthetics-*',
+      size: 1,
+      query: {
+        bool: {
+          filter: [
+            { term: { 'synthetics.type': 'step/end' } },
+            { term: { 'synthetics.step.status': 'failed' } },
+            { term: { 'monitor.check_group': checkGroup } },
+          ],
+        },
+      },
+    });
+
+    const failedStepHit = failedStepResponse.body.hits.hits[0];
+    const stepName = (failedStepHit?._source as any)?.synthetics?.step?.name;
+    const stepAction = (failedStepHit?._source as any)?.error?.message;
+    // Try to get script source from the first query response
+    let scriptSource = (failedStepHit?._source as any)?.synthetics?.payload?.source;
+
+    // If script source is not in the first response, try the second query
+    if (!scriptSource) {
+      const finalAttemptResponse = await esClient.search({
+        index: 'synthetics-*',
+        size: 1,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'monitor.check_group': checkGroup } },
+              { term: { 'summary.final_attempt': 'true' } },
+            ],
+          },
+        },
+      });
+
+      const finalAttemptHit = finalAttemptResponse.body.hits.hits[0];
+      scriptSource = (finalAttemptHit?._source as any)?.synthetics?.payload?.source;
+    }
+
+    return {
+      stepName,
+      stepAction: stepAction ? extractStepActionFromError(stepAction) : undefined,
+      scriptSource,
+    };
+  } catch (error) {
+    // Silently fail if we can't fetch step information
+    return null;
+  }
+};
 
 export const getMonitorAlertDocument = (
   monitorSummary: MonitorSummaryStatusRule,
@@ -98,6 +170,7 @@ export interface MonitorSummaryData {
     down: number;
   };
   params?: StatusRuleParams;
+  stepInfo?: string;
 }
 
 export const getMonitorSummary = ({
@@ -109,6 +182,7 @@ export const getMonitorSummary = ({
   reason,
   checks,
   params,
+  stepInfo = '',
 }: MonitorSummaryData): MonitorSummaryStatusRule => {
   const { downThreshold } = getConditionType(params?.condition);
   const monitorName = monitorInfo?.monitor?.name ?? monitorInfo?.monitor?.id;
@@ -175,6 +249,7 @@ export const getMonitorSummary = ({
     downThreshold,
     timestamp,
     monitorTags: monitorInfo.tags,
+    stepInfo,
   };
 };
 
@@ -362,3 +437,47 @@ export const UNAVAILABLE_LABEL = i18n.translate(
 export const HOST_LABEL = i18n.translate('xpack.synthetics.alertRules.monitorStatus.host.label', {
   defaultMessage: 'Host',
 });
+
+/**
+ * Extracts step action from error message.
+ * For example, from "error executing step: locator.textContent: Timeout 50000ms exceeded."
+ * it will extract "locator.textContent"
+ */
+const extractStepActionFromError = (errorMessage: string): string | undefined => {
+  // Pattern: "error executing step: <action>: <error details>"
+  const stepMatch = errorMessage.match(/error executing step:\s*([^:]+):/i);
+
+  if (stepMatch) {
+    return stepMatch[1].trim();
+  }
+
+  return undefined;
+};
+
+/**
+ * Formats step information for display in alert messages
+ */
+export const formatStepInformation = (stepInfo: StepInformation | null): string => {
+  if (!stepInfo) {
+    return '';
+  }
+
+  const parts: string[] = [];
+
+  if (stepInfo.stepName) {
+    parts.push(`\n- Step name: ${stepInfo.stepName}  `);
+  }
+
+  if (stepInfo.stepAction) {
+    parts.push(`\n- Step action: ${stepInfo.stepAction}  `);
+  }
+
+  if (stepInfo.scriptSource) {
+    // Limit script source to first 200 characters to avoid too long messages
+    const truncatedScript = stepInfo.scriptSource.substring(0, 200);
+    const script = stepInfo.scriptSource.length > 200 ? `${truncatedScript}...` : truncatedScript;
+    parts.push(`\n- Script: ${script}  `);
+  }
+
+  return parts.join('');
+};
