@@ -122,9 +122,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
           expect(valueNow).to.equal(valueBefore);
         });
-
-        const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
-        expect(valueNow).to.equal(valueBefore);
       });
 
       it('dashboard does not load with unsaved changes when changes are discarded', async () => {
