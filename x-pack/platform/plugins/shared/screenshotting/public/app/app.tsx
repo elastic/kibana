@@ -31,20 +31,22 @@ export function App() {
     context,
   });
 
+  // eslint-disable-next-line @elastic/eui/no-css-color
   const divCss = css`
-    .scrExpression {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    width: 100vw;
+    height: 100vh;
+    background: white;
+
+    .visualization {
       display: flex;
+      flex: 1 1 100%;
+      flex-direction: column;
       width: 100%;
       height: 100%;
-
-      .visualization {
-        display: flex;
-        flex: 1 1 100%;
-        flex-direction: column;
-        width: 100%;
-        height: 100%;
-        position: relative;
-      }
+      position: relative;
     }
   `;
 
@@ -54,11 +56,6 @@ export function App() {
       data-render-error={!isEmpty && error ? error.message : null}
       ref={elementRef}
       className="scrExpression"
-      style={{
-        background: 'white',
-        width: '100vw',
-        height: '100vh',
-      }}
       css={divCss}
     />
   );
