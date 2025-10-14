@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { scheduledQueryFactory } from './scheduled_query';
+export const MAX_SCHEDULED_REPORT_LIST_SIZE = 100;
+export const DEFAULT_SCHEDULED_REPORT_LIST_SIZE = 10;
