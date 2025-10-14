@@ -531,7 +531,7 @@ export async function pickTestGroupRunOrder() {
             key: 'jest',
             agents: {
               ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 85,
+              diskSizeGb: 100,
             },
             retry: {
               automatic: [
@@ -583,7 +583,7 @@ export async function pickTestGroupRunOrder() {
                 ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 90,
+                  timeout_in_minutes: 120,
                   agents: expandAgentQueue(queue),
                   env: {
                     FTR_CONFIG_GROUP_KEY: key,
