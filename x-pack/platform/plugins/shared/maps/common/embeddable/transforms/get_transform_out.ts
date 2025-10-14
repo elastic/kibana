@@ -10,8 +10,8 @@ import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhance
 import type { StoredMapEmbeddableState } from './types';
 import { MAP_SAVED_OBJECT_REF_NAME } from './get_transform_in';
 import type { MapByValueState } from '../types';
-import { injectReferences } from '../../migrations/references';
 import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
+import { transformMapAttributesOut } from '../../content_management/transform_map_attributes_out';
 
 export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['transformOut']) {
   function transformOut(state: StoredMapEmbeddableState, references?: Reference[]) {
@@ -36,10 +36,10 @@ export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['
       return {
         ...state,
         ...(enhancementsState ? { enhancements: enhancementsState } : {}),
-        attributes: injectReferences({
-          attributes: (state as MapByValueState).attributes,
-          references: references ?? [],
-        }).attributes,
+        attributes: transformMapAttributesOut(
+          (state as MapByValueState).attributes,
+          references ?? []
+        ),
       };
     }
 

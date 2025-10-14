@@ -143,10 +143,9 @@ export const formatUpdateRequest = ({
       }
 
       let oldValue = oldIncident[name] ? oldIncident[name] : oldIncident[key];
-      // Non-internal fields are stored under `properties` in the old incident
-      if (!fieldMeta.internal) {
-        oldValue = oldIncident.properties
-          ? (oldIncident.properties as Record<string, unknown>)[key]
+      if (fieldMeta.prefix) {
+        oldValue = oldIncident[fieldMeta.prefix]
+          ? (oldIncident[fieldMeta.prefix] as Record<string, unknown>)[key]
           : null;
       }
 
@@ -192,10 +191,12 @@ export function prepareAdditionalFieldsForCreation(
   fields: ResilientFieldMeta[],
   additionalFields: NonNullable<Incident['additionalFields']>
 ): Partial<CreateIncidentData> {
+  const { properties, ...rest } = additionalFields;
+  const flattenedAdditionalFields = { ...(properties ?? {}), ...rest };
   const data: Partial<CreateIncidentData> = {};
   const fieldsMetaData = transformFieldMetadataToRecord(fields);
 
-  Object.entries(additionalFields).forEach(([key, value]) => {
+  Object.entries(flattenedAdditionalFields).forEach(([key, value]) => {
     const fieldMeta = fieldsMetaData[key];
 
     // validate `select` and `multiselect` values
@@ -203,12 +204,12 @@ export function prepareAdditionalFieldsForCreation(
       validateValues(fieldMeta, Array.isArray(value) ? value : [value]);
     }
 
-    // Custom fields need to be prefixed with 'properties.'
-    if (fieldMeta.prefix === 'properties') {
-      if (!data.properties) {
-        data.properties = {};
+    // Some fields need to be prefixed
+    if (fieldMeta && fieldMeta.prefix) {
+      if (!data[fieldMeta.prefix]) {
+        data[fieldMeta.prefix] = {};
       }
-      data.properties[key] = value;
+      (data[fieldMeta.prefix] as Record<string, unknown>)[key] = value;
     } else {
       data[key] = value;
     }

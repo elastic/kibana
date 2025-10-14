@@ -21,7 +21,6 @@ import { useGetSeverity } from './use_get_severity';
 
 import * as i18n from './translations';
 import { generateJSONValidator } from '../validate_json';
-// import { JsonEditorField } from '../json_editor_field';
 import { AdditionalFormFields } from './additional_form_fields';
 
 const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
@@ -133,6 +132,32 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
           },
         }}
       />
+      {showAdditionalFields && (
+        <UseField
+          path="fields.additionalFields"
+          component={JsonEditorField}
+          config={{
+            label: i18n.ADDITIONAL_FIELDS_LABEL,
+            validations: [
+              {
+                validator: generateJSONValidator({ maxAdditionalFields: 50 }),
+              },
+            ],
+          }}
+          componentProps={{
+            euiCodeEditorProps: {
+              fullWidth: true,
+              height: '200px',
+              options: {
+                fontSize: '12px',
+                renderValidationDecorations: 'off',
+              },
+            },
+            dataTestSubj: 'additionalFieldsEditor',
+          }}
+        />
+      )}
+
       <EuiSpacer size="m" />
       {showAdditionalFields && (
         <UseField

@@ -2296,17 +2296,50 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.ActionTypeModel.hideInUi",
-            "type": "CompoundType",
+            "id": "def-public.ActionTypeModel.getHideInUi",
+            "type": "Function",
             "tags": [],
-            "label": "hideInUi",
+            "label": "getHideInUi",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              "((actionTypes: ",
+              {
+                "pluginId": "@kbn/actions-types",
+                "scope": "common",
+                "docId": "kibKbnActionsTypesPluginApi",
+                "section": "def-common.ActionType",
+                "text": "ActionType"
+              },
+              "[]) => boolean) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.ActionTypeModel.getHideInUi.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "actionTypes",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/actions-types",
+                    "scope": "common",
+                    "docId": "kibKbnActionsTypesPluginApi",
+                    "section": "def-common.ActionType",
+                    "text": "ActionType"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "triggersActionsUi",
@@ -3616,6 +3649,17 @@
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTableItem.isInternallyManaged",
+            "type": "boolean",
+            "tags": [],
+            "label": "isInternallyManaged",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3698,6 +3742,17 @@
             "signature": [
               "boolean | undefined"
             ],
+            "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleType.isInternallyManaged",
+            "type": "boolean",
+            "tags": [],
+            "label": "isInternallyManaged",
+            "description": [],
             "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3930,6 +3985,20 @@
             "description": [],
             "signature": [
               "React.FunctionComponent<any> | React.LazyExoticComponent<React.ComponentType<any>> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.isInternallyManaged",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isInternallyManaged",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
             "deprecated": false,

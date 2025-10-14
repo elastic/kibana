@@ -410,6 +410,21 @@ paths:
                       - status
                   status:
                     $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
+                  users:
+                    description: User statistics for privilege monitoring
+                    type: object
+                    properties:
+                      current_count:
+                        description: Current number of privileged users being monitored
+                        type: integer
+                      max_allowed:
+                        description: >-
+                          Maximum number of privileged users allowed to be
+                          monitored
+                        type: integer
+                    required:
+                      - current_count
+                      - max_allowed
                 required:
                   - status
           description: Successful response
@@ -1027,6 +1042,44 @@ paths:
       summary: Upsert an entity in Entity Store
       tags:
         - Security Entity Analytics API
+  /api/entity_store/entities/bulk:
+    put:
+      description: >
+        Update or create many entities in Entity Store.
+
+        If the specified entity already exists, it is updated with the provided
+        values.  If the entity does not exist, a new one is created.
+
+        The creation is asynchronous. The time for a document to be present in
+        the  final index depends on the entity store transform and usually takes
+        more than 1 minute.
+      operationId: UpsertEntitiesBulk
+      parameters:
+        - in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntitiesContainer'
+        description: Schema for the updating many entities
+        required: true
+      responses:
+        '200':
+          description: Entities updated or created
+        '403':
+          description: Operation on a restricted field
+        '503':
+          description: >-
+            Operation on an uninitialized Engine or in a cluster without CRUD
+            API Enabled
+      summary: Upsert many entities in Entity Store
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/entities/list:
     get:
       description: List entities records, paging, sorting and filtering as needed.
@@ -1182,6 +1235,8 @@ paths:
             schema:
               type: object
               properties:
+                enable_reset_to_zero:
+                  type: boolean
                 exclude_alert_statuses:
                   items:
                     type: string
@@ -1605,6 +1660,15 @@ components:
         - updating
         - error
       type: string
+    EntitiesContainer:
+      type: object
+      properties:
+        entities:
+          items:
+            $ref: '#/components/schemas/EntityContainer'
+          type: array
+      required:
+        - entities
     Entity:
       oneOf:
         - $ref: '#/components/schemas/UserEntity'
@@ -1645,6 +1709,16 @@ components:
       required:
         - has_all_required
         - privileges
+    EntityContainer:
+      type: object
+      properties:
+        record:
+          $ref: '#/components/schemas/Entity'
+        type:
+          $ref: '#/components/schemas/EntityType'
+      required:
+        - type
+        - record
     EntityField:
       additionalProperties: false
       type: object
@@ -1971,6 +2045,23 @@ components:
                 ingested:
                   format: date-time
                   type: string
+            user:
+              type: object
+              properties:
+                entity:
+                  type: object
+                  properties:
+                    attributes:
+                      type: object
+                      properties:
+                        Privileged:
+                          description: Indicates if the user is privileged.
+                          type: boolean
+                is_privileged:
+                  description: Indicates if the user is privileged.
+                  type: boolean
+                name:
+                  type: string
     MonitoredUserUpdateDoc:
       type: object
       properties:
@@ -1979,14 +2070,7 @@ components:
           properties:
             labels:
               items:
-                type: object
-                properties:
-                  field:
-                    type: string
-                  source:
-                    type: string
-                  value:
-                    type: string
+                $ref: '#/components/schemas/MonitoringLabel'
               type: array
         id:
           type: string
@@ -2031,6 +2115,19 @@ components:
           $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
       required:
         - status
+    MonitoringLabel:
+      type: object
+      properties:
+        field:
+          type: string
+        source:
+          type: string
+        value:
+          type: string
+      required:
+        - field
+        - value
+        - source
     PrivilegeMonitoringEngineStatus:
       description: The status of the Privilege Monitoring Engine
       enum:
