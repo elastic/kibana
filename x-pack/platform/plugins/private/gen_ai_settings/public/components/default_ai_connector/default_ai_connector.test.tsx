@@ -91,9 +91,7 @@ function setupTest(canSaveAdvancedSettings = true) {
     </>,
     {
       wrapper: ({ children }) => (
-        <TestWrapper canSaveAdvancedSettings={canSaveAdvancedSettings}>
-          {children}
-        </TestWrapper>
+        <TestWrapper canSaveAdvancedSettings={canSaveAdvancedSettings}>{children}</TestWrapper>
       ),
     }
   );
@@ -140,14 +138,14 @@ describe('DefaultAIConnector', () => {
         screen
           .getByText('Pre-configured')
           .compareDocumentPosition(screen.getByText('Pre configured Connector')) &
-        Node.DOCUMENT_POSITION_FOLLOWING
+          Node.DOCUMENT_POSITION_FOLLOWING
       ).toBeTruthy();
       expect(
         // eslint-disable-next-line no-bitwise
         screen
           .getByText('Custom connectors')
           .compareDocumentPosition(screen.getByText('Custom Connector 1')) &
-        Node.DOCUMENT_POSITION_FOLLOWING
+          Node.DOCUMENT_POSITION_FOLLOWING
       ).toBeTruthy();
 
       expect(
@@ -155,7 +153,7 @@ describe('DefaultAIConnector', () => {
         screen
           .getByText('Pre configured Connector')
           .compareDocumentPosition(screen.getByText('Custom connectors')) &
-        Node.DOCUMENT_POSITION_FOLLOWING
+          Node.DOCUMENT_POSITION_FOLLOWING
       ).toBeTruthy();
     });
 
