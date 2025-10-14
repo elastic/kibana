@@ -17,7 +17,7 @@ import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
 import { useActionModal } from '../../../context/action_modal';
 import { getSloHealthStateText } from '../../../lib/slo_health_helpers';
 import { getSLOTransformId, getSLOSummaryTransformId } from '../../../../common/constants';
-import { HealthCalloutContentWithCTA } from './health_callout_content_with_cta';
+import { HealthCalloutContentWithCTA } from './health_callout/content_with_cta';
 
 export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
   const { isLoading, isError, data } = useFetchSloHealth({ list: [slo] });
@@ -131,7 +131,6 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
                 <HealthCalloutContentWithCTA
                   textSize="s"
                   content={missingRollupContent}
-                  url={rollupUrl}
                   isMissing={true}
                   handleReset={handleReset}
                 />
@@ -141,7 +140,6 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
               <HealthCalloutContentWithCTA
                 textSize="s"
                 content={missingSummaryContent}
-                url={summaryUrl}
                 isMissing={true}
                 handleReset={handleReset}
               />
