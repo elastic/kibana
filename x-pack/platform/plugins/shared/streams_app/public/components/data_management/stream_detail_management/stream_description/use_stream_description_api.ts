@@ -144,14 +144,39 @@ export const useStreamDescriptionApi = ({
     notifications.toasts,
   ]);
 
+  const onCancelEdit = useCallback(() => {
+    setDescription(definition.stream.description);
+    setIsEditing(false);
+  }, [setIsEditing, setDescription, definition.stream.description]);
+
+  const onGenerateDescription = useCallback(() => {
+    generate();
+    setIsEditing(true);
+  }, [generate, setIsEditing]);
+
+  const onStartEditing = useCallback(() => {
+    setIsEditing(true);
+  }, [setIsEditing]);
+
+  const onSaveDescription = useCallback(() => {
+    if (description !== definition.stream.description) {
+      save(description);
+    }
+    setIsEditing(false);
+  }, [description, definition.stream.description, save, setIsEditing]);
+
+  const areButtonsDisabled = isUpdating || isGenerating;
+
   return {
-    generate,
-    save,
     description,
     setDescription,
     isGenerating,
     isUpdating,
     isEditing,
-    setIsEditing,
+    areButtonsDisabled,
+    onCancelEdit,
+    onGenerateDescription,
+    onStartEditing,
+    onSaveDescription,
   };
 };

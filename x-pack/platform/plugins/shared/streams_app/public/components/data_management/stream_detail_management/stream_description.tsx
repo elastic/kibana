@@ -84,14 +84,16 @@ const CANCEL_LABEL = i18n.translate(
 
 export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refreshDefinition }) => {
   const {
-    save,
-    generate,
     isGenerating,
     description,
     isUpdating,
     isEditing,
-    setIsEditing,
     setDescription,
+    onCancelEdit,
+    onGenerateDescription,
+    onSaveDescription,
+    onStartEditing,
+    areButtonsDisabled,
   } = useStreamDescriptionApi({ definition, refreshDefinition });
 
   return (
@@ -109,12 +111,10 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
             </EuiText>
             <EuiMarkdownEditor
               value={description}
-              onChange={(next) => {
-                setDescription(next);
-              }}
+              onChange={setDescription}
               aria-labelledby="stream-description-editor"
               placeholder={STREAM_DESCRIPTION_EMPTY}
-              readOnly={isGenerating || isUpdating || !isEditing}
+              readOnly={areButtonsDisabled || !isEditing}
               toolbarProps={{
                 right: (
                   <EuiFlexGroup
@@ -129,11 +129,8 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                           aria-label={CANCEL_LABEL}
                           size="s"
                           isLoading={isUpdating}
-                          isDisabled={isUpdating || isGenerating}
-                          onClick={() => {
-                            setIsEditing(false);
-                            setDescription(definition.stream.description || '');
-                          }}
+                          isDisabled={areButtonsDisabled}
+                          onClick={onCancelEdit}
                         >
                           {CANCEL_LABEL}
                         </EuiButtonEmpty>
@@ -145,11 +142,8 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                           size: 's',
                           iconType: 'sparkles',
                           children: GENERATE_DESCRIPTION_BUTTON_LABEL,
-                          onClick() {
-                            generate();
-                            setIsEditing(false);
-                          },
-                          isDisabled: isGenerating || isUpdating,
+                          onClick: onGenerateDescription,
+                          isDisabled: areButtonsDisabled,
                           isLoading: isGenerating,
                         }}
                       />
@@ -161,13 +155,12 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                         iconSize="s"
                         fill
                         isLoading={isUpdating}
-                        isDisabled={isUpdating || isGenerating}
+                        isDisabled={areButtonsDisabled}
                         onClick={() => {
                           if (!isEditing) {
-                            setIsEditing(true);
+                            onStartEditing();
                           } else {
-                            save(description);
-                            setIsEditing(false);
+                            onSaveDescription();
                           }
                         }}
                       >
@@ -191,10 +184,8 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
               <EuiButton
                 size="s"
                 isLoading={isUpdating}
-                isDisabled={isUpdating || isGenerating}
-                onClick={() => {
-                  setIsEditing(true);
-                }}
+                isDisabled={areButtonsDisabled}
+                onClick={onStartEditing}
               >
                 {MANUAL_ENTRY_BUTTON_LABEL}
               </EuiButton>
@@ -206,11 +197,8 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refres
                   size: 's',
                   iconType: 'sparkles',
                   children: GENERATE_DESCRIPTION_BUTTON_LABEL,
-                  onClick() {
-                    generate();
-                    setIsEditing(true);
-                  },
-                  isDisabled: isGenerating || isUpdating,
+                  onClick: onGenerateDescription,
+                  isDisabled: areButtonsDisabled,
                   isLoading: isGenerating,
                 }}
               />
