@@ -171,6 +171,10 @@ export const streamRoutingMachine = setup({
             });
           }),
         },
+        'routingRule.reviewSuggested': {
+          target: '#ready.reviewSuggestedRule',
+          actions: [{ type: 'storeSuggestedRuleId', params: ({ event }) => event }],
+        },
       },
       invoke: {
         id: 'routingSamplesMachine',
@@ -197,10 +201,6 @@ export const streamRoutingMachine = setup({
               guard: 'canReorderRules',
               target: 'reorderingRules',
               actions: [{ type: 'reorderRouting', params: ({ event }) => event }],
-            },
-            'routingRule.reviewSuggested': {
-              target: 'reviewSuggestedRule',
-              actions: [{ type: 'storeSuggestedRuleId', params: ({ event }) => event }],
             },
           },
         },
