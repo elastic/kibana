@@ -19,7 +19,7 @@ import {
   ML_JOB_ID,
   ML_PARTITION_FIELD_VALUE,
 } from '@kbn/ml-anomaly-utils';
-import type { CriteriaField, Influencer } from '@kbn/ml-anomaly-utils/types';
+import type { CriteriaField, Influencer } from '@kbn/ml-anomaly-utils';
 import type { SeverityThreshold } from '../../../common/types/anomalies';
 import { getIndicesOptions } from '../../../common/util/datafeed_utils';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
