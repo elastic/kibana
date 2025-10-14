@@ -134,6 +134,8 @@
     "@kbn/saved-objects-tagging-plugin",
     "@kbn/core-http-browser-mocks",
     "@kbn/discover-utils",
+    "@kbn/deeplinks-management",
+    "@kbn/observability-nav-icons"
   ],
   "exclude": ["target/**/*"]
 }
