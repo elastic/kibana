@@ -30,6 +30,7 @@ import {
   JsonEditorField,
   NumericField,
   RadioGroupField,
+  ToggleField,
 } from '../../../../shared_imports';
 import { UnitField, timeUnits } from '../../shared';
 import type { DataRetention } from '../../../../../common';
@@ -229,6 +230,7 @@ interface LogisticsForm {
 interface LogisticsFormInternal extends LogisticsForm {
   addMeta: boolean;
   doCreateDataStream: boolean;
+  setIndexMode: boolean;
 }
 
 interface Props {
@@ -243,14 +245,16 @@ function formDeserializer(formData: LogisticsForm): LogisticsFormInternal {
     ...formData,
     addMeta: Boolean(formData._meta && Object.keys(formData._meta).length),
     doCreateDataStream: Boolean(formData.dataStream),
+    setIndexMode: Boolean(formData.indexMode),
   };
 }
 
 function getformSerializer(initialTemplateData: LogisticsForm = {}) {
   return (formData: LogisticsFormInternal): LogisticsForm => {
-    const { addMeta, doCreateDataStream, ...rest } = formData;
+    const { addMeta, doCreateDataStream, setIndexMode, ...rest } = formData;
     const dataStream = doCreateDataStream ? initialTemplateData.dataStream ?? {} : undefined;
-    return { ...rest, dataStream };
+    const indexMode = setIndexMode ? rest.indexMode : undefined;
+    return { ...rest, dataStream, indexMode };
   };
 }
 
@@ -273,22 +277,33 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       setFieldValue,
     } = form;
 
-    const [{ addMeta, doCreateDataStream, lifecycle, indexPatterns: indexPatternsField }] =
-      useFormData<{
-        addMeta: boolean;
-        lifecycle: DataRetention;
-        doCreateDataStream: boolean;
-        indexPatterns: string[];
-      }>({
-        form,
-        watch: [
-          'addMeta',
-          'lifecycle.enabled',
-          'lifecycle.infiniteDataRetention',
-          'doCreateDataStream',
-          'indexPatterns',
-        ],
-      });
+    const [
+      { addMeta, doCreateDataStream, lifecycle, indexPatterns: indexPatternsField, setIndexMode },
+    ] = useFormData<{
+      addMeta: boolean;
+      lifecycle: DataRetention;
+      doCreateDataStream: boolean;
+      indexPatterns: string[];
+      indexMode: string;
+      setIndexMode: boolean;
+    }>({
+      form,
+      watch: [
+        'addMeta',
+        'lifecycle.enabled',
+        'lifecycle.infiniteDataRetention',
+        'doCreateDataStream',
+        'indexPatterns',
+        'indexMode',
+        'setIndexMode',
+      ],
+    });
+
+    useEffect(() => {
+      if (!setIndexMode) {
+        setFieldValue('indexMode', undefined);
+      }
+    }, [setIndexMode, setFieldValue]);
 
     useEffect(() => {
       if (
@@ -298,6 +313,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
         // Only set index mode if index pattern was changed
         defaultValue.indexPatterns !== indexPatternsField
       ) {
+        setFieldValue('setIndexMode', true);
         setFieldValue('indexMode', LOGSDB_INDEX_MODE);
       }
     }, [defaultValue.indexPatterns, indexPatternsField, setFieldValue]);
@@ -457,17 +473,37 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
           )}
 
           {/* Index mode */}
-          <FormRow title={indexMode.title} description={indexMode.description}>
-            <UseField
-              path="indexMode"
-              componentProps={{
-                euiFieldProps: {
-                  hasDividers: true,
-                  'data-test-subj': indexMode.testSubject,
-                  options: indexMode.options,
-                },
-              }}
-            />
+          <FormRow
+            title={indexMode.title}
+            description={
+              <>
+                {indexMode.description}
+                <EuiSpacer size="m" />
+                <UseField
+                  path="setIndexMode"
+                  component={ToggleField}
+                  componentProps={{
+                    'data-test-subj': 'toggleIndexMode',
+                    euiFieldProps: {
+                      label: 'Set index mode',
+                    },
+                  }}
+                />
+              </>
+            }
+          >
+            {setIndexMode && (
+              <UseField
+                path="indexMode"
+                componentProps={{
+                  euiFieldProps: {
+                    hasDividers: true,
+                    'data-test-subj': indexMode.testSubject,
+                    options: indexMode.options,
+                  },
+                }}
+              />
+            )}
           </FormRow>
 
           {/* Order */}

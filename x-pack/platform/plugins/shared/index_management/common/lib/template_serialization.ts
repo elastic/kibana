@@ -17,7 +17,6 @@ import { deserializeESLifecycle } from './data_stream_utils';
 import {
   allowAutoCreateRadioValues,
   allowAutoCreateRadioIds,
-  STANDARD_INDEX_MODE,
   LOGSDB_INDEX_MODE,
 } from '../constants';
 import type { DataStreamOptions } from '../types/data_streams';
@@ -102,7 +101,7 @@ export function deserializeTemplate(
   const indexMode = (settings?.index?.mode ??
     (isLogsdbEnabled && indexPatterns.some((pattern) => pattern === 'logs-*-*')
       ? LOGSDB_INDEX_MODE
-      : STANDARD_INDEX_MODE)) as IndexMode;
+      : undefined)) as IndexMode | undefined;
 
   const deserializedTemplate: TemplateDeserialized = {
     name,

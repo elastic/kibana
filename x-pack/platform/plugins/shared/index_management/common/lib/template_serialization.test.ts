@@ -59,7 +59,7 @@ describe('Template serialization', () => {
                 },
               },
             })
-          ).toHaveProperty('indexMode', value ?? STANDARD_INDEX_MODE);
+          ).toHaveProperty('indexMode', value);
         });
       });
 
@@ -78,7 +78,7 @@ describe('Template serialization', () => {
           ).toHaveProperty('indexMode', LOGSDB_INDEX_MODE);
         });
 
-        test('deserializes to standard index mode when logsdb is disabled', () => {
+        test('deserializes index mode to undefined when logsdb is disabled', () => {
           expect(
             deserializeTemplate(
               {
@@ -89,7 +89,7 @@ describe('Template serialization', () => {
               undefined,
               false
             )
-          ).toHaveProperty('indexMode', STANDARD_INDEX_MODE);
+          ).toHaveProperty('indexMode', undefined);
         });
       });
     });
