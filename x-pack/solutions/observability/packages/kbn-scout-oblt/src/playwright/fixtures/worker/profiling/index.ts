@@ -31,7 +31,6 @@ export const profilingClientFixture = coreWorkerFixtures.extend<
           ...kibanaServer,
           auth: `${username}:${PROFILING_TEST_PASSWORD}`,
         });
-        console.log('URL: ' + url);
         return createProfilingApiClient(supertest(url));
       }
       await use({
