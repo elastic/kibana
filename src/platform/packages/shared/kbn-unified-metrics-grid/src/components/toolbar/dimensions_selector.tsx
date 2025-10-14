@@ -100,8 +100,13 @@ export const DimensionsSelector = ({
   }, [allDimensions, selectedDimensions, intersectingDimensions]);
 
   const handleChange = useCallback(
-    (chosenOption?: SelectableEntry[]) => {
-      const newSelection = chosenOption?.map((p) => p.value) ?? [];
+    (chosenOption?: SelectableEntry | SelectableEntry[]) => {
+      const opts = Array.isArray(chosenOption)
+        ? chosenOption
+        : chosenOption != null
+        ? [chosenOption]
+        : [];
+      const newSelection = opts.map((p) => p.value);
       // Enforce the maximum limit
       const limitedSelection = newSelection.slice(0, MAX_DIMENSIONS_SELECTIONS);
       onChange(limitedSelection);
@@ -114,7 +119,7 @@ export const DimensionsSelector = ({
       return (
         <FormattedMessage
           id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabel"
-          defaultMessage="No dimensions selected"
+          defaultMessage="No dimension selected"
         />
       );
     }
@@ -123,7 +128,7 @@ export const DimensionsSelector = ({
         <EuiFlexItem grow={false}>
           <FormattedMessage
             id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabelWithSelection"
-            defaultMessage="Dimensions"
+            defaultMessage="Dimension"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -137,8 +142,7 @@ export const DimensionsSelector = ({
     const isAtMaxLimit = selectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
     const statusMessage = isAtMaxLimit
       ? i18n.translate('metricsExperience.dimensionsSelector.maxLimitStatusMessage', {
-          defaultMessage:
-            'Maximum of {maxDimensions} dimensions selected ({count}/{maxDimensions})',
+          defaultMessage: 'Maximum of {maxDimensions} dimension selected ({count}/{maxDimensions})',
           values: { count: selectedDimensions.length, maxDimensions: MAX_DIMENSIONS_SELECTIONS },
         })
       : i18n.translate('metricsExperience.dimensionsSelector.selectedStatusMessage', {
@@ -168,7 +172,7 @@ export const DimensionsSelector = ({
           : option.label.includes(normalizedSearchValue);
       }}
       options={options}
-      singleSelection={false}
+      singleSelection={MAX_DIMENSIONS_SELECTIONS === 1}
       onChange={handleChange}
       popoverContentBelowSearch={popoverContentBelowSearch}
     />
