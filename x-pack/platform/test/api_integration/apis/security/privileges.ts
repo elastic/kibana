@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import util from 'util';
-import { isEqual, isEqualWith } from 'lodash';
 import expect from '@kbn/expect';
 import type { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
 import { diff } from 'jest-diff';
+import { isEqual, isEqualWith } from 'lodash';
+import util from 'util';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -88,6 +88,19 @@ export default function ({ getService }: FtrProviderContext) {
       searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchQueryRules: ['all', 'read', 'minimal_all', 'minimal_read'],
+      workflowsManagement: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'workflow_create',
+        'workflow_update',
+        'workflow_delete',
+        'workflow_execute',
+        'workflow_read',
+        'workflow_execution_read',
+        'workflow_execution_cancel',
+      ],
       searchInferenceEndpoints: ['all', 'read', 'minimal_all', 'minimal_read'],
       fleetv2: [
         'all',
