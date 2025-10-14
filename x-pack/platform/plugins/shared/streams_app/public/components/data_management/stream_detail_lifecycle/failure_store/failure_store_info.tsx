@@ -15,7 +15,7 @@ import { StorageSizeCard } from './cards/storage_size_card';
 import { IngestionCard } from './cards/ingestion_card';
 import { FailureStoreIngestionRate } from './ingestion_rate';
 import type { EnhancedFailureStoreStats } from '../hooks/use_failure_store_stats';
-import type { useAggregations } from '../hooks/use_ingestion_rate';
+import { StreamAggregations } from '../hooks/use_ingestion_rate';
 
 export const FailureStoreInfo = ({
   openModal,
@@ -26,8 +26,6 @@ export const FailureStoreInfo = ({
   config,
   timeState,
   aggregations,
-  isLoadingAggregations,
-  aggregationsError,
 }: {
   openModal: (show: boolean) => void;
   definition: Streams.ingest.all.GetResponse;
@@ -36,9 +34,7 @@ export const FailureStoreInfo = ({
   stats?: EnhancedFailureStoreStats;
   config?: FailureStore;
   timeState: TimeState;
-  aggregations?: ReturnType<typeof useAggregations>['aggregations'];
-  isLoadingAggregations: boolean;
-  aggregationsError: Error | undefined;
+  aggregations?: StreamAggregations;
 }) => {
   return (
     <>
@@ -72,8 +68,7 @@ export const FailureStoreInfo = ({
         isLoadingStats={isLoadingStats}
         stats={stats}
         timeState={timeState}
-        isLoadingAggregations={isLoadingAggregations}
-        aggregationsError={aggregationsError}
+        statsError={statsError}
         aggregations={aggregations}
       />
     </>

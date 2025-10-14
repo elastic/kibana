@@ -26,12 +26,11 @@ import moment from 'moment';
 import React, { useMemo } from 'react';
 import { orderIlmPhases } from '../helpers/helpers';
 import { formatBytes } from '../helpers/format_bytes';
-import type { EnhancedDataStreamStats } from '../hooks/use_data_stream_stats';
 import { useIlmPhasesColorAndDescription } from '../hooks/use_ilm_phases_color_and_description';
-import type { useAggregations } from '../hooks/use_ingestion_rate';
+import type { StreamAggregations } from '../hooks/use_ingestion_rate';
 import { useIngestionRate, useIngestionRatePerTier } from '../hooks/use_ingestion_rate';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
-import type { CalculatedStats } from '../hooks/use_calculated_stats';
+import type { CalculatedStats } from '../helpers/get_calculated_stats';
 
 interface BaseChartComponentProps {
   definition: Streams.ingest.all.GetResponse;
@@ -41,37 +40,34 @@ interface BaseChartComponentProps {
 
 interface MainStreamChartProps extends BaseChartComponentProps {
   stats?: CalculatedStats;
-  isLoadingAggregations: boolean;
-  aggregations?: ReturnType<typeof useAggregations>['aggregations'];
-  aggregationsError: Error | undefined;
+  aggregations?: StreamAggregations;
+  statsError: Error | undefined;
 }
 
 interface FailureStoreChartProps extends BaseChartComponentProps {
   stats?: CalculatedStats;
-  isLoadingAggregations: boolean;
-  aggregations?: ReturnType<typeof useAggregations>['aggregations'];
-  aggregationsError: Error | undefined;
+  aggregations?: StreamAggregations;
+  statsError: Error | undefined;
 }
 
 type ChartComponentProps = MainStreamChartProps | FailureStoreChartProps;
 type ChartPhasesComponentProps = BaseChartComponentProps & {
-  stats?: EnhancedDataStreamStats;
+  stats?: CalculatedStats;
 };
 
 export function ChartBarSeries({
   stats,
   timeState,
   isLoadingStats,
-  isLoadingAggregations,
   aggregations,
-  aggregationsError,
+  statsError,
 }: ChartComponentProps) {
   const mainStreamResult = useIngestionRate({
     calculatedStats: stats,
     timeState,
     aggregations,
-    isLoading: isLoadingAggregations,
-    error: aggregationsError,
+    isLoading: isLoadingStats,
+    error: statsError,
   });
 
   const formatAsBytes = !!stats;
@@ -98,16 +94,15 @@ export function FailureStoreChartBarSeries({
   stats,
   timeState,
   isLoadingStats,
-  isLoadingAggregations,
   aggregations,
-  aggregationsError,
+  statsError,
 }: ChartComponentProps) {
   const failureStoreResult = useIngestionRate({
     calculatedStats: stats,
     timeState,
     aggregations,
-    isLoading: isLoadingAggregations,
-    error: aggregationsError,
+    isLoading: isLoadingStats,
+    error: statsError,
   });
 
   const formatAsBytes = !!stats;

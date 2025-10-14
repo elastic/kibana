@@ -14,13 +14,8 @@ import { FailureStoreInfo } from './failure_store_info';
 import { useUpdateFailureStore } from '../../../../hooks/use_update_failure_store';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { NoPermissionBanner } from './no_permission_banner';
-import {
-  useFailureStoreStats,
-  type EnhancedFailureStoreStats,
-} from '../hooks/use_failure_store_stats';
-import { useCalculatedFailureStoreStats } from '../hooks/use_calculated_failure_store_stats';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
-import { useAggregations } from '../hooks/use_ingestion_rate';
+import { useDataStreamStats } from '../hooks/use_data_stream_stats';
 
 // Lazy load the FailureStoreModal to reduce bundle size
 const LazyFailureStoreModal = React.lazy(async () => ({
@@ -31,8 +26,10 @@ const FailureStoreModal = withSuspense(LazyFailureStoreModal);
 
 export const StreamDetailFailureStore = ({
   definition,
+  data,
 }: {
   definition: Streams.ingest.all.GetResponse;
+  data: ReturnType<typeof useDataStreamStats>;
 }) => {
   const [isFailureStoreModalOpen, setIsFailureStoreModalOpen] = useState(false);
   const { updateFailureStore } = useUpdateFailureStore();
@@ -41,34 +38,6 @@ export const StreamDetailFailureStore = ({
   } = useKibana();
 
   const { timeState } = useTimefilter();
-
-  const {
-    data,
-    isLoading: isLoadingStats,
-    error: statsError,
-    refresh,
-  } = useFailureStoreStats({ definition });
-
-  const {
-    aggregations,
-    isLoading: isLoadingAggregations,
-    error: aggregationsError,
-  } = useAggregations({
-    definition,
-    timeState,
-    totalDocs: data?.stats?.count,
-    isFailureStore: true,
-  });
-
-  const calculatedStats = useCalculatedFailureStoreStats({
-    stats: data?.stats,
-    timeState,
-    aggregations,
-  });
-
-  // Combine stats with calculated values for backward compatibility
-  const enhancedStats: EnhancedFailureStoreStats | undefined =
-    data?.stats && calculatedStats ? { ...data.stats, ...calculatedStats } : undefined;
 
   const {
     privileges: {
@@ -105,7 +74,7 @@ export const StreamDetailFailureStore = ({
       });
     }
     closeModal();
-    refresh();
+    data.refresh();
   };
 
   return (
@@ -113,29 +82,27 @@ export const StreamDetailFailureStore = ({
       <EuiFlexGroup direction="column" gutterSize="m">
         {readFailureStorePrivilege ? (
           <>
-            {isFailureStoreModalOpen && manageFailureStorePrivilege && data?.config && (
+            {isFailureStoreModalOpen && manageFailureStorePrivilege && data?.stats?.fs.config && (
               <FailureStoreModal
                 onCloseModal={closeModal}
                 onSaveModal={handleSaveModal}
                 failureStoreProps={{
-                  failureStoreEnabled: data?.config.enabled,
-                  defaultRetentionPeriod: data?.config.retentionPeriod.default,
-                  customRetentionPeriod: data?.config.retentionPeriod.custom,
+                  failureStoreEnabled: data?.stats?.fs.config.enabled,
+                  defaultRetentionPeriod: data?.stats?.fs.config.retentionPeriod.default,
+                  customRetentionPeriod: data?.stats?.fs.config.retentionPeriod.custom,
                 }}
               />
             )}
-            {isLoadingStats || data?.config.enabled ? (
+            {data.isLoading || data?.stats?.fs.config.enabled ? (
               <FailureStoreInfo
                 openModal={setIsFailureStoreModalOpen}
                 definition={definition}
-                statsError={statsError}
-                isLoadingStats={isLoadingStats}
-                stats={enhancedStats}
-                config={data?.config}
+                statsError={data.error}
+                isLoadingStats={data.isLoading}
+                stats={data.stats?.fs.stats}
+                config={data?.stats?.fs.config}
                 timeState={timeState}
-                isLoadingAggregations={isLoadingAggregations}
-                aggregationsError={aggregationsError}
-                aggregations={aggregations}
+                aggregations={data?.stats?.fs.aggregations}
               />
             ) : (
               <NoFailureStorePanel openModal={setIsFailureStoreModalOpen} definition={definition} />

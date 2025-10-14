@@ -10,16 +10,22 @@ import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
 import type { TimeState } from '@kbn/es-query';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import type { Streams, PhaseName } from '@kbn/streams-schema';
+import { ISearchStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import type { CalculatedStats } from './use_calculated_stats';
+import type { CalculatedStats } from '../helpers/get_calculated_stats';
 import { useIlmPhasesColorAndDescription } from './use_ilm_phases_color_and_description';
 import { getFailureStoreIndexName } from '../helpers/failure_store_index_name';
 
 const TIMESTAMP_FIELD = '@timestamp';
 const DEFAULT_SAMPLER_PROBABILITY = 0.1;
 const STATISTICAL_ERROR_THRESHOLD = 0.01;
+
+export interface StreamAggregations {
+  buckets: Array<{ key: number; doc_count: number }>;
+  interval: string;
+}
 
 // Calculate sampling probability based on total docs to keep statistical error below threshold
 const getSamplingProbability = (totalDocs?: number): number => {
@@ -74,7 +80,7 @@ export const useIngestionRate = ({
   calculatedStats?: CalculatedStats;
   timeState: TimeState;
   isLoading: boolean;
-  aggregations?: ReturnType<typeof useAggregations>['aggregations'];
+  aggregations?: StreamAggregations;
   error: Error | undefined;
 }) => {
   const ingestionRate = useMemo(() => {
@@ -280,108 +286,92 @@ export const useIngestionRatePerTier = ({
   };
 };
 
-export const useAggregations = ({
+export const getAggregations = async ({
   definition,
   timeState,
   totalDocs,
   isFailureStore = false,
+  core,
+  search,
+  signal,
 }: {
   definition: Streams.ingest.all.GetResponse;
   timeState: TimeState;
   totalDocs?: number;
   isFailureStore?: boolean;
+  core: { uiSettings: { get: (key: string) => any } };
+  search: ISearchStart;
+  signal: AbortSignal;
 }) => {
-  const {
-    core,
-    dependencies: {
-      start: { data },
-    },
-  } = useKibana();
-
   const samplingProbability = getSamplingProbability(totalDocs);
 
-  const aggregationsFetch = useStreamsAppFetch(
-    async ({ signal }) => {
-      const intervalData = getIntervalAndType(timeState, core);
-      if (!intervalData) {
-        return;
-      }
+  const intervalData = getIntervalAndType(timeState, core);
+  if (!intervalData) {
+    return;
+  }
 
-      const { interval, intervalType } = intervalData;
+  const { interval, intervalType } = intervalData;
 
-      const indexName = isFailureStore
-        ? getFailureStoreIndexName(definition)
-        : definition.stream.name;
+  const indexName = isFailureStore ? getFailureStoreIndexName(definition) : definition.stream.name;
 
-      const {
-        rawResponse: { aggregations },
-      } = await lastValueFrom(
-        data.search.search<
-          IKibanaSearchRequest,
-          IKibanaSearchResponse<{
-            aggregations:
-              | {
-                  sampler: { docs_count: { buckets: Array<{ key: number; doc_count: number }> } };
-                }
-              | undefined;
-          }>
-        >(
-          {
-            params: {
-              index: indexName,
-              track_total_hits: false,
-              body: {
-                size: 0,
-                query: {
-                  bool: {
-                    filter: [
-                      {
-                        range: {
-                          [TIMESTAMP_FIELD]: {
-                            gte: timeState.start,
-                            lte: timeState.end,
-                          },
-                        },
+  const {
+    rawResponse: { aggregations },
+  } = await lastValueFrom(
+    search.search<
+      IKibanaSearchRequest,
+      IKibanaSearchResponse<{
+        aggregations:
+          | { sampler: { docs_count: { buckets: Array<{ key: number; doc_count: number }> } } }
+          | undefined;
+      }>
+    >(
+      {
+        params: {
+          index: indexName,
+          track_total_hits: false,
+          body: {
+            size: 0,
+            query: {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      [TIMESTAMP_FIELD]: {
+                        gte: timeState.start,
+                        lte: timeState.end,
                       },
-                    ],
+                    },
                   },
+                ],
+              },
+            },
+            aggs: {
+              sampler: {
+                random_sampler: {
+                  probability: samplingProbability,
+                  seed: 42,
                 },
                 aggs: {
-                  sampler: {
-                    random_sampler: {
-                      probability: samplingProbability,
-                      seed: 42,
-                    },
-                    aggs: {
-                      docs_count: {
-                        date_histogram: {
-                          field: TIMESTAMP_FIELD,
-                          [intervalType]: interval,
-                          min_doc_count: 0,
-                          extended_bounds: { min: timeState.start, max: timeState.end },
-                        },
-                      },
+                  docs_count: {
+                    date_histogram: {
+                      field: TIMESTAMP_FIELD,
+                      [intervalType]: interval,
+                      min_doc_count: 0,
+                      extended_bounds: { min: timeState.start, max: timeState.end },
                     },
                   },
                 },
               },
             },
           },
-          { abortSignal: signal }
-        )
-      );
-
-      return {
-        buckets: aggregations?.sampler.docs_count.buckets || [],
-        interval,
-      };
-    },
-    [timeState, core, isFailureStore, definition, data.search, samplingProbability]
+        },
+      },
+      { abortSignal: signal }
+    )
   );
 
   return {
-    aggregations: aggregationsFetch.value,
-    isLoading: aggregationsFetch.loading,
-    error: aggregationsFetch.error,
+    buckets: aggregations?.sampler.docs_count.buckets || [],
+    interval,
   };
 };

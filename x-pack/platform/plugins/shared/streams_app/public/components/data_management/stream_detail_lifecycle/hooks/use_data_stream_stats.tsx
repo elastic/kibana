@@ -9,39 +9,106 @@ import type { Streams } from '@kbn/streams-schema';
 import type { DataStreamStatServiceResponse } from '@kbn/dataset-quality-plugin/public';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import type { CalculatedStats } from './use_calculated_stats';
+import { getCalculatedStats } from '../helpers/get_calculated_stats';
+import { getAggregations } from './use_ingestion_rate';
+import { TimeState } from '@kbn/es-query';
+import { formatBytes } from '../helpers/format_bytes';
 
 export type DataStreamStats = DataStreamStatServiceResponse['dataStreamsStats'][number];
 
-// Enhanced type that includes calculated values for backward compatibility
-export type EnhancedDataStreamStats = DataStreamStats & CalculatedStats;
-
 export const useDataStreamStats = ({
   definition,
+  timeState,
 }: {
   definition: Streams.ingest.all.GetResponse;
+  timeState: TimeState;
 }) => {
   const {
+    core,
     services: { dataStreamsClient },
+    dependencies: {
+      start: {
+        data: { search },
+        streams: { streamsRepositoryClient },
+      },
+    },
   } = useKibana();
 
   const statsFetch = useStreamsAppFetch(
-    async () => {
+    async ({ signal }) => {
       const client = await dataStreamsClient;
-      const {
-        dataStreamsStats: [dsStats],
-      } = await client.getDataStreamsStats({
-        datasetQuery: definition.stream.name,
-        includeCreationDate: true,
-      });
+      const [
+        {
+          dataStreamsStats: [dsStats],
+        },
+        failureStore,
+      ] = await Promise.all([
+        client.getDataStreamsStats({
+          datasetQuery: definition.stream.name,
+          includeCreationDate: true,
+        }),
+
+        streamsRepositoryClient.fetch('GET /internal/streams/{name}/failure_store/stats', {
+          signal,
+          params: {
+            path: { name: definition.stream.name },
+          },
+        }),
+      ]);
 
       if (!dsStats || !dsStats.creationDate) {
         return undefined;
       }
 
-      return dsStats;
+      const [aggregations, failureStoreAggregations] = await Promise.all([
+        getAggregations({ definition, timeState, core, search, signal }),
+        failureStore.config.enabled
+          ? getAggregations({ definition, timeState, core, search, signal, isFailureStore: true })
+          : undefined,
+      ]);
+
+      const dsSizeWithoutFs = Math.max(
+        0,
+        (dsStats.sizeBytes ?? 0) - (failureStore?.stats?.size ?? 0)
+      );
+
+      return {
+        ds: {
+          stats: {
+            ...dsStats,
+            sizeBytes: dsSizeWithoutFs,
+            size: formatBytes(dsSizeWithoutFs),
+            ...getCalculatedStats({
+              stats: {
+                creationDate: dsStats.creationDate,
+                totalDocs: dsStats.totalDocs,
+                sizeBytes: dsSizeWithoutFs,
+              },
+              timeState,
+              buckets: aggregations?.buckets,
+            }),
+          },
+          aggregations: aggregations,
+        },
+        fs: {
+          stats: {
+            ...failureStore.stats,
+            ...getCalculatedStats({
+              stats: {
+                creationDate: failureStore.stats?.creationDate,
+                totalDocs: failureStore.stats?.count,
+                sizeBytes: failureStore.stats?.size,
+              },
+              timeState,
+              buckets: failureStoreAggregations?.buckets,
+            }),
+          },
+          config: failureStore.config,
+          aggregations: failureStoreAggregations,
+        },
+      };
     },
-    [dataStreamsClient, definition],
+    [dataStreamsClient, definition, streamsRepositoryClient],
     {
       withTimeRange: false,
       withRefresh: true,
