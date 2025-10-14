@@ -79,23 +79,18 @@ export const DashboardViewport = ({
     };
   }, [controlGroupApi]);
 
-  // Bug in main where panels are loaded before control filters are ready
-  // Want to migrate to react embeddable controls with same behavior
-  // TODO - do not load panels until control filters are ready
-  /*
-  const [dashboardInitialized, setDashboardInitialized] = useState(false);
+  const [controlsReady, setControlsReady] = useState(false);
   useEffect(() => {
     let ignore = false;
-    dashboard.untilContainerInitialized().then(() => {
+    dashboardInternalApi.untilControlsInitialized().then(() => {
       if (!ignore) {
-        setDashboardInitialized(true);
+        setControlsReady(true);
       }
     });
     return () => {
       ignore = true;
     };
-  }, [dashboard]);
-  */
+  }, [dashboardInternalApi]);
 
   return (
     <div
@@ -140,7 +135,9 @@ export const DashboardViewport = ({
         data-description={description}
         data-shared-items-count={panelCount}
       >
-        <DashboardGrid dashboardContainerRef={dashboardContainerRef} />
+        {viewMode === 'print' || controlsReady ? (
+          <DashboardGrid dashboardContainerRef={dashboardContainerRef} />
+        ) : null}
       </div>
     </div>
   );
