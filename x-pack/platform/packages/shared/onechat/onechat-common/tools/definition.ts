@@ -27,6 +27,28 @@ export enum ToolType {
    * Index search tools
    */
   index_search = 'index_search',
+  /**
+   * Tools from external MCP servers
+   */
+  mcp = 'mcp',
+}
+
+/**
+ * Provider metadata for tools
+ */
+export interface ToolProviderMetadata {
+  /**
+   * Unique identifier for the provider (e.g., 'builtin', 'persisted', 'mcp.github')
+   */
+  id: string;
+  /**
+   * Human-readable name for the provider (e.g., 'GitHub MCP Server')
+   */
+  name: string;
+  /**
+   * Type of the provider (e.g., 'builtin', 'persisted', 'mcp')
+   */
+  type: string;
 }
 
 /**
@@ -62,6 +84,10 @@ export interface ToolDefinition<
    * The type-specific configuration for this tool.
    */
   configuration: TConfig;
+  /**
+   * Optional metadata about the tool's provider
+   */
+  provider?: ToolProviderMetadata;
 }
 
 export interface ToolDefinitionWithSchema<

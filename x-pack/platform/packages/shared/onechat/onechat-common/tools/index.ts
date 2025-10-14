@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
+export {
+  ToolType,
+  type ToolDefinition,
+  type ToolDefinitionWithSchema,
+  type ToolProviderMetadata,
+} from './definition';
 export { isReservedToolId, validateToolId, toolIdRegexp, toolIdMaxLength } from './tool_ids';
 export {
   platformCoreTools,
@@ -50,6 +55,12 @@ export {
   type BuiltinToolDefinition,
   type BuiltinToolDefinitionWithSchema,
 } from './types/builtin';
+export {
+  isMcpTool,
+  type McpToolConfiguration,
+  type McpToolDefinition,
+  type McpToolDefinitionWithSchema,
+} from './types/mcp';
 export {
   ToolResultType,
   type ToolResult,

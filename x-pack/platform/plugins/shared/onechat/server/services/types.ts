@@ -18,6 +18,7 @@ import type { RunnerFactory } from './runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
 import type { ChatService } from './chat';
+import type { McpConnectionManager } from './mcp/mcp_connection_manager';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -35,6 +36,7 @@ export interface InternalStartServices {
 export interface ServiceSetupDeps {
   logger: Logger;
   workflowsManagement?: WorkflowsPluginSetup;
+  mcpConnectionManager: McpConnectionManager;
 }
 
 export interface ServicesStartDeps {

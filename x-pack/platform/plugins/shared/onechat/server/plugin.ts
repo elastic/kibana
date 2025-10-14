@@ -8,6 +8,8 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { OnechatConfig } from './config';
+import { validateMcpServerConfigs } from './config_validation';
+import { McpConnectionManager } from './services/mcp/mcp_connection_manager';
 import { ServiceManager } from './services';
 import type {
   OnechatPluginSetup,
@@ -31,9 +33,9 @@ export class OnechatPlugin
     >
 {
   private logger: Logger;
-  // @ts-expect-error unused for now
   private config: OnechatConfig;
   private serviceManager = new ServiceManager();
+  private mcpConnectionManager?: McpConnectionManager;
 
   constructor(context: PluginInitializerContext<OnechatConfig>) {
     this.logger = context.logger.get();
@@ -44,9 +46,30 @@ export class OnechatPlugin
     coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     setupDeps: OnechatSetupDependencies
   ): OnechatPluginSetup {
+    // Validate MCP server configuration
+    const mcpServers = this.config.mcp.servers;
+    const configErrors = validateMcpServerConfigs(mcpServers);
+    if (configErrors.length > 0) {
+      this.logger.error('MCP server configuration errors:');
+      configErrors.forEach((error) => this.logger.error(`  - ${error}`));
+      throw new Error(`Invalid MCP server configuration. See logs for details.`);
+    }
+
+    // Initialize MCP connection manager
+    this.mcpConnectionManager = new McpConnectionManager({
+      logger: this.logger.get('mcp'),
+      config: mcpServers,
+    });
+
+    // Initialize connection manager asynchronously (non-blocking)
+    this.mcpConnectionManager.initialize().catch((error) => {
+      this.logger.error(`Failed to initialize MCP connections: ${error}`);
+    });
+
     const serviceSetups = this.serviceManager.setupServices({
       logger: this.logger.get('services'),
       workflowsManagement: setupDeps.workflowsManagement,
+      mcpConnectionManager: this.mcpConnectionManager,
     });
 
     registerFeatures({ features: setupDeps.features });
@@ -105,5 +128,10 @@ export class OnechatPlugin
     };
   }
 
-  stop() {}
+  async stop() {
+    // Shutdown MCP connections
+    if (this.mcpConnectionManager) {
+      await this.mcpConnectionManager.shutdown();
+    }
+  }
 }

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchServiceStart,
+  Logger,
+  UiSettingsServiceStart,
+  SavedObjectsServiceStart,
+} from '@kbn/core/server';
 import type { Runner } from '@kbn/onechat-server';
 import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { isAllowedBuiltinTool } from '@kbn/onechat-server/allow_lists';
@@ -20,18 +25,23 @@ import {
 import type { ToolsServiceSetup, ToolsServiceStart } from './types';
 import { getToolTypeDefinitions } from './tool_types';
 import { createPersistedProviderFn } from './persisted';
+import { createMcpProviderFn } from './mcp/mcp_provider';
 import { createToolRegistry } from './tool_registry';
 import { getToolTypeInfo } from './utils';
+import type { McpConnectionManager } from '../mcp/mcp_connection_manager';
 
 export interface ToolsServiceSetupDeps {
   logger: Logger;
   workflowsManagement?: WorkflowsPluginSetup;
+  mcpConnectionManager: McpConnectionManager;
 }
 
 export interface ToolsServiceStartDeps {
   getRunner: () => Runner;
   elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
 }
 
 export class ToolsService {
@@ -59,25 +69,38 @@ export class ToolsService {
     };
   }
 
-  start({ getRunner, elasticsearch, spaces }: ToolsServiceStartDeps): ToolsServiceStart {
-    const { logger, workflowsManagement } = this.setupDeps!;
+  start({
+    getRunner,
+    elasticsearch,
+    spaces,
+    uiSettings,
+    savedObjects,
+  }: ToolsServiceStartDeps): ToolsServiceStart {
+    const { logger, workflowsManagement, mcpConnectionManager } = this.setupDeps!;
 
     const toolTypes = getToolTypeDefinitions({ workflowsManagement });
 
     const builtinProviderFn = createBuiltinProviderFn({
       registry: this.builtinRegistry,
       toolTypes,
+      uiSettings,
+      savedObjects,
     });
     const persistedProviderFn = createPersistedProviderFn({
       logger,
       esClient: elasticsearch.client.asInternalUser,
       toolTypes,
     });
+    const mcpProviderFn = createMcpProviderFn({
+      connectionManager: mcpConnectionManager,
+      logger: logger.get('mcp-provider'),
+    });
 
     const getRegistry: ToolsServiceStart['getRegistry'] = async ({ request }) => {
       const space = getCurrentSpaceId({ request, spaces });
       const builtinProvider = await builtinProviderFn({ request, space });
       const persistedProvider = await persistedProviderFn({ request, space });
+      const mcpProvider = await mcpProviderFn({ request, space });
 
       return createToolRegistry({
         getRunner,
@@ -85,6 +108,7 @@ export class ToolsService {
         request,
         builtinProvider,
         persistedProvider,
+        mcpProvider,
       });
     };
 

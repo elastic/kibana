@@ -28,14 +28,18 @@ export class ServiceManager {
   public internalSetup?: InternalSetupServices;
   public internalStart?: InternalStartServices;
 
-  setupServices({ logger, workflowsManagement }: ServiceSetupDeps): InternalSetupServices {
+  setupServices({
+    logger,
+    workflowsManagement,
+    mcpConnectionManager,
+  }: ServiceSetupDeps): InternalSetupServices {
     this.services = {
       tools: new ToolsService(),
       agents: new AgentsService(),
     };
 
     this.internalSetup = {
-      tools: this.services.tools.setup({ logger, workflowsManagement }),
+      tools: this.services.tools.setup({ logger, workflowsManagement, mcpConnectionManager }),
       agents: this.services.agents.setup({ logger }),
     };
 
