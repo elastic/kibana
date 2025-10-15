@@ -22,7 +22,7 @@ import {
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
@@ -62,6 +62,7 @@ export interface DataMsg {
   fetchStatus: FetchStatus;
   error?: Error;
   query?: AggregateQuery | Query | undefined;
+  timeRange?: TimeRange;
 }
 
 export interface DataMainMsg extends DataMsg {

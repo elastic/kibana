@@ -88,8 +88,10 @@ export function fetchAll(
     const dataView = searchSource.getField('index')!;
     const { query, sort } = appStateContainer.getState();
     const prevQuery = dataSubjects.documents$.getValue().query;
+    const prevTimeRange = dataSubjects.documents$.getValue().timeRange;
     const isEsqlQuery = isOfAggregateQueryType(query);
     const currentTab = getCurrentTab();
+    const timeRange = currentTab.dataRequestParams.timeRangeAbsolute;
 
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);
@@ -101,13 +103,13 @@ export function fetchAll(
         dataView,
         services,
         sort: sort as SortOrder[],
-        inputTimeRange: currentTab.dataRequestParams.timeRangeAbsolute,
+        inputTimeRange: timeRange,
       });
     }
 
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$);
-    sendLoadingMsg(dataSubjects.documents$, { query });
+    sendLoadingMsg(dataSubjects.documents$, { query, timeRange });
     sendLoadingMsg(dataSubjects.totalHits$, {
       result: dataSubjects.totalHits$.getValue().result,
     });
@@ -122,7 +124,7 @@ export function fetchAll(
           data,
           expressions,
           scopedProfilesManager,
-          timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
+          timeRange,
           esqlVariables: currentTab.esqlVariables,
           searchSessionId: params.searchSessionId,
         })
@@ -174,7 +176,8 @@ export function fetchAll(
          * The partial state for ES|QL mode is necessary in several scenarios:
          * 1. Initial query execution (no previous query)
          * 2. Query has changed from the previous execution
-         * 3. ESQL variables are present (indicating parameterized queries that may affect results)
+         * 3. TimeRange has changed from the previous execution
+         * 4. ESQL variables are present (indicating parameterized queries that may affect results)
          *
          * In the follow-up useEsqlMode hook, when queries change, new columns are added to AppState
          * so the data table shows the updated columns. The partial state was introduced to prevent
@@ -191,9 +194,10 @@ export function fetchAll(
 
           const isFirstQuery = !prevQuery;
           const queryChanged = !isEqual(query, prevQuery);
+          const timeRangeChanged = !isEqual(prevTimeRange, timeRange);
           const hasEsqlVariables = Boolean(currentTab.esqlVariables?.length);
 
-          return isFirstQuery || queryChanged || hasEsqlVariables
+          return isFirstQuery || queryChanged || timeRangeChanged || hasEsqlVariables
             ? FetchStatus.PARTIAL
             : FetchStatus.COMPLETE;
         })();
