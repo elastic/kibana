@@ -49,9 +49,6 @@ export class ReindexServiceServerPlugin
     this.version = new Version();
     this.version.setup(env.packageInfo.version);
     this.rollupsEnabled = config.get<ReindexConfig>().rollupsEnabled;
-    console.log('#######################');
-    console.log(this.rollupsEnabled);
-    console.log('#######################');
   }
 
   public setup({
