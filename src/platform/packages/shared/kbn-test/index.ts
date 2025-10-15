@@ -13,7 +13,7 @@ export { KbnClientRequesterError } from './src/kbn_client/kbn_client_requester_e
 export { startServersCli, startServers } from './src/functional_tests/start_servers';
 
 // @internal
-export { runTestsCli, runTests } from './src/functional_tests/run_tests';
+export { runTestsCli, runTests, runTestsCliParallel } from './src/functional_tests/run_tests';
 export {
   runElasticsearch,
   runKibanaServer,

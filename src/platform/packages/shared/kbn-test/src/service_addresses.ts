@@ -26,13 +26,13 @@ export const TEST_KIBANA_PORT = Number(
 export const TEST_ES_HOST = parsedEsUrlParts?.hostname || process.env.TEST_ES_HOST || 'localhost';
 export const TEST_ES_PORT = Number(parsedEsUrlParts?.port || process.env.TEST_ES_PORT || 9220);
 
-export const TEST_ES_TRANSPORT_PORT = process.env.TEST_ES_TRANSPORT_PORT || '9300-9400';
+export const TEST_ES_TRANSPORT_PORT = Number(process.env.TEST_ES_TRANSPORT_PORT || 9300);
 
 export const TEST_FLEET_HOST = 'localhost';
 export const TEST_FLEET_PORT = Number(process.env.TEST_FLEET_PORT ?? 8220);
 
 export const TEST_AGENTLESS_HOST = 'localhost';
-export const TEST_AGENTLESS_PORT = '8089';
+export const TEST_AGENTLESS_PORT = 8089;
 
 export const FLEET_PACKAGE_REGISTRY_PORT = process.env.FLEET_PACKAGE_REGISTRY_PORT
   ? Number(process.env.FLEET_PACKAGE_REGISTRY_PORT)

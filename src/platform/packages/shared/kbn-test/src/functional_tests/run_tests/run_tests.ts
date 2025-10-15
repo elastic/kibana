@@ -14,6 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 
+import { Subject } from 'rxjs';
 import { applyFipsOverrides } from '../lib/fips_overrides';
 import { Config, readConfigFile } from '../../functional_test_runner';
 
@@ -22,11 +23,31 @@ import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';
 import type { RunTestsOptions } from './flags';
 import { TEST_FLEET_HOST, TEST_FLEET_PORT } from '../../service_addresses';
+import { CI_PARALLEL_PROCESS_PREFIX } from '../../ci_parallel_process_prefix';
 
 /**
  * Run servers and tests for each config
  */
 export async function runTests(log: ToolingLog, options: RunTestsOptions) {
+  const pause$ = new Subject<void>();
+  const releasePause = () => {
+    if (!pause$.closed) {
+      pause$.next();
+      pause$.complete();
+    }
+  };
+
+  let messageHandler: ((msg: unknown) => void) | undefined;
+  if (typeof process.on === 'function') {
+    messageHandler = (msg: unknown) => {
+      if (msg === 'FTR_CONTINUE') {
+        process.off('message', messageHandler!);
+        releasePause();
+      }
+    };
+    process.on('message', messageHandler);
+  }
+
   if (!process.env.CI) {
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
@@ -37,6 +58,10 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
+  }
+
+  if (!options.pause) {
+    releasePause();
   }
 
   const settingOverrides = {
@@ -104,22 +129,33 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         const onEarlyExit = (msg: string) => {
           log.error(msg);
           abortCtrl.abort();
+          releasePause();
         };
 
         let shutdownEs;
+        const kibanaProcessNames: string[] = [];
         try {
           if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
-            shutdownEs = await runElasticsearch({ ...options, log, config, onEarlyExit });
+            shutdownEs = await runElasticsearch({
+              ...options,
+              name: `${CI_PARALLEL_PROCESS_PREFIX}ftr`,
+              log,
+              config,
+              onEarlyExit,
+            });
             if (abortCtrl.signal.aborted) {
               return;
             }
           }
 
-          await runKibanaServer({
+          const kibanaProcName = `${CI_PARALLEL_PROCESS_PREFIX}kibana-ftr`;
+
+          const mainKibanaProcesses = await runKibanaServer({
             procs,
             config,
             logsDir: options.logsDir,
             installDir: options.installDir,
+            name: kibanaProcName,
             onEarlyExit,
             extraKbnOpts: [
               config.get('serverless')
@@ -128,27 +164,32 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             ],
           });
 
+          kibanaProcessNames.push(...mainKibanaProcesses);
+
           const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
 
           if (startRemoteKibana) {
-            await runKibanaServer({
-              procs,
-              config: new Config({
-                settings: {
-                  ...config.getAll(),
-                  kbnTestServer: {
-                    sourceArgs: ['--no-base-path'],
-                    serverArgs: [
-                      ...config.get('kbnTestServer.serverArgs'),
-                      `--xpack.fleet.syncIntegrations.taskInterval=5s`,
-                      `--elasticsearch.hosts=http://${TEST_FLEET_HOST}:${TEST_FLEET_PORT + 1}`,
-                      `--server.port=${TEST_FLEET_PORT + 1}`,
-                    ],
-                  },
+            const remoteConfig = new Config({
+              settings: {
+                ...config.getAll(),
+                kbnTestServer: {
+                  sourceArgs: ['--no-base-path'],
+                  serverArgs: [
+                    ...config.get('kbnTestServer.serverArgs'),
+                    `--xpack.fleet.syncIntegrations.taskInterval=5s`,
+                    `--elasticsearch.hosts=http://${TEST_FLEET_HOST}:${TEST_FLEET_PORT + 1}`,
+                    `--server.port=${TEST_FLEET_PORT + 1}`,
+                  ],
                 },
-                path: config.path,
-                module: config.module,
-              }),
+              },
+              path: config.path,
+              module: config.module,
+            });
+
+            const remoteKibanaProcesses = await runKibanaServer({
+              procs,
+              name: kibanaProcName,
+              config: remoteConfig,
               logsDir: options.logsDir,
               installDir: options.installDir,
               onEarlyExit,
@@ -159,10 +200,40 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               ],
               remote: true,
             });
+
+            kibanaProcessNames.push(...remoteKibanaProcesses);
+          }
+
+          if (typeof process.send === 'function') {
+            try {
+              process.send('FTR_WARMUP_DONE');
+            } catch (err) {
+              log.error(
+                new Error('Failed to notify parent process about warmup completion', { cause: err })
+              );
+            }
           }
 
           if (abortCtrl.signal.aborted) {
             return;
+          }
+
+          if (!pause$.closed) {
+            await new Promise<void>((resolve) => {
+              pause$.subscribe({
+                complete: () => {
+                  resolve();
+                },
+              });
+
+              abortCtrl.signal.addEventListener(
+                'abort',
+                () => {
+                  releasePause();
+                },
+                { once: true }
+              );
+            });
           }
 
           await runFtr({
@@ -179,7 +250,18 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               await setTimeout(delay);
             }
 
-            await procs.stop('kibana');
+            while (kibanaProcessNames.length > 0) {
+              const name = kibanaProcessNames.pop();
+              if (!name) {
+                continue;
+              }
+
+              try {
+                await procs.stop(name);
+              } catch (error) {
+                log.debug(`Failed to stop process ${name}`, error);
+              }
+            }
           } finally {
             if (shutdownEs) {
               await shutdownEs();
@@ -189,4 +271,9 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       });
     });
   }
+  if (messageHandler) {
+    process.off('message', messageHandler);
+  }
+
+  releasePause();
 }
