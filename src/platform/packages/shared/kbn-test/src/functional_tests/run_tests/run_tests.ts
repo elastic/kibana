@@ -19,6 +19,7 @@ import {
   TEST_REMOTE_ES_PORT,
   TEST_REMOTE_KIBANA_PORT,
 } from '@kbn/test-services';
+import { Subject } from 'rxjs';
 import { applyFipsOverrides } from '../lib/fips_overrides';
 import { Config, readConfigFile } from '../../functional_test_runner';
 
@@ -31,6 +32,25 @@ import type { RunTestsOptions } from './flags';
  * Run servers and tests for each config
  */
 export async function runTests(log: ToolingLog, options: RunTestsOptions) {
+  const pause$ = new Subject<void>();
+  const releasePause = () => {
+    if (!pause$.closed) {
+      pause$.next();
+      pause$.complete();
+    }
+  };
+
+  let messageHandler: ((msg: unknown) => void) | undefined;
+  if (typeof process.on === 'function') {
+    messageHandler = (msg: unknown) => {
+      if (msg === 'FTR_CONTINUE') {
+        process.off('message', messageHandler!);
+        releasePause();
+      }
+    };
+    process.on('message', messageHandler);
+  }
+
   if (!process.env.CI) {
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
@@ -41,6 +61,10 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
+  }
+
+  if (!options.pause) {
+    releasePause();
   }
 
   const settingOverrides = {
@@ -108,11 +132,11 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         const onEarlyExit = (msg: string) => {
           log.error(msg);
           abortCtrl.abort();
+          releasePause();
         };
 
         let shutdownEs;
         const kibanaProcessNames: string[] = [];
-
         try {
           if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
             shutdownEs = await runElasticsearch({
@@ -178,8 +202,36 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             kibanaProcessNames.push(...remoteKibanaProcesses);
           }
 
+          if (typeof process.send === 'function') {
+            try {
+              process.send('FTR_WARMUP_DONE');
+            } catch (err) {
+              log.error(
+                new Error('Failed to notify parent process about warmup completion', { cause: err })
+              );
+            }
+          }
+
           if (abortCtrl.signal.aborted) {
             return;
+          }
+
+          if (!pause$.closed) {
+            await new Promise<void>((resolve) => {
+              pause$.subscribe({
+                complete: () => {
+                  resolve();
+                },
+              });
+
+              abortCtrl.signal.addEventListener(
+                'abort',
+                () => {
+                  releasePause();
+                },
+                { once: true }
+              );
+            });
           }
 
           await runFtr({
@@ -217,4 +269,9 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       });
     });
   }
+  if (messageHandler) {
+    process.off('message', messageHandler);
+  }
+
+  releasePause();
 }

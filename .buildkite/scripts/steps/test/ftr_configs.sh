@@ -18,9 +18,6 @@ export JOB="$FTR_CONFIG_GROUP_KEY"
 
 FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}"
 
-# a FTR failure will result in the script returning an exit code of 10
-exitCode=0
-
 configs="${FTR_CONFIG:-}"
 
 # The first retry should only run the configs that failed in the previous attempt
@@ -44,97 +41,42 @@ if [ "$configs" == "" ]; then
   exit 1
 fi
 
-failedConfigs=""
-results=()
-
+config_args=()
 while read -r config; do
-  if [[ ! "$config" ]]; then
-    continue;
-  fi
-
-  FULL_COMMAND="node scripts/functional_tests --bail --config $config $EXTRA_ARGS"
-
-  CONFIG_EXECUTION_KEY="${config}_executed"
-  IS_CONFIG_EXECUTION=$(buildkite-agent meta-data get "$CONFIG_EXECUTION_KEY" --default "false" --log-level error)
-
-  if [[ "${IS_CONFIG_EXECUTION}" == "true" ]]; then
-    echo "--- [ already-tested ] $FULL_COMMAND"
-    continue
-  else
-    echo "--- $ $FULL_COMMAND"
-  fi
-
-  start=$(date +%s)
-
-  if [[ "${USE_CHROME_BETA:-}" =~ ^(1|true)$ ]]; then
-    echo "USE_CHROME_BETA was set - using google-chrome-beta"
-    export TEST_BROWSER_BINARY_PATH="$(which google-chrome-beta)"
-
-    # download the beta version of chromedriver
-    export CHROMEDRIVER_VERSION=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json -s | jq -r '.channels.Beta.version')
-    export DETECT_CHROMEDRIVER_VERSION=false
-    node node_modules/chromedriver/install.js --chromedriver-force-download
-
-    # set annotation on the build
-    buildkite-agent annotate --style info --context chrome-beta "This build uses Google Chrome Beta @ ${CHROMEDRIVER_VERSION}"
-  fi
-
-  # prevent non-zero exit code from breaking the loop
-  set +e;
-  node ./scripts/functional_tests \
-    --bail \
-    --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-    --config="$config" \
-    "$EXTRA_ARGS"
-  lastCode=$?
-  set -e;
-
-  # Scout reporter
-  if [[ "${SCOUT_REPORTER_ENABLED:-}" =~ ^(1|true)$ ]]; then
-    # Upload events after running each config
-    echo "Upload Scout reporter events to AppEx QA's team cluster for config $config"
-    node scripts/scout upload-events --dontFailOnError
-    echo "Upload successful, removing local events at .scout/reports"
-    rm -rf .scout/reports
-  else
-    echo "SCOUT_REPORTER_ENABLED=$SCOUT_REPORTER_ENABLED, skipping event upload."
-  fi
-
-  timeSec=$(($(date +%s)-start))
-  if [[ $timeSec -gt 60 ]]; then
-    min=$((timeSec/60))
-    sec=$((timeSec-(min*60)))
-    duration="${min}m ${sec}s"
-  else
-    duration="${timeSec}s"
-  fi
-
-  results+=("- $config
-    duration: ${duration}
-    result: ${lastCode}")
-
-  if [ $lastCode -eq 0 ]; then
-    # Test was successful, so mark it as executed
-    buildkite-agent meta-data set "$CONFIG_EXECUTION_KEY" "true"
-  else
-    exitCode=10
-    echo "FTR exited with code $lastCode"
-    echo "^^^ +++"
-
-    if [[ "$failedConfigs" ]]; then
-      failedConfigs="${failedConfigs}"$'\n'"$config"
-    else
-      failedConfigs="$config"
-    fi
+  if [[ "$config" ]]; then
+    config_args+=("--config" "$config")
   fi
 done <<< "$configs"
 
-if [[ "$failedConfigs" ]]; then
-  buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
+if [[ ${#config_args[@]} -eq 0 ]]; then
+  echo "No configs resolved after processing input"
+  exit 1
 fi
 
-echo "--- FTR configs complete"
-printf "%s\n" "${results[@]}"
-echo ""
+cmd=(node scripts/functional_tests_parallel --bail --suppress --stats)
 
-exit $exitCode
+if [[ -n "${KIBANA_BUILD_LOCATION:-}" ]]; then
+  cmd+=(--kibana-install-dir "$KIBANA_BUILD_LOCATION")
+fi
+
+cmd+=("${config_args[@]}")
+
+if [[ -n "$EXTRA_ARGS" ]]; then
+  # shellcheck disable=SC2206
+  extra_args=($EXTRA_ARGS)
+  cmd+=("${extra_args[@]}")
+fi
+
+echo "--- Running functional_tests_parallel"
+echo "--- $ ${cmd[*]}"
+
+set +e
+"${cmd[@]}"
+parallel_exit=$?
+set -e
+
+if [[ $parallel_exit -ne 0 ]]; then
+  exit 10
+fi
+
+exit 0
