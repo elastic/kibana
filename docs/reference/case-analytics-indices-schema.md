@@ -19,7 +19,7 @@ The cases as data feature is in technical preview, meaning the schema for the ca
 
 | Name | Field type | Description |
 | :---- | :---- | :---- |
-| @timestamp | date | The date that the case was added to the case analytics indices.
+| @timestamp | date | The date the document for the case was added to the case analytics indices.
 | title | text / semantic\_text | The case title. |
 | description | text / semantic\_text | The case description. |
 | tags | keyword | Tags added to case. |
@@ -66,7 +66,7 @@ The cases as data feature is in technical preview, meaning the schema for the ca
 
 | Name | Field type | Description |
 | :---- | :---- | :---- |
-| @timestamp | date | The date that the comment was added to the case analytics indices. |
+| @timestamp | date | The date the document for the case was added to the case analytics indices. |
 | case\_id | keyword | The case UUID.  |
 | comment | text | The user’s comment. |
 | created\_at | date | The date the comment was added, provided in ISO 8601 \[2\] format and set to the servers' timezone. |
@@ -86,7 +86,7 @@ The cases as data feature is in technical preview, meaning the schema for the ca
 
 | Name | Field type | Description |
 | :---- | :---- | :---- |
-| @timestamp | date | The date that the case attachment was added to the case analytics indices. |
+| @timestamp | date | The date the document for the case was added to the case analytics indices. |
 | case\_id | keyword | The case UUID. |
 | type | keyword | The type of attachment. |
 | payload | flattened | The data in the attachment. |
@@ -108,7 +108,7 @@ The cases as data feature is in technical preview, meaning the schema for the ca
 
 | Name | Field type | Description |
 | :---- | :---- | :---- |
-| @timestamp | date | The date of the insertion of the attachment in the CAI |
+| @timestamp | date | The date the document for the case was added to the case analytics indices. |
 | case\_id | keyword | The case UUID. |
 | action | keyword | The user’s action. Possible values are `add`, `create`, `update`, `delete`.  |
 | type | keyword | The type of the action a user took. Possible values are `status`, `create\_case`, `delete\_case`. |
@@ -117,7 +117,7 @@ The cases as data feature is in technical preview, meaning the schema for the ca
 | payload.category | keyword | The new case category. |
 | payload.severity | keyword | The new case severity. Possible values are `low`, `medium`, `high`, `critical`. |
 | created\_at | date | The date of when the case was created, provided in ISO 8601 \[2\] format and set to the servers' timezone. |
-| created\_at\_ms | long |  |
+| created\_at\_ms | long | The case creation timestamp in milliseconds. |
 | created\_by.username | keyword | The username of the user who created the case. |
 | created\_by.profile\_uid | keyword | The user ID of the user who created the case. |
 | created\_by.full\_name | keyword | The full name of the user who created the case. |
