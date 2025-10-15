@@ -402,10 +402,11 @@ export const createAgentPolicyHandler: FleetRequestHandler<
     ) {
       await updateAgentPolicySpaces({
         agentPolicyId: agentPolicy.id,
+        newAgentPolicyName: agentPolicy.name,
         currentSpaceId: spaceId,
         newSpaceIds: spaceIds,
         authorizedSpaces,
-        options: { force },
+        options: { force, validateUniqueName: true },
       });
     }
 
@@ -543,8 +544,9 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const { force, bumpRevision, space_ids: spaceIds, ...data } = request.body;
+  const { force, bumpRevision, ...data } = request.body;
 
+  const spaceIds = data.space_ids;
   let spaceId = fleetContext.spaceId;
 
   logger.debug(`updating policy [${request.params.agentPolicyId}] in space [${spaceId}]`);
@@ -561,6 +563,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       );
       await updateAgentPolicySpaces({
         agentPolicyId: request.params.agentPolicyId,
+        newAgentPolicyName: data.name,
         currentSpaceId: spaceId,
         newSpaceIds: spaceIds,
         authorizedSpaces,

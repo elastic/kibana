@@ -32,12 +32,14 @@ const UPDATE_AGENT_BATCH_SIZE = 1000;
 
 export async function updateAgentPolicySpaces({
   agentPolicyId,
+  newAgentPolicyName,
   currentSpaceId,
   newSpaceIds,
   authorizedSpaces,
   options,
 }: {
   agentPolicyId: string;
+  newAgentPolicyName: string;
   currentSpaceId: string;
   newSpaceIds: string[];
   authorizedSpaces: string[];
@@ -73,9 +75,6 @@ export async function updateAgentPolicySpaces({
   if (deepEqual(existingPolicy?.space_ids?.sort() ?? [DEFAULT_SPACE_ID], newSpaceIds.sort())) {
     return;
   }
-  if (options?.validateUniqueName) {
-    await validatePackagePoliciesUniqueNameAcrossSpaces(existingPackagePolicies, newSpaceIds);
-  }
 
   if (existingPackagePolicies.some((packagePolicy) => packagePolicy.policy_ids.length > 1)) {
     throw new FleetError(
@@ -99,6 +98,15 @@ export async function updateAgentPolicySpaces({
     if (!authorizedSpaces.includes(spaceId)) {
       throw new FleetError(`Not enough permissions to remove policies from space ${spaceId}`);
     }
+  }
+
+  if (options?.validateUniqueName) {
+    await agentPolicyService.requireUniqueName(soClient, {
+      id: agentPolicyId,
+      name: newAgentPolicyName,
+      space_ids: newSpaceIds,
+    });
+    await validatePackagePoliciesUniqueNameAcrossSpaces(existingPackagePolicies, newSpaceIds);
   }
 
   const res = await soClient.updateObjectsSpaces(

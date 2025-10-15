@@ -631,7 +631,12 @@ class AgentPolicyService {
 
   public async requireUniqueName(
     soClient: SavedObjectsClientContract,
-    givenPolicy: { id?: string; name: string; supports_agentless?: boolean | null }
+    givenPolicy: {
+      id?: string;
+      name: string;
+      space_ids?: string[];
+      supports_agentless?: boolean | null;
+    }
   ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
 
@@ -640,6 +645,7 @@ class AgentPolicyService {
         type: savedObjectType,
         searchFields: ['name'],
         search: escapeSearchQueryPhrase(givenPolicy.name),
+        namespaces: givenPolicy.space_ids,
       })
       .catch(
         catchAndSetErrorStackTrace.withMessage(
@@ -647,23 +653,17 @@ class AgentPolicyService {
         )
       );
 
-    const idsWithName = results.total && results.saved_objects.map(({ id }) => id);
-    if (Array.isArray(idsWithName)) {
-      const isEditingSelf = givenPolicy.id && idsWithName.includes(givenPolicy.id);
-
-      if (
-        (!givenPolicy?.supports_agentless && !givenPolicy.id) ||
-        (!givenPolicy?.supports_agentless && !isEditingSelf)
-      ) {
-        const isSinglePolicy = idsWithName.length === 1;
+    const idsWithName = results.total ? results.saved_objects.map(({ id }) => id) : [];
+    const othersWithName = idsWithName.filter((id) => id !== givenPolicy.id);
+    if (othersWithName.length) {
+      if (!givenPolicy?.supports_agentless) {
+        const isSinglePolicy = othersWithName.length === 1;
         const existClause = isSinglePolicy
-          ? `Agent Policy '${idsWithName[0]}' already exists`
-          : `Agent Policies '${idsWithName.join(',')}' already exist`;
+          ? `Agent Policy '${othersWithName[0]}' already exists`
+          : `Agent Policies '${othersWithName.join(',')}' already exist`;
 
         throw new AgentPolicyNameExistsError(`${existClause} with name '${givenPolicy.name}'`);
-      }
-
-      if (givenPolicy?.supports_agentless && !givenPolicy.id) {
+      } else {
         const integrationName = givenPolicy.name.split(' ').pop();
         throw new AgentlessPolicyExistsRequestError(
           `${givenPolicy.name} already exist. Please rename the integration name ${integrationName}.`
@@ -967,9 +967,11 @@ class AgentPolicyService {
     logger.debug(`Starting update of agent policy ${id}`);
 
     if (agentPolicy.name) {
-      await this.requireUniqueName(soClient, {
+      const allSpacesSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+      await this.requireUniqueName(allSpacesSoClient, {
         id,
         name: agentPolicy.name,
+        space_ids: agentPolicy?.space_ids,
         supports_agentless: agentPolicy?.supports_agentless,
       });
     }
