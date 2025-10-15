@@ -7,7 +7,7 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { of } from 'rxjs';
-import { TimeState } from '@kbn/es-query';
+import type { TimeState } from '@kbn/es-query';
 import { useDataStreamStats } from './use_data_stream_stats';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
