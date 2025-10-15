@@ -47,7 +47,7 @@ export async function enrollAgent(
           '-e',
           'KIBANA_FLEET_SETUP=1',
           '-p',
-          '8220:8220',
+          `8220:8220`,
           '--rm',
           `docker.elastic.co/elastic-agent/elastic-agent:${version}`,
         ],

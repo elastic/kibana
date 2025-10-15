@@ -5,7 +5,11 @@
  * 2.0.
  */
 import type { FtrConfigProviderContext, Config } from '@kbn/test';
-import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
+import {
+  fleetPackageRegistryDockerImage,
+  defineDockerServersConfig,
+  FLEET_PACKAGE_REGISTRY_PORT,
+} from '@kbn/test';
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { ServerlessProjectType } from '@kbn/es';
@@ -74,7 +78,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
      * will spin up a local docker package registry locally for you
      * if this is defined it takes precedence over the `packageRegistryOverride` variable
      */
-    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+    const dockerRegistryPort = FLEET_PACKAGE_REGISTRY_PORT;
 
     const svlSharedConfig = await readConfigFile(
       require.resolve('../../serverless/shared/config.base.ts')

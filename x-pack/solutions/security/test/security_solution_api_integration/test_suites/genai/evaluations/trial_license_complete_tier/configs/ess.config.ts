@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { TEST_ES_HOST, TEST_ES_PORT, type FtrConfigProviderContext } from '@kbn/test';
 import { getSecurityGenAIConfigFromEnvVar } from '../../../../../scripts/genai/vault/manage_secrets';
 import { getTinyElserServerArgs } from '../../../knowledge_base/entries/utils/helpers';
 
@@ -31,7 +31,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
                 a.startsWith('--elasticsearch.ssl.certificateAuthorities=')
               )
           ),
-        '--elasticsearch.hosts=http://localhost:9220',
+        `--elasticsearch.hosts=http://${TEST_ES_HOST}:${TEST_ES_PORT}`,
         `--xpack.actions.preconfigured=${JSON.stringify(preconfiguredConnectors)}`,
         `--xpack.actions.allowedHosts=["*"]`,
         `--xpack.securitySolution.enableExperimental=["assistantModelEvaluation"]`,

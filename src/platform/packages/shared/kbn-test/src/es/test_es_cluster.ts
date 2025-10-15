@@ -269,6 +269,7 @@ export function createTestEsCluster<
           ssl,
           kill: true, // likely don't need this but avoids any issues where the ESS cluster wasn't cleaned up
           waitForReady: true,
+          namePrefix: clusterName,
         });
         return;
       } else if (Path.isAbsolute(esFrom)) {

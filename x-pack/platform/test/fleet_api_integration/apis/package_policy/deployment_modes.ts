@@ -7,6 +7,7 @@
 import type * as http from 'http';
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
+import { TEST_AGENTLESS_PORT } from '@kbn/test';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupMockServer } from '../agents/helpers/mock_agentless_api';
@@ -23,7 +24,7 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
-      mockApiServer = await mockAgentlessApiService.listen(8089); // Start the agentless api mock server on port 8089
+      mockApiServer = await mockAgentlessApiService.listen(TEST_AGENTLESS_PORT); // Start the agentless api mock server on this port
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
       );

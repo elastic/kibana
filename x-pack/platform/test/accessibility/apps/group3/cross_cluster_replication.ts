@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { TEST_ES_TRANSPORT_PORT } from '@kbn/test';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -41,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.common.navigateToApp('remoteClusters');
             await PageObjects.remoteClusters.createNewRemoteCluster(
               remoteName,
-              'localhost:9300',
+              `localhost:${TEST_ES_TRANSPORT_PORT}'`,
               false
             );
             await es.indices.create({ index: testIndex });

@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import moment from 'moment-timezone';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test';
 import { waitForDocumentInIndex } from '../../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
 import type { RoleCredentials, SupertestWithRoleScopeType } from '../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
@@ -167,7 +168,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(downResponse.hits.hits[0]._source).property('locationNames', 'Dev Service');
         expect(downResponse.hits.hits[0]._source).property(
           'linkMessage',
-          `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+          `- Link: http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
         expect(downResponse.hits.hits[0]._source).property('locationId', 'dev');
       });
@@ -210,7 +211,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(recoveredResponse.hits.hits[0]._source).property('locationNames', 'Dev Service');
         expect(recoveredResponse.hits.hits[0]._source).property(
           'linkMessage',
-          `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+          `- Link: http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
         expect(recoveredResponse.hits.hits[0]._source).property('locationId', 'dev');
         expect(recoveredResponse.hits.hits[0]._source).property(
@@ -312,7 +313,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           );
           expect(hit).property(
             'linkMessage',
-            `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=${hit?.locationId}`
+            `- Link: http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=${hit?.locationId}`
           );
         });
       });
@@ -396,7 +397,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(downResponse.hits.hits[0]._source).property('locationNames', 'Dev Service');
         expect(downResponse.hits.hits[0]._source).property(
           'linkMessage',
-          `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+          `- Link: http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
         expect(downResponse.hits.hits[0]._source).property('locationId', 'dev');
       });
@@ -440,7 +441,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(recoveredResponse.hits.hits[0]._source).property('locationNames', 'Dev Service');
         expect(recoveredResponse.hits.hits[0]._source).property(
           'linkMessage',
-          `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+          `- Link: http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
         expect(recoveredResponse.hits.hits[0]._source).property('locationId', 'dev');
         expect(recoveredResponse.hits.hits[0]._source).property(
@@ -613,7 +614,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           );
           expect(downResponse.hits.hits[0]._source).property(
             'linkMessage',
-            `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+            `- Link: http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
           );
           expect(downResponse.hits.hits[0]._source).property('locationId', 'dev and dev2');
         });
@@ -671,7 +672,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           );
           expect(recoveryResponse.hits.hits[0]._source).property(
             'linkMessage',
-            `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+            `- Link: http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
           );
           expect(recoveryResponse.hits.hits[0]._source).property('locationId', 'dev and dev2');
         });
@@ -720,7 +721,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(alertActionDoc).property('locationNames', 'Dev Service and Dev Service 2');
           expect(alertActionDoc).property(
             'linkMessage',
-            `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+            `- Link: http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
           );
           expect(alertActionDoc).property('locationId', 'dev and dev2');
         });
@@ -761,7 +762,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(alertActionDoc).property('locationNames', 'Dev Service and Dev Service 2');
           expect(alertActionDoc).property(
             'linkMessage',
-            `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+            `- Link: http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
           );
           expect(alertActionDoc).property('locationId', 'dev and dev2');
           expect(alertActionDoc).property('recoveryReason', 'the alert condition is no longer met');
@@ -882,7 +883,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(downResponse.hits.hits[0]._source).property('locationNames', 'Dev Service');
           expect(downResponse.hits.hits[0]._source).property(
             'linkMessage',
-            `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+            `- Link: http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
           );
           expect(downResponse.hits.hits[0]._source).property('locationId', 'dev');
         });
@@ -958,7 +959,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(recoveryResponse.hits.hits[0]._source).property('locationNames', 'Dev Service');
           expect(recoveryResponse.hits.hits[0]._source).property(
             'linkMessage',
-            `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+            `- Link: http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
           );
           expect(recoveryResponse.hits.hits[0]._source).property('locationId', 'dev');
         });
@@ -1073,7 +1074,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
         expect(downResponse.hits.hits[0]._source).property(
           'linkMessage',
-          `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+          `- Link: http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
         expect(downResponse.hits.hits[0]._source).property('locationId', 'dev and dev2');
       });
@@ -1105,7 +1106,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
         expect(alertAction.hits.hits[0]._source).property(
           'linkMessage',
-          `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+          `- Link: http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
         expect(alertAction.hits.hits[0]._source).property('locationId', 'dev and dev2');
       });
@@ -1158,7 +1159,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
         expect(recoveryAction.hits.hits[0]._source).property(
           'linkMessage',
-          `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
+          `- Link: http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
         expect(recoveryAction.hits.hits[0]._source).property('locationId', 'dev and dev2');
       });

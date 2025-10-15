@@ -16,6 +16,7 @@ import {
   type FtrConfigProvider,
   defineDockerServersConfig,
   fleetPackageRegistryDockerImage,
+  FLEET_PACKAGE_REGISTRY_PORT,
 } from '@kbn/test';
 import path from 'path';
 import { services } from '../services';
@@ -70,7 +71,7 @@ export function makeFtrConfigProvider(
      * will spin up a local docker package registry locally for you
      * if this is defined it takes precedence over the `packageRegistryOverride` variable
      */
-    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+    const dockerRegistryPort = FLEET_PACKAGE_REGISTRY_PORT;
 
     const packageRegistryConfig = path.join(__dirname, '../fixtures/package_registry_config.yml');
     const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];

@@ -6,6 +6,13 @@
  */
 import axios from 'axios';
 import expect from '@kbn/expect';
+import {
+  TEST_ES_HOST,
+  TEST_ES_PORT,
+  TEST_ES_TRANSPORT_PORT,
+  TEST_KIBANA_HOST,
+  TEST_KIBANA_PORT,
+} from '@kbn/test';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 interface IntegrationPackage {
@@ -77,9 +84,9 @@ export default ({ getService }: FtrProviderContext) => {
           id: 'remote-elasticsearch1',
           name: 'Remote ES Output',
           type: 'remote_elasticsearch',
-          hosts: ['http://localhost:9221'],
+          hosts: [`http://${TEST_ES_HOST}:${TEST_ES_PORT + 1}`],
           kibana_api_key: await createRemoteAPIKey(),
-          kibana_url: 'http://localhost:5621',
+          kibana_url: `http://localhost:${TEST_KIBANA_PORT + 1}`,
           sync_integrations: true,
           sync_uninstalled_integrations: true,
           secrets: {
@@ -91,12 +98,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     async function createLocalOutputOnRemote() {
       const response = await axios.post(
-        'http://localhost:5621/api/fleet/outputs',
+        `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT + 1}/api/fleet/outputs`,
         {
           id: 'es',
           type: 'elasticsearch',
           name: 'Local ES Output',
-          hosts: ['http://localhost:9221'],
+          hosts: [`http://${TEST_ES_HOST}:${TEST_ES_PORT + 1}`],
         },
         {
           auth: { username: 'elastic', password: 'changeme' },
@@ -112,7 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
           cluster: {
             remote: {
               local: {
-                seeds: ['localhost:9300'],
+                seeds: [`localhost:${TEST_ES_TRANSPORT_PORT}`],
               },
             },
           },
@@ -213,10 +220,13 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
 
       // Clean up the local output on remote
-      const response = await axios.delete('http://localhost:5621/api/fleet/outputs/es', {
-        auth: { username: 'elastic', password: 'changeme' },
-        headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'fleet-e2e' },
-      });
+      const response = await axios.delete(
+        `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT + 1}/api/fleet/outputs/es`,
+        {
+          auth: { username: 'elastic', password: 'changeme' },
+          headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'fleet-e2e' },
+        }
+      );
       expect(response.status).to.be(200);
 
       await localEs.indices.delete({

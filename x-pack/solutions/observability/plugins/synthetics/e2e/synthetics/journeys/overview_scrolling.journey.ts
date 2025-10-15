@@ -7,6 +7,7 @@
 
 import { before, after, expect, journey, step } from '@elastic/synthetics';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
+import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test';
 import {
   addTestMonitor,
   cleanTestMonitors,
@@ -20,13 +21,13 @@ journey('OverviewScrolling', async ({ page, params }) => {
 
   const listOfRequests: string[] = [];
   const expected = [
-    'http://localhost:5620/internal/synthetics/service/enablement',
-    'http://localhost:5620/internal/synthetics/monitor/filters',
-    'http://localhost:5620/internal/uptime/service/locations',
-    'http://localhost:5620/internal/synthetics/overview?sortField=status&sortOrder=asc&',
-    'http://localhost:5620/internal/synthetics/overview_status?&scopeStatusByLocation=true',
-    'http://localhost:5620/internal/synthetics/service/monitors?perPage=10&page=1&sortOrder=asc&sortField=name.keyword&',
-    'http://localhost:5620/internal/synthetics/enable_default_alerting',
+    `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/internal/synthetics/service/enablement`,
+    `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/internal/synthetics/monitor/filters`,
+    `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/internal/uptime/service/locations`,
+    `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/internal/synthetics/overview?sortField=status&sortOrder=asc&`,
+    `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/internal/synthetics/overview_status?&scopeStatusByLocation=true`,
+    `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/internal/synthetics/service/monitors?perPage=10&page=1&sortOrder=asc&sortField=name.keyword&`,
+    `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/internal/synthetics/enable_default_alerting`,
   ];
 
   before(async () => {

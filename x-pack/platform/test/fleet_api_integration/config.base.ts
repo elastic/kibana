@@ -12,6 +12,9 @@ import {
   fleetPackageRegistryDockerImage,
   defineDockerServersConfig,
   getKibanaCliLoggers,
+  FLEET_PACKAGE_REGISTRY_PORT,
+  TEST_AGENTLESS_PORT,
+  TEST_AGENTLESS_HOST,
 } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
@@ -23,7 +26,8 @@ export const BUNDLED_PACKAGE_DIR = '/tmp/fleet_bundled_packages';
 export default async function ({ readConfigFile, log }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
-  const registryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+  const registryPort = FLEET_PACKAGE_REGISTRY_PORT;
+
   const skipRunningDockerRegistry =
     process.env.FLEET_SKIP_RUNNING_PACKAGE_REGISTRY === 'true' ? true : false;
 
@@ -91,7 +95,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           enableAgentPrivilegeLevelChange: true,
         })}`,
         `--xpack.fleet.agentless.enabled=true`,
-        `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api`,
+        `--xpack.fleet.agentless.api.url=http://${TEST_AGENTLESS_HOST}:${TEST_AGENTLESS_PORT}/agentless-api`,
         `--xpack.fleet.agentless.api.tls.certificate=${KBN_CERT_PATH}`,
         `--xpack.fleet.agentless.api.tls.key=${KBN_KEY_PATH}`,
         `--xpack.fleet.agentless.api.tls.ca=${CA_CERT_PATH}`,

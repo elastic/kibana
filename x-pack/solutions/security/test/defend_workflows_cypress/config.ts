@@ -6,6 +6,7 @@
  */
 
 import type { FtrConfigProviderContext } from '@kbn/test';
+import { TEST_FLEET_PORT } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/network_services';
 import { services } from './services';
@@ -45,7 +46,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.strict=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-        `--xpack.fleet.agents.fleet_server.hosts=["https://${hostIp}:8220"]`,
+        `--xpack.fleet.agents.fleet_server.hosts=["https://${hostIp}:${TEST_FLEET_PORT}"]`,
         `--xpack.fleet.agents.elasticsearch.host=http://${hostIp}:${kibanaCommonTestsConfig.get(
           'servers.elasticsearch.port'
         )}`,

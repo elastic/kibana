@@ -13,13 +13,13 @@ export {
   SYSTEM_INDICES_SUPERUSER,
   ELASTIC_SERVERLESS_SUPERUSER,
   ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
-  SERVERLESS_NODES,
   getDockerFileMountPath,
   verifyDockerInstalled,
   maybeCreateDockerNetwork,
   type ServerlessProjectType,
   readRolesFromResource,
   readRolesDescriptorsFromResource,
+  getServerlessNodeArgs,
 } from './src/utils';
 export type { ArtifactLicense } from './src/artifact';
 export { SERVERLESS_ROLES_ROOT_PATH, STATEFUL_ROLES_ROOT_PATH } from './src/paths';

@@ -19,6 +19,7 @@ import {
   kbnTestConfig,
   systemIndicesSuperuser,
   defineDockerServersConfig,
+  FLEET_PACKAGE_REGISTRY_PORT,
 } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
@@ -60,7 +61,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
      * will spin up a local docker package registry locally for you
      * if this is defined it takes precedence over the `packageRegistryOverride` variable
      */
-    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+    const dockerRegistryPort = FLEET_PACKAGE_REGISTRY_PORT;
 
     const xPackAPITestsConfig = await readConfigFile(
       require.resolve('../../api_integration/config.ts')

@@ -7,6 +7,7 @@
 
 import { journey, step, before, after } from '@elastic/synthetics';
 import { recordVideo } from '@kbn/observability-synthetics-test-data';
+import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test';
 import { byTestId } from '../../helpers/utils';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import { cleanSettings } from './services/settings';
@@ -24,7 +25,7 @@ journey('AlertingDefaults', async ({ page, params }) => {
   });
 
   step('Login to kibana', async () => {
-    await page.goto('http://localhost:5620/login?next=%2F');
+    await page.goto(`http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/login?next=%2F`);
     await syntheticsApp.loginToKibana();
   });
 
@@ -133,10 +134,13 @@ journey('AlertingDefaults', async ({ page, params }) => {
     await syntheticsApp.loginToKibana('viewer', 'changeme');
   });
 
-  step('Go to http://localhost:5620/app/synthetics/settings/alerting', async () => {
-    await page.goto('http://localhost:5620/app/synthetics/settings/alerting', {
-      waitUntil: 'networkidle',
-    });
+  step('Go to app/synthetics/settings/alerting', async () => {
+    await page.goto(
+      `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/settings/alerting`,
+      {
+        waitUntil: 'networkidle',
+      }
+    );
     await page.isDisabled('.euiComboBox__inputWrap');
     await page.isDisabled('button:has-text("Apply changes")');
     await page.isDisabled('button:has-text("Add connector")');

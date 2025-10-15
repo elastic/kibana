@@ -87,3 +87,16 @@ export { getDockerFileMountPath } from '@kbn/es';
 export const fleetPackageRegistryDockerImage =
   process.env.FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE ||
   'docker.elastic.co/kibana-ci/package-registry-distribution:lite';
+
+export {
+  TEST_ES_PORT,
+  TEST_ES_HOST,
+  TEST_ES_TRANSPORT_PORT,
+  TEST_KIBANA_PORT,
+  TEST_KIBANA_HOST,
+  TEST_FLEET_HOST,
+  TEST_FLEET_PORT,
+  TEST_AGENTLESS_HOST,
+  TEST_AGENTLESS_PORT,
+  FLEET_PACKAGE_REGISTRY_PORT,
+} from './src/service_addresses';

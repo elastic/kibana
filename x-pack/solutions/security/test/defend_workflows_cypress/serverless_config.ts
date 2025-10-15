@@ -6,7 +6,7 @@
  */
 
 import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/network_services';
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { TEST_FLEET_PORT, type FtrConfigProviderContext } from '@kbn/test';
 
 import type { ExperimentalFeatures } from '@kbn/security-solution-plugin/common/experimental_features';
 import { ES_RESOURCES } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/serverless';
@@ -43,7 +43,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       fleetserver: {
         protocol: 'https',
         hostname: hostIp,
-        port: 8220,
+        port: TEST_FLEET_PORT,
       },
     },
 
@@ -51,7 +51,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...config.kbnTestServer,
       serverArgs: [
         ...config.kbnTestServer.serverArgs,
-        `--xpack.fleet.agents.fleet_server.hosts=["https://${hostIp}:8220"]`,
+        `--xpack.fleet.agents.fleet_server.hosts=["https://${hostIp}:${TEST_FLEET_PORT}"]`,
         `--xpack.fleet.agents.elasticsearch.host=http://${hostIp}:${defendWorkflowsCypressConfig.get(
           'servers.elasticsearch.port'
         )}`,

@@ -14,6 +14,7 @@ import type {
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
 import { generateAssistantComment } from '@kbn/security-solution-plugin/server/lib/siem_migrations/common/task/util/comments';
 import type { StoredSiemMigration } from '@kbn/security-solution-plugin/server/lib/siem_migrations/common/types';
+import { TEST_AGENTLESS_PORT } from '@kbn/test';
 
 const SIEM_MIGRATIONS_BASE_INDEX_PATTERN = '.kibana-siem-rule-migrations';
 
@@ -23,7 +24,7 @@ const SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN = `${SIEM_MIGRATIONS_BASE_INDEX_PA
 const SOME_USER_ID = 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0';
 
 export const defaultOriginalRule: OriginalRule = {
-  id: 'https://127.0.0.1:8089/servicesNS/nobody/SA-AccessProtection/saved/searches/Access%20-%20Default%20Account%20Usage%20-%20Rule',
+  id: `https://127.0.0.1:${TEST_AGENTLESS_PORT}/servicesNS/nobody/SA-AccessProtection/saved/searches/Access%20-%20Default%20Account%20Usage%20-%20Rule`,
   vendor: 'splunk',
   title: 'Access - Default Account Usage - Rule',
   description:
@@ -37,7 +38,7 @@ export const defaultOriginalRule: OriginalRule = {
 };
 
 export const splunkRuleWithResources: OriginalRule = {
-  id: 'https://127.0.0.1:8089/servicesNS/nobody/DA-ESS-EndpointProtection/saved/searches/Endpoint%20-%20Old%20Malware%20Infection%20-%20Rule',
+  id: `https://127.0.0.1:${TEST_AGENTLESS_PORT}/servicesNS/nobody/DA-ESS-EndpointProtection/saved/searches/Endpoint%20-%20Old%20Malware%20Infection%20-%20Rule`,
   vendor: 'splunk',
   title: 'Endpoint - Old Malware Infection - Rule',
   query:

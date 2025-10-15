@@ -6,6 +6,7 @@
  */
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
+import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test';
 import { cleanTestParams } from './services/add_monitor';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
@@ -25,10 +26,15 @@ journey(`GlobalParameters`, async ({ page, params }) => {
   });
 
   step('Add params', async () => {
-    await page.goto('http://localhost:5620/app/synthetics/settings/params', {
-      waitUntil: 'networkidle',
-    });
-    expect(page.url()).toBe('http://localhost:5620/app/synthetics/settings/params');
+    await page.goto(
+      `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/settings/params`,
+      {
+        waitUntil: 'networkidle',
+      }
+    );
+    expect(page.url()).toBe(
+      `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/settings/params`
+    );
     await page.click('text=No items found');
     await page.click('button:has-text("Create Parameter")');
     await page.click('[aria-label="Key"]');

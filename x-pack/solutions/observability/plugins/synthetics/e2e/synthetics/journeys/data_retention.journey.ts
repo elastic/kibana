@@ -9,6 +9,7 @@ import type { Page } from '@elastic/synthetics';
 import { journey, step, expect } from '@elastic/synthetics';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import { recordVideo } from '@kbn/observability-synthetics-test-data';
+import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import { byTestId, assertText } from '../../helpers/utils';
 
@@ -25,9 +26,13 @@ journey(`DataRetentionPage`, async ({ page, params }) => {
 
   step('validate data retention tab', async () => {
     await page.click('text=Settings');
-    expect(page.url()).toBe('http://localhost:5620/app/synthetics/settings/alerting');
+    expect(page.url()).toBe(
+      `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/settings/alerting`
+    );
     await page.click('text=Data retention');
-    expect(page.url()).toBe('http://localhost:5620/app/synthetics/settings/data-retention');
+    expect(page.url()).toBe(
+      `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/settings/data-retention`
+    );
     await page.click('text=Synthetics data is configured by managed index lifecycle policies');
 
     await page.click('text=0 Bytes');

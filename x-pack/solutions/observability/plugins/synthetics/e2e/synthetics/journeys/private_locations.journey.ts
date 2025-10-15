@@ -7,6 +7,7 @@
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { waitForLoadingToFinish } from '@kbn/ux-plugin/e2e/journeys/utils';
+import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test';
 import { SyntheticsServices } from './services/synthetics_services';
 import { byTestId } from '../../helpers/utils';
 import { addTestMonitor, cleanPrivateLocations, cleanTestMonitors } from './services/add_monitor';
@@ -39,10 +40,14 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
 
   step('Click text=Private Locations', async () => {
     await page.click('text=Private Locations');
-    expect(page.url()).toBe('http://localhost:5620/app/synthetics/settings/private-locations');
+    expect(page.url()).toBe(
+      `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/settings/private-locations`
+    );
     await page.click('text=No agent policies found');
     await page.click('text=Create agent policy');
-    expect(page.url()).toBe('http://localhost:5620/app/fleet/policies?create');
+    expect(page.url()).toBe(
+      `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/fleet/policies?create`
+    );
     await page.click('[placeholder="Choose a name"]');
     await page.fill('[placeholder="Choose a name"]', 'Test fleet policy');
     await page.click('text=Collect system logs and metrics');
@@ -50,7 +55,7 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await page.waitForTimeout(5 * 1000);
     await waitForLoadingToFinish({ page });
   });
-  step('Go to http://localhost:5620/app/fleet/policies', async () => {
+  step('Go to /app/fleet/policies', async () => {
     await syntheticsApp.navigateToSettings(false);
     await page.click('text=Private Locations');
   });
@@ -157,9 +162,13 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await cleanTestMonitors(params);
 
     await page.click('text=Data Retention');
-    expect(page.url()).toBe('http://localhost:5620/app/synthetics/settings/data-retention');
+    expect(page.url()).toBe(
+      `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/settings/data-retention`
+    );
     await page.click('text=Private Locations');
-    expect(page.url()).toBe('http://localhost:5620/app/synthetics/settings/private-locations');
+    expect(page.url()).toBe(
+      `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/synthetics/settings/private-locations`
+    );
     await page.click('[aria-label="Delete location"]');
     await page.click('button:has-text("Delete location")');
     await page.click('text=Create your first private location');

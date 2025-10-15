@@ -9,6 +9,7 @@ import type * as http from 'http';
 import expect from '@kbn/expect';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '@kbn/fleet-plugin/server/constants';
+import { TEST_AGENTLESS_PORT, TEST_FLEET_HOST, TEST_FLEET_PORT } from '@kbn/test';
 import { skipIfNoDockerRegistry, generateAgent } from '../../helpers';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupMockServer } from '../agents/helpers/mock_agentless_api';
@@ -170,7 +171,7 @@ export default function (providerContext: FtrProviderContext) {
       let mockApiServer: http.Server;
       before(async () => {
         // Start the mock agentless API server
-        mockApiServer = await mockAgentlessApiService.listen(8089);
+        mockApiServer = await mockAgentlessApiService.listen(TEST_AGENTLESS_PORT);
 
         await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
@@ -686,7 +687,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'fleet-default-fleet-server-host',
             name: 'Default Fleet server',
             is_default: true,
-            host_urls: ['https://localhost:8220'],
+            host_urls: [`https://${TEST_FLEET_HOST}:${TEST_FLEET_PORT}`],
           });
 
         if (fleetServerHostResponse.status === 409) {
