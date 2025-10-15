@@ -23,7 +23,7 @@ export interface Evaluator {
 export interface EvaluatorConfig {
   evaluatorId: EvaluatorId;
   evaluatorIdOverride?: string;
-  customInstructions: string | number;
+  customInstructions?: string | number;
 }
 
 export interface EvaluationRequest {
@@ -43,9 +43,6 @@ export interface ConversationRoundEvaluation {
 
 export interface EvaluationRunResponse {
   conversationId: string;
-  status: 'completed' | 'failed';
-  startedAt: string;
-  completedAt?: string;
   results: ConversationRoundEvaluation[];
 }
 

@@ -158,24 +158,19 @@ export function registerEvaluationRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const { conversationId, evaluators } = request.body;
+        const { conversations: conversationsService } = getInternalServices();
         const startedAt = new Date().toISOString();
 
-        const mockResults = [
-          {
-            roundId: 'round-1',
-            scores: evaluators.map((evaluator) => ({
-              evaluatorId: evaluator.evaluatorIdOverride || evaluator.evaluatorId,
-              score: Math.random(),
-            })),
-          },
-          {
-            roundId: 'round-2',
-            scores: evaluators.map((evaluator) => ({
-              evaluatorId: evaluator.evaluatorIdOverride || evaluator.evaluatorId,
-              score: Math.random(),
-            })),
-          },
-        ];
+        const client = await conversationsService.getScopedClient({ request });
+        const conversation = await client.get(conversationId);
+
+        const mockResults = conversation.rounds.map((round) => ({
+          roundId: round.id,
+          scores: evaluators.map((evaluator) => ({
+            evaluatorId: evaluator.evaluatorIdOverride || evaluator.evaluatorId,
+            score: Math.random(),
+          })),
+        }));
 
         return response.ok<EvaluationRunResponse>({
           body: {

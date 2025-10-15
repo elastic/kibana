@@ -6,7 +6,12 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { Evaluator, ListEvaluatorsResponse } from '../../../common/http_api/evaluations';
+import type {
+  Evaluator,
+  ListEvaluatorsResponse,
+  EvaluatorConfig,
+  EvaluationRunResponse,
+} from '../../../common/http_api/evaluations';
 import { publicApiPath } from '../../../common/constants';
 
 export class EvaluationsService {
@@ -19,5 +24,14 @@ export class EvaluationsService {
   async list(): Promise<Evaluator[]> {
     const response = await this.http.get<ListEvaluatorsResponse>(`${publicApiPath}/evaluators`);
     return response.evaluators;
+  }
+
+  async run(conversationId: string, evaluators: EvaluatorConfig[]): Promise<EvaluationRunResponse> {
+    return await this.http.post<EvaluationRunResponse>(`${publicApiPath}/evaluations`, {
+      body: JSON.stringify({
+        conversationId,
+        evaluators,
+      }),
+    });
   }
 }

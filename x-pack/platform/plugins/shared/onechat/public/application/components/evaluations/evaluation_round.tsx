@@ -64,11 +64,11 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
             </EuiText>
           </EuiFlexGroup>
           <EvaluatorBadgesGroup
-            relevance={roundEvaluation?.scores.relevance_score}
-            precision={roundEvaluation?.scores.precision_score}
-            recall={roundEvaluation?.scores.recall_score}
-            groundedness={roundEvaluation?.scores.groundedness_score}
-            regex={roundEvaluation?.scores.regex_score}
+            relevance={roundEvaluation?.scores.relevance}
+            precision={roundEvaluation?.scores.precision}
+            recall={roundEvaluation?.scores.recall}
+            groundedness={roundEvaluation?.scores.groundedness}
+            regex={roundEvaluation?.scores.regex}
           />
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>

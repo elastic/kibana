@@ -10,13 +10,11 @@ import React, { createContext, useContext, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Evaluator } from '../../components/evaluations/modal/types';
 import { useConversationId } from '../../hooks/use_conversation_id';
+import { useOnechatServices } from '../../hooks/use_onechat_service';
+import type { EvaluatorConfig } from '../../../../common/http_api/evaluations';
 
 export interface EvaluationScores {
-  groundedness_score?: number;
-  relevance_score?: number;
-  recall_score?: number;
-  precision_score?: number;
-  regex_score?: number;
+  [evaluatorId: string]: number;
 }
 
 export interface ConversationRoundEvaluation {
@@ -44,62 +42,37 @@ export const EvaluationsProvider: React.FC<EvaluationsProviderProps> = ({ childr
   const [showThinking, setShowThinking] = useState(false);
   const queryClient = useQueryClient();
   const conversationId = useConversationId();
+  const { evaluationsService } = useOnechatServices();
 
   const triggerEvaluation = async (evaluators: Evaluator[]): Promise<void> => {
-    const formattedEvaluators = evaluators.map((evaluator) => ({
-      evaluatorId: evaluator.id,
-      customInstructions: evaluator.customInstructions || undefined,
+    if (!conversationId) {
+      return;
+    }
+
+    const selectedEvaluatorsConfig: EvaluatorConfig[] = evaluators.map((evaluator) => ({
+      evaluatorId: evaluator.id as any,
+      customInstructions: evaluator.customInstructions || '',
     }));
 
-    // TODO @CHRIS: REPLACE ALL THIS WITH AN API CALL & also update use_evaluations.ts hook to have a queryFn
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        if (conversationId) {
-          const evaluationQueryKey = ['evaluations', conversationId];
+    const response = await evaluationsService.run(conversationId, selectedEvaluatorsConfig);
 
-          const MOCK_ROUND_IDS = [
-            '66712ad1-5631-4bf6-8607-21e1e721b14b',
-            '6abe5ffc-89f4-4ef3-a3f9-8dd195c45ab1',
-            'c0a0d6f9-cd7b-4e2d-98a2-b8510ba5bcaf',
-            '5ca69ed4-bdf8-4270-8a1b-3b88e3df9e7b',
-          ];
+    const evaluationQueryKey = ['evaluations', conversationId];
 
-          const MOCK_ROUND_EVALUATIONS = MOCK_ROUND_IDS.map((roundId) => {
-            const scores: EvaluationScores = {};
+    const conversationRoundEvaluations = response.results.map((result) => {
+      const scores: EvaluationScores = {};
 
-            // Only include scores for evaluators that were selected
-            formattedEvaluators.forEach((evaluator) => {
-              switch (evaluator.evaluatorId) {
-                case 'groundedness':
-                  scores.groundedness_score = Math.random();
-                  break;
-                case 'relevance':
-                  scores.relevance_score = Math.random();
-                  break;
-                case 'recall':
-                  scores.recall_score = Math.random();
-                  break;
-                case 'precision':
-                  scores.precision_score = Math.random();
-                  break;
-                case 'regex':
-                  scores.regex_score = Math.random();
-                  break;
-              }
-            });
+      result.scores.forEach((scoreItem) => {
+        scores[scoreItem.evaluatorId] = scoreItem.score;
+      });
 
-            return {
-              roundId,
-              scores,
-            };
-          });
+      return {
+        roundId: result.roundId,
+        scores,
+      };
+    });
 
-          queryClient.setQueryData<EvaluationCacheData>(evaluationQueryKey, {
-            results: MOCK_ROUND_EVALUATIONS,
-          });
-        }
-        resolve();
-      }, 3000);
+    queryClient.setQueryData<EvaluationCacheData>(evaluationQueryKey, {
+      results: conversationRoundEvaluations,
     });
   };
 
