@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
-import { getSloHealthStateText } from '../../../../lib/slo_health_helpers';
 import { ContentWithInspectCta } from '../../../slo_details/components/health_callout/content_with_inspect_cta';
 import { paths } from '../../../../../common/locators/paths';
 
@@ -49,8 +48,6 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
     setShowCallOut(false);
     sessionStorage.setItem('slo_health_callout_hidden', 'true');
   };
-
-  const stateText = getSloHealthStateText(hasUnhealthy, hasMissing);
 
   return (
     <EuiCallOut
