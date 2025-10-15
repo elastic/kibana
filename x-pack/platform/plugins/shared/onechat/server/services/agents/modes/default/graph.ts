@@ -12,7 +12,7 @@ import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { ConversationRound, ResolvedAgentCapabilities } from '@kbn/onechat-common';
+import type { Conversation, ResolvedAgentCapabilities } from '@kbn/onechat-common';
 import type { AgentMemoryProvider, AgentMemory } from '@kbn/onechat-server/agents';
 import {
   createToolResultMessage,
@@ -55,7 +55,7 @@ export const createAgentGraph = ({
   memoryProvider: AgentMemoryProvider;
   tools: StructuredTool[];
   capabilities: ResolvedAgentCapabilities;
-  conversation: ConversationRound[];
+  conversation?: Conversation;
   customInstructions?: string;
   logger: Logger;
 }) => {
@@ -69,7 +69,11 @@ export const createAgentGraph = ({
     const nextMessage = state.initialMessages[state.initialMessages.length - 1];
     const term = extractTextContent(nextMessage as BaseMessage);
 
-    const memories = await memoryProvider.recall({ message: term, previousRounds: conversation });
+    const memories = await memoryProvider.recall({
+      message: term,
+      previousRounds: conversation?.rounds,
+      conversationId: conversation?.id,
+    });
 
     console.log('*** recallMemory', memories);
 

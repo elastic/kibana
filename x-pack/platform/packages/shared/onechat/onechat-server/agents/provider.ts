@@ -11,6 +11,7 @@ import {
   type RoundInput,
   type ChatAgentEvent,
   type AgentCapabilities,
+  type Conversation,
 } from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -79,11 +80,16 @@ export interface AgentHandlerContext {
 }
 
 export interface AgentMemory {
+  conversation_id: string;
   content: string;
 }
 
 export interface AgentMemoryProvider {
-  recall(opts: { message: string; previousRounds?: ConversationRound[] }): Promise<AgentMemory[]>;
+  recall(opts: {
+    message: string;
+    previousRounds?: ConversationRound[];
+    conversationId?: string;
+  }): Promise<AgentMemory[]>;
 }
 
 /**
@@ -99,10 +105,10 @@ export interface AgentEventEmitter {
 
 export interface AgentParams {
   /**
-   * Previous rounds of conversation.
+   * Current conversation.
    * Defaults to an empty list (new conversation)
    */
-  conversation?: ConversationRound[];
+  conversation?: Conversation;
   /**
    * The input triggering this round.
    */

@@ -26,6 +26,7 @@ export const createConversationSummary = ({
   updatedAt?: Date;
 }): ConversationSummary => {
   return {
+    conversation_id: conversation.id,
     user_id: user.id,
     user_name: user.username,
     agent_id: conversation.agent_id,
@@ -51,20 +52,40 @@ export const createSemanticSummary = ({
     key_topics: keyTopics,
     outcomes_and_decisions: outcomesAndDecisions,
     unanswered_questions: unansweredQuestions,
+    entities,
   } = structuredData;
 
-  const summary = `
-Title: ${title}
-Summary: ${overallSummary}
-User Intent: ${userIntent}
-Key Topics: ${keyTopics.join(', ')}
-Entities:\n ${structuredData.entities
-    .map((entity) => `- ${entity.type}: ${entity.name}`)
-    .join('\n')}
-Agent Actions:\n ${agentActions.map((item) => ` - ${item}`).join('\n')}
-Outcomes and Decisions:\n ${outcomesAndDecisions.map((item) => ` - ${item}`).join('\n')}
-Unanswered Questions:\n ${unansweredQuestions.map((item) => ` - ${item}`).join('\n')}
-`;
+  const summaryParts: string[] = [];
 
-  return summary;
+  // Always include the main parts
+  if (title.trim()) {
+    summaryParts.push(`Title: ${title}`);
+  }
+  if (overallSummary.trim()) {
+    summaryParts.push(`Summary: ${overallSummary}`);
+  }
+  if (userIntent.trim()) {
+    summaryParts.push(`User Intent: ${userIntent}`);
+  }
+  if (keyTopics?.length > 0) {
+    summaryParts.push(`Key Topics: ${keyTopics.join(', ')}`);
+  }
+  if (entities?.length > 0) {
+    const entityLines = entities.map((entity) => `- ${entity.type}: ${entity.name}`).join('\n');
+    summaryParts.push(`Entities:\n${entityLines}`);
+  }
+  if (agentActions?.length > 0) {
+    const actionLines = agentActions.map((item) => ` - ${item}`).join('\n');
+    summaryParts.push(`Agent Actions:\n${actionLines}`);
+  }
+  if (outcomesAndDecisions?.length > 0) {
+    const outcomeLines = outcomesAndDecisions.map((item) => ` - ${item}`).join('\n');
+    summaryParts.push(`Outcomes and Decisions:\n${outcomeLines}`);
+  }
+  if (unansweredQuestions?.length > 0) {
+    const questionLines = unansweredQuestions.map((item) => ` - ${item}`).join('\n');
+    summaryParts.push(`Unanswered Questions:\n${questionLines}`);
+  }
+
+  return summaryParts.join('\n\n');
 };

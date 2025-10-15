@@ -16,6 +16,7 @@ const storageSettings = {
   name: conversationSummaryIndexName,
   schema: {
     properties: {
+      conversation_id: types.keyword({}),
       user_id: types.keyword({}),
       user_name: types.keyword({}),
       agent_id: types.keyword({}),
@@ -47,6 +48,7 @@ const storageSettings = {
 } satisfies IndexStorageSettings;
 
 export interface ConversationSummaryProperties {
+  conversation_id: string;
   user_id: string;
   user_name: string;
   agent_id: string;

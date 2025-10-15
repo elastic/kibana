@@ -82,7 +82,7 @@ export const createMemoryProvider = ({
   modelProvider: ModelProvider;
 }): AgentMemoryProvider => {
   return {
-    recall: async ({ message, previousRounds = [] }) => {
+    recall: async ({ message, previousRounds = [], conversationId }) => {
       return withActiveInferenceSpan(
         'GenerateRecallQuery',
         { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
@@ -124,16 +124,18 @@ export const createMemoryProvider = ({
 
           const summaryService = await conversationsService.getSummarizationService({ request });
 
-          // TODO: (not necessarily there) we need a way to exclude the current conversation from the search
           const results = await summaryService.search({
+            conversationId,
             term: mainIntentQuery,
             keywords: uniq([...extractedKeywords, ...entities.map((entity) => entity.name)]),
             questions: hypotheticalQuestions,
           });
 
-          // TODO: improve format
           return results.map((result) => {
-            return { content: result.semantic_summary };
+            return {
+              conversation_id: result.conversation_id,
+              content: result.semantic_summary,
+            };
           });
         }
       );

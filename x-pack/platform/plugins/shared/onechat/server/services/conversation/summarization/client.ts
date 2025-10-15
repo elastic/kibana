@@ -24,6 +24,7 @@ import { summarizeConversation } from './summarizer';
 import { createConversationSummary, createSemanticSummary } from './utils';
 
 export interface SummarySearchParams {
+  conversationId?: string;
   term: string;
   keywords?: string[];
   questions?: string[];
@@ -134,7 +135,7 @@ class ConversationSummaryServiceImpl implements ConversationSummaryService {
   }
 
   async search(options: SummarySearchParams): Promise<ConversationSummary[]> {
-    const { term, keywords = [], questions = [] } = options;
+    const { term, keywords = [], questions = [], conversationId } = options;
 
     const response = await this.storage.getClient().search({
       track_total_hits: false,
@@ -148,6 +149,19 @@ class ConversationSummaryServiceImpl implements ConversationSummaryService {
                 ? { user_name: this.user.username }
                 : { user_id: this.user.id },
             },
+            ...(conversationId
+              ? [
+                  {
+                    bool: {
+                      must_not: {
+                        term: {
+                          _id: conversationId,
+                        },
+                      },
+                    },
+                  },
+                ]
+              : []),
           ],
           must: [
             {
@@ -158,6 +172,17 @@ class ConversationSummaryServiceImpl implements ConversationSummaryService {
                 },
               },
             },
+            {
+              multi_match: {
+                query: term,
+                fields: [
+                  'structured_data.title',
+                  'structured_data.user_intent',
+                  'structured_data.discussion_summary',
+                ],
+                boost: 1,
+              },
+            },
             ...(keywords.length > 0
               ? [
                   {
@@ -166,6 +191,18 @@ class ConversationSummaryServiceImpl implements ConversationSummaryService {
                         query: keywords.join(' '),
                         boost: 1,
                       },
+                    },
+                  },
+                  {
+                    multi_match: {
+                      query: keywords.join(' '),
+                      fields: [
+                        'structured_data.title',
+                        'structured_data.user_intent',
+                        'structured_data.discussion_summary',
+                        'structured_data.key_topics',
+                      ],
+                      boost: 1,
                     },
                   },
                 ]

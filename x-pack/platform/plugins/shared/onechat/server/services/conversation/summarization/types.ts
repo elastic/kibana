@@ -6,6 +6,7 @@
  */
 
 export interface ConversationSummary {
+  conversation_id: string;
   user_id: string;
   user_name: string;
   agent_id: string;

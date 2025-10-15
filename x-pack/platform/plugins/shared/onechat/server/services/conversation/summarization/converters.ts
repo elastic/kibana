@@ -17,6 +17,7 @@ export const fromEs = (document: Document): ConversationSummary => {
   }
 
   return {
+    conversation_id: document._id,
     user_id: document._source.user_id,
     user_name: document._source.user_name,
     agent_id: document._source.agent_id,
@@ -46,6 +47,7 @@ export const toEs = ({
   space: string;
 }): ConversationSummaryProperties => {
   return {
+    conversation_id: summary.conversation_id,
     agent_id: summary.agent_id,
     user_id: summary.user_id,
     user_name: summary.user_name,
