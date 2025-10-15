@@ -12,7 +12,6 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  kubernetesEnabled: false,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
   /**
@@ -39,16 +38,8 @@ export const allowedExperimentalValues = Object.freeze({
    */
   socTrendsEnabled: false,
 
-  /**
-   * Enables Automated Endpoint Process actions
-   */
-  automatedProcessActionsEnabled: true,
-
   /** Enables the `kill-process` response action for SentinelOne */
   responseActionsSentinelOneKillProcessEnabled: true,
-
-  /** Enable the `processes` response actions for SentinelOne */
-  responseActionsSentinelOneProcessesEnabled: true,
 
   /**
    * Enables the ability to send Response actions to Crowdstrike and persist the results
@@ -124,25 +115,6 @@ export const allowedExperimentalValues = Object.freeze({
   protectionUpdatesEnabled: true,
 
   /**
-   * Disables the timeline save tour.
-   * This flag is used to disable the tour in cypress tests.
-   */
-  disableTimelineSaveTour: false,
-
-  /**
-   * Enables the risk engine privileges route
-   * and associated callout in the UI
-   */
-  riskEnginePrivilegesRouteEnabled: true,
-
-  /**
-   * Enables SentinelOne manual host isolation response actions directly through the connector
-   * sub-actions framework.
-   * v8.12.0
-   */
-  sentinelOneManualHostActionsEnabled: true,
-
-  /**
    * Enables Response actions telemetry collection
    * Should be enabled in 8.17.0
    */
@@ -184,6 +156,11 @@ export const allowedExperimentalValues = Object.freeze({
   filterProcessDescendantsForEventFiltersEnabled: true,
 
   /**
+   * Adds a new option to filter descendants of a process for Management / Trusted Apps
+   */
+  filterProcessDescendantsForTrustedAppsEnabled: false,
+
+  /**
    * Enables the rule's bulk action to manage alert suppression
    */
   bulkEditAlertSuppressionEnabled: true,
@@ -194,22 +171,10 @@ export const allowedExperimentalValues = Object.freeze({
   doesNotMatchForIndicatorMatchRuleEnabled: true,
 
   /**
-   * Enables the new data ingestion hub
-   */
-  dataIngestionHubEnabled: false,
-
-  /**
    * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
    * can be disabled if necessary in a given environment.
    */
   entityStoreDisabled: false,
-
-  /**
-   * Enables the Service Entity Store. The Entity Store feature will install the service engine by default.
-   */
-  serviceEntityStoreEnabled: true,
-  /**
-
 
   /**
    * Disables the siem migrations feature
@@ -276,7 +241,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the ability to import and migration dashboards through automatic migration service
    */
-  automaticDashboardsMigration: false,
+  automaticDashboardsMigration: true,
 
   /**
    * Enables the SIEM Readiness Dashboard feature
