@@ -29,9 +29,13 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Enhanced navigation menu for spaces that use a solution view. The new navigation experience provides more workspace for your data with an improved collapsed mode, hover menus, and responsiveness.
 * New Data Management menu. To ease the access to data-related management tasks, you can now find Fleet, Index Management, Integrations, and Ingest Pipelines in a dedicated menu, next to the Stack Management menu that previously hosted these pages.
 * Kibana is now available in German in Beta. To get started, set the locale in your kibana settings as follows: `i18n.locale: de-DE`. If you find any issues, please raise them on [Github](https://github.com/elastic/kibana/issues) [#236903]({{kib-pull}}236903).
-
+* Adds a table list view mode to the space selection screen for a more scalable design when a user has access to many spaces [#229046]({{kib-pull}}229046).
 
 **Alerting**:
+* Enable cases numerical id service [#238555]({{kib-pull}}238555).
+* Create case analytics indexes per solution per space [#234125]({{kib-pull}}234125).
+* Revert incremental id and add multifield [#230278]({{kib-pull}}230278).
+* Show image thumbnail [#226004]({{kib-pull}}226004).
 * Adds a new Connector for Jira Service Management [#235408]({{kib-pull}}235408).
 * Adds `xpack.actions.email.recipient_allowlist` kibana config [#220058]({{kib-pull}}220058).
 * Adds OAuth2 Client Credentials authentication support to Kibana Webhook connectors [#218442]({{kib-pull}}218442).
@@ -74,6 +78,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Improves Discover’s {{esql}} LOOKUP JOIN experience with an index editor flyout supporting inline editing, CSV import, contextual actions based on privileges, and a query bar that opens Discover with a prefilled ES|QL query [#232686]({{kib-pull}}232686).
 * You can now add controls directly in Discover by typing variables (for example `?service` or `??host.name`) in your {{esql}} queries. Instead of having to maintain multiple similar queries, controls let you dynamically change parts of a single query using dropdowns, multi-selects, and date pickers with value suggestions [#229598]({{kib-pull}}229598).
 * Adds related errors count and failure badge when exploring traces in Discover [#227413]({{kib-pull}}227413).
+* Shows logs related to the current document when exploring Traces in Discover [#232784]({{kib-pull}}232784).
 * Adds a warning when navigating away from Discover with unsaved changes [#225252]({{kib-pull}}225252).
 * Adds the ability to view the currently active profiles, such as the detected solution and data source contexts, which determine Discover's context-aware experiences [#222999]({{kib-pull}}222999).
 * Appends the casting only when necessary in Discover's {{esql}} mode filtering [#234748]({{kib-pull}}234748).
@@ -96,6 +101,7 @@ For the Elastic Observability 9.2.0 release information, refer to [Elastic Obser
 For the Elastic Security 9.2.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Machine Learning**:
+* Set the default retention period for the Logs anomaly detection configurations to 120 days [#231080]({{kib-pull}}231080).
 * Redesigns file upload UX [#232923]({{kib-pull}}232923).
 * Adds an `AI` section into `Stack Management` [#227289]({{kib-pull}}227289).
 * AI Connector/Inference endpoints creation UI: Adds icon for Contextual AI [#236951]({{kib-pull}}236951).
@@ -123,22 +129,6 @@ For the Elastic Security 9.2.0 release information, refer to [Elastic Security S
 **Search**:
 * Adds the ability to save Playgrounds within a space [#229511]({{kib-pull}}229511).
 * Improves code examples in the Synonyms interface [#235944]({{kib-pull}}235944).
-
-**TODO:Other entries to categorize**
-* Enable cases numerical id service [#238555]({{kib-pull}}238555).
-* Adds an advanced option that will disable the filtering of file backed volumes and CD-ROMs in the device_control plugin [#236620]({{kib-pull}}236620).
-* 🌊 Cell-level actions for stream routing conditions [#235560]({{kib-pull}}235560).
-% !!TODO!! The above PR had a lengthy release note description:
-% In Streams, users can now create routing conditions directly from preview table cells. When defining a child stream, cell values in the sample documents table are actionable: clicking them reveals quick actions (such as equals / not equals). This enables faster, more intuitive creation of routing conditions without leaving the preview context.
-* Feature: Add Agents link to view data links [#234679]({{kib-pull}}234679).
-* Create case analytics indexes per solution per space [#234125]({{kib-pull}}234125).
-* Showing Logs in context of the trace [#232784]({{kib-pull}}232784).
-* Set the default retention period for the Logs anomaly detection configurations to 120 days [#231080]({{kib-pull}}231080).
-* Revert incremental id and add multifield [#230278]({{kib-pull}}230278).
-* Adds kibana.alert.grouping field to infra alerts [#229054]({{kib-pull}}229054).
-* Adds table list view to space selector screen [#229046]({{kib-pull}}229046).
-* Adds kibana.alert.grouping field to ES Query rule [#228580]({{kib-pull}}228580).
-* Show image thumbnail [#226004]({{kib-pull}}226004).
 
 
 ### Fixes [kibana-9.2.0-fixes]
@@ -179,15 +169,8 @@ For the Elastic Security 9.2.0 release information, refer to [Elastic Security S
 
 **Search**:
 * Fixes an accessibility issue where resetting changes or removing all terms in the Synonyms panel was not announced by screen readers. VoiceOver users on Safari will now hear updates when terms are reset [#237877]({{kib-pull}}237877).
+* Fixes an issue with a null property being read in Playground [#230729]({{kib-pull}}230729).
 
-**TODO: Other entries to categorize**
-* Improve performance of clustering [#238394]({{kib-pull}}238394).
-* Enable auto-extraction by default and add user actions for observable actions [#236524]({{kib-pull}}236524).
-* Fixes unresponsive save button during tool creation [#235828]({{kib-pull}}235828).
-* Fix: add default monaco contrib import for cmd+/ comment toggling [#235334]({{kib-pull}}235334).
-* Show full tool traces in a flyout [#234654]({{kib-pull}}234654).
-* Fixes null property being read on Playground [#230729]({{kib-pull}}230729).
-* Update docs around FF toggle via API [#227817]({{kib-pull}}227817).
 
 ## 9.1.5 [kibana-9.1.5-release-notes]
 
