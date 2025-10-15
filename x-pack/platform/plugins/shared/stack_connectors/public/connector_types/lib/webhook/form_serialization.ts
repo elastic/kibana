@@ -22,7 +22,7 @@ import { isEmpty } from 'lodash';
  */
 
 export const formDeserializer = (data: ConnectorFormSchema): InternalConnectorForm => {
-  const configHeaders = Object.entries(data?.config.headers ?? {}).map(([key, value]) => ({
+  const configHeaders = Object.entries(data?.config?.headers ?? {}).map(([key, value]) => ({
     key,
     value,
     type: 'config' as const,
