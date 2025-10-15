@@ -9,7 +9,7 @@
 
 import { extractTemplateVariables } from './extract_template_variables';
 
-describe('extractNunjucksVariables', () => {
+describe('extractTemplateVariables', () => {
   it('should extract variables from a Nunjucks template string', () => {
     const template = `
       Hello {{ user.name }}!

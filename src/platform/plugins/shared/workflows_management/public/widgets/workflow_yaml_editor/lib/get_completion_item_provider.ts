@@ -1240,6 +1240,12 @@ export function getCompletionItemProvider(
   workflowYamlSchema: z.ZodSchema
 ): monaco.languages.CompletionItemProvider {
   return {
+    // Trigger characters for completion:
+    // '@' - variable references
+    // '.' - property access within variables
+    // ' ' - space, used for separating tokens in Liquid syntax
+    // '|' - Liquid filters (e.g., {{ variable | filter }})
+    // '{' - start of Liquid blocks (e.g., {{ ... }})
     triggerCharacters: ['@', '.', ' ', '|', '{'],
     provideCompletionItems: (model, position, completionContext) => {
       try {

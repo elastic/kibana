@@ -8,6 +8,11 @@
  */
 
 /**
+ * Default length to extend error highlighting when exact boundaries cannot be determined
+ */
+const DEFAULT_ERROR_HIGHLIGHT_EXTENSION = 10;
+
+/**
  * Extracts position information from liquidjs error messages
  * By default, liquidjs returns the start of the line of the error message
  * This function tries to pinpoint the specific problematic token rather than just the start of the expression
@@ -55,7 +60,7 @@ export const extractLiquidErrorPosition = (
     } else {
       // Find the end of the current word/expression
       const wordMatch = remainingText.match(/^\S+/);
-      end = offset + (wordMatch ? wordMatch[0].length : 10);
+      end = offset + (wordMatch ? wordMatch[0].length : DEFAULT_ERROR_HIGHLIGHT_EXTENSION);
     }
 
     return {
@@ -126,7 +131,10 @@ const findSpecificErrorToken = (
     if (contentIndex !== -1) {
       return {
         start: contentIndex,
-        end: Math.min(contentIndex + content.length + 10, text.length), // Extend a bit to show the unclosed part
+        end: Math.min(
+          contentIndex + content.length + DEFAULT_ERROR_HIGHLIGHT_EXTENSION,
+          text.length
+        ), // Extend a bit to show the unclosed part
       };
     }
   }

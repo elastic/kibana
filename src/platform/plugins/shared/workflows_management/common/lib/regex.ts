@@ -22,6 +22,21 @@ export const PROPERTY_PATH_REGEX =
 export const LIQUID_FILTER_REGEX = /\{\{\s*[^}]*\|\s*(\w*)\s*$/;
 
 // Matches: variable | filter_prefix within liquid blocks (outside of mustache syntax)
+/**
+ * LIQUID_BLOCK_FILTER_REGEX matches a variable followed by a filter within a Liquid block, but outside mustache syntax.
+ *
+ * Regex breakdown:
+ * (?:^|[^{])      - Non-capturing group: start of line or any character except '{' (to avoid mustache blocks)
+ * \s*             - Optional whitespace
+ * [^{}\s]+        - One or more characters that are not '{', '}', or whitespace (the variable name)
+ * \s*             - Optional whitespace
+ * \|              - Pipe character separating variable and filter
+ * \s*             - Optional whitespace
+ * (\w*)           - Capturing group: the filter name (alphanumeric/underscore)
+ * \s*$            - Optional whitespace to end of line
+ *
+ * Example match: "foo | filter"
+ */
 export const LIQUID_BLOCK_FILTER_REGEX = /(?:^|[^{])\s*[^{}\s]+\s*\|\s*(\w*)\s*$/;
 
 // Matches liquid keywords within a liquid block (assign, case, when, echo, etc.)
