@@ -26,23 +26,25 @@ const legacyMetricStateMetricOptionsSchema = schema.object({
    * - 'xl': Extra large
    * - 'xxl': Double extra large
    */
-  size: schema.oneOf(
-    [
-      schema.literal('xs'),
-      schema.literal('s'),
-      schema.literal('m'),
-      schema.literal('l'),
-      schema.literal('xl'),
-      schema.literal('xxl'),
-    ],
-    { meta: { description: 'Font size for the label and value' }, defaultValue: 'm' }
+  size: schema.maybe(
+    schema.oneOf(
+      [
+        schema.literal('xs'),
+        schema.literal('s'),
+        schema.literal('m'),
+        schema.literal('l'),
+        schema.literal('xl'),
+        schema.literal('xxl'),
+      ],
+      { meta: { description: 'Font size for the label and value' }, defaultValue: 'm' }
+    )
   ),
   /**
    * Alignment of the label and value for the legacy metric.
    * For example, align the label to the bottom and the value to the right.
    */
-  alignments: schema.object(
-    {
+  alignments: schema.maybe(
+    schema.object({
       /**
        * Alignment for label. Possible values:
        * - 'top': Align label to the top of the value (default)
@@ -62,8 +64,7 @@ const legacyMetricStateMetricOptionsSchema = schema.object({
         meta: { description: 'Value alignment' },
         defaultValue: 'left',
       }),
-    },
-    { defaultValue: { labels: 'top', value: 'left' } }
+    })
   ),
   /**
    * Where to apply the color (background or value)

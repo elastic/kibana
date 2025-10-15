@@ -50,9 +50,8 @@ function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisuali
     layerType: 'data',
     accessor: ACCESSOR,
     size: layer.metric.size,
-    titlePosition: layer.metric.alignments.labels,
-    textAlign: layer.metric.alignments.value,
-    // todo: handle all color configs
+    titlePosition: layer.metric.alignments?.labels,
+    textAlign: layer.metric.alignments?.value,
     ...(layer.metric.apply_color_to
       ? layer.metric.apply_color_to === 'background'
         ? { colorMode: 'Background' }
