@@ -8,7 +8,10 @@
 import { expect } from '@kbn/scout';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import type { Conversation, ConversationRound } from '@kbn/onechat-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import { EvaluatorId } from '../../../common/http_api/evaluations';
 import type { EvaluatorConfig } from '../../../common/http_api/evaluations';
 import type { EvaluationService } from './evaluation_service';
@@ -17,9 +20,29 @@ import { EvaluationServiceImpl } from './evaluation_service';
 describe('EvaluationService', () => {
   let logger: MockedLogger;
   let service: EvaluationService;
+  let mockInference: jest.Mocked<InferenceServerStart>;
+  let mockInferenceClient: jest.Mocked<BoundInferenceClient>;
+  let mockRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
+
   beforeEach(() => {
     logger = loggerMock.create();
-    service = new EvaluationServiceImpl({ logger });
+    mockRequest = httpServerMock.createKibanaRequest();
+
+    mockInferenceClient = {
+      chatComplete: jest.fn().mockResolvedValue({
+        content: '0.8',
+        tokens: { completion: 10, prompt: 5, total: 15 },
+      }),
+    } as any;
+
+    mockInference = {
+      getDefaultConnector: jest.fn().mockResolvedValue({
+        connectorId: 'test-connector-id',
+      }),
+      getClient: jest.fn().mockReturnValue(mockInferenceClient),
+    } as any;
+
+    service = new EvaluationServiceImpl({ logger, inference: mockInference });
   });
 
   const createMockConversation = (rounds: ConversationRound[]): Conversation => ({
@@ -53,7 +76,11 @@ describe('EvaluationService', () => {
         },
       ];
 
-      const results = await service.evaluateConversation(conversation, evaluatorConfigs);
+      const results = await service.evaluateConversation(
+        conversation,
+        evaluatorConfigs,
+        mockRequest
+      );
 
       expect(results).toHaveLength(2);
       expect(results[0].roundId).toBe('round-1');
@@ -74,7 +101,11 @@ describe('EvaluationService', () => {
         },
       ];
 
-      const results = await service.evaluateConversation(conversation, evaluatorConfigs);
+      const results = await service.evaluateConversation(
+        conversation,
+        evaluatorConfigs,
+        mockRequest
+      );
 
       expect(results).toHaveLength(1);
       expect(results[0].scores).toHaveLength(2);
@@ -94,12 +125,16 @@ describe('EvaluationService', () => {
         },
       ];
 
-      const results = await service.evaluateConversation(conversation, evaluatorConfigs);
+      const results = await service.evaluateConversation(
+        conversation,
+        evaluatorConfigs,
+        mockRequest
+      );
 
       expect(results[0].scores[0].score).toBe(1);
     });
 
-    it('returns mock scores for non-regex evaluators', async () => {
+    it('calls criteria evaluator for EvaluatorId.Relevance', async () => {
       const conversation = createMockConversation([createMockRound('round-1', 'Hello world')]);
 
       const evaluatorConfigs: EvaluatorConfig[] = [
@@ -109,10 +144,13 @@ describe('EvaluationService', () => {
         },
       ];
 
-      const results = await service.evaluateConversation(conversation, evaluatorConfigs);
+      const results = await service.evaluateConversation(
+        conversation,
+        evaluatorConfigs,
+        mockRequest
+      );
 
-      expect(results[0].scores[0].score).toBeGreaterThanOrEqual(0);
-      expect(results[0].scores[0].score).toBeLessThanOrEqual(1);
+      expect(results[0].scores[0].score).toBe(0.8);
     });
 
     it('uses evaluatorIdOverride when provided', async () => {
@@ -126,7 +164,11 @@ describe('EvaluationService', () => {
         },
       ];
 
-      const results = await service.evaluateConversation(conversation, evaluatorConfigs);
+      const results = await service.evaluateConversation(
+        conversation,
+        evaluatorConfigs,
+        mockRequest
+      );
 
       expect(results[0].scores[0].evaluatorId).toBe('custom-regex-1');
     });
@@ -148,7 +190,11 @@ describe('EvaluationService', () => {
         },
       ];
 
-      const results = await service.evaluateConversation(conversation, evaluatorConfigs);
+      const results = await service.evaluateConversation(
+        conversation,
+        evaluatorConfigs,
+        mockRequest
+      );
 
       expect(results).toEqual(
         expect.arrayContaining([
@@ -175,7 +221,11 @@ describe('EvaluationService', () => {
         },
       ];
 
-      const results = await service.evaluateConversation(conversation, evaluatorConfigs);
+      const results = await service.evaluateConversation(
+        conversation,
+        evaluatorConfigs,
+        mockRequest
+      );
 
       expect(results).toHaveLength(0);
     });
@@ -190,9 +240,9 @@ describe('EvaluationService', () => {
         },
       ];
 
-      await expect(service.evaluateConversation(conversation, evaluatorConfigs)).rejects.toThrow(
-        'Invalid regex pattern'
-      );
+      await expect(
+        service.evaluateConversation(conversation, evaluatorConfigs, mockRequest)
+      ).rejects.toThrow('Invalid regex pattern');
     });
 
     it('handles missing customInstructions gracefully', async () => {
@@ -204,7 +254,11 @@ describe('EvaluationService', () => {
         },
       ];
 
-      const results = await service.evaluateConversation(conversation, evaluatorConfigs);
+      const results = await service.evaluateConversation(
+        conversation,
+        evaluatorConfigs,
+        mockRequest
+      );
 
       expect(results[0].scores[0].score).toBe(1);
     });

@@ -107,6 +107,7 @@ export class ServiceManager {
 
     const evaluations = new EvaluationServiceImpl({
       logger: logger.get('evaluations'),
+      inference,
     });
 
     this.internalStart = {

@@ -163,7 +163,7 @@ export function registerEvaluationRoutes({
         const client = await conversationsService.getScopedClient({ request });
         const conversation = await client.get(conversationId);
 
-        const results = await evaluations.evaluateConversation(conversation, evaluators);
+        const results = await evaluations.evaluateConversation(conversation, evaluators, request);
 
         const updatedRounds = conversation.rounds.map((round) => {
           const roundEvaluation = results.find((r) => r.roundId === round.id);

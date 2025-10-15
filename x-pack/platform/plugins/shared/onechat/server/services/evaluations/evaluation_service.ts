@@ -5,48 +5,62 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { Conversation } from '@kbn/onechat-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type {
   EvaluatorConfig,
   ConversationRoundEvaluation,
 } from '../../../common/http_api/evaluations';
 import { EvaluatorId } from '../../../common/http_api/evaluations';
 import type { EvaluatorRegistry } from './types';
-import { createRegexEvaluator } from './evaluators';
+import { createRegexEvaluator, createCriteriaEvaluator } from './evaluators';
 
 export interface EvaluationService {
   evaluateConversation(
     conversation: Conversation,
-    evaluatorConfigs: EvaluatorConfig[]
+    evaluatorConfigs: EvaluatorConfig[],
+    request: KibanaRequest
   ): Promise<ConversationRoundEvaluation[]>;
 }
 
 interface EvaluationServiceDeps {
   logger: Logger;
+  inference: InferenceServerStart;
 }
 
 export class EvaluationServiceImpl implements EvaluationService {
   private readonly logger: Logger;
-  private readonly evaluators: Partial<EvaluatorRegistry>;
+  private readonly inference: InferenceServerStart;
 
-  constructor({ logger }: EvaluationServiceDeps) {
+  constructor({ logger, inference }: EvaluationServiceDeps) {
     this.logger = logger;
-    this.evaluators = {
-      [EvaluatorId.Regex]: createRegexEvaluator(),
-    };
+    this.inference = inference;
   }
 
   async evaluateConversation(
     conversation: Conversation,
-    evaluatorConfigs: EvaluatorConfig[]
+    evaluatorConfigs: EvaluatorConfig[],
+    request: KibanaRequest
   ): Promise<ConversationRoundEvaluation[]> {
+    const defaultConnector = await this.inference.getDefaultConnector(request);
+    const inferenceClient = this.inference.getClient({
+      request,
+      bindTo: { connectorId: defaultConnector.connectorId },
+    });
+
+    const evaluators: Partial<EvaluatorRegistry> = {
+      [EvaluatorId.Regex]: createRegexEvaluator(),
+      [EvaluatorId.Relevance]: createCriteriaEvaluator({ inferenceClient }),
+    };
+
     const results: ConversationRoundEvaluation[] = [];
 
     for (const round of conversation.rounds) {
       const scores = await Promise.all(
         evaluatorConfigs.map(async (config) => {
-          const evaluator = this.evaluators[config.evaluatorId];
+          const evaluator = evaluators[config.evaluatorId];
           let score: number;
 
           if (evaluator) {
