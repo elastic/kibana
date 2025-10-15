@@ -33,7 +33,7 @@ export const performComputation = (
   try {
     // Parse YAML document
     const lineCounter = new LineCounter();
-    const yamlDoc = YAML.parseDocument(yamlString, { lineCounter });
+    const yamlDoc = YAML.parseDocument(yamlString, { lineCounter, keepSourceTokens: true });
 
     // Parse workflow JSON for graph creation
     const dynamicConnectorTypes = getCachedDynamicConnectorTypes() || {};
