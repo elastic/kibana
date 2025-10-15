@@ -28908,18 +28908,18 @@ react-window-infinite-loader@^1.0.9:
   resolved "https://registry.yarnpkg.com/react-window-infinite-loader/-/react-window-infinite-loader-1.0.9.tgz#d861c03d5cbc550e2f185371af820fd22d46c099"
   integrity sha512-5Hg89IdU4Vrp0RT8kZYKeTIxWZYhNkVXeI1HbKo01Vm/Z7qztDvXljwx16sMzsa9yapRJQW3ODZfMUw38SOWHw==
 
-react-window@*, react-window@^1.8.10:
+react-window@*, react-window@^2.2.0:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/react-window/-/react-window-2.2.1.tgz#3adbafffba43ed045895adec2d050883670953ff"
+  integrity sha512-jrUMKDLW1B4yX4OU0QjdytGgWIg6wqWfiTe86lUhFsCUltkNNB/zYxFU0DTKAzBOMRbkpLVWS1IkLvQeO4L7nw==
+
+react-window@^1.8.10:
   version "1.8.11"
   resolved "https://registry.yarnpkg.com/react-window/-/react-window-1.8.11.tgz#a857b48fa85bd77042d59cc460964ff2e0648525"
   integrity sha512-+SRbUVT2scadgFSWx+R1P754xHPEqvcfSfVX10QYg6POOz+WNgkN48pS+BtZNIMGiL1HYrSEiCkwsMS15QogEQ==
   dependencies:
     "@babel/runtime" "^7.0.0"
     memoize-one ">=3.1.1 <6"
-
-react-window@^2.2.0:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/react-window/-/react-window-2.2.1.tgz#3adbafffba43ed045895adec2d050883670953ff"
-  integrity sha512-jrUMKDLW1B4yX4OU0QjdytGgWIg6wqWfiTe86lUhFsCUltkNNB/zYxFU0DTKAzBOMRbkpLVWS1IkLvQeO4L7nw==
 
 "react@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react@^17.0.0 || ^18.2.0 || ^19.0.0":
   version "19.0.0"
