@@ -116,13 +116,13 @@ export const createConnectedSearchSessionIndicator = ({
     const onContinueInBackground = useCallback(() => {
       if (saveDisabled) return;
       usageCollector?.trackSessionSentToBackground();
-      sessionService.save();
+      sessionService.save({ entryPoint: 'connected search session indicator' });
     }, [saveDisabled]);
 
     const onSaveResults = useCallback(() => {
       if (saveDisabled) return;
       usageCollector?.trackSessionSavedResults();
-      sessionService.save();
+      sessionService.save({ entryPoint: 'connected search session indicator' });
     }, [saveDisabled]);
 
     const onCancel = useCallback(() => {
