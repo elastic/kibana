@@ -91,7 +91,6 @@ describe('autocomplete', () => {
   const sourceCommands = ['row', 'from', 'show', 'ts'];
   const headerCommands = ['set'];
 
-  // Helper function to get source and header commands formatted for suggestions
   const getSourceAndHeaderCommands = () => {
     return [
       ...headerCommands.map((name) => name.toUpperCase() + ' '),
@@ -99,7 +98,6 @@ describe('autocomplete', () => {
     ];
   };
 
-  // Helper function to get non-source/header commands
   const getNonSourceHeaderCommands = () => {
     return esqlCommandRegistry
       ?.getAllCommands()
@@ -475,7 +473,7 @@ describe('autocomplete', () => {
     );
     // Source command
     testSuggestions('F/', [
-      ...getSourceAndHeaderCommands(),
+      ...['FROM ', 'ROW ', 'SHOW ', 'TS '].map(attachTriggerCommand),
       ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
