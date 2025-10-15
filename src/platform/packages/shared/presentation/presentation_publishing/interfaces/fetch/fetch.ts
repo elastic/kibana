@@ -49,10 +49,16 @@ function getReloadTimeFetchContext(api: unknown, reloadTimestamp?: number): Relo
   const typeApi = api as Partial<
     PublishesTimeRange & HasParentApi<Partial<PublishesUnifiedSearch & PublishesSearchSession>>
   >;
+
   const uuid = apiHasUniqueId(typeApi) ? typeApi.uuid : undefined;
+  const section = typeApi.parentApi?.layout$.getValue().panels[uuid]?.grid?.sectionId;
   const allFilters = typeApi?.parentApi?.filters$?.value;
   const filters = uuid
-    ? allFilters?.filter((currentFilter) => currentFilter.meta.controlledBy !== uuid)
+    ? allFilters?.filter(
+        (currentFilter) =>
+          currentFilter.meta.controlledBy !== uuid &&
+          (currentFilter.meta.group ? currentFilter.meta.group === section : true)
+      )
     : allFilters;
   return {
     reloadTimestamp,
@@ -83,12 +89,18 @@ function getBatchedObservables(api: unknown): Array<Observable<unknown>> {
   if (apiPublishesTimeRange(api)) {
     observables.push(api.timeRange$.pipe(skip(1)));
   }
-
   if (apiHasParentApi(api) && apiPublishesUnifiedSearch(api.parentApi)) {
+    const sectionId$: Observable<string | undefined> = api.parentApi?.getPanelSection$(api.uuid);
     observables.push(
-      combineLatest([api.parentApi.filters$, api.parentApi.query$]).pipe(
+      combineLatest([api.parentApi.filters$, api.parentApi.query$, sectionId$]).pipe(
         skip(1),
-        filter(() => !hasSearchSession(api))
+        filter(() => {
+          console.log('hasSearchSession', hasSearchSession(api));
+          return !hasSearchSession(api);
+        }),
+        tap(() => {
+          console.log('AFTER GILTER');
+        })
       )
     );
   }
@@ -105,6 +117,7 @@ function getBatchedObservables(api: unknown): Array<Observable<unknown>> {
       )
     );
   }
+  // observables.push(api.parentApi?.getPanelSection$(api.uuid));
 
   return observables;
 }
@@ -115,11 +128,20 @@ function getBatchedObservables(api: unknown): Array<Observable<unknown>> {
 function getImmediateObservables(api: unknown): Array<Observable<unknown>> {
   const observables: Array<Observable<unknown>> = [];
   if (apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)) {
-    observables.push(api.parentApi.searchSessionId$.pipe(skip(1)));
+    observables.push(
+      api.parentApi.searchSessionId$.pipe(
+        skip(1),
+        tap((id) => {
+          console.log('SEARCH SESSION', id);
+        })
+      )
+    );
   }
   if (apiHasParentApi(api) && apiPublishesReload(api.parentApi)) {
     observables.push(api.parentApi.reload$.pipe(filter(() => !hasSearchSession(api))));
   }
+  // const sectionId$: Observable<string | undefined> = api.parentApi?.getPanelSection$(api.uuid);
+  // observables.push(api.parentApi?.getPanelSection$(api.uuid));
   return observables;
 }
 
@@ -167,6 +189,10 @@ export function fetch$(api: unknown): Observable<FetchContext> {
   );
 
   return fetchContext$.pipe(
+    // tap((reloadTimeFetchContext) => {
+    //   if (api.uuid !== '68f74abf-99d0-4cef-b982-52b07de82444')
+    //     console.log({ reloadTimeFetchContext });
+    // }),
     combineLatestWith(isFetchPaused$),
     filter(([, isFetchPaused]) => !isFetchPaused),
     map(([fetchContext]) => fetchContext),

@@ -596,6 +596,11 @@ export function initializeLayoutManager(
         });
         trackPanel.scrollToBottom$.next();
       },
+      getPanelSection$: (uuid: string) => {
+        const panels = layout$.getValue().panels;
+        if (!panels[uuid]) return;
+        return layout$.pipe(map((layout) => layout.panels[uuid].grid.sectionId));
+      },
     },
     cleanup: () => {
       gridLayoutSubscription.unsubscribe();

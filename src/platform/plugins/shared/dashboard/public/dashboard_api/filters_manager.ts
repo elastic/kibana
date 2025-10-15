@@ -18,6 +18,7 @@ import {
   first,
   map,
   skip,
+  tap,
 } from 'rxjs';
 
 import type { Filter } from '@kbn/es-query';
@@ -66,7 +67,12 @@ export const initializeFiltersManager = (
       ) as Filter[][];
       return allOutputFilters && allOutputFilters.length > 0 ? allOutputFilters.flat() : undefined;
     }
-  ).pipe(distinctUntilChanged(deepEqual));
+  ).pipe(
+    // tap((allOutputFilters) => {
+    //   console.log({ allOutputFilters });
+    // }),
+    distinctUntilChanged(deepEqual)
+  );
 
   /** don't push filters to `unpublishedFilters$` until all children have their filters ready */
   const filterManagerSubscription = combineLatest([childFiltersLoading$, childFilters$])
@@ -114,6 +120,7 @@ export const initializeFiltersManager = (
         })
       )
       .subscribe((allFilters) => {
+        console.log({ allFilters });
         filters$.next(allFilters);
       })
   );

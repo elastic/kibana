@@ -59,9 +59,9 @@ export type ReloadReason =
 
 function getSearchContext(parentApi: unknown, esqlVariables: ESQLControlVariable[] = []) {
   const unifiedSearch$ = apiPublishesUnifiedSearch(parentApi)
-    ? pick(parentApi, 'filters$', 'query$', 'timeslice$', 'timeRange$')
+    ? pick(parentApi, 'query$', 'timeslice$', 'timeRange$')
     : {
-        filters$: new BehaviorSubject(undefined),
+        // filters$: new BehaviorSubject(undefined),
         query$: new BehaviorSubject(undefined),
         timeslice$: new BehaviorSubject(undefined),
         timeRange$: new BehaviorSubject(undefined),
@@ -69,7 +69,7 @@ function getSearchContext(parentApi: unknown, esqlVariables: ESQLControlVariable
 
   return {
     esqlVariables,
-    filters: unifiedSearch$.filters$.getValue(),
+    // filters: unifiedSearch$.filters$.getValue(),
     query: unifiedSearch$.query$.getValue(),
     timeRange: unifiedSearch$.timeRange$.getValue(),
     timeslice: unifiedSearch$.timeslice$?.getValue(),
@@ -266,7 +266,12 @@ export function loadEmbeddableData(
 
   const mergedSubscriptions = merge(
     // on search context change, reload
-    fetch$(api).pipe(map(() => 'searchContext' as ReloadReason)),
+    fetch$(api).pipe(
+      tap((fiters) => {
+        console.log({ fiters });
+      }),
+      map(() => 'searchContext' as ReloadReason)
+    ),
     controlESQLVariables$.pipe(
       waitUntilChanged(),
       map(() => 'ESQLvariables' as ReloadReason)

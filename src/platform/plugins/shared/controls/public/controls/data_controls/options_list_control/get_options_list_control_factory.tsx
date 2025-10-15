@@ -10,6 +10,7 @@
 import React, { useEffect } from 'react';
 import {
   BehaviorSubject,
+  Observable,
   Subject,
   combineLatest,
   debounceTime,
@@ -74,6 +75,8 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       if (isOptionsListESQLControlState(state)) {
         throw new Error('ES|QL control state handling not yet implemented');
       }
+
+      const sectionId$: Observable<string> = parentApi?.getPanelSection$(uuid);
 
       const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager();
@@ -218,20 +221,23 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         selectionsManager.api.selectedOptions$,
         selectionsManager.api.existsSelected$,
         selectionsManager.api.exclude$,
+        sectionId$,
       ])
         .pipe(debounceTime(0))
-        .subscribe(([dataViews, fieldName, selectedOptions, existsSelected, exclude]) => {
-          const dataView = dataViews?.[0];
-          if (!dataView) return;
+        .subscribe(
+          ([dataViews, fieldName, selectedOptions, existsSelected, exclude, sectionId]) => {
+            const dataView = dataViews?.[0];
+            if (!dataView) return;
 
-          const newFilter = buildFilter(dataView, uuid, {
-            fieldName,
-            selectedOptions,
-            existsSelected,
-            exclude,
-          });
-          dataControlManager.internalApi.setOutputFilter(newFilter);
-        });
+            const newFilter = buildFilter(dataView, uuid, {
+              fieldName,
+              selectedOptions,
+              existsSelected,
+              exclude,
+            });
+            dataControlManager.internalApi.setOutputFilter(newFilter);
+          }
+        );
 
       function serializeState(): SerializedPanelState<OptionsListControlState> {
         return {

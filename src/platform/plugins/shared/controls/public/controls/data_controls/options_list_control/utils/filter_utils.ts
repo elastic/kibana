@@ -22,7 +22,7 @@ export const buildFilter = (
   filterState: Pick<
     OptionsListDSLControlState,
     'fieldName' | 'existsSelected' | 'exclude' | 'selectedOptions'
-  >
+  > & { sectionId?: string }
 ) => {
   let newFilter: Filter | undefined;
   const field = dataView.getFieldByName(filterState.fieldName);
@@ -40,6 +40,8 @@ export const buildFilter = (
     newFilter.meta.key = field?.name;
     if (filterState.exclude) newFilter.meta.negate = true;
     newFilter.meta.controlledBy = controlId;
+    if (filterState.sectionId) newFilter.meta.group = filterState.sectionId;
   }
+  // console.log({ newFilter });
   return newFilter;
 };

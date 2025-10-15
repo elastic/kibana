@@ -50,7 +50,10 @@ export function initializeSearchSessionManager(
       },
       dashboardInternalApi,
       searchSessionSettings,
-      (searchSessionId: string) => searchSessionId$.next(searchSessionId)
+      (searchSessionId: string) => {
+        console.log('HERE!!!!!!!!');
+        searchSessionId$.next(searchSessionId);
+      }
     );
   }
   return {
