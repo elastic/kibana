@@ -61,6 +61,12 @@ export type {
   AnomalySwimLaneEmbeddableApi,
 } from './anomaly_swimlane/types';
 
+export type {
+  MlEntity,
+  SingleMetricViewerEmbeddableUserInput,
+  SingleMetricViewerEmbeddableState,
+} from './single_metric_viewer/types';
+
 /**
  * Common API for all ML embeddables
  */

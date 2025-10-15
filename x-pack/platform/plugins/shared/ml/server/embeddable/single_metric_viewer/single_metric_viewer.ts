@@ -10,20 +10,21 @@ import { filterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { serializedTitlesSchema } from '../schemas';
 
-export const singleMetricViewerEmbeddableUserInputSchema = schema.object({
+const baseUserInputProps = schema.object({
   forecastId: schema.maybe(schema.string()),
   functionDescription: schema.maybe(schema.string()),
   jobIds: schema.arrayOf(schema.string()),
   selectedDetectorIndex: schema.number(),
   selectedEntities: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+});
+
+export const singleMetricViewerEmbeddableUserInputSchema = schema.object({
+  ...baseUserInputProps.getPropSchemas(),
   panelTitle: schema.maybe(schema.string()),
 });
 
-const { panelTitle, ...baseUserInputProps } =
-  singleMetricViewerEmbeddableUserInputSchema.getPropSchemas();
-
 export const singleMetricViewerEmbeddableCustomInputSchema = schema.object({
-  ...baseUserInputProps,
+  ...baseUserInputProps.getPropSchemas(),
   id: schema.maybe(schema.string()),
   filters: schema.maybe(schema.arrayOf(filterSchema)),
   query: schema.maybe(querySchema),
