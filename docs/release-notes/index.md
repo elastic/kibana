@@ -45,33 +45,22 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds the **Select all** functionality for Options list controls [#221010]({{kib-pull}}221010).
 
 **Data ingestion and Fleet**:
-* Adds toggle that grants permission to write to `logs` datastream [#233374]({{kib-pull}}233374).
-% !!TODO!! The above PR had a lengthy release note description:
-% Added `write to logs streams` toggle on outputs allowing the user to have greater control of whether agents that use an output have permission to write to the logs stream.
-* Complete OTel configuration pipelines with an exporter [#233090]({{kib-pull}}233090).
-* Enable feature flag `enableAutoInstallContentPackages` [#232668]({{kib-pull}}232668).
-% !!TODO!! The above PR had a lengthy release note description:
-% Enable feature to auto install content packages where data is ingested for the matching datasets defined in the packages' discovery fields.
-* Knowledge base integration support [#230107]({{kib-pull}}230107).
-% !!TODO!! The above PR had a lengthy release note description:
-% Adds support for indexing package knowledge base docs into the .integration_knowledge system index, with per-document updates and automatic removal when a package is deleted. To be utilized by package developers allowing the AI assistants to have greater context relevant to particular packages.
-* Added MIGRATE to signed actions [#228566]({{kib-pull}}228566).
-* Show agentless resources" toggle added to Fleet > Settings for debugging and diagnostics purposes [#237528]({{kib-pull}}237528).
-* Update max version supported of package spec to 3.5 [#235942]({{kib-pull}}235942).
-* Enables installation support of alerting_rule_template kibana assets from packages [#235842]({{kib-pull}}235842).
-* Added new filter to only show agentless integrations [#235686]({{kib-pull}}235686).
-* Adds support for installing alerting_rule_template assets from packages [#233533]({{kib-pull}}233533).
-* Feat(fleet): add support for url variable type [#231062]({{kib-pull}}231062).
-% !!TODO!! The above PR had a lengthy release note description:
-% Adds support for a new url type variable in Fleet packages which provides better input validation of URLs in configurations.
-* Feat(fleet): add support for duration variable type [#231027]({{kib-pull}}231027).
-% !!TODO!! The above PR had a lengthy release note description:
-% Adds support for a new duration variable type in Fleet packages which provides better input validation of duration strings (e.g. 1h30m) in configurations.
-* Integrations overview: render accordion for sample events [#228799]({{kib-pull}}228799).
-* Exclude metrics data streams [#227842]({{kib-pull}}227842).
-* Adds package rollback API [#226754]({{kib-pull}}226754).
-* The remove processor in the ingest pipelines now supports "keep" option [#225638]({{kib-pull}}225638).
-* Adds action to Add tags to Agent details page [#225433]({{kib-pull}}225433).
+* Adds a toggle on the {{es}} output configuration page that grants agents permission to write to the `logs` and `logs.*` data streams [#233374]({{kib-pull}}233374).
+* Completes OTel configuration pipelines with an exporter [#233090]({{kib-pull}}233090).
+* Enables feature to auto-install content packages when data is ingested for datasets that match the datasets defined in the packages' `discovery` fields [#232668]({{kib-pull}}232668).
+* Adds support for indexing package knowledge base docs into the `.integration_knowledge` system index, allowing AI assistants used by integration developers to have greater context relevant to specific packages [#230107]({{kib-pull}}230107).
+* Adds the `MIGRATE` action to the `SIGNED_ACTIONS` set [#228566]({{kib-pull}}228566).
+* Adds a **Show agentless resources** toggle on the Fleet > Settings page to allow for debugging and diagnostics [#237528]({{kib-pull}}237528).
+* Updates the maximum supported version of package spec to 3.5 [#235942]({{kib-pull}}235942).
+* Enables the installation of `alerting_rule_template` {{kib}} assets from packages; also enables a background task for reporting agent status changes in {{fleet}} [#235842]({{kib-pull}}235842).
+* Adds a filter on the Integrations page to show only agentless integrations [#235686]({{kib-pull}}235686).
+* Adds support for a new `url` variable type in {{fleet}} packages which provides better input validation of URLs in configurations [#231062]({{kib-pull}}231062).
+* Adds support for a new `duration` variable type in {{fleet}} packages which provides better input validation of duration strings in configurations [#231027]({{kib-pull}}231027).
+* Renders the accordion for sample events on the integration overview page as collapsed by default [#228799]({{kib-pull}}228799).
+* Hides metrics data streams and packages on Logs Essentials projects [#227842]({{kib-pull}}227842).
+* Adds a package rollback API [#226754]({{kib-pull}}226754).
+* Adds support for the `keep` option in the Remove processor in ingest pipelines [#225638]({{kib-pull}}225638).
+* Adds the **Add / remove tags** action on the agent details page [#225433]({{kib-pull}}225433).
 
 **Discover**:
 * Enable Discover tabs by default [#235150]({{kib-pull}}235150).
