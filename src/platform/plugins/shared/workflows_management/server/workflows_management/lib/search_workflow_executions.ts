@@ -21,6 +21,10 @@ interface SearchWorkflowExecutionsParams {
   workflowExecutionIndex: string;
   query: QueryDslQueryContainer;
   sort?: Sort;
+  size?: number;
+  from?: number;
+  page?: number;
+  perPage?: number;
 }
 
 export const searchWorkflowExecutions = async ({
@@ -29,6 +33,10 @@ export const searchWorkflowExecutions = async ({
   workflowExecutionIndex,
   query,
   sort = [{ createdAt: 'desc' }],
+  size,
+  from,
+  page = 1,
+  perPage = 20,
 }: SearchWorkflowExecutionsParams): Promise<WorkflowExecutionListDto> => {
   try {
     logger.info(`Searching workflow executions in index ${workflowExecutionIndex}`);
@@ -36,9 +44,12 @@ export const searchWorkflowExecutions = async ({
       index: workflowExecutionIndex,
       query,
       sort,
+      size,
+      from,
+      track_total_hits: true,
     });
 
-    return transformToWorkflowExecutionListModel(response);
+    return transformToWorkflowExecutionListModel(response, page, perPage);
   } catch (error) {
     logger.error(`Failed to search workflow executions: ${error}`);
     throw error;
@@ -46,8 +57,13 @@ export const searchWorkflowExecutions = async ({
 };
 
 function transformToWorkflowExecutionListModel(
-  response: SearchResponse<EsWorkflowExecution>
+  response: SearchResponse<EsWorkflowExecution>,
+  page: number,
+  perPage: number
 ): WorkflowExecutionListDto {
+  const total =
+    typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
+
   return {
     results: response.hits.hits.map((hit) => {
       const workflowExecution = hit._source!;
@@ -64,9 +80,9 @@ function transformToWorkflowExecutionListModel(
       };
     }),
     _pagination: {
-      limit: response.hits.hits.length,
-      page: 1,
-      total: response.hits.hits.length,
+      limit: perPage,
+      page,
+      total,
     },
   };
 }
