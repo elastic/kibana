@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ExplorerNoJobsSelected } from './explorer_no_jobs_selected';
+export { AnomalyDetectionNoJobsSelected } from './anomaly_detection_no_jobs_selected';
