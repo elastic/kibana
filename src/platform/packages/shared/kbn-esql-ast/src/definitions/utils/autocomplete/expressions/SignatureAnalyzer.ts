@@ -22,6 +22,7 @@ import { acceptsArbitraryExpressions } from './utils';
 import type { FunctionDefinition } from '../../../types';
 
 /** Centralizes signature analysis using getValidSignaturesAndTypesToSuggestNext API. */
+
 export class SignatureAnalyzer {
   private readonly signatures: Signature[];
 
@@ -59,6 +60,7 @@ export class SignatureAnalyzer {
     }
 
     const validationResult = getValidSignaturesAndTypesToSuggestNext(node, context, fnDefinition);
+
     const firstArgumentType = validationResult.enrichedArgs[0]?.dataType;
 
     return new SignatureAnalyzer(
@@ -163,6 +165,7 @@ export class SignatureAnalyzer {
     return this.currentParameterIndex >= this.maxParams - 1;
   }
 
+
   /**
    * Returns true if more parameters can be added.
    * Considers: mandatory args, variadic functions, max params.
@@ -234,6 +237,10 @@ export class SignatureAnalyzer {
     return this.signatures;
   }
 
+  // ============================================================================
+  // Public API: Type Analysis
+  // ============================================================================
+
   /**
    * Returns true if function accepts arbitrary expressions in parameters.
    *
@@ -250,6 +257,11 @@ export class SignatureAnalyzer {
 
   /**
    * Gets accepted types for the current/next parameter.
+   *
+   * Special handling for:
+   * - Functions with arbitrary expressions → returns ['any']
+   * - Boolean homogeneity → returns ['any'] (user can build boolean expressions)
+   * - Other homogeneous types → returns types matching first parameter
    */
   public getAcceptedTypes(): FunctionParameterType[] {
     // Special case 1: functions accepting arbitrary expressions (CASE, etc.)

@@ -17,6 +17,7 @@ import { inOperators, patternMatchOperators } from '../../../../../all_operators
 
 const WHITESPACE_NORMALIZE_REGEX = /\s+/g;
 const TRAILING_WHITESPACE_REGEX = /\s+$/;
+
 const NULL_CHECK_CANDIDATES = ['is null', 'is not null'] as const;
 
 /**
@@ -114,8 +115,11 @@ async function handleInfixOperator(
   const syntheticNode = createSyntheticNode(operatorName, text, expressionRoot);
 
   return dispatchOperators({
+
     ...context,
     expressionRoot: syntheticNode,
     innerText: text,
   });
+
+  return result;
 }

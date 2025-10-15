@@ -21,6 +21,7 @@ const NOT_LIKE_REGEX = /\bnot\s+like\s*$/i;
 const NOT_IN_REGEX = /\bnot\s+in\s*$/i;
 const IS_NOT_REGEX = /\bis\s+not\b/i;
 
+
 // Regex to extract field name before operator: match[1] = fieldName
 // Matches with or without opening parenthesis
 const FIELD_BEFORE_IN_REGEX = /(\w+)\s+(?:not\s+)?in\s*\(?\s*$/i;
@@ -35,6 +36,19 @@ function createSyntheticInfixOperatorNode(
   operatorName: string,
   innerText: string,
   fieldPattern: RegExp,
+=======
+// ============================================================================
+// Synthetic Node Creation Functions
+// ============================================================================
+
+/**
+ * Creates a synthetic binary expression node for IN / NOT IN operators.
+ * Used when cursor is right after "field IN " or "field IN (".
+ * If innerText ends with "(", creates a list node instead of placeholder.
+ */
+export function createSyntheticListOperatorNode(
+  operatorName: string,
+  innerText: string,
   leftOperand?: ESQLSingleAstItem
 ): ESQLFunction {
   const textLength = innerText.length;
@@ -42,6 +56,10 @@ function createSyntheticInfixOperatorNode(
 
   const right = hasOpenParen ? createEmptyListNode(textLength) : createPlaceholderNode(textLength);
   const left = leftOperand ?? extractFieldFromText(innerText, fieldPattern);
+=======
+
+  // Extract field name from text if leftOperand is not provided or not a column
+  const left = leftOperand ?? extractFieldFromText(innerText, FIELD_BEFORE_IN_REGEX);
 
   return {
     type: 'function',
@@ -121,6 +139,7 @@ export function detectNullCheck(innerText: string): PartialOperatorDetection | n
 
   return {
     operatorName: containsNot ? 'is not null' : 'is null',
+
     textBeforeCursor: innerText,
   };
 }
@@ -135,6 +154,7 @@ export function detectLike(innerText: string): PartialOperatorDetection | null {
   }
 
   const isNotLike = NOT_LIKE_REGEX.test(innerText);
+
 
   return {
     operatorName: isNotLike ? 'not like' : 'like',
@@ -153,6 +173,7 @@ export function detectIn(innerText: string): PartialOperatorDetection | null {
   }
 
   const isNotIn = NOT_IN_REGEX.test(innerText);
+
 
   return {
     operatorName: isNotIn ? 'not in' : 'in',
