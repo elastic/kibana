@@ -60,7 +60,9 @@
     "@kbn/licensing-types",
     "@kbn/llm-tasks-plugin",
     "@kbn/product-doc-base-plugin",
-    "@kbn/inference-endpoint-plugin"
+    "@kbn/inference-endpoint-plugin",
+    "@kbn/spaces-utils",
+    "@kbn/usage-collection-plugin"
   ],
   "exclude": ["target/**/*"]
 }

@@ -219,7 +219,6 @@ describe('DashboardGrid', () => {
       const newSection = internalApi.layout$.getValue().sections['54321'];
       expect(newSection).toEqual({
         grid: {
-          i: '54321',
           y: 8,
         },
         title: 'New collapsible section',
@@ -252,7 +251,8 @@ describe('DashboardGrid', () => {
           {
             title: 'Empty section',
             collapsed: false,
-            grid: { i: 'emptySection', y: 8 },
+            grid: { y: 8 },
+            uid: 'emptySection',
             panels: [],
           },
         ],

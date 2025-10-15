@@ -100,11 +100,11 @@ describe('getHoverItem()', () => {
 
     test('nested function name', async () => {
       await assertGetHoverItem(`from a | stats avg(round(numberField))`, 'round', [
-        '**Acceptable types**: **double** | **integer** | **long**',
+        '**Acceptable types**: **aggregate_metric_double** | **double** | **integer** | **long**',
         ...createFunctionContent('round'),
       ]);
       await assertGetHoverItem(`from a | stats avg(nonExistentFn(numberField))`, 'nonExistentFn', [
-        '**Acceptable types**: **double** | **integer** | **long**',
+        '**Acceptable types**: **aggregate_metric_double** | **double** | **integer** | **long**',
         ...createFunctionContent('nonExistentFn'),
       ]);
     });
