@@ -160,7 +160,6 @@ describe('Space awareness migration', () => {
             `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
             `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
             `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
-            `NOT exception-list-agnostic.attributes.tags:(ownerSpaceId*)`,
           ],
         })
       );
