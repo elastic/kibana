@@ -22,7 +22,6 @@ export {
   isToolCallStep,
   isReasoningStep,
 } from './conversation';
-export { type EvaluationScore } from './evaluations';
 export {
   ChatEventType,
   type ChatEventBase,
