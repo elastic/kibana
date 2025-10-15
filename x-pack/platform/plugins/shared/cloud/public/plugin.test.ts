@@ -199,6 +199,45 @@ describe('Cloud Plugin', () => {
         const result = await setup.fetchElasticsearchConfig();
         expect(result).toEqual({ elasticsearchUrl: 'elasticsearch-url' });
       });
+      describe('exposes getInTrial', () => {
+        it('is `true` when `serverless.in_trial` is set', () => {
+          const { setup } = setupPlugin({
+            serverless: {
+              project_id: 'my-awesome-project',
+              in_trial: true,
+            },
+          });
+
+          expect(setup.getInTrial()).toBe(true);
+        });
+        it('is `false` when `serverless.in_trial` is set to false', () => {
+          const { setup } = setupPlugin({
+            serverless: {
+              project_id: 'my-awesome-project',
+              in_trial: false,
+            },
+          });
+          expect(setup.getInTrial()).toBe(false);
+        });
+        it('is `true` when `trial_end_date` is set and is in the future', () => {
+          const { setup } = setupPlugin({
+            trial_end_date: new Date(Date.now() + 10000).toISOString(),
+          });
+
+          expect(setup.getInTrial()).toBe(true);
+        });
+        it('is `false` when `trial_end_date` is set and is in the past', () => {
+          const { setup } = setupPlugin({
+            trial_end_date: new Date(Date.now() - 10000).toISOString(),
+          });
+
+          expect(setup.getInTrial()).toBe(false);
+        });
+        it('is `false` when `serverless.in_trial` & `trial_end_date` are not set', () => {
+          const { setup } = setupPlugin({});
+          expect(setup.getInTrial()).toBe(false);
+        });
+      });
     });
   });
 
@@ -331,6 +370,50 @@ describe('Cloud Plugin', () => {
       const start = plugin.start(coreStart);
       const result = await start.fetchElasticsearchConfig();
       expect(result).toEqual({ elasticsearchUrl: 'elasticsearch-url' });
+    });
+    describe('exposes getInTrial', () => {
+      const getStartAndSetup = (configParts?: Partial<CloudConfigType>) => {
+        const { plugin } = startPlugin(configParts);
+        const coreStart = coreMock.createStart();
+        return plugin.start(coreStart);
+      };
+      it('is `true` when `serverless.in_trial` is set', () => {
+        const pluginStart = getStartAndSetup({
+          serverless: {
+            project_id: 'my-awesome-project',
+            in_trial: true,
+          },
+        });
+
+        expect(pluginStart.getInTrial()).toBe(true);
+      });
+      it('is `false` when `serverless.in_trial` is set to false', () => {
+        const pluginStart = getStartAndSetup({
+          serverless: {
+            project_id: 'my-awesome-project',
+            in_trial: false,
+          },
+        });
+        expect(pluginStart.getInTrial()).toBe(false);
+      });
+      it('is `true` when `trial_end_date` is set and is in the future', () => {
+        const pluginStart = getStartAndSetup({
+          trial_end_date: new Date(Date.now() + 10000).toISOString(),
+        });
+
+        expect(pluginStart.getInTrial()).toBe(true);
+      });
+      it('is `false` when `trial_end_date` is set and is in the past', () => {
+        const pluginStart = getStartAndSetup({
+          trial_end_date: new Date(Date.now() - 10000).toISOString(),
+        });
+
+        expect(pluginStart.getInTrial()).toBe(false);
+      });
+      it('is `false` when `serverless.in_trial` & `trial_end_date` are not set', () => {
+        const pluginStart = getStartAndSetup({});
+        expect(pluginStart.getInTrial()).toBe(false);
+      });
     });
   });
 });

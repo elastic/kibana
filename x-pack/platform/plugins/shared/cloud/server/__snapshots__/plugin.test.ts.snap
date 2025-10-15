@@ -13,6 +13,7 @@ Object {
   "csp": "aws",
   "deploymentId": "deployment-id",
   "elasticsearchUrl": undefined,
+  "getInTrial": [Function],
   "instanceSizeMb": undefined,
   "isCloudEnabled": true,
   "isElasticStaffOwned": undefined,
@@ -38,6 +39,7 @@ Object {
 exports[`Cloud Plugin #start interface snapshot 1`] = `
 Object {
   "baseUrl": "https://cloud.elastic.co",
+  "getInTrial": [Function],
   "isCloudEnabled": true,
   "projectsUrl": "https://cloud.elastic.co/projects/",
 }

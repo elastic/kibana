@@ -60,6 +60,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   private readonly logger: Logger;
   private elasticsearchConfig?: PublicElasticsearchConfigType;
   private readonly cloudUrls = new CloudUrlsService();
+  private readonly trialEndDate: Date | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
@@ -67,18 +68,15 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     this.isServerlessEnabled = !!this.config.serverless?.project_id;
     this.logger = initializerContext.logger.get();
     this.elasticsearchConfig = undefined;
+    this.trialEndDate = this.config.trial_end_date
+      ? new Date(this.config.trial_end_date)
+      : undefined;
   }
 
   public setup(core: CoreSetup): CloudSetup {
     registerCloudDeploymentMetadataAnalyticsContext(core.analytics, this.config);
 
-    const {
-      id,
-      cname,
-      trial_end_date: trialEndDate,
-      is_elastic_staff_owned: isElasticStaffOwned,
-      csp,
-    } = this.config;
+    const { id, cname, is_elastic_staff_owned: isElasticStaffOwned, csp } = this.config;
 
     let decodedId: DecodedCloudId | undefined;
     if (id) {
@@ -96,7 +94,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       csp,
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
-      trialEndDate: trialEndDate ? new Date(trialEndDate) : undefined,
+      trialEndDate: this.trialEndDate,
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
       onboarding: {
@@ -121,6 +119,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       ...this.cloudUrls.getUrls(), // TODO: Deprecate directly accessing URLs, use `getUrls` instead
       getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
       getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),
+      getInTrial: this.isInTrial.bind(this),
     };
   }
 
@@ -170,6 +169,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       ...this.cloudUrls.getUrls(), // TODO: Deprecate directly accessing URLs, use `getUrls` instead
       getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
       getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),
+      getInTrial: this.isInTrial.bind(this),
     };
   }
 
@@ -195,5 +195,13 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         elasticsearchUrl: undefined,
       };
     }
+  }
+
+  private isInTrial(): boolean {
+    if (this.config.serverless?.in_trial) return true;
+    if (this.trialEndDate !== undefined) {
+      return Date.now() <= this.trialEndDate.getTime();
+    }
+    return false;
   }
 }
