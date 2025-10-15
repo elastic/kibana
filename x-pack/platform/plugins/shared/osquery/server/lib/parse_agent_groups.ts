@@ -77,6 +77,44 @@ export const aggregateResults = async (
   return uniq<string>(results);
 };
 
+/**
+ * Parses agent selection criteria and returns a list of validated agent IDs.
+ *
+ * This function fetches agents based on the provided selection criteria (all agents,
+ * specific platforms, policies, or manually specified agent IDs). It uses paginated
+ * queries with Point-in-Time API to support enterprise-scale deployments (10k+ agents).
+ *
+ * @param soClient - Saved Objects client for accessing package policies
+ * @param esClient - Elasticsearch client for PIT-based pagination
+ * @param context - Osquery app context providing agent and policy services
+ * @param agentSelection - Agent selection criteria
+ *
+ * @returns {Promise<string[]>} Array of validated agent IDs, or empty array if:
+ *   - No agents match the selection criteria
+ *   - Agent/PackagePolicy services are unavailable
+ *
+ * @remarks
+ * This function does NOT throw errors. Callers should check for empty array and
+ * handle appropriately (typically by throwing a 400 error).
+ *
+ * The function implicitly validates agents through:
+ * - Space-scoped agent service (enforces RBAC)
+ * - Online status filtering (status:online)
+ * - Osquery policy filtering (only agents with Osquery integration)
+ * - PIT-based pagination (handles 10k+ agents safely)
+ *
+ * @example
+ * const agents = await parseAgentSelection(soClient, esClient, context, {
+ *   allAgentsSelected: true,
+ *   spaceId: 'default',
+ * });
+ *
+ * if (!agents.length) {
+ *   throw new CustomHttpRequestError('No agents found for selection', 400);
+ * }
+ *
+ * @see aggregateResults for pagination implementation details
+ */
 export const parseAgentSelection = async (
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -177,14 +215,34 @@ export const parseAgentSelection = async (
 
   const selectedAgentsArray = Array.from(selectedAgents);
 
-  // validate if all selected agents are in current space. If not, getByIds will throw an error, caught by caller
-  try {
-    await agentService?.getByIds(selectedAgentsArray, { ignoreMissing: false });
-
-    return selectedAgentsArray;
-  } catch (error) {
-    context.logFactory.get().error(error);
-
-    return [];
-  }
+  /**
+   * VALIDATION RATIONALE:
+   *
+   * This function does NOT perform an additional validation call via getByIds() because:
+   * // await agentService?.getByIds(selectedAgentsArray, { ignoreMissing: false });
+   * 1. ALREADY VALIDATED: All agents in selectedAgentsArray were successfully fetched through
+   *    aggregateResults(), which uses Fleet's listAgents() with proper pagination (PIT + searchAfter).
+   *    If an agent didn't exist or wasn't accessible, it wouldn't be in this array.
+   *
+   * 2. SPACE-SCOPED: The agentService is already space-scoped via asInternalScopedUser(spaceId).
+   *    Fleet's listAgents() enforces space boundaries through Kibana's security model.
+   *
+   * 3. FILTERED BY CRITERIA: Agents are filtered by:
+   *    - status:online (only active agents)
+   *    - policy_id (only agents with Osquery integration)
+   *    - Platform/policy selection (if specified)
+   *
+   * 4. SCALABILITY: A redundant getByIds() call would fail for 10k+ agents due to
+   *    Elasticsearch's max_result_window limit (default: 10,000). The getByIds method
+   *    doesn't use pagination, making it unsuitable for enterprise-scale deployments.
+   *
+   * 5. PERFORMANCE: Avoiding redundant validation reduces API latency and ES load.
+   *
+   * HISTORICAL NOTE: This validation was originally added to check space boundaries, but
+   * the space-scoped service already enforces this during the initial fetch. Removing this
+   * validation resolves Issue #2 from the 10k+ agents scalability investigation.
+   *
+   * @see https://github.com/elastic/kibana/issues/206924 (Fleet pagination issue)
+   */
+  return selectedAgentsArray;
 };

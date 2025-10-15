@@ -60,12 +60,9 @@ export const buildResultsQuery = ({
     index,
     ignore_unavailable: true,
     aggs: {
-      count_by_agent_id: {
-        terms: {
-          field: 'elastic_agent.id',
-          size: 10000,
-        },
-      },
+      // Using cardinality aggregation for unbounded agent counting
+      // Cardinality supports billions of unique values without size limits (HyperLogLog++ algorithm)
+      // The previous terms aggregation (count_by_agent_id) was unused and imposed an artificial 10k ceiling
       unique_agents: {
         cardinality: {
           field: 'elastic_agent.id',

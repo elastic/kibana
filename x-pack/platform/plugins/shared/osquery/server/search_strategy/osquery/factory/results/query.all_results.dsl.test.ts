@@ -45,12 +45,6 @@ describe('buildResultsQuery', () => {
         index: 'logs-osquery_manager.result*',
         ignore_unavailable: true,
         aggs: {
-          count_by_agent_id: {
-            terms: {
-              field: 'elastic_agent.id',
-              size: 10000,
-            },
-          },
           unique_agents: {
             cardinality: {
               field: 'elastic_agent.id',
@@ -248,12 +242,6 @@ describe('buildResultsQuery', () => {
         index: 'logs-osquery_manager.result-prod,logs-osquery_manager.result-staging',
         ignore_unavailable: true,
         aggs: {
-          count_by_agent_id: {
-            terms: {
-              field: 'elastic_agent.id',
-              size: 10000,
-            },
-          },
           unique_agents: {
             cardinality: {
               field: 'elastic_agent.id',

@@ -6,7 +6,6 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
 import type {
   ResultsStrategyResponse,
   ResultsRequestOptions,
@@ -18,10 +17,6 @@ import { buildResultsQuery } from './query.all_results.dsl';
 
 export const allResults: OsqueryFactory<OsqueryQueries.results> = {
   buildDsl: (options: ResultsRequestOptions) => {
-    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
-    }
-
     return buildResultsQuery(options);
   },
   parse: async (

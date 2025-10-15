@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import type {
   ActionResultsRequestOptions,
   ActionResultsStrategyResponse,
@@ -18,10 +17,6 @@ import { buildActionResultsQuery } from './query.action_results.dsl';
 
 export const actionResults: OsqueryFactory<OsqueryQueries.actionResults> = {
   buildDsl: (options: ActionResultsRequestOptions) => {
-    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
-      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
-    }
-
     return buildActionResultsQuery(options);
   },
   // @ts-expect-error update types
