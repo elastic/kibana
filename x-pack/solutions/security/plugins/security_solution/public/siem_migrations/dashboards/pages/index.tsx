@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle, EuiSpacer } from '@elastic/eui';
 import type { RouteComponentProps } from 'react-router-dom';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
-import { useKibana, useNavigation } from '../../../common/lib/kibana';
+import { useNavigation } from '../../../common/lib/kibana';
 import { HeaderPage } from '../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { SecurityPageName } from '../../../app/types';
@@ -53,14 +53,6 @@ export const MigrationDashboardsPage: React.FC<MigrationDashboardsPageProps> = R
         });
       }
     }, [isLoading, migrationId, navigateTo, dashboardMigrationsStats]);
-
-    const { removeFinishedMigrationsNotification } = useKibana().services.siemMigrations.dashboards;
-
-    useEffect(() => {
-      return () => {
-        removeFinishedMigrationsNotification();
-      };
-    }, [removeFinishedMigrationsNotification]);
 
     const onMigrationIdChange = (selectedId?: string) => {
       navigateTo({ deepLinkId: SecurityPageName.siemMigrationsDashboards, path: selectedId });

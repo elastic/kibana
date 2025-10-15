@@ -43,7 +43,7 @@ export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
   private isPolling = false;
   public connectorIdStorage: MigrationsStorage<string>;
   public traceOptionsStorage: MigrationsStorage<TraceOptions>;
-  public toastsByMigrationId: Record<string, Toast> = {};
+  public toastsByMigrationId: Record<string, Toast>;
 
   constructor(
     protected readonly core: CoreStart,
@@ -56,7 +56,7 @@ export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
     });
 
     this.latestStats$ = new BehaviorSubject<T[] | null>(null);
-
+    this.toastsByMigrationId = {};
     this.plugins.spaces.getActiveSpace().then((space) => {
       this.connectorIdStorage.setSpaceId(space.id);
       this.startPolling();

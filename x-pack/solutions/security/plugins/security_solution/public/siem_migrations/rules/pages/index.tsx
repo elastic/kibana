@@ -11,7 +11,7 @@ import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle, EuiSpacer } from
 import type { RouteComponentProps } from 'react-router-dom';
 import type { RelatedIntegration } from '../../../../common/api/detection_engine';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
-import { useKibana, useNavigation } from '../../../common/lib/kibana';
+import { useNavigation } from '../../../common/lib/kibana';
 import { HeaderPage } from '../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { SecurityPageName } from '../../../app/types';
@@ -67,14 +67,6 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
         });
       }
     }, [isLoading, migrationId, navigateTo, ruleMigrationsStats]);
-
-    const { removeFinishedMigrationsNotification } = useKibana().services.siemMigrations.dashboards;
-
-    useEffect(() => {
-      return () => {
-        removeFinishedMigrationsNotification();
-      };
-    }, [removeFinishedMigrationsNotification]);
 
     const onMigrationIdChange = (selectedId?: string) => {
       navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: selectedId });

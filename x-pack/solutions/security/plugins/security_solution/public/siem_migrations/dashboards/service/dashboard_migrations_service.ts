@@ -221,7 +221,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
   }
 
   protected sendFinishedMigrationNotification(taskStats: DashboardMigrationStats) {
-    const toast = getSuccessToast(taskStats, this.core);
+    const toast = getSuccessToast(taskStats, this.core, this);
     this.toastsByMigrationId[taskStats.id] = this.core.notifications.toasts.addSuccess(toast);
     return toast;
   }

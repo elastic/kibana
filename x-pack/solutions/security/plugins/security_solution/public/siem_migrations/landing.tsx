@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { LandingLinksIconsCategories } from '@kbn/security-solution-navigation/landing_links';
 import { SecurityPageName } from '../../common';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
-import { useKibana } from '../common/lib/kibana';
 import { Title } from '../common/components/header_page/title';
 import { useRootNavLink } from '../common/links/nav_links';
 import { useGlobalQueryString } from '../common/utils/global_query_string';
@@ -27,13 +26,6 @@ export const MigrationsLandingPage = () => {
   const { links = [], categories = [] } =
     useRootNavLink(SecurityPageName.siemMigrationsLanding) ?? {};
   const urlState = useGlobalQueryString();
-  const { removeFinishedMigrationsNotification } = useKibana().services.siemMigrations.dashboards;
-
-  useEffect(() => {
-    return () => {
-      removeFinishedMigrationsNotification();
-    };
-  }, [removeFinishedMigrationsNotification]);
 
   return (
     <SecuritySolutionPageWrapper>
