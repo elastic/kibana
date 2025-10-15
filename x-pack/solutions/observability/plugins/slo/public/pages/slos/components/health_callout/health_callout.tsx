@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -68,37 +68,36 @@ export function HealthCallout() {
             e.stopPropagation();
           }}
         >
-          <EuiFlexItem>
-            <span data-test-subj="sloHealthCalloutDescription">
-              <FormattedMessage
-                id="xpack.slo.sloList.healthCallout.description"
-                defaultMessage="The following {count, plural, one {SLO is} other {SLOs are}} in an unhealthy state. Data may be missing or incomplete. You can inspect {count, plural, one {it} other {each one}} here:"
-                values={{
-                  count: unhealthyAndMissingSloList.length,
-                }}
-              />
-            </span>
-            <ul>
-              {unhealthyAndMissingSloList.map((result) => (
-                <li key={result.sloId}>
-                  <ContentWithInspectCta
-                    textSize="xs"
-                    content={result.sloName}
-                    url={paths.sloDetails(result.sloId, '*', undefined, 'overview')}
-                  />
-                </li>
-              ))}
-            </ul>
-            {typeof total === 'number' && total > results.length && (
-              <p style={{ marginLeft: '4px' }}>
-                <FormattedMessage
-                  id="xpack.slo.sloList.healthCallout.moreUnhealthySloLinkText"
-                  defaultMessage="+ {count} more"
-                  values={{ count: total - results.length }}
+          <span data-test-subj="sloHealthCalloutDescription">
+            <FormattedMessage
+              id="xpack.slo.sloList.healthCallout.description"
+              defaultMessage="The following {count, plural, one {SLO is} other {SLOs are}} in an unhealthy state. Data may be missing or incomplete. You can inspect {count, plural, one {it} other {each one}} here:"
+              values={{
+                count: unhealthyAndMissingSloList.length,
+              }}
+            />
+          </span>
+          <ul>
+            {unhealthyAndMissingSloList.map((result) => (
+              <li key={result.sloId}>
+                <ContentWithInspectCta
+                  textSize="xs"
+                  content={result.sloName}
+                  url={paths.sloDetails(result.sloId, '*', undefined, 'overview')}
                 />
-              </p>
-            )}
-          </EuiFlexItem>
+              </li>
+            ))}
+          </ul>
+          {typeof total === 'number' && total > results.length && (
+            <>
+              <FormattedMessage
+                id="xpack.slo.sloList.healthCallout.moreUnhealthySloLinkText"
+                defaultMessage="+ {count} more"
+                values={{ count: total - results.length }}
+              />
+              <EuiSpacer size="s" />
+            </>
+          )}
           <EuiFlexGroup direction="row" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
@@ -112,7 +111,7 @@ export function HealthCallout() {
                 onClick={dismiss}
               >
                 <FormattedMessage
-                  id="xpack.slo.sloList.healthCallout.buttonDimissLabel"
+                  id="xpack.slo.sloList.healthCallout.buttonDismissLabel"
                   defaultMessage="Dismiss"
                 />
               </EuiButtonEmpty>

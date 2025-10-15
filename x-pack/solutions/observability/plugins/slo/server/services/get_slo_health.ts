@@ -56,6 +56,7 @@ export class GetSLOHealth {
 
     do {
       const sloIdCompositeQueryResponse = await this.scopedClusterClient.asCurrentUser.search({
+        index: '.slo-observability.summary-*',
         size: 0,
         aggs: {
           sloIds: {
@@ -79,8 +80,6 @@ export class GetSLOHealth {
             },
           },
         },
-        index: '.slo-observability.summary-*',
-        _source: ['slo.id', 'slo.instanceId', 'slo.revision', 'slo.name'],
         ...(params.list?.length && {
           query: {
             bool: {

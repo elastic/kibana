@@ -279,6 +279,8 @@ describe('GetSLOHealth', () => {
     it('reports a healthy SLO as healthy even when another SLO has a missing summary transform', async () => {
       const slo1 = createSLO({ id: 'c06591d1-9bd0-4538-8618-592759f265d1' });
       const slo2 = createSLO({ id: 'c06591d1-9bd0-4538-8618-592759f265d2' });
+      mockSLOCompositeAggResponse([slo1, slo2]);
+
       mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
         took: 0,
         timed_out: false,
@@ -335,6 +337,8 @@ describe('GetSLOHealth', () => {
     it('shows only 1 missing summary transform', async () => {
       const slo1 = createSLO({ id: 'c06591d1-9bd0-4538-8618-592759f265d1' });
       const slo2 = createSLO({ id: 'c06591d1-9bd0-4538-8618-592759f265d2' });
+      mockSLOCompositeAggResponse([slo1, slo2]);
+
       mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
         took: 0,
         timed_out: false,
