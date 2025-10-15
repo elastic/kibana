@@ -19,7 +19,7 @@ export const useRiskScorePreview = ({
   filter,
   exclude_alert_statuses: excludeAlertStatuses,
   filters,
-}: UseRiskScorePreviewParams) => {
+}: UseRiskScorePreviewParams & { filters?: Array<{ entity_types: string[]; filter: string }> }) => {
   const { fetchRiskScorePreview } = useEntityAnalyticsRoutes();
 
   return useQuery(
@@ -56,7 +56,8 @@ export const useRiskScorePreview = ({
       }
 
       if (filters && filters.length > 0) {
-        params.filters = filters;
+        // Type cast needed until backend PR merges with filters support
+        (params as RiskScoresPreviewRequest & { filters?: typeof filters }).filters = filters;
       }
 
       const response = await fetchRiskScorePreview({ signal, params });
