@@ -715,15 +715,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       },
     } = await this.fetchActionRequestEsDoc(actionId);
 
-    const {
-      responseActionsSentinelOneProcessesEnabled: isRunningProcessesEnabled,
-      responseActionsSentinelOneRunScriptEnabled: isRunScriptEnabled,
-    } = this.options.endpointService.experimentalFeatures;
+    const { responseActionsSentinelOneRunScriptEnabled: isRunScriptEnabled } =
+      this.options.endpointService.experimentalFeatures;
 
-    if (
-      (command === 'running-processes' && !isRunningProcessesEnabled) ||
-      (command === 'runscript' && !isRunScriptEnabled)
-    ) {
+    if (command === 'runscript' && !isRunScriptEnabled) {
       throw new ResponseActionsClientError(
         `File downloads are not supported for ${this.agentType} ${command}. Feature disabled`,
         400
@@ -826,15 +821,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       },
     } = await this.fetchActionRequestEsDoc(actionId);
 
-    const {
-      responseActionsSentinelOneProcessesEnabled: isRunningProcessesEnabled,
-      responseActionsSentinelOneRunScriptEnabled: isRunScriptEnabled,
-    } = this.options.endpointService.experimentalFeatures;
+    const { responseActionsSentinelOneRunScriptEnabled: isRunScriptEnabled } =
+      this.options.endpointService.experimentalFeatures;
 
-    if (
-      (command === 'running-processes' && !isRunningProcessesEnabled) ||
-      (command === 'runscript' && !isRunScriptEnabled)
-    ) {
+    if (command === 'runscript' && !isRunScriptEnabled) {
       throw new ResponseActionsClientError(
         `File downloads are not supported for ${this.agentType} ${command}. Feature disabled`,
         400
@@ -1013,15 +1003,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     actionRequest: GetProcessesRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<GetProcessesActionOutputContent>> {
-    if (
-      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled
-    ) {
-      throw new ResponseActionsClientError(
-        `processes not supported for ${this.agentType} agent type. Feature disabled`,
-        400
-      );
-    }
-
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       undefined,
       GetProcessesActionOutputContent,
