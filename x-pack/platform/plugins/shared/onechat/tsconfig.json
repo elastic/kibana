@@ -59,6 +59,7 @@
     "@kbn/data-views-plugin",
     "@kbn/expressions-plugin",
     "@kbn/lens-plugin",
+    "@kbn/license-management-plugin",
     "@kbn/scout",
     "@kbn/management-settings-field-definition",
     "@kbn/management-settings-types",

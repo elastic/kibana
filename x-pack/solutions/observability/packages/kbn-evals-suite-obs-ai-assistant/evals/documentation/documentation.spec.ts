@@ -12,9 +12,7 @@ import type {
   PerformInstallResponse,
   UninstallResponse,
 } from '@kbn/product-doc-base-plugin/common/http_api/installation';
-import { evaluate as base } from '../../src/evaluate';
-import type { EvaluateDocumentationDataset } from './evaluate_documentation_dataset';
-import { createEvaluateDocumentationDataset } from './evaluate_documentation_dataset';
+import { evaluate } from '../../src/evaluate';
 
 /**
  * NOTE: This scenario has been migrated from the legacy evaluation framework.
@@ -26,23 +24,6 @@ const ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/st
 const ELASTIC_DOCS_INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
 const ELASTIC_DOCS_UNINSTALL_ALL_API_PATH = '/internal/product_doc_base/uninstall';
 const inferenceId = defaultInferenceEndpoints.ELSER;
-
-const evaluate = base.extend<{
-  evaluateDocumentationDataset: EvaluateDocumentationDataset;
-}>({
-  evaluateDocumentationDataset: [
-    ({ chatClient, evaluators, phoenixClient }, use) => {
-      use(
-        createEvaluateDocumentationDataset({
-          chatClient,
-          evaluators,
-          phoenixClient,
-        })
-      );
-    },
-    { scope: 'test' },
-  ],
-});
 
 evaluate.describe('Retrieve documentation function', { tag: '@svlOblt' }, () => {
   evaluate.beforeAll(async ({ kbnClient, log }) => {
@@ -79,14 +60,14 @@ evaluate.describe('Retrieve documentation function', { tag: '@svlOblt' }, () => 
     }
   });
 
-  evaluate('retrieves ES documentation', async ({ evaluateDocumentationDataset }) => {
-    await evaluateDocumentationDataset({
+  evaluate('retrieves ES documentation', async ({ evaluateDataset }) => {
+    await evaluateDataset({
       dataset: {
         name: 'documentation: elasticsearch https',
         description: 'Validates retrieve_elastic_doc usage for configuring HTTPS in Elasticsearch.',
         examples: [
           {
-            input: { prompt: 'How can I configure HTTPS in Elasticsearch?' },
+            input: { question: 'How can I configure HTTPS in Elasticsearch?' },
             output: {
               criteria: [
                 `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about the Elastic stack`,
@@ -102,15 +83,16 @@ evaluate.describe('Retrieve documentation function', { tag: '@svlOblt' }, () => 
     });
   });
 
-  evaluate('retrieves Kibana documentation', async ({ evaluateDocumentationDataset }) => {
-    await evaluateDocumentationDataset({
+  evaluate('retrieves Kibana documentation', async ({ evaluateDataset }) => {
+    await evaluateDataset({
       dataset: {
         name: 'documentation: kibana lens',
         description: 'Validates retrieve_elastic_doc usage for Kibana Lens guidance.',
         examples: [
           {
             input: {
-              prompt: 'What is Kibana Lens and how do I create a bar chart visualization with it?',
+              question:
+                'What is Kibana Lens and how do I create a bar chart visualization with it?',
             },
             output: {
               criteria: [
@@ -126,15 +108,15 @@ evaluate.describe('Retrieve documentation function', { tag: '@svlOblt' }, () => 
     });
   });
 
-  evaluate('retrieves Observability documentation', async ({ evaluateDocumentationDataset }) => {
-    await evaluateDocumentationDataset({
+  evaluate('retrieves Observability documentation', async ({ evaluateDataset }) => {
+    await evaluateDataset({
       dataset: {
         name: 'documentation: observability nodejs apm',
         description: 'Validates retrieve_elastic_doc usage for Observability APM instructions.',
         examples: [
           {
             input: {
-              prompt:
+              question:
                 'How can I set up APM instrumentation for my Node.js service in Elastic Observability?',
             },
             output: {

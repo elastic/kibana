@@ -20,7 +20,7 @@ export interface PanelPlacementSettings {
 }
 
 export interface PanelPlacementReturn {
-  newPanelPlacement: Omit<GridData, 'i'>;
+  newPanelPlacement: GridData;
   otherPanels: DashboardLayout['panels'];
 }
 

@@ -9,6 +9,7 @@ import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import { getDocumentById } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { createErrorResult } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const getDocumentByIdSchema = z.object({
@@ -46,16 +47,13 @@ export const getDocumentByIdTool = (): BuiltinToolDefinition<typeof getDocumentB
 
       return {
         results: [
-          {
-            type: ToolResultType.error,
-            data: {
-              message: `Document with ID '${result.id}' not found in index '${result.index}'`,
-              metadata: {
-                id: result.id,
-                index: result.index,
-              },
+          createErrorResult({
+            message: `Document with ID '${result.id}' not found in index '${result.index}'`,
+            metadata: {
+              id: result.id,
+              index: result.index,
             },
-          },
+          }),
         ],
       };
     },

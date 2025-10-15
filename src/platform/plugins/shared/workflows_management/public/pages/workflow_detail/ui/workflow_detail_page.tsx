@@ -12,6 +12,8 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { css } from '@emotion/react';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
@@ -25,6 +27,7 @@ import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditor } from './workflow_editor';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import { WorkflowEditorStoreProvider } from '../../../widgets/workflow_yaml_editor/lib/store';
 
 export function WorkflowDetailPage({ id }: { id: string }) {
   const { application, notifications } = useKibana().services;
@@ -45,56 +48,40 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const [hasChanges, setHasChanges] = useState(false);
   const [highlightDiff, setHighlightDiff] = useState(false);
 
+  const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
+  const closeModal = useCallback(() => {
+    setWorkflowExecuteModalOpen(false);
+  }, []);
+
   const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
 
-  const { updateWorkflow, runWorkflow, testWorkflow } = useWorkflowActions();
+  const { updateWorkflow, testWorkflow } = useWorkflowActions();
 
   const canSaveWorkflow = Boolean(application?.capabilities.workflowsManagement.updateWorkflow);
   const canRunWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
-  const canTestWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
 
-  const handleSave = () => {
-    if (!id) {
-      notifications?.toasts.addError(new Error('Workflow is not loaded'), {
-        toastLifeTimeMs: 3000,
-        title: i18n.translate('workflows.workflowDetailHeader.error.workflowNotLoaded', {
-          defaultMessage: 'Workflow is not loaded',
-        }),
-      });
-      return;
-    }
-    updateWorkflow.mutate(
-      {
-        id,
-        workflow: {
-          yaml: workflowYaml,
-        },
-      },
-      {
-        onError: (err: unknown) => {
-          // Extract message from HTTP error body and update the error message
-          if (
-            err &&
-            typeof err === 'object' &&
-            'body' in err &&
-            err.body &&
-            typeof err.body === 'object' &&
-            'message' in err.body &&
-            typeof err.body.message === 'string'
-          ) {
-            (err as any).message = err.body.message;
-          }
-          notifications?.toasts.addError(err as Error, {
-            toastLifeTimeMs: 3000,
-            title: 'Failed to save workflow',
-          });
-        },
-      }
-    );
-  };
-
-  const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
-  const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
+  const handleSave = useCallback(
+    (onSuccess?: () => void) => {
+      updateWorkflow.mutate(
+        { id, workflow: { yaml: workflowYaml } },
+        {
+          ...(onSuccess && { onSuccess }),
+          onError: (err) => {
+            if (err.body?.message) {
+              err.message = err.body.message; // Extract message from HTTP error body and update the error message
+            }
+            notifications?.toasts.addError(err, {
+              toastLifeTimeMs: 3000,
+              title: i18n.translate('workflows.detail.error.workflowSaveFailed', {
+                defaultMessage: 'Failed to save workflow',
+              }),
+            });
+          },
+        }
+      );
+    },
+    [id, workflowYaml, updateWorkflow, notifications?.toasts]
+  );
 
   const definitionFromCurrentYaml: WorkflowYaml | null = useMemo(() => {
     const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
@@ -105,99 +92,50 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     return parsingResult.data as WorkflowYaml;
   }, [workflowYaml]);
 
-  const handleRunClick = ({ test = false }: { test: boolean }) => {
-    const def = test ? definitionFromCurrentYaml : workflow?.definition;
-    let needInput: boolean | undefined = false;
-    if (def?.triggers) {
-      needInput =
-        def.triggers.some((trigger) => trigger.type === 'alert') ||
-        (def.triggers.some((trigger) => trigger.type === 'manual') &&
-          def.inputs &&
-          Object.keys(def.inputs).length > 0);
-    }
-    if (needInput) {
-      if (test) {
-        setTestWorkflowModalOpen(true);
-      } else {
-        setWorkflowExecuteModalOpen(true);
-      }
-    } else {
-      if (test) {
-        handleTestRunWorkflow({});
-      } else {
-        handleRunWorkflow({});
-      }
-    }
-  };
+  const handleRun = useCallback(() => {
+    setWorkflowExecuteModalOpen(true);
+  }, [setWorkflowExecuteModalOpen]);
 
-  const handleRunWorkflow = (event: Record<string, any>) => {
-    if (!workflow) {
-      notifications?.toasts.addError(new Error('Workflow is not loaded'), {
-        toastLifeTimeMs: 3000,
-        title: i18n.translate('workflows.workflowDetailHeader.error.workflowNotLoaded', {
-          defaultMessage: 'Workflow is not loaded',
-        }),
-      });
-      return;
-    }
-    runWorkflow.mutate(
-      { id, inputs: event },
-      {
-        onSuccess: ({ workflowExecutionId }) => {
-          notifications?.toasts.addSuccess(
-            i18n.translate('workflows.workflowDetailHeader.success.workflowRunStarted', {
-              defaultMessage: 'Workflow run started',
-            }),
-            {
-              toastLifeTimeMs: 3000,
+  const handleRunWorkflow = useCallback(
+    (event: Record<string, any>) => {
+      testWorkflow.mutate(
+        { workflowYaml, inputs: event },
+        {
+          onSuccess: ({ workflowExecutionId }) => {
+            notifications?.toasts.addSuccess(
+              i18n.translate('workflows.workflowDetailHeader.success.workflowTestRunStarted', {
+                defaultMessage: 'Workflow test run started',
+              }),
+              { toastLifeTimeMs: 3000 }
+            );
+            setSelectedExecution(workflowExecutionId);
+          },
+          onError: (err) => {
+            if (err.body?.message) {
+              err.message = err.body.message; // Extract message from HTTP error body and update the error message
             }
-          );
-          setSelectedExecution(workflowExecutionId);
-        },
-        onError: (err: unknown) => {
-          notifications?.toasts.addError(err as Error, {
-            toastLifeTimeMs: 3000,
-            title: i18n.translate('workflows.workflowDetailHeader.error.workflowRunFailed', {
-              defaultMessage: 'Failed to run workflow',
-            }),
-          });
-        },
-      }
-    );
-  };
+            notifications?.toasts.addError(err as Error, {
+              toastLifeTimeMs: 3000,
+              title: i18n.translate('workflows.workflowDetailHeader.error.workflowTestRunFailed', {
+                defaultMessage: 'Failed to test workflow',
+              }),
+            });
+          },
+        }
+      );
+    },
+    [notifications?.toasts, setSelectedExecution, testWorkflow, workflowYaml]
+  );
 
-  const handleTestRunWorkflow = (event: Record<string, any>) => {
-    testWorkflow.mutate(
-      { workflowYaml, inputs: event },
-      {
-        onSuccess: ({ workflowExecutionId }) => {
-          notifications?.toasts.addSuccess(
-            i18n.translate('workflows.workflowDetailHeader.success.workflowTestRunStarted', {
-              defaultMessage: 'Workflow test run started',
-            }),
-            {
-              toastLifeTimeMs: 3000,
-            }
-          );
-          setSelectedExecution(workflowExecutionId);
-        },
-        onError: (err: unknown) => {
-          notifications?.toasts.addError(err as Error, {
-            toastLifeTimeMs: 3000,
-            title: i18n.translate('workflows.workflowDetailHeader.error.workflowTestRunFailed', {
-              defaultMessage: 'Failed to test workflow',
-            }),
-          });
-        },
-      }
-    );
-  };
+  const handleSaveAndRun = useCallback(() => {
+    handleSave(() => handleRun());
+  }, [handleRun, handleSave]);
 
   const handleToggleWorkflow = useCallback(() => {
     if (!workflow) {
       notifications?.toasts.addError(new Error('Workflow is not loaded'), {
         toastLifeTimeMs: 3000,
-        title: i18n.translate('workflows.workflowDetailHeader.error.workflowNotLoaded', {
+        title: i18n.translate('workflows.detail.error.workflowNotLoaded', {
           defaultMessage: 'Workflow is not loaded',
         }),
       });
@@ -226,10 +164,13 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     setHasChanges(false);
   }, [workflow]);
 
-  const handleChange = (wfString: string = '') => {
-    setWorkflowYaml(wfString);
-    setHasChanges(originalWorkflowYaml !== wfString);
-  };
+  const handleChange = useCallback(
+    (wfString: string = '') => {
+      setWorkflowYaml(wfString);
+      setHasChanges(originalWorkflowYaml !== wfString);
+    },
+    [originalWorkflowYaml]
+  );
 
   if (workflowError) {
     const error = workflowError as Error;
@@ -244,74 +185,72 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   }
 
   return (
-    <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
-      <EuiFlexItem style={{ overflow: 'hidden' }}>
-        <WorkflowDetailHeader
-          name={workflow?.name}
-          isLoading={isLoadingWorkflow}
-          activeTab={activeTab}
-          canRunWorkflow={canRunWorkflow}
-          canSaveWorkflow={canSaveWorkflow}
-          isValid={workflow?.valid ?? true}
-          isEnabled={workflow?.enabled ?? false}
-          handleRunClick={() => handleRunClick({ test: false })}
-          handleSave={handleSave}
-          handleToggleWorkflow={handleToggleWorkflow}
-          canTestWorkflow={canTestWorkflow}
-          handleTestClick={() => handleRunClick({ test: true })}
-          handleTabChange={setActiveTab}
-          hasUnsavedChanges={hasChanges}
-          highlightDiff={highlightDiff}
-          setHighlightDiff={setHighlightDiff}
-          lastUpdatedAt={workflow?.lastUpdatedAt ?? null}
-        />
-        <WorkflowEditorLayout
-          editor={
-            <WorkflowEditor
-              workflow={workflow}
-              workflowYaml={yamlValue}
-              onWorkflowYamlChange={handleChange}
-              hasChanges={hasChanges}
-              execution={execution}
-              activeTab={activeTab}
-              selectedExecutionId={selectedExecutionId}
-              selectedStepId={selectedStepId}
-              highlightDiff={highlightDiff}
-              setSelectedExecution={setSelectedExecution}
-            />
-          }
-          executionList={
-            activeTab === 'executions' && workflow && !selectedExecutionId ? (
-              <WorkflowExecutionList workflowId={workflow?.id ?? null} />
-            ) : null
-          }
-          executionDetail={
-            workflow && selectedExecutionId ? (
-              <WorkflowExecutionDetail
-                workflowExecutionId={selectedExecutionId}
+    <WorkflowEditorStoreProvider>
+      <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
+        <EuiFlexItem grow={false}>
+          <WorkflowDetailHeader
+            name={workflow?.name}
+            isLoading={isLoadingWorkflow}
+            activeTab={activeTab}
+            canRunWorkflow={canRunWorkflow}
+            canSaveWorkflow={canSaveWorkflow}
+            isValid={workflow?.valid ?? true}
+            isEnabled={workflow?.enabled ?? false}
+            handleRunClick={handleRun}
+            handleSave={handleSave}
+            handleToggleWorkflow={handleToggleWorkflow}
+            handleTabChange={setActiveTab}
+            hasUnsavedChanges={hasChanges}
+            highlightDiff={highlightDiff}
+            setHighlightDiff={setHighlightDiff}
+            lastUpdatedAt={workflow?.lastUpdatedAt ?? null}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
+          <WorkflowEditorLayout
+            editor={
+              <WorkflowEditor
+                workflow={workflow}
                 workflowYaml={yamlValue}
-                showBackButton={activeTab === 'executions'}
-                onClose={() => setSelectedExecution(null)}
+                onWorkflowYamlChange={handleChange}
+                handleSave={handleSave}
+                handleRun={handleRun}
+                handleSaveAndRun={handleSaveAndRun}
+                hasChanges={hasChanges}
+                execution={execution}
+                activeTab={activeTab}
+                selectedExecutionId={selectedExecutionId}
+                selectedStepId={selectedStepId}
+                highlightDiff={highlightDiff}
+                setSelectedExecution={setSelectedExecution}
               />
-            ) : null
-          }
-        />
-      </EuiFlexItem>
+            }
+            executionList={
+              activeTab === 'executions' && workflow && !selectedExecutionId ? (
+                <WorkflowExecutionList workflowId={workflow?.id ?? null} />
+              ) : null
+            }
+            executionDetail={
+              workflow && selectedExecutionId ? (
+                <WorkflowExecutionDetail
+                  workflowExecutionId={selectedExecutionId}
+                  workflowYaml={yamlValue}
+                  showBackButton={activeTab === 'executions'}
+                  onClose={() => setSelectedExecution(null)}
+                />
+              ) : null
+            }
+          />
+        </EuiFlexItem>
 
-      {workflowExecuteModalOpen && workflow && (
-        <WorkflowExecuteModal
-          definition={workflow.definition}
-          onClose={() => setWorkflowExecuteModalOpen(false)}
-          onSubmit={handleRunWorkflow}
-        />
-      )}
-      {testWorkflowModalOpen && definitionFromCurrentYaml && (
-        <WorkflowExecuteModal
-          definition={definitionFromCurrentYaml}
-          onClose={() => setTestWorkflowModalOpen(false)}
-          onSubmit={handleTestRunWorkflow}
-        />
-      )}
-    </EuiFlexGroup>
+        {workflowExecuteModalOpen && definitionFromCurrentYaml && (
+          <WorkflowExecuteModal
+            definition={definitionFromCurrentYaml}
+            onClose={closeModal}
+            onSubmit={handleRunWorkflow}
+          />
+        )}
+      </EuiFlexGroup>
+    </WorkflowEditorStoreProvider>
   );
 }

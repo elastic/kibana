@@ -13,6 +13,7 @@ import type { ChartSectionConfiguration } from '@kbn/unified-histogram';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 import { once } from 'lodash';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
+import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import type { DataSourceProfileProvider } from '../../../profiles';
 
 export const createChartSection = (
@@ -23,9 +24,22 @@ export const createChartSection = (
     once((): ChartSectionConfiguration => {
       return {
         ...(prev ? prev() : {}),
-        Component: (props: ChartSectionProps) => (
-          <UnifiedMetricsExperienceGrid {...props} client={metricsExperienceClient} />
-        ),
+        Component: (props: ChartSectionProps) => {
+          // This will prevent the filter being added to the query for multi-dimensional breakdowns when the user clicks on a data point on the series.
+          const handleFilter = (event: ExpressionRendererEvent['data']) => {
+            if (props.onFilter) {
+              props.onFilter(event);
+            }
+            event.preventDefault();
+          };
+          return (
+            <UnifiedMetricsExperienceGrid
+              {...props}
+              onFilter={handleFilter}
+              client={metricsExperienceClient}
+            />
+          );
+        },
         replaceDefaultChart: !!metricsExperienceClient,
         localStorageKeyPrefix: 'discover:metricsExperience',
         defaultTopPanelHeight: 'max-content',
