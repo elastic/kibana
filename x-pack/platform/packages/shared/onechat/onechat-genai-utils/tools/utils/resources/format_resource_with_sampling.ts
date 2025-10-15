@@ -55,7 +55,7 @@ const mapFieldWithStats = (field: MappingFieldWithStats, maxValues: number = 3):
             children: take(field.stats.values, maxValues).map<XmlNode>((value) => {
               return {
                 tagName: 'value',
-                children: [truncate(`${value.value}`, 100)],
+                children: [truncate(normalizeSpaces(`${value.value}`), 100)],
               };
             }),
           },
@@ -69,5 +69,9 @@ const truncate = (text: unknown, maxLength: number): string => {
   if (str.length <= maxLength) {
     return str;
   }
-  return str.substring(0, maxLength) + '...';
+  return str.substring(0, maxLength) + '[truncated]';
+};
+
+const normalizeSpaces = (input: string): string => {
+  return input.trim().replace(/\s+/g, ' ');
 };

@@ -68,13 +68,20 @@ export const getHostHits = async (
     });
 };
 
+const EXPECTED_AGENT_BASELINE_HITS = [
+  { os: { type: 'linux' } },
+  { os: { type: 'linux' } },
+  { os: { type: 'macos' } },
+  { os: { type: 'windows' } },
+];
+
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const es = getService('es');
 
-  describe('@serverless @serverlessQA @ess create_endpoint_exceptions', () => {
+  describe('@serverless @serverlessQA @ess @skipInServerlessMKI create_endpoint_exceptions', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/endpoint_without_host_type'
@@ -153,7 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('operating system types (os_types)', () => {
       describe('endpoints', () => {
-        it('should filter 1 operating system types (os_type) if it is set as part of an endpoint exception', async () => {
+        it('should ignore endpoint exceptions and return baseline results', async () => {
           const rule = getRuleForAlertTesting(['endpoint_without_host_type']);
           const { id } = await createRuleWithExceptionEntries(
             supertest,
@@ -175,9 +182,12 @@ export default ({ getService }: FtrProviderContext) => {
             ]
           );
           await waitForRuleSuccess({ supertest, log, id });
-          await waitForAlertsToBePresent(supertest, log, 3, [id]);
+          await waitForAlertsToBePresent(supertest, log, 4, [id]);
           const hits = await getHostHits(supertest, log, id);
           expect(hits).toEqual([
+            {
+              os: { name: 'Linux' },
+            },
             {
               os: { name: 'Linux' },
             },
@@ -186,140 +196,13 @@ export default ({ getService }: FtrProviderContext) => {
             },
             {
               os: { name: 'Windows' },
-            },
-          ]);
-        });
-
-        it('should filter 2 operating system types as an "OR" (os_type) if it is set as part of an endpoint exception', async () => {
-          const rule = getRuleForAlertTesting(['endpoint_without_host_type']);
-          const { id } = await createRuleWithExceptionEntries(
-            supertest,
-            log,
-            rule,
-            [],
-            [
-              {
-                osTypes: ['linux', 'macos'],
-                entries: [
-                  {
-                    field: 'event.code',
-                    operator: 'included',
-                    type: 'match',
-                    value: '1',
-                  },
-                ],
-              },
-            ]
-          );
-          await waitForRuleSuccess({ supertest, log, id });
-          await waitForAlertsToBePresent(supertest, log, 3, [id]);
-          const hits = await getHostHits(supertest, log, id);
-          expect(hits).toEqual([
-            {
-              os: { name: 'Linux' },
-            },
-            {
-              os: { name: 'Macos' },
-            },
-            {
-              os: { name: 'Windows' },
-            },
-          ]);
-        });
-
-        it('should filter multiple operating system types if it is set as part of an endpoint exception', async () => {
-          const rule = getRuleForAlertTesting(['endpoint_without_host_type']);
-          const { id } = await createRuleWithExceptionEntries(
-            supertest,
-            log,
-            rule,
-            [],
-            [
-              {
-                osTypes: ['linux'],
-                entries: [
-                  {
-                    field: 'event.code',
-                    operator: 'included',
-                    type: 'match',
-                    value: '1',
-                  },
-                ],
-              },
-              {
-                osTypes: ['windows'],
-                entries: [
-                  {
-                    field: 'event.code',
-                    operator: 'included',
-                    type: 'match',
-                    value: '2',
-                  },
-                ],
-              },
-            ]
-          );
-          await waitForRuleSuccess({ supertest, log, id });
-          await waitForAlertsToBePresent(supertest, log, 2, [id]);
-          const hits = await getHostHits(supertest, log, id);
-          expect(hits).toEqual([
-            {
-              os: { name: 'Linux' },
-            },
-            {
-              os: { name: 'Macos' },
-            },
-          ]);
-        });
-
-        it('should filter multiple operating system types (os_type) with multiple filter items for an endpoint', async () => {
-          const rule = getRuleForAlertTesting(['endpoint_without_host_type']);
-          const { id } = await createRuleWithExceptionEntries(
-            supertest,
-            log,
-            rule,
-            [],
-            [
-              {
-                osTypes: ['macos', 'linux'],
-                entries: [
-                  {
-                    field: 'event.code',
-                    operator: 'included',
-                    type: 'match',
-                    value: '1',
-                  },
-                ],
-              },
-              {
-                osTypes: ['windows', 'linux', 'macos'],
-                entries: [
-                  {
-                    field: 'event.code',
-                    operator: 'included',
-                    type: 'match',
-                    value: '2',
-                  },
-                ],
-              },
-            ]
-          );
-          await waitForRuleSuccess({ supertest, log, id });
-          await waitForAlertsToBePresent(supertest, log, 2, [id]);
-          const hits = await getHostHits(supertest, log, id);
-          expect(hits).toEqual([
-            {
-              os: { name: 'Linux' },
-            },
-            {
-              os: { name: 'Macos' },
             },
           ]);
         });
       });
 
       describe('agent', () => {
-        it('should filter 1 operating system types (os_type) if it is set as part of an endpoint exception', async () => {
+        it('should ignore endpoint exceptions and return baseline results', async () => {
           const rule = getRuleForAlertTesting(['agent']);
           const { id } = await createRuleWithExceptionEntries(
             supertest,
@@ -341,151 +224,14 @@ export default ({ getService }: FtrProviderContext) => {
             ]
           );
           await waitForRuleSuccess({ supertest, log, id });
-          await waitForAlertsToBePresent(supertest, log, 3, [id]);
+          await waitForAlertsToBePresent(supertest, log, 4, [id]);
           const hits = await getHostHits(supertest, log, id);
-          expect(hits).toEqual([
-            {
-              os: { type: 'linux' },
-            },
-            {
-              os: { type: 'macos' },
-            },
-            {
-              os: { type: 'windows' },
-            },
-          ]);
-        });
-
-        it('should filter 1 operating system type as an "OR" (os_type) if it is set as part of an endpoint exception', async () => {
-          const rule = getRuleForAlertTesting(['agent']);
-          const { id } = await createRuleWithExceptionEntries(
-            supertest,
-            log,
-            rule,
-            [],
-            [
-              {
-                osTypes: ['linux', 'macos'],
-                entries: [
-                  {
-                    field: 'event.code',
-                    operator: 'included',
-                    type: 'match',
-                    value: '1',
-                  },
-                ],
-              },
-            ]
-          );
-          await waitForRuleSuccess({ supertest, log, id });
-          await waitForAlertsToBePresent(supertest, log, 3, [id]);
-          const hits = await getHostHits(supertest, log, id);
-          expect(hits).toEqual([
-            {
-              os: { type: 'linux' },
-            },
-            {
-              os: { type: 'macos' },
-            },
-            {
-              os: { type: 'windows' },
-            },
-          ]);
-        });
-
-        it('should filter multiple operating system types if it is set as part of an endpoint exception', async () => {
-          const rule = getRuleForAlertTesting(['agent']);
-          const { id } = await createRuleWithExceptionEntries(
-            supertest,
-            log,
-            rule,
-            [],
-            [
-              {
-                osTypes: ['linux'],
-                entries: [
-                  {
-                    field: 'event.code',
-                    operator: 'included',
-                    type: 'match',
-                    value: '1',
-                  },
-                ],
-              },
-              {
-                osTypes: ['windows'],
-                entries: [
-                  {
-                    field: 'event.code',
-                    operator: 'included',
-                    type: 'match',
-                    value: '2',
-                  },
-                ],
-              },
-            ]
-          );
-          await waitForRuleSuccess({ supertest, log, id });
-          await waitForAlertsToBePresent(supertest, log, 2, [id]);
-          const hits = await getHostHits(supertest, log, id);
-          expect(hits).toEqual([
-            {
-              os: { type: 'linux' },
-            },
-            {
-              os: { type: 'macos' },
-            },
-          ]);
-        });
-
-        it('should filter multiple operating system types (os_type) with multiple filter items for an endpoint', async () => {
-          const rule = getRuleForAlertTesting(['agent']);
-          const { id } = await createRuleWithExceptionEntries(
-            supertest,
-            log,
-            rule,
-            [],
-            [
-              {
-                osTypes: ['macos', 'linux'],
-                entries: [
-                  {
-                    field: 'event.code',
-                    operator: 'included',
-                    type: 'match',
-                    value: '1',
-                  },
-                ],
-              },
-              {
-                osTypes: ['windows', 'linux', 'macos'],
-                entries: [
-                  {
-                    field: 'event.code',
-                    operator: 'included',
-                    type: 'match',
-                    value: '2',
-                  },
-                ],
-              },
-            ]
-          );
-          await waitForRuleSuccess({ supertest, log, id });
-          await waitForAlertsToBePresent(supertest, log, 2, [id]);
-          const hits = await getHostHits(supertest, log, id);
-          expect(hits).toEqual([
-            {
-              os: { type: 'linux' },
-            },
-            {
-              os: { type: 'macos' },
-            },
-          ]);
+          expect(hits).toEqual(EXPECTED_AGENT_BASELINE_HITS);
         });
       });
 
       describe('agent and endpoint', () => {
-        it('should filter 2 operating system types (os_type) if it is set as part of an endpoint exception', async () => {
+        it('should ignore endpoint exceptions and return combined baseline results', async () => {
           const rule = getRuleForAlertTesting(['agent', 'endpoint_without_host_type']);
           const { id } = await createRuleWithExceptionEntries(
             supertest,
@@ -507,11 +253,17 @@ export default ({ getService }: FtrProviderContext) => {
             ]
           );
           await waitForRuleSuccess({ supertest, log, id });
-          await waitForAlertsToBePresent(supertest, log, 6, [id]);
+          await waitForAlertsToBePresent(supertest, log, 8, [id]);
           const hits = await getHostHits(supertest, log, id);
           expect(hits).toEqual([
             {
               os: { type: 'linux' },
+            },
+            {
+              os: { type: 'linux' },
+            },
+            {
+              os: { name: 'Linux' },
             },
             {
               os: { name: 'Linux' },
@@ -527,154 +279,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
             {
               os: { name: 'Windows' },
-            },
-          ]);
-        });
-
-        it('should filter 2 operating system types as an "OR" (os_type) if it is set as part of an endpoint exception', async () => {
-          const rule = getRuleForAlertTesting(['agent', 'endpoint_without_host_type']);
-          const { id } = await createRuleWithExceptionEntries(
-            supertest,
-            log,
-            rule,
-            [],
-            [
-              {
-                osTypes: ['linux', 'macos'],
-                entries: [
-                  {
-                    field: 'event.code',
-                    operator: 'included',
-                    type: 'match',
-                    value: '1',
-                  },
-                ],
-              },
-            ]
-          );
-          await waitForRuleSuccess({ supertest, log, id });
-          await waitForAlertsToBePresent(supertest, log, 6, [id]);
-          const hits = await getHostHits(supertest, log, id);
-          expect(hits).toEqual([
-            {
-              os: { type: 'linux' },
-            },
-            {
-              os: { name: 'Linux' },
-            },
-            {
-              os: { type: 'macos' },
-            },
-            {
-              os: { name: 'Macos' },
-            },
-            {
-              os: { type: 'windows' },
-            },
-            {
-              os: { name: 'Windows' },
-            },
-          ]);
-        });
-
-        it('should filter multiple operating system types if it is set as part of an endpoint exception', async () => {
-          const rule = getRuleForAlertTesting(['agent', 'endpoint_without_host_type']);
-          const { id } = await createRuleWithExceptionEntries(
-            supertest,
-            log,
-            rule,
-            [],
-            [
-              {
-                osTypes: ['linux'],
-                entries: [
-                  {
-                    field: 'event.code',
-                    operator: 'included',
-                    type: 'match',
-                    value: '1',
-                  },
-                ],
-              },
-              {
-                osTypes: ['windows'],
-                entries: [
-                  {
-                    field: 'event.code',
-                    operator: 'included',
-                    type: 'match',
-                    value: '2',
-                  },
-                ],
-              },
-            ]
-          );
-          await waitForRuleSuccess({ supertest, log, id });
-          await waitForAlertsToBePresent(supertest, log, 4, [id]);
-          const hits = await getHostHits(supertest, log, id);
-          expect(hits).toEqual([
-            {
-              os: { type: 'linux' },
-            },
-            {
-              os: { name: 'Linux' },
-            },
-            {
-              os: { type: 'macos' },
-            },
-            {
-              os: { name: 'Macos' },
-            },
-          ]);
-        });
-
-        it('should filter multiple operating system types (os_type) with multiple filter items for an endpoint', async () => {
-          const rule = getRuleForAlertTesting(['agent', 'endpoint_without_host_type']);
-          const { id } = await createRuleWithExceptionEntries(
-            supertest,
-            log,
-            rule,
-            [],
-            [
-              {
-                osTypes: ['macos', 'linux'],
-                entries: [
-                  {
-                    field: 'event.code',
-                    operator: 'included',
-                    type: 'match',
-                    value: '1',
-                  },
-                ],
-              },
-              {
-                osTypes: ['windows', 'linux', 'macos'],
-                entries: [
-                  {
-                    field: 'event.code',
-                    operator: 'included',
-                    type: 'match',
-                    value: '2',
-                  },
-                ],
-              },
-            ]
-          );
-          await waitForRuleSuccess({ supertest, log, id });
-          await waitForAlertsToBePresent(supertest, log, 4, [id]);
-          const hits = await getHostHits(supertest, log, id);
-          expect(hits).toEqual([
-            {
-              os: { type: 'linux' },
-            },
-            {
-              os: { name: 'Linux' },
-            },
-            {
-              os: { type: 'macos' },
-            },
-            {
-              os: { name: 'Macos' },
             },
           ]);
         });
@@ -682,7 +286,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('"is" operator', () => {
-      it('should filter 1 value set as an endpoint exception and 1 value set as a normal rule exception ', async () => {
+      it('should apply only normal rule exceptions, ignoring endpoint exceptions', async () => {
         const rule = getRuleForAlertTesting(['agent']);
         const { id } = await createRuleWithExceptionEntries(
           supertest,
@@ -713,58 +317,21 @@ export default ({ getService }: FtrProviderContext) => {
           ]
         );
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForAlertsToBePresent(supertest, log, 1, [id]);
+        await waitForAlertsToBePresent(supertest, log, 2, [id]);
         const hits = await getHostHits(supertest, log, id);
         expect(hits).toEqual([
           {
             os: { type: 'macos' },
           },
-        ]);
-      });
-
-      it('should filter 1 value set as an endpoint exception and 1 value set as a normal rule exception with os_type set', async () => {
-        const rule = getRuleForAlertTesting(['agent']);
-        const { id } = await createRuleWithExceptionEntries(
-          supertest,
-          log,
-          rule,
-          [
-            [
-              {
-                field: 'host.os.type',
-                operator: 'included',
-                type: 'match',
-                value: 'linux',
-              },
-            ],
-          ],
-          [
-            {
-              osTypes: ['windows'],
-              entries: [
-                {
-                  field: 'host.os.type',
-                  operator: 'included',
-                  type: 'match',
-                  value: 'windows',
-                },
-              ],
-            },
-          ]
-        );
-        await waitForRuleSuccess({ supertest, log, id });
-        await waitForAlertsToBePresent(supertest, log, 1, [id]);
-        const hits = await getHostHits(supertest, log, id);
-        expect(hits).toEqual([
           {
-            os: { type: 'macos' },
+            os: { type: 'windows' },
           },
         ]);
       });
     });
 
     describe('"is one of" operator', () => {
-      it('should filter 1 single value if it is set as an exception and the os_type is set to only 1 value', async () => {
+      it('should ignore endpoint exceptions and return baseline results', async () => {
         const rule = getRuleForAlertTesting(['agent']);
         const { id } = await createRuleWithExceptionEntries(
           supertest,
@@ -786,90 +353,12 @@ export default ({ getService }: FtrProviderContext) => {
           ]
         );
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForAlertsToBePresent(supertest, log, 3, [id]);
+        await waitForAlertsToBePresent(supertest, log, 4, [id]);
         const hits = await getHostHits(supertest, log, id);
-        expect(hits).toEqual([
-          {
-            os: { type: 'linux' },
-          },
-          {
-            os: { type: 'linux' },
-          },
-          {
-            os: { type: 'macos' },
-          },
-        ]);
+        expect(hits).toEqual(EXPECTED_AGENT_BASELINE_HITS);
       });
 
-      it('should filter 2 values if it is set as an exception and the os_type is set to 2 values', async () => {
-        const rule = getRuleForAlertTesting(['agent']);
-        const { id } = await createRuleWithExceptionEntries(
-          supertest,
-          log,
-          rule,
-          [],
-          [
-            {
-              osTypes: ['windows', 'linux'],
-              entries: [
-                {
-                  field: 'event.code',
-                  operator: 'included',
-                  type: 'match_any',
-                  value: ['1', '2'],
-                },
-              ],
-            },
-          ]
-        );
-        await waitForRuleSuccess({ supertest, log, id });
-        await waitForAlertsToBePresent(supertest, log, 2, [id]);
-        const hits = await getHostHits(supertest, log, id);
-        expect(hits).toEqual([
-          {
-            os: { type: 'linux' },
-          },
-          {
-            os: { type: 'macos' },
-          },
-        ]);
-      });
-
-      it('should filter 2 values if it is set as an exception and the os_type is set to undefined', async () => {
-        const rule = getRuleForAlertTesting(['agent']);
-        const { id } = await createRuleWithExceptionEntries(
-          supertest,
-          log,
-          rule,
-          [],
-          [
-            {
-              osTypes: undefined, // This is only possible through the REST API
-              entries: [
-                {
-                  field: 'event.code',
-                  operator: 'included',
-                  type: 'match_any',
-                  value: ['1', '2'],
-                },
-              ],
-            },
-          ]
-        );
-        await waitForRuleSuccess({ supertest, log, id });
-        await waitForAlertsToBePresent(supertest, log, 2, [id]);
-        const hits = await getHostHits(supertest, log, id);
-        expect(hits).toEqual([
-          {
-            os: { type: 'linux' },
-          },
-          {
-            os: { type: 'macos' },
-          },
-        ]);
-      });
-
-      it('should filter no values if they are set as an exception but the os_type is set to something not within the documents', async () => {
+      it('should return baseline results even when os_type is set to something not within the documents', async () => {
         const rule = getRuleForAlertTesting(['agent']);
         const { id } = await createRuleWithExceptionEntries(
           supertest,
@@ -893,20 +382,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 4, [id]);
         const hits = await getHostHits(supertest, log, id);
-        expect(hits).toEqual([
-          {
-            os: { type: 'linux' },
-          },
-          {
-            os: { type: 'linux' },
-          },
-          {
-            os: { type: 'macos' },
-          },
-          {
-            os: { type: 'windows' },
-          },
-        ]);
+        expect(hits).toEqual(EXPECTED_AGENT_BASELINE_HITS);
       });
     });
   });

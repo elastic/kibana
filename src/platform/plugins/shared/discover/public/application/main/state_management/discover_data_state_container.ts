@@ -331,11 +331,12 @@ export function getDataStateContainer({
             disableNextFetchOnStateChange$.next(false);
           }
 
+          abortController = new AbortController();
+
           // Trigger chart fetching after the pre fetch state has been updated
           // to ensure state values that would affect data fetching are set
           fetchChart$.next();
 
-          abortController = new AbortController();
           const prevAutoRefreshDone = autoRefreshDone;
           const fetchAllTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchAll');
 

@@ -21,6 +21,7 @@ import {
   EuiPagination,
   EuiPopover,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -121,6 +122,9 @@ export class ItemsGridPagination extends Component {
             pageCount={pageCount}
             activePage={activePage}
             onPageClick={this.onPageClick}
+            aria-label={i18n.translate('xpack.ml.itemsGrid.pagination.ariaLabel', {
+              defaultMessage: 'Items grid pagination',
+            })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

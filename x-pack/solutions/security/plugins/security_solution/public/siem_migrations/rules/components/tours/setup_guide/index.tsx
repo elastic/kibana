@@ -57,6 +57,7 @@ export const SiemMigrationSetupTour: React.FC<SetupTourProps> = React.memo(({ ch
 
   return (
     <EuiTourStep
+      data-test-subj="siemMigrationsSetupTourStep"
       anchorPosition="downCenter"
       content={i18n.SETUP_SIEM_MIGRATION_TOUR_CONTENT}
       isStepOpen={showTour}
@@ -68,7 +69,14 @@ export const SiemMigrationSetupTour: React.FC<SetupTourProps> = React.memo(({ ch
       subtitle={i18n.SETUP_SIEM_MIGRATION_TOUR_SUBTITLE}
       title={i18n.SETUP_SIEM_MIGRATION_TOUR_TITLE}
       footerAction={
-        <EuiButtonEmpty size="xs" color="text" flush="right" onClick={onTourFinished}>
+        <EuiButtonEmpty
+          data-test-subj="finishTourButton"
+          aria-label={i18n.FINISH_TOUR_BUTTON}
+          size="xs"
+          color="text"
+          flush="right"
+          onClick={onTourFinished}
+        >
           {i18n.FINISH_TOUR_BUTTON}
         </EuiButtonEmpty>
       }

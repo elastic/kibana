@@ -57,6 +57,7 @@ describe('useTotalHits', () => {
     query: { query: '', language: 'kuery' },
     getTimeRange: () => timeRange,
     fetch$,
+    abortController: new AbortController(),
     onTotalHitsChange: jest.fn(),
   });
 
