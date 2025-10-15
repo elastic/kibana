@@ -76,9 +76,34 @@ const statusSchema: StatusSchema = {
 };
 
 const observablesSchema: ObservablesSchema = {
-  auto: { default: long, custom: long },
-  manual: { default: long, custom: long },
-  total: long,
+  auto: {
+    default: {
+      type: 'long',
+      _meta: { description: 'Number of default type observables automatically extracted' },
+    },
+    custom: {
+      type: 'long',
+      _meta: { description: 'Number of custom type observables automatically extracted' },
+    },
+  },
+  manual: {
+    default: {
+      type: 'long',
+      _meta: { description: 'Number of default type observables manually added' },
+    },
+    custom: {
+      type: 'long',
+      _meta: { description: 'Number of custom type observables manually added' },
+    },
+  },
+  total: {
+    type: 'long',
+    _meta: { description: 'Total number of observables' },
+  },
+  casesWithMaxObservables: {
+    type: 'long',
+    _meta: { description: 'Number of cases with maximum observables' },
+  },
 };
 
 const solutionTelemetry: SolutionTelemetrySchema = {
@@ -116,8 +141,14 @@ export const casesSchema: CasesTelemetrySchema = {
       status: statusSchema,
       syncAlertsOn: long,
       syncAlertsOff: long,
-      extractObservablesOn: long,
-      extractObservablesOff: long,
+      extractObservablesOn: {
+        type: 'long',
+        _meta: { description: 'Automatically extract observables setting enabled' },
+      },
+      extractObservablesOff: {
+        type: 'long',
+        _meta: { description: 'Automatically extract observables setting disabled' },
+      },
       observables: observablesSchema,
       totalWithMaxObservables: long,
       totalUsers: long,

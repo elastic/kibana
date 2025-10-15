@@ -3513,38 +3513,62 @@
                   "type": "long"
                 },
                 "extractObservablesOn": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Automatically extract observables setting enabled"
+                  }
                 },
                 "extractObservablesOff": {
-                  "type": "long"
+                  "type": "long",
+                  "_meta": {
+                    "description": "Automatically extract observables setting disabled"
+                  }
                 },
                 "observables": {
                   "properties": {
                     "auto": {
                       "properties": {
                         "default": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of default type observables automatically extracted"
+                          }
                         },
                         "custom": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom type observables automatically extracted"
+                          }
                         }
                       }
                     },
                     "manual": {
                       "properties": {
                         "default": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of default type observables manually added"
+                          }
                         },
                         "custom": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom type observables manually added"
+                          }
                         }
                       }
                     },
                     "total": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of observables"
+                      }
                     },
                     "casesWithMaxObservables": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of cases with maximum observables"
+                      }
                     }
                   }
                 },
@@ -3697,28 +3721,46 @@
                     "auto": {
                       "properties": {
                         "default": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of default type observables automatically extracted"
+                          }
                         },
                         "custom": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom type observables automatically extracted"
+                          }
                         }
                       }
                     },
                     "manual": {
                       "properties": {
                         "default": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of default type observables manually added"
+                          }
                         },
                         "custom": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom type observables manually added"
+                          }
                         }
                       }
                     },
                     "total": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of observables"
+                      }
                     },
                     "casesWithMaxObservables": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of cases with maximum observables"
+                      }
                     }
                   }
                 }
@@ -3843,28 +3885,46 @@
                     "auto": {
                       "properties": {
                         "default": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of default type observables automatically extracted"
+                          }
                         },
                         "custom": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom type observables automatically extracted"
+                          }
                         }
                       }
                     },
                     "manual": {
                       "properties": {
                         "default": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of default type observables manually added"
+                          }
                         },
                         "custom": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom type observables manually added"
+                          }
                         }
                       }
                     },
                     "total": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of observables"
+                      }
                     },
                     "casesWithMaxObservables": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of cases with maximum observables"
+                      }
                     }
                   }
                 }
@@ -3989,28 +4049,46 @@
                     "auto": {
                       "properties": {
                         "default": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of default type observables automatically extracted"
+                          }
                         },
                         "custom": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom type observables automatically extracted"
+                          }
                         }
                       }
                     },
                     "manual": {
                       "properties": {
                         "default": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of default type observables manually added"
+                          }
                         },
                         "custom": {
-                          "type": "long"
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom type observables manually added"
+                          }
                         }
                       }
                     },
                     "total": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of observables"
+                      }
                     },
                     "casesWithMaxObservables": {
-                      "type": "long"
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of cases with maximum observables"
+                      }
                     }
                   }
                 }
