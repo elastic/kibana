@@ -90,7 +90,6 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           'enableAutomaticAgentUpgrades',
           'enableAgentMigrations',
         ])}`,
-        `--xpack.cloud.id='123456789'`,
         `--xpack.fleet.agentless.enabled=true`,
         `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api`,
         `--xpack.fleet.agentless.api.tls.certificate=${KBN_CERT_PATH}`,
