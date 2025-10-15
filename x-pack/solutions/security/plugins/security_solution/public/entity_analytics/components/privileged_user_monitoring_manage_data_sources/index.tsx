@@ -92,7 +92,7 @@ export const PrivilegedUserMonitoringManageDataSources = ({
         <EuiCallOut
           title={
             <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.file.retrievalError"
+              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.integrations.noAccessMessage"
               defaultMessage="Insufficient privileges to view or manage integrations data source. Please contact your administrator."
             />
           }
