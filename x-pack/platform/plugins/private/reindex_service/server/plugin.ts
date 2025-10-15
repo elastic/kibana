@@ -42,15 +42,16 @@ export class ReindexServiceServerPlugin
   private reindexService: ReindexServiceInternalApi | null = null;
   private readonly logger: Logger;
   private version: Version;
-  private rollupsEnabled: boolean = false;
+  private rollupsEnabled: boolean;
 
   constructor({ logger, env, config }: PluginInitializerContext) {
     this.logger = logger.get();
     this.version = new Version();
     this.version.setup(env.packageInfo.version);
-    if (config.get<ReindexConfig>().rollupsEnabled) {
-      this.rollupsEnabled = true;
-    }
+    this.rollupsEnabled = config.get<ReindexConfig>().rollupsEnabled;
+    console.log('#######################');
+    console.log(this.rollupsEnabled);
+    console.log('#######################');
   }
 
   public setup({
