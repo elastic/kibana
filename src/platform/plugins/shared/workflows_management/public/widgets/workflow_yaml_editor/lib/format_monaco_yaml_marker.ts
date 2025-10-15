@@ -8,14 +8,14 @@
  */
 
 import type { monaco } from '@kbn/monaco';
-import type { z } from '@kbn/zod';
 import type YAML from 'yaml';
 import { getCurrentPath, formatValidationError } from '../../../../common/lib/yaml_utils';
+import type { WorkflowZodSchemaLooseType } from '../../../../common/schema';
 
 export function formatMonacoYamlMarker(
   marker: monaco.editor.IMarker | monaco.editor.IMarkerData,
   editorModel: monaco.editor.ITextModel,
-  workflowYamlSchemaLoose: z.ZodSchema,
+  workflowYamlSchemaLoose: WorkflowZodSchemaLooseType,
   yamlDocument: YAML.Document | null
 ) {
   // Check if this is a validation error that could benefit from dynamic formatting

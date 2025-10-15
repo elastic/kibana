@@ -28,7 +28,10 @@ import { WorkflowGraph } from '@kbn/workflows/graph';
 import { getDetailedTypeDescription, getSchemaAtPath, parsePath } from '../../../../common/lib/zod';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
-import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
+import {
+  WorkflowZodSchemaLooseType,
+  getCachedDynamicConnectorTypes,
+} from '../../../../common/schema';
 import {
   VARIABLE_REGEX_GLOBAL,
   PROPERTY_PATH_REGEX,
@@ -49,6 +52,7 @@ import {
   generateRRuleTriggerSnippet,
 } from './snippets/generate_trigger_snippet';
 import { getCachedAllConnectors } from './connectors_cache';
+import type { WorkflowEditorStore } from './store';
 
 // Cache for built-in step types extracted from schema
 let builtInStepTypesCache: Array<{
@@ -867,7 +871,8 @@ export function getSuggestion(
 }
 
 export function getCompletionItemProvider(
-  workflowYamlSchema: z.ZodSchema,
+  workflowYamlSchema: WorkflowZodSchemaLooseType,
+  // getStore: () => WorkflowEditorStore,
   dynamicConnectorTypes?: Record<string, any>
 ): monaco.languages.CompletionItemProvider {
   return {
@@ -914,7 +919,7 @@ export function getCompletionItemProvider(
         // const yamlDocument = useSelector(selectYamlDocument);
 
         // Try to parse with the strict schema first
-        const result = parseWorkflowYamlToJSON(value, workflowYamlSchema);
+        const result = parseWorkflowYamlToJSON(value, workflowYamlSchema as z.ZodSchema);
 
         // If strict parsing fails, try with a more lenient approach for completion
         let workflowData = 'success' in result && result.success ? result.data : null;

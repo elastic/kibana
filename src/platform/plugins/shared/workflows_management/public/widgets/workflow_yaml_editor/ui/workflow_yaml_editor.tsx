@@ -19,11 +19,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type YAML from 'yaml';
 import { useDispatch, useSelector } from 'react-redux';
 import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
-import { addDynamicConnectorsToCache, getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import { addDynamicConnectorsToCache } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
-import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
 import {
   ElasticsearchMonacoConnectorHandler,
   GenericMonacoConnectorHandler,
@@ -51,6 +50,8 @@ import {
   setCursorPosition,
   setStepExecutions,
   setYamlString,
+  setConnectors,
+  selectSchemaLoose,
 } from '../lib/store';
 import {
   useFocusedStepOutline,
@@ -66,6 +67,7 @@ import { useWorkflowEditorStyles } from '../styles/use_workflow_editor_styles';
 import { registerWorkflowYamlLanguage } from '../lib/monaco_language/workflow_yaml';
 import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
 import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_styles';
+import { useCompletionProvider } from './hooks/use_completion_provider';
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
@@ -177,6 +179,7 @@ export const WorkflowYAMLEditor = ({
   const dispatch = useDispatch();
   const focusedStepInfo = useSelector(selectFocusedStepInfo);
   const yamlDocument = useSelector(selectYamlDocument);
+  const workflowYamlSchemaLoose = useSelector(selectSchemaLoose);
   const yamlDocumentRef = useRef<YAML.Document | null>(null);
   yamlDocumentRef.current = yamlDocument || null;
 
@@ -185,6 +188,10 @@ export const WorkflowYAMLEditor = ({
 
   // Data
   const { data: connectorsData } = useAvailableConnectors();
+
+  useEffect(() => {
+    dispatch(setConnectors(connectorsData));
+  }, [connectorsData, dispatch]);
 
   useEffect(() => {
     if (connectorsData?.connectorTypes) {
@@ -221,14 +228,6 @@ export const WorkflowYAMLEditor = ({
     ];
   }, [workflowJsonSchemaStrict, workflowSchemaUriStrict]);
 
-  // TODO: move the schema generation up to detail page or some wrapper component
-  const workflowYamlSchemaLoose = useMemo(() => {
-    if (!connectorsData?.connectorTypes) {
-      return getWorkflowZodSchemaLoose({});
-    }
-    return getWorkflowZodSchemaLoose(connectorsData.connectorTypes);
-  }, [connectorsData?.connectorTypes]);
-
   const { error: errorValidating, isLoading: isLoadingValidation } = useYamlValidation(
     editorRef.current
   );
@@ -236,7 +235,7 @@ export const WorkflowYAMLEditor = ({
   const { validationErrors, transformMonacoMarkers, handleMarkersChanged } =
     useMonacoMarkersChangedInterceptor({
       yamlDocumentRef,
-      workflowYamlSchema: workflowYamlSchemaLoose,
+      workflowYamlSchema: workflowYamlSchemaLoose!,
     });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
@@ -539,9 +538,7 @@ export const WorkflowYAMLEditor = ({
     closeActionsPopover();
   };
 
-  const completionProvider = useMemo(() => {
-    return getCompletionItemProvider(workflowYamlSchemaLoose, connectorsData?.connectorTypes);
-  }, [workflowYamlSchemaLoose, connectorsData?.connectorTypes]);
+  const completionProvider = useCompletionProvider();
 
   useEffect(() => {
     // Monkey patching

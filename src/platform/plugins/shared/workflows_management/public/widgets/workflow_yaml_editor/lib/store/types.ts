@@ -13,10 +13,14 @@ import type { EnhancedStore } from '@reduxjs/toolkit';
 import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import type { LineCounter } from 'yaml';
 import type { WorkflowLookup } from './utils/build_workflow_lookup';
+import type { WorkflowZodSchemaLooseType } from '../../../../../common/schema';
+import type { ConnectorsResponse } from '../../../../entities/connectors/model/use_available_connectors';
 
 // State interface - only serializable data
 export interface WorkflowEditorState {
   yamlString?: string;
+  connectors?: ConnectorsResponse; // This will hold connector types info
+  schemaLoose: WorkflowZodSchemaLooseType;
   computed?: {
     yamlDocument?: YAML.Document; // This will be handled specially for serialization
     yamlLineCounter?: LineCounter;
