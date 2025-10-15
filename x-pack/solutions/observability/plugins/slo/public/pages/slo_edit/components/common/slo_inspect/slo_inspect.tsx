@@ -129,6 +129,10 @@ export function SLOInspect({ slo, disabled }: Props) {
                     iconType="link"
                     data-test-subj="o11ySLOInspectDetailsButton"
                     href={http?.basePath.prepend('/app/management/data/transform')}
+                    aria-label={i18n.translate(
+                      'xpack.slo.sLOInspect.viewRollupTransformButtonAriaLabel',
+                      { defaultMessage: 'View rollup transform' }
+                    )}
                   />
                 }
               />
@@ -146,6 +150,10 @@ export function SLOInspect({ slo, disabled }: Props) {
                     iconType="link"
                     data-test-subj="o11ySLOInspectDetailsButton"
                     href={http?.basePath.prepend('/app/management/data/transform')}
+                    aria-label={i18n.translate(
+                      'xpack.slo.sLOInspect.viewSummaryTransformButtonAriaLabel',
+                      { defaultMessage: 'View summary transform' }
+                    )}
                   />
                 }
               />
@@ -162,6 +170,10 @@ export function SLOInspect({ slo, disabled }: Props) {
                     iconType="link"
                     data-test-subj="o11ySLOInspectDetailsButton"
                     href={rollUpPipelineUrl}
+                    aria-label={i18n.translate(
+                      'xpack.slo.sLOInspect.viewRollupPipelineButtonAriaLabel',
+                      { defaultMessage: 'View rollup ingest pipeline' }
+                    )}
                   />
                 }
                 json={inspectSloData.rollUpPipeline}
@@ -179,6 +191,10 @@ export function SLOInspect({ slo, disabled }: Props) {
                     iconType="link"
                     data-test-subj="o11ySLOInspectDetailsButton"
                     href={summaryPipelineUrl}
+                    aria-label={i18n.translate(
+                      'xpack.slo.sLOInspect.viewSummaryPipelineButtonAriaLabel',
+                      { defaultMessage: 'View summary ingest pipeline' }
+                    )}
                   />
                 }
                 json={inspectSloData.summaryPipeline}
