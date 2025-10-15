@@ -11,73 +11,70 @@ import 'cypress-network-idle';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import {
-  ADD_EXCEPTION_BTN,
-  ALERT_CHECKBOX,
-  CLOSE_ALERT_BTN,
-  CLOSE_SELECTED_ALERTS_BTN,
-  EXPAND_ALERT_BTN,
-  MARK_ALERT_ACKNOWLEDGED_BTN,
-  OPEN_ALERT_BTN,
-  SEND_ALERT_TO_TIMELINE_BTN,
-  ALERT_CHARTS_TOGGLE_BUTTON,
-  SELECT_COUNTS_TABLE,
-  SELECT_TREEMAP,
-  TAKE_ACTION_POPOVER_BTN,
-  TIMELINE_CONTEXT_MENU_BTN,
-  CLOSE_FLYOUT,
-  OPEN_ANALYZER_BTN,
-  TAKE_ACTION_BTN,
-  TAKE_ACTION_MENU,
+  ACKNOWLDEGED_ALERTS_FILTER_BTN,
+  ACTIONS_EXPAND_BUTTON,
   ADD_ENDPOINT_EXCEPTION_BTN,
-  DATAGRID_CHANGES_IN_PROGRESS,
-  CLOSED_ALERTS_FILTER_BTN,
-  OPENED_ALERTS_FILTER_BTN,
-  EVENT_CONTAINER_TABLE_LOADING,
-  SELECT_ALL_ALERTS,
-  SELECT_ALL_VISIBLE_ALERTS,
+  ADD_EXCEPTION_BTN,
+  ALERT_CHARTS_TOGGLE_BUTTON,
+  ALERT_CHECKBOX,
+  ALERT_COUNT_TABLE_COLUMN,
+  ALERT_EMBEDDABLE_PROGRESS_BAR,
+  ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION,
+  ALERT_TABLE_GRID_VIEW_OPTION,
+  ALERT_TABLE_SUMMARY_VIEW_SELECTABLE,
+  ALERT_TAGGING_CONTEXT_MENU,
+  ALERT_TAGGING_CONTEXT_MENU_ITEM,
+  ALERT_TAGGING_UPDATE_BUTTON,
+  ALERTS_HISTOGRAM_LEGEND,
   CELL_ADD_TO_TIMELINE_BUTTON,
   CELL_FILTER_IN_BUTTON,
-  CELL_SHOW_TOP_FIELD_BUTTON,
-  ACTIONS_EXPAND_BUTTON,
-  ALERT_EMBEDDABLE_PROGRESS_BAR,
-  ALERT_COUNT_TABLE_COLUMN,
-  SELECT_HISTOGRAM,
   CELL_FILTER_OUT_BUTTON,
-  ALERTS_HISTOGRAM_LEGEND,
-  LEGEND_ACTIONS,
-  SESSION_VIEWER_BUTTON,
-  ALERT_TAGGING_CONTEXT_MENU_ITEM,
-  ALERT_TAGGING_CONTEXT_MENU,
-  ALERT_TAGGING_UPDATE_BUTTON,
-  ALERTS_HISTOGRAM_PANEL_LOADER,
-  ALERT_TABLE_SUMMARY_VIEW_SELECTABLE,
-  ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION,
-  HOVER_ACTIONS_CONTAINER,
-  ALERT_TABLE_GRID_VIEW_OPTION,
-  TOOLTIP,
-  ACKNOWLDEGED_ALERTS_FILTER_BTN,
-  SELECTED_ALERTS,
+  CELL_SHOW_TOP_FIELD_BUTTON,
+  CLOSE_ALERT_BTN,
+  CLOSE_FLYOUT,
+  CLOSE_SELECTED_ALERTS_BTN,
+  CLOSED_ALERTS_FILTER_BTN,
+  DATAGRID_CHANGES_IN_PROGRESS,
+  EVENT_CONTAINER_TABLE_LOADING,
+  EXPAND_ALERT_BTN,
   GROUP_ALERTS_BY_BTN,
+  HOVER_ACTIONS_CONTAINER,
+  LEGEND_ACTIONS,
+  MARK_ALERT_ACKNOWLEDGED_BTN,
+  OPEN_ALERT_BTN,
+  OPEN_ANALYZER_BTN,
+  OPENED_ALERTS_FILTER_BTN,
+  SELECT_ALL_ALERTS,
+  SELECT_ALL_VISIBLE_ALERTS,
+  SELECT_COUNTS_TABLE,
+  SELECT_HISTOGRAM,
+  SELECT_TREEMAP,
+  SELECTED_ALERTS,
+  SEND_ALERT_TO_TIMELINE_BTN,
+  SESSION_VIEWER_BUTTON,
+  TAKE_ACTION_BTN,
   TAKE_ACTION_GROUPED_ALERTS_BTN,
-  ALERT_STATUS_BADGE_BUTTON,
+  TAKE_ACTION_MENU,
+  TAKE_ACTION_POPOVER_BTN,
+  TIMELINE_CONTEXT_MENU_BTN,
+  TOOLTIP,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import {
-  UPDATE_ENRICHMENT_RANGE_BUTTON,
   ENRICHMENT_QUERY_END_INPUT,
   ENRICHMENT_QUERY_RANGE_PICKER,
   ENRICHMENT_QUERY_START_INPUT,
-  CELL_EXPAND_VALUE,
+  UPDATE_ENRICHMENT_RANGE_BUTTON,
 } from '../screens/alerts_details';
 import { FIELD_INPUT } from '../screens/exceptions';
 import {
-  DETECTION_PAGE_FILTERS_LOADING,
   DETECTION_PAGE_FILTER_GROUP_LOADING,
   DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON,
   DETECTION_PAGE_FILTER_GROUP_WRAPPER,
-  OPTION_LISTS_LOADING,
-  OPTION_LIST_VALUES,
+  DETECTION_PAGE_FILTERS_LOADING,
   OPTION_LIST_CLEAR_BTN,
+  OPTION_LIST_VALUES,
+  OPTION_LISTS_LOADING,
   OPTION_SELECTABLE,
 } from '../screens/common/filter_group';
 import { LOADING_SPINNER } from '../screens/common/page';
@@ -178,13 +175,6 @@ export const hideMessageTooltip = () => {
 
 export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();
 
-export const closeAlertFromStatusBadge = () => {
-  cy.get(ALERT_STATUS_BADGE_BUTTON).click();
-  cy.get(CLOSE_ALERT_BTN).click();
-  selectAndConfirmClosingReason();
-  cy.get(CLOSE_ALERT_BTN).should('not.exist');
-};
-
 export const setEnrichmentDates = (from?: string, to?: string) => {
   cy.get(ENRICHMENT_QUERY_RANGE_PICKER).within(() => {
     if (from) {
@@ -214,14 +204,14 @@ export const openPageFilterPopover = (filterIndex: number) => {
   cy.log(`Opening Page filter popover for index ${filterIndex}`);
 
   cy.get(OPTION_LIST_VALUES(filterIndex)).click();
-  cy.get(OPTION_LIST_VALUES(filterIndex)).should('have.class', 'euiFilterButton-isSelected');
+  cy.get(OPTION_LIST_VALUES(filterIndex)).should('have.attr', 'aria-expanded', 'true');
 };
 
 export const closePageFilterPopover = (filterIndex: number) => {
   cy.log(`Closing Page filter popover for index ${filterIndex}`);
 
   cy.get(OPTION_LIST_VALUES(filterIndex)).click();
-  cy.get(OPTION_LIST_VALUES(filterIndex)).should('not.have.class', 'euiFilterButton-isSelected');
+  cy.get(OPTION_LIST_VALUES(filterIndex)).should('have.attr', 'aria-expanded', 'false');
 };
 
 export const hasSelection = (filterIndex: number) => {
@@ -463,16 +453,6 @@ export const waitForAlerts = () => {
   cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
 };
 
-export const expandAlertTableCellValue = (columnSelector: string, row = 1) => {
-  cy.get(columnSelector).eq(1).realHover();
-  cy.get(columnSelector).eq(1).find(CELL_EXPAND_VALUE).click();
-};
-
-export const hideAlertTableHorizontalScrollBar = () => {
-  // .realHover ends up being flaky if the scroll bar is visible as the element below it cannot be properly
-  cy.get('.euiDataGrid__virtualized').invoke('attr', 'style', 'overflow-x: hidden');
-};
-
 export const scrollAlertTableColumnIntoView = (columnSelector: string) => {
   cy.get(columnSelector).eq(0).scrollIntoView();
 
@@ -583,11 +563,6 @@ export const updateAlertTags = () => {
 export const showHoverActionsEventRenderedView = (fieldSelector: string) => {
   cy.get(fieldSelector).first().realHover();
   cy.get(HOVER_ACTIONS_CONTAINER).should('be.visible');
-};
-
-export const waitForTopNHistogramToLoad = () => {
-  cy.get(ALERTS_HISTOGRAM_PANEL_LOADER).should('exist');
-  cy.get(ALERTS_HISTOGRAM_PANEL_LOADER).should('not.exist');
 };
 
 export const switchAlertTableToEventRenderedView = () => {

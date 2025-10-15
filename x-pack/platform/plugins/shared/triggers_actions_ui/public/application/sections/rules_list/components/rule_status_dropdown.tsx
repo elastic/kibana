@@ -188,7 +188,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
             : moment(new Date(rule.isSnoozedUntil!)).format(SNOOZE_END_TIME_FORMAT)
         }
       >
-        <EuiText color="subdued" size="xs">
+        <EuiText tabIndex={0} color="subdued" size="xs">
           {rule.muteAll ? INDEFINITELY : moment(new Date(rule.isSnoozedUntil!)).fromNow(true)}
         </EuiText>
       </EuiToolTip>

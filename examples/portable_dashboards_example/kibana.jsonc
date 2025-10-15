@@ -3,6 +3,8 @@
   "id": "@kbn/portable-dashboards-example",
   "owner": "@elastic/kibana-presentation",
   "description": "Example plugin for portable dashboards",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "portableDashboardExamples",
     "server": false,

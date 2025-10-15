@@ -20,6 +20,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 interface RoundErrorProps {
   error: unknown;
@@ -44,6 +45,7 @@ export const RoundError: React.FC<RoundErrorProps> = ({ error, onRetry }) => {
   return (
     <EuiAccordion
       id="round-error"
+      data-test-subj="agentBuilderRoundError"
       buttonContent={
         <FormattedMessage
           id="xpack.onechat.round.error.title"
@@ -51,7 +53,14 @@ export const RoundError: React.FC<RoundErrorProps> = ({ error, onRetry }) => {
         />
       }
       extraAction={
-        <EuiButtonEmpty size="s" onClick={onRetry}>
+        <EuiButtonEmpty
+          aria-label={i18n.translate('xpack.onechat.round.error.retryLabel', {
+            defaultMessage: 'Retry',
+          })}
+          size="s"
+          onClick={onRetry}
+          data-test-subj="agentBuilderRoundErrorRetryButton"
+        >
           <FormattedMessage id="xpack.onechat.round.error.tryAgain" defaultMessage="Try again?" />
         </EuiButtonEmpty>
       }

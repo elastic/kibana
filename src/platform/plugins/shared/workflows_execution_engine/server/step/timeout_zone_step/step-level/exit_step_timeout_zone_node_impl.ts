@@ -9,13 +9,16 @@
 
 import type { NodeImplementation } from '../../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 
 export class ExitStepTimeoutZoneNodeImpl implements NodeImplementation {
-  constructor(private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager) {}
+  constructor(
+    private stepExecutionRuntime: StepExecutionRuntime,
+    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
+  ) {}
 
   public async run(): Promise<void> {
-    this.wfExecutionRuntimeManager.exitScope();
-    await this.wfExecutionRuntimeManager.finishStep();
+    await this.stepExecutionRuntime.finishStep();
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 }

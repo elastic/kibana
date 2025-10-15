@@ -194,4 +194,97 @@ describe('validateConfig', () => {
       );
     });
   });
+
+  describe('defaultValue type validation', () => {
+    beforeEach(() => {
+      mockValidateQuery.mockResolvedValue({ errors: [], warnings: [] });
+      mockGetESQLQueryVariables.mockReturnValue(['param1']);
+      mockCreateBadRequestError.mockImplementation((message: string) => {
+        const error = new Error(message);
+        error.name = 'OnechatBadRequestError';
+        return error as any;
+      });
+    });
+
+    const createConfig = (type: EsqlToolFieldTypes, defaultValue: unknown) => ({
+      query: 'FROM my_cases | WHERE field == ?param1',
+      params: {
+        param1: {
+          type,
+          description: 'Test param',
+          optional: true,
+          defaultValue,
+        },
+      },
+    });
+
+    describe('valid defaultValue types', () => {
+      const validCases = [
+        { type: 'text' as const, value: 'hello' },
+        { type: 'keyword' as const, value: 'active' },
+        { type: 'long' as const, value: 42 },
+        { type: 'integer' as const, value: 123 },
+        { type: 'double' as const, value: 3.14 },
+        { type: 'float' as const, value: 2.5 },
+        { type: 'boolean' as const, value: true },
+        { type: 'date' as const, value: '2023-01-01T00:00:00Z' },
+        { type: 'object' as const, value: { key: 'value' } },
+        { type: 'nested' as const, value: [{ id: 1 }] },
+      ];
+
+      it.each(validCases)(
+        'should pass validation for $type with $value',
+        async ({ type, value }) => {
+          const config = createConfig(type, value);
+          await expect(validateConfig(config as any)).resolves.toBeUndefined();
+        }
+      );
+    });
+
+    describe('invalid defaultValue types', () => {
+      const invalidCases = [
+        { type: 'text' as const, value: 123, expectedError: 'not a string' },
+        { type: 'long' as const, value: 3.14, expectedError: 'not an integer' },
+        { type: 'integer' as const, value: 'not a number', expectedError: 'not an integer' },
+        { type: 'double' as const, value: 'not a number', expectedError: 'not a number' },
+        { type: 'boolean' as const, value: 'true', expectedError: 'not a boolean' },
+        { type: 'object' as const, value: 'not an object', expectedError: 'not an object' },
+        { type: 'object' as const, value: null, expectedError: 'not an object' },
+        { type: 'object' as const, value: ['not', 'an', 'object'], expectedError: 'not an object' },
+        { type: 'nested' as const, value: { not: 'an array' }, expectedError: 'not an array' },
+      ];
+
+      it.each(invalidCases)(
+        'should throw error for $type with $value',
+        async ({ type, value, expectedError }) => {
+          const config = createConfig(type, value);
+          await expect(validateConfig(config as any)).rejects.toThrow();
+          expect(mockCreateBadRequestError).toHaveBeenCalledWith(
+            `Parameter 'param1' has type '${type}' but defaultValue is ${expectedError}`
+          );
+        }
+      );
+    });
+
+    describe('edge cases', () => {
+      it('should pass validation when parameter has no defaultValue', async () => {
+        const config = {
+          query: 'FROM my_cases | WHERE name == ?param1',
+          params: {
+            param1: {
+              type: 'text' as EsqlToolFieldTypes,
+              description: 'Name',
+              optional: true,
+            },
+          },
+        };
+        await expect(validateConfig(config as any)).resolves.toBeUndefined();
+      });
+
+      it('should pass validation when parameter has undefined defaultValue', async () => {
+        const config = createConfig('text', undefined);
+        await expect(validateConfig(config as any)).resolves.toBeUndefined();
+      });
+    });
+  });
 });

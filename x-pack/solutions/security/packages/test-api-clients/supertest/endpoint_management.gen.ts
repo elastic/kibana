@@ -101,10 +101,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .send(props.body as object);
     },
     /**
-      * Download a file from an endpoint. 
-> info
-> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
-> {`file_id`} = {`action_id`}`.`{`agent_id`}
+      * Download a file associated with a response action.
 
       */
     endpointFileDownload(props: EndpointFileDownloadProps, kibanaSpace: string = 'default') {
@@ -120,10 +117,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-      * Get information for the specified file using the file ID.
-> info
-> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
-> {`file_id`} = {`action_id`}`.`{`agent_id`}
+      * Get information for the specified response action file download.
 
       */
     endpointFileInfo(props: EndpointFileInfoProps, kibanaSpace: string = 'default') {

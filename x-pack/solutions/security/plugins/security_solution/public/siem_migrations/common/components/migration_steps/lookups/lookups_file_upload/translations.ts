@@ -11,20 +11,3 @@ export const LOOKUPS_DATA_INPUT_FILE_UPLOAD_PROMPT = i18n.translate(
   'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.lookupsFileUpload.prompt',
   { defaultMessage: 'Select or drag and drop the exported lookup files' }
 );
-export const LOOKUPS_DATA_INPUT_FILE_UPLOAD_NOT_UPLOADED_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.lookupsFileUpload.notUploadedTitle',
-  { defaultMessage: 'Lookups not uploaded' }
-);
-export const LOOKUPS_DATA_INPUT_FILE_UPLOAD_NOT_UPLOADED = (lookupsNames: string) =>
-  i18n.translate(
-    'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.lookupsFileUpload.notUploaded',
-    {
-      defaultMessage: 'The following files did not match any missing lookup: {lookupsNames}',
-      values: { lookupsNames },
-    }
-  );
-
-export const LOOKUPS_DATA_INPUT_FILE_UPLOAD_BUTTON = i18n.translate(
-  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.lookupsFileUpload.button',
-  { defaultMessage: 'Upload' }
-);

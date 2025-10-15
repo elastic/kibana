@@ -102,6 +102,7 @@ export class ObservabilityAIAssistantService {
 
     const { asInternalUser } = coreStart.elasticsearch.client;
     const { asCurrentUser } = coreStart.elasticsearch.client.asScoped(request);
+    const analytics = coreStart.analytics;
 
     const kbService = new KnowledgeBaseService({
       core: this.core,
@@ -133,6 +134,7 @@ export class ObservabilityAIAssistantService {
         : undefined,
       knowledgeBaseService: kbService,
       scopes: scopes || ['all'],
+      analytics,
     });
   }
 

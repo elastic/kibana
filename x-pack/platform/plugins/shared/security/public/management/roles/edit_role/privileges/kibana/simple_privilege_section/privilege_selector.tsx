@@ -9,6 +9,7 @@ import { EuiSelect } from '@elastic/eui';
 import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { constants } from '@kbn/security-ui-components';
 
 interface Props {
@@ -49,6 +50,9 @@ export class PrivilegeSelector extends Component<Props, {}> {
         onChange={this.onChange}
         disabled={disabled}
         compressed={compressed}
+        aria-label={i18n.translate('xpack.security.privilegeSelector.select.ariaLabel', {
+          defaultMessage: 'Privilege',
+        })}
       />
     );
   }

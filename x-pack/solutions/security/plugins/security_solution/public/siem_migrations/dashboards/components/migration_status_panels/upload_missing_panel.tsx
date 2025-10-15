@@ -24,6 +24,7 @@ import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_t
 import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import type { DashboardMigrationStats } from '../../types';
+import { useKibana } from '../../../../common/lib/kibana/use_kibana';
 
 interface DashboardMigrationsUploadMissingPanelProps {
   migrationStats: DashboardMigrationStats;
@@ -67,7 +68,7 @@ const DashboardMigrationsUploadMissingPanelContent =
       const { data: translationStats, isLoading: isLoadingTranslationStats } =
         useGetMigrationTranslationStats(migrationStats.id);
       const { openFlyout } = useMigrationDataInputContext();
-
+      const { telemetry } = useKibana().services.siemMigrations.dashboards;
       const totalDashboardsToRetry = useMemo(() => {
         if (!translationStats) return 0;
 
@@ -80,7 +81,11 @@ const DashboardMigrationsUploadMissingPanelContent =
 
       const onOpenFlyout = useCallback(() => {
         openFlyout(migrationStats);
-      }, [migrationStats, openFlyout]);
+        telemetry.reportSetupMigrationOpenResources({
+          migrationId: migrationStats.id,
+          missingResourcesCount: missingResources.length,
+        });
+      }, [migrationStats, openFlyout, telemetry, missingResources.length]);
 
       return (
         <>

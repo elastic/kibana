@@ -9,18 +9,22 @@
 import { schema } from '@kbn/config-schema';
 import { referenceSchema, updateOptionsSchema } from '@kbn/content-management-utils';
 
-import { dashboardState, dashboardAPICreateResultSchema } from './common';
+import { getDashboardStateSchema, getDashboardAPICreateResultSchema } from './common';
 
 export const dashboardUpdateOptionsSchema = schema.object({
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   mergeAttributes: schema.maybe(updateOptionsSchema.mergeAttributes),
 });
 
-export const dashboardUpdateRequestAttributesSchema = schema.object({
-  ...dashboardState,
-  type: schema.maybe(schema.string()),
-  references: schema.maybe(schema.arrayOf(referenceSchema)),
-  spaces: schema.maybe(schema.arrayOf(schema.string())),
-});
+export function getDashboardUpdateRequestAttributesSchema() {
+  return schema.object({
+    ...getDashboardStateSchema(),
+    type: schema.maybe(schema.string()),
+    references: schema.maybe(schema.arrayOf(referenceSchema)),
+    spaces: schema.maybe(schema.arrayOf(schema.string())),
+  });
+}
 
-export const dashboardUpdateResultSchema = dashboardAPICreateResultSchema;
+export function getDashboardUpdateResultSchema() {
+  return getDashboardAPICreateResultSchema();
+}

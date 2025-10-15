@@ -1,0 +1,58 @@
+{
+  "id": "dashboardMarkdown",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "dashboardMarkdown",
+        "id": "def-server.MarkdownEditorState",
+        "type": "Type",
+        "tags": [],
+        "label": "MarkdownEditorState",
+        "description": [],
+        "signature": [
+          "{ readonly content: string; }"
+        ],
+        "path": "src/platform/plugins/shared/dashboard_markdown/server/schemas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboardMarkdown",
+        "id": "def-server.MarkdownEmbeddableState",
+        "type": "Type",
+        "tags": [],
+        "label": "MarkdownEmbeddableState",
+        "description": [],
+        "signature": [
+          "{ readonly title?: string | undefined; readonly description?: string | undefined; readonly hidePanelTitles?: boolean | undefined; readonly content: string; }"
+        ],
+        "path": "src/platform/plugins/shared/dashboard_markdown/server/schemas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

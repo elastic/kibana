@@ -17,9 +17,7 @@ import {
   EuiText,
   EuiBasicTable,
 } from '@elastic/eui';
-import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import React, { useEffect, useState, useCallback } from 'react';
-import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Query, TimeRange } from '@kbn/data-plugin/common';
 import { take } from 'rxjs';
@@ -47,36 +45,6 @@ interface WorkflowExecuteEventFormProps {
   setErrors: (errors: string | null) => void;
 }
 
-const getDefaultWorkflowInput = (currentUser: any): string => {
-  const userEmail = currentUser?.email || 'workflow-user@gmail.com';
-  const userName = currentUser?.username || 'workflow-user';
-  return JSON.stringify(
-    {
-      event: {
-        ruleName: 'Detect vulnerabilities',
-        additionalData: {
-          user: userEmail,
-          userName,
-        },
-      },
-    },
-    null,
-    2
-  );
-};
-
-const getCurrentUser = async (security: SecurityServiceStart) => {
-  try {
-    if (security) {
-      return await security.authc.getCurrentUser();
-    }
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
-  }
-  return null;
-};
-
 const unflattenObject = (flatObject: Record<string, any>): Record<string, any> => {
   const result: Record<string, any> = {};
 
@@ -86,12 +54,14 @@ const unflattenObject = (flatObject: Record<string, any>): Record<string, any> =
     for (let i = 0; i < keys.length; i++) {
       const currentKey = keys[i];
       if (i === keys.length - 1) {
-        current[currentKey] = flatObject[key];
+        const v = flatObject[key];
+        current[currentKey] = v && typeof v === 'object' ? { ...v } : v;
       } else {
         if (
           current[currentKey] === undefined ||
           typeof current[currentKey] !== 'object' ||
-          Array.isArray(current[currentKey])
+          Array.isArray(current[currentKey]) ||
+          !Object.isExtensible(current[currentKey]) // add this
         ) {
           current[currentKey] = {};
         }
@@ -117,7 +87,6 @@ export const WorkflowExecuteEventForm = ({
     spaces,
   } = services;
   const [spaceId, setSpaceId] = useState<string | null>(null);
-  const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [timeRange, setTimeRange] = useState<TimeRange>({
     from: 'now-15m',
@@ -203,17 +172,6 @@ export const WorkflowExecuteEventForm = ({
     }
   }, [fetchAlerts, spaceId]);
 
-  // Get current user
-  useEffect(() => {
-    if (!services.security) {
-      setErrors('Security service not available');
-      return;
-    }
-    getCurrentUser(services.security).then((user: AuthenticatedUser | null): void => {
-      setCurrentUser(user);
-    });
-  }, [services.security, setErrors]);
-
   const updateEventData = (selectedAlerts: Alert[]) => {
     if (selectedAlerts.length > 0) {
       const alertEvents = selectedAlerts.map((alert: Alert) => {
@@ -230,24 +188,12 @@ export const WorkflowExecuteEventForm = ({
       const workflowEvent = {
         event: {
           alerts: alertEvents,
-          additionalData: {
-            user: currentUser?.email || 'workflow-user@gmail.com',
-            userName: currentUser?.username || 'workflow-user',
-          },
         },
       };
 
       setValue(JSON.stringify(workflowEvent, null, 2));
-    } else {
-      setValue(getDefaultWorkflowInput(currentUser));
     }
   };
-
-  useEffect(() => {
-    if (!value && currentUser) {
-      setValue(getDefaultWorkflowInput(currentUser));
-    }
-  }, [value, currentUser, setValue]);
 
   const handleQueryChange = ({
     query: newQuery,

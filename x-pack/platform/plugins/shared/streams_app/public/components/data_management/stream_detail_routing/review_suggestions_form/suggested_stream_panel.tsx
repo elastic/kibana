@@ -19,9 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
-import { type ReviewSuggestionsInputs } from './use_review_suggestions_form';
-import { getPercentageFormatter } from '../../../../util/formatters';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
+import type { PartitionSuggestion } from './use_review_suggestions_form';
 import { useMatchRate } from './use_match_rate';
 import {
   useStreamRoutingEvents,
@@ -30,8 +28,6 @@ import {
 import { SelectablePanel } from './selectable_panel';
 import { ConditionPanel } from '../../shared';
 
-const percentageFormatter = getPercentageFormatter({ precision: 2 });
-
 export function SuggestedStreamPanel({
   definition,
   partition,
@@ -39,12 +35,11 @@ export function SuggestedStreamPanel({
   onPreview,
 }: {
   definition: Streams.WiredStream.GetResponse;
-  partition: ReviewSuggestionsInputs['suggestions'][number];
+  partition: PartitionSuggestion;
   onDismiss(): void;
   onPreview(toggle: boolean): void;
 }) {
-  const { timeState } = useTimefilter();
-  const matchRate = useMatchRate(definition, partition, timeState.start, timeState.end);
+  const matchRate = useMatchRate(definition, partition);
   const selectedPreview = useStreamSamplesSelector((snapshot) => snapshot.context.selectedPreview);
   const isSelected = Boolean(
     selectedPreview &&
@@ -72,7 +67,7 @@ export function SuggestedStreamPanel({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="success">
-                {percentageFormatter.format(matchRate.value)}
+                {matchRate.value}
               </EuiText>
             </EuiFlexItem>
           </>

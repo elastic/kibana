@@ -224,6 +224,11 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
   );
 
   const ParamEditor = selectedOperationDefinition?.paramEditor;
+  const functionPlaceholder =
+    functionLabel ||
+    i18n.translate('xpack.lens.indexPattern.referenceFunctionPlaceholder', {
+      defaultMessage: 'Sub-function',
+    });
 
   return (
     <div>
@@ -246,16 +251,12 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
               compressed
               isClearable={false}
               data-test-subj="indexPattern-reference-function"
-              placeholder={
-                functionLabel ||
-                i18n.translate('xpack.lens.indexPattern.referenceFunctionPlaceholder', {
-                  defaultMessage: 'Sub-function',
-                })
-              }
+              placeholder={functionPlaceholder}
               options={functionOptions}
               isInvalid={showOperationInvalid || showSelectionFunctionInvalid}
               selectedOptions={selectedOption}
               singleSelection={{ asPlainText: true }}
+              aria-label={functionPlaceholder}
               onChange={(choices: Array<EuiComboBoxOptionOption<string>>) => {
                 if (choices.length === 0) {
                   return onDeleteColumn();

@@ -57,7 +57,7 @@ export class WorkflowsPlugin
         id: PLUGIN_ID,
         title: PLUGIN_NAME,
         appRoute: '/app/workflows',
-        euiIconType: 'merge', // TODO: use "workflowsAll" when available
+        euiIconType: 'workflowsApp',
         visibleIn: ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
         category: DEFAULT_APP_CATEGORIES.management,
         order: 9015,

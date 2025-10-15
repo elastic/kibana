@@ -1523,15 +1523,17 @@ export class CstToAstConverter {
 
   // --------------------------------------------------------------------- FUSE
 
-  private fromFuseCommand(ctx: cst.FuseCommandContext): ast.ESQLCommand<'fuse'> {
+  private fromFuseCommand(ctx: cst.FuseCommandContext): ast.ESQLAstFuseCommand {
     const fuseTypeCtx = ctx.identifier();
 
     const args: ast.ESQLAstItem[] = [];
     let incomplete = false;
 
+    const fuseType = fuseTypeCtx ? this.fromIdentifier(fuseTypeCtx) : undefined;
+
     // FUSE <fuse_method>
-    if (fuseTypeCtx) {
-      args.push(this.fromIdentifier(fuseTypeCtx));
+    if (fuseType) {
+      args.push(fuseType);
     }
 
     // FUSE SCORE BY <score_column> GROUP BY <group_column> KEY BY <key_columns> WITH <options>
@@ -1543,7 +1545,16 @@ export class CstToAstConverter {
       incomplete ||= configurationItemCommandOption?.incomplete ?? true;
     }
 
-    return this.createCommand('fuse', ctx, { args, incomplete });
+    const fuseCommand = this.createCommand<'fuse', ast.ESQLAstFuseCommand>('fuse', ctx, {
+      args,
+      incomplete,
+    });
+
+    if (fuseType) {
+      fuseCommand.fuseType = fuseType;
+    }
+
+    return fuseCommand;
   }
 
   private fromFuseConfigurationItem(
@@ -1569,7 +1580,7 @@ export class CstToAstConverter {
     const keyCtx = configCtx.KEY();
     if (keyCtx && byContext) {
       const args = this.fromFields(configCtx.fields());
-      const incomplete = args.length === 0;
+      const incomplete = args.length === 0 || args.some((arg) => arg.incomplete);
       return this.toOption('key by', configCtx, args, incomplete);
     }
 
@@ -1598,7 +1609,8 @@ export class CstToAstConverter {
         args.push(map);
       }
 
-      const incomplete = args.length === 0 || map.incomplete;
+      const incomplete =
+        args.length === 0 || map.incomplete || !textExistsAndIsValid(configCtx.getText());
       return this.toOption('with', configCtx, args, incomplete);
     }
 

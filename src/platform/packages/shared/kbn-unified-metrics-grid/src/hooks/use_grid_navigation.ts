@@ -104,14 +104,15 @@ export const useGridNavigation = ({
     [focusedCell, gridRows, gridColumns, totalRows, getIndexFromRowCol, focusCell]
   );
 
-  const handleCellClick = useCallback((rowIndex: number, colIndex: number) => {
+  const handleFocusCell = useCallback((rowIndex: number, colIndex: number) => {
     setFocusedCell({ rowIndex, colIndex });
   }, []);
 
   return {
     focusedCell,
     handleKeyDown,
-    handleCellClick,
+    handleFocusCell,
+    focusCell,
     getRowColFromIndex,
   };
 };

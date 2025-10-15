@@ -20,6 +20,7 @@ import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
 import type { ActionType, ActionsApiRequestHandlerContext, ExecutorType } from './types';
 import type { ActionsConfig } from './config';
+import { ActionTypeRegistry } from './action_type_registry';
 import type { ActionsPluginsSetup, ActionsPluginsStart, PluginSetupContract } from './plugin';
 import { ActionsPlugin } from './plugin';
 import {
@@ -896,6 +897,59 @@ describe('Actions Plugin', () => {
         expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
           'Connector: My action type'
         );
+      });
+    });
+
+    describe('listTypes()', () => {
+      it('passes through feature ID and sets exposeValidation to true', async () => {
+        const actionTypeRegistryListMock = jest.spyOn(ActionTypeRegistry.prototype, 'list');
+        const pluginSetup = await plugin.setup(coreSetup, pluginsSetup);
+        pluginSetup.registerType({
+          id: '.server-log',
+          name: 'Server log',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: {
+              schema: schema.object({
+                text: schema.string({ minLength: 1 }),
+              }),
+            },
+          },
+          executor,
+        });
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        const result = pluginStart.listTypes('alerting');
+        expect(result).toEqual([
+          {
+            id: '.server-log',
+            name: 'Server log',
+            enabled: true,
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'basic',
+            supportedFeatureIds: ['alerting'],
+            isSystemActionType: false,
+            validate: { params: expect.any(Object) },
+          },
+        ]);
+
+        // check that validation works
+        try {
+          result[0].validate?.params.schema.validate({ text: '' });
+        } catch (err) {
+          expect(err.message).toMatchInlineSnapshot(
+            `"[text]: value has length [0] but it must have a minimum length of [1]."`
+          );
+        }
+
+        expect(actionTypeRegistryListMock).toHaveBeenCalledWith({
+          exposeValidation: true,
+          featureId: 'alerting',
+        });
       });
     });
 

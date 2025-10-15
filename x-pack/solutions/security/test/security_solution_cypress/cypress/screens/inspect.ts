@@ -41,7 +41,6 @@ export const INSPECT_BUTTON_ICON = '[data-test-subj="inspect-icon-button"]';
 export const INSPECT_MODAL = '[data-test-subj="modal-inspect-euiModal"]';
 export const INSPECT_MODAL_REQUEST_TAB = getDataTestSubjectSelector('modal-inspect-request-tab');
 export const INSPECT_MODAL_RESPONSE_TAB = getDataTestSubjectSelector('modal-inspect-response-tab');
-export const INSPECT_MODAL_STATS_TAB = getDataTestSubjectSelector('modal-inspect-statistics-tab');
 export const INSPECT_MODAL_INDEX_PATTERN = '[data-test-subj="index-pattern-description"]';
 export const EMBEDDABLE_PANEL_TOGGLE_ICON = '[data-test-subj="embeddablePanelToggleMenuIcon"]';
 export const EMBEDDABLE_PANEL_INSPECT = '[data-test-subj="embeddablePanelAction-inspect"]';

@@ -647,7 +647,6 @@ describe('EPM index template install', () => {
           },
           template: {
             mappings: {
-              dynamic: true,
               dynamic_templates: undefined,
               properties: {
                 test_dimension: {
@@ -798,7 +797,6 @@ describe('EPM index template install', () => {
           },
           template: {
             mappings: {
-              dynamic: true,
               dynamic_templates: undefined,
               properties: {
                 test_dimension: {

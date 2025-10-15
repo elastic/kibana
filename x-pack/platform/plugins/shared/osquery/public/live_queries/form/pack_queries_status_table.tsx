@@ -171,7 +171,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     (id: string) => (
       <div css={truncateTooltipTextCss}>
         <EuiToolTip content={id} display="block">
-          <>{id}</>
+          <span tabIndex={0}>{id}</span>
         </EuiToolTip>
       </div>
     ),
@@ -261,6 +261,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           data-test-subj={`toggleIcon-${item.id}`}
           onClick={getHandleErrorsToggle(item)}
           iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          aria-label={i18n.translate('xpack.osquery.pack.queriesTable.toggleResultsAriaLabel', {
+            defaultMessage: 'Toggle results',
+          })}
         />
       ) : (
         <></>
@@ -299,7 +302,13 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         },
         {
           render: (item: { action_id: string }) => (
-            <EuiButtonIcon iconType={'expand'} onClick={handleQueryFlyoutOpen(item)} />
+            <EuiButtonIcon
+              iconType={'expand'}
+              onClick={handleQueryFlyoutOpen(item)}
+              aria-label={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
+                defaultMessage: 'View query',
+              })}
+            />
           ),
         },
       ];

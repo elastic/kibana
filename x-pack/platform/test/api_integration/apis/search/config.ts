@@ -15,7 +15,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('.')],
     kbnTestServer: {
       ...baseIntegrationTestsConfig.get('kbnTestServer'),
-      serverArgs: [...baseIntegrationTestsConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...baseIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
+        '--data.search.sessions.enabled=true',
+      ],
     },
   };
 }

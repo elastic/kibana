@@ -42,6 +42,12 @@ interface Props {
   displayFancy?: (label: string, aIConnector?: AIConnector) => React.ReactNode;
   setIsOpen?: (isOpen: boolean) => void;
   stats?: AttackDiscoveryStats | null;
+
+  /**
+   * Allows parent components to control whether the default connector should be
+   * automatically selected or the explicit user selection action required.
+   */
+  explicitConnectorSelection?: boolean;
 }
 
 export type AIConnector = ActionConnector & {
@@ -59,6 +65,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     onConnectorSelectionChange,
     setIsOpen,
     stats = null,
+    explicitConnectorSelection,
   }) => {
     const {
       actionTypeRegistry,
@@ -129,7 +136,9 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     );
 
     // Use effective value (optimistic or actual) or fall back to default
-    const selectedOrDefaultConnectorId = effectiveSelectedConnectorId ?? defaultAIConnectorId;
+    const selectedOrDefaultConnectorId =
+      effectiveSelectedConnectorId ??
+      (explicitConnectorSelection ? undefined : defaultAIConnectorId);
     const selectedOrDefaultConnector = aiConnectors?.find(
       (connector) => connector.id === selectedOrDefaultConnectorId
     );

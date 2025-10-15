@@ -7,5 +7,3 @@
 
 export const EVENTS_TAB = '[data-test-subj="navigation-events"]';
 export const EVENTS_TAB_CONTENT = '[data-test-subj="events-viewer-panel"]';
-
-export const EVENTS_HISTOGRAM = '[data-test-subj="alertsOrEventsHistogramQueryPanel"]';

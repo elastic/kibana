@@ -241,6 +241,7 @@ export const DiscoverTopNav = ({
       <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />
       <SearchBar
         useBackgroundSearchButton={
+          stateContainer.customizationContext.displayMode !== 'embedded' &&
           services.data.search.isBackgroundSearchEnabled &&
           !!services.capabilities.discover_v2.storeSearchSession
         }

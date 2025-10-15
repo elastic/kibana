@@ -103,26 +103,26 @@ The table below lists the UiActions registered to embeddable panel triggers.
 
 | UiAction | Description | Trigger | Optional interfaces required by action |
 | ---------| ----------- | ---------- | ---------- |
-| ACTION_ADD_TO_LIBRARY | Converts by-value panel to by-reference panel and stores panel configuration to library | CONTEXT_MENU_TRIGGER | HasLibraryTransforms |
-| ACTION_CLONE_PANEL | Clones panel in page | CONTEXT_MENU_TRIGGER | |
-| ACTION_COPY_TO_DASHBOARD | Opens "copy to dashboard" modal | CONTEXT_MENU_TRIGGER | |
+| saveToLibrary | Converts by-value panel to by-reference panel and stores panel configuration to library | CONTEXT_MENU_TRIGGER | HasLibraryTransforms |
+| clonePanel | Clones panel in page | CONTEXT_MENU_TRIGGER | |
+| copyToDashboard | Opens "copy to dashboard" modal | CONTEXT_MENU_TRIGGER | |
 | ACTION_CUSTOMIZE_PANEL | Opens panel settings flyout | CONTEXT_MENU_TRIGGER | PublishesDataViews, PublishesDescription, PublishesWritableDescription, PublishesTitle, PublishesWritableTitle, PublishesTimeRange, PublishesWritableTimeRange |
-| ACTION_DEPRECATION_BADGE | Displays deprecation badge for Visualize embeddable input controls | PANEL_BADGE_TRIGGER | HasVisualizeConfig |
+| ACTION_INPUT_CONTROL_DEPRECATION_BADGE | Displays deprecation badge for Visualize embeddable input controls | PANEL_BADGE_TRIGGER | HasVisualizeConfig |
 | ACTION_EDIT_IN_LENS | Opens Visualize embeddable in lens editor | CONTEXT_MENU_TRIGGER | HasVisualizeConfig |
-| ACTION_EDIT_PANEL | Opens embeddable editor | CONTEXT_MENU_TRIGGER | HasEditCapabilities |
-| ACTION_EXPAND_PANEL | Expands panel so page only displays single panel | CONTEXT_MENU_TRIGGER | |
+| editPanel | Opens embeddable editor | CONTEXT_MENU_TRIGGER | HasEditCapabilities |
+| togglePanel | Expands panel so page only displays single panel | CONTEXT_MENU_TRIGGER | |
 | ACTION_EXPLORE_DATA | Explore underlying data | CONTEXT_MENU_TRIGGER | PublishesDataViews |
 | ACTION_EXPORT_CSV | Exports raw data table to CSV | CONTEXT_MENU_TRIGGER | HasInspectorAdapters |
-| ACTION_INSPECT_PANEL | Opens inspector flyout | CONTEXT_MENU_TRIGGER | HasInspectorAdapters |
+| openInspector | Opens inspector flyout | CONTEXT_MENU_TRIGGER | HasInspectorAdapters |
 | ACTION_OPEN_IN_DISCOVER | Opens Discover application with  Lens embeddable data request context | CONTEXT_MENU_TRIGGER | LensApiCallbacks |
-| ACTION_REMOVE_PANEL | Removes embeddable from page | CONTEXT_MENU_TRIGGER | |
+| deletePanel | Removes embeddable from page | CONTEXT_MENU_TRIGGER | |
 | ACTION_SHOW_CONFIG_PANEL | Opens read-only view of embeddable configuration | CONTEXT_MENU_TRIGGER | HasReadOnlyCapabilities |
-| ACTION_UNLINK_FROM_LIBRARY | Converts by-reference panel to by-value panel | CONTEXT_MENU_TRIGGER | HasLibraryTransforms |
+| unlinkFromLibrary | Converts by-reference panel to by-value panel | CONTEXT_MENU_TRIGGER | HasLibraryTransforms |
 | ACTION_VIEW_SAVED_SEARCH | Open in Discover session in Discover application | CONTEXT_MENU_TRIGGER | |
-| ADD_TO_EXISTING_CASE_ACTION_ID | Add to case | CONTEXT_MENU_TRIGGER | LensApiCallbacks |
-| ALERT_RULE_TRIGGER | Create an alert rule from panel | CONTEXT_MENU_TRIGGER | |
-| BADGE_FILTERS_NOTIFICATION | Displays filters notification badge | PANEL_NOTIFICATION_TRIGGER | Partial<PublishesUnifiedSearch> |
-| CONVERT_LEGACY_MARKDOWN_ACTION_ID | Converts markdown visualize panel to markdown panel | CONTEXT_MENU_TRIGGER | HasVisualizeConfig | 
+| embeddable_addToExistingCase | Add to case | CONTEXT_MENU_TRIGGER | LensApiCallbacks |
+| alertRule | Create an alert rule from panel | CONTEXT_MENU_TRIGGER | |
+| ACTION_FILTERS_NOTIFICATION | Displays filters notification badge | PANEL_NOTIFICATION_TRIGGER | Partial<PublishesUnifiedSearch> |
+| CONVERT_LEGACY_MARKDOWN | Converts markdown visualize panel to markdown panel | CONTEXT_MENU_TRIGGER | HasVisualizeConfig | 
 | create-ml-ad-job-action | Detect anomalies | CONTEXT_MENU_TRIGGER |  |
 | FILTER_BY_MAP_EXTENT | Filters page by map bounds | CONTEXT_MENU_TRIGGER | |
 | generateCsvReport | Starts CSV reporting job for Discover session | CONTEXT_MENU_TRIGGER | PublishesSavedSearch, PublishesTitle |

@@ -122,7 +122,8 @@ export const createLensEmbeddableFactory = (
       const integrationsConfig = initializeIntegrations(
         getLatestState,
         dynamicActionsManager?.serializeState,
-        services
+        services,
+        internalApi
       );
       const actionsConfig = initializeActionApi(
         uuid,

@@ -7,27 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SHOW_USERS_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.users.show',
-  {
-    defaultMessage: 'Show users',
-  }
-);
-
-export const HIDE_USERS_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.users.hide',
-  {
-    defaultMessage: 'Hide users',
-  }
-);
-
-export const RISK_ENGINE_STATUS = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.status',
-  {
-    defaultMessage: 'Status',
-  }
-);
-
 export const RISK_ENGINE_STATUS_ON = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.statusOn',
   {
@@ -39,13 +18,6 @@ export const RISK_ENGINE_STATUS_OFF = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.statusOff',
   {
     defaultMessage: 'Off',
-  }
-);
-
-export const ENTITY_RISK_SCORING = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.entityRiskScoring',
-  {
-    defaultMessage: 'Entity risk score',
   }
 );
 
@@ -132,13 +104,6 @@ export const PREVIEW_ERROR_TRY_AGAIN = i18n.translate(
   }
 );
 
-export const PREVIEW_QUERY_ERROR_TITLE = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.queryErrorTitle',
-  {
-    defaultMessage: 'Invalid query',
-  }
-);
-
 export const ERROR_PANEL_TITLE = i18n.translate(
   'xpack.securitySolution.riskScore.errorPanel.title',
   {
@@ -157,20 +122,6 @@ export const ERROR_PANEL_ERRORS = i18n.translate(
   'xpack.securitySolution.riskScore.errorPanel.errors',
   {
     defaultMessage: 'Errors',
-  }
-);
-
-export const CHECK_PRIVILEGES = i18n.translate(
-  'xpack.securitySolution.riskScore.errors.privileges.check',
-  {
-    defaultMessage: 'Check privileges',
-  }
-);
-
-export const NEED_TO_HAVE = i18n.translate(
-  'xpack.securitySolution.riskScore.errors.privileges.needToHave',
-  {
-    defaultMessage: 'You need to have:',
   }
 );
 

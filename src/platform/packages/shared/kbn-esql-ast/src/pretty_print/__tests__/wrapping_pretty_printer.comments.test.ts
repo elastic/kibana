@@ -805,4 +805,117 @@ ROW
       });
     });
   });
+
+  describe('header commands', () => {
+    describe('top comments', () => {
+      test('single line comment before SET', () => {
+        const src = `// Header comment
+SET timeout = "30s";
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('multi-line comment before SET', () => {
+        const src = `/* Header comment
+   with multiple lines */
+SET timeout = "30s";
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('multiple comments before SET', () => {
+        const src = `// First comment
+/* Second comment */
+// Third comment
+SET timeout = "30s";
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('comments before multiple SET commands', () => {
+        const src = `// First SET
+SET timeout = "30s";
+// Second SET
+SET max_results = 100;
+FROM index`;
+        assertReprint(src);
+      });
+    });
+
+    describe('left comments', () => {
+      test('comment to the left of SET keyword', () => {
+        const src = `/* left */ SET timeout = "30s";
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('multiple left comments', () => {
+        const src = `/* a */ /* b */ SET timeout = "30s";
+FROM index`;
+        assertReprint(src);
+      });
+    });
+
+    describe('right comments', () => {
+      test('comment at the end of SET line', () => {
+        const src = `SET timeout = "30s"; // Important timeout
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('multi-line comment after SET semicolon', () => {
+        const src = `SET timeout = "30s"; /* Important */
+FROM index`;
+        assertReprint(src);
+      });
+    });
+
+    describe('comments in SET arguments', () => {
+      test('comment before identifier', () => {
+        const src = `SET /* key */ timeout = "30s";
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('comment after identifier', () => {
+        const src = `SET timeout /* key */ = "30s";
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('comment before value', () => {
+        const src = `SET timeout = /* value */ "30s";
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('comment after value', () => {
+        const src = `SET timeout = "30s" /* value */;
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('can skip header', () => {
+        const text = reprint(
+          `SET timeout = "30s" /* value */;
+FROM index`,
+          { skipHeader: true }
+        ).text;
+
+        expect(text).toBe(`FROM index`);
+      });
+
+      test('comments around assignment operator', () => {
+        const src = `SET timeout /* before */ = /* after */ "30s";
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('multiple comments in SET arguments', () => {
+        const src = `SET /* a */ timeout /* b */ = /* c */ "30s" /* d */;
+FROM index`;
+        assertReprint(src);
+      });
+    });
+  });
 });

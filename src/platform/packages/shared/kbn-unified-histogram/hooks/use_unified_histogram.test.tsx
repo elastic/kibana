@@ -8,7 +8,7 @@
  */
 
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import { type ESQLControlVariable, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { act } from 'react-dom/test-utils';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
@@ -17,6 +17,20 @@ import { renderHook, waitFor } from '@testing-library/react';
 
 describe('useUnifiedHistogram', () => {
   it('should initialize', async () => {
+    const esqlControlState = {
+      'id-1': {
+        grow: false,
+        order: 0,
+        type: 'esqlControl',
+        width: 'medium' as const,
+        selectedOptions: ['field-1'],
+        variableName: 'agent_keyword',
+        variableType: ESQLVariableType.VALUES,
+        controlType: EsqlControlType.VALUES_FROM_QUERY,
+        esqlQuery: 'FROM logstash* | STATS BY field',
+        title: 'field',
+      },
+    };
     const hook = renderHook(() =>
       useUnifiedHistogram({
         services: unifiedHistogramServicesMock,
@@ -34,6 +48,7 @@ describe('useUnifiedHistogram', () => {
             type: 'values',
           },
         ] as ESQLControlVariable[],
+        controlsState: esqlControlState,
       })
     );
     expect(hook.result.current.isInitialized).toBe(false);
@@ -52,6 +67,7 @@ describe('useUnifiedHistogram', () => {
         type: 'values',
       },
     ]);
+    expect(hook.result.current.chartProps?.controlsState).toBe(esqlControlState);
     expect(hook.result.current.layoutProps).toBeDefined();
   });
 

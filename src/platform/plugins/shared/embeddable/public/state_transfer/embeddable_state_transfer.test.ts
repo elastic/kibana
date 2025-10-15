@@ -11,6 +11,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EmbeddableStateTransfer } from '.';
 import type { ApplicationStart, PublicAppInfo } from '@kbn/core/public';
+import type { EmbeddablePackageState } from './types';
 import { EMBEDDABLE_EDITOR_STATE_KEY, EMBEDDABLE_PACKAGE_STATE_KEY } from './types';
 import { EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY } from './embeddable_state_transfer';
 import { Subject } from 'rxjs';
@@ -225,10 +226,32 @@ describe('embeddable state transfer', () => {
       },
     });
     const fetchedState = stateTransfer.getIncomingEmbeddablePackage(testAppId);
-    expect(fetchedState).toEqual({
-      type: 'skisEmbeddable',
-      serializedState: { rawState: { savedObjectId: '123' } },
+    expect(fetchedState).toEqual([
+      {
+        type: 'skisEmbeddable',
+        serializedState: { rawState: { savedObjectId: '123' } },
+      },
+    ]);
+  });
+
+  it('can fetch an array of incoming embeddable package state', async () => {
+    store.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
+      [EMBEDDABLE_PACKAGE_STATE_KEY]: {
+        [testAppId]: [
+          {
+            type: 'skisEmbeddable',
+            serializedState: { rawState: { savedObjectId: '123' } },
+          },
+        ],
+      },
     });
+    const fetchedState = stateTransfer.getIncomingEmbeddablePackage(testAppId);
+    expect(fetchedState).toEqual([
+      {
+        type: 'skisEmbeddable',
+        serializedState: { rawState: { savedObjectId: '123' } },
+      },
+    ]);
   });
 
   it('can fetch an incoming embeddable package state and ignore state for other apps', async () => {
@@ -245,16 +268,20 @@ describe('embeddable state transfer', () => {
       },
     });
     const fetchedState = stateTransfer.getIncomingEmbeddablePackage(testAppId);
-    expect(fetchedState).toEqual({
-      type: 'skisEmbeddable',
-      serializedState: { rawState: { savedObjectId: '123' } },
-    });
+    expect(fetchedState).toEqual([
+      {
+        type: 'skisEmbeddable',
+        serializedState: { rawState: { savedObjectId: '123' } },
+      },
+    ]);
 
     const fetchedState2 = stateTransfer.getIncomingEmbeddablePackage('testApp2');
-    expect(fetchedState2).toEqual({
-      type: 'crossCountryEmbeddable',
-      serializedState: { rawState: { savedObjectId: '456' } },
-    });
+    expect(fetchedState2).toEqual([
+      {
+        type: 'crossCountryEmbeddable',
+        serializedState: { rawState: { savedObjectId: '456' } },
+      },
+    ]);
   });
 
   it('embeddable package state returns undefined when state is not in the right shape', async () => {
@@ -297,6 +324,82 @@ describe('embeddable state transfer', () => {
     stateTransfer.getIncomingEditorState(testAppId, true);
     expect(store.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY)).toEqual({
       iSHouldStillbeHere: 'doing the sports thing',
+    });
+  });
+
+  describe('navigateToWithMultipleEmbeddablePackage', () => {
+    it('stores multiple embeddable packages and navigates', async () => {
+      const multiplePackages: EmbeddablePackageState[] = [
+        {
+          type: 'visualization',
+          serializedState: { rawState: { id: 'vis1', title: 'Visualization 1' } },
+          embeddableId: 'vis1',
+        },
+        {
+          type: 'lens',
+          serializedState: { rawState: { id: 'lens1', title: 'Lens 1' } },
+          embeddableId: 'lens1',
+        },
+      ];
+
+      await stateTransfer.navigateToWithMultipleEmbeddablePackage(destinationApp, {
+        state: multiplePackages,
+      });
+
+      expect(application.navigateToApp).toHaveBeenCalledWith(destinationApp, {
+        openInNewTab: undefined,
+        skipAppLeave: undefined,
+      });
+
+      expect(store.set).toHaveBeenCalledWith(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
+        [EMBEDDABLE_PACKAGE_STATE_KEY]: {
+          [destinationApp]: multiplePackages,
+        },
+      });
+      expect(stateTransfer.isTransferInProgress).toBe(true);
+    });
+
+    it('preserves existing state for other apps when storing multiple packages', async () => {
+      // Pre-populate storage with existing state
+      const existingState = {
+        [EMBEDDABLE_PACKAGE_STATE_KEY]: {
+          lens: { type: 'existing', serializedState: {} },
+        },
+      };
+      store.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, existingState);
+
+      const multiplePackages: EmbeddablePackageState[] = [
+        {
+          type: 'visualization',
+          serializedState: { rawState: { id: 'vis1', title: 'Visualization 1' } },
+          embeddableId: 'vis1',
+        },
+      ];
+
+      await stateTransfer.navigateToWithMultipleEmbeddablePackage(destinationApp, {
+        state: multiplePackages,
+      });
+
+      expect(store.set).toHaveBeenCalledWith(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
+        [EMBEDDABLE_PACKAGE_STATE_KEY]: {
+          lens: {
+            serializedState: {},
+            type: 'existing',
+          },
+          superUltraVisualize: [
+            {
+              embeddableId: 'vis1',
+              serializedState: {
+                rawState: {
+                  id: 'vis1',
+                  title: 'Visualization 1',
+                },
+              },
+              type: 'visualization',
+            },
+          ],
+        },
+      });
     });
   });
 });

@@ -57,6 +57,9 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
   const { getLensAttributes, columns, generateVisualizationQuery, generateTableQuery } =
     usePrivilegedUserActivityParams(selectedToggleOption, sourcererDataView);
   const stackByOptions = useStackByOptions(selectedToggleOption);
+  const stackByLabel = i18n.translate('xpack.securitySolution.genericDashboard.stackBy.label', {
+    defaultMessage: 'Stack by',
+  });
   const setSelectedChartOptionCallback = useCallback(
     (value: string) => {
       setSelectedStackByOption(value ?? stackByOptions[0].value);
@@ -117,12 +120,11 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
                 <EuiSuperSelect
                   onChange={setSelectedChartOptionCallback}
                   options={stackByOptions}
-                  prepend={i18n.translate('xpack.securitySolution.genericDashboard.stackBy.label', {
-                    defaultMessage: 'Stack by',
-                  })}
+                  prepend={stackByLabel}
                   valueOfSelected={selectedStackByOption}
                   hasDividers={true}
                   itemLayoutAlign="top"
+                  aria-label={stackByLabel}
                 />
               )}
             </EuiFlexItem>

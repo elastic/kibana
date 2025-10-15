@@ -44,6 +44,7 @@ export const EnterTryBlockNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('enter-try-block'),
   enterNormalPathNodeId: z.string(),
+  enterFallbackPathNodeId: z.string(),
   exitNodeId: z.string(),
 });
 export type EnterTryBlockNode = z.infer<typeof EnterTryBlockNodeSchema>;

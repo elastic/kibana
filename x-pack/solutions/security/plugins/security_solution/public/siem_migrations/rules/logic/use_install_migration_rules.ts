@@ -34,7 +34,7 @@ export const useInstallMigrationRules = (
   const reportTelemetry = useCallback(
     ({ ids, enabled = false }: InstallMigrationRulesParams, error?: Error) => {
       const count = ids?.length ?? translationStats?.rules.success.installable ?? 0;
-      telemetry.reportTranslatedRuleBulkInstall({ migrationId, enabled, count, error });
+      telemetry.reportTranslatedItemBulkInstall({ migrationId, enabled, count, error });
     },
     [migrationId, telemetry, translationStats?.rules.success.installable]
   );

@@ -728,5 +728,11 @@ function createUrlGeneratorState({
     hideAggregatedPreview: appState.hideAggregatedPreview,
     breakdownField: appState.breakdownField,
     dataViewSpec: !dataView?.isPersisted() ? dataView?.toMinimalSpec() : undefined,
+    ...(shouldRestoreSearchSession
+      ? {
+          hideChart: appState.hideChart ?? false,
+          sampleSize: appState.sampleSize,
+        }
+      : {}),
   };
 }

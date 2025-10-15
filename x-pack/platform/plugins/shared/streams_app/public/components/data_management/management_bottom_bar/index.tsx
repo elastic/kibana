@@ -15,6 +15,7 @@ interface ManagementBottomBarProps {
   disabled?: boolean;
   insufficientPrivileges?: boolean;
   isLoading?: boolean;
+  isInvalid?: boolean;
   onCancel: () => void;
   onConfirm: () => void;
 }
@@ -24,6 +25,7 @@ export function ManagementBottomBar({
   disabled = false,
   isLoading = false,
   insufficientPrivileges = false,
+  isInvalid = false,
   onCancel,
   onConfirm,
 }: ManagementBottomBarProps) {
@@ -51,7 +53,11 @@ export function ManagementBottomBar({
         </EuiButtonEmpty>
         <EuiToolTip
           content={
-            insufficientPrivileges
+            isInvalid
+              ? i18n.translate('xpack.streams.streamDetailView.managementTab.bottomBar.fixErrors', {
+                  defaultMessage: 'Please fix the errors before saving.',
+                })
+              : insufficientPrivileges
               ? i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.bottomBar.onlySimulate',
                   {
@@ -63,7 +69,7 @@ export function ManagementBottomBar({
         >
           <EuiButton
             data-test-subj="streamsAppManagementBottomBarButton"
-            disabled={disabled || insufficientPrivileges}
+            disabled={disabled || insufficientPrivileges || isInvalid}
             color="primary"
             fill
             size="s"

@@ -283,14 +283,15 @@ class SecurityWorkflowInsightsService {
     defendInsights: DefendInsight[],
     request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>
   ): Promise<Array<Awaited<WriteResponseBase | void>>> {
-    if (!defendInsights || !defendInsights.length) {
-      return [];
-    }
-
     await this.isInitialized;
 
     // suppress existing insights since they might be stale, any current ones will be refreshed
     await this.suppressExistingInsights([request.body.insightType]);
+
+    // comes after suppression since we should always suppress stale insights
+    if (!defendInsights || !defendInsights.length) {
+      return [];
+    }
 
     const workflowInsights = await buildWorkflowInsights({
       defendInsights,

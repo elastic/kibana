@@ -71,6 +71,7 @@ export const Configuration = ({ toolType, setToolType, mode }: ConfigurationProp
           name="type"
           render={({ field: { ref, ...field } }) => (
             <EuiSelect
+              data-test-subj="agentBuilderToolTypeSelect"
               options={editableToolTypes}
               {...field}
               inputRef={ref}

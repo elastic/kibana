@@ -234,6 +234,7 @@ export const RecurringScheduleFormFields = memo(
                           singleSelection={{ asPlainText: true }}
                           selectedOptions={[{ label: timezone[0] }]}
                           isClearable={false}
+                          aria-label={i18n.RECURRING_SCHEDULE_FORM_TIMEZONE}
                           prepend={
                             <EuiFormLabel htmlFor={'disabled-timezone'}>
                               {i18n.RECURRING_SCHEDULE_FORM_TIMEZONE}

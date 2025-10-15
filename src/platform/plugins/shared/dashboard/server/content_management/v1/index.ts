@@ -30,7 +30,7 @@ export type {
   DashboardFilter,
   DashboardQuery,
 } from './types';
-export { serviceDefinition } from './cm_services';
-export { dashboardAPIGetResultSchema, dashboardSearchResultsSchema } from './schema';
+export { getServiceDefinition } from './cm_services';
+export { getDashboardAPIGetResultSchema, getDashboardSearchResultsSchema } from './schema';
 export { savedObjectToItem } from './transform_utils';
 export { transformDashboardIn } from './transforms';

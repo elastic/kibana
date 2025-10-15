@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/task-manager-performance-plugin",
   "owner": "@elastic/response-ops",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "taskManagerPerformance",
     "server": true,

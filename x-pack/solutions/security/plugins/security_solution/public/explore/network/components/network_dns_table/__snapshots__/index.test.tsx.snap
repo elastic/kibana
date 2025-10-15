@@ -925,6 +925,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
       class="euiFlexItem c4 emotion-euiFlexItem-growZero"
     >
       <nav
+        aria-label="Table pagination"
         class="euiPagination emotion-euiPagination"
         data-test-subj="numberedPagination"
       >

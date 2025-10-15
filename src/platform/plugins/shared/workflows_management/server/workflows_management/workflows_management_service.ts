@@ -35,9 +35,14 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows/types/v1';
 import { v4 as generateUuid } from 'uuid';
+import {
+  WORKFLOWS_EXECUTION_LOGS_INDEX,
+  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+} from '../../common';
+
 import { InvalidYamlSchemaError, WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
-
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml_utils';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
@@ -45,12 +50,7 @@ import { hasScheduledTriggers } from '../lib/schedule_utils';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
 import { createStorage } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
-import { createOrUpdateIndex } from './lib/create_index';
 import { getWorkflowExecution } from './lib/get_workflow_execution';
-import {
-  WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-} from './lib/index_mappings';
 import { searchStepExecutions } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 import type { IWorkflowEventLogger, LogSearchResult } from './lib/workflow_logger';
@@ -62,10 +62,13 @@ import type {
   GetWorkflowsParams,
 } from './workflows_management_api';
 
+const DEFAULT_PAGE_SIZE = 20;
 export interface SearchWorkflowExecutionsParams {
   workflowId: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
+  page?: number;
+  perPage?: number;
 }
 
 export class WorkflowsService {
@@ -73,23 +76,16 @@ export class WorkflowsService {
   private workflowStorage: WorkflowStorage | null = null;
   private taskScheduler: WorkflowTaskScheduler | null = null;
   private readonly logger: Logger;
-  private readonly workflowsExecutionIndex: string;
-  private readonly stepsExecutionIndex: string;
   private workflowEventLoggerService: SimpleWorkflowLogger | null = null;
   private security?: SecurityServiceStart;
 
   constructor(
     esClientPromise: Promise<ElasticsearchClient>,
     logger: Logger,
-    workflowsExecutionIndex: string,
-    stepsExecutionIndex: string,
-    workflowExecutionLogsIndex: string,
     enableConsoleLogging: boolean = false
   ) {
     this.logger = logger;
-    this.stepsExecutionIndex = stepsExecutionIndex;
-    this.workflowsExecutionIndex = workflowsExecutionIndex;
-    void this.initialize(esClientPromise, workflowExecutionLogsIndex, enableConsoleLogging);
+    void this.initialize(esClientPromise, enableConsoleLogging);
   }
 
   public setTaskScheduler(taskScheduler: WorkflowTaskScheduler) {
@@ -102,7 +98,6 @@ export class WorkflowsService {
 
   private async initialize(
     esClientPromise: Promise<ElasticsearchClient>,
-    workflowExecutionLogsIndex: string,
     enableConsoleLogging: boolean = false
   ) {
     this.esClient = await esClientPromise;
@@ -116,23 +111,9 @@ export class WorkflowsService {
     this.workflowEventLoggerService = new SimpleWorkflowLogger(
       this.logger,
       this.esClient,
-      workflowExecutionLogsIndex,
+      WORKFLOWS_EXECUTION_LOGS_INDEX,
       enableConsoleLogging
     );
-
-    // Create execution indices
-    await createOrUpdateIndex({
-      esClient: this.esClient,
-      indexName: this.workflowsExecutionIndex,
-      mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-      logger: this.logger,
-    });
-    await createOrUpdateIndex({
-      esClient: this.esClient,
-      indexName: this.stepsExecutionIndex,
-      mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-      logger: this.logger,
-    });
   }
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
@@ -672,7 +653,7 @@ export class WorkflowsService {
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
       const response = await this.esClient!.search({
-        index: this.workflowsExecutionIndex,
+        index: WORKFLOWS_EXECUTIONS_INDEX,
         size: 0,
         query: {
           bool: {
@@ -779,8 +760,8 @@ export class WorkflowsService {
     return getWorkflowExecution({
       esClient: this.esClient!,
       logger: this.logger,
-      workflowExecutionIndex: this.workflowsExecutionIndex,
-      stepsExecutionIndex: this.stepsExecutionIndex,
+      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
+      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       workflowExecutionId: executionId,
       spaceId,
     });
@@ -819,15 +800,23 @@ export class WorkflowsService {
       });
     }
 
+    const page = params.page ?? 1;
+    const perPage = params.perPage ?? DEFAULT_PAGE_SIZE;
+    const from = (page - 1) * perPage;
+
     return searchWorkflowExecutions({
       esClient: this.esClient!,
       logger: this.logger,
-      workflowExecutionIndex: this.workflowsExecutionIndex,
+      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
       query: {
         bool: {
           must,
         },
       },
+      size: perPage,
+      from,
+      page,
+      perPage,
     });
   }
 
@@ -836,7 +825,7 @@ export class WorkflowsService {
     spaceId: string
   ): Promise<WorkflowExecutionHistoryModel[]> {
     const response = await this.esClient!.search<EsWorkflowStepExecution>({
-      index: this.stepsExecutionIndex,
+      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       query: {
         bool: {
           must: [
@@ -884,7 +873,7 @@ export class WorkflowsService {
 
     try {
       const response = await this.esClient.search<EsWorkflowExecution>({
-        index: this.workflowsExecutionIndex,
+        index: WORKFLOWS_EXECUTIONS_INDEX,
         size: 0, // We only want aggregations
         query: {
           bool: {
@@ -971,7 +960,7 @@ export class WorkflowsService {
     return searchStepExecutions({
       esClient: this.esClient!,
       logger: this.logger,
-      stepsExecutionIndex: this.stepsExecutionIndex,
+      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       workflowExecutionId: params.executionId,
       additionalQuery: { term: { id: params.id } },
       spaceId,
@@ -999,7 +988,7 @@ export class WorkflowsService {
   ): Promise<EsWorkflowStepExecution | null> {
     const { executionId, id } = params;
     const response = await this.esClient!.search<EsWorkflowStepExecution>({
-      index: this.stepsExecutionIndex,
+      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       query: {
         bool: {
           must: [{ term: { workflowRunId: executionId } }, { term: { id } }, { term: { spaceId } }],

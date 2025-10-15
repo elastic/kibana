@@ -13,7 +13,7 @@ import { KQLSyntaxError } from '@kbn/es-query';
 import type { NodeImplementation } from '../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import { evaluateKql } from './eval_kql';
-import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 
 export class EnterIfNodeImpl implements NodeImplementation {
@@ -21,13 +21,12 @@ export class EnterIfNodeImpl implements NodeImplementation {
     private node: EnterIfNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
     private workflowGraph: WorkflowGraph,
-    private workflowContextManager: WorkflowContextManager,
+    private stepExecutionRuntime: StepExecutionRuntime,
     private workflowContextLogger: IWorkflowEventLogger
   ) {}
 
   public async run(): Promise<void> {
-    await this.wfExecutionRuntimeManager.startStep();
-    this.wfExecutionRuntimeManager.enterScope();
+    await this.stepExecutionRuntime.startStep();
     const successors: any[] = this.workflowGraph.getDirectSuccessors(this.node.id);
 
     if (
@@ -95,7 +94,7 @@ export class EnterIfNodeImpl implements NodeImplementation {
     }
 
     try {
-      return evaluateKql(condition, this.workflowContextManager.getContext());
+      return evaluateKql(condition, this.stepExecutionRuntime.contextManager.getContext());
     } catch (error) {
       if (error instanceof KQLSyntaxError) {
         throw new Error(

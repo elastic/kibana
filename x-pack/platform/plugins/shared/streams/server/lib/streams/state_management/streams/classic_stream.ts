@@ -433,7 +433,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         },
       },
       {
-        type: 'unlink_systems',
+        type: 'unlink_features',
         request: {
           name: this._definition.name,
         },

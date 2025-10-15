@@ -35,7 +35,6 @@ describe('WorkflowDetailHeader', () => {
     handleSave: () => {},
     isEnabled: true,
     handleToggleWorkflow: () => {},
-    canTestWorkflow: true,
     isValid: true,
     hasUnsavedChanges: false,
     highlightDiff: false,
