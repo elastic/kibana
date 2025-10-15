@@ -47,7 +47,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Dashboards and Visualizations**:
 * Adds the ability to configure index settings when importing geospatial files in Maps [#232308]({{kib-pull}}232308).
-* Adds a new Inline Markdown editor to edit your text while switching between **Editing** and **Preview** mode.[#229191]({{kib-pull}}229191).
+* Adds a new Inline Markdown editor to edit your text while switching between **Editing** and **Preview** mode[#229191]({{kib-pull}}229191).
 * Updates the toolbar popover for Metric charts, which is now called **Appearance**. [#233992]({{kib-pull}}233992).
 * Improves ES|QL suggestions logic when an {{esql}} visualization query changes [#231767]({{kib-pull}}231767).
 * Adds a new **Add** menu to the toolbar that lets you populate your dashboard with visualizations, panels, sections, and controls.[#230324]({{kib-pull}}230324).
