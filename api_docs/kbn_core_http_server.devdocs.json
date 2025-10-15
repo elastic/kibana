@@ -3425,6 +3425,10 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
+              },
+              {
                 "plugin": "@kbn/content-management-content-insights-server",
                 "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
               },
@@ -7950,6 +7954,10 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/external/create/create_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/external/unarchive/unarchive_maintenance_window_route.test.ts"
               },
               {
@@ -9071,6 +9079,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/bulk_enable/bulk_enable_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/external/update/update_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -12271,6 +12283,10 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/torq_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -15907,6 +15923,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/entity_crud/upsert_entity.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/entity_crud/upsert_entities_bulk.ts"
               },
               {
                 "plugin": "securitySolution",
