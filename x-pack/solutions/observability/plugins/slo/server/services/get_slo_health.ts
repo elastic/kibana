@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  TransformGetTransformStatsTransformStats,
+  AggregationsAggregate,
+  FieldValue,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { FetchSLOHealthParams, FetchSLOHealthResponse } from '@kbn/slo-schema';
 import { fetchSLOHealthResponseSchema } from '@kbn/slo-schema';
-import type { AggregationsAggregate, FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import { type Dictionary, groupBy, keyBy } from 'lodash';
 import moment from 'moment';
 import {
@@ -253,7 +256,10 @@ function computeState(
 function getTransformHealth(
   transformStat?: TransformGetTransformStatsTransformStats
 ): HealthStatus {
-  return transformStat?.health?.status?.toLowerCase() === 'green' ? 'healthy' : 'unhealthy';
+  if (!transformStat) {
+    return 'missing';
+  }
+  return transformStat.health?.status?.toLowerCase() === 'green' ? 'healthy' : 'unhealthy';
 }
 
 function computeHealth(
