@@ -18,6 +18,7 @@ import {
   EuiIcon,
   EuiTextColor,
   EuiToolTip,
+  EuiLink,
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
@@ -33,28 +34,19 @@ type ProcessorMetricBadgesProps = ProcessorMetrics;
 const formatter = getPercentageFormatter();
 
 const messageStyles = css`
-  white-space: pre-wrap;
   overflow-wrap: anywhere;
-  word-break: break-word;
 `;
 
-const expandedMessageStyles = css`
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  max-height: 33vh;
-  overflow-y: auto;
-`;
-
-const CLAMP_LINES = 4;
 const ProcessorErrorMessage = ({ message }: { message: string }) => {
   const [expanded, toggleExpanded] = useToggle(false);
+  const { euiTheme } = useEuiTheme();
+  const CLAMP_LINES = 4;
   const shouldTruncate = shouldTruncateMessage(message, CLAMP_LINES);
 
   return (
     <>
       {expanded ? (
-        <div css={expandedMessageStyles}>{message}</div>
+        <div css={messageStyles}>{message}</div>
       ) : (
         <EuiTextBlockTruncate lines={CLAMP_LINES} cloneElement>
           <span css={messageStyles}>{message}</span>
@@ -62,14 +54,12 @@ const ProcessorErrorMessage = ({ message }: { message: string }) => {
       )}
 
       {shouldTruncate && (
-        <EuiButtonEmpty
-          size="xs"
+        <EuiLink
           onClick={toggleExpanded}
           data-test-subj="streamsAppProcessorErrorMessageToggle"
           css={css`
-            display: block;
-            margin: 0 auto;
-  `}
+            padding-top: ${euiTheme.size.xs};
+          `}
         >
           {expanded
             ? i18n.translate(
@@ -80,7 +70,7 @@ const ProcessorErrorMessage = ({ message }: { message: string }) => {
                 'xpack.streams.streamDetailView.managementTab.enrichment.processorErrors.message.showMore',
                 { defaultMessage: 'Show full message' }
               )}
-        </EuiButtonEmpty>
+        </EuiLink>
       )}
     </>
   );
