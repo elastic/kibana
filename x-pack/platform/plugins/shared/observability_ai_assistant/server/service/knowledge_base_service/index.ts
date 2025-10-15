@@ -125,6 +125,22 @@ export class KnowledgeBaseService {
     queries: Array<{ text: string; boost?: number }>;
     esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
   }): Promise<RecalledEntry[]> {
+    // Check if the .integration_knowledge index exists before searching for documents
+    // This has to be done with `.search` since `.exists` and `.get` can't be performed
+    // with the internal system user (lack of permissions)
+    try {
+      await esClient.asInternalUser.search({
+        index: INTEGRATION_KNOWLEDGE_INDEX,
+        size: 0,
+      });
+    } catch (error) {
+      // If there's an error checking the index existence, assume it doesn't exist and don't attempt to recall
+      this.dependencies.logger.debug(
+        `Error checking for ${INTEGRATION_KNOWLEDGE_INDEX} index. Skipping integration knowledge recall.`
+      );
+      this.dependencies.logger.debug(error);
+      return [];
+    }
     try {
       // Search the .integration_knowledge index using semantic search on the content field
       const response = await esClient.asInternalUser.search<IntegrationKnowledgeBaseEntry>({
