@@ -10,4 +10,5 @@ export { ChatService } from './chat';
 export { ConversationsService } from './conversations';
 export { ToolsService } from './tools';
 export { OAuthManager } from './oauth';
+export { McpService } from './mcp/mcp_service';
 export type { OnechatInternalService } from './types';

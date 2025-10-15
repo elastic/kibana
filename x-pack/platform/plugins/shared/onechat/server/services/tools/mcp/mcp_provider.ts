@@ -180,20 +180,20 @@ function convertMcpToolToInternal({
         let shouldDisconnect = false;
 
         try {
-          // Check if this is an OAuth server
-          if (connectionManager.isOAuthServer(serverId)) {
+          // Check if this server requires per-user authentication
+          if (connectionManager.requiresUserAuth(serverId)) {
             const userToken = context?.userToken;
             
             if (!userToken) {
               throw new Error(`OAuth authentication required for MCP server "${serverName}". Please connect to the server first.`);
             }
 
-            // Create per-request OAuth client
+            // Create per-request OAuth client with user's token
             logger.debug(`Creating OAuth client for tool "${mcpTool.name}" on server "${serverId}"`);
             clientToUse = await connectionManager.createOAuthClient(serverId, userToken);
             shouldDisconnect = true;
           } else {
-            // Use static client for API key / no auth servers
+            // Use static backend client (API key, no auth, or machine-to-machine OAuth)
             clientToUse = client;
           }
 
@@ -236,12 +236,13 @@ function convertMcpToolToInternal({
           };
         } catch (error) {
           logger.error(`Error executing MCP tool "${mcpTool.name}": ${error}`);
+          const errorMessage = (error as Error).message || String(error);
           return {
             results: [
               {
                 type: 'error' as const,
                 data: {
-                  message: `MCP tool execution failed: ${(error as Error).message}`,
+                  message: `MCP tool execution failed: ${errorMessage}`,
                   error: String(error),
                 },
               },

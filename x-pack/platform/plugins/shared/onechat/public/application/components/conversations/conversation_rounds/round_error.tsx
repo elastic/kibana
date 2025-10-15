@@ -7,6 +7,8 @@
 
 import {
   EuiAccordion,
+  EuiButton,
+  EuiCallOut,
   EuiCodeBlock,
   EuiText,
   EuiPanel,
@@ -16,14 +18,20 @@ import {
   useEuiTheme,
   EuiSpacer,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import { css } from '@emotion/react';
+import type { ConversationRoundStep } from '@kbn/onechat-common/chat/conversation';
+import { isToolCallStep } from '@kbn/onechat-common/chat/conversation';
+import { detectOAuthError } from '../../../../utils/oauth_error_detector';
+import { extractServerIdFromToolId } from '../../../../utils/mcp_utils';
+import { OAuthAuthButton } from '../oauth_auth_button';
 
 interface RoundErrorProps {
   error: unknown;
   onRetry: () => void;
+  steps: ConversationRoundStep[];
 }
 
 const getStackTrace = (error: unknown) => {
@@ -35,12 +43,64 @@ const getStackTrace = (error: unknown) => {
   return formatOnechatErrorMessage(error);
 };
 
-export const RoundError: React.FC<RoundErrorProps> = ({ error, onRetry }) => {
+export const RoundError: React.FC<RoundErrorProps> = ({ error, onRetry, steps }) => {
   const { euiTheme } = useEuiTheme();
+  const [hasAuthenticated, setHasAuthenticated] = useState(false);
+
   const codeBlockStyles = css`
     word-break: break-all;
     border-radius: ${euiTheme.border.radius.small};
   `;
+
+  // Check if this is an OAuth authentication error
+  const errorAsError = error instanceof Error ? error : new Error(String(error));
+  const oauthError = detectOAuthError(errorAsError);
+
+  if (oauthError.isOAuthError && oauthError.serverName) {
+    // Extract serverId from the last attempted tool in steps
+    let serverId: string | undefined;
+    
+    // Find the last tool call step to get the tool ID
+    for (let i = steps.length - 1; i >= 0; i--) {
+      if (isToolCallStep(steps[i])) {
+        const toolId = steps[i].toolId;
+        serverId = extractServerIdFromToolId(toolId);
+        if (serverId) break;
+      }
+    }
+
+    if (serverId) {
+      return (
+        <EuiCallOut title="Authentication Required" color="warning" iconType="lock">
+          <EuiText size="s">
+            <p>
+              This tool requires you to authenticate with {oauthError.serverName}. Click the button
+              below to authorize access.
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <OAuthAuthButton
+                serverName={oauthError.serverName}
+                serverId={serverId}
+                onAuthSuccess={() => setHasAuthenticated(true)}
+              />
+            </EuiFlexItem>
+            {hasAuthenticated && (
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={onRetry} iconType="refresh" size="s">
+                  Retry
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiCallOut>
+      );
+    }
+  }
+
+  // Original error display for non-OAuth errors
   return (
     <EuiAccordion
       id="round-error"

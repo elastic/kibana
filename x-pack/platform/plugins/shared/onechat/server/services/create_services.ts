@@ -12,6 +12,7 @@ import type {
   ServicesStartDeps,
   ServiceSetupDeps,
 } from './types';
+import type { McpConnectionManager } from './mcp/mcp_connection_manager';
 import { ToolsService } from './tools';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './runner';
@@ -25,6 +26,7 @@ interface ServiceInstances {
 
 export class ServiceManager {
   private services?: ServiceInstances;
+  private mcpConnectionManager?: McpConnectionManager;
   public internalSetup?: InternalSetupServices;
   public internalStart?: InternalStartServices;
 
@@ -33,6 +35,7 @@ export class ServiceManager {
     workflowsManagement,
     mcpConnectionManager,
   }: ServiceSetupDeps): InternalSetupServices {
+    this.mcpConnectionManager = mcpConnectionManager;
     this.services = {
       tools: new ToolsService(),
       agents: new AgentsService(),
@@ -108,12 +111,17 @@ export class ServiceManager {
       savedObjects,
     });
 
+    if (!this.mcpConnectionManager) {
+      throw new Error('MCP Connection Manager not initialized');
+    }
+
     this.internalStart = {
       tools,
       agents,
       conversations,
       runnerFactory,
       chat,
+      mcp: this.mcpConnectionManager,
     };
 
     return this.internalStart;

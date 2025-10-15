@@ -12,10 +12,12 @@ import type {
   ConversationRound,
   ConversationRoundStep,
 } from '@kbn/onechat-common';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
 import { RoundThinking } from './round_thinking/round_thinking';
+import { OAuthAuthCallout } from './oauth_auth_callout';
+import { detectOAuthErrorInSteps } from '../../../utils/detect_oauth_error';
 
 export interface RoundResponseProps {
   rawRound: ConversationRound;
@@ -31,6 +33,10 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   isLoading,
 }) => {
   const showThinking = steps.length > 0;
+  
+  // Check if there's an OAuth authentication error in the steps
+  const oauthError = useMemo(() => detectOAuthErrorInSteps(steps), [steps]);
+  
   return (
     <EuiFlexGroup
       direction="column"
@@ -43,6 +49,13 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       {showThinking && (
         <EuiFlexItem grow={false}>
           <RoundThinking steps={steps} isLoading={isLoading} rawRound={rawRound} />
+        </EuiFlexItem>
+      )}
+
+      {/* Display OAuth authentication callout if needed */}
+      {oauthError.hasOAuthError && oauthError.serverId && oauthError.serverName && (
+        <EuiFlexItem grow={false}>
+          <OAuthAuthCallout serverName={oauthError.serverName} serverId={oauthError.serverId} />
         </EuiFlexItem>
       )}
 

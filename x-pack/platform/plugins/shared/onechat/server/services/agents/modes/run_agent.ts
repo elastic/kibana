@@ -48,6 +48,11 @@ export interface RunAgentParams {
    * optional signal to abort the execution of the agent
    */
   abortSignal?: AbortSignal;
+  /**
+   * Optional OAuth access tokens for MCP servers.
+   * Keys are MCP server IDs, values are access tokens for per-user authentication.
+   */
+  userMcpTokens?: Record<string, string>;
 }
 
 export interface RunAgentResponse {

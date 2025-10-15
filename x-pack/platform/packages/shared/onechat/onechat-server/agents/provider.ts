@@ -95,6 +95,11 @@ export interface AgentParams {
    * Agent capabilities to enable.
    */
   capabilities?: AgentCapabilities;
+  /**
+   * Optional OAuth access tokens for MCP servers.
+   * Keys are MCP server IDs, values are access tokens for per-user authentication.
+   */
+  userMcpTokens?: Record<string, string>;
 }
 
 export interface AgentResponse {

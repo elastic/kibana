@@ -16,7 +16,7 @@ interface StoredTokenData extends OAuthTokenSet {
 
 /**
  * OAuth Token Storage
- * 
+ *
  * Manages OAuth tokens in browser localStorage.
  * Tokens are scoped per-user and per-server for isolation.
  */
@@ -32,7 +32,7 @@ export class OAuthTokenStorage {
 
   /**
    * Store OAuth token set for a user and server
-   * 
+   *
    * @param userId Current user ID
    * @param serverId MCP server ID
    * @param tokenSet OAuth token set to store
@@ -45,7 +45,7 @@ export class OAuthTokenStorage {
     tokenEndpoint?: string
   ): void {
     const key = this.storageKey(userId, serverId);
-    
+
     // Calculate expires_at if expires_in is provided
     const tokenToStore: StoredTokenData = {
       ...tokenSet,
@@ -66,14 +66,14 @@ export class OAuthTokenStorage {
 
   /**
    * Retrieve OAuth token set for a user and server
-   * 
+   *
    * @param userId Current user ID
    * @param serverId MCP server ID
    * @returns Token set with metadata or null if not found
    */
   getToken(userId: string, serverId: string): StoredTokenData | null {
     const key = this.storageKey(userId, serverId);
-    
+
     try {
       const stored = localStorage.getItem(key);
       if (!stored) {
@@ -81,7 +81,7 @@ export class OAuthTokenStorage {
       }
 
       const tokenSet = JSON.parse(stored) as StoredTokenData;
-      
+
       // Validate token structure
       if (!tokenSet.access_token || tokenSet.token_type !== 'Bearer') {
         console.warn('Invalid token structure found in storage');
@@ -98,7 +98,7 @@ export class OAuthTokenStorage {
 
   /**
    * Check if a token set is expired
-   * 
+   *
    * @param tokenSet Token set to check
    * @returns True if token is expired or will expire within 60 seconds
    */
@@ -111,13 +111,13 @@ export class OAuthTokenStorage {
     // Consider token expired if it expires within 60 seconds (safety buffer)
     const expiryTime = tokenSet.expires_at * 1000; // Convert to milliseconds
     const bufferTime = 60 * 1000; // 60 seconds buffer
-    
-    return Date.now() >= (expiryTime - bufferTime);
+
+    return Date.now() >= expiryTime - bufferTime;
   }
 
   /**
    * Clear OAuth token for a user and server
-   * 
+   *
    * @param userId Current user ID
    * @param serverId MCP server ID
    */
@@ -131,16 +131,47 @@ export class OAuthTokenStorage {
   }
 
   /**
+   * Get all server IDs that have tokens for a user
+   *
+   * Scans localStorage for all tokens belonging to the specified user.
+   *
+   * @param userId Current user ID
+   * @returns Array of server IDs
+   */
+  getAllServerIds(userId: string): string[] {
+    const prefix = `${this.storagePrefix}.${userId}.`;
+    const serverIds: string[] = [];
+
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(prefix)) {
+          // Extract serverId from key: "onechat.mcp.oauth.{userId}.{serverId}"
+          const serverId = key.substring(prefix.length);
+          if (serverId) {
+            serverIds.push(serverId);
+          }
+        }
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to scan localStorage for server IDs:', error);
+    }
+
+    return serverIds;
+  }
+
+  /**
    * Clear all OAuth tokens for a user (across all servers)
-   * 
+   *
    * @param userId Current user ID
    */
   clearAllTokens(userId: string): void {
     const prefix = `${this.storagePrefix}.${userId}.`;
-    
+
     try {
       const keysToRemove: string[] = [];
-      
+
       // Find all keys for this user
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -158,7 +189,7 @@ export class OAuthTokenStorage {
 
   /**
    * List all server IDs for which a user has tokens
-   * 
+   *
    * @param userId Current user ID
    * @returns Array of server IDs
    */
@@ -182,4 +213,3 @@ export class OAuthTokenStorage {
     return serverIds;
   }
 }
-

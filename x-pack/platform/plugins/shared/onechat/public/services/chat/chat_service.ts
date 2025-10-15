@@ -22,6 +22,7 @@ export interface ChatParams {
   conversationId?: string;
   capabilities?: AgentCapabilities;
   input: string;
+  userMcpTokens?: Record<string, string>;
 }
 
 export class ChatService {
@@ -38,6 +39,7 @@ export class ChatService {
       conversation_id: params.conversationId,
       connector_id: params.connectorId,
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
+      user_mcp_tokens: params.userMcpTokens,
     };
     return defer(() => {
       return this.http.post(`${publicApiPath}/converse/async`, {

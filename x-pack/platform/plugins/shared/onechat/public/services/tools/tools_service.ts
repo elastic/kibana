@@ -79,6 +79,11 @@ export class ToolsService {
             userMcpTokens = {
               [serverId]: token,
             };
+            // eslint-disable-next-line no-console
+            console.log(
+              `Found valid OAuth token for MCP server: ${serverId}`,
+              token.substring(0, 20) + '...'
+            );
           } else {
             // No valid token - might need to initiate OAuth flow
             // For now, continue without token and let backend handle the 401

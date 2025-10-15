@@ -11,6 +11,7 @@ import type { ChatService } from './chat';
 import type { ConversationsService } from './conversations';
 import type { ToolsService } from './tools';
 import type { OAuthManager } from './oauth';
+import type { McpService } from './mcp/mcp_service';
 
 export interface OnechatInternalService {
   agentService: AgentService;
@@ -18,5 +19,6 @@ export interface OnechatInternalService {
   conversationsService: ConversationsService;
   toolsService: ToolsService;
   oauthManager: OAuthManager;
+  mcpService: McpService;
   startDependencies: OnechatStartDependencies;
 }

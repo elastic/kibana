@@ -21,7 +21,7 @@ interface UseSendMessageMutationProps {
 }
 
 export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
-  const { chatService } = useOnechatServices();
+  const { chatService, oauthManager } = useOnechatServices();
   const { reportConverseError } = useReportConverseError();
   const conversationActions = useConversationActions();
   const [isResponseLoading, setIsResponseLoading] = useState(false);
@@ -43,17 +43,35 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     isAborted: () => Boolean(messageControllerRef?.current?.signal?.aborted),
   });
 
-  const sendMessage = ({ message }: { message: string }) => {
+  const sendMessage = async ({ message }: { message: string }) => {
     const signal = messageControllerRef.current?.signal;
     if (!signal) {
       return Promise.reject(new Error('Abort signal not present'));
     }
+
+    // Collect all valid MCP OAuth tokens
+    let userMcpTokens: Record<string, string> | undefined;
+    if (oauthManager) {
+      try {
+        userMcpTokens = await oauthManager.getAllValidTokens();
+        // eslint-disable-next-line no-console
+        console.log(
+          'Sending MCP tokens with conversation request:',
+          Object.keys(userMcpTokens || {})
+        );
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to collect MCP tokens:', error);
+      }
+    }
+
     const events$ = chatService.chat({
       signal,
       input: message,
       conversationId,
       agentId,
       connectorId,
+      userMcpTokens,
     });
 
     return subscribeToChatEvents(events$);

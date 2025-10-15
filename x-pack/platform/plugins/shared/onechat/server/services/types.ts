@@ -31,6 +31,7 @@ export interface InternalStartServices {
   conversations: ConversationService;
   chat: ChatService;
   runnerFactory: RunnerFactory;
+  mcp: McpConnectionManager;
 }
 
 export interface ServiceSetupDeps {

@@ -44,6 +44,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     runId = uuidv4(),
     agentId,
     abortSignal,
+    userMcpTokens,
   },
   { logger, request, modelProvider, toolProvider, events }
 ) => {
@@ -67,6 +68,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     logger,
     request,
     sendEvent: eventEmitter,
+    userMcpTokens,
   });
 
   const initialMessages = conversationToLangchainMessages({

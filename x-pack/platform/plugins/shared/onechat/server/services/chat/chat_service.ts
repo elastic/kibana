@@ -105,6 +105,11 @@ export interface ChatConverseParams {
    * Request bound to this call.
    */
   request: KibanaRequest;
+  /**
+   * Optional OAuth access tokens for MCP servers.
+   * Keys are MCP server IDs, values are access tokens for per-user authentication.
+   */
+  userMcpTokens?: Record<string, string>;
 }
 
 export const createChatService = (options: ChatServiceOptions): ChatService => {
@@ -144,6 +149,7 @@ class ChatServiceImpl implements ChatService {
     abortSignal,
     nextInput,
     autoCreateConversationWithId = false,
+    userMcpTokens,
   }: ChatConverseParams): Observable<ChatEvent> {
     const { inference } = this;
     const isNewConversation = !conversationId;
@@ -217,6 +223,7 @@ class ChatServiceImpl implements ChatService {
             abortSignal,
             agentService: this.agentService,
             defaultConnectorId: selectedConnectorId,
+            userMcpTokens,
           });
 
           const title$ = shouldCreateNewConversation$.pipe(

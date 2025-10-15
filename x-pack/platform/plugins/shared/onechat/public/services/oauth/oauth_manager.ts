@@ -24,7 +24,7 @@ interface OAuthFlowState {
 
 /**
  * OAuth Manager
- * 
+ *
  * Manages OAuth 2.1 authorization code flow with PKCE for MCP servers.
  * Handles discovery, authorization, token exchange, refresh, and storage.
  */
@@ -33,10 +33,7 @@ export class OAuthManager {
   private readonly storage: OAuthTokenStorage;
   private readonly discovery: OAuthDiscoveryService;
 
-  constructor(
-    private http: HttpSetup,
-    private getCurrentUserId: () => string
-  ) {
+  constructor(private http: HttpSetup, private getCurrentUserId: () => string) {
     this.pkce = new PKCEHelper();
     this.storage = new OAuthTokenStorage();
     this.discovery = new OAuthDiscoveryService(http);
@@ -44,10 +41,10 @@ export class OAuthManager {
 
   /**
    * Initiate OAuth authorization code flow with PKCE
-   * 
+   *
    * Redirects browser to OAuth provider's authorization endpoint.
    * State is stored in sessionStorage for callback handling.
-   * 
+   *
    * @param serverId MCP server ID
    * @param serverUrl MCP server URL
    * @param config OAuth configuration for the server
@@ -107,10 +104,10 @@ export class OAuthManager {
 
   /**
    * Handle OAuth callback after user authorization
-   * 
+   *
    * Exchanges authorization code for access token using PKCE.
    * Stores token in localStorage and cleans up session state.
-   * 
+   *
    * @param params URL search params from callback
    * @returns serverId of the authenticated server
    */
@@ -148,7 +145,7 @@ export class OAuthManager {
     let flowState: OAuthFlowState;
     try {
       flowState = JSON.parse(flowStateJson);
-    } catch (error) {
+    } catch (parseError) {
       throw new OAuthError(
         OAuthErrorType.DISCOVERY_FAILED,
         'Invalid OAuth flow state in session storage'
@@ -170,6 +167,13 @@ export class OAuthManager {
     const userId = this.getCurrentUserId();
     this.storage.setToken(userId, serverId, tokenSet, metadata.token_endpoint);
 
+    // eslint-disable-next-line no-console
+    console.log(`Stored OAuth token for user "${userId}", server "${serverId}"`, {
+      hasAccessToken: !!tokenSet.access_token,
+      hasRefreshToken: !!tokenSet.refresh_token,
+      expiresIn: tokenSet.expires_in,
+    });
+
     // Cleanup session storage
     sessionStorage.removeItem(`oauth.${state}`);
 
@@ -178,16 +182,22 @@ export class OAuthManager {
 
   /**
    * Get valid access token for a server
-   * 
+   *
    * Returns cached token if valid, attempts refresh if expired.
    * Returns null if no token or refresh fails.
-   * 
+   *
    * @param serverId MCP server ID
    * @returns Access token or null
    */
   async getValidToken(serverId: string): Promise<string | null> {
     const userId = this.getCurrentUserId();
     const tokenSet = this.storage.getToken(userId, serverId);
+
+    // eslint-disable-next-line no-console
+    console.log(`Retrieving OAuth token for user "${userId}", server "${serverId}"`, {
+      found: !!tokenSet,
+      hasAccessToken: tokenSet ? !!tokenSet.access_token : false,
+    });
 
     if (!tokenSet) {
       return null;
@@ -202,12 +212,12 @@ export class OAuthManager {
           return refreshedToken;
         } catch (error) {
           // Refresh failed, clear token
-          console.error('Token refresh failed:', error);
+          // Token refresh failed, clear token and return null
           this.storage.clearToken(userId, serverId);
           return null;
         }
       }
-      
+
       // No refresh token, token is expired
       this.storage.clearToken(userId, serverId);
       return null;
@@ -218,7 +228,7 @@ export class OAuthManager {
 
   /**
    * Check if user has a valid token for a server
-   * 
+   *
    * @param serverId MCP server ID
    * @returns True if valid token exists
    */
@@ -229,7 +239,7 @@ export class OAuthManager {
 
   /**
    * Clear token for a server
-   * 
+   *
    * @param serverId MCP server ID
    */
   clearToken(serverId: string): void {
@@ -238,10 +248,41 @@ export class OAuthManager {
   }
 
   /**
+   * Get all valid OAuth tokens for all MCP servers
+   *
+   * Returns a map of serverId -> accessToken for all servers where the user has valid tokens.
+   * Automatically refreshes expired tokens if refresh tokens are available.
+   *
+   * @returns Record of serverId to access token
+   */
+  async getAllValidTokens(): Promise<Record<string, string>> {
+    const userId = this.getCurrentUserId();
+    const serverIds = this.storage.getAllServerIds(userId);
+    const tokens: Record<string, string> = {};
+
+    // Collect valid tokens for all servers
+    await Promise.all(
+      serverIds.map(async (serverId) => {
+        try {
+          const token = await this.getValidToken(serverId);
+          if (token) {
+            tokens[serverId] = token;
+          }
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.warn(`Failed to get token for MCP server ${serverId}:`, error);
+        }
+      })
+    );
+
+    return tokens;
+  }
+
+  /**
    * Get redirect URI for OAuth callback
    */
   private getRedirectUri(): string {
-    return `${window.location.origin}/app/onechat/oauth/callback`;
+    return `${window.location.origin}/app/agent_builder/oauth/callback`;
   }
 
   /**
@@ -270,7 +311,7 @@ export class OAuthManager {
 
   /**
    * Exchange authorization code for access token
-   * 
+   *
    * For confidential clients (with clientSecret), uses Basic Authentication per OAuth 2.0 spec.
    * For public clients (without clientSecret), uses PKCE only.
    */
@@ -281,57 +322,31 @@ export class OAuthManager {
     clientSecret: string | undefined,
     tokenEndpoint: string
   ): Promise<OAuthTokenSet> {
-    // Build token request body
-    const body = new URLSearchParams({
-      grant_type: 'authorization_code',
-      code,
-      redirect_uri: this.getRedirectUri(),
-      code_verifier: codeVerifier,
-    });
+    // For confidential clients, use backend endpoint to securely exchange code
+    // The backend has access to clientSecret
+    const serverId = this.getServerIdFromSessionState();
 
-    // Build headers
-    const headers: HeadersInit = {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Accept: 'application/json',
-    };
-
-    // For confidential clients, use Basic Authentication (RFC 6749 Section 2.3.1)
-    // For public clients, send client_id in body
-    if (clientSecret) {
-      // Confidential client: client_id and client_secret in Basic auth header
-      const credentials = btoa(`${clientId}:${clientSecret}`);
-      headers.Authorization = `Basic ${credentials}`;
-    } else {
-      // Public client: client_id in body
-      body.set('client_id', clientId);
+    if (!serverId) {
+      throw new Error('Server ID not found in session state');
     }
 
     try {
-      // Token endpoint requires application/x-www-form-urlencoded
-      const response = await fetch(tokenEndpoint, {
-        method: 'POST',
-        headers,
-        body: body.toString(),
-      });
+      const tokenData = await this.http.post<OAuthTokenSet>(
+        `/internal/onechat/mcp/servers/${serverId}/oauth/token`,
+        {
+          body: JSON.stringify({
+            code,
+            codeVerifier,
+            redirectUri: this.getRedirectUri(),
+          }),
+        }
+      );
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Token exchange failed: ${response.statusText} - ${errorText}`);
-      }
-
-      const tokenData = await response.json();
-      
       if (!tokenData.access_token) {
         throw new Error('Invalid token response: missing access_token');
       }
 
-      return {
-        access_token: tokenData.access_token,
-        refresh_token: tokenData.refresh_token,
-        expires_in: tokenData.expires_in,
-        token_type: tokenData.token_type || 'Bearer',
-        scope: tokenData.scope,
-      };
+      return tokenData;
     } catch (error) {
       throw new OAuthError(
         OAuthErrorType.NETWORK_ERROR,
@@ -342,8 +357,30 @@ export class OAuthManager {
   }
 
   /**
+   * Get server ID from current OAuth flow session state
+   */
+  private getServerIdFromSessionState(): string | undefined {
+    // Iterate through session storage to find the OAuth state
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key?.startsWith('oauth.')) {
+        const stateData = sessionStorage.getItem(key);
+        if (stateData) {
+          try {
+            const parsed = JSON.parse(stateData);
+            return parsed.serverId;
+          } catch {
+            // Ignore parse errors
+          }
+        }
+      }
+    }
+    return undefined;
+  }
+
+  /**
    * Refresh access token using refresh token
-   * 
+   *
    * @param serverId MCP server ID
    * @param refreshToken Refresh token to use
    * @returns New access token
@@ -409,4 +446,3 @@ export class OAuthManager {
     }
   }
 }
-

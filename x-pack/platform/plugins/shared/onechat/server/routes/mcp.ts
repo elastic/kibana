@@ -139,4 +139,160 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         }
       })
     );
+
+  // Get OAuth configuration for an MCP server (for frontend to initiate OAuth flow)
+  router.get(
+    {
+      path: '/internal/onechat/mcp/servers/{serverId}/oauth_config',
+      validate: {
+        params: schema.object({
+          serverId: schema.string(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { serverId } = request.params;
+      const { mcp } = getInternalServices();
+
+      const config = mcp.getServerConfig(serverId);
+
+      if (!config || config.auth?.type !== 'oauth') {
+        return response.notFound({
+          body: { message: `OAuth config not found for server: ${serverId}` },
+        });
+      }
+
+      // Return only public OAuth config (no secrets)
+      return response.ok({
+        body: {
+          serverId: config.id,
+          serverName: config.name,
+          serverUrl: config.url,
+          clientId: config.auth.clientId,
+          authorizationEndpoint: config.auth.authorizationEndpoint,
+          tokenEndpoint: config.auth.tokenEndpoint,
+          scopes: config.auth.scopes || [],
+          discoveryUrl: config.auth.discoveryUrl,
+        },
+      });
+    })
+  );
+
+  // OAuth token exchange endpoint - exchanges authorization code for access token
+  router.post(
+    {
+      path: '/internal/onechat/mcp/servers/{serverId}/oauth/token',
+      validate: {
+        params: schema.object({
+          serverId: schema.string(),
+        }),
+        body: schema.object({
+          code: schema.string(),
+          codeVerifier: schema.string(),
+          redirectUri: schema.string(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { serverId } = request.params;
+      const { code, codeVerifier, redirectUri } = request.body;
+      const { mcp } = getInternalServices();
+
+      const config = mcp.getServerConfig(serverId);
+
+      if (!config || config.auth?.type !== 'oauth') {
+        return response.notFound({
+          body: { message: `OAuth config not found for server: ${serverId}` },
+        });
+      }
+
+      const auth = config.auth;
+
+      if (!auth.clientSecret) {
+        return response.badRequest({
+          body: { message: `Server ${serverId} does not have client secret configured` },
+        });
+      }
+
+      try {
+        // Determine token endpoint
+        let tokenEndpoint = auth.tokenEndpoint;
+        if (!tokenEndpoint && config.url.includes('paypal.com')) {
+          // Auto-detect PayPal token endpoint
+          tokenEndpoint = config.url.includes('sandbox')
+            ? 'https://api-m.sandbox.paypal.com/v1/oauth2/token'
+            : 'https://api-m.paypal.com/v1/oauth2/token';
+        }
+
+        if (!tokenEndpoint) {
+          return response.badRequest({
+            body: { message: `No token endpoint configured for server: ${serverId}` },
+          });
+        }
+
+        // Build token request
+        const tokenBody = new URLSearchParams({
+          grant_type: 'authorization_code',
+          code,
+          redirect_uri: redirectUri,
+          code_verifier: codeVerifier,
+        });
+
+        // Use HTTP Basic Auth for confidential clients
+        const credentials = Buffer.from(`${auth.clientId}:${auth.clientSecret}`).toString(
+          'base64'
+        );
+
+        const tokenResponse = await fetch(tokenEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Authorization: `Basic ${credentials}`,
+            Accept: 'application/json',
+          },
+          body: tokenBody.toString(),
+        });
+
+        if (!tokenResponse.ok) {
+          const errorText = await tokenResponse.text();
+          return response.customError({
+            statusCode: tokenResponse.status,
+            body: { message: `Token exchange failed: ${errorText}` },
+          });
+        }
+
+        const tokenData = await tokenResponse.json();
+
+        if (!tokenData.access_token) {
+          return response.badRequest({
+            body: { message: 'Invalid token response: missing access_token' },
+          });
+        }
+
+        // Return token data to frontend
+        return response.ok({
+          body: {
+            access_token: tokenData.access_token,
+            refresh_token: tokenData.refresh_token,
+            expires_in: tokenData.expires_in,
+            token_type: tokenData.token_type || 'Bearer',
+            scope: tokenData.scope,
+          },
+        });
+      } catch (error) {
+        return response.customError({
+          statusCode: 500,
+          body: { message: `Token exchange failed: ${(error as Error).message}` },
+        });
+      }
+    })
+  );
 }

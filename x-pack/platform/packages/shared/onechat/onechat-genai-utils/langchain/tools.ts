@@ -43,12 +43,14 @@ export const toolsToLangchain = async ({
   logger,
   sendEvent,
   addReasoningParam = true,
+  userMcpTokens,
 }: {
   request: KibanaRequest;
   tools: ToolProvider | ExecutableTool[];
   logger: Logger;
   sendEvent?: AgentEventEmitterFn;
   addReasoningParam?: boolean;
+  userMcpTokens?: Record<string, string>;
 }): Promise<ToolsAndMappings> => {
   const allTools = Array.isArray(tools) ? tools : await tools.list({ request });
   const onechatToLangchainIdMap = createToolIdMappings(allTools);
@@ -56,7 +58,7 @@ export const toolsToLangchain = async ({
   const convertedTools = await Promise.all(
     allTools.map((tool) => {
       const toolId = onechatToLangchainIdMap.get(tool.id);
-      return toolToLangchain({ tool, logger, toolId, sendEvent, addReasoningParam });
+      return toolToLangchain({ tool, logger, toolId, sendEvent, addReasoningParam, userMcpTokens });
     })
   );
 
@@ -100,12 +102,14 @@ export const toolToLangchain = async ({
   logger,
   sendEvent,
   addReasoningParam = true,
+  userMcpTokens,
 }: {
   tool: ExecutableTool;
   toolId?: string;
   logger: Logger;
   sendEvent?: AgentEventEmitterFn;
   addReasoningParam?: boolean;
+  userMcpTokens?: Record<string, string>;
 }): Promise<StructuredTool> => {
   const description = tool.getLlmDescription
     ? await tool.getLlmDescription({ description: tool.description, config: tool.configuration })
@@ -124,24 +128,38 @@ export const toolToLangchain = async ({
         };
       }
 
+      // Extract userToken from userMcpTokens if this is an MCP tool
+      let userToken: string | undefined;
+      if (userMcpTokens && tool.id.startsWith('mcp.')) {
+        // MCP tool ID format: mcp.{serverId}.{toolName}
+        const toolParts = tool.id.split('.');
+        if (toolParts.length >= 3) {
+          const serverId = toolParts[1];
+          userToken = userMcpTokens[serverId];
+          if (userToken) {
+            logger.debug(`Using OAuth token for MCP tool "${tool.id}" (server: "${serverId}")`);
+          }
+        }
+      }
+
       // remove internal parameters before calling tool handler.
       const input = omit(rawInput, ['_reasoning']);
 
       try {
         logger.debug(`Calling tool ${tool.id} with params: ${JSON.stringify(input, null, 2)}`);
-        const toolReturn = await tool.execute({ toolParams: input, onEvent });
+        const toolReturn = await tool.execute({ toolParams: input, onEvent, userToken });
         const content = JSON.stringify({ results: toolReturn.results });
         logger.debug(`Tool ${tool.id} returned reply of length ${content.length}`);
         return [content, toolReturn];
       } catch (e) {
         logger.warn(`error calling tool ${tool.id}: ${e}`);
-        logger.debug(e.stack);
+        logger.debug((e as Error).stack);
 
         const errorToolReturn: RunToolReturn = {
           results: [
             {
               type: ToolResultType.error,
-              data: { message: e.message },
+              data: { message: (e as Error).message },
             },
           ],
         };

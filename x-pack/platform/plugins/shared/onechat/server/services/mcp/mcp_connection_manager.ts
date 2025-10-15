@@ -45,10 +45,48 @@ export class McpConnectionManager {
       return;
     }
 
-    this.logger.info(`Initializing ${this.config.length} MCP server connection(s)`);
+    // Filter servers that can connect at startup
+    // Skip only if:
+    // - OAuth with authorizationEndpoint (per-user auth required)
+    // - AND no backend credentials (clientSecret + tokenEndpoint) for tool discovery
+    const serversToConnect = this.config.filter((server) => {
+      const hasAuthorizationEndpoint =
+        server.auth?.type === 'oauth' && server.auth.authorizationEndpoint;
+      const hasBackendCredentials =
+        server.auth?.type === 'oauth' &&
+        server.auth.clientSecret &&
+        (server.auth.tokenEndpoint || server.url.includes('paypal.com'));
+
+      // Skip if per-user auth required without backend credentials
+      if (hasAuthorizationEndpoint && !hasBackendCredentials) {
+        this.logger.info(
+          `Skipping "${server.id}" during startup - requires per-user OAuth authorization (no backend credentials)`
+        );
+        return false;
+      }
+
+      // Connect if:
+      // - No auth required
+      // - API key auth
+      // - OAuth with backend credentials (even if authorizationEndpoint present)
+      // Note: When both clientSecret and authorizationEndpoint are present,
+      // we connect with merchant credentials at startup to discover merchant tools,
+      // but tool execution will still require per-user authentication.
+      if (hasAuthorizationEndpoint && hasBackendCredentials) {
+        this.logger.info(
+          `Connecting to "${server.id}" with backend credentials for tool discovery (per-user auth required for execution)`
+        );
+      }
+
+      return true;
+    });
+
+    this.logger.info(
+      `Initializing ${serversToConnect.length}/${this.config.length} MCP server connection(s)`
+    );
 
     const results = await Promise.allSettled(
-      this.config.map((serverConfig) => this.connectToServer(serverConfig))
+      serversToConnect.map((serverConfig) => this.connectToServer(serverConfig))
     );
 
     let successCount = 0;
@@ -57,13 +95,13 @@ export class McpConnectionManager {
         successCount++;
       } else {
         this.logger.error(
-          `Failed to connect to MCP server "${this.config[index].id}": ${result.reason}`
+          `Failed to connect to MCP server "${serversToConnect[index].id}": ${result.reason}`
         );
       }
     });
 
     this.logger.info(
-      `MCP initialization complete: ${successCount}/${this.config.length} server(s) connected`
+      `MCP initialization complete: ${successCount}/${serversToConnect.length} server(s) connected`
     );
   }
 
@@ -299,27 +337,74 @@ export class McpConnectionManager {
 
     try {
       // OAuth Client Credentials flow (RFC 6749 Section 4.4)
+      // Different providers have different formats:
+      // - PayPal: HTTP Basic Auth + grant_type=client_credentials
+      // - GitHub: Form parameters with client_id, client_secret, grant_type
+
+      const isGitHub = tokenEndpoint.includes('github.com');
       const credentials = Buffer.from(`${auth.clientId}:${auth.clientSecret}`).toString('base64');
 
-      const response = await fetch(tokenEndpoint, {
-        method: 'POST',
-        headers: {
+      let body: string;
+      let headers: Record<string, string>;
+
+      if (isGitHub) {
+        // GitHub format: credentials in body
+        body = new URLSearchParams({
+          grant_type: 'client_credentials',
+          client_id: auth.clientId,
+          client_secret: auth.clientSecret!,
+        }).toString();
+        headers = {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Accept: 'application/json',
+        };
+      } else {
+        // PayPal/standard format: HTTP Basic Auth
+        body = 'grant_type=client_credentials';
+        headers = {
           'Content-Type': 'application/x-www-form-urlencoded',
           Accept: 'application/json',
           'Accept-Language': 'en_US',
           Authorization: `Basic ${credentials}`,
-        },
-        body: 'grant_type=client_credentials',
+        };
+      }
+
+      const response = await fetch(tokenEndpoint, {
+        method: 'POST',
+        headers,
+        body,
       });
 
       if (!response.ok) {
         const errorText = await response.text();
+        this.logger.error(
+          `OAuth token request failed for "${serverId}": ${response.status} ${response.statusText} - ${errorText}`
+        );
         throw new Error(`OAuth token request failed: ${response.statusText} - ${errorText}`);
       }
 
-      const tokenData = await response.json();
+      const responseText = await response.text();
+      this.logger.debug(
+        `OAuth token response for "${serverId}": ${responseText.substring(0, 200)}`
+      );
+
+      let tokenData: any;
+      try {
+        tokenData = JSON.parse(responseText);
+      } catch {
+        // GitHub might return form-encoded response, try parsing it
+        const params = new URLSearchParams(responseText);
+        tokenData = {
+          access_token: params.get('access_token'),
+          expires_in: params.get('expires_in'),
+          token_type: params.get('token_type'),
+        };
+      }
 
       if (!tokenData.access_token) {
+        this.logger.error(
+          `Invalid OAuth token response for "${serverId}": ${responseText.substring(0, 500)}`
+        );
         throw new Error('Invalid OAuth token response: missing access_token');
       }
 
@@ -401,6 +486,20 @@ export class McpConnectionManager {
   isOAuthServer(serverId: string): boolean {
     const serverConfig = this.getServerConfig(serverId);
     return serverConfig?.auth?.type === 'oauth';
+  }
+
+  /**
+   * Check if a server requires per-user OAuth authentication
+   * Returns true for Authorization Code flow (with authorizationEndpoint)
+   * Backend connections are only for tool discovery, not execution
+   */
+  requiresUserAuth(serverId: string): boolean {
+    const serverConfig = this.getServerConfig(serverId);
+    // Per-user auth required if OAuth with authorizationEndpoint
+    // Backend connection (if exists) is only for tool discovery, not execution
+    return (
+      serverConfig?.auth?.type === 'oauth' && serverConfig.auth.authorizationEndpoint !== undefined
+    );
   }
 
   /**

@@ -31,11 +31,13 @@ import { appPaths } from '../../../../../utils/app_paths';
 import { TabularDataResultStep } from './tabular_data_result_step';
 import { OtherResultStep } from './other_result_step';
 import { QueryResultStep } from './query_result_step';
+import { ErrorResultStep } from './error_result_step';
 import { ToolResponseFlyout } from '../../tool_response_flyout';
 import { useToolResultsFlyout } from '../../../../../hooks/thinking/use_tool_results_flyout';
 
 interface ToolResultDisplayProps {
   toolResult: ToolResult;
+  toolId?: string;
 }
 
 // Exposed in main thinking chain, for now query and tabular data
@@ -47,7 +49,7 @@ const mainThinkingResultTypes = [
 // Populated in flyout
 const flyoutResultTypes = [ToolResultType.other, ToolResultType.resource];
 
-const ToolResultDisplay: React.FC<ToolResultDisplayProps> = ({ toolResult }) => {
+const ToolResultDisplay: React.FC<ToolResultDisplayProps> = ({ toolResult, toolId }) => {
   switch (toolResult.type) {
     // TODO: Add resource result step once we can reliably access the reference ID
     // case ToolResultType.resource:
@@ -56,6 +58,8 @@ const ToolResultDisplay: React.FC<ToolResultDisplayProps> = ({ toolResult }) => 
       return <QueryResultStep result={toolResult} />;
     case ToolResultType.tabularData:
       return <TabularDataResultStep result={toolResult} />;
+    case ToolResultType.error:
+      return <ErrorResultStep result={toolResult} toolId={toolId} />;
     default:
       // Other results
       // Also showing Resource results as Other results for now as JSON blobs
@@ -177,7 +181,7 @@ const getMainThinkingResultItems = ({
     .filter((result: ToolResult) => mainThinkingResultTypes.includes(result.type))
     .map((result: ToolResult, index) => (
       <ThinkingItemLayout key={`step-${stepIndex}-${step.tool_id}-result-${index}`}>
-        <ToolResultDisplay toolResult={result} />
+        <ToolResultDisplay toolResult={result} toolId={step.tool_id} />
       </ThinkingItemLayout>
     ));
 };

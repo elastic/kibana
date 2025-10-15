@@ -78,6 +78,14 @@ export function registerChatRoutes({
         }
       )
     ),
+    user_mcp_tokens: schema.maybe(
+      schema.recordOf(schema.string(), schema.string(), {
+        meta: {
+          description:
+            'Optional OAuth access tokens for MCP servers, provided by the frontend. Keys are MCP server IDs, values are access tokens for per-user authentication.',
+        },
+      })
+    ),
   });
 
   const callConverse = ({
@@ -97,6 +105,7 @@ export function registerChatRoutes({
       conversation_id: conversationId,
       input,
       capabilities,
+      user_mcp_tokens: userMcpTokens,
     } = payload;
 
     return chatService.converse({
@@ -107,6 +116,7 @@ export function registerChatRoutes({
       abortSignal,
       nextInput: { message: input },
       request,
+      userMcpTokens,
     });
   };
 

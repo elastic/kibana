@@ -20,6 +20,7 @@ export interface ChatRequestBodyPayload {
   conversation_id?: string;
   capabilities?: AgentCapabilities;
   input: string;
+  user_mcp_tokens?: Record<string, string>;
 }
 
 export interface ChatResponse {
