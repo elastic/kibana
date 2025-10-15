@@ -146,18 +146,26 @@ export const DimensionsSelector = ({
 
   const popoverContentBelowSearch = useMemo(() => {
     const count = selectedDimensions.length;
-    const statusMessage =
-      MAX_DIMENSIONS_SELECTIONS > 1 && count > 0
-        ? i18n.translate('metricsExperience.dimensionsSelector.selectedStatusMessage', {
-            defaultMessage:
-              '{count, plural, one {# dimension selected} other {# dimensions selected}}',
-            values: { count },
-          })
-        : i18n.translate('metricsExperience.dimensionsSelector.instructionMessage', {
-            defaultMessage:
-              'Select {maxDimensions, plural, one {a dimension} other {dimensions}} to break down your metrics',
-            values: { maxDimensions: MAX_DIMENSIONS_SELECTIONS },
-          });
+    const isAtMaxLimit = count >= MAX_DIMENSIONS_SELECTIONS;
+
+    let statusMessage: string;
+    if (MAX_DIMENSIONS_SELECTIONS > 1 && isAtMaxLimit) {
+      statusMessage = i18n.translate('metricsExperience.dimensionsSelector.maxLimitStatusMessage', {
+        defaultMessage: 'Maximum of {maxDimensions} dimensions selected ({count}/{maxDimensions})',
+        values: { count, maxDimensions: MAX_DIMENSIONS_SELECTIONS },
+      });
+    } else if (MAX_DIMENSIONS_SELECTIONS > 1 && count > 0) {
+      statusMessage = i18n.translate('metricsExperience.dimensionsSelector.selectedStatusMessage', {
+        defaultMessage: '{count, plural, one {# dimension selected} other {# dimensions selected}}',
+        values: { count },
+      });
+    } else {
+      statusMessage = i18n.translate('metricsExperience.dimensionsSelector.instructionMessage', {
+        defaultMessage:
+          'Select {maxDimensions, plural, one {a dimension} other {dimensions}} to break down your metrics',
+        values: { maxDimensions: MAX_DIMENSIONS_SELECTIONS },
+      });
+    }
 
     return (
       <ClearAllSection
