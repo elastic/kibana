@@ -15,7 +15,13 @@ export const OSQUERY = 'app/osquery';
 export const NEW_LIVE_QUERY = 'app/osquery/live_queries/new';
 export const OSQUERY_INTEGRATION_PAGE = '/app/fleet/integrations/osquery_manager/add-integration';
 export const navigateTo = (page: string, opts?: Partial<Cypress.VisitOptions>) => {
-  cy.visit(page, opts);
+  cy.visit(page, {
+    ...opts,
+    onBeforeLoad: (win) => {
+      disableNewFeaturesTours(win);
+      opts?.onBeforeLoad?.(win);
+    },
+  });
   cy.contains('Loading Elastic').should('exist');
   cy.contains('Loading Elastic').should('not.exist');
 
