@@ -340,7 +340,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   }, [refetch]);
 
   const wrappedOnFieldEdited = useCallback(async () => {
-    onFieldEdited(); // TODO: test
+    onFieldEdited();
   }, [onFieldEdited]);
 
   return (

@@ -282,7 +282,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     removedFieldName?: string;
   }) => Promise<void> = useCallback(
     async (options) => {
-      // TODO: remove dataView from dependency
       const { editedDataView, removedFieldName } = options || {
         editedDataView: dataView,
       };
