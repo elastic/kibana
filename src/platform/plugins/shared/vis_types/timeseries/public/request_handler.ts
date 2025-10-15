@@ -101,11 +101,20 @@ export const metricsRequestHandler = async ({
             .ok({ time: query.time, json: { rawResponse: query.response } });
         });
 
-        searchTracker?.complete();
+        const maxTime = Object.values(visData.trackedEsSearches || {}).reduce(
+          (max, search) => Math.max(max, search.time || 0),
+          0
+        );
+
+        searchTracker?.complete({
+          runtimeMs: maxTime,
+          resultsCount: 0,
+          resultsBytesSize: 0,
+        });
 
         return visData;
       } catch (e) {
-        searchTracker?.error();
+        searchTracker?.error(e);
         throw e;
       } finally {
         expressionAbortSignal.removeEventListener('abort', expressionAbortHandler);

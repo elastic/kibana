@@ -159,9 +159,9 @@ describe('Session service', () => {
       }).complete;
 
       expect(state$.getValue()).toBe(SearchSessionState.Loading);
-      complete1({ rawResponse: {} });
+      complete1({ resultsBytesSize: 0, resultsCount: 0, runtimeMs: 0 });
       expect(state$.getValue()).toBe(SearchSessionState.Loading);
-      complete2({ rawResponse: {} });
+      complete2({ resultsBytesSize: 0, resultsCount: 0, runtimeMs: 0 });
       expect(state$.getValue()).toBe(SearchSessionState.Completed);
     });
 
@@ -174,7 +174,7 @@ describe('Session service', () => {
       sessionService.trackSearch({ abort, poll });
       sessionService.trackSearch({ abort, poll });
       const complete = sessionService.trackSearch({ abort, poll }).complete;
-      complete({ rawResponse: {} });
+      complete({ resultsBytesSize: 0, resultsCount: 0, runtimeMs: 0 });
 
       await sessionService.cancel({ source: 'test' });
 
@@ -213,7 +213,7 @@ describe('Session service', () => {
         sessionService.start();
 
         const searchTracker = sessionService.trackSearch({ abort, poll });
-        searchTracker.complete({ rawResponse: {} });
+        searchTracker.complete({ resultsBytesSize: 0, resultsCount: 0, runtimeMs: 0 });
 
         expect(poll).toHaveBeenCalledTimes(0);
 
@@ -425,7 +425,7 @@ describe('Session service', () => {
     const poll = jest.fn(() => Promise.resolve());
 
     const search1 = sessionService.trackSearch({ poll, abort });
-    search1.complete({ rawResponse: {} });
+    search1.complete({ resultsBytesSize: 0, resultsCount: 0, runtimeMs: 0 });
 
     const search2 = sessionService.trackSearch({ poll, abort });
     search2.error(new Error());
@@ -552,7 +552,7 @@ describe('Session service', () => {
         poll: async () => {},
       }).complete;
 
-      complete({ rawResponse: {} });
+      complete({ resultsBytesSize: 0, resultsCount: 0, runtimeMs: 0 });
 
       expect(emitResult).toEqual([false]);
 
@@ -582,7 +582,7 @@ describe('Session service', () => {
         poll: async () => {},
       }).complete;
 
-      complete({ rawResponse: {} });
+      complete({ resultsBytesSize: 0, resultsCount: 0, runtimeMs: 0 });
 
       expect(emitResult).toEqual([false]);
 
@@ -612,7 +612,7 @@ describe('Session service', () => {
 
       expect(usageCollector.trackSessionIndicatorSaveDisabled).toHaveBeenCalledTimes(0);
 
-      complete({ rawResponse: {} });
+      complete({ resultsBytesSize: 0, resultsCount: 0, runtimeMs: 0 });
 
       jest.advanceTimersByTime(5 * 60 * 1000); // 5 minutes
 
@@ -671,7 +671,7 @@ describe('Session service', () => {
         sessionService.start();
 
         // When
-        complete({ rawResponse: {} });
+        complete({ resultsBytesSize: 0, resultsCount: 0, runtimeMs: 0 });
 
         // Then
         expect(sessionService.isCurrentSession(firstSessionId)).toBe(false);
