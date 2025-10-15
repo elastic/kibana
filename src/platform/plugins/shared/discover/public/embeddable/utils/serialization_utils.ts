@@ -26,7 +26,10 @@ import type { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { extract, inject } from '../../../common/embeddable/search_inject_extract';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../../common/embeddable/constants';
-import type { SearchEmbeddableSerializedState } from '../../../common/embeddable/types';
+import type {
+  SearchEmbeddableByValueSerializedState,
+  SearchEmbeddableSerializedState,
+} from '../../../common/embeddable/types';
 import type { DiscoverServices } from '../../build_services';
 import { EDITABLE_PANEL_KEYS, SEARCH_EMBEDDABLE_TYPE } from '../constants';
 import type { SearchEmbeddableRuntimeState } from '../types';
@@ -92,15 +95,12 @@ export const serializeState = ({
   savedSearch: SavedSearch;
   serializeTitles: () => SerializedTitles;
   serializeTimeRange: () => SerializedTimeRange;
-  serializeDynamicActions: (() => SerializedPanelState<DynamicActionsSerializedState>) | undefined;
+  serializeDynamicActions: (() => DynamicActionsSerializedState) | undefined;
   savedObjectId?: string;
 }): SerializedPanelState<SearchEmbeddableSerializedState> => {
   const searchSource = savedSearch.searchSource;
   const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
-
-  const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
-    serializeDynamicActions?.() ?? {};
 
   if (savedObjectId) {
     const editableAttributesBackup = initialState.rawSavedObjectAttributes ?? {};
@@ -119,35 +119,28 @@ export const serializeState = ({
         // Serialize the current dashboard state into the panel state **without** updating the saved object
         ...serializeTitles(),
         ...serializeTimeRange(),
-        ...dynamicActionsState,
+        ...serializeDynamicActions?.(),
         ...overwriteState,
+        savedObjectId,
       },
-      references: [
-        ...(dynamicActionsReferences ?? []),
-        {
-          name: SAVED_OBJECT_REF_NAME,
-          type: SEARCH_EMBEDDABLE_TYPE,
-          id: savedObjectId,
-        },
-      ],
+      references: [],
     };
   }
 
-  const { state, references } = extract({
-    type: SEARCH_EMBEDDABLE_TYPE,
+  const state = {
     attributes: {
       ...savedSearchAttributes,
       references: originalReferences,
     },
-  });
+  };
 
   return {
     rawState: {
       ...serializeTitles(),
       ...serializeTimeRange(),
-      ...dynamicActionsState,
-      ...(state as unknown as SavedSearchAttributes),
+      ...serializeDynamicActions?.(),
+      ...state,
     },
-    references: [...references, ...(dynamicActionsReferences ?? [])],
+    references: [],
   };
 };

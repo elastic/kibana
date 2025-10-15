@@ -114,7 +114,7 @@ export const getSearchEmbeddableFactory = ({
           savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
           serializeTitles: titleManager.getLatestState,
           serializeTimeRange: timeRangeManager.getLatestState,
-          serializeDynamicActions: dynamicActionsManager?.serializeState,
+          serializeDynamicActions: dynamicActionsManager?.getLatestState(),
           savedObjectId,
         });
 
