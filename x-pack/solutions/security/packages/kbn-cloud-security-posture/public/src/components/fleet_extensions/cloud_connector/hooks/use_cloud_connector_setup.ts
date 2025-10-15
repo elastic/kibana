@@ -117,16 +117,6 @@ export const useCloudConnectorSetup = (
         }
       }
 
-      // Set cloud_connector_id based on credential type
-      if ('cloudConnectorId' in credentials && credentials.cloudConnectorId) {
-        updatedPolicy.cloud_connector_id = credentials.cloudConnectorId;
-      } else if (
-        'azure_credentials_cloud_connector_id' in credentials &&
-        credentials.azure_credentials_cloud_connector_id
-      ) {
-        updatedPolicy.cloud_connector_id = credentials.azure_credentials_cloud_connector_id;
-      }
-
       // Update existing connection credentials state
       setExistingConnectionCredentials(credentials);
       updatePolicy({ updatedPolicy });
