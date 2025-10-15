@@ -354,6 +354,29 @@ export class SearchInterceptor {
     const cancel = async () => {
       // If the request times out, we handle cancellation after we make the last call to retrieve the results
       if (!id || isSavedToBackground || searchAbortController.isTimeout()) return;
+      const isStoring = this.deps.session.isStoring();
+      if (isStoring) {
+        // Since we are still storing the search we want to wait until it's finally stored and after that we can run a new search to ensure the searches are stored alongside it
+        const sub = this.deps.session.state$
+          .pipe(
+            filter((state) => state !== SearchSessionState.SendingToBackground),
+            take(1)
+          )
+          .subscribe(() => {
+            this.runSearch(
+              { id, ...request },
+              {
+                ...options,
+                ...this.deps.session.getSearchOptions(sessionId),
+                isSearchStored: false,
+                abortSignal: undefined,
+              }
+            ).then(() => sub.unsubscribe());
+          });
+        // Remove the subscription since we don't need it anymore
+        return;
+      }
+
       try {
         await sendCancelRequest();
       } catch (e) {

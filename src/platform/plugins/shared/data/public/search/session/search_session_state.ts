@@ -43,6 +43,11 @@ export enum SearchSessionState {
   BackgroundLoading = 'backgroundLoading',
 
   /**
+   * Search session is getting stored in the server.
+   */
+  SendingToBackground = 'sendingToBackground',
+
+  /**
    * Page load completed with search session created.
    */
   BackgroundCompleted = 'backgroundCompleted',
@@ -96,6 +101,12 @@ export interface SessionStateInternal<SearchDescriptor = unknown, SearchMeta ext
    * Has the session already been stored (i.e. "sent to background")?
    */
   isStored: boolean;
+
+  /**
+   * There is a brief moment where the session is getting stored but is not yet there. We need to track this so if we
+   * cancel the searches too fast they aren't deleted and still get stored alongisde the session.
+   */
+  isStoring: boolean;
 
   /**
    * Saved object of a current search session
@@ -156,6 +167,7 @@ const createSessionDefaultState: <
 >() => SessionStateInternal<SearchDescriptor, SearchMeta> = () => ({
   sessionId: undefined,
   appName: undefined,
+  isStoring: false,
   isStored: false,
   isRestore: false,
   isCanceled: false,
@@ -172,6 +184,7 @@ export interface SessionPureTransitions<
   start: (state: S) => ({ appName }: { appName: string }) => S;
   restore: (state: S) => (sessionId: string) => S;
   clear: (state: S) => () => S;
+  storing: (state: S) => () => S;
   store: (state: S) => (searchSessionSavedObject: SearchSessionSavedObject) => S;
   trackSearch: (state: S) => (search: SearchDescriptor, meta?: SearchMeta) => S;
   removeSearch: (state: S) => (search: SearchDescriptor) => S;
@@ -201,6 +214,15 @@ export const sessionPureTransitions: SessionPureTransitions = {
     isStored: true,
   }),
   clear: (state) => () => createSessionDefaultState(),
+  storing: (state) => () => {
+    if (!state.sessionId) throw new Error("Can't store session. Missing sessionId");
+    if (state.isStored || state.isRestore)
+      throw new Error('Can\'t store because current session is already stored"');
+    return {
+      ...state,
+      isStoring: true,
+    };
+  },
   store: (state) => (searchSessionSavedObject: SearchSessionSavedObject) => {
     if (!state.sessionId) throw new Error("Can't store session. Missing sessionId");
     if (state.isStored || state.isRestore)
@@ -208,6 +230,7 @@ export const sessionPureTransitions: SessionPureTransitions = {
     return {
       ...state,
       isStored: true,
+      isStoring: false,
       searchSessionSavedObject,
     };
   },
@@ -294,6 +317,7 @@ export const sessionPureTransitions: SessionPureTransitions = {
       isCanceled: true,
       canceledTime: new Date(),
       isStored: false,
+      isStoring: false,
       searchSessionSavedObject: undefined,
     };
   },
@@ -347,6 +371,7 @@ export const sessionPureSelectors: SessionPureSelectors = {
     if (!state.sessionId) return SearchSessionState.None;
     if (!state.isStarted) return SearchSessionState.None;
     if (state.isCanceled) return SearchSessionState.Canceled;
+    if (state.isStoring) return SearchSessionState.SendingToBackground;
 
     const pendingSearches = state.trackedSearches.filter(
       (s) => s.state === TrackedSearchState.InProgress

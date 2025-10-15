@@ -456,6 +456,12 @@ export class SessionService {
     return state.get().isStored;
   }
 
+  public isStoring(
+    state: SessionStateContainer<TrackSearchDescriptor, TrackSearchMeta> = this.state
+  ) {
+    return state.get().isStoring;
+  }
+
   /**
    * Is restoring the older saved searches
    */
@@ -599,6 +605,8 @@ export class SessionService {
       sessionStartTime: this.state.get().startTime,
       appendStartTime: currentSessionInfoProvider.appendSessionStartTimeToName,
     });
+
+    this.state.transitions.storing();
 
     const searchSessionSavedObject = await this.sessionsClient.create({
       name: formattedName,
