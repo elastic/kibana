@@ -141,6 +141,10 @@ describe('connectorOverrides', () => {
         expect(serialized).toEqual(serializedData);
         expect(serialized.config.providerConfig).not.toHaveProperty('headers');
         expect(serialized.config).toHaveProperty('headers');
+        expect(serialized.config.headers).toEqual({
+          'test-header-key-1': 'test-header-value-1',
+          'test-header-key-2': 'test-header-value-2',
+        });
       });
 
       it('should move max allocations into adaptive allocations object in provider config', async () => {

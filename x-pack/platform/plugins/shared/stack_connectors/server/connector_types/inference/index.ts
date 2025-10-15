@@ -66,11 +66,10 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   preSaveHook: async ({ config, secrets, logger, services, isUpdate }) => {
     const esClient = services.scopedClusterClient.asInternalUser;
     try {
-      const taskSettings = config?.taskTypeConfig
-        ? {
-            ...unflattenObject(config?.taskTypeConfig),
-          }
-        : {};
+      const taskSettings = {
+        ...(config?.taskTypeConfig ? unflattenObject(config?.taskTypeConfig) : {}),
+        ...(config?.headers ? { headers: config.headers } : {}),
+      };
       const serviceSettings = {
         ...unflattenObject(config?.providerConfig ?? {}),
         ...unflattenObject(secrets?.providerSecrets ?? {}),
