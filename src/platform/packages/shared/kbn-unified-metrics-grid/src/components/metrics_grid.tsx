@@ -101,7 +101,7 @@ export const MetricsGrid = ({
 
   const handleViewDetails = useCallback(
     (esqlQuery: string, metric: MetricField, chartId: string) => {
-      const chartIndex = rows.findIndex((row) => `chart-${row.key}` === chartId);
+      const chartIndex = rows.findIndex((row) => row.key === chartId);
       const { rowIndex, colIndex } = getRowColFromIndex(chartIndex);
 
       setExpandedMetric({ metric, esqlQuery, chartId, rowIndex, colIndex });
