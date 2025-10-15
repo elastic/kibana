@@ -34,7 +34,7 @@ describe('Success Notification', () => {
     it('renders the component with correct text and button', () => {
       const { getByText, getByRole } = render(
         <TestProviders>
-          <SuccessToastContent migration={getRuleMigrationStatsMock()} />
+          <SuccessToastContent migration={getRuleMigrationStatsMock()} dismissHandler={jest.fn()} />
         </TestProviders>
       );
 
@@ -52,7 +52,7 @@ describe('Success Notification', () => {
     it('calls navigateTo when the button is clicked', () => {
       const { getByRole } = render(
         <TestProviders>
-          <SuccessToastContent migration={getRuleMigrationStatsMock()} />
+          <SuccessToastContent migration={getRuleMigrationStatsMock()} dismissHandler={jest.fn()} />
         </TestProviders>
       );
 
