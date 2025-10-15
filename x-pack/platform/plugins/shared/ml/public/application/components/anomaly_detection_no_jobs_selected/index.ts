@@ -4,11 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Client } from '@elastic/elasticsearch';
 
-export const deleteRuleById = async (es: Client, id: string) => {
-  await es.delete({
-    id: `alert:${id}`,
-    index: '.kibana_alerting_cases',
-  });
-};
+export { AnomalyDetectionNoJobsSelected } from './anomaly_detection_no_jobs_selected';
