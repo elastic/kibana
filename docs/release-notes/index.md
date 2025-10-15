@@ -25,6 +25,11 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ### Features and enhancements [kibana-9.2.0-features-enhancements]
 
+**Navigation and general interface**
+* Enhanced navigation menu for spaces that use a solution view. The new navigation experience provides more workspace for your data with an improved collapsed mode, hover menus, and responsiveness.
+* New Data Management menu. To ease the access to data-related management tasks, you can now find Fleet, Index Management, Integrations, and Ingest Pipelines in a dedicated menu, next to the Stack Management menu that previously hosted these pages.
+
+
 **Alerting**:
 * Adds a new Connector for Jira Service Management [#235408]({{kib-pull}}235408).
 * Adds `xpack.actions.email.recipient_allowlist` kibana config [#220058]({{kib-pull}}220058).
@@ -76,37 +81,30 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds action to Add tags to Agent details page [#225433]({{kib-pull}}225433).
 
 **Discover**:
-* Enable Discover tabs by default [#235150]({{kib-pull}}235150).
-% !!TODO!! The above PR had a lengthy release note description:
-% You can now manage multiple data explorations simultaneously in Discover using tabs. Navigate between them seamlessly, duplicate them to build on previous queries, and save them into a single Discover session to retrieve your queries, filters, and data configurations untouched at a later time.
-* Interactive LOOKUP JOIN indices with editor flyout [#232686]({{kib-pull}}232686).
-% !!TODO!! The above PR had a lengthy release note description:
-% Improve Discover’s LOOKUP JOIN UX with an index editor flyout supporting inline editing, CSV import, contextual actions based on privileges, and a query bar that opens Discover with a prefilled ES|QL query.
-* Supports controls [#229598]({{kib-pull}}229598).
-* Show related errors count and add failure badge [#227413]({{kib-pull}}227413).
-* Append the casting only when necessary in Discover filtering [#234748]({{kib-pull}}234748).
-* Removes the default limit 10 added on the query [#234349]({{kib-pull}}234349).
-* Improve available column lists [#233221]({{kib-pull}}233221).
-% !!TODO!! The above PR had a lengthy release note description:
-% The ES|QL autocomplete feature has been extended so that fields from the lookup index are suggested after a complete `LOOKUP JOIN` command. The same enhancement has been applied to columns from an enrichment policy after a complete `ENRICH` command.
-* Store more than 20 queries in the history [#232955]({{kib-pull}}232955).
-* Supports remote cluster lookup mode indices in the editor [#232907]({{kib-pull}}232907).
-* Improve function validation [#230139]({{kib-pull}}230139).
-* Support expressions in STATS [#229513]({{kib-pull}}229513).
-* Enhances grok semantics extraction with onigurama regex pattern [#229409]({{kib-pull}}229409).
-* Adds "Prettify" button in the editor and removes the abiity to unwrap [#228159]({{kib-pull}}228159).
-* Adds unsaved changes modal [#225252]({{kib-pull}}225252).
-* Managed data view improvement [#223451]({{kib-pull}}223451).
-* Adds profiles inspector [#222999]({{kib-pull}}222999).
+* You can now manage multiple data explorations simultaneously in Discover using tabs. Navigate between them seamlessly, duplicate them to build on previous queries, and save them into a single Discover session to retrieve your queries, filters, and data configurations untouched at a later time [#235150]({{kib-pull}}235150).
+* Improves Discover’s {{esql}} LOOKUP JOIN experience with an index editor flyout supporting inline editing, CSV import, contextual actions based on privileges, and a query bar that opens Discover with a prefilled ES|QL query [#232686]({{kib-pull}}232686).
+* You can now add controls directly in Discover by typing variables (for example `?service` or `??host.name`) in your {{esql}} queries. Instead of having to maintain multiple similar queries, controls let you dynamically change parts of a single query using dropdowns, multi-selects, and date pickers with value suggestions [#229598]({{kib-pull}}229598).
+* Adds related errors count and failure badge when exploring traces in Discover [#227413]({{kib-pull}}227413).
+* Adds a warning when navigating away from Discover with unsaved changes [#225252]({{kib-pull}}225252).
+* Adds the ability to view the currently active profiles, such as the detected solution and data source contexts, which determine Discover's context-aware experiences [#222999]({{kib-pull}}222999).
+* Appends the casting only when necessary in Discover's {{esql}} mode filtering [#234748]({{kib-pull}}234748).
+* Removes the default limit of `10` added to the query base query when switching to {{esql}} mode in Discover [#234349]({{kib-pull}}234349).
+
+**{{esql}} editor**
+* Extends the {{esql}} query history size to 50 KB, which represents between 200 to 300 queries instead of 20 [#232955]({{kib-pull}}232955).
+* Adds support for lookup indices from remote clusters [#232907]({{kib-pull}}232907).
+* The {{esql}} autocomplete feature has been extended so that fields from the selected lookup index are suggested when using the `LOOKUP JOIN` command. The same enhancement was applied to column suggestions when using the `ENRICH` command [#233221]({{kib-pull}}233221).
+* Improves function validation [#230139]({{kib-pull}}230139).
+* Adds support for expressions in the STATS command [#229513]({{kib-pull}}229513).
+* Enhances GROK semantics extraction with Onigurama regex patterns [#229409]({{kib-pull}}229409).
+* Adds a "Prettify" button that automatically formats queries to make them more readable [#228159]({{kib-pull}}228159).
+* Displays function license requirements in the in-product {{esql}} help reference [#229961]({{kib-pull}}229961).
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.2.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
 
 **Elastic Security solution**:
 For the Elastic Security 9.2.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
-
-**Kibana platform**:
-* 🚨New Solution SideNav by Default (Only Non-Serverless) [#234201]({{kib-pull}}234201).
 
 **Machine Learning**:
 * Redesigns file upload UX [#232923]({{kib-pull}}232923).
@@ -128,6 +126,7 @@ For the Elastic Security 9.2.0 release information, refer to [Elastic Security S
 * Inference endpoints UI serverless: Enables adaptive allocations and allow user to set max allocations [#222726]({{kib-pull}}222726).
 
 **Management**:
+* Data views managed by Elastic are now clearly identified in the UI. You can no longer edit them and instead have to duplicate them to apply any changes while preserving the original data view [#223451]({{kib-pull}}223451).
 * Enable the new background search UX [#236818]({{kib-pull}}236818).
 * Manually map new fields from schema editor [#235919]({{kib-pull}}235919).
 * Partitioning: AI-assisted suggestions [#235759]({{kib-pull}}235759).
@@ -172,34 +171,28 @@ For the Elastic Security 9.2.0 release information, refer to [Elastic Security S
 * Fixes loading saved query's query in the rule definition [#229964]({{kib-pull}}229964).
 
 **Dashboards and Visualizations**:
-* Soften validation on filter schema [#237477]({{kib-pull}}237477).
-* Adjust cancel button height in Discover with tabs enabled view [#236118]({{kib-pull}}236118).
-* Fixes resize bug [#233755]({{kib-pull}}233755).
-* Skip automatic scroll when panel is visible [#233226]({{kib-pull}}233226).
-* Fixes panel borders [#232676]({{kib-pull}}232676).
-* Fixes error handling in "Save to library" modal for Links panel [#231168]({{kib-pull}}231168).
-* Log warning if filter and query state are malformed [#230088]({{kib-pull}}230088).
-* Fixes an issue on Firefox where the ESQL inline editor in discover would prevent scrolling [#228849]({{kib-pull}}228849).
+* Skips automatic scroll when interacting with a panel that is already visible [#233226]({{kib-pull}}233226).
+* Correctly show solid panel borders when a dashboard is in View mode [#232676]({{kib-pull}}232676).
+* Fixes error handling when saving a Links panel to the library from a dashboard [#231168]({{kib-pull}}231168).
+* Logs a warning instead of throwing an error if a filter and query state can not be read or written due to missing or malformed references [#230088]({{kib-pull}}230088).
 
 **Data ingestion and Fleet**:
 * Fixes "package not found" error when skipping cloud onboarding for a prerelease package [#238629]({{kib-pull}}238629).
 
 **Discover**:
-* This is a serverless feature, so this bug was only affecting serverless. Let's mention it only there [#237575]({{kib-pull}}237575).
+* Fixes an issue with the data view creation flyout that could glitch when accessed from a separate page [#228749]({{kib-pull}}228749).
+
+**{{esql}} editor**:
 * Fixes controls' trigger across various commands [#236121]({{kib-pull}}236121).
-* Fixes lookup indexes route failures on read permissions [#233282]({{kib-pull}}233282).
-* Incorrect filtering logic when removing comment field [#230116]({{kib-pull}}230116).
-* Displays The Function License Availability In Our Inline Docs [#229961]({{kib-pull}}229961).
-* Fix: Data view creation flyout glitches when the page is accessed from a separate page [#228749]({{kib-pull}}228749).
+* Fixes lookup index route failures on read permissions [#233282]({{kib-pull}}233282).
+* Fixes incorrect filtering logic when removing a comment field [#230116]({{kib-pull}}230116).
+* Fixes an issue on Firefox where the {{esql}} inline editor could prevent scrolling [#228849]({{kib-pull}}228849).
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.2.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
 
 **Elastic Security solution**:
 For the Elastic Security 9.2.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
-
-**Kibana platform**:
-* Refactor nav_control_popover [#235780]({{kib-pull}}235780).
 
 **Kibana security**:
 * Skipped spaces tests using esArchiver for MKI [#234061]({{kib-pull}}234061).
