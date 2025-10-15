@@ -20,7 +20,10 @@ import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
 import type { EntityType } from '../../../../common/search_strategy';
 import type { ExperimentalFeatures } from '../../../../common';
-import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
+import type {
+  AssetCriticalityRecord,
+  RiskScoresPreviewResponse,
+} from '../../../../common/api/entity_analytics';
 import type {
   AfterKeys,
   EntityRiskScoreRecord,
@@ -40,7 +43,6 @@ import type {
   CalculateRiskScoreAggregations,
   CalculateScoresParams,
   RiskScoreBucket,
-  RiskScoresCalculationResponse,
 } from '../types';
 import { RIEMANN_ZETA_VALUE, RIEMANN_ZETA_S_VALUE } from './constants';
 import { getPainlessScripts, type PainlessScripts } from './painless';
@@ -285,7 +287,7 @@ export const calculateRiskScores = async ({
   experimentalFeatures: ExperimentalFeatures;
 } & CalculateScoresParams & {
     filters?: Array<{ entity_types: string[]; filter: string }>;
-  }): Promise<RiskScoresCalculationResponse> =>
+  }): Promise<RiskScoresPreviewResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
     const now = new Date().toISOString();
     const scriptedMetricPainless = await getPainlessScripts();
@@ -423,19 +425,17 @@ export const calculateRiskScores = async ({
       now,
     });
 
-    // Extract entity identifiers from scores
-    const hosts = hostScores.map((score) => score.id_value);
-    const users = userScores.map((score) => score.id_value);
-    const services = serviceScores.map((score) => score.id_value);
-
     return {
       ...(debug
         ? {
-            requests: responses.map(({ entityType, request, response }) => ({
-              entityType,
-              request,
-              response,
-            })),
+            debug: {
+              request: JSON.stringify(
+                responses.map(({ entityType, request }) => ({ entityType, request }))
+              ),
+              response: JSON.stringify(
+                responses.map(({ entityType, response }) => ({ entityType, response }))
+              ),
+            },
           }
         : {}),
       after_keys: afterKeys,
@@ -443,12 +443,6 @@ export const calculateRiskScores = async ({
         host: hostScores,
         user: userScores,
         service: serviceScores,
-      },
-      entities: {
-        user: users,
-        host: hosts,
-        service: services,
-        generic: [],
       },
     };
   });

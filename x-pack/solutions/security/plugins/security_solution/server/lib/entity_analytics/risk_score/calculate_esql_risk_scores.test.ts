@@ -14,14 +14,7 @@ import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
 describe('Calculate risk scores with ESQL', () => {
   describe('ESQL query', () => {
     it('matches snapshot', () => {
-      const q = getESQL({
-        entityType: EntityType.host,
-        bounds: { lower: 'abel', upper: 'zuzanna' },
-        sampleSize: 10000,
-        pageSize: 3500,
-        index: '.alerts-security.alerts-default',
-        weight: 1,
-      });
+      const q = getESQL(EntityType.host, { lower: 'abel', upper: 'zuzanna' }, 10000, 3500);
       expect(q).toMatchSnapshot();
     });
   });
