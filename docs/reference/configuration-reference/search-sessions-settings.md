@@ -11,8 +11,7 @@ applies_to:
 
 :::{important} - Background search replaces Search sessions
 
-% [Background search](docs-content://explore-analyze/discover/background-search.md) is a feature introduced in version 9.2. It replaces the **Search sessions** feature, deprecated in version 8.15.
-Background search is a feature introduced in version 9.2. It replaces the **Search sessions** feature, deprecated in version 8.15.
+[Background search](docs-content://explore-analyze/discover/background-search.md) is a feature introduced in version 9.2. It replaces the **Search sessions** feature, deprecated in version 8.15.
 :::
 
 :::{note}
