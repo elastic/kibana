@@ -70,7 +70,6 @@ interface Props {
   isEmbeddable: boolean;
   showLegend: boolean;
   serviceName?: string;
-  isFullTrace: boolean;
   filterByServiceName: boolean;
 }
 
@@ -86,14 +85,12 @@ export function TraceWaterfallContextProvider({
   isEmbeddable,
   showLegend,
   serviceName,
-  isFullTrace,
   filterByServiceName,
 }: Props) {
   const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy, traceState } =
     useTraceWaterfall({
       traceItems,
       serviceName,
-      isFullTrace,
       filterByServiceName,
     });
 

@@ -22,14 +22,17 @@ export interface TraceWaterfallItem extends TraceItem {
 export function useTraceWaterfall({
   traceItems,
   serviceName,
-  isFullTrace,
   filterByServiceName,
 }: {
   traceItems: TraceItem[];
-  isFullTrace: boolean;
   serviceName?: string;
   filterByServiceName: boolean;
 }) {
+  const isFullTrace = useMemo(
+    () => (serviceName ? traceItems.every((item) => item.serviceName === serviceName) : true),
+    [traceItems, serviceName]
+  );
+
   const waterfall = useMemo(() => {
     const isFilteredTrace = !isFullTrace && !!serviceName && filterByServiceName;
     const filteredTraceItems = isFilteredTrace

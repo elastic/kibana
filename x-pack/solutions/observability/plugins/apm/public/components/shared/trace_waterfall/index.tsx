@@ -48,11 +48,6 @@ export function TraceWaterfall({
   serviceName,
   filterByServiceName = false,
 }: Props) {
-  const isFullTrace = useMemo(
-    () => (serviceName ? traceItems.every((item) => item.serviceName === serviceName) : true),
-    [traceItems, serviceName]
-  );
-
   return (
     <TraceWaterfallContextProvider
       traceItems={traceItems}
@@ -65,7 +60,6 @@ export function TraceWaterfall({
       isEmbeddable={isEmbeddable}
       showLegend={showLegend}
       serviceName={serviceName}
-      isFullTrace={isFullTrace}
       filterByServiceName={filterByServiceName}
     >
       <TraceWarning>
