@@ -12,6 +12,7 @@ import type {
   ReasoningStep,
   ConversationRoundStepType,
 } from '@kbn/onechat-common/chat/conversation';
+import type { EvaluationScore } from '@kbn/onechat-common/chat/evaluations';
 
 /**
  * A version of ToolCallWithResult where 'results' is a serialized string.
@@ -39,4 +40,5 @@ export type PersistentConversationRoundStep = PersistentToolCallStep | Reasoning
  */
 export type PersistentConversationRound = Omit<ConversationRound, 'steps'> & {
   steps: PersistentConversationRoundStep[];
+  evaluations?: EvaluationScore[];
 };

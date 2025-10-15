@@ -165,6 +165,19 @@ export function registerEvaluationRoutes({
 
         const results = await evaluations.evaluateConversation(conversation, evaluators);
 
+        const updatedRounds = conversation.rounds.map((round) => {
+          const roundEvaluation = results.find((r) => r.roundId === round.id);
+          return {
+            ...round,
+            evaluations: roundEvaluation?.scores || [],
+          };
+        });
+
+        await client.update({
+          id: conversationId,
+          rounds: updatedRounds,
+        });
+
         return response.ok<EvaluationRunResponse>({
           body: {
             conversationId,

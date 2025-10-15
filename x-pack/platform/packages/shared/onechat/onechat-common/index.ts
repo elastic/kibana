@@ -95,6 +95,7 @@ export {
   type ConversationRoundStep,
   type ReasoningStepData,
   type ReasoningStep,
+  type EvaluationScore,
   ConversationRoundStepType,
   isToolCallStep,
   isReasoningStep,

@@ -7,6 +7,7 @@
 
 import type { UserIdAndName } from '../base/users';
 import type { ToolResult } from '../tools/tool_result';
+import type { EvaluationScore } from './evaluations';
 
 /**
  * Represents a user input that initiated a conversation round.
