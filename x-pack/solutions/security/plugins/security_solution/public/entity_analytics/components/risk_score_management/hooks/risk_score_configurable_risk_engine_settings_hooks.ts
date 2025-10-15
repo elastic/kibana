@@ -55,20 +55,19 @@ const settingsAreEqual = (
   first?: Partial<RiskScoreConfiguration>,
   second?: Partial<RiskScoreConfiguration>
 ) => {
-  // Compare filters with normalized entity_types for proper comparison
-  const alertFiltersEqual =
-    JSON.stringify(
-      first?.alertFilters?.map((f) => ({
-        entity_types: f.entity_types?.sort(),
-        filter: f.filter,
-      })) || []
-    ) ===
-    JSON.stringify(
-      second?.alertFilters?.map((f) => ({
-        entity_types: f.entity_types?.sort(),
-        filter: f.filter,
-      })) || []
-    );
+  // Normalize filters for comparison (handle undefined/empty arrays)
+  const normalizeFilters = (filters?: AlertFilter[]) => {
+    if (!filters || filters.length === 0) return [];
+    return filters.map((f) => ({
+      entity_types: (f.entity_types || []).sort(),
+      filter: f.filter || '',
+    }));
+  };
+
+  const firstFilters = normalizeFilters(first?.alertFilters);
+  const secondFilters = normalizeFilters(second?.alertFilters);
+
+  const alertFiltersEqual = JSON.stringify(firstFilters) === JSON.stringify(secondFilters);
 
   return (
     first?.includeClosedAlerts === second?.includeClosedAlerts &&
@@ -125,10 +124,15 @@ export const useConfigurableRiskEngineSettings = () => {
       const riskEngineSettings = await fetchRiskEngineSettings();
 
       // Transform filters from backend format to internal format for storage
+      // Handle case where backend doesn't have filters field yet (before backend PR merges)
       const transformedSettings = riskEngineSettings
         ? {
             ...riskEngineSettings,
-            alertFilters: riskEngineSettings.filters || [],
+            alertFilters:
+              (riskEngineSettings as Record<string, unknown>).filters &&
+              Array.isArray((riskEngineSettings as Record<string, unknown>).filters)
+                ? ((riskEngineSettings as Record<string, unknown>).filters as AlertFilter[])
+                : [],
           }
         : undefined;
 
