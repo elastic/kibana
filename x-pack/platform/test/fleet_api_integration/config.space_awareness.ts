@@ -21,6 +21,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     'enableStrictKQLValidation',
     'subfeaturePrivileges',
     'useSpaceAwareness',
+    'enablePackageRollback',
   ])}`;
 
   return {

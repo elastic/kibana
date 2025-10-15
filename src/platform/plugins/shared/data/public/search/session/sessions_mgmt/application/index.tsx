@@ -19,8 +19,6 @@ import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { renderApp } from './render';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../constants';
-
 export class SearchSessionsMgmtApp {
   constructor(
     private coreSetup: CoreSetup<IManagementSectionsPluginsStart>,
@@ -44,11 +42,7 @@ export class SearchSessionsMgmtApp {
       application,
     } = coreStart;
 
-    const hasBackgroundSearchEnabled = coreStart.featureFlags.getBooleanValue(
-      BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-      false
-    );
-    const pluginName = APP.getI18nName(hasBackgroundSearchEnabled);
+    const pluginName = APP.getI18nName();
     docTitle.change(pluginName);
     this.params.setBreadcrumbs([{ text: pluginName }]);
 

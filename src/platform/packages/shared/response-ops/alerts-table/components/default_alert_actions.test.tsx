@@ -63,7 +63,7 @@ const context = createPartialObjectMock<RenderContext<AdditionalContext>>({
 
 const TestComponent = (_props: AlertActionsProps) => (
   <AlertsTableContextProvider value={context}>
-    <DefaultAlertActions {..._props} />
+    <DefaultAlertActions<AdditionalContext> {..._props} />
   </AlertsTableContextProvider>
 );
 

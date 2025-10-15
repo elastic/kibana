@@ -132,7 +132,7 @@ export const FileStatus: FC<Props> = ({
                       <EuiFlexItem grow={false}>
                         <span
                           css={{ fontWeight: 'bold' }}
-                          data-test-subj={`dataVisualizerFileResultsTitle_${index}`}
+                          data-test-subj={`dataVisualizerFileResultsTitle-${index}`}
                         >
                           {fileStatus.fileName}
                         </span>
@@ -162,7 +162,7 @@ export const FileStatus: FC<Props> = ({
                               />
                             }
                           >
-                            <AnalysisExplanation fileStatus={fileStatus} />
+                            <AnalysisExplanation fileStatus={fileStatus} index={index} />
                           </EuiToolTip>
                         </EuiFlexItem>
 
@@ -172,6 +172,7 @@ export const FileStatus: FC<Props> = ({
                             analyzeFileWithOverrides={fileUploadManager.analyzeFileWithOverrides(
                               index
                             )}
+                            index={index}
                           />
                         </EuiFlexItem>
                       </>
@@ -195,6 +196,7 @@ export const FileStatus: FC<Props> = ({
                               iconType="trash"
                               size="xs"
                               color="danger"
+                              data-test-subj={`mlFileUploadDeleteFileButton-${index}`}
                               aria-label={i18n.translate(
                                 'xpack.dataVisualizer.file.fileStatus.deleteFile',
                                 {
@@ -220,7 +222,7 @@ export const FileStatus: FC<Props> = ({
                       <EuiTab
                         isSelected={selectedTab === TAB.PREVIEW}
                         onClick={() => setSelectedTab(TAB.PREVIEW)}
-                        data-test-subj="mlFileUploadFileStatusPreviewTab"
+                        data-test-subj={`mlFileUploadFileStatusPreviewTab-${index}`}
                       >
                         <FormattedMessage
                           id="xpack.dataVisualizer.file.fileStatus.previewTabTitle"
@@ -233,7 +235,7 @@ export const FileStatus: FC<Props> = ({
                       <EuiTab
                         isSelected={selectedTab === TAB.STATS}
                         onClick={() => setSelectedTab(TAB.STATS)}
-                        data-test-subj="mlFileUploadFileStatusStatsTab"
+                        data-test-subj={`mlFileUploadFileStatusStatsTab-${index}`}
                       >
                         <FormattedMessage
                           id="xpack.dataVisualizer.file.fileStatus.statsTabTitle"
@@ -246,7 +248,7 @@ export const FileStatus: FC<Props> = ({
                       <EuiTab
                         isSelected={selectedTab === TAB.MAPPINGS}
                         onClick={() => setSelectedTab(TAB.MAPPINGS)}
-                        data-test-subj="mlFileUploadFileStatusMappingsTab"
+                        data-test-subj={`mlFileUploadFileStatusMappingsTab-${index}`}
                       >
                         <FormattedMessage
                           id="xpack.dataVisualizer.file.fileStatus.mappingsTabTitle"
@@ -258,7 +260,7 @@ export const FileStatus: FC<Props> = ({
                       <EuiTab
                         isSelected={selectedTab === TAB.PIPELINE}
                         onClick={() => setSelectedTab(TAB.PIPELINE)}
-                        data-test-subj="mlFileUploadFileStatusPipelineTab"
+                        data-test-subj={`mlFileUploadFileStatusPipelineTab-${index}`}
                       >
                         <FormattedMessage
                           id="xpack.dataVisualizer.file.fileStatus.pipelineTabTitle"
@@ -289,7 +291,9 @@ export const FileStatus: FC<Props> = ({
                   ) : null}
 
                   {selectedTab === TAB.STATS ? (
-                    <FieldsStatsGrid results={fileStatus.results!} />
+                    <div data-test-subj={`dataVisualizerFileStatsPanel-${index}`}>
+                      <FieldsStatsGrid results={fileStatus.results!} />
+                    </div>
                   ) : null}
 
                   {selectedTab === TAB.MAPPINGS ? (
@@ -321,6 +325,7 @@ export const FileStatus: FC<Props> = ({
                     <AnalysisOverrides
                       fileStatus={fileStatus}
                       analyzeFileWithOverrides={fileUploadManager.analyzeFileWithOverrides(index)}
+                      index={index}
                     />
                   ) : null}
                 </>

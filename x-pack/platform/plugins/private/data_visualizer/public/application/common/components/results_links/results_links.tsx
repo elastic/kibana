@@ -198,7 +198,7 @@ export const ResultsLinks: FC<Props> = ({
   }
 
   return (
-    <EuiFlexGroup gutterSize="l">
+    <EuiFlexGroup gutterSize="l" data-test-subj="dataVisualizerFileResultsLinks">
       {createDataView && discoverLink && (
         <EuiFlexItem>
           <EuiCard

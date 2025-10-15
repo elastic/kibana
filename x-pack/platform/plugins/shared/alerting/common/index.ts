@@ -217,6 +217,8 @@ export {
   contextToSchemaName,
 } from './alert_schema';
 
+export { getMaxAlertLimit, ALLOWED_MAX_ALERTS } from './max_alert_limit';
+
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
 export const BASE_MAINTENANCE_WINDOW_API_PATH = '/api/maintenance_window';

@@ -7,69 +7,86 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useRef } from 'react';
+import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiPanel, useEuiOverflowScroll, useEuiTheme } from '@elastic/eui';
+import { EuiSplitPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-import { useRovingIndex } from '../../hooks/use_roving_index';
+import type { MenuItem } from '../../../types';
+import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
+import { getFocusableElements } from '../../utils/get_focusable_elements';
+import { updateTabIndices } from '../../utils/update_tab_indices';
+import { handleRovingIndex } from '../../utils/handle_roving_index';
+import { useScroll } from '../../hooks/use_scroll';
 
 export interface SideNavPanelProps {
   children: ReactNode;
   footer?: ReactNode;
+  openerNode: MenuItem;
 }
 
 /**
- * Side navigation panel that opens on mouse click if the page contains sub-pages.
- *
- * `paddingSize="m"` is already `16px`, so we have to manually set `12px` padding
- *
- * TODO: pass ref to EuiPanel
+ * Side navigation panel that opens on mouse click if the primary menu item contains a submenu.
+ * Shows only in expanded mode.
  */
-export const SideNavPanel = ({ children, footer }: SideNavPanelProps): JSX.Element => {
-  const ref = useRef<HTMLDivElement | null>(null);
-
+export const SideNavPanel = ({ children, footer, openerNode }: SideNavPanelProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
+  const scrollStyles = useScroll();
 
-  useRovingIndex(ref);
+  const wrapperStyles = css`
+    // > For instance, only plain or transparent panels can have a border and/or shadow.
+    // source: https://eui.elastic.co/docs/components/containers/panel/
+    box-sizing: border-box;
+    border-right: ${euiTheme.border.width.thin} ${euiTheme.colors.borderBaseSubdued} solid;
+    display: flex;
+    flex-direction: column;
+    width: ${SIDE_PANEL_WIDTH}px;
+  `;
+
+  const navigationPanelStyles = css`
+    ${scrollStyles}
+  `;
 
   return (
-    <div
-      role="region"
+    <EuiSplitPanel.Outer
       aria-label={i18n.translate('core.ui.chrome.sideNavigation.sidePanelAriaLabel', {
-        defaultMessage: 'Side panel',
+        defaultMessage: `Side panel for {label}`,
+        values: {
+          label: openerNode.label,
+        },
       })}
-      ref={ref}
+      borderRadius="none"
+      // Used in Storybook to limit the height of the panel
+      className="side-nav-panel"
+      css={wrapperStyles}
+      data-test-subj={`side-navigation-panel side-navigation-panel_${openerNode.id}`}
+      hasShadow={false}
+      role="region"
     >
-      <EuiPanel
-        className="side_panel"
-        css={css`
-          ${useEuiOverflowScroll('y')}
-          border-right: ${euiTheme.border.width.thin} ${euiTheme.colors.borderBaseSubdued} solid;
-          height: 100%;
-          scroll-padding-top: 44px; /* account for fixed header when scrolling to elements */
-          display: flex;
-          flex-direction: column;
-        `}
+      <EuiSplitPanel.Inner
         color="subdued"
-        // > For instance, only plain or transparent panels can have a border and/or shadow.
-        // source: https://eui.elastic.co/docs/components/containers/panel/
-        // hasBorder
+        css={navigationPanelStyles}
+        data-test-subj="side-navigation-panel-content"
+        onKeyDown={handleRovingIndex}
+        panelRef={(ref) => {
+          if (ref) {
+            const elements = getFocusableElements(ref);
+            updateTabIndices(elements);
+          }
+        }}
         paddingSize="none"
-        borderRadius="none"
+      >
+        {children}
+      </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner
+        color="subdued"
+        data-test-subj="side-navigation-panel-footer"
+        paddingSize="none"
         grow={false}
       >
-        <div
-          css={css`
-            flex-grow: 1;
-            overflow-y: auto;
-          `}
-        >
-          {children}
-        </div>
         {footer}
-      </EuiPanel>
-    </div>
+      </EuiSplitPanel.Inner>
+    </EuiSplitPanel.Outer>
   );
 };

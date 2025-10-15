@@ -649,6 +649,7 @@ export default ({ getService }: FtrProviderContext) => {
           _meta: {
             mappingsVersion: 4,
           },
+          enableResetToZero: true,
         });
       });
 

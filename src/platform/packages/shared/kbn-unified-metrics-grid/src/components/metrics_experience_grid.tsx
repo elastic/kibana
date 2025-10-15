@@ -33,7 +33,7 @@ import {
   useValueFilters,
 } from '../hooks';
 import { MetricsGridWrapper } from './metrics_grid_wrapper';
-import { ChartLoadingProgress, EmptyState } from './empty_state/empty_state';
+import { MetricsGridLoadingProgress, EmptyState } from './empty_state/empty_state';
 
 export const MetricsExperienceGrid = ({
   dataView,
@@ -47,12 +47,15 @@ export const MetricsExperienceGrid = ({
   services,
   input$: originalInput$,
   isChartLoading: isDiscoverLoading,
+  isComponentVisible,
+  abortController,
+  timeRange,
 }: ChartSectionProps) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
   const { currentPage, dimensions, valueFilters, onPageChange, searchTerm } = useMetricsGridState();
-  const { getTimeRange, updateTimeRange } = requestParams;
+  const { updateTimeRange } = requestParams;
 
   const input$ = useMemo(
     () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
@@ -67,13 +70,13 @@ export const MetricsExperienceGrid = ({
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
   const { data: fields = [], isFetching: isFieldsLoading } = useMetricFieldsQuery({
     index: indexPattern,
-    timeRange: getTimeRange(),
+    timeRange,
   });
 
   const {
     currentPageFields = [],
     totalPages = 0,
-    filteredFieldsBySearch = [],
+    filteredFieldsCount = 0,
   } = usePaginatedFields({
     fields,
     dimensions,
@@ -83,8 +86,8 @@ export const MetricsExperienceGrid = ({
   }) ?? {};
 
   const columns = useMemo<EuiFlexGridProps['columns']>(
-    () => Math.min(currentPageFields.length, 4) as EuiFlexGridProps['columns'],
-    [currentPageFields]
+    () => Math.min(filteredFieldsCount, 4) as EuiFlexGridProps['columns'],
+    [filteredFieldsCount]
   );
 
   const filters = useValueFilters(valueFilters);
@@ -100,6 +103,7 @@ export const MetricsExperienceGrid = ({
       chartToolbarCss={chartToolbarCss}
       requestParams={requestParams}
       fields={fields}
+      isComponentVisible={isComponentVisible}
     >
       <EuiFlexGroup
         direction="column"
@@ -131,7 +135,7 @@ export const MetricsExperienceGrid = ({
                   <strong>
                     {i18n.translate('metricsExperience.grid.metricsCount.label', {
                       defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
-                      values: { count: filteredFieldsBySearch.length },
+                      values: { count: filteredFieldsCount },
                     })}
                   </strong>
                 </EuiText>
@@ -157,7 +161,7 @@ export const MetricsExperienceGrid = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow>
-          {isDiscoverLoading && <ChartLoadingProgress />}
+          {isDiscoverLoading && <MetricsGridLoadingProgress />}
           <MetricsGrid
             pivotOn="metric"
             columns={columns}
@@ -170,6 +174,7 @@ export const MetricsExperienceGrid = ({
             onFilter={onFilter}
             discoverFetch$={discoverFetch$}
             requestParams={requestParams}
+            abortController={abortController}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

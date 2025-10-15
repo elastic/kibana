@@ -24,6 +24,7 @@ import type {
   StepWithForeach,
   WorkflowSettings,
   WorkflowOnFailure,
+  TimeoutProp,
 } from '../../spec/schema';
 import type {
   AtomicGraphNode,
@@ -47,6 +48,8 @@ import type {
   ExitNormalPathNode,
   EnterFallbackPathNode,
   ExitFallbackPathNode,
+  EnterTimeoutZoneNode,
+  ExitTimeoutZoneNode,
   GraphNodeUnion,
   WorkflowGraphType,
 } from '../types';
@@ -73,7 +76,7 @@ function getStepId(node: BaseStep, context: GraphBuildContext): string {
   // TODO: This is a workaround for the fact that some steps do not have an `id` field.
   // We should ensure that all steps have an `id` field in the future - either explicitly set or generated from name.
   const nodeId = (node as any).id || node.name;
-  const parts = [];
+  const parts: string[] = [];
 
   if (context.parentKey) {
     parts.push(context.parentKey);
@@ -115,6 +118,17 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
 
   if ((currentStep as StepWithForeach).foreach) {
     return createForeachGraphForStepWithForeach(currentStep as StepWithForeach, context);
+  }
+
+  if ((currentStep as TimeoutProp).timeout) {
+    const step = currentStep as BaseStep & TimeoutProp;
+    return handleTimeout(
+      getStepId(step, context),
+      'step_level_timeout',
+      step.timeout!,
+      visitAbstractStep(omit(step, ['timeout']) as BaseStep, context),
+      context
+    );
   }
 
   if ((currentStep as WaitStep).type === 'wait') {
@@ -372,6 +386,35 @@ function visitOnFailure(
   return graph;
 }
 
+function handleTimeout(
+  stepId: string,
+  stepType: 'workflow_level_timeout' | 'step_level_timeout',
+  timeout: string,
+  innerGraph: graphlib.Graph<GraphNodeUnion>,
+  context: GraphBuildContext
+): graphlib.Graph<GraphNodeUnion> {
+  const enterTimeoutZone: EnterTimeoutZoneNode = {
+    id: `enterTimeoutZone_${stepId}`,
+    type: 'enter-timeout-zone',
+    stepId,
+    stepType,
+    timeout,
+  };
+  const exitTimeoutZone: ExitTimeoutZoneNode = {
+    id: `exitTimeoutZone_${stepId}`,
+    type: 'exit-timeout-zone',
+    stepId,
+    stepType,
+  };
+  const graph = new graphlib.Graph<GraphNodeUnion>({ directed: true });
+  graph.setNode(enterTimeoutZone.id, enterTimeoutZone);
+  graph.setNode(exitTimeoutZone.id, exitTimeoutZone);
+  context.stack.push(enterTimeoutZone);
+  insertGraphBetweenNodes(graph, innerGraph, enterTimeoutZone.id, exitTimeoutZone.id);
+  context.stack.pop();
+  return graph;
+}
+
 function handleStepLevelOnFailure(
   step: BaseStep,
   context: GraphBuildContext
@@ -552,6 +595,7 @@ function createFallback(
   const enterTryBlockNodeId = `enterTryBlock_${stepId}`;
   const exitTryBlockNodeId = `exitTryBlock_${stepId}`;
   const enterNormalPathNodeId = `enterNormalPath_${stepId}`;
+  const enterFallbackPathNodeId = `enterFallbackPath_${stepId}`;
 
   const enterTryBlockNode: EnterTryBlockNode = {
     id: enterTryBlockNodeId,
@@ -560,6 +604,7 @@ function createFallback(
     stepType: 'fallback',
     type: 'enter-try-block',
     enterNormalPathNodeId,
+    enterFallbackPathNodeId,
   };
   graph.setNode(enterTryBlockNodeId, enterTryBlockNode);
   const exitTryBlockNode: ExitTryBlockNode = {
@@ -709,7 +754,19 @@ export function convertToWorkflowGraph(
     parentKey: '',
   };
 
-  return createStepsSequence(workflowSchema.steps, context);
+  let finalGraph = createStepsSequence(workflowSchema.steps, context);
+
+  if (workflowSchema.settings?.timeout) {
+    finalGraph = handleTimeout(
+      'workflow_level_timeout',
+      'workflow_level_timeout',
+      workflowSchema.settings.timeout,
+      finalGraph,
+      context
+    );
+  }
+
+  return finalGraph;
 }
 
 export function convertToSerializableGraph(graph: graphlib.Graph): any {

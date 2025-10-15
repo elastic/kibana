@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
-  aiAssistantManagementSelection: 6917
+  aiAssistantManagementSelection: 9214
   aiops: 19890
   alerting: 28395
   apm: 38573
@@ -47,7 +47,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6596
   embeddableEnhanced: 10332
   enterpriseSearch: 38494
-  esql: 13323
+  esql: 18000
   esqlDataGrid: 10209
   esUiShared: 101220
   eventAnnotation: 22361
@@ -68,7 +68,7 @@ pageLoadAssetSize:
   filesManagement: 5270
   fileUpload: 16910
   fleet: 187942
-  genAiSettings: 4981
+  genAiSettings: 5003
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
@@ -116,12 +116,12 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 82382
-  onechat: 17322
+  onechat: 19088
   osquery: 47588
   painlessLab: 6299
   presentationPanel: 11484
   presentationUtil: 9000
-  productDocBase: 3074
+  productDocBase: 3083
   productIntercept: 9860
   profiling: 20716
   reindexService: 3601
@@ -149,12 +149,12 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79987
-  securitySolution: 106289
+  securitySolution: 120431
   securitySolutionEss: 43319
   securitySolutionServerless: 62964
   serverless: 10682
   serverlessChat: 5133
-  serverlessObservability: 16307
+  serverlessObservability: 22100
   serverlessSearch: 35000
   sessionView: 47938
   share: 58677
@@ -162,7 +162,7 @@ pageLoadAssetSize:
   snapshotRestore: 28452
   spaces: 32135
   stackAlerts: 31499
-  stackConnectors: 67975
+  stackConnectors: 68838
   streams: 9000
   streamsApp: 17000
   synthetics: 31571

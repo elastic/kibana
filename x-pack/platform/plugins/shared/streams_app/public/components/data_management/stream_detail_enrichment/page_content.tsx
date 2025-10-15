@@ -9,12 +9,10 @@ import React, { useMemo } from 'react';
 import {
   EuiAccordion,
   EuiCode,
-  EuiFlexGroup,
   EuiPanel,
   EuiResizableContainer,
   EuiSplitPanel,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
@@ -36,6 +34,7 @@ import {
 import { NoStepsEmptyPrompt } from './empty_prompts';
 import { RootSteps } from './steps/root_steps';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
 import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
 
@@ -82,9 +81,13 @@ export function StreamDetailEnrichmentContentImpl() {
 
   const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
-  const hasChanges = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const canUpdate = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
+  const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
+  const hasDefinitionError = useSimulatorSelector((snapshot) =>
+    Boolean(snapshot.context.simulation?.definition_error)
+  );
 
   const canManage = useStreamEnrichmentSelector(
     (state) => state.context.definition.privileges.manage
@@ -92,6 +95,8 @@ export function StreamDetailEnrichmentContentImpl() {
   const isSavingChanges = useStreamEnrichmentSelector((state) =>
     state.matches({ ready: { stream: 'updating' } })
   );
+
+  const hasChanges = canUpdate && !isSimulating;
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges,
@@ -112,6 +117,7 @@ export function StreamDetailEnrichmentContentImpl() {
         <StreamsAppContextProvider context={context}>
           <SchemaChangesReviewModal
             fields={detectedFields}
+            streamType={getStreamTypeFromDefinition(definition.stream)}
             definition={definition}
             storedFields={definitionFields}
             submitChanges={async () => saveChanges()}
@@ -172,6 +178,7 @@ export function StreamDetailEnrichmentContentImpl() {
           isLoading={isSavingChanges}
           disabled={!hasChanges}
           insufficientPrivileges={!canManage}
+          isInvalid={hasDefinitionError}
         />
       )}
     </EuiSplitPanel.Outer>
@@ -179,15 +186,13 @@ export function StreamDetailEnrichmentContentImpl() {
 }
 
 const StepsEditor = React.memo(() => {
-  const { euiTheme } = useEuiTheme();
-
   const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
 
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
 
   const errors = useMemo(() => {
     if (!simulation) {
-      return { ignoredFields: [], mappingFailures: [] };
+      return { ignoredFields: [], mappingFailures: [], definition_error: undefined };
     }
 
     const ignoredFieldsSet = new Set<string>();
@@ -210,6 +215,7 @@ const StepsEditor = React.memo(() => {
     return {
       ignoredFields: Array.from(ignoredFieldsSet),
       mappingFailures: Array.from(mappingFailuresSet),
+      definition_error: simulation.definition_error,
     };
   }, [simulation]);
 
@@ -218,8 +224,23 @@ const StepsEditor = React.memo(() => {
   return (
     <>
       {hasSteps ? <RootSteps stepRefs={stepRefs} /> : <NoStepsEmptyPrompt />}
-      {(!isEmpty(errors.ignoredFields) || !isEmpty(errors.mappingFailures)) && (
+      {(!isEmpty(errors.ignoredFields) ||
+        !isEmpty(errors.mappingFailures) ||
+        errors.definition_error) && (
         <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
+          {errors.definition_error && (
+            <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
+              <EuiText size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.streams.streamDetailView.managementTab.enrichment.definitionError"
+                    defaultMessage="Please fix this error before saving: {error}"
+                    values={{ error: errors.definition_error.message }}
+                  />
+                </p>
+              </EuiText>
+            </EuiPanel>
+          )}
           {!isEmpty(errors.ignoredFields) && (
             <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
               <EuiAccordion
@@ -229,40 +250,42 @@ const StepsEditor = React.memo(() => {
                   <strong>
                     {i18n.translate(
                       'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.title',
-                      { defaultMessage: 'Some fields were ignored during the simulation.' }
+                      { defaultMessage: 'Malformed fields detected.' }
                     )}
                   </strong>
                 }
               >
                 <EuiText component="p" size="s">
                   <p>
+                    <FormattedMessage
+                      id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
+                      defaultMessage="Some fields are malformed and won’t be stored correctly: {fields}"
+                      values={{
+                        fields: errors.ignoredFields.map((field) => (
+                          <>
+                            <EuiCode key={field}>{field}</EuiCode>{' '}
+                          </>
+                        )),
+                      }}
+                    />
+                  </p>
+                  <p>
                     {i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.description',
+                      'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.causesLabel',
                       {
                         defaultMessage:
-                          'Some fields in these documents were ignored during the ingestion simulation. Review the fields’ mapping limits.',
+                          'This can happen due to type mismatches or fields exceeding configured limits.',
                       }
                     )}
                   </p>
                   <p>
-                    <FormattedMessage
-                      id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
-                      defaultMessage="The ignored fields are: {fields}"
-                      values={{
-                        fields: (
-                          <EuiFlexGroup
-                            gutterSize="s"
-                            css={css`
-                              margin-top: ${euiTheme.size.s};
-                            `}
-                          >
-                            {errors.ignoredFields.map((field) => (
-                              <EuiCode key={field}>{field}</EuiCode>
-                            ))}
-                          </EuiFlexGroup>
-                        ),
-                      }}
-                    />
+                    {i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.suggestionsLabel',
+                      {
+                        defaultMessage:
+                          'Check your field mappings, add processors to normalize values, or remove the conflicting fields.',
+                      }
+                    )}
                   </p>
                 </EuiText>
               </EuiAccordion>

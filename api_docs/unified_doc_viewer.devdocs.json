@@ -207,7 +207,7 @@
           },
           ") => JSX.Element) | undefined; indexes: ",
           "TraceIndexes",
-          "; } & React.RefAttributes<",
+          "; showTraceWaterfall?: boolean | undefined; } & React.RefAttributes<",
           {
             "pluginId": "unifiedDocViewer",
             "scope": "public",
@@ -341,11 +341,17 @@
         "label": "UnifiedDocViewerObservabilityTracesOverview",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<",
+          "React.ForwardRefExoticComponent<Omit<Omit<",
           "DocViewRenderProps",
           " & { indexes: ",
           "TraceIndexes",
-          "; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; } & React.RefAttributes<{}>>"
+          "; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; } & React.RefAttributes<",
+          "OverviewApi",
+          ">, \"ref\"> & { ref?: ((instance: ",
+          "OverviewApi",
+          " | null) => void) | React.RefObject<",
+          "OverviewApi",
+          "> | null | undefined; }, \"ref\"> & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/doc_viewer_overview/lazy_doc_viewer_obs_traces_overview.tsx",
         "deprecated": false,
@@ -508,7 +514,7 @@
           },
           ") => JSX.Element) | undefined; indexes: ",
           "TraceIndexes",
-          "; }"
+          "; showTraceWaterfall?: boolean | undefined; }"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
         "deprecated": false,

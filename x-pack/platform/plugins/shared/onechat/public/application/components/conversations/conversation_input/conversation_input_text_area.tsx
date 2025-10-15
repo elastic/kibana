@@ -35,12 +35,16 @@ interface ConversationInputTextAreaProps {
   input: string;
   setInput: (input: string) => void;
   onSubmit: () => void;
+  disabled: boolean;
+  agentId?: string;
 }
 
 export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps> = ({
   input,
   setInput,
   onSubmit,
+  disabled,
+  agentId,
 }) => {
   const conversationId = useConversationId();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -51,6 +55,17 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
       textAreaRef.current?.focus();
     }, 200);
   }, [conversationId]);
+
+  const disabledPlaceholder = i18n.translate(
+    'xpack.onechat.conversationInputForm.disabledPlaceholder',
+    {
+      defaultMessage: 'Agent "{agentId}" has been deleted. Please start a new conversation.',
+      values: {
+        agentId,
+      },
+    }
+  );
+
   return (
     <EuiFlexItem css={inputContainerStyles}>
       <EuiTextArea
@@ -70,13 +85,18 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
             onSubmit();
           }
         }}
-        placeholder={i18n.translate('xpack.onechat.conversationInputForm.placeholder', {
-          defaultMessage: 'Ask anything',
-        })}
+        placeholder={
+          disabled
+            ? disabledPlaceholder
+            : i18n.translate('xpack.onechat.conversationInputForm.placeholder', {
+                defaultMessage: 'Ask anything',
+              })
+        }
         rows={1}
         inputRef={textAreaRef}
         fullWidth
         resize="none"
+        disabled={disabled}
       />
     </EuiFlexItem>
   );

@@ -178,8 +178,10 @@ const buildEsqlQuery = ({
 | WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
 ${
   isEnrichPolicyExists
-    ? `| ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type
-| ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type
+    ? `
+| ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
+| ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip
+
 // Construct actor and target entities data
 | EVAL actorDocData = CONCAT("{",
     "\\"id\\":\\"", actor.entity.id, "\\"",
@@ -187,6 +189,12 @@ ${
     ",\\"entity\\":", "{",
       "\\"name\\":\\"", actorEntityName, "\\"",
       ",\\"type\\":\\"", actorEntityType, "\\"",
+      ",\\"sub_type\\":\\"", actorEntitySubType, "\\"",
+      CASE (
+        actorHostIp IS NOT NULL,
+        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
+        ""
+      ),
     "}",
   "}")
 | EVAL targetDocData = CONCAT("{",
@@ -195,10 +203,34 @@ ${
     ",\\"entity\\":", "{",
       "\\"name\\":\\"", targetEntityName, "\\"",
       ",\\"type\\":\\"", targetEntityType, "\\"",
+      ",\\"sub_type\\":\\"", targetEntitySubType, "\\"",
+      CASE (
+        targetHostIp IS NOT NULL,
+        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
+        ""
+      ),
     "}",
-  "}")`
-    : `| EVAL actorDocData = TO_STRING(null)
-| EVAL targetDocData = TO_STRING(null)`
+  "}")
+// Map host and source values to enriched contextual data
+| EVAL sourceIps = source.ip
+| EVAL sourceCountryCodes = source.geo.country_iso_code`
+    : `
+// Fallback to null string with non-enriched actor
+| EVAL actorEntityType = TO_STRING(null)
+| EVAL actorEntitySubType = TO_STRING(null)
+| EVAL actorHostIp = TO_STRING(null)
+| EVAL actorDocData = TO_STRING(null)
+
+// Fallback to null string with non-enriched target
+| EVAL targetEntityType = TO_STRING(null)
+| EVAL targetEntitySubType = TO_STRING(null)
+| EVAL targetHostIp = TO_STRING(null)
+| EVAL targetDocData = TO_STRING(null)
+
+// Fallback to null string with non-enriched host and source data
+| EVAL sourceIps = TO_STRING(null)
+| EVAL sourceCountryCodes = TO_STRING(null)
+`
 }
 // Origin event and alerts allow us to identify the start position of graph traversal
 | EVAL isOrigin = ${
@@ -230,18 +262,64 @@ ${
         : ''
     }
   "}")
+
+// Construct actor and target entity groups
+| EVAL actorEntityGroup = CASE(
+    actorEntityType IS NOT NULL AND actorEntitySubType IS NOT NULL,
+    CONCAT(actorEntityType, ":", actorEntitySubType),
+    actorEntityType IS NOT NULL,
+    actorEntityType,
+    actor.entity.id
+  )
+| EVAL targetEntityGroup = CASE(
+    targetEntityType IS NOT NULL AND targetEntitySubType IS NOT NULL,
+    CONCAT(targetEntityType, ":", targetEntitySubType),
+    targetEntityType IS NOT NULL,
+    targetEntityType,
+    target.entity.id
+  )
+
+| EVAL actorLabel = CASE(actorEntitySubType IS NOT NULL, actorEntitySubType, actor.entity.id)
+| EVAL targetLabel = CASE(targetEntitySubType IS NOT NULL, targetEntitySubType, target.entity.id)
+| EVAL actorEntityType = CASE(
+    actorEntityType IS NOT NULL,
+    actorEntityType,
+    ""
+  )
+| EVAL targetEntityType = CASE(
+    targetEntityType IS NOT NULL,
+    targetEntityType,
+    ""
+  )
 | STATS badge = COUNT(*),
+  uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, event.id, null)),
+  uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, event.id, null)),
+  isAlert = MV_MAX(VALUES(isAlert)),
   docs = VALUES(docData),
+  sourceIps = MV_DEDUPE(VALUES(sourceIps)),
+  sourceCountryCodes = MV_DEDUPE(VALUES(sourceCountryCodes)),
+  // actor attributes
+  actorEntityGroup = VALUES(actorEntityGroup),
+  actorIds = VALUES(actor.entity.id),
+  actorIdsCount = COUNT_DISTINCT(actor.entity.id),
+  actorEntityType = VALUES(actorEntityType),
+  actorLabel = VALUES(actorLabel),
   actorsDocData = VALUES(actorDocData),
-  targetsDocData = VALUES(targetDocData),
-  isAlert = MV_MAX(VALUES(isAlert))
-    BY actorIds = actor.entity.id,
-      action = event.action,
-      targetIds = target.entity.id,
+  actorHostIp = VALUES(actorHostIp),
+  // target attributes
+  targetEntityGroup = VALUES(targetEntityGroup),
+  targetIds = VALUES(target.entity.id),
+  targetIdsCount = COUNT_DISTINCT(target.entity.id),
+  targetEntityType = VALUES(targetEntityType),
+  targetLabel = VALUES(targetLabel),
+  targetsDocData = VALUES(targetDocData)
+    BY action = event.action,
+      actorEntityGroup,
+      targetEntityGroup,
       isOrigin,
       isOriginAlert
 | LIMIT 1000
-| SORT isOrigin DESC, action, actorIds`;
+| SORT action DESC, actorEntityGroup, targetEntityGroup, isOrigin`;
 
   return query;
 };

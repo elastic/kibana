@@ -8,6 +8,9 @@
  */
 
 import { z } from '@kbn/zod';
+import moment from 'moment-timezone';
+
+export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
 /* -- Settings -- */
 export const RetryPolicySchema = z.object({
@@ -36,7 +39,9 @@ export const WorkflowOnFailureSchema = z.object({
   fallback: z.array(BaseStepSchema).min(1).optional(),
   continue: z.boolean().optional(),
 });
+
 export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
+
 export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
   const schema = WorkflowOnFailureSchema.extend({
     fallback: z.array(stepSchema).optional(),
@@ -53,6 +58,7 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
 export const WorkflowSettingsSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
+  timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
 
@@ -82,11 +88,24 @@ export const ScheduledTriggerSchema = z.object({
   type: z.literal('scheduled'),
   enabled: z.boolean().optional().default(true),
   with: z.union([
+    // New format: every: "5m", "2h", "1d", "30s"
     z.object({
-      every: z.string().min(1),
-      unit: z.enum(['second', 'minute', 'hour', 'day', 'week', 'month', 'year']),
+      every: z
+        .string()
+        .regex(/^\d+[smhd]$/, 'Invalid interval format. Use format like "5m", "2h", "1d", "30s"'),
     }),
-    z.object({ cron: z.string().min(1) }),
+    z.object({
+      rrule: z.object({
+        freq: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
+        interval: z.number().int().positive(),
+        tzid: z.enum(moment.tz.names() as [string, ...string[]]).default('UTC'),
+        dtstart: z.string().optional(),
+        byhour: z.array(z.number().int().min(0).max(23)).optional(),
+        byminute: z.array(z.number().int().min(0).max(59)).optional(),
+        byweekday: z.array(z.enum(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'])).optional(),
+        bymonthday: z.array(z.number().int().min(1).max(31)).optional(),
+      }),
+    }),
   ]),
 });
 
@@ -109,10 +128,10 @@ export const TriggerTypes = [
 export type TriggerType = (typeof TriggerTypes)[number];
 
 /* --- Steps --- */
-const StepWithTimeoutSchema = z.object({
-  timeout: z.number().optional(),
+export const TimeoutPropSchema = z.object({
+  timeout: DurationSchema.optional(),
 });
-export type StepWithTimeout = z.infer<typeof StepWithTimeoutSchema>;
+export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
 const StepWithForEachSchema = z.object({
   foreach: z.string().optional(),
@@ -137,14 +156,14 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
 })
   .merge(StepWithIfConditionSchema)
   .merge(StepWithForEachSchema)
-  .merge(StepWithTimeoutSchema)
+  .merge(TimeoutPropSchema)
   .merge(StepWithOnFailureSchema);
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
 export const WaitStepSchema = BaseStepSchema.extend({
   type: z.literal('wait'),
   with: z.object({
-    duration: z.string().regex(/^\d+(ms|[smhdw])$/), // e.g., '5s', '1m', '2h'
+    duration: DurationSchema, // e.g., '5s', '1m', '2h'
   }),
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
@@ -164,7 +183,7 @@ export const HttpStepSchema = BaseStepSchema.extend({
 })
   .merge(StepWithIfConditionSchema)
   .merge(StepWithForEachSchema)
-  .merge(StepWithTimeoutSchema)
+  .merge(TimeoutPropSchema)
   .merge(StepWithOnFailureSchema);
 export type HttpStep = z.infer<typeof HttpStepSchema>;
 

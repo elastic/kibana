@@ -20,37 +20,43 @@ const filterStateStoreSchema = schema.oneOf(
   }
 );
 
-export const filterMetaSchema = schema.object({
-  alias: schema.maybe(schema.nullable(schema.string())),
-  disabled: schema.maybe(schema.boolean()),
-  negate: schema.maybe(schema.boolean()),
-  controlledBy: schema.maybe(
-    schema.string({ meta: { description: 'Identifies the owner the filter.' } })
-  ),
-  group: schema.maybe(
-    schema.string({ meta: { description: 'The group to which this filter belongs.' } })
-  ),
-  // field is missing from the Filter type, but is stored in SerializedSearchSourceFields
-  // see the todo in src/platform/packages/shared/kbn-es-query/src/filters/helpers/update_filter.ts
-  field: schema.maybe(schema.string()),
-  index: schema.maybe(schema.string()),
-  isMultiIndex: schema.maybe(schema.boolean()),
-  type: schema.maybe(schema.string()),
-  key: schema.maybe(schema.string()),
-  // We could consider creating FilterMetaParams as a schema to match the concrete Filter type.
-  // However, this is difficult because FilterMetaParams can be a `filterSchema` which is defined below.
-  // This would require a more complex schema definition that can handle recursive types.
-  // For now, we use `schema.any()` to allow flexibility in the params field.
-  params: schema.maybe(schema.any()),
-  value: schema.maybe(schema.string()),
-});
+export const filterMetaSchema = schema.object(
+  {
+    alias: schema.maybe(schema.nullable(schema.string())),
+    disabled: schema.maybe(schema.boolean()),
+    negate: schema.maybe(schema.boolean()),
+    controlledBy: schema.maybe(
+      schema.string({ meta: { description: 'Identifies the owner the filter.' } })
+    ),
+    group: schema.maybe(
+      schema.string({ meta: { description: 'The group to which this filter belongs.' } })
+    ),
+    // field is missing from the Filter type, but is stored in SerializedSearchSourceFields
+    // see the todo in src/platform/packages/shared/kbn-es-query/src/filters/helpers/update_filter.ts
+    field: schema.maybe(schema.string()),
+    index: schema.maybe(schema.string()),
+    isMultiIndex: schema.maybe(schema.boolean()),
+    type: schema.maybe(schema.string()),
+    key: schema.maybe(schema.string()),
+    // We could consider creating FilterMetaParams as a schema to match the concrete Filter type.
+    // However, this is difficult because FilterMetaParams can be a `filterSchema` which is defined below.
+    // This would require a more complex schema definition that can handle recursive types.
+    // For now, we use `schema.any()` to allow flexibility in the params field.
+    params: schema.maybe(schema.any()),
+    value: schema.maybe(schema.string()),
+  },
+  { unknowns: 'allow' }
+);
 
-export const filterSchema = schema.object({
-  meta: filterMetaSchema,
-  query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-  $state: schema.maybe(
-    schema.object({
-      store: filterStateStoreSchema,
-    })
-  ),
-});
+export const filterSchema = schema.object(
+  {
+    meta: filterMetaSchema,
+    query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+    $state: schema.maybe(
+      schema.object({
+        store: filterStateStoreSchema,
+      })
+    ),
+  },
+  { meta: { id: 'kbn-es-query-server-filterSchema' } }
+);

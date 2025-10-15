@@ -20,6 +20,8 @@ export type {
   RunWorkflowCommand,
   RunStepCommand,
   RunWorkflowResponseDto,
+  TestWorkflowResponseDto,
+  TestWorkflowCommand,
   StackFrame,
   UpdatedWorkflowResponseDto,
   // dtos

@@ -21,27 +21,30 @@ export function transformPanelsOut(
   sections: SavedDashboardSection[] = [],
   references?: SavedObjectReference[]
 ): DashboardAttributes['panels'] {
-  const panels = JSON.parse(panelsJSON);
-  const sectionsMap: { [uuid: string]: DashboardPanel | DashboardSection } = sections.reduce(
-    (prev, section) => {
-      const sectionId = section.gridData.i;
-      return { ...prev, [sectionId]: { ...section, panels: [] } };
-    },
-    {}
-  );
-  panels.forEach((panel: SavedDashboardPanel) => {
+  const topLevelPanels: DashboardPanel[] = [];
+  const sectionsMap: { [uuid: string]: DashboardSection } = {};
+  sections.forEach((section) => {
+    const { gridData: grid, ...restOfSection } = section;
+    const { i: sectionId, ...restOfGrid } = grid;
+    sectionsMap[sectionId] = {
+      ...restOfSection,
+      grid: restOfGrid,
+      panels: [],
+      uid: sectionId,
+    };
+  });
+
+  JSON.parse(panelsJSON).forEach((panel: SavedDashboardPanel) => {
     const filteredReferences = getReferencesForPanelId(panel.panelIndex, references ?? []);
     const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
     const { sectionId } = panel.gridData;
     if (sectionId) {
-      (sectionsMap[sectionId] as DashboardSection).panels.push(
-        transformPanelProperties(panel, panelReferences)
-      );
+      sectionsMap[sectionId].panels.push(transformPanelProperties(panel, panelReferences));
     } else {
-      sectionsMap[panel.panelIndex] = transformPanelProperties(panel, panelReferences);
+      topLevelPanels.push(transformPanelProperties(panel, panelReferences));
     }
   });
-  return Object.values(sectionsMap);
+  return [...topLevelPanels, ...Object.values(sectionsMap)];
 }
 
 function transformPanelProperties(
@@ -57,7 +60,7 @@ function transformPanelProperties(
   }: SavedDashboardPanel,
   references?: SavedObjectReference[]
 ) {
-  const { sectionId, ...rest } = gridData; // drop section ID, if it exists
+  const { sectionId, i, ...restOfGrid } = gridData;
 
   const matchingReference =
     panelRefName && references
@@ -90,10 +93,10 @@ function transformPanelProperties(
   }
 
   return {
-    grid: rest,
+    grid: restOfGrid,
     config: transformedPanelConfig ? transformedPanelConfig : config,
     uid: panelIndex,
     type: panelType,
-    version,
+    ...(version && { version }),
   };
 }
