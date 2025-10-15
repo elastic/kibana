@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
+import type { EvaluationScore } from '../../../common/http_api/evaluations';
 import { queryKeys } from '../query_keys';
 import { newConversationId } from '../utils/new_conversation';
 import { useConversationId } from './use_conversation_id';
@@ -103,6 +104,19 @@ export const useConversationRounds = () => {
   }, [conversation?.rounds, error, pendingMessage]);
 
   return conversationRounds;
+};
+
+export const useConversationRoundEvaluations = (): EvaluationScore[] => {
+  const { conversation } = useConversation();
+  const formattedEvaluations: EvaluationScore[] = [];
+
+  conversation?.rounds.forEach((round) => {
+    if (round.evaluations) {
+      formattedEvaluations.push(...round.evaluations);
+    }
+  });
+
+  return formattedEvaluations;
 };
 
 // Returns a flattened list of all steps across all rounds.

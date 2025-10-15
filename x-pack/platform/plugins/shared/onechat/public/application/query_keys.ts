@@ -18,6 +18,10 @@ export const queryKeys = {
     all: ['agentProfiles'] as const,
     byId: (agentProfileId?: string) => ['agentProfiles', agentProfileId],
   },
+  evaluators: {
+    all: ['evaluators'] as const,
+    list: () => ['evaluators', 'list'] as const,
+  },
   tools: {
     all: ['tools', 'list'] as const,
     typeInfo: ['tools', 'typeInfo'] as const,

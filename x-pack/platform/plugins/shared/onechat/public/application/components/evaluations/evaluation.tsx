@@ -8,18 +8,21 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiSpacer, useEuiTheme, EuiText, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { useConversationRounds, useConversationTitle } from '../../hooks/use_conversation';
+import {
+  useConversationRoundEvaluations,
+  useConversationRounds,
+  useConversationTitle,
+} from '../../hooks/use_conversation';
 import { EvaluationRound } from './evaluation_round';
 import { EvaluatorBadgesGroup } from './evaluator_badges_group';
-import { useEvaluations } from './hooks/use_evaluations';
 import { calculateAverages } from './utils/calculateEvaluationAverages';
 
 export const Evaluation: React.FC = () => {
   const conversationRounds = useConversationRounds();
+  const conversationRoundEvaluations = useConversationRoundEvaluations();
   const { euiTheme } = useEuiTheme();
   const { title: conversationTitle } = useConversationTitle();
-  const { evaluationData } = useEvaluations();
-  const averages = calculateAverages(evaluationData);
+  const averages = calculateAverages(conversationRoundEvaluations);
 
   const evaluationContainerStyles = css`
     padding: ${euiTheme.size.base};
@@ -95,9 +98,7 @@ export const Evaluation: React.FC = () => {
             <EvaluationRound
               round={round}
               roundNumber={index + 1}
-              roundEvaluation={evaluationData?.results.find(
-                (result) => result.roundId === round.id
-              )}
+              roundEvaluation={round.evaluations}
             />
             {index < conversationRounds.length - 1 && <EuiSpacer size="l" />}
           </React.Fragment>

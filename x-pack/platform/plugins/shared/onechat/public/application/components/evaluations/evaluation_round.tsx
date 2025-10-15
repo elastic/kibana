@@ -17,8 +17,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ConversationRound } from '@kbn/onechat-common';
+import type { EvaluationScore } from '../../../../common/http_api/evaluations';
 import { ChatMessageText } from '../conversations/conversation_rounds/chat_message_text';
-import type { ConversationRoundEvaluation } from '../../context/evaluations/evaluations_context';
 import { useEvaluations } from '../../context/evaluations/evaluations_context';
 import { RoundSteps } from '../conversations/conversation_rounds/round_thinking/steps/round_steps';
 import { EvaluatorBadgesGroup } from './evaluator_badges_group';
@@ -26,7 +26,7 @@ import { EvaluatorBadgesGroup } from './evaluator_badges_group';
 interface EvaluationRoundProps {
   round: ConversationRound;
   roundNumber: number;
-  roundEvaluation?: ConversationRoundEvaluation;
+  roundEvaluation?: EvaluationScore[];
 }
 
 const copyToClipboard = (text: string) => {
@@ -40,6 +40,14 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { showThinking } = useEvaluations();
+
+  const relevanceScore = roundEvaluation?.find((score) => score.evaluatorId === 'relevance')?.score;
+  const precisionScore = roundEvaluation?.find((score) => score.evaluatorId === 'precision')?.score;
+  const recallScore = roundEvaluation?.find((score) => score.evaluatorId === 'recall')?.score;
+  const groundednessScore = roundEvaluation?.find(
+    (score) => score.evaluatorId === 'groundedness'
+  )?.score;
+  const regexScore = roundEvaluation?.find((score) => score.evaluatorId === 'regex')?.score;
 
   const inputPanelStyles = css`
     border-radius: ${euiTheme.border.radius.small};
@@ -64,11 +72,11 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
             </EuiText>
           </EuiFlexGroup>
           <EvaluatorBadgesGroup
-            relevance={roundEvaluation?.scores.relevance}
-            precision={roundEvaluation?.scores.precision}
-            recall={roundEvaluation?.scores.recall}
-            groundedness={roundEvaluation?.scores.groundedness}
-            regex={roundEvaluation?.scores.regex}
+            relevance={relevanceScore}
+            precision={precisionScore}
+            recall={recallScore}
+            groundedness={groundednessScore}
+            regex={regexScore}
           />
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>

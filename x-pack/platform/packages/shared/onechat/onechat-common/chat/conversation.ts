@@ -117,6 +117,11 @@ export const isReasoningStep = (step: ConversationRoundStep): step is ReasoningS
  */
 export type ConversationRoundStep = ToolCallStep | ReasoningStep;
 
+export interface EvaluationScore {
+  evaluatorId: string;
+  score: number;
+}
+
 /**
  * Represents a round in a conversation, containing all the information
  * related to this particular round.
@@ -132,6 +137,8 @@ export interface ConversationRound {
   response: AssistantResponse;
   /** when tracing is enabled, contains the traceId associated with this round */
   trace_id?: string;
+  /** List of evaluations for this round */
+  evaluations?: EvaluationScore[];
 }
 
 export interface Conversation {

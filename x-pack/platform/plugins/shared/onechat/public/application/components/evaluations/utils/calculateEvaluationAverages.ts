@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import type { EvaluationScore } from '../../../../../common/http_api/evaluations';
+
 // Calculate averages from evaluation data
-export const calculateAverages = (evaluationData: any) => {
-  if (!evaluationData?.results?.length) {
+export const calculateAverages = (evaluationData: EvaluationScore[]) => {
+  if (!evaluationData?.length) {
     return {};
   }
-
-  const results = evaluationData.results;
 
   // Initialize sums and counts for all possible score types
   const scoreSums: Record<string, number> = {};
   const scoreCounts: Record<string, number> = {};
 
   // Process each result
-  results.forEach((result: any) => {
+  evaluationData.forEach((result: any) => {
     if (result.scores) {
       Object.entries(result.scores).forEach(([scoreKey, scoreValue]) => {
         if (typeof scoreValue === 'number') {
