@@ -16,7 +16,9 @@ import type {
 import type { ESQLCommand, ESQLSingleAstItem } from '../../../../types';
 import type {
   FunctionDefinition,
+  FunctionDefinitionTypes,
   FunctionParameter,
+  FunctionParameterType,
   Signature,
   SupportedDataType,
 } from '../../../types';
@@ -67,15 +69,30 @@ export interface FunctionParameterContext {
   hasMoreMandatoryArgs?: boolean;
   // Function definition for function-specific parameter handling (e.g., CASE function)
   functionDefinition?: FunctionDefinition;
-  // Type of the first argument in the function (for homogenity type checking)
   firstArgumentType?: SupportedDataType | 'unknown';
-  // Index of the current parameter being edited
   currentParameterIndex?: number;
-  // Signaturres that match the already-given arguments
   validSignatures?: Signature[];
 }
 
 export interface PartialOperatorDetection {
   operatorName: string;
   textBeforeCursor?: string;
+}
+
+export interface ParamDefinition {
+  type: FunctionParameterType;
+  constantOnly?: boolean;
+  suggestedValues?: string[];
+  fieldsOnly?: boolean;
+  name?: string;
+}
+
+export interface FunctionDef {
+  name: string;
+  type: FunctionDefinitionTypes;
+  signatures?: Array<{
+    params: Array<{ type: FunctionParameterType; name?: string }>;
+    minParams?: number;
+    returnType?: string;
+  }>;
 }

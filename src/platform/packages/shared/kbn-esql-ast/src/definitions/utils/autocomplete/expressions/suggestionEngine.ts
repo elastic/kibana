@@ -29,10 +29,10 @@ export async function suggestForExpression(
   params: SuggestForExpressionParams
 ): Promise<ISuggestionItem[]> {
   const baseCtx = buildContext(params);
-  const preSuggestions = await trySuggestForPartialOperators(baseCtx);
+  const partialSuggestions = await trySuggestForPartialOperators(baseCtx);
 
-  if (preSuggestions !== null) {
-    return attachRanges(baseCtx, preSuggestions);
+  if (partialSuggestions !== null) {
+    return attachRanges(baseCtx, partialSuggestions);
   }
 
   const position: ExpressionPosition = getPosition(baseCtx.innerText, baseCtx.expressionRoot);
@@ -43,48 +43,47 @@ export async function suggestForExpression(
 }
 
 /**
- * Pre-pass for partial operator tokens before the AST exists.
  * Handles IN/NOT IN, LIKE/RLIKE, and IS/IS NOT operators.
- * Purpose: provide operator-specific suggestions even inside function args
- * (e.g. CASE(field IN ▌), CASE(field IS ▌)) when the user is typing a partial operator
- * and the parser hasn't formed the operator node yet.
  *
- * Only runs when AST doesn't have a complete operator node (e.g., deep inside CASE).
- * For complete expressions (e.g., WHERE field IN), the normal flow handles it.
+ * Use cases:
+ * 1. Partial operator typing: "field IS ", "field IS N", "field LIKE "
+ * 2. Complete operator without AST: "CASE(field IN(" - operator complete but no AST node
+ *
+ * - If valid AST node exists: uses it directly (preserves parser information)
+ * - If AST missing/incomplete: creates synthetic node or suggests directly
+ *
+ * Skips when AST has a complete operator node - normal flow handles it.
  */
 async function trySuggestForPartialOperators(
   ctx: ExpressionContext
 ): Promise<ISuggestionItem[] | null> {
   const { innerText, expressionRoot } = ctx;
 
-  // Skip if we already have a complete operator function node (e.g., WHERE field LIKE)
-  // In that case, the normal flow should handle it
-  if (expressionRoot?.type === 'function') {
-    const operatorName = (expressionRoot as any).name?.toLowerCase();
-
-    // Combine all partial operators from definitions
-    const partialOperatorNames = [
-      ...nullCheckOperators.map((op) => op.name),
-      ...inOperators.map((op) => op.name),
-      ...patternMatchOperators.map((op) => op.name),
-    ];
-
-    if (partialOperatorNames.includes(operatorName)) {
-      return null;
-    }
-  }
-
-  // Try each detector in sequence
   const detection = detectNullCheck(innerText) || detectLike(innerText) || detectIn(innerText);
 
   if (!detection) {
     return null;
   }
 
-  // Dispatch to appropriate handler
-  const result = await dispatchPartialOperators(detection.operatorName, detection, ctx);
+  // If we have an AST operator node, check if it's complete
+  if (expressionRoot?.type === 'function') {
+    const astOperatorName = expressionRoot.name?.toLowerCase();
+    const isIncomplete = expressionRoot.incomplete;
 
-  return result;
+    // Build list of all operator names that we handle in the partial system
+    const managedPartialOperators = [
+      ...nullCheckOperators.map((op) => op.name),
+      ...inOperators.map((op) => op.name),
+      ...patternMatchOperators.map((op) => op.name),
+    ];
+
+    // If AST has a complete operator node (not incomplete), let normal flow handle it
+    if (managedPartialOperators.includes(astOperatorName) && !isIncomplete) {
+      return null;
+    }
+  }
+
+  return dispatchPartialOperators(detection.operatorName, detection, ctx);
 }
 
 /** Derives innerText and option flags from the incoming params.*/

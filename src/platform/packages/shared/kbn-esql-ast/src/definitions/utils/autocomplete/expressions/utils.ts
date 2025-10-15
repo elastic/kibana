@@ -72,8 +72,10 @@ export function matchesSpecialFunction(name: string, expected: SpecialFunctionNa
   return name.toLowerCase() === expected;
 }
 
-// Builds function parameter context for suggestions
-// Commands with special filtering (like STATS) can extend with command-specific functionsToIgnore
+/**
+ *   Builds function parameter context for suggestions
+ *   Commands with special filtering (like STATS) can extend with command-specific functionsToIgnore
+ */
 export function buildExpressionFunctionParameterContext(
   fn: ESQLFunction,
   context?: ICommandContext

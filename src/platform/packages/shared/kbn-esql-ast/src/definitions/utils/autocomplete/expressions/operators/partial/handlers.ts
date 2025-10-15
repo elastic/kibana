@@ -9,9 +9,11 @@
 
 import type { ISuggestionItem } from '../../../../../../commands_registry/types';
 import type { ExpressionContext, PartialOperatorDetection } from '../../types';
+import type { ESQLSingleAstItem, ESQLFunction } from '../../../../../../types';
 import { getFunctionDefinition } from '../../../../functions';
 import { createSyntheticListOperatorNode, createSyntheticLikeOperatorNode } from './utils';
 import { dispatchOperators } from '../dispatcher';
+import { inOperators, patternMatchOperators } from '../../../../../all_operators';
 
 const WHITESPACE_NORMALIZE_REGEX = /\s+/g;
 const TRAILING_WHITESPACE_REGEX = /\s+$/;
@@ -21,6 +23,7 @@ const NULL_CHECK_CANDIDATES = ['is null', 'is not null'] as const;
 /**
  * Handles IS NULL / IS NOT NULL partial operators.
  * Generates suggestions directly without creating synthetic nodes.
+ * Supports prefix matching: "IS N" suggests both IS NULL and IS NOT NULL.
  */
 export async function handleNullCheckOperator(
   { textBeforeCursor }: PartialOperatorDetection,
@@ -60,47 +63,63 @@ export async function handleNullCheckOperator(
   return suggestions.length > 0 ? suggestions : null;
 }
 
-/**
- * Handles LIKE / NOT LIKE partial operators.
- * Creates synthetic node and dispatches to normal flow.
- */
 export async function handleLikeOperator(
-  { operatorName, textBeforeCursor }: PartialOperatorDetection,
+  detection: PartialOperatorDetection,
   context: ExpressionContext
 ): Promise<ISuggestionItem[] | null> {
-  const { innerText, expressionRoot } = context;
-  const text = textBeforeCursor || innerText;
+  return handleInfixOperator(
+    detection,
+    context,
+    patternMatchOperators.map((op) => op.name),
+    createSyntheticLikeOperatorNode
+  );
+}
 
-  const syntheticNode = createSyntheticLikeOperatorNode(operatorName, text, expressionRoot);
-
-  return dispatchOperators({
-    ...context,
-    expressionRoot: syntheticNode,
-    innerText: text,
-  });
+export async function handleInOperator(
+  detection: PartialOperatorDetection,
+  context: ExpressionContext
+): Promise<ISuggestionItem[] | null> {
+  return handleInfixOperator(
+    detection,
+    context,
+    inOperators.map((op) => op.name),
+    createSyntheticListOperatorNode
+  );
 }
 
 /**
- * Handles IN / NOT IN partial operators.
- * Creates synthetic node and dispatches to normal flow.
+ * Handles infix operators with content (IN, LIKE, RLIKE, etc.).
+ * Uses existing AST node if available, otherwise creates synthetic node.
  */
-export async function handleInOperator(
+async function handleInfixOperator(
   { operatorName, textBeforeCursor }: PartialOperatorDetection,
-  context: ExpressionContext
+  context: ExpressionContext,
+  operatorNames: string[],
+  createSyntheticNode: (
+    operatorName: string,
+    text: string,
+    expressionRoot?: ESQLSingleAstItem
+  ) => ESQLFunction
 ): Promise<ISuggestionItem[] | null> {
   const { innerText, expressionRoot } = context;
   const text = textBeforeCursor || innerText;
 
+  const hasValidAstNode =
+    expressionRoot?.type === 'function' &&
+    operatorNames.includes(expressionRoot.name?.toLowerCase() ?? '');
 
-  const syntheticNode = createSyntheticListOperatorNode(operatorName, text, expressionRoot);
+  if (hasValidAstNode) {
+    return dispatchOperators({ ...context, innerText: text });
+  }
 
+  const syntheticNode = createSyntheticNode(operatorName, text, expressionRoot);
 
-  const result = await dispatchOperators({
+  return dispatchOperators({
+
     ...context,
     expressionRoot: syntheticNode,
     innerText: text,
   });
-
 
   return result;
 }

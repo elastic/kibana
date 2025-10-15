@@ -21,13 +21,8 @@ import type { ICommandContext } from '../../../../commands_registry/types';
 import { acceptsArbitraryExpressions } from './utils';
 import type { FunctionDefinition } from '../../../types';
 
-/**
- * Centralizes signature analysis using getValidSignaturesAndTypesToSuggestNext API.
- *
- * Eliminate duplicated homogeneity checks and signature analysis
- * scattered across multiple files. This class wraps the existing
- * getValidSignaturesAndTypesToSuggestNext helper and adds homogeneity/variadic logic.
- */
+/** Centralizes signature analysis using getValidSignaturesAndTypesToSuggestNext API. */
+
 export class SignatureAnalyzer {
   private readonly signatures: Signature[];
 
@@ -161,6 +156,16 @@ export class SignatureAnalyzer {
     return Math.max(...this.signatures.map((sig) => sig.params.length));
   }
 
+  /** Returns true if current parameter index is at or beyond max params.*/
+  public get isAtMaxParams(): boolean {
+    if (this.isVariadic) {
+      return false;
+    }
+
+    return this.currentParameterIndex >= this.maxParams - 1;
+  }
+
+
   /**
    * Returns true if more parameters can be added.
    * Considers: mandatory args, variadic functions, max params.
@@ -174,9 +179,27 @@ export class SignatureAnalyzer {
       return true;
     }
 
-    const isAtMaxParams = this.currentParameterIndex >= this.maxParams - 1;
+    return !this.isAtMaxParams && this.maxParams > 0;
+  }
 
-    return !isAtMaxParams && this.maxParams > 0;
+  /**
+   * Checks if given type is compatible with current parameter position.
+   */
+  public isCurrentTypeCompatible(
+    givenType: SupportedDataType | 'unknown',
+    isLiteral: boolean
+  ): boolean {
+    if (this.paramDefinitions.length > 0) {
+      return this.paramDefinitions.some((def) =>
+        argMatchesParamType(givenType, def.type, isLiteral, false)
+      );
+    }
+
+    if (this.isVariadic && this.firstArgumentType) {
+      return argMatchesParamType(givenType, this.firstArgumentType, isLiteral, false);
+    }
+
+    return false;
   }
 
   /**
@@ -222,7 +245,6 @@ export class SignatureAnalyzer {
    * Returns true if function accepts arbitrary expressions in parameters.
    *
    * This pattern indicates functions where parameters can contain complex expressions
-   * (not just simple values), characterized by:
    * - Variadic with multiple parameters (minParams >= 2)
    * - Unknown return type (depends on arguments)
    * - Mixed parameter types (boolean + any)
@@ -294,6 +316,24 @@ export class SignatureAnalyzer {
     return this.paramDefinitions.some((def) =>
       argMatchesParamType(expressionType, def.type, isLiteral, false)
     );
+  }
+
+  /** Returns complete parameter state for comma/operator decision engines. */
+  public getParameterState(
+    expressionType: SupportedDataType | 'unknown',
+    isLiteral: boolean
+  ): {
+    typeMatches: boolean;
+    isLiteral: boolean;
+    hasMoreParams: boolean;
+    isVariadic: boolean;
+  } {
+    return {
+      typeMatches: this.isCurrentTypeCompatible(expressionType, isLiteral),
+      isLiteral,
+      hasMoreParams: this.hasMoreParams,
+      isVariadic: this.isVariadic,
+    };
   }
 
   private ensureKeywordAndText(types: FunctionParameterType[]): FunctionParameterType[] {

@@ -28,22 +28,14 @@ export function getLogicalContinuationSuggestions(): ISuggestionItem[] {
   return logicalOperators.map(getOperatorSuggestion);
 }
 
-/**
- * Detects when the current innerText ends with an IN or NOT IN token,
- * before the parser has formed the operator node in the AST.
- * Useful inside function-argument contexts (e.g., CASE(... IN ▌)).
- */
 export function endsWithInOrNotInToken(innerText: string): boolean {
-  return /\b(?:not\s+)?in\s*$/i.test(innerText.trimEnd());
+  return /\b(?:not\s+)?in\s*\(?\s*$/i.test(innerText);
 }
 
-/** Detects trailing LIKE/RLIKE (with optional NOT) before AST forms the operator */
 export function endsWithLikeOrRlikeToken(innerText: string): boolean {
-  return /\b(?:not\s+)?r?like\s*$/i.test(innerText.trimEnd());
+  return /\b(?:not\s+)?r?like\s+$/i.test(innerText);
 }
 
-/** Detects trailing IS or IS NOT (partial) before AST forms the operator */
 export function endsWithIsOrIsNotToken(innerText: string): boolean {
-  const text = innerText.trimEnd();
-  return /\bis\s*(?:not\s*)?$/i.test(text);
+  return /\bis\s+(?:n(?:o(?:t(?:\s+n(?:u(?:l(?:l)?)?)?|\s*)?)?|u(?:l(?:l)?)?)?)?$/i.test(innerText);
 }

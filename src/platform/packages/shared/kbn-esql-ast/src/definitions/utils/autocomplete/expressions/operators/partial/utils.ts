@@ -17,15 +17,26 @@ import type { PartialOperatorDetection } from '../../types';
 import { endsWithInOrNotInToken, endsWithIsOrIsNotToken, endsWithLikeOrRlikeToken } from '../utils';
 import { Builder } from '../../../../../../builder';
 
-const TRAILING_NON_WORD_REGEX = /\W+$/;
 const NOT_LIKE_REGEX = /\bnot\s+like\s*$/i;
 const NOT_IN_REGEX = /\bnot\s+in\s*$/i;
+const IS_NOT_REGEX = /\bis\s+not\b/i;
+
 
 // Regex to extract field name before operator: match[1] = fieldName
 // Matches with or without opening parenthesis
 const FIELD_BEFORE_IN_REGEX = /(\w+)\s+(?:not\s+)?in\s*\(?\s*$/i;
 const FIELD_BEFORE_LIKE_REGEX = /(\w+)\s+(?:not\s+)?(?:r)?like\s*\(?\s*$/i;
 
+/**
+ * Creates a synthetic infix operator node (IN, LIKE, RLIKE, etc.).
+ * Used when cursor is right after operator: "field IN ", "field IN(", "field LIKE ".
+ * If innerText ends with "(", creates a list node instead of placeholder.
+ */
+function createSyntheticInfixOperatorNode(
+  operatorName: string,
+  innerText: string,
+  fieldPattern: RegExp,
+=======
 // ============================================================================
 // Synthetic Node Creation Functions
 // ============================================================================
@@ -44,6 +55,8 @@ export function createSyntheticListOperatorNode(
   const hasOpenParen = /\(\s*$/.test(innerText);
 
   const right = hasOpenParen ? createEmptyListNode(textLength) : createPlaceholderNode(textLength);
+  const left = leftOperand ?? extractFieldFromText(innerText, fieldPattern);
+=======
 
   // Extract field name from text if leftOperand is not provided or not a column
   const left = leftOperand ?? extractFieldFromText(innerText, FIELD_BEFORE_IN_REGEX);
@@ -59,33 +72,30 @@ export function createSyntheticListOperatorNode(
   };
 }
 
-/**
- * Creates a synthetic binary expression node for LIKE / NOT LIKE operators.
- * Used when cursor is right after "field LIKE " or "field LIKE (".
- * If innerText ends with "(", creates a list node instead of placeholder.
- */
+export function createSyntheticListOperatorNode(
+  operatorName: string,
+  innerText: string,
+  leftOperand?: ESQLSingleAstItem
+): ESQLFunction {
+  return createSyntheticInfixOperatorNode(
+    operatorName,
+    innerText,
+    FIELD_BEFORE_IN_REGEX,
+    leftOperand
+  );
+}
+
 export function createSyntheticLikeOperatorNode(
   operatorName: string,
   innerText: string,
   leftOperand?: ESQLSingleAstItem
 ): ESQLFunction {
-  const textLength = innerText.length;
-  const hasOpenParen = /\(\s*$/.test(innerText);
-
-  const right = hasOpenParen ? createEmptyListNode(textLength) : createPlaceholderNode(textLength);
-
-  // Extract field name from text if leftOperand is not provided or not a column
-  const left = leftOperand ?? extractFieldFromText(innerText, FIELD_BEFORE_LIKE_REGEX);
-
-  return {
-    type: 'function',
-    name: operatorName,
-    subtype: 'binary-expression',
-    args: [left ?? createPlaceholderNode(0), right],
-    incomplete: true,
-    location: { min: textLength, max: textLength },
-    text: operatorName,
-  };
+  return createSyntheticInfixOperatorNode(
+    operatorName,
+    innerText,
+    FIELD_BEFORE_LIKE_REGEX,
+    leftOperand
+  );
 }
 
 function createPlaceholderNode(textLength: number): ESQLUnknownItem {
@@ -115,39 +125,36 @@ function extractFieldFromText(innerText: string, pattern: RegExp): ESQLSingleAst
   return undefined;
 }
 
-// ============================================================================
-// Detection Functions
-// ============================================================================
-
 /**
  * Detects partial IS NULL / IS NOT NULL operators.
- * Examples: "field IS ", "field IS NOT ", "field IS /"
+ * Examples: "field IS ", "field IS N", "field IS NOT ", "field IS NOT N"
  */
 export function detectNullCheck(innerText: string): PartialOperatorDetection | null {
-  const cleanedText = innerText.replace(TRAILING_NON_WORD_REGEX, ' ');
-
-  if (!endsWithIsOrIsNotToken(cleanedText)) {
+  if (!endsWithIsOrIsNotToken(innerText)) {
     return null;
   }
 
+  // Check if it contains NOT to determine which operator
+  const containsNot = IS_NOT_REGEX.test(innerText);
+
   return {
-    operatorName: 'is null',
+    operatorName: containsNot ? 'is not null' : 'is null',
+
     textBeforeCursor: innerText,
   };
 }
 
 /**
  * Detects partial LIKE / NOT LIKE operators.
- * Examples: "field LIKE ", "field NOT LIKE ", "field LIKE ("
+ * Examples: "field LIKE ", "field NOT LIKE "
  */
 export function detectLike(innerText: string): PartialOperatorDetection | null {
-  const cleanedText = innerText.replace(TRAILING_NON_WORD_REGEX, ' ');
-
-  if (!endsWithLikeOrRlikeToken(cleanedText)) {
+  if (!endsWithLikeOrRlikeToken(innerText)) {
     return null;
   }
 
-  const isNotLike = NOT_LIKE_REGEX.test(cleanedText);
+  const isNotLike = NOT_LIKE_REGEX.test(innerText);
+
 
   return {
     operatorName: isNotLike ? 'not like' : 'like',
@@ -157,16 +164,16 @@ export function detectLike(innerText: string): PartialOperatorDetection | null {
 
 /**
  * Detects partial IN / NOT IN operators.
- * Examples: "field IN ", "field NOT IN ", "field IN ("
+ * Examples: "field IN ", "field IN(", "field NOT IN ", "field NOT IN("
  */
 export function detectIn(innerText: string): PartialOperatorDetection | null {
-  const cleanedText = innerText.replace(TRAILING_NON_WORD_REGEX, ' ');
-
-  if (!endsWithInOrNotInToken(cleanedText)) {
+  // Don't clean the text - we want to preserve parentheses to NOT match them
+  if (!endsWithInOrNotInToken(innerText)) {
     return null;
   }
 
-  const isNotIn = NOT_IN_REGEX.test(cleanedText);
+  const isNotIn = NOT_IN_REGEX.test(innerText);
+
 
   return {
     operatorName: isNotIn ? 'not in' : 'in',

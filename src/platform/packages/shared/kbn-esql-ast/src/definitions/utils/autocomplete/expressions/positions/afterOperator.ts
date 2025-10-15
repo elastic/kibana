@@ -8,46 +8,270 @@
  */
 
 import type { ISuggestionItem } from '../../../../../commands_registry/types';
-import type { ESQLFunction } from '../../../../../types';
-import { getExpressionType, getRightmostNonVariadicOperator } from '../../../expressions';
-import { getSuggestionsToRightOfOperatorExpression } from '../../../operators';
+import { listCompleteItem } from '../../../../../commands_registry/complete_items';
+import type { ESQLAstItem, ESQLFunction } from '../../../../../types';
+import type { FunctionDefinition, SupportedDataType } from '../../../../types';
+import { FunctionDefinitionTypes, isArrayType } from '../../../../types';
+import { SignatureAnalyzer } from '../SignatureAnalyzer';
+import {
+  getExpressionType,
+  getRightmostNonVariadicOperator,
+  getMatchingSignatures,
+} from '../../../expressions';
+import { getFunctionDefinition } from '../../../functions';
+import { removeFinalUnknownIdentiferArg, getOverlapRange } from '../../../shared';
+import { logicalOperators } from '../../../../all_operators';
 import { dispatchOperators } from '../operators/dispatcher';
+import { isLiteral } from '../../../../../ast/is';
 import type { ExpressionContext } from '../types';
+import { SuggestionBuilder } from '../SuggestionBuilder';
+import { shouldSuggestOperators } from './afterComplete/shouldSuggestOperators';
 
 /**
- * Suggests completions after an operator
- * Called for 'after_operator' position (e.g., field = |, field IN |)
- * Delegates to special case handlers first, then suggests appropriate right-hand values
+ * Suggests completions after an operator (e.g., field = |, field IN |)
+ * Handles special cases (IN, IS NULL) or delegates to generic operator logic
  */
 export async function suggestAfterOperator(ctx: ExpressionContext): Promise<ISuggestionItem[]> {
-  const { expressionRoot, innerText, options } = ctx;
+  const { expressionRoot, context } = ctx;
 
   if (!expressionRoot) {
     return [];
   }
 
-  // Try special case handling first (IN, IS NULL, etc.)
   const specialSuggestions = await dispatchOperators(ctx);
 
   if (specialSuggestions) {
     return specialSuggestions;
   }
 
-  // Default: suggest appropriate values/operators to the right
   const fn = expressionRoot as ESQLFunction;
   const rightmostOperator = getRightmostNonVariadicOperator(fn) as ESQLFunction;
+  const getExprType = (expression: ESQLAstItem) => getExpressionType(expression, context?.columns);
 
-  return getSuggestionsToRightOfOperatorExpression({
-    queryText: innerText,
-    location: ctx.location,
-    rootOperator: rightmostOperator,
-    preferredExpressionType: options.preferredExpressionType,
-    getExpressionType: (expression) => getExpressionType(expression, ctx.context?.columns),
-    getColumnsByType: ctx.callbacks?.getByType ?? (() => Promise.resolve([])),
-    context: ctx.context,
-    callbacks: { hasMinimumLicenseRequired: ctx.callbacks?.hasMinimumLicenseRequired },
-    addSpaceAfterOperator: options.addSpaceAfterOperator,
-    openSuggestions: options.openSuggestions,
+  const { complete, reason } = isOperatorComplete(rightmostOperator, getExprType);
+
+  if (complete) {
+    return handleCompleteOperator(ctx, rightmostOperator, getExprType);
+  }
+
+  return handleIncompleteOperator(ctx, rightmostOperator, getExprType, reason);
+}
+
+/** Checks if an operator invocation is complete and correctly typed */
+function isOperatorComplete(
+  func: ESQLFunction,
+  getExprType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
+): {
+  complete: boolean;
+  reason?: 'tooFewArgs' | 'wrongTypes';
+} {
+  const fnDefinition = getFunctionDefinition(func.name);
+
+  if (!fnDefinition) {
+    return { complete: false };
+  }
+
+  const cleanedArgs = removeFinalUnknownIdentiferArg(func.args, getExprType);
+
+  const argLengthCheck = fnDefinition.signatures.some(({ minParams, params }) => {
+    if (minParams && cleanedArgs.length >= minParams) {
+      return true;
+    }
+
+    if (cleanedArgs.length === params.length) {
+      return true;
+    }
+
+    return cleanedArgs.length >= params.filter(({ optional }) => !optional).length;
+  });
+
+  if (!argLengthCheck) {
+    return { complete: false, reason: 'tooFewArgs' };
+  }
+
+  const givenTypes = func.args.map((arg) => getExprType(arg));
+  const literalMask = func.args.map((arg) => isLiteral(Array.isArray(arg) ? arg[0] : arg));
+
+  const hasCorrectTypes = !!getMatchingSignatures(
+    fnDefinition.signatures,
+    givenTypes,
+    literalMask,
+    true
+  ).length;
+
+  if (!hasCorrectTypes) {
+    return { complete: false, reason: 'wrongTypes' };
+  }
+
+  return { complete: true };
+}
+
+/** Returns supported right-side types for binary operators matching the left-side type */
+function getSupportedTypesForBinaryOperators(
+  fnDef: FunctionDefinition | undefined,
+  previousType: SupportedDataType | 'unknown'
+) {
+  return fnDef
+    ? fnDef.signatures
+        .filter(({ params }) =>
+          params.find(({ name, type }) => name === 'left' && type === previousType)
+        )
+        .map(({ params }) => params[1]?.type as SupportedDataType | 'unknown')
+        .filter((type) => type !== undefined && !isArrayType(type))
+    : [previousType];
+}
+
+/**
+ * Handles suggestions for complete operator expressions (e.g., field > 0 |)
+ * Suggests operators that can continue the expression
+ */
+function handleCompleteOperator(
+  ctx: ExpressionContext,
+  operator: ESQLFunction,
+  getExprType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
+): ISuggestionItem[] {
+  const { innerText, location, options } = ctx;
+
+  const operatorReturnType = getExprType(operator);
+  const builder = new SuggestionBuilder(ctx);
+
+  const operatorDecision = shouldSuggestOperators({
+    expressionType: operatorReturnType,
     functionParameterContext: options.functionParameterContext,
+    ctx,
+  });
+
+  if (operatorDecision.shouldSuggest) {
+    let allowed = operatorDecision.allowedOperators;
+
+    if (!allowed && operatorReturnType === 'boolean') {
+      allowed = logicalOperators
+        .filter(({ locationsAvailable }) => locationsAvailable.includes(location))
+        .map(({ name }) => name);
+    }
+
+    builder.addOperators({
+      leftParamType:
+        operatorReturnType === 'unknown' || operatorReturnType === 'unsupported'
+          ? 'any'
+          : operatorReturnType,
+      ignored: ['=', ':'],
+      allowed,
+    });
+  }
+
+  // Add comma using decision engine for boolean operators in functions
+  if (operatorReturnType === 'boolean' && options.functionParameterContext) {
+    const analyzer = SignatureAnalyzer.from(options.functionParameterContext);
+
+    if (analyzer) {
+      builder.addCommaIfNeeded({
+        position: 'after_complete', // Boolean operator expression is complete
+        typeMatches: true,
+        isLiteral: false,
+        hasMoreParams: analyzer.hasMoreParams,
+        isVariadic: analyzer.isVariadic,
+        hasMoreMandatoryArgs: analyzer.getHasMoreMandatoryArgs(),
+        functionSignatures: analyzer.getValidSignatures(),
+        isCursorFollowedByComma: false,
+      });
+    }
+  }
+
+  const suggestions = builder.build();
+
+  return suggestions.map<ISuggestionItem>((suggestion) => {
+    const overlap = getOverlapRange(innerText, suggestion.text);
+
+    return {
+      ...suggestion,
+      rangeToReplace: overlap,
+    };
+  });
+}
+
+/**
+ * Handles suggestions for incomplete operator expressions (e.g., field > |)
+ * Suggests fields, literals, and functions for the right-hand operand
+ */
+async function handleIncompleteOperator(
+  ctx: ExpressionContext,
+  operator: ESQLFunction,
+  getExprType: (expression: ESQLAstItem) => SupportedDataType | 'unknown',
+  reason?: 'tooFewArgs' | 'wrongTypes'
+): Promise<ISuggestionItem[]> {
+  const { innerText, options } = ctx;
+  const builder = new SuggestionBuilder(ctx);
+
+  const cleanedArgs = removeFinalUnknownIdentiferArg(operator.args, getExprType);
+  const leftArgType = getExprType(operator.args[cleanedArgs.length - 1]);
+
+  if (reason === 'tooFewArgs') {
+    const fnDef = getFunctionDefinition(operator.name);
+
+    if (fnDef?.signatures.every(({ params }) => params.some(({ type }) => isArrayType(type)))) {
+      return [listCompleteItem];
+    }
+
+    // AND/OR special case: suggest broader field/function set instead of just boolean
+    const isAndOrWithBooleanLeft =
+      leftArgType === 'boolean' &&
+      (operator.name === 'and' || operator.name === 'or') &&
+      getFunctionDefinition(operator.name)?.type === FunctionDefinitionTypes.OPERATOR;
+
+    const typeToUse = isAndOrWithBooleanLeft
+      ? (['any'] as (SupportedDataType | 'unknown' | 'any')[])
+      : getSupportedTypesForBinaryOperators(fnDef, leftArgType);
+
+    const useValueType = Boolean(operator.subtype === 'binary-expression');
+
+    await builder
+      .addFields({
+        types: typeToUse,
+        values: useValueType,
+        addSpaceAfterField: options.addSpaceAfterOperator ?? false,
+        openSuggestions: options.openSuggestions ?? false,
+        promoteToTop: true,
+      })
+      .then((b) =>
+        b
+          .addLiterals({
+            types: typeToUse,
+            includeDateLiterals: true,
+            includeCompatibleLiterals: false,
+            addComma: false,
+            advanceCursorAndOpenSuggestions: options.openSuggestions ?? false,
+          })
+          .addFunctions({
+            types: typeToUse,
+            ignoredFunctions: [],
+            addSpaceAfterFunction: options.addSpaceAfterOperator ?? false,
+            openSuggestions: options.openSuggestions ?? false,
+          })
+      );
+  }
+
+  if (reason === 'wrongTypes') {
+    if (leftArgType && options.preferredExpressionType) {
+      if (
+        leftArgType !== options.preferredExpressionType &&
+        leftArgType !== 'unknown' &&
+        leftArgType !== 'unsupported'
+      ) {
+        builder.addOperators({
+          leftParamType: leftArgType,
+          returnTypes: [options.preferredExpressionType],
+        });
+      }
+    }
+  }
+
+  return builder.build().map<ISuggestionItem>((suggestion) => {
+    const overlap = getOverlapRange(innerText, suggestion.text);
+
+    return {
+      ...suggestion,
+      rangeToReplace: overlap,
+    };
   });
 }

@@ -9,8 +9,11 @@
 
 import { isColumn, isFunctionExpression, isLiteral } from '../../../../ast/is';
 import { within } from '../../../../ast/location';
-import type { ESQLSingleAstItem } from '../../../../types';
+import type { ESQLSingleAstItem, ESQLFunction } from '../../../../types';
+import type { ESQLColumnData } from '../../../../commands_registry/types';
 import { isNullCheckOperator } from './utils';
+import { checkFunctionInvocationComplete } from '../../functions';
+import { getExpressionType } from '../../expressions';
 
 export type ExpressionPosition =
   | 'in_function'
@@ -27,7 +30,8 @@ const REGEX_SPECIAL_CHARS = /[.*+?^${}()|[\]\\]/g;
 /** Determines the position of the cursor within an expression */
 export function getPosition(
   innerText: string,
-  expressionRoot: ESQLSingleAstItem | undefined
+  expressionRoot: ESQLSingleAstItem | undefined,
+  columns?: Map<string, ESQLColumnData>
 ): ExpressionPosition {
   // Handle NOT keyword first (must be before empty check for proper precedence)
   const endsWithNot = NOT_PATTERN.test(innerText.trimEnd());
@@ -69,6 +73,16 @@ export function getPosition(
     }
 
     // Binary operators (e.g., "field = |", "field IN |")
+    // Check if operator is complete (has both operands)
+    if (expressionRoot.subtype === 'binary-expression' && columns) {
+      const { complete } = checkFunctionInvocationComplete(expressionRoot as ESQLFunction, (expr) =>
+        getExpressionType(expr, columns)
+      );
+
+      return complete ? 'after_complete' : 'after_operator';
+    }
+
+    // Fallback: if no columns available, use old behavior
     return 'after_operator';
   }
 

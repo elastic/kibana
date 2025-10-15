@@ -18,28 +18,16 @@ import { SignatureAnalyzer } from '../SignatureAnalyzer';
 import { getControlSuggestion, getVariablePrefix, getLiteralsSuggestions } from '../../helpers';
 import { buildValueDefinitions } from '../../../values';
 import { getCompatibleLiterals } from '../../../literals';
-import type { FunctionDefinitionTypes, FunctionParameterType } from '../../../../types';
+import type {
+  FunctionDefinition,
+  FunctionParameter,
+  FunctionParameterType,
+} from '../../../../types';
 import { type ISuggestionItem } from '../../../../../commands_registry/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../../../constants';
 import { allStarConstant } from '../../../../../..';
 
-interface ParamDefinition {
-  type: FunctionParameterType;
-  constantOnly?: boolean;
-  suggestedValues?: string[];
-  fieldsOnly?: boolean;
-  name?: string;
-}
-
-interface FunctionDef {
-  name: string;
-  type: FunctionDefinitionTypes;
-  signatures?: Array<{
-    params: Array<{ type: FunctionParameterType; name?: string }>;
-    minParams?: number;
-    returnType?: string;
-  }>;
-}
+type FunctionParamContext = NonNullable<ExpressionContext['options']['functionParameterContext']>;
 
 /** Handles suggestions when starting a new expression (empty position) */
 export async function suggestForEmptyExpression(
@@ -57,7 +45,7 @@ export async function suggestForEmptyExpression(
 
 /** Handles suggestions when cursor is inside a function parameter (empty position) */
 async function handleFunctionParameterContext(
-  functionParamContext: NonNullable<ExpressionContext['options']['functionParameterContext']>,
+  functionParamContext: FunctionParamContext,
   ctx: ExpressionContext
 ): Promise<ISuggestionItem[]> {
   // Early validation
@@ -77,9 +65,7 @@ async function handleFunctionParameterContext(
 }
 
 /** Validates that we can suggest for this function parameter position */
-function isValidFunctionParameterPosition(
-  functionParamContext: NonNullable<ExpressionContext['options']['functionParameterContext']>
-): boolean {
+function isValidFunctionParameterPosition(functionParamContext: FunctionParamContext): boolean {
   const { functionDefinition, paramDefinitions } = functionParamContext;
 
   if (!functionDefinition) {
@@ -102,7 +88,7 @@ function isValidFunctionParameterPosition(
 
 /** Try suggestions that are exclusive (if present, return only these) */
 function tryExclusiveSuggestions(
-  functionParamContext: NonNullable<ExpressionContext['options']['functionParameterContext']>,
+  functionParamContext: FunctionParamContext,
   ctx: ExpressionContext
 ): ISuggestionItem[] {
   const { functionDefinition, paramDefinitions } = functionParamContext;
@@ -132,17 +118,14 @@ function tryExclusiveSuggestions(
 
 /** Build composite suggestions: literals + fields + functions */
 async function buildCompositeSuggestions(
-  functionParamContext: NonNullable<ExpressionContext['options']['functionParameterContext']>,
+  functionParamContext: FunctionParamContext,
   ctx: ExpressionContext
 ): Promise<ISuggestionItem[]> {
-  const { paramDefinitions, functionDefinition } = functionParamContext;
   const { options } = ctx;
 
   // Determine configuration
   const config = getParamSuggestionConfig(
     functionParamContext,
-    paramDefinitions,
-    functionDefinition!,
     options.isCursorFollowedByComma ?? false
   );
 
@@ -163,7 +146,7 @@ async function buildCompositeSuggestions(
 
 /** Build all literal suggestions (constants + dates) */
 function buildLiteralSuggestions(
-  functionParamContext: NonNullable<ExpressionContext['options']['functionParameterContext']>,
+  functionParamContext: FunctionParamContext,
   ctx: ExpressionContext,
   config: ReturnType<typeof getParamSuggestionConfig>
 ): ISuggestionItem[] {
@@ -207,7 +190,7 @@ function buildLiteralSuggestions(
 
 /** Build field and function suggestions using SuggestionBuilder */
 async function buildFieldAndFunctionSuggestions(
-  functionParamContext: NonNullable<ExpressionContext['options']['functionParameterContext']>,
+  functionParamContext: FunctionParamContext,
   ctx: ExpressionContext,
   config: ReturnType<typeof getParamSuggestionConfig>
 ): Promise<ISuggestionItem[]> {
@@ -301,7 +284,7 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
 }
 
 /** Collects all unique suggested values from parameter definitions (e.g., enums) */
-function collectSuggestedValues(paramDefinitions: ParamDefinition[]): string[] {
+function collectSuggestedValues(paramDefinitions: FunctionParameter[]): string[] {
   return uniq(
     paramDefinitions
       .map(({ suggestedValues }) => suggestedValues)
@@ -311,7 +294,7 @@ function collectSuggestedValues(paramDefinitions: ParamDefinition[]): string[] {
 }
 
 /** Filters parameters that only accept constant values (literals or duration types) */
-function getConstantOnlyParams(paramDefinitions: ParamDefinition[]): ParamDefinition[] {
+function getConstantOnlyParams(paramDefinitions: FunctionParameter[]): FunctionParameter[] {
   return paramDefinitions.filter(
     ({ constantOnly, type }) => constantOnly || /_duration/.test(String(type))
   );
@@ -319,11 +302,10 @@ function getConstantOnlyParams(paramDefinitions: ParamDefinition[]): ParamDefini
 
 /** Derives suggestion configuration for next function parameter */
 function getParamSuggestionConfig(
-  functionParamContext: NonNullable<ExpressionContext['options']['functionParameterContext']>,
-  paramDefinitions: ParamDefinition[],
-  functionDefinition: FunctionDef,
+  functionParamContext: FunctionParamContext,
   isCursorFollowedByComma: boolean
 ) {
+  const { functionDefinition } = functionParamContext;
   const analyzer = SignatureAnalyzer.from(functionParamContext);
   const acceptedTypes = (analyzer?.getAcceptedTypes() ?? ['any']) as FunctionParameterType[];
 
@@ -332,16 +314,12 @@ function getParamSuggestionConfig(
   const commaContext: CommaContext = {
     position: 'empty_expression',
     hasMoreMandatoryArgs,
-    functionType: functionDefinition.type,
+    functionType: functionDefinition!.type,
     isCursorFollowedByComma,
-    functionSignatures: functionDefinition.signatures,
+    functionSignatures: functionDefinition!.signatures,
   };
 
   const shouldAddComma = shouldSuggestComma(commaContext);
-
-  // Always allow running the field/function builder. The builder will suppress
-  // fields when all params are constant-only, but still allow functions that
-  // can produce constant values of accepted types.
   const allowFieldsAndFunctions = true;
 
   return { acceptedTypes, shouldAddComma, allowFieldsAndFunctions };
@@ -349,8 +327,8 @@ function getParamSuggestionConfig(
 
 /** Builds suggestions for enum/predefined values */
 function buildEnumValueSuggestions(
-  paramDefinitions: ParamDefinition[],
-  functionDefinition: FunctionDef,
+  paramDefinitions: FunctionParameter[],
+  functionDefinition: FunctionDefinition,
   hasMoreMandatoryArgs: boolean,
   isCursorFollowedByComma: boolean
 ): ISuggestionItem[] {
@@ -378,7 +356,7 @@ function buildEnumValueSuggestions(
 
 /** Builds suggestions for constant-only literal parameters */
 function buildConstantOnlyLiteralSuggestions(
-  paramDefinitions: ParamDefinition[],
+  paramDefinitions: FunctionParameter[],
   context: ExpressionContext['context'],
   shouldAddComma: boolean,
   hasMoreMandatoryArgs: boolean
