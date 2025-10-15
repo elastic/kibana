@@ -87,13 +87,15 @@ export const DimensionsSelector = ({
     return allDimensions.map<SelectableEntry>((dimension) => {
       const isSelected = selectedDimensions.includes(dimension.name);
       const isIntersecting = intersectingDimensions.has(dimension.name);
-      const isDisabledByLimit = !isSelected && isAtMaxLimit;
+      const isDisabledByLimit =
+        MAX_DIMENSIONS_SELECTIONS === 1 ? false : !isSelected && isAtMaxLimit;
 
       return {
         value: dimension.name,
         label: dimension.name,
         checked: isSelected ? 'on' : undefined,
-        disabled: !isIntersecting || isDisabledByLimit,
+        // In single-selection mode, don't check intersections since we're replacing, not adding
+        disabled: MAX_DIMENSIONS_SELECTIONS === 1 ? false : !isIntersecting || isDisabledByLimit,
         key: dimension.name,
       };
     });
@@ -139,17 +141,12 @@ export const DimensionsSelector = ({
   }, [selectedDimensions]);
 
   const popoverContentBelowSearch = useMemo(() => {
-    const isAtMaxLimit = selectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
-    const statusMessage = isAtMaxLimit
-      ? i18n.translate('metricsExperience.dimensionsSelector.maxLimitStatusMessage', {
-          defaultMessage: 'Maximum of {maxDimensions} dimension selected ({count}/{maxDimensions})',
-          values: { count: selectedDimensions.length, maxDimensions: MAX_DIMENSIONS_SELECTIONS },
-        })
-      : i18n.translate('metricsExperience.dimensionsSelector.selectedStatusMessage', {
-          defaultMessage:
-            '{count, plural, one {# dimension selected} other {# dimensions selected}}',
-          values: { count: selectedDimensions.length },
-        });
+    const statusMessage = i18n.translate(
+      'metricsExperience.dimensionsSelector.instructionMessage',
+      {
+        defaultMessage: 'Select a dimension to break down your metrics',
+      }
+    );
 
     return (
       <ClearAllSection
