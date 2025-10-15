@@ -19,6 +19,7 @@ import {
   getPromptMock,
   getUpdatePromptSchemaMock,
 } from '../../__mocks__/prompts_schema.mock';
+import { spaceTestScenarios, withSpace } from '../../__mocks__/space_test_helpers';
 
 describe('Perform bulk action route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -211,6 +212,143 @@ describe('Perform bulk action route', () => {
 
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual('More than 100 ids sent for bulk edit action.');
+    });
+  });
+
+  describe('Prompts bulk actions route with Spaces', () => {
+    describe('non-default space behavior', () => {
+      it('should work correctly in non-default space', async () => {
+        const { clients: spaceClients, context: spaceContext } = requestContextMock.createTools();
+        withSpace(spaceTestScenarios.nonDefaultSpace)(spaceContext);
+
+        (
+          (await spaceClients.elasticAssistant.getAIAssistantPromptsDataClient.getWriter())
+            .bulk as jest.Mock
+        ).mockResolvedValue({
+          docs_created: [mockPrompt],
+          docs_updated: [],
+          docs_deleted: [],
+          errors: [],
+          total: 1,
+        });
+        spaceClients.elasticAssistant.getAIAssistantPromptsDataClient.findDocuments.mockResolvedValueOnce(
+          Promise.resolve(getEmptyFindResult())
+        );
+        spaceContext.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+
+        const spaceServer = serverMock.create();
+        bulkPromptsRoute(spaceServer.router, logger);
+
+        const response = await spaceServer.inject(
+          getPromptsBulkActionRequest([], [], ['dummy-id-1']),
+          requestContextMock.convertContext(spaceContext)
+        );
+
+        expect(response.status).toEqual(200);
+        expect(response.body.success).toBe(true);
+        expect(spaceContext.elasticAssistant.getSpaceId()).toBe(spaceTestScenarios.nonDefaultSpace);
+      });
+
+      it('should handle partial failures in non-default space', async () => {
+        const { clients: spaceClients, context: spaceContext } = requestContextMock.createTools();
+        withSpace(spaceTestScenarios.alternativeSpace)(spaceContext);
+
+        (
+          (await spaceClients.elasticAssistant.getAIAssistantPromptsDataClient.getWriter())
+            .bulk as jest.Mock
+        ).mockResolvedValue({
+          docs_created: [],
+          docs_updated: [],
+          docs_deleted: [],
+          errors: [{ message: 'Space-specific error', document: { id: 'failed-prompt' } }],
+          total: 1,
+        });
+        spaceClients.elasticAssistant.getAIAssistantPromptsDataClient.findDocuments.mockResolvedValueOnce(
+          Promise.resolve(getEmptyFindResult())
+        );
+        spaceContext.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+
+        const spaceServer = serverMock.create();
+        bulkPromptsRoute(spaceServer.router, logger);
+
+        const response = await spaceServer.inject(
+          getPromptsBulkActionRequest([], [], ['dummy-id-1']),
+          requestContextMock.convertContext(spaceContext)
+        );
+
+        expect(response.status).toEqual(500);
+        expect(response.body.attributes.errors).toHaveLength(1);
+        expect(spaceContext.elasticAssistant.getSpaceId()).toBe(
+          spaceTestScenarios.alternativeSpace
+        );
+      });
+    });
+
+    describe('space isolation', () => {
+      it('should only perform bulk actions on prompts in the current space', async () => {
+        // Setup space1 with prompts to bulk edit
+        const { clients: space1Clients, context: space1Context } = requestContextMock.createTools();
+        withSpace('space1')(space1Context);
+        (
+          (await space1Clients.elasticAssistant.getAIAssistantPromptsDataClient.getWriter())
+            .bulk as jest.Mock
+        ).mockResolvedValue({
+          docs_created: [],
+          docs_updated: [{ id: 'space1-prompt-1' }, { id: 'space1-prompt-2' }],
+          docs_deleted: [],
+          errors: [],
+          total: 2,
+        });
+        space1Clients.elasticAssistant.getAIAssistantPromptsDataClient.findDocuments.mockResolvedValueOnce(
+          Promise.resolve(getEmptyFindResult())
+        );
+        space1Context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+
+        // Setup space2 with different prompts
+        const { clients: space2Clients, context: space2Context } = requestContextMock.createTools();
+        withSpace('space2')(space2Context);
+        (
+          (await space2Clients.elasticAssistant.getAIAssistantPromptsDataClient.getWriter())
+            .bulk as jest.Mock
+        ).mockResolvedValue({
+          docs_created: [],
+          docs_updated: [{ id: 'space2-prompt-1' }],
+          docs_deleted: [],
+          errors: [],
+          total: 1,
+        });
+        space2Clients.elasticAssistant.getAIAssistantPromptsDataClient.findDocuments.mockResolvedValueOnce(
+          Promise.resolve(getEmptyFindResult())
+        );
+        space2Context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+
+        const space1Server = serverMock.create();
+        const space2Server = serverMock.create();
+        bulkPromptsRoute(space1Server.router, logger);
+        bulkPromptsRoute(space2Server.router, logger);
+
+        // Perform bulk action in space1
+        const space1Response = await space1Server.inject(
+          getPromptsBulkActionRequest([], [], ['dummy-id-1']),
+          requestContextMock.convertContext(space1Context)
+        );
+
+        // Perform bulk action in space2
+        const space2Response = await space2Server.inject(
+          getPromptsBulkActionRequest([], [], ['dummy-id-1']),
+          requestContextMock.convertContext(space2Context)
+        );
+
+        expect(space1Response.status).toEqual(200);
+        expect(space2Response.status).toEqual(200);
+
+        // Verify each space operated on different prompts
+        expect(space1Response.body.attributes.results.updated).toHaveLength(2);
+        expect(space2Response.body.attributes.results.updated).toHaveLength(1);
+
+        expect(space1Context.elasticAssistant.getSpaceId()).toBe('space1');
+        expect(space2Context.elasticAssistant.getSpaceId()).toBe('space2');
+      });
     });
   });
 });

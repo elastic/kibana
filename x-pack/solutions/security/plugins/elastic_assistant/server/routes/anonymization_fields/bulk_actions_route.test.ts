@@ -22,6 +22,7 @@ import {
   getPerformBulkActionSchemaMock,
   getUpdateAnonymizationFieldSchemaMock,
 } from '../../__mocks__/anonymization_fields_schema.mock';
+import { spaceTestScenarios, withSpace } from '../../__mocks__/space_test_helpers';
 
 describe('Perform bulk action route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -199,6 +200,112 @@ describe('Perform bulk action route', () => {
       const result = server.validate(request);
 
       expect(result.ok).toHaveBeenCalled();
+    });
+  });
+
+  describe('Anonymization fields bulk actions route with Spaces', () => {
+    describe('non-default space behavior', () => {
+      it('should work correctly in non-default space', async () => {
+        const { clients: spaceClients, context: spaceContext } = requestContextMock.createTools();
+        withSpace(spaceTestScenarios.nonDefaultSpace)(spaceContext);
+
+        (
+          (
+            await spaceClients.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient.getWriter()
+          ).bulk as jest.Mock
+        ).mockResolvedValue({
+          docs_created: [mockAnonymizationField],
+          docs_updated: [],
+          docs_deleted: [],
+          errors: [],
+          total: 1,
+        });
+        spaceClients.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient.findDocuments.mockResolvedValueOnce(
+          Promise.resolve(getEmptyFindResult())
+        );
+        spaceContext.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+
+        const spaceServer = serverMock.create();
+        bulkActionAnonymizationFieldsRoute(spaceServer.router, logger);
+
+        const response = await spaceServer.inject(
+          getAnonymizationFieldsBulkActionRequest([], [], ['dummy-id-1']),
+          requestContextMock.convertContext(spaceContext)
+        );
+
+        expect(response.status).toEqual(200);
+        expect(response.body.success).toBe(true);
+        expect(spaceContext.elasticAssistant.getSpaceId()).toBe(spaceTestScenarios.nonDefaultSpace);
+      });
+    });
+
+    describe('space isolation', () => {
+      it('should only perform bulk actions on anonymization fields in the current space', async () => {
+        // Setup space1 with anonymization fields to bulk edit
+        const { clients: space1Clients, context: space1Context } = requestContextMock.createTools();
+        withSpace('space1')(space1Context);
+        (
+          (
+            await space1Clients.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient.getWriter()
+          ).bulk as jest.Mock
+        ).mockResolvedValue({
+          docs_created: [],
+          docs_updated: [{ id: 'space1-field-1' }, { id: 'space1-field-2' }],
+          docs_deleted: [],
+          errors: [],
+          total: 2,
+        });
+        space1Clients.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient.findDocuments.mockResolvedValueOnce(
+          Promise.resolve(getEmptyFindResult())
+        );
+        space1Context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+
+        // Setup space2 with different anonymization fields
+        const { clients: space2Clients, context: space2Context } = requestContextMock.createTools();
+        withSpace('space2')(space2Context);
+        (
+          (
+            await space2Clients.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient.getWriter()
+          ).bulk as jest.Mock
+        ).mockResolvedValue({
+          docs_created: [],
+          docs_updated: [{ id: 'space2-field-1' }],
+          docs_deleted: [],
+          errors: [],
+          total: 1,
+        });
+        space2Clients.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient.findDocuments.mockResolvedValueOnce(
+          Promise.resolve(getEmptyFindResult())
+        );
+        space2Context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+
+        const space1Server = serverMock.create();
+        const space2Server = serverMock.create();
+        bulkActionAnonymizationFieldsRoute(space1Server.router, logger);
+        bulkActionAnonymizationFieldsRoute(space2Server.router, logger);
+
+        // Perform bulk action in space1
+        const space1Response = await space1Server.inject(
+          getAnonymizationFieldsBulkActionRequest([], [], ['dummy-id-1']),
+          requestContextMock.convertContext(space1Context)
+        );
+
+        // Perform bulk action in space2
+        const space2Response = await space2Server.inject(
+          getAnonymizationFieldsBulkActionRequest([], [], ['dummy-id-1']),
+          requestContextMock.convertContext(space2Context)
+        );
+
+        expect(space1Response.status).toEqual(200);
+        expect(space2Response.status).toEqual(200);
+
+        // Verify each space operated on different anonymization fields
+        expect(space1Response.body.attributes.results.updated).toHaveLength(2);
+        expect(space2Response.body.attributes.results.updated).toHaveLength(1);
+
+        expect(space1Context.elasticAssistant.getSpaceId()).toBe('space1');
+        expect(space2Context.elasticAssistant.getSpaceId()).toBe('space2');
+      });
     });
   });
 });
