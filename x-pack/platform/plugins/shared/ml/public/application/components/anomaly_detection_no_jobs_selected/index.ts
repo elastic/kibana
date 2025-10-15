@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import { configs } from '../configs';
-
-export default configs.basic;
+export { AnomalyDetectionNoJobsSelected } from './anomaly_detection_no_jobs_selected';
