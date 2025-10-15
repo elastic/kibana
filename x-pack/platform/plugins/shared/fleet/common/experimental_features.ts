@@ -76,13 +76,13 @@ export const getUpdatedExperimentalFeatures = <T extends Record<string, boolean>
   const updatedFeatures = { ...existingFeatures };
 
   for (const value of enableExperimentalConfigValue) {
-    if (value in existingFeatures) {
+    if (Object.prototype.hasOwnProperty.call(existingFeatures, value)) {
       updatedFeatures[value as keyof T] = true as T[keyof T];
     }
   }
 
   for (const [key, value] of Object.entries(experimentalFeaturesConfigValue)) {
-    if (key in existingFeatures && typeof value === 'boolean') {
+    if (Object.prototype.hasOwnProperty.call(existingFeatures, key) && typeof value === 'boolean') {
       updatedFeatures[key as keyof T] = value as T[keyof T];
     }
   }
