@@ -53,39 +53,15 @@ interface BulkDisableResult {
 export type CreatedAtSearchResponse = SearchResponse<{ created_at: string }>;
 
 export class ScheduledReportsService {
-  private auditLogger: AuditLogger;
-  private esClient: IClusterClient;
-  private logger: Logger;
-  private reportingCore: ReportingCore;
-  private responseFactory: KibanaResponseFactory;
-  private savedObjectsClient: SavedObjectsClientContract;
-  private taskManager: TaskManagerStartContract;
-
-  constructor({
-    auditLogger,
-    esClient,
-    logger,
-    reportingCore,
-    responseFactory,
-    savedObjectsClient,
-    taskManager,
-  }: {
-    auditLogger: AuditLogger;
-    esClient: IClusterClient;
-    logger: Logger;
-    reportingCore: ReportingCore;
-    responseFactory: KibanaResponseFactory;
-    savedObjectsClient: SavedObjectsClientContract;
-    taskManager: TaskManagerStartContract;
-  }) {
-    this.auditLogger = auditLogger;
-    this.esClient = esClient;
-    this.logger = logger;
-    this.reportingCore = reportingCore;
-    this.responseFactory = responseFactory;
-    this.savedObjectsClient = savedObjectsClient;
-    this.taskManager = taskManager;
-  }
+  constructor(
+    private auditLogger: AuditLogger,
+    private esClient: IClusterClient,
+    private logger: Logger,
+    private reportingCore: ReportingCore,
+    private responseFactory: KibanaResponseFactory,
+    private savedObjectsClient: SavedObjectsClientContract,
+    private taskManager: TaskManagerStartContract
+  ) {}
 
   static async build({
     logger,
@@ -103,15 +79,15 @@ export class ScheduledReportsService {
     const savedObjectsClient = await reportingCore.getScopedSoClient(request);
     const taskManager = await reportingCore.getTaskManager();
 
-    return new ScheduledReportsService({
+    return new ScheduledReportsService(
       auditLogger,
       esClient,
       logger,
       reportingCore,
       responseFactory,
       savedObjectsClient,
-      taskManager,
-    });
+      taskManager
+    );
   }
 
   public async list({
