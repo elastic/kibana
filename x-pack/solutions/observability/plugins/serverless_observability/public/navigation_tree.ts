@@ -495,22 +495,25 @@ export const createNavigationTree = ({
                   { link: 'management:maintenanceWindows' },
                 ],
               },
-              {
-                id: 'machine_learning',
-                title: i18n.translate(
-                  'xpack.serverlessObservability.nav.projectSettings.machineLearning',
-                  {
-                    defaultMessage: 'Machine Learning',
-                  }
-                ),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  { link: 'management:overview' },
-                  { link: 'management:anomaly_detection' },
-                  { link: 'management:analytics' },
-                  { link: 'management:trained_models' },
-                ],
-              },
+              ...filterForFeatureAvailability(
+                {
+                  id: 'machine_learning',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.projectSettings.machineLearning',
+                    {
+                      defaultMessage: 'Machine Learning',
+                    }
+                  ),
+                  breadcrumbStatus: 'hidden',
+                  children: [
+                    { link: 'management:overview' },
+                    { link: 'management:anomaly_detection' },
+                    { link: 'management:analytics' },
+                    { link: 'management:trained_models' },
+                  ],
+                },
+                overviewAvailable
+              ),
               ...filterForFeatureAvailability(
                 {
                   title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.ai', {
