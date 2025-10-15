@@ -27,7 +27,6 @@ import useToggle from 'react-use/lib/useToggle';
 import { css } from '@emotion/react';
 import { getPercentageFormatter } from '../../../../../../util/formatters';
 import type { ProcessorMetrics } from '../../../state_management/simulation_state_machine';
-import {  shouldTruncateMessage } from './utils';
 
 type ProcessorMetricBadgesProps = ProcessorMetrics;
 
