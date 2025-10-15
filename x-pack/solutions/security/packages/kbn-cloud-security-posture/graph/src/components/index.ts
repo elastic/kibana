@@ -10,7 +10,7 @@ export { GraphInvestigation } from './graph_investigation/graph_investigation';
 export {
   type GraphGroupedNodePreviewPanelProps,
   GraphGroupedNodePreviewPanel,
-} from './graph_grouped_node_preview_panel';
+} from './graph_grouped_node_preview_panel/graph_grouped_node_preview_panel';
 export {
   GraphGroupedNodePreviewPanelKey,
   GROUP_PREVIEW_BANNER,

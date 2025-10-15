@@ -13,7 +13,7 @@ import {
   DOCUMENT_TYPE_ALERT,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
-import type { GraphGroupedNodePreviewPanelProps } from '.';
+import type { GraphGroupedNodePreviewPanelProps } from './graph_grouped_node_preview_panel';
 import type { PanelItems, EntityItem, EventItem, AlertItem } from './components/grouped_item/types';
 import { LoadingBody } from './components/loading_body';
 import { EmptyBody } from './components/empty_body';
