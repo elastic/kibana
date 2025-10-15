@@ -9,12 +9,12 @@ import expect from 'expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
-  const securitySolutionApi = getService('securitySolutionApi');
+  const entityAnalyticsApi = getService('entityAnalyticsApi');
 
   describe('@ess @skipInServerlessMKI Entity store - Entities list API', () => {
     describe('when the entity store is disable', () => {
       it("should return response with success status when the index doesn't exist", async () => {
-        const { body } = await securitySolutionApi.listEntities({
+        const { body } = await entityAnalyticsApi.listEntities({
           query: { entity_types: ['host'] },
         });
 
@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return hosts from the entity store index', async () => {
-        const { body } = await securitySolutionApi.listEntities({
+        const { body } = await entityAnalyticsApi.listEntities({
           query: { entity_types: ['host'] },
         });
 
@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return users from the entity store index', async () => {
-        const { body } = await securitySolutionApi.listEntities({
+        const { body } = await entityAnalyticsApi.listEntities({
           query: { entity_types: ['user'] },
         });
 
@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return services from the entity store index', async () => {
-        const { body } = await securitySolutionApi.listEntities({
+        const { body } = await entityAnalyticsApi.listEntities({
           query: { entity_types: ['service'] },
         });
 
@@ -68,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return two entity types from the entity store index', async () => {
-        const { body } = await securitySolutionApi.listEntities({
+        const { body } = await entityAnalyticsApi.listEntities({
           query: { entity_types: ['user', 'host'] },
         });
 

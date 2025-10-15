@@ -2,7 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["node", "@kbn/ambient-ftr-types"],
+    "types": [
+      "node",
+      "@kbn/ambient-ftr-types"
+    ],
     // there is still a decent amount of JS in this plugin and we are taking
     // advantage of the fact that TS doesn't know the types of that code and
     // gives us `any`. Once that code is converted to .ts we can remove this
@@ -165,12 +168,7 @@
     "@kbn/ml-trained-models-utils",
     "@kbn/observability-synthetics-test-data",
     "@kbn/ml-trained-models-utils",
-    "@kbn/openapi-common",
-    "@kbn/securitysolution-lists-common",
-    "@kbn/securitysolution-exceptions-common",
-    "@kbn/securitysolution-endpoint-exceptions-common",
     "@kbn/entityManager-plugin",
-    "@kbn/osquery-plugin",
     "@kbn/entities-schema",
     "@kbn/actions-simulators-plugin",
     "@kbn/cases-api-integration-test-plugin",
@@ -195,5 +193,6 @@
     "@kbn/inference-common",
     "@kbn/aiops-change-point-detection",
     "@kbn/scout-info",
+    "@kbn/security-solution-test-api-clients",
   ]
 }

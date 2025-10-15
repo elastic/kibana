@@ -13,6 +13,7 @@ export {
   DEFAULT_SPACE_ID,
   API_VERSIONS,
 } from './constants';
+export { getRouteUrlForSpace } from './get_spaced_route_url';
 export { addSpaceIdToPath, getSpaceIdFromPath } from './lib/spaces_url_parser';
 export type {
   Space,

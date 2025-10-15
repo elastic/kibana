@@ -11,7 +11,7 @@ import type { ComponentType, ReactNode } from 'react';
 import type { RuleActionParam, ActionVariable } from '@kbn/alerting-types';
 import { IconType, RecursivePartial } from '@elastic/eui';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { SubFeature } from '@kbn/actions-types';
+import { ActionType, SubFeature } from '@kbn/actions-types';
 import { TypeRegistry } from '../type_registry';
 import { RuleFormParamsErrors } from './rule_types';
 
@@ -129,7 +129,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   isExperimental?: boolean;
   subtype?: Array<{ id: string; name: string }>;
   convertParamsBetweenGroups?: (params: ActionParams) => ActionParams | {};
-  hideInUi?: boolean;
+  getHideInUi?: (actionTypes: ActionType[]) => boolean;
   modalWidth?: number;
   isSystemActionType?: boolean;
   subFeature?: SubFeature;

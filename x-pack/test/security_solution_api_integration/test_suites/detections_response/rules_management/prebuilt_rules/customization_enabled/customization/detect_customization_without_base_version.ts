@@ -19,7 +19,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
 
   describe('@ess @serverless @skipInServerlessMKI Detect prebuilt rule customization (base version is missing)', () => {
@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
       ruleType?: RuleResponse['type'];
     }) => {
       // Assert the customization for "fieldName" works
-      const { body: customizedResponse } = await securitySolutionApi
+      const { body: customizedResponse } = await detectionsApi
         .patchRule({
           body: { rule_id: PREBUILT_RULE_ID, type: ruleType, [fieldName]: customizedValue },
         })
@@ -185,7 +185,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }));
 
       it('"timeline_template" fields', async () => {
-        const { body: customizedResponse } = await securitySolutionApi
+        const { body: customizedResponse } = await detectionsApi
           .patchRule({
             body: {
               rule_id: PREBUILT_RULE_ID,
@@ -277,7 +277,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }));
 
       it('"data_view_id" field', async () => {
-        const { body: customizedResponse } = await securitySolutionApi
+        const { body: customizedResponse } = await detectionsApi
           .patchRule({
             body: { rule_id: PREBUILT_RULE_ID, data_view_id: 'new-data-view', index: [] },
           })

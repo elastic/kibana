@@ -26,6 +26,7 @@ import type {
   PostBlockkitParams,
 } from '../../../common/slack_api/types';
 import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
+import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
 import { SlackActionParams } from '../types';
 import { subtype } from '../slack/slack';
 
@@ -47,7 +48,10 @@ export const getConnectorType = (): ConnectorTypeModel<
 > => ({
   id: SLACK_API_CONNECTOR_ID,
   subtype,
-  hideInUi: true,
+  // Hide slack api connector in UI when when slack connector is enabled in config
+  getHideInUi: (actionTypes) =>
+    actionTypes.find((actionType) => actionType.id === SLACK_CONNECTOR_ID)?.enabledInConfig ===
+    true,
   modalWidth: 675,
   iconClass: 'logoSlack',
   selectMessage: SELECT_MESSAGE,
