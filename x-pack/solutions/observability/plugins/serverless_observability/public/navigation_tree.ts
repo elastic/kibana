@@ -436,6 +436,7 @@ export const createNavigationTree = ({
                   { link: 'management:transform' },
                   { link: 'management:rollup_jobs' },
                   { link: 'management:data_quality' },
+                  { link: 'management:data_usage' },
                 ],
               },
             ],
@@ -532,14 +533,6 @@ export const createNavigationTree = ({
                 },
                 overviewAvailable
               ),
-              {
-                id: 'data',
-                title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.data', {
-                  defaultMessage: 'Data',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [{ link: 'management:data_usage' }],
-              },
               {
                 id: 'content',
                 title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.content', {
