@@ -453,8 +453,10 @@ class AgentPolicyService {
       const { fleetServerId } = agentlessAgentService.getDefaultSettings();
       agentPolicy.fleet_server_host_id = fleetServerId;
     }
-
-    await this.requireUniqueName(soClient, agentPolicy);
+    const nameCheckSoClient = agentPolicy.space_ids
+      ? appContextService.getInternalUserSOClientWithoutSpaceExtension()
+      : soClient;
+    await this.requireUniqueName(nameCheckSoClient, agentPolicy);
     await validatePolicyNamespaceForSpace({
       spaceId: soClient.getCurrentNamespace(),
       namespace: agentPolicy.namespace,
