@@ -26,14 +26,17 @@ import type { ToolsServiceSetup, ToolsServiceStart } from './types';
 import { getToolTypeDefinitions } from './tool_types';
 import { createPersistedProviderFn } from './persisted';
 import { createMcpProviderFn } from './mcp/mcp_provider';
+import { createComposioProviderFn } from './composio/composio_provider';
 import { createToolRegistry } from './tool_registry';
 import { getToolTypeInfo } from './utils';
 import type { McpConnectionManager } from '../mcp/mcp_connection_manager';
+import type { ComposioConnectionManager } from '../composio/composio_connection_manager';
 
 export interface ToolsServiceSetupDeps {
   logger: Logger;
   workflowsManagement?: WorkflowsPluginSetup;
   mcpConnectionManager: McpConnectionManager;
+  composioConnectionManager?: ComposioConnectionManager;
 }
 
 export interface ToolsServiceStartDeps {
@@ -42,6 +45,7 @@ export interface ToolsServiceStartDeps {
   spaces?: SpacesPluginStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  composioConnectionManager?: ComposioConnectionManager;
 }
 
 export class ToolsService {
@@ -75,6 +79,7 @@ export class ToolsService {
     spaces,
     uiSettings,
     savedObjects,
+    composioConnectionManager,
   }: ToolsServiceStartDeps): ToolsServiceStart {
     const { logger, workflowsManagement, mcpConnectionManager } = this.setupDeps!;
 
@@ -96,11 +101,22 @@ export class ToolsService {
       logger: logger.get('mcp-provider'),
     });
 
+    // Create Composio provider if configured
+    const composioProviderFn = composioConnectionManager
+      ? createComposioProviderFn({
+          connectionManager: composioConnectionManager,
+          logger: logger.get('composio-provider'),
+        })
+      : undefined;
+
     const getRegistry: ToolsServiceStart['getRegistry'] = async ({ request }) => {
       const space = getCurrentSpaceId({ request, spaces });
       const builtinProvider = await builtinProviderFn({ request, space });
       const persistedProvider = await persistedProviderFn({ request, space });
       const mcpProvider = await mcpProviderFn({ request, space });
+      const composioProvider = composioProviderFn
+        ? await composioProviderFn({ request, space })
+        : undefined;
 
       return createToolRegistry({
         getRunner,
@@ -109,6 +125,7 @@ export class ToolsService {
         builtinProvider,
         persistedProvider,
         mcpProvider,
+        composioProvider,
       });
     };
 

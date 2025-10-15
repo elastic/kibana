@@ -22,6 +22,7 @@ import {
   ChatService,
   ConversationsService,
   McpService,
+  ComposioService,
   OAuthManager,
   ToolsService,
 } from './services';
@@ -105,6 +106,7 @@ export class OnechatPlugin
     const conversationsService = new ConversationsService({ http });
     const toolsService = new ToolsService({ http, oauthManager });
     const mcpService = new McpService(http);
+    const composioService = new ComposioService(http);
 
     this.internalServices = {
       agentService,
@@ -113,6 +115,7 @@ export class OnechatPlugin
       toolsService,
       oauthManager,
       mcpService,
+      composioService,
       startDependencies,
     };
 

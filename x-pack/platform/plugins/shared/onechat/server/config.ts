@@ -55,16 +55,38 @@ const mcpServerSchema = schema.object({
   ),
 });
 
+/**
+ * Individual Composio toolkit configuration
+ */
+const composioToolkitSchema = schema.object({
+  id: schema.string({ minLength: 1 }),
+  name: schema.string({ minLength: 1 }),
+  enabled: schema.boolean({ defaultValue: true }),
+  authConfigId: schema.string({ minLength: 1 }),
+  tools: schema.maybe(schema.arrayOf(schema.string())),
+});
+
+/**
+ * Composio integration configuration
+ */
+const composioConfigSchema = schema.object({
+  apiKey: schema.string({ minLength: 1 }),
+  toolkits: schema.arrayOf(composioToolkitSchema, { defaultValue: [] }),
+});
+
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   mcp: schema.object({
     servers: schema.arrayOf(mcpServerSchema, { defaultValue: [] }),
   }),
+  composio: schema.maybe(composioConfigSchema),
 });
 
 export type OnechatConfig = TypeOf<typeof configSchema>;
 export type McpServerConfig = TypeOf<typeof mcpServerSchema>;
 export type McpAuthConfig = TypeOf<typeof mcpAuthSchema>;
+export type ComposioToolkitConfig = TypeOf<typeof composioToolkitSchema>;
+export type ComposioConfig = TypeOf<typeof composioConfigSchema>;
 
 export const config: PluginConfigDescriptor<OnechatConfig> = {
   schema: configSchema,

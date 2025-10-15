@@ -13,6 +13,7 @@ import type {
   ServiceSetupDeps,
 } from './types';
 import type { McpConnectionManager } from './mcp/mcp_connection_manager';
+import type { ComposioConnectionManager } from './composio/composio_connection_manager';
 import { ToolsService } from './tools';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './runner';
@@ -27,6 +28,7 @@ interface ServiceInstances {
 export class ServiceManager {
   private services?: ServiceInstances;
   private mcpConnectionManager?: McpConnectionManager;
+  private composioConnectionManager?: ComposioConnectionManager;
   public internalSetup?: InternalSetupServices;
   public internalStart?: InternalStartServices;
 
@@ -34,15 +36,22 @@ export class ServiceManager {
     logger,
     workflowsManagement,
     mcpConnectionManager,
+    composioConnectionManager,
   }: ServiceSetupDeps): InternalSetupServices {
     this.mcpConnectionManager = mcpConnectionManager;
+    this.composioConnectionManager = composioConnectionManager;
     this.services = {
       tools: new ToolsService(),
       agents: new AgentsService(),
     };
 
     this.internalSetup = {
-      tools: this.services.tools.setup({ logger, workflowsManagement, mcpConnectionManager }),
+      tools: this.services.tools.setup({
+        logger,
+        workflowsManagement,
+        mcpConnectionManager,
+        composioConnectionManager,
+      }),
       agents: this.services.agents.setup({ logger }),
     };
 
@@ -57,9 +66,15 @@ export class ServiceManager {
     inference,
     uiSettings,
     savedObjects,
+    composioConnectionManager,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
+    }
+
+    // Update composioConnectionManager from start phase
+    if (composioConnectionManager) {
+      this.composioConnectionManager = composioConnectionManager;
     }
 
     // eslint-disable-next-line prefer-const
@@ -75,6 +90,9 @@ export class ServiceManager {
       getRunner,
       spaces,
       elasticsearch,
+      uiSettings,
+      savedObjects,
+      composioConnectionManager: this.composioConnectionManager,
     });
 
     const agents = this.services.agents.start({
@@ -122,6 +140,7 @@ export class ServiceManager {
       runnerFactory,
       chat,
       mcp: this.mcpConnectionManager,
+      composio: this.composioConnectionManager,
     };
 
     return this.internalStart;

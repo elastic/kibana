@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { OnechatConfig } from './config';
 import { validateMcpServerConfigs } from './config_validation';
 import { McpConnectionManager } from './services/mcp/mcp_connection_manager';
+import { ComposioConnectionManager } from './services/composio/composio_connection_manager';
 import { ServiceManager } from './services';
 import type {
   OnechatPluginSetup,
@@ -36,6 +37,7 @@ export class OnechatPlugin
   private config: OnechatConfig;
   private serviceManager = new ServiceManager();
   private mcpConnectionManager?: McpConnectionManager;
+  private composioConnectionManager?: ComposioConnectionManager;
 
   constructor(context: PluginInitializerContext<OnechatConfig>) {
     this.logger = context.logger.get();
@@ -66,10 +68,13 @@ export class OnechatPlugin
       this.logger.error(`Failed to initialize MCP connections: ${error}`);
     });
 
+    // Note: Composio initialization happens in start() phase when Elasticsearch client is available
+
     const serviceSetups = this.serviceManager.setupServices({
       logger: this.logger.get('services'),
       workflowsManagement: setupDeps.workflowsManagement,
       mcpConnectionManager: this.mcpConnectionManager,
+      composioConnectionManager: undefined, // Will be initialized in start()
     });
 
     registerFeatures({ features: setupDeps.features });
@@ -107,6 +112,20 @@ export class OnechatPlugin
     { elasticsearch, security, uiSettings, savedObjects }: CoreStart,
     { inference, spaces }: OnechatStartDependencies
   ): OnechatPluginStart {
+    // Initialize Composio connection manager if configured (needs Elasticsearch client)
+    if (this.config.composio) {
+      this.composioConnectionManager = new ComposioConnectionManager({
+        logger: this.logger.get('composio'),
+        config: this.config.composio,
+        esClient: elasticsearch.client.asInternalUser,
+      });
+
+      // Initialize Composio manager asynchronously (non-blocking)
+      this.composioConnectionManager.initialize().catch((error) => {
+        this.logger.error(`Failed to initialize Composio integration: ${error}`);
+      });
+    }
+
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
@@ -115,6 +134,7 @@ export class OnechatPlugin
       spaces,
       uiSettings,
       savedObjects,
+      composioConnectionManager: this.composioConnectionManager,
     });
 
     const { tools, runnerFactory } = startServices;
@@ -132,6 +152,11 @@ export class OnechatPlugin
     // Shutdown MCP connections
     if (this.mcpConnectionManager) {
       await this.mcpConnectionManager.shutdown();
+    }
+
+    // Shutdown Composio connections
+    if (this.composioConnectionManager) {
+      await this.composioConnectionManager.stop();
     }
   }
 }

@@ -19,6 +19,7 @@ import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
 import type { ChatService } from './chat';
 import type { McpConnectionManager } from './mcp/mcp_connection_manager';
+import type { ComposioConnectionManager } from './composio/composio_connection_manager';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -32,12 +33,14 @@ export interface InternalStartServices {
   chat: ChatService;
   runnerFactory: RunnerFactory;
   mcp: McpConnectionManager;
+  composio?: ComposioConnectionManager;
 }
 
 export interface ServiceSetupDeps {
   logger: Logger;
   workflowsManagement?: WorkflowsPluginSetup;
   mcpConnectionManager: McpConnectionManager;
+  composioConnectionManager?: ComposioConnectionManager;
 }
 
 export interface ServicesStartDeps {
@@ -50,4 +53,5 @@ export interface ServicesStartDeps {
   // plugin deps
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
+  composioConnectionManager?: ComposioConnectionManager;
 }

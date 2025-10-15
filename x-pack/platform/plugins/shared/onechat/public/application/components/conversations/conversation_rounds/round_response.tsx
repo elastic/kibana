@@ -53,9 +53,14 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       )}
 
       {/* Display OAuth authentication callout if needed */}
-      {oauthError.hasOAuthError && oauthError.serverId && oauthError.serverName && (
+      {oauthError.hasOAuthError && oauthError.serverName && (
         <EuiFlexItem grow={false}>
-          <OAuthAuthCallout serverName={oauthError.serverName} serverId={oauthError.serverId} />
+          <OAuthAuthCallout
+            serverName={oauthError.serverName}
+            serverId={oauthError.serverId}
+            toolkitId={oauthError.toolkitId}
+            provider={oauthError.provider}
+          />
         </EuiFlexItem>
       )}
 

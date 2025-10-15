@@ -47,6 +47,7 @@ interface CreateToolClientParams {
   persistedProvider: WritableToolProvider;
   builtinProvider: ReadonlyToolProvider;
   mcpProvider: ReadonlyToolProvider;
+  composioProvider?: ReadonlyToolProvider;
   request: KibanaRequest;
   space: string;
 }
@@ -59,6 +60,7 @@ class ToolRegistryImpl implements ToolRegistry {
   private readonly persistedProvider: WritableToolProvider;
   private readonly builtinProvider: ReadonlyToolProvider;
   private readonly mcpProvider: ReadonlyToolProvider;
+  private readonly composioProvider?: ReadonlyToolProvider;
   private readonly request: KibanaRequest;
   private readonly getRunner: () => Runner;
 
@@ -66,18 +68,25 @@ class ToolRegistryImpl implements ToolRegistry {
     persistedProvider,
     builtinProvider,
     mcpProvider,
+    composioProvider,
     request,
     getRunner,
   }: CreateToolClientParams) {
     this.persistedProvider = persistedProvider;
     this.builtinProvider = builtinProvider;
     this.mcpProvider = mcpProvider;
+    this.composioProvider = composioProvider;
     this.request = request;
     this.getRunner = getRunner;
   }
 
   private get orderedProviders(): ToolProvider[] {
-    return [this.builtinProvider, this.mcpProvider, this.persistedProvider];
+    const providers = [this.builtinProvider, this.mcpProvider];
+    if (this.composioProvider) {
+      providers.push(this.composioProvider);
+    }
+    providers.push(this.persistedProvider);
+    return providers;
   }
 
   async execute<TParams extends object = Record<string, unknown>, TResult = unknown>(

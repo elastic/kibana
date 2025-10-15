@@ -19,32 +19,73 @@ import { useOnechatServices } from '../../../hooks/use_onechat_service';
 
 interface OAuthAuthCalloutProps {
   serverName: string;
-  serverId: string;
+  serverId?: string; // For MCP
+  toolkitId?: string; // For Composio
+  provider: 'mcp' | 'composio';
 }
 
-export const OAuthAuthCallout: React.FC<OAuthAuthCalloutProps> = ({ serverName, serverId }) => {
-  const { oauthManager } = useOnechatServices();
+export const OAuthAuthCallout: React.FC<OAuthAuthCalloutProps> = ({
+  serverName,
+  serverId,
+  toolkitId,
+  provider,
+}) => {
+  const { oauthManager, composioService } = useOnechatServices();
   const [hasValidToken, setHasValidToken] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
   const [hasAuthenticated, setHasAuthenticated] = useState(false);
 
-  // Check if user already has a valid token
+  // Check if user already has a valid token/connection
   useEffect(() => {
-    const checkToken = async () => {
+    const checkAuth = async () => {
       try {
-        const token = await oauthManager.getValidToken(serverId);
-        setHasValidToken(!!token);
+        if (provider === 'mcp' && serverId) {
+          // Check MCP OAuth token
+          const token = await oauthManager.getValidToken(serverId);
+          setHasValidToken(!!token);
+        } else if (provider === 'composio' && toolkitId) {
+          // First check localStorage for quick response
+          const localAuth = localStorage.getItem(`onechat.composio.auth.${toolkitId}`);
+          if (localAuth) {
+            try {
+              const authData = JSON.parse(localAuth);
+              // eslint-disable-next-line no-console
+              console.log('Found Composio auth in localStorage:', authData);
+              setHasValidToken(true);
+              setIsChecking(false);
+              return;
+            } catch (e) {
+              // Invalid JSON, remove it
+              localStorage.removeItem(`onechat.composio.auth.${toolkitId}`);
+            }
+          }
+
+          // If not in localStorage, check backend
+          const status = await composioService.checkConnectionStatus(toolkitId);
+          setHasValidToken(status.isConnected);
+
+          // If backend says connected, store in localStorage for next time
+          if (status.isConnected) {
+            localStorage.setItem(
+              `onechat.composio.auth.${toolkitId}`,
+              JSON.stringify({
+                verified: true,
+                verifiedAt: new Date().toISOString(),
+              })
+            );
+          }
+        }
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error('Failed to check OAuth token:', error);
+        console.error('Failed to check authentication status:', error);
         setHasValidToken(false);
       } finally {
         setIsChecking(false);
       }
     };
 
-    checkToken();
-  }, [serverId, oauthManager, hasAuthenticated]);
+    checkAuth();
+  }, [serverId, toolkitId, provider, oauthManager, composioService, hasAuthenticated]);
 
   // Don't show anything if checking or if user already has valid token
   if (isChecking) {
@@ -81,6 +122,8 @@ export const OAuthAuthCallout: React.FC<OAuthAuthCalloutProps> = ({ serverName, 
           <OAuthAuthButton
             serverName={serverName}
             serverId={serverId}
+            toolkitId={toolkitId}
+            provider={provider}
             onAuthSuccess={() => setHasAuthenticated(true)}
           />
         </EuiFlexItem>

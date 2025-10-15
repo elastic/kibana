@@ -12,6 +12,7 @@ import type { ConversationsService } from './conversations';
 import type { ToolsService } from './tools';
 import type { OAuthManager } from './oauth';
 import type { McpService } from './mcp/mcp_service';
+import type { ComposioService } from './composio/composio_service';
 
 export interface OnechatInternalService {
   agentService: AgentService;
@@ -20,5 +21,6 @@ export interface OnechatInternalService {
   toolsService: ToolsService;
   oauthManager: OAuthManager;
   mcpService: McpService;
+  composioService: ComposioService;
   startDependencies: OnechatStartDependencies;
 }

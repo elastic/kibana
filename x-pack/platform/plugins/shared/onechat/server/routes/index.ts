@@ -12,6 +12,7 @@ import { registerAgentRoutes } from './agents';
 import { registerChatRoutes } from './chat';
 import { registerConversationRoutes } from './conversations';
 import { registerMCPRoutes } from './mcp';
+import { registerComposioRoutes } from './composio';
 import { registerA2ARoutes } from './a2a';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
@@ -21,5 +22,6 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerChatRoutes(dependencies);
   registerConversationRoutes(dependencies);
   registerMCPRoutes(dependencies);
+  registerComposioRoutes(dependencies);
   registerA2ARoutes(dependencies);
 };
