@@ -13,12 +13,12 @@ import type { RootState } from './types';
 // Selectors
 
 // Base selectors - these are simple property accessors that don't need memoization
-export const selectWorkflowState = (state: RootState) => state.workflow;
+export const selectWorkflowEditorState = (state: RootState) => state.workflow;
 const selectComputedState = (state: RootState) => state.workflow.computed;
 
 // Exported memoized selectors for final properties
 export const selectYamlString = createSelector(
-  selectWorkflowState,
+  selectWorkflowEditorState,
   (workflow) => workflow.yamlString
 );
 
@@ -48,17 +48,17 @@ export const selectWorkflowDefinition = createSelector(
 );
 
 export const selectFocusedStepId = createSelector(
-  selectWorkflowState,
+  selectWorkflowEditorState,
   (workflow) => workflow.focusedStepId
 );
 
 export const selectHighlightedStepId = createSelector(
-  selectWorkflowState,
+  selectWorkflowEditorState,
   (workflow) => workflow.highlightedStepId
 );
 
 export const selectStepExecutions = createSelector(
-  selectWorkflowState,
+  selectWorkflowEditorState,
   (workflow) => workflow.stepExecutions
 );
 
@@ -70,11 +70,11 @@ export const selectFocusedStepInfo = createSelector(
 );
 
 export const selectConnectorsData = createSelector(
-  selectWorkflowState,
+  selectWorkflowEditorState,
   (workflow) => workflow.connectors
 );
 
 export const selectSchemaLoose = createSelector(
-  selectWorkflowState,
+  selectWorkflowEditorState,
   (workflow) => workflow.schemaLoose
 );

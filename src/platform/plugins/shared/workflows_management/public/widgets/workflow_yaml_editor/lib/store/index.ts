@@ -23,6 +23,7 @@ export { createWorkflowEditorStore, workflowEditorStore } from './store';
 
 // Selectors
 export {
+  selectWorkflowEditorState,
   selectYamlString,
   selectYamlDocument,
   selectWorkflowLookup,

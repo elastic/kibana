@@ -28,9 +28,13 @@ export const createWorkflowEditorStore = () => {
             'workflow.computed.workflowGraph',
             'workflow.computed.workflowLookup',
             'workflow.computed.workflowDefinition',
+            'workflow.schemaLoose',
           ],
           // Ignore these specific action types that contain non-serializable data
-          ignoredActions: ['workflow/_setComputedDataInternal'],
+          ignoredActions: [
+            'workflow/_setComputedDataInternal',
+            'workflow/_setGeneratedSchemaInternal',
+          ],
         },
       }).concat(workflowComputationMiddleware, schemaGenerationMiddleware),
   });
