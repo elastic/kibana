@@ -11,12 +11,8 @@ import type { SVGProps } from 'react';
 import React from 'react';
 
 const iconType: React.FC<SVGProps<SVGSVGElement>> = (props) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-    <path
-      d="M13.5 8.5V3C13.5 2.72386 13.2761 2.5 13 2.5H3C2.72386 2.5 2.5 2.72386 2.5 3V8.5M13.5 8.5H2.5M13.5 8.5V10C13.5 10.2761 13.2761 10.5 13 10.5H3C2.72386 10.5 2.5 10.2761 2.5 10V8.5"
-      stroke="black"
-    />
-    <path d="M6.5 10.5V13.5M6.5 13.5H9.5M6.5 13.5H4M9.5 13.5V10.5M9.5 13.5H12" stroke="black" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" {...props}>
+    <path d="M13 9H3V10H13V9ZM7 13H9V11H7V13ZM3 3V8H13V3H3ZM14 10C14 10.5523 13.5523 11 13 11H10V13H12V14H4V13H6V11H3C2.44772 11 2 10.5523 2 10V3C2 2.44772 2.44772 2 3 2H13C13.5523 2 14 2.44772 14 3V10Z" />
   </svg>
 );
 
