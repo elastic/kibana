@@ -57,11 +57,13 @@ export class PointInTimeFinder<T = unknown, A = unknown>
     this.#log = logger.get('point-in-time-finder');
     this.#client = client;
     this.#internalOptions = internalOptions;
+
+    const { perPage, ...otherFindOptions } = findOptions;
     this.#findOptions = {
       // Default to 1000 items per page as a tradeoff between
       // speed and memory consumption.
-      perPage: 1000,
-      ...findOptions,
+      perPage: perPage ?? 1000,
+      ...otherFindOptions,
     };
   }
 
