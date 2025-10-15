@@ -183,12 +183,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await deleteAllTestIndices();
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/225446
-      it.skip('goes to the start page if there exists no index', async () => {
-        await pageObjects.common.navigateToApp('searchHomepage');
-        await pageObjects.searchHomePage.expectToBeOnStartpage();
-      });
-
       it('goes to the home page if there exists at least one index', async () => {
         await pageObjects.common.navigateToApp('searchHomepage');
         await pageObjects.searchHomePage.expectToBeOnHomepage();
@@ -243,12 +237,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await deleteAllTestIndices();
-      });
-
-      // FLAKY: https://github.com/elastic/kibana/issues/225446
-      it.skip('goes to the start page if there exists no index', async () => {
-        await pageObjects.common.navigateToApp('searchHomepage');
-        await pageObjects.searchHomePage.expectToBeOnStartpage();
       });
 
       it('goes to the home page if there exists at least one index', async () => {

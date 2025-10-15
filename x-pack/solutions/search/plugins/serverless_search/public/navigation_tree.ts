@@ -7,7 +7,6 @@
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
-import type { GetIsActiveFn } from '@kbn/core-chrome-browser/src/project_navigation';
 import { i18n } from '@kbn/i18n';
 import agentsIcon from './assets/robot.svg';
 import playgroundIcon from './assets/playground.svg';
@@ -52,13 +51,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
     return isAppRegistered(appId) ? [content] : [];
   }
 
-  const homeGetIsActive: GetIsActiveFn = ({ pathNameSerialized, prepend }) => {
-    return (
-      pathNameSerialized.startsWith(prepend('/app/elasticsearch/home')) ||
-      pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
-    );
-  };
-
   return {
     body: [
       {
@@ -71,7 +63,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         breadcrumbStatus: 'hidden',
         children: [
           {
-            getIsActive: homeGetIsActive,
             icon: 'logoElasticsearch',
             link: 'searchHomepage',
             renderAs: 'home',
@@ -85,7 +76,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             }),
             link: 'searchHomepage',
             spaceBefore: 'm',
-            getIsActive: homeGetIsActive,
             sideNavVersion: 'v1',
           },
           {

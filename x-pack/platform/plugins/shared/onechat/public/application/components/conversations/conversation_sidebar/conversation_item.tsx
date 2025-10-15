@@ -51,7 +51,7 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation
             }
           ),
           onClick: () => setShowDeleteModal(true),
-          'data-test-subj': 'delete-conversation-button',
+          'data-test-subj': `delete-conversation-button-${conversation.id}`,
         }}
       />
       {showDeleteModal && (

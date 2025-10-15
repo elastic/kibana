@@ -5,6 +5,7 @@
  * 2.0.
  */
 import moment from 'moment';
+import { useMemo } from 'react';
 import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
 import type { TimeState } from '@kbn/es-query';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
@@ -45,118 +46,47 @@ const getIntervalAndType = (
 };
 
 export const useIngestionRate = ({
-  definition,
   stats,
   timeState,
-  isFailureStore = false,
+  isLoading,
+  aggregations,
+  error,
 }: {
-  definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats | FailureStoreStats;
   timeState: TimeState;
-  isFailureStore?: boolean;
+  isLoading: boolean;
+  aggregations?: ReturnType<typeof useAggregations>['aggregations'];
+  error: Error | undefined;
 }) => {
-  const {
-    core,
-    dependencies: {
-      start: { data },
-    },
-  } = useKibana();
+  const ingestionRate = useMemo(() => {
+    if (!aggregations) {
+      return undefined;
+    }
 
-  const ingestionRateFetch = useStreamsAppFetch(
-    async ({ signal }) => {
-      const intervalData = getIntervalAndType(timeState, core);
-      if (!intervalData) {
-        return;
-      }
+    const start = moment(timeState.start);
+    const end = moment(timeState.end);
 
-      const start = moment(timeState.start);
-      const end = moment(timeState.end);
+    if (!aggregations || !aggregations.buckets || aggregations.buckets.length === 0) {
+      return { start, end, interval: aggregations.interval, buckets: [] };
+    }
 
-      const { interval, intervalType } = intervalData;
+    const { buckets, interval } = aggregations;
 
-      const indexName = isFailureStore
-        ? getFailureStoreIndexName(definition)
-        : definition.stream.name;
-
-      const {
-        rawResponse: { aggregations },
-      } = await lastValueFrom(
-        data.search.search<
-          IKibanaSearchRequest,
-          IKibanaSearchResponse<{
-            aggregations:
-              | {
-                  sampler: { docs_count: { buckets: Array<{ key: number; doc_count: number }> } };
-                }
-              | undefined;
-          }>
-        >(
-          {
-            params: {
-              index: indexName,
-              track_total_hits: false,
-              body: {
-                size: 0,
-                query: {
-                  bool: {
-                    filter: [
-                      {
-                        range: {
-                          [TIMESTAMP_FIELD]: {
-                            gte: timeState.start,
-                            lte: timeState.end,
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
-                aggs: {
-                  sampler: {
-                    random_sampler: {
-                      probability: RANDOM_SAMPLER_PROBABILITY,
-                      seed: 42,
-                    },
-                    aggs: {
-                      docs_count: {
-                        date_histogram: {
-                          field: TIMESTAMP_FIELD,
-                          [intervalType]: interval,
-                          min_doc_count: 0,
-                          extended_bounds: { min: timeState.start, max: timeState.end },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-          { abortSignal: signal }
-        )
-      );
-
-      if (!aggregations || aggregations.sampler.docs_count.buckets.length === 0) {
-        return { start, end, interval, buckets: {} };
-      }
-
-      return {
-        start,
-        end,
-        interval,
-        buckets: aggregations.sampler.docs_count.buckets.map(({ key, doc_count: docCount }) => ({
-          key,
-          value: docCount * (stats ? stats.bytesPerDoc : 1),
-        })),
-      };
-    },
-    [stats, timeState, core, isFailureStore, definition, data.search]
-  );
+    return {
+      start,
+      end,
+      interval,
+      buckets: buckets.map(({ key, doc_count: docCount }) => ({
+        key,
+        value: docCount * (stats ? stats.bytesPerDoc : 1),
+      })),
+    };
+  }, [aggregations, timeState.start, timeState.end, stats]);
 
   return {
-    ingestionRate: ingestionRateFetch.value,
-    isLoading: ingestionRateFetch.loading,
-    error: ingestionRateFetch.error,
+    ingestionRate,
+    isLoading,
+    error,
   };
 };
 
@@ -330,5 +260,107 @@ export const useIngestionRatePerTier = ({
     ingestionRate: ingestionRateFetch.value,
     isLoading: ingestionRateFetch.loading,
     error: ingestionRateFetch.error,
+  };
+};
+
+export const useAggregations = ({
+  definition,
+  timeState,
+  isFailureStore = false,
+}: {
+  definition: Streams.ingest.all.GetResponse;
+  timeState: TimeState;
+  isFailureStore?: boolean;
+}) => {
+  const {
+    core,
+    dependencies: {
+      start: { data },
+    },
+  } = useKibana();
+
+  const aggregationsFetch = useStreamsAppFetch(
+    async ({ signal }) => {
+      const intervalData = getIntervalAndType(timeState, core);
+      if (!intervalData) {
+        return;
+      }
+
+      const { interval, intervalType } = intervalData;
+
+      const indexName = isFailureStore
+        ? getFailureStoreIndexName(definition)
+        : definition.stream.name;
+
+      const {
+        rawResponse: { aggregations },
+      } = await lastValueFrom(
+        data.search.search<
+          IKibanaSearchRequest,
+          IKibanaSearchResponse<{
+            aggregations:
+              | {
+                  sampler: { docs_count: { buckets: Array<{ key: number; doc_count: number }> } };
+                }
+              | undefined;
+          }>
+        >(
+          {
+            params: {
+              index: indexName,
+              track_total_hits: false,
+              body: {
+                size: 0,
+                query: {
+                  bool: {
+                    filter: [
+                      {
+                        range: {
+                          [TIMESTAMP_FIELD]: {
+                            gte: timeState.start,
+                            lte: timeState.end,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+                aggs: {
+                  sampler: {
+                    random_sampler: {
+                      probability: RANDOM_SAMPLER_PROBABILITY,
+                      seed: 42,
+                    },
+                    aggs: {
+                      docs_count: {
+                        date_histogram: {
+                          field: TIMESTAMP_FIELD,
+                          [intervalType]: interval,
+                          min_doc_count: 0,
+                          extended_bounds: { min: timeState.start, max: timeState.end },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          { abortSignal: signal }
+        )
+      );
+
+      return {
+        buckets: aggregations?.sampler.docs_count.buckets || [],
+        interval,
+      };
+    },
+    [timeState, core, isFailureStore, definition, data.search]
+  );
+
+  return {
+    aggregations: aggregationsFetch.value,
+    isLoading: aggregationsFetch.loading,
+    error: aggregationsFetch.error,
   };
 };
