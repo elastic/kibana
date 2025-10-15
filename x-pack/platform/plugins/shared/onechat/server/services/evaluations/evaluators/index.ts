@@ -7,3 +7,4 @@
 
 export { createRegexEvaluator } from './regex_evaluator';
 export { createCriteriaEvaluator } from './criteria_evaluator';
+export { createGroundednessEvaluator } from './groundedness_evaluator';

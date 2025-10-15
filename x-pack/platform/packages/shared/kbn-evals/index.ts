@@ -12,3 +12,6 @@ export type { KibanaPhoenixClient } from './src/kibana_phoenix_client/client';
 export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';
 export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
 export type { EvaluationDataset } from './src/types';
+export { LlmGroundednessEvaluationPrompt } from './src/evaluators/groundedness/prompt';
+export { calculateGroundednessScore } from './src/evaluators/groundedness/scoring';
+export type { GroundednessAnalysis } from './src/evaluators/groundedness/types';

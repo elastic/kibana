@@ -15,7 +15,11 @@ import type {
 } from '../../../common/http_api/evaluations';
 import { EvaluatorId } from '../../../common/http_api/evaluations';
 import type { EvaluatorRegistry } from './types';
-import { createRegexEvaluator, createCriteriaEvaluator } from './evaluators';
+import {
+  createRegexEvaluator,
+  createCriteriaEvaluator,
+  createGroundednessEvaluator,
+} from './evaluators';
 
 export interface EvaluationService {
   evaluateConversation(
@@ -53,6 +57,10 @@ export class EvaluationServiceImpl implements EvaluationService {
     const evaluators: Partial<EvaluatorRegistry> = {
       [EvaluatorId.Regex]: createRegexEvaluator(),
       [EvaluatorId.Relevance]: createCriteriaEvaluator({ inferenceClient }),
+      [EvaluatorId.Groundedness]: createGroundednessEvaluator({
+        inferenceClient,
+        logger: this.logger,
+      }),
     };
 
     const results: ConversationRoundEvaluation[] = [];
