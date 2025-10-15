@@ -60,9 +60,6 @@ export class ControlsPlugin
     startPlugins.dashboard.registerDashboardPanelSettings(ESQL_CONTROL, () => {
       return CONTROL_PANEL_PLACEMENT;
     });
-    startPlugins.dashboard.registerDashboardPanelSettings(TIME_SLIDER_CONTROL, () => {
-      return CONTROL_PANEL_PLACEMENT;
-    });
   }
 
   public stop() {}
