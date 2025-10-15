@@ -348,6 +348,9 @@ export const getMockRuleSearchResponse = (
               ? {
                   type: 'external',
                   isCustomized,
+                  customizedFields: isCustomized
+                    ? [{ fieldName: 'tags' }, { fieldName: 'name' }, { fieldName: 'description' }]
+                    : [],
                 }
               : { type: 'internal' },
           },
@@ -426,6 +429,9 @@ export const getMockThreatMatchRuleSO = ({
           ? {
               type: 'external',
               isCustomized,
+              customizedFields: isCustomized
+                ? [{ fieldName: 'tags' }, { fieldName: 'name' }, { fieldName: 'description' }]
+                : [],
             }
           : { type: 'internal' },
         license: '',
