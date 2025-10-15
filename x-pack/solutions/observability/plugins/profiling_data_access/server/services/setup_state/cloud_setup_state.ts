@@ -9,9 +9,7 @@ import type { RecursivePartial } from '@elastic/eui';
 import type { ProfilingCloudSetupOptions } from '../../../common';
 import type { CloudSetupState } from '../../../common/cloud_setup';
 import { createDefaultCloudSetupState } from '../../../common/cloud_setup';
-import {
-  validateResourceManagement,
-} from '../../../common/cluster_settings';
+import { validateResourceManagement } from '../../../common/cluster_settings';
 import {
   validateCollectorPackagePolicy,
   validateProfilingInApmPackagePolicy,

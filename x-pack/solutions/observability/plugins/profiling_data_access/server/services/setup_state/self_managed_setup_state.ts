@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import {
-  validateResourceManagement,
-} from '../../../common/cluster_settings';
+import { validateResourceManagement } from '../../../common/cluster_settings';
 import { hasProfilingData } from '../../../common/has_profiling_data';
 import type { ProfilingSetupOptions, SetupState } from '../../../common/setup';
 import { createDefaultSetupState, mergePartialSetupStates } from '../../../common/setup';
