@@ -238,8 +238,8 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
   }
 
   protected sendFinishedMigrationNotification(taskStats: RuleMigrationStats) {
-    this.toasts.push(
-      this.core.notifications.toasts.addSuccess(getSuccessToast(taskStats, this.core))
-    );
+    const toast = getSuccessToast(taskStats, this.core);
+    this.toastsByMigrationId[taskStats.id] = this.core.notifications.toasts.addSuccess(toast);
+    return toast;
   }
 }

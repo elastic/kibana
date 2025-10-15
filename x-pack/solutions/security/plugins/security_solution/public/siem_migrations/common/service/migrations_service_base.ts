@@ -43,7 +43,7 @@ export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
   private isPolling = false;
   public connectorIdStorage: MigrationsStorage<string>;
   public traceOptionsStorage: MigrationsStorage<TraceOptions>;
-  public toasts: Toast[] = [];
+  public toastsByMigrationId: Record<string, Toast> = {};
 
   constructor(
     protected readonly core: CoreStart,
@@ -205,12 +205,17 @@ export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
     } while (pendingMigrationIds.length > 0);
   }
 
-  public removeFinishedMigrationsNotification() {
-    if (this.toasts.length > 0) {
-      this.toasts.forEach((toast) => {
-        this.core.notifications.toasts.remove(toast);
-      });
-      this.toasts = [];
+  public removeFinishedMigrationsNotification(migrationId?: string) {
+    if (migrationId && this.toastsByMigrationId[migrationId]) {
+      this.core.notifications.toasts.remove(this.toastsByMigrationId[migrationId]);
+      delete this.toastsByMigrationId[migrationId];
+    } else {
+      if (Object.values(this.toastsByMigrationId).length > 0) {
+        Object.values(this.toastsByMigrationId).forEach((toast) => {
+          this.core.notifications.toasts.remove(toast);
+        });
+        this.toastsByMigrationId = {};
+      }
     }
   }
 }

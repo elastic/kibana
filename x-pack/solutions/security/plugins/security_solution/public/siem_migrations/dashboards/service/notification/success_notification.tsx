@@ -17,6 +17,7 @@ import type { ToastInput } from '@kbn/core-notifications-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { DashboardMigrationTaskStats } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 
 export const getSuccessToast = (
@@ -44,6 +45,7 @@ const SuccessToastContent: React.FC<{ migrationStats: DashboardMigrationTaskStat
   migrationStats,
 }) => {
   const { navigateTo, getAppUrl } = useNavigation();
+  const { removeFinishedMigrationsNotification } = useKibana().services.siemMigrations.dashboards;
 
   const navParams = useMemo(() => {
     return { deepLinkId: SecurityPageName.siemMigrationsDashboards, path: migrationStats.id };
@@ -56,8 +58,9 @@ const SuccessToastContent: React.FC<{ migrationStats: DashboardMigrationTaskStat
         deepLinkId: SecurityPageName.siemMigrationsDashboards,
         path: migrationStats.id,
       });
+      removeFinishedMigrationsNotification(migrationStats.id);
     },
-    [navigateTo, migrationStats.id]
+    [navigateTo, migrationStats.id, removeFinishedMigrationsNotification]
   );
   const url = useMemo(() => getAppUrl(navParams), [getAppUrl, navParams]);
 
