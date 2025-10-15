@@ -157,8 +157,14 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       account_type: { type: 'keyword' },
       is_setup_automatic: { type: 'boolean' },
       setup_access_option: { type: 'keyword' },
-      supports_cloud_connector: { type: 'boolean' },
-      cloud_connector_id: { type: 'keyword' },
+      supports_cloud_connector: {
+        type: 'boolean',
+        _meta: { description: 'Whether the package policy supports cloud connector' },
+      },
+      cloud_connector_id: {
+        type: 'keyword',
+        _meta: { description: 'Cloud connector ID' },
+      },
     },
   },
   alerts_stats: {
@@ -221,13 +227,37 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
   cspm_cloud_connector_usage_stats: {
     type: 'array',
     items: {
-      id: { type: 'keyword' },
-      created_at: { type: 'date' },
-      updated_at: { type: 'date' },
-      hasCredentials: { type: 'boolean' },
-      cloud_provider: { type: 'keyword' },
-      packagePolicyIds: { type: 'array', items: { type: 'keyword' } },
-      packagePolicyCount: { type: 'long' },
+      id: {
+        type: 'keyword',
+        _meta: { description: 'Cloud connector ID' },
+      },
+      created_at: {
+        type: 'date',
+        _meta: { description: 'Cloud connector created at' },
+      },
+      updated_at: {
+        type: 'date',
+        _meta: { description: 'Cloud connector updated at' },
+      },
+      hasCredentials: {
+        type: 'boolean',
+        _meta: { description: 'Whether the cloud connector has valid credentials' },
+      },
+      cloud_provider: {
+        type: 'keyword',
+        _meta: { description: 'Cloud connector cloud provider' },
+      },
+      packagePolicyIds: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: { description: 'Package policy ID' },
+        },
+      },
+      packagePolicyCount: {
+        type: 'long',
+        _meta: { description: 'Number of package policies using the cloud connector' },
+      },
     },
   },
 };
