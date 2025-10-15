@@ -472,9 +472,6 @@ export const createNavigationTree = ({
                     cloudLink: 'billingAndSub',
                   },
                   {
-                    cloudLink: 'performance',
-                  },
-                  {
                     cloudLink: 'userAndRoles',
                     title: i18n.translate('xpack.serverlessObservability.navLinks.usersAndRoles', {
                       defaultMessage: 'Members',
@@ -495,6 +492,7 @@ export const createNavigationTree = ({
                   { link: 'management:triggersActionsAlerts' },
                   { link: 'management:triggersActions' },
                   { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
+                  { link: 'management:maintenanceWindows' },
                 ],
               },
               {
@@ -506,7 +504,12 @@ export const createNavigationTree = ({
                   }
                 ),
                 breadcrumbStatus: 'hidden',
-                children: [{ link: 'management:trained_models' }],
+                children: [
+                  { link: 'management:overview' },
+                  { link: 'management:anomaly_detection' },
+                  { link: 'management:analytics' },
+                  { link: 'management:trained_models' },
+                ],
               },
               ...filterForFeatureAvailability(
                 {
