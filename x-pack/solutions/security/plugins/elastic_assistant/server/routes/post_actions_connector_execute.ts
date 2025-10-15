@@ -134,12 +134,6 @@ export const postActionsConnectorExecuteRoute = (
           const connector = connectors.length > 0 ? connectors[0] : undefined;
           const isOssModel = isOpenSourceModel(connector);
 
-          // If model isn't provided in the request body, use the model from the connector config
-          // This override is only needed for ActionsClient as InferenceChatModel grabs the correct model if not defined
-          if (request.body.model == null) {
-            request.body.model = connector.config?.defaultModel;
-          }
-
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient();
           if (conversationId) {
