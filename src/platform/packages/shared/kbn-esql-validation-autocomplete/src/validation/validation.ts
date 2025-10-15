@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAst, ESQLCommand, ESQLMessage, ErrorTypes } from '@kbn/esql-ast';
+import type { ESQLAst, ESQLCommand, ESQLMessage } from '@kbn/esql-ast';
 import { EsqlQuery, esqlCommandRegistry, walk } from '@kbn/esql-ast';
 import type {
   ESQLFieldWithMetadata,
@@ -22,6 +22,31 @@ import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 import { getSubqueriesToValidate } from './helpers';
 
+const COMMAND_DEPENDENCIES: Readonly<Record<string, ReadonlyArray<keyof ESQLCallbacks>>> = {
+  from: ['getSources'],
+  timeseries: ['getSources'],
+
+  enrich: ['getPolicies', 'getColumnsFor'],
+  join: ['getJoinIndices'],
+
+  where: ['getColumnsFor'],
+  eval: ['getColumnsFor'],
+  stats: ['getColumnsFor'],
+  sort: ['getColumnsFor'],
+  keep: ['getColumnsFor'],
+  drop: ['getColumnsFor'],
+  rename: ['getColumnsFor'],
+  dissect: ['getColumnsFor'],
+  grok: ['getColumnsFor'],
+  mv_expand: ['getColumnsFor'],
+  change_point: ['getColumnsFor'],
+  completion: ['getColumnsFor'],
+  rerank: ['getColumnsFor'],
+  fuse: ['getColumnsFor'],
+  row: ['getColumnsFor'],
+  fork: ['getColumnsFor'],
+};
+
 /**
  * ES|QL validation public API
  * It takes a query string and returns a list of messages (errors and warnings) after validate
@@ -31,65 +56,22 @@ import { getSubqueriesToValidate } from './helpers';
  */
 export async function validateQuery(
   queryString: string,
-  options: ValidationOptions = {},
+  options: ValidationOptions = {}, // deprecated
   callbacks?: ESQLCallbacks
 ): Promise<ValidationResult> {
-  const result = await validateAst(queryString, callbacks);
-  // early return if we do not want to ignore errors
-  if (!options.ignoreOnMissingCallbacks) {
-    return result;
-  }
-  const finalCallbacks = callbacks || {};
-  const errorTypoesToIgnore = Object.entries(ignoreErrorsMap).reduce((acc, [key, errorCodes]) => {
-    if (
-      !(key in finalCallbacks) ||
-      (key in finalCallbacks && finalCallbacks[key as keyof ESQLCallbacks] == null)
-    ) {
-      for (const e of errorCodes) {
-        acc[e] = true;
-      }
-    }
-    return acc;
-  }, {} as Partial<Record<ErrorTypes, boolean>>);
-  const filteredErrors = result.errors
-    .filter((error) => {
-      if ('severity' in error) {
-        return true;
-      }
-      return !errorTypoesToIgnore[error.code as ErrorTypes];
-    })
-    .map((error) =>
-      'severity' in error
-        ? {
-            text: error.message,
-            code: error.code!,
-            type: 'error' as const,
-            location: { min: error.startColumn, max: error.endColumn },
-          }
-        : error
-    );
-  return { errors: filteredErrors, warnings: result.warnings };
+  return validateAst(queryString, callbacks);
 }
 
 /**
- * @internal
+ * Helper to check if a callback is available.
+ * This replaces the manual ignoreErrorsMap approach.
  */
-export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
-  getColumnsFor: ['unknownColumn', 'unsupportedFieldType'],
-  getSources: ['unknownIndex'],
-  getPolicies: ['unknownPolicy'],
-  getPreferences: [],
-  getFieldsMetadata: [],
-  getVariables: [],
-  canSuggestVariables: [],
-  getJoinIndices: ['invalidJoinIndex'],
-  getTimeseriesIndices: ['unknownIndex'],
-  getEditorExtensions: [],
-  getInferenceEndpoints: [],
-  getLicense: [],
-  getActiveProduct: [],
-  canCreateLookupIndex: [],
-};
+function shouldValidateCallback<K extends keyof ESQLCallbacks>(
+  callbacks: ESQLCallbacks | undefined,
+  name: K
+): boolean {
+  return callbacks?.[name] !== undefined;
+}
 
 /**
  * This function will perform an high level validation of the
@@ -107,28 +89,28 @@ async function validateAst(
   const rootCommands = parsingResult.ast.commands;
 
   const [sources, availablePolicies, joinIndices] = await Promise.all([
-    // retrieve the list of available sources
-    retrieveSources(rootCommands, callbacks),
-    // retrieve available policies (if an enrich command has been defined)
-    retrievePolicies(rootCommands, callbacks),
-    // retrieve indices for join command
-    callbacks?.getJoinIndices?.(),
+    shouldValidateCallback(callbacks, 'getSources')
+      ? retrieveSources(rootCommands, callbacks)
+      : new Set<string>(),
+    shouldValidateCallback(callbacks, 'getPolicies')
+      ? retrievePolicies(rootCommands, callbacks)
+      : new Map(),
+    shouldValidateCallback(callbacks, 'getJoinIndices') ? callbacks?.getJoinIndices?.() : undefined,
   ]);
 
   const sourceQuery = queryString.split('|')[0];
-  const sourceFields = await new QueryColumns(
-    EsqlQuery.fromSrc(sourceQuery).ast,
-    sourceQuery,
-    callbacks
-  ).asMap();
+  const sourceFields = shouldValidateCallback(callbacks, 'getColumnsFor')
+    ? await new QueryColumns(EsqlQuery.fromSrc(sourceQuery).ast, sourceQuery, callbacks).asMap()
+    : new Map();
 
-  // TODO move into the loop?
-  messages.push(
-    ...validateUnsupportedTypeFields(
-      sourceFields as Map<string, ESQLFieldWithMetadata>,
-      rootCommands
-    )
-  );
+  if (shouldValidateCallback(callbacks, 'getColumnsFor') && sourceFields.size > 0) {
+    messages.push(
+      ...validateUnsupportedTypeFields(
+        sourceFields as Map<string, ESQLFieldWithMetadata>,
+        rootCommands
+      )
+    );
+  }
 
   const license = await callbacks?.getLicense?.();
   const hasMinimumLicenseRequired = license?.hasAtLeast;
@@ -142,7 +124,9 @@ async function validateAst(
   const subqueries = getSubqueriesToValidate(rootCommands);
   for (const subquery of subqueries) {
     const subqueryUpToThisCommand = { ...subquery, commands: subquery.commands.slice(0, -1) };
-    const columns = await new QueryColumns(subqueryUpToThisCommand, queryString, callbacks).asMap();
+    const columns = shouldValidateCallback(callbacks, 'getColumnsFor')
+      ? await new QueryColumns(subqueryUpToThisCommand, queryString, callbacks).asMap()
+      : new Map();
 
     const references: ReferenceMaps = {
       sources,
@@ -221,13 +205,24 @@ function validateCommand(
   const context = {
     columns: references.columns,
     policies: references.policies,
-    sources: [...references.sources].map((source) => ({
-      name: source,
-    })),
+    sources: [...references.sources].map((source) => ({ name: source })),
     joinSources: references.joinIndices,
   };
 
   if (commandDefinition.methods.validate) {
+    const requiredCallbacks =
+      COMMAND_DEPENDENCIES[command.name as keyof typeof COMMAND_DEPENDENCIES];
+
+    if (requiredCallbacks) {
+      const hasMissingCallback = requiredCallbacks.some(
+        (callbackName) => !shouldValidateCallback(callbacks, callbackName as keyof ESQLCallbacks)
+      );
+
+      if (hasMissingCallback) {
+        return messages;
+      }
+    }
+
     messages.push(...commandDefinition.methods.validate(command, ast, context, callbacks));
   }
 

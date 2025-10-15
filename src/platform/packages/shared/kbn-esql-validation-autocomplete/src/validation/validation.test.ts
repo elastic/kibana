@@ -22,9 +22,8 @@ import {
   policies,
   unsupported_field,
 } from '../__tests__/helpers';
-import { nonNullable } from '../shared/helpers';
 import { setup } from './__tests__/helpers';
-import { ignoreErrorsMap, validateQuery } from './validation';
+import { validateQuery } from './validation';
 
 const NESTING_LEVELS = 4;
 const NESTED_DEPTHS = Array(NESTING_LEVELS)
@@ -715,15 +714,16 @@ describe('validation logic', () => {
 
     async function loadFixtures() {
       // early exit if the testCases are already defined locally
-      if (testCases.length) {
-        return { testCases };
+      const localTestCases: Array<{ query: string; error: string[] }> = [];
+      if (localTestCases.length) {
+        return { testCases: localTestCases };
       }
       const json = await readFile(join(__dirname, 'esql_validation_meta_tests.json'), 'utf8');
       const esqlPackage = JSON.parse(json);
       return esqlPackage as Fixtures;
     }
 
-    function excludeErrorsByContent(excludedCallback: Array<keyof typeof ignoreErrorsMap>) {
+    function excludeErrorsByContent(excludedCallback: string[]) {
       const contentByCallback = {
         getSources: /Unknown index/,
         getPolicies: /Unknown policy/,
@@ -756,8 +756,7 @@ describe('validation logic', () => {
           .map(({ query }) =>
             validateQuery(
               query,
-
-              { ignoreOnMissingCallbacks: true },
+              {}, // ignoreOnMissingCallbacks is now automatic
               getCallbackMocks()
             )
           )
@@ -772,7 +771,7 @@ describe('validation logic', () => {
     });
 
     // test excluding one callback at the time
-    it.each(['getSources', 'getColumnsFor', 'getPolicies'] as Array<keyof typeof ignoreErrorsMap>)(
+    it.each(['getSources', 'getColumnsFor', 'getPolicies'])(
       `should not error if %s is missing`,
       async (excludedCallback) => {
         const filteredTestCases = fixtures.testCases.filter((t) =>
@@ -784,38 +783,53 @@ describe('validation logic', () => {
           filteredTestCases.map(({ query }) =>
             validateQuery(
               query,
-              { ignoreOnMissingCallbacks: true },
+              {}, // ignoreOnMissingCallbacks is now automatic
               getPartialCallbackMocks(excludedCallback)
             )
           )
         );
         for (const { errors } of allErrors) {
-          expect(
-            errors.every(({ code }) =>
-              ignoreErrorsMap[excludedCallback].every((ignoredCode) => ignoredCode !== code)
-            )
-          ).toBe(true);
+          const errorCodes = errors.map((e) => e.code);
+          // Verify errors related to excluded callback are not present
+          if (excludedCallback === 'getSources') {
+            expect(errorCodes.every((code) => code !== 'unknownIndex')).toBe(true);
+          } else if (excludedCallback === 'getColumnsFor') {
+            expect(
+              errorCodes.every(
+                (code) =>
+                  code !== 'unknownColumn' &&
+                  code !== 'wrongArgumentType' &&
+                  code !== 'unsupportedFieldType'
+              )
+            ).toBe(true);
+          } else if (excludedCallback === 'getPolicies') {
+            expect(errorCodes.every((code) => code !== 'unknownPolicy')).toBe(true);
+          }
         }
       }
     );
 
     it('should work if no callback passed', async () => {
-      const excludedCallbacks = ['getSources', 'getPolicies', 'getColumnsFor'] as Array<
-        keyof typeof ignoreErrorsMap
-      >;
+      const excludedCallbacks = ['getSources', 'getPolicies', 'getColumnsFor'];
       for (const testCase of fixtures.testCases.filter((t) =>
         t.error.some((message) =>
           excludeErrorsByContent(excludedCallbacks).every((regexp) => regexp?.test(message))
         )
       )) {
-        const { errors } = await validateQuery(testCase.query, {
-          ignoreOnMissingCallbacks: true,
-        });
+        const { errors } = await validateQuery(
+          testCase.query,
+          {} // ignoreOnMissingCallbacks is now automatic
+        );
+        // Verify no callback-dependent errors are present
+        const errorCodes = errors.map((e) => e.code);
         expect(
-          errors.every(({ code }) =>
-            Object.values(ignoreErrorsMap)
-              .filter(nonNullable)
-              .every((ignoredCode) => ignoredCode.every((i) => i !== code))
+          errorCodes.every(
+            (code) =>
+              code !== 'unknownIndex' &&
+              code !== 'unknownColumn' &&
+              code !== 'wrongArgumentType' &&
+              code !== 'unsupportedFieldType' &&
+              code !== 'unknownPolicy'
           )
         ).toBe(true);
       }
