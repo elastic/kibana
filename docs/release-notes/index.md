@@ -126,7 +126,8 @@ For the Elastic Security 9.2.0 release information, refer to [Elastic Security S
 * The Console introduction tour is now disabled by default. You can manually start the tour at any time from the Help popover [#227978]({{kib-pull}}227978).
 * Improves the rate-limiter UX [#227678]({{kib-pull}}227678).
 
-**Search**:
+**Elasticsearch solution**:
+* Agent Builder is now available in technical preview. Agent Builder is a set of capabilities for simplifying the development of AI agents based on your enterprise data. Learn more and get started from [this page](docs-content://solutions/search/agent-builder/get-started.md).
 * Adds the ability to save Playgrounds within a space [#229511]({{kib-pull}}229511).
 * Improves code examples in the Synonyms interface [#235944]({{kib-pull}}235944).
 
