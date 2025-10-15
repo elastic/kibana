@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-import { configs } from '../configs';
-
-export default configs.basic;
+export * from './anomaly_swimlane/anomaly_swimlane';
+export * from './common/serialized_titles';
