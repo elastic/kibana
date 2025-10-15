@@ -639,6 +639,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   is_system_action: true,
                   name: 'Workflows',
                   referenced_by_count: 0,
+                  is_connector_type_deprecated: false,
                 },
               ]);
               break;
