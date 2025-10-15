@@ -47,7 +47,7 @@ export function SignificantEventsTable({
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
   const [selectedFeature, setSelectedFeature] = useState<Feature>();
-  const { featuresByName } = useStreamFeatures(definition);
+  const { featuresByName, refreshFeatures } = useStreamFeatures(definition);
 
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
@@ -224,6 +224,7 @@ export function SignificantEventsTable({
           closeFlyout={() => {
             setSelectedFeature(undefined);
           }}
+          refreshFeatures={refreshFeatures}
         />
       )}
       {isDeleteModalVisible && selectedDeleteItem && (
