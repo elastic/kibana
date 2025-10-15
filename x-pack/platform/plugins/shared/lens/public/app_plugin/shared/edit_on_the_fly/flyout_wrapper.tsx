@@ -16,7 +16,6 @@ import {
   EuiTitle,
   EuiToolTip,
   EuiButton,
-  EuiIcon,
   EuiLink,
   EuiBetaBadge,
   EuiSpacer,
@@ -107,11 +106,6 @@ export const FlyoutWrapper = ({
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">
                   <EuiLink onClick={navigateToLensEditor} data-test-subj="navigateToLensEditorLink">
-                    <EuiIcon
-                      type="arrowStart"
-                      size="s"
-                      style={{ verticalAlign: 'text-top', paddingTop: '2px' }}
-                    />{' '}
                     {i18n.translate('xpack.lens.config.editLinkLabel', {
                       defaultMessage: 'Edit in Lens',
                     })}
