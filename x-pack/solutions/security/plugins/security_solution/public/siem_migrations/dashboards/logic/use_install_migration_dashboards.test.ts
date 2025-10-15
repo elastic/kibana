@@ -12,6 +12,7 @@ import { TestProviders } from '../../../common/mock/test_providers';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useInvalidateGetMigrationDashboards } from './use_get_migration_dashboards';
 import { useInvalidateGetMigrationTranslationStats } from './use_get_migration_translation_stats';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 
 jest.mock('../api');
 jest.mock('../../../common/hooks/use_app_toasts', () => ({
@@ -26,6 +27,9 @@ jest.mock('./use_get_migration_dashboards', () => ({
 jest.mock('./use_get_migration_translation_stats', () => ({
   useInvalidateGetMigrationTranslationStats: jest.fn(),
 }));
+jest.mock('../../../common/lib/kibana/kibana_react', () => ({
+  useKibana: jest.fn(),
+}));
 
 const mockResponse = { installed: 2 };
 const mockError = new Error('API error');
@@ -33,6 +37,7 @@ const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 const invalidateDashboards = jest.fn();
 const invalidateStats = jest.fn();
+const mockReportTranslatedItemBulkInstall = jest.fn();
 
 describe('useInstallMigrationDashboards', () => {
   beforeEach(() => {
@@ -43,6 +48,17 @@ describe('useInstallMigrationDashboards', () => {
     });
     (useInvalidateGetMigrationDashboards as jest.Mock).mockReturnValue(invalidateDashboards);
     (useInvalidateGetMigrationTranslationStats as jest.Mock).mockReturnValue(invalidateStats);
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        siemMigrations: {
+          dashboards: {
+            telemetry: {
+              reportTranslatedItemBulkInstall: mockReportTranslatedItemBulkInstall,
+            },
+          },
+        },
+      },
+    });
   });
 
   describe('on success', () => {

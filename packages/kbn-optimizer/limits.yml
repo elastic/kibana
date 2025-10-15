@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
-  aiAssistantManagementSelection: 8988
+  aiAssistantManagementSelection: 9214
   aiops: 19890
   alerting: 28395
   apm: 38573
@@ -116,7 +116,7 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 82382
-  onechat: 17322
+  onechat: 19088
   osquery: 47588
   painlessLab: 6299
   presentationPanel: 11484
@@ -139,6 +139,7 @@ pageLoadAssetSize:
   screenshotMode: 2351
   screenshotting: 8417
   searchAssistant: 6150
+  searchGettingStarted: 6352
   searchHomepage: 7962
   searchIndices: 10564
   searchInferenceEndpoints: 8071
@@ -149,12 +150,12 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79987
-  securitySolution: 106289
+  securitySolution: 120431
   securitySolutionEss: 43319
   securitySolutionServerless: 62964
   serverless: 10682
   serverlessChat: 5133
-  serverlessObservability: 16307
+  serverlessObservability: 22100
   serverlessSearch: 35000
   sessionView: 47938
   share: 58677
@@ -162,7 +163,7 @@ pageLoadAssetSize:
   snapshotRestore: 28452
   spaces: 32135
   stackAlerts: 31499
-  stackConnectors: 68838
+  stackConnectors: 74000
   streams: 9000
   streamsApp: 17000
   synthetics: 31571
@@ -197,4 +198,4 @@ pageLoadAssetSize:
   visualizations: 41000
   watcher: 16031
   workchatApp: 12411
-  workflowsManagement: 6555
+  workflowsManagement: 6800

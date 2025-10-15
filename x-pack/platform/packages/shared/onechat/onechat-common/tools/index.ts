@@ -28,6 +28,7 @@ export {
   EsqlToolFieldType,
   type EsqlToolFieldTypes,
   type EsqlToolParam,
+  type EsqlToolParamValue,
   type EsqlToolDefinition,
   type EsqlToolDefinitionWithSchema,
   isEsqlTool,
