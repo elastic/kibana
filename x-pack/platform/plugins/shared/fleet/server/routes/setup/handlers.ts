@@ -11,7 +11,11 @@ import { formatNonFatalErrors, setupFleet } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
 import type { FleetRequestHandler } from '../../types';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
-import { isActionSecretStorageEnabled, isSecretStorageEnabled, isSSLSecretStorageEnabled } from '../../services/secrets';
+import {
+  isActionSecretStorageEnabled,
+  isSecretStorageEnabled,
+  isSSLSecretStorageEnabled,
+} from '../../services/secrets';
 import { isSpaceAwarenessEnabled } from '../../services/spaces/helpers';
 
 export const getFleetStatusHandler: FleetRequestHandler = async (context, request, response) => {
