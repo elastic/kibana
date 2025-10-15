@@ -10,6 +10,7 @@
 import type { DataViewLazy } from '@kbn/data-views-plugin/common';
 import {
   fromKueryExpression,
+  getFilterField,
   getKqlFieldNames,
   isCombinedFilter,
   isFilter,
@@ -19,21 +20,21 @@ import {
 import type { SearchRequest } from './fetch';
 import type { EsQuerySortValue } from '../..';
 
-const collectFilterFields = (filter: Filter, acc: string[]) => {
-  if (!isFilter(filter) || filter.meta?.disabled === true) {
-    return;
-  }
+const collectFilterFields = (filter: Filter, acc: string[] = []): string[] => {
+  if (!isFilter(filter) || filter.meta?.disabled === true) return acc;
 
   if (isCombinedFilter(filter)) {
     for (const nested of filter.meta.params ?? []) {
       collectFilterFields(nested, acc);
     }
-    return;
+
+    return acc;
   }
 
-  if (filter.meta?.key) {
-    acc.push(filter.meta.key);
-  }
+  const field = filter.meta?.key ?? getFilterField(filter);
+  if (field) acc.push(field);
+
+  return acc;
 };
 
 export async function queryToFields({
@@ -59,9 +60,8 @@ export async function queryToFields({
   }
 
   const { filters = [] } = request;
-  for (const filter of typeof filters === 'function' ? filters() : filters) {
-    collectFilterFields(filter, fields);
-  }
+  const requestFilters = typeof filters === 'function' ? filters() : filters;
+  fields = fields.concat(requestFilters.flatMap((filter) => collectFilterFields(filter)));
 
   // if source filtering is enabled, we need to fetch all the fields
   const fieldName =
