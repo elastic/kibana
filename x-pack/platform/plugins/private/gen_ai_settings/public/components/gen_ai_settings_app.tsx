@@ -26,7 +26,10 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { isEmpty } from 'lodash';
-import { AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED } from '../../common/constants';
+import {
+  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE,
+} from '../../common/constants';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { useKibana } from '../hooks/use_kibana';
 import { GoToSpacesButton } from './go_to_spaces_button';
@@ -96,7 +99,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
 
   const showDefaultLlmSetting = featureFlags.getBooleanValue(
     AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-    false
+    AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE
   );
 
   const connectorDescription = useMemo(() => {
