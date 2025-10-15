@@ -70,7 +70,7 @@ export interface DataStream {
   hidden: boolean;
   nextGenerationManagedBy: string;
   failureStoreEnabled?: boolean;
-  failureStoreRetention: {
+  failureStoreRetention?: {
     customRetentionPeriod?: string;
     defaultRetentionPeriod?: string;
   };

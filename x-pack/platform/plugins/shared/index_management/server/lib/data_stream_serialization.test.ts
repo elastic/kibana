@@ -208,7 +208,8 @@ describe('deserializeDataStream', () => {
       const result = deserializeDataStream(mockDataStreamFromEs, false, failureStoreSettings);
 
       expect(result.failureStoreEnabled).toBe(true);
-      expect(result.failureStoreRetention.defaultRetentionPeriod).toBe('30d');
+      expect(result.failureStoreRetention).toBeDefined();
+      expect(result.failureStoreRetention!.defaultRetentionPeriod).toBe('30d');
     });
 
     it('should not enable failure store when data stream does not match cluster setting pattern', () => {
@@ -269,7 +270,8 @@ describe('deserializeDataStream', () => {
 
       const result = deserializeDataStream(dataStreamWithLifecycle, false);
 
-      expect(result.failureStoreRetention.customRetentionPeriod).toBe('21d');
+      expect(result.failureStoreRetention).toBeDefined();
+      expect(result.failureStoreRetention!.customRetentionPeriod).toBe('21d');
     });
   });
 
