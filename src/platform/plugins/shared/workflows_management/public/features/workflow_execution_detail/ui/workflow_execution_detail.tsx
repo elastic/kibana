@@ -106,7 +106,6 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = (
           <WorkflowStepExecutionDetails
             workflowExecutionId={workflowExecutionId}
             stepExecution={selectedStepExecution}
-            setSelectedStepId={setSelectedStep}
             isLoading={isLoading}
           />
         }
