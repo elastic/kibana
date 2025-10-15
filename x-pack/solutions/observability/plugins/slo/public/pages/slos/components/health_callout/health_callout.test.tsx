@@ -17,7 +17,7 @@ jest.mock('../../../../hooks/use_fetch_slo_health');
 const mockUseFetchSloHealth = useFetchSloHealth as jest.Mock;
 
 describe('HealthCallout', () => {
-  it('should render unhealthy message when only unhealthy transforms are present', () => {
+  it('should render unhealthy message when an unhealthy rollup transform is present', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
@@ -32,13 +32,34 @@ describe('HealthCallout', () => {
         <HealthCallout sloList={[]} />
       </I18nProvider>
     );
-    fireEvent.click(screen.getByText(/Transform error detected/));
+    fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
     expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following transform is in an unhealthy state:'
+      'The following SLO is in an unhealthy state. Data may be missing or incomplete. You can inspect it here:'
     );
   });
 
-  it('should render missing message when only missing transforms are present', () => {
+  it('should render unhealthy message when an unhealthy summary transform is present', () => {
+    mockUseFetchSloHealth.mockReturnValue({
+      data: [
+        {
+          sloId: '1',
+          health: { overall: 'unhealthy', rollup: 'healthy', summary: 'unhealthy' },
+        },
+      ],
+    });
+
+    render(
+      <I18nProvider>
+        <HealthCallout sloList={[]} />
+      </I18nProvider>
+    );
+    fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
+    expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
+      'The following SLO is in an unhealthy state. Data may be missing or incomplete. You can inspect it here:'
+    );
+  });
+
+  it('should render unhealthy message when a missing rollup transform is present', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
@@ -53,84 +74,38 @@ describe('HealthCallout', () => {
         <HealthCallout sloList={[]} />
       </I18nProvider>
     );
-    fireEvent.click(screen.getByText(/Transform error detected/));
+    fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
     expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following transform is in a missing state:'
+      'The following SLO is in an unhealthy state. Data may be missing or incomplete. You can inspect it here:'
     );
   });
 
-  it('should render unhealthy or missing message when both are present', () => {
-    mockUseFetchSloHealth.mockReturnValue({
-      data: [
-        {
-          sloId: '1',
-          health: { overall: 'unhealthy', rollup: 'unhealthy', summary: 'healthy' },
-        },
-        {
-          sloId: '2',
-          health: { overall: 'unhealthy', rollup: 'missing', summary: 'healthy' },
-        },
-      ],
-    });
-
-    render(
-      <I18nProvider>
-        <HealthCallout sloList={[]} />
-      </I18nProvider>
-    );
-    fireEvent.click(screen.getByText(/Transform error detected/));
-    expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following transforms are in an unhealthy or missing state:'
-    );
-  });
-
-  it('should show only 1 missing summary transform', () => {
+  it('should render unhealthy message when a missing summary transform is present', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
           sloId: '1',
           health: { overall: 'unhealthy', rollup: 'healthy', summary: 'missing' },
         },
-        {
-          sloId: '2',
-          health: { overall: 'healthy', rollup: 'healthy', summary: 'healthy' },
-        },
       ],
     });
 
     render(
       <I18nProvider>
-        <HealthCallout
-          sloList={[
-            { id: '1', name: 'SLO 1' },
-            { id: '2', name: 'SLO 2' },
-          ]}
-        />
+        <HealthCallout sloList={[]} />
       </I18nProvider>
     );
-    fireEvent.click(screen.getByText(/Transform error detected/));
+    fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
     expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
-      'The following transform is in a missing state:'
+      'The following SLO is in an unhealthy state. Data may be missing or incomplete. You can inspect it here:'
     );
-    const summaryTransformId = getSLOSummaryTransformId('1', undefined);
-    expect(
-      screen.getByText((content, element) => content.startsWith(summaryTransformId))
-    ).toBeInTheDocument();
-    const summaryTransformId2 = getSLOSummaryTransformId('2', undefined);
-    expect(
-      screen.queryByText((content, element) => content.startsWith(summaryTransformId2))
-    ).not.toBeInTheDocument();
   });
 
-  it('should show 2 missing entries for summary and rollup', () => {
+  it('should not render if all SLOs are healthy', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
           sloId: '1',
-          health: { overall: 'unhealthy', rollup: 'missing', summary: 'missing' },
-        },
-        {
-          sloId: '2',
           health: { overall: 'healthy', rollup: 'healthy', summary: 'healthy' },
         },
       ],
@@ -138,80 +113,36 @@ describe('HealthCallout', () => {
 
     render(
       <I18nProvider>
-        <HealthCallout
-          sloList={[
-            { id: '1', name: 'SLO 1' },
-            { id: '2', name: 'SLO 2' },
-          ]}
-        />
+        <HealthCallout sloList={[]} />
       </I18nProvider>
     );
-    fireEvent.click(screen.getByText(/Transform error detected/));
-    expect(
-      screen.getByText(/The following transforms are in a missing state:/)
-    ).toBeInTheDocument();
-    const summaryTransformId = getSLOSummaryTransformId('1', undefined);
-    expect(
-      screen.getByText((content, element) => content.startsWith(summaryTransformId))
-    ).toBeInTheDocument();
-    const summaryTransformId2 = getSLOSummaryTransformId('2', undefined);
-    expect(
-      screen.queryByText((content, element) => content.startsWith(summaryTransformId2))
-    ).not.toBeInTheDocument();
+    // The callout should not be present when all SLOs are healthy
+    expect(screen.queryByText(/Some SLOs are unhealthy/)).toBeNull();
   });
 
-  it('should show a mix of missing and unhealthy entries', () => {
+  it('should list all unhealthy SLOs', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
           sloId: '1',
-          health: { overall: 'unhealthy', rollup: 'unhealthy', summary: 'missing' },
+          health: { overall: 'unhealthy', rollup: 'healthy', summary: 'unhealthy' },
         },
         {
           sloId: '2',
-          health: { overall: 'unhealthy', rollup: 'missing', summary: 'unhealthy' },
-        },
-        {
-          sloId: '3',
-          health: { overall: 'healthy', rollup: 'healthy', summary: 'healthy' },
+          health: { overall: 'unhealthy', rollup: 'unhealthy', summary: 'healthy' },
         },
       ],
     });
 
     render(
       <I18nProvider>
-        <HealthCallout
-          sloList={[
-            { id: '1', name: 'SLO 1' },
-            { id: '2', name: 'SLO 2' },
-            { id: '3', name: 'SLO 3' },
-          ]}
-        />
+        <HealthCallout sloList={[]} />
       </I18nProvider>
     );
-    fireEvent.click(screen.getByText(/Transform error detected/));
-    expect(
-      screen.getByText(/The following transforms are in an unhealthy or missing state:/)
-    ).toBeInTheDocument();
 
-    const rollupTransformId1 = getSLOTransformId('1', undefined);
-    expect(
-      screen.getByText((content, element) => content.startsWith(rollupTransformId1))
-    ).toBeInTheDocument();
-
-    const summaryTransformId1 = getSLOSummaryTransformId('1', undefined);
-    expect(
-      screen.getByText((content, element) => content.startsWith(summaryTransformId1))
-    ).toBeInTheDocument();
-
-    const rollupTransformId2 = getSLOTransformId('2', undefined);
-    expect(
-      screen.getByText((content, element) => content.startsWith(rollupTransformId2))
-    ).toBeInTheDocument();
-
-    const summaryTransformId2 = getSLOSummaryTransformId('2', undefined);
-    expect(
-      screen.getByText((content, element) => content.startsWith(summaryTransformId2))
-    ).toBeInTheDocument();
+    fireEvent.click(screen.getByText(/Some SLOs are unhealthy/));
+    expect(screen.getByTestId('sloHealthCalloutDescription').textContent).toBe(
+      'The following SLOs are in an unhealthy state. Data may be missing or incomplete. You can inspect each one here:'
+    );
   });
 });
