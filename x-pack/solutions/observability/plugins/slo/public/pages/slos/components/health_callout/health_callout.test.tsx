@@ -8,7 +8,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../../common/constants';
 import { HealthCallout } from './health_callout';
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
 
