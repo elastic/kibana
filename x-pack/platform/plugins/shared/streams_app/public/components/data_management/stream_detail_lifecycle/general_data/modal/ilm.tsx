@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Phases, PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
-import type { IngestStreamLifecycle } from '@kbn/streams-schema';
+import type { IngestStreamLifecycleILM } from '@kbn/streams-schema';
 import { isIlmLifecycle } from '@kbn/streams-schema';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
@@ -21,6 +21,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import type { IngestStreamLifecycleAll } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import { getFormattedError } from '../../../../../util/errors';
 
 interface PhaseProps {
@@ -34,8 +35,8 @@ interface IlmOptionData {
 
 interface ModalOptions {
   getIlmPolicies: () => Promise<PolicyFromES[]>;
-  initialValue: IngestStreamLifecycle;
-  setLifecycle: (lifecycle: IngestStreamLifecycle) => void;
+  initialValue: IngestStreamLifecycleAll;
+  setLifecycle: (lifecycle: IngestStreamLifecycleILM) => void;
   setSaveButtonDisabled: (isDisabled: boolean) => void;
   readOnly: boolean;
 }
@@ -49,14 +50,14 @@ export function IlmField({
 }: ModalOptions) {
   const { euiTheme } = useEuiTheme();
   const [selectedPolicy, setSelectedPolicy] = useState(
-    isIlmLifecycle(initialValue) ? initialValue.ilm?.policy : undefined
+    isIlmLifecycle(initialValue) ? initialValue.ilm.policy : undefined
   );
   const [policies, setPolicies] = useState<Array<EuiSelectableOption<IlmOptionData>>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
   useEffect(() => {
-    setSelectedPolicy(isIlmLifecycle(initialValue) ? initialValue.ilm?.policy : undefined);
+    setSelectedPolicy(isIlmLifecycle(initialValue) ? initialValue.ilm.policy : undefined);
   }, [initialValue]);
 
   const isBorealis = euiTheme.themeName === 'EUI_THEME_BOREALIS';
@@ -78,7 +79,7 @@ export function IlmField({
         desc.push({
           description: i18n.translate('xpack.streams.phases.frozen', {
             defaultMessage:
-              'Frozen {previosStartAge, select, undefined {forever} other {till {previosStartAge}}}',
+              'Frozen {previosStartAge, select, undefined {indefinitely} other {for {previosStartAge}}}',
             values: { previosStartAge },
           }),
           color: phaseToIndicatorColors.frozen,
@@ -89,7 +90,7 @@ export function IlmField({
         desc.push({
           description: i18n.translate('xpack.streams.phases.cold', {
             defaultMessage:
-              'Cold {previosStartAge, select, undefined {forever} other {till {previosStartAge}}}',
+              'Cold {previosStartAge, select, undefined {indefinitely} other {for {previosStartAge}}}',
             values: { previosStartAge },
           }),
           color: phaseToIndicatorColors.cold,
@@ -100,7 +101,7 @@ export function IlmField({
         desc.push({
           description: i18n.translate('xpack.streams.phases.warm', {
             defaultMessage:
-              'Warm {previosStartAge, select, undefined {forever} other {till {previosStartAge}}}',
+              'Warm {previosStartAge, select, undefined {indefinitely} other {for {previosStartAge}}}',
             values: { previosStartAge },
           }),
           color: phaseToIndicatorColors.warm,
@@ -111,7 +112,7 @@ export function IlmField({
         desc.push({
           description: i18n.translate('xpack.streams.phases.hot', {
             defaultMessage:
-              'Hot {previosStartAge, select, undefined {forever} other {till {previosStartAge}}}',
+              'Hot {previosStartAge, select, undefined {indefinitely} other {for {previosStartAge}}}',
             values: { previosStartAge },
           }),
           color: phaseToIndicatorColors.hot,

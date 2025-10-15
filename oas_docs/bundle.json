@@ -19749,6 +19749,171 @@
         ]
       }
     },
+    "/api/fleet/agents/bulk_migrate": {
+      "post": {
+        "description": "Bulk migrate agents to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.",
+        "operationId": "post-fleet-agents-bulk-migrate",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "agents": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "batchSize": {
+                    "type": "number"
+                  },
+                  "enrollment_token": {
+                    "type": "string"
+                  },
+                  "settings": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ca_sha256": {
+                        "type": "string"
+                      },
+                      "certificate_authorities": {
+                        "type": "string"
+                      },
+                      "elastic_agent_cert": {
+                        "type": "string"
+                      },
+                      "elastic_agent_cert_key": {
+                        "type": "string"
+                      },
+                      "elastic_agent_cert_key_passphrase": {
+                        "type": "string"
+                      },
+                      "headers": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "insecure": {
+                        "type": "boolean"
+                      },
+                      "proxy_disabled": {
+                        "type": "boolean"
+                      },
+                      "proxy_headers": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "proxy_url": {
+                        "type": "string"
+                      },
+                      "staging": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "uri": {
+                    "format": "uri",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "agents",
+                  "uri",
+                  "enrollment_token"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "actionId"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad Request"
+          }
+        },
+        "summary": "Migrate multiple agents",
+        "tags": [
+          "Elastic Agents"
+        ]
+      }
+    },
     "/api/fleet/agents/bulk_reassign": {
       "post": {
         "description": "[Required authorization] Route required privileges: fleet-agents-all.",
@@ -22010,6 +22175,165 @@
         "summary": "Create an agent action",
         "tags": [
           "Elastic Agent actions"
+        ]
+      }
+    },
+    "/api/fleet/agents/{agentId}/migrate": {
+      "post": {
+        "description": "Migrate a single agent to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.",
+        "operationId": "post-fleet-agents-agentid-migrate",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "agentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "enrollment_token": {
+                    "type": "string"
+                  },
+                  "settings": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "ca_sha256": {
+                        "type": "string"
+                      },
+                      "certificate_authorities": {
+                        "type": "string"
+                      },
+                      "elastic_agent_cert": {
+                        "type": "string"
+                      },
+                      "elastic_agent_cert_key": {
+                        "type": "string"
+                      },
+                      "elastic_agent_cert_key_passphrase": {
+                        "type": "string"
+                      },
+                      "headers": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "insecure": {
+                        "type": "boolean"
+                      },
+                      "proxy_disabled": {
+                        "type": "boolean"
+                      },
+                      "proxy_headers": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "proxy_url": {
+                        "type": "string"
+                      },
+                      "replace_token": {
+                        "type": "string"
+                      },
+                      "staging": {
+                        "type": "string"
+                      },
+                      "tags": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "uri": {
+                    "format": "uri",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "uri",
+                  "enrollment_token"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "actionId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "actionId"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad Request"
+          }
+        },
+        "summary": "Migrate a single agent",
+        "tags": [
+          "Elastic Agents"
         ]
       }
     },
@@ -29313,6 +29637,25 @@
                               "ssl": {
                                 "additionalProperties": false,
                                 "properties": {
+                                  "agent_key": {
+                                    "anyOf": [
+                                      {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "id": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "id"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
                                   "es_key": {
                                     "anyOf": [
                                       {
@@ -29361,6 +29704,18 @@
                             "additionalProperties": false,
                             "nullable": true,
                             "properties": {
+                              "agent_certificate": {
+                                "type": "string"
+                              },
+                              "agent_certificate_authorities": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "agent_key": {
+                                "type": "string"
+                              },
                               "certificate": {
                                 "type": "string"
                               },
@@ -29518,6 +29873,25 @@
                       "ssl": {
                         "additionalProperties": false,
                         "properties": {
+                          "agent_key": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "type": "object"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          },
                           "es_key": {
                             "anyOf": [
                               {
@@ -29566,6 +29940,18 @@
                     "additionalProperties": false,
                     "nullable": true,
                     "properties": {
+                      "agent_certificate": {
+                        "type": "string"
+                      },
+                      "agent_certificate_authorities": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "agent_key": {
+                        "type": "string"
+                      },
                       "certificate": {
                         "type": "string"
                       },
@@ -29655,6 +30041,25 @@
                             "ssl": {
                               "additionalProperties": false,
                               "properties": {
+                                "agent_key": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
                                 "es_key": {
                                   "anyOf": [
                                     {
@@ -29703,6 +30108,18 @@
                           "additionalProperties": false,
                           "nullable": true,
                           "properties": {
+                            "agent_certificate": {
+                              "type": "string"
+                            },
+                            "agent_certificate_authorities": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "agent_key": {
+                              "type": "string"
+                            },
                             "certificate": {
                               "type": "string"
                             },
@@ -29928,6 +30345,25 @@
                             "ssl": {
                               "additionalProperties": false,
                               "properties": {
+                                "agent_key": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
                                 "es_key": {
                                   "anyOf": [
                                     {
@@ -29976,6 +30412,18 @@
                           "additionalProperties": false,
                           "nullable": true,
                           "properties": {
+                            "agent_certificate": {
+                              "type": "string"
+                            },
+                            "agent_certificate_authorities": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "agent_key": {
+                              "type": "string"
+                            },
                             "certificate": {
                               "type": "string"
                             },
@@ -30119,6 +30567,25 @@
                       "ssl": {
                         "additionalProperties": false,
                         "properties": {
+                          "agent_key": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "type": "object"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          },
                           "es_key": {
                             "anyOf": [
                               {
@@ -30167,6 +30634,18 @@
                     "additionalProperties": false,
                     "nullable": true,
                     "properties": {
+                      "agent_certificate": {
+                        "type": "string"
+                      },
+                      "agent_certificate_authorities": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "agent_key": {
+                        "type": "string"
+                      },
                       "certificate": {
                         "type": "string"
                       },
@@ -30255,6 +30734,25 @@
                             "ssl": {
                               "additionalProperties": false,
                               "properties": {
+                                "agent_key": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
                                 "es_key": {
                                   "anyOf": [
                                     {
@@ -30303,6 +30801,18 @@
                           "additionalProperties": false,
                           "nullable": true,
                           "properties": {
+                            "agent_certificate": {
+                              "type": "string"
+                            },
+                            "agent_certificate_authorities": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "agent_key": {
+                              "type": "string"
+                            },
                             "certificate": {
                               "type": "string"
                             },
@@ -50474,19 +50984,7 @@
                                     },
                                     {
                                       "properties": {
-                                        "kql": {
-                                          "additionalProperties": false,
-                                          "properties": {
-                                            "query": {
-                                              "type": "string"
-                                            }
-                                          },
-                                          "required": [
-                                            "query"
-                                          ],
-                                          "type": "object"
-                                        },
-                                        "system": {
+                                        "feature": {
                                           "additionalProperties": false,
                                           "properties": {
                                             "filter": {
@@ -50773,6 +51271,18 @@
                                           "required": [
                                             "name",
                                             "filter"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "kql": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "query": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "query"
                                           ],
                                           "type": "object"
                                         }
@@ -54119,19 +54629,7 @@
                                     },
                                     {
                                       "properties": {
-                                        "kql": {
-                                          "additionalProperties": false,
-                                          "properties": {
-                                            "query": {
-                                              "type": "string"
-                                            }
-                                          },
-                                          "required": [
-                                            "query"
-                                          ],
-                                          "type": "object"
-                                        },
-                                        "system": {
+                                        "feature": {
                                           "additionalProperties": false,
                                           "properties": {
                                             "filter": {
@@ -54418,6 +54916,18 @@
                                           "required": [
                                             "name",
                                             "filter"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "kql": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "query": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "query"
                                           ],
                                           "type": "object"
                                         }
@@ -57321,19 +57831,7 @@
                                     },
                                     {
                                       "properties": {
-                                        "kql": {
-                                          "additionalProperties": false,
-                                          "properties": {
-                                            "query": {
-                                              "type": "string"
-                                            }
-                                          },
-                                          "required": [
-                                            "query"
-                                          ],
-                                          "type": "object"
-                                        },
-                                        "system": {
+                                        "feature": {
                                           "additionalProperties": false,
                                           "properties": {
                                             "filter": {
@@ -57620,6 +58118,18 @@
                                           "required": [
                                             "name",
                                             "filter"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "kql": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "query": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "query"
                                           ],
                                           "type": "object"
                                         }
@@ -60662,19 +61172,7 @@
                                     },
                                     {
                                       "properties": {
-                                        "kql": {
-                                          "additionalProperties": false,
-                                          "properties": {
-                                            "query": {
-                                              "type": "string"
-                                            }
-                                          },
-                                          "required": [
-                                            "query"
-                                          ],
-                                          "type": "object"
-                                        },
-                                        "system": {
+                                        "feature": {
                                           "additionalProperties": false,
                                           "properties": {
                                             "filter": {
@@ -60961,6 +61459,18 @@
                                           "required": [
                                             "name",
                                             "filter"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "kql": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "query": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "query"
                                           ],
                                           "type": "object"
                                         }
@@ -63866,19 +64376,7 @@
                                 },
                                 {
                                   "properties": {
-                                    "kql": {
-                                      "additionalProperties": false,
-                                      "properties": {
-                                        "query": {
-                                          "type": "string"
-                                        }
-                                      },
-                                      "required": [
-                                        "query"
-                                      ],
-                                      "type": "object"
-                                    },
-                                    "system": {
+                                    "feature": {
                                       "additionalProperties": false,
                                       "properties": {
                                         "filter": {
@@ -64165,6 +64663,18 @@
                                       "required": [
                                         "name",
                                         "filter"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    "kql": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "query": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "query"
                                       ],
                                       "type": "object"
                                     }
@@ -71468,19 +71978,7 @@
                                 },
                                 {
                                   "properties": {
-                                    "kql": {
-                                      "additionalProperties": false,
-                                      "properties": {
-                                        "query": {
-                                          "type": "string"
-                                        }
-                                      },
-                                      "required": [
-                                        "query"
-                                      ],
-                                      "type": "object"
-                                    },
-                                    "system": {
+                                    "feature": {
                                       "additionalProperties": false,
                                       "properties": {
                                         "filter": {
@@ -71769,6 +72267,18 @@
                                         "filter"
                                       ],
                                       "type": "object"
+                                    },
+                                    "kql": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "query": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "query"
+                                      ],
+                                      "type": "object"
                                     }
                                   },
                                   "required": [
@@ -71926,19 +72436,7 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
-                  "kql": {
-                    "additionalProperties": false,
-                    "properties": {
-                      "query": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "query"
-                    ],
-                    "type": "object"
-                  },
-                  "system": {
+                  "feature": {
                     "additionalProperties": false,
                     "properties": {
                       "filter": {
@@ -72225,6 +72723,18 @@
                     "required": [
                       "name",
                       "filter"
+                    ],
+                    "type": "object"
+                  },
+                  "kql": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "query": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "query"
                     ],
                     "type": "object"
                   },
@@ -72554,7 +73064,7 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
-                  "system": {
+                  "feature": {
                     "additionalProperties": false,
                     "properties": {
                       "description": {
@@ -72919,19 +73429,7 @@
                   "query": {
                     "additionalProperties": false,
                     "properties": {
-                      "kql": {
-                        "additionalProperties": false,
-                        "properties": {
-                          "query": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "query"
-                        ],
-                        "type": "object"
-                      },
-                      "system": {
+                      "feature": {
                         "additionalProperties": false,
                         "properties": {
                           "filter": {
@@ -73218,6 +73716,18 @@
                         "required": [
                           "name",
                           "filter"
+                        ],
+                        "type": "object"
+                      },
+                      "kql": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "query": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "query"
                         ],
                         "type": "object"
                       }

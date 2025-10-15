@@ -10,7 +10,7 @@
 import type { HttpGraphNode } from '@kbn/workflows/graph';
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import type { UrlValidator } from '../../lib/url_validator';
-import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 import type { BaseStep, RunStepResult } from '../node_implementation';
@@ -31,7 +31,7 @@ export interface HttpStep extends BaseStep {
 export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
   constructor(
     node: HttpGraphNode,
-    contextManager: WorkflowContextManager,
+    stepExecutionRuntime: StepExecutionRuntime,
     private workflowLogger: IWorkflowEventLogger,
     private urlValidator: UrlValidator,
     workflowRuntime: WorkflowExecutionRuntimeManager
@@ -44,14 +44,14 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
     };
     super(
       httpStep,
-      contextManager,
+      stepExecutionRuntime,
       undefined, // no connector executor needed for HTTP
       workflowRuntime
     );
   }
 
   public getInput() {
-    const context = this.contextManager.getContext();
+    const context = this.stepExecutionRuntime.contextManager.getContext();
     const { url, method = 'GET', headers = {}, body } = this.step.with;
 
     return {
@@ -138,7 +138,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
       url,
       method,
       headers,
-      signal: this.contextManager.abortController.signal,
+      signal: this.stepExecutionRuntime.abortController.signal,
     };
 
     if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {

@@ -20,12 +20,14 @@ export const useTimeRangeMetadata = ({
   filters,
   start,
   end,
+  isInventoryView = false,
 }: {
   kuery?: string;
   filters?: string;
   dataSource: EntityTypes;
   start: string;
   end: string;
+  isInventoryView?: boolean;
 }): FetcherResult<GetTimeRangeMetadataResponse> => {
   const { data, refetch, status } = useFetcher(
     async (callApi) => {
@@ -37,12 +39,13 @@ export const useTimeRangeMetadata = ({
           kuery,
           dataSource,
           filters,
+          isInventoryView,
         },
       });
 
       return decodeOrThrow(getTimeRangeMetadataResponseRT)(response);
     },
-    [start, end, kuery, filters, dataSource],
+    [start, end, kuery, filters, dataSource, isInventoryView],
     {
       reloadRequestTimeUpdateEnabled: false,
     }

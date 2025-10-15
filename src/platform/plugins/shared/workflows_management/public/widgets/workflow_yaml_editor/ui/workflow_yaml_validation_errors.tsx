@@ -21,15 +21,15 @@ import {
   euiFontSize,
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { YamlValidationError } from '../model/types';
+import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
 
 const severityOrder = ['error', 'warning', 'info'];
 
 interface WorkflowYAMLValidationErrorsProps {
   isMounted: boolean;
   error: Error | null;
-  validationErrors: YamlValidationError[] | null;
-  onErrorClick?: (error: YamlValidationError) => void;
+  validationErrors: YamlValidationResult[] | null;
+  onErrorClick?: (error: YamlValidationResult) => void;
   rightSide?: React.ReactNode;
 }
 
@@ -91,13 +91,16 @@ export function WorkflowYAMLValidationErrors({
   }
 
   const sortedValidationErrors = validationErrors?.sort((a, b) => {
-    if (a.lineNumber === b.lineNumber) {
-      if (a.column === b.column) {
-        return severityOrder.indexOf(a.severity) - severityOrder.indexOf(b.severity);
+    if (a.startLineNumber === b.startLineNumber) {
+      if (a.startColumn === b.startColumn) {
+        if (a.severity && b.severity) {
+          return severityOrder.indexOf(a.severity) - severityOrder.indexOf(b.severity);
+        }
+        return 0;
       }
-      return a.column - b.column;
+      return a.startColumn - b.startColumn;
     }
-    return a.lineNumber - b.lineNumber;
+    return a.startLineNumber - b.startLineNumber;
   });
 
   return (
@@ -125,7 +128,7 @@ export function WorkflowYAMLValidationErrors({
         <EuiFlexGroup direction="column" gutterSize="s">
           {sortedValidationErrors?.map((error, index) => (
             <button
-              key={`${error.lineNumber}-${error.column}-${error.message}-${index}-${error.severity}`}
+              key={`${error.startLineNumber}-${error.startColumn}-${error.message}-${index}-${error.severity}`}
               css={styles.validationError}
               onClick={() => onErrorClick?.(error)}
               onKeyDown={(e) => {
@@ -137,7 +140,7 @@ export function WorkflowYAMLValidationErrors({
               tabIndex={0}
             >
               <EuiFlexItem grow={false} css={styles.validationErrorLineNumber}>
-                <b>{error.lineNumber}</b>:{error.column}
+                <b>{error.startLineNumber}</b>:{error.startColumn}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiIcon

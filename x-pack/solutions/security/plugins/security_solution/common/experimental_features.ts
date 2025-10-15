@@ -43,23 +43,9 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables the `upload` endpoint response action (v8.9)
-   */
-  responseActionUploadEnabled: true,
-
-  /**
    * Enables Automated Endpoint Process actions
    */
   automatedProcessActionsEnabled: true,
-
-  /**
-   * Enables the ability to send Response actions to SentinelOne and persist the results
-   * in ES. Adds API changes to support `agentType` and supports `isolate` and `release`
-   * response actions in Response Console.
-   *
-   * Release: v8.13.0
-   */
-  responseActionsSentinelOneV1Enabled: true,
 
   /**
    * Enables use of SentinelOne response actions that complete asynchronously
@@ -67,9 +53,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: v8.14.0
    */
   responseActionsSentinelOneV2Enabled: true,
-
-  /** Enables the `get-file` response action for SentinelOne */
-  responseActionsSentinelOneGetFileEnabled: true,
 
   /** Enables the `kill-process` response action for SentinelOne */
   responseActionsSentinelOneKillProcessEnabled: true,
@@ -128,12 +111,12 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Disables ESQL-based risk scoring
    */
-  disableESQLRiskScoring: true,
+  disableESQLRiskScoring: false,
 
   /**
    * Enable resetting risk scores to zero for outdated entities
    */
-  enableRiskScoreResetToZero: false,
+  enableRiskScoreResetToZero: true,
 
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
@@ -237,10 +220,6 @@ export const allowedExperimentalValues = Object.freeze({
   serviceEntityStoreEnabled: true,
   /**
 
-   /**
-   * Enables Integrations Sync for Privileged User Monitoring
-   */
-  integrationsSyncEnabled: false,
 
   /**
    * Disables the siem migrations feature
@@ -285,7 +264,7 @@ export const allowedExperimentalValues = Object.freeze({
   eventCollectionDataReductionBannerEnabled: true,
 
   /** Enables new Data View Picker */
-  newDataViewPickerEnabled: false,
+  newDataViewPickerEnabled: true,
 
   /**
    * Enables Microsoft Defender for Endpoint's RunScript command

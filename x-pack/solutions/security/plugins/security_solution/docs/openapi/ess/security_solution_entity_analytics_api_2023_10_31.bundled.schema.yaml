@@ -1988,6 +1988,23 @@ components:
                 ingested:
                   format: date-time
                   type: string
+            user:
+              type: object
+              properties:
+                entity:
+                  type: object
+                  properties:
+                    attributes:
+                      type: object
+                      properties:
+                        Privileged:
+                          description: Indicates if the user is privileged.
+                          type: boolean
+                is_privileged:
+                  description: Indicates if the user is privileged.
+                  type: boolean
+                name:
+                  type: string
     MonitoredUserUpdateDoc:
       type: object
       properties:

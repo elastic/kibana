@@ -14,7 +14,7 @@ describe('Clone panel placement strategies', () => {
   it('no other panels', () => {
     const currentPanels = {
       '1': {
-        grid: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+        grid: { x: 0, y: 0, w: 6, h: 6 },
         type: 'lens',
         config: {},
       },

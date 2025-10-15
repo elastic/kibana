@@ -81,8 +81,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
 
           // Expose tools scoped to the request
           for (const tool of tools) {
-            const toolSchema =
-              typeof tool.schema === 'function' ? await tool.schema() : tool.schema;
+            const toolSchema = await tool.getSchema();
             server.tool(
               idMapping.get(tool.id) ?? tool.id,
               tool.description,

@@ -338,7 +338,7 @@ export async function pickTestGroupRunOrder() {
     : [];
 
   const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
-    ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.js', '!**/__fixtures__/**']), {
+    ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.*js', '!**/__fixtures__/**']), {
         cwd: process.cwd(),
         absolute: false,
         ignore: DISABLED_JEST_CONFIGS,
@@ -507,7 +507,7 @@ export async function pickTestGroupRunOrder() {
             key: 'jest',
             agents: {
               ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 85,
+              diskSizeGb: 100,
             },
             env: {
               SCOUT_TARGET_TYPE: 'local',

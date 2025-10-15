@@ -379,7 +379,10 @@ describe('Discover state', () => {
       const nextId = 'id';
       mockServices.data.search.session.start = jest.fn(() => nextId);
       state.actions.initializeAndSync();
-      expect(state.searchSessionManager.getNextSearchSessionId()).toBe(nextId);
+      expect(state.searchSessionManager.getNextSearchSessionId()).toEqual({
+        searchSessionId: nextId,
+        isSearchSessionRestored: false,
+      });
     });
   });
 

@@ -43,6 +43,7 @@ import {
 import { loadDataViewList, initializeTabs } from './actions';
 import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
+import type { DiscoverSearchSessionManager } from '../discover_search_session';
 
 const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
@@ -376,6 +377,7 @@ export interface InternalStateDependencies {
   runtimeStateManager: RuntimeStateManager;
   urlStateStorage: IKbnUrlStateStorage;
   tabsStorageManager: TabsStorageManager;
+  searchSessionManager: DiscoverSearchSessionManager;
 }
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';

@@ -108,7 +108,7 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     await expect(page.getByRole('button', { name: 'Save changes' })).toBeEnabled();
   });
 
-  test('should cancel creating a new processor', async ({ page, pageObjects }) => {
+  test('should cancel creating a new processor', async ({ pageObjects }) => {
     await pageObjects.streams.clickAddProcessor();
 
     // Fill in some data
@@ -120,7 +120,7 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     await pageObjects.streams.confirmDiscardInModal();
 
     // Verify we're back to idle state
-    expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(0);
+    expect(await pageObjects.streams.getProcessorsListItemsFast()).toHaveLength(0);
   });
 
   test('should show validation errors for invalid processors configuration', async ({
@@ -129,7 +129,7 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
   }) => {
     await pageObjects.streams.clickAddProcessor();
     // Field can be automatically filled based on the samples, empty it.
-    await pageObjects.streams.fillProcessorFieldInput('');
+    await pageObjects.streams.processorFieldComboBox.clear();
 
     await pageObjects.streams.fillProcessorFieldInput('message');
     await pageObjects.streams.clickSaveProcessor();

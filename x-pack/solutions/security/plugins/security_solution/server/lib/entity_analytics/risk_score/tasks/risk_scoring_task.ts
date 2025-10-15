@@ -283,6 +283,7 @@ export const runTask = async ({
       excludeAlertStatuses,
       excludeAlertTags,
       alertSampleSizePerShard,
+      enableResetToZero,
     } = configuration;
     if (!enabled) {
       log('risk engine is not enabled, exiting task');
@@ -336,7 +337,8 @@ export const runTask = async ({
          **/
         if (
           (isFirstRunForEntityType || !isWorkComplete) &&
-          experimentalFeatures.enableRiskScoreResetToZero
+          experimentalFeatures.enableRiskScoreResetToZero &&
+          enableResetToZero
         ) {
           log(`Resetting to zero all ${identifierType} risk scores without recent risk input data`);
           await riskScoreService.resetToZero({

@@ -45,6 +45,7 @@ export const createDeletionDetectionService = (
         'debug',
         `No new full sync for source ${source.id}; skipping deletion detection.`
       );
+      return;
     }
 
     const [completedEventTimeStamp, startedEventTimeStamp] = await Promise.all([
@@ -71,14 +72,17 @@ export const createDeletionDetectionService = (
         completedEventTimeStamp,
       });
 
-      dataClient.log(`debug`, `allIntegrationsUserNames: ${allIntegrationsUserNames}`);
       // get all users in the privileged index for this source that are not in integrations docs
       const staleUsers = await findStaleUsers(
         source.id,
         allIntegrationsUserNames,
-        'entity_analytics_integration' // TODO: confirm index/type constant
+        'entity_analytics_integration'
       );
-      dataClient.log(`debug`, `staleUsers: ${staleUsers}`);
+
+      if (staleUsers.length === 0) {
+        dataClient.log('debug', `No stale users to soft delete for source ${source.id}`);
+        return;
+      }
       const ops = bulkUtilsService.bulkSoftDeleteOperations(
         staleUsers,
         dataClient.index,
@@ -117,7 +121,6 @@ export const createDeletionDetectionService = (
     const usersToDelete: string[] = [];
     while (fetchMore) {
       const privilegedMonitoringUsers = await esClient.search<never, StaleUsersAggregations>({
-        // you need to change the name for this type
         index: source.indexPattern,
         ...buildFindUsersSearchBody({
           timeGte: startedEventTimeStamp,

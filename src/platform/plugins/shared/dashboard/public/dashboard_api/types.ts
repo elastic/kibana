@@ -66,7 +66,7 @@ export interface DashboardCreationOptions {
 
   getPassThroughContext?: PassThroughContext['getPassThroughContext'];
 
-  getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
+  getIncomingEmbeddables?: () => EmbeddablePackageState[] | undefined;
 
   useSearchSessionsIntegration?: boolean;
   searchSessionSettings?: {
@@ -173,4 +173,5 @@ export interface DashboardInternalApi {
     controlGroupInput: ControlsGroupState | undefined;
     controlGroupReferences: Reference[];
   };
+  untilControlsInitialized: () => Promise<void>;
 }

@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
-import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
 import { REINDEX_SERVICE_BASE_PATH } from '../../../common';
 import type { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
@@ -53,7 +52,6 @@ export function registerReindexIndicesRoutes({ router, getReindexService }: Rout
     },
     async ({ core }, request, response) => {
       const {
-        savedObjects: { getClient },
         elasticsearch: { client: esClient },
       } = await core;
 
@@ -63,7 +61,6 @@ export function registerReindexIndicesRoutes({ router, getReindexService }: Rout
 
       try {
         const reindexService = (await getReindexService()).getScopedClient({
-          savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
           dataClient: esClient,
           request,
         });
@@ -103,15 +100,12 @@ export function registerReindexIndicesRoutes({ router, getReindexService }: Rout
     },
     async ({ core }, request, response) => {
       const {
-        savedObjects,
         elasticsearch: { client: esClient },
       } = await core;
-      const { getClient } = savedObjects;
       const { indexName } = request.params;
 
       try {
         const reindexService = (await getReindexService()).getScopedClient({
-          savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
           dataClient: esClient,
           request,
         });
@@ -147,15 +141,12 @@ export function registerReindexIndicesRoutes({ router, getReindexService }: Rout
     },
     async ({ core }, request, response) => {
       const {
-        savedObjects,
         elasticsearch: { client: esClient },
       } = await core;
       const { indexName } = request.params;
-      const { getClient } = savedObjects;
 
       try {
         const reindexService = (await getReindexService()).getScopedClient({
-          savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
           dataClient: esClient,
           request,
         });

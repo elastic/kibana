@@ -4081,22 +4081,6 @@
                 "path": "x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget/server/init_routes.ts"
               },
               {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_post_auth_interceptor.test.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_request_interceptor.test.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_request_interceptor.test.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_request_interceptor.test.ts"
-              },
-              {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
               },
@@ -7806,6 +7790,10 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/clone/clone_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
               },
               {
@@ -9507,6 +9495,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/delete/delete_backfill_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -14499,10 +14491,6 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/platform/plugins/private/canvas/server/routes/shareables/download.ts"
-              },
-              {
-                "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/workpad/find.ts"
               },
               {
@@ -15599,10 +15587,6 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/platform/plugins/private/canvas/server/routes/shareables/download.test.ts"
-              },
-              {
-                "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/templates/list.test.ts"
               },
               {
@@ -16174,10 +16158,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/custom_elements/create.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/platform/plugins/private/canvas/server/routes/shareables/zip.ts"
               },
               {
                 "plugin": "canvas",
@@ -17306,10 +17286,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/custom_elements/create.test.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/platform/plugins/private/canvas/server/routes/shareables/zip.test.ts"
               },
               {
                 "plugin": "canvas",

@@ -9,24 +9,44 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 
 import { packagePolicyService } from '../package_policy';
 
-import { createAgentAction } from './actions';
+import type { Agent } from '../../types';
+
+import { FleetUnauthorizedError } from '../../errors';
+
+import { createAgentAction, createErrorActionResults } from './actions';
 import { getAgentById } from './crud';
-import { changeAgentPrivilegeLevel } from './change_privilege_level';
+import {
+  bulkChangeAgentsPrivilegeLevel,
+  changeAgentPrivilegeLevel,
+} from './change_privilege_level';
+import { getAgents } from './crud';
 
 jest.mock('../package_policy');
 jest.mock('./crud');
 jest.mock('./actions');
 
+jest.mock('./crud', () => {
+  return {
+    getAgents: jest.fn(),
+    getAgentsByKuery: jest.fn(),
+    openPointInTime: jest.fn(),
+    getAgentById: jest.fn(),
+  };
+});
+
 const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
 const mockedCreateAgentAction = createAgentAction as jest.MockedFunction<typeof createAgentAction>;
-const mockedGetAgentById = getAgentById as jest.MockedFunction<typeof getAgentById>;
+const mockedCreateErrorActionResults = createErrorActionResults as jest.MockedFunction<
+  typeof createErrorActionResults
+>;
+
+const esClientMock = elasticsearchServiceMock.createInternalClient();
+const soClientMock = savedObjectsClientMock.create();
 
 describe('changeAgentPrivilegeLevel', () => {
-  const esClientMock = elasticsearchServiceMock.createInternalClient();
-  const soClientMock = savedObjectsClientMock.create();
   const agentId = 'agent-id';
   const policyId = 'policy-id';
-  mockedGetAgentById.mockResolvedValue({ policy_id: policyId } as any);
+  (getAgentById as jest.Mock).mockResolvedValue({ policy_id: policyId } as any);
 
   it('should throw an error if the agent needs root access', async () => {
     mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
@@ -112,5 +132,99 @@ describe('changeAgentPrivilegeLevel', () => {
       secrets: { user_info: { password: 'password' } },
     });
     expect(res).toEqual({ actionId: 'test-action-id' });
+  });
+});
+
+describe('bulkChangeAgentsPrivilegeLevel', () => {
+  const mockedAgent: Agent = {
+    id: 'agent-123',
+    policy_id: 'policy-0001',
+    last_checkin: new Date().toISOString(),
+    components: [],
+    local_metadata: {
+      elastic: {
+        agent: {
+          version: '1.0.0',
+        },
+      },
+    },
+    enrolled_at: new Date().toISOString(),
+    active: true,
+    packages: [],
+    type: 'PERMANENT',
+  };
+
+  beforeEach(() => {
+    // Reset mocks before each test
+    jest.resetAllMocks();
+
+    // Mock the createAgentAction response
+    mockedCreateAgentAction.mockResolvedValue({
+      id: 'test-action-id',
+      type: 'PRIVILEGE_LEVEL_CHANGE',
+      agents: ['agent-123'],
+      created_at: new Date().toISOString(),
+    });
+  });
+  it('should create a PRIVILEGE_LEVEL_CHANGE action for the specified agents', async () => {
+    (getAgents as jest.Mock).mockResolvedValue([mockedAgent, mockedAgent]);
+    const options = {
+      user_info: {
+        username: 'user1',
+        groupname: 'group1',
+        password: 'test',
+      },
+    };
+    await bulkChangeAgentsPrivilegeLevel(esClientMock, soClientMock, {
+      ...options,
+      agentIds: [mockedAgent.id, mockedAgent.id],
+    });
+    expect(mockedCreateAgentAction).toHaveBeenCalledTimes(1);
+    expect(mockedCreateAgentAction).toHaveBeenCalledWith(esClientMock, soClientMock, {
+      agents: [mockedAgent.id, mockedAgent.id],
+      created_at: expect.any(String),
+      data: { unprivileged: true, user_info: { groupname: 'group1', username: 'user1' } },
+      id: expect.any(String),
+      namespaces: ['default'],
+      secrets: { user_info: { password: 'test' } },
+      total: 2,
+      type: 'PRIVILEGE_LEVEL_CHANGE',
+    });
+  });
+
+  it('should record error result if agent policies contain integrations that require root access', async () => {
+    (getAgents as jest.Mock).mockResolvedValue([mockedAgent, mockedAgent]);
+    const options = {
+      user_info: {
+        username: 'user1',
+        groupname: 'group1',
+        password: 'test',
+      },
+    };
+    mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+      {
+        id: 'package-1',
+        package: { name: 'Package 1', requires_root: false },
+      },
+      {
+        id: 'package-2',
+        package: { name: 'Package 2', requires_root: true },
+      },
+    ] as any);
+
+    await bulkChangeAgentsPrivilegeLevel(esClientMock, soClientMock, {
+      ...options,
+      agentIds: [mockedAgent.id, mockedAgent.id],
+    });
+    expect(mockedCreateErrorActionResults).toHaveBeenCalledWith(
+      esClientMock,
+      expect.any(String),
+      {
+        'agent-123': new FleetUnauthorizedError(
+          'Agent agent-123 contains integrations that require root access: Package 2'
+        ),
+      },
+      'agent does not support privilege change action'
+    );
   });
 });

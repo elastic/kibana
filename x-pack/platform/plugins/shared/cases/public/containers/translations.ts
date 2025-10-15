@@ -98,5 +98,5 @@ export const OBSERVABLE_MAX_REACHED = (maxObservables: number) =>
   i18n.translate('xpack.cases.caseView.observables.maxReached', {
     values: { maxObservables },
     defaultMessage:
-      'The maximum number of observables is {maxObservables}. Some observables were not added.',
+      "You've reached the maximum number of observables {maxObservables} that can be added to a case. Some observables were not added.",
   });

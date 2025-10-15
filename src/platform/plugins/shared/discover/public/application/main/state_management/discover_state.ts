@@ -28,7 +28,7 @@ import { buildStateSubscribe } from './utils/build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
 import type { DiscoverDataStateContainer } from './discover_data_state_container';
 import { getDataStateContainer } from './discover_data_state_container';
-import { DiscoverSearchSessionManager } from './discover_search_session';
+import type { DiscoverSearchSessionManager } from './discover_search_session';
 import type { DiscoverAppLocatorParams } from '../../../../common';
 import { DISCOVER_APP_LOCATOR } from '../../../../common';
 import type { DiscoverAppState, DiscoverAppStateContainer } from './discover_app_state_container';
@@ -79,6 +79,10 @@ export interface DiscoverStateContainerParams {
    * State manager for runtime state that can't be stored in Redux
    */
   runtimeStateManager: RuntimeStateManager;
+  /**
+   * Manages search sessions and search session URL state
+   */
+  searchSessionManager: DiscoverSearchSessionManager;
 }
 
 export interface DiscoverStateContainer {
@@ -222,17 +226,10 @@ export function getDiscoverStateContainer({
   stateStorageContainer: stateStorage,
   internalState,
   runtimeStateManager,
+  searchSessionManager,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const injectCurrentTab = createTabActionInjector(tabId);
   const getCurrentTab = () => selectTab(internalState.getState(), tabId);
-
-  /**
-   * Search session logic
-   */
-  const searchSessionManager = new DiscoverSearchSessionManager({
-    history: services.history,
-    session: services.data.search.session,
-  });
 
   /**
    * Saved Search State Container, the persisted saved object of Discover
@@ -731,5 +728,11 @@ function createUrlGeneratorState({
     hideAggregatedPreview: appState.hideAggregatedPreview,
     breakdownField: appState.breakdownField,
     dataViewSpec: !dataView?.isPersisted() ? dataView?.toMinimalSpec() : undefined,
+    ...(shouldRestoreSearchSession
+      ? {
+          hideChart: appState.hideChart ?? false,
+          sampleSize: appState.sampleSize,
+        }
+      : {}),
   };
 }
