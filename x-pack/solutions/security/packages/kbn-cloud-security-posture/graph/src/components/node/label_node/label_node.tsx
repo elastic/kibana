@@ -8,7 +8,14 @@
 import React, { memo, useMemo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { css } from '@emotion/react';
-import { EuiText, EuiTextTruncate, transparentize, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import {
+  EuiText,
+  EuiTextTruncate,
+  EuiToolTip,
+  transparentize,
+  useEuiShadow,
+  useEuiTheme,
+} from '@elastic/eui';
 import {
   LabelNodeContainer,
   LabelShape,
@@ -33,6 +40,10 @@ export const TEST_SUBJ_STACKED_SHAPE = 'label-node-stacked-shape';
 export const TEST_SUBJ_HANDLE = 'label-node-handle';
 export const TEST_SUBJ_EXPAND_BTN = 'label-node-expand-btn';
 export const TEST_SUBJ_HOVER_OUTLINE = 'label-node-hover-outline';
+export const TEST_SUBJ_TOOLTIP = 'label-node-tooltip';
+export const TEST_SUBJ_LABEL_TEXT = 'label-node-text';
+
+const MAX_LABEL_LENGTH = 27;
 
 export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   const {
@@ -98,7 +109,21 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
                 font-size: ${euiTheme.font.scale.xs * 10.5}px;
               `}
             >
-              <EuiTextTruncate truncation="end" text={text} />
+              {text.length > MAX_LABEL_LENGTH ? (
+                <EuiToolTip content={text} display="block" data-test-subj={TEST_SUBJ_TOOLTIP}>
+                  <EuiTextTruncate
+                    data-test-subj={TEST_SUBJ_LABEL_TEXT}
+                    truncation="middle"
+                    text={text}
+                  />
+                </EuiToolTip>
+              ) : (
+                <EuiTextTruncate
+                  data-test-subj={TEST_SUBJ_LABEL_TEXT}
+                  truncation="middle"
+                  text={text}
+                />
+              )}
             </EuiText>
             <LabelNodeBadges analysis={analysis} onEventClick={eventClickHandler} />
           </div>
