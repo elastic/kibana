@@ -1106,7 +1106,7 @@ describe('WorkflowsService', () => {
           },
         ],
         _pagination: {
-          limit: 1,
+          limit: 20,
           page: 1,
           total: 1,
         },
@@ -1131,7 +1131,10 @@ describe('WorkflowsService', () => {
             ]),
           },
         },
+        size: 20,
+        from: 0,
         sort: [{ createdAt: 'desc' }],
+        track_total_hits: true,
       });
     });
 
@@ -1251,7 +1254,7 @@ describe('WorkflowsService', () => {
       expect(result).toEqual({
         results: [],
         _pagination: {
-          limit: 0,
+          limit: 20,
           page: 1,
           total: 0,
         },

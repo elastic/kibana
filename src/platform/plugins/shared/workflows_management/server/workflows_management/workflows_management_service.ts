@@ -46,6 +46,7 @@ import {
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../../common';
+
 import { InvalidYamlSchemaError, WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml_utils';
@@ -68,10 +69,13 @@ import type {
   GetWorkflowsParams,
 } from './workflows_management_api';
 
+const DEFAULT_PAGE_SIZE = 20;
 export interface SearchWorkflowExecutionsParams {
   workflowId: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
+  page?: number;
+  perPage?: number;
 }
 
 export class WorkflowsService {
@@ -818,6 +822,10 @@ export class WorkflowsService {
       });
     }
 
+    const page = params.page ?? 1;
+    const perPage = params.perPage ?? DEFAULT_PAGE_SIZE;
+    const from = (page - 1) * perPage;
+
     return searchWorkflowExecutions({
       esClient: this.esClient!,
       logger: this.logger,
@@ -827,6 +835,10 @@ export class WorkflowsService {
           must,
         },
       },
+      size: perPage,
+      from,
+      page,
+      perPage,
     });
   }
 

@@ -7,8 +7,8 @@
 
 import { core } from '@elastic/opentelemetry-node/sdk';
 import { createWithActiveSpan, withActiveSpan } from '@kbn/tracing-utils';
-import { propagation, trace } from '@opentelemetry/api';
-import { BAGGAGE_TRACKING_BEACON_KEY, BAGGAGE_TRACKING_BEACON_VALUE } from './baggage';
+import { trace } from '@opentelemetry/api';
+import { createInferenceContext } from './create_inference_context';
 import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from './root_inference_span';
 
 /**
@@ -16,39 +16,19 @@ import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from './root_inference_span';
  * context will be exported via the inference exporters. This allows us to export
  * a subset of spans to external systems like Phoenix.
  */
+
+const TRACER = trace.getTracer('inference');
+
 export const withActiveInferenceSpan = createWithActiveSpan(
   {
-    tracer: trace.getTracer('inference'),
+    tracer: TRACER,
   },
   (name, opts, ctx, cb) => {
     if (core.isTracingSuppressed(ctx)) {
       return cb();
     }
 
-    let baggage = propagation.getBaggage(ctx);
-
-    let isRootInferenceSpan = false;
-
-    // If the tracking beacon isn't found in the baggage for
-    // the current context, this is the root span for the inference context
-    if (!baggage) {
-      baggage = propagation.createBaggage({
-        [BAGGAGE_TRACKING_BEACON_KEY]: {
-          value: BAGGAGE_TRACKING_BEACON_VALUE,
-        },
-      });
-      isRootInferenceSpan = true;
-    } else if (
-      baggage.getEntry(BAGGAGE_TRACKING_BEACON_KEY)?.value !== BAGGAGE_TRACKING_BEACON_VALUE
-    ) {
-      isRootInferenceSpan = true;
-      baggage = baggage.setEntry(BAGGAGE_TRACKING_BEACON_KEY, {
-        value: BAGGAGE_TRACKING_BEACON_VALUE,
-      });
-    }
-
-    // create a new context with the updated baggage
-    const parentContext = propagation.setBaggage(ctx, baggage);
+    const { context: parentContext, isRoot } = createInferenceContext();
 
     return withActiveSpan(
       name,
@@ -56,7 +36,7 @@ export const withActiveInferenceSpan = createWithActiveSpan(
         ...opts,
         attributes: {
           ...opts.attributes,
-          [IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME]: isRootInferenceSpan,
+          [IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME]: isRoot,
         },
       },
       parentContext,
