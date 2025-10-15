@@ -60,7 +60,12 @@ import type { initializeTrackPanel } from '../track_panel';
 import { areLayoutsEqual } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
-import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from './types';
+import {
+  isDashboardLayoutPanel,
+  type DashboardChildren,
+  type DashboardLayout,
+  type DashboardLayoutPanel,
+} from './types';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
@@ -252,6 +257,15 @@ export function initializeLayoutManager(
     return titles;
   }
 
+  const createPanel = (panelPackage: PanelPackage) => {
+    const { serializedState, maybePanelId } = panelPackage;
+    const uuid = maybePanelId ?? v4();
+
+    if (serializedState) currentChildState[uuid] = serializedState;
+
+    return uuid;
+  };
+
   // --------------------------------------------------------------------------------------
   // API definition
   // --------------------------------------------------------------------------------------
@@ -260,15 +274,12 @@ export function initializeLayoutManager(
     options?: {
       displaySuccessMessage?: boolean;
       beside?: string;
-      disableScrollTo?: boolean;
     },
     grid?: DashboardPanel['grid']
   ) => {
-    const { panelType: type, serializedState, maybePanelId } = panelPackage;
-    const uuid = maybePanelId ?? v4();
-    usageCollectionService?.reportUiCounter(DASHBOARD_UI_METRIC_ID, METRIC_TYPE.CLICK, type);
-
-    if (serializedState) currentChildState[uuid] = serializedState;
+    const uuid = createPanel(panelPackage);
+    const { serializedState, panelType } = panelPackage;
+    usageCollectionService?.reportUiCounter(DASHBOARD_UI_METRIC_ID, METRIC_TYPE.CLICK, panelType);
 
     layout$.next(await placeNewPanel(uuid, panelPackage, grid, options?.beside));
 
@@ -279,10 +290,8 @@ export function initializeLayoutManager(
         'data-test-subj': 'addEmbeddableToDashboardSuccess',
       });
     }
-    if (!options?.disableScrollTo) {
-      trackPanel.setScrollToPanelId(uuid);
-      trackPanel.setHighlightPanelId(uuid);
-    }
+    trackPanel.setScrollToPanelId(uuid);
+    trackPanel.setHighlightPanelId(uuid);
     return (await getChildApi(uuid)) as ApiType;
   };
 
@@ -367,10 +376,7 @@ export function initializeLayoutManager(
     trackPanel.setHighlightPanelId(uuidOfDuplicate);
   };
 
-  const pinPanel = (uuid: string) => {
-    const controlToPin = layout$.getValue().panels[uuid];
-    if (!controlToPin) return;
-
+  const pinPanel = (uuid: string, controlToPin: DashboardLayoutPanel) => {
     // add control panel to the end of the pinned controls
     const newControls = { ...layout$.getValue().controls };
 
@@ -387,21 +393,20 @@ export function initializeLayoutManager(
     layout$.next({ ...layout$.getValue(), panels: newPanels, controls: newControls });
   };
 
-  const addPinnedPanel = async (panelPackage: PanelPackage) => {
-    const newPanel = await addNewPanel<{ uuid: string }>(panelPackage, {
-      disableScrollTo: true,
-    });
-    pinPanel(newPanel.uuid);
-    return newPanel;
-  };
-
   const getChildApi = async (uuid: string): Promise<DefaultEmbeddableApi | undefined> => {
-    const panelLayout = layout$.value.panels[uuid];
+    const { panels, controls } = layout$.value;
+    // Typescript erroneously believes panels[uuid] cannot be undefined, so we need to add these Object.hasOwn
+    // checks to get the type signature of panelLayout to be correct
+    const panelLayout = Object.hasOwn(panels, uuid)
+      ? panels[uuid]
+      : Object.hasOwn(controls, uuid)
+      ? controls[uuid]
+      : undefined;
     if (!panelLayout) throw new PanelNotFoundError();
     if (children$.value[uuid]) return children$.value[uuid];
 
     // if the panel is in a collapsed section and has never been built, then childApi will be undefined
-    if (isSectionCollapsed(panelLayout.grid.sectionId)) {
+    if (isDashboardLayoutPanel(panelLayout) && isSectionCollapsed(panelLayout.grid.sectionId)) {
       return undefined;
     }
 
@@ -524,8 +529,26 @@ export function initializeLayoutManager(
           controls: newControls,
         });
       },
-      pinPanel,
-      addPinnedPanel,
+      pinPanel: (uuid: string) => {
+        const controlToPin = layout$.getValue().panels[uuid];
+        if (!controlToPin) return;
+
+        pinPanel(uuid, controlToPin);
+      },
+      addPinnedPanel: async (panelPackage: PanelPackage) => {
+        const newPanelUuid = createPanel(panelPackage);
+        const { serializedState } = panelPackage;
+        const displaySettings = serializedState
+          ? pick(serializedState.rawState, 'grow', 'width')
+          : {};
+        const panelToPin = {
+          type: panelPackage.panelType,
+          grid: { x: 0, y: 0, w: 1, h: 1 },
+          ...displaySettings,
+        };
+        pinPanel(newPanelUuid, panelToPin);
+        return await getChildApi(newPanelUuid);
+      },
 
       /** Sections */
       addNewSection: () => {

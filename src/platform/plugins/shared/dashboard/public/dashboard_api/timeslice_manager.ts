@@ -25,7 +25,10 @@ export const initializeTimesliceManager = (
     PublishesTimeslice,
     Timeslice
   >({ children$ }, 'timeslice$', apiPublishesTimeslice, undefined).subscribe((newTimeslice) => {
-    timeslice$.next(newTimeslice);
+    // Guard against children that publish an empty timeslice
+    const [from, to] = newTimeslice ?? [];
+    if (typeof from !== 'number' || typeof to !== 'number') timeslice$.next(undefined);
+    else timeslice$.next(newTimeslice);
   });
 
   return {

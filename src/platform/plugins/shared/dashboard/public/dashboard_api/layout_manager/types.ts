@@ -24,6 +24,9 @@ export interface DashboardLayoutPanel {
   grow?: boolean;
 }
 
+export const isDashboardLayoutPanel = (panel: unknown): panel is DashboardLayoutPanel =>
+  Boolean((panel as DashboardLayoutPanel).type) && Boolean((panel as DashboardLayoutPanel).grid);
+
 export interface DashboardLayout {
   panels: {
     [uuid: string]: DashboardLayoutPanel;
