@@ -7,9 +7,9 @@ applies_to:
 
 # Case analytics indices schema[case-analytics-indices-schema]
 
-This page lists fields that can appear in case analytics indices documents. These fields display general data about cases, in addition to data about case comments, attachments, and activity. To learn more about the indices and cases as data feature, refer to 
+This page lists fields that can appear in case analytics indices documents. These fields display general data about cases, in addition to data about case comments, attachments, and activity. 
 
-% [Use cases as data](docs-content://explore-analyze/alerts-cases/cases/cases-as-data.md).
+% To learn more about the indices and cases as data feature, refer to [Use cases as data](docs-content://explore-analyze/alerts-cases/cases/cases-as-data.md).
 
 ::::{important}
 The cases as data feature is in technical preview, meaning the schema for the case analytics indices is subject to change. 
@@ -111,7 +111,7 @@ The cases as data feature is in technical preview, meaning the schema for the ca
 | @timestamp | date | The date the document for the case was added to the case analytics indices. |
 | case\_id | keyword | The case UUID. |
 | action | keyword | The user’s action. Possible values are `add`, `create`, `update`, `delete`.  |
-| type | keyword | The type of the action a user took. Possible values are `status`, `create\_case`, `delete\_case`. |
+| type | keyword | The type of the action a user took. Possible values are `status`, `create_case`, `delete_case`. |
 | payload.status | keyword | The new case status. Possible values are `open`, `in-progress`, `closed`. |
 | payload.tags | keyword | The new case tags. |
 | payload.category | keyword | The new case category. |
