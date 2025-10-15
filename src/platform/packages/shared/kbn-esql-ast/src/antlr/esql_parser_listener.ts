@@ -78,10 +78,11 @@ import { CompositeForkSubQueryContext } from "./esql_parser.js";
 import { ForkSubQueryProcessingCommandContext } from "./esql_parser.js";
 import { RerankCommandContext } from "./esql_parser.js";
 import { CompletionCommandContext } from "./esql_parser.js";
-import { LookupCommandContext } from "./esql_parser.js";
-import { InlinestatsCommandContext } from "./esql_parser.js";
-import { InsistCommandContext } from "./esql_parser.js";
+import { InlineStatsCommandContext } from "./esql_parser.js";
 import { FuseCommandContext } from "./esql_parser.js";
+import { FuseConfigurationContext } from "./esql_parser.js";
+import { LookupCommandContext } from "./esql_parser.js";
+import { InsistCommandContext } from "./esql_parser.js";
 import { SetCommandContext } from "./esql_parser.js";
 import { SetFieldContext } from "./esql_parser.js";
 import { MatchExpressionContext } from "./esql_parser.js";
@@ -130,7 +131,6 @@ import { ComparisonOperatorContext } from "./esql_parser.js";
 import { JoinCommandContext } from "./esql_parser.js";
 import { JoinTargetContext } from "./esql_parser.js";
 import { JoinConditionContext } from "./esql_parser.js";
-import { JoinPredicateContext } from "./esql_parser.js";
 
 
 /**
@@ -829,35 +829,15 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitCompletionCommand?: (ctx: CompletionCommandContext) => void;
 	/**
-	 * Enter a parse tree produced by `esql_parser.lookupCommand`.
+	 * Enter a parse tree produced by `esql_parser.inlineStatsCommand`.
 	 * @param ctx the parse tree
 	 */
-	enterLookupCommand?: (ctx: LookupCommandContext) => void;
+	enterInlineStatsCommand?: (ctx: InlineStatsCommandContext) => void;
 	/**
-	 * Exit a parse tree produced by `esql_parser.lookupCommand`.
+	 * Exit a parse tree produced by `esql_parser.inlineStatsCommand`.
 	 * @param ctx the parse tree
 	 */
-	exitLookupCommand?: (ctx: LookupCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.inlinestatsCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.inlinestatsCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.insistCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterInsistCommand?: (ctx: InsistCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.insistCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitInsistCommand?: (ctx: InsistCommandContext) => void;
+	exitInlineStatsCommand?: (ctx: InlineStatsCommandContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.fuseCommand`.
 	 * @param ctx the parse tree
@@ -868,6 +848,36 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitFuseCommand?: (ctx: FuseCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.fuseConfiguration`.
+	 * @param ctx the parse tree
+	 */
+	enterFuseConfiguration?: (ctx: FuseConfigurationContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.fuseConfiguration`.
+	 * @param ctx the parse tree
+	 */
+	exitFuseConfiguration?: (ctx: FuseConfigurationContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.lookupCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterLookupCommand?: (ctx: LookupCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.lookupCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitLookupCommand?: (ctx: LookupCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.insistCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterInsistCommand?: (ctx: InsistCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.insistCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitInsistCommand?: (ctx: InsistCommandContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.setCommand`.
 	 * @param ctx the parse tree
@@ -1410,15 +1420,5 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitJoinCondition?: (ctx: JoinConditionContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.joinPredicate`.
-	 * @param ctx the parse tree
-	 */
-	enterJoinPredicate?: (ctx: JoinPredicateContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.joinPredicate`.
-	 * @param ctx the parse tree
-	 */
-	exitJoinPredicate?: (ctx: JoinPredicateContext) => void;
 }
 

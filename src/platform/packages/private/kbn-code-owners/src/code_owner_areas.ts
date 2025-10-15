@@ -67,7 +67,8 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/streams-program-team',
   ],
   security: [
-    'elastic/kibana-cloud-security-posture',
+    'elastic/contextual-security-apps',
+    'elastic/integration-experience',
     'elastic/security-asset-management',
     'elastic/security-data-analytics',
     'elastic/security-defend-workflows',
@@ -78,7 +79,6 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/security-engineering-productivity',
     'elastic/security-entity-analytics',
     'elastic/security-generative-ai',
-    'elastic/security-scalability',
     'elastic/security-service-integrations',
     'elastic/security-solution',
     'elastic/security-threat-hunting',

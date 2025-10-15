@@ -8,8 +8,9 @@
  */
 
 import type { CSSProperties, FunctionComponent } from 'react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
+import { css as cssClassName } from '@emotion/css';
 import { css } from '@emotion/react';
 import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
@@ -20,6 +21,8 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiToolTip,
+  useEuiTheme,
+  transparentize,
 } from '@elastic/eui';
 import type { monaco } from '@kbn/monaco';
 import { CONSOLE_OUTPUT_THEME_ID, CONSOLE_OUTPUT_LANG_ID } from '@kbn/monaco';
@@ -34,6 +37,68 @@ import {
 import { useEditorReadContext, useRequestReadContext, useServicesContext } from '../../contexts';
 import { MonacoEditorOutputActionsProvider } from './monaco_editor_output_actions_provider';
 import { useResizeCheckerUtils } from './hooks';
+import { useActionStyles, useHighlightedLinesClassName } from './styles';
+import type { StatusCodeClassNames } from './types';
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const { actions } = useActionStyles();
+
+  return {
+    outputActions: css`
+      ${actions}
+
+      // For IE11
+      min-width: ${euiTheme.size.l};
+    `,
+  };
+};
+
+const useStatusCodeClassNames = (): StatusCodeClassNames => {
+  const { euiTheme } = useEuiTheme();
+
+  return useMemo(
+    () => ({
+      monacoStatusCodeLinePrimary: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.primary, 0.9)};
+      `,
+      monacoStatusCodeLineNumberPrimary: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.primary, 0.5)};
+      `,
+      monacoStatusCodeLineSuccess: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.success, 0.9)};
+      `,
+      monacoStatusCodeLineNumberSuccess: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.success, 0.5)};
+      `,
+      monacoStatusCodeLineDefault: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.lightShade, 0.9)};
+      `,
+      monacoStatusCodeLineNumberDefault: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.lightShade, 0.5)};
+      `,
+      monacoStatusCodeLineWarning: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.warning, 0.9)};
+      `,
+      monacoStatusCodeLineNumberWarning: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.warning, 0.5)};
+      `,
+      monacoStatusCodeLineDanger: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.danger, 0.9)};
+      `,
+      monacoStatusCodeLineNumberDanger: cssClassName`
+        background-color: ${transparentize(euiTheme.colors.danger, 0.5)};
+      `,
+    }),
+    [
+      euiTheme.colors.primary,
+      euiTheme.colors.success,
+      euiTheme.colors.lightShade,
+      euiTheme.colors.warning,
+      euiTheme.colors.danger,
+    ]
+  );
+};
 
 export const MonacoEditorOutput: FunctionComponent = () => {
   const context = useServicesContext();
@@ -48,6 +113,9 @@ export const MonacoEditorOutput: FunctionComponent = () => {
   const [mode, setMode] = useState('text');
   const divRef = useRef<HTMLDivElement | null>(null);
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
+  const monacoEditorOutputStyles = useStyles();
+  const statusCodeClassNames = useStatusCodeClassNames();
+  const highlightedLinesClassName = useHighlightedLinesClassName();
   const lineDecorations = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
   const actionsProvider = useRef<MonacoEditorOutputActionsProvider | null>(null);
@@ -55,13 +123,17 @@ export const MonacoEditorOutput: FunctionComponent = () => {
 
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
-      const provider = new MonacoEditorOutputActionsProvider(editor, setEditorActionsCss);
+      const provider = new MonacoEditorOutputActionsProvider(
+        editor,
+        setEditorActionsCss,
+        highlightedLinesClassName
+      );
       actionsProvider.current = provider;
 
       setupResizeChecker(divRef.current!, editor);
       lineDecorations.current = editor.createDecorationsCollection();
     },
-    [setupResizeChecker]
+    [highlightedLinesClassName, setupResizeChecker]
   );
 
   const editorWillUnmountCallback = useCallback(() => {
@@ -100,7 +172,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
       );
       if (isMultipleRequest) {
         // If there are multiple responses, add decorations for their status codes
-        const decorations = getStatusCodeDecorations(data);
+        const decorations = getStatusCodeDecorations(data, statusCodeClassNames);
         lineDecorations.current?.set(decorations);
         // Highlight first line of the output editor
         actionsProvider.current?.selectFirstLine();
@@ -108,7 +180,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
     } else {
       setValue('');
     }
-  }, [readOnlySettings, data, value]);
+  }, [readOnlySettings, data, value, statusCodeClassNames]);
 
   const copyOutputCallback = useCallback(async () => {
     const selectedText = (await actionsProvider.current?.getParsedOutput()) as string;
@@ -143,7 +215,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
       ref={divRef}
     >
       <EuiFlexGroup
-        className="conApp__outputActions"
+        css={monacoEditorOutputStyles.outputActions}
         responsive={false}
         style={editorActionsCss}
         justifyContent="center"

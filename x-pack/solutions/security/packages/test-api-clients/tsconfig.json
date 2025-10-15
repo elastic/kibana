@@ -1,0 +1,27 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core-http-common",
+    "@kbn/openapi-common",
+    "@kbn/security-solution-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/ftr-common-functional-services",
+    "@kbn/securitysolution-endpoint-exceptions-common",
+    "@kbn/securitysolution-exceptions-common",
+    "@kbn/securitysolution-lists-common",
+    "@kbn/osquery-plugin"
+  ]
+}

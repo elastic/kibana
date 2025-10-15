@@ -91,6 +91,7 @@ describe('CrowdstrikeActionsClient class', () => {
     'getFile',
     'execute',
     'upload',
+    'cancel',
   ] as Array<keyof ResponseActionsClient>)(
     'should throw an un-supported error for %s',
     async (methodName) => {

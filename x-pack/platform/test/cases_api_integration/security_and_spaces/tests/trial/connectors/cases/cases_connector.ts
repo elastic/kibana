@@ -340,6 +340,7 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'securitySolutionFixture',
             settings: {
               syncAlerts: false,
+              extractObservables: false,
             },
             severity: 'low',
             status: 'open',
@@ -347,6 +348,7 @@ export default ({ getService }: FtrProviderContext): void => {
             title: 'Test rule (Auto-created)',
             totalAlerts: 5,
             totalComment: 0,
+            totalEvents: 0,
             updated_by: {
               email: null,
               full_name: null,
@@ -453,6 +455,7 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'securitySolutionFixture',
             settings: {
               syncAlerts: false,
+              extractObservables: false,
             },
             severity: 'high',
             status: 'open',
@@ -460,6 +463,7 @@ export default ({ getService }: FtrProviderContext): void => {
             title: 'Case with sample template',
             totalAlerts: 5,
             totalComment: 0,
+            totalEvents: 0,
             updated_by: {
               email: null,
               full_name: null,
@@ -824,6 +828,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -838,6 +843,7 @@ export default ({ getService }: FtrProviderContext): void => {
               title: 'Test rule - Grouping by A (Auto-created)',
               totalAlerts: 3,
               totalComment: 0,
+              totalEvents: 0,
               updated_by: {
                 email: null,
                 full_name: null,
@@ -872,6 +878,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -886,6 +893,7 @@ export default ({ getService }: FtrProviderContext): void => {
               title: 'Test rule - Grouping by B (Auto-created)',
               totalAlerts: 2,
               totalComment: 0,
+              totalEvents: 0,
               updated_by: {
                 email: null,
                 full_name: null,
@@ -1339,6 +1347,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -1351,6 +1360,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 'test',
               ],
               title: 'custom-title',
+              totalEvents: 0,
               totalAlerts: 2,
               totalComment: 1,
               updated_by: {
@@ -1387,6 +1397,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -1401,6 +1412,7 @@ export default ({ getService }: FtrProviderContext): void => {
               title: 'Test rule - Grouping by field_value_2 (Auto-created)',
               totalAlerts: 2,
               totalComment: 2,
+              totalEvents: 0,
               updated_by: {
                 email: null,
                 full_name: null,
@@ -1435,6 +1447,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -1449,6 +1462,7 @@ export default ({ getService }: FtrProviderContext): void => {
               title: 'Test rule - Grouping by field_value_3 (Auto-created)',
               totalAlerts: 1,
               totalComment: 0,
+              totalEvents: 0,
               updated_by: {
                 email: null,
                 full_name: null,
@@ -1895,6 +1909,10 @@ const createCaseWithId = async ({
         type: ConnectorTypes.none,
         fields: null,
       },
+      settings: {
+        syncAlerts: req?.settings?.syncAlerts ?? false,
+        extractObservables: req?.settings?.extractObservables ?? false,
+      },
       // @ts-ignore
       status: STATUS_EXTERNAL_TO_ESMODEL[req?.status ?? CaseStatuses.open],
       // @ts-ignore
@@ -1909,6 +1927,7 @@ const createCaseWithId = async ({
       external_service: null,
       total_alerts: 0,
       total_comments: 0,
+      total_events: 0,
       observables: [],
       incremental_id: undefined,
     },

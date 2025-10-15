@@ -140,7 +140,7 @@ const getDefaultFieldTableColumns = ({ highlight }: { highlight: string }): Fiel
           <EuiScreenReaderOnly data-test-subj="descriptionForScreenReaderOnly">
             <p>{i18n.DESCRIPTION_FOR_FIELD(name)}</p>
           </EuiScreenReaderOnly>
-          <span css={styles.truncatable}>
+          <span css={styles.truncatable} tabIndex={0}>
             <span css={styles.description} data-test-subj={`field-${name}-description`}>
               {`${description ?? getEmptyValue()} ${getExampleText(example)}`}
             </span>

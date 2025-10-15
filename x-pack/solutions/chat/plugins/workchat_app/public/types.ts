@@ -6,7 +6,7 @@
  */
 
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
-import type { ChatDataRegistryPluginSetup } from '@kbn/chat-data-registry-plugin/public';
+import type { DataSourcesRegistryPluginSetup } from '@kbn/data-sources-registry-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkChatAppPluginSetup {}
@@ -15,7 +15,7 @@ export interface WorkChatAppPluginSetup {}
 export interface WorkChatAppPluginStart {}
 
 export interface WorkChatAppPluginSetupDependencies {
-  chatDataRegistry: ChatDataRegistryPluginSetup;
+  dataSourcesRegistry: DataSourcesRegistryPluginSetup;
 }
 
 export interface WorkChatAppPluginStartDependencies {

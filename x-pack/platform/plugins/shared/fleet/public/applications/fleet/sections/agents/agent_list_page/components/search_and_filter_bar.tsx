@@ -63,7 +63,8 @@ export interface SearchAndFilterBarProps {
   latestAgentActionErrors: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
-  protectedAndFleetAgents: Agent[];
+  unsupportedMigrateAgents: Agent[];
+  unsupportedPrivilegeLevelChangeAgents: Agent[];
 }
 
 export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps> = ({
@@ -95,7 +96,8 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   latestAgentActionErrors,
   sortField,
   sortOrder,
-  protectedAndFleetAgents,
+  unsupportedMigrateAgents,
+  unsupportedPrivilegeLevelChangeAgents,
 }) => {
   const authz = useAuthz();
 
@@ -231,7 +233,8 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   agentPolicies={agentPolicies}
                   sortField={sortField}
                   sortOrder={sortOrder}
-                  protectedAndFleetAgents={protectedAndFleetAgents}
+                  unsupportedMigrateAgents={unsupportedMigrateAgents}
+                  unsupportedPrivilegeLevelChangeAgents={unsupportedPrivilegeLevelChangeAgents}
                 />
               </EuiFlexItem>
             ) : null}

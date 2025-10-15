@@ -36,6 +36,8 @@ export const fieldTypes = [
   'unsupported',
   'date_nanos',
   'function_named_parameters',
+  'aggregate_metric_double',
+  'dense_vector',
 ] as const;
 
 export type FieldType = (typeof fieldTypes)[number];
@@ -133,6 +135,9 @@ export enum FunctionDefinitionTypes {
   TIME_SERIES_AGG = 'time_series_agg',
 }
 
+export const grokSupportedDataTypes = ['int', 'long', 'double', 'float', 'boolean'] as const;
+export type GrokDataType = (typeof grokSupportedDataTypes)[number];
+
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
 
 /**
@@ -184,6 +189,15 @@ export interface ElasticsearchCommandDefinition {
   observability_tier?: string;
 }
 
+export interface ElasticsearchSettingsDefinition {
+  name: string;
+  type: string;
+  serverlessOnly: boolean;
+  preview: boolean;
+  snapshotOnly: boolean;
+  description: string;
+}
+
 /**
  * This is the return type of a function definition.
  *
@@ -218,6 +232,7 @@ export interface FunctionFilterPredicates {
   location: Location;
   returnTypes?: string[];
   ignored?: string[];
+  allowed?: string[];
 }
 
 export interface Literals {

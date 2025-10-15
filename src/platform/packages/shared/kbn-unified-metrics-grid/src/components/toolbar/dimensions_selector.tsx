@@ -13,8 +13,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { ClearAllSection } from './clear_all_section';
-
-const MAX_DIMENSIONS_SELECTIONS = 10;
+import {
+  MAX_DIMENSIONS_SELECTIONS,
+  METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
+} from '../../common/constants';
 
 interface DimensionsFilterProps {
   fields: Array<{
@@ -156,7 +158,7 @@ export const DimensionsSelector = ({
 
   return (
     <ToolbarSelector
-      data-test-subj="metricsExperienceBreakdownSelector"
+      data-test-subj={METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}
       data-selected-value={selectedDimensions}
       searchable
       buttonLabel={buttonLabel}

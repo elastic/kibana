@@ -8,7 +8,6 @@
  */
 
 import expect from '@kbn/expect';
-import { type SavedObjectReference } from '@kbn/core/server';
 import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -17,15 +16,18 @@ const updatedDashboard = {
   options: { useMargins: false },
   panels: [
     {
+      config: {},
       type: 'visualization',
-      gridData: { x: 0, y: 0, w: 48, h: 60, i: '1' },
-      panelIndex: '1',
+      grid: { x: 0, y: 0, w: 48, h: 60 },
+      uid: '1',
       version: '7.3.0',
     },
   ],
-  timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
+  timeRange: {
+    from: 'Wed Sep 16 2015 22:52:17 GMT-0700',
+    to: 'Fri Sep 18 2015 12:24:38 GMT-0700',
+  },
   timeRestore: true,
-  timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
   references: [
     {
       id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -68,100 +70,6 @@ export default function ({ getService }: FtrProviderContext) {
         statusCode: 404,
         error: 'Not Found',
         message: 'A dashboard with saved object ID not-an-id was not found.',
-      });
-    });
-
-    describe('update a dashboard with tags', () => {
-      it('adds a tag to the dashboard', async () => {
-        const response = await supertest
-          .put(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
-          .set('kbn-xsrf', 'true')
-          .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
-          .set('elastic-api-version', '1')
-          .send({
-            ...updatedDashboard,
-            tags: ['bar'],
-          });
-
-        expect(response.status).to.be(200);
-        expect(response.body.data.tags).to.contain('bar');
-        expect(response.body.data.tags).to.have.length(1);
-        const referenceIds = response.body.data.references.map(
-          (ref: SavedObjectReference) => ref.id
-        );
-        expect(referenceIds).to.contain('tag-2');
-        expect(referenceIds).to.contain('dd7caf20-9efd-11e7-acb3-3dab96693fab');
-        expect(response.body.data.references).to.have.length(2);
-      });
-
-      it('replaces the tags on the dashboard', async () => {
-        const response = await supertest
-          .put(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
-          .set('kbn-xsrf', 'true')
-          .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
-          .set('elastic-api-version', '1')
-          .send({
-            ...updatedDashboard,
-            tags: ['foo'],
-          });
-
-        expect(response.status).to.be(200);
-        expect(response.body.data.tags).to.contain('foo');
-        expect(response.body.data.tags).to.have.length(1);
-        const referenceIds = response.body.data.references.map(
-          (ref: SavedObjectReference) => ref.id
-        );
-        expect(referenceIds).to.contain('tag-1');
-        expect(referenceIds).to.contain('dd7caf20-9efd-11e7-acb3-3dab96693fab');
-        expect(response.body.data.references).to.have.length(2);
-      });
-
-      it('empty tags array removes all tags', async () => {
-        const response = await supertest
-          .put(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
-          .set('kbn-xsrf', 'true')
-          .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
-          .set('elastic-api-version', '1')
-          .send({
-            ...updatedDashboard,
-            tags: [],
-          });
-
-        expect(response.status).to.be(200);
-        expect(response.body.data).not.to.have.property('tags');
-        const referenceIds = response.body.data.references.map(
-          (ref: SavedObjectReference) => ref.id
-        );
-        expect(referenceIds).to.contain('dd7caf20-9efd-11e7-acb3-3dab96693fab');
-        expect(response.body.data.references).to.have.length(1);
-      });
-
-      it('creates tag if a saved object matching a tag name is not found', async () => {
-        const randomTagName = `tag-${Math.random() * 1000}`;
-        const response = await supertest
-          .put(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
-          .set('kbn-xsrf', 'true')
-          .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
-          .set('elastic-api-version', '1')
-          .send({
-            ...updatedDashboard,
-            tags: ['foo', 'bar', 'buzz', randomTagName],
-          });
-
-        expect(response.status).to.be(200);
-        expect(response.body.data.tags).to.contain('foo');
-        expect(response.body.data.tags).to.contain('bar');
-        expect(response.body.data.tags).to.contain('buzz');
-        expect(response.body.data.tags).to.contain(randomTagName);
-        expect(response.body.data.tags).to.have.length(4);
-        const referenceIds = response.body.data.references.map(
-          (ref: SavedObjectReference) => ref.id
-        );
-        expect(referenceIds).to.contain('tag-1');
-        expect(referenceIds).to.contain('tag-2');
-        expect(referenceIds).to.contain('tag-3');
-        expect(referenceIds).to.contain('dd7caf20-9efd-11e7-acb3-3dab96693fab');
-        expect(response.body.data.references).to.have.length(5);
       });
     });
   });

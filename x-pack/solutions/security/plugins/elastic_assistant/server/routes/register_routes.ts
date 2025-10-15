@@ -9,9 +9,12 @@ import type { Logger } from '@kbn/core/server';
 
 import { findSecurityAIPromptsRoute } from './security_ai_prompts/find_prompts';
 import { findAlertSummaryRoute } from './alert_summary/find_route';
-import { findAttackDiscoveriesRoute } from './attack_discovery/get/internal/find_attack_discoveries';
-import { postAttackDiscoveryRoute } from './attack_discovery/post/internal/post_attack_discovery';
-import { postAttackDiscoveryBulkRoute } from './attack_discovery/post/internal/post_attack_discovery_bulk';
+import { findAttackDiscoveriesInternalRoute } from './attack_discovery/internal/get/find_attack_discoveries_internal';
+import { findAttackDiscoveriesRoute } from './attack_discovery/public/get/find_attack_discoveries';
+import { postAttackDiscoveryGenerateRoute } from './attack_discovery/public/post/post_attack_discovery_generate';
+import { postAttackDiscoveryInternalRoute } from './attack_discovery/internal/post/post_attack_discovery_internal';
+import { postAttackDiscoveryBulkRoute } from './attack_discovery/public/post/post_attack_discovery_bulk';
+import { postAttackDiscoveryBulkInternalRoute } from './attack_discovery/internal/post/post_attack_discovery_bulk_internal';
 import type { ElasticAssistantPluginRouter } from '../types';
 import { createConversationRoute } from './user_conversations/create_route';
 import { deleteConversationRoute } from './user_conversations/delete_route';
@@ -41,17 +44,27 @@ import {
 } from './defend_insights';
 import { deleteKnowledgeBaseEntryRoute } from './knowledge_base/entries/delete_route';
 import { updateKnowledgeBaseEntryRoute } from './knowledge_base/entries/update_route';
-import { getAttackDiscoveryGenerationsRoute } from './attack_discovery/get/internal/get_attack_discovery_generations';
-import { postAttackDiscoveryGenerationsDismissRoute } from './attack_discovery/post/internal/post_attack_discovery_generations_dismiss';
+import { getAttackDiscoveryGenerationsRoute } from './attack_discovery/public/get/get_attack_discovery_generations';
+import { getAttackDiscoveryGenerationRoute } from './attack_discovery/public/get/get_attack_discovery_generation';
+import { getAttackDiscoveryGenerationsInternalRoute } from './attack_discovery/internal/get/get_attack_discovery_generations_internal';
+import { postAttackDiscoveryGenerationsDismissInternalRoute } from './attack_discovery/internal/post/post_attack_discovery_generations_dismiss_internal';
+import { postAttackDiscoveryGenerationsDismissRoute } from './attack_discovery/public/post/post_attack_discovery_generations_dismiss';
 import { getKnowledgeBaseEntryRoute } from './knowledge_base/entries/get_route';
 import { bulkAlertSummaryRoute } from './alert_summary/bulk_actions_route';
-import { createAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/create';
-import { getAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/get';
-import { updateAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/update';
-import { deleteAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/delete';
-import { findAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/find';
-import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/disable';
-import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
+import { createAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/post/create';
+import { createAttackDiscoverySchedulesInternalRoute } from './attack_discovery/schedules/internal/post/create';
+import { getAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/get/get';
+import { getAttackDiscoverySchedulesInternalRoute } from './attack_discovery/schedules/internal/get/get';
+import { updateAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/put/update';
+import { updateAttackDiscoverySchedulesInternalRoute } from './attack_discovery/schedules/internal/put/update';
+import { deleteAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/delete/delete';
+import { deleteAttackDiscoverySchedulesInternalRoute } from './attack_discovery/schedules/internal/delete/delete';
+import { findAttackDiscoverySchedulesInternalRoute } from './attack_discovery/schedules/internal/get/find';
+import { findAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/get/find';
+import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/post/disable';
+import { disableAttackDiscoverySchedulesInternalRoute } from './attack_discovery/schedules/internal/post/disable';
+import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/post/enable';
+import { enableAttackDiscoverySchedulesInternalRoute } from './attack_discovery/schedules/internal/post/enable';
 import type { ConfigSchema } from '../config_schema';
 import { deleteAllConversationsRoute } from './user_conversations/delete_all_route';
 import { suggestUsersRoute } from './users/suggest';
@@ -117,20 +130,43 @@ export const registerRoutes = (
   findAnonymizationFieldsRoute(router, logger);
 
   // Attack Discovery
+  findAttackDiscoveriesInternalRoute(router);
   findAttackDiscoveriesRoute(router);
+
   postAttackDiscoveryBulkRoute(router);
+  postAttackDiscoveryBulkInternalRoute(router);
+
   getAttackDiscoveryGenerationsRoute(router);
+  getAttackDiscoveryGenerationRoute(router);
+  getAttackDiscoveryGenerationsInternalRoute(router);
+
   postAttackDiscoveryGenerationsDismissRoute(router);
-  postAttackDiscoveryRoute(router);
+  postAttackDiscoveryGenerationsDismissInternalRoute(router);
+
+  postAttackDiscoveryGenerateRoute(router);
+  postAttackDiscoveryInternalRoute(router);
 
   // Attack Discovery Schedules
   createAttackDiscoverySchedulesRoute(router);
+  createAttackDiscoverySchedulesInternalRoute(router);
+
   getAttackDiscoverySchedulesRoute(router);
+  getAttackDiscoverySchedulesInternalRoute(router);
+
   findAttackDiscoverySchedulesRoute(router);
+  findAttackDiscoverySchedulesInternalRoute(router);
+
   updateAttackDiscoverySchedulesRoute(router);
+  updateAttackDiscoverySchedulesInternalRoute(router);
+
   deleteAttackDiscoverySchedulesRoute(router);
+  deleteAttackDiscoverySchedulesInternalRoute(router);
+
   disableAttackDiscoverySchedulesRoute(router);
+  disableAttackDiscoverySchedulesInternalRoute(router);
+
   enableAttackDiscoverySchedulesRoute(router);
+  enableAttackDiscoverySchedulesInternalRoute(router);
 
   // Alert Summary
   bulkAlertSummaryRoute(router, logger);

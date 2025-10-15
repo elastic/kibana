@@ -15,6 +15,7 @@ import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/lin
 import { AiNavigationIcon } from './icon';
 import { createStackManagementNavigationTree } from '../stack_management_navigation';
 import { renderAiSocCallout } from './callout';
+import { v2EaseFooterItems } from './v2_ease_footer_items';
 
 const SOLUTION_NAME = i18n.translate(
   'xpack.securitySolutionServerless.aiNavigation.projectType.title',
@@ -33,21 +34,33 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
       isCollapsible: false,
       children: [
         {
+          id: 'ease_home',
+          link: securityLink(SecurityPageName.landing),
+          title: SOLUTION_NAME,
+          icon: AiNavigationIcon,
+          renderAs: 'home',
+          sideNavVersion: 'v2',
+        },
+        {
           id: SecurityPageName.alertSummary,
           link: securityLink(SecurityPageName.alertSummary),
+          iconV2: 'warning',
         },
         {
           id: SecurityPageName.attackDiscovery,
           link: securityLink(SecurityPageName.attackDiscovery),
+          iconV2: 'bolt',
         },
         {
           breadcrumbStatus: 'hidden',
           children: [
-            defaultNavigationTree.cases(),
+            defaultNavigationTree.cases({ sideNavVersion: 'v1' }),
+            defaultNavigationTree.cases({ sideNavVersion: 'v2' }),
             {
               id: SecurityPageName.configurations,
               link: securityLink(SecurityPageName.configurations),
               renderAs: 'item',
+              iconV2: 'controlsHorizontal',
               children: [
                 {
                   id: SecurityPageName.configurationsIntegrations,
@@ -74,6 +87,7 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
             {
               id: SecurityPageName.aiValue,
               link: securityLink(SecurityPageName.aiValue),
+              iconV2: 'reporter',
             },
           ],
         },
@@ -102,12 +116,15 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
           id: SecurityPageName.landing,
           link: securityLink(SecurityPageName.landing),
           icon: 'launch',
+          iconV2: 'launch',
         },
         {
           link: 'dev_tools',
           title: i18nStrings.devTools,
           icon: 'editorCodeBlock',
+          iconV2: 'editorCodeBlock',
         },
+        ...v2EaseFooterItems,
         createStackManagementNavigationTree(),
       ],
     },

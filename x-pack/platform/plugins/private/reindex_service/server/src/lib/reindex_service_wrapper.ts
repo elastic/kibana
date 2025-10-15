@@ -15,6 +15,7 @@ import type {
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { type Version } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
 import { ReindexWorker } from './worker';
@@ -31,10 +32,8 @@ import type {
   BatchReindexArgs,
 } from '../../../common';
 import type { ReindexSavedObject } from './types';
-import { ReindexStatus } from '../../../common';
 
 export interface ReindexServiceScopedClientArgs {
-  savedObjects: SavedObjectsClientContract;
   dataClient: IScopedClusterClient;
   request: KibanaRequest;
 }
@@ -74,6 +73,7 @@ export class ReindexServiceWrapper {
     logger: Logger;
     licensing: LicensingPluginStart;
     security: SecurityPluginStart;
+    soClient: SavedObjectsClientContract;
     version: Version;
   };
 
@@ -91,6 +91,7 @@ export class ReindexServiceWrapper {
       logger,
       licensing,
       security,
+      soClient,
       version,
     };
 
@@ -116,10 +117,13 @@ export class ReindexServiceWrapper {
   public getScopedClient({
     dataClient,
     request,
-    savedObjects,
   }: ReindexServiceScopedClientArgs): ReindexServiceScopedClient {
     const callAsCurrentUser = dataClient.asCurrentUser;
-    const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser, this.deps.logger);
+    const reindexActions = reindexActionsFactory(
+      this.deps.soClient,
+      callAsCurrentUser,
+      this.deps.logger
+    );
     const reindexService = reindexServiceFactory(
       callAsCurrentUser,
       reindexActions,

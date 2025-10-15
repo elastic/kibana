@@ -17,14 +17,14 @@ import {
   EuiButton,
   EuiFlexGrid,
   useIsWithinBreakpoints,
+  EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../hooks/use_kibana';
-import { useUserPrivilegesQuery } from '../hooks/api/use_user_permissions';
-import { generateRandomIndexName } from '../utils/indices';
 import { SampleDataActionButton } from './sample_data_action_button';
+import { useIsSampleDataAvailable } from '../hooks/use_is_sample_data_available';
 
 interface GettingStartedCardMetadata {
   title: string | NonNullable<React.ReactNode>;
@@ -120,8 +120,11 @@ export const GetStartedWithElasticsearch = () => {
     }
   }, [application, chrome]);
 
-  const indexName = useMemo(() => generateRandomIndexName(), []);
-  const { data: userPrivileges } = useUserPrivilegesQuery(indexName);
+  const {
+    hasRequiredLicense,
+    isPluginAvailable: isSampleDataIngestPluginAvailable,
+    hasPrivileges: hasSampleDataRequiredPrivileges,
+  } = useIsSampleDataAvailable();
   const isSmallScreen = useIsWithinBreakpoints(['xs', 's', 'm']);
 
   const gettingStartedCards: GettingStartedCardMetadata[] = [
@@ -168,9 +171,11 @@ export const GetStartedWithElasticsearch = () => {
           defaultMessage="Start with pre-built data sets, including sample visualizations, dashboards, and more."
         />
       ),
-      buttonComponent: <SampleDataActionButton />,
+      buttonComponent: <SampleDataActionButton hasRequiredLicense={hasRequiredLicense} />,
       conditionalCheck: () =>
-        sampleDataIngest !== undefined && userPrivileges?.privileges?.canManageIndex === true,
+        sampleDataIngest !== undefined &&
+        isSampleDataIngestPluginAvailable &&
+        hasSampleDataRequiredPrivileges,
     },
     // Create index card
     {
@@ -282,13 +287,22 @@ export const GetStartedWithElasticsearch = () => {
   return (
     <EuiFlexGroup gutterSize="m" direction="column" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
-        <EuiTitle size="xxs">
+        <EuiTitle size="s">
           <h3>
             {i18n.translate('xpack.searchHomepage.getStarted.title', {
               defaultMessage: 'Get started with Elasticsearch',
             })}
           </h3>
         </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText color="subdued" size="s">
+          <p>
+            {i18n.translate('xpack.searchHomepage.getStarted.description', {
+              defaultMessage:
+                'Use the Dev console to quickly start interacting with the Elasticsearch API.',
+            })}
+          </p>
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGrid columns={isSmallScreen ? 2 : 4} gutterSize="l" responsive={false}>

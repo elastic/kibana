@@ -26,7 +26,10 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { isEmpty } from 'lodash';
-import { AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED } from '../../common/constants';
+import {
+  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE,
+} from '../../common/constants';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { useKibana } from '../hooks/use_kibana';
 import { GoToSpacesButton } from './go_to_spaces_button';
@@ -35,6 +38,7 @@ import { getElasticManagedLlmConnector } from '../utils/get_elastic_managed_llm_
 import { useSettingsContext } from '../contexts/settings_context';
 import { DefaultAIConnector } from './default_ai_connector/default_ai_connector';
 import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
+import { AIAssistantVisibility } from './ai_assistant_visibility/ai_assistant_visibility';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -43,7 +47,12 @@ interface GenAiSettingsAppProps {
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
   const { application, http, docLinks, notifications, featureFlags } = services;
-  const { showSpacesIntegration, isPermissionsBased, showAiBreadcrumb } = useEnabledFeatures();
+  const {
+    showSpacesIntegration,
+    isPermissionsBased,
+    showAiBreadcrumb,
+    showAiAssistantsVisibilitySetting,
+  } = useEnabledFeatures();
   const { euiTheme } = useEuiTheme();
   const { unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
 
@@ -90,7 +99,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
 
   const showDefaultLlmSetting = featureFlags.getBooleanValue(
     AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-    false
+    AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE
   );
 
   const connectorDescription = useMemo(() => {
@@ -194,7 +203,10 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
 
   async function handleSave() {
     try {
-      await saveAll();
+      const needsReload = await saveAll();
+      if (needsReload) {
+        window.location.reload();
+      }
     } catch (e) {
       const error = e as Error;
       notifications.toasts.addDanger({
@@ -363,6 +375,11 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   />
                 </EuiFormRow>
               </EuiDescribedFormGroup>
+            )}
+            {showAiAssistantsVisibilitySetting && (
+              <EuiFlexItem>
+                <AIAssistantVisibility />
+              </EuiFlexItem>
             )}
           </EuiPanel>
         </EuiPageSection>

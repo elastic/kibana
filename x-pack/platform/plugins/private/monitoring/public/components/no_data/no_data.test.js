@@ -9,6 +9,14 @@ import React from 'react';
 import { renderWithI18nProvider } from '@kbn/test-jest-helpers';
 import { NoData } from '.';
 
+jest.mock('../../legacy_shims', () => ({
+  Legacy: {
+    shims: {
+      hasEnterpriseLicense: false,
+    },
+  },
+}));
+
 const enabler = {};
 
 describe('NoData', () => {

@@ -31,6 +31,7 @@ import {
 } from './redux';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 import { createTabsStorageManager, type TabsStorageManager } from './tabs_storage_manager';
+import { DiscoverSearchSessionManager } from './discover_search_session';
 
 let history: History;
 let stateStorage: IKbnUrlStateStorage;
@@ -58,6 +59,10 @@ describe('Test discover app state container', () => {
       runtimeStateManager: createRuntimeStateManager(),
       urlStateStorage: stateStorage,
       tabsStorageManager,
+      searchSessionManager: new DiscoverSearchSessionManager({
+        history: discoverServiceMock.history,
+        session: discoverServiceMock.data.search.session,
+      }),
     });
     savedSearchState = getSavedSearchContainer({
       services: discoverServiceMock,

@@ -8,7 +8,6 @@
  */
 
 import expect from '@kbn/expect';
-import { type SavedObjectReference } from '@kbn/core/server';
 import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
 import { DEFAULT_IGNORE_PARENT_SETTINGS } from '@kbn/controls-constants';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -29,7 +28,6 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
       expect(response.status).to.be(200);
-      expect(response.body.data.kibanaSavedObjectMeta.searchSource).to.eql({});
       expect(response.body.data.panels).to.eql([]);
       expect(response.body.data.timeRestore).to.be(false);
       expect(response.body.data.options).to.eql({
@@ -54,13 +52,13 @@ export default function ({ getService }: FtrProviderContext) {
           panels: [
             {
               type: 'visualization',
-              gridData: {
+              grid: {
                 x: 0,
                 y: 0,
                 w: 24,
                 h: 15,
               },
-              panelConfig: {},
+              config: {},
             },
           ],
         });
@@ -68,10 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.status).to.be(200);
       expect(response.body.data.panels).to.be.an('array');
       // panel index is a random uuid when not provided
-      expect(response.body.data.panels[0].panelIndex).match(/^[0-9a-f-]{36}$/);
-      expect(response.body.data.panels[0].panelIndex).to.eql(
-        response.body.data.panels[0].gridData.i
-      );
+      expect(response.body.data.panels[0].uid).match(/^[0-9a-f-]{36}$/);
     });
 
     it('sets controls default values', async () => {
@@ -144,15 +139,14 @@ export default function ({ getService }: FtrProviderContext) {
           panels: [
             {
               type: 'visualization',
-              gridData: {
+              grid: {
                 x: 0,
                 y: 0,
                 w: 24,
                 h: 15,
-                i: 'bizz',
               },
-              panelConfig: {},
-              panelIndex: 'bizz',
+              config: {},
+              uid: 'bizz',
             },
           ],
           references: [
@@ -166,148 +160,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.status).to.be(200);
       expect(response.body.data.panels).to.be.an('array');
-    });
-
-    describe('create a dashboard with tags', () => {
-      it('with tags specified as an array of names', async () => {
-        const title = `foo-${Date.now()}-${Math.random()}`;
-
-        const response = await supertest
-          .post(PUBLIC_API_PATH)
-          .set('kbn-xsrf', 'true')
-          .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
-          .set('elastic-api-version', '1')
-          .send({
-            title,
-            tags: ['foo'],
-            references: [
-              {
-                name: 'bizz:panel_bizz',
-                type: 'visualization',
-                id: 'my-saved-object',
-              },
-            ],
-          });
-
-        expect(response.status).to.be(200);
-        expect(response.body.data.tags).to.contain('foo');
-        expect(response.body.data.tags).to.have.length(1);
-        // adds tag reference to existing references
-        const referenceIds = response.body.data.references.map(
-          (ref: SavedObjectReference) => ref.id
-        );
-        expect(referenceIds).to.contain('tag-1');
-        expect(referenceIds).to.contain('my-saved-object');
-        expect(response.body.data.references).to.have.length(2);
-      });
-
-      it('creates tags if a saved object matching a tag name is not found', async () => {
-        const title = `foo-${Date.now()}-${Math.random()}`;
-        const response = await supertest
-          .post(PUBLIC_API_PATH)
-          .set('kbn-xsrf', 'true')
-          .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
-          .set('elastic-api-version', '1')
-          .send({
-            title,
-            tags: ['foo', 'not-found-tag'],
-          });
-        expect(response.status).to.be(200);
-        expect(response.body.data.tags).to.contain('foo', 'not-found-tag');
-        expect(response.body.data.tags).to.have.length(2);
-        const referenceIds = response.body.data.references.map(
-          (ref: SavedObjectReference) => ref.id
-        );
-        expect(referenceIds).to.contain('tag-1');
-        expect(response.body.data.references).to.have.length(2);
-      });
-
-      it('with tags specified as references', async () => {
-        const title = `foo-${Date.now()}-${Math.random()}`;
-        const response = await supertest
-          .post(PUBLIC_API_PATH)
-          .set('kbn-xsrf', 'true')
-          .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
-          .set('elastic-api-version', '1')
-          .send({
-            title,
-            references: [
-              {
-                type: 'tag',
-                id: 'tag-3',
-                name: 'tag-ref-tag-3',
-              },
-            ],
-          });
-        expect(response.status).to.be(200);
-        expect(response.body.data.tags).to.contain('buzz');
-        expect(response.body.data.tags).to.have.length(1);
-        const referenceIds = response.body.data.references.map(
-          (ref: SavedObjectReference) => ref.id
-        );
-        expect(referenceIds).to.contain('tag-3');
-        expect(response.body.data.references).to.have.length(1);
-      });
-
-      it('with tags specified using both tags array and references', async () => {
-        const title = `foo-${Date.now()}-${Math.random()}`;
-        const response = await supertest
-          .post(PUBLIC_API_PATH)
-          .set('kbn-xsrf', 'true')
-          .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
-          .set('elastic-api-version', '1')
-          .send({
-            title,
-            tags: ['foo'],
-            references: [
-              {
-                type: 'tag',
-                id: 'tag-2',
-                name: 'tag-ref-tag-2',
-              },
-            ],
-          });
-        expect(response.status).to.be(200);
-        expect(response.body.data.tags).to.contain('foo');
-        expect(response.body.data.tags).to.contain('bar');
-        expect(response.body.data.tags).to.have.length(2);
-        const referenceIds = response.body.data.references.map(
-          (ref: SavedObjectReference) => ref.id
-        );
-        expect(referenceIds).to.contain('tag-1');
-        expect(referenceIds).to.contain('tag-2');
-        expect(response.body.data.references).to.have.length(2);
-      });
-
-      it('with the same tag specified as a reference and a tag name', async () => {
-        const title = `foo-${Date.now()}-${Math.random()}`;
-        const response = await supertest
-          .post(PUBLIC_API_PATH)
-          .set('kbn-xsrf', 'true')
-          .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
-          .set('elastic-api-version', '1')
-          .send({
-            title,
-            tags: ['foo', 'buzz'],
-            references: [
-              {
-                type: 'tag',
-                id: 'tag-1',
-                name: 'tag-ref-tag-1',
-              },
-            ],
-          });
-        expect(response.status).to.be(200);
-        expect(response.body.data.tags).to.contain('foo');
-        expect(response.body.data.tags).to.contain('buzz');
-        expect(response.body.data.tags).to.have.length(2);
-        const referenceIds = response.body.data.references.map(
-          (ref: SavedObjectReference) => ref.id
-        );
-        expect(referenceIds).to.contain('tag-1');
-        expect(referenceIds).to.contain('tag-3');
-        expect(response.body.data.references).to.have.length(2);
-      });
     });
 
     // TODO Maybe move this test to x-pack/platform/test/api_integration/dashboards

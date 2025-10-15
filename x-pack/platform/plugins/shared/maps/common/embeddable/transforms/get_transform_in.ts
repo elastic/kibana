@@ -10,7 +10,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { MapByReferenceState, MapByValueState, MapEmbeddableState } from '../types';
 import type { StoredMapEmbeddableState } from './types';
 import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
-import { extractReferences } from '../../migrations/references';
+import { transformMapAttributesIn } from '../../content_management/transform_map_attributes_in';
 
 export const MAP_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
@@ -44,16 +44,16 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
 
     // by value
     if ((state as MapByValueState).attributes) {
-      const { attributes, references } = extractReferences({
-        attributes: (state as MapByValueState).attributes,
-      });
+      const { attributes, references } = transformMapAttributesIn(
+        (state as MapByValueState).attributes
+      );
 
       return {
         state: {
           ...state,
           ...(enhancementsState ? { enhancements: enhancementsState } : {}),
           attributes,
-        } as MapByValueState,
+        } as StoredMapEmbeddableState,
         references: [...references, ...enhancementsReferences],
       };
     }

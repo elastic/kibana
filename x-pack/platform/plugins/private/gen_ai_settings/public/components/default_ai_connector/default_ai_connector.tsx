@@ -170,9 +170,11 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
           options={options}
           selectedOptions={selectedOptions}
           onChange={onChangeDefaultLlm}
-          isDisabled={fields[GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]?.isReadOnly}
           isLoading={connectors.loading}
-          isInvalid={selectedOptions.length === 0 && !connectors.loading}
+          isInvalid={
+            (selectedOptions.length === 0 && !connectors.loading) ||
+            (defaultLlmOnlyValue && selectedOptions[0]?.value === NO_DEFAULT_CONNECTOR)
+          }
         />
       </EuiFormRow>
 
@@ -182,7 +184,6 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
             <EuiCheckbox
               id="defaultAiConnectorCheckbox"
               data-test-subj="defaultAiConnectorCheckbox"
-              disabled={fields[GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]?.isReadOnly}
               label={
                 <FormattedMessage
                   id="genAiSettings.gen_ai_settings.settings.defaultLlmOnly.checkbox.label"
