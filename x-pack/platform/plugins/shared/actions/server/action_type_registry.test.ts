@@ -400,6 +400,7 @@ describe('actionTypeRegistry', () => {
           supportedFeatureIds: ['alerting'],
           isSystemActionType: false,
           validate: { params: expect.any(Object) },
+          isDeprecated: false,
         },
         {
           id: 'my-connector-type-with-subaction',
@@ -411,6 +412,7 @@ describe('actionTypeRegistry', () => {
           supportedFeatureIds: ['alerting'],
           isSystemActionType: false,
           validate: { params: expect.any(Object) },
+          isDeprecated: false,
         },
       ]);
 

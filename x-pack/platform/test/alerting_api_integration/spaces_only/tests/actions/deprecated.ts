@@ -18,6 +18,8 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
   describe('connectorType deprecated', () => {
     const objectRemover = new ObjectRemover(supertest);
 
+    after(() => objectRemover.removeAll());
+
     it('should handle get connector request with deprecated connector type appropriately', async () => {
       const { body: ConnectorTypes } = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/api/actions/connector_types`
