@@ -63,7 +63,7 @@ export interface HookServices {
 
 export interface ActionsApiRequestHandlerContext {
   getActionsClient: () => ActionsClient;
-  listTypes: ActionTypeRegistry['list'];
+  listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
 }
 
 export type ActionsRequestHandlerContext = CustomRequestHandlerContext<{

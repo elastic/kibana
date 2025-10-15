@@ -9,6 +9,7 @@ import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpe
 import { useMemo } from 'react';
 import {
   AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE,
   DEFAULT_AI_CONNECTOR,
 } from '../../../common/constants';
 import { useAIConnectors } from './use_ai_connectors';
@@ -21,7 +22,7 @@ export const useDefaultAIConnectorId = () => {
   const legacyDefaultConnectorId = uiSettings.get<string>(DEFAULT_AI_CONNECTOR);
   const useNewDefaultConnector = featureFlags.getBooleanValue(
     AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-    false
+    AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE
   );
   const newDefaultConnectorId = getDefaultConnector(connectors, settings)?.id;
 

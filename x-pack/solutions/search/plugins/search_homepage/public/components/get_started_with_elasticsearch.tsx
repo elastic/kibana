@@ -17,6 +17,7 @@ import {
   EuiButton,
   EuiFlexGrid,
   useIsWithinBreakpoints,
+  EuiSpacer,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -286,13 +287,22 @@ export const GetStartedWithElasticsearch = () => {
   return (
     <EuiFlexGroup gutterSize="m" direction="column" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
-        <EuiTitle size="xxs">
+        <EuiTitle size="s">
           <h3>
             {i18n.translate('xpack.searchHomepage.getStarted.title', {
               defaultMessage: 'Get started with Elasticsearch',
             })}
           </h3>
         </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText color="subdued" size="s">
+          <p>
+            {i18n.translate('xpack.searchHomepage.getStarted.description', {
+              defaultMessage:
+                'Use the Dev console to quickly start interacting with the Elasticsearch API.',
+            })}
+          </p>
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGrid columns={isSmallScreen ? 2 : 4} gutterSize="l" responsive={false}>
