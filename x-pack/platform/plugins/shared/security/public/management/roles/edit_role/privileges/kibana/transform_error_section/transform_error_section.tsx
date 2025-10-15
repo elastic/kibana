@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiCodeBlock, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { PureComponent } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { RoleTransformError } from '@kbn/security-plugin-types-common';
 import { RoleTransformErrorReason } from '@kbn/security-plugin-types-common';
 
 interface TransformErrorSectionProps {
-  transformErrors: string[];
+  transformErrors: RoleTransformError[];
 }
 
 const transformErrorMessages: Record<string, string> = {
@@ -80,21 +81,46 @@ const transformErrorMessages: Record<string, string> = {
   ),
 };
 
-const ERROR_PREFIX = 'kibana:';
+const KIBANA_ERROR_PREFIX = 'kibana:';
 export class TransformErrorSection extends PureComponent<TransformErrorSectionProps, {}> {
   private getErrorMessage() {
     const { transformErrors } = this.props;
 
-    const errorReason = transformErrors
-      .find((error) => error.startsWith(ERROR_PREFIX))
-      ?.replace(ERROR_PREFIX, '');
+    const { reason, state } =
+      transformErrors.find((error) => error.reason.startsWith(KIBANA_ERROR_PREFIX)) ?? {};
 
-    return errorReason && transformErrorMessages[errorReason]
-      ? transformErrorMessages[errorReason]
-      : i18n.translate('xpack.security.management.editRole.transformErrorSectionDescription', {
-          defaultMessage:
-            'This role definition is invalid, and cannot be edited through this screen.',
-        });
+    const normalizedReason = reason?.replace(KIBANA_ERROR_PREFIX, '');
+
+    const errorMessage =
+      normalizedReason && transformErrorMessages[normalizedReason]
+        ? transformErrorMessages[normalizedReason]
+        : i18n.translate('xpack.security.management.editRole.transformErrorSectionDescription', {
+            defaultMessage:
+              'This role definition is invalid, and cannot be edited through this screen.',
+          });
+
+    return (
+      <div>
+        <EuiText size="m">{errorMessage}</EuiText>
+        {state && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCodeBlock
+              language="json"
+              fontSize="s"
+              paddingSize="s"
+              overflowHeight={100}
+              isCopyable
+              title={i18n.translate('xpack.security.management.editRole.codeBlock.details', {
+                defaultMessage: 'Configuration causing the error',
+              })}
+            >
+              {JSON.stringify(state)}
+            </EuiCodeBlock>
+          </>
+        )}
+      </div>
+    );
   }
 
   public render() {
@@ -110,7 +136,7 @@ export class TransformErrorSection extends PureComponent<TransformErrorSectionPr
             />
           </h2>
         }
-        body={<p>{this.getErrorMessage()}</p>}
+        body={this.getErrorMessage()}
       />
     );
   }

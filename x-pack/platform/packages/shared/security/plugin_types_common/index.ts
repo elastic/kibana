@@ -23,6 +23,8 @@ export type {
   FeaturesPrivileges,
   RawKibanaFeaturePrivileges,
   RawKibanaPrivileges,
+  RoleKibanaApplication,
+  RoleTransformError,
 } from './src/authorization';
 export type { SecurityLicense, SecurityLicenseFeatures, LoginLayout } from './src/licensing';
 export type {

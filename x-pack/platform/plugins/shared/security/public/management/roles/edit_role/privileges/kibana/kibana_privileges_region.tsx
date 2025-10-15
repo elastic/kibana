@@ -56,7 +56,7 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
 
     if (
       role._transform_error &&
-      role._transform_error.some((error) => error.startsWith('kibana'))
+      role._transform_error.some((error) => error.reason.startsWith('kibana'))
     ) {
       return <TransformErrorSection transformErrors={role._transform_error} />;
     }
