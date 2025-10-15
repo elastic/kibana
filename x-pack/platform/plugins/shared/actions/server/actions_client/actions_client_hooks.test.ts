@@ -9,8 +9,8 @@ import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { ActionTypeRegistryOpts } from '../action_type_registry';
-import { ActionTypeRegistry } from '../action_type_registry';
+import type { ConnectorTypeRegistryOpts } from '../connector_type_registry';
+import { ConnectorTypeRegistry } from '../connector_type_registry';
 import { ActionsClient } from './actions_client';
 import type { ExecutorType } from '../types';
 import type { ILicenseState } from '../lib';
@@ -55,8 +55,8 @@ const postDeleteHook = jest.fn();
 
 let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
-let actionTypeRegistry: ActionTypeRegistry;
-let actionTypeRegistryParams: ActionTypeRegistryOpts;
+let connectorTypeRegistry: ConnectorTypeRegistry;
+let connectorTypeRegistryParams: ConnectorTypeRegistryOpts;
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
@@ -113,7 +113,7 @@ beforeEach(() => {
   logger = loggerMock.create();
   mockedLicenseState = licenseStateMock.create();
 
-  actionTypeRegistryParams = {
+  connectorTypeRegistryParams = {
     licensing: licensingMock.createSetup(),
     taskManager: mockTaskManager,
     taskRunnerFactory: new TaskRunnerFactory(
@@ -130,10 +130,10 @@ beforeEach(() => {
     inMemoryConnectors: [],
   };
 
-  actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+  connectorTypeRegistry = new ConnectorTypeRegistry(connectorTypeRegistryParams);
   actionsClient = new ActionsClient({
     logger,
-    actionTypeRegistry,
+    connectorTypeRegistry,
     unsecuredSavedObjectsClient,
     scopedClusterClient,
     kibanaIndices,
@@ -148,7 +148,7 @@ beforeEach(() => {
     getEventLogClient,
   });
 
-  actionTypeRegistry.register({
+  connectorTypeRegistry.register({
     id: 'hooked-action-type',
     name: 'Hooked action type',
     minimumLicenseRequired: 'gold',

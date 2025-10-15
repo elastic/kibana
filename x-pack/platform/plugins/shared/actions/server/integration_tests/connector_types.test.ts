@@ -6,19 +6,19 @@
  */
 
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
-import type { ActionTypeRegistry } from '../action_type_registry';
+import type { ConnectorTypeRegistry } from '../connector_type_registry';
 import { setupTestServers } from './lib';
 import { connectorTypes } from './mocks/connector_types';
 import { actionsConfigMock } from '../actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ActionTypeConfig, Services } from '../types';
 
-jest.mock('../action_type_registry', () => {
-  const actual = jest.requireActual('../action_type_registry');
+jest.mock('../connector_type_registry', () => {
+  const actual = jest.requireActual('../connector_type_registry');
   return {
     ...actual,
-    ActionTypeRegistry: jest.fn().mockImplementation((opts) => {
-      return new actual.ActionTypeRegistry(opts);
+    ConnectorTypeRegistry: jest.fn().mockImplementation((opts) => {
+      return new actual.ConnectorTypeRegistry(opts);
     }),
   };
 });
@@ -44,16 +44,16 @@ jest.mock('openai', () => ({
 describe('Connector type config checks', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
-  let actionTypeRegistry: ActionTypeRegistry;
+  let connectorTypeRegistry: ConnectorTypeRegistry;
 
   beforeAll(async () => {
     const setupResult = await setupTestServers();
     esServer = setupResult.esServer;
     kibanaServer = setupResult.kibanaServer;
 
-    const mockedActionTypeRegistry = jest.requireMock('../action_type_registry');
-    expect(mockedActionTypeRegistry.ActionTypeRegistry).toHaveBeenCalledTimes(1);
-    actionTypeRegistry = mockedActionTypeRegistry.ActionTypeRegistry.mock.results[0].value;
+    const mockedConnectorTypeRegistry = jest.requireMock('../connector_type_registry');
+    expect(mockedConnectorTypeRegistry.ConnectorTypeRegistry).toHaveBeenCalledTimes(1);
+    connectorTypeRegistry = mockedConnectorTypeRegistry.ConnectorTypeRegistry.mock.results[0].value;
   });
 
   afterAll(async () => {
@@ -66,7 +66,7 @@ describe('Connector type config checks', () => {
   });
 
   test('ensure connector types list up to date', () => {
-    expect(connectorTypes).toEqual(actionTypeRegistry.getAllTypes());
+    expect(connectorTypes).toEqual(connectorTypeRegistry.getAllTypes());
   });
 
   for (const connectorTypeId of connectorTypes) {
@@ -74,7 +74,7 @@ describe('Connector type config checks', () => {
       const {
         getService,
         validate: { config, params, secrets },
-      } = actionTypeRegistry.get(connectorTypeId);
+      } = connectorTypeRegistry.get(connectorTypeId);
 
       // SubActionConnector
       if (getService) {

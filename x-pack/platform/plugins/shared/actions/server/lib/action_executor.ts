@@ -38,7 +38,7 @@ import type {
   ActionTypeConfig,
   ActionTypeExecutorRawResult,
   ActionTypeExecutorResult,
-  ActionTypeRegistryContract,
+  ConnectorTypeRegistryContract,
   ActionTypeSecrets,
   GetServicesFunction,
   GetUnsecuredServicesFunction,
@@ -67,7 +67,7 @@ export interface ActionExecutorContext {
   getServices: GetServicesFunction;
   getUnsecuredServices: GetUnsecuredServicesFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
-  actionTypeRegistry: ActionTypeRegistryContract;
+  actionTypeRegistry: ConnectorTypeRegistryContract;
   analyticsService: AnalyticsServiceStart;
   eventLogger: IEventLogger;
   inMemoryConnectors: InMemoryConnector[];
@@ -751,7 +751,7 @@ interface EnsureAuthorizedToExecuteOpts {
   actionId: string;
   actionTypeId: string;
   params: Record<string, unknown>;
-  actionTypeRegistry: ActionTypeRegistryContract;
+  actionTypeRegistry: ConnectorTypeRegistryContract;
   authorization: ActionsAuthorization;
   source?: ActionExecutionSourceType;
 }

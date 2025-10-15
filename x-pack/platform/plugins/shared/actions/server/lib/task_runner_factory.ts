@@ -31,7 +31,7 @@ import type {
   ActionTaskExecutorParams,
   ActionTaskParams,
   ActionTypeExecutorResult,
-  ActionTypeRegistryContract,
+  ConnectorTypeRegistryContract,
   SpaceIdToNamespaceFunction,
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
@@ -46,7 +46,7 @@ import { ActionTypeDisabledError } from './errors';
 
 export interface TaskRunnerContext {
   logger: Logger;
-  actionTypeRegistry: ActionTypeRegistryContract;
+  actionTypeRegistry: ConnectorTypeRegistryContract;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   basePathService: IBasePath;

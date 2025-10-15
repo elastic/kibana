@@ -33,7 +33,7 @@ import type {
   GetGlobalExecutionLogParams,
   IExecutionLogResult,
 } from '../../common';
-import type { ActionTypeRegistry } from '../action_type_registry';
+import type { ConnectorTypeRegistry } from '../connector_type_registry';
 import type { ActionExecutorContract } from '../lib';
 import { parseDate } from '../lib';
 import type {
@@ -85,7 +85,7 @@ export interface ConstructorOptions {
   logger: Logger;
   kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
-  actionTypeRegistry: ActionTypeRegistry;
+  connectorTypeRegistry: ConnectorTypeRegistry;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
@@ -103,7 +103,7 @@ export interface ActionsClientContext {
   kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  actionTypeRegistry: ActionTypeRegistry;
+  connectorTypeRegistry: ConnectorTypeRegistry;
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
   request: KibanaRequest;
@@ -120,7 +120,7 @@ export class ActionsClient {
 
   constructor({
     logger,
-    actionTypeRegistry,
+    connectorTypeRegistry,
     kibanaIndices,
     scopedClusterClient,
     unsecuredSavedObjectsClient,
@@ -136,7 +136,7 @@ export class ActionsClient {
   }: ConstructorOptions) {
     this.context = {
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -449,7 +449,7 @@ export class ActionsClient {
 
     let actionType: ActionType | undefined;
     try {
-      actionType = this.context.actionTypeRegistry.get(actionTypeId);
+      actionType = this.context.connectorTypeRegistry.get(actionTypeId);
     } catch (e) {
       this.context.logger.error(
         `Failed fetching action type from registry: ${e.message} - deletion will proceed.`
@@ -516,7 +516,7 @@ export class ActionsClient {
     actionTypeId: string,
     options: { notifyUsage: boolean } = { notifyUsage: false }
   ) {
-    return this.context.actionTypeRegistry.isActionTypeEnabled(actionTypeId, options);
+    return this.context.connectorTypeRegistry.isActionTypeEnabled(actionTypeId, options);
   }
 
   public isPreconfigured(connectorId: string): boolean {

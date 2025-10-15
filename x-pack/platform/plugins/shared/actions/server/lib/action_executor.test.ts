@@ -7,7 +7,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ActionExecutor } from './action_executor';
-import { actionTypeRegistryMock } from '../action_type_registry.mock';
+import { connectorTypeRegistryMock } from '../connector_type_registry.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
   httpServerMock,
@@ -48,7 +48,7 @@ const services = actionsMock.createServices();
 const unsecuredServices = actionsMock.createUnsecuredServices();
 
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
-const connectorTypeRegistry = actionTypeRegistryMock.create();
+const connectorTypeRegistry = connectorTypeRegistryMock.create();
 const eventLogger = eventLoggerMock.create();
 
 const CONNECTOR_ID = '1';

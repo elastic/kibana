@@ -20,7 +20,7 @@ import type {
 import type { AnySchema } from 'joi';
 import type { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import type { ServiceParams } from './sub_action_framework/types';
-import type { ActionTypeRegistry } from './action_type_registry';
+import type { ConnectorTypeRegistry } from './connector_type_registry';
 import type { PluginSetupContract, PluginStartContract } from './plugin';
 import type { ActionsClient } from './actions_client';
 import type { ActionTypeExecutorResult, SubFeature } from '../common';
@@ -32,7 +32,7 @@ export type { ActionTypeExecutorResult, ActionTypeExecutorRawResult } from '../c
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type GetUnsecuredServicesFunction = () => UnsecuredServices;
-export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
+export type ConnectorTypeRegistryContract = PublicMethodsOf<ConnectorTypeRegistry>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type ActionTypeConfig = Record<string, unknown>;
 export type ActionTypeSecrets = Record<string, unknown>;
@@ -63,7 +63,7 @@ export interface HookServices {
 
 export interface ActionsApiRequestHandlerContext {
   getActionsClient: () => ActionsClient;
-  listTypes: ActionTypeRegistry['list'];
+  listTypes: ConnectorTypeRegistry['list'];
 }
 
 export type ActionsRequestHandlerContext = CustomRequestHandlerContext<{

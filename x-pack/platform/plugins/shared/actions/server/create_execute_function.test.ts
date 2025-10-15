@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { actionTypeRegistryMock } from './action_type_registry.mock';
+import { connectorTypeRegistryMock } from './connector_type_registry.mock';
 import {
   asHttpRequestExecutionSource,
   asSavedObjectExecutionSource,
@@ -38,10 +38,10 @@ beforeEach(() => {
 
 describe('bulkExecute()', () => {
   test('schedules the action with all given parameters', async () => {
-    const actionTypeRegistry = actionTypeRegistryMock.create();
+    const connectorTypeRegistry = connectorTypeRegistryMock.create();
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      actionTypeRegistry,
+      actionTypeRegistry: connectorTypeRegistry,
       isESOCanEncrypt: true,
       inMemoryConnectors: [],
       configurationUtilities: mockActionsConfig,
@@ -123,16 +123,16 @@ describe('bulkExecute()', () => {
       ],
       { refresh: false }
     );
-    expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('123', 'mock-action', {
+    expect(connectorTypeRegistry.isActionExecutable).toHaveBeenCalledWith('123', 'mock-action', {
       notifyUsage: true,
     });
   });
 
   test('schedules the action with all given parameters and consumer', async () => {
-    const actionTypeRegistry = actionTypeRegistryMock.create();
+    const connectorTypeRegistry = connectorTypeRegistryMock.create();
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      actionTypeRegistry,
+      actionTypeRegistry: connectorTypeRegistry,
       isESOCanEncrypt: true,
       inMemoryConnectors: [],
       configurationUtilities: mockActionsConfig,
@@ -217,16 +217,16 @@ describe('bulkExecute()', () => {
       ],
       { refresh: false }
     );
-    expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('123', 'mock-action', {
+    expect(connectorTypeRegistry.isActionExecutable).toHaveBeenCalledWith('123', 'mock-action', {
       notifyUsage: true,
     });
   });
 
   test('schedules the action with all given parameters and relatedSavedObjects', async () => {
-    const actionTypeRegistry = actionTypeRegistryMock.create();
+    const connectorTypeRegistry = connectorTypeRegistryMock.create();
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      actionTypeRegistry,
+      actionTypeRegistry: connectorTypeRegistry,
       isESOCanEncrypt: true,
       inMemoryConnectors: [],
       configurationUtilities: mockActionsConfig,
@@ -313,7 +313,7 @@ describe('bulkExecute()', () => {
   test('schedules the action with all given parameters with a preconfigured action', async () => {
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      actionTypeRegistry: actionTypeRegistryMock.create(),
+      actionTypeRegistry: connectorTypeRegistryMock.create(),
       isESOCanEncrypt: true,
       inMemoryConnectors: [
         {
@@ -413,7 +413,7 @@ describe('bulkExecute()', () => {
   test('schedules the action with all given parameters with a system action', async () => {
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      actionTypeRegistry: actionTypeRegistryMock.create(),
+      actionTypeRegistry: connectorTypeRegistryMock.create(),
       isESOCanEncrypt: true,
       inMemoryConnectors: [
         {
@@ -513,7 +513,7 @@ describe('bulkExecute()', () => {
   test('schedules the action with all given parameters with a preconfigured action and relatedSavedObjects', async () => {
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      actionTypeRegistry: actionTypeRegistryMock.create(),
+      actionTypeRegistry: connectorTypeRegistryMock.create(),
       isESOCanEncrypt: true,
       inMemoryConnectors: [
         {
@@ -634,7 +634,7 @@ describe('bulkExecute()', () => {
   test('schedules the action with all given parameters with a system action and relatedSavedObjects', async () => {
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      actionTypeRegistry: actionTypeRegistryMock.create(),
+      actionTypeRegistry: connectorTypeRegistryMock.create(),
       isESOCanEncrypt: true,
       inMemoryConnectors: [
         {
@@ -756,7 +756,7 @@ describe('bulkExecute()', () => {
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       isESOCanEncrypt: false,
-      actionTypeRegistry: actionTypeRegistryMock.create(),
+      actionTypeRegistry: connectorTypeRegistryMock.create(),
       inMemoryConnectors: [],
       configurationUtilities: mockActionsConfig,
       logger: mockLogger,
@@ -782,7 +782,7 @@ describe('bulkExecute()', () => {
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       isESOCanEncrypt: true,
-      actionTypeRegistry: actionTypeRegistryMock.create(),
+      actionTypeRegistry: connectorTypeRegistryMock.create(),
       inMemoryConnectors: [],
       configurationUtilities: mockActionsConfig,
       logger: mockLogger,
@@ -862,16 +862,16 @@ describe('bulkExecute()', () => {
   });
 
   test('skips the disabled action types', async () => {
-    const mockedActionTypeRegistry = actionTypeRegistryMock.create();
+    const mockedConnectorTypeRegistry = connectorTypeRegistryMock.create();
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       isESOCanEncrypt: true,
-      actionTypeRegistry: mockedActionTypeRegistry,
+      actionTypeRegistry: mockedConnectorTypeRegistry,
       inMemoryConnectors: [],
       configurationUtilities: mockActionsConfig,
       logger: mockLogger,
     });
-    mockedActionTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
+    mockedConnectorTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
       throw new Error('Fail');
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
@@ -923,11 +923,11 @@ describe('bulkExecute()', () => {
   });
 
   test('should skip ensure action type if action type is preconfigured and license is valid', async () => {
-    const mockedActionTypeRegistry = actionTypeRegistryMock.create();
+    const mockedConnectorTypeRegistry = connectorTypeRegistryMock.create();
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       isESOCanEncrypt: true,
-      actionTypeRegistry: mockedActionTypeRegistry,
+      actionTypeRegistry: mockedConnectorTypeRegistry,
       inMemoryConnectors: [
         {
           actionTypeId: 'mock-action',
@@ -943,7 +943,7 @@ describe('bulkExecute()', () => {
       configurationUtilities: mockActionsConfig,
       logger: mockLogger,
     });
-    mockedActionTypeRegistry.isActionExecutable.mockImplementation(() => true);
+    mockedConnectorTypeRegistry.isActionExecutable.mockImplementation(() => true);
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -981,15 +981,15 @@ describe('bulkExecute()', () => {
       },
     ]);
 
-    expect(mockedActionTypeRegistry.ensureActionTypeEnabled).not.toHaveBeenCalled();
+    expect(mockedConnectorTypeRegistry.ensureActionTypeEnabled).not.toHaveBeenCalled();
   });
 
   test('should skip ensure action type if action type is system action and license is valid', async () => {
-    const mockedActionTypeRegistry = actionTypeRegistryMock.create();
+    const mockedConnectorTypeRegistry = connectorTypeRegistryMock.create();
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       isESOCanEncrypt: true,
-      actionTypeRegistry: mockedActionTypeRegistry,
+      actionTypeRegistry: mockedConnectorTypeRegistry,
       inMemoryConnectors: [
         {
           actionTypeId: 'test.system-action',
@@ -1005,7 +1005,7 @@ describe('bulkExecute()', () => {
       configurationUtilities: mockActionsConfig,
       logger: mockLogger,
     });
-    mockedActionTypeRegistry.isActionExecutable.mockImplementation(() => true);
+    mockedConnectorTypeRegistry.isActionExecutable.mockImplementation(() => true);
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -1043,7 +1043,7 @@ describe('bulkExecute()', () => {
       },
     ]);
 
-    expect(mockedActionTypeRegistry.ensureActionTypeEnabled).not.toHaveBeenCalled();
+    expect(mockedConnectorTypeRegistry.ensureActionTypeEnabled).not.toHaveBeenCalled();
   });
 
   test('returns queuedActionsLimitError response when the max number of queued actions has been reached', async () => {
@@ -1057,7 +1057,7 @@ describe('bulkExecute()', () => {
     mockActionsConfig.getMaxQueued.mockReturnValueOnce(2);
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      actionTypeRegistry: actionTypeRegistryMock.create(),
+      actionTypeRegistry: connectorTypeRegistryMock.create(),
       isESOCanEncrypt: true,
       inMemoryConnectors: [],
       configurationUtilities: mockActionsConfig,
@@ -1113,7 +1113,7 @@ describe('bulkExecute()', () => {
     mockActionsConfig.getMaxQueued.mockReturnValueOnce(3);
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      actionTypeRegistry: actionTypeRegistryMock.create(),
+      actionTypeRegistry: connectorTypeRegistryMock.create(),
       isESOCanEncrypt: true,
       inMemoryConnectors: [],
       configurationUtilities: mockActionsConfig,
@@ -1202,7 +1202,7 @@ describe('bulkExecute()', () => {
     mockActionsConfig.getMaxQueued.mockReturnValueOnce(3);
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      actionTypeRegistry: actionTypeRegistryMock.create(),
+      actionTypeRegistry: connectorTypeRegistryMock.create(),
       isESOCanEncrypt: true,
       inMemoryConnectors: [],
       configurationUtilities: mockActionsConfig,
@@ -1291,7 +1291,7 @@ describe('bulkExecute()', () => {
     mockActionsConfig.getMaxQueued.mockReturnValueOnce(3);
     const executeFn = createBulkExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      actionTypeRegistry: actionTypeRegistryMock.create(),
+      actionTypeRegistry: connectorTypeRegistryMock.create(),
       isESOCanEncrypt: true,
       inMemoryConnectors: [],
       configurationUtilities: mockActionsConfig,

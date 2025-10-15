@@ -7,10 +7,7 @@
 
 import type { ISavedObjectsRepository, SavedObjectsBulkResponse } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type {
-  ActionTypeRegistryContract as ConnectorTypeRegistryContract,
-  InMemoryConnector,
-} from './types';
+import type { ConnectorTypeRegistryContract, InMemoryConnector } from './types';
 import { UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import type { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';

@@ -23,7 +23,7 @@ import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/us
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/logging';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
-import type { ActionTypeRegistry } from '../../../../action_type_registry';
+import type { ConnectorTypeRegistry } from '../../../../connector_type_registry';
 import { getAllUnsecured } from './get_all';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
@@ -65,14 +65,14 @@ const connectorTokenClient = connectorTokenClientMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 let actionsClient: ActionsClient;
-let actionTypeRegistry: ActionTypeRegistry;
+let connectorTypeRegistry: ConnectorTypeRegistry;
 
 describe('getAll()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     actionsClient = new ActionsClient({
       logger,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -128,7 +128,7 @@ describe('getAll()', () => {
 
         actionsClient = new ActionsClient({
           logger,
-          actionTypeRegistry,
+          connectorTypeRegistry,
           unsecuredSavedObjectsClient,
           scopedClusterClient,
           kibanaIndices,
@@ -272,7 +272,7 @@ describe('getAll()', () => {
 
       actionsClient = new ActionsClient({
         logger,
-        actionTypeRegistry,
+        connectorTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -374,7 +374,7 @@ describe('getAll()', () => {
 
       actionsClient = new ActionsClient({
         logger,
-        actionTypeRegistry,
+        connectorTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -478,7 +478,7 @@ describe('getAll()', () => {
 
       actionsClient = new ActionsClient({
         logger,
-        actionTypeRegistry,
+        connectorTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -569,7 +569,7 @@ describe('getAll()', () => {
 
       actionsClient = new ActionsClient({
         logger,
-        actionTypeRegistry,
+        connectorTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -611,7 +611,7 @@ describe('getAll()', () => {
 
       actionsClient = new ActionsClient({
         logger,
-        actionTypeRegistry,
+        connectorTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -680,7 +680,7 @@ describe('getAll()', () => {
 
         actionsClient = new ActionsClient({
           logger,
-          actionTypeRegistry,
+          connectorTypeRegistry,
           unsecuredSavedObjectsClient,
           scopedClusterClient,
           kibanaIndices,
@@ -756,7 +756,7 @@ describe('getAll()', () => {
 
       actionsClient = new ActionsClient({
         logger,
-        actionTypeRegistry,
+        connectorTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,

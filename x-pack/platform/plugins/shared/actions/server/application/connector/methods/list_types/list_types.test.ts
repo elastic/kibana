@@ -6,8 +6,8 @@
  */
 
 import { actionsConfigMock } from '../../../../actions_config.mock';
-import type { ActionTypeRegistryOpts } from '../../../../action_type_registry';
-import { ActionTypeRegistry } from '../../../../action_type_registry';
+import type { ConnectorTypeRegistryOpts } from '../../../../connector_type_registry';
+import { ConnectorTypeRegistry } from '../../../../connector_type_registry';
 import type { ActionsAuthorization } from '../../../../authorization/actions_authorization';
 import type { ILicenseState } from '../../../../lib';
 import { ActionExecutor, TaskRunnerFactory } from '../../../../lib';
@@ -30,8 +30,8 @@ import type { ExecutorType } from '../../../../types';
 import { ConnectorRateLimiter } from '../../../../lib/connector_rate_limiter';
 
 let mockedLicenseState: jest.Mocked<ILicenseState>;
-let actionTypeRegistryParams: ActionTypeRegistryOpts;
-let actionTypeRegistry: ActionTypeRegistry;
+let connectorTypeRegistryParams: ConnectorTypeRegistryOpts;
+let connectorTypeRegistry: ConnectorTypeRegistry;
 
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
@@ -43,7 +43,7 @@ describe('listTypes()', () => {
   beforeEach(async () => {
     jest.resetAllMocks();
     mockedLicenseState = licenseStateMock.create();
-    actionTypeRegistryParams = {
+    connectorTypeRegistryParams = {
       licensing: licensingMock.createSetup(),
       taskManager: taskManagerMock.createSetup(),
       taskRunnerFactory: new TaskRunnerFactory(
@@ -59,12 +59,12 @@ describe('listTypes()', () => {
       licenseState: mockedLicenseState,
       inMemoryConnectors: [],
     };
-    actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    connectorTypeRegistry = new ConnectorTypeRegistry(connectorTypeRegistryParams);
     actionsClient = new ActionsClient({
       logger: loggingSystemMock.create().get(),
       kibanaIndices: ['.kibana'],
       scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-      actionTypeRegistry,
+      connectorTypeRegistry,
       unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
       inMemoryConnectors: [],
       actionExecutor: actionExecutorMock.create(),
@@ -79,7 +79,7 @@ describe('listTypes()', () => {
   it('filters action types by feature ID', async () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
 
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
@@ -92,7 +92,7 @@ describe('listTypes()', () => {
       executor,
     });
 
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type-2',
       name: 'My action type 2',
       minimumLicenseRequired: 'basic',
@@ -122,7 +122,7 @@ describe('listTypes()', () => {
   it('filters out system action types when not defining options', async () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
 
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
@@ -135,7 +135,7 @@ describe('listTypes()', () => {
       executor,
     });
 
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type-2',
       name: 'My action type 2',
       minimumLicenseRequired: 'basic',
@@ -148,7 +148,7 @@ describe('listTypes()', () => {
       executor,
     });
 
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: '.cases',
       name: 'Cases',
       minimumLicenseRequired: 'platinum',
@@ -189,7 +189,7 @@ describe('listTypes()', () => {
   it('return system action types when defining options', async () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
 
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: 'my-action-type',
       name: 'My action type',
       minimumLicenseRequired: 'basic',
@@ -202,7 +202,7 @@ describe('listTypes()', () => {
       executor,
     });
 
-    actionTypeRegistry.register({
+    connectorTypeRegistry.register({
       id: '.cases',
       name: 'Cases',
       minimumLicenseRequired: 'platinum',
