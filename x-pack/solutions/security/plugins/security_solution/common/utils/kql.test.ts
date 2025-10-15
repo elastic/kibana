@@ -9,16 +9,16 @@ import {
   escapeKQLStringParam,
   prepareKQLParam,
   prepareKQLStringParam,
-  cleanupKQLStringParam,
+  fullyEscapeKQLStringParam,
 } from './kql';
 
-const escapeTestCases = [
+const partialEscapeTestCases = [
   ['does NOT remove white spaces quotes', ' netcat', ' netcat'],
   ['escapes quotes', 'I said, "Hello."', 'I said, \\"Hello.\\"'],
   [
     'should escape special characters',
     `This \\ has (a lot of) <special> characters, don't you *think*? "Yes."`,
-    `This \\ has (a lot of) <special> characters, don't you *think*? \\"Yes.\\"`,
+    `This \\\\ has (a lot of) <special> characters, don't you *think*? \\"Yes.\\"`,
   ],
   ['does NOT escape keywords', 'foo and bar or baz not qux', 'foo and bar or baz not qux'],
   [
@@ -48,14 +48,14 @@ const escapeTestCases = [
     'This\\nhas\\tnewlines\\r\\nwith\\ttabs',
   ],
   [
-    'removes backslashes at the end of the string',
+    'escapes backslashes at the end of the string',
     'Try not to break the search\\',
-    'Try not to break the search',
+    'Try not to break the search\\\\',
   ],
 ];
 
 describe('prepareKQLParam', () => {
-  it.each(escapeTestCases)('%s', (_, input, expected) => {
+  it.each(partialEscapeTestCases)('%s', (_, input, expected) => {
     expect(prepareKQLParam(input)).toBe(`"${expected}"`);
   });
 
@@ -75,33 +75,33 @@ describe('prepareKQLParam', () => {
 });
 
 describe('prepareKQLStringParam', () => {
-  it.each(escapeTestCases)('%s', (_, input, expected) => {
+  it.each(partialEscapeTestCases)('%s', (_, input, expected) => {
     expect(prepareKQLStringParam(input)).toBe(`"${expected}"`);
   });
 });
 
 describe('escapeKQLStringParam', () => {
-  it.each(escapeTestCases)('%s', (_, input, expected) => {
+  it.each(partialEscapeTestCases)('%s', (_, input, expected) => {
     expect(escapeKQLStringParam(input)).toBe(expected);
   });
 });
 
-const cleanupTestCases = [
-  ['removes quotes, but keeps commas and dots', 'I said, "Hello."', 'I said, Hello.'],
+const fullyEscapeTestCases = [
+  ['escapes quotes, but keeps commas and dots', 'I said, "Hello."', 'I said, \\"Hello.\\"'],
   [
     'should cleanup special characters',
     `This \\ has (a lot of) <special> characters, don't you *think*? "Yes."`,
-    `This has a lot of special characters, don't you think ? Yes.`,
+    `This \\\\ has \\(a lot of\\) \\<special\\> characters, don't you \\*think\\*? \\"Yes.\\"`,
   ],
   [
     'should cleanup special characters and trim whitespace',
-    `a \"user-agent+ \t }with \n a *\\:(surprise{)   \t`,
-    `a user agent with a surprise`,
+    `a "user-agent+ \t }with \n a *\\:(surprise{)   \t`,
+    `a \\"user-agent+ \\}with a \\*\\\\\\:\\(surprise\\{\\)`,
   ],
   [
     "should keep certain characters that are not problematic (.,'&^%$#)",
-    `\t some -characters *are ok "to use ({.,'&^%$#})`,
-    `some characters are ok to use .,'&^%$#`,
+    `\t some characters are ok to use .,'&^%$#-+_=|/!`,
+    `some characters are ok to use .,'&^%$#-+_=|/!`,
   ],
   ['does NOT escape keywords', 'foo and bar or baz not qux', 'foo and bar or baz not qux'],
   [
@@ -111,8 +111,8 @@ const cleanupTestCases = [
   ],
 ];
 
-describe('cleanupKQLStringParam', () => {
-  it.each(cleanupTestCases)('%s', (_, input, expected) => {
-    expect(cleanupKQLStringParam(input)).toBe(expected);
+describe('fullyEscapeKQLStringParam', () => {
+  it.each(fullyEscapeTestCases)('%s', (_, input, expected) => {
+    expect(fullyEscapeKQLStringParam(input)).toBe(expected);
   });
 });
