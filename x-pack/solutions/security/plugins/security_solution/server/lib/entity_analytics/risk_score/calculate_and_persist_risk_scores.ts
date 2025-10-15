@@ -8,10 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { ExperimentalFeatures } from '../../../../common';
-import type {
-  EntityType,
-  RiskScoresCalculationResponse,
-} from '../../../../common/api/entity_analytics';
+import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
 import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 import { calculateRiskScores } from './calculate_risk_scores';
@@ -19,8 +16,10 @@ import type { CalculateAndPersistScoresParams } from '../types';
 import { calculateScoresWithESQL } from './calculate_esql_risk_scores';
 
 export type CalculationResults = RiskScoresCalculationResponse & {
-  entities: Record<EntityType, string[]>;
+  errors: string[];
+  scores_written: number;
 };
+
 export const calculateAndPersistRiskScores = async (
   params: CalculateAndPersistScoresParams & {
     assetCriticalityService: AssetCriticalityService;

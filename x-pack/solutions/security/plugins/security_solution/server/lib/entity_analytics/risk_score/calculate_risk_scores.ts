@@ -37,14 +37,13 @@ import type { AssetCriticalityService } from '../asset_criticality/asset_critica
 import { applyCriticalityToScore, getCriticalityModifier } from '../asset_criticality/helpers';
 import { getAfterKeyForIdentifierType, getFieldForIdentifier } from './helpers';
 import type {
-  CalculateResults,
   CalculateRiskScoreAggregations,
   CalculateScoresParams,
   RiskScoreBucket,
+  RiskScoresCalculationResponse,
 } from '../types';
 import { RIEMANN_ZETA_VALUE, RIEMANN_ZETA_S_VALUE } from './constants';
 import { getPainlessScripts, type PainlessScripts } from './painless';
-import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 
 const max10DecimalPlaces = (num: number) => Math.round(num * 1e10) / 1e10;
 
@@ -284,7 +283,9 @@ export const calculateRiskScores = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
   experimentalFeatures: ExperimentalFeatures;
-} & CalculateScoresParams): Promise<CalculateResults> =>
+} & CalculateScoresParams & {
+    filters?: Array<{ entity_types: string[]; filter: string }>;
+  }): Promise<RiskScoresCalculationResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
     const now = new Date().toISOString();
     const scriptedMetricPainless = await getPainlessScripts();
@@ -394,21 +395,6 @@ export const calculateRiskScores = async ({
     const hostBuckets = combinedAggregations.host?.buckets ?? [];
     const serviceBuckets = combinedAggregations.service?.buckets ?? [];
 
-    const hosts =
-      combinedAggregations.host?.buckets.map(
-        ({ key }) => key[EntityTypeToIdentifierField.host]
-      ) || [];
-
-    const users =
-      combinedAggregations.user?.buckets.map(
-        ({ key }) => key[EntityTypeToIdentifierField.user]
-      ) || [];
-
-    const services =
-      combinedAggregations.service?.buckets.map(
-        ({ key }) => key[EntityTypeToIdentifierField.service]
-      ) || [];
-
     const afterKeys = {
       host: combinedAfterKeys.host,
       user: combinedAfterKeys.user,
@@ -436,6 +422,11 @@ export const calculateRiskScores = async ({
       logger,
       now,
     });
+
+    // Extract entity identifiers from scores
+    const hosts = hostScores.map((score) => score.id_value);
+    const users = userScores.map((score) => score.id_value);
+    const services = serviceScores.map((score) => score.id_value);
 
     return {
       ...(debug
