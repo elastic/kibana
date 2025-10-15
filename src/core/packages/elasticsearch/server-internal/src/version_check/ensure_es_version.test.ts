@@ -248,6 +248,16 @@ describe('pollEsNodesVersion', () => {
     subscriptions.push(subscription);
   });
 
+  it.todo(
+    'retries the nodes.info call a "healthCheckRetry" number of times before emitting an error',
+    (done) => {}
+  );
+
+  it.todo(
+    'retries a healthCheckRetry number of times on failure before emitting an error',
+    (done) => {}
+  );
+
   it('returns isCompatible=false and keeps polling when a poll request throws, only responding again if the error message has changed', (done) => {
     expect.assertions(8);
     const expectedCompatibilityResults = [false, false, true, false];

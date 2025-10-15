@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const HEALTH_CHECK_REQUEST_TIMEOUT = 120000; // 2 minutes
+export const HEALTH_CHECK_REQUEST_TIMEOUT = 120000;
