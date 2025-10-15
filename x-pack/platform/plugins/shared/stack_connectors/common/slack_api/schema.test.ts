@@ -42,14 +42,17 @@ describe('Slack schema validations', () => {
       ).toBeUndefined();
     });
   });
+
   describe('Validate channel name', () => {
     test('should return error if the channel name does not start with #', () => {
       expect(validateChannelName('general')).toBe('Channel name must start with #');
     });
+
     test('should return undefined for valid channel names starting with #', () => {
       expect(validateChannelName('#general')).toBeUndefined();
       expect(validateChannelName('#channel-123')).toBeUndefined();
     });
+
     test('should handle channel names with special characters', () => {
       expect(validateChannelName('#test-team')).toBeUndefined();
       expect(validateChannelName('#incident-*')).toBeUndefined();
