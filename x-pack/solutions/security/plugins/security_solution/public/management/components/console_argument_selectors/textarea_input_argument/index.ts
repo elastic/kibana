@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './textarea_input';
+export * from './textarea_input_argument';

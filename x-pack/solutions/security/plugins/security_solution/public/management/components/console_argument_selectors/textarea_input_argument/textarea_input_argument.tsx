@@ -12,9 +12,9 @@ import type { CommandArgumentValueSelectorProps } from '../../console/types';
 /**
  * Console argument component that displays a popup textarea for user to enter free-form data.
  */
-export const TextareaInput = memo<
+export const TextareaInputArgument = memo<
   CommandArgumentValueSelectorProps<unknown, unknown, EndpointCommandDefinitionMeta>
 >((props) => {
   return <div>{'TextareaInput placeholder'}</div>;
 });
-TextareaInput.displayName = 'TextareaInput';
+TextareaInputArgument.displayName = 'TextareaInputArgument';
