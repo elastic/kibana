@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { isRoot } from '@kbn/streams-schema';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { StreamSystemConfiguration } from './stream_system_configuration';
+import { StreamFeatureConfiguration } from './stream_feature_configuration';
 import { IndexConfiguration } from './advanced_view/index_configuration';
 import { DeleteStreamPanel } from './advanced_view/delete_stream';
 import { ImportExportPanel } from './advanced_view/import_export';
@@ -41,7 +41,7 @@ export function WiredAdvancedView({
         <>
           <StreamDescription definition={definition} />
           <EuiSpacer />
-          <StreamSystemConfiguration definition={definition.stream} />
+          <StreamFeatureConfiguration definition={definition.stream} />
         </>
       )}
       <EuiSpacer size="m" />
