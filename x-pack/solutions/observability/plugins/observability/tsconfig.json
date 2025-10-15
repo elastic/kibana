@@ -123,7 +123,8 @@
     "@kbn/controls-plugin",
     "@kbn/core-http-browser",
     "@kbn/esql",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/core-elasticsearch-server-utils",
   ],
   "exclude": [
     "target/**/*"
