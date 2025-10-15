@@ -11,7 +11,7 @@ import { ML_ENTITY_FIELD_OPERATIONS, ML_ENTITY_FIELD_TYPE } from './anomaly_util
 const mlEntityFieldTypeSchema = schema.oneOf([
   schema.literal(ML_ENTITY_FIELD_TYPE.BY),
   schema.literal(ML_ENTITY_FIELD_TYPE.OVER),
-  schema.literal(ML_ENTITY_FIELD_TYPE.PARTITON),
+  schema.literal(ML_ENTITY_FIELD_TYPE.PARTITION),
 ]);
 
 const mlEntityFieldOperationSchema = schema.oneOf([

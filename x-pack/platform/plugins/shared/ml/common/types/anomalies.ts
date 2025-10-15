@@ -4,8 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-export interface SeverityThreshold {
-  min: number;
-  max?: number;
-}
+export const severityThresholdSchema = schema.object({
+  min: schema.number(),
+  max: schema.maybe(schema.number()),
+});
+
+export type SeverityThreshold = TypeOf<typeof severityThresholdSchema>;
