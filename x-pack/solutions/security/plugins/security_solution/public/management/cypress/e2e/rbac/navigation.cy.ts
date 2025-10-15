@@ -161,7 +161,7 @@ describe(
       it('with access to all of the subpages, all of those should be displayed', () => {
         login(ROLE.soc_manager);
         loadPage('/app/security');
-        cy.get(ServerlessHeaders.MORE_MENU_BTN).click(); // open "More" menu first to make sure "Assets" link is visible
+        ServerlessHeaders.showMoreItems();
         cy.get(MenuButtonSelector).click(); // click "Assets" to open the menu
         cy.get(allPages[0].selector).click(); // open the Assets anv panel by clicking the first item in more>assets popover
 

@@ -119,3 +119,16 @@ export const openNavigationPanelFor = (pageName: string) => {
 export const openNavigationPanel = (pageName: string) => {
   cy.get(pageName).click();
 };
+
+export const showMoreItems = () => {
+  // ensure nav items are rendered
+  cy.get('[data-test-subj~="nav-item"]').should('exist');
+  cy.get('[data-test-subj="globalLoadingIndicator-hidden"').should('exist');
+  cy.get('[data-test-subj="globalLoadingIndicator"').should('not.exist');
+
+  // more item is unstable on initial rendering of security solution because of page height measurement
+  // eslint-disable-next-line cypress/no-unnecessary-waiting
+  cy.wait(1000);
+  cy.get(MORE_MENU_BTN).click();
+  cy.get(MORE_MENU_BTN).should('have.attr', 'aria-expanded', 'true');
+};

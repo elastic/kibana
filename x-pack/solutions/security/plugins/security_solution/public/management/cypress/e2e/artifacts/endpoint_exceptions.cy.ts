@@ -68,7 +68,7 @@ describe(
 
         cy.visit(APP_PATH);
 
-        cy.get(serverlessSecurityHeaders.MORE_MENU_BTN).click();
+        serverlessSecurityHeaders.showMoreItems();
         serverlessSecurityHeaders.openNavigationPanelFor(
           serverlessSecurityHeaders.ENDPOINT_EXCEPTIONS
         );
