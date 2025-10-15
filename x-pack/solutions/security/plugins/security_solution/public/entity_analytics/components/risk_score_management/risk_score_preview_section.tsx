@@ -176,7 +176,8 @@ const RiskEnginePreview: React.FC<{
       end: to,
     },
     exclude_alert_statuses: includeClosedAlerts ? [] : ['closed'],
-    filters: alertFilters,
+    // Pass filters to API (will only work once backend PR merges)
+    filters: alertFilters && alertFilters.length > 0 ? alertFilters : undefined,
   });
 
   if (isError) {
