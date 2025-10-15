@@ -10,7 +10,6 @@ import { screen, fireEvent } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import QualitySummaryCards from '.';
 
-// Mock the hooks
 jest.mock('../../../../hooks/use_overview_summary_panel', () => ({
   useOverviewSummaryPanel: jest.fn(),
 }));
@@ -87,12 +86,18 @@ describe('QualitySummaryCards', () => {
     expect(
       screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Degraded documents')
     ).toBeTruthy();
+    expect(
+      screen.getByTestId('datasetQualityDetailsSummaryKpiValue-Degraded documents')
+    ).toHaveTextContent(defaultSummaryPanelData.totalDegradedDocsCount);
   });
 
   it('renders failed docs card when failure store is available and user has read permission', () => {
     renderWithI18n(<QualitySummaryCards {...defaultProps} />);
 
     expect(screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Failed documents')).toBeTruthy();
+    expect(
+      screen.getByTestId('datasetQualityDetailsSummaryKpiValue-Failed documents')
+    ).toHaveTextContent(defaultSummaryPanelData.totalFailedDocsCount);
   });
 
   it('renders no failure store card when failure store is not available', () => {
@@ -103,8 +108,30 @@ describe('QualitySummaryCards', () => {
     });
 
     renderWithI18n(<QualitySummaryCards {...defaultProps} />);
+    const noFailureStoreCard = screen.getByTestId(
+      'datasetQualityDetailsSummaryKpiCard-noFailureStore'
+    );
 
-    expect(screen.getByText('No failure store')).toBeTruthy();
+    expect(noFailureStoreCard).toBeTruthy();
+    expect(noFailureStoreCard).toHaveTextContent('No failure store');
+  });
+
+  it('does not show enable failure store button when user cannot manage failure store', () => {
+    mockUseFailureStoreModal.mockReturnValue({
+      ...defaultFailureStoreModal,
+      hasFailureStore: false,
+      canUserReadFailureStore: true,
+      canUserManageFailureStore: false,
+    });
+
+    renderWithI18n(<QualitySummaryCards {...defaultProps} />);
+    const noFailureStoreCard = screen.getByTestId(
+      'datasetQualityDetailsSummaryKpiCard-noFailureStore'
+    );
+
+    expect(noFailureStoreCard).toBeTruthy();
+    expect(noFailureStoreCard).toHaveTextContent('No failure store');
+    expect(screen.queryByTestId('datasetQualityDetailsEnableFailureStoreButton')).toBe(null);
   });
 
   it('calls handleDocsTrendChartChange and setSelectedCard when degraded card is clicked', () => {
@@ -143,7 +170,7 @@ describe('QualitySummaryCards', () => {
     expect(setSelectedCard).toHaveBeenCalledWith('failed');
   });
 
-  it('passes correct selection state when degraded card is selected', () => {
+  it('indicates when degraded card is selected', () => {
     renderWithI18n(<QualitySummaryCards {...defaultProps} selectedCard="degraded" />);
 
     const degradedCard = screen.getByTestId(
@@ -170,7 +197,7 @@ describe('QualitySummaryCards', () => {
 
     renderWithI18n(<QualitySummaryCards {...defaultProps} />);
 
-    expect(screen.getByText('Enable failure store')).toBeTruthy();
+    expect(screen.getByTestId('datasetQualityDetailsEnableFailureStoreButton')).toBeTruthy();
   });
 
   it('calls openModal when enable failure store button is clicked', () => {
@@ -186,7 +213,7 @@ describe('QualitySummaryCards', () => {
 
     renderWithI18n(<QualitySummaryCards {...defaultProps} />);
 
-    const enableButton = screen.getByText('Enable failure store');
+    const enableButton = screen.getByTestId('datasetQualityDetailsEnableFailureStoreButton');
     fireEvent.click(enableButton);
 
     expect(openModal).toHaveBeenCalledTimes(1);
@@ -198,38 +225,13 @@ describe('QualitySummaryCards', () => {
     mockUseFailureStoreModal.mockReturnValue({
       ...defaultFailureStoreModal,
       hasFailureStore: false,
-      canUserReadFailureStore: false,
+      canUserReadFailureStore: true,
+      canUserManageFailureStore: true,
       renderModal,
     });
 
     renderWithI18n(<QualitySummaryCards {...defaultProps} />);
 
     expect(renderModal).toHaveBeenCalled();
-  });
-
-  it('does not show enable failure store button when user cannot manage failure store', () => {
-    mockUseFailureStoreModal.mockReturnValue({
-      ...defaultFailureStoreModal,
-      hasFailureStore: false,
-      canUserReadFailureStore: false,
-      canUserManageFailureStore: false,
-    });
-
-    renderWithI18n(<QualitySummaryCards {...defaultProps} />);
-
-    expect(screen.queryByText('Enable failure store')).toBe(null);
-  });
-
-  it('handles missing failure store with correct disabled card state', () => {
-    mockUseFailureStoreModal.mockReturnValue({
-      ...defaultFailureStoreModal,
-      hasFailureStore: false,
-      canUserReadFailureStore: false,
-      canUserManageFailureStore: false,
-    });
-
-    renderWithI18n(<QualitySummaryCards {...defaultProps} />);
-
-    expect(screen.getByText('No failure store')).toBeTruthy();
   });
 });

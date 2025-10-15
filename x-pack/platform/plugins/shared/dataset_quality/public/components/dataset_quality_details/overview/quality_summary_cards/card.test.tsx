@@ -19,9 +19,11 @@ describe('Card', () => {
   it('renders basic card content correctly', () => {
     render(<Card {...defaultProps} />);
 
-    expect(screen.getByText('Test Card Title')).toBeTruthy();
-    expect(screen.getByText('1,234')).toBeTruthy();
-    expect(screen.getByText('Test Footer')).toBeTruthy();
+    const card = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title');
+    expect(card).toBeTruthy();
+    expect(card).toHaveTextContent('Test Card Title');
+    expect(card).toHaveTextContent('1,234');
+    expect(card).toHaveTextContent('Test Footer');
   });
 
   it('renders as a div when onClick is not provided', () => {
@@ -62,9 +64,19 @@ describe('Card', () => {
     const tooltipContent = <div>Tooltip content</div>;
     render(<Card {...defaultProps} titleTooltipContent={tooltipContent} />);
 
-    const tooltipIcon = screen.getByText('Info');
+    const tooltipIcon = screen
+      .getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title')
+      .querySelector('[data-euiicon-type="question"]');
     expect(tooltipIcon).toBeTruthy();
-    expect(tooltipIcon.closest('[data-euiicon-type="question"]')).toBeTruthy();
+  });
+
+  it('renders title without tooltip when titleTooltipContent is not provided', () => {
+    render(<Card {...defaultProps} />);
+
+    const tooltipIcon = screen
+      .getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title')
+      .querySelector('[data-euiicon-type="question"]');
+    expect(tooltipIcon).toBe(null);
   });
 
   it('shows loading skeleton when isLoading is true', () => {
@@ -78,21 +90,6 @@ describe('Card', () => {
     expect(skeletonText).toBeTruthy();
   });
 
-  it('uses custom dataTestSubjTitle when provided', () => {
-    render(<Card {...defaultProps} dataTestSubjTitle="customTestId" />);
-
-    const card = screen.getByTestId('datasetQualityDetailsSummaryKpiCard-customTestId');
-    expect(card).toBeTruthy();
-  });
-
-  it('renders KPI value with correct test subject', () => {
-    render(<Card {...defaultProps} />);
-
-    const kpiValue = screen.getByTestId('datasetQualityDetailsSummaryKpiValue-Test Card Title');
-    expect(kpiValue).toBeTruthy();
-    expect(kpiValue.textContent).toBe('1,234');
-  });
-
   it('renders complex footer content', () => {
     const complexFooter = (
       <div>
@@ -102,7 +99,9 @@ describe('Card', () => {
     );
     render(<Card {...defaultProps} footer={complexFooter} />);
 
-    expect(screen.getByText('Complex')).toBeTruthy();
+    expect(
+      screen.getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title')
+    ).toHaveTextContent('Complex');
     expect(screen.getByRole('button', { name: 'Footer' })).toBeTruthy();
   });
 
@@ -112,12 +111,5 @@ describe('Card', () => {
     const kpiValue = screen.getByTestId('datasetQualityDetailsSummaryKpiValue-Test Card Title');
     expect(kpiValue).toBeTruthy();
     expect(kpiValue.textContent).toBe('');
-  });
-
-  it('renders title without tooltip when titleTooltipContent is not provided', () => {
-    render(<Card {...defaultProps} />);
-
-    expect(screen.getByText('Test Card Title')).toBeTruthy();
-    expect(screen.queryByText('Info')).toBe(null);
   });
 });

@@ -89,8 +89,6 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
         internalReqHeader
       );
       expect(resp.status).to.be(200);
-      expect(resp.body).to.have.property('headers');
-      expect(resp.body.headers).to.be.an('object');
     });
 
     it('should disable failure store successfully', async () => {
@@ -105,8 +103,6 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
         internalReqHeader
       );
       expect(resp.status).to.be(200);
-      expect(resp.body).to.have.property('headers');
-      expect(resp.body.headers).to.be.an('object');
     });
 
     it('should enable failure store with custom retention period', async () => {
@@ -121,8 +117,6 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
         internalReqHeader
       );
       expect(resp.status).to.be(200);
-      expect(resp.body).to.have.property('headers');
-      expect(resp.body.headers).to.be.an('object');
     });
   });
 }

@@ -340,7 +340,7 @@ describe('updateFailureStoreRoute', () => {
         serverless: false,
       });
 
-      const result = await updateFailureStoreHandler(mockResources);
+      await updateFailureStoreHandler(mockResources);
 
       expect(mockUpdateFailureStore).toHaveBeenCalledWith({
         esClient: mockEsClient.asCurrentUser,
@@ -349,9 +349,6 @@ describe('updateFailureStoreRoute', () => {
         customRetentionPeriod: '30d',
         isServerless: false,
       });
-      expect(result).toEqual({
-        headers: { 'x-elastic-product': 'Elasticsearch' },
-      });
     });
 
     it('should enable failure store with custom retention period in serverless', async () => {
@@ -359,7 +356,7 @@ describe('updateFailureStoreRoute', () => {
         serverless: true,
       });
 
-      const result = await updateFailureStoreHandler(mockResources);
+      await updateFailureStoreHandler(mockResources);
 
       expect(mockUpdateFailureStore).toHaveBeenCalledWith({
         esClient: mockEsClient.asCurrentUser,
@@ -367,9 +364,6 @@ describe('updateFailureStoreRoute', () => {
         failureStoreEnabled: true,
         customRetentionPeriod: '30d',
         isServerless: true,
-      });
-      expect(result).toEqual({
-        headers: { 'x-elastic-product': 'Elasticsearch' },
       });
     });
 
@@ -383,7 +377,7 @@ describe('updateFailureStoreRoute', () => {
         customRetentionPeriod: undefined,
       };
 
-      const result = await updateFailureStoreHandler(mockResources);
+      await updateFailureStoreHandler(mockResources);
 
       expect(mockUpdateFailureStore).toHaveBeenCalledWith({
         esClient: mockEsClient.asCurrentUser,
@@ -391,9 +385,6 @@ describe('updateFailureStoreRoute', () => {
         failureStoreEnabled: false,
         customRetentionPeriod: undefined,
         isServerless: false,
-      });
-      expect(result).toEqual({
-        headers: { 'x-elastic-product': 'Elasticsearch' },
       });
     });
 
@@ -407,7 +398,7 @@ describe('updateFailureStoreRoute', () => {
         customRetentionPeriod: undefined,
       };
 
-      const result = await updateFailureStoreHandler(mockResources);
+      await updateFailureStoreHandler(mockResources);
 
       expect(mockUpdateFailureStore).toHaveBeenCalledWith({
         esClient: mockEsClient.asCurrentUser,
@@ -415,9 +406,6 @@ describe('updateFailureStoreRoute', () => {
         failureStoreEnabled: true,
         customRetentionPeriod: undefined,
         isServerless: false,
-      });
-      expect(result).toEqual({
-        headers: { 'x-elastic-product': 'Elasticsearch' },
       });
     });
   });

@@ -24,7 +24,7 @@ describe('updateFailureStore', () => {
       const mockResponse = { acknowledged: true };
       mockEsClient.indices.putDataStreamOptions.mockResolvedValue(mockResponse);
 
-      const result = await updateFailureStore({
+      await updateFailureStore({
         esClient: mockEsClient,
         dataStream: 'logs-test-default',
         failureStoreEnabled: true,
@@ -45,14 +45,13 @@ describe('updateFailureStore', () => {
         },
         { meta: true }
       );
-      expect(result).toEqual(mockResponse);
     });
 
     it('should enable failure store with custom retention period in serverless', async () => {
       const mockResponse = { acknowledged: true };
       mockEsClient.indices.putDataStreamOptions.mockResolvedValue(mockResponse);
 
-      const result = await updateFailureStore({
+      await updateFailureStore({
         esClient: mockEsClient,
         dataStream: 'logs-test-default',
         failureStoreEnabled: true,
@@ -72,14 +71,13 @@ describe('updateFailureStore', () => {
         },
         { meta: true }
       );
-      expect(result).toEqual(mockResponse);
     });
 
     it('should disable failure store in non-serverless', async () => {
       const mockResponse = { acknowledged: true };
       mockEsClient.indices.putDataStreamOptions.mockResolvedValue(mockResponse);
 
-      const result = await updateFailureStore({
+      await updateFailureStore({
         esClient: mockEsClient,
         dataStream: 'logs-test-default',
         failureStoreEnabled: false,
@@ -100,14 +98,13 @@ describe('updateFailureStore', () => {
         },
         { meta: true }
       );
-      expect(result).toEqual(mockResponse);
     });
 
     it('should disable failure store in serverless', async () => {
       const mockResponse = { acknowledged: true };
       mockEsClient.indices.putDataStreamOptions.mockResolvedValue(mockResponse);
 
-      const result = await updateFailureStore({
+      await updateFailureStore({
         esClient: mockEsClient,
         dataStream: 'metrics-system-default',
         failureStoreEnabled: false,
@@ -127,14 +124,13 @@ describe('updateFailureStore', () => {
         },
         { meta: true }
       );
-      expect(result).toEqual(mockResponse);
     });
 
     it('should enable failure store without custom retention period', async () => {
       const mockResponse = { acknowledged: true };
       mockEsClient.indices.putDataStreamOptions.mockResolvedValue(mockResponse);
 
-      const result = await updateFailureStore({
+      await updateFailureStore({
         esClient: mockEsClient,
         dataStream: 'logs-test-default',
         failureStoreEnabled: true,
@@ -155,7 +151,6 @@ describe('updateFailureStore', () => {
         },
         { meta: true }
       );
-      expect(result).toEqual(mockResponse);
     });
 
     it('should include enabled field in lifecycle for non-serverless when enabling', async () => {

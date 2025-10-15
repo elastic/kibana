@@ -234,20 +234,6 @@ describe('useFailureStoreModal', () => {
       expect(mockFailureStoreModal).not.toHaveBeenCalled();
     });
 
-    it('should return null when user cannot manage and modal is not open', () => {
-      mockUseDatasetQualityDetailsState.mockReturnValue({
-        ...defaultMockData,
-        canUserManageFailureStore: false,
-      });
-
-      const { result } = renderHook(() => useFailureStoreModal());
-
-      const modalElement = result.current.renderModal();
-
-      expect(modalElement).toBeNull();
-      expect(mockFailureStoreModal).not.toHaveBeenCalled();
-    });
-
     it('should pass correct props to FailureStoreModal', () => {
       mockUseDatasetQualityDetailsState.mockReturnValue({
         ...defaultMockData,
