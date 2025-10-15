@@ -42,7 +42,7 @@ export function generateConnectorSnippet(
     (c) => c.type === connectorType
   )?.connectorIdRequired;
   // Get required parameters for this connector type
-  const requiredParams = getRequiredParamsForConnector(connectorType);
+  const requiredParams = getRequiredParamsForConnector(connectorType, dynamicConnectorTypes);
 
   if (requiredParams.length === 0) {
     // No required params, just add empty with block with a placeholder comment

@@ -365,3 +365,60 @@ export interface ConnectorTypeInfo {
 }
 
 export type ConnectorTypeInfoMinimal = Pick<ConnectorTypeInfo, 'actionTypeId' | 'displayName'>;
+
+export interface ConnectorContract {
+  type: string;
+  paramsSchema: z.ZodType;
+  connectorIdRequired?: boolean;
+  connectorId?: z.ZodType;
+  outputSchema: z.ZodType;
+  description?: string;
+  summary?: string;
+  instances?: ConnectorInstance[];
+}
+
+export interface DynamicConnectorContract extends ConnectorContract {
+  /** Action type ID from Kibana actions plugin */
+  actionTypeId: string;
+  /** Available connector instances */
+  instances: Array<{
+    id: string;
+    name: string;
+    isPreconfigured: boolean;
+    isDeprecated: boolean;
+  }>;
+  /** Whether this connector type is enabled */
+  enabled?: boolean;
+  /** Whether this is a system action type */
+  isSystemActionType?: boolean;
+}
+
+export interface InternalConnectorContract extends ConnectorContract {
+  /** HTTP method(s) for this API endpoint */
+  methods?: string[];
+  /** Summary for this API endpoint */
+  summary?: string;
+  /** URL pattern(s) for this API endpoint */
+  patterns?: string[];
+  /** Whether this is an internal connector with hardcoded endpoint details */
+  isInternal?: boolean;
+  /** Documentation URL for this API endpoint */
+  documentation?: string | null;
+  /** Parameter type metadata for proper request building */
+  parameterTypes?: {
+    pathParams?: string[];
+    urlParams?: string[];
+    bodyParams?: string[];
+  };
+}
+
+export interface ConnectorExamples {
+  params?: Record<string, any>;
+  snippet?: string;
+}
+
+export interface EnhancedInternalConnectorContract extends InternalConnectorContract {
+  examples?: ConnectorExamples;
+}
+
+export type ConnectorContractUnion = DynamicConnectorContract | EnhancedInternalConnectorContract;

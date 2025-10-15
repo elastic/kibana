@@ -8,7 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ConnectorContract, ConnectorTypeInfo } from '@kbn/workflows';
+import type {
+  ConnectorContractUnion,
+  ConnectorTypeInfo,
+  EnhancedInternalConnectorContract,
+  InternalConnectorContract,
+} from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
@@ -141,6 +146,7 @@ import {
   TorqParamsSchema,
   TorqResponseSchema,
 } from './stack_connectors_schema';
+import { mergeEnhancedConnectors } from './enhanced_es_connectors';
 
 /**
  * Get parameter schema for a specific sub-action
@@ -614,7 +620,7 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
 }
 
 // Static connectors used for schema generation
-const staticConnectors: ConnectorContract[] = [
+const staticConnectors: ConnectorContractUnion[] = [
   {
     type: 'console',
     summary: 'Console',
@@ -683,7 +689,7 @@ const staticConnectors: ConnectorContract[] = [
  *
  * To regenerate: run `npm run generate:es-connectors` from @kbn/workflows package
  */
-function generateElasticsearchConnectors(): ConnectorContract[] {
+function generateElasticsearchConnectors(): EnhancedInternalConnectorContract[] {
   // Lazy load the large generated files to keep them out of the main bundle
   const {
     GENERATED_ELASTICSEARCH_CONNECTORS,
@@ -692,7 +698,6 @@ function generateElasticsearchConnectors(): ConnectorContract[] {
 
   const {
     ENHANCED_ELASTICSEARCH_CONNECTORS,
-    mergeEnhancedConnectors,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
   } = require('./enhanced_es_connectors');
 
@@ -703,7 +708,7 @@ function generateElasticsearchConnectors(): ConnectorContract[] {
   );
 }
 
-function generateKibanaConnectors(): ConnectorContract[] {
+function generateKibanaConnectors(): InternalConnectorContract[] {
   // Lazy load the generated Kibana connectors
 
   const {
@@ -720,8 +725,8 @@ function generateKibanaConnectors(): ConnectorContract[] {
  */
 export function convertDynamicConnectorsToContracts(
   connectorTypes: Record<string, ConnectorTypeInfo>
-): ConnectorContract[] {
-  const connectorContracts: ConnectorContract[] = [];
+): ConnectorContractUnion[] {
+  const connectorContracts: ConnectorContractUnion[] = [];
 
   Object.values(connectorTypes).forEach((connectorType) => {
     try {
@@ -789,9 +794,9 @@ export function convertDynamicConnectorsToContracts(
 }
 
 // Global cache for all connectors (static + generated + dynamic)
-let allConnectorsCache: ConnectorContract[] | null = null;
+let allConnectorsCache: ConnectorContractUnion[] | null = null;
 
-let allConnectorsMapCache: Map<string, ConnectorContract> | null = null;
+let allConnectorsMapCache: Map<string, ConnectorContractUnion> | null = null;
 
 // Global cache for dynamic connector types (with instances)
 let dynamicConnectorTypesCache: Record<string, ConnectorTypeInfo> | null = null;
@@ -799,11 +804,11 @@ let dynamicConnectorTypesCache: Record<string, ConnectorTypeInfo> | null = null;
 // Track the last processed connector types to avoid unnecessary re-processing
 let lastProcessedConnectorTypesHash: string | null = null;
 
-export function getCachedAllConnectorsMap(): Map<string, ConnectorContract> | null {
+export function getCachedAllConnectorsMap(): Map<string, ConnectorContractUnion> | null {
   return allConnectorsMapCache;
 }
 
-export function setCachedAllConnectorsMap(allConnectors: ConnectorContract[]) {
+export function setCachedAllConnectorsMap(allConnectors: ConnectorContractUnion[]) {
   allConnectorsMapCache = new Map(allConnectors.map((c) => [c.type, c]));
 }
 
@@ -858,7 +863,7 @@ export function getCachedDynamicConnectorTypes(): Record<string, ConnectorTypeIn
 }
 
 // Combine static connectors with dynamic Elasticsearch and Kibana connectors
-export function getAllConnectors(): ConnectorContract[] {
+export function getAllConnectors(): ConnectorContractUnion[] {
   // Return cached connectors if available
   if (allConnectorsCache !== null) {
     return allConnectorsCache;
@@ -899,7 +904,7 @@ export const getOutputSchemaForStepType = (stepType: string) => {
  */
 export function getAllConnectorsWithDynamic(
   dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
-): ConnectorContract[] {
+): ConnectorContractUnion[] {
   const staticAndGeneratedConnectors = getAllConnectors();
 
   // Graceful fallback if dynamic connectors are not available

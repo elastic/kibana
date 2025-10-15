@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { isEnhancedInternalConnector, type ConnectorTypeInfo } from '@kbn/workflows';
 import { getCachedAllConnectors } from './connectors_cache';
 // import type { EnhancedConnectorDefinition } from '../../../../common/enhanced_es_connectors';
 
@@ -114,24 +115,19 @@ import { getCachedAllConnectors } from './connectors_cache';
  */
 export function getRequiredParamsForConnector(
   connectorType: string,
-  dynamicConnectorTypes?: Record<string, any>
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
 ): Array<{ name: string; example?: string; defaultValue?: string }> {
   // Get all connectors (both static and generated)
   const allConnectors = getCachedAllConnectors(dynamicConnectorTypes);
 
   // Find the connector by type
-  const connector = allConnectors.find((c: any) => c.type === connectorType);
+  const connector = allConnectors.find((c) => c.type === connectorType);
 
   if (connector && connector.paramsSchema) {
     try {
-      // Check if this connector has enhanced examples
-      const hasEnhancedExamples = (connector as any).examples?.params;
-
-      // Processing enhanced examples for connector
-
-      if (hasEnhancedExamples) {
+      if (isEnhancedInternalConnector(connector) && connector.examples?.params) {
         // Use examples directly from enhanced connector
-        const exampleParams = (connector as any).examples.params;
+        const exampleParams = connector.examples.params;
         // Using enhanced examples
         const result: Array<{ name: string; example?: any; defaultValue?: string }> = [];
 

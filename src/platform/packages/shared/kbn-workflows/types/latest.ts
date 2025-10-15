@@ -46,6 +46,10 @@ export type {
   ConnectorInstance,
   ConnectorTypeInfo,
   ConnectorTypeInfoMinimal,
+  ConnectorContractUnion,
+  EnhancedInternalConnectorContract,
+  InternalConnectorContract,
+  DynamicConnectorContract,
 } from './v1';
 
 // exported full to use enum as values
