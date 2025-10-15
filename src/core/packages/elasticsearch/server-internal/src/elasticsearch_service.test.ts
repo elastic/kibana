@@ -242,32 +242,21 @@ describe('#setup', () => {
       .mockImplementationOnce(() =>
         elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
       );
-
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
     const setupContract = await elasticsearchService.setup(setupDeps);
-
-    // Initial call should happen synchronously
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
 
-    // Advance timers to trigger interval emission (this allows retry delay to emit)
     await jest.advanceTimersByTimeAsync(TICK);
 
-    // After retry completes (triggered by interval emission)
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
 
-    // Wait for the observable to emit (it should have cached value from shareReplay)
     await firstValueFrom(setupContract.esNodesCompatibility$);
 
-    // Advance timers to trigger next poll
+    await jest.advanceTimersByTimeAsync(TICK);
     await jest.advanceTimersByTimeAsync(TICK);
 
-    // Advance timers again to allow the second poll's retry to complete
-    await jest.advanceTimersByTimeAsync(TICK);
-
-    // Wait for second poll to complete
     await firstValueFrom(setupContract.esNodesCompatibility$);
-    // Second poll: initial + 1 retry = 2 more calls (total 4)
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(4);
   });
 

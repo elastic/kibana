@@ -26,6 +26,8 @@ const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
 export const DEFAULT_API_VERSION = 'master';
 
+export const DEFAULT_HEALTH_CHECK_RETRY = 3;
+
 export type ElasticsearchConfigType = TypeOf<typeof configSchema>;
 
 const requestHeadersWhitelistSchemas = [
@@ -156,7 +158,7 @@ export const configSchema = schema.object({
   healthCheck: schema.object({
     delay: schema.duration({ defaultValue: 2500 }),
     startupDelay: schema.duration({ defaultValue: 500 }),
-    retry: schema.number({ defaultValue: 3, min: 1 }),
+    retry: schema.number({ defaultValue: DEFAULT_HEALTH_CHECK_RETRY, min: 1 }),
   }),
   ignoreVersionMismatch: offeringBasedSchema({
     serverless: schema.boolean({ defaultValue: true }),
@@ -477,7 +479,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.sniffInterval = rawConfig.sniffInterval;
     this.healthCheckDelay = rawConfig.healthCheck.delay;
     this.healthCheckStartupDelay = rawConfig.healthCheck.startupDelay;
-    this.healthCheckRetry = rawConfig.healthCheck.retry ? rawConfig.healthCheck.retry : 3;
+    this.healthCheckRetry = rawConfig.healthCheck.retry;
     this.username = rawConfig.username;
     this.password = rawConfig.password;
     this.serviceAccountToken = rawConfig.serviceAccountToken;
