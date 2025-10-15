@@ -255,13 +255,13 @@ describe('ScheduledReportsService', () => {
     }));
     taskManager.bulkGet = jest.fn().mockResolvedValue(nextRunResponse);
     mockResponseFactory = getMockResponseFactory();
+    jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValue(true);
     scheduledReportsService = await ScheduledReportsService.build({
       logger: mockLogger,
       reportingCore: core,
       responseFactory: mockResponseFactory,
       request: fakeRawRequest,
     });
-    jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValue(true);
 
     (mockResponseFactory.ok as jest.Mock) = jest.fn((args: unknown) => args);
     (mockResponseFactory.forbidden as jest.Mock) = jest.fn((args: unknown) => args);
@@ -271,7 +271,6 @@ describe('ScheduledReportsService', () => {
   describe('list', () => {
     it('should pass parameters in the request body', async () => {
       const result = await scheduledReportsService.list({
-        request: fakeRawRequest,
         user: { username: 'somebody' },
         page: 1,
         size: 10,
@@ -404,8 +403,13 @@ describe('ScheduledReportsService', () => {
 
     it('should filter by username when user does not have manage reporting permissions', async () => {
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
-      await scheduledReportsService.list({
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
         request: fakeRawRequest,
+      });
+      await scheduledReportsService.list({
         user: { username: 'somebody' },
         page: 1,
         size: 10,
@@ -450,7 +454,6 @@ describe('ScheduledReportsService', () => {
         saved_objects: [],
       }));
       const result = await scheduledReportsService.list({
-        request: fakeRawRequest,
         user: { username: 'somebody' },
         page: 1,
         size: 10,
@@ -473,7 +476,6 @@ describe('ScheduledReportsService', () => {
 
       await expect(
         scheduledReportsService.list({
-          request: fakeRawRequest,
           user: { username: 'somebody' },
           page: 1,
           size: 10,
@@ -495,7 +497,6 @@ describe('ScheduledReportsService', () => {
       });
 
       const result = await scheduledReportsService.list({
-        request: fakeRawRequest,
         user: { username: 'somebody' },
         page: 1,
         size: 10,
@@ -568,7 +569,6 @@ describe('ScheduledReportsService', () => {
         throw new Error('task manager error');
       });
       const result = await scheduledReportsService.list({
-        request: fakeRawRequest,
         user: { username: 'somebody' },
         page: 1,
         size: 10,
@@ -639,7 +639,6 @@ describe('ScheduledReportsService', () => {
         return [nextRunResponse[0], { tag: 'error', error: new Error('not found') }];
       });
       const result = await scheduledReportsService.list({
-        request: fakeRawRequest,
         user: { username: 'somebody' },
         page: 1,
         size: 10,
@@ -709,7 +708,6 @@ describe('ScheduledReportsService', () => {
   describe('bulkDisable', () => {
     it('should pass parameters in the request body', async () => {
       const result = await scheduledReportsService.bulkDisable({
-        request: fakeRawRequest,
         user: { username: 'elastic' },
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
@@ -787,6 +785,12 @@ describe('ScheduledReportsService', () => {
 
     it('should not disable scheduled report when user does not have permissions', async () => {
       jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
       soClient.bulkUpdate = jest.fn().mockImplementationOnce(async () => ({
         saved_objects: [
           {
@@ -801,7 +805,6 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        request: fakeRawRequest,
         user: { username: 'elastic' },
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
@@ -910,7 +913,6 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        request: fakeRawRequest,
         user: { username: 'elastic' },
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
@@ -987,7 +989,6 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        request: fakeRawRequest,
         user: { username: 'elastic' },
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
@@ -1040,7 +1041,6 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        request: fakeRawRequest,
         user: { username: 'elastic' },
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
@@ -1117,7 +1117,6 @@ describe('ScheduledReportsService', () => {
         errors: [],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        request: fakeRawRequest,
         user: { username: 'elastic' },
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
@@ -1196,7 +1195,6 @@ describe('ScheduledReportsService', () => {
         ],
       }));
       const result = await scheduledReportsService.bulkDisable({
-        request: fakeRawRequest,
         user: { username: 'elastic' },
         ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
       });
@@ -1246,7 +1244,6 @@ describe('ScheduledReportsService', () => {
 
       await expect(
         scheduledReportsService.bulkDisable({
-          request: fakeRawRequest,
           user: { username: 'somebody' },
           ids: ['aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4'],
         })

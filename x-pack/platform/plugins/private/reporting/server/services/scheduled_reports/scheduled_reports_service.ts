@@ -55,9 +55,9 @@ export type CreatedAtSearchResponse = SearchResponse<{ created_at: string }>;
 export class ScheduledReportsService {
   constructor(
     private auditLogger: AuditLogger,
+    private userCanManageReporting: Boolean,
     private esClient: IClusterClient,
     private logger: Logger,
-    private reportingCore: ReportingCore,
     private responseFactory: KibanaResponseFactory,
     private savedObjectsClient: SavedObjectsClientContract,
     private taskManager: TaskManagerStartContract
@@ -78,12 +78,13 @@ export class ScheduledReportsService {
     const auditLogger = await reportingCore.getAuditLogger(request);
     const savedObjectsClient = await reportingCore.getScopedSoClient(request);
     const taskManager = await reportingCore.getTaskManager();
+    const userCanManageReporting = await reportingCore.canManageReportingForSpace(request);
 
     return new ScheduledReportsService(
       auditLogger,
+      userCanManageReporting,
       esClient,
       logger,
-      reportingCore,
       responseFactory,
       savedObjectsClient,
       taskManager
@@ -91,12 +92,10 @@ export class ScheduledReportsService {
   }
 
   public async list({
-    request,
     user,
     page = 1,
     size = DEFAULT_SCHEDULED_REPORT_LIST_SIZE,
   }: {
-    request: KibanaRequest;
     user: ReportingUser;
     page: number;
     size: number;
@@ -104,16 +103,11 @@ export class ScheduledReportsService {
     try {
       const username = this.getUsername(user);
 
-      // if user has Manage Reporting privileges, we can list
-      // scheduled reports for all users in this space, otherwise
-      // we will filter only to the scheduled reports created by the user
-      const canManageReporting = await this.canManageReporting(request);
-
       const response = await this.savedObjectsClient.find<ScheduledReportType>({
         type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
         page,
         perPage: size,
-        ...(!canManageReporting
+        ...(!this.userCanManageReporting
           ? { filter: `scheduled_report.attributes.createdBy: "${username}"` }
           : {}),
       });
@@ -182,11 +176,9 @@ export class ScheduledReportsService {
 
   public async bulkDisable({
     ids,
-    request,
     user,
   }: {
     ids: string[];
-    request: KibanaRequest;
     user: ReportingUser;
   }): Promise<BulkDisableResult> {
     try {
@@ -194,10 +186,6 @@ export class ScheduledReportsService {
       const bulkErrors: BulkOperationError[] = [];
       const disabledScheduledReportIds: Set<string> = new Set();
       const username = this.getUsername(user);
-
-      // if user has Manage Reporting privileges, they can disable
-      // scheduled reports for all users in this space
-      const canManageReporting = await this.canManageReporting(request);
 
       const bulkGetResult = await this.savedObjectsClient.bulkGet<ScheduledReportType>(
         ids.map((id) => ({ id, type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE }))
@@ -213,7 +201,7 @@ export class ScheduledReportsService {
           });
         } else {
           // check if user is allowed to update this scheduled report
-          if (so.attributes.createdBy !== username && !canManageReporting) {
+          if (so.attributes.createdBy !== username && !this.userCanManageReporting) {
             bulkErrors.push({
               message: `Not found.`,
               status: 404,
@@ -309,10 +297,6 @@ export class ScheduledReportsService {
         body: `Error disabling scheduled reports: ${error.message}`,
       });
     }
-  }
-
-  private async canManageReporting(request: KibanaRequest) {
-    return await this.reportingCore.canManageReportingForSpace(request);
   }
 
   private getUsername(user: ReportingUser): string | Boolean {

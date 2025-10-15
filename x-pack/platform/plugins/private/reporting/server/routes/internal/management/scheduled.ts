@@ -91,7 +91,7 @@ export function registerScheduledRoutesInternal(reporting: ReportingCore, logger
             responseFactory: res,
           });
 
-          const results = await scheduledReportsService.list({ request: req, user, page, size });
+          const results = await scheduledReportsService.list({ user, page, size });
 
           counters.usageCounter();
 
@@ -152,7 +152,7 @@ export function registerScheduledRoutesInternal(reporting: ReportingCore, logger
             responseFactory: res,
           });
 
-          const results = await scheduledReportsService.bulkDisable({ request: req, user, ids });
+          const results = await scheduledReportsService.bulkDisable({ user, ids });
 
           counters.usageCounter();
 
