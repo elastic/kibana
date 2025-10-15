@@ -11,15 +11,17 @@ import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-
 import type { Conversation } from '@kbn/onechat-common';
 import type { ScopedModel } from '@kbn/onechat-server';
 import { conversationToLangchainMessages } from '../../agents/modes/utils';
+import type { SummaryStructuredData } from './types';
 
 const structuredMemorySchema = z.object({
-  title: z
+  title: z.string().describe("A concise, 5-10 word summary of the conversation's main topic."),
+  user_intent: z
     .string()
-    .optional()
-    .describe("A concise, 5-10 word summary of the conversation's main topic."),
+    .describe(
+      "A clear and concise statement describing what the user was trying to achieve in this conversation. Start with a verb, e.g., 'Debug a Python script that fails to connect to a database'."
+    ),
   overall_summary: z
     .string()
-    .optional()
     .describe(
       'A brief, 2-6 sentence narrative summary of the entire conversation. Capture the main goal and the result.'
     ),
@@ -27,12 +29,6 @@ const structuredMemorySchema = z.object({
     .array(z.string())
     .describe(
       "An array of strings representing the primary subjects discussed, e.g., 'API authentication', 'data visualization', 'bug fixing'."
-    ),
-  user_intent: z
-    .string()
-    .nullable()
-    .describe(
-      "A clear and concise statement describing what the user was trying to achieve in this conversation. Start with a verb, e.g., 'Debug a Python script that fails to connect to a database'."
     ),
   outcomes_and_decisions: z
     .array(z.string())
@@ -42,12 +38,12 @@ const structuredMemorySchema = z.object({
   unanswered_questions: z
     .array(z.string())
     .describe(
-      'An array of strings listing any important questions the user asked that were not fully resolved by the end of the conversation.'
+      'An array of strings listing any important questions the user asked that were not fully resolved by the end of the conversation. May be left empty.'
     ),
   agent_actions: z
     .array(z.string())
     .describe(
-      "An array of strings describing the specific actions the agent took, e.g., 'Ran a shell command', 'Searched the web for error codes', 'Wrote a Python script'."
+      "An array of strings describing the specific actions the agent took, e.g., 'Ran a shell command', 'Searched the web for error codes', 'Wrote a Python script'. May be left empty."
     ),
 });
 
@@ -86,7 +82,7 @@ export const summarizeConversation = async ({
 }: {
   conversation: Conversation;
   model: ScopedModel;
-}) => {
+}): Promise<SummaryStructuredData> => {
   return withActiveInferenceSpan(
     'SummarizeConversation',
     { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
@@ -115,17 +111,15 @@ export const summarizeConversation = async ({
         unanswered_questions: unansweredQuestions,
       } = response;
 
-      const summary = `
-Title: ${title}
-Overall Summary: ${overallSummary}
-User Intent: ${userIntent}
-Agent Actions: ${agentActions.join('\n')}
-Key Topics: ${keyTopics.join(', ')}
-Outcomes and Decisions: ${outcomesAndDecisions.join('\n')}
-Unanswered Questions: ${unansweredQuestions.join('\n')}
-  `;
-
-      return summary;
+      return {
+        title,
+        discussion_summary: overallSummary,
+        user_intent: userIntent,
+        key_topics: keyTopics ?? [],
+        outcomes_and_decisions: outcomesAndDecisions ?? [],
+        unanswered_questions: unansweredQuestions ?? [],
+        agent_actions: agentActions ?? [],
+      };
     }
   );
 };

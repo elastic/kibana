@@ -18,9 +18,10 @@ import type { ModelProvider } from '@kbn/onechat-server';
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
-import { fromEs, toEs, createConversationSummary, type Document } from './converters';
+import { fromEs, type Document } from './converters';
 import type { ConversationSummary } from './types';
 import { summarizeConversation } from './summarizer';
+import { createConversationSummary, createSemanticSummary } from './utils';
 
 export interface SummarySearchParams {
   term: string;
@@ -32,7 +33,6 @@ export interface ConversationSummaryService {
   get(conversationId: string): Promise<ConversationSummary>;
   exists(conversationId: string): Promise<boolean>;
   create(conversation: Conversation): Promise<ConversationSummary>;
-  update(conversation: Conversation): Promise<ConversationSummary>;
   search(params: SummarySearchParams): Promise<ConversationSummary[]>;
   delete(conversationId: string): Promise<boolean>;
 }
@@ -109,14 +109,17 @@ class ConversationSummaryServiceImpl implements ConversationSummaryService {
     const now = new Date();
     const id = conversation.id;
 
-    const summary = await summarizeConversation({
+    const structuredData = await summarizeConversation({
       conversation,
       model: await this.modelProvider.getDefaultModel(),
     });
 
+    const semanticSummary = createSemanticSummary({ structuredData });
+
     const attributes = createConversationSummary({
       conversation,
-      summary,
+      summary: semanticSummary,
+      structuredData,
       user: this.user,
       spaceId: this.spaceId,
       createdAt: now,
@@ -128,35 +131,6 @@ class ConversationSummaryServiceImpl implements ConversationSummaryService {
     });
 
     return this.get(id);
-  }
-
-  async update(conversation: Conversation): Promise<ConversationSummary> {
-    const { id: conversationId } = conversation;
-    const now = new Date();
-    const document = await this._get(conversation.id);
-    if (!document) {
-      throw createConversationNotFoundError({ conversationId });
-    }
-
-    if (!hasAccess({ conversation: document, user: this.user })) {
-      throw createConversationNotFoundError({ conversationId });
-    }
-
-    const storedConversation = fromEs(document);
-    const updatedConversation = updateConversation({
-      conversation: storedConversation,
-      update: conversation,
-      updateDate: now,
-      space: this.spaceId,
-    });
-    const attributes = toEs(updatedConversation, this.spaceId);
-
-    await this.storage.getClient().index({
-      id: conversation.id,
-      document: attributes,
-    });
-
-    return this.get(conversation.id);
   }
 
   async search(options: SummarySearchParams): Promise<ConversationSummary[]> {
@@ -178,7 +152,7 @@ class ConversationSummaryServiceImpl implements ConversationSummaryService {
           must: [
             {
               match: {
-                summary: {
+                semantic_summary: {
                   query: term,
                   boost: 2,
                 },
@@ -188,7 +162,7 @@ class ConversationSummaryServiceImpl implements ConversationSummaryService {
               ? [
                   {
                     match: {
-                      summary: {
+                      semantic_summary: {
                         query: keywords.join(' '),
                         boost: 1,
                       },
@@ -196,6 +170,14 @@ class ConversationSummaryServiceImpl implements ConversationSummaryService {
                   },
                 ]
               : []),
+            ...questions.map((question) => ({
+              match: {
+                semantic_summary: {
+                  query: question,
+                  boost: 0.8,
+                },
+              },
+            })),
           ],
         },
       },

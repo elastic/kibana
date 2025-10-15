@@ -13,5 +13,16 @@ export interface ConversationSummary {
   title: string;
   created_at: string;
   updated_at: string;
-  summary: string;
+  semantic_summary: string;
+  structured_data: SummaryStructuredData;
+}
+
+export interface SummaryStructuredData {
+  title: string;
+  discussion_summary: string;
+  user_intent: string;
+  key_topics: string[];
+  outcomes_and_decisions: string[];
+  unanswered_questions: string[];
+  agent_actions: string[];
 }

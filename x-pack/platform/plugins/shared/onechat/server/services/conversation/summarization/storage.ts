@@ -23,7 +23,19 @@ const storageSettings = {
       title: types.text({}),
       created_at: types.date({}),
       updated_at: types.date({}),
-      summary: types.semantic_text({}),
+      semantic_summary: types.semantic_text({}),
+      structured_data: types.object({
+        dynamic: false,
+        properties: {
+          title: types.text({}),
+          discussion_summary: types.text({}),
+          user_intent: types.text({}),
+          key_topics: types.text({}),
+          outcome_and_decisions: types.text({}),
+          unanswered_questions: types.text({}),
+          agent_actions: types.text({}),
+        },
+      }),
     },
   },
 } satisfies IndexStorageSettings;
@@ -36,7 +48,18 @@ export interface ConversationSummaryProperties {
   title: string;
   created_at: string;
   updated_at: string;
-  summary: string;
+
+  semantic_summary: string;
+
+  structured_data: {
+    title: string;
+    discussion_summary: string;
+    user_intent: string;
+    key_topics?: string[];
+    outcomes_and_decisions?: string[];
+    unanswered_questions?: string[];
+    agent_actions?: string[];
+  };
 }
 
 export type ConversationSummaryStorageSettings = typeof storageSettings;

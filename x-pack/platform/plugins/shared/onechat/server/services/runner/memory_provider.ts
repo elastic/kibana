@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ModelProvider } from '@kbn/onechat-server';
 import type { AgentMemoryProvider } from '@kbn/onechat-server/agents';
@@ -68,46 +69,58 @@ export const createMemoryProvider = ({
 }): AgentMemoryProvider => {
   return {
     recall: async ({ message, previousRounds = [] }) => {
-      const model = await modelProvider.getDefaultModel();
+      return withActiveInferenceSpan(
+        'GenerateRecallQuery',
+        { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
+        () => {
+          const model = await modelProvider.getDefaultModel();
 
-      const conversationMessages = conversationToLangchainMessages({
-        nextInput: {
-          message,
-        },
-        previousRounds,
-        ignoreSteps: true,
-      });
+          const conversationMessages = conversationToLangchainMessages({
+            nextInput: {
+              message,
+            },
+            previousRounds,
+            ignoreSteps: true,
+          });
 
-      const messages: BaseMessageLike[] = [
-        {
-          role: 'system',
-          content: REWRITE_QUERY_SYSTEM_PROMPT,
-        },
-        ...conversationMessages,
-      ];
+          const messages: BaseMessageLike[] = [
+            {
+              role: 'system',
+              content: REWRITE_QUERY_SYSTEM_PROMPT,
+            },
+            ...conversationMessages,
+          ];
 
-      const {
-        main_intent_query: mainIntentQuery,
-        extracted_keywords: extractedKeywords,
-        hypothetical_questions: hypotheticalQuestions,
-      } = await model.chatModel
-        .withStructuredOutput(rewrittenQueriesSchema, { name: 'rewrite_query' })
-        .invoke(messages);
+          const {
+            main_intent_query: mainIntentQuery,
+            extracted_keywords: extractedKeywords,
+            hypothetical_questions: hypotheticalQuestions,
+          } = await model.chatModel
+            .withStructuredOutput(rewrittenQueriesSchema, { name: 'rewrite_query' })
+            .invoke(messages);
 
-      console.log('**** query rewrite', mainIntentQuery, extractedKeywords, hypotheticalQuestions);
+          console.log(
+            '**** query rewrite',
+            mainIntentQuery,
+            extractedKeywords,
+            hypotheticalQuestions
+          );
 
-      const summaryService = await conversationsService.getSummarizationService({ request });
+          const summaryService = await conversationsService.getSummarizationService({ request });
 
-      const results = await summaryService.search({
-        term: mainIntentQuery,
-        keywords: extractedKeywords,
-        questions: hypotheticalQuestions,
-      });
+          // TODO: (not necessarily there) we need a way to exclude the current conversation from the search
+          const results = await summaryService.search({
+            term: mainIntentQuery,
+            keywords: extractedKeywords,
+            questions: hypotheticalQuestions,
+          });
 
-      // TODO: improve format
-      return results.map((result) => {
-        return { content: result.summary };
-      });
+          // TODO: improve format
+          return results.map((result) => {
+            return { content: result.semantic_summary };
+          });
+        }
+      );
     },
   };
 };

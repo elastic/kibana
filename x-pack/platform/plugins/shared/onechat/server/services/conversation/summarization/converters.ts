@@ -6,38 +6,10 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { type Conversation, type UserIdAndName } from '@kbn/onechat-common';
 import type { ConversationSummaryProperties } from './storage';
 import type { ConversationSummary } from './types';
 
 export type Document = Pick<GetResponse<ConversationSummaryProperties>, '_source' | '_id'>;
-
-export const createConversationSummary = ({
-  conversation,
-  user,
-  summary,
-  spaceId,
-  createdAt = new Date(),
-  updatedAt = createdAt,
-}: {
-  conversation: Conversation;
-  user: UserIdAndName;
-  summary: string;
-  spaceId: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-}): ConversationSummary => {
-  return {
-    user_id: user.id,
-    user_name: user.username,
-    agent_id: conversation.agent_id,
-    space: spaceId,
-    title: conversation.title,
-    summary,
-    created_at: createdAt.toISOString(),
-    updated_at: updatedAt.toISOString(),
-  };
-};
 
 export const fromEs = (document: Document): ConversationSummary => {
   if (!document._source) {
@@ -52,7 +24,16 @@ export const fromEs = (document: Document): ConversationSummary => {
     title: document._source.title,
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
-    summary: document._source.summary,
+    semantic_summary: document._source.semantic_summary,
+    structured_data: {
+      title: document._source.structured_data.title,
+      discussion_summary: document._source.structured_data.discussion_summary,
+      user_intent: document._source.structured_data.user_intent,
+      key_topics: document._source.structured_data.key_topics ?? [],
+      outcomes_and_decisions: document._source.structured_data.outcomes_and_decisions ?? [],
+      unanswered_questions: document._source.structured_data.unanswered_questions ?? [],
+      agent_actions: document._source.structured_data.agent_actions ?? [],
+    },
   };
 };
 
@@ -71,6 +52,15 @@ export const toEs = ({
     title: summary.title,
     created_at: summary.created_at,
     updated_at: summary.updated_at,
-    summary: summary.summary,
+    semantic_summary: summary.semantic_summary,
+    structured_data: {
+      title: summary.structured_data.title,
+      discussion_summary: summary.structured_data.discussion_summary,
+      user_intent: summary.structured_data.user_intent,
+      key_topics: summary.structured_data.key_topics ?? [],
+      outcomes_and_decisions: summary.structured_data.outcomes_and_decisions ?? [],
+      unanswered_questions: summary.structured_data.unanswered_questions ?? [],
+      agent_actions: summary.structured_data.agent_actions ?? [],
+    },
   };
 };
