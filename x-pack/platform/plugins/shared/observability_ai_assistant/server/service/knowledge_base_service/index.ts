@@ -168,7 +168,9 @@ export class KnowledgeBaseService {
         id: hit._id!,
       }));
     } catch (error) {
-      this.dependencies.logger.error(`Error recalling from ${INTEGRATION_KNOWLEDGE_INDEX} index`);
+      this.dependencies.logger.error(
+        `Error recalling from index "${INTEGRATION_KNOWLEDGE_INDEX}": ${error?.message}`
+      );
       this.dependencies.logger.debug(error);
       return [];
     }
