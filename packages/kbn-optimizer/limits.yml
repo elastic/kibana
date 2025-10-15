@@ -155,7 +155,7 @@ pageLoadAssetSize:
   securitySolutionServerless: 62964
   serverless: 10682
   serverlessChat: 5133
-  serverlessObservability: 16307
+  serverlessObservability: 22100
   serverlessSearch: 35000
   sessionView: 47938
   share: 58677
@@ -163,7 +163,7 @@ pageLoadAssetSize:
   snapshotRestore: 28452
   spaces: 32135
   stackAlerts: 31499
-  stackConnectors: 68838
+  stackConnectors: 74000
   streams: 9000
   streamsApp: 17000
   synthetics: 31571
@@ -198,4 +198,4 @@ pageLoadAssetSize:
   visualizations: 41000
   watcher: 16031
   workchatApp: 12411
-  workflowsManagement: 6555
+  workflowsManagement: 6800
