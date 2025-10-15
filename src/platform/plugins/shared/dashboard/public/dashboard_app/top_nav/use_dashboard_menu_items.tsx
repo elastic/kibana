@@ -218,7 +218,8 @@ export const useDashboardMenuItems = ({
         testId: 'openBackgroundSearchFlyoutButton',
         run: () =>
           dataService.search.showSearchSessionsFlyout({
-            appId,
+            appId: appId!,
+            trackingProps: { entryPoint: 'background search button' },
           }),
       } as TopNavMenuData,
 

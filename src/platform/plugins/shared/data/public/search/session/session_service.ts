@@ -629,7 +629,7 @@ export class SessionService {
    * Save current session as SO to get back to results later
    * (Send to background)
    */
-  public async save() {
+  public async save(trackingProps: { entryPoint: string }) {
     const sessionId = this.getSessionId();
     if (!sessionId) throw new Error('No current session');
     const currentSessionApp = this.state.get().appName;
@@ -659,7 +659,10 @@ export class SessionService {
       sessionId,
     });
 
-    this.searchSessionEBTManager?.trackBgsStarted({ session: searchSessionSavedObject });
+    this.searchSessionEBTManager?.trackBgsStarted({
+      session: searchSessionSavedObject,
+      ...trackingProps,
+    });
 
     // if we are still interested in this result
     if (this.isCurrentSession(sessionId)) {
