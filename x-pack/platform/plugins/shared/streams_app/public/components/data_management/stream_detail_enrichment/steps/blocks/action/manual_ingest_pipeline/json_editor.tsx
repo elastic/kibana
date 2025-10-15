@@ -95,6 +95,23 @@ export const JsonEditor = () => {
     field.onChange(parseXJsonOrString(newValue));
   };
 
+  const suggestionsRef = React.useRef<ProcessorSuggestionsResponse | null>(null);
+  const fetchRef = React.useRef<Promise<ProcessorSuggestionsResponse> | null>(null);
+
+  const loadProcessorSuggestions = React.useCallback(async (): Promise<ProcessorSuggestionsResponse> => {
+    if (suggestionsRef.current) return suggestionsRef.current;
+    if (!fetchRef.current) {
+      fetchRef.current = fetchProcessorSuggestions(streamsRepositoryClient, signal).finally(() => {});
+    }
+    const res = await fetchRef.current;
+    if (res && res.processors.length > 0) {
+      suggestionsRef.current = res;
+    } else {
+      fetchRef.current = null;
+    }
+    return res;
+  }, [streamsRepositoryClient, signal]);
+
   const suggestionProvider = React.useMemo<monaco.languages.CompletionItemProvider>(() => {
     const isProcessorTypeKeyContext = (
       model: monaco.editor.ITextModel,
@@ -121,12 +138,12 @@ export const JsonEditor = () => {
         model: monaco.editor.ITextModel,
         position: monaco.Position
       ): Promise<monaco.languages.CompletionList> => {
-        let response: ProcessorSuggestionsResponse = { processors: [], propertiesByProcessor: {} };
-        try {
-          response = await fetchProcessorSuggestions(streamsRepositoryClient, signal);
-        } catch {
-          response = { processors: [], propertiesByProcessor: {} };
-        }
+        const response = await loadProcessorSuggestions().catch(
+          (): ProcessorSuggestionsResponse => ({
+            processors: [],
+            propertiesByProcessor: {},
+          })
+        );
 
         const lineContentAfter = model.getValueInRange({
           startLineNumber: position.lineNumber,
@@ -205,7 +222,7 @@ export const JsonEditor = () => {
         return { suggestions };
       },
     };
-  }, [streamsRepositoryClient, signal]);
+  }, [loadProcessorSuggestions]);
 
   React.useEffect(() => {
     const disposable = monaco.languages.registerCompletionItemProvider('xjson', suggestionProvider);

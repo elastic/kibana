@@ -43,7 +43,7 @@ import type {
 } from './types';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { FeatureService } from './lib/streams/feature/feature_service';
-import { ProcessorSuggestionsService } from './lib/streams/ingest/processor_suggestions_service';
+import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}

@@ -6,12 +6,13 @@
  */
 
 import type { ConsoleStart } from '@kbn/console-plugin/server';
-import type { JsonValue } from '@kbn/utility-types';
 import type {
   ProcessorSuggestion,
   ProcessorPropertySuggestion,
   ProcessorSuggestionsResponse,
 } from '../../../../common';
+import type { JsonValue } from '@kbn/utility-types';
+import { getTemplateFromRule } from '../helpers/template_semantics';
 
 type SpecJsonFetcher = () => ReturnType<ConsoleStart['getSpecJson']>;
 
@@ -119,35 +120,7 @@ export class ProcessorSuggestionsService {
   }
 
   private extractTemplateFromRule(rule: unknown): unknown {
-    if (rule === null) return null;
-
-    const primitiveType = typeof rule;
-    if (primitiveType === 'string' || primitiveType === 'number' || primitiveType === 'boolean') {
-      return rule;
-    }
-    if (Array.isArray(rule)) return [];
-
-    if (isRecord(rule)) {
-      const explicitTemplate = rule.__template;
-      if (explicitTemplate !== undefined) return explicitTemplate;
-
-      const oneOf = rule.__one_of;
-      if (Array.isArray(oneOf) && oneOf.length > 0) {
-        const firstOption = oneOf[0];
-        if (isRecord(firstOption) && '__template' in firstOption) {
-          return firstOption.__template;
-        }
-        const firstType = typeof firstOption;
-        if (firstType === 'string' || firstType === 'number' || firstType === 'boolean')
-          return firstOption;
-        if (Array.isArray(firstOption)) return [];
-        if (isRecord(firstOption)) return firstOption;
-      }
-
-      return {};
-    }
-
-    return undefined;
+    return getTemplateFromRule(rule) as JsonValue | undefined;
   }
 
   private normalizeToJsonValue(template: JsonValue | undefined): JsonValue | undefined {
@@ -177,3 +150,5 @@ export class ProcessorSuggestionsService {
     }
   }
 }
+
+

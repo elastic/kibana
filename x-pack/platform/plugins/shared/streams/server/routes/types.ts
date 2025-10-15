@@ -21,7 +21,7 @@ import type { StreamsClient } from '../lib/streams/client';
 import type { EbtTelemetryClient } from '../lib/telemetry';
 import type { StreamsServer } from '../types';
 import type { FeatureClient } from '../lib/streams/feature/feature_client';
-import type { ProcessorSuggestionsService } from '../lib/streams/ingest/processor_suggestions_service';
+import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipelines/processor_suggestions_service';
 
 type GetScopedClients = ({
   request,

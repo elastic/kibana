@@ -10,8 +10,6 @@ import type { JsonValue } from '@kbn/utility-types';
 import type { ProcessorSuggestionsResponse } from '@kbn/streams-plugin/common';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 
-let suggestionsPromise: Promise<ProcessorSuggestionsResponse> | null = null;
-
 export const serializeXJson = (v: unknown, defaultVal: string = '{}') => {
   if (!v) {
     return defaultVal;
@@ -47,27 +45,15 @@ export const fetchProcessorSuggestions = async (
   streamsRepositoryClient: StreamsRepositoryClient,
   signal: AbortSignal
 ): Promise<ProcessorSuggestionsResponse> => {
-  if (suggestionsPromise) return suggestionsPromise;
-
-  const fetchPromise = (async (): Promise<ProcessorSuggestionsResponse> => {
-    try {
-      const result = await streamsRepositoryClient.fetch(
-        'GET /internal/streams/ingest/processor_suggestions',
-        { signal }
-      );
-      return result ?? { processors: [], propertiesByProcessor: {} };
-    } catch {
-      return { processors: [], propertiesByProcessor: {} };
-    }
-  })();
-
-  suggestionsPromise = fetchPromise;
-
-  const resolved = await fetchPromise;
-  if (!resolved || resolved.processors.length === 0) {
-    suggestionsPromise = null;
+  try {
+    const result = await streamsRepositoryClient.fetch(
+      'GET /internal/streams/ingest/processor_suggestions',
+      { signal }
+    );
+    return result ?? { processors: [], propertiesByProcessor: {} };
+  } catch {
+    return { processors: [], propertiesByProcessor: {} };
   }
-  return resolved;
 };
 
 /**
@@ -228,7 +214,6 @@ export const detectProcessorContext = (
   if (top?.type === '{' && top.owner && knownProcessors.includes(top.owner)) {
     return { kind: 'processorProperty', processorName: top.owner };
   }
-
   return { kind: 'processorKey' };
 };
 
@@ -236,32 +221,15 @@ export const shouldSuggestProcessorKey = (
   lineBeforeCursor: string,
   nearbyContextBeforeCursor: string
 ): boolean => {
-  const trimmedLine = lineBeforeCursor.trimEnd();
-  if (!trimmedLine.endsWith('"')) {
-    return false;
-  }
-
   const tripleQuoteCount = (nearbyContextBeforeCursor.match(/"""/g) || []).length;
-  if (tripleQuoteCount % 2 === 1) {
-    return false;
-  }
+  if (tripleQuoteCount % 2 === 1) return false;
 
-  const lastQuoteGlobal = nearbyContextBeforeCursor.lastIndexOf('"');
-  if (lastQuoteGlobal === -1) return false;
-  let i = lastQuoteGlobal - 1;
-  let prev: string | null = null;
-  while (i >= 0) {
-    const ch = nearbyContextBeforeCursor[i];
-    if (!/\s/.test(ch)) {
-      prev = ch;
-      break;
-    }
-    i--;
-  }
+  const trimmed = lineBeforeCursor.trimEnd();
+  if (!trimmed.endsWith('"')) return false;
 
-  if (prev === ':') return false;
-  if (prev === '[') return false;
-  if (prev === '{' || prev === ',' || prev === null) return true;
-
-  return false;
+  let i = trimmed.length - 2;
+  while (i >= 0 && /\s/.test(trimmed[i])) i--;
+  const prev = i >= 0 ? trimmed[i] : null;
+  if (prev === ':' || prev === '[') return false;
+  return prev === '{' || prev === ',' || prev === null;
 };
