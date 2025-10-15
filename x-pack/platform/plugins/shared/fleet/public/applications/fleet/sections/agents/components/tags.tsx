@@ -36,7 +36,7 @@ export const Tags: React.FunctionComponent<Props> = ({ tags, color, size }) => {
           anchorClassName={'wrappedText'}
           content={<span data-test-subj="agentTagsTooltip">{tags.join(', ')}</span>}
         >
-          <EuiText size={size} color={color}>
+          <EuiText size={size} color={color} tabIndex={0}>
             <span data-test-subj="agentTags">
               {take(tags, 3).map(truncateTag).join(', ')}
               {tags.length > MAX_TAGS_TO_DISPLAY

@@ -129,14 +129,15 @@ async function setupInterceptors(
 ) {
   try {
     return await Promise.all([
-      // mock title
+      // title generation
       llmProxy.interceptors.toolChoice({
         name: 'set_title',
         response: toolCallMock('set_title', { title: options.title }),
       }),
 
-      // intercept the user message and respond with tool call to "platform_core_search"
+      // agent - first call -> make it call the `platform_core_search` tool
       llmProxy.interceptors.userMessage({
+        name: 'agent:tool_call',
         when: ({ messages }) => {
           const lastMessage = last(messages)?.content as string;
           return lastMessage.includes(options.userPrompt);
@@ -146,6 +147,7 @@ async function setupInterceptors(
         }),
       }),
 
+      // search tool - index explorer call
       llmProxy.interceptors.toolChoice({
         name: 'select_resources',
         response: toolCallMock('select_resources', {
@@ -159,7 +161,9 @@ async function setupInterceptors(
         }),
       }),
 
+      // search tool - tool selection call
       llmProxy.interceptors.userMessage({
+        name: 'search_tool:tool_selection',
         when: ({ messages }) => {
           const lastMessage = last(messages)?.content as string;
           return lastMessage.startsWith('Execute the following user query:');
@@ -170,21 +174,26 @@ async function setupInterceptors(
         }),
       }),
 
+      // generate esql - request documentation call
       llmProxy.interceptors.toolChoice({
-        name: 'structuredOutput',
-        response: toolCallMock('structuredOutput', { commands: ['WHERE'] }),
+        name: 'request_documentation',
+        response: toolCallMock('request_documentation', { commands: ['WHERE'], functions: [] }),
       }),
 
       llmProxy.interceptors.toolMessage({
+        name: 'generate_esql:generate_query',
         when: ({ messages }) => {
-          const lastMessage = last(messages);
-          const contentParsed = JSON.parse(lastMessage?.content as string);
-          return contentParsed?.documentation;
+          const systemMessage = messages.find((message) => message.role === 'system');
+          return (systemMessage?.content as string).includes(
+            `respond to the user's question by providing a valid ES|QL query`
+          );
         },
         response: `Here's the ES|QL query:\`\`\`esql${options.esqlQuery}\`\`\``,
       }),
 
+      // agent - second call -> make it actually answer
       void llmProxy.interceptors.toolMessage({
+        name: 'agent:final_response',
         when: ({ messages }) => {
           const lastMessage = last(messages);
           const contentParsed = JSON.parse(lastMessage?.content as string);

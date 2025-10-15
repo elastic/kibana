@@ -82,6 +82,12 @@ export const WhenExpression = ({
           id="aggTypeField"
           value={aggType}
           fullWidth
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.common.expressionItems.threshold.aggTypeSelectAriaLabel',
+            {
+              defaultMessage: 'Aggregation type',
+            }
+          )}
           onChange={(e) => {
             onChangeSelectedAggType(e.target.value);
             setAggTypePopoverOpen(false);

@@ -278,6 +278,7 @@ type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePoli
 
 const mockAgentPolicyGet = (spaceIds: string[] = ['default'], additionalProps?: any) => {
   const basePolicy = {
+    id: 'agentPolicy1',
     name: 'Test Agent Policy',
     namespace: 'test',
     status: 'active',
@@ -4267,19 +4268,190 @@ describe('Package policy service', () => {
   });
 
   describe('delete', () => {
-    // TODO: Add tests
-    it('should allow to delete a package policy', async () => {});
+    const mockPackagePolicy = {
+      id: 'test-package-policy',
+      type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      attributes: createPackagePolicyMock(),
+      references: [],
+    };
+
+    it('should allow to delete package policies from ES index', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: createPackagePolicyMock(),
+          },
+        ],
+      });
+
+      soClient.get.mockResolvedValueOnce({
+        ...mockPackagePolicy,
+      });
+
+      mockAgentPolicyGet();
+
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+        return Promise.resolve({
+          ...(await mockedGetPackageInfo(params)),
+          elasticsearch: {
+            privileges: {
+              cluster: ['monitor'],
+            },
+          },
+        } as PackageInfo);
+      });
+      const idToDelete = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: idToDelete, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [idToDelete]);
+
+      expect(soClient.bulkDelete).toHaveBeenCalledWith(
+        [{ id: idToDelete, type: 'ingest-package-policies' }],
+        { force: true }
+      );
+    });
+    it('should allow to delete orphaned package policies from ES index', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: createPackagePolicyMock(),
+          },
+        ],
+      });
+
+      soClient.get.mockResolvedValueOnce({
+        ...mockPackagePolicy,
+      });
+
+      // agent policy not found
+      mockAgentPolicyService.get.mockRejectedValueOnce({
+        output: { statusCode: 404, payload: { message: 'policy not found' } },
+      });
+
+      mockAgentPolicyService.getByIds.mockResolvedValueOnce([
+        {
+          id: 'agentPolicy1',
+          name: 'Test Agent Policy',
+          namespace: 'test',
+          status: 'active',
+          is_managed: false,
+          updated_at: new Date().toISOString(),
+          updated_by: 'test',
+          revision: 1,
+          is_protected: false,
+          space_ids: ['default'],
+        },
+      ]);
+
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+        return Promise.resolve({
+          ...(await mockedGetPackageInfo(params)),
+          elasticsearch: {
+            privileges: {
+              cluster: ['monitor'],
+            },
+          },
+        } as PackageInfo);
+      });
+      const idToDelete = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: idToDelete, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [idToDelete]);
+
+      expect(soClient.bulkDelete).toHaveBeenCalledWith(
+        [{ id: idToDelete, type: 'ingest-package-policies' }],
+        { force: true }
+      );
+    });
+
+    it('should not allow to delete managed package policies', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: createPackagePolicyMock(),
+          },
+        ],
+      });
+
+      soClient.get.mockResolvedValueOnce({
+        ...mockPackagePolicy,
+      });
+      const managedAgentPolicy = {
+        id: 'agentPolicy1',
+        name: 'Test Agent Policy',
+        namespace: 'test',
+        status: 'active',
+        is_managed: true,
+        updated_at: new Date().toISOString(),
+        updated_by: 'test',
+        revision: 1,
+        is_protected: false,
+        space_ids: ['default'],
+      } as any;
+      // agent policy not found
+      mockAgentPolicyService.get.mockResolvedValueOnce(managedAgentPolicy);
+
+      mockAgentPolicyService.getByIds.mockResolvedValueOnce([managedAgentPolicy]);
+
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+        return Promise.resolve({
+          ...(await mockedGetPackageInfo(params)),
+          elasticsearch: {
+            privileges: {
+              cluster: ['monitor'],
+            },
+          },
+        } as PackageInfo);
+      });
+      const idToDelete = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
+
+      expect(await packagePolicyService.delete(soClient, esClient, [idToDelete])).toEqual([
+        {
+          body: {
+            message:
+              'Cannot remove integrations of hosted agent policy in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
+          },
+          id: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
+          statusCode: 400,
+          success: false,
+        },
+      ]);
+
+      expect(soClient.bulkDelete).not.toHaveBeenCalled();
+    });
 
     it('should call audit logger', async () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-      const mockPackagePolicy = {
-        id: 'test-package-policy',
-        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        attributes: {},
-        references: [],
-      };
 
       soClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [{ ...mockPackagePolicy }],
@@ -4300,6 +4472,13 @@ describe('Package policy service', () => {
         id: 'test-package-policy',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
+    });
+
+    it('should return empty array if no package policies are found', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const res = await packagePolicyService.delete(soClient, esClient, ['test-package-policy']);
+      expect(res).toEqual([]);
     });
   });
 
@@ -6566,6 +6745,80 @@ describe('Package policy service', () => {
         expect(result.inputs[0]?.streams[0]?.vars?.path.value).toEqual(['/var/log/test123.log']);
         expect(result.inputs[0]?.streams[0]?.vars?.path_2.value).toBe('/var/log/custom.log');
         expect(result.inputs[0]?.policy_template).toBe('template_1');
+      });
+    });
+
+    describe('when updating a limited package', () => {
+      it('should not add new inputs', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              enabled: true,
+              type: 'connectors-py',
+              policy_template: 'github',
+              streams: [],
+            },
+          ],
+        };
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              multiple: false,
+              name: 'github',
+              description: 'test',
+              title: 'github',
+              template_path: 'agent.yml.hbs',
+              type: 'connectors-py',
+              input: 'connectors-py',
+            },
+            {
+              multiple: false,
+              type: 'connectors-py',
+              name: 'gmail',
+              description: 'test',
+              title: 'gmail',
+              template_path: 'agent.yml.hbs',
+              input: 'connectors-py',
+            },
+          ],
+        } as any;
+
+        const inputsOverride: NewPackagePolicyInput[] = packageToPackagePolicyInputs(packageInfo);
+        const result = updatePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          inputsOverride as InputsOverride[],
+          false
+        );
+
+        expect(result.inputs.length).toBe(2);
+        const enabledInputs = result.inputs.filter((input) => input.enabled);
+        const disabledInputs = result.inputs.filter((input) => !input.enabled);
+        expect(enabledInputs.length).toBe(1);
+        expect(disabledInputs.length).toBe(1);
+        expect(enabledInputs[0]?.type).toBe('connectors-py');
+        expect(enabledInputs[0]?.policy_template).toBe('github');
+        expect(disabledInputs[0]?.type).toBe('connectors-py');
+        expect(disabledInputs[0]?.policy_template).toBe('gmail');
       });
     });
   });

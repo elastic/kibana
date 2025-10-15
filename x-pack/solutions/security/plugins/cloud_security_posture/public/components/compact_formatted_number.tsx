@@ -32,7 +32,7 @@ export const CompactFormattedNumber = ({
 
   return (
     <EuiToolTip content={number.toLocaleString()}>
-      <span>
+      <span tabIndex={0}>
         {number.toLocaleString(undefined, {
           notation: 'compact',
           maximumFractionDigits: 1,
