@@ -16,6 +16,7 @@ import type {
 } from '../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { isAzureCloudConnectorVars } from '../utils';
+import { AZURE_PROVIDER } from '../constants';
 
 export const AzureReusableConnectorForm: React.FC<{
   cloudConnectorId: string | undefined;
@@ -27,7 +28,7 @@ export const AzureReusableConnectorForm: React.FC<{
 
   const azureCloudConnectorData: AzureCloudConnectorOption[] = useMemo(() => {
     return cloudConnectors
-      .filter((connector) => isAzureCloudConnectorVars(connector.vars, 'azure'))
+      .filter((connector) => isAzureCloudConnectorVars(connector.vars, AZURE_PROVIDER))
       .map((connector) => {
         const azureVars = connector.vars as AzureCloudConnectorVars;
         return {
@@ -43,7 +44,7 @@ export const AzureReusableConnectorForm: React.FC<{
 
   // Convert cloud connectors to combo box options (only standard properties for EuiComboBox)
   const comboBoxOptions: ComboBoxOption[] = cloudConnectors
-    .filter((connector) => isAzureCloudConnectorVars(connector.vars, 'azure'))
+    .filter((connector) => isAzureCloudConnectorVars(connector.vars, AZURE_PROVIDER))
     .map((connector) => ({
       label: connector.name,
       value: connector.id, // Use ID as value for easier lookup
@@ -65,12 +66,24 @@ export const AzureReusableConnectorForm: React.FC<{
       if (selectedOption?.value) {
         const connector = azureCloudConnectorData.find((opt) => opt.id === selectedOption.value);
         if (connector?.tenantId && connector?.clientId) {
+          // Extract string values safely to avoid circular references
+          const tenantIdValue =
+            typeof connector.tenantId?.value?.id === 'string'
+              ? connector.tenantId.value.id
+              : undefined;
+          const clientIdValue =
+            typeof connector.clientId?.value?.id === 'string'
+              ? connector.clientId.value.id
+              : undefined;
+          const azureConnectorIdValue =
+            typeof connector.azure_credentials_cloud_connector_id?.value?.id === 'string'
+              ? connector.azure_credentials_cloud_connector_id.value.id
+              : undefined;
+
           setCredentials({
-            ...credentials,
-            tenantId: connector.tenantId.value,
-            clientId: connector.clientId.value,
-            azure_credentials_cloud_connector_id:
-              connector.azure_credentials_cloud_connector_id?.value,
+            tenantId: tenantIdValue,
+            clientId: clientIdValue,
+            azure_credentials_cloud_connector_id: azureConnectorIdValue,
             cloudConnectorId: connector.id,
           });
         }

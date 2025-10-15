@@ -9,19 +9,37 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
-import type { CloudConnectorFormProps } from '../types';
+import type { CloudConnectorFormProps, CloudSetupForCloudConnector } from '../types';
 import { AzureArmTemplateGuide } from './azure_arm_template_guide';
 import {
   type AzureCloudConnectorFieldNames,
   getCloudConnectorRemoteRoleTemplate,
-  getElasticStackId,
   isAzureCredentials,
   updateInputVarsWithCredentials,
   updatePolicyWithAzureCloudConnectorCredentials,
+  getDeploymentIdFromUrl,
+  getKibanaComponentId,
 } from '../utils';
-import { AZURE_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
+import { AZURE_CLOUD_CONNECTOR_FIELD_NAMES, AZURE_PROVIDER } from '../constants';
 import { getAzureCloudConnectorsCredentialsFormOptions } from './azure_cloud_connector_options';
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
+
+const getElasticStackId = (cloud?: CloudSetupForCloudConnector): string | undefined => {
+  if (!cloud) return undefined;
+
+  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
+    return cloud.serverless.projectId;
+  }
+
+  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
+  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
+
+  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
+    return kibanaComponentId;
+  }
+
+  return undefined;
+};
 
 export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   input,
@@ -43,7 +61,7 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           cloud,
           packageInfo,
           templateName,
-          provider: 'azure',
+          provider: AZURE_PROVIDER,
         })
       : undefined;
 

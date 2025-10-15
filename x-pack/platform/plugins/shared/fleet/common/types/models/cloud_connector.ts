@@ -34,9 +34,9 @@ export interface AwsCloudConnectorVars extends BaseCloudConnectorVars {
 }
 
 export interface AzureCloudConnectorVars extends BaseCloudConnectorVars {
-  tenant_id: CloudConnectorVar;
-  client_id: CloudConnectorVar;
-  azure_credentials_cloud_connector_id: CloudConnectorVar;
+  tenant_id: CloudConnectorSecretVar;
+  client_id: CloudConnectorSecretVar;
+  azure_credentials_cloud_connector_id: CloudConnectorSecretVar;
 }
 
 type CloudConnectorVars = AwsCloudConnectorVars | AzureCloudConnectorVars;

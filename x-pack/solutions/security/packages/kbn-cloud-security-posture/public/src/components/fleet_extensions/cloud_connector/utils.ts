@@ -14,7 +14,6 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import semver from 'semver';
 
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type {
   AwsCloudConnectorVars,
   AzureCloudConnectorVars,
@@ -24,6 +23,7 @@ import type {
   AzureCloudConnectorCredentials,
   CloudConnectorCredentials,
   CloudProviders,
+  GetCloudConnectorRemoteRoleTemplateParams,
 } from './types';
 import {
   AWS_CLOUD_CONNECTOR_FIELD_NAMES,
@@ -34,6 +34,12 @@ import {
   CLOUD_CONNECTOR_CSPM_REUSABLE_MIN_VERSION,
   AWS_PROVIDER,
   AZURE_PROVIDER,
+  AWS_SINGLE_ACCOUNT,
+  AZURE_SINGLE_ACCOUNT,
+  TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
+  TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
+  AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME,
+  AWS_ACCOUNT_TYPE_INPUT_VAR_NAME,
 } from './constants';
 
 // Type for Azure cloud connector field names
@@ -50,7 +56,7 @@ export const isAwsCloudConnectorVars = (
   return (
     (AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN in vars ||
       AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN in vars) &&
-    provider === 'aws'
+    provider === AWS_PROVIDER
   );
 };
 
@@ -67,7 +73,7 @@ export const isAzureCloudConnectorVars = (
   return (
     (AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID in vars ||
       AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID in vars) &&
-    provider === 'azure'
+    provider === AZURE_PROVIDER
   );
 };
 
@@ -84,9 +90,9 @@ export function hasValidNewConnectionCredentials(
   if (!provider) return false;
 
   switch (provider) {
-    case 'aws':
+    case AWS_PROVIDER:
       return isAwsCredentials(credentials) && !!credentials.roleArn;
-    case 'azure':
+    case AZURE_PROVIDER:
       return isAzureCredentials(credentials) && !!credentials.tenantId;
     default:
       return false;
@@ -99,13 +105,13 @@ const getCloudProviderFromCloudHost = (cloudHost: string | undefined): string | 
   return match;
 };
 
-const getDeploymentIdFromUrl = (url: string | undefined): string | undefined => {
+export const getDeploymentIdFromUrl = (url: string | undefined): string | undefined => {
   if (!url) return undefined;
   const match = url.match(/\/deployments\/([^/?#]+)/);
   return match?.[1];
 };
 
-const getKibanaComponentId = (cloudId: string | undefined): string | undefined => {
+export const getKibanaComponentId = (cloudId: string | undefined): string | undefined => {
   if (!cloudId) return undefined;
 
   const base64Part = cloudId.split(':')[1];
@@ -135,39 +141,34 @@ export const getTemplateUrlFromPackageInfo = (
   }
 };
 
-type CloudSetupForCloudConnector = Pick<
-  CloudSetup,
-  | 'isCloudEnabled'
-  | 'cloudId'
-  | 'cloudHost'
-  | 'deploymentUrl'
-  | 'serverless'
-  | 'isServerlessEnabled'
->;
-
-export const getElasticStackId = (cloud?: CloudSetupForCloudConnector): string | undefined => {
-  if (!cloud) return undefined;
-
-  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
-    return cloud.serverless.projectId;
+const getAccountTypeFromInput = (
+  input: NewPackagePolicyInput,
+  provider: CloudProviders
+): string | undefined => {
+  switch (provider) {
+    case AWS_PROVIDER:
+      return (
+        input?.streams?.[0]?.vars?.[AWS_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value ?? AWS_SINGLE_ACCOUNT
+      );
+    case AZURE_PROVIDER:
+      return (
+        input?.streams?.[0]?.vars?.[AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME]?.value ??
+        AZURE_SINGLE_ACCOUNT
+      );
   }
-
-  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
-  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
-
-  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
-    return kibanaComponentId;
-  }
-
   return undefined;
 };
-interface GetCloudConnectorRemoteRoleTemplateParams {
-  input: NewPackagePolicyInput;
-  cloud: CloudSetupForCloudConnector;
-  packageInfo: PackageInfo;
-  templateName: string;
-  provider: CloudProviders;
-}
+
+const getTemplateFieldNameByProvider = (provider: CloudProviders): string | undefined => {
+  switch (provider) {
+    case AWS_PROVIDER:
+      return CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS;
+    case AZURE_PROVIDER:
+      return ARM_TEMPLATE_URL_CLOUD_CONNECTORS;
+    default:
+      return undefined;
+  }
+};
 
 export const getCloudConnectorRemoteRoleTemplate = ({
   input,
@@ -176,37 +177,33 @@ export const getCloudConnectorRemoteRoleTemplate = ({
   templateName,
   provider,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
-  const accountTypeField = Object.keys(input?.streams?.[0]?.vars || {}).find((key) =>
-    key.includes('account_type')
-  );
-  const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
-  const TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR = 'RESOURCE_ID';
+  if (!provider || (provider !== AWS_PROVIDER && provider !== AZURE_PROVIDER)) return undefined;
 
-  const accountType = input?.streams?.[0]?.vars?.[accountTypeField || '']?.value;
+  let elasticResourceId: string | undefined;
+  const accountType = getAccountTypeFromInput(input, provider);
 
   if (!accountType) return undefined;
 
   const hostProvider = getCloudProviderFromCloudHost(cloud?.cloudHost);
-  if (!hostProvider || (provider === 'aws' && hostProvider !== provider)) return undefined;
+  if (!hostProvider || (provider === AWS_PROVIDER && hostProvider !== provider)) return undefined;
 
-  const elasticStackId = getElasticStackId(cloud);
+  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
+  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
+  const templateUrlFieldName = getTemplateFieldNameByProvider(provider);
 
-  if (!elasticStackId) return undefined;
-
-  const templateUrlFieldName =
-    provider === AWS_PROVIDER
-      ? CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS
-      : provider === AZURE_PROVIDER
-      ? ARM_TEMPLATE_URL_CLOUD_CONNECTORS
-      : undefined;
-
-  if (templateUrlFieldName) {
-    return getTemplateUrlFromPackageInfo(packageInfo, templateName, templateUrlFieldName)
-      ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
-      ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticStackId);
+  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
+    elasticResourceId = cloud.serverless.projectId;
   }
 
-  return undefined;
+  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
+    elasticResourceId = kibanaComponentId;
+  }
+
+  if (!elasticResourceId || !templateUrlFieldName) return undefined;
+
+  return getTemplateUrlFromPackageInfo(packageInfo, templateName, templateUrlFieldName)
+    ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
+    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
 };
 
 /**
@@ -219,29 +216,29 @@ const updatePolicyInputsWithVars = (
   policy: NewPackagePolicy,
   updatedVars: PackagePolicyConfigRecord
 ): NewPackagePolicy => {
-  const updatedPolicy = { ...policy };
-
-  updatedPolicy.inputs = [
-    ...updatedPolicy.inputs
+  // Create a deep copy to avoid circular references
+  const updatedPolicy: NewPackagePolicy = {
+    ...policy,
+    inputs: policy.inputs
       .map((i: NewPackagePolicyInput) => {
-        if (i.enabled && i.streams[0].enabled) {
+        if (i.enabled && i.streams[0]?.enabled) {
           return {
             ...i,
             streams: i.streams.map((s: NewPackagePolicyInputStream) => {
               if (s.enabled) {
                 return {
                   ...s,
-                  vars: updatedVars,
+                  vars: { ...updatedVars }, // Create a shallow copy instead of referencing directly
                 };
               }
-              return s; // Return the original stream if not enabled
+              return { ...s }; // Return a copy of the original stream if not enabled
             }),
           };
         }
-        return i; // Return the original input if not enabled
+        return { ...i }; // Return a copy of the original input if not enabled
       })
       .filter(Boolean), // Filter out undefined values
-  ];
+  };
 
   return updatedPolicy;
 };
@@ -354,16 +351,22 @@ export const updateInputVarsWithAwsCredentials = (
 ): PackagePolicyConfigRecord | undefined => {
   if (!inputVars) return inputVars;
 
+  // Use spread operator - it works fine as long as we don't mutate nested objects
   const updatedInputVars: PackagePolicyConfigRecord = { ...inputVars };
 
-  // Update role_arn fields
+  // Update role_arn fields - always create new objects instead of mutating
   if (inputCredentials?.roleArn !== undefined) {
     if (updatedInputVars.role_arn) {
-      updatedInputVars.role_arn.value = inputCredentials.roleArn;
+      updatedInputVars.role_arn = {
+        ...updatedInputVars.role_arn,
+        value: inputCredentials.roleArn,
+      };
     }
     if (updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]) {
-      updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN].value =
-        inputCredentials.roleArn;
+      updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN] = {
+        ...updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN],
+        value: inputCredentials.roleArn,
+      };
     }
   } else {
     // Clear role_arn fields when roleArn is undefined
@@ -410,12 +413,16 @@ export const updateInputVarsWithAzureCredentials = (
 ): PackagePolicyConfigRecord | undefined => {
   if (!inputVars) return inputVars;
 
+  // Use spread operator but ensure we create new objects for nested properties
   const updatedInputVars: PackagePolicyConfigRecord = { ...inputVars };
 
-  // Update Azure-specific fields
+  // Update Azure-specific fields - always create new objects instead of mutating
   if (credentials?.tenantId !== undefined) {
     if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID]) {
-      updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID].value = credentials.tenantId;
+      updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID] = {
+        ...updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID],
+        value: credentials.tenantId,
+      };
     } else {
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID] = {
         value: credentials.tenantId,
@@ -433,7 +440,10 @@ export const updateInputVarsWithAzureCredentials = (
 
   if (credentials?.clientId !== undefined) {
     if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID]) {
-      updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID].value = credentials.clientId;
+      updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID] = {
+        ...updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID],
+        value: credentials.clientId,
+      };
     } else {
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID] = {
         value: credentials.clientId,
@@ -451,9 +461,10 @@ export const updateInputVarsWithAzureCredentials = (
 
   if (credentials?.azure_credentials_cloud_connector_id !== undefined) {
     if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID]) {
-      updatedInputVars[
-        AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID
-      ].value = credentials.azure_credentials_cloud_connector_id;
+      updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID] = {
+        ...updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID],
+        value: credentials.azure_credentials_cloud_connector_id,
+      };
     } else {
       updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID] = {
         value: credentials.azure_credentials_cloud_connector_id,

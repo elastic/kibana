@@ -21,6 +21,7 @@ import type { CloudConnectorSetupProps } from './cloud_connector_setup';
 import type { UseQueryResult } from '@tanstack/react-query';
 import type { CloudConnector, CloudProvider } from '@kbn/fleet-plugin/public';
 import { NewCloudConnectorForm } from './form/new_cloud_connector_form';
+import { AWS_PROVIDER } from './constants';
 
 // Mock child components
 jest.mock('./form/new_cloud_connector_form', () => ({
@@ -91,7 +92,7 @@ describe('CloudConnectorSetup', () => {
     updatePolicy: mockUpdatePolicy,
     packageInfo: mockPackageInfo,
     cloud: mockCloudSetup,
-    cloudProvider: 'aws',
+    cloudProvider: AWS_PROVIDER,
     hasInvalidRequiredVars: false,
     templateName: 'cloudbeat/cis_aws',
   };
@@ -99,7 +100,7 @@ describe('CloudConnectorSetup', () => {
   const createMockCloudConnector = (
     id: string,
     name: string,
-    provider: CloudProvider = 'aws'
+    provider: CloudProvider = AWS_PROVIDER
   ): CloudConnector => ({
     id,
     name,

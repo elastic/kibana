@@ -125,14 +125,14 @@ export const isAwsCloudConnectorVars = (
   vars: AwsCloudConnectorVars | AzureCloudConnectorVars,
   provider: string
 ): vars is AwsCloudConnectorVars => {
-  return 'role_arn' in vars && provider === 'aws';
+  return 'role_arn' in vars && provider === AWS_PROVIDER;
 };
 
 export const isAzureCloudConnectorVars = (
   vars: AwsCloudConnectorVars | AzureCloudConnectorVars,
   provider: string
 ): vars is AzureCloudConnectorVars => {
-  return 'azure.credentials.tenant_id' in vars && provider === 'azure';
+  return 'azure.credentials.tenant_id' in vars && provider === AZURE_PROVIDER;
 };
 ```
 
@@ -150,7 +150,7 @@ export const isAzureCloudConnectorVars = (
 
 // Use literal strings directly:
 return 'role_arn' in vars && provider === 'aws';
-return 'azure.credentials.tenant_id' in vars && provider === 'azure';
+return 'azure.credentials.tenant_id' in vars && provider === AZURE_PROVIDER;
 ```
 
 ## Data Structure Reference
@@ -288,7 +288,7 @@ const azureVars: AzureCloudConnectorVars = {
   azure_credentials_cloud_connector_id: { value: 'connector-id' },
 };
 
-expect(isAzureCloudConnectorVars(azureVars, 'azure')).toBe(true);
+expect(isAzureCloudConnectorVars(azureVars, AZURE_PROVIDER)).toBe(true);
 ```
 
 ## Build & Development

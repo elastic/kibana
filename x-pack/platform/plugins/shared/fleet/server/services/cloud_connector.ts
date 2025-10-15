@@ -388,9 +388,21 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       cloudConnector.cloudProvider === 'azure' &&
       this.isAzureCloudConnectorVars(vars, 'azure')
     ) {
-      const tenantId = vars.tenant_id?.value;
-      const clientId = vars.client_id?.value;
-      const cloudConnectorId = vars.azure_credentials_cloud_connector_id?.value;
+      const tenantIdValue = vars.tenant_id?.value;
+      const clientIdValue = vars.client_id?.value;
+      const cloudConnectorIdValue = vars.azure_credentials_cloud_connector_id?.value;
+
+      // Handle both string values and CloudConnectorSecretReference objects for validation
+      // because Azure credentials might be provided as plain secret strings (not password type) during creation
+      // but stored as secret references in saved objects
+      const tenantId = typeof tenantIdValue === 'string' ? tenantIdValue : tenantIdValue?.id;
+
+      const clientId = typeof clientIdValue === 'string' ? clientIdValue : clientIdValue?.id;
+
+      const cloudConnectorId =
+        typeof cloudConnectorIdValue === 'string'
+          ? cloudConnectorIdValue
+          : cloudConnectorIdValue?.id;
 
       if (!tenantId) {
         logger.error('Package policy must contain tenant_id variable');

@@ -309,16 +309,36 @@ const extractPackagePolicyVars = (
   }
 
   if (packagePolicy.supports_cloud_connector && cloudProvider === 'azure') {
-    const tenantId: string = vars.tenant_id?.value || vars[AZURE_TENANT_ID_VAR_NAME]?.value;
-    const clientId: string = vars.client_id?.value || vars[AZURE_CLIENT_ID_VAR_NAME]?.value;
-    const cloudConnectorId: string =
-      vars.cloud_connector_id?.value || vars[AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME]?.value;
+    // Extract tenant_id - handle both string values and secret references
+    const tenantIdVar = vars.tenant_id || vars[AZURE_TENANT_ID_VAR_NAME];
+    const tenantIdValue = tenantIdVar?.value;
 
-    if (tenantId && clientId && cloudConnectorId) {
+    // Extract client_id - handle both string values and secret references
+    const clientIdVar = vars.client_id || vars[AZURE_CLIENT_ID_VAR_NAME];
+    const clientIdValue = clientIdVar?.value;
+
+    // Extract connector_id - handle both string values and secret references
+    const connectorIdVar = vars[AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME];
+    const connectorIdValue = connectorIdVar?.value;
+
+    if (tenantIdValue && clientIdValue && connectorIdValue) {
+      // Create proper CloudConnectorSecretVar structure for each field
+      const tenantId: CloudConnectorSecretVar = tenantIdVar?.value?.isSecretRef
+        ? (tenantIdVar as CloudConnectorSecretVar)
+        : { type: 'password', value: { isSecretRef: false, id: String(tenantIdValue) } };
+
+      const clientId: CloudConnectorSecretVar = clientIdVar?.value?.isSecretRef
+        ? (clientIdVar as CloudConnectorSecretVar)
+        : { type: 'password', value: { isSecretRef: false, id: String(clientIdValue) } };
+
+      const connectorId: CloudConnectorSecretVar = connectorIdVar?.value?.isSecretRef
+        ? (connectorIdVar as CloudConnectorSecretVar)
+        : { type: 'password', value: { isSecretRef: false, id: String(connectorIdValue) } };
+
       const azureCloudConnectorVars: AzureCloudConnectorVars = {
-        tenant_id: { type: 'text', value: tenantId },
-        client_id: { type: 'text', value: clientId },
-        azure_credentials_cloud_connector_id: { type: 'text', value: cloudConnectorId },
+        tenant_id: tenantId,
+        client_id: clientId,
+        azure_credentials_cloud_connector_id: connectorId,
       };
 
       return azureCloudConnectorVars;

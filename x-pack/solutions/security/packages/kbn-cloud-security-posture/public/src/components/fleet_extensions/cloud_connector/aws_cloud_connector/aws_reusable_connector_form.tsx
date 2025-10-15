@@ -16,6 +16,7 @@ import type {
 } from '../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { isAwsCloudConnectorVars } from '../utils';
+import { AWS_PROVIDER } from '../constants';
 
 export const AWSReusableConnectorForm: React.FC<{
   cloudConnectorId: string | undefined;
@@ -28,7 +29,7 @@ export const AWSReusableConnectorForm: React.FC<{
   // Memoize AWS-specific connector data
   const awsConnectionData: AwsCloudConnectorOption[] = useMemo(() => {
     return cloudConnectors
-      .filter((connector) => isAwsCloudConnectorVars(connector.vars, 'aws'))
+      .filter((connector) => isAwsCloudConnectorVars(connector.vars, AWS_PROVIDER))
       .map((connector) => {
         // Type assertion after filtering for AWS connectors
         const awsVars = connector.vars as AwsCloudConnectorVars;
@@ -46,7 +47,7 @@ export const AWSReusableConnectorForm: React.FC<{
   const comboBoxOptions: ComboBoxOption[] = useMemo(
     () =>
       cloudConnectors
-        .filter((connector) => isAwsCloudConnectorVars(connector.vars, 'aws'))
+        .filter((connector) => isAwsCloudConnectorVars(connector.vars, AWS_PROVIDER))
         .map((connector) => ({
           label: connector.name,
           value: connector.id,

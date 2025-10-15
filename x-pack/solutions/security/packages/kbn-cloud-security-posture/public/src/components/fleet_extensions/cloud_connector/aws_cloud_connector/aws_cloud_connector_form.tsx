@@ -18,7 +18,7 @@ import {
   isAwsCredentials,
   type AwsCloudConnectorFieldNames,
 } from '../utils';
-import { AWS_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
+import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, AWS_PROVIDER } from '../constants';
 import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 
@@ -41,7 +41,7 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           cloud,
           packageInfo,
           templateName,
-          provider: 'aws',
+          provider: AWS_PROVIDER,
         })
       : undefined;
   const inputVars = input.streams.find((i) => i.enabled)?.vars;

@@ -12,7 +12,7 @@ import { EuiText } from '@elastic/eui';
 import { AZURE_INPUT_FIELDS_TEST_SUBJECTS } from '@kbn/cloud-security-posture-common';
 import type { PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import type { CloudConnectorField } from '../types';
-import { AZURE_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
+import { AZURE_CLOUD_CONNECTOR_FIELD_NAMES, AZURE_PROVIDER } from '../constants';
 
 const AZURE_CLOUD_CONNECTOR_FIELD_LABELS = {
   tenant_id: i18n.translate(
@@ -127,7 +127,7 @@ export const getAzureCloudConnectorsCredentialsFormOptions = (
   }
 
   return {
-    provider: 'azure' as const,
+    provider: AZURE_PROVIDER,
     fields,
     description: (
       <EuiText color="subdued" size="s">

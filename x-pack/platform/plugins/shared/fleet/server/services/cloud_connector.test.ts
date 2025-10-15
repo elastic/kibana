@@ -12,6 +12,10 @@ import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 import { createSavedObjectClientMock } from '../mocks';
 import type { CreateCloudConnectorRequest } from '../../common/types/rest_spec/cloud_connector';
+import type {
+  AwsCloudConnectorVars,
+  AzureCloudConnectorVars,
+} from '../../common/types/models/cloud_connector';
 
 import { CloudConnectorService } from './cloud_connector';
 import { appContextService } from './app_context';
@@ -147,7 +151,7 @@ describe('CloudConnectorService', () => {
       const emptyVarsRequest: CreateCloudConnectorRequest = {
         name: 'test-connector',
         cloudProvider: 'aws',
-        vars: {},
+        vars: {} as AwsCloudConnectorVars,
       };
 
       await expect(service.create(mockSoClient, emptyVarsRequest)).rejects.toThrow(
@@ -181,7 +185,7 @@ describe('CloudConnectorService', () => {
             },
             type: 'password',
           },
-        },
+        } as AwsCloudConnectorVars,
       };
 
       await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
@@ -198,7 +202,7 @@ describe('CloudConnectorService', () => {
             value: 'arn:aws:iam::123456789012:role/TestRole',
             type: 'text',
           },
-        },
+        } as AwsCloudConnectorVars,
       };
 
       await expect(service.create(mockSoClient, invalidRequest)).rejects.toThrow(
@@ -211,11 +215,11 @@ describe('CloudConnectorService', () => {
         name: 'azure-test-connector',
         cloudProvider: 'azure',
         vars: {
-          'azure.credentials.tenant_id': {
+          tenant_id: {
             value: 'test-tenant-id-12345',
             type: 'text',
           },
-          'azure.credentials.client_id': {
+          client_id: {
             value: 'test-client-id',
             type: 'text',
           },
@@ -223,7 +227,7 @@ describe('CloudConnectorService', () => {
             value: 'test-connector-id',
             type: 'text',
           },
-        },
+        } as AzureCloudConnectorVars,
       };
 
       const mockAzureSavedObject = {
@@ -280,11 +284,11 @@ describe('CloudConnectorService', () => {
         name: 'azure-test-connector',
         cloudProvider: 'azure',
         vars: {
-          'azure.credentials.tenant_id': {
+          tenant_id: {
             value: 'very-long-tenant-id-12345678901234567890',
             type: 'text',
           },
-          'azure.credentials.client_id': {
+          client_id: {
             value: 'test-client-id',
             type: 'text',
           },
@@ -300,7 +304,7 @@ describe('CloudConnectorService', () => {
         type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         references: [],
         attributes: {
-          name: 'azure-connector-very-lon',
+          name: 'azure-connector-test-cli-very-lon',
           namespace: '*',
           cloudProvider: 'azure',
           vars: {
@@ -742,7 +746,7 @@ describe('CloudConnectorService', () => {
           type: 'text' as const,
         },
         // Missing external_id
-      };
+      } as AwsCloudConnectorVars;
 
       await expect(
         service.update(mockSoClient, 'cloud-connector-123', {
@@ -1000,7 +1004,7 @@ describe('CloudConnectorService', () => {
               },
               type: 'password',
             },
-          },
+          } as AwsCloudConnectorVars,
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
@@ -1041,7 +1045,7 @@ describe('CloudConnectorService', () => {
               value: 'arn:aws:iam::123456789012:role/TestRole',
               type: 'text',
             },
-          },
+          } as AwsCloudConnectorVars,
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
@@ -1258,7 +1262,7 @@ describe('CloudConnectorService', () => {
       it('should throw error for unsupported cloud provider', () => {
         const invalidRequest: CreateCloudConnectorRequest = {
           name: 'test-connector',
-          cloudProvider: 'azure' as any,
+          cloudProvider: 'gcp' as any,
           vars: {
             role_arn: {
               value: 'arn:aws:iam::123456789012:role/TestRole',
@@ -1275,7 +1279,7 @@ describe('CloudConnectorService', () => {
         };
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
-          'Unsupported cloud provider: azure'
+          'Unsupported cloud provider: gcp'
         );
       });
 

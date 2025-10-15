@@ -9,6 +9,7 @@ import React from 'react';
 import type { NewCloudConnectorFormProps } from '../types';
 import { AWSCloudConnectorForm } from '../aws_cloud_connector/aws_cloud_connector_form';
 import { AzureCloudConnectorForm } from '../azure_cloud_connector/azure_cloud_connector_form';
+import { AWS_PROVIDER, AZURE_PROVIDER } from '../../constants';
 
 export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
   input,
@@ -24,10 +25,10 @@ export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
   hasInvalidRequiredVars,
 }) => {
   // Default to AWS if no cloudProvider is specified
-  const provider = cloudProvider || 'aws';
+  const provider = cloudProvider || AWS_PROVIDER;
 
   switch (provider) {
-    case 'aws':
+    case AWS_PROVIDER:
       return (
         <AWSCloudConnectorForm
           templateName={templateName || ''}
@@ -43,7 +44,7 @@ export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
           setCredentials={setCredentials}
         />
       );
-    case 'azure':
+    case AZURE_PROVIDER:
       return (
         <AzureCloudConnectorForm
           templateName={templateName || ''}

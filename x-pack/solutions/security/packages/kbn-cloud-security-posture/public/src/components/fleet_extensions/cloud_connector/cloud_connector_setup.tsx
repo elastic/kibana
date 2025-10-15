@@ -22,7 +22,7 @@ import { useGetCloudConnectors } from './hooks/use_get_cloud_connectors';
 import { useCloudConnectorSetup } from './hooks/use_cloud_connector_setup';
 import { CloudConnectorTabs, type CloudConnectorTab } from './cloud_connector_tabs';
 import type { UpdatePolicy } from '../types';
-import { TABS, CLOUD_FORMATION_EXTERNAL_DOC_URL } from './constants';
+import { TABS, CLOUD_FORMATION_EXTERNAL_DOC_URL, AWS_PROVIDER } from './constants';
 import { hasValidNewConnectionCredentials, isCloudConnectorReusableEnabled } from './utils';
 export interface CloudConnectorSetupProps {
   input: NewPackagePolicyInput;
@@ -190,7 +190,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           selectedTabId={selectedTabId}
           onTabClick={onTabClick}
           isEditPage={isEditPage}
-          cloudProvider={cloudProvider || 'aws'}
+          cloudProvider={cloudProvider || AWS_PROVIDER}
           cloudConnectorsCount={cloudConnectorsCount || 0}
         />
       )}
