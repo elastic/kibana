@@ -1062,7 +1062,7 @@ export function getCompletionItemProvider(
             // Return early for variable expressions to prevent other completions
             return {
               suggestions,
-              incomplete: false,
+              incomplete: true,
             };
           }
         }
