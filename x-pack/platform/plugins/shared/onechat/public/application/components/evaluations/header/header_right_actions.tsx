@@ -13,11 +13,16 @@ import type { EvaluatorConfig } from '../../../../../common/http_api/evaluations
 import { EvaluatorSelectionModal } from '../modal/evaluator_selection_modal';
 import { useEvaluationsData } from '../hooks/use_evaluations_data';
 import type { Evaluator } from '../modal/types';
+import { appPaths } from '../../../utils/app_paths';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { useConversationId } from '../../../hooks/use_conversation_id';
 
 export const HeaderRightActions: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { runEvaluations } = useEvaluationsData();
+  const { createOnechatUrl } = useNavigation();
+  const conversationId = useConversationId();
 
   const actionsContainerStyles = css`
     display: flex;
@@ -52,6 +57,19 @@ export const HeaderRightActions: React.FC<{}> = () => {
 
   return (
     <EuiPageHeaderSection css={actionsContainerStyles} aria-label={labels.container}>
+      <EuiButton size="m" href={createOnechatUrl(appPaths.evaluations.list)}>
+        {i18n.translate('xpack.onechat.evaluations.evaluationsHistory', {
+          defaultMessage: 'Evaluations History',
+        })}
+      </EuiButton>
+      <EuiButton
+        size="m"
+        href={createOnechatUrl(appPaths.chat.conversation({ conversationId: conversationId! }))}
+      >
+        {i18n.translate('xpack.onechat.evaluations.returnToChat', {
+          defaultMessage: 'Return to chat',
+        })}
+      </EuiButton>
       <EuiButton size="m" onClick={handleSelectEvaluators}>
         {i18n.translate('xpack.onechat.evaluations.selectEvaluators', {
           defaultMessage: 'Select Evaluators',
