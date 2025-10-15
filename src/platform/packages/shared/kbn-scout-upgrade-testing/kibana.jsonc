@@ -1,6 +1,10 @@
 {
-  "type": "shared-common",
+  "type": "functional-tests",
   "id": "@kbn/scout-upgrade-testing",
-  "owner": "@appex-qa",
+  "owner": [
+    "@elastic/appex-qa"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "devOnly": true
 }

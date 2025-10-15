@@ -19,6 +19,7 @@ import { MapsPage } from './maps_page';
 import { RenderablePage } from './renderable_page';
 import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
+import { TimePicker } from './time_picker';
 
 export interface PageObjectsFixtures {
   page: ScoutPage;
@@ -35,6 +36,7 @@ export interface PageObjects {
   renderable: RenderablePage;
   collapsibleNav: CollapsibleNav;
   toasts: Toasts;
+  timePicker: TimePicker;
 }
 
 /**
@@ -53,6 +55,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     renderable: createLazyPageObject(RenderablePage, fixtures.page),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
     toasts: createLazyPageObject(Toasts, fixtures.page),
+    timePicker: createLazyPageObject(TimePicker, fixtures.page),
     // Add new page objects here
   };
 }
