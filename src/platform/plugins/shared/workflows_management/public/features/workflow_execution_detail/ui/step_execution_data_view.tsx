@@ -28,7 +28,7 @@ const titles = {
   }),
 };
 
-interface StepExecutionDataViewProps extends Omit<JSONDataViewProps, 'data'> {
+interface StepExecutionDataViewProps extends Omit<JSONDataViewProps, 'data' | 'stepId'> {
   stepExecution: WorkflowStepExecutionDto;
   mode: 'input' | 'output';
 }
@@ -74,6 +74,8 @@ export const StepExecutionDataView = ({
     <JSONDataView
       data={data}
       title={title}
+      mode={mode}
+      stepId={stepExecution.stepId}
       searchTerm={searchTerm}
       onSearchTermChange={handleSearchTermChange}
       {...props}

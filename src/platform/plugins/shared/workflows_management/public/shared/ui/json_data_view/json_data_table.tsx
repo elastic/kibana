@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useRef } from 'react';
-import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
+import React, { useCallback, useMemo, useRef } from 'react';
+import type { EuiDataGridColumnCellAction } from '@elastic/eui';
 import {
   EuiDataGrid,
   type UseEuiTheme,
@@ -16,75 +16,43 @@ import {
   type EuiDataGridProps,
   useResizeObserver,
   EuiEmptyPrompt,
+  copyToClipboard,
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePager } from '@kbn/discover-utils';
+import { i18n } from '@kbn/i18n';
 import { TableFieldValue } from './table_field_value';
 import { kibanaFlatten } from '../../lib/kibana_flatten';
 import { FieldName } from './field_name';
 import { inferFieldType } from './infer_field_type';
 import { formatValue } from './format_value';
 import { useGetFormattedDateTime } from '../use_formatted_date';
+import type { JSONDataTableProps, JSONDataTableRecord } from './types';
 
 const MIN_NAME_COLUMN_WIDTH = 120;
 const MAX_NAME_COLUMN_WIDTH = 300;
 
-/**
- * Props for the JSONDataTable component
- */
-export interface JSONDataTableProps {
-  /**
-   * The JSON data to display. Can be a single object, an array of objects, or any serializable value.
-   * If an array is provided, only the first object will be displayed.
-   * If a primitive value is provided, it will be wrapped in an object.
-   */
-  data: Record<string, unknown>;
+const CopyFieldPathText = i18n.translate('workflows.jsonDataTable.copyFieldPath', {
+  defaultMessage: 'Copy field path',
+});
+const getCopyCellActionComponent = (
+  filteredDataTableRecords: JSONDataTableRecord[],
+  pathPrefix: string
+): EuiDataGridColumnCellAction =>
+  React.memo(({ rowIndex, Component }) => {
+    const row = filteredDataTableRecords[rowIndex];
+    const copy = useCallback(() => {
+      copyToClipboard(`${pathPrefix}.${row.flattened.field}`);
+    }, [row.flattened.field]);
 
-  /**
-   * Optional title for the data view. Defaults to 'JSON Data'
-   */
-  title?: string;
-
-  /**
-   * Optional columns to display. If not provided, all keys from the data will be used.
-   */
-  columns?: string[];
-
-  /**
-   * Optional custom column metadata for type information and formatting
-   */
-  columnsMeta?: DataTableColumnsMeta;
-
-  /**
-   * Whether to hide the actions column in the doc viewer. Defaults to true.
-   */
-  hideActionsColumn?: boolean;
-
-  /**
-   * Additional CSS class name for styling
-   */
-  className?: string;
-
-  /**
-   * Optional search term to filter the data
-   */
-  searchTerm?: string;
-
-  /**
-   * Test subject for testing purposes
-   */
-  'data-test-subj'?: string;
-}
-
-interface JSONDataTableRecord extends DataTableRecord {
-  flattened: {
-    field: string;
-    value: string;
-    fieldType: string;
-  };
-}
+    return (
+      <Component onClick={copy} iconType="copyClipboard" aria-label={CopyFieldPathText}>
+        {CopyFieldPathText}
+      </Component>
+    );
+  });
 
 /**
  * JSONDataTable component that displays arbitrary JSON data using Kibana's unified data table.
@@ -113,6 +81,7 @@ export function JSONDataTable({
   title = 'JSON Data',
   columns,
   searchTerm,
+  pathPrefix,
   'data-test-subj': dataTestSubj = 'jsonDataTable',
 }: JSONDataTableProps) {
   const styles = useMemoCss(componentStyles);
@@ -170,6 +139,10 @@ export function JSONDataTable({
     totalItems: filteredDataTableRecords.length,
   });
 
+  const cellActions: EuiDataGridColumnCellAction[] = useMemo(() => {
+    return [getCopyCellActionComponent(filteredDataTableRecords, pathPrefix)];
+  }, [filteredDataTableRecords, pathPrefix]);
+
   // Grid columns configuration
   const gridColumns: EuiDataGridProps['columns'] = useMemo(
     () => [
@@ -181,6 +154,7 @@ export function JSONDataTable({
           MAX_NAME_COLUMN_WIDTH
         ),
         actions: false,
+        cellActions,
       },
       {
         id: 'value',
@@ -188,7 +162,7 @@ export function JSONDataTable({
         actions: false,
       },
     ],
-    [containerWidth]
+    [containerWidth, cellActions]
   );
 
   // Cell renderer for the data grid
@@ -198,17 +172,14 @@ export function JSONDataTable({
       if (!row) return null;
 
       if (columnId === 'name') {
-        const fieldName = row.flattened.field as string;
-        const fieldType = row.flattened.fieldType as string;
-
-        return <FieldName fieldName={fieldName} fieldType={fieldType} highlight={searchTerm} />;
+        return <FieldName row={row} pathPrefix={pathPrefix} highlight={searchTerm} />;
       }
 
       if (columnId === 'value') {
         return (
           <TableFieldValue
-            formattedValue={row.flattened.value as string}
-            field={row.flattened.field as string}
+            formattedValue={row.flattened.value}
+            field={row.flattened.field}
             rawValue={row.flattened.value}
             isHighlighted={Boolean(
               searchTerm && row.flattened.value.toLowerCase().includes(searchTerm.toLowerCase())
@@ -219,7 +190,7 @@ export function JSONDataTable({
 
       return null;
     };
-  }, [filteredDataTableRecords, searchTerm]);
+  }, [filteredDataTableRecords, searchTerm, pathPrefix]);
 
   if (filteredDataTableRecords.length === 0) {
     return (

@@ -22,6 +22,14 @@ export interface JSONDataViewProps {
   data: Record<string, unknown> | Record<string, unknown>[] | unknown;
 
   /**
+   * The mode of the data view.
+   */
+  mode: 'input' | 'output';
+  /**
+   * The step ID to prefix the data path.
+   */
+  stepId: string;
+  /**
    * Optional title for the data view. Defaults to 'JSON Data'
    */
   title?: string;
@@ -50,12 +58,21 @@ export interface JSONDataViewProps {
 export function JSONDataView({
   data,
   title = 'JSON Data',
+  mode,
   columns,
   searchTerm,
+  stepId,
   onSearchTermChange,
   'data-test-subj': dataTestSubj = 'jsonDataTable',
 }: JSONDataViewProps) {
   const [viewMode, setViewMode] = useState<'table' | 'json'>('table');
+
+  const pathPrefix = useMemo(() => {
+    if (Array.isArray(data) && data.length > 0) {
+      return `steps.${stepId}.${mode}[0]`; // jsonObject will be data[0]
+    }
+    return `steps.${stepId}.${mode}`;
+  }, [data, mode, stepId]);
 
   // Convert data to object format if needed
   const jsonObject = useMemo(() => {
@@ -145,6 +162,7 @@ export function JSONDataView({
           <JSONDataTable
             data={jsonObject}
             title={title}
+            pathPrefix={pathPrefix}
             columns={columns}
             searchTerm={searchTerm}
           />

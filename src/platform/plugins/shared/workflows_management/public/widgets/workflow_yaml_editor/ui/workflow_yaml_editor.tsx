@@ -29,6 +29,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type YAML from 'yaml';
 import { type Pair, type Scalar, isPair, isScalar } from 'yaml';
 import { useDispatch, useSelector } from 'react-redux';
+import { Droppable } from '@kbn/dom-drag-drop';
 import {
   getStepNodesWithType,
   getTriggerNodes,
@@ -383,6 +384,49 @@ export const WorkflowYAMLEditor = ({
       lastChangeWasTypingRef.current = false;
     },
     [onChange, changeSideEffects]
+  );
+
+  // Handle drag and drop of fields into the editor
+  const handleFieldDrop = useCallback(
+    (droppedItem: { id: string; humanData?: { label?: string } }) => {
+      const editor = editorRef.current;
+      if (!editor) return;
+
+      // Get the current cursor position
+      const position = editor.getPosition();
+      if (position) {
+        // Extract the field path from the dropped item
+        const textToInsert = droppedItem.humanData?.label || droppedItem.id;
+
+        // Insert the field reference at the cursor position with template syntax
+        editor.executeEdits('drop-field', [
+          {
+            range: new monaco.Range(
+              position.lineNumber,
+              position.column,
+              position.lineNumber,
+              position.column
+            ),
+            text: textToInsert,
+          },
+        ]);
+
+        // Move cursor to the end of the inserted text
+        const newPosition = new monaco.Position(
+          position.lineNumber,
+          position.column + textToInsert.length
+        );
+        editor.setPosition(newPosition);
+        editor.focus();
+
+        // Trigger change side effects
+        const model = editor.getModel();
+        if (model) {
+          handleChange(model.getValue());
+        }
+      }
+    },
+    [handleChange]
   );
 
   const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);
@@ -1470,15 +1514,27 @@ export const WorkflowYAMLEditor = ({
         </div>
       )}
       <div css={styles.editorContainer}>
-        <YamlEditor
-          editorDidMount={handleEditorDidMount}
-          editorWillUnmount={handleEditorWillUnmount}
-          onChange={handleChange}
-          options={editorOptions}
-          schemas={schemas}
-          suggestionProvider={completionProvider}
-          {...props}
-        />
+        <Droppable
+          value={{
+            id: 'yaml-editor-drop-zone',
+            humanData: { label: 'YAML Editor' },
+          }}
+          dropTypes={['field_add', 'move_compatible']}
+          onDrop={handleFieldDrop}
+          order={[0]}
+        >
+          <div style={{ height: '100%', width: '100%' }}>
+            <YamlEditor
+              editorDidMount={handleEditorDidMount}
+              editorWillUnmount={handleEditorWillUnmount}
+              onChange={handleChange}
+              options={editorOptions}
+              schemas={schemas}
+              suggestionProvider={completionProvider}
+              {...props}
+            />
+          </div>
+        </Droppable>
       </div>
       <div css={styles.validationErrorsContainer}>
         <WorkflowYAMLValidationErrors
@@ -1858,6 +1914,15 @@ const componentStyles = {
     minWidth: 0,
     overflowY: 'auto',
     minHeight: 0,
+    // Styles for drag and drop visual feedback
+    '.domDroppable__container': {
+      height: '100%',
+    },
+    '.domDroppable__container-active': {
+      outline: '2px dashed #0077cc',
+      outlineOffset: '-2px',
+      backgroundColor: 'rgba(0, 119, 204, 0.05)',
+    },
   }),
   validationErrorsContainer: css({
     flexShrink: 0,

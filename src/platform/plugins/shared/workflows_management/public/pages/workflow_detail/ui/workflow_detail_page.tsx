@@ -14,6 +14,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { css } from '@emotion/react';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
@@ -186,71 +187,73 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   return (
     <WorkflowEditorStoreProvider>
-      <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
-        <EuiFlexItem grow={false}>
-          <WorkflowDetailHeader
-            name={workflow?.name}
-            isLoading={isLoadingWorkflow}
-            activeTab={activeTab}
-            canRunWorkflow={canRunWorkflow}
-            canSaveWorkflow={canSaveWorkflow}
-            isValid={workflow?.valid ?? true}
-            isEnabled={workflow?.enabled ?? false}
-            handleRunClick={handleRun}
-            handleSave={handleSave}
-            handleToggleWorkflow={handleToggleWorkflow}
-            handleTabChange={setActiveTab}
-            hasUnsavedChanges={hasChanges}
-            highlightDiff={highlightDiff}
-            setHighlightDiff={setHighlightDiff}
-            lastUpdatedAt={workflow?.lastUpdatedAt ?? null}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
-          <WorkflowEditorLayout
-            editor={
-              <WorkflowEditor
-                workflow={workflow}
-                workflowYaml={yamlValue}
-                onWorkflowYamlChange={handleChange}
-                handleSave={handleSave}
-                handleRun={handleRun}
-                handleSaveAndRun={handleSaveAndRun}
-                hasChanges={hasChanges}
-                execution={execution}
-                activeTab={activeTab}
-                selectedExecutionId={selectedExecutionId}
-                selectedStepId={selectedStepId}
-                highlightDiff={highlightDiff}
-                setSelectedExecution={setSelectedExecution}
-              />
-            }
-            executionList={
-              activeTab === 'executions' && workflow && !selectedExecutionId ? (
-                <WorkflowExecutionList workflowId={workflow?.id ?? null} />
-              ) : null
-            }
-            executionDetail={
-              workflow && selectedExecutionId ? (
-                <WorkflowExecutionDetail
-                  workflowExecutionId={selectedExecutionId}
+      <RootDragDropProvider>
+        <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
+          <EuiFlexItem grow={false}>
+            <WorkflowDetailHeader
+              name={workflow?.name}
+              isLoading={isLoadingWorkflow}
+              activeTab={activeTab}
+              canRunWorkflow={canRunWorkflow}
+              canSaveWorkflow={canSaveWorkflow}
+              isValid={workflow?.valid ?? true}
+              isEnabled={workflow?.enabled ?? false}
+              handleRunClick={handleRun}
+              handleSave={handleSave}
+              handleToggleWorkflow={handleToggleWorkflow}
+              handleTabChange={setActiveTab}
+              hasUnsavedChanges={hasChanges}
+              highlightDiff={highlightDiff}
+              setHighlightDiff={setHighlightDiff}
+              lastUpdatedAt={workflow?.lastUpdatedAt ?? null}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
+            <WorkflowEditorLayout
+              editor={
+                <WorkflowEditor
+                  workflow={workflow}
                   workflowYaml={yamlValue}
-                  showBackButton={activeTab === 'executions'}
-                  onClose={() => setSelectedExecution(null)}
+                  onWorkflowYamlChange={handleChange}
+                  handleSave={handleSave}
+                  handleRun={handleRun}
+                  handleSaveAndRun={handleSaveAndRun}
+                  hasChanges={hasChanges}
+                  execution={execution}
+                  activeTab={activeTab}
+                  selectedExecutionId={selectedExecutionId}
+                  selectedStepId={selectedStepId}
+                  highlightDiff={highlightDiff}
+                  setSelectedExecution={setSelectedExecution}
                 />
-              ) : null
-            }
-          />
-        </EuiFlexItem>
+              }
+              executionList={
+                activeTab === 'executions' && workflow && !selectedExecutionId ? (
+                  <WorkflowExecutionList workflowId={workflow?.id ?? null} />
+                ) : null
+              }
+              executionDetail={
+                workflow && selectedExecutionId ? (
+                  <WorkflowExecutionDetail
+                    workflowExecutionId={selectedExecutionId}
+                    workflowYaml={yamlValue}
+                    showBackButton={activeTab === 'executions'}
+                    onClose={() => setSelectedExecution(null)}
+                  />
+                ) : null
+              }
+            />
+          </EuiFlexItem>
 
-        {workflowExecuteModalOpen && definitionFromCurrentYaml && (
-          <WorkflowExecuteModal
-            definition={definitionFromCurrentYaml}
-            onClose={closeModal}
-            onSubmit={handleRunWorkflow}
-          />
-        )}
-      </EuiFlexGroup>
+          {workflowExecuteModalOpen && definitionFromCurrentYaml && (
+            <WorkflowExecuteModal
+              definition={definitionFromCurrentYaml}
+              onClose={closeModal}
+              onSubmit={handleRunWorkflow}
+            />
+          )}
+        </EuiFlexGroup>
+      </RootDragDropProvider>
     </WorkflowEditorStoreProvider>
   );
 }

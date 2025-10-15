@@ -9,45 +9,61 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHighlight } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { Draggable } from '@kbn/dom-drag-drop';
+import type { JSONDataTableRecord } from './types';
 
 interface FieldNameProps {
-  fieldName: string;
-  fieldType: string;
+  row: JSONDataTableRecord;
+  pathPrefix: string;
   highlight?: string;
 }
 
-export function FieldName({ fieldName, fieldType, highlight = '' }: FieldNameProps) {
-  const fieldDisplayName = fieldName;
+export function FieldName({ row, pathPrefix, highlight = '' }: FieldNameProps) {
+  const fieldName = row.flattened.field;
+  const fieldType = row.flattened.fieldType;
+
+  const draggableValue = useMemo(
+    () => ({ id: row.id, humanData: { label: `${pathPrefix}.${fieldName}` } }),
+    [row.id, pathPrefix, fieldName]
+  );
 
   return (
-    <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          gutterSize="s"
-          responsive={false}
-          alignItems="center"
-          direction="row"
-          wrap={false}
-          className="kbnDocViewer__fieldName_icon"
-        >
-          <EuiFlexItem grow={false}>
-            <FieldIcon type={fieldType} size="s" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center" direction="row" wrap>
-          <EuiFlexItem
-            className="kbnDocViewer__fieldName eui-textBreakAll"
-            grow={false}
-            data-test-subj={`tableDocViewRow-${fieldName}-name`}
+    <Draggable key={row.id} dragType="move" order={[0]} value={draggableValue}>
+      <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            gutterSize="s"
+            responsive={false}
+            alignItems="center"
+            direction="row"
+            wrap={false}
+            className="kbnDocViewer__fieldName_icon"
           >
-            <EuiHighlight search={highlight}>{fieldDisplayName}</EuiHighlight>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <FieldIcon type={fieldType} size="s" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiFlexGroup
+            gutterSize="none"
+            responsive={false}
+            alignItems="center"
+            direction="row"
+            wrap
+          >
+            <EuiFlexItem
+              className="kbnDocViewer__fieldName eui-textBreakAll"
+              grow={false}
+              data-test-subj={`tableDocViewRow-${fieldName}-name`}
+            >
+              <EuiHighlight search={highlight}>{fieldName}</EuiHighlight>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </Draggable>
   );
 }
