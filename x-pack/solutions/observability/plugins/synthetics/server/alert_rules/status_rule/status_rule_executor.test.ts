@@ -585,6 +585,7 @@ describe('StatusRuleExecutor', () => {
 
     it('should return the correct range for a default rule', () => {
       const range = statusRule.getRange(maxPeriod);
+      statusRule.params = {};
       const expectedFrom = moment()
         .subtract(maxPeriod * 1, 'milliseconds')
         .subtract(5, 'minutes')
