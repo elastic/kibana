@@ -26,13 +26,11 @@ import useToggle from 'react-use/lib/useToggle';
 import { css } from '@emotion/react';
 import { getPercentageFormatter } from '../../../../../../util/formatters';
 import type { ProcessorMetrics } from '../../../state_management/simulation_state_machine';
+import {  shouldTruncateMessage } from './utils';
 
 type ProcessorMetricBadgesProps = ProcessorMetrics;
 
 const formatter = getPercentageFormatter();
-
-const CLAMP_LINES = 4;
-const LONG_MESSAGE_CHARACTER_THRESHOLD = 300;
 
 const messageStyles = css`
   white-space: pre-wrap;
@@ -40,15 +38,23 @@ const messageStyles = css`
   word-break: break-word;
 `;
 
+const expandedMessageStyles = css`
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-height: 33vh;
+  overflow-y: auto;
+`;
+
+const CLAMP_LINES = 4;
 const ProcessorErrorMessage = ({ message }: { message: string }) => {
   const [expanded, toggleExpanded] = useToggle(false);
-  const shouldTruncate =
-    message.length > LONG_MESSAGE_CHARACTER_THRESHOLD || message.includes('\n');
+  const shouldTruncate = shouldTruncateMessage(message, CLAMP_LINES);
 
   return (
     <>
-      {expanded || !shouldTruncate ? (
-        <div css={messageStyles}>{message}</div>
+      {expanded ? (
+        <div css={expandedMessageStyles}>{message}</div>
       ) : (
         <EuiTextBlockTruncate lines={CLAMP_LINES} cloneElement>
           <span css={messageStyles}>{message}</span>
@@ -60,6 +66,10 @@ const ProcessorErrorMessage = ({ message }: { message: string }) => {
           size="xs"
           onClick={toggleExpanded}
           data-test-subj="streamsAppProcessorErrorMessageToggle"
+          css={css`
+            display: block;
+            margin: 0 auto;
+  `}
         >
           {expanded
             ? i18n.translate(
