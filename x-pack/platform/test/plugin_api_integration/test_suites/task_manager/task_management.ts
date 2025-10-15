@@ -931,28 +931,23 @@ export default function ({ getService }: FtrProviderContext) {
         params: {},
       });
 
-      log.info(`get task after scheduling`);
       await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
         const task = await currentTask(taskId);
-        log.info(`task ${taskId} - ${JSON.stringify(task)}`);
         expect(task.schedule?.interval).to.eql('1d');
         expect(task.status).to.eql('idle');
       });
 
       // call ensureScheduled with a different schedule
-      log.info(`calling ensureScheduled`);
       const result = await ensureTaskScheduled({
         id: taskId,
         taskType: 'sampleRecurringTask',
         params: {},
         schedule: { interval: '5m' },
       });
-      log.info(`ensureScheduled returned ${JSON.stringify(result)}`);
 
       await retry.try(async () => {
         const task = await currentTask(taskId);
-        log.info(`task ${taskId} - ${JSON.stringify(task)}`);
         expect(task.schedule?.interval).to.eql('5m');
       });
     });
