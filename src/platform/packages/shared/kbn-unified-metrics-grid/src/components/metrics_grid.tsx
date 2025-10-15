@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
-import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, useEuiTheme, useMutationObserver } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
@@ -20,6 +20,8 @@ import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
 import { EmptyState } from './empty_state/empty_state';
 import { useGridNavigation } from '../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../context/fields_metadata';
+
+const METRICS_GRID_VIEW_DETAILS_OPEN_CLASS = 'metricsExperienceGrid--viewDetailsOpen';
 
 export type MetricsGridProps = Pick<
   ChartSectionProps,
@@ -107,6 +109,7 @@ export const MetricsGrid = ({
       const { rowIndex, colIndex } = getRowColFromIndex(chartIndex);
 
       setExpandedMetric({ metric, esqlQuery, chartId, rowIndex, colIndex });
+      gridRef.current?.classList.add(METRICS_GRID_VIEW_DETAILS_OPEN_CLASS);
       dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
     },
     [rows, getRowColFromIndex]
@@ -114,11 +117,12 @@ export const MetricsGrid = ({
 
   const handleCloseFlyout = useCallback(() => {
     if (expandedMetric) {
-      // Use setTimeout to ensure the flyout is fully closed before focusing
-      setTimeout(() => {
+      // Use requestAnimationFrame to ensure the flyout is fully closed before focusing
+      requestAnimationFrame(() => {
         focusCell(expandedMetric.rowIndex, expandedMetric.colIndex);
-      }, 0);
+      });
     }
+    gridRef.current?.classList.remove(METRICS_GRID_VIEW_DETAILS_OPEN_CLASS);
     setExpandedMetric(undefined);
   }, [expandedMetric, focusCell]);
 
@@ -132,25 +136,22 @@ export const MetricsGrid = ({
     return { current: null };
   }, [expandedMetric?.chartId]);
 
-  // TODO: find a better way to handle conflicts with other flyouts
-  // https://github.com/elastic/kibana/issues/237965
-  useEffect(() => {
-    const handleClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-
-      if (target.closest('[data-test-subj="embeddablePanelAction-openInspector"]')) {
-        if (expandedMetric) {
-          handleCloseFlyout();
-        }
+  const watchForInspectorPanel = useCallback<MutationCallback>(() => {
+    if (!gridRef.current?.classList.contains(METRICS_GRID_VIEW_DETAILS_OPEN_CLASS)) {
+      return;
+    }
+    setTimeout(() => {
+      const inspectorPanel = document.querySelector('[data-test-subj="inspectorPanel"]');
+      if (inspectorPanel) {
+        dismissAllFlyoutsExceptFor(DiscoverFlyouts.inspectorPanel);
       }
-    };
+    }, 0);
+  }, []);
 
-    document.addEventListener('click', handleClick);
-
-    return () => {
-      document.removeEventListener('click', handleClick);
-    };
-  }, [expandedMetric, handleCloseFlyout]);
+  useMutationObserver(document.body, watchForInspectorPanel, {
+    attributes: true,
+    attributeFilter: ['class'],
+  });
 
   const normalizedFields = useMemo(() => (Array.isArray(fields) ? fields : [fields]), [fields]);
 
@@ -229,7 +230,6 @@ export const MetricsGrid = ({
           chartRef={getChartRefForFocus()}
           metric={expandedMetric.metric}
           esqlQuery={expandedMetric.esqlQuery}
-          isOpen
           onClose={handleCloseFlyout}
         />
       )}
