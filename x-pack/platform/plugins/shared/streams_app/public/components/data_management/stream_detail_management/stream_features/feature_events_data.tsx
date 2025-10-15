@@ -12,14 +12,40 @@ import { Chart, BarSeries, Settings } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getIndexPatternsForStream } from '@kbn/streams-schema';
+import { conditionToESQL } from '@kbn/streamlang';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { useStreamFeatureEventsData } from './hooks/use_stream_feature_events_data';
-import { useStreamFeatureDiscoverUrl } from './hooks/use_stream_feature_discover_url';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 
 export const FeatureEventsData = ({ feature }: { feature: Feature }) => {
   const chartBaseTheme = useElasticChartsTheme();
 
   const events = useStreamFeatureEventsData(feature);
-  const url = useStreamFeatureDiscoverUrl({ filter: feature.filter });
+
+  const {
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
+  const useUrl = share.url.locators.useUrl;
+
+  const { definition } = useStreamDetail();
+  const esqlQuery = `FROM ${getIndexPatternsForStream(definition.stream).join(',')}
+      | WHERE ${conditionToESQL(feature.filter)}`;
+
+  const discoverLink = useUrl<DiscoverAppLocatorParams>(
+    () => ({
+      id: DISCOVER_APP_LOCATOR,
+      params: {
+        query: { esql: esqlQuery },
+        timeRange: { from: 'now-24h', to: 'now' },
+      },
+    }),
+    [esqlQuery]
+  );
 
   return (
     <>
@@ -32,10 +58,10 @@ export const FeatureEventsData = ({ feature }: { feature: Feature }) => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {url ? (
+          {discoverLink ? (
             <EuiButtonEmpty
               size="s"
-              href={url}
+              href={discoverLink}
               aria-label={i18n.translate(
                 'xpack.streams.identifiedFeatureEvents.viewAllLinkAriaLabel',
                 {
