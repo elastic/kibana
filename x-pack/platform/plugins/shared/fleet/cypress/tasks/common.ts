@@ -78,6 +78,9 @@ const disableNewFeaturesTours = (window: Window) => {
   tourStorageKeys.forEach((key) => {
     window.localStorage.setItem(key, JSON.stringify(tourConfig));
   });
+
+  // other keys in incompatible format
+  window.localStorage.setItem('solutionNavigationTour:completed', 'true');
 };
 
 const disableFleetTours = (window: Window) => {

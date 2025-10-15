@@ -24,7 +24,14 @@ export const waitForPageToBeLoaded = () => {
 };
 
 export const loadPage = (url: string, options: Partial<Cypress.VisitOptions> = {}) => {
-  cy.visit(url, options);
+  cy.visit(url, {
+    ...options,
+    onBeforeLoad: (win) => {
+      // disable new feature tours
+      win.localStorage.setItem('solutionNavigationTour:completed', 'true');
+      options.onBeforeLoad?.(win);
+    },
+  });
   waitForPageToBeLoaded();
   closeKibanaBrowserSecurityToastIfNecessary();
 };
