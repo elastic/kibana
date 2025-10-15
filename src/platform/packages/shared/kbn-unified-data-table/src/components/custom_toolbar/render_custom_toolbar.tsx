@@ -177,7 +177,7 @@ export const getRenderCustomToolbarWithElements = ({
     });
 };
 
-const styles = {
+export const styles = {
   toolbar: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.xs}`,
