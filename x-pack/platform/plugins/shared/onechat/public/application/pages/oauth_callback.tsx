@@ -127,6 +127,14 @@ export const OAuthCallbackPage: React.FC = () => {
         const returnTo = sessionStorage.getItem('oauth.returnTo') || '/';
         sessionStorage.removeItem('oauth.returnTo');
 
+        // Check if there's a message to auto-retry
+        // Note: We don't remove it here - the conversation component will handle it
+        const lastMessage = sessionStorage.getItem('oauth.lastMessage');
+        if (lastMessage) {
+          // eslint-disable-next-line no-console
+          console.log('Message pending for auto-retry after OAuth:', lastMessage);
+        }
+
         // Small delay to ensure everything is stored
         await new Promise((resolve) => setTimeout(resolve, 100));
 

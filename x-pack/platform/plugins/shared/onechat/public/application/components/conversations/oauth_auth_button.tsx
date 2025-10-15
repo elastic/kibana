@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
 import { useToasts } from '../../hooks/use_toasts';
+import { useConversationRounds } from '../../hooks/use_conversation';
 
 interface OAuthAuthButtonProps {
   serverName: string;
@@ -28,11 +29,20 @@ export const OAuthAuthButton: React.FC<OAuthAuthButtonProps> = ({
   const { oauthManager, mcpService, composioService } = useOnechatServices();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const { addSuccessToast, addErrorToast } = useToasts();
+  const conversationRounds = useConversationRounds();
 
   const handleAuthenticate = async () => {
     setIsAuthenticating(true);
 
     try {
+      // Store the last user message for auto-retry after successful OAuth
+      const lastRound = conversationRounds[conversationRounds.length - 1];
+      if (lastRound?.input?.message) {
+        sessionStorage.setItem('oauth.lastMessage', lastRound.input.message);
+        // eslint-disable-next-line no-console
+        console.log('Stored last message for auto-retry:', lastRound.input.message);
+      }
+
       if (provider === 'composio' && toolkitId) {
         // Composio OAuth flow - use the same OAuth callback route as MCP
         // Store current location to return after OAuth
@@ -80,14 +90,13 @@ export const OAuthAuthButton: React.FC<OAuthAuthButtonProps> = ({
         sessionStorage.setItem('oauth.returnTo', appPath);
 
         // Initiate OAuth flow (will redirect)
+        // Note: This redirects the browser, so we return immediately
+        // Don't call onAuthSuccess or show toast - user is leaving the page
         await oauthManager.initiateAuthFlow(serverId, config.serverUrl, config);
 
-        addSuccessToast({
-          title: `Successfully authenticated with ${serverName}`,
-        });
+        // Return early - browser is redirecting, don't update UI
+        return;
       }
-
-      onAuthSuccess();
     } catch (error) {
       addErrorToast({
         title: `Failed to authenticate with ${serverName}`,

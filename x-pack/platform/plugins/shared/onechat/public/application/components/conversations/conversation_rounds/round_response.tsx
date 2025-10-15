@@ -24,6 +24,7 @@ export interface RoundResponseProps {
   response: AssistantResponse;
   steps: ConversationRoundStep[];
   isLoading: boolean;
+  hideOAuthCallout?: boolean; // Hide duplicate OAuth callouts
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
@@ -31,12 +32,13 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   response: { message },
   steps,
   isLoading,
+  hideOAuthCallout = false,
 }) => {
   const showThinking = steps.length > 0;
-  
+
   // Check if there's an OAuth authentication error in the steps
   const oauthError = useMemo(() => detectOAuthErrorInSteps(steps), [steps]);
-  
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -52,8 +54,8 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
         </EuiFlexItem>
       )}
 
-      {/* Display OAuth authentication callout if needed */}
-      {oauthError.hasOAuthError && oauthError.serverName && (
+      {/* Display OAuth authentication callout if needed (and not hidden by deduplication) */}
+      {oauthError.hasOAuthError && oauthError.serverName && !hideOAuthCallout && (
         <EuiFlexItem grow={false}>
           <OAuthAuthCallout
             serverName={oauthError.serverName}

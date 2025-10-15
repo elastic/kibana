@@ -33,11 +33,29 @@ export const Conversation: React.FC<{}> = () => {
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
   const { euiTheme } = useEuiTheme();
-  const { isResponseLoading } = useSendMessage();
+  const { isResponseLoading, sendMessage, cleanConversation } = useSendMessage();
   const { isFetched } = useConversationStatus();
   const location = useLocation<LocationState>();
 
   const shouldStickToBottom = location.state?.shouldStickToBottom ?? true;
+
+  // Auto-retry message after OAuth if one is pending
+  useEffect(() => {
+    const pendingMessage = sessionStorage.getItem('oauth.lastMessage');
+    if (pendingMessage && conversationId && isFetched && !isResponseLoading) {
+      // eslint-disable-next-line no-console
+      console.log('Auto-retrying message after OAuth:', pendingMessage);
+      sessionStorage.removeItem('oauth.lastMessage');
+
+      // Clean the failed message (with auth error) from conversation history
+      cleanConversation();
+
+      // Small delay to let UI settle after cleaning
+      setTimeout(() => {
+        sendMessage({ message: pendingMessage });
+      }, 300);
+    }
+  }, [conversationId, isFetched, isResponseLoading, sendMessage, cleanConversation]);
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const {
