@@ -58,10 +58,3 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
 
   return '';
 };
-
-const LONG_MESSAGE_CHARACTER_THRESHOLD = 300;
-export const shouldTruncateMessage = (
-  message: string,
-) => {
-  return (message?.length ?? 0) > LONG_MESSAGE_CHARACTER_THRESHOLD;
-};
