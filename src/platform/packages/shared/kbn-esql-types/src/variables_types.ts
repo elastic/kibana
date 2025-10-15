@@ -48,6 +48,7 @@ export type ControlWidthOptions = 'small' | 'medium' | 'large';
 export interface ESQLControlState {
   grow?: boolean;
   width?: ControlWidthOptions;
+  selectionType: 'single' | 'multi';
   title: string;
   selectedOptions: string[];
   variableName: string;

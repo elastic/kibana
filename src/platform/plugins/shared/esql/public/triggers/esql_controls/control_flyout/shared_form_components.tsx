@@ -18,6 +18,7 @@ import {
   EuiFieldText,
   EuiFormRow,
   EuiComboBox,
+  EuiRadioGroup,
   type EuiComboBoxOptionOption,
   EuiButtonGroup,
   EuiSpacer,
@@ -35,6 +36,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiCode,
+  EuiCallOut,
 } from '@elastic/eui';
 import { checkVariableExistence } from './helpers';
 
@@ -72,6 +74,21 @@ const minimumWidthButtonGroup = [
     id: `large`,
     label: i18n.translate('esql.flyout.minimumWidth.large', {
       defaultMessage: 'Large',
+    }),
+  },
+];
+
+const selectionTypeOptions = [
+  {
+    id: 'single',
+    label: i18n.translate('esql.flyout.selectionType.single', {
+      defaultMessage: 'Only allow a single selection',
+    }),
+  },
+  {
+    id: 'multi',
+    label: i18n.translate('esql.flyout.selectionType.multi', {
+      defaultMessage: 'Allow multiple selections',
     }),
   },
 ];
@@ -314,6 +331,53 @@ export function ControlWidth({
           />
         </>
       )}
+    </>
+  );
+}
+
+export function ControlSelectionType({
+  selectionType,
+  onSelectionTypeChange,
+}: {
+  selectionType: 'single' | 'multi';
+  onSelectionTypeChange: (type: 'single' | 'multi') => void;
+}) {
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        label={i18n.translate('esql.flyout.selectionType.label', {
+          defaultMessage: 'Selections',
+        })}
+        fullWidth
+      >
+        <EuiRadioGroup
+          compressed
+          options={selectionTypeOptions}
+          idSelected={selectionType}
+          onChange={(id) => {
+            const newSelectionType = id === 'single' ? 'single' : 'multi';
+            onSelectionTypeChange(newSelectionType);
+          }}
+          name="selectionType"
+          data-test-subj="esqlControlSelectionType"
+        />
+      </EuiFormRow>
+      {selectionType === 'multi' ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="primary"
+            iconType="info"
+            title={i18n.translate('esql.flyout.selectionType.callout', {
+              defaultMessage:
+                'You must use MV_CONTAINS in your ES|QL query for multi-select controls to work.',
+            })}
+          />
+        </>
+      ) : null}
     </>
   );
 }

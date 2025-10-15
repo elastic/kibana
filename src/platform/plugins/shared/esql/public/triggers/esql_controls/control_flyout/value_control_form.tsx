@@ -29,7 +29,7 @@ import {
   appendStatsByToQuery,
 } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '../../../create_editor';
-import { ControlWidth, ControlLabel } from './shared_form_components';
+import { ControlWidth, ControlLabel, ControlSelectionType } from './shared_form_components';
 import { ChooseColumnPopover } from './choose_column_popover';
 
 interface ValueControlFormProps {
@@ -102,6 +102,9 @@ export function ValueControlForm({
   );
   const [label, setLabel] = useState(initialState?.title ?? '');
   const [minimumWidth, setMinimumWidth] = useState(initialState?.width ?? 'medium');
+  const [selectionType, setSelectionType] = useState<'single' | 'multi'>(
+    initialState?.selectionType ?? 'single'
+  );
   const [grow, setGrow] = useState(initialState?.grow ?? false);
 
   const onValuesChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
@@ -142,6 +145,12 @@ export function ValueControlForm({
   const onMinimumSizeChange = useCallback((optionId: string) => {
     if (optionId) {
       setMinimumWidth(optionId as ControlWidthOptions);
+    }
+  }, []);
+
+  const onSelectionTypeChange = useCallback((type: 'single' | 'multi') => {
+    if (type) {
+      setSelectionType(type);
     }
   }, []);
 
@@ -219,6 +228,7 @@ export function ValueControlForm({
       availableOptions,
       selectedOptions: [availableOptions[0]],
       width: minimumWidth,
+      selectionType,
       title: label || variableNameWithoutQuestionmark,
       variableName: variableNameWithoutQuestionmark,
       variableType,
@@ -230,6 +240,7 @@ export function ValueControlForm({
       setControlState(state);
     }
   }, [
+    selectionType,
     controlFlyoutType,
     grow,
     initialState,
@@ -370,6 +381,11 @@ export function ValueControlForm({
         // This property is not compatible with the unified search yet
         // we will hide this possibility for now
         hideFitToSpace={currentApp === 'discover'}
+      />
+
+      <ControlSelectionType
+        selectionType={selectionType}
+        onSelectionTypeChange={onSelectionTypeChange}
       />
     </>
   );
