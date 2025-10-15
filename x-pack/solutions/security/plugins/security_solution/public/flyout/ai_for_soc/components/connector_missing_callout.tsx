@@ -63,7 +63,13 @@ export const ConnectorMissingCallout = memo(
     );
     const { navigateTo } = useNavigateTo();
     const goToKibanaSettings = useCallback(
-      () => navigateTo({ appId: 'management', path: useNewDefaultConnector ? "kibana/securityAiAssistantManagement?tab=connectors" : '/kibana/settings?query=defaultAIConnector' }),
+      () =>
+        navigateTo({
+          appId: 'management',
+          path: useNewDefaultConnector
+            ? 'kibana/securityAiAssistantManagement?tab=connectors'
+            : '/kibana/settings?query=defaultAIConnector',
+        }),
       [navigateTo]
     );
 
