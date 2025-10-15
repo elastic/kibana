@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { TEST_FLEET_PORT, type FtrConfigProviderContext } from '@kbn/test';
 
-import { SERVERLESS_NODES } from '@kbn/es';
+import { getServerlessNodeArgs } from '@kbn/es';
 import { startOsqueryCypress } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const securitySolutionCypressConfig = await readConfigFile(
     require.resolve('./serverless_config.base.ts')
   );
+
+  const nodeArgs = await getServerlessNodeArgs(undefined, undefined);
 
   return {
     ...securitySolutionCypressConfig.getAll(),
@@ -30,9 +32,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...securitySolutionCypressConfig.get('kbnTestServer'),
       serverArgs: [
         ...securitySolutionCypressConfig.get('kbnTestServer.serverArgs'),
-        `--xpack.fleet.agents.fleet_server.hosts=["https://host.docker.internal:8220"]`,
+        `--xpack.fleet.agents.fleet_server.hosts=["https://host.docker.internal:${TEST_FLEET_PORT}"]`,
         `--xpack.fleet.agents.elasticsearch.host=http://${
-          SERVERLESS_NODES[0].name
+          nodeArgs[0].name
         }:${securitySolutionCypressConfig.get('servers.elasticsearch.port')}`,
         `--xpack.fleet.packages.0.name=osquery_manager`,
         `--xpack.fleet.packages.0.version=latest`,

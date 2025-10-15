@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { TEST_FLEET_PORT, type FtrConfigProviderContext } from '@kbn/test';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 
@@ -25,7 +25,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       fleetserver: {
         protocol: 'https',
         hostname: 'host.docker.internal',
-        port: 8220,
+        port: TEST_FLEET_PORT,
       },
     },
 
@@ -48,7 +48,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.strict=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-        `--xpack.fleet.agents.fleet_server.hosts=["https://host.docker.internal:8220"]`,
+        `--xpack.fleet.agents.fleet_server.hosts=["https://host.docker.internal:${TEST_FLEET_PORT}"]`,
         `--xpack.fleet.agents.elasticsearch.host=http://host.docker.internal:${kibanaCommonTestsConfig.get(
           'servers.elasticsearch.port'
         )}`,

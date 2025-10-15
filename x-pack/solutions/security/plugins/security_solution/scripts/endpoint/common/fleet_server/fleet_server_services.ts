@@ -38,7 +38,7 @@ import {
   FLEET_SERVER_KEY_PATH,
   fleetServerDevServiceAccount,
 } from '@kbn/dev-utils';
-import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
+import { getServerlessNodeArgs, maybeCreateDockerNetwork, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
 import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
 import { captureCallingStack, dump, prefixedOutputLogger } from '../utils';
@@ -310,7 +310,7 @@ const startFleetServerWithDocker = async ({
       await maybeCreateDockerNetwork(log);
       try {
         const dockerArgs = isServerless
-          ? getFleetServerStandAloneDockerArgs({
+          ? await getFleetServerStandAloneDockerArgs({
               containerName,
               hostname,
               port,
@@ -507,15 +507,15 @@ type GetFleetServerStandAloneDockerArgsOptions = Pick<
   'esUrl' | 'hostname' | 'containerName' | 'port' | 'agentVersion'
 >;
 
-const getFleetServerStandAloneDockerArgs = ({
+const getFleetServerStandAloneDockerArgs = async ({
   containerName,
   hostname,
   esUrl,
   agentVersion,
   port,
-}: GetFleetServerStandAloneDockerArgsOptions): string[] => {
+}: GetFleetServerStandAloneDockerArgsOptions): Promise<string[]> => {
   const esURL = new URL(esUrl);
-  esURL.hostname = SERVERLESS_NODES[0].name;
+  esURL.hostname = (await getServerlessNodeArgs(undefined, undefined))[0].name;
 
   return [
     'run',

@@ -7,6 +7,7 @@
 
 import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
+import { TEST_FLEET_PORT } from '@kbn/test';
 import { pageObjects } from '../page_objects';
 import { services } from '../services';
 
@@ -39,7 +40,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
          *   1. release a new package to EPR
          *   2. merge the updated version number change to kibana
          */
-        `--xpack.fleet.agents.fleet_server.hosts=["https://ftr.kibana:8220"]`,
+        `--xpack.fleet.agents.fleet_server.hosts=["https://ftr.kibana:${TEST_FLEET_PORT}"]`,
         `--xpack.fleet.internal.fleetServerStandalone=true`,
       ],
     },

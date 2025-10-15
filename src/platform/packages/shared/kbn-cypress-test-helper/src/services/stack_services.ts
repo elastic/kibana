@@ -10,7 +10,7 @@
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
-import { KbnClient } from '@kbn/test';
+import { KbnClient, TEST_FLEET_HOST, TEST_FLEET_PORT } from '@kbn/test';
 import pRetry from 'p-retry';
 import type { ReqOptions } from '@kbn/test/src/kbn_client/kbn_client_requester';
 import { type AxiosResponse } from 'axios';
@@ -112,7 +112,7 @@ class KbnClientExtended extends KbnClient {
 export const createRuntimeServices = async ({
   kibanaUrl: _kibanaUrl,
   elasticsearchUrl,
-  fleetServerUrl = 'https://localhost:8220',
+  fleetServerUrl = `https://${TEST_FLEET_HOST}:${TEST_FLEET_PORT}`,
   username: _username,
   password: _password,
   spaceId,

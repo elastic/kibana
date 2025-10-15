@@ -21,6 +21,7 @@ import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
 import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';
 import type { RunTestsOptions } from './flags';
+import { TEST_FLEET_HOST, TEST_FLEET_PORT } from '../../service_addresses';
 
 /**
  * Run servers and tests for each config
@@ -140,8 +141,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
                     serverArgs: [
                       ...config.get('kbnTestServer.serverArgs'),
                       `--xpack.fleet.syncIntegrations.taskInterval=5s`,
-                      `--elasticsearch.hosts=http://localhost:9221`,
-                      `--server.port=5621`,
+                      `--elasticsearch.hosts=http://${TEST_FLEET_HOST}:${TEST_FLEET_PORT + 1}`,
+                      `--server.port=${TEST_FLEET_PORT + 1}`,
                     ],
                   },
                 },

@@ -7,6 +7,7 @@
 
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { TEST_AGENTLESS_HOST, TEST_AGENTLESS_PORT, TEST_FLEET_PORT } from '@kbn/test';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from './constants';
 import { pageObjects } from './page_objects';
 
@@ -23,10 +24,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        `--xpack.fleet.agents.fleet_server.hosts=["https://ftr.kibana:8220"]`,
+        `--xpack.fleet.agents.fleet_server.hosts=["https://ftr.kibana:${TEST_FLEET_PORT}"]`,
         `--xpack.fleet.internal.fleetServerStandalone=true`,
         `--xpack.fleet.agentless.enabled=true`,
-        `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api`,
+        `--xpack.fleet.agentless.api.url=http://${TEST_AGENTLESS_HOST}:${TEST_AGENTLESS_PORT}/agentless-api`,
         `--xpack.fleet.agentless.api.tls.certificate=${KBN_CERT_PATH}`,
         `--xpack.fleet.agentless.api.tls.key=${KBN_KEY_PATH}`,
         `--xpack.fleet.agentless.api.tls.ca=${CA_CERT_PATH}`,

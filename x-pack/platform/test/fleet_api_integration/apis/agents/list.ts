@@ -9,6 +9,7 @@ import type * as http from 'http';
 import expect from '@kbn/expect';
 import { type Agent, FLEET_ELASTIC_AGENT_PACKAGE, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 
+import { TEST_AGENTLESS_PORT } from '@kbn/test';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupMockServer } from './helpers/mock_agentless_api';
 
@@ -24,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
     let mockApiServer: http.Server;
 
     before(async () => {
-      mockApiServer = await mockAgentlessApiService.listen(8089); // Start the agentless api mock server on port 8089
+      mockApiServer = await mockAgentlessApiService.listen(TEST_AGENTLESS_PORT); // Start the agentless api mock server on this port
       // Ensure fleet default outputs are setup
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/fleet/agents');

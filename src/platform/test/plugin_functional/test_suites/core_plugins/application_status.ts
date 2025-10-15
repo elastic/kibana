@@ -11,6 +11,7 @@ import Url from 'url';
 import expect from '@kbn/expect';
 import type { AppUpdatableFields } from '@kbn/core-application-browser';
 import { AppStatus } from '@kbn/core-application-browser';
+import { TEST_KIBANA_PORT } from '@kbn/test';
 import type { PluginFunctionalProviderContext } from '../../services';
 import '@kbn/core-app-status-plugin/public/types';
 
@@ -18,7 +19,7 @@ const getKibanaUrl = (pathname?: string, search?: string) =>
   Url.format({
     protocol: 'http:',
     hostname: process.env.TEST_KIBANA_HOST || 'localhost',
-    port: process.env.TEST_KIBANA_PORT || '5620',
+    port: TEST_KIBANA_PORT,
     pathname,
     search,
   });
