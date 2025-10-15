@@ -2064,11 +2064,6 @@ components:
                 type: object
                 properties:
                   content:
-                    discriminator:
-                      mapping:
-                        endpoint: '#/components/schemas/RunningProcessesOutputEndpoint'
-                        sentinel_one: '#/components/schemas/RunningProcessesOutputSentinelOne'
-                      propertyName: agentType
                     oneOf:
                       - $ref: '#/components/schemas/RunningProcessesOutputEndpoint'
                       - $ref: '#/components/schemas/RunningProcessesOutputSentinelOne'
@@ -2122,12 +2117,6 @@ components:
                             type: string
               type: object
             parameters:
-              discriminator:
-                mapping:
-                  crowdstrike: '#/components/schemas/RunscriptParamsCrowdStrike'
-                  microsoft_defender_endpoint: '#/components/schemas/RunscriptParamsMicrosoft'
-                  sentinel_one: '#/components/schemas/RunscriptParamsSentinelOne'
-                propertyName: agentType
               oneOf:
                 - $ref: '#/components/schemas/RunscriptParamsCrowdStrike'
                 - $ref: '#/components/schemas/RunscriptParamsMicrosoft'
