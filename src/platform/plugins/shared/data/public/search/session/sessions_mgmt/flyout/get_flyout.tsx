@@ -38,9 +38,11 @@ export function openSearchSessionsFlyout({
   sessionsClient: ISessionsClient;
   share: SharePluginStart;
 }) {
-  return (
-    attrs: { appId?: string; onBackgroundSearchOpened?: BackgroundSearchOpenedHandler } = {}
-  ) => {
+  return (attrs: {
+    appId: string;
+    trackingProps: { entryPoint: string };
+    onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
+  }) => {
     const api = new SearchSessionsMgmtAPI(sessionsClient, config, {
       notifications: coreStart.notifications,
       application: coreStart.application,
@@ -67,6 +69,7 @@ export function openSearchSessionsFlyout({
               config={config}
               kibanaVersion={kibanaVersion}
               locators={share.url.locators}
+              entryPoint={attrs.trackingProps.entryPoint}
             />
           </KibanaReactContextProvider>
         ),

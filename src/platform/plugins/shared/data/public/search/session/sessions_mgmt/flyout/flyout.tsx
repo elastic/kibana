@@ -41,6 +41,7 @@ export const Flyout = ({
   kibanaVersion,
   locators,
   appId,
+  entryPoint,
   onBackgroundSearchOpened,
 }: {
   onClose: () => void;
@@ -52,6 +53,7 @@ export const Flyout = ({
   kibanaVersion: string;
   locators: LocatorsStart;
   appId?: string;
+  entryPoint: string;
   onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
 }) => {
   const flyoutId = useGeneratedHtmlId();
@@ -88,7 +90,7 @@ export const Flyout = ({
           appId={appId}
           onBackgroundSearchOpened={onBackgroundSearchOpened}
           searchSessionEBTManager={ebtManager}
-          from="flyout"
+          from={entryPoint}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

@@ -71,8 +71,9 @@ export interface ISearchStart {
   /**
    * Shows a flyout with a table to manage search sessions.
    */
-  showSearchSessionsFlyout: (attrs?: {
-    appId?: string;
+  showSearchSessionsFlyout: (attrs: {
+    appId: string;
+    trackingProps: { entryPoint: string };
     onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
   }) => void;
   /**

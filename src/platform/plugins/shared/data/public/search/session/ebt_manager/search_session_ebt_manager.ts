@@ -34,11 +34,18 @@ export class SearchSessionEBTManager {
     this.reportEventCore(...args);
   }
 
-  public trackBgsStarted({ session }: { session: SearchSessionSavedObject }) {
+  public trackBgsStarted({
+    entryPoint,
+    session,
+  }: {
+    entryPoint: string;
+    session: SearchSessionSavedObject;
+  }) {
     const query = session.attributes.restoreState?.query as Query | AggregateQuery | undefined;
     const queryString = this.getQueryString(query);
 
     this.reportEvent(BG_SEARCH_START, {
+      entry_point: entryPoint,
       query_lang: this.getQueryLanguage(query),
       session_id: session.attributes.sessionId,
       query_chars_bucket: this.getQueryStringCharCount(queryString),

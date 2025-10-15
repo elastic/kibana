@@ -556,6 +556,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
                   this.services.notifications.toasts.remove(toast);
                   this.services.data.search.showSearchSessionsFlyout({
                     appId: this.services.appName,
+                    trackingProps: { entryPoint: 'toast' },
                   });
                 }}
               >
@@ -574,7 +575,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     query?: QT | Query | undefined;
   }) => {
     if (!this.isDirty()) {
-      const searchSession = await this.services.data.search.session.save();
+      const searchSession = await this.services.data.search.session.save({
+        entryPoint: 'main button',
+      });
       this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
       return;
     }
@@ -586,7 +589,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       .subscribe(async (newSessionId) => {
         if (currentSessionId === newSessionId) return;
         subscription.unsubscribe();
-        const searchSession = await this.services.data.search.session.save();
+        const searchSession = await this.services.data.search.session.save({
+          entryPoint: 'main button',
+        });
         this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
       });
 

@@ -34,6 +34,10 @@ export const registerSearchSessionEBTManagerAnalytics = (core: CoreSetup) => {
     schema: {
       query_lang: COMMON_SCHEMA.query_lang,
       session_id: COMMON_SCHEMA.session_id,
+      entry_point: {
+        type: 'keyword',
+        _meta: { description: 'The entry point used to start the background search.' },
+      },
       query_chars_bucket: {
         type: 'integer',
         _meta: {
