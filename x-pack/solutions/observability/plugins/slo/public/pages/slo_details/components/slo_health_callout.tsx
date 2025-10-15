@@ -119,13 +119,15 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
               </li>
             )}
             {health.summary === 'unhealthy' && !!summaryUrl && (
-              <ContentWithInspectCta
-                textSize="s"
-                content={unhealthySummaryContent}
-                url={summaryUrl}
-              />
+              <li key={`${slo.id}-summary-unhealthy`}>
+                <ContentWithInspectCta
+                  textSize="s"
+                  content={unhealthySummaryContent}
+                  url={summaryUrl}
+                />
+              </li>
             )}
-            {health.rollup === 'missing' && !!rollupUrl && (
+            {health.rollup === 'missing' && (
               <li key={`${slo.id}-rollup-missing`}>
                 <ContentWithResetCta
                   textSize="s"
@@ -134,12 +136,14 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
                 />
               </li>
             )}
-            {health.summary === 'missing' && !!summaryUrl && (
-              <ContentWithResetCta
-                textSize="s"
-                content={missingSummaryContent}
-                handleReset={handleReset}
-              />
+            {health.summary === 'missing' && (
+              <li key={`${slo.id}-summary-missing`}>
+                <ContentWithResetCta
+                  textSize="s"
+                  content={missingSummaryContent}
+                  handleReset={handleReset}
+                />
+              </li>
             )}
           </ul>
         </EuiFlexItem>
