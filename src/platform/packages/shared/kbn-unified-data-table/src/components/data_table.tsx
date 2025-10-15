@@ -1441,6 +1441,23 @@ const componentStyles = {
       '.unifiedDataTable__cell--expanded': {
         backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
       },
+      '.unifiedDataTable__cellValue': {
+        fontFamily: euiTheme.font.familyCode,
+      },
+      '.unifiedDataTable__rowControl': {
+        marginTop: -1, // fine-tuning the vertical alignment with the text for any row height setting
+      },
+      // Compact density - 'auto & custom' row height
+      '.euiDataGrid--fontSizeSmall .euiDataGridRowCell__content:not(.euiDataGridRowCell__content--defaultHeight) .unifiedDataTable__rowControl':
+        {
+          marginTop: -2.5,
+        },
+      // Compact density - 'single' row height
+      '.euiDataGrid--fontSizeSmall .euiDataGridRowCell__content--defaultHeight .unifiedDataTable__rowControl':
+        {
+          alignSelf: 'flex-start',
+          marginTop: -3,
+        },
       '.euiDataGrid__content': {
         background: 'transparent',
       },
