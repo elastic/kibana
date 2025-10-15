@@ -74,7 +74,7 @@ exports[`DraftModeCallout Default case renders a default callout when custom pro
 </div>
 `;
 
-exports[`DraftModeCallout Node override case renders a callout with custom content when custom props are present 1`] = `
+exports[`DraftModeCallout Node override case renders a component override when a node prop is provided 1`] = `
 <p
   data-test-subj="overriddenDraftModeCallOut"
 >
