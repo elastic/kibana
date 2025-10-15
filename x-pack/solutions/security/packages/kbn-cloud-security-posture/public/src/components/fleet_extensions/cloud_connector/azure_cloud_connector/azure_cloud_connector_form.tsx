@@ -52,8 +52,6 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   credentials,
   setCredentials,
 }) => {
-  // For now, we'll use a placeholder ARM template URL
-  // In a real implementation, this would be generated similarly to AWS CloudFormation
   const armTemplateUrl =
     cloud && templateName
       ? getCloudConnectorRemoteRoleTemplate({
@@ -69,7 +67,6 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
 
   const inputVars = input.streams.find((i) => i.enabled)?.vars;
 
-  // Update inputVars with current credentials using utility function or inputVars if no credentials are provided
   const updatedInputVars = credentials
     ? updateInputVarsWithCredentials(inputVars, credentials)
     : inputVars;

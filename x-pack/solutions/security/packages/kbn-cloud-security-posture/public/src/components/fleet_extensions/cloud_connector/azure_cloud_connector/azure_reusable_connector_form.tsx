@@ -43,12 +43,10 @@ export const AzureReusableConnectorForm: React.FC<{
   }, [cloudConnectors]);
 
   // Convert cloud connectors to combo box options (only standard properties for EuiComboBox)
-  const comboBoxOptions: ComboBoxOption[] = cloudConnectors
-    .filter((connector) => isAzureCloudConnectorVars(connector.vars, AZURE_PROVIDER))
-    .map((connector) => ({
-      label: connector.name,
-      value: connector.id, // Use ID as value for easier lookup
-    }));
+  const comboBoxOptions: ComboBoxOption[] = azureCloudConnectorData.map((connector) => ({
+    label: connector.label,
+    value: connector.value,
+  }));
 
   // Find the currently selected connector based on credentials
   const selectedConnector = useMemo(() => {
@@ -65,7 +63,11 @@ export const AzureReusableConnectorForm: React.FC<{
 
       if (selectedOption?.value) {
         const connector = azureCloudConnectorData.find((opt) => opt.id === selectedOption.value);
-        if (connector?.tenantId && connector?.clientId) {
+        if (
+          connector?.tenantId &&
+          connector?.clientId &&
+          connector?.azure_credentials_cloud_connector_id
+        ) {
           // Extract string values safely to avoid circular references
           const tenantIdValue =
             typeof connector.tenantId?.value?.id === 'string'
@@ -88,6 +90,7 @@ export const AzureReusableConnectorForm: React.FC<{
           });
         }
       } else {
+        // Handle deselection
         setCredentials({
           ...credentials,
           tenantId: undefined,

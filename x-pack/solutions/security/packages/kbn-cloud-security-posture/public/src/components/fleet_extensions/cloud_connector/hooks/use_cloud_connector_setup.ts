@@ -10,7 +10,7 @@ import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/
 import type { PackagePolicyConfigRecord } from '@kbn/fleet-plugin/public/types';
 import type { UpdatePolicy } from '../../types';
 import type { CloudConnectorCredentials, AwsCloudConnectorCredentials } from '../types';
-import { updateInputVarsWithCredentials, updatePolicyInputs } from '../utils';
+import { isAzureCloudConnectorVars, updateInputVarsWithCredentials, updatePolicyInputs } from '../utils';
 import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, AZURE_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
 
 export interface UseCloudConnectorSetupReturn {
@@ -29,12 +29,8 @@ export interface UseCloudConnectorSetupReturn {
 
 // Helper function to create initial credentials based on existing vars
 const createInitialCredentials = (vars: PackagePolicyConfigRecord): CloudConnectorCredentials => {
-  // Determine provider type based on which fields exist
-  const isAzureProvider =
-    vars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID]?.value ||
-    vars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID]?.value;
 
-  if (isAzureProvider) {
+  if (isAzureCloudConnectorVars(vars, 'azure')) {
     return {
       tenantId:
         vars.tenant_id?.value || vars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID]?.value,
@@ -58,7 +54,7 @@ export const useCloudConnectorSetup = (
   newPolicy: NewPackagePolicy,
   updatePolicy: UpdatePolicy
 ): UseCloudConnectorSetupReturn => {
-  // State for new connection form - initialize based on existing vars
+  // State for new connection form
   const [newConnectionCredentials, setNewConnectionCredentials] =
     useState<CloudConnectorCredentials>(() => {
       // Safely access vars from the first enabled stream or fallback to empty object
@@ -66,7 +62,7 @@ export const useCloudConnectorSetup = (
       return createInitialCredentials(vars);
     });
 
-  // State for existing connection form - initialize as empty object to be populated based on provider
+  // State for existing connection form
   const [existingConnectionCredentials, setExistingConnectionCredentials] =
     useState<CloudConnectorCredentials>({});
 
@@ -76,7 +72,7 @@ export const useCloudConnectorSetup = (
       const updatedPolicy = { ...newPolicy };
       const inputVars = input.streams?.find((i) => i.enabled)?.vars;
 
-      // Handle undefined cases safely - only update if inputVars exists
+      // Handle undefined cases safely
       if (inputVars) {
         const updatedInputVars = updateInputVarsWithCredentials(
           inputVars as PackagePolicyConfigRecord,
@@ -103,7 +99,7 @@ export const useCloudConnectorSetup = (
       const updatedPolicy = { ...newPolicy };
       const inputVars = input.streams?.find((i) => i.enabled)?.vars;
 
-      // Handle undefined cases safely - only update if inputVars exists
+      // Handle undefined cases safely
       if (inputVars) {
         const updatedInputVars = updateInputVarsWithCredentials(
           inputVars as PackagePolicyConfigRecord,

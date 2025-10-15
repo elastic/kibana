@@ -42,7 +42,6 @@ import {
   AWS_ACCOUNT_TYPE_INPUT_VAR_NAME,
 } from './constants';
 
-// Type for Azure cloud connector field names
 export type AzureCloudConnectorFieldNames =
   (typeof AZURE_CLOUD_CONNECTOR_FIELD_NAMES)[keyof typeof AZURE_CLOUD_CONNECTOR_FIELD_NAMES];
 
@@ -67,7 +66,7 @@ export function isAwsCredentials(
 }
 
 export const isAzureCloudConnectorVars = (
-  vars: AwsCloudConnectorVars | AzureCloudConnectorVars,
+  vars: AwsCloudConnectorVars | AzureCloudConnectorVars | PackagePolicyConfigRecord,
   provider: string
 ): vars is AzureCloudConnectorVars => {
   return (
@@ -260,20 +259,20 @@ export const updatePolicyWithAwsCloudConnectorCredentials = (
 
   const updatedVars = { ...input.streams[0].vars };
 
-  // Update role_arn
+  // Update role_arn if it exists in inputCredentials
   if (inputCredentials.role_arn) {
     updatedVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN].value = inputCredentials.role_arn;
   }
-  // Update external_id
+  // Update external_id if it exists in inputCredentials
   if (inputCredentials.external_id) {
     updatedVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID].value = inputCredentials.external_id;
   }
-  // Update aws.role_arn
+  // Update aws.role_arn if it exists in inputCredentials
   if (inputCredentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]) {
     updatedVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN].value =
       inputCredentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN];
   }
-  // Update aws.credentials.external_id
+  // Update aws.credentials.external_id if it exists in inputCredentials
   if (inputCredentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]) {
     updatedVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID].value =
       inputCredentials[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID];
@@ -305,29 +304,29 @@ export const updatePolicyWithAzureCloudConnectorCredentials = (
 
   const updatedVars = { ...input.streams[0].vars };
 
-  // Update tenant_id
+  // Update tenant_id if it exists in inputCredentials
   if (inputCredentials.tenant_id) {
     updatedVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID].value = inputCredentials.tenant_id;
   }
 
-  // Update client_id
+  // Update client_id if it exists in inputCredentials
   if (inputCredentials.client_id) {
     updatedVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID].value = inputCredentials.client_id;
   }
 
-  // Update azure.credentials.tenant_id if exists in vars
+  // Update azure.credentials.tenant_id if exists in inputCredentials
   if (inputCredentials[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID]) {
     updatedVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID].value =
       inputCredentials[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID];
   }
 
-  // Update azure.credentials.client_id if exists in vars
+  // Update azure.credentials.client_id if exists in inputCredentials
   if (inputCredentials[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID]) {
     updatedVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID].value =
       inputCredentials[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID];
   }
 
-  // Update azure_credentials_cloud_connector_id
+  // Update azure_credentials_cloud_connector_id if exists in inputCredentials
   if (inputCredentials.azure_credentials_cloud_connector_id) {
     updatedVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID].value =
       inputCredentials[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID];

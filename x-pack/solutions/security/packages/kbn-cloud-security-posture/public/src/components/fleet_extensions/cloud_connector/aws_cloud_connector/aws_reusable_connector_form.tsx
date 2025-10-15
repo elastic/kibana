@@ -26,12 +26,11 @@ export const AWSReusableConnectorForm: React.FC<{
 }> = ({ credentials, setCredentials, isEditPage, cloudConnectorId }) => {
   const { data: cloudConnectors = [] } = useGetCloudConnectors();
 
-  // Memoize AWS-specific connector data
+  // Filter the connectors to only AWS
   const awsConnectionData: AwsCloudConnectorOption[] = useMemo(() => {
     return cloudConnectors
       .filter((connector) => isAwsCloudConnectorVars(connector.vars, AWS_PROVIDER))
       .map((connector) => {
-        // Type assertion after filtering for AWS connectors
         const awsVars = connector.vars as AwsCloudConnectorVars;
         return {
           label: connector.name,
@@ -46,13 +45,11 @@ export const AWSReusableConnectorForm: React.FC<{
   // Convert cloud connectors to combo box options (only standard properties for EuiComboBox)
   const comboBoxOptions: ComboBoxOption[] = useMemo(
     () =>
-      cloudConnectors
-        .filter((connector) => isAwsCloudConnectorVars(connector.vars, AWS_PROVIDER))
-        .map((connector) => ({
-          label: connector.name,
-          value: connector.id,
-        })),
-    [cloudConnectors]
+      awsConnectionData.map((connector) => ({
+        label: connector.label,
+        value: connector.value,
+      })),
+    [awsConnectionData]
   );
 
   // Find the currently selected connector based on credentials
@@ -78,8 +75,8 @@ export const AWSReusableConnectorForm: React.FC<{
       } else {
         // Handle deselection
         setCredentials({
-          roleArn: '',
-          externalId: '',
+          roleArn: undefined,
+          externalId: undefined,
           cloudConnectorId: undefined,
         });
       }

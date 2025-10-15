@@ -19,7 +19,6 @@ import type { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
 
 export type CloudProviders = typeof AWS_PROVIDER | typeof GCP_PROVIDER | typeof AZURE_PROVIDER;
 
-// Cloud Connector Credential Types
 interface BaseCloudConnectorCredentials {
   cloudConnectorId?: string;
 }
@@ -34,7 +33,6 @@ export interface AzureCloudConnectorCredentials extends BaseCloudConnectorCreden
   azure_credentials_cloud_connector_id?: string;
 }
 
-// Union type for backwards compatibility
 export type CloudConnectorCredentials =
   | AwsCloudConnectorCredentials
   | AzureCloudConnectorCredentials;
