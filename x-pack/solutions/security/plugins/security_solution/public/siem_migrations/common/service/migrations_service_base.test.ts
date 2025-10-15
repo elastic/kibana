@@ -12,7 +12,7 @@
  * We use Jest for assertions and mocking. We also use Jest’s fake timers to simulate the polling loop.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, Toast } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
@@ -326,6 +326,90 @@ describe('SiemMigrationsServiceBase', () => {
 
         // Restore real timers.
         jest.useRealTimers();
+      });
+    });
+  });
+
+  describe('removeFinishedMigrationsNotification', () => {
+    let mockToastRemove: jest.Mock;
+
+    beforeEach(() => {
+      mockToastRemove = jest.fn();
+      mockNotifications.toasts.remove = mockToastRemove;
+    });
+
+    it('should remove specific migration notification when migrationId is provided', () => {
+      const migrationId = 'mig-1';
+      const mockToast = { id: 'toast-1', title: 'Migration Complete' };
+
+      service.toastsByMigrationId[migrationId] = mockToast as Toast;
+
+      service.removeFinishedMigrationsNotification(migrationId);
+
+      expect(mockToastRemove).toHaveBeenCalledWith(mockToast);
+      expect(service.toastsByMigrationId[migrationId]).toBeUndefined();
+    });
+
+    it('should not call remove when migrationId is provided but no toast exists', () => {
+      const migrationId = 'mig-1';
+
+      service.toastsByMigrationId = {};
+
+      service.removeFinishedMigrationsNotification(migrationId);
+
+      expect(mockToastRemove).not.toHaveBeenCalled();
+    });
+
+    it('should remove all migration notifications when no migrationId is provided', () => {
+      const mockToast1 = { id: 'toast-1', title: 'Migration 1 Complete' };
+      const mockToast2 = { id: 'toast-2', title: 'Migration 2 Complete' };
+
+      service.toastsByMigrationId = {
+        'mig-1': mockToast1 as Toast,
+        'mig-2': mockToast2 as Toast,
+      };
+
+      service.removeFinishedMigrationsNotification();
+
+      expect(mockToastRemove).toHaveBeenCalledTimes(2);
+      expect(mockToastRemove).toHaveBeenCalledWith(mockToast1);
+      expect(mockToastRemove).toHaveBeenCalledWith(mockToast2);
+      expect(service.toastsByMigrationId).toEqual({});
+    });
+
+    it('should not call remove when no migrationId is provided and no toasts exist', () => {
+      service.toastsByMigrationId = {};
+
+      service.removeFinishedMigrationsNotification();
+
+      expect(mockToastRemove).not.toHaveBeenCalled();
+    });
+
+    it('should handle empty toastsByMigrationId object when no migrationId is provided', () => {
+      service.toastsByMigrationId = {};
+
+      service.removeFinishedMigrationsNotification();
+
+      expect(mockToastRemove).not.toHaveBeenCalled();
+      expect(service.toastsByMigrationId).toEqual({});
+    });
+
+    it('should only remove the specific migration toast when migrationId is provided, leaving others intact', () => {
+      const migrationId = 'mig-1';
+      const mockToast1 = { id: 'toast-1', title: 'Migration 1 Complete' };
+      const mockToast2 = { id: 'toast-2', title: 'Migration 2 Complete' };
+
+      service.toastsByMigrationId = {
+        'mig-1': mockToast1 as Toast,
+        'mig-2': mockToast2 as Toast,
+      };
+
+      service.removeFinishedMigrationsNotification(migrationId);
+
+      expect(mockToastRemove).toHaveBeenCalledTimes(1);
+      expect(mockToastRemove).toHaveBeenCalledWith(mockToast1);
+      expect(service.toastsByMigrationId).toEqual({
+        'mig-2': mockToast2,
       });
     });
   });
