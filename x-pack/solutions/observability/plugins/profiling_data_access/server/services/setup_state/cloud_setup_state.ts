@@ -10,7 +10,6 @@ import type { ProfilingCloudSetupOptions } from '../../../common';
 import type { CloudSetupState } from '../../../common/cloud_setup';
 import { createDefaultCloudSetupState } from '../../../common/cloud_setup';
 import {
-  validateMaximumBuckets,
   validateResourceManagement,
 } from '../../../common/cluster_settings';
 import {
@@ -28,7 +27,6 @@ export async function cloudSetupState(
   state.cloud.available = params.isCloudEnabled;
 
   const verifyFunctions = [
-    validateMaximumBuckets,
     validateResourceManagement,
     validateCollectorPackagePolicy,
     validateSymbolizerPackagePolicy,
