@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { PanelBody, List } from '../styles';
 import { i18nNamespaceKey } from '../constants';
+import { CONTENT_BODY_TEST_ID } from '../test_ids';
 import { Title } from './title';
 import { ListHeader } from './list_header';
 import { GroupedItem } from './grouped_item/grouped_item';
@@ -39,7 +40,7 @@ export const ContentBody: FC<ContentBodyProps> = ({
   onChangePage,
   onChangeItemsPerPage,
 }) => (
-  <PanelBody>
+  <PanelBody data-test-subj={CONTENT_BODY_TEST_ID}>
     <Title icon={icon} text={groupedItemsType} count={totalHits} />
     <ListHeader groupedItemsType={groupedItemsType} />
     <EuiText size="s">{maxDocumentsShownLabel}</EuiText>
