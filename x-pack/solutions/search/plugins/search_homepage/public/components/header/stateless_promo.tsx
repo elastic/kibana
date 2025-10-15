@@ -13,20 +13,21 @@ import { HeaderCTALink } from './cta_link';
 export const StatelessHeaderPromo = () => {
   return (
     <HeaderPromo
-      title={i18n.translate('xpack.searchHomepage.header.statelessPromo.9.title', {
-        defaultMessage: 'Excluding vectors from source',
+      title={i18n.translate('xpack.searchHomepage.header.statelessPromo.title', {
+        defaultMessage: 'GPUs go brrr! GPU-accelerated inference for ELSER',
       })}
-      description={i18n.translate('xpack.searchHomepage.header.statelessPromo.9.description', {
+      description={i18n.translate('xpack.searchHomepage.header.statelessPromo.description', {
         defaultMessage:
-          'Elasticsearch now excludes vectors from source by default, saving space and improving performance while keeping vectors accessible when needed.',
+          'We are thrilled to launch ELSER on ElS -- get state-of-the-art semantic search relevance without having to manage your own machine learning nodes.',
       })}
       cta={
         <HeaderCTALink
-          data-telemetry-id="9-exclude-vectors"
-          href="https://www.elastic.co/search-labs/blog/elasticsearch-exclude-vectors-from-source"
+          // "search-promo-homepage-" is prepended to the telemetry id in HeaderCTALink
+          data-telemetry-id="11-elser-on-eis"
+          href="https://www.elastic.co/docs/explore-analyze/elastic-inference/eis#elser-on-eis"
         >
-          {i18n.translate('xpack.searchHomepage.statelessPromo.9.content', {
-            defaultMessage: 'View on Elasticsearch Labs',
+          {i18n.translate('xpack.searchHomepage.statelessPromo.content', {
+            defaultMessage: 'View docs',
           })}
         </HeaderCTALink>
       }
