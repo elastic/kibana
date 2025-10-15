@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import { mlEntityFieldSchema } from '@kbn/ml-anomaly-utils/schemas';
-import { serializedTitlesSchema } from '../schemas';
+import { serializedTitlesSchema } from '../common/serialized_titles';
 import { severityThresholdSchema } from '../../../common/types/anomalies';
 
 export const anomalyChartsEmbeddableRuntimeStateSchema = schema.object({
