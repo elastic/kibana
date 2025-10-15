@@ -221,9 +221,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
   }
 
   protected sendFinishedMigrationNotification(taskStats: DashboardMigrationStats) {
-    const toast = getSuccessToast(taskStats, this.core, this);
-    this.toastsByMigrationId[taskStats.id] = this.core.notifications.toasts.addSuccess(toast);
-    return toast;
+    this.core.notifications.toasts.addSuccess(getSuccessToast(taskStats, this.core));
   }
 
   /** Deletes a dashboard migration by its ID, refreshing the stats to remove it from the list */

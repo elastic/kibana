@@ -17,13 +17,11 @@ import type { ToastInput } from '@kbn/core-notifications-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { SiemDashboardMigrationsService } from '../dashboard_migrations_service';
 import type { DashboardMigrationTaskStats } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 
 export const getSuccessToast = (
   migrationStats: DashboardMigrationTaskStats,
-  core: CoreStart,
-  service: SiemDashboardMigrationsService
+  core: CoreStart
 ): ToastInput => ({
   color: 'success',
   iconType: 'check',
@@ -36,16 +34,15 @@ export const getSuccessToast = (
   ),
   text: toMountPoint(
     <NavigationProvider core={core}>
-      <SuccessToastContent migrationStats={migrationStats} service={service} />
+      <SuccessToastContent migrationStats={migrationStats} />
     </NavigationProvider>,
     core
   ),
 });
 
-const SuccessToastContent: React.FC<{
-  migrationStats: DashboardMigrationTaskStats;
-  service: SiemDashboardMigrationsService;
-}> = ({ migrationStats, service }) => {
+const SuccessToastContent: React.FC<{ migrationStats: DashboardMigrationTaskStats }> = ({
+  migrationStats,
+}) => {
   const { navigateTo, getAppUrl } = useNavigation();
 
   const navParams = useMemo(() => {
@@ -59,9 +56,8 @@ const SuccessToastContent: React.FC<{
         deepLinkId: SecurityPageName.siemMigrationsDashboards,
         path: migrationStats.id,
       });
-      service.removeFinishedMigrationsNotification(migrationStats.id);
     },
-    [navigateTo, migrationStats.id, service]
+    [navigateTo, migrationStats.id]
   );
   const url = useMemo(() => getAppUrl(navParams), [getAppUrl, navParams]);
 
