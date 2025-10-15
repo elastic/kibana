@@ -57,9 +57,9 @@ export class OnechatPlugin
     core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
     deps: OnechatSetupDependencies
   ): OnechatPluginSetup {
-    const isOnechatUiEnabled = core.uiSettings.get<boolean>(
+    const isOnechatUiEnabled = core.settings.client.get<boolean>(
       AGENT_BUILDER_ENABLED_SETTING_ID,
-      false
+      true
     );
 
     const navigationService = new NavigationService({
