@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { getSettingsCompletionItems } from '../../../definitions/utils/settings';
-import { isBinaryExpression, type ESQLCommand } from '../../../..';
+import { isBinaryExpression, semiColonCompleteItem, type ESQLCommand } from '../../../..';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 
@@ -30,11 +30,8 @@ export async function autocomplete(
   if (isBinaryExpression(settingArg) && !settingArg.incomplete) {
     return [
       {
-        label: ';',
-        text: ';',
-        kind: 'Keyword',
-        detail: 'End of statement',
-        sortText: '1',
+        ...semiColonCompleteItem,
+        text: ';\n',
       },
     ];
   }
