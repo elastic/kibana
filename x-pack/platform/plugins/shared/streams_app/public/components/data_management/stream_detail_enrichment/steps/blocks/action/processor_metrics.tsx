@@ -40,8 +40,8 @@ const messageStyles = css`
 const ProcessorErrorMessage = ({ message }: { message: string }) => {
   const [expanded, toggleExpanded] = useToggle(false);
   const { euiTheme } = useEuiTheme();
-  const CLAMP_LINES = 4;
-  const shouldTruncate = shouldTruncateMessage(message, CLAMP_LINES);
+  const CLAMP_LINES = 5;
+  const shouldTruncate = shouldTruncateMessage(message);
 
   return (
     <>

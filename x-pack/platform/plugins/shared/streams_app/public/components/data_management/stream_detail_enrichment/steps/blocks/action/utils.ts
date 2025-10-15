@@ -60,15 +60,8 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
 };
 
 const LONG_MESSAGE_CHARACTER_THRESHOLD = 300;
-
-export const normalizeNewlines = (s: string) => s.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-
-export const countLines = (s: string) => (s ? normalizeNewlines(s).split('\n').length : 0);
-
 export const shouldTruncateMessage = (
   message: string,
-  clampLines: number
 ) => {
-  const lineCount = countLines(message);
-  return lineCount > clampLines || (message?.length ?? 0) > LONG_MESSAGE_CHARACTER_THRESHOLD;
+  return (message?.length ?? 0) > LONG_MESSAGE_CHARACTER_THRESHOLD;
 };
