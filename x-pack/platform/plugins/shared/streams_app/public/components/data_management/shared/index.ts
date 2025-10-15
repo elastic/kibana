@@ -7,4 +7,4 @@
 export { PreviewFlyout } from './preview_flyout';
 export type { DataTableRecordWithIndex } from './preview_flyout';
 export { MemoPreviewTable } from './preview_table';
-export { ConditionPanel, ConditionDisplay } from './condition_display';
+export { ConditionPanel, ConditionDisplay, EditableConditionPanel } from './condition_display';
