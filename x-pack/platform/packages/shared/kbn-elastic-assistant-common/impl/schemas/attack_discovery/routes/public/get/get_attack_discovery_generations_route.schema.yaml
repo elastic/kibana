@@ -28,10 +28,11 @@ paths:
           example: "now"
         - name: size
           in: query
-          required: true
+          required: false
           schema:
             type: number
             minimum: 1
+            default: 50
           description: The maximum number of generations to retrieve
           example: 50
         - name: start
