@@ -13,7 +13,6 @@ import { createIndexPatternService } from '../../../data_views_service/service';
 import { useLensDispatch, updateIndexPatterns } from '../../../state_management';
 import { replaceIndexpattern } from '../../../state_management/lens_slice';
 import type { LayerConfigurationProps } from './types';
-import { useLensSelector } from '../../../state_management';
 import type { ConfigPanelWrapperProps } from '../../../editor_frame_service/editor_frame/config_panel/types';
 
 export function LayerConfiguration({
@@ -40,7 +39,6 @@ export function LayerConfiguration({
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
-  const { visualization } = useLensSelector((state) => state.lens);
   const indexPatternService = useMemo(
     () =>
       createIndexPatternService({
