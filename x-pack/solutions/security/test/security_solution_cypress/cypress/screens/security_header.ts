@@ -95,9 +95,10 @@ export const LOADING_INDICATOR = '[data-test-subj="globalLoadingIndicator"]';
 export const KIBANA_LOADING_ICON = '[data-test-subj="kbnLoadingMessage"]';
 
 // Siem Migrations
-export const TRANSLATED_RULES_PAGE = getDataTestSubjectSelectorMatch(
-  'nav-item-id-siem_migrations-rules'
-);
+export const TRANSLATED_RULES_PAGE = Cypress.env('IS_SERVERLESS')
+  ? getDataTestSubjectSelectorMatch('nav-item-id-siem_migrations-rules')
+  : getDataTestSubjectSelector('solutionSideNavPanelLink-siem_migrations-rules');
+
 export const TRANSLATED_DASHBOARDS_PAGE = getDataTestSubjectSelector(
   'solutionSideNavPanelLink-siem_migrations-dashboards'
 );
