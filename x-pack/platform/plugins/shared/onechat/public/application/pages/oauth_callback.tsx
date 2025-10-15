@@ -91,9 +91,36 @@ export const OAuthCallbackPage: React.FC = () => {
           }
         } else {
           // Handle MCP OAuth callback (default)
+          // eslint-disable-next-line no-console
+          console.log('=== MCP OAuth Callback ===');
+          // eslint-disable-next-line no-console
+          console.log('URL params:', Object.fromEntries(params.entries()));
+
           const serverId = await oauthManager.handleCallback(params);
+
           // eslint-disable-next-line no-console
           console.log('MCP OAuth authentication successful for server:', serverId);
+
+          // Verify token was stored
+          const token = await oauthManager.getValidToken(serverId);
+          // eslint-disable-next-line no-console
+          console.log('Token verification after storage:', {
+            serverId,
+            hasToken: !!token,
+            tokenPreview: token ? token.substring(0, 20) + '...' : 'none',
+          });
+
+          // Check localStorage directly - scan for any keys with this serverId
+          const allKeys = Object.keys(localStorage).filter(
+            (k) => k.includes(`onechat.mcp.oauth`) && k.endsWith(`.${serverId}`)
+          );
+          // eslint-disable-next-line no-console
+          console.log('localStorage keys for this server:', allKeys);
+          if (allKeys.length > 0) {
+            const storedData = localStorage.getItem(allKeys[0]);
+            // eslint-disable-next-line no-console
+            console.log('Stored token data:', storedData ? JSON.parse(storedData) : null);
+          }
         }
 
         // Get return URL (where user came from before OAuth flow)

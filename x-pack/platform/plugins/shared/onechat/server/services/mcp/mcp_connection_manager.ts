@@ -48,7 +48,7 @@ export class McpConnectionManager {
     // Filter servers that can connect at startup
     // Skip only if:
     // - OAuth with authorizationEndpoint (per-user auth required)
-    // - AND no backend credentials (clientSecret + tokenEndpoint) for tool discovery
+    // - AND no backend auth method (clientSecret + tokenEndpoint OR adminToken)
     const serversToConnect = this.config.filter((server) => {
       const hasAuthorizationEndpoint =
         server.auth?.type === 'oauth' && server.auth.authorizationEndpoint;
@@ -56,11 +56,32 @@ export class McpConnectionManager {
         server.auth?.type === 'oauth' &&
         server.auth.clientSecret &&
         (server.auth.tokenEndpoint || server.url.includes('paypal.com'));
+      const hasAdminToken = server.auth?.type === 'oauth' && server.auth.adminToken;
 
-      // Skip if per-user auth required without backend credentials
-      if (hasAuthorizationEndpoint && !hasBackendCredentials) {
+      // Check if this is GitHub (only supports Authorization Code flow for Client Credentials)
+      const isGitHubOAuthApp =
+        server.url.includes('github.com') || server.url.includes('githubcopilot.com');
+
+      // Skip if per-user auth required without ANY backend auth method
+      if (hasAuthorizationEndpoint && !hasBackendCredentials && !hasAdminToken) {
         this.logger.info(
-          `Skipping "${server.id}" during startup - requires per-user OAuth authorization (no backend credentials)`
+          `Skipping "${server.id}" during startup - requires per-user OAuth authorization (no backend credentials or admin token)`
+        );
+        return false;
+      }
+
+      // GitHub with admin token: Use admin token for startup, require per-user auth for execution
+      if (hasAuthorizationEndpoint && isGitHubOAuthApp && hasAdminToken) {
+        this.logger.info(
+          `Connecting to "${server.id}" with admin token for tool discovery (per-user auth required for execution)`
+        );
+        return true;
+      }
+
+      // GitHub with backend credentials but no admin token: Skip (GitHub OAuth Apps don't support Client Credentials)
+      if (hasAuthorizationEndpoint && isGitHubOAuthApp && !hasAdminToken) {
+        this.logger.info(
+          `Skipping "${server.id}" during startup - GitHub OAuth Apps require either admin token or per-user authentication`
         );
         return false;
       }
@@ -68,13 +89,16 @@ export class McpConnectionManager {
       // Connect if:
       // - No auth required
       // - API key auth
-      // - OAuth with backend credentials (even if authorizationEndpoint present)
-      // Note: When both clientSecret and authorizationEndpoint are present,
-      // we connect with merchant credentials at startup to discover merchant tools,
+      // - OAuth with backend credentials AND supports Client Credentials flow (e.g., PayPal)
+      // - OAuth with admin token (e.g., GitHub PAT)
+      // Note: When authorizationEndpoint is present,
+      // we connect with backend/admin credentials at startup to discover tools,
       // but tool execution will still require per-user authentication.
-      if (hasAuthorizationEndpoint && hasBackendCredentials) {
+      if (hasAuthorizationEndpoint && (hasBackendCredentials || hasAdminToken)) {
         this.logger.info(
-          `Connecting to "${server.id}" with backend credentials for tool discovery (per-user auth required for execution)`
+          `Connecting to "${server.id}" with ${
+            hasAdminToken ? 'admin token' : 'backend credentials'
+          } for tool discovery (per-user auth required for execution)`
         );
       }
 
@@ -121,7 +145,11 @@ export class McpConnectionManager {
 
       // Handle authentication
       let authHeaders: Record<string, string> = {};
-      if (auth?.type === 'oauth' && auth.clientSecret) {
+      if (auth?.type === 'oauth' && auth.adminToken) {
+        // OAuth with admin token (e.g., GitHub Personal Access Token)
+        this.logger.debug(`Using admin token for "${id}"`);
+        authHeaders.Authorization = `Bearer ${auth.adminToken}`;
+      } else if (auth?.type === 'oauth' && auth.clientSecret) {
         // OAuth with clientSecret: determine if we need token exchange or direct auth
         const needsTokenExchange = auth.tokenEndpoint || url.includes('paypal.com');
 

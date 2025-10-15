@@ -82,9 +82,10 @@ export class OAuthTokenStorage {
 
       const tokenSet = JSON.parse(stored) as StoredTokenData;
 
-      // Validate token structure
-      if (!tokenSet.access_token || tokenSet.token_type !== 'Bearer') {
-        console.warn('Invalid token structure found in storage');
+      // Validate token structure - only require access_token
+      // token_type might be missing or different for some providers
+      if (!tokenSet.access_token) {
+        console.warn('Invalid token structure found in storage: missing access_token');
         this.clearToken(userId, serverId);
         return null;
       }
