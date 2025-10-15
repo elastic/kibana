@@ -10,105 +10,12 @@
 import { z } from '@kbn/zod';
 import { isEnhancedInternalConnector, type ConnectorTypeInfo } from '@kbn/workflows';
 import { getCachedAllConnectors } from './connectors_cache';
-// import type { EnhancedConnectorDefinition } from '../../../../common/enhanced_es_connectors';
 
-/**
- * Get required parameters for a connector type from generated schemas
- */
-// export function getRequiredParamsForConnector(
-//   connectorType: string
-// ): Array<{ name: string; example?: string; defaultValue?: string }> {
-//   // Get all connectors (both static and generated)
-//   const allConnectors = getCachedAllConnectors();
-
-//   // Find the connector by type
-//   const connector = allConnectors.find((c) => c.type === connectorType);
-
-//   if (connector && connector.paramsSchema) {
-//     try {
-//       // Check if this connector has enhanced examples
-//       const hasEnhancedExamples = (connector as EnhancedConnectorDefinition).examples?.params;
-
-//       // Processing enhanced examples for connector
-
-//       if (hasEnhancedExamples) {
-//         // Use examples directly from enhanced connector
-//         const exampleParams = (connector as any).examples.params;
-//         // Using enhanced examples
-//         const result: Array<{ name: string; example?: any; defaultValue?: string }> = [];
-
-//         for (const [key, value] of Object.entries(exampleParams)) {
-//           // Include common important parameters for ES APIs
-//           if (
-//             [
-//               'index',
-//               'id',
-//               'body',
-//               'query',
-//               'size',
-//               'from',
-//               'sort',
-//               'aggs',
-//               'aggregations',
-//               'format',
-//             ].includes(key)
-//           ) {
-//             result.push({ name: key, example: value });
-//             // Added enhanced example
-//           }
-//         }
-
-//         if (result.length > 0) {
-//           // Returning enhanced examples
-//           return result;
-//         }
-//       }
-
-//       // Fallback to extracting from schema
-//       const params = extractRequiredParamsFromSchema(connector.paramsSchema);
-
-//       // Return only required parameters, or most important ones if no required ones
-//       const requiredParams = params.filter((p) => p.required);
-//       if (requiredParams.length > 0) {
-//         return requiredParams.map((p) => ({ name: p.name, example: p.example }));
-//       }
-
-//       // If no required params, return the most important ones for ES APIs
-//       const importantParams = params.filter((p) =>
-//         [
-//           'index',
-//           'id',
-//           'body',
-//           'query',
-//           'size',
-//           'from',
-//           'sort',
-//           'aggs',
-//           'aggregations',
-//           'format',
-//         ].includes(p.name)
-//       );
-//       if (importantParams.length > 0) {
-//         return importantParams.slice(0, 3).map((p) => ({ name: p.name, example: p.example }));
-//       }
-//     } catch (error) {
-//       // Silently continue with fallback parameters
-//     }
-//   }
-
-//   // Fallback to basic hardcoded ones for non-ES connectors
-//   const basicConnectorParams: Record<string, Array<{ name: string; example?: string }>> = {
-//     console: [{ name: 'message', example: 'Hello World' }],
-//     slack: [{ name: 'message', example: 'Hello Slack' }],
-//     http: [
-//       { name: 'url', example: 'https://api.example.com' },
-//       { name: 'method', example: 'GET' },
-//     ],
-//     wait: [{ name: 'duration', example: '5s' }],
-//   };
-
-//   return basicConnectorParams[connectorType] || [];
-// }
+export interface RequiredParamForConnector {
+  name: string;
+  example?: string;
+  defaultValue?: string;
+}
 
 /**
  * Get required parameters for a connector type from generated schemas
@@ -116,7 +23,7 @@ import { getCachedAllConnectors } from './connectors_cache';
 export function getRequiredParamsForConnector(
   connectorType: string,
   dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
-): Array<{ name: string; example?: string; defaultValue?: string }> {
+): RequiredParamForConnector[] {
   // Get all connectors (both static and generated)
   const allConnectors = getCachedAllConnectors(dynamicConnectorTypes);
 
@@ -129,7 +36,7 @@ export function getRequiredParamsForConnector(
         // Use examples directly from enhanced connector
         const exampleParams = connector.examples.params;
         // Using enhanced examples
-        const result: Array<{ name: string; example?: any; defaultValue?: string }> = [];
+        const result: RequiredParamForConnector[] = [];
 
         for (const [key, value] of Object.entries(exampleParams)) {
           // Include common important parameters for ES APIs

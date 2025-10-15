@@ -18,51 +18,6 @@ export function formatMonacoYamlMarker(
   workflowYamlSchemaLoose: z.ZodSchema,
   yamlDocument: YAML.Document | null
 ) {
-  // // Apply custom formatting to schema validation errors (from monaco-yaml)
-  // if (owner === 'yaml' && marker.message) {
-  //   // Extract the actual value from the editor at the error position
-  //   const model = editor.getModel();
-  //   let receivedValue: string | undefined;
-
-  //   if (model) {
-  //     try {
-  //       // Get the text at the error position
-  //       const range = {
-  //         startLineNumber: marker.startLineNumber,
-  //         startColumn: marker.startColumn,
-  //         endLineNumber: marker.endLineNumber || marker.startLineNumber,
-  //         endColumn: marker.endColumn || marker.startColumn + 10, // fallback range
-  //       };
-
-  //       const textAtError = model.getValueInRange(range);
-
-  //       // Try to extract the value (remove quotes if present)
-  //       const valueMatch = textAtError.match(/^\s*([^:\s]+)/);
-  //       if (valueMatch) {
-  //         receivedValue = valueMatch[1].replace(/['"]/g, '');
-  //       }
-  //     } catch (e) {
-  //       // Fallback to parsing the message
-  //       receivedValue = extractReceivedValue(marker.message);
-  //     }
-  //   }
-
-  //   // Create a mock error object that matches our formatter's expected structure
-  //   const mockError: MockZodError = {
-  //     message: marker.message,
-  //     issues: [
-  //       {
-  //         code: marker.message.includes('Value must be') ? 'invalid_literal' : 'unknown',
-  //         message: marker.message,
-  //         path: ['type'], // Assume it's a type field error for now
-  //         received: receivedValue ?? '',
-  //       },
-  //     ],
-  //   };
-
-  //   const { message } = formatValidationError(mockError, workflowYamlSchema);
-  //   formattedMessage = message;
-  // }
   // Check if this is a validation error that could benefit from dynamic formatting
   const hasNumericEnumPattern =
     // Patterns with quotes: Expected "0 | 1 | 2"
@@ -131,26 +86,3 @@ export function formatMonacoYamlMarker(
   }
   return marker;
 }
-
-// // Helper function to extract the received value from Monaco's error message
-// function extractReceivedValue(message: string): string | undefined {
-//   // Try different patterns to extract the received value
-
-//   // Pattern 1: "Value must be one of: ... Received: 'value'"
-//   let receivedMatch = message.match(/Received:\s*['"]([^'"]+)['"]/);
-//   if (receivedMatch) {
-//     return receivedMatch[1];
-//   }
-
-//   // Pattern 2: "Value must be one of: ... Received: value" (without quotes)
-//   receivedMatch = message.match(/Received:\s*([^\s,]+)/);
-//   if (receivedMatch) {
-//     return receivedMatch[1];
-//   }
-
-//   // Pattern 3: Look for the actual value in the editor at the error position
-//   // This is more complex but might be needed if Monaco doesn't include the value in the message
-
-//   // For now, return undefined if we can't extract it
-//   return undefined;
-// }

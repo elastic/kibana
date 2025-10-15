@@ -41,18 +41,35 @@ export function generateConnectorSnippet(
   const isConnectorIdRequired = getCachedAllConnectors().find(
     (c) => c.type === connectorType
   )?.connectorIdRequired;
+
+  // Generate smart connector-id value based on available instances
+  let connectorIdValue: string | undefined;
+  if (isConnectorIdRequired) {
+    const instances = getConnectorInstancesForType(connectorType, dynamicConnectorTypes);
+    if (instances.length > 0) {
+      // Use the first non-deprecated instance as default, or first instance if all are deprecated
+      const defaultInstance = instances.find((i) => !i.isDeprecated) || instances[0];
+      connectorIdValue = defaultInstance.name;
+    } else {
+      // No instances configured, add placeholder comment
+      connectorIdValue = '# Enter connector ID here';
+    }
+  }
+
   // Get required parameters for this connector type
   const requiredParams = getRequiredParamsForConnector(connectorType, dynamicConnectorTypes);
 
   if (requiredParams.length === 0) {
     // No required params, just add empty with block with a placeholder comment
     parameters = {
+      'connector-id': connectorIdValue,
       with: {},
     };
     // We'll add the comment manually after YAML serialization
   } else {
     // Create with block with required parameters as placeholders
     parameters = {
+      'connector-id': connectorIdValue,
       with: {},
     };
     requiredParams.forEach((param) => {
@@ -66,11 +83,12 @@ export function generateConnectorSnippet(
     // - name: ${stepType}_step
     //   type: ${stepType}
     //   ...parameters
+
     const step = [
       {
         name: `${connectorType.replaceAll('.', '_')}_step`,
         type: connectorType,
-        'connector-id': isConnectorIdRequired ? '# A Kibana connector name' : undefined,
+        'connector-id': connectorIdValue,
         ...parameters,
       },
     ];
@@ -109,58 +127,6 @@ export function generateConnectorSnippet(
 
   return `${connectorType}\n${yamlString}`;
 }
-
-// /**
-//  * Generate a snippet template for a connector type with required parameters
-//  */
-// function generateConnectorSnippet(
-//   connectorType: string,
-//   shouldBeQuoted: boolean,
-//   dynamicConnectorTypes?: Record<string, any>
-// ): string {
-//   const quotedType = shouldBeQuoted ? `"${connectorType}"` : connectorType;
-
-//   let snippet = quotedType;
-
-//   // Add connector-id if required
-//   if (connectorTypeRequiresConnectorId(connectorType, dynamicConnectorTypes)) {
-//     const instances = getConnectorInstancesForType(connectorType, dynamicConnectorTypes);
-
-//     if (instances.length > 0) {
-//       // Use the first non-deprecated instance as default, or first instance if all are deprecated
-//       const defaultInstance = instances.find((i) => !i.isDeprecated) || instances[0];
-//       snippet += `\nconnector-id: ${defaultInstance.id}`;
-//     } else {
-//       // No instances configured, add placeholder
-//       snippet += `\nconnector-id: # Enter connector ID here`;
-//     }
-//   }
-
-//   // Get required parameters for this connector type
-//   const requiredParams = getRequiredParamsForConnector(connectorType, dynamicConnectorTypes);
-
-//   if (requiredParams.length === 0) {
-//     // No required params, just add empty with block with a placeholder
-//     snippet += `\nwith:\n  # Add parameters here. Click Ctrl+Space (Ctrl+I on Mac) to see all available options`;
-//     return snippet;
-//   }
-
-//   // Create with block with required parameters as placeholders
-//   snippet += `\nwith:`;
-//   requiredParams.forEach((param) => {
-//     const placeholder = param.example || param.defaultValue || '';
-
-//     // Handle complex objects (like body) by formatting as YAML
-//     if (typeof placeholder === 'object' && placeholder !== null) {
-//       const yamlContent = formatObjectAsYaml(placeholder, 2);
-//       snippet += `\n  ${param.name}:\n${yamlContent}`;
-//     } else {
-//       snippet += `\n  ${param.name}: ${placeholder}`;
-//     }
-//   });
-
-//   return snippet;
-// }
 
 /**
  * Check if a connector type requires a connector-id field
