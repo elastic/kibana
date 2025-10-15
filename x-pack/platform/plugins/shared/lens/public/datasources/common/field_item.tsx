@@ -131,6 +131,13 @@ export function InnerFieldItem(props: FieldItemProps) {
     setOpen(false);
   }, [setOpen]);
 
+  const adaptedGetCustomFieldType = useMemo(() => {
+    if (isTextBasedColumnField(field) && getCustomFieldType) {
+      return () => getCustomFieldType(field);
+    }
+    return undefined;
+  }, [field, getCustomFieldType]);
+
   const addFilterAndClose: AddFieldFilterHandler | undefined = useMemo(
     () =>
       filterManager && indexPattern
@@ -304,6 +311,7 @@ export function InnerFieldItem(props: FieldItemProps) {
               field={dataViewField}
               closePopover={closePopover}
               buttonAddFieldToWorkspaceProps={buttonAddFieldToWorkspaceProps}
+              getCustomFieldType={adaptedGetCustomFieldType}
               onAddFieldToWorkspace={onAddFieldToWorkspace}
               onAddFilter={addFilterAndClose}
               onEditField={editFieldAndClose}

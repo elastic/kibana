@@ -17,6 +17,8 @@ export const getSnapshot = ({
   featureStates = [],
   totalIndices = getRandomNumber(),
   totalDataStreams = getRandomNumber(),
+  managedRepository = undefined,
+  isLastSuccessfulSnapshot = undefined,
 }: Partial<{
   repository: string;
   snapshot: string;
@@ -27,6 +29,8 @@ export const getSnapshot = ({
   includeGlobalState: boolean;
   totalIndices: number;
   totalDataStreams: number;
+  managedRepository: string;
+  isLastSuccessfulSnapshot: boolean;
 }> = {}) => ({
   repository,
   snapshot,
@@ -45,6 +49,8 @@ export const getSnapshot = ({
   durationInMillis: 707,
   indexFailures,
   shards: { total: 3, failed: 0, successful: 3 },
+  managedRepository,
+  isLastSuccessfulSnapshot,
 });
 
 export const getIndexFailure = (index = getRandomString()) => ({

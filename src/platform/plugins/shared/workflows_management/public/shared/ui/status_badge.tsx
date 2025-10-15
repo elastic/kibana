@@ -8,13 +8,14 @@
  */
 
 import {
-  EuiBadge,
   EuiBeacon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
+  EuiToolTip,
+  formatDate,
   useEuiTheme,
   type EuiFlexGroupProps,
   type EuiTextProps,
@@ -24,6 +25,8 @@ import { ExecutionStatus } from '@kbn/workflows';
 import React from 'react';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { TokenColor } from '@elastic/eui/src/components/token/token_types';
+import { FormattedRelative } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { getStatusLabel } from '../translations';
 interface ExecutionStatusColors {
   color: string;
@@ -70,6 +73,11 @@ const getExecutionStatusColorsMap = (
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       tokenColor: 'gray',
     },
+    [ExecutionStatus.TIMED_OUT]: {
+      color: euiTheme.colors.danger,
+      backgroundColor: euiTheme.colors.backgroundBaseDanger,
+      tokenColor: 'euiColorVis6' as const,
+    },
     [ExecutionStatus.SKIPPED]: {
       color: euiTheme.colors.textDisabled,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
@@ -95,6 +103,7 @@ export const getExecutionStatusColors = (
 const ExecutionStatusIconTypeMap: Record<ExecutionStatus, EuiIconType> = {
   [ExecutionStatus.COMPLETED]: 'checkInCircleFilled',
   [ExecutionStatus.FAILED]: 'errorFilled',
+  [ExecutionStatus.TIMED_OUT]: 'errorFilled',
   [ExecutionStatus.PENDING]: 'clock',
   [ExecutionStatus.RUNNING]: 'play',
   [ExecutionStatus.WAITING]: 'clock',
@@ -122,25 +131,36 @@ export const getExecutionStatusIcon = (euiTheme: EuiThemeComputed, status: Execu
 
 export function StatusBadge({
   status,
+  date,
   textProps,
   ...props
-}: { status: ExecutionStatus | undefined; textProps?: EuiTextProps } & EuiFlexGroupProps) {
+}: {
+  status: ExecutionStatus | undefined;
+  date?: string | undefined;
+  textProps?: EuiTextProps;
+} & EuiFlexGroupProps) {
   const { euiTheme } = useEuiTheme();
-  if (!status) {
-    return <EuiBadge color="subdued">-</EuiBadge>;
-  }
+  if (!status) return;
 
   const statusLabel = getStatusLabel(status);
   const icon = getExecutionStatusIcon(euiTheme, status);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs" {...props}>
-      <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-      <EuiFlexItem grow={false} className="eui-hideFor--s">
-        <EuiText size="s" {...textProps}>
-          {statusLabel}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiToolTip content={date ? `${statusLabel} ${date ? `on ${formatDate(date)}` : ''}` : null}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" {...props}>
+        <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
+        <EuiFlexItem grow={false} className="eui-hideFor--s">
+          <EuiText
+            size="s"
+            {...textProps}
+            css={css`::first-letter {
+              text-transform: capitalize;
+            `}
+          >
+            {date ? <FormattedRelative value={date} /> : statusLabel}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
   );
 }

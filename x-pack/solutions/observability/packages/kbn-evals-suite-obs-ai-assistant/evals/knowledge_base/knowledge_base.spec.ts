@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { EvaluateKnowledgeBaseDataset } from './evaluate_knowledge_base_dataset';
-import { createEvaluateKnowledgeBaseDataset } from './evaluate_knowledge_base_dataset';
-import { evaluate as base } from '../../src/evaluate';
+import { evaluate } from '../../src/evaluate';
 import { testDocs } from '../../src/sample_data/knowledge_base';
 
 /**
@@ -16,33 +14,21 @@ import { testDocs } from '../../src/sample_data/knowledge_base';
  * Any changes should be made in both places until the legacy evaluation framework is removed.
  */
 
-const evaluate = base.extend<{
-  evaluateKnowledgeBase: EvaluateKnowledgeBaseDataset;
-}>({
-  evaluateKnowledgeBase: [
-    ({ knowledgeBaseClient, chatClient, evaluators, phoenixClient }, use) => {
-      use(
-        createEvaluateKnowledgeBaseDataset({
-          chatClient,
-          evaluators,
-          phoenixClient,
-          knowledgeBaseClient,
-        })
-      );
-    },
-    { scope: 'test' },
-  ],
-});
-
 evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
+  evaluate.beforeAll(async ({ knowledgeBaseClient }) => {
+    await knowledgeBaseClient.ensureInstalled().catch((e) => {
+      throw new Error(`Failed to install knowledge base: ${e.message}`);
+    });
+  });
+
   evaluate.describe('kb functions', () => {
-    evaluate.afterEach(async ({ esClient, knowledgeBaseClient, conversationsClient }) => {
+    evaluate.afterEach(async ({ knowledgeBaseClient, conversationsClient }) => {
       await knowledgeBaseClient.clear();
       await conversationsClient.clear();
     });
 
-    evaluate('summarizes information', async ({ evaluateKnowledgeBase }) => {
-      await evaluateKnowledgeBase({
+    evaluate('summarizes information', async ({ evaluateDataset }) => {
+      await evaluateDataset({
         dataset: {
           name: 'kb: summarize',
           description: 'Tests the summarize function of the knowledge base',
@@ -66,7 +52,7 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
       });
     });
 
-    evaluate('recalls information', async ({ knowledgeBaseClient, evaluateKnowledgeBase }) => {
+    evaluate('recalls information', async ({ knowledgeBaseClient, evaluateDataset }) => {
       await knowledgeBaseClient.importEntries({
         entries: [
           {
@@ -77,7 +63,7 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
         ],
       });
 
-      await evaluateKnowledgeBase({
+      await evaluateDataset({
         dataset: {
           name: 'kb: recall',
           description: 'Tests the recall functions of the knowledge base',
@@ -105,7 +91,7 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
       await knowledgeBaseClient.importEntries({ entries: testDocs });
     });
 
-    evaluate.afterAll(async ({ esClient, knowledgeBaseClient, conversationsClient }) => {
+    evaluate.afterAll(async ({ knowledgeBaseClient, conversationsClient }) => {
       await knowledgeBaseClient.clear();
       await conversationsClient.clear();
     });
@@ -139,8 +125,8 @@ evaluate.describe('Knowledge base', { tag: '@svlOblt' }, () => {
 
     evaluate(
       'retrieves and describes information from the knowledge base',
-      async ({ evaluateKnowledgeBase }) => {
-        await evaluateKnowledgeBase({
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
           dataset: {
             name: 'kb: retrieval',
             description: 'Tests retrieval of information from the knowledge base.',

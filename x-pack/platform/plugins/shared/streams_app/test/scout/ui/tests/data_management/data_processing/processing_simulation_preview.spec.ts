@@ -149,7 +149,7 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
 
     await pageObjects.streams.clickAddProcessor();
     await pageObjects.streams.selectProcessorType('set');
-    await pageObjects.streams.fillProcessorFieldInput('custom_threshold');
+    await pageObjects.streams.fillProcessorFieldInput('custom_threshold', { isCustomValue: true });
     await page.locator('input[name="value"]').fill('1024');
     await pageObjects.streams.clickSaveProcessor();
 

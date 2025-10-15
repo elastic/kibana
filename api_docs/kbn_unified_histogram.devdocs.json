@@ -570,7 +570,7 @@
         "label": "UnifiedHistogramChart",
         "description": [],
         "signature": [
-          "({\n  isChartAvailable,\n  services,\n  dataView,\n  requestParams,\n  relativeTimeRange: originalRelativeTimeRange,\n  request,\n  hits,\n  chart,\n  breakdown,\n  lensVisService,\n  isPlainRecord,\n  renderCustomChartToggleActions,\n  input$: originalInput$,\n  lensAdapters,\n  dataLoading$,\n  isChartLoading,\n  onChartHiddenChange,\n  onTimeIntervalChange,\n  onBreakdownFieldChange,\n  onTotalHitsChange,\n  onChartLoad,\n  columns,\n  ...histogramProps\n}: ",
+          "({\n  isChartAvailable,\n  services,\n  dataView,\n  requestParams,\n  relativeTimeRange: originalRelativeTimeRange,\n  request,\n  hits,\n  chart,\n  breakdown,\n  lensVisService,\n  isPlainRecord,\n  renderCustomChartToggleActions,\n  input$: originalInput$,\n  lensAdapters,\n  dataLoading$,\n  isChartLoading,\n  onChartHiddenChange,\n  onTimeIntervalChange,\n  onBreakdownFieldChange,\n  onTotalHitsChange,\n  onChartLoad,\n  columns,\n  controlsState,\n  ...histogramProps\n}: ",
           {
             "pluginId": "@kbn/unified-histogram",
             "scope": "public",
@@ -589,7 +589,7 @@
             "id": "def-public.UnifiedHistogramChart.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  isChartAvailable,\n  services,\n  dataView,\n  requestParams,\n  relativeTimeRange: originalRelativeTimeRange,\n  request,\n  hits,\n  chart,\n  breakdown,\n  lensVisService,\n  isPlainRecord,\n  renderCustomChartToggleActions,\n  input$: originalInput$,\n  lensAdapters,\n  dataLoading$,\n  isChartLoading,\n  onChartHiddenChange,\n  onTimeIntervalChange,\n  onBreakdownFieldChange,\n  onTotalHitsChange,\n  onChartLoad,\n  columns,\n  ...histogramProps\n}",
+            "label": "{\n  isChartAvailable,\n  services,\n  dataView,\n  requestParams,\n  relativeTimeRange: originalRelativeTimeRange,\n  request,\n  hits,\n  chart,\n  breakdown,\n  lensVisService,\n  isPlainRecord,\n  renderCustomChartToggleActions,\n  input$: originalInput$,\n  lensAdapters,\n  dataLoading$,\n  isChartLoading,\n  onChartHiddenChange,\n  onTimeIntervalChange,\n  onBreakdownFieldChange,\n  onTotalHitsChange,\n  onChartLoad,\n  columns,\n  controlsState,\n  ...histogramProps\n}",
             "description": [],
             "signature": [
               {
@@ -1744,6 +1744,35 @@
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.controlsState",
+            "type": "Object",
+            "tags": [],
+            "label": "controlsState",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlPanelsState",
+                "text": "ControlPanelsState"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlState",
+                "text": "ESQLControlState"
+              },
+              "> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2012,6 +2041,27 @@
                 "section": "def-public.DataViewsServicePublic",
                 "text": "DataViewsServicePublic"
               }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramServices.fieldsMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldsMetadata",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldsMetadata",
+                "scope": "public",
+                "docId": "kibFieldsMetadataPluginApi",
+                "section": "def-public.FieldsMetadataPublicStart",
+                "text": "FieldsMetadataPublicStart"
+              },
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
             "deprecated": false,
@@ -3034,7 +3084,23 @@
             "section": "def-common.ESQLControlVariable",
             "text": "ESQLControlVariable"
           },
-          "[] | undefined; externalVisContext?: ",
+          "[] | undefined; controlsState?: ",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlPanelsState",
+            "text": "ControlPanelsState"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlState",
+            "text": "ESQLControlState"
+          },
+          "> | undefined; externalVisContext?: ",
           {
             "pluginId": "@kbn/unified-histogram",
             "scope": "public",

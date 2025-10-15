@@ -62,7 +62,7 @@ describe(
           'Automatic Troubleshooting Access to the automatic troubleshooting.Automatic Troubleshooting sub-feature privilegeAllReadNone',
           'Global Artifact Management Manage global assignment of endpoint artifacts (e.g., Trusted Applications, Event Filters) across all policies. This privilege controls global assignment rights only; privileges for each artifact type are required for full artifact management.Global Artifact Management sub-feature privilegeAllNone',
           'Trusted Applications Helps mitigate conflicts with other software, usually other antivirus or endpoint security applications.Trusted Applications sub-feature privilegeAllReadNone',
-          'Trusted Devices Allows management of trusted USB and external devices that bypass device control protections.Trusted Devices sub-feature privilegeAllReadNone',
+          'Trusted Devices Manage security exceptions for USB and external devices.Trusted Devices sub-feature privilegeAllReadNone',
           'Host Isolation Exceptions Add specific IP addresses that isolated hosts are still allowed to communicate with, even when isolated from the rest of the network.Host Isolation Exceptions sub-feature privilegeAllReadNone',
           'Blocklist Extend Elastic Defend’s protection against malicious processes and protect against potentially harmful applications.Blocklist sub-feature privilegeAllReadNone',
           'Event Filters Filter out endpoint events that you do not need or want stored in Elasticsearch.Event Filters sub-feature privilegeAllReadNone',

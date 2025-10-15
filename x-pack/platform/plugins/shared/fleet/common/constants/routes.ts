@@ -47,6 +47,7 @@ export const EPM_API_ROUTES = {
   DELETE_PATTERN: EPM_PACKAGES_ONE_WITH_OPTIONAL_VERSION,
   INSTALL_KIBANA_ASSETS_PATTERN: `${EPM_PACKAGES_ONE}/kibana_assets`,
   DELETE_KIBANA_ASSETS_PATTERN: `${EPM_PACKAGES_ONE}/kibana_assets`,
+  INSTALL_RULE_ASSETS_PATTERN: `${EPM_PACKAGES_ONE}/rule_assets`,
   FILEPATH_PATTERN: `${EPM_PACKAGES_ONE}/{filePath*}`,
   KNOWLEDGE_BASE_PATTERN: `${INTERNAL_ROOT}/epm/packages/{pkgName}/knowledge_base`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
@@ -187,6 +188,7 @@ export const AGENT_API_ROUTES = {
   GET_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}/{fileName}`,
   DELETE_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}`,
   PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/{agentId}/privilege_level_change`,
+  BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/bulk_privilege_level_change`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {

@@ -50,6 +50,7 @@ describe('ProductDocBasePlugin', () => {
       update: jest.fn().mockResolvedValue({}),
       uninstall: jest.fn().mockResolvedValue({}),
       getStatus: jest.fn().mockResolvedValue({}),
+      getStatuses: jest.fn().mockResolvedValue({}),
       updateAll: jest.fn().mockResolvedValue({}),
     });
   });
@@ -89,6 +90,7 @@ describe('ProductDocBasePlugin', () => {
       expect(startContract).toEqual({
         management: {
           getStatus: expect.any(Function),
+          getStatuses: expect.any(Function),
           install: expect.any(Function),
           uninstall: expect.any(Function),
           update: expect.any(Function),

@@ -169,14 +169,62 @@ describe('useCloudConnectorSetup', () => {
   });
 
   describe('credential state management', () => {
-    it('should initialize with empty credentials', () => {
+    it('should initialize with empty credentials when the input has no var values', () => {
+      const emptyMockPolicy = {
+        ...mockPolicy,
+        inputs: [
+          {
+            ...mockInput,
+            streams: [
+              {
+                ...mockInput.streams[0],
+                vars: {
+                  role_arn: { value: undefined },
+                  external_id: { value: undefined },
+                },
+              },
+            ],
+          },
+        ],
+      } as NewPackagePolicy;
+
+      const emptyMockInput = {
+        ...mockInput,
+        streams: [
+          {
+            ...mockInput.streams[0],
+            vars: {
+              role_arn: { value: undefined },
+              external_id: { value: undefined },
+            },
+          },
+        ],
+      } as NewPackagePolicyInput;
+
       const { result } = renderHook(() =>
-        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy)
+        useCloudConnectorSetup(emptyMockInput, emptyMockPolicy, mockUpdatePolicy)
       );
 
       expect(result.current.newConnectionCredentials).toEqual({
         roleArn: undefined,
         externalId: undefined,
+      });
+
+      expect(result.current.existingConnectionCredentials).toEqual({
+        roleArn: undefined,
+        externalId: undefined,
+        cloudConnectorId: undefined,
+      });
+    });
+
+    it('should initialize with credentials from input vars when available', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy)
+      );
+
+      expect(result.current.newConnectionCredentials).toEqual({
+        roleArn: 'arn:aws:iam::123456789012:role/TestRole',
+        externalId: 'test-external-id',
       });
 
       expect(result.current.existingConnectionCredentials).toEqual({

@@ -26,10 +26,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await makeChecks(es, A11Y_TEST_MONITOR_ID, 150, 1, 1000, {
         tls: {
-          certificate_not_valid_after: moment().add(30, 'days').toISOString(),
-          certificate_not_valid_before: moment().subtract(90, 'days').toISOString(),
           server: {
             x509: {
+              not_after: moment().add(30, 'days').toISOString(),
+              not_before: moment().subtract(90, 'days').toISOString(),
               subject: {
                 common_name: 'a11y_common_name',
               },

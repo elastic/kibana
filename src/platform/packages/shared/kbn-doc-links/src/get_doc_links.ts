@@ -69,6 +69,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     cloud: {
       beatsAndLogstashConfiguration: `${ELASTIC_DOCS}deploy-manage/deploy/elastic-cloud/find-cloud-id`,
+      elasticsearchBillingManagingCosts: `${ELASTIC_DOCS}deploy-manage/cloud-organization/billing/elasticsearch-billing-dimensions#elasticsearch-billing-managing-elasticsearch-costs`,
       indexManagement: `${ELASTIC_DOCS}manage-data/lifecycle/index-lifecycle-management/migrate-index-management`,
     },
     console: {
@@ -487,6 +488,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       detectionEngineOverview: `${ELASTIC_DOCS}solutions/security/detect-and-alert`,
       aiAssistant: {
         home: `${ELASTIC_DOCS}solutions/security/ai/ai-assistant`,
+        knowledgeBaseHome: `${ELASTIC_DOCS}solutions/security/ai/ai-assistant-knowledge-base`,
         knowledgeBaseIndexEntries: `${ELASTIC_DOCS}solutions/security/ai/ai-assistant-knowledge-base#knowledge-base-add-knowledge-index`,
       },
       signalsMigrationApi: isServerless
@@ -615,6 +617,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       aiAssistant: `${ELASTIC_DOCS}solutions/observability/observability-ai-assistant`,
       elasticManagedLlm: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/elastic-managed-llm`,
       elasticManagedLlmUsageCost: `${ELASTIC_WEBSITE_URL}pricing`,
+      elasticServerlessSearchManagedLlmUsageCost: `${ELASTIC_WEBSITE_URL}pricing/serverless-search`,
     },
     alerting: {
       guide: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/create-manage-rules`,
@@ -725,6 +728,13 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       createApiKey: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-security-create-api-key`
         : `${ELASTICSEARCH_APIS}operation/operation-security-create-api-key`,
+      createApiKeyMetadata: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-security-create-api-key#operation-security-create-api-key-body-application-json`
+        : `${ELASTICSEARCH_APIS}operation/operation-security-create-api-key#operation-security-create-api-key-body-application-json`,
+      createApiKeyRoleDescriptors: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-security-create-api-key#operation-security-create-api-key-body-application-json-role_descriptors`
+        : `${ELASTICSEARCH_APIS}operation/operation-security-create-api-key#operation-security-create-api-key-body-application-json-role_descriptors`,
+      createCrossClusterApiKey: `${ELASTICSEARCH_APIS}operation/operation-security-create-cross-cluster-api-key`,
       createPipeline: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-ingest-put-pipeline`
         : `${ELASTICSEARCH_APIS}operation/operation-ingest-put-pipeline`,
@@ -911,6 +921,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       remoteESOoutputTroubleshooting: `${ELASTIC_DOCS}reference/fleet/remote-elasticsearch-output#troubleshooting`,
       agentReleaseProcess: `${ELASTIC_DOCS}reference/fleet/fleet-agent-release-process`,
       fipsIngest: `${ELASTIC_DOCS}deploy-manage/security/fips-ingest`,
+      edotCollector: `${ELASTIC_DOCS}reference/edot-collector`,
     },
     integrationDeveloper: {
       upload: `${ELASTIC_DOCS}extend/integrations/upload-new-integration`,
@@ -1025,6 +1036,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     agentBuilder: {
       agentBuilder: `${ELASTIC_DOCS}solutions/search/elastic-agent-builder`,
       getStarted: `${ELASTIC_DOCS}solutions/search/agent-builder/get-started`,
+      models: `${ELASTIC_DOCS}solutions/search/agent-builder/models`,
       chat: `${ELASTIC_DOCS}solutions/search/agent-builder/chat`,
       agentBuilderAgents: `${ELASTIC_DOCS}solutions/search/agent-builder/agent-builder-agents`,
       tools: `${ELASTIC_DOCS}solutions/search/agent-builder/tools`,

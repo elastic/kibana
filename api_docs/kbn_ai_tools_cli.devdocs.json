@@ -19,7 +19,7 @@
         "label": "loadHuggingFaceDatasets",
         "description": [],
         "signature": [
-          "({\n  esClient,\n  logger,\n  accessToken,\n  datasets = PREDEFINED_HUGGING_FACE_DATASETS,\n  limit = 1000,\n  clear = false,\n}: { esClient: ",
+          "({\n  esClient,\n  logger,\n  accessToken,\n  datasets = PREDEFINED_HUGGING_FACE_DATASETS,\n  limit,\n  clear = false,\n}: { esClient: ",
           "ElasticsearchClient",
           "; logger: ",
           {
@@ -48,7 +48,7 @@
             "id": "def-server.loadHuggingFaceDatasets.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  esClient,\n  logger,\n  accessToken,\n  datasets = PREDEFINED_HUGGING_FACE_DATASETS,\n  limit = 1000,\n  clear = false,\n}",
+            "label": "{\n  esClient,\n  logger,\n  accessToken,\n  datasets = PREDEFINED_HUGGING_FACE_DATASETS,\n  limit,\n  clear = false,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/load_hugging_face_datasets.ts",
             "deprecated": false,

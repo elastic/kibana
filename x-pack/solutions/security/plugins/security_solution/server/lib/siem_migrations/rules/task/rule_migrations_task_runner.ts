@@ -33,6 +33,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
   RuleMigrationTaskOutput
 > {
   private retriever: RuleMigrationsRetriever;
+  protected readonly taskConcurrency = 10;
 
   constructor(
     public readonly migrationId: string,

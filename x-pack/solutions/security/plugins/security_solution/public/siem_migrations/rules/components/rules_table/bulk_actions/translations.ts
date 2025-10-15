@@ -33,10 +33,3 @@ export const UPDATE_MISSING_INDEX_PATTERN_SELECTED_RULES = (numberOfSelectedRule
     }
   );
 };
-
-export const UPDATE_MISSING_INDEX_PATTERN_SELECTED_RULES_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.updateMissingIndexPatternSelectedRulesButtonAriaLabel',
-  {
-    defaultMessage: 'Update selected missing index pattern',
-  }
-);

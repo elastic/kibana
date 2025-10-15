@@ -23,7 +23,7 @@ const createTool = (
     configuration: {},
     readonly: false,
     tags: [],
-    schema: () => z.object({}),
+    getSchema: () => z.object({}),
     execute: jest.fn(),
     ...parts,
   };
@@ -35,7 +35,7 @@ describe('toolToLangchain', () => {
   it('converts the tool to langchain', async () => {
     const tool = createTool('toolA', {
       description: 'desc',
-      schema: () => z.object({ foo: z.string() }),
+      getSchema: () => z.object({ foo: z.string() }),
     });
 
     const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger });
@@ -50,7 +50,7 @@ describe('toolToLangchain', () => {
   it('wraps the tool handler', async () => {
     const tool = createTool('toolA', {
       description: 'desc',
-      schema: () => z.object({ hello: z.string() }),
+      getSchema: () => z.object({ hello: z.string() }),
       execute: jest
         .fn()
         .mockResolvedValue({ results: [{ type: ToolResultType.other, data: 'foo' }] }),
