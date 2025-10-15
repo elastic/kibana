@@ -17,6 +17,7 @@ import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './runner';
 import { ConversationServiceImpl } from './conversation';
 import { createChatService } from './chat';
+import { EvaluationServiceImpl } from './evaluations';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -104,12 +105,17 @@ export class ServiceManager {
       savedObjects,
     });
 
+    const evaluations = new EvaluationServiceImpl({
+      logger: logger.get('evaluations'),
+    });
+
     this.internalStart = {
       tools,
       agents,
       conversations,
       runnerFactory,
       chat,
+      evaluations,
     };
 
     return this.internalStart;

@@ -158,23 +158,17 @@ export function registerEvaluationRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const { conversationId, evaluators } = request.body;
-        const { conversations: conversationsService } = getInternalServices();
+        const { conversations: conversationsService, evaluations } = getInternalServices();
 
         const client = await conversationsService.getScopedClient({ request });
         const conversation = await client.get(conversationId);
 
-        const mockResults = conversation.rounds.map((round) => ({
-          roundId: round.id,
-          scores: evaluators.map((evaluator) => ({
-            evaluatorId: evaluator.evaluatorIdOverride || evaluator.evaluatorId,
-            score: Math.random(),
-          })),
-        }));
+        const results = await evaluations.evaluateConversation(conversation, evaluators);
 
         return response.ok<EvaluationRunResponse>({
           body: {
             conversationId,
-            results: mockResults,
+            results,
           },
         });
       })

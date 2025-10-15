@@ -18,6 +18,7 @@ import type { RunnerFactory } from './runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
 import type { ChatService } from './chat';
+import type { EvaluationService } from './evaluations';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -30,6 +31,7 @@ export interface InternalStartServices {
   conversations: ConversationService;
   chat: ChatService;
   runnerFactory: RunnerFactory;
+  evaluations: EvaluationService;
 }
 
 export interface ServiceSetupDeps {
