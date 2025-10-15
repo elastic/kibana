@@ -45,7 +45,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds a new Inline Markdown editor to edit your text while switching between **Editing** and **Preview** mode.[#229191]({{kib-pull}}229191).
 * Updates the toolbar popover for Metric charts, which is now called **Appearance**. [#233992]({{kib-pull}}233992).
 * Improves ES|QL suggestions logic when an {{esql}} visualization query changes [#231767]({{kib-pull}}231767).
-* Adds a new **Add** menu to the toolbar.[#230324]({{kib-pull}}230324).
+* Adds a new **Add** menu to the toolbar that lets you populate your dashboard with visualizations, panels, sections, and controls.[#230324]({{kib-pull}}230324).
 * Improves perceived performance of dashboard flyouts [#226052]({{kib-pull}}226052).
 * Adds the **Select all** functionality for Options list controls [#221010]({{kib-pull}}221010).
 
