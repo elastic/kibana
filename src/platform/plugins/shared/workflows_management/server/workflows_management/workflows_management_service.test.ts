@@ -96,13 +96,12 @@ describe('WorkflowsService', () => {
       getAll: jest.fn().mockResolvedValue({ data: [] }),
     } as unknown as PublicMethodsOf<ActionsClient>);
 
-    service = new WorkflowsService(
-      mockEsClientPromise,
-      mockLogger,
-      false,
-      mockGetActionsClient,
-      mockGetActionsClientWithRequest
-    );
+    const mockGetActionsStart = jest.fn().mockResolvedValue({
+      getUnsecuredActionsClient: mockGetActionsClient,
+      getActionsClientWithRequest: mockGetActionsClientWithRequest,
+    });
+
+    service = new WorkflowsService(mockEsClientPromise, mockLogger, false, mockGetActionsStart);
 
     mockSecurity = {
       authc: {

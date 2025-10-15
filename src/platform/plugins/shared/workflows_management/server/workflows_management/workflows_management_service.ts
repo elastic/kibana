@@ -38,6 +38,7 @@ import type { z } from '@kbn/zod';
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { UNSUPPORTED_CONNECTOR_TYPES } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
 import {
@@ -89,12 +90,13 @@ export class WorkflowsService {
     esClientPromise: Promise<ElasticsearchClient>,
     logger: Logger,
     enableConsoleLogging: boolean = false,
-    getActionsClient: () => Promise<IUnsecuredActionsClient>,
-    getActionsClientWithRequest: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>
+    getActionsStart: () => Promise<ActionsPluginStartContract>
   ) {
     this.logger = logger;
-    this.getActionsClient = getActionsClient;
-    this.getActionsClientWithRequest = getActionsClientWithRequest;
+    this.getActionsClient = () =>
+      getActionsStart().then((actions) => actions.getUnsecuredActionsClient());
+    this.getActionsClientWithRequest = (request: KibanaRequest) =>
+      getActionsStart().then((actions) => actions.getActionsClientWithRequest(request));
     void this.initialize(esClientPromise, enableConsoleLogging);
   }
 
