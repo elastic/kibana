@@ -119,16 +119,16 @@ export const config: PluginConfigDescriptor = {
 
       return fullConfig;
     },
-    // Log invalid experimental values listed in xpack.fleet.fleet.enableExperimental
+    // Log invalid experimental values listed in xpack.fleet.enableExperimental
     (fullConfig, fromPath, addDeprecation) => {
       for (const key of fullConfig?.xpack?.fleet?.enableExperimental ?? []) {
         if (!isValidExperimentalValue(key)) {
           addDeprecation({
-            configPath: 'xpack.fleet.fleet.enableExperimental',
-            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.fleet.enableExperimental].`,
+            configPath: 'xpack.fleet.enableExperimental',
+            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.enableExperimental].`,
             correctiveActions: {
               manualSteps: [
-                `Use [xpack.fleet.fleet.enableExperimental] with an array of valid experimental features.`,
+                `Use [xpack.fleet.enableExperimental] with an array of valid experimental features.`,
               ],
             },
             level: 'warning',
@@ -137,15 +137,15 @@ export const config: PluginConfigDescriptor = {
       }
     },
 
-    // Prefer using xpack.fleet.fleet.experimentalFeatures over xpack.fleet.fleet.enableExperimental
+    // Prefer using xpack.fleet.experimentalFeatures over xpack.fleet.enableExperimental
     (fullConfig, fromPath, addDeprecation) => {
       if (fullConfig?.xpack?.fleet?.enableExperimental?.length > 0) {
         addDeprecation({
-          configPath: 'xpack.fleet.fleet.enableExperimental',
-          message: `Config key [xpack.fleet.fleet.enableExperimental] is deprecated. Please use [xpack.fleet.fleet.experimentalFeatures] instead.`,
+          configPath: 'xpack.fleet.enableExperimental',
+          message: `Config key [xpack.fleet.enableExperimental] is deprecated. Please use [xpack.fleet.experimentalFeatures] instead.`,
           correctiveActions: {
             manualSteps: [
-              `Use [xpack.fleet.fleet.experimentalFeatures] to enable or disable experimental features.`,
+              `Use [xpack.fleet.experimentalFeatures] to enable or disable experimental features.`,
             ],
           },
           level: 'warning',
@@ -153,16 +153,16 @@ export const config: PluginConfigDescriptor = {
       }
     },
 
-    // Log invalid experimental values listed in xpack.fleet.fleet.experimentalFeatures
+    // Log invalid experimental values listed in xpack.fleet.experimentalFeatures
     (fullConfig, fromPath, addDeprecation) => {
       for (const key of Object.keys(fullConfig?.xpack?.fleet?.experimentalFeatures ?? {})) {
         if (!isValidExperimentalValue(key)) {
           addDeprecation({
-            configPath: 'xpack.fleet.fleet.experimentalFeatures',
-            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.fleet.experimentalFeatures].`,
+            configPath: 'xpack.fleet.experimentalFeatures',
+            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.experimentalFeatures].`,
             correctiveActions: {
               manualSteps: [
-                `Use [xpack.fleet.fleet.experimentalFeatures] with an object containing valid experimental features.`,
+                `Use [xpack.fleet.experimentalFeatures] with an object containing valid experimental features.`,
               ],
             },
             level: 'warning',

@@ -150,8 +150,8 @@ describe('Config schema', () => {
 
       expect(res.messages).toMatchInlineSnapshot(`
         Array [
-          "[notvalid] is not a valid fleet experimental feature [xpack.fleet.fleet.enableExperimental].",
-          "Config key [xpack.fleet.fleet.enableExperimental] is deprecated. Please use [xpack.fleet.fleet.experimentalFeatures] instead.",
+          "[notvalid] is not a valid fleet experimental feature [xpack.fleet.enableExperimental].",
+          "Config key [xpack.fleet.enableExperimental] is deprecated. Please use [xpack.fleet.experimentalFeatures] instead.",
         ]
       `);
     });
@@ -163,7 +163,7 @@ describe('Config schema', () => {
 
       expect(res.messages).toMatchInlineSnapshot(`
         Array [
-          "Config key [xpack.fleet.fleet.enableExperimental] is deprecated. Please use [xpack.fleet.fleet.experimentalFeatures] instead.",
+          "Config key [xpack.fleet.enableExperimental] is deprecated. Please use [xpack.fleet.experimentalFeatures] instead.",
         ]
       `);
     });
@@ -177,7 +177,7 @@ describe('Config schema', () => {
 
       expect(res.messages).toMatchInlineSnapshot(`
         Array [
-          "[notvalid] is not a valid fleet experimental feature [xpack.fleet.fleet.experimentalFeatures].",
+          "[notvalid] is not a valid fleet experimental feature [xpack.fleet.experimentalFeatures].",
         ]
       `);
     });

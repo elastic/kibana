@@ -73,6 +73,7 @@ export const AddFleetServerHostStepContent = ({
   const { notifications } = useStartServices();
   const { getHref } = useLink();
   const { enableSSLSecrets } = ExperimentalFeaturesService.get();
+  console.log('----> xp features:', ExperimentalFeaturesService.get());
 
   const [isFirstLoad, setIsFirstLoad] = React.useState(true);
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({

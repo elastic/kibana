@@ -5,98 +5,103 @@
  * 2.0.
  */
 
-import { parseExperimentalConfigValue } from './experimental_features';
+import { getUpdatedExperimentalFeatures } from './experimental_features';
 
-describe('parseExperimentalConfigValue', () => {
+const defaultFeatures = {
+  enableFoo: false,
+  enableBar: true,
+  enableBaz: true,
+} as const;
+
+describe('getUpdatedExperimentalFeatures', () => {
   it('should return default values if no config is provided', () => {
-    const result = parseExperimentalConfigValue([], {});
-    expect(result).toEqual({
-      showExperimentalShipperOptions: false,
-      useSpaceAwareness: true,
-      enableAutomaticAgentUpgrades: true,
-      enableSyncIntegrationsOnRemote: true,
-      enableSSLSecrets: false,
-      installedIntegrationsTabularUI: true,
-      enabledUpgradeAgentlessDeploymentsTask: true,
-      enablePackageRollback: false,
-      enableAutoInstallContentPackages: true,
-      enableOtelIntegrations: true,
-      enableAgentStatusAlerting: true,
-      enableAgentPrivilegeLevelChange: false,
-    });
+    const result = getUpdatedExperimentalFeatures([], {}, defaultFeatures);
+    expect(result).toEqual(defaultFeatures);
   });
 
   it('should enable features listed in the enableExperimental config if they are not listed in experimentalFeatures', () => {
-    const result = parseExperimentalConfigValue(
+    const result = getUpdatedExperimentalFeatures(
       [
-        'showExperimentalShipperOptions', // default: false
-        'useSpaceAwareness', // default: true
+        'enableFoo', // default: false
+        'enableBar', // default: true
       ],
-      {}
+      {},
+      defaultFeatures
     );
     expect(result).toEqual({
-      showExperimentalShipperOptions: true, // enabled
-      useSpaceAwareness: true, // unchanged
-      enableAutomaticAgentUpgrades: true,
-      enableSyncIntegrationsOnRemote: true,
-      enableSSLSecrets: false,
-      installedIntegrationsTabularUI: true,
-      enabledUpgradeAgentlessDeploymentsTask: true,
-      enablePackageRollback: false,
-      enableAutoInstallContentPackages: true,
-      enableOtelIntegrations: true,
-      enableAgentStatusAlerting: true,
-      enableAgentPrivilegeLevelChange: false,
+      enableFoo: true, // enabled
+      enableBar: true, // already enabled by default
+      enableBaz: true, // default
     });
   });
 
   it('should enable or disable features listed in the experimentalFeatures config', () => {
-    const result = parseExperimentalConfigValue([], {
-      showExperimentalShipperOptions: true, // default: false
-      useSpaceAwareness: false, // default: true
-    });
+    const result = getUpdatedExperimentalFeatures(
+      [],
+      {
+        enableFoo: true, // default: false
+        enableBar: false, // default: true,
+      },
+      defaultFeatures
+    );
     expect(result).toEqual({
-      showExperimentalShipperOptions: true, // enabled
-      useSpaceAwareness: false, // disabled
-      enableAutomaticAgentUpgrades: true,
-      enableSyncIntegrationsOnRemote: true,
-      enableSSLSecrets: false,
-      installedIntegrationsTabularUI: true,
-      enabledUpgradeAgentlessDeploymentsTask: true,
-      enablePackageRollback: false,
-      enableAutoInstallContentPackages: true,
-      enableOtelIntegrations: true,
-      enableAgentStatusAlerting: true,
-      enableAgentPrivilegeLevelChange: false,
+      enableFoo: true, // enabled
+      enableBar: false, // disabled
+      enableBaz: true, // default
     });
   });
 
   it('should disable features listed in the experimentalFeatures config even if they are listed in enableExperimental', () => {
-    const result = parseExperimentalConfigValue(
+    const result = getUpdatedExperimentalFeatures(
       [
-        'showExperimentalShipperOptions', // default: false
-        'useSpaceAwareness', // default: true
-        'enableSSLSecrets', // default: false
+        'enableFoo', // default: false
+        'enableBar', // default: true
       ],
       {
-        showExperimentalShipperOptions: false, // listed in enableExperimental, but disabled here
-        useSpaceAwareness: false, // listed in enableExperimental, but disabled here
-        enableSSLSecrets: true, // listed in enableExperimental, but enabled here
-      }
+        enableFoo: false, // listed in enableExperimental, but disabled here
+        enableBar: false, // listed in enableExperimental, but disabled here
+      },
+      defaultFeatures
     );
     expect(result).toEqual({
-      showExperimentalShipperOptions: false, // disabled
-      useSpaceAwareness: false, // disabled
-      enableSSLSecrets: true, // enabled
-      enableAutomaticAgentUpgrades: true,
-      enableSyncIntegrationsOnRemote: true,
-      installedIntegrationsTabularUI: true,
-      enabledUpgradeAgentlessDeploymentsTask: true,
-      enablePackageRollback: false,
-      enableAutoInstallContentPackages: true,
-      enableOtelIntegrations: true,
-      enableAgentStatusAlerting: true,
-      enableAgentPrivilegeLevelChange: false,
+      enableFoo: false, // disabled
+      enableBar: false, // disabled
+      enableBaz: true, // default
+    });
+  });
+
+  it('should ignore invalid feature names in both configs', () => {
+    const result = getUpdatedExperimentalFeatures(
+      [
+        'enableFoo', // valid
+        'invalidFeature1', // invalid
+      ],
+      {
+        enableBar: false, // valid
+        invalidFeature2: true, // invalid
+      },
+      defaultFeatures
+    );
+    expect(result).toEqual({
+      enableFoo: true, // enabled
+      enableBar: false, // disabled
+      enableBaz: true, // default
+    });
+  });
+
+  it('should ignore non-boolean values in experimentalFeatures config', () => {
+    const result = getUpdatedExperimentalFeatures(
+      ['enableFoo'], // valid
+      {
+        enableBar: 'yes', // invalid, should be boolean
+        enableBaz: null, // invalid, should be boolean
+      } as any,
+      defaultFeatures
+    );
+    expect(result).toEqual({
+      enableFoo: true, // enabled
+      enableBar: true, // default
+      enableBaz: true, // default
     });
   });
 });
