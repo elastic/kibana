@@ -33,8 +33,6 @@ export interface TraceWaterfallContextProps {
   colorBy: WaterfallLegendType;
   showLegend: boolean;
   serviceName?: string;
-  showFullTrace: boolean;
-  toggleFullTrace?: () => void;
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
@@ -50,7 +48,6 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   colorBy: WaterfallLegendType.ServiceName,
   showLegend: false,
   serviceName: '',
-  showFullTrace: false,
 });
 
 export type OnNodeClick = (id: string) => void;
@@ -73,8 +70,8 @@ interface Props {
   isEmbeddable: boolean;
   showLegend: boolean;
   serviceName?: string;
-  showFullTrace: boolean;
-  toggleFullTrace?: () => void;
+  isFullTrace: boolean;
+  filterByServiceName: boolean;
 }
 
 export function TraceWaterfallContextProvider({
@@ -89,14 +86,15 @@ export function TraceWaterfallContextProvider({
   isEmbeddable,
   showLegend,
   serviceName,
-  showFullTrace,
-  toggleFullTrace,
+  isFullTrace,
+  filterByServiceName,
 }: Props) {
   const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy, traceState } =
     useTraceWaterfall({
       traceItems,
       serviceName,
-      showFullTrace,
+      isFullTrace,
+      filterByServiceName,
     });
 
   const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT * maxDepth;
@@ -124,8 +122,6 @@ export function TraceWaterfallContextProvider({
         colorBy,
         showLegend,
         serviceName,
-        showFullTrace,
-        toggleFullTrace,
       }}
     >
       {children}

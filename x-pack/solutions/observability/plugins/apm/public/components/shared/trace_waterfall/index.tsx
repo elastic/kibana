@@ -5,11 +5,9 @@
  * 2.0.
  */
 import type { EuiAccordionProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSwitch, useEuiTheme } from '@elastic/eui';
-import { useBoolean } from '@kbn/react-hooks';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { AutoSizer, WindowScroller } from 'react-virtualized';
 import type { ListChildComponentProps } from 'react-window';
 import { VariableSizeList as List, areEqual } from 'react-window';
@@ -23,11 +21,6 @@ import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { TraceWarning } from './trace_warning';
 import { WaterfallLegends } from './waterfall_legends';
 
-const FULL_TRACE_TOGGLE = i18n.translate(
-  'xpack.apm.traceWaterfallComponent.euiSwitch.toggleFullTraceLabel',
-  { defaultMessage: 'Show full trace' }
-);
-
 export interface Props {
   traceItems: TraceItem[];
   showAccordion?: boolean;
@@ -39,6 +32,7 @@ export interface Props {
   isEmbeddable?: boolean;
   showLegend?: boolean;
   serviceName?: string;
+  filterByServiceName?: boolean;
 }
 
 export function TraceWaterfall({
@@ -52,14 +46,12 @@ export function TraceWaterfall({
   isEmbeddable = false,
   showLegend = false,
   serviceName,
+  filterByServiceName = false,
 }: Props) {
   const isFullTrace = useMemo(
-    () => traceItems.every((item) => item.serviceName === serviceName),
+    () => (serviceName ? traceItems.every((item) => item.serviceName === serviceName) : true),
     [traceItems, serviceName]
   );
-  const [showFullTrace, { toggle }] = useBoolean(isFullTrace);
-
-  const toggleFullTrace = useMemo(() => (!isFullTrace ? toggle : undefined), [isFullTrace, toggle]);
 
   return (
     <TraceWaterfallContextProvider
@@ -73,8 +65,8 @@ export function TraceWaterfall({
       isEmbeddable={isEmbeddable}
       showLegend={showLegend}
       serviceName={serviceName}
-      showFullTrace={showFullTrace}
-      toggleFullTrace={toggleFullTrace}
+      isFullTrace={isFullTrace}
+      filterByServiceName={filterByServiceName}
     >
       <TraceWarning>
         <TraceWaterfallComponent />
@@ -93,29 +85,14 @@ function TraceWaterfallComponent() {
     colorBy,
     showLegend,
     serviceName,
-    showFullTrace,
-    toggleFullTrace,
   } = useTraceWaterfallContext();
 
   return (
     <EuiFlexGroup direction="column">
-      {serviceName || showLegend ? (
-        <EuiFlexGroup justifyContent="spaceBetween">
-          {showLegend && (
-            <EuiFlexItem>
-              <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />
-            </EuiFlexItem>
-          )}
-          {serviceName && toggleFullTrace && (
-            <EuiFlexItem grow={0}>
-              <EuiSwitch
-                label={FULL_TRACE_TOGGLE}
-                onChange={() => toggleFullTrace()}
-                checked={showFullTrace}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+      {serviceName && showLegend ? (
+        <EuiFlexItem>
+          <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />
+        </EuiFlexItem>
       ) : null}
       <EuiFlexItem>
         <div style={{ position: 'relative' }}>

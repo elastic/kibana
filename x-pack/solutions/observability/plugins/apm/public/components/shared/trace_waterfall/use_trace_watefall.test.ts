@@ -431,6 +431,18 @@ describe('getTraceMap', () => {
     expect(Object.keys(result)).toHaveLength(1);
   });
 
+  it('handles finding the root from filtered spans with same timestamps by checking if they are not direct children', () => {
+    const items = [
+      child1,
+      { ...grandchild, timestampUs: new Date('2024-01-01T00:00:00.500Z').getTime() * 1000 },
+    ];
+
+    const result = getTraceParentChildrenMap(items, true);
+
+    expect(result.root).toEqual([expect.objectContaining({ id: '2' })]);
+    expect(Object.keys(result)).toHaveLength(3);
+  });
+
   it('handles multiple roots (should only keep the last as root)', () => {
     const items: TraceItem[] = [
       {

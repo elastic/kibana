@@ -22,17 +22,19 @@ export interface TraceWaterfallItem extends TraceItem {
 export function useTraceWaterfall({
   traceItems,
   serviceName,
-  showFullTrace,
+  isFullTrace,
+  filterByServiceName,
 }: {
   traceItems: TraceItem[];
-  showFullTrace: boolean;
+  isFullTrace: boolean;
   serviceName?: string;
+  filterByServiceName: boolean;
 }) {
   const waterfall = useMemo(() => {
-    const filteredTraceItems =
-      !showFullTrace && serviceName
-        ? traceItems.filter((item) => item.serviceName === serviceName)
-        : traceItems;
+    const isFilteredTrace = !isFullTrace && !!serviceName && filterByServiceName;
+    const filteredTraceItems = isFilteredTrace
+      ? traceItems.filter((item) => item.serviceName === serviceName)
+      : traceItems;
 
     const legends = getLegends(filteredTraceItems);
     const colorBy =
@@ -40,14 +42,12 @@ export function useTraceWaterfall({
         ? WaterfallLegendType.ServiceName
         : WaterfallLegendType.Type;
     const colorMap = createColorLookupMap(legends);
-    const traceParentChildrenMap = getTraceParentChildrenMap(
-      filteredTraceItems,
-      !showFullTrace && !!serviceName
-    );
+    const traceParentChildrenMap = getTraceParentChildrenMap(filteredTraceItems, isFilteredTrace);
     const { rootItem, traceState, orphans } = getRootItemOrFallback(
       traceParentChildrenMap,
       filteredTraceItems
     );
+
     const traceWaterfall = rootItem
       ? getTraceWaterfall({
           rootItem,
@@ -67,7 +67,7 @@ export function useTraceWaterfall({
       legends,
       colorBy,
     };
-  }, [traceItems, serviceName, showFullTrace]);
+  }, [traceItems, serviceName, isFullTrace, filterByServiceName]);
 
   return waterfall;
 }
@@ -106,19 +106,33 @@ export function createColorLookupMap(legends: IWaterfallLegend[]): Map<string, s
 }
 
 export function getTraceParentChildrenMap(traceItems: TraceItem[], filteredTrace: boolean) {
-  const traceMap = traceItems.reduce<Record<string, TraceItem[]>>((acc, item, index) => {
-    if (!item.parentId) {
-      acc.root = [item];
-    } else if (filteredTrace && index === 0) {
-      acc.root = [item];
+  if (traceItems.length === 0) {
+    return {};
+  }
+
+  const traceMap: Record<string, TraceItem[]> = {};
+
+  traceItems.reduce<Record<string, TraceItem[]>>((acc, item) => {
+    if (item.parentId) {
+      (acc[item.parentId] ??= []).push(item);
     } else {
-      if (!acc[item.parentId]) {
-        acc[item.parentId] = [];
-      }
-      acc[item.parentId].push(item);
+      (acc.root ??= [])[0] = item;
     }
     return acc;
-  }, {});
+  }, traceMap);
+
+  // If filtered trace, elect the earliest arriving span as the root if there is no root found already
+  if (filteredTrace && !traceMap.root) {
+    const root = traceItems
+      .slice(1)
+      .reduce(
+        (acc, span) =>
+          acc.timestampUs <= span.timestampUs || acc.id === span.parentId ? acc : span,
+        traceItems[0]
+      );
+
+    traceMap.root = [root];
+  }
 
   return traceMap;
 }
@@ -144,7 +158,7 @@ export function getRootItemOrFallback(
   const parentIds = new Set(traceItems.map(({ id }) => id));
   // TODO: Reuse waterfall util methods where possible or if logic is the same
   const orphans = traceItems.filter(
-    (item) => item.parentId && !parentIds.has(item.parentId) && item !== rootItem
+    (item) => item.parentId && !parentIds.has(item.parentId) && item.id !== rootItem?.id
   );
 
   if (rootItem) {
