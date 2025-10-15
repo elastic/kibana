@@ -516,5 +516,37 @@ describe('createPointInTimeFinder()', () => {
       expect(repository.find).toHaveBeenCalledTimes(2);
       expect(repository.closePointInTime).toHaveBeenCalledTimes(2);
     });
+
+    test('defaults perPage to 1000 when passed as undefined', async () => {
+      repository.openPointInTimeForType.mockResolvedValueOnce({
+        id: 'pit-id-123',
+      });
+      repository.find.mockResolvedValueOnce({
+        total: 0,
+        saved_objects: [],
+        pit_id: 'pit-id-123',
+        per_page: 1000,
+        page: 0,
+      });
+
+      const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
+        type: ['visualization'],
+        perPage: undefined,
+      };
+
+      const finder = new PointInTimeFinder(findOptions, {
+        logger,
+        client: repository,
+      });
+
+      await finder.find().next();
+
+      expect(repository.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          perPage: 1000,
+        }),
+        undefined
+      );
+    });
   });
 });
