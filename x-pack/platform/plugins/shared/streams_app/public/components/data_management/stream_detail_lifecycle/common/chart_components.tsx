@@ -132,7 +132,7 @@ export function ChartBarSeriesBase({
 
   return ingestionRateError ? (
     'Failed to load ingestion rate'
-  ) : !ingestionRate && (isLoadingStats || isLoadingIngestionRate || !ingestionRate) ? (
+  ) : !ingestionRate && (isLoadingStats || isLoadingIngestionRate) ? (
     <EuiLoadingChart />
   ) : (
     <>
@@ -196,7 +196,7 @@ function ChartBarPhasesSeriesBase({
 
   return ingestionRateError ? (
     'Failed to load ingestion rate'
-  ) : !ingestionRate && (isLoadingStats || isLoadingIngestionRate || !ingestionRate) ? (
+  ) : !ingestionRate && (isLoadingStats || isLoadingIngestionRate) ? (
     <EuiLoadingChart />
   ) : (
     <>
