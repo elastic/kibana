@@ -9,7 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject, debounceTime, merge } from 'rxjs';
+import { BehaviorSubject, debounceTime, from, merge, startWith } from 'rxjs';
 import { v4 } from 'uuid';
 import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import { DASHBOARD_APP_ID } from '../../common/constants';
@@ -89,6 +89,12 @@ export function getDashboardApi({
   );
 
   const controlGroupManager = initializeControlGroupManager(mergedControlGroupState, getReferences);
+  const unPauseWhenControlsAreAvailable = async () => {
+    await controlGroupManager.internalApi.untilControlsInitialized();
+    return false;
+  };
+  const isFetchPaused$ = from(unPauseWhenControlsAreAvailable()).pipe(startWith(true));
+
   const dataLoadingManager = initializeDataLoadingManager(layoutManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(
     controlGroupManager.api.controlGroupApi$,
@@ -154,6 +160,7 @@ export function getDashboardApi({
       description: settingsManager.api.title$.value,
     },
     fullScreenMode$,
+    isFetchPaused$,
     getAppContext: () => {
       const embeddableAppContext = creationOptions?.getEmbeddableAppContext?.(savedObjectId$.value);
       return {
