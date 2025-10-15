@@ -115,9 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const valueAfter = await dashboardControls.getTimeSliceFromTimeSlider();
         expect(valueBefore).to.not.equal(valueAfter);
 
-        await dashboard.clickCancelOutOfEditMode();
-
-        await dashboard.getIsInViewMode();
+        await dashboard.clickDiscardChanges();
 
         // valueNow maybe grabbed before timeslider has reset
         await retry.try(async () => {
@@ -127,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('dashboard does not load with unsaved changes when changes are discarded', async () => {
-        await dashboard.switchToEditMode();
+        await dashboard.loadDashboardInEditMode('test time slider control');
         await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
       });
 
@@ -138,11 +136,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        // Some test cases switch out of edit mode
-        // If there are test failures in these cases then after hook runs in view mode
-        if (!(await dashboard.getIsInEditMode())) {
-          await dashboard.switchToEditMode();
-        }
         await dashboardControls.clearAllControls();
       });
     });
