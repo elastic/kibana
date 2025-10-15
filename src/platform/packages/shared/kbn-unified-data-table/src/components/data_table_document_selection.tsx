@@ -20,7 +20,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
-  useEuiFontSize,
   useEuiTheme,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
@@ -35,6 +34,7 @@ import { DataTableCopyRowsAsText } from './data_table_copy_rows_as_text';
 import { DataTableCopyRowsAsJson } from './data_table_copy_rows_as_json';
 import { useControlColumn } from '../hooks/use_control_column';
 import type { CustomBulkActions } from '../types';
+import { styles as toolbarStyles } from './custom_toolbar/render_custom_toolbar';
 
 export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
   const { record, rowIndex } = useControlColumn(props);
@@ -174,8 +174,6 @@ export function DataTableDocumentToolbarBtn({
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
   const { selectAllDocs, clearAllSelectedDocs, selectedDocsCount, docIdsInSelectionOrder } =
     selectedDocsState;
-
-  const { euiTheme } = useEuiTheme();
 
   const closePopover = useCallback(() => {
     setIsSelectionPopoverOpen(false);
@@ -332,13 +330,9 @@ export function DataTableDocumentToolbarBtn({
           badgeContent={fieldFormats
             .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
             .convert(selectedDocsCount)}
-          size="s"
           css={css`
-            border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
             .euiButtonEmpty__content {
-              font-size: ${useEuiFontSize('xs').fontSize};
               flex-direction: row-reverse;
-              line-height: ${useEuiFontSize('xs').lineHeight};
             }
           `}
         >
@@ -368,17 +362,20 @@ export function DataTableDocumentToolbarBtn({
   );
 
   return (
-    <EuiFlexGroup
-      responsive={false}
-      gutterSize="none"
-      wrap={false}
-      className="unifiedDataTableToolbarControlGroup"
-    >
-      <EuiFlexItem className="unifiedDataTableToolbarControlButton" grow={false}>
+    <EuiFlexGroup responsive={false} gutterSize="s" wrap={false}>
+      <EuiFlexItem
+        className="unifiedDataTableToolbarControlButton"
+        css={toolbarStyles.controlButton}
+        grow={false}
+      >
         {selectedRowsMenuButton}
       </EuiFlexItem>
       {shouldSuggestToSelectAll ? (
-        <EuiFlexItem className="unifiedDataTableToolbarControlButton" grow={false}>
+        <EuiFlexItem
+          className="unifiedDataTableToolbarControlButton"
+          css={toolbarStyles.controlButton}
+          grow={false}
+        >
           <EuiDataGridToolbarControl
             data-test-subj="dscGridSelectAllDocs"
             onClick={() => {
