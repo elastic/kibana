@@ -270,8 +270,10 @@ export class CstToAstConverter {
 
   private fromSetCommand(ctx: cst.SetCommandContext): ast.ESQLAstSetHeaderCommand {
     const setFieldCtx = ctx.setField();
-    const arg = this.fromSetFieldContext(setFieldCtx);
-    const command = Builder.header.command.set(arg ? [arg] : [], {}, this.getParserFields(ctx));
+    const binaryExpression = this.fromSetFieldContext(setFieldCtx);
+
+    const args = binaryExpression ? [binaryExpression] : [];
+    const command = Builder.header.command.set(args, {}, this.getParserFields(ctx));
 
     return command;
   }
