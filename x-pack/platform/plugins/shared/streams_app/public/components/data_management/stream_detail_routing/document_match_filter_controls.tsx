@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
+import { getPercentageFormatter } from '../../../util/formatters';
 import {
   useStreamSamplesSelector,
   type DocumentMatchFilterOptions,
@@ -21,9 +22,11 @@ import {
 
 export interface DocumentMatchFilterControlsProps {
   onFilterChange: (filter: DocumentMatchFilterOptions) => void;
-  matchedDocumentPercentage: number | undefined;
+  matchedDocumentPercentage?: number | null;
   isDisabled?: boolean;
 }
+
+const percentageFormatter = getPercentageFormatter({ precision: 1 });
 
 export const DocumentMatchFilterControls = ({
   onFilterChange,
@@ -43,6 +46,9 @@ export const DocumentMatchFilterControls = ({
     [documentMatchFilter, onFilterChange]
   );
 
+  const hasNoValue =
+    isDisabled || matchedDocumentPercentage === undefined || matchedDocumentPercentage === null;
+
   return (
     <EuiFlexItem grow={false} data-test-subj="routingPreviewFilterControls">
       <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -56,17 +62,13 @@ export const DocumentMatchFilterControls = ({
               data-test-subj="routingPreviewMatchedFilterButton"
               hasActiveFilters={documentMatchFilter === 'matched'}
               onClick={() => handleFilterChanged('matched')}
-              isDisabled={
-                isDisabled ||
-                matchedDocumentPercentage === undefined ||
-                isNaN(matchedDocumentPercentage)
-              }
+              isDisabled={hasNoValue}
               isSelected={documentMatchFilter === 'matched'}
               badgeColor="success"
               grow={false}
               isToggle
               numActiveFilters={
-                matchedDocumentPercentage === undefined ? '' : `${matchedDocumentPercentage}%`
+                hasNoValue ? '' : percentageFormatter.format(matchedDocumentPercentage)
               }
             >
               {i18n.translate('xpack.streams.streamDetail.preview.filter.matched', {
@@ -81,17 +83,15 @@ export const DocumentMatchFilterControls = ({
               data-test-subj="routingPreviewUnmatchedFilterButton"
               hasActiveFilters={documentMatchFilter === 'unmatched'}
               onClick={() => handleFilterChanged('unmatched')}
-              isDisabled={
-                isDisabled ||
-                matchedDocumentPercentage === undefined ||
-                isNaN(matchedDocumentPercentage)
-              }
+              isDisabled={hasNoValue}
               isSelected={documentMatchFilter === 'unmatched'}
               badgeColor="accent"
               grow={false}
               isToggle
               numActiveFilters={
-                matchedDocumentPercentage === undefined ? '' : `${100 - matchedDocumentPercentage}%`
+                hasNoValue
+                  ? ''
+                  : percentageFormatter.format(Math.max(1 - matchedDocumentPercentage, 0))
               }
             >
               {i18n.translate('xpack.streams.streamDetail.preview.filter.unmatched', {

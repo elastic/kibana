@@ -48,6 +48,7 @@ import type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
   InternalHttpServiceStart,
+  GenerateOasArgs,
 } from './types';
 import { registerCoreHandlers } from './register_lifecycle_handlers';
 import type { ExternalUrlConfigType } from './external_url';
@@ -226,11 +227,12 @@ export class HttpService
     return this.internalSetup;
   }
 
-  // this method exists because we need the start contract to create the `CoreStart` used to start
+  // this method exists because we need the start contract to create `CoreStart` used to start
   // the `plugin` and `legacy` services.
   public getStartContract(): InternalHttpServiceStart {
     return {
       ...pick(this.internalSetup!, ['auth', 'basePath', 'getServerInfo', 'staticAssets']),
+      generateOas: (args: GenerateOasArgs) => this.generateOas(args),
       isListening: () => this.httpServer.isListening(),
     };
   }
@@ -257,6 +259,24 @@ export class HttpService
     }
 
     return this.getStartContract();
+  }
+
+  private generateOas({ pluginId, baseUrl, filters }: GenerateOasArgs) {
+    // Potentially quite expensive
+    return firstValueFrom(
+      of(1).pipe(
+        HttpService.generateOasSemaphore.acquire(),
+        mergeMap(async () => {
+          return generateOpenApiDocument(this.httpServer.getRouters({ pluginId }), {
+            baseUrl,
+            title: 'Kibana HTTP APIs',
+            version: '0.0.0', // TODO get a better version here
+            filters,
+            env: { serverless: this.env.packageInfo.buildFlavor === 'serverless' },
+          });
+        })
+      )
+    );
   }
 
   private registerOasApi(config: HttpConfig) {
@@ -305,32 +325,19 @@ export class HttpService
         } catch (e) {
           return h.response({ message: e.message }).code(400);
         }
-        return await firstValueFrom(
-          of(1).pipe(
-            HttpService.generateOasSemaphore.acquire(),
-            mergeMap(async () => {
-              try {
-                // Potentially quite expensive
-                const result = await generateOpenApiDocument(
-                  this.httpServer.getRouters({ pluginId: query.pluginId }),
-                  {
-                    baseUrl,
-                    title: 'Kibana HTTP APIs',
-                    version: '0.0.0', // TODO get a better version here
-                    filters,
-                    env: { serverless: this.env.packageInfo.buildFlavor === 'serverless' },
-                  }
-                );
-                return h.response(result);
-              } catch (e) {
-                this.log.error(e);
-                return h.response({ message: e.message }).code(500);
-              }
-            })
-          )
-        );
+        try {
+          const result = await this.generateOas({
+            baseUrl,
+            filters,
+            pluginId: query.pluginId,
+          });
+          return h.response(result);
+        } catch (e) {
+          return h.response({ message: e.message }).code(500);
+        }
       },
       options: {
+        auth: false,
         app: {
           access: 'public',
           security: {
@@ -340,7 +347,6 @@ export class HttpService
             },
           },
         },
-        auth: false,
         cache: {
           privacy: 'public',
           otherwise: 'must-revalidate',

@@ -488,6 +488,20 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsMap.assertMapElementsExists();
           await ml.dataFrameAnalyticsMap.assertJobMapTitle(testData.jobId);
         });
+
+        it('opens job details fly-out in the map view', async () => {
+          await ml.testExecution.logTestStep('should open the job details fly-out');
+          await ml.navigation.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList');
+          await ml.dataFrameAnalyticsTable.openMapView(testData.jobId);
+          await ml.dataFrameAnalyticsMap.assertMapElementsExists();
+          await ml.dataFrameAnalyticsMap.openMlAnalyticsIdSelectionBadge(testData.jobId);
+          await ml.dataFrameAnalyticsMap.assertAnalyticsJobDetailsFlyoutButtonExists(
+            testData.jobId
+          );
+          await ml.dataFrameAnalyticsMap.openAnalyticsJobDetailsFlyout(testData.jobId);
+          await ml.jobDetailsFlyout.assertAnalyticsDetailsFlyoutExists();
+          await ml.jobDetailsFlyout.assertAnalyticsDetailsFlyoutIdExists(testData.jobId);
+        });
       });
     }
   });

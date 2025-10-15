@@ -211,6 +211,21 @@ export class OneChatPageObject extends FtrService {
     return await responseElement.getVisibleText();
   }
 
+  /**
+   * Click the retry button in the error UI
+   */
+  async clickRetryButton() {
+    const retryButton = await this.testSubjects.find('agentBuilderRoundErrorRetryButton');
+    await retryButton.click();
+  }
+
+  /**
+   * Check if the error UI is visible
+   */
+  async isErrorVisible() {
+    return await this.testSubjects.exists('agentBuilderRoundError');
+  }
+
   /*
    * ==========================
    * Tools: navigation helpers
