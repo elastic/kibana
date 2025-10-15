@@ -12,7 +12,6 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { HostDetailsPanelKey } from '../../host_details_left';
 import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { HostPanelKey } from '../../shared/constants';
 
 interface UseNavigateToHostDetailsParams {
@@ -43,17 +42,12 @@ export const useNavigateToHostDetails = ({
 }: UseNavigateToHostDetailsParams): UseNavigateToHostDetailsResult => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
-  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationDisabled'
-  );
 
   telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
     entity: EntityType.host,
   });
 
-  const isLinkEnabled = useMemo(() => {
-    return !isPreviewMode || (isNewNavigationEnabled && isPreviewMode);
-  }, [isNewNavigationEnabled, isPreviewMode]);
+  const isLinkEnabled = useMemo(() => !isPreviewMode || isPreviewMode, [isPreviewMode]);
 
   const openDetailsPanel = useCallback(
     (path?: EntityDetailsPath) => {
@@ -80,16 +74,15 @@ export const useNavigateToHostDetails = ({
       };
 
       // When new navigation is enabled, nevigation in preview is enabled and open a new flyout
-      if (isNewNavigationEnabled && isPreviewMode) {
+      if (isPreviewMode) {
         openFlyout({ right, left });
       }
       // When not in preview mode, open left panel as usual
-      else if (!isPreviewMode) {
+      else {
         openLeftPanel(left);
       }
     },
     [
-      isNewNavigationEnabled,
       isPreviewMode,
       openFlyout,
       openLeftPanel,

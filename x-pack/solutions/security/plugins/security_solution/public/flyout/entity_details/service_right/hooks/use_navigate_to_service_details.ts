@@ -11,7 +11,6 @@ import type { EntityDetailsPath } from '../../shared/components/left_panel/left_
 import { useKibana } from '../../../../common/lib/kibana';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { ServiceDetailsPanelKey } from '../../service_details_left';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ServicePanelKey } from '../../shared/constants';
 
 interface UseNavigateToServiceDetailsParams {
@@ -43,11 +42,6 @@ export const useNavigateToServiceDetails = ({
 }: UseNavigateToServiceDetailsParams): UseNavigateToServiceDetailsResult => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
-  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationDisabled'
-  );
-
-  const isLinkEnabled = !isPreviewMode || (isNewNavigationEnabled && isPreviewMode);
 
   const openDetailsPanel = useCallback(
     (path: EntityDetailsPath) => {
@@ -77,16 +71,15 @@ export const useNavigateToServiceDetails = ({
       };
 
       // When new navigation is enabled, navigation in preview is enabled and open a new flyout
-      if (isNewNavigationEnabled && isPreviewMode) {
+      if (isPreviewMode) {
         openFlyout({ right, left });
-      } else if (!isPreviewMode) {
+      } else {
         // When not in preview mode, open left panel as usual
         openLeftPanel(left);
       }
     },
     [
       contextID,
-      isNewNavigationEnabled,
       isPreviewMode,
       isRiskScoreExist,
       openFlyout,
@@ -97,5 +90,5 @@ export const useNavigateToServiceDetails = ({
     ]
   );
 
-  return { openDetailsPanel, isLinkEnabled };
+  return { openDetailsPanel, isLinkEnabled: true };
 };

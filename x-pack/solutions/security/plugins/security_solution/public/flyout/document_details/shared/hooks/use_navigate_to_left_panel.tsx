@@ -12,7 +12,7 @@ import { DocumentEventTypes } from '../../../../common/lib/telemetry/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DocumentDetailsLeftPanelKey, DocumentDetailsRightPanelKey } from '../constants/panel_keys';
 import { useDocumentDetailsContext } from '../context';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+
 export interface UseNavigateToLeftPanelParams {
   /**
    * The tab to navigate to
@@ -36,7 +36,7 @@ export interface UseNavigateToLeftPanelResult {
 }
 
 /**
- * Hook that returns the a callback to navigate to the analyzer in the flyout
+ * Hook that returns a callback to navigate to the analyzer in the flyout
  */
 export const useNavigateToLeftPanel = ({
   tab,
@@ -45,12 +45,6 @@ export const useNavigateToLeftPanel = ({
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, isPreviewMode } = useDocumentDetailsContext();
-
-  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationDisabled'
-  );
-
-  const isEnabled = isNewNavigationEnabled || (!isNewNavigationEnabled && !isPreviewMode);
 
   const right: FlyoutPanelProps = useMemo(
     () => ({
@@ -88,7 +82,7 @@ export const useNavigateToLeftPanel = ({
         panel: 'left',
         tabId: tab,
       });
-    } else if (isNewNavigationEnabled && isPreviewMode) {
+    } else {
       openFlyout({
         right,
         left,
@@ -98,17 +92,7 @@ export const useNavigateToLeftPanel = ({
         panel: 'left',
       });
     }
-  }, [
-    openFlyout,
-    openLeftPanel,
-    right,
-    left,
-    scopeId,
-    telemetry,
-    isPreviewMode,
-    tab,
-    isNewNavigationEnabled,
-  ]);
+  }, [openFlyout, openLeftPanel, right, left, scopeId, telemetry, isPreviewMode, tab]);
 
-  return useMemo(() => ({ navigateToLeftPanel, isEnabled }), [navigateToLeftPanel, isEnabled]);
+  return useMemo(() => ({ navigateToLeftPanel, isEnabled: true }), [navigateToLeftPanel]);
 };
