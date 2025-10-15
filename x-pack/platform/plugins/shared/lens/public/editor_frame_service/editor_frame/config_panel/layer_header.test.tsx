@@ -22,15 +22,20 @@ import type { LensAppState } from '../../../state_management';
 import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 
+interface RenderLayerSettingsOptions {
+  propsOverrides?: Partial<React.ComponentProps<typeof LayerHeader>>;
+  preloadedStateOverrides?: Partial<LensAppState>;
+  datasourceMapOverrides?: DatasourceMap;
+  visualizationMapOverrides?: VisualizationMap;
+}
+
 describe('LayerHeader', () => {
-  const renderLayerSettings = (
+  const renderLayerSettings = ({
     propsOverrides = {},
-    { preloadedStateOverrides }: { preloadedStateOverrides: Partial<LensAppState> } = {
-      preloadedStateOverrides: {},
-    },
-    datasourceMapOverrides?: DatasourceMap,
-    visualizationMapOverrides?: VisualizationMap
-  ) => {
+    preloadedStateOverrides = {},
+    datasourceMapOverrides,
+    visualizationMapOverrides,
+  }: RenderLayerSettingsOptions = {}) => {
     const datasourceMap = datasourceMapOverrides ?? {
       testDatasource: createMockDatasource(),
       testDatasource2: createMockDatasource('testDatasource2'),
@@ -101,7 +106,7 @@ describe('LayerHeader', () => {
   };
 
   it('should use custom renderer if passed', () => {
-    renderLayerSettings({ activeVisualizationId: 'testVis2' });
+    renderLayerSettings({ propsOverrides: { activeVisualizationId: 'testVis2' } });
     expect(screen.getByText('CustomLayerHeader')).toBeInTheDocument();
     expect(screen.queryByTestId('lnsChartSwitchPopover')).not.toBeInTheDocument();
   });
@@ -126,11 +131,22 @@ describe('LayerHeader', () => {
   });
 
   it('should render static header if only one visualization is available', () => {
-    renderLayerSettings({}, { preloadedStateOverrides: {} }, undefined, {
-      testVis: {
-        ...createMockVisualization(),
-        getDescription: () => ({ label: 'myVisualizationType', icon: 'empty' }),
-        visualizationTypes: ['testVis'],
+    renderLayerSettings({
+      preloadedStateOverrides: {},
+      visualizationMapOverrides: {
+        testVis: {
+          ...createMockVisualization(),
+          getDescription: () => ({ label: 'myVisualizationType', icon: 'empty' }),
+          visualizationTypes: [
+            {
+              id: 'testVis',
+              description: 'myVisualizationType',
+              icon: 'empty',
+              label: 'testVis',
+              sortPriority: 1,
+            },
+          ],
+        },
       },
     });
     expect(screen.getByText('myVisualizationType')).toBeInTheDocument();
@@ -139,8 +155,10 @@ describe('LayerHeader', () => {
 
   it('Discover path: should only allow switch to subtypes when onlyAllowSwitchToSubtypes is true', async () => {
     const { openChartSwitch, getAllChartSwitchOptions } = renderLayerSettings({
-      onlyAllowSwitchToSubtypes: true,
-      activeVisualizationId: 'testVis3',
+      propsOverrides: {
+        onlyAllowSwitchToSubtypes: true,
+        activeVisualizationId: 'testVis3',
+      },
     });
     await openChartSwitch();
     expect(getAllChartSwitchOptions()).toEqual([
