@@ -403,7 +403,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
         },
         currentSpaceId: spaceId,
         authorizedSpaces,
-        options: { force, validateUniqueName: true },
+        options: { force },
       });
     }
 
@@ -562,7 +562,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
         agentPolicy: { ...data, id: request.params.agentPolicyId },
         currentSpaceId: spaceId,
         authorizedSpaces,
-        options: { force, validateUniqueName: true },
+        options: { force },
       });
 
       spaceId = spaceIds[0];

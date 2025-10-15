@@ -40,7 +40,7 @@ export async function updateAgentPolicySpaces({
   agentPolicy: Pick<AgentPolicy, 'id' | 'name' | 'space_ids' | 'supports_agentless'>;
   currentSpaceId: string;
   authorizedSpaces: string[];
-  options?: { force?: boolean; validateUniqueName?: boolean };
+  options?: { force?: boolean };
 }) {
   const { id: agentPolicyId, space_ids: newSpaceIds } = agentPolicy;
 
@@ -99,10 +99,8 @@ export async function updateAgentPolicySpaces({
     }
   }
 
-  if (options?.validateUniqueName) {
-    await agentPolicyService.requireUniqueName(soClient, agentPolicy);
-    await validatePackagePoliciesUniqueNameAcrossSpaces(existingPackagePolicies, newSpaceIds);
-  }
+  await agentPolicyService.requireUniqueName(soClient, agentPolicy);
+  await validatePackagePoliciesUniqueNameAcrossSpaces(existingPackagePolicies, newSpaceIds);
 
   const res = await soClient.updateObjectsSpaces(
     [
