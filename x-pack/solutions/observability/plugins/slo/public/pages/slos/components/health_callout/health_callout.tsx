@@ -37,13 +37,6 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
     return null;
   }
 
-  const hasUnhealthy = unhealthyAndMissingSloList.some(
-    (result) => result.health.rollup === 'unhealthy' || result.health.summary === 'unhealthy'
-  );
-  const hasMissing = unhealthyAndMissingSloList.some(
-    (result) => result.health.rollup === 'missing' || result.health.summary === 'missing'
-  );
-
   const dismiss = () => {
     setShowCallOut(false);
     sessionStorage.setItem('slo_health_callout_hidden', 'true');
