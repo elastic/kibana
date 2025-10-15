@@ -35,13 +35,6 @@ function mergeWithDefaults(originalObject: InputTypeLegacyMetricChart) {
   const defaults = {
     sampling: 1,
     ignore_global_filters: false,
-    metric: {
-      size: 'm',
-      alignments: {
-        labels: 'top',
-        value: 'left',
-      },
-    },
   };
   return merge(structuredClone(defaults), structuredClone(originalObject));
 }
@@ -111,7 +104,7 @@ describe('legacy metric chart transformations', () => {
     });
 
     it('comprehensive legacy metric chart with ad hoc data view', () => {
-      const comprehensiveMetricConfig: InputTypeLegacyMetricChart = {
+      const comprehensiveLegacyMetricConfig: InputTypeLegacyMetricChart = {
         type: 'legacy_metric',
         title: 'Comprehensive Test Metric',
         description: 'A comprehensive metric chart with all features',
@@ -138,12 +131,12 @@ describe('legacy metric chart transformations', () => {
         },
       };
 
-      const finalAPIState = validateAndApiToApiTransforms(comprehensiveMetricConfig);
-      expect(mergeWithDefaults(comprehensiveMetricConfig)).toEqual(finalAPIState);
+      const finalAPIState = validateAndApiToApiTransforms(comprehensiveLegacyMetricConfig);
+      expect(mergeWithDefaults(comprehensiveLegacyMetricConfig)).toEqual(finalAPIState);
     });
 
     it('comprehensive legacy metric chart with data view', () => {
-      const comprehensiveMetricConfig: InputTypeLegacyMetricChart = {
+      const comprehensiveLegacyMetricConfig: InputTypeLegacyMetricChart = {
         type: 'legacy_metric',
         title: 'Comprehensive Test Metric',
         description: 'A comprehensive metric chart with all features',
@@ -173,8 +166,8 @@ describe('legacy metric chart transformations', () => {
           size: 'l',
         },
       };
-      const finalAPIState = validateAndApiToApiTransforms(comprehensiveMetricConfig);
-      expect(mergeWithDefaults(comprehensiveMetricConfig)).toEqual(finalAPIState);
+      const finalAPIState = validateAndApiToApiTransforms(comprehensiveLegacyMetricConfig);
+      expect(mergeWithDefaults(comprehensiveLegacyMetricConfig)).toEqual(finalAPIState);
     });
 
     it('comprehensive ESQL-based legacy metric chart', () => {
@@ -203,6 +196,4 @@ describe('legacy metric chart transformations', () => {
       expect(mergeWithDefaults(esqlLegacyMetricConfig)).toEqual(finalAPIState);
     });
   });
-
-  describe('from lens state to api', () => {});
 });
