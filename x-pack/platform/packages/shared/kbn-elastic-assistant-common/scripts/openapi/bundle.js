@@ -14,7 +14,7 @@ const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
 
 (async () => {
   await bundle({
-    sourceGlob: join(ELASTIC_ASSISTANT_ROOT, 'impl/schemas/**/*.schema.yaml'),
+    sourceGlob: join(ELASTIC_ASSISTANT_ROOT, 'impl/schemas/!(attack_discovery)/**/*.schema.yaml'),
     outputFilePath: join(
       ELASTIC_ASSISTANT_ROOT,
       'docs/openapi/serverless/elastic_assistant_api_{version}.bundled.schema.yaml'
@@ -38,7 +38,7 @@ const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
   });
 
   await bundle({
-    sourceGlob: join(ELASTIC_ASSISTANT_ROOT, 'impl/schemas/**/*.schema.yaml'),
+    sourceGlob: join(ELASTIC_ASSISTANT_ROOT, 'impl/schemas/!(attack_discovery)/**/*.schema.yaml'),
     outputFilePath: join(
       ELASTIC_ASSISTANT_ROOT,
       'docs/openapi/ess/elastic_assistant_api_{version}.bundled.schema.yaml'

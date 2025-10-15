@@ -306,7 +306,7 @@ describe('DashboardMigrationDataInputFlyout', () => {
     // Start migration
     fireEvent.click(getByTestId('testModalStartMigrationButton'));
 
-    expect(mockStartMigration).toHaveBeenCalledWith('test-id-retry', 'failed', {
+    expect(mockStartMigration).toHaveBeenCalledWith('test-id-retry', 'not_fully_translated', {
       connectorId: 'Test Connector 1',
     });
   });
