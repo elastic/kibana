@@ -170,7 +170,8 @@ const removeAllFieldsAndResetTimestamp: string = minifyPainless(`
       if (params.entityType == 'generic') {
         newDoc.entity.behaviors = new HashMap();
         for (String key : ctx._source.entity.behaviors.keySet()) {
-          if (ctx._source.entity.behaviors[key] instanceof Boolean) {
+          def value = ctx._source.entity.behaviors[key];
+          if (value instanceof Boolean || value == 'true') {
             newDoc.entity.behaviors[key] = false;
           }
         }
@@ -178,7 +179,8 @@ const removeAllFieldsAndResetTimestamp: string = minifyPainless(`
         newDoc[params.entityType].entity = new HashMap();
         newDoc[params.entityType].entity.behaviors = new HashMap();
         for (String key : ctx._source.entity.behaviors.keySet()) {
-          if (ctx._source.entity.behaviors[key] instanceof Boolean) {
+          def value = ctx._source.entity.behaviors[key];
+          if (value instanceof Boolean || value == 'true') {
             newDoc[params.entityType].entity.behaviors[key] = false;
           }
         }
