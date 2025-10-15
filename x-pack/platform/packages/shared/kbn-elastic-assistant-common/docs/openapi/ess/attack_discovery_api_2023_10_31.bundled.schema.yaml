@@ -1428,8 +1428,9 @@ paths:
           example: 50
           in: query
           name: size
-          required: true
+          required: false
           schema:
+            default: 50
             minimum: 1
             type: number
         - description: >-
