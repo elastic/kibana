@@ -7,37 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Adapters } from '@kbn/inspector-plugin/common';
-import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
-import type { BehaviorSubject } from 'rxjs';
-import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
-import { isEqual } from 'lodash';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getTimeDifferenceInSeconds } from '@kbn/timerange';
-import type { DiscoverAppStateContainer } from '../state_management/discover_app_state_container';
-import { updateVolatileSearchSource } from './update_search_source';
+import type { Adapters } from "@kbn/inspector-plugin/common";
+import type { SavedSearch, SortOrder } from "@kbn/saved-search-plugin/public";
+import type { BehaviorSubject } from "rxjs";
+import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from "rxjs";
+import { isOfAggregateQueryType } from "@kbn/es-query";
+import { getTimeDifferenceInSeconds } from "@kbn/timerange";
+import type { DiscoverAppStateContainer } from "../state_management/discover_app_state_container";
+import { updateVolatileSearchSource } from "./update_search_source";
 import {
   checkHitCount,
   sendCompleteMsg,
   sendErrorMsg,
   sendErrorTo,
-  sendLoadingMsg,
-  sendLoadingMoreMsg,
   sendLoadingMoreFinishedMsg,
-  sendResetMsg,
-} from '../hooks/use_saved_search_messages';
-import { fetchDocuments } from './fetch_documents';
-import { FetchStatus } from '../../types';
-import type {
-  DataMain$,
-  DataMsg,
-  SavedSearchData,
-} from '../state_management/discover_data_state_container';
-import type { DiscoverServices } from '../../../build_services';
-import { fetchEsql } from './fetch_esql';
-import type { InternalStateStore, TabState } from '../state_management/redux';
-import type { ScopedProfilesManager } from '../../../context_awareness';
-import type { ScopedDiscoverEBTManager } from '../../../ebt_manager';
+  sendLoadingMoreMsg,
+  sendLoadingMsg,
+  sendResetMsg
+} from "../hooks/use_saved_search_messages";
+import { fetchDocuments } from "./fetch_documents";
+import { FetchStatus } from "../../types";
+import type { DataMain$, DataMsg, SavedSearchData } from "../state_management/discover_data_state_container";
+import type { DiscoverServices } from "../../../build_services";
+import { fetchEsql } from "./fetch_esql";
+import type { InternalStateStore, TabState } from "../state_management/redux";
+import type { ScopedProfilesManager } from "../../../context_awareness";
+import type { ScopedDiscoverEBTManager } from "../../../ebt_manager";
 
 export interface CommonFetchParams {
   dataSubjects: SavedSearchData;
@@ -169,34 +164,19 @@ export function fetchAll(
         }
 
         /**
-         * Determine the appropriate fetch status for ES|QL queries.
+         * Determine the appropriate fetch status
          *
-         * The partial state for ES|QL mode is necessary in several scenarios:
-         * 1. Initial query execution (no previous query)
-         * 2. Query has changed from the previous execution
-         * 3. ESQL variables are present (indicating parameterized queries that may affect results)
-         *
-         * In the follow-up useEsqlMode hook, when queries change, new columns are added to AppState
-         * so the data table shows the updated columns. The partial state was introduced to prevent
+         * The partial state for ES|QL mode is necessary to prevent frequent state changes
+         * that cause the data table to re-render too often.
+         * Depending on the type of query new columns can be added to AppState to ensure the data table
+         * shows the updated columns. The partial state was introduced to prevent
          * too frequent state changes that cause the table to re-render too often, which can cause
          * race conditions, poor user experience, and potential test flakiness.
          *
          * For non-ES|QL queries, we always use COMPLETE status as they don't require this
          * special handling.
          */
-        const fetchStatus = (() => {
-          if (!isEsqlQuery) {
-            return FetchStatus.COMPLETE;
-          }
-
-          const isFirstQuery = !prevQuery;
-          const queryChanged = !isEqual(query, prevQuery);
-          const hasEsqlVariables = Boolean(currentTab.esqlVariables?.length);
-
-          return isFirstQuery || queryChanged || hasEsqlVariables
-            ? FetchStatus.PARTIAL
-            : FetchStatus.COMPLETE;
-        })();
+        const fetchStatus = isEsqlQuery ? FetchStatus.PARTIAL : FetchStatus.COMPLETE;
 
         dataSubjects.documents$.next({
           fetchStatus,
