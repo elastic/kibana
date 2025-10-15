@@ -939,7 +939,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // call ensureScheduled with a different schedule
-      const result = await ensureTaskScheduled({
+      await ensureTaskScheduled({
         id: taskId,
         taskType: 'sampleRecurringTask',
         params: {},
