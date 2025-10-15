@@ -43,6 +43,8 @@ export function DiscoverFlyoutStreamProcessingLink({
     doc,
   });
 
+  if (!doc.raw._id) return null;
+
   if (loading) return <EuiLoadingSpinner size="s" />;
 
   if (!value || error) return null;
