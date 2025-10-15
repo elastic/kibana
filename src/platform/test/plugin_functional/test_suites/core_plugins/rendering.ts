@@ -270,6 +270,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.fleet.agentless.isDefault (boolean?)',
         'xpack.fleet.agentless.customIntegrations.enabled (boolean?)',
         'xpack.fleet.enableExperimental (array?)',
+        'xpack.fleet.experimentalFeatures (record?)',
         'xpack.fleet.internal.activeAgentsSoftLimit (number?)',
         'xpack.fleet.internal.excludeDataStreamTypes (array?)',
         'xpack.fleet.internal.fleetServerStandalone (boolean?)',
