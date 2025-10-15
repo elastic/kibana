@@ -103,7 +103,7 @@ If no relevant information is found, inform the user you could not locate the re
     promptGroupId: builtinPromptGroupId,
     prompt: {
       default:
-        "Call this for knowledge about the latest entity risk score and the inputs that contributed to the calculation (sorted by 'kibana.alert.risk_score') in the environment, or when answering questions about how critical or risky an entity is. When informing the risk score value for a entity you must use the normalized field 'calculated_score_norm'.\n\nIMPORTANT: This tool requires NO parameters. All configuration is automatically retrieved from the assistant_settings tool. Always call the assistant_settings tool first to get current configuration and confirm with the user before calling this tool.",
+        "Call this for knowledge about the latest entity risk score and the inputs that contributed to the calculation (sorted by 'kibana.alert.risk_score') in the environment, or when answering questions about how critical or risky an entity is. When informing the risk score value for a entity you must use the normalized field 'calculated_score_norm'.\n\nIMPORTANT: This tool requires identifier_type and identifier parameters. All configuration (alertsIndexPattern) is automatically retrieved from the assistant_settings tool. Always call the assistant_settings tool first to get current configuration and confirm with the user before calling this tool.",
     },
   },
 ];

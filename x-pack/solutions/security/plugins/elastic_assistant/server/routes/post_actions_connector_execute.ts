@@ -207,8 +207,8 @@ export const postActionsConnectorExecuteRoute = (
 
           onLlmResponse = async (
             content: string,
-            traceData: Message['traceData'] = {},
-            isError = false
+            traceData: unknown,
+            isError: boolean
           ): Promise<void> => {
             if (conversationsDataClient && conversationId) {
               const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
@@ -222,7 +222,7 @@ export const postActionsConnectorExecuteRoute = (
                 messageContent: prunedContent,
                 replacements: latestReplacements,
                 isError,
-                traceData,
+                traceData: traceData || {},
                 contentReferences: prunedContentReferencesStore,
               });
             }
@@ -283,7 +283,7 @@ export const postActionsConnectorExecuteRoute = (
               isOssModel,
               inferenceChatModelDisabled,
               conversationId,
-              context: ctx,
+              context: context,
               logger,
               inference,
               messages: conversationMessages,

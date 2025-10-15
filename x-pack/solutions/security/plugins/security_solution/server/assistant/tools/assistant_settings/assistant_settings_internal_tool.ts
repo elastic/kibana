@@ -179,6 +179,7 @@ export const assistantSettingsInternalTool = (
             break;
           case 'core.security.entity_risk_score':
             toolSpecificSettings = {
+              alertsIndexPattern,
               anonymizationFields,
             };
             toolName = 'Entity Risk Score';

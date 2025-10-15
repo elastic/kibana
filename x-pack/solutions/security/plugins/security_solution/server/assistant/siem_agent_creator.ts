@@ -34,7 +34,7 @@ export const siemAgentCreator = (): BuiltInAgentDefinition => {
     2. **For security-specific tools**:
        - Use 'core.security.alert_counts' for alert statistics and counts (e.g., "How many alerts do I have?")
        - Use 'core.security.open_and_acknowledged_alerts' for specific alerts or alert details (e.g., "What are the latest alerts?", "What is the most common host?")
-       - Use 'core.security.entity_risk_score' for entity risk analysis
+       - Use 'core.security.entity_risk_score' for entity risk analysis (requires identifier_type and identifier parameters)
        - Use 'core.security.knowledge_base_retrieval' for saved knowledge
 
     3. **Workflow for security tools that require settings**:

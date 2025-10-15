@@ -36,7 +36,6 @@ const productDocumentationToolSchema = z.object({
     `
     )
     .optional(),
-  connectorId: z.string().describe('The connector ID to use for the LLM tasks'),
 });
 
 // Note: The actual description used by the LLM comes from the builtin tool prompts
@@ -67,7 +66,11 @@ export const productDocumentationInternalTool = (
         savedObjectsClient,
       });
     },
-    handler: async ({ query, product, connectorId }, context) => {
+    handler: async ({ query, product }, context) => {
+      // Extract connectorId from request context (same pattern as getLlmDescriptionHelper)
+      const connectorId =
+        (context.request.params as { connectorId?: string })?.connectorId || 'default';
+
       const [, pluginsStart] = await getStartServices();
 
       // Access llmTasks directly from the start plugins (same as RequestContextFactory does)

@@ -8,12 +8,10 @@
 import { z } from '@kbn/zod';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
-import { Document } from 'langchain/document';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { ToolType } from '@kbn/onechat-common';
-import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
 
 const knowledgeBaseRetrievalToolSchema = z.object({

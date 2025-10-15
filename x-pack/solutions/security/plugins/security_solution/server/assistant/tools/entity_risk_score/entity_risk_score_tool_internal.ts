@@ -14,19 +14,53 @@ import {
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { StartServicesAccessor } from '@kbn/core/server';
 import { IdentifierType } from '../../../../common/api/entity_analytics/common/common.gen';
 import { createGetRiskScores } from '../../../lib/entity_analytics/risk_score/get_risk_score';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { createGetAlertsById } from './get_alert_by_id';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
+
+// Helper function to parse assistant settings and extract configuration
+const parseAssistantSettings = (settingsData: unknown) => {
+  const result = {
+    alertsIndexPattern: '.alerts-security.alerts-default',
+  };
+
+  if (
+    settingsData &&
+    typeof settingsData === 'object' &&
+    'settings' in settingsData &&
+    settingsData.settings &&
+    typeof settingsData.settings === 'object'
+  ) {
+    // Get defaults for this tool
+    if (
+      'defaults' in settingsData.settings &&
+      settingsData.settings.defaults &&
+      typeof settingsData.settings.defaults === 'object' &&
+      'entityRiskScoreToolInternal' in settingsData.settings.defaults
+    ) {
+      const toolDefaults = settingsData.settings.defaults.entityRiskScoreToolInternal;
+      if (toolDefaults && typeof toolDefaults === 'object') {
+        if (
+          'alertsIndexPattern' in toolDefaults &&
+          typeof toolDefaults.alertsIndexPattern === 'string'
+        ) {
+          result.alertsIndexPattern = toolDefaults.alertsIndexPattern;
+        }
+      }
+    }
+  }
+
+  return result;
+};
 
 const entityRiskScoreInternalSchema = z.object({
   identifier_type: IdentifierType,
   identifier: z.string().min(1).describe('The value that identifies the entity.'),
-  alertsIndexPattern: z.string().describe('The index pattern for alerts.'),
 });
 
 export const ENTITY_RISK_SCORE_TOOL_INTERNAL_ID = 'core.security.entity_risk_score';
@@ -45,7 +79,7 @@ export const entityRiskScoreToolInternal = (
     getLlmDescription: async ({ config, description }, context) => {
       return getLlmDescriptionHelper({
         description,
-        context,
+        context: context as unknown as Parameters<typeof getLlmDescriptionHelper>[0]['context'], // Type assertion to handle context type mismatch
         promptId: 'EntityRiskScoreTool',
         promptGroupId: 'builtin-security-tools',
         getStartServices,
@@ -53,7 +87,7 @@ export const entityRiskScoreToolInternal = (
       });
     },
     handler: async (
-      { identifier_type: identifierType, identifier, alertsIndexPattern },
+      { identifier_type: identifierType, identifier },
       { esClient, logger, request, toolProvider }
     ) => {
       logger.debug(
@@ -61,6 +95,30 @@ export const entityRiskScoreToolInternal = (
       );
 
       try {
+        // Get configuration from assistant settings tool (with fallback defaults)
+        let settingsData: unknown = null;
+
+        try {
+          const [, pluginsStart] = await getStartServices();
+          const toolRegistry = await pluginsStart.onechat.tools.getRegistry({
+            request,
+          });
+          const assistantSettingsResult = await toolRegistry.execute({
+            toolId: 'core.security.assistant_settings',
+            toolParams: { toolId: 'core.security.entity_risk_score' },
+          });
+
+          if (assistantSettingsResult.results && assistantSettingsResult.results.length > 0) {
+            settingsData = assistantSettingsResult.results[0].data;
+          }
+        } catch (error) {
+          // Use defaults if assistant settings fails
+        }
+
+        // Parse assistant settings to get configuration (with fallbacks)
+        const parsed = parseAssistantSettings(settingsData);
+        const { alertsIndexPattern } = parsed;
+
         // Get space ID from request context - use default space for now
         const spaceId = 'default';
 
