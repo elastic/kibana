@@ -22,6 +22,7 @@ import {
   AgentService,
   ChatService,
   ConversationsService,
+  EvaluationsService,
   NavigationService,
   ToolsService,
   type OnechatInternalService,
@@ -106,6 +107,7 @@ export class OnechatPlugin
     const agentService = new AgentService({ http });
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
+    const evaluationsService = new EvaluationsService({ http });
     const toolsService = new ToolsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
@@ -119,6 +121,7 @@ export class OnechatPlugin
       agentService,
       chatService,
       conversationsService,
+      evaluationsService,
       navigationService,
       toolsService,
       startDependencies,

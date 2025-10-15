@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiModal,
   EuiModalHeader,
@@ -18,6 +18,8 @@ import {
   EuiFlexItem,
   EuiSpacer,
   useEuiTheme,
+  EuiLoadingSpinner,
+  EuiCallOut,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -25,6 +27,7 @@ import { EvaluatorList } from './evaluator_list';
 import { EvaluatorDetails } from './evaluator_details';
 import { SelectionSummary } from './selection_summary';
 import type { Evaluator } from './types';
+import { useOnechatServices } from '../../../hooks/use_onechat_service';
 
 interface EvaluatorSelectionModalProps {
   isOpen: boolean;
@@ -32,49 +35,42 @@ interface EvaluatorSelectionModalProps {
   onConfirm: (selectedEvaluators: Evaluator[]) => Promise<void>;
 }
 
-const AVAILABLE_EVALUATORS: Evaluator[] = [
-  {
-    id: 'relevance',
-    name: 'Relevance Evaluator',
-    description: 'Evaluates how relevant the response is to the input query',
-    type: 'text',
-  },
-  {
-    id: 'groundedness',
-    name: 'Groundedness Evaluator',
-    description: 'Checks if the response is grounded in the provided context',
-    type: 'text',
-  },
-  {
-    id: 'recall',
-    name: 'Recall Evaluator',
-    description: 'Measures how well the response recalls relevant information',
-    type: 'number',
-  },
-  {
-    id: 'precision',
-    name: 'Precision Evaluator',
-    description: 'Assesses the precision and accuracy of the response',
-    type: 'number',
-  },
-  {
-    id: 'regex',
-    name: 'Regex Evaluator',
-    description: 'Uses regex patterns to validate response format',
-    type: 'text',
-  },
-];
-
 export const EvaluatorSelectionModal: React.FC<EvaluatorSelectionModalProps> = ({
   isOpen,
   onClose,
   onConfirm,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { evaluationsService } = useOnechatServices();
+  const [availableEvaluators, setAvailableEvaluators] = useState<Evaluator[]>([]);
   const [selectedEvaluators, setSelectedEvaluators] = useState<Evaluator[]>([]);
   const [selectedEvaluator, setSelectedEvaluator] = useState<Evaluator | null>(null);
   const [customInstructions, setCustomInstructions] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingEvaluators, setIsFetchingEvaluators] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen && availableEvaluators.length === 0) {
+      const fetchEvaluators = async () => {
+        setIsFetchingEvaluators(true);
+        setFetchError(null);
+        try {
+          const evaluators = await evaluationsService.list();
+          setAvailableEvaluators(evaluators);
+        } catch (error) {
+          setFetchError(
+            i18n.translate('xpack.onechat.evaluations.fetchError', {
+              defaultMessage: 'Failed to fetch evaluators',
+            })
+          );
+        } finally {
+          setIsFetchingEvaluators(false);
+        }
+      };
+      fetchEvaluators();
+    }
+  }, [isOpen, availableEvaluators.length, evaluationsService]);
 
   const handleEvaluatorSelect = (evaluator: Evaluator) => {
     setSelectedEvaluator(evaluator);
@@ -137,50 +133,67 @@ export const EvaluatorSelectionModal: React.FC<EvaluatorSelectionModalProps> = (
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiFlexGroup gutterSize="l">
-          <EuiFlexItem grow={1}>
-            <EvaluatorList
-              evaluators={AVAILABLE_EVALUATORS}
+        {isFetchingEvaluators ? (
+          <div
+            css={css`
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              padding: ${euiTheme.size.xxl};
+            `}
+          >
+            <EuiLoadingSpinner size="xl" />
+          </div>
+        ) : fetchError ? (
+          <EuiCallOut title={fetchError} color="danger" iconType="error" />
+        ) : (
+          <>
+            <EuiFlexGroup gutterSize="l">
+              <EuiFlexItem grow={1}>
+                <EvaluatorList
+                  evaluators={availableEvaluators}
+                  selectedEvaluators={selectedEvaluators}
+                  selectedEvaluator={selectedEvaluator}
+                  onEvaluatorSelect={handleEvaluatorSelect}
+                  onEvaluatorToggle={handleEvaluatorToggle}
+                />
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={2}>
+                {selectedEvaluator ? (
+                  <EvaluatorDetails
+                    evaluator={selectedEvaluator}
+                    customInstructions={customInstructions[selectedEvaluator.id] || ''}
+                    onInstructionsChange={(instructions) =>
+                      handleInstructionsChange(selectedEvaluator.id, instructions)
+                    }
+                  />
+                ) : (
+                  <div
+                    css={css`
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      height: 100%;
+                      color: ${euiTheme.colors.subduedText};
+                    `}
+                  >
+                    {i18n.translate('xpack.onechat.evaluations.selectEvaluatorToConfigure', {
+                      defaultMessage: 'Select an evaluator to configure',
+                    })}
+                  </div>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="l" />
+
+            <SelectionSummary
               selectedEvaluators={selectedEvaluators}
-              selectedEvaluator={selectedEvaluator}
-              onEvaluatorSelect={handleEvaluatorSelect}
-              onEvaluatorToggle={handleEvaluatorToggle}
+              customInstructions={customInstructions}
             />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={2}>
-            {selectedEvaluator ? (
-              <EvaluatorDetails
-                evaluator={selectedEvaluator}
-                customInstructions={customInstructions[selectedEvaluator.id] || ''}
-                onInstructionsChange={(instructions) =>
-                  handleInstructionsChange(selectedEvaluator.id, instructions)
-                }
-              />
-            ) : (
-              <div
-                css={css`
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  height: 100%;
-                  color: ${euiTheme.colors.subduedText};
-                `}
-              >
-                {i18n.translate('xpack.onechat.evaluations.selectEvaluatorToConfigure', {
-                  defaultMessage: 'Select an evaluator to configure',
-                })}
-              </div>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="l" />
-
-        <SelectionSummary
-          selectedEvaluators={selectedEvaluators}
-          customInstructions={customInstructions}
-        />
+          </>
+        )}
       </EuiModalBody>
 
       <EuiModalFooter>

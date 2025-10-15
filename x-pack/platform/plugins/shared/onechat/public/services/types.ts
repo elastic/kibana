@@ -10,6 +10,7 @@ import type { OnechatStartDependencies } from '../types';
 import type { AgentService } from './agents';
 import type { ChatService } from './chat';
 import type { ConversationsService } from './conversations';
+import type { EvaluationsService } from './evaluations';
 import type { ToolsService } from './tools';
 import type { NavigationService } from './navigation';
 
@@ -17,6 +18,7 @@ export interface OnechatInternalService {
   agentService: AgentService;
   chatService: ChatService;
   conversationsService: ConversationsService;
+  evaluationsService: EvaluationsService;
   navigationService: NavigationService;
   toolsService: ToolsService;
   startDependencies: OnechatStartDependencies;

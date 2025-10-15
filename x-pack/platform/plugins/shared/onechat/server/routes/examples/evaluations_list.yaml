@@ -1,0 +1,30 @@
+responses:
+  200:
+    description: 'Successfully retrieved list of available evaluators'
+    content:
+      application/json:
+        examples:
+          evaluatorsListExample:
+            description: 'Example response listing all available evaluators with metadata'
+            value:
+              evaluators:
+                - id: 'relevance'
+                  name: 'Relevance Evaluator'
+                  description: 'Evaluates how relevant the response is to the input query'
+                  type: 'text'
+                - id: 'groundedness'
+                  name: 'Groundedness Evaluator'
+                  description: 'Checks if the response is grounded in the provided context'
+                  type: 'text'
+                - id: 'recall'
+                  name: 'Recall Evaluator'
+                  description: 'Measures how well the response recalls relevant information'
+                  type: 'number'
+                - id: 'precision'
+                  name: 'Precision Evaluator'
+                  description: 'Assesses the precision and accuracy of the response'
+                  type: 'number'
+                - id: 'regex'
+                  name: 'Regex Evaluator'
+                  description: 'Uses regex patterns to validate response format'
+                  type: 'text'

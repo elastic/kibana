@@ -1,0 +1,37 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        evaluationRequestExample:
+          description: 'Example request to run evaluations on a conversation'
+          value:
+            conversationId: 'conv-123'
+            evaluators:
+              - evaluatorId: 'relevance'
+                customInstructions: 'Evaluate response relevance'
+              - evaluatorId: 'recall'
+                evaluatorIdOverride: 'custom-recall'
+                customInstructions: 5
+responses:
+  200:
+    description: 'Evaluation completed successfully'
+    content:
+      application/json:
+        examples:
+          evaluationResponseExample:
+            description: 'Example response with evaluation results'
+            value:
+              conversationId: 'conv-123'
+              results:
+                - roundId: 'round-1'
+                  scores:
+                    - evaluatorId: 'relevance'
+                      score: 0.85
+                    - evaluatorId: 'custom-recall'
+                      score: 0.72
+                - roundId: 'round-2'
+                  scores:
+                    - evaluatorId: 'relevance'
+                      score: 0.91
+                    - evaluatorId: 'custom-recall'
+                      score: 0.68
