@@ -39,7 +39,7 @@ const messageStyles = css`
 const ProcessorErrorMessage = ({ message }: { message: string }) => {
   const [expanded, toggleExpanded] = useToggle(false);
   const { euiTheme } = useEuiTheme();
-  
+
   const CLAMP_LINES = 5;
   const LONG_MESSAGE_CHARACTER_THRESHOLD = 300;
   const shouldTruncate = message.length > LONG_MESSAGE_CHARACTER_THRESHOLD;
