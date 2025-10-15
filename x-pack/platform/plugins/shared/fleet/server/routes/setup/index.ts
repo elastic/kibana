@@ -99,6 +99,7 @@ export const GetAgentsSetupResponseSchema = schema.object(
     is_space_awareness_enabled: schema.maybe(schema.boolean()),
     is_secrets_storage_enabled: schema.maybe(schema.boolean()),
     is_ssl_secrets_storage_enabled: schema.maybe(schema.boolean()),
+    is_action_secrets_storage_enabled: schema.maybe(schema.boolean()),
   },
   {
     meta: {

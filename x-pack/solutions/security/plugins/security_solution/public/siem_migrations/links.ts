@@ -25,8 +25,7 @@ const subLinks: LinkItem[] = [
       defaultMessage: 'Translated rules',
     }),
     description: i18n.translate('xpack.securitySolution.appLinks.siemMigrationsRules.description', {
-      defaultMessage:
-        'Our generative AI powered Automatic migration tool automates some of the most time consuming migrations tasks and processes.',
+      defaultMessage: 'Migrate your SIEM rules to Elastic using AI powered Automatic migration.',
     }),
     landingIcon: IconRules,
     path: SIEM_MIGRATIONS_RULES_PATH,
@@ -43,8 +42,7 @@ const subLinks: LinkItem[] = [
     description: i18n.translate(
       'xpack.securitySolution.appLinks.siemMigrationsDashboards.description',
       {
-        defaultMessage:
-          'Our generative AI powered Automatic migration tool automates some of the most time consuming migrations tasks and processes.',
+        defaultMessage: 'Migrate your dashboards to Elastic using AI powered Automatic migration.',
       }
     ),
     landingIcon: IconDashboards,
