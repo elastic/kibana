@@ -8,6 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
+import { isEmpty } from 'lodash';
 import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
 import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
 import { populateAlertActions } from '../../../common/rules/alert_actions';
@@ -22,7 +23,7 @@ import {
   SYNTHETICS_TLS_RULE,
 } from '../../../common/constants/synthetics_alerts';
 import type { DefaultRuleType } from '../../../common/types/default_alerts';
-export class DefaultAlertService {
+export class DefaultRuleService {
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
   server: SyntheticsServerSetup;
@@ -45,8 +46,15 @@ export class DefaultAlertService {
     return this.settings;
   }
 
-  async setupDefaultAlerts() {
+  async setupDefaultRules() {
     this.settings = await this.getSettings();
+    if (isEmpty(this.settings?.defaultConnectors)) {
+      this.server.logger.debug(`Default connectors are not set. Skipping default rule setup.`);
+      return {
+        statusRule: null,
+        tlsRule: null,
+      };
+    }
 
     const [statusRule, tlsRule] = await Promise.allSettled([
       this.setupStatusRule(),
@@ -152,7 +160,7 @@ export class DefaultAlertService {
   async updateStatusRule(enabled?: boolean) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (enabled) {
-      return this.upsertDefaultAlert(
+      return this.upsertDefaultRule(
         SYNTHETICS_STATUS_RULE,
         `Synthetics status internal rule`,
         minimumRuleInterval
@@ -168,7 +176,7 @@ export class DefaultAlertService {
   async updateTlsRule(enabled?: boolean) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (enabled) {
-      return this.upsertDefaultAlert(
+      return this.upsertDefaultRule(
         SYNTHETICS_TLS_RULE,
         `Synthetics internal TLS rule`,
         minimumRuleInterval
@@ -181,7 +189,7 @@ export class DefaultAlertService {
     }
   }
 
-  async upsertDefaultAlert(ruleType: DefaultRuleType, name: string, interval: string) {
+  async upsertDefaultRule(ruleType: DefaultRuleType, name: string, interval: string) {
     const rulesClient = await (await this.context.alerting)?.getRulesClient();
 
     const alert = await this.getExistingAlert(ruleType);
