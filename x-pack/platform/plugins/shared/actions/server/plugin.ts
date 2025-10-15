@@ -148,6 +148,8 @@ export interface PluginStartContract {
 
   getAllTypes: ActionTypeRegistry['getAllTypes'];
 
+  listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
+
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
 
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
@@ -614,6 +616,9 @@ export class ActionsPlugin
         return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
       },
       getAllTypes: actionTypeRegistry!.getAllTypes.bind(actionTypeRegistry),
+      listTypes: (featureId?: string) => {
+        return this.actionTypeRegistry!.list({ featureId, exposeValidation: true });
+      },
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
       },
@@ -785,7 +790,9 @@ export class ActionsPlugin
             },
           });
         },
-        listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),
+        listTypes: (featureId?: string) => {
+          return actionTypeRegistry!.list({ featureId });
+        },
       };
     };
   };
