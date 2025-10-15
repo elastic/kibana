@@ -28,6 +28,7 @@ paths:
 
 
 components:
+  x-codegen-enabled: false
   schemas:
     ActionDetailsResponse:
       oneOf:
@@ -249,12 +250,6 @@ components:
                 - $ref: '#/components/schemas/RunscriptParamsCrowdStrike'
                 - $ref: '#/components/schemas/RunscriptParamsMicrosoft'
                 - $ref: '#/components/schemas/RunscriptParamsSentinelOne'
-              discriminator:
-                propertyName: agentType
-                mapping:
-                  crowdstrike: '#/components/schemas/RunscriptParamsCrowdStrike'
-                  microsoft_defender_endpoint: '#/components/schemas/RunscriptParamsMicrosoft'
-                  sentinel_one: '#/components/schemas/RunscriptParamsSentinelOne'
             outputs:
               type: object
               additionalProperties:
@@ -441,8 +436,4 @@ components:
                     oneOf:
                       - $ref: '#/components/schemas/RunningProcessesOutputEndpoint'
                       - $ref: '#/components/schemas/RunningProcessesOutputSentinelOne'
-                    discriminator:
-                      propertyName: agentType
-                      mapping:
-                        endpoint: '#/components/schemas/RunningProcessesOutputEndpoint'
-                        sentinel_one: '#/components/schemas/RunningProcessesOutputSentinelOne'
+
