@@ -2,7 +2,7 @@ requestBody:
   content:
     application/json:
       examples:
-        evaluationRequestExample:
+        evaluationRunRequestExample:
           description: 'Example request to run evaluations on a conversation'
           value:
             conversationId: 'conv-123'

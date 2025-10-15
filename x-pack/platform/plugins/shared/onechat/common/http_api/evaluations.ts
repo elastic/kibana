@@ -26,7 +26,7 @@ export interface EvaluatorConfig {
   customInstructions?: string | number;
 }
 
-export interface EvaluationRequest {
+export interface EvaluationRunRequest {
   conversationId: string;
   evaluators: EvaluatorConfig[];
 }
