@@ -13,8 +13,6 @@ import type { IconType, RecursivePartial } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionType, SubFeature } from '@kbn/actions-types';
 import type { SerializerFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
-import type { InternalConnectorForm } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/types';
 import type { RuleFormParamsErrors } from './rule_types';
 import type { TypeRegistry } from '../type_registry';
 
@@ -77,6 +75,21 @@ export enum ActionConnectorMode {
   Test = 'test',
   ActionForm = 'actionForm',
 }
+
+export type ConnectorFormSchema<
+  Config = Record<string, unknown>,
+  Secrets = Record<string, unknown>
+> = Pick<
+  UserConfiguredActionConnector<Config, Secrets>,
+  'actionTypeId' | 'isDeprecated' | 'config' | 'secrets'
+> &
+  Partial<Pick<UserConfiguredActionConnector<Config, Secrets>, 'id' | 'name'>>;
+
+export type InternalConnectorForm = ConnectorFormSchema & {
+  __internal__?: {
+    headers?: Array<{ key: string; value: string; type: string }>;
+  };
+};
 
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;

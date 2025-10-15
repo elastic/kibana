@@ -36,6 +36,5 @@
     "@kbn/response-ops-rules-apis",
     "@kbn/controls-constants",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/triggers-actions-ui-plugin",
   ]
 }

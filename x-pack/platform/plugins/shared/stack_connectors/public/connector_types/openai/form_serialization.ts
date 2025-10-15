@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
-import type { InternalConnectorForm } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/types';
+import type { ConnectorFormSchema, InternalConnectorForm } from '@kbn/alerts-ui-shared';
 import { isEmpty } from 'lodash';
 
 export const formDeserializer = (data: ConnectorFormSchema): InternalConnectorForm => {

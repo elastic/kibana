@@ -6,11 +6,11 @@
  */
 
 import React, { lazy } from 'react';
-import { ConnectorForm, formDeserializer, formSerializer } from './connector_form';
-import { actionTypeRegistryMock } from '../../action_type_registry.mock';
+import { waitFor, act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/react';
-import { act } from '@testing-library/react';
+import * as useFormModule from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form';
+import { ConnectorForm } from './connector_form';
+import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import type { AppMockRenderer } from '../test_utils';
 import { createAppMockRenderer } from '../test_utils';
 
@@ -147,100 +147,34 @@ describe('ConnectorForm', () => {
     });
   });
 
-  describe('serializers', () => {
-    it('formSerializer works as expected for .gen-ai', () => {
-      const formData = {
-        actionTypeId: '.gen-ai',
-        isDeprecated: false,
-        config: {
-          headers: [
-            { key: 'foo', value: 'bar' },
-            { key: 'an', value: 'tonio' },
-          ],
-        },
-        secrets: {
-          secretHeaders: [
-            {
-              key: 'foo',
-              value: 'bar',
-            },
-          ],
-        },
-        isMissingSecrets: false,
-      };
-
-      expect(formSerializer(formData)).toEqual({
-        actionTypeId: '.gen-ai',
-        config: {
-          headers: {
-            foo: 'bar',
-            an: 'tonio',
-          },
-        },
-        isDeprecated: false,
-        isMissingSecrets: false,
-        secrets: {
-          secretHeaders: undefined,
-        },
-      });
+  it('passes the serializers from the connector type model to the underlying form', async () => {
+    const useFormSpy = jest.spyOn(useFormModule, 'useForm');
+    const formSerializer = jest.fn((data) => data);
+    const formDeserializer = jest.fn((data) => data);
+    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+      actionConnectorFields: lazy(() => import('./connector_mock')),
+      formSerializer,
+      formDeserializer,
     });
 
-    it('formDeserializer works as expected for .gen-ai', () => {
-      const formData = {
-        actionTypeId: '.gen-ai',
-        isDeprecated: false,
-        config: {
-          headers: {
-            foo: 'bar',
-            an: 'tonio',
-          },
-        },
-        secrets: {
-          secretHeaders: {
-            not: 'relevant',
-          },
-        },
-        isMissingSecrets: false,
-      };
+    appMockRenderer.render(
+      <ConnectorForm
+        actionTypeModel={actionTypeModel}
+        isEdit={false}
+        connector={connector}
+        onChange={onChange}
+        onFormModifiedChange={onFormModifiedChange}
+      />
+    );
 
-      expect(formDeserializer(formData)).toEqual({
-        actionTypeId: '.gen-ai',
-        config: {
-          headers: [
-            {
-              key: 'foo',
-              type: 'config',
-              value: 'bar',
-            },
-            {
-              key: 'an',
-              type: 'config',
-              value: 'tonio',
-            },
-          ],
-        },
-        __internal__: {
-          headers: [
-            {
-              key: 'foo',
-              type: 'config',
-              value: 'bar',
-            },
-            {
-              key: 'an',
-              type: 'config',
-              value: 'tonio',
-            },
-          ],
-        },
-        isDeprecated: false,
-        isMissingSecrets: false,
-        secrets: {
-          secretHeaders: {
-            not: 'relevant',
-          },
-        },
-      });
-    });
+    // Wait for the form to render to avoid suspended resources warnings from rtl
+    await screen.findByTestId('test-connector-text-field');
+
+    expect(useFormSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        serializer: formSerializer,
+        deserializer: formDeserializer,
+      })
+    );
   });
 });
