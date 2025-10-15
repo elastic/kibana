@@ -27,6 +27,18 @@ const mcpAuthSchema = schema.oneOf([
     }),
   }),
   schema.object({
+    type: schema.literal('basicAuth'),
+    username: schema.string(),
+    password: schema.string(),
+  }),
+  schema.object({
+    type: schema.literal('mtls'),
+    cert: schema.string(), // Path to client certificate file or PEM string
+    key: schema.string(), // Path to private key file or PEM string
+    ca: schema.maybe(schema.string()), // Optional CA certificate (path or PEM string)
+    passphrase: schema.maybe(schema.string()), // Optional passphrase for encrypted private key
+  }),
+  schema.object({
     type: schema.literal('oauth'),
     clientId: schema.string(),
     clientSecret: schema.maybe(schema.string()), // For confidential clients (server-side apps)
@@ -44,6 +56,7 @@ const mcpAuthSchema = schema.oneOf([
 const mcpServerSchema = schema.object({
   id: schema.string({ minLength: 1 }),
   name: schema.string({ minLength: 1 }),
+  description: schema.maybe(schema.string()),
   enabled: schema.boolean({ defaultValue: true }),
   type: schema.maybe(
     schema.oneOf([schema.literal('http'), schema.literal('sse'), schema.literal('auto')])
@@ -54,6 +67,7 @@ const mcpServerSchema = schema.object({
     schema.object({
       timeout: schema.number({ defaultValue: 30000, min: 1000, max: 300000 }),
       retries: schema.number({ defaultValue: 3, min: 0, max: 10 }),
+      rejectUnauthorized: schema.boolean({ defaultValue: true }),
     })
   ),
 });

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import https from 'node:https';
+import fs from 'node:fs';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
@@ -21,6 +23,22 @@ interface McpConnection {
   lastConnected?: Date;
   accessToken?: string; // For OAuth client credentials
   tokenExpiry?: number; // Unix timestamp
+}
+
+/**
+ * Helper to read certificate/key files or return PEM strings
+ */
+function readCertOrKey(certOrKey: string): string {
+  // If it looks like a PEM string, return as-is
+  if (certOrKey.includes('-----BEGIN')) {
+    return certOrKey;
+  }
+  // Otherwise, treat as file path and read it
+  try {
+    return fs.readFileSync(certOrKey, 'utf8');
+  } catch (error) {
+    throw new Error(`Failed to read certificate/key file: ${certOrKey} - ${error}`);
+  }
 }
 
 /**
@@ -143,7 +161,26 @@ export class McpConnectionManager {
       let client: Client;
       let transportType: string;
 
-      // Handle authentication
+      // First, handle mTLS (mutual TLS) if configured
+      // This needs to be done before other auth because OAuth token exchanges may also need mTLS
+      let mtlsOptions: { cert?: string; key?: string; ca?: string; passphrase?: string } = {};
+      if (auth?.type === 'mtls') {
+        this.logger.debug(`Using mTLS client certificate authentication for "${id}"`);
+        try {
+          mtlsOptions = {
+            cert: readCertOrKey(auth.cert),
+            key: readCertOrKey(auth.key),
+            ...(auth.ca && { ca: readCertOrKey(auth.ca) }),
+            ...(auth.passphrase && { passphrase: auth.passphrase }),
+          };
+          this.logger.debug(`mTLS certificates loaded successfully for "${id}"`);
+        } catch (error) {
+          this.logger.error(`Failed to load mTLS certificates for "${id}": ${error}`);
+          throw error;
+        }
+      }
+
+      // Handle authentication headers
       let authHeaders: Record<string, string> = {};
       if (auth?.type === 'oauth' && auth.adminToken) {
         // OAuth with admin token (e.g., GitHub Personal Access Token)
@@ -156,7 +193,7 @@ export class McpConnectionManager {
         if (needsTokenExchange) {
           // OAuth Client Credentials flow: exchange clientId/clientSecret for access token
           this.logger.debug(`Using OAuth token exchange for "${id}"`);
-          const accessToken = await this.getOAuthAccessToken(id, auth, url);
+          const accessToken = await this.getOAuthAccessToken(id, auth, url, options, mtlsOptions);
           authHeaders.Authorization = `Bearer ${accessToken}`;
         } else {
           // Direct authentication: use clientId/clientSecret as HTTP Basic Auth
@@ -166,6 +203,11 @@ export class McpConnectionManager {
           );
           authHeaders.Authorization = `Basic ${credentials}`;
         }
+      } else if (auth?.type === 'basicAuth') {
+        // HTTP Basic Authentication (username/password)
+        this.logger.debug(`Using HTTP Basic Auth for "${id}"`);
+        const credentials = Buffer.from(`${auth.username}:${auth.password}`).toString('base64');
+        authHeaders.Authorization = `Basic ${credentials}`;
       } else if (auth?.type === 'apiKey') {
         // Regular API key auth
         authHeaders = auth.headers;
@@ -176,15 +218,37 @@ export class McpConnectionManager {
       const shouldTryHTTP = transportPreference === 'http' || transportPreference === 'auto';
       const shouldTrySSE = transportPreference === 'sse' || transportPreference === 'auto';
 
+      // Configure HTTPS agent for SSL/TLS options
+      const rejectUnauthorized = options?.rejectUnauthorized ?? true;
+
+      const httpsAgent = url.startsWith('https')
+        ? new https.Agent({
+            rejectUnauthorized,
+            // Allow flexible TLS version negotiation
+            minVersion: 'TLSv1.2',
+            maxVersion: 'TLSv1.3',
+            // Add mTLS options if present
+            ...mtlsOptions,
+          })
+        : undefined;
+
+      if (!rejectUnauthorized) {
+        this.logger.warn(
+          `SSL certificate validation is disabled for "${id}". This should only be used in development.`
+        );
+      }
+
       // Try modern StreamableHTTP transport first (if enabled)
       if (shouldTryHTTP) {
         try {
           this.logger.debug(`Trying StreamableHTTP transport for "${id}"`);
           // For StreamableHTTP transport, pass headers via requestInit
-          const streamableOptions: any = {};
-          if (Object.keys(authHeaders).length > 0) {
-            streamableOptions.requestInit = { headers: authHeaders };
-          }
+          const streamableOptions: any = {
+            requestInit: {
+              headers: authHeaders,
+              ...(httpsAgent && { agent: httpsAgent }),
+            },
+          };
           transport = new StreamableHTTPClientTransport(new URL(url), streamableOptions);
 
           client = new Client(
@@ -223,11 +287,16 @@ export class McpConnectionManager {
           );
 
           // For SSE transport, pass headers via eventSourceInit and requestInit
-          const sseOptions: any = {};
-          if (Object.keys(authHeaders).length > 0) {
-            sseOptions.eventSourceInit = { headers: authHeaders };
-            sseOptions.requestInit = { headers: authHeaders };
-          }
+          const sseOptions: any = {
+            eventSourceInit: {
+              headers: authHeaders,
+              ...(httpsAgent && { https: { rejectUnauthorized } }),
+            },
+            requestInit: {
+              headers: authHeaders,
+              ...(httpsAgent && { agent: httpsAgent }),
+            },
+          };
           transport = new SSEClientTransport(new URL(url), sseOptions);
 
           client = new Client(
@@ -258,11 +327,16 @@ export class McpConnectionManager {
         // Only try SSE (type: 'sse' was explicitly set)
         this.logger.debug(`Using SSE transport for "${id}" (explicitly configured)`);
         // For SSE transport, pass headers via eventSourceInit and requestInit
-        const sseOptions: any = {};
-        if (Object.keys(authHeaders).length > 0) {
-          sseOptions.eventSourceInit = { headers: authHeaders };
-          sseOptions.requestInit = { headers: authHeaders };
-        }
+        const sseOptions: any = {
+          eventSourceInit: {
+            headers: authHeaders,
+            ...(httpsAgent && { https: { rejectUnauthorized } }),
+          },
+          requestInit: {
+            headers: authHeaders,
+            ...(httpsAgent && { agent: httpsAgent }),
+          },
+        };
         transport = new SSEClientTransport(new URL(url), sseOptions);
 
         client = new Client(
@@ -331,7 +405,9 @@ export class McpConnectionManager {
   private async getOAuthAccessToken(
     serverId: string,
     auth: { type: 'oauth'; clientId: string; clientSecret?: string; tokenEndpoint?: string },
-    mcpServerUrl: string
+    mcpServerUrl: string,
+    options?: { rejectUnauthorized?: boolean },
+    mtlsOptions?: { cert?: string; key?: string; ca?: string; passphrase?: string }
   ): Promise<string> {
     const connection = this.connections.get(serverId);
 
@@ -397,10 +473,23 @@ export class McpConnectionManager {
         };
       }
 
+      // Configure HTTPS agent for SSL/TLS options
+      const rejectUnauthorized = options?.rejectUnauthorized ?? true;
+      const httpsAgent = tokenEndpoint.startsWith('https')
+        ? new https.Agent({
+            rejectUnauthorized,
+            minVersion: 'TLSv1.2',
+            maxVersion: 'TLSv1.3',
+            // Include mTLS options if present
+            ...(mtlsOptions || {}),
+          })
+        : undefined;
+
       const response = await fetch(tokenEndpoint, {
         method: 'POST',
         headers,
         body,
+        ...(httpsAgent && { agent: httpsAgent }),
       });
 
       if (!response.ok) {
