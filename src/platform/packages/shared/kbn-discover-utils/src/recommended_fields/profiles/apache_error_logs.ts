@@ -13,17 +13,17 @@
 export const APACHE_ERROR_LOGS_PROFILE = {
   pattern: 'logs-apache.error',
   fields: [
-    'http.request.method',
-    'url.path',
-    'http.response.status_code',
-    'http.response.bytes',
     'client.ip',
-    'user.agent',
-    'referrer',
-    'message',
-    'log.level',
-    'source.ip',
     'destination.ip',
+    'http.request.method',
+    'http.response.bytes',
+    'http.response.status_code',
+    'log.level',
+    'message',
+    'referrer',
+    'source.ip',
+    'url.path',
+    'user.agent',
   ],
 } as const;
 

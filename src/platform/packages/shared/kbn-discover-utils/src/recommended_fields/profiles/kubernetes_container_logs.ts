@@ -13,14 +13,14 @@
 export const KUBERNETES_CONTAINER_LOGS_PROFILE = {
   pattern: 'logs-kubernetes.container_logs',
   fields: [
-    'log.level',
-    'message',
-    'kubernetes.pod.name',
+    'container.image.name',
     'kubernetes.container.name',
     'kubernetes.namespace',
-    'orchestrator.resource.name',
-    'container.image.name',
     'kubernetes.node.name',
+    'kubernetes.pod.name',
+    'log.level',
+    'message',
+    'orchestrator.resource.name',
   ],
 } as const;
 
