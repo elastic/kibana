@@ -13,6 +13,8 @@ import { Document } from 'langchain/document';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { ToolType } from '@kbn/onechat-common';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
 
 const knowledgeBaseRetrievalToolSchema = z.object({
   query: z.string().describe(`Summary of items/things to search for in the knowledge base`),
@@ -63,13 +65,24 @@ const KB_RETRIEVAL_INTERNAL_TOOL_ID = 'core.security.knowledge_base_retrieval';
  * Returns a tool for querying the knowledge base using the InternalToolDefinition pattern.
  */
 export const knowledgeBaseRetrievalInternalTool = (
-  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>
+  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>,
+  savedObjectsClient: SavedObjectsClientContract
 ): BuiltinToolDefinition<typeof knowledgeBaseRetrievalToolSchema> => {
   return {
     id: KB_RETRIEVAL_INTERNAL_TOOL_ID,
     type: ToolType.builtin,
     description: toolDescription,
     schema: knowledgeBaseRetrievalToolSchema,
+    getLlmDescription: async ({ config, description }, context) => {
+      return getLlmDescriptionHelper({
+        description,
+        context,
+        promptId: 'KnowledgeBaseRetrievalTool',
+        promptGroupId: 'builtin-security-tools',
+        getStartServices,
+        savedObjectsClient,
+      });
+    },
     handler: async ({ query }, context) => {
       try {
         // Get access to the elastic-assistant plugin through start services

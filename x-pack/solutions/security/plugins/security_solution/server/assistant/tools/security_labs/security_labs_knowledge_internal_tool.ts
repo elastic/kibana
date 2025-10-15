@@ -16,6 +16,8 @@ import { Document } from 'langchain/document';
 import yaml from 'js-yaml';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
 
 const securityLabsKnowledgeToolSchema = z.object({
   question: z
@@ -34,12 +36,23 @@ export const SECURITY_LABS_KNOWLEDGE_INTERNAL_TOOL_DESCRIPTION =
  * Returns a tool for retrieving Security Labs knowledge base content using the InternalToolDefinition pattern.
  */
 export const securityLabsKnowledgeInternalTool = (
-  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>
+  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>,
+  savedObjectsClient: SavedObjectsClientContract
 ): BuiltinToolDefinition<typeof securityLabsKnowledgeToolSchema> => {
   return {
     id: 'security-labs-knowledge-internal-tool',
     description: SECURITY_LABS_KNOWLEDGE_INTERNAL_TOOL_DESCRIPTION,
     schema: securityLabsKnowledgeToolSchema,
+    getLlmDescription: async ({ config, description }, context) => {
+      return getLlmDescriptionHelper({
+        description,
+        context,
+        promptId: 'SecurityLabsKnowledgeBaseTool',
+        promptGroupId: 'builtin-security-tools',
+        getStartServices,
+        savedObjectsClient,
+      });
+    },
     handler: async ({ question }, context) => {
       try {
         // Get access to the elastic-assistant plugin through start services

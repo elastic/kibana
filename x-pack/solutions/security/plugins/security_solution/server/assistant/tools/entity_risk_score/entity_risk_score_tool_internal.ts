@@ -18,6 +18,10 @@ import { IdentifierType } from '../../../../common/api/entity_analytics/common/c
 import { createGetRiskScores } from '../../../lib/entity_analytics/risk_score/get_risk_score';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { createGetAlertsById } from './get_alert_by_id';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { StartServicesAccessor } from '@kbn/core/server';
+import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
+import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
 
 const entityRiskScoreInternalSchema = z.object({
   identifier_type: IdentifierType,
@@ -29,14 +33,25 @@ export const ENTITY_RISK_SCORE_TOOL_INTERNAL_ID = 'core.security.entity_risk_sco
 
 export const ENTITY_RISK_SCORE_TOOL_INTERNAL_DESCRIPTION = `Call this for knowledge about the latest entity risk score and the inputs that contributed to the calculation (sorted by 'kibana.alert.risk_score') in the environment, or when answering questions about how critical or risky an entity is. When informing the risk score value for a entity you must use the normalized field 'calculated_score_norm'.`;
 
-export const entityRiskScoreToolInternal = (): BuiltinToolDefinition<
-  typeof entityRiskScoreInternalSchema
-> => {
+export const entityRiskScoreToolInternal = (
+  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>,
+  savedObjectsClient: SavedObjectsClientContract
+): BuiltinToolDefinition<typeof entityRiskScoreInternalSchema> => {
   return {
     id: ENTITY_RISK_SCORE_TOOL_INTERNAL_ID,
     type: ToolType.builtin,
     description: ENTITY_RISK_SCORE_TOOL_INTERNAL_DESCRIPTION,
     schema: entityRiskScoreInternalSchema,
+    getLlmDescription: async ({ config, description }, context) => {
+      return getLlmDescriptionHelper({
+        description,
+        context,
+        promptId: 'EntityRiskScoreTool',
+        promptGroupId: 'builtin-security-tools',
+        getStartServices,
+        savedObjectsClient,
+      });
+    },
     handler: async (
       { identifier_type: identifierType, identifier, alertsIndexPattern },
       { esClient, logger, request, toolProvider }

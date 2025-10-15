@@ -49,6 +49,7 @@ import {
   costSavingsInsightPart1,
   costSavingsInsightPart2,
 } from './prompts';
+import { builtinToolPrompts } from './builtin_tool_prompts';
 
 export const promptGroupId = {
   attackDiscovery: 'attackDiscovery',
@@ -519,4 +520,6 @@ export const localPrompts: Prompt[] = [
     promptGroupId: promptGroupId.aiAssistant,
     prompt: { default: starterPromptPrompt4 },
   },
+  // Builtin tool prompts for internal tools (onechat agent builder)
+  ...builtinToolPrompts,
 ];

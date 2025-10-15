@@ -9,11 +9,11 @@ import { z } from '@kbn/zod';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 // Content references are handled at the agent execution level, not at the tool level
-import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
-import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { ToolType } from '@kbn/onechat-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 
 const productDocumentationToolSchema = z.object({
@@ -39,20 +39,34 @@ const productDocumentationToolSchema = z.object({
   connectorId: z.string().describe('The connector ID to use for the LLM tasks'),
 });
 
-export const PRODUCT_DOCUMENTATION_INTERNAL_TOOL_DESCRIPTION =
-  'Use this tool to retrieve documentation about Elastic products. You can retrieve documentation about the Elastic stack, such as Kibana and Elasticsearch, or for Elastic solutions, such as Elastic Security, Elastic Observability or Elastic Enterprise Search.';
+// Note: The actual description used by the LLM comes from the builtin tool prompts
+// (promptId: 'ProductDocumentationTool', promptGroupId: 'builtin-security-tools')
+// This constant is only used as a fallback if prompt fetching fails
+const PRODUCT_DOCUMENTATION_INTERNAL_TOOL_DESCRIPTION =
+  'Use this tool to retrieve official documentation about Elastic products and technologies.';
 
 /**
  * Returns a tool for retrieving product documentation using the InternalToolDefinition pattern.
  */
 export const productDocumentationInternalTool = (
-  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>
+  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>,
+  savedObjectsClient: SavedObjectsClientContract
 ): BuiltinToolDefinition<typeof productDocumentationToolSchema> => {
   return {
     id: 'core.security.product_documentation',
     type: ToolType.builtin,
     description: PRODUCT_DOCUMENTATION_INTERNAL_TOOL_DESCRIPTION,
     schema: productDocumentationToolSchema,
+    getLlmDescription: async ({ config, description }, context) => {
+      return getLlmDescriptionHelper({
+        description,
+        context: context as unknown as Parameters<typeof getLlmDescriptionHelper>[0]['context'], // Type assertion to handle context type mismatch
+        promptId: 'ProductDocumentationTool',
+        promptGroupId: 'builtin-security-tools',
+        getStartServices,
+        savedObjectsClient,
+      });
+    },
     handler: async ({ query, product, connectorId }, context) => {
       const [, pluginsStart] = await getStartServices();
 
@@ -88,21 +102,5 @@ export const productDocumentationInternalTool = (
       };
     },
     tags: ['product-documentation', 'documentation', 'elastic'],
-  };
-};
-
-type EnrichedDocument = RetrieveDocumentationResultDoc & {
-  citation?: string;
-};
-
-const enrichDocument = (contentReferencesStore: ContentReferencesStore) => {
-  return (document: RetrieveDocumentationResultDoc): EnrichedDocument => {
-    const reference = contentReferencesStore.add((p) =>
-      productDocumentationReference(p.id, document.title, document.url)
-    );
-    return {
-      ...document,
-      citation: contentReferenceBlock(reference),
-    };
   };
 };

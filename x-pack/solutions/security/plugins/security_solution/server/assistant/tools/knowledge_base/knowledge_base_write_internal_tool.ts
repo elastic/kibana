@@ -13,6 +13,8 @@ import type { KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-commo
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { ToolType } from '@kbn/onechat-common';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
 
 const knowledgeBaseWriteToolSchema = z.object({
   name: z.string().describe(`This is what the user will use to refer to the entry in the future.`),
@@ -47,13 +49,24 @@ const KB_WRITE_INTERNAL_TOOL_ID = 'core.security.knowledge_base_write';
  * Returns a tool for writing to the knowledge base using the InternalToolDefinition pattern.
  */
 export const knowledgeBaseWriteInternalTool = (
-  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>
+  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>,
+  savedObjectsClient: SavedObjectsClientContract
 ): BuiltinToolDefinition<typeof knowledgeBaseWriteToolSchema> => {
   return {
     id: KB_WRITE_INTERNAL_TOOL_ID,
     type: ToolType.builtin,
     description: toolDescription,
     schema: knowledgeBaseWriteToolSchema,
+    getLlmDescription: async ({ config, description }, context) => {
+      return getLlmDescriptionHelper({
+        description,
+        context,
+        promptId: 'KnowledgeBaseWriteTool',
+        promptGroupId: 'builtin-security-tools',
+        getStartServices,
+        savedObjectsClient,
+      });
+    },
     handler: async ({ name, query, required }, context) => {
       try {
         // Get access to the elastic-assistant plugin through start services

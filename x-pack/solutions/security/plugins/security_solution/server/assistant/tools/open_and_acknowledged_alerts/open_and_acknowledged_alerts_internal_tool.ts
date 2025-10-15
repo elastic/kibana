@@ -19,6 +19,8 @@ import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
 import type { StartServicesAccessor } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 
 // Extended request type to store tool replacements temporarily
@@ -139,13 +141,24 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_DESCRIPTION =
  * Returns a tool for querying open and acknowledged alerts using the InternalToolDefinition pattern.
  */
 export const openAndAcknowledgedAlertsInternalTool = (
-  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>
+  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>,
+  savedObjectsClient: SavedObjectsClientContract
 ): BuiltinToolDefinition<typeof openAndAcknowledgedAlertsToolSchema> => {
   return {
     id: OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_ID,
     type: ToolType.builtin,
     description: OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_DESCRIPTION,
     schema: openAndAcknowledgedAlertsToolSchema,
+    getLlmDescription: async ({ config, description }, context) => {
+      return getLlmDescriptionHelper({
+        description,
+        context,
+        promptId: 'OpenAndAcknowledgedAlertsTool',
+        promptGroupId: 'builtin-security-tools',
+        getStartServices,
+        savedObjectsClient,
+      });
+    },
     handler: async (params, context) => {
       // Get configuration from assistant settings tool (with fallback defaults)
       let settingsData: unknown = null;

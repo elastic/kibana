@@ -58,7 +58,8 @@ export interface LLmDescriptionHandlerParams<TConfig extends object = {}> {
 }
 
 export type LlmDescriptionHandler<TConfig extends object = {}> = (
-  params: LLmDescriptionHandlerParams<TConfig>
+  params: LLmDescriptionHandlerParams<TConfig>,
+  context?: { request: KibanaRequest; spaceId: string }
 ) => MaybePromise<string>;
 
 /**

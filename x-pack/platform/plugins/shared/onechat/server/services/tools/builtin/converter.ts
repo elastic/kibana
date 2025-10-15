@@ -34,6 +34,11 @@ export const convertTool = ({
       readonly: true,
       getSchema: () => tool.schema,
       getHandler: () => tool.handler,
+      getLlmDescription: tool.getLlmDescription
+        ? async (args) => {
+            return tool.getLlmDescription!(args, context);
+          }
+        : undefined,
     };
   }
   if (!isBuiltinDefinition(definition)) {

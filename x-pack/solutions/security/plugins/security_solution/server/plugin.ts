@@ -9,6 +9,7 @@ import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type { LogMeta, Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
@@ -259,13 +260,35 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     // Register onechat tools
     plugins.onechat.tools.register(assistantSettingsInternalTool(core.getStartServices));
-    plugins.onechat.tools.register(openAndAcknowledgedAlertsInternalTool(core.getStartServices));
-    plugins.onechat.tools.register(alertCountsInternalTool(core.getStartServices));
-    plugins.onechat.tools.register(productDocumentationInternalTool(core.getStartServices));
-    plugins.onechat.tools.register(knowledgeBaseRetrievalInternalTool(core.getStartServices));
-    plugins.onechat.tools.register(knowledgeBaseWriteInternalTool(core.getStartServices));
-    plugins.onechat.tools.register(securityLabsKnowledgeInternalTool(core.getStartServices));
-    plugins.onechat.tools.register(entityRiskScoreToolInternal());
+
+    // Create savedObjectsClient for tools that need it
+    core.getStartServices().then(async ([coreStart]) => {
+      const savedObjectsClient =
+        coreStart.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
+
+      // Register tools that need savedObjectsClient for getLlmDescription
+      plugins.onechat.tools.register(
+        openAndAcknowledgedAlertsInternalTool(core.getStartServices, savedObjectsClient)
+      );
+      plugins.onechat.tools.register(
+        alertCountsInternalTool(core.getStartServices, savedObjectsClient)
+      );
+      plugins.onechat.tools.register(
+        knowledgeBaseRetrievalInternalTool(core.getStartServices, savedObjectsClient)
+      );
+      plugins.onechat.tools.register(
+        knowledgeBaseWriteInternalTool(core.getStartServices, savedObjectsClient)
+      );
+      plugins.onechat.tools.register(
+        securityLabsKnowledgeInternalTool(core.getStartServices, savedObjectsClient)
+      );
+      plugins.onechat.tools.register(
+        entityRiskScoreToolInternal(core.getStartServices, savedObjectsClient)
+      );
+      plugins.onechat.tools.register(
+        productDocumentationInternalTool(core.getStartServices, savedObjectsClient)
+      );
+    });
 
     plugins.onechat.agents.register(siemAgentCreator());
 
