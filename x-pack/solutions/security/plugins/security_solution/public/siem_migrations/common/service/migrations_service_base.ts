@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import { BehaviorSubject, distinctUntilChanged, type Observable } from 'rxjs';
-import type { CoreStart, Toast } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { TraceOptions } from '@kbn/elastic-assistant/impl/assistant/types';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
@@ -43,7 +43,6 @@ export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
   private isPolling = false;
   public connectorIdStorage: MigrationsStorage<string>;
   public traceOptionsStorage: MigrationsStorage<TraceOptions>;
-  public toastsByMigrationId: Record<string, Toast>;
 
   constructor(
     protected readonly core: CoreStart,
@@ -56,7 +55,7 @@ export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
     });
 
     this.latestStats$ = new BehaviorSubject<T[] | null>(null);
-    this.toastsByMigrationId = {};
+
     this.plugins.spaces.getActiveSpace().then((space) => {
       this.connectorIdStorage.setSpaceId(space.id);
       this.startPolling();
@@ -203,19 +202,5 @@ export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
         await this.sleep(TASK_STATS_POLLING_SLEEP_SECONDS);
       }
     } while (pendingMigrationIds.length > 0);
-  }
-
-  public removeFinishedMigrationsNotification(migrationId?: string) {
-    if (migrationId && this.toastsByMigrationId[migrationId]) {
-      this.core.notifications.toasts.remove(this.toastsByMigrationId[migrationId]);
-      delete this.toastsByMigrationId[migrationId];
-    } else {
-      if (Object.values(this.toastsByMigrationId).length > 0) {
-        Object.values(this.toastsByMigrationId).forEach((toast) => {
-          this.core.notifications.toasts.remove(toast);
-        });
-        this.toastsByMigrationId = {};
-      }
-    }
   }
 }

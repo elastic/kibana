@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useNavigation } from '@kbn/security-solution-navigation';
-import { SuccessToastContent, getSuccessToast } from './success_notification';
+import { SuccessToastContent, raiseSuccessToast } from './success_notification';
 import { getRuleMigrationStatsMock } from '../../__mocks__';
 import { TestProviders } from '../../../../common/mock';
 
@@ -69,7 +69,7 @@ describe('Success Notification', () => {
   describe('getSuccessToast', () => {
     it('returns a toast object with the correct properties', () => {
       const migration = getRuleMigrationStatsMock();
-      const toast = getSuccessToast(migration, coreMock.createStart());
+      const toast = raiseSuccessToast(migration, coreMock.createStart());
 
       expect(toast).toEqual({
         color: 'success',
