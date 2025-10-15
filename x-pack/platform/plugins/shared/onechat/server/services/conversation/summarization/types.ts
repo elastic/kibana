@@ -25,4 +25,10 @@ export interface SummaryStructuredData {
   outcomes_and_decisions: string[];
   unanswered_questions: string[];
   agent_actions: string[];
+  entities: StructuredEntity[];
+}
+
+export interface StructuredEntity {
+  type: string;
+  name: string;
 }

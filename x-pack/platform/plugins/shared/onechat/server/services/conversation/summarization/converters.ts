@@ -33,6 +33,7 @@ export const fromEs = (document: Document): ConversationSummary => {
       outcomes_and_decisions: document._source.structured_data.outcomes_and_decisions ?? [],
       unanswered_questions: document._source.structured_data.unanswered_questions ?? [],
       agent_actions: document._source.structured_data.agent_actions ?? [],
+      entities: document._source.structured_data.entities ?? [],
     },
   };
 };
@@ -61,6 +62,7 @@ export const toEs = ({
       outcomes_and_decisions: summary.structured_data.outcomes_and_decisions ?? [],
       unanswered_questions: summary.structured_data.unanswered_questions ?? [],
       agent_actions: summary.structured_data.agent_actions ?? [],
+      entities: summary.structured_data.entities ?? [],
     },
   };
 };

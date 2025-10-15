@@ -30,6 +30,14 @@ const structuredMemorySchema = z.object({
     .describe(
       "An array of strings representing the primary subjects discussed, e.g., 'API authentication', 'data visualization', 'bug fixing'."
     ),
+  entities: z
+    .array(
+      z.object({
+        type: z.string().describe('The category of the entity (e.g., "filename", "person").'),
+        name: z.string().describe('The extracted value of the entity (e.g., "build.sh", "Alice").'),
+      })
+    )
+    .describe('A list of structured named entities found in the conversation.'),
   outcomes_and_decisions: z
     .array(z.string())
     .describe(
@@ -53,20 +61,18 @@ const SYSTEM_PROMPT = `You are an expert AI assistant. Your task is to process a
 CONVERSATION:
 user: "Hey, I'm trying to run the build.sh script but it's failing with a 'permission denied' error. Can you help?"
 assistant: "It sounds like the script isn't executable. You can fix that by running 'chmod +x build.sh'. Try that and let me know if it works."
-user: "That worked! Thanks."
+user: "That worked! Thanks. This was for GH issue #456 by the way."
 
 YOUR OUTPUT:
 {
   "title": "Fix 'permission denied' on build.sh script",
-  "overall_summary": "User was unable to run a shell script due to a 'permission denied' error. The assistant identified the issue as a lack of execute permissions and provided the 'chmod +x' command to resolve it.",
-  "key_topics": ["shell script", "file permissions", "chmod"],
-  "entities": {
-    "files": ["build.sh"],
-    "people": [],
-    "organizations": [],
-    "dates": []
-  },
   "user_intent": "Fix a 'permission denied' error when running a shell script.",
+  "overall_summary": "User was unable to run a shell script due to a 'permission denied' error. The assistant identified the issue as a lack of execute permissions and provided the 'chmod +x' command to resolve it.",
+  "key_topics": ["shell script", "file permissions", "chmod", "#456"],
+  "entities": [
+    { "type": "filename", "name": "build.sh" },
+    { "type": "github_issue", "name": "#456" }
+  ],
   "outcomes_and_decisions": [
     "The 'permission denied' error was resolved by making the script executable with 'chmod +x build.sh'."
   ],
@@ -109,6 +115,7 @@ export const summarizeConversation = async ({
         key_topics: keyTopics,
         outcomes_and_decisions: outcomesAndDecisions,
         unanswered_questions: unansweredQuestions,
+        entities,
       } = response;
 
       return {
@@ -119,6 +126,7 @@ export const summarizeConversation = async ({
         outcomes_and_decisions: outcomesAndDecisions ?? [],
         unanswered_questions: unansweredQuestions ?? [],
         agent_actions: agentActions ?? [],
+        entities: entities ?? [],
       };
     }
   );

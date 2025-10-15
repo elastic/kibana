@@ -58,6 +58,9 @@ Title: ${title}
 Summary: ${overallSummary}
 User Intent: ${userIntent}
 Key Topics: ${keyTopics.join(', ')}
+Entities:\n ${structuredData.entities
+    .map((entity) => `- ${entity.type}: ${entity.name}`)
+    .join('\n')}
 Agent Actions:\n ${agentActions.map((item) => ` - ${item}`).join('\n')}
 Outcomes and Decisions:\n ${outcomesAndDecisions.map((item) => ` - ${item}`).join('\n')}
 Unanswered Questions:\n ${unansweredQuestions.map((item) => ` - ${item}`).join('\n')}

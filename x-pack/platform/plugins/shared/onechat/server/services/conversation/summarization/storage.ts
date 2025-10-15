@@ -34,6 +34,12 @@ const storageSettings = {
           outcome_and_decisions: types.text({}),
           unanswered_questions: types.text({}),
           agent_actions: types.text({}),
+          entities: types.nested({
+            properties: {
+              type: types.keyword(),
+              name: types.keyword(),
+            },
+          }),
         },
       }),
     },
@@ -59,6 +65,10 @@ export interface ConversationSummaryProperties {
     outcomes_and_decisions?: string[];
     unanswered_questions?: string[];
     agent_actions?: string[];
+    entities?: {
+      type: string;
+      name: string;
+    }[];
   };
 }
 
