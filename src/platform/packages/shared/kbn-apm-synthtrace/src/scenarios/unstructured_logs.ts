@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates unstructured log messages from different sources like Java and web servers.
+ */
+
 import type { LogDocument } from '@kbn/apm-synthtrace-client';
 import { log } from '@kbn/apm-synthtrace-client';
 import type { Scenario } from '../cli/scenario';

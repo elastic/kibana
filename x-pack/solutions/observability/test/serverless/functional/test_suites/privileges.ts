@@ -51,18 +51,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           return await privilege.getVisibleText();
         })
       );
-      expect(privileges.length).to.be(11);
+      expect(privileges.length).to.be(12);
       expect(text).to.eql([
         'Discover\nAll\nRead\nNone',
         'Dashboard\nAll\nRead\nNone',
-        'Streams\nAll\nRead\nNone',
         'Logs\nAll\nRead\nNone',
         'Infrastructure\nAll\nRead\nNone',
         'Applications\nAll\nRead\nNone',
+        'Agent Builder\nAll\nRead\nNone',
         'Synthetics\nAll\nRead\nNone',
         'Cases\nAll\nRead\nNone',
         'Machine Learning\nAll\nRead\nNone',
         'SLOs\nAll\nRead\nNone',
+        'Workflows\nAll\nRead\nNone',
         'Observability AI Assistant\nAll\nNone',
       ]);
     });

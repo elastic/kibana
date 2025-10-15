@@ -12,7 +12,14 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./stats'));
     loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./dashboards/create'));
     loadTestFile(require.resolve('./resources/missing'));
+    loadTestFile(require.resolve('./resources/upsert'));
+    loadTestFile(require.resolve('./resources/get'));
+    loadTestFile(require.resolve('./dashboards/get'));
+    loadTestFile(require.resolve('./stats_all'));
+    loadTestFile(require.resolve('./translation_stats'));
   });
 }

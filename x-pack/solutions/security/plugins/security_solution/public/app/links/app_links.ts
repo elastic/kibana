@@ -6,14 +6,16 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 
-import { aiValueLinks } from '../../reports/links';
+import { getAiValueFilteredLinks } from '../../reports/links';
 import { configurationsLinks } from '../../configurations/links';
 import { links as attackDiscoveryLinks } from '../../attack_discovery/links';
 import { links as assetInventoryLinks } from '../../asset_inventory/links';
+import { siemReadinessLinks } from '../../siem_readiness/links';
 import type { AppLinkItems } from '../../common/links/types';
 import { indicatorsLinks } from '../../threat_intelligence/links';
 import { alertsLink, alertSummaryLink } from '../../detections/links';
 import { links as rulesLinks } from '../../rules/links';
+import { links as siemMigrationsLinks } from '../../siem_migrations/links';
 import { links as timelinesLinks } from '../../timelines/links';
 import { links as casesLinks } from '../../cases/links';
 import { links as managementLinks, getManagementFilteredLinks } from '../../management/links';
@@ -26,7 +28,6 @@ import { entityAnalyticsLinks } from '../../entity_analytics/links';
 
 export const appLinks: AppLinkItems = Object.freeze([
   dashboardsLinks,
-  aiValueLinks,
   alertsLink,
   alertSummaryLink,
   attackDiscoveryLinks,
@@ -39,8 +40,10 @@ export const appLinks: AppLinkItems = Object.freeze([
   entityAnalyticsLinks,
   assetInventoryLinks,
   rulesLinks,
+  siemMigrationsLinks,
   onboardingLinks,
   managementLinks,
+  siemReadinessLinks,
 ]);
 
 export const getFilteredLinks = async (
@@ -48,10 +51,10 @@ export const getFilteredLinks = async (
   plugins: StartPlugins
 ): Promise<AppLinkItems> => {
   const managementFilteredLinks = await getManagementFilteredLinks(core, plugins);
+  const aiValueFilteredLinks = await getAiValueFilteredLinks(core, plugins);
 
-  return Object.freeze([
+  const filteredLinks = [
     dashboardsLinks,
-    aiValueLinks,
     alertsLink,
     alertSummaryLink,
     attackDiscoveryLinks,
@@ -64,7 +67,16 @@ export const getFilteredLinks = async (
     entityAnalyticsLinks,
     assetInventoryLinks,
     rulesLinks,
+    siemMigrationsLinks,
     onboardingLinks,
     managementFilteredLinks,
-  ]);
+    siemReadinessLinks,
+  ];
+
+  // Add AI Value links only if user has required role
+  if (aiValueFilteredLinks) {
+    filteredLinks.push(aiValueFilteredLinks);
+  }
+
+  return Object.freeze(filteredLinks);
 };

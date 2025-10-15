@@ -28,6 +28,7 @@ import type { ReportingRequestHandlerContext } from '../../../../types';
 import { registerScheduleRoutesInternal } from '../schedule_from_jobparams';
 import type { FakeRawRequest, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { EventTracker } from '../../../../usage';
 
 const fakeRawRequest: FakeRawRequest = {
   headers: {
@@ -43,6 +44,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
   let mockExportTypesRegistry: ExportTypesRegistry;
   let reportingCore: ReportingCore;
   let soClient: SavedObjectsClientContract;
+  let eventTracker: EventTracker;
 
   const mockConfigSchema = createMockConfigSchema({
     queue: { indexInterval: 'year', timeout: 10000, pollEnabled: true },
@@ -102,6 +104,9 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       hasPermanentEncryptionKey: true,
       areNotificationsEnabled: true,
     });
+
+    eventTracker = new EventTracker(mockCoreSetup.analytics, 'jobId', 'exportTypeId', 'appId');
+    jest.spyOn(reportingCore, 'getEventTracker').mockReturnValue(eventTracker);
 
     mockExportTypesRegistry = new ExportTypesRegistry();
     mockExportTypesRegistry.register(mockPdfExportType);
@@ -377,5 +382,12 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
           },
         });
       });
+
+    expect(eventTracker.createReport).toHaveBeenCalledTimes(1);
+    expect(eventTracker.createReport).toHaveBeenCalledWith({
+      isDeprecated: false,
+      isPublicApi: false,
+      scheduleType: 'scheduled',
+    });
   });
 });

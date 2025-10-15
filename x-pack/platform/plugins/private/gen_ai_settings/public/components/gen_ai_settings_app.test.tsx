@@ -22,9 +22,12 @@ const mockUseEnabledFeatures = useEnabledFeatures as jest.MockedFunction<typeof 
 describe('GenAiSettingsApp', () => {
   const coreStart = coreMock.createStart();
   const setBreadcrumbs = jest.fn();
+  const featureFlagsGetBooleanValueMock = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    featureFlagsGetBooleanValueMock.mockReturnValue(true);
 
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
@@ -35,11 +38,17 @@ describe('GenAiSettingsApp', () => {
       },
     };
 
+    coreStart.featureFlags = {
+      ...coreStart.featureFlags,
+      getBooleanValue: featureFlagsGetBooleanValueMock,
+    };
+
     // Default mock for enabled features
     mockUseEnabledFeatures.mockReturnValue({
       showSpacesIntegration: true,
       isPermissionsBased: false,
       showAiBreadcrumb: true,
+      showAiAssistantsVisibilitySetting: true,
     });
   });
 
@@ -74,6 +83,7 @@ describe('GenAiSettingsApp', () => {
         showSpacesIntegration: true,
         isPermissionsBased: false,
         showAiBreadcrumb: false,
+        showAiAssistantsVisibilitySetting: true,
       });
 
       renderComponent();
@@ -105,11 +115,21 @@ describe('GenAiSettingsApp', () => {
       expect(screen.getByTestId('goToSpacesButton')).toBeInTheDocument();
     });
 
+    it('does not render default llm setting when feature is disabled', () => {
+      featureFlagsGetBooleanValueMock.mockReturnValue(false);
+
+      renderComponent();
+
+      expect(screen.queryByTestId('defaultAiConnectorComboBox')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('defaultAiConnectorCheckbox')).not.toBeInTheDocument();
+    });
+
     it('should conditionally render sections based on settings', () => {
       mockUseEnabledFeatures.mockReturnValue({
         showSpacesIntegration: false,
         isPermissionsBased: false,
         showAiBreadcrumb: true,
+        showAiAssistantsVisibilitySetting: true,
       });
 
       renderComponent();
@@ -120,6 +140,7 @@ describe('GenAiSettingsApp', () => {
         showSpacesIntegration: true,
         isPermissionsBased: false,
         showAiBreadcrumb: true,
+        showAiAssistantsVisibilitySetting: true,
       });
       coreStart.application.capabilities = {
         ...coreStart.application.capabilities,
@@ -142,6 +163,7 @@ describe('GenAiSettingsApp', () => {
         showSpacesIntegration: true,
         isPermissionsBased: true,
         showAiBreadcrumb: true,
+        showAiAssistantsVisibilitySetting: true,
       });
       coreStart.application.capabilities = {
         ...coreStart.application.capabilities,
@@ -161,6 +183,7 @@ describe('GenAiSettingsApp', () => {
         showSpacesIntegration: true,
         isPermissionsBased: true,
         showAiBreadcrumb: true,
+        showAiAssistantsVisibilitySetting: true,
       });
       coreStart.application.capabilities = {
         ...coreStart.application.capabilities,

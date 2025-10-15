@@ -34,7 +34,10 @@ export type {
 export { aiAssistantCapabilities } from '../common/capabilities';
 export { ConnectorSelectorBase } from './components/connector_selector/connector_selector_base';
 export { useAbortableAsync, type AbortableAsyncState } from './hooks/use_abortable_async';
-export { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
+export {
+  useGenAIConnectorsWithoutContext,
+  type UseGenAIConnectorsResult,
+} from './hooks/use_genai_connectors';
 
 export { createStorybookChatService, createStorybookService } from './storybook_mock';
 
@@ -107,7 +110,6 @@ export {
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
-  aiAssistantPreferredAIAssistantType,
 } from '../common/ui_settings/settings_keys';
 
 export {

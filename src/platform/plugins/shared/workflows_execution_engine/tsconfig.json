@@ -17,8 +17,8 @@
     "@kbn/actions-plugin",
     "@kbn/workflows",
     "@kbn/task-manager-plugin",
-    "@kbn/apm-utils",
     "@kbn/es-query",
+    "@kbn/core-elasticsearch-server",
   ],
   "exclude": [
     "target/**/*"

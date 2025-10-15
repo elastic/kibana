@@ -24,6 +24,62 @@ components:
               $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         - $ref: '#/components/schemas/DashboardMigrationData'
 
+    DashboardMigrationTranslationStats:
+      type: object
+      description: The dashboard migration translation stats object.
+      required:
+        - id
+        - dashboards
+      properties:
+        id:
+          description: The migration id
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        dashboards:
+          type: object
+          description: The dashboards migration translation stats.
+          required:
+            - total
+            - success
+            - failed
+          properties:
+            total:
+              type: integer
+              description: The total number of dashboards in the migration.
+            success:
+              type: object
+              description: The number of dashboards that have been successfully translated.
+              required:
+                - total
+                - result
+                - installable
+              properties:
+                total:
+                  type: integer
+                  description: The total number of dashboards that have been successfully translated.
+                result:
+                  type: object
+                  description: The translation results
+                  required:
+                    - full
+                    - partial
+                    - untranslatable
+                  properties:
+                    full:
+                      type: integer
+                      description: The number of dashboards that have been fully translated.
+                    partial:
+                      type: integer
+                      description: The number of dashboards that have been partially translated.
+                    untranslatable:
+                      type: integer
+                      description: The number of dashboards that could not be translated.
+                installable:
+                  type: integer
+                  description: The number of dashboards that have been successfully translated and can be installed.
+            failed:
+              type: integer
+              description: The number of dashboards that have failed translation.
+
     DashboardMigrationData:
       type: object
       description: The dashboard migration object ( without Id ) with its settings.
@@ -99,6 +155,22 @@ components:
           type: string
           description: The user who last updated the migration
 
+    UpdateMigrationDashboard:
+      type: object
+      description: The dashboard migration data object for dashboard update operation
+      required:
+        - id
+      properties:
+        id:
+          description: The dashboard migration id
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        elastic_dashboard:
+          description: The migrated elastic dashboard attributes to update.
+          $ref: '#/components/schemas/ElasticDashboardPartial'
+        comments:
+          description: The comments for the migration including a summary from the LLM in markdown.
+          $ref: './common.schema.yaml#/components/schemas/MigrationComments'
+
     OriginalDashboard:
       type: object
       required:
@@ -153,6 +225,11 @@ components:
         data:
           type: string
           description: The data of the dashboard, format could depend on the vendor
+
+    ElasticDashboardPartial:
+      description: The partial version of the migrated elastic dashboard.
+      $ref: '#/components/schemas/ElasticDashboard'
+      x-modify: partial
 
     DashboardMigrationTaskStats:
       description: The dashboard migration task stats object.

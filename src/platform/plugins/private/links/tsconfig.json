@@ -36,7 +36,6 @@
     "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
-    "@kbn/presentation-panel-plugin",
     "@kbn/share-plugin",
     "@kbn/es-query",
     "@kbn/presentation-util"

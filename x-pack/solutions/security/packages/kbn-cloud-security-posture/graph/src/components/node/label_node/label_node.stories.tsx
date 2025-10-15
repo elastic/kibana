@@ -24,8 +24,8 @@ const meta: Meta<LabelNodeViewModel> = {
     shape: 'label',
     color: 'primary',
     interactive: true,
-    eventsCount: 2,
-    alertsCount: 2,
+    uniqueEventsCount: 2,
+    uniqueAlertsCount: 2,
     ips: [
       '10.200.0.202',
       '192.14.29.80',

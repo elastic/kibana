@@ -109,6 +109,7 @@ describe('simple trace', () => {
       'trace.id': expect.stringContaining('00000000000000000000000241'),
       'transaction.duration.us': 1000000,
       'transaction.id': expect.stringContaining('0000000240'),
+      'span.id': expect.stringContaining('0000000240'),
       'transaction.name': 'GET /api/product/list',
       'transaction.type': 'request',
       'transaction.sampled': true,

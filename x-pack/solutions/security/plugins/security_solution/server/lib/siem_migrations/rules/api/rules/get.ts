@@ -18,7 +18,7 @@ import type { RuleMigrationGetRulesOptions } from '../../data/rule_migrations_da
 import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
 import { authz } from '../../../common/api/util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
-import { withExistingMigration } from '../util/with_existing_migration_id';
+import { withExistingMigration } from '../../../common/api/util/with_existing_migration_id';
 
 export const registerSiemRuleMigrationsGetRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -73,11 +73,11 @@ export const registerSiemRuleMigrationsGetRulesRoute = (
 
               const result = await ruleMigrationsClient.data.items.get(migrationId, options);
 
-              await siemMigrationAuditLogger.logGetMigrationRules({ migrationId });
+              await siemMigrationAuditLogger.logGetMigrationItems({ migrationId });
               return res.ok({ body: result });
             } catch (error) {
               logger.error(error);
-              await siemMigrationAuditLogger.logGetMigrationRules({ migrationId, error });
+              await siemMigrationAuditLogger.logGetMigrationItems({ migrationId, error });
               return res.badRequest({ body: error.message });
             }
           }

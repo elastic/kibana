@@ -198,13 +198,6 @@ export const RULE_NAME_OVERRIDE_FIELD_LABEL = i18n.translate(
   }
 );
 
-export const RULE_NAME_OVERRIDE_DISABLED_FIELD_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleNameOverrideDisabledFieldDescription',
-  {
-    defaultMessage: 'Rule name will not be overridden',
-  }
-);
-
 export const THREAT_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.threatFieldLabel',
   {
@@ -287,13 +280,6 @@ export const MACHINE_LEARNING_JOB_NOT_AVAILABLE = i18n.translate(
   {
     defaultMessage:
       'This job is currently unavailable. Please ensure that all related ML integrations are installed and configured.',
-  }
-);
-
-export const OPEN_HELP_POPOVER_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.machineLearning.mlJobNotAvailable.openHelpPopoverAriaLabel',
-  {
-    defaultMessage: 'Open help popover',
   }
 );
 

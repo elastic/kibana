@@ -7,76 +7,103 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { synth, Parser, BasicPrettyPrinter } from '@kbn/esql-ast';
+import type { QueryOperator } from '@kbn/esql-composer';
+import { drop, evaluate, stats, timeseries, where, rename } from '@kbn/esql-composer';
+import { type MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { DIMENSION_TYPES } from '../../constants';
+import { DIMENSIONS_COLUMN } from './constants';
+import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
 
 interface CreateESQLQueryParams {
-  metricName: string;
-  index?: string;
-  instrument?: string;
+  metric: MetricField;
   dimensions?: string[];
   filters?: Array<{ field: string; value: string }>;
 }
 
-export function createESQLQuery({
-  index = 'metrics-*',
-  instrument,
-  dimensions = [],
-  metricName,
-  filters,
-}: CreateESQLQueryParams) {
-  // Build dimension part for ES|QL query
-  const dimensionFields =
-    dimensions && dimensions.length > 0
-      ? dimensions.map((dim: string) => `\`${dim}\``).join(', ')
-      : '';
+const separator = '\u203A'.normalize('NFC');
 
-  const { root } = Parser.parse(`TS ${index}`);
+/**
+ * Checks if a given field type requires explicit casting to a string in an ESQL query.
+ * This is necessary for non-keyword types like IP, numeric, and boolean fields when
+ * used in CONCAT operations.
+ *
+ * @param fieldType - The Elasticsearch field type (e.g., 'ip', 'long', 'keyword').
+ * @returns `true` if the field type needs to be cast to a string, otherwise `false`.
+ */
+function needsStringCasting(fieldType: ES_FIELD_TYPES): boolean {
+  return DIMENSION_TYPES.includes(fieldType) && fieldType !== ES_FIELD_TYPES.KEYWORD;
+}
 
+/**
+ * Creates a complete ESQL query string for metrics visualizations.
+ * The function constructs a query that includes time series aggregation, filtering,
+ * and selective string casting for dimension fields to prevent query failures with
+ * non-keyword types.
+ *
+ * @param metric - The full metric field object, including dimension type information.
+ * @param dimensions - An array of selected dimension names.
+ * @param filters - An array of filters to apply to the query.
+ * @returns A complete ESQL query string.
+ */
+export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQLQueryParams) {
+  const { name: metricField, instrument, index, dimensions: metricDimensions } = metric;
+  const source = timeseries(index);
+
+  const whereConditions: QueryOperator[] = [];
+  const valuesByField = new Map<string, Set<string>>();
   if (filters && filters.length) {
-    const valuesByField = new Map<string, Set<string>>();
-
     for (const filter of filters) {
-      if (valuesByField.has(filter.field)) {
-        const values = valuesByField.get(filter.field);
-        values?.add(filter.value);
+      const currentValues = valuesByField.get(filter.field);
+      if (currentValues) {
+        currentValues.add(filter.value);
       } else {
         valuesByField.set(filter.field, new Set([filter.value]));
       }
     }
 
-    const whereConditions: string[] = [];
     valuesByField.forEach((value, key) => {
-      const values = [...value].map((v) => `"${v}"`).join(', ');
-      whereConditions.push(`${key} IN (${values})`);
+      whereConditions.push(
+        where(`${key} IN (${new Array(value.size).fill('?').join(', ')})`, Array.from(value))
+      );
     });
-
-    root.commands.push(synth.cmd(`WHERE ${whereConditions.join(' AND ')}`));
   }
 
-  // Choose ES|QL query based on time_series_metric type
-  if (instrument === 'counter') {
-    root.commands.push(
-      synth.cmd(`
-        STATS SUM(RATE(\`${metricName}\`)) BY BUCKET(\`@timestamp\`, 100, ?_tstart, ?_tend)${
-        dimensionFields ? `, ${dimensionFields}` : ''
-      }`)
-    );
-  } else if (instrument === 'gauge') {
-    root.commands.push(
-      synth.cmd(`
-        STATS AVG(\`${metricName}\`) BY BUCKET(\`@timestamp\`, 100, ?_tstart, ?_tend)${
-        dimensionFields ? `, ${dimensionFields}` : ''
-      }`)
-    );
-  } else {
-    // Default fallback for other metric types
-    root.commands.push(
-      synth.cmd(`
-        STATS AVG(\`${metricName}\`) BY BUCKET(\`@timestamp\`, 100, ?_tstart, ?_tend)${
-        dimensionFields ? `, ${dimensionFields}` : ''
-      }`)
-    );
-  }
+  const dimensionTypeMap = new Map(metricDimensions?.map((dim) => [dim.name, dim.type]));
 
-  return BasicPrettyPrinter.print(root);
+  const unfilteredDimensions = (dimensions ?? []).filter((dim) => !valuesByField.has(dim));
+  const queryPipeline = source.pipe(
+    ...whereConditions,
+    unfilteredDimensions.length > 0
+      ? where(unfilteredDimensions.map((dim) => `${dim} IS NOT NULL`).join(' AND '))
+      : (query) => query,
+    stats(
+      `${createMetricAggregation({
+        instrument,
+        placeholderName: 'metricField',
+      })} BY ${createTimeBucketAggregation({})}${
+        (dimensions ?? []).length > 0 ? `, ${dimensions.join(',')}` : ''
+      }`,
+      {
+        metricField,
+      }
+    ),
+    ...((dimensions ?? []).length > 0
+      ? dimensions.length === 1
+        ? [rename(`??dim as ${DIMENSIONS_COLUMN}`, { dim: dimensions[0] })]
+        : [
+            evaluate(
+              `${DIMENSIONS_COLUMN} = CONCAT(${dimensions
+                .map((dim) => {
+                  const dimType = dimensionTypeMap.get(dim);
+                  return dimType && needsStringCasting(dimType) ? `${dim}::STRING` : dim;
+                })
+                .join(`, " ${separator} ", `)})`
+            ),
+            drop(`${dimensions.join(',')}`),
+          ]
+      : [])
+  );
+
+  return queryPipeline.toString();
 }

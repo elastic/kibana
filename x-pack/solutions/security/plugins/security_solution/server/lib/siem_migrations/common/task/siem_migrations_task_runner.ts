@@ -6,7 +6,7 @@
  */
 
 import assert from 'assert';
-import type { AuthenticatedUser, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import { abortSignalToPromise, AbortError } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
@@ -23,12 +23,10 @@ import type {
 import { ActionsClientChat } from './util/actions_client_chat';
 import type { SiemMigrationTelemetryClient } from './siem_migrations_telemetry_client';
 
-/** Number of concurrent item translations in the pool */
-const TASK_CONCURRENCY = 10 as const;
 /** Number of items loaded in memory to be translated in the pool */
 const TASK_BATCH_SIZE = 100 as const;
 /** The timeout of each individual agent invocation in minutes */
-const AGENT_INVOKE_TIMEOUT_MIN = 3 as const;
+const AGENT_INVOKE_TIMEOUT_MIN = 20 as const;
 
 /** Exponential backoff configuration to handle rate limit errors */
 const RETRY_CONFIG = {
@@ -51,12 +49,21 @@ const EXECUTOR_SLEEP = {
 
 /** This limit should never be reached, it's a safety net to prevent infinite loops.
  * It represents the max number of consecutive rate limit recovery & failure attempts.
- * This can only happen when the API can not process TASK_CONCURRENCY translations at a time,
+ * This can only happen when the API can not process all concurrenct translations ( based on taskConcurrency ) at a time,
  * even after the executor sleep is increased on every attempt.
  **/
 const EXECUTOR_RECOVER_MAX_ATTEMPTS = 3 as const;
 
-export class SiemMigrationTaskRunner<
+export type SiemTaskRunnerConstructor<
+  M extends MigrationDocument = MigrationDocument,
+  I extends ItemDocument = ItemDocument,
+  P extends object = {},
+  C extends object = {},
+  O extends object = {}
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+> = new (...params: any[]) => SiemMigrationTaskRunner<M, I, P, C, O>;
+
+export abstract class SiemMigrationTaskRunner<
   M extends MigrationDocument = MigrationDocument, // The migration document type (rule migrations and dashboard migrations very similar but have differences)
   I extends ItemDocument = ItemDocument, // The rule or dashboard document type
   P extends object = {}, // The migration task input parameters schema
@@ -69,36 +76,33 @@ export class SiemMigrationTaskRunner<
   private abort: ReturnType<typeof abortSignalToPromise>;
   private executorSleepMultiplier: number = EXECUTOR_SLEEP.initialValueSeconds;
   public isWaiting: boolean = false;
+  /** Number of concurrent items to process. Each item triggers one instance of graph */
+  protected abstract readonly taskConcurrency: number;
 
   constructor(
     public readonly migrationId: string,
+    protected readonly request: KibanaRequest,
     public readonly startedBy: AuthenticatedUser,
     public readonly abortController: AbortController,
     protected readonly data: SiemMigrationsDataClient<M, I>,
     protected readonly logger: Logger,
     protected readonly dependencies: SiemMigrationsClientDependencies
   ) {
-    this.actionsClientChat = new ActionsClientChat(this.dependencies.actionsClient, this.logger);
+    this.actionsClientChat = new ActionsClientChat(this.request, this.dependencies);
     this.abort = abortSignalToPromise(this.abortController.signal);
   }
 
   /** Receives the connectorId and creates the `this.task` and `this.telemetry` attributes */
-  public async setup(connectorId: string): Promise<void> {
-    throw new Error('setup method must be implemented in the subclass');
-  }
+  public abstract setup(connectorId: string): Promise<void>;
 
   /** Prepares the migration item for the task execution */
-  protected async prepareTaskInput(item: Stored<I>): Promise<P> {
-    throw new Error('prepareTaskInput method must be implemented in the subclass');
-  }
+  protected abstract prepareTaskInput(item: Stored<I>): Promise<P>;
 
   /** Processes the output of the migration task and returns the item to save */
-  protected processTaskOutput(item: Stored<I>, output: O): Stored<I> {
-    throw new Error('processTaskOutput method must be implemented in the subclass');
-  }
+  protected abstract processTaskOutput(item: Stored<I>, output: O): Stored<I>;
 
   /** Optional initialization logic */
-  async initialize() {}
+  public async initialize() {}
 
   public async run(invocationConfig: RunnableConfig<C>): Promise<void> {
     assert(this.telemetry, 'telemetry is missing please call setup() first');
@@ -120,7 +124,7 @@ export class SiemMigrationTaskRunner<
     }
 
     const migrateItemTask = this.createMigrateItemTask(invocationConfig);
-    this.logger.debug(`Started translations. Concurrency is: ${TASK_CONCURRENCY}`);
+    this.logger.debug(`Started translations. Concurrency is: ${this.taskConcurrency}`);
 
     try {
       do {
@@ -135,7 +139,7 @@ export class SiemMigrationTaskRunner<
         this.logger.debug(`Start processing batch of ${migrationItems.length} items`);
 
         const { errors } = await initPromisePool<Stored<I>, void, Error>({
-          concurrency: TASK_CONCURRENCY,
+          concurrency: this.taskConcurrency,
           abortSignal: this.abortController.signal,
           items: migrationItems,
           executor: async (migrationItem) => {
@@ -203,6 +207,9 @@ export class SiemMigrationTaskRunner<
     const config: RunnableConfig<C> = {
       timeout: AGENT_INVOKE_TIMEOUT_MIN * 60 * 1000, // milliseconds timeout
       ...invocationConfig,
+      metadata: {
+        migrationId: this.migrationId,
+      },
       signal: this.abortController.signal,
     };
 
@@ -247,6 +254,7 @@ export class SiemMigrationTaskRunner<
           await this.executorSleep(); // Random sleep, increased every time we hit the rate limit.
           return await invoke();
         } catch (error) {
+          this.logger.debug(`Error during migration item translation: ${error.toString()}`);
           if (!this.isRateLimitError(error) || recoverAttemptsLeft === 0) {
             throw error;
           }

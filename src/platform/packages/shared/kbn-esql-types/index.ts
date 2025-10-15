@@ -18,19 +18,17 @@ export {
   type PublishesESQLVariables,
   apiPublishesESQLVariable,
   apiPublishesESQLVariables,
+  controlHasVariableName,
 } from './src/variables_types';
 
 export {
   type IndicesAutocompleteResult,
   type IndexAutocompleteItem,
+  type ResolveIndexResponse,
   type ESQLSourceResult,
 } from './src/sources_autocomplete_types';
 
-export {
-  type RecommendedQuery,
-  type RecommendedField,
-  type ResolveIndexResponse,
-} from './src/extensions_autocomplete_types';
+export { type RecommendedQuery, type RecommendedField } from './src/extensions_autocomplete_types';
 
 export {
   type InferenceEndpointsAutocompleteResult,
@@ -38,3 +36,5 @@ export {
 } from './src/inference_endpoint_autocomplete_types';
 
 export { REGISTRY_EXTENSIONS_ROUTE } from './src/constants';
+
+export { type ESQLTelemetryCallbacks } from './src/esql_telemetry_types';

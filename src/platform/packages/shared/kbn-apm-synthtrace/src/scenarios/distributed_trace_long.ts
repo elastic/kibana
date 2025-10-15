@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates a very long and complex distributed trace with many nested spans.
+ */
+
 /* eslint-disable @typescript-eslint/no-shadow */
 
 import type { ApmFields } from '@kbn/apm-synthtrace-client';

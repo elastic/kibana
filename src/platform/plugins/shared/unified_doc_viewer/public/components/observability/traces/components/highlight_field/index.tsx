@@ -10,7 +10,7 @@
 import type { EuiTextProps } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import React from 'react';
-import type { FieldConfigValue } from '../../resources/get_field_configuration';
+import type { FieldConfigValue } from '../../../../content_framework';
 
 interface Props {
   value?: FieldConfigValue;

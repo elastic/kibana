@@ -46,10 +46,13 @@ export function SecuritySolutionServerlessUtils({
 
   // Invalidate API keys when all tests have finished.
   lifecycle.cleanup.add(async () => {
-    rolesCredentials.forEach((credential, role) => {
-      log.debug(`Invalidating API key for role [${role}]`);
-      invalidateApiKey(credential);
-    });
+    const invalidationPromises = Array.from(rolesCredentials.entries()).map(
+      async ([role, credential]) => {
+        log.debug(`Invalidating API key for role [${role}]`);
+        await invalidateApiKey(credential);
+      }
+    );
+    await Promise.all(invalidationPromises);
   });
 
   const createSuperTest = async (role = 'admin') => {

@@ -11,3 +11,5 @@ import { registerLensVisualizationsAPIRoutes } from './visualizations';
 export function registerLensAPIRoutes(args: RegisterAPIRoutesArgs) {
   registerLensVisualizationsAPIRoutes(args);
 }
+
+export * from './schema';

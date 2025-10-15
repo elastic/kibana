@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiIconTip } from '@elastic/eui';
 import type { AuditMessageBase } from '../../../../common/types/audit_message';
 
 interface Props {
@@ -35,11 +35,7 @@ export const JobIcon: FC<Props> = ({ message, showTooltip = false }) => {
   }
 
   if (showTooltip) {
-    return (
-      <EuiToolTip position="bottom" content={message.text}>
-        <EuiIcon type={icon} color={color} />
-      </EuiToolTip>
-    );
+    return <EuiIconTip content={message.text} position="bottom" type={icon} color={color} />;
   } else {
     return <EuiIcon type={icon} color={color} />;
   }

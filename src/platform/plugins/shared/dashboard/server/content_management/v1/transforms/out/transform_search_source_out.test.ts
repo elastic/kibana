@@ -33,10 +33,8 @@ describe('transformSearchSourceOut', () => {
     };
     const result = transformSearchSourceOut(meta, references);
     expect(result).toEqual({
-      searchSource: {
-        filters: [{ foo: 'bar', meta: { index: 'fizzle-1234' } }],
-        query: { query: 'test', language: 'kuery' },
-      },
+      filters: [{ foo: 'bar', meta: { index: 'fizzle-1234' } }],
+      query: { query: 'test', language: 'kuery' },
     });
   });
 
@@ -46,7 +44,7 @@ describe('transformSearchSourceOut', () => {
 
   it('returns empty searchSource if parseSearchSourceJSON throws', () => {
     const meta = { searchSourceJSON: 'not json' };
-    expect(transformSearchSourceOut(meta, [])).toEqual({ searchSource: {} });
+    expect(transformSearchSourceOut(meta, [])).toEqual({});
   });
 
   it('falls back to parsedSearchSource if injectReferences throws', () => {
@@ -58,10 +56,8 @@ describe('transformSearchSourceOut', () => {
     };
     const result = transformSearchSourceOut(meta, []);
     expect(result).toEqual({
-      searchSource: {
-        filters: [{ foo: 'bar', meta: { indexRefName: 'does-not-exist' } }],
-        query: { query: 'test', language: 'kuery' },
-      },
+      filters: [{ foo: 'bar', meta: { indexRefName: 'does-not-exist' } }],
+      query: { query: 'test', language: 'kuery' },
     });
   });
 });

@@ -16,6 +16,9 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { appPaths } from '../../../utils/app_paths';
 
 interface ActiveToolsStatusProps {
   activeToolsCount: number;
@@ -26,6 +29,7 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
   activeToolsCount,
   warningThreshold,
 }) => {
+  const { createOnechatUrl } = useNavigation();
   const isOverThreshold = activeToolsCount > warningThreshold;
   const isZeroTools = activeToolsCount === 0;
   const shouldShowWarning = isOverThreshold || isZeroTools;
@@ -78,7 +82,7 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
                   <EuiText size="m" color={statusColor}>
                     <strong aria-label={statusMessage}>
                       {i18n.translate('xpack.onechat.activeToolsStatus.title', {
-                        defaultMessage: 'You have {count} active tools',
+                        defaultMessage: 'This agent has {count} active tools',
                         values: { count: activeToolsCount },
                       })}
                     </strong>
@@ -88,32 +92,21 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="s" color="subdued">
-                {i18n.translate('xpack.onechat.activeToolsStatus.description', {
-                  defaultMessage:
-                    'Tools are the skills your agent can use to get things done. For best results, try to keep the list under {threshold} — it helps your agent stay focused and respond more clearly.',
-                  values: { threshold: warningThreshold },
-                })}
+                <FormattedMessage
+                  id="xpack.onechat.activeToolsStatus.description"
+                  defaultMessage="{toolsLink} enable agents to work with your data. For best results, keep the selection under {threshold} to avoid overwhelming your agent with too many options."
+                  values={{
+                    toolsLink: (
+                      <EuiLink href={createOnechatUrl(appPaths.tools.list)}>
+                        {i18n.translate('xpack.onechat.activeToolsStatus.toolsLinkText', {
+                          defaultMessage: 'Tools',
+                        })}
+                      </EuiLink>
+                    ),
+                    threshold: warningThreshold,
+                  }}
+                />
               </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiLink
-                href="#"
-                aria-label={i18n.translate('xpack.onechat.activeToolsStatus.learnMoreAriaLabel', {
-                  defaultMessage: 'Learn more about active tools management',
-                })}
-              >
-                <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-                  {i18n.translate('xpack.onechat.activeToolsStatus.learnMore', {
-                    defaultMessage: 'Learn more',
-                  })}
-                  <EuiIcon
-                    type="popout"
-                    aria-label={i18n.translate('xpack.onechat.activeToolsStatus.externalLinkIcon', {
-                      defaultMessage: 'External link',
-                    })}
-                  />
-                </EuiFlexGroup>
-              </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

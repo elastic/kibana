@@ -10,16 +10,15 @@ import { recurse } from 'cypress-recurse';
 import {
   CONFIRM_DELETE_RULE_BTN,
   CONFIRM_DUPLICATE_RULE,
+  CONFIRM_FILL_RULE_GAPS_WARNING_BTN,
   CONFIRM_MANUAL_RULE_RUN_WARNING_BTN,
-  DUPLICATE_WITHOUT_EXCEPTIONS_OPTION,
   DUPLICATE_WITH_EXCEPTIONS_OPTION,
   DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION,
+  DUPLICATE_WITHOUT_EXCEPTIONS_OPTION,
   MODAL_CONFIRMATION_BODY,
   MODAL_CONFIRMATION_BTN,
-  MODAL_CONFIRMATION_TITLE,
   RULES_TAGS_FILTER_BTN,
   TOASTER_BODY,
-  CONFIRM_FILL_RULE_GAPS_WARNING_BTN,
 } from '../screens/alerts_detection_rules';
 import { EUI_SELECTABLE_LIST_ITEM, TIMELINE_SEARCHBOX } from '../screens/common/controls';
 import {
@@ -27,10 +26,16 @@ import {
   ADD_INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM,
   ADD_RULE_ACTIONS_MENU_ITEM,
   ADD_TAGS_RULE_BULK_MENU_ITEM,
+  ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM,
   APPLY_TIMELINE_RULE_BULK_MENU_ITEM,
   BULK_ACTIONS_BTN,
   BULK_ACTIONS_PROGRESS_BTN,
   BULK_EXPORT_ACTION_BTN,
+  BULK_FILL_RULE_GAPS_BTN,
+  BULK_FILL_RULE_GAPS_WARNING_MODAL,
+  BULK_MANUAL_RULE_RUN_BTN,
+  BULK_MANUAL_RULE_RUN_WARNING_MODAL,
+  DELETE_ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM,
   DELETE_INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
   DELETE_INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM,
   DELETE_RULE_BULK_BTN,
@@ -52,19 +57,13 @@ import {
   RULES_BULK_EDIT_SCHEDULES_WARNING,
   RULES_BULK_EDIT_TAGS,
   RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR,
-  BULK_MANUAL_RULE_RUN_BTN,
-  BULK_MANUAL_RULE_RUN_WARNING_MODAL,
+  SET_ALERT_SUPPRESSION_FOR_THRESHOLD_BULK_MENU_ITEM,
+  SET_ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM,
   TAGS_RULE_BULK_MENU_ITEM,
   UPDATE_SCHEDULE_INTERVAL_INPUT,
   UPDATE_SCHEDULE_LOOKBACK_INPUT,
   UPDATE_SCHEDULE_MENU_ITEM,
   UPDATE_SCHEDULE_TIME_UNIT_SELECT,
-  ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM,
-  SET_ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM,
-  DELETE_ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM,
-  SET_ALERT_SUPPRESSION_FOR_THRESHOLD_BULK_MENU_ITEM,
-  BULK_FILL_RULE_GAPS_BTN,
-  BULK_FILL_RULE_GAPS_WARNING_MODAL,
 } from '../screens/rules_bulk_actions';
 import { SCHEDULE_DETAILS } from '../screens/rule_details';
 
@@ -470,13 +469,6 @@ export const checkEsqlRulesCannotBeModified = (rulesCount: number) => {
   );
 };
 
-export const waitForMixedRulesBulkEditModal = (rulesCount: number) => {
-  cy.get(MODAL_CONFIRMATION_TITLE).should(
-    'have.text',
-    `This action can only be applied to ${rulesCount} rules`
-  );
-};
-
 // SCHEDULE MANUAL RULE RUN
 export const scheduleManualRuleRunForSelectedRules = (
   enabledCount: number,
@@ -488,7 +480,7 @@ export const scheduleManualRuleRunForSelectedRules = (
   if (disabledCount > 0) {
     cy.get(BULK_MANUAL_RULE_RUN_WARNING_MODAL).should(
       'have.text',
-      `This action can only be applied to ${enabledCount} rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot schedule manual rule run for disabled rules)CancelSchedule ${enabledCount} rules`
+      `This action can only be applied to ${enabledCount} rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot schedule manual rule run for disabled rules)CancelSchedule ${enabledCount} rulesYou are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.`
     );
     cy.get(CONFIRM_MANUAL_RULE_RUN_WARNING_BTN).click();
   }
@@ -511,7 +503,7 @@ export const scheduleBulkFillGapsForSelectedRules = (
   if (disabledCount > 0) {
     cy.get(BULK_FILL_RULE_GAPS_WARNING_MODAL).should(
       'have.text',
-      `This action can only be applied to ${enabledCount} rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot fill gaps for disabled rules)CancelSchedule gap fills`
+      `This action can only be applied to ${enabledCount} rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot fill gaps for disabled rules)CancelSchedule gap fillsYou are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.`
     );
     cy.get(CONFIRM_FILL_RULE_GAPS_WARNING_BTN).click();
   }

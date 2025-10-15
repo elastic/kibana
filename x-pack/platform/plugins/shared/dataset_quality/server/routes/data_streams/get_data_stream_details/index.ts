@@ -8,7 +8,11 @@
 import { badRequest } from '@hapi/boom';
 import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
 import type { DataStreamDetails } from '../../../../common/api_types';
-import { FAILURE_STORE_PRIVILEGE, MAX_HOSTS_METRIC_VALUE } from '../../../../common/constants';
+import {
+  FAILURE_STORE_PRIVILEGE,
+  MANAGE_FAILURE_STORE_PRIVILEGE,
+  MAX_HOSTS_METRIC_VALUE,
+} from '../../../../common/constants';
 import { _IGNORED } from '../../../../common/es_fields';
 import { datasetQualityPrivileges } from '../../../services';
 import { createDatasetQualityESClient } from '../../../utils';
@@ -40,7 +44,7 @@ export async function getDataStreamDetails({
     await datasetQualityPrivileges.getHasIndexPrivileges(
       esClientAsCurrentUser,
       [dataStream],
-      ['monitor', FAILURE_STORE_PRIVILEGE]
+      ['monitor', FAILURE_STORE_PRIVILEGE, MANAGE_FAILURE_STORE_PRIVILEGE]
     )
   )[dataStream];
 
@@ -91,8 +95,10 @@ export async function getDataStreamDetails({
       userPrivileges: {
         canMonitor: dataStreamPrivileges.monitor,
         canReadFailureStore: dataStreamPrivileges[FAILURE_STORE_PRIVILEGE],
+        canManageFailureStore: dataStreamPrivileges[MANAGE_FAILURE_STORE_PRIVILEGE],
       },
       customRetentionPeriod: esDataStream?.customRetentionPeriod,
+      defaultRetentionPeriod: esDataStream?.defaultRetentionPeriod,
     };
   } catch (e) {
     // Respond with empty object if data stream does not exist

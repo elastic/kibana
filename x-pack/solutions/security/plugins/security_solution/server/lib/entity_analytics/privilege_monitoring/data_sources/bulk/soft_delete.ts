@@ -27,31 +27,48 @@ import type { PrivMonBulkUser } from '../../types';
  */
 export const bulkSoftDeleteOperationsFactory =
   (dataClient: PrivilegeMonitoringDataClient) =>
-  (users: PrivMonBulkUser[], userIndexName: string): object[] => {
+  (
+    users: PrivMonBulkUser[],
+    userIndexName: string,
+    sourceType: 'index' | 'entity_analytics_integration'
+  ): object[] => {
     const ops: object[] = [];
     dataClient.log('debug', `Building bulk operations for soft delete users`);
+    const now = new Date().toISOString();
     for (const user of users) {
       ops.push(
         { update: { _index: userIndexName, _id: user.existingUserId } },
         {
           script: {
             source: `
+            ctx._source['@timestamp'] = params.now;
+            ctx._source.event.ingested = params.now;
+            
             if (ctx._source.labels?.source_ids != null && !ctx._source.labels?.source_ids.isEmpty()) {
               ctx._source.labels.source_ids.removeIf(idx -> idx == params.source_id);
             }
+            
+            if (ctx._source.entity_analytics_monitoring != null && ctx._source.entity_analytics_monitoring.labels != null) {
+             ctx._source.entity_analytics_monitoring.labels.removeIf(l -> l != null && l.source == params.source_id);
+          }
 
             if (ctx._source.labels?.source_ids == null || ctx._source.labels.source_ids.isEmpty()) {
               if (ctx._source.labels?.sources != null) {
-                ctx._source.labels.sources.removeIf(src -> src == 'index');
+                ctx._source.labels.sources.removeIf(src -> src == params.source_type);
               }
             }
 
             if (ctx._source.labels?.sources == null || ctx._source.labels.sources.isEmpty()) {
               ctx._source.user.is_privileged = false;
+              ctx._source.user.entity = ctx._source.user.entity != null ? ctx._source.user.entity : new HashMap();
+              ctx._source.user.entity.attributes = ctx._source.user.entity.attributes != null ? ctx._source.user.entity.attributes : new HashMap();
+              ctx._source.user.entity.attributes.Privileged = false;
             }
           `,
             params: {
               source_id: user.sourceId,
+              now,
+              source_type: sourceType,
             },
           },
         }

@@ -25,7 +25,6 @@ import {
   INTERNAL_API_ACCESS,
   PostEvaluateBody,
   PostEvaluateResponse,
-  DefendInsightType,
   INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
@@ -34,7 +33,6 @@ import type { StructuredTool } from '@langchain/core/tools';
 import { omit } from 'lodash/fp';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { HumanMessage } from '@langchain/core/messages';
-import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/prompts';
 import { evaluateDefendInsights } from '../../lib/defend_insights/evaluation';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
 import { promptGroupId } from '../../lib/prompt/local_prompt_object';
@@ -227,29 +225,15 @@ export const postEvaluateRoute = (
           }
 
           if (defendInsightsGraphs.length > 0) {
-            const connectorsWithPrompts = await Promise.all(
-              connectors.map(async (connector) => {
-                const prompts = await getDefendInsightsPrompt({
-                  type: DefendInsightType.Enum.incompatible_antivirus,
-                  actionsClient,
-                  connectorId: connector.id,
-                  connector,
-                  savedObjectsClient,
-                });
-                return {
-                  ...connector,
-                  prompts,
-                };
-              })
-            );
             try {
               void evaluateDefendInsights({
                 actionsClient,
                 defendInsightsGraphs,
-                connectors: connectorsWithPrompts,
+                connectors,
                 connectorTimeout: RESPONSE_TIMEOUT,
                 datasetName,
                 esClient,
+                soClient: savedObjectsClient,
                 kbDataClient,
                 esClientInternalUser,
                 evaluationId,
@@ -465,6 +449,7 @@ export const postEvaluateRoute = (
                   actionsClient,
                   savedObjectsClient,
                   tools,
+                  checkpointSaver: await assistantContext.getCheckpointSaver(),
                 }),
               };
             })
@@ -522,6 +507,9 @@ export const postEvaluateRoute = (
                   {
                     runName,
                     tags: ['evaluation'],
+                    configurable: {
+                      thread_id: uuidv4(),
+                    },
                   }
                 );
                 const lastMessage = result.messages[result.messages.length - 1];

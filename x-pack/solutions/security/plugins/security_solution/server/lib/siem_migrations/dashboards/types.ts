@@ -7,9 +7,10 @@
 
 import type { IndexPatternAdapter } from '@kbn/index-adapter';
 import type {
-  SiemMigrationsClientDependencies,
-  SiemMigrationsCreateClientParams,
-} from '../common/types';
+  DashboardMigration,
+  DashboardMigrationDashboard,
+} from '../../../../common/siem_migrations/model/dashboard_migration.gen';
+import type { Stored } from '../types';
 
 export interface DashboardMigrationAdapters {
   migrations: IndexPatternAdapter;
@@ -25,7 +26,5 @@ export type DashboardMigrationIndexNameProviders = Record<
   DashboardMigrationIndexNameProvider
 >;
 
-export type DashboardMigrationsClientDependencies = SiemMigrationsClientDependencies;
-
-export type DashboardMigrationsCreateClientParams =
-  SiemMigrationsCreateClientParams<DashboardMigrationsClientDependencies>;
+export type StoredDashboardMigration = Stored<DashboardMigration>;
+export type StoredDashboardMigrationDashboard = Stored<DashboardMigrationDashboard>;

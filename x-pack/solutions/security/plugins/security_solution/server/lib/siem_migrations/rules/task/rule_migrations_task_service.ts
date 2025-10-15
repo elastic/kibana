@@ -20,6 +20,7 @@ export class RuleMigrationsTaskService {
   }
 
   public createClient({
+    request,
     currentUser,
     dataClient,
     dependencies,
@@ -28,6 +29,7 @@ export class RuleMigrationsTaskService {
       this.migrationsRunning,
       this.logger,
       dataClient,
+      request,
       currentUser,
       dependencies
     );

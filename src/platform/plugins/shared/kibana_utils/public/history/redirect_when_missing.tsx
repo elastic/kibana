@@ -19,10 +19,26 @@ import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { SavedObjectNotFound } from '..';
 import { KibanaThemeProvider } from '../theme';
 
-const ReactMarkdown = React.lazy(() => import('react-markdown'));
-const ErrorRenderer = (props: { children: string }) => (
+type MarkdownRendererProps = {
+  basePath: HttpStart['basePath'];
+  children: string;
+};
+
+const MarkdownRenderer = React.lazy(async () => {
+  const { default: ReactMarkdown } = await import('react-markdown');
+  const WrappedRenderer = ({ basePath, children }: MarkdownRendererProps) => (
+    <ReactMarkdown
+      transformLinkUri={(href) => ReactMarkdown.uriTransformer(basePath.prepend(href))}
+      children={children}
+    />
+  );
+
+  return { default: WrappedRenderer };
+});
+
+const ErrorRenderer = (props: MarkdownRendererProps) => (
   <React.Suspense fallback={<EuiLoadingSpinner />}>
-    <ReactMarkdown {...props} />
+    <MarkdownRenderer {...props} />
   </React.Suspense>
 );
 
@@ -102,7 +118,7 @@ export function redirectWhenMissing({
       text: (element: HTMLElement) => {
         ReactDOM.render(
           <KibanaThemeProvider theme$={theme.theme$} userProfile={userProfile}>
-            <ErrorRenderer>{error.message}</ErrorRenderer>
+            <ErrorRenderer basePath={basePath}>{error.message}</ErrorRenderer>
           </KibanaThemeProvider>,
           element
         );

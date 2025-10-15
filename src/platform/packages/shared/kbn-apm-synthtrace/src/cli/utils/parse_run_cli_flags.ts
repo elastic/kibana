@@ -75,12 +75,14 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'target',
       'workers',
       'kibana',
+      'apiKey',
       'concurrency',
       'versionOverride',
       'clean',
       'assume-package-version',
       'liveBucketSize',
-      'uniqueIds'
+      'uniqueIds',
+      'insecure'
     ),
     scenarioOpts: flags.scenarioOpts as unknown as Record<string, any>,
     logLevel: parsedLogLevel,

@@ -37,6 +37,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./bulk_uninstall'));
     loadTestFile(require.resolve('./bulk_install_upgrade'));
     loadTestFile(require.resolve('./bulk_install'));
+    loadTestFile(require.resolve('./bulk_rollback'));
     loadTestFile(require.resolve('./update_assets'));
     loadTestFile(require.resolve('./data_stream'));
     loadTestFile(require.resolve('./package_install_complete'));

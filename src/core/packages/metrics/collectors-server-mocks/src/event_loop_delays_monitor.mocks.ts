@@ -27,6 +27,7 @@ function createMockRawNsDataHistogram(
     percentiles: {
       '50': 12607487,
       '75': 12615679,
+      '90': 12648447,
       '95': 12648447,
       '99': 12713983,
     },
@@ -51,6 +52,7 @@ function createMockMonitorDataMsHistogram(
     percentiles: {
       '50': 12.607487,
       '75': 12.615679,
+      '90': 12.648447,
       '95': 12.648447,
       '99': 12.713983,
     },

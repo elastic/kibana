@@ -19,10 +19,9 @@ const logsStreamDefinition: Streams.WiredStream.Definition = {
       fields: {},
       routing: [],
     },
-    lifecycle: {
-      inherit: {},
-    },
+    lifecycle: { inherit: {} },
     processing: { steps: [] },
+    settings: {},
   },
 };
 

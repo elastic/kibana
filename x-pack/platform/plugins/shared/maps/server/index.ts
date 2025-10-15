@@ -10,7 +10,25 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { MapsXPackConfig } from './config';
 import { configSchema } from './config';
 
+export type { StoredMapAttributes } from './saved_objects/types';
+
 export type {
+  AdhocDataView,
+  CustomIcon,
+  MapAttributes,
+  MapCenter,
+  MapSettings,
+
+  //
+  // Layer types
+  //
+  Attribution,
+  StoredEMSVectorTileLayer,
+  StoredHeatmapLayer,
+  StoredLayerGroup,
+  StoredRasterLayer,
+  StoredVectorLayer,
+
   //
   // Source types
   //
@@ -48,7 +66,6 @@ export type {
   ColorDynamicStylePropertyDescriptor,
   ColorStaticStylePropertyDescriptor,
   ColorStylePropertyDescriptor,
-  CustomIcon,
   DynamicStyleProperties,
   DynamicStylePropertyOptions,
   EMSVectorTileStyleDescriptor,

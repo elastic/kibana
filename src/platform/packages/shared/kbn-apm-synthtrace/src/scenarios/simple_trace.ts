@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates a simple APM trace with a mix of successful and failed transactions, plus metrics.
+ */
+
 import type { ApmFields, Instance } from '@kbn/apm-synthtrace-client';
 import { apm, ApmSynthtracePipelineSchema } from '@kbn/apm-synthtrace-client';
 import type { Scenario } from '../cli/scenario';

@@ -19,7 +19,22 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
+
 import type { Pipeline } from '../../../../../common/types';
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    deleteAction: css`
+      color: ${euiTheme.colors.dangerText};
+    `,
+    contextMenu: css`
+      width: 150px;
+    `,
+  };
+};
 
 export interface Props {
   pipeline: Pipeline;
@@ -40,8 +55,7 @@ export const FlyoutFooter = ({
   renderViewTreeButton,
   onViewTreeClick,
 }: Props) => {
-  const { euiTheme } = useEuiTheme();
-
+  const styles = useStyles();
   const [showPopover, setShowPopover] = useState(false);
   const popoverActions = [
     /**
@@ -67,7 +81,7 @@ export const FlyoutFooter = ({
         setShowPopover(false);
         onDeleteClick([pipeline]);
       },
-      css: { color: euiTheme.colors.dangerText },
+      css: styles.deleteAction,
     },
   ];
 
@@ -141,7 +155,7 @@ export const FlyoutFooter = ({
                       items: popoverActions,
                     },
                   ]}
-                  css={{ width: '150px' }}
+                  css={styles.contextMenu}
                 />
               </EuiPopover>
             </EuiFlexItem>

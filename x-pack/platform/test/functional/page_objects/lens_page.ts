@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import chroma from 'chroma-js';
 import expect from '@kbn/expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { FittingFunction, XYCurveType } from '@kbn/lens-plugin/public';
@@ -22,6 +23,8 @@ declare global {
     ELASTIC_LENS_CSV_CONTENT?: Record<string, { content: string; type: string }>;
   }
 }
+
+const ECH_BADGE_SELECTOR = '.echBadge__content';
 
 export function LensPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -1469,10 +1472,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           await this.getMetricElementIfExists('.echMetricText__subtitle', tile)
         )?.getAttribute('innerText'),
         extraText: await (
-          await this.getMetricElementIfExists('.echMetricText__extra', tile)
+          await this.getMetricElementIfExists('.echMetricText__extraBlock', tile)
         )?.getAttribute('innerText'),
         value: await (
-          await this.getMetricElementIfExists('.echMetricText__value', tile)
+          await this.getMetricElementIfExists('.echMetricText__valueBlock', tile)
         )?.getAttribute('innerText'),
         color: await (
           await this.getMetricElementIfExists('.echMetric', tile)
@@ -2119,6 +2122,37 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return find.existsByCssSelector(
         `[data-test-subj="lnsDataTable"][class*="cellPadding-${size}-fontSize-${size}"]`
       );
+    },
+
+    async getSecondaryMetricLabel(tile?: WebElementWrapper) {
+      const ECH_SECONDARY_METRIC_LABEL_SELECTOR = '.echSecondaryMetric__label';
+      const label = tile
+        ? await this.getMetricElementIfExists(ECH_SECONDARY_METRIC_LABEL_SELECTOR, tile)
+        : await find.byCssSelector(ECH_SECONDARY_METRIC_LABEL_SELECTOR);
+      return label ? label.getAttribute('innerText') : undefined;
+    },
+
+    async hasSecondaryMetricBadge(tile?: WebElementWrapper) {
+      return tile
+        ? Boolean(this.getMetricElementIfExists(ECH_BADGE_SELECTOR, tile))
+        : find.existsByCssSelector(ECH_BADGE_SELECTOR);
+    },
+
+    async getSecondaryMetricBadge(tile?: WebElementWrapper) {
+      return tile
+        ? this.getMetricElementIfExists(ECH_BADGE_SELECTOR, tile)
+        : find.byCssSelector(ECH_BADGE_SELECTOR);
+    },
+
+    async getSecondaryMetricBadgeText(tile?: WebElementWrapper) {
+      const badge = await this.getSecondaryMetricBadge(tile);
+      return badge ? await badge.getVisibleText() : undefined;
+    },
+
+    async getSecondaryMetricBadgeColor(tile?: WebElementWrapper) {
+      const badge = await this.getSecondaryMetricBadge(tile);
+      const color = badge ? await badge.getComputedStyle('background-color') : undefined;
+      return color ? chroma(color).hex().toUpperCase() : undefined;
     },
   });
 }

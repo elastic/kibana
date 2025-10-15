@@ -9,8 +9,11 @@
 
 import { z } from '@kbn/zod';
 import { createTracedEsClient } from '@kbn/traced-es-client';
+import { isoToEpoch } from '@kbn/zod-helpers';
+import { parse as dateMathParse } from '@kbn/datemath';
 import { getMetricFields } from './get_metric_fields';
 import { createRoute } from '../create_route';
+import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
 
 export const getFieldsRoute = createRoute({
   endpoint: 'GET /internal/metrics_experience/fields',
@@ -18,15 +21,22 @@ export const getFieldsRoute = createRoute({
   params: z.object({
     query: z.object({
       index: z.string().default('metrics-*'),
-      to: z.string().default('now'),
-      from: z.string().default('now-15m'),
+      to: z.string().datetime().default(dateMathParse('now')!.toISOString()).transform(isoToEpoch),
+      from: z
+        .string()
+        .datetime()
+        .default(dateMathParse('now-15m', { roundUp: true })!.toISOString())
+        .transform(isoToEpoch),
       fields: z.union([z.string(), z.array(z.string())]).default('*'),
       page: z.coerce.number().int().positive().default(1),
       size: z.coerce.number().int().positive().default(100),
     }),
   }),
-  handler: async ({ context, params, logger }) => {
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+  handler: async ({ context, params, logger, response }) => {
+    const { elasticsearch, featureFlags } = await context.core;
+    await throwNotFoundIfMetricsExperienceDisabled(featureFlags);
+
+    const esClient = elasticsearch.client.asCurrentUser;
     const page = params.query.page;
     const size = params.query.size;
 
@@ -37,8 +47,7 @@ export const getFieldsRoute = createRoute({
         plugin: 'metrics_experience',
       }),
       indexPattern: params.query.index,
-      from: params.query.from,
-      to: params.query.to,
+      timerange: { from: params.query.from, to: params.query.to },
       fields: params.query.fields,
       page,
       size,

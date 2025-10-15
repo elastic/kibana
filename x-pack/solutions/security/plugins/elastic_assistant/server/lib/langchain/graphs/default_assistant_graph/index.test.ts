@@ -99,6 +99,9 @@ describe('callAssistantGraph', () => {
     traceOptions: {},
     responseLanguage: 'English',
     contentReferencesStore: newContentReferencesStoreMock(),
+    assistantContext: {
+      getCheckpointSaver: jest.fn().mockResolvedValue(null),
+    },
     core: {
       uiSettings: {
         client: {

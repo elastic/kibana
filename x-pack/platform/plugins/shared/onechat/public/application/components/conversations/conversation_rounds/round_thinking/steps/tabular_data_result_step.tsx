@@ -4,43 +4,70 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBasicTable, EuiCode } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiLink, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
-import React from 'react';
+import { useOnechatServices } from '../../../../../hooks/use_onechat_service';
 
 interface TabularDataResultStepProps {
   result: TabularDataResult;
 }
 
-const formatCellValue = (value: unknown): React.ReactNode => {
-  if (value === null || value === undefined) {
-    return '—';
-  }
-  if (typeof value === 'object') {
-    try {
-      return <EuiCode>{JSON.stringify(value)}</EuiCode>;
-    } catch (e) {
-      return String(value);
-    }
-  }
-  return String(value);
-};
-
 export const TabularDataResultStep: React.FC<TabularDataResultStepProps> = ({
   result: { data },
 }) => {
+  const {
+    startDependencies: { share },
+  } = useOnechatServices();
+
+  const {
+    url: { locators },
+  } = share;
+
+  const discoverLocator = useMemo(() => locators.get('DISCOVER_APP_LOCATOR'), [locators]);
+
+  const { query: esqlQuery } = data;
+
+  const discoverUrl = useMemo(() => {
+    if (!esqlQuery) return undefined;
+    return discoverLocator?.getRedirectUrl({
+      query: { esql: esqlQuery },
+    });
+  }, [discoverLocator, esqlQuery]);
+
   return (
-    <EuiBasicTable
-      columns={data.columns.map((column) => {
-        return {
-          field: column.name,
-          name: column.name,
-          render: (value: unknown) => formatCellValue(value),
-        };
-      })}
-      items={data.values.map((row) => {
-        return Object.fromEntries(data.columns.map((col, idx) => [col.name, row[idx]]));
-      })}
-    />
+    <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.onechat.conversation.thinking.tabularDataResultStep.foundRecordsMessage"
+          defaultMessage="Found {results}"
+          values={{
+            results: (
+              <EuiLink
+                href={discoverUrl}
+                data-test-subj="onechat-esql-data-result-see-in-discover"
+                aria-label={i18n.translate(
+                  'xpack.onechat.conversation.thinking.tabularDataResultStep.seeInDiscoverAriaLabel',
+                  {
+                    defaultMessage: 'Explore results in Discover',
+                  }
+                )}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.onechat.conversation.thinking.tabularDataResultStep.foundRecordsMessage"
+                  defaultMessage="{totalResults, plural, one {{totalResults, number} result} other {{totalResults, number} results}}"
+                  values={{
+                    totalResults: data.values.length,
+                  }}
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
+    </EuiFlexGroup>
   );
 };

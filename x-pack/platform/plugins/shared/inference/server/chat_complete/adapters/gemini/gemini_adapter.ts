@@ -228,9 +228,10 @@ function messageToGeminiMapper() {
               functionResponse: {
                 name: message.toolCallId,
                 // gemini expects a structured response shape, making sure we're not sending a string
-                response: (typeof message.response === 'string'
-                  ? { response: message.response }
-                  : (message.response as string)) as object,
+                response:
+                  typeof message.response === 'string'
+                    ? { response: message.response }
+                    : message.response,
               },
             },
           ],

@@ -21,6 +21,7 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { postPagerduty } from './post_pagerduty';
 import { convertTimestamp } from '../lib/convert_timestamp';
 
@@ -229,6 +230,7 @@ async function executor(
       actionId,
       message,
       serviceMessage: err.message,
+      errorSource: getErrorSource(err),
     };
   }
 

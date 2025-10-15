@@ -10,11 +10,16 @@
 import {
   bucketDateHistogramOperationSchema,
   bucketTermsOperationSchema,
-  bucketFilterOperationSchema,
+  bucketFiltersOperationSchema,
   bucketHistogramOperationSchema,
   bucketRangesOperationSchema,
   bucketOperationDefinitionSchema,
 } from './bucket_ops';
+import {
+  LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
+  LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
+  LENS_TERMS_SIZE_DEFAULT,
+} from './constants';
 
 describe('Bucket Operation Schemas', () => {
   describe('dateHistogram operation', () => {
@@ -22,6 +27,9 @@ describe('Bucket Operation Schemas', () => {
       const input = {
         operation: 'date_histogram',
         field: 'timestamp',
+        suggested_interval: 'auto',
+        include_empty_rows: true,
+        use_original_time_range: true,
       };
 
       const validated = bucketDateHistogramOperationSchema.validate(input);
@@ -42,10 +50,9 @@ describe('Bucket Operation Schemas', () => {
       const input = {
         operation: 'terms',
         fields: ['category'],
-        size: 5,
       };
       const validated = bucketTermsOperationSchema.validate(input);
-      expect(validated).toEqual(input);
+      expect(validated).toEqual({ ...input, size: LENS_TERMS_SIZE_DEFAULT });
     });
 
     it('validates a valid terms configuration', () => {
@@ -91,7 +98,7 @@ describe('Bucket Operation Schemas', () => {
         },
         {
           type: 'custom' as const,
-          operation: 'field-op-only' as const,
+          operation: 'average' as const,
           field: 'myfield',
           direction: 'asc' as const,
         },
@@ -125,7 +132,7 @@ describe('Bucket Operation Schemas', () => {
         ],
       };
 
-      const validated = bucketFilterOperationSchema.validate(input);
+      const validated = bucketFiltersOperationSchema.validate(input);
       expect(validated).toEqual(input);
     });
   });
@@ -135,11 +142,14 @@ describe('Bucket Operation Schemas', () => {
       const input = {
         operation: 'histogram',
         field: 'price',
-        granularity: 5,
       };
 
       const validated = bucketHistogramOperationSchema.validate(input);
-      expect(validated).toEqual(input);
+      expect(validated).toEqual({
+        ...input,
+        granularity: LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
+        include_empty_rows: LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
+      });
     });
 
     it('enforces granularity limits', () => {
@@ -184,16 +194,20 @@ describe('Bucket Operation Schemas', () => {
         {
           operation: 'date_histogram',
           field: 'timestamp',
+          suggested_interval: 'auto',
+          include_empty_rows: true,
+          use_original_time_range: true,
         },
         {
           operation: 'terms',
           fields: ['category'],
-          size: 5,
+          size: LENS_TERMS_SIZE_DEFAULT,
         },
         {
           operation: 'histogram',
           field: 'price',
-          granularity: 5,
+          granularity: LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
+          include_empty_rows: LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
         },
         {
           operation: 'range',

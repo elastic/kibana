@@ -20,11 +20,223 @@ import type {
   IndicesStats,
 } from '../indices.metadata.types';
 import type { NodeIngestPipelinesStats } from '../ingest_pipelines_stats.types';
-import { SiemMigrationsEventTypes } from './types';
 import type {
   HealthDiagnosticQueryResult,
   HealthDiagnosticQueryStats,
 } from '../diagnostic/health_diagnostic_service.types';
+
+import { SIEM_MIGRATIONS_EVENTS } from './events/siem_migrations';
+import type {
+  RuleBulkUpgradeTelemetry,
+  RuleUpgradeTelemetry,
+} from '../../detection_engine/prebuilt_rules/api/perform_rule_upgrade/update_rule_telemetry';
+
+// Telemetry event that is sent for each rule that is upgraded during a prebuilt rule upgrade
+export const DETECTION_RULE_UPGRADE_EVENT: EventTypeOpts<RuleUpgradeTelemetry> = {
+  eventType: 'detection_rule_upgrade',
+  schema: {
+    ruleId: { type: 'keyword', _meta: { description: 'Rule ID' } },
+    ruleName: { type: 'keyword', _meta: { description: 'Rule name' } },
+    hasBaseVersion: {
+      type: 'boolean',
+      _meta: { description: 'True if base version exists for this rule' },
+    },
+    finalResult: {
+      type: 'keyword',
+      _meta: { description: 'Overall outcome: SUCCESS | SKIP | ERROR' },
+    },
+    updatedFieldsSummary: {
+      properties: {
+        count: { type: 'long', _meta: { description: 'Number of updated fields' } },
+        nonSolvableConflictsCount: {
+          type: 'long',
+          _meta: { description: 'Number of non-solvable conflicts' },
+        },
+        solvableConflictsCount: {
+          type: 'long',
+          _meta: { description: 'Number of solvable conflicts' },
+        },
+        noConflictsCount: {
+          type: 'long',
+          _meta: { description: 'Number of fields without conflicts' },
+        },
+      },
+    },
+    updatedFieldsTotal: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Rule field name',
+        },
+      },
+      _meta: { description: 'Fields that were updated' },
+    },
+    updatedFieldsWithNonSolvableConflicts: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Rule field name',
+        },
+      },
+      _meta: { description: 'Fields with non-solvable conflicts' },
+    },
+    updatedFieldsWithSolvableConflicts: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Rule field name',
+        },
+      },
+      _meta: { description: 'Fields with solvable conflicts' },
+    },
+    updatedFieldsWithNoConflicts: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Rule field name',
+        },
+      },
+      _meta: { description: 'Fields updated without conflicts' },
+    },
+  },
+};
+
+// Telemetry event that is sent for each bulk upgrade rules request
+export const DETECTION_RULE_BULK_UPGRADE_EVENT: EventTypeOpts<RuleBulkUpgradeTelemetry> = {
+  eventType: 'detection_rule_bulk_upgrade',
+  schema: {
+    successfulUpdates: {
+      properties: {
+        totalNumberOfRules: {
+          type: 'long',
+          _meta: { description: 'Number of successfully updated rules in bulk update request' },
+        },
+        numOfCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description: 'Number of successfully updated customized rules in bulk update request',
+          },
+        },
+        numOfNonCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of successfully updated non-customized rules in bulk update request',
+          },
+        },
+        numOfNonSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of successfully updated rules with non-solvable conflicts in bulk update request',
+          },
+        },
+        numOfSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of successfully updated rules with solvable conflicts in bulk update request',
+          },
+        },
+        numOfNoConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of successfully updated rules with no conflicts in bulk update request',
+          },
+        },
+      },
+    },
+    errorUpdates: {
+      properties: {
+        totalNumberOfRules: {
+          type: 'long',
+          _meta: { description: 'Number of rules that failed to update in bulk update request' },
+        },
+        numOfCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description: 'Number of customized rules that failed to update in bulk update request',
+          },
+        },
+        numOfNonCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of non-customized rules that failed to update in bulk update request',
+          },
+        },
+        numOfNonSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with non-solvable conflicts that failed to update in bulk update request',
+          },
+        },
+        numOfSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with solvable conflicts that failed to update in bulk update request',
+          },
+        },
+        numOfNoConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with no conflicts that failed to update in bulk update request',
+          },
+        },
+      },
+    },
+    skippedUpdates: {
+      properties: {
+        totalNumberOfRules: {
+          type: 'long',
+          _meta: { description: 'Number of rules that were skipped during bulk update request' },
+        },
+        numOfCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description: 'Number of customized rules that were skipped during bulk update request',
+          },
+        },
+        numOfNonCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of non-customized rules that were skipped during bulk update request',
+          },
+        },
+        numOfNonSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with non-solvable conflicts that were skipped during bulk update request',
+          },
+        },
+        numOfSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with solvable conflicts that were skipped during bulk update request',
+          },
+        },
+        numOfNoConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with no conflicts that were skipped during bulk update request',
+          },
+        },
+      },
+    },
+  },
+};
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
@@ -1161,397 +1373,6 @@ export const ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT: EventTypeOpts<{
   },
 };
 
-export const SIEM_MIGRATIONS_MIGRATION_SUCCESS: EventTypeOpts<{
-  model: string;
-  migrationId: string;
-  duration: number;
-  completed: number;
-  failed: number;
-  total: number;
-  eventName: string;
-}> = {
-  eventType: SiemMigrationsEventTypes.MigrationSuccess,
-  schema: {
-    eventName: {
-      type: 'keyword',
-      _meta: {
-        description: 'The event name/description',
-        optional: false,
-      },
-    },
-    model: {
-      type: 'keyword',
-      _meta: {
-        description: 'The LLM model that was used',
-      },
-    },
-    migrationId: {
-      type: 'keyword',
-      _meta: {
-        description: 'Unique identifier for the migration',
-      },
-    },
-    duration: {
-      type: 'long',
-      _meta: {
-        description: 'Duration of the migration in milliseconds',
-      },
-    },
-    completed: {
-      type: 'long',
-      _meta: {
-        description: 'Number of rules successfully migrated',
-      },
-    },
-    failed: {
-      type: 'long',
-      _meta: {
-        description: 'Number of rules that failed to migrate',
-      },
-    },
-    total: {
-      type: 'long',
-      _meta: {
-        description: 'Total number of rules to migrate',
-      },
-    },
-  },
-};
-
-export const SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS: EventTypeOpts<{
-  model: string;
-  migrationId: string;
-  duration: number;
-  translationResult: string;
-  prebuiltMatch: boolean;
-  eventName: string;
-}> = {
-  eventType: SiemMigrationsEventTypes.TranslationSuccess,
-  schema: {
-    eventName: {
-      type: 'keyword',
-      _meta: {
-        description: 'The event name/description',
-        optional: false,
-      },
-    },
-    translationResult: {
-      type: 'keyword',
-      _meta: {
-        description: 'Describes if the translation was full or partial',
-      },
-    },
-    model: {
-      type: 'keyword',
-      _meta: {
-        description: 'The LLM model that was used',
-      },
-    },
-    migrationId: {
-      type: 'keyword',
-      _meta: {
-        description: 'Unique identifier for the migration',
-      },
-    },
-    duration: {
-      type: 'long',
-      _meta: {
-        description: 'Duration of the migration in milliseconds',
-      },
-    },
-    prebuiltMatch: {
-      type: 'boolean',
-      _meta: {
-        description: 'Whether a prebuilt rule was matched',
-      },
-    },
-  },
-};
-
-export const SIEM_MIGRATIONS_PREBUILT_RULES_MATCH: EventTypeOpts<{
-  model: string;
-  migrationId: string;
-  preFilterRuleNames: string[];
-  preFilterRuleCount: number;
-  postFilterRuleName: string;
-  postFilterRuleCount: number;
-  eventName: string;
-}> = {
-  eventType: SiemMigrationsEventTypes.PrebuiltRulesMatch,
-  schema: {
-    eventName: {
-      type: 'keyword',
-      _meta: {
-        description: 'The event name/description',
-        optional: false,
-      },
-    },
-    model: {
-      type: 'keyword',
-      _meta: {
-        description: 'The LLM model that was used',
-      },
-    },
-    migrationId: {
-      type: 'keyword',
-      _meta: {
-        description: 'Unique identifier for the migration',
-      },
-    },
-    preFilterRuleNames: {
-      type: 'array',
-      items: {
-        type: 'keyword',
-        _meta: {
-          description: 'List of matched rules from Semantic search before LLM filtering',
-        },
-      },
-    },
-    preFilterRuleCount: {
-      type: 'long',
-      _meta: {
-        description: 'Count of rules matched before LLM filtering',
-      },
-    },
-    postFilterRuleName: {
-      type: 'keyword',
-      _meta: {
-        description: 'List of matched rules from Semantic search after LLM filtering',
-      },
-    },
-    postFilterRuleCount: {
-      type: 'long',
-      _meta: {
-        description: 'Count of rules matched before LLM filtering',
-      },
-    },
-  },
-};
-
-export const SIEM_MIGRATIONS_INTEGRATIONS_MATCH: EventTypeOpts<{
-  model: string;
-  migrationId: string;
-  preFilterIntegrationNames: string[];
-  preFilterIntegrationCount: number;
-  postFilterIntegrationName: string;
-  postFilterIntegrationCount: number;
-  eventName: string;
-}> = {
-  eventType: SiemMigrationsEventTypes.IntegrationsMatch,
-  schema: {
-    eventName: {
-      type: 'keyword',
-      _meta: {
-        description: 'The event name/description',
-        optional: false,
-      },
-    },
-    model: {
-      type: 'keyword',
-      _meta: {
-        description: 'The LLM model that was used',
-      },
-    },
-    migrationId: {
-      type: 'keyword',
-      _meta: {
-        description: 'Unique identifier for the migration',
-      },
-    },
-    preFilterIntegrationNames: {
-      type: 'array',
-      items: {
-        type: 'keyword',
-        _meta: {
-          description: 'List of matched integrations from Semantic search before LLM filtering',
-        },
-      },
-    },
-    preFilterIntegrationCount: {
-      type: 'long',
-      _meta: {
-        description: 'Count of integrations matched before LLM filtering',
-      },
-    },
-    postFilterIntegrationName: {
-      type: 'keyword',
-      _meta: {
-        description: 'List of matched integrations from Semantic search after LLM filtering',
-      },
-    },
-    postFilterIntegrationCount: {
-      type: 'long',
-      _meta: {
-        description: 'Count of integrations matched before LLM filtering',
-      },
-    },
-  },
-};
-
-export const SIEM_MIGRATIONS_MIGRATION_FAILURE: EventTypeOpts<{
-  model: string;
-  error: string;
-  migrationId: string;
-  duration: number;
-  completed: number;
-  failed: number;
-  total: number;
-  eventName: string;
-}> = {
-  eventType: SiemMigrationsEventTypes.MigrationFailure,
-  schema: {
-    eventName: {
-      type: 'keyword',
-      _meta: {
-        description: 'The event name/description',
-        optional: false,
-      },
-    },
-    error: {
-      type: 'keyword',
-      _meta: {
-        description: 'Error message for the migration failure',
-      },
-    },
-    model: {
-      type: 'keyword',
-      _meta: {
-        description: 'The LLM model that was used',
-      },
-    },
-    migrationId: {
-      type: 'keyword',
-      _meta: {
-        description: 'Unique identifier for the migration',
-      },
-    },
-    duration: {
-      type: 'long',
-      _meta: {
-        description: 'Duration of the migration in milliseconds',
-      },
-    },
-    completed: {
-      type: 'long',
-      _meta: {
-        description: 'Number of rules successfully migrated',
-      },
-    },
-    failed: {
-      type: 'long',
-      _meta: {
-        description: 'Number of rules that failed to migrate',
-      },
-    },
-    total: {
-      type: 'long',
-      _meta: {
-        description: 'Total number of rules to migrate',
-      },
-    },
-  },
-};
-
-export const SIEM_MIGRATIONS_MIGRATION_ABORTED: EventTypeOpts<{
-  model: string;
-  reason: string;
-  migrationId: string;
-  duration: number;
-  completed: number;
-  failed: number;
-  total: number;
-  eventName: string;
-}> = {
-  eventType: SiemMigrationsEventTypes.MigrationAborted,
-  schema: {
-    eventName: {
-      type: 'keyword',
-      _meta: {
-        description: 'The event name/description',
-        optional: false,
-      },
-    },
-    model: {
-      type: 'keyword',
-      _meta: {
-        description: 'The LLM model that was used',
-      },
-    },
-    reason: {
-      type: 'keyword',
-      _meta: {
-        description: 'The reason of the migration abort',
-      },
-    },
-    migrationId: {
-      type: 'keyword',
-      _meta: {
-        description: 'Unique identifier for the migration',
-      },
-    },
-    duration: {
-      type: 'long',
-      _meta: {
-        description: 'Duration of the migration in milliseconds',
-      },
-    },
-    completed: {
-      type: 'long',
-      _meta: {
-        description: 'Number of rules successfully migrated',
-      },
-    },
-    failed: {
-      type: 'long',
-      _meta: {
-        description: 'Number of rules that failed to migrate',
-      },
-    },
-    total: {
-      type: 'long',
-      _meta: {
-        description: 'Total number of rules to migrate',
-      },
-    },
-  },
-};
-
-export const SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE: EventTypeOpts<{
-  model: string;
-  error: string;
-  migrationId: string;
-  eventName: string;
-}> = {
-  eventType: SiemMigrationsEventTypes.TranslationFailure,
-  schema: {
-    eventName: {
-      type: 'keyword',
-      _meta: {
-        description: 'The event name/description',
-        optional: false,
-      },
-    },
-    error: {
-      type: 'keyword',
-      _meta: {
-        description: 'Error message for the translation failure',
-      },
-    },
-    model: {
-      type: 'keyword',
-      _meta: {
-        description: 'The LLM model that was used',
-      },
-    },
-    migrationId: {
-      type: 'keyword',
-      _meta: {
-        description: 'Unique identifier for the migration',
-      },
-    },
-  },
-};
-
 export const ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT: EventTypeOpts<{
   insightId: string;
 }> = {
@@ -1617,6 +1438,8 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
 };
 
 export const events = [
+  DETECTION_RULE_UPGRADE_EVENT,
+  DETECTION_RULE_BULK_UPGRADE_EVENT,
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
   RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
@@ -1642,12 +1465,6 @@ export const events = [
   TELEMETRY_INDEX_STATS_EVENT,
   TELEMETRY_INDEX_TEMPLATES_EVENT,
   TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT,
-  SIEM_MIGRATIONS_MIGRATION_SUCCESS,
-  SIEM_MIGRATIONS_MIGRATION_ABORTED,
-  SIEM_MIGRATIONS_MIGRATION_FAILURE,
-  SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS,
-  SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE,
-  SIEM_MIGRATIONS_PREBUILT_RULES_MATCH,
-  SIEM_MIGRATIONS_INTEGRATIONS_MATCH,
+  ...SIEM_MIGRATIONS_EVENTS,
   GAP_DETECTED_EVENT,
 ];

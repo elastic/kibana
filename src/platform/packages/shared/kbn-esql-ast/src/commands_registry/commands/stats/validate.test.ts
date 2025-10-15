@@ -9,6 +9,7 @@
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/validation';
+import type { ICommandContext } from '../../types';
 
 const statsExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
   return expectErrors(query, expectedErrors, context, 'stats', validate);
@@ -20,24 +21,22 @@ describe('STATS Validation', () => {
   });
 
   describe('STATS <aggregates> [ BY <grouping> ]', () => {
-    const newUserDefinedColumns = new Map(mockContext.userDefinedColumns);
-    newUserDefinedColumns.set('doubleField * 3.281', [
-      {
-        name: 'doubleField * 3.281',
-        type: 'double',
-        location: { min: 0, max: 10 },
-      },
-    ]);
-    newUserDefinedColumns.set('avg_doubleField', [
-      {
-        name: 'avg_doubleField',
-        type: 'double',
-        location: { min: 0, max: 10 },
-      },
-    ]);
-    const context = {
+    const newColumns = new Map(mockContext.columns);
+    newColumns.set('doubleField * 3.281', {
+      name: 'doubleField * 3.281',
+      type: 'double',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
+    newColumns.set('avg_doubleField', {
+      name: 'avg_doubleField',
+      type: 'double',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
+    const context: ICommandContext = {
       ...mockContext,
-      userDefinedColumns: newUserDefinedColumns,
+      columns: newColumns,
     };
     test('no errors on correct usage', () => {
       statsExpectErrors('from a_index | stats by textField', []);

@@ -14,6 +14,7 @@ import type { ReactElement } from 'react';
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
+import type { Writable } from '@kbn/utility-types';
 import { LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 import type { DataRequest } from '../../util/data_request';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
@@ -25,6 +26,7 @@ import type {
   MapExtent,
   StyleDescriptor,
   StyleMetaDescriptor,
+  VectorLayerDescriptor,
 } from '../../../../common/descriptor_types';
 import type { ISource, SourceEditorArgs } from '../../sources/source';
 import { type DataRequestContext } from '../../../actions';
@@ -54,7 +56,6 @@ export class LayerGroup implements ILayer {
         typeof options.label === 'string' && options.label.length
           ? options.label
           : DEFAULT_LAYER_GROUP_LABEL,
-      sourceDescriptor: null,
       visible: typeof options.visible === 'boolean' ? options.visible : true,
     };
   }
@@ -94,7 +95,7 @@ export class LayerGroup implements ILayer {
     const childrenDescriptors = await asyncMap(this.getChildren(), async (childLayer) => {
       return (await childLayer.cloneDescriptor()).map((childLayerDescriptor) => {
         if (childLayerDescriptor.parent === this.getId()) {
-          childLayerDescriptor.parent = clonedDescriptor.id;
+          (childLayerDescriptor as Writable<VectorLayerDescriptor>).parent = clonedDescriptor.id;
         }
         return childLayerDescriptor;
       });

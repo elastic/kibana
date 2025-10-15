@@ -8,6 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { RELATED_INTEGRATION } from '../../../detections/constants';
 import { IntegrationIcon } from './integration_icon';
 import { DocumentSeverity } from '../../document_details/right/components/severity';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
@@ -30,7 +31,11 @@ export const HEADER_INTEGRATION_TITLE_TEST_ID = 'ai-for-soc-alert-flyout-header-
 export const HeaderTitle = memo(() => {
   const { dataFormattedForFieldBrowser, getFieldsData } = useAIForSOCDetailsContext();
   const { ruleName, timestamp } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-  const integrationName = getField(getFieldsData('relatedIntegrationPackage')) || '';
+
+  const integrationName = useMemo(
+    () => getField(getFieldsData(RELATED_INTEGRATION)) || '',
+    [getFieldsData]
+  );
 
   const title = useMemo(() => getAlertTitle({ ruleName }), [ruleName]);
 

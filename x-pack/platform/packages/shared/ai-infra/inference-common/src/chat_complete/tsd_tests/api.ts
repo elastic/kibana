@@ -14,7 +14,7 @@ import type {
 } from '../api';
 import type { Message } from '../messages';
 import { MessageRole } from '../messages';
-import type { ToolDefinition, ToolResponseOf } from '../tools';
+import type { ToolDefinition } from '../tools';
 import { ToolChoiceType } from '../tools';
 
 declare const mockApi: ChatCompleteAPI;
@@ -24,7 +24,7 @@ const getWeatherToolDefinition = {
   schema: {
     type: 'object',
     properties: { location: { type: 'string' } },
-    required: ['location'],
+    required: ['location' as const],
   },
   description: 'Get weather',
 } satisfies ToolDefinition;
@@ -32,10 +32,10 @@ const getWeatherToolDefinition = {
 const getStockPriceToolDefinition = {
   schema: {
     type: 'object',
-    properties: { location: { type: 'string' } },
-    required: ['location'],
+    properties: { symbol: { type: 'string' } },
+    required: ['symbol' as const],
   },
-  description: 'Get weather',
+  description: 'Get stock price',
 } satisfies ToolDefinition;
 
 const myTools = {
@@ -50,7 +50,7 @@ type MyTools = typeof myTools;
  */
 declare const defaultToolResponse: ChatCompleteResponse<{}>;
 
-expectType<{ content: string; toolCalls: [] }>(defaultToolResponse);
+expectType<{ content: string; toolCalls: never[] }>(defaultToolResponse);
 
 /**
  * No tools
@@ -60,7 +60,7 @@ declare const emptyToolResponse: ChatCompleteResponse<{
   toolChoice: ToolChoiceType.auto;
 }>;
 
-expectType<{ content: string; toolCalls: [] }>(emptyToolResponse);
+expectType<{ content: string; toolCalls: never[] }>(emptyToolResponse);
 
 /**
  * Defined tools
@@ -74,10 +74,19 @@ expectType<{
   content: string;
   toolCalls: Array<{
     toolCallId: string;
-    function: {
-      name: keyof MyTools;
-      arguments: ToolResponseOf<MyTools['get_stock_price'] | MyTools['get_weather']>;
-    };
+    function:
+      | {
+          name: 'get_stock_price';
+          arguments: {
+            symbol: string;
+          };
+        }
+      | {
+          name: 'get_weather';
+          arguments: {
+            location: string;
+          };
+        };
   }>;
 }>(specificToolResponse);
 
@@ -177,7 +186,7 @@ const resToolChoiceNone = mockApi({
   toolChoice: ToolChoiceType.none,
 });
 resToolChoiceNone.then((r) => {
-  expectType<[]>(r.toolCalls);
+  expectType<never[]>(r.toolCalls);
 });
 
 /**
@@ -206,7 +215,9 @@ resToolChoiceSpecific.then((r) => {
         toolCallId: string;
         function: {
           name: 'get_weather';
-          arguments: ToolResponseOf<typeof getWeatherToolDefinition>;
+          arguments: {
+            location: string;
+          };
         };
       }>
     >(r.toolCalls);

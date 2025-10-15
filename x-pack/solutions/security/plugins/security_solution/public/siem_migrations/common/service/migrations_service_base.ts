@@ -20,20 +20,18 @@ import type { StartPluginsDependencies } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import { licenseService } from '../../../common/hooks/use_license';
 import {
-  getMissingCapabilities,
+  getMissingCapabilitiesChecker,
   type MissingCapability,
   type CapabilitiesLevel,
 } from './capabilities';
 import { MigrationsStorage } from './storage';
 import * as i18n from './translations';
 import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../types';
+import { TASK_STATS_POLLING_SLEEP_SECONDS } from '../constants';
 
 // use the default assistant namespace since it's the only one we use
 const NAMESPACE_TRACE_OPTIONS_SESSION_STORAGE_KEY =
   `${DEFAULT_ASSISTANT_NAMESPACE}.${TRACE_OPTIONS_SESSION_STORAGE_KEY}` as const;
-
-export const TASK_STATS_POLLING_SLEEP_SECONDS = 10 as const;
-export const START_STOP_POLLING_SLEEP_SECONDS = 1 as const;
 
 export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
   protected abstract startMigrationFromStats(connectorId: string, taskStats: T): Promise<void>;
@@ -71,6 +69,7 @@ export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
 
   /** Returns any missing capabilities for the user to use this feature */
   public getMissingCapabilities(level?: CapabilitiesLevel): MissingCapability[] {
+    const getMissingCapabilities = getMissingCapabilitiesChecker();
     return getMissingCapabilities(this.core.application.capabilities, level);
   }
 

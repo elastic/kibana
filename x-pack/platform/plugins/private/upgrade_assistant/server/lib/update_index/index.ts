@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getRollupJobByIndexName, getReindexWarnings } from '@kbn/upgrade-assistant-pkg-server';
-import type { Version } from '@kbn/upgrade-assistant-pkg-server';
+import type { Version } from '@kbn/upgrade-assistant-pkg-common';
 import type { UpdateIndexOperation } from '../../../common/update_index';
 
 export interface UpdateIndexParams {

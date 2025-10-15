@@ -59,7 +59,6 @@ describe('SiemMigrationsBaseEvaluator', () => {
 
   beforeAll(() => {
     const taskRunner = (SiemMigrationTaskRunner as jest.Mock)();
-
     taskEvaluator = new SiemMigrationTaskEvaluator(taskRunner, mockDependencies, mockLogger);
   });
 

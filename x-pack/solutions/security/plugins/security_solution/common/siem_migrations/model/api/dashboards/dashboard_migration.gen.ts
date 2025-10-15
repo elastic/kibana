@@ -15,14 +15,16 @@
  */
 
 import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
 
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import {
+  DashboardMigrationTranslationStats,
+  DashboardMigrationTaskStats,
   DashboardMigration,
+  DashboardMigrationDashboard,
   DashboardMigrationTaskExecutionSettings,
   DashboardMigrationRetryFilter,
-  DashboardMigrationTaskStats,
 } from '../../dashboard_migration.gen';
 import { SplunkOriginalDashboardExport } from '../../vendor/dashboards/splunk.gen';
 import {
@@ -72,6 +74,36 @@ export type CreateDashboardMigrationDashboardsRequestBodyInput = z.input<
   typeof CreateDashboardMigrationDashboardsRequestBody
 >;
 
+export type DeleteDashboardMigrationRequestParams = z.infer<
+  typeof DeleteDashboardMigrationRequestParams
+>;
+export const DeleteDashboardMigrationRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type DeleteDashboardMigrationRequestParamsInput = z.input<
+  typeof DeleteDashboardMigrationRequestParams
+>;
+
+export type GetAllDashboardMigrationsStatsResponse = z.infer<
+  typeof GetAllDashboardMigrationsStatsResponse
+>;
+export const GetAllDashboardMigrationsStatsResponse = z.array(DashboardMigrationTaskStats);
+
+export type GetAllTranslationStatsDashboardMigrationRequestParams = z.infer<
+  typeof GetAllTranslationStatsDashboardMigrationRequestParams
+>;
+export const GetAllTranslationStatsDashboardMigrationRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type GetAllTranslationStatsDashboardMigrationRequestParamsInput = z.input<
+  typeof GetAllTranslationStatsDashboardMigrationRequestParams
+>;
+
+export type GetAllTranslationStatsDashboardMigrationResponse = z.infer<
+  typeof GetAllTranslationStatsDashboardMigrationResponse
+>;
+export const GetAllTranslationStatsDashboardMigrationResponse = DashboardMigrationTranslationStats;
+
 export type GetDashboardMigrationRequestParams = z.infer<typeof GetDashboardMigrationRequestParams>;
 export const GetDashboardMigrationRequestParams = z.object({
   migration_id: NonEmptyString,
@@ -82,6 +114,46 @@ export type GetDashboardMigrationRequestParamsInput = z.input<
 
 export type GetDashboardMigrationResponse = z.infer<typeof GetDashboardMigrationResponse>;
 export const GetDashboardMigrationResponse = DashboardMigration;
+export type GetDashboardMigrationDashboardsRequestQuery = z.infer<
+  typeof GetDashboardMigrationDashboardsRequestQuery
+>;
+export const GetDashboardMigrationDashboardsRequestQuery = z.object({
+  page: z.coerce.number().optional(),
+  per_page: z.coerce.number().optional(),
+  sort_field: NonEmptyString.optional(),
+  sort_direction: z.enum(['asc', 'desc']).optional(),
+  search_term: z.string().optional(),
+  ids: ArrayFromString(NonEmptyString).optional(),
+  is_installed: BooleanFromString.optional(),
+  is_fully_translated: BooleanFromString.optional(),
+  is_partially_translated: BooleanFromString.optional(),
+  is_untranslatable: BooleanFromString.optional(),
+  is_failed: BooleanFromString.optional(),
+});
+export type GetDashboardMigrationDashboardsRequestQueryInput = z.input<
+  typeof GetDashboardMigrationDashboardsRequestQuery
+>;
+
+export type GetDashboardMigrationDashboardsRequestParams = z.infer<
+  typeof GetDashboardMigrationDashboardsRequestParams
+>;
+export const GetDashboardMigrationDashboardsRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type GetDashboardMigrationDashboardsRequestParamsInput = z.input<
+  typeof GetDashboardMigrationDashboardsRequestParams
+>;
+
+export type GetDashboardMigrationDashboardsResponse = z.infer<
+  typeof GetDashboardMigrationDashboardsResponse
+>;
+export const GetDashboardMigrationDashboardsResponse = z.object({
+  /**
+   * The total number of rules in migration.
+   */
+  total: z.number(),
+  data: z.array(DashboardMigrationDashboard),
+});
 export type GetDashboardMigrationResourcesRequestQuery = z.infer<
   typeof GetDashboardMigrationResourcesRequestQuery
 >;
@@ -141,6 +213,37 @@ export type GetDashboardMigrationStatsRequestParamsInput = z.input<
 export type GetDashboardMigrationStatsResponse = z.infer<typeof GetDashboardMigrationStatsResponse>;
 export const GetDashboardMigrationStatsResponse = DashboardMigrationTaskStats;
 
+export type InstallMigrationDashboardsRequestParams = z.infer<
+  typeof InstallMigrationDashboardsRequestParams
+>;
+export const InstallMigrationDashboardsRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type InstallMigrationDashboardsRequestParamsInput = z.input<
+  typeof InstallMigrationDashboardsRequestParams
+>;
+
+export type InstallMigrationDashboardsRequestBody = z.infer<
+  typeof InstallMigrationDashboardsRequestBody
+>;
+export const InstallMigrationDashboardsRequestBody = z.object({
+  /**
+   * The list of dashboard migration ids to install
+   */
+  ids: z.array(NonEmptyString).optional(),
+});
+export type InstallMigrationDashboardsRequestBodyInput = z.input<
+  typeof InstallMigrationDashboardsRequestBody
+>;
+
+export type InstallMigrationDashboardsResponse = z.infer<typeof InstallMigrationDashboardsResponse>;
+export const InstallMigrationDashboardsResponse = z.object({
+  /**
+   * The number of dashboards that were installed.
+   */
+  installed: z.number(),
+});
+
 export type StartDashboardsMigrationRequestParams = z.infer<
   typeof StartDashboardsMigrationRequestParams
 >;
@@ -194,6 +297,31 @@ export const StopDashboardsMigrationResponse = z.object({
    */
   stopped: z.boolean(),
 });
+
+export type UpdateDashboardMigrationRequestParams = z.infer<
+  typeof UpdateDashboardMigrationRequestParams
+>;
+export const UpdateDashboardMigrationRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type UpdateDashboardMigrationRequestParamsInput = z.input<
+  typeof UpdateDashboardMigrationRequestParams
+>;
+
+export type UpdateDashboardMigrationRequestBody = z.infer<
+  typeof UpdateDashboardMigrationRequestBody
+>;
+export const UpdateDashboardMigrationRequestBody = z
+  .object({
+    /**
+     * The dashboard migration name
+     */
+    name: NonEmptyString.optional(),
+  })
+  .strict();
+export type UpdateDashboardMigrationRequestBodyInput = z.input<
+  typeof UpdateDashboardMigrationRequestBody
+>;
 
 export type UpsertDashboardMigrationResourcesRequestParams = z.infer<
   typeof UpsertDashboardMigrationResourcesRequestParams

@@ -29,7 +29,7 @@ import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type {
-  AttackDiscoveryPostRequestBody,
+  AttackDiscoveryPostInternalRequestBody,
   DefendInsightsPostRequestBody,
   AssistantFeatures,
   ExecuteConnectorRequestBody,
@@ -55,6 +55,7 @@ import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plu
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { CheckPrivileges, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint';
 import type {
   GetAIAssistantKnowledgeBaseDataClientParams,
   AIAssistantKnowledgeBaseDataClient,
@@ -170,6 +171,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAlertSummaryDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
+  getCheckpointSaver: () => Promise<BaseCheckpointSaver | null>;
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
   savedObjectsClient: SavedObjectsClientContract;
@@ -202,6 +204,8 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     defendInsights: string;
+    checkpoints: string;
+    checkpointWrites: string;
   };
   indexTemplate: {
     alertSummary: string;
@@ -210,6 +214,8 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     defendInsights: string;
+    checkpoints: string;
+    checkpointWrites: string;
   };
   aliases: {
     alertSummary: string;
@@ -218,6 +224,8 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     defendInsights: string;
+    checkpoints: string;
+    checkpointWrites: string;
   };
   indexPatterns: {
     alertSummary: string;
@@ -226,6 +234,8 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     defendInsights: string;
+    checkpoints: string;
+    checkpointWrites: string;
   };
   pipelines: {
     knowledgeBase: string;
@@ -282,7 +292,9 @@ export interface AssistantToolParams {
   request: KibanaRequest<
     unknown,
     unknown,
-    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody | DefendInsightsPostRequestBody
+    | ExecuteConnectorRequestBody
+    | AttackDiscoveryPostInternalRequestBody
+    | DefendInsightsPostRequestBody
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;

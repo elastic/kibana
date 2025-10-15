@@ -16,7 +16,12 @@ import { BehaviorSubject } from 'rxjs';
 jest.mock('@kbn/saved-objects-plugin/public', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { render } = require('@testing-library/react');
-  const MockSavedObjectSaveModal = ({ onSave }: { onSave: (props: OnSaveProps) => void }) => {
+  const MockSavedObjectSaveModal = ({
+    onSave,
+  }: {
+    onSave: (props: OnSaveProps) => Promise<unknown> | unknown;
+  }) => {
+    // invoke onSave synchronously to simulate the user confirming the save
     onSave({
       newTitle: 'Library panel one',
       newCopyOnSave: true,
@@ -27,7 +32,7 @@ jest.mock('@kbn/saved-objects-plugin/public', () => {
     return null;
   };
   return {
-    SavedObjectSaveModal: MockSavedObjectSaveModal,
+    SavedObjectSaveModalWithSaveResult: MockSavedObjectSaveModal,
     showSaveModal: (saveModal: React.ReactElement) => {
       render(saveModal);
     },

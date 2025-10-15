@@ -4,44 +4,46 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiListGroup,
-  EuiListGroupItem,
+  EuiCallOut,
+  EuiFieldText,
+  EuiFormRow,
+  EuiIcon,
+  EuiLink,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiText,
+  EuiSpacer,
+  copyToClipboard,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../hooks/use_kibana';
-import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
 export function StreamDeleteModal({
   onClose,
   onDelete,
   onCancel,
   name,
-  relatedStreams,
 }: {
   onClose: () => void;
   onDelete: () => Promise<void>;
   onCancel: () => void;
   name: string;
-  relatedStreams: string[];
 }) {
   const {
     core: { notifications },
   } = useKibana();
-  const router = useStreamsAppRouter();
 
   const [isDeletingStream, setDeleteInProgress] = useState(false);
+  const [streamName, setStreamName] = useState('');
   const modalTitleId = useGeneratedHtmlId();
 
   const handleDelete = async () => {
@@ -71,69 +73,78 @@ export function StreamDeleteModal({
   return (
     <EuiModal aria-labelledby={modalTitleId} onClose={onClose}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>
-          {i18n.translate('xpack.streams.streamDetailRouting.deleteModalTitle', {
-            defaultMessage: 'Are you sure you want to delete this data stream?',
+        <EuiModalHeaderTitle>
+          {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.title', {
+            defaultMessage: 'Are you sure you want to delete {stream} ?',
+            values: { stream: name },
           })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiText>
-            {i18n.translate('xpack.streams.streamDetailRouting.deleteModalDescription', {
-              defaultMessage:
-                'Deleting this stream will remove all of its children and the data will no longer be routed. All existing data will be removed as well.',
-            })}
-          </EuiText>
-          {relatedStreams.length > 1 && (
-            <>
-              <EuiText>
-                {i18n.translate('xpack.streams.streamDetailRouting.deleteModalStreams', {
-                  defaultMessage: 'The following streams will be deleted:',
-                })}
-              </EuiText>
-              <EuiListGroup flush={true} maxWidth={false}>
-                {relatedStreams.map((stream) => (
-                  <EuiListGroupItem
-                    key={stream}
-                    target="_blank"
-                    href={router.link('/{key}/management/{tab}', {
-                      path: {
-                        key: stream,
-                        tab: 'route',
-                      },
-                    })}
-                    label={stream}
-                  />
-                ))}
-              </EuiListGroup>
-            </>
+        <EuiCallOut
+          color="warning"
+          iconType="warning"
+          title={
+            <FormattedMessage
+              id="xpack.streams.streamDetailView.deleteStreamModal.warningText"
+              defaultMessage="This action cannot be undone and permanently deletes the {stream} stream and all its contents. This action cannot be undone."
+              values={{
+                stream: (
+                  <EuiLink
+                    onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                      e.currentTarget.blur();
+                      copyToClipboard(name);
+                    }}
+                  >
+                    {name} <EuiIcon type="copy" />
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+        />
+
+        <EuiSpacer size="m" />
+
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate(
+            'xpack.streams.streamDetailView.deleteStreamModal.confirmationInputLabel',
+            {
+              defaultMessage: 'To confirm, type {stream}',
+              values: { stream: name },
+            }
           )}
-        </EuiFlexGroup>
+        >
+          <EuiFieldText
+            data-test-subj="streamsAppDeleteStreamModalStreamNameInput"
+            onChange={(e) => setStreamName(e.target.value)}
+            fullWidth
+            name={'stream-name-deletion'}
+            autoFocus
+          />
+        </EuiFormRow>
       </EuiModalBody>
+
       <EuiModalFooter>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiButtonEmpty
-            data-test-subj="streamsAppStreamDetailRoutingCancelButton"
-            onClick={onCancel}
-          >
-            {i18n.translate('xpack.streams.streamDetailRouting.deleteModalCancel', {
-              defaultMessage: 'Cancel',
-            })}
-          </EuiButtonEmpty>
-          <EuiButton
-            data-test-subj="streamsAppStreamDetailRoutingDeleteButton"
-            color="danger"
-            fill
-            onClick={handleDelete}
-            isLoading={isDeletingStream}
-          >
-            {i18n.translate('xpack.streams.streamDetailRouting.delete', {
-              defaultMessage: 'Delete',
-            })}
-          </EuiButton>
-        </EuiFlexGroup>
+        <EuiButtonEmpty isDisabled={isDeletingStream} onClick={onCancel}>
+          {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.cancelButton', {
+            defaultMessage: 'Cancel',
+          })}
+        </EuiButtonEmpty>
+
+        <EuiButton
+          isDisabled={streamName !== name}
+          isLoading={isDeletingStream}
+          color="danger"
+          onClick={handleDelete}
+          fill
+        >
+          {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.deleteButton', {
+            defaultMessage: 'Delete',
+          })}
+        </EuiButton>
       </EuiModalFooter>
     </EuiModal>
   );

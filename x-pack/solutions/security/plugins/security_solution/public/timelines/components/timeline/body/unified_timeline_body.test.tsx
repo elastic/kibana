@@ -93,7 +93,9 @@ describe('UnifiedTimelineBody', () => {
     );
   });
 
-  it('should render the dataview error component when no dataView is provided', () => {
+  // WARN: skipping this test as data view picker is the new default implementation.
+  // See https://github.com/elastic/security-team/issues/11959
+  it.skip('should render the dataview error component when no dataView is provided', () => {
     mockUseGetScopedSourcererDataView.mockImplementationOnce(() => undefined);
     const { queryByTestId } = renderTestComponents();
 

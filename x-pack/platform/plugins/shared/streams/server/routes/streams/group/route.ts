@@ -81,10 +81,6 @@ const upsertGroupRoute = createServerRoute({
       request,
     });
 
-    if (!(await streamsClient.isStreamsEnabled())) {
-      throw badData('Streams are not enabled for Group streams.');
-    }
-
     const core = await context.core;
     const groupStreamsEnabled = await core.uiSettings.client.get(
       OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS

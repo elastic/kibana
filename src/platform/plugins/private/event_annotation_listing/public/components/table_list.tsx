@@ -12,7 +12,7 @@ import { TableListViewTable } from '@kbn/content-management-table-list-view-tabl
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-browser';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { QueryInputServices } from '@kbn/visualization-ui-components';

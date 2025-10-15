@@ -239,7 +239,9 @@ export const trustedAppsFormSelectors = {
 export const trustedDevicesFormSelectors = {
   selectOs: (osOption: 'Windows and Mac' | 'Windows' | 'Mac') => {
     cy.getByTestSubj('trustedDevices-form-osSelectField').click();
-    cy.get('[role="option"]').contains(osOption).click();
+    cy.get('[role="option"]')
+      .contains(new RegExp(`^${osOption}$`))
+      .click();
   },
 
   selectField: (field: 'Username' | 'Host' | 'Device ID' | 'Manufacturer' | 'Product ID') => {

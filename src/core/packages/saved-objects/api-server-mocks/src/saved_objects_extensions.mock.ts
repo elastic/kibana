@@ -13,50 +13,55 @@ import type {
   ISavedObjectsSpacesExtension,
   SavedObjectsExtensions,
 } from '@kbn/core-saved-objects-server';
+import { lazyObject } from '@kbn/lazy-object';
 
-const createEncryptionExtension = (): jest.Mocked<ISavedObjectsEncryptionExtension> => ({
-  isEncryptableType: jest.fn(),
-  decryptOrStripResponseAttributes: jest.fn(),
-  encryptAttributes: jest.fn(),
-  shouldEnforceRandomId: jest.fn(),
-});
+const createEncryptionExtension = (): jest.Mocked<ISavedObjectsEncryptionExtension> =>
+  lazyObject({
+    isEncryptableType: jest.fn(),
+    decryptOrStripResponseAttributes: jest.fn(),
+    encryptAttributes: jest.fn(),
+    shouldEnforceRandomId: jest.fn(),
+  });
 
-const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> => ({
-  authorizeCreate: jest.fn(),
-  authorizeBulkCreate: jest.fn(),
-  authorizeUpdate: jest.fn(),
-  authorizeBulkUpdate: jest.fn(),
-  authorizeDelete: jest.fn(),
-  authorizeBulkDelete: jest.fn(),
-  authorizeGet: jest.fn(),
-  authorizeBulkGet: jest.fn(),
-  authorizeCheckConflicts: jest.fn(),
-  authorizeRemoveReferences: jest.fn(),
-  authorizeOpenPointInTime: jest.fn(),
-  auditClosePointInTime: jest.fn(),
-  authorizeFind: jest.fn(),
-  getFindRedactTypeMap: jest.fn(),
-  authorizeAndRedactMultiNamespaceReferences: jest.fn(),
-  authorizeAndRedactInternalBulkResolve: jest.fn(),
-  redactNamespaces: jest.fn(),
-  authorizeUpdateSpaces: jest.fn(),
-  authorizeDisableLegacyUrlAliases: jest.fn(),
-  auditObjectsForSpaceDeletion: jest.fn(),
-  getCurrentUser: jest.fn(),
-  includeSavedObjectNames: jest.fn(),
-});
+const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> =>
+  lazyObject({
+    authorizeCreate: jest.fn(),
+    authorizeBulkCreate: jest.fn(),
+    authorizeUpdate: jest.fn(),
+    authorizeBulkUpdate: jest.fn(),
+    authorizeDelete: jest.fn(),
+    authorizeBulkDelete: jest.fn(),
+    authorizeGet: jest.fn(),
+    authorizeBulkGet: jest.fn(),
+    authorizeCheckConflicts: jest.fn(),
+    authorizeRemoveReferences: jest.fn(),
+    authorizeOpenPointInTime: jest.fn(),
+    auditClosePointInTime: jest.fn(),
+    authorizeFind: jest.fn(),
+    getFindRedactTypeMap: jest.fn(),
+    authorizeAndRedactMultiNamespaceReferences: jest.fn(),
+    authorizeAndRedactInternalBulkResolve: jest.fn(),
+    redactNamespaces: jest.fn(),
+    authorizeUpdateSpaces: jest.fn(),
+    authorizeDisableLegacyUrlAliases: jest.fn(),
+    auditObjectsForSpaceDeletion: jest.fn(),
+    getCurrentUser: jest.fn(),
+    includeSavedObjectNames: jest.fn(),
+  });
 
-const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> => ({
-  getCurrentNamespace: jest.fn(),
-  getSearchableNamespaces: jest.fn(),
-  asScopedToNamespace: jest.fn().mockImplementation(createSpacesExtension),
-});
+const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> =>
+  lazyObject({
+    getCurrentNamespace: jest.fn(),
+    getSearchableNamespaces: jest.fn(),
+    asScopedToNamespace: jest.fn().mockImplementation(createSpacesExtension),
+  });
 
-const create = (): jest.Mocked<SavedObjectsExtensions> => ({
-  encryptionExtension: createEncryptionExtension(),
-  securityExtension: createSecurityExtension(),
-  spacesExtension: createSpacesExtension(),
-});
+const create = (): jest.Mocked<SavedObjectsExtensions> =>
+  lazyObject({
+    encryptionExtension: createEncryptionExtension(),
+    securityExtension: createSecurityExtension(),
+    spacesExtension: createSpacesExtension(),
+  });
 
 export const savedObjectsExtensionsMock = {
   create,

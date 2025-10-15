@@ -26,6 +26,7 @@ import {
   INDEX_FIELD,
   FILTER_OUT_EXACT_FIELDS_FOR_CONTENT,
   TRANSACTION_NAME_FIELD,
+  OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
 } from '@kbn/discover-utils';
 import type { TraceDocument } from '@kbn/discover-utils/src';
 import { formatFieldValue } from '@kbn/discover-utils/src';
@@ -109,9 +110,12 @@ const getResourceBadgeIcon = (
     case SERVICE_NAME_FIELD:
       return () => {
         const { euiTheme } = useEuiTheme();
+        const agentName = (fields[OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE] ||
+          fields[AGENT_NAME_FIELD]) as AgentName;
+
         return (
           <AgentIcon
-            agentName={fields[AGENT_NAME_FIELD] as AgentName}
+            agentName={agentName}
             size="m"
             css={css`
               margin-right: ${euiTheme.size.xs};

@@ -7,6 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Copyright Elasticsearch B.V.and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/**
+ * Generates a service with an extremely high number of dependencies (2000) for cardinality testing.
+ */
+
 import type { ApmFields, Instance } from '@kbn/apm-synthtrace-client';
 import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
 import { random, times } from 'lodash';

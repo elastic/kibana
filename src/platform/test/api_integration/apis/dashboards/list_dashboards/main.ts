@@ -18,6 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
       const response = await supertest
         .get(`${PUBLIC_API_PATH}`)
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send();
 
       expect(response.status).to.be(200);
@@ -30,6 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
       const response = await supertest
         .get(`${PUBLIC_API_PATH}?perPage=10`)
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send();
 
       expect(response.status).to.be(200);
@@ -41,6 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
       const response = await supertest
         .get(`${PUBLIC_API_PATH}?page=5&perPage=10`)
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send();
 
       expect(response.status).to.be(200);

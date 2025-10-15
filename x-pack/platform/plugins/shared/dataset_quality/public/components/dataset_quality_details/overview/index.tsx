@@ -7,17 +7,52 @@
 
 import React, { useCallback, useState } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { OnRefreshProps } from '@elastic/eui';
-import { EuiFlexItem, EuiSpacer, EuiSplitPanel } from '@elastic/eui';
+import type { TimeRange } from '@kbn/es-query';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonTitle,
+  EuiSpacer,
+  EuiSplitPanel,
+} from '@elastic/eui';
 import type { QualityIssueType } from '../../../state_machines/dataset_quality_details_controller';
 import { useDatasetQualityDetailsState } from '../../../hooks';
 import { AggregationNotSupported } from './aggregation_not_supported';
 import { QualityIssues } from './quality_issues';
 import { FailureStoreWarning } from '../../failure_store/failure_store_warning';
+import { Panel, PanelIndicator } from './summary/panel';
+import { Card } from './quality_summary_cards/card';
 
-const OverviewHeader = dynamic(() => import('./header'));
-const Summary = dynamic(() => import('./summary'));
-const QualitySummaryCards = dynamic(() => import('./quality_summary_cards'));
+const OverviewHeader = dynamic(() => import('./header'), {
+  fallback: <EuiSkeletonTitle size="m" />,
+});
+const Summary = dynamic(() => import('./summary'), {
+  fallback: (
+    <EuiFlexGroup gutterSize="m">
+      <Panel title="" isLoading={true}>
+        <PanelIndicator label="" isLoading={true} value="" />
+        <PanelIndicator label="" isLoading={true} value="" />
+      </Panel>
+      <Panel title="" isLoading={true}>
+        <PanelIndicator label="" isLoading={true} value="" />
+        <PanelIndicator label="" isLoading={true} value="" />
+      </Panel>
+    </EuiFlexGroup>
+  ),
+});
+const QualitySummaryCards = dynamic(() => import('./quality_summary_cards'), {
+  fallback: (
+    <EuiFlexGroup gutterSize="m" direction="column" style={{ height: '100%' }}>
+      <EuiFlexItem grow={true}>
+        <Card title="" isLoading={true} kpiValue="" footer={null} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={true}>
+        <Card title="" isLoading={true} kpiValue="" footer={null} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ),
+});
+
 const DocumentTrends = dynamic(() => import('./document_trends'));
 
 export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
@@ -27,6 +62,7 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
     canUserReadFailureStore,
     updateTimeRange,
     loadingState: { dataStreamSettingsLoading },
+    view,
   } = useDatasetQualityDetailsState();
 
   const [lastReloadTime, setLastReloadTime] = useState<number>(Date.now());
@@ -34,9 +70,9 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
   const [selectedQualityCard, setSelectedQualityCard] =
     React.useState<QualityIssueType>('degraded');
 
-  const handleRefresh = useCallback(
-    (refreshProps: OnRefreshProps) => {
-      updateTimeRange(refreshProps);
+  const handleTimeChange = useCallback(
+    (refreshProps: TimeRange) => {
+      updateTimeRange({ start: refreshProps.from, end: refreshProps.to });
       setLastReloadTime(Date.now());
     },
     [updateTimeRange]
@@ -44,7 +80,7 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
   return (
     <>
       {isNonAggregatable && <AggregationNotSupported dataStream={dataStream} />}
-      <OverviewHeader handleRefresh={handleRefresh} />
+      <OverviewHeader handleTimeChange={handleTimeChange} />
       <EuiSpacer size="m" />
 
       {!dataStreamSettingsLoading && !canUserReadFailureStore && (
@@ -54,9 +90,12 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
         </EuiFlexItem>
       )}
 
-      {/* This should be hidden in `streams` view */}
-      <Summary />
-      <EuiSpacer size="m" />
+      {view === 'dataQuality' && (
+        <>
+          <Summary />
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       <EuiSplitPanel.Outer
         direction="row"
@@ -73,8 +112,11 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
         <EuiSplitPanel.Inner grow={true}>
           <DocumentTrends
             lastReloadTime={lastReloadTime}
-            displayCreateRuleButton={selectedQualityCard === 'degraded'}
             openAlertFlyout={openAlertFlyout}
+            displayActions={{
+              displayCreateRuleButton: selectedQualityCard === 'degraded',
+              displayEditFailureStore: selectedQualityCard === 'failed' && view !== 'wired', // Don't allow editing failure store for Wired Streams
+            }}
           />
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>

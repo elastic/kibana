@@ -45,10 +45,7 @@ const getPipelineNameFromLocation = (location: Location) => {
   return params.get('pipeline');
 };
 
-export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
-  history,
-  location,
-}) => {
+export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const { services } = useKibana();
 
   const pipelineNameFromLocation = getPipelineNameFromLocation(history.location);
@@ -68,18 +65,23 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   }, [services.metric, services.breadcrumbs]);
 
   const goToEditPipeline = (pipelineName: string) => {
+    // this double encoding (+1 in getEditPath) is a
+    // temporary workaround for history v4 bug with url-encoded
+    // route params see https://github.com/elastic/kibana/issues/234500
     const encodedParam = encodeURIComponent(pipelineName);
     history.push(getEditPath({ pipelineName: encodedParam }));
   };
 
   const goToClonePipeline = (clonedPipelineName: string) => {
+    // this double encoding (+1 in getClonePath) is a
+    // temporary workaround for history v4 bug with url-encoded
+    // route params see https://github.com/elastic/kibana/issues/234500
     const encodedParam = encodeURIComponent(clonedPipelineName);
     history.push(getClonePath({ clonedPipelineName: encodedParam }));
   };
 
   const goToCreatePipeline = (pipelineName: string) => {
-    const encodedParam = encodeURIComponent(pipelineName);
-    history.push(getCreatePath({ pipelineName: encodedParam }));
+    history.push(getCreatePath({ pipelineName }));
   };
 
   const goHome = () => {

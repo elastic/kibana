@@ -11,7 +11,7 @@ import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram'
 import React, { useCallback, useEffect } from 'react';
 import type { DiscoverMainContentProps } from '../layout/discover_main_content';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
-import { selectTabRuntimeState } from '../../state_management/redux';
+import { DEFAULT_HISTOGRAM_KEY_PREFIX, selectTabRuntimeState } from '../../state_management/redux';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 export const useUnifiedHistogramCommon = ({
@@ -19,20 +19,32 @@ export const useUnifiedHistogramCommon = ({
   layoutProps,
   stateContainer,
   panelsToggle,
+  localStorageKeyPrefix,
 }: {
   currentTabId: string;
   layoutProps?: UnifiedHistogramPartialLayoutProps;
   stateContainer: DiscoverStateContainer;
   panelsToggle?: DiscoverMainContentProps['panelsToggle'];
+  localStorageKeyPrefix?: string;
 }) => {
   useEffect(() => {
-    if (layoutProps) {
-      selectTabRuntimeState(
-        stateContainer.runtimeStateManager,
-        currentTabId
-      ).unifiedHistogramLayoutProps$.next(layoutProps);
+    if (!layoutProps) {
+      return;
     }
-  }, [currentTabId, stateContainer.runtimeStateManager, layoutProps]);
+
+    const histogramConfig$ = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      currentTabId
+    ).unifiedHistogramConfig$;
+
+    histogramConfig$.next({
+      ...histogramConfig$.getValue(),
+      layoutPropsMap: {
+        ...histogramConfig$.getValue().layoutPropsMap,
+        [localStorageKeyPrefix ?? DEFAULT_HISTOGRAM_KEY_PREFIX]: layoutProps,
+      },
+    });
+  }, [currentTabId, layoutProps, localStorageKeyPrefix, stateContainer.runtimeStateManager]);
 
   const isEsqlMode = useIsEsqlMode();
   const renderCustomChartToggleActions = useCallback(

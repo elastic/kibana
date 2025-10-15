@@ -29,7 +29,7 @@ export const SavedPlaygroundFetchError = () => {
       title={
         <h1>
           {i18n.translate('xpack.searchPlayground.savedPlayground.fetchError.title', {
-            defaultMessage: 'Error loading RAG playground',
+            defaultMessage: 'Error loading playground',
           })}
         </h1>
       }

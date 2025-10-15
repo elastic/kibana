@@ -20,7 +20,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-
+import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { BaseFilesClient } from '@kbn/shared-ux-file-types';
 import type { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
@@ -49,7 +49,7 @@ interface TestProviderProps {
   filesClient?: BaseFilesClient;
 }
 
-window.scrollTo = jest.fn();
+jest.spyOn(window, 'scrollTo').mockImplementation(() => {});
 
 const getMockedFilesClient = (): BaseFilesClient => {
   const mockedFilesClient = createMockFilesClient();
@@ -93,11 +93,12 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   queryClient,
   filesClient,
 }) => {
-  const finalCoreStart = useMemo(() => coreStart ?? coreMock.createStart(), [coreStart]);
-  const finalServices = useMemo(
-    () => ({ ...createStartServicesMock({ license }), ...coreStart, ...services }),
-    [coreStart, license, services]
-  );
+  const finalCoreStart = useMemo(() => {
+    return coreStart ?? coreMock.createStart();
+  }, [coreStart]);
+  const finalServices = useMemo(() => {
+    return { ...createStartServicesMock({ license }), ...coreStart, ...services };
+  }, [coreStart, license, services]);
 
   const defaultQueryClient = useMemo(() => createTestQueryClient(), []);
 
@@ -155,20 +156,22 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
 
   return (
     <KibanaRenderContextProvider {...finalCoreStart}>
-      <KibanaContextProvider services={finalServices}>
-        <MemoryRouter>
-          <CasesProvider value={casesProviderValue} queryClient={finalQueryClient}>
-            <FilesContext client={finalFilesClient}>{children}</FilesContext>
-          </CasesProvider>
-        </MemoryRouter>
-      </KibanaContextProvider>
+      <I18nProvider>
+        <KibanaContextProvider services={finalServices}>
+          <MemoryRouter>
+            <CasesProvider value={casesProviderValue} queryClient={finalQueryClient}>
+              <FilesContext client={finalFilesClient}>{children}</FilesContext>
+            </CasesProvider>
+          </MemoryRouter>
+        </KibanaContextProvider>
+      </I18nProvider>
     </KibanaRenderContextProvider>
   );
 };
 
 TestProvidersComponent.displayName = 'TestProviders';
 
-export const TestProviders = React.memo(TestProvidersComponent);
+export const TestProviders = TestProvidersComponent;
 
 type CustomRenderOptions = Omit<RenderOptions, 'wrapper'> & {
   wrapperProps?: Omit<TestProviderProps, 'children'>;

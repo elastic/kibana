@@ -74,3 +74,5 @@ export const DEFAULT_METRICS_VIEW_ATTRIBUTES = {
 };
 
 export const SNAPSHOT_API_MAX_METRICS = 20;
+
+export const SCHEMA_SELECTOR_DOCS_LINK = 'https://ela.st/schema-selector-hosts';

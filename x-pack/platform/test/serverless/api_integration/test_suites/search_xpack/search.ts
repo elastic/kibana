@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const svlUserManager = getService('svlUserManager');
   let roleAuthc: RoleCredentials;
-  // TODO: `supertestWithoutAuth` is typed as `any` in `x-pack/test/api_integration/apis/search/search.ts`,
+  // TODO: `supertestWithoutAuth` is typed as `any` in `x-pack/platform/test/api_integration/apis/search/search.ts`,
   // but within Serverless tests it's typed as `supertest.SuperTest<supertest.Test>`. This causes TS errors
   // when accessing `loginResponse.headers`, so we cast it as `any` here to match the original tests.
   const supertestNoAuth = getService('supertestWithoutAuth') as any;

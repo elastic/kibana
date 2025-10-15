@@ -29,7 +29,7 @@ export function FailureBadge({ outcome }: { outcome?: EventOutcome }) {
           defaultMessage: 'event.outcome = failure',
         })}
       >
-        <EuiBadge color={euiTheme.colors.danger}>
+        <EuiBadge color={euiTheme.colors.danger} tabIndex={0}>
           {i18n.translate('xpack.apm.failure_badge.label', {
             defaultMessage: 'failure',
           })}

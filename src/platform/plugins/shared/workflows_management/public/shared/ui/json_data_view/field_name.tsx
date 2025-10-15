@@ -8,7 +8,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiHighlight } from '@elastic/eui';
-import { FieldIcon } from '@kbn/field-utils';
+import { FieldIcon } from '@kbn/react-field';
 import React from 'react';
 
 interface FieldNameProps {

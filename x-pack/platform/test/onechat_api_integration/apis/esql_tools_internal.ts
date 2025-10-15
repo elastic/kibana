@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { range } from 'lodash';
+import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -31,14 +32,17 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       for (const toolId of createdToolIds) {
         try {
-          await supertest.delete(`/api/chat/tools/${toolId}`).set('kbn-xsrf', 'kibana').expect(200);
+          await supertest
+            .delete(`/api/agent_builder/tools/${toolId}`)
+            .set('kbn-xsrf', 'kibana')
+            .expect(200);
         } catch (error) {
           log.warning(`Failed to delete tool ${toolId}: ${error.message}`);
         }
       }
     });
 
-    describe('POST /internal/chat/tools/_bulk_delete', () => {
+    describe('POST /internal/agent_builder/tools/_bulk_delete', () => {
       before(async () => {
         for (let i = 0; i < 4; i++) {
           const testTool = {
@@ -46,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: `bulk-delete-test-tool-${i}`,
           };
           const response = await supertest
-            .post('/api/chat/tools')
+            .post('/api/agent_builder/tools')
             .set('kbn-xsrf', 'kibana')
             .send(testTool)
             .expect(200);
@@ -57,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should bulk delete existing tools', async () => {
         const toolIdsToDelete = range(0, 2).map((i) => `bulk-delete-test-tool-${i}`);
         const response = await supertest
-          .post('/internal/chat/tools/_bulk_delete')
+          .post('/internal/agent_builder/tools/_bulk_delete')
           .set('kbn-xsrf', 'kibana')
           .set('x-elastic-internal-origin', 'kibana')
           .send({ ids: toolIdsToDelete })
@@ -79,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
         const ids = [...toolIdsToDelete, nonExistentToolId];
 
         const response = await supertest
-          .post('/internal/chat/tools/_bulk_delete')
+          .post('/internal/agent_builder/tools/_bulk_delete')
           .set('kbn-xsrf', 'kibana')
           .set('x-elastic-internal-origin', 'kibana')
           .send({ ids })
@@ -103,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should handle an empty list of IDs', async () => {
         const response = await supertest
-          .post('/internal/chat/tools/_bulk_delete')
+          .post('/internal/agent_builder/tools/_bulk_delete')
           .set('kbn-xsrf', 'kibana')
           .set('x-elastic-internal-origin', 'kibana')
           .send({ ids: [] })
@@ -116,18 +120,18 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 404 when ES|QL tool API is disabled', async () => {
         await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': false,
+          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
         });
 
         await supertest
-          .post('/internal/chat/tools/_bulk_delete')
+          .post('/internal/agent_builder/tools/_bulk_delete')
           .set('kbn-xsrf', 'kibana')
           .set('x-elastic-internal-origin', 'kibana')
           .send({ ids: ['any-id'] })
           .expect(404);
 
         await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': true,
+          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
         });
       });
     });

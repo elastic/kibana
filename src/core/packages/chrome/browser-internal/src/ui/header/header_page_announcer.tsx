@@ -37,7 +37,17 @@ export const HeaderPageAnnouncer: FC<{
 
     const breadcrumbText = [...breadcrumbs]
       .reverse()
-      .map((breadcrumb) => (typeof breadcrumb.text === 'string' ? breadcrumb.text : null))
+      .map((breadcrumb) => {
+        if (typeof breadcrumb['aria-label'] === 'string') {
+          return breadcrumb['aria-label'];
+        }
+
+        if (typeof breadcrumb.text === 'string') {
+          return breadcrumb.text;
+        }
+
+        return null;
+      })
       .filter(Boolean) as string[];
 
     breadcrumbText.push(branding);

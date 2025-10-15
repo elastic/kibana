@@ -74,12 +74,6 @@ export class GenAiSettingsPlugin
     });
 
     core.uiSettings.register({
-      /**
-       * TODO:
-       * Once assistants changes have been made that watch this uiSetting,
-       * change the bellow configuration to the following:
-       * {"readonlyMode": "ui", "schema": schema.string(), "value": "NO_DEFAULT_CONNECTOR"}
-       */
       [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: {
         readonlyMode: 'ui',
         readonly: true,
@@ -89,12 +83,6 @@ export class GenAiSettingsPlugin
     });
 
     core.uiSettings.register({
-      /**
-       * TODO:
-       * Once assistants changes have been made that watch this uiSetting,
-       * change the bellow configuration to the following:
-       * {"readonlyMode": "ui", "schema": schema.boolean(), "value": false}
-       */
       [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: {
         readonlyMode: 'ui',
         readonly: true,

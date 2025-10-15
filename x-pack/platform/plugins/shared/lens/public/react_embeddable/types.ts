@@ -204,6 +204,7 @@ export interface IntegrationCallbacks extends LensApiProps {
   updateAttributes: (newAttributes: LensRuntimeState['attributes']) => void;
   updateSavedObjectId: (newSavedObjectId: LensRuntimeState['savedObjectId']) => void;
   updateOverrides: (newOverrides: LensOverrides['overrides']) => void;
+  updateAbortController: (abortController?: AbortController) => void;
   getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<Action[]>;
 }
 
@@ -265,6 +266,7 @@ export interface LensSharedProps {
   noPadding?: boolean;
   viewMode?: ViewMode;
   forceDSL?: boolean;
+  esqlVariables?: ESQLControlVariable[];
 }
 
 interface LensRequestHandlersProps {
@@ -345,7 +347,7 @@ type ComponentProps = LensComponentProps & LensPublicCallbacks;
 type ComponentSerializedProps = TypedLensSerializedState;
 
 type LensRendererPrivateProps = ComponentSerializedProps & ComponentProps;
-export type LensRendererProps = Simplify<LensRendererPrivateProps>;
+export type LensRendererProps = LensRendererPrivateProps;
 
 /**
  * The LensRuntimeState is the state stored for a dashboard panel

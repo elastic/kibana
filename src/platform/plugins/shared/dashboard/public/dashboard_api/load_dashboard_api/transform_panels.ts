@@ -23,36 +23,33 @@ export async function transformPanels(
 
   return await asyncMap(panels, async (panel) => {
     if (isDashboardSection(panel)) {
-      const panelsInSection = await asyncMap(
-        panel.panels as DashboardPanel[],
-        async (panelInSection) => {
-          return await transformPanel(panelInSection, filterReferences(panelInSection.panelIndex));
-        }
-      );
+      const panelsInSection = await asyncMap(panel.panels, async (panelInSection) => {
+        return await transformPanel(panelInSection, filterReferences(panelInSection.uid));
+      });
       return {
         ...panel,
         panels: panelsInSection,
       };
     }
 
-    return await transformPanel(panel, filterReferences(panel.panelIndex));
+    return await transformPanel(panel, filterReferences(panel.uid));
   });
 }
 
 async function transformPanel(panel: DashboardPanel, references?: Reference[]) {
-  const transforms = await embeddableService.getTransforms(panel.type);
-  if (!transforms?.transformOut) return panel;
+  const transformOut = await embeddableService.getLegacyURLTransform(panel.type);
+  if (!transformOut) return panel;
 
   try {
-    const transformedPanelConfig = transforms.transformOut(panel.panelConfig, references);
+    const transformedPanelConfig = transformOut(panel.config, references);
     return {
       ...panel,
-      panelConfig: transformedPanelConfig,
+      config: transformedPanelConfig,
     };
   } catch (transformOutError) {
     // eslint-disable-next-line no-console
     console.warn(
-      `Unable to transform panel state, panelId: ${panel.panelIndex}, error: ${transformOutError}`
+      `Unable to transform panel state, panelId: ${panel.uid}, error: ${transformOutError}`
     );
     // do not prevent dashboard render on transform error
     return panel;

@@ -16,17 +16,15 @@ import type { CoreStart } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
-import { getMissingCapabilities } from './capabilities';
-import {
-  TASK_STATS_POLLING_SLEEP_SECONDS,
-  SiemMigrationsServiceBase,
-} from './migrations_service_base';
+import { getMissingCapabilitiesChecker } from './capabilities';
+import { SiemMigrationsServiceBase } from './migrations_service_base';
 import type { MigrationTaskStats } from '../../../../common/siem_migrations/model/common.gen';
+import { TASK_STATS_POLLING_SLEEP_SECONDS } from '../constants';
 
 // --- Mocks for external modules ---
 
 jest.mock('./capabilities', () => ({
-  getMissingCapabilities: jest.fn(() => []),
+  getMissingCapabilitiesChecker: jest.fn(() => () => []),
 }));
 
 jest.mock('../../../common/experimental_features_service', () => ({
@@ -49,7 +47,7 @@ jest.mock('./notifications/missing_capabilities_notification', () => ({
   getMissingCapabilitiesToast: jest.fn().mockReturnValue({ title: 'Missing Capabilities' }),
 }));
 
-const mockGetMissingCapabilities = getMissingCapabilities as jest.Mock;
+const mockGetMissingCapabilitiesChecker = getMissingCapabilitiesChecker as jest.Mock;
 
 const mockStartMigrationFromStats = jest.fn();
 const mockFetchMigrationStats = jest.fn();
@@ -99,7 +97,7 @@ describe('SiemMigrationsServiceBase', () => {
       },
     } as unknown as StartPluginsDependencies;
 
-    mockGetMissingCapabilities.mockReturnValue([]);
+    mockGetMissingCapabilitiesChecker.mockReturnValue(() => []);
     mockStartMigrationFromStats.mockImplementationOnce(() => Promise.resolve());
     mockFetchMigrationStats.mockResolvedValue(defaultMigrationStats);
     mockFetchMigrationsStatsAll.mockResolvedValue([]);

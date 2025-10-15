@@ -670,6 +670,7 @@ export interface ESQLSearchResponse {
   all_columns?: ESQLColumn[];
   values: ESQLRow[];
   took?: number;
+  documents_found?: number;
   _clusters?: estypes.ClusterStatistics;
 }
 
@@ -681,7 +682,7 @@ export interface ESQLSearchParams {
   query: string;
   filter?: unknown;
   locale?: string;
-  include_ccs_metadata?: boolean;
+  include_execution_metadata?: boolean;
   dropNullColumns?: boolean;
   params?:
     | estypes.ScalarValue[]

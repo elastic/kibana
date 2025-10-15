@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
         const deleteResult = await apis.delete({ id: createdSchedule.id });
         expect(deleteResult).toEqual({ id: createdSchedule.id });
 
-        checkIfScheduleDoesNotExist({ getService, id: createdSchedule.id });
+        await checkIfScheduleDoesNotExist({ getService, id: createdSchedule.id });
       });
     });
 

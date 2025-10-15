@@ -137,3 +137,24 @@ export interface ExplorerChartsData {
   timeFieldName: string;
   errorMessages: ExplorerChartSeriesErrorMessages | undefined;
 }
+
+export interface GetTopInfluencersRequest {
+  jobIds: string[];
+  earliestMs: number;
+  latestMs: number;
+  maxFieldValues?: number;
+  perPage?: number;
+  page?: number;
+  influencers?: Array<{ fieldName: string; fieldValue: string }>;
+  influencersFilterQuery?: any;
+}
+
+export type InfluencersByFieldResponse = Record<
+  string,
+  Array<{ influencerFieldValue: string; maxAnomalyScore: number; sumAnomalyScore: number }>
+>;
+
+export interface ViewByResponse {
+  results: Record<string, Record<number, number>>;
+  cardinality: number;
+}

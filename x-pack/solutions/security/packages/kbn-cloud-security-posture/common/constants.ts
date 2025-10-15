@@ -7,6 +7,15 @@
 import type { VulnSeverity } from './types/vulnerabilities';
 import type { MisconfigurationEvaluationStatus } from './types/misconfigurations';
 
+export const ORGANIZATION_ACCOUNT = 'organization-account';
+export const SINGLE_ACCOUNT = 'single-account';
+export const AZURE_SINGLE_ACCOUNT = SINGLE_ACCOUNT;
+export const AZURE_ORGANIZATION_ACCOUNT = ORGANIZATION_ACCOUNT;
+export const AWS_SINGLE_ACCOUNT = SINGLE_ACCOUNT;
+export const AWS_ORGANIZATION_ACCOUNT = ORGANIZATION_ACCOUNT;
+export const GCP_SINGLE_ACCOUNT = SINGLE_ACCOUNT;
+export const GCP_ORGANIZATION_ACCOUNT = ORGANIZATION_ACCOUNT;
+
 export const KSPM_POLICY_TEMPLATE = 'kspm';
 export const CSPM_POLICY_TEMPLATE = 'cspm';
 export const CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS =

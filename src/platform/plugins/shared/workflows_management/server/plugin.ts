@@ -19,13 +19,8 @@ import type {
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
-import {
-  WORKFLOWS_EXECUTION_LOGS_INDEX,
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-} from '../common';
 import type { WorkflowsManagementConfig } from './config';
-import { workflowSavedObjectType } from './saved_objects/workflow';
+
 import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
@@ -97,7 +92,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
           };
 
           // Run the workflow, @tb: maybe switch to scheduler?
-          return await this.api.runWorkflow(workflowToRun, spaceId, inputs);
+          return await this.api.runWorkflow(workflowToRun, spaceId, inputs, request);
         };
       };
 
@@ -118,7 +113,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
           description: 'Executes workflows on a scheduled basis',
           timeout: '5m',
           maxAttempts: 3,
-          createTaskRunner: ({ taskInstance }) => {
+          createTaskRunner: ({ taskInstance, fakeRequest }) => {
             // Capture the plugin instance in a closure
             const plugin = this;
             // Use a factory pattern to get dependencies when the task runs
@@ -133,7 +128,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
                   workflowsService: plugin.workflowsService!,
                   workflowsExecutionEngine: (pluginsStart as any).workflowsExecutionEngine,
                   actionsClient: plugin.unsecureActionsClient!,
-                })({ taskInstance });
+                })({ taskInstance, fakeRequest });
 
                 return taskRunner.run();
               },
@@ -147,7 +142,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     }
 
     // Register saved object types
-    core.savedObjects.registerType(workflowSavedObjectType);
 
     registerFeatures(plugins);
 
@@ -161,12 +155,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       .getStartServices()
       .then(([coreStart]) => coreStart.elasticsearch.client.asInternalUser);
 
-    // Get saved objects client from core
-    const getSavedObjectsClient = () =>
-      core
-        .getStartServices()
-        .then(([coreStart]) => coreStart.savedObjects.getUnsafeInternalClient());
-
     const getWorkflowExecutionEngine = () =>
       core
         .getStartServices()
@@ -175,10 +163,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     this.workflowsService = new WorkflowsService(
       esClientPromise,
       this.logger,
-      getSavedObjectsClient,
-      WORKFLOWS_EXECUTIONS_INDEX,
-      WORKFLOWS_STEP_EXECUTIONS_INDEX,
-      WORKFLOWS_EXECUTION_LOGS_INDEX,
       this.config.logging.console
     );
     this.api = new WorkflowsManagementApi(this.workflowsService, getWorkflowExecutionEngine);
@@ -211,7 +195,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     const actionsTypes = plugins.actions.getAllTypes();
     this.logger.debug(`Available action types: ${actionsTypes.join(', ')}`);
 
-    this.logger.debug('Workflows Management: Started');
+    this.logger.info('Workflows Management: Started');
 
     return {};
   }

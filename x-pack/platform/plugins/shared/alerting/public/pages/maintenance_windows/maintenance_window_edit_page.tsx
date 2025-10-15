@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { EuiPageSection } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
 
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useMaintenanceWindowsNavigation } from '../../hooks/use_navigation';
@@ -38,6 +38,7 @@ export const MaintenanceWindowsEditPage = React.memo(() => {
   return (
     <EuiPageSection restrictWidth={true}>
       <PageHeader showBackButton={true} title={i18n.EDIT_MAINTENANCE_WINDOW} />
+      <EuiSpacer size="m" />
       <CreateMaintenanceWindowForm
         initialValue={maintenanceWindow}
         maintenanceWindowId={maintenanceWindowId}

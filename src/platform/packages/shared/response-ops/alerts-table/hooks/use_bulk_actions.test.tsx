@@ -74,6 +74,7 @@ describe('bulk action hooks', () => {
   const mockAddExistingCase = mockCasesService.hooks.useCasesAddToExistingCaseModal.mockReturnValue(
     {
       open: mockOpenExistingCase,
+      close: jest.fn(),
     }
   );
 

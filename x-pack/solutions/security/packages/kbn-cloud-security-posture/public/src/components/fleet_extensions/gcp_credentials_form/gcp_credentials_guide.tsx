@@ -30,13 +30,13 @@ export const GoogleCloudShellCredentialsGuide = (props: {
       <EuiSpacer size="xs" />
       <EuiText size="s" color="subdued">
         <FormattedMessage
-          id="securitySolutionPackages.googleCloudShellCredentials.guide.description"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudshell.guide.description"
           defaultMessage="The Google Cloud Shell Command below will generate a Service Account Credentials JSON key to set up access for assessing your GCP environment's security posture. Learn more about {learnMore}."
           values={{
             learnMore: (
               <Link url={GOOGLE_CLOUD_SHELL_EXTERNAL_DOC_URL}>
                 <FormattedMessage
-                  id="securitySolutionPackages.googleCloudShellCredentials.guide.learnMoreLinkText"
+                  id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudshell.guide.learnMoreLinkText"
                   defaultMessage="Google Cloud Shell"
                 />
               </Link>
@@ -48,7 +48,7 @@ export const GoogleCloudShellCredentialsGuide = (props: {
           <ol>
             <li>
               <FormattedMessage
-                id="securitySolutionPackages.googleCloudShellCredentials.guide.steps.launch"
+                id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudshell.guide.steps.launch"
                 defaultMessage="Log into your {googleCloudConsole}"
                 values={{
                   googleCloudConsole: <strong>{'Google Cloud Console'}</strong>,
@@ -60,13 +60,13 @@ export const GoogleCloudShellCredentialsGuide = (props: {
               <>
                 {props?.isOrganization ? (
                   <FormattedMessage
-                    id="securitySolutionPackages.googleCloudShellCredentials.guide.steps.copyWithOrgId"
+                    id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudshell.guide.steps.copyWithOrgId"
                     defaultMessage="Replace <PROJECT_ID> and <ORG_ID_VALUE> in the following command with your project ID and organization ID then copy the command"
                     ignoreTag
                   />
                 ) : (
                   <FormattedMessage
-                    id="securitySolutionPackages.googleCloudShellCredentials.guide.steps.copyWithProjectId"
+                    id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudshell.guide.steps.copyWithProjectId"
                     defaultMessage="Replace <PROJECT_ID> in the following command with your project ID then copy the command"
                     ignoreTag
                   />
@@ -80,7 +80,7 @@ export const GoogleCloudShellCredentialsGuide = (props: {
             <EuiSpacer size="xs" />
             <li>
               <FormattedMessage
-                id="securitySolutionPackages.googleCloudShellCredentials.guide.steps.cloudShellButton"
+                id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudshell.guide.steps.cloudShellButton"
                 defaultMessage="Click the {cloudShellButton} button below and login into your account"
                 values={{
                   cloudShellButton: <strong>{'Launch Google Cloud Shell'}</strong>,
@@ -91,7 +91,7 @@ export const GoogleCloudShellCredentialsGuide = (props: {
             <EuiSpacer size="xs" />
             <li>
               <FormattedMessage
-                id="securitySolutionPackages.googleCloudShellCredentials.guide.steps.confirmation"
+                id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudshell.guide.steps.confirmation"
                 defaultMessage="Check {trustRepo} and click {confirmButton}"
                 values={{
                   confirmButton: <strong>{'Confirm'}</strong>,
@@ -103,7 +103,7 @@ export const GoogleCloudShellCredentialsGuide = (props: {
             <EuiSpacer size="xs" />
             <li>
               <FormattedMessage
-                id="securitySolutionPackages.googleCloudShellCredentials.guide.steps.runCloudShellScript"
+                id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudshell.guide.steps.runCloudShellScript"
                 defaultMessage="Paste and run command in the {googleCloudShell} terminal"
                 values={{
                   googleCloudShell: <strong>{'Google Cloud Shell'}</strong>,
@@ -114,7 +114,7 @@ export const GoogleCloudShellCredentialsGuide = (props: {
             <EuiSpacer size="xs" />
             <li>
               <FormattedMessage
-                id="securitySolutionPackages.googleCloudShellCredentials.guide.steps.copyJsonServiceKey"
+                id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudshell.guide.steps.copyJsonServiceKey"
                 defaultMessage="Run {catCommand} to view the service account key. Copy and paste Credentials JSON below"
                 values={{
                   catCommand: <code>{'cat KEY_FILE.json'}</code>,

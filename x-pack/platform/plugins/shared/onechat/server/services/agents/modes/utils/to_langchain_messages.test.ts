@@ -44,6 +44,7 @@ describe('conversationLangchainMessages', () => {
   it('handles a round with only user and assistant messages', () => {
     const previousRounds: ConversationRound[] = [
       {
+        id: 'round-1',
         input: makeRoundInput('hi'),
         steps: [],
         response: makeAssistantResponse('hello!'),
@@ -66,6 +67,7 @@ describe('conversationLangchainMessages', () => {
   it('handles a round with a tool call step', () => {
     const toolCall = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
       {
+        tool_result_id: 'result-1',
         type: ToolResultType.other,
         data: {
           some: 'result1',
@@ -74,6 +76,7 @@ describe('conversationLangchainMessages', () => {
     ]);
     const previousRounds: ConversationRound[] = [
       {
+        id: 'round-1',
         input: makeRoundInput('find foo'),
         steps: [makeToolCallStep(toolCall)],
         response: makeAssistantResponse('done!'),
@@ -101,6 +104,7 @@ describe('conversationLangchainMessages', () => {
       JSON.stringify({
         results: [
           {
+            tool_result_id: 'result-1',
             type: ToolResultType.other,
             data: {
               some: 'result1',
@@ -118,16 +122,18 @@ describe('conversationLangchainMessages', () => {
   it('handles multiple rounds', () => {
     const previousRounds: ConversationRound[] = [
       {
+        id: 'round-1',
         input: makeRoundInput('hi'),
         steps: [],
         response: makeAssistantResponse('hello!'),
       },
       {
+        id: 'round-2',
         input: makeRoundInput('search for bar'),
         steps: [
           makeToolCallStep(
             makeToolCallWithResult('call-2', 'lookup', { id: 42 }, [
-              { type: ToolResultType.other, data: { some: 'result1' } },
+              { tool_result_id: 'result-2', type: ToolResultType.other, data: { some: 'result1' } },
             ])
           ),
         ],
@@ -158,7 +164,11 @@ describe('conversationLangchainMessages', () => {
     expect((toolCallAIMessage as AIMessage).tool_calls![0].id).toBe('call-2');
     expect((toolCallToolMessage as ToolMessage).tool_call_id).toBe('call-2');
     expect(toolCallToolMessage.content).toEqual(
-      JSON.stringify({ results: [{ type: ToolResultType.other, data: { some: 'result1' } }] })
+      JSON.stringify({
+        results: [
+          { tool_result_id: 'result-2', type: ToolResultType.other, data: { some: 'result1' } },
+        ],
+      })
     );
     expect(isAIMessage(secondAssistantMessage)).toBe(true);
     expect(secondAssistantMessage.content).toBe('done with bar');
@@ -169,6 +179,7 @@ describe('conversationLangchainMessages', () => {
   it('escapes tool ids', () => {
     const toolCall = makeToolCallWithResult('call-1', '.search', { query: 'foo' }, [
       {
+        tool_result_id: 'result-1',
         type: ToolResultType.other,
         data: {
           some: 'data',
@@ -177,6 +188,7 @@ describe('conversationLangchainMessages', () => {
     ]);
     const previousRounds: ConversationRound[] = [
       {
+        id: 'round-1',
         input: makeRoundInput('find foo'),
         steps: [makeToolCallStep(toolCall)],
         response: makeAssistantResponse('done!'),

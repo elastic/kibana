@@ -6,13 +6,14 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
+import { sendRequest } from '@kbn/es-ui-shared-plugin/public';
 import type {
+  ReindexArgs,
   ReindexStatusResponse,
   ReindexOperation,
   ReindexOperationCancelResponse,
-} from '@kbn/upgrade-assistant-pkg-common';
-import { UA_BASE_PATH } from '@kbn/upgrade-assistant-pkg-common';
-import { sendRequest } from '@kbn/es-ui-shared-plugin/public';
+} from '../../common';
+import { REINDEX_SERVICE_BASE_PATH } from '../../common';
 
 export class ReindexService {
   private client: HttpSetup;
@@ -24,21 +25,22 @@ export class ReindexService {
   public async getReindexStatus(indexName: string) {
     return sendRequest<ReindexStatusResponse>(this.client, {
       method: 'get',
-      path: `${UA_BASE_PATH}/reindex/${indexName}`,
+      path: `${REINDEX_SERVICE_BASE_PATH}/${indexName}`,
     });
   }
 
-  public async startReindex(indexName: string) {
+  public async startReindex(reindexArgs: ReindexArgs) {
     return sendRequest<ReindexOperation>(this.client, {
       method: 'post',
-      path: `${UA_BASE_PATH}/reindex/${indexName}`,
+      path: REINDEX_SERVICE_BASE_PATH,
+      body: reindexArgs,
     });
   }
 
   public async cancelReindex(indexName: string) {
     return sendRequest<ReindexOperationCancelResponse>(this.client, {
       method: 'post',
-      path: `${UA_BASE_PATH}/reindex/${indexName}/cancel`,
+      path: `${REINDEX_SERVICE_BASE_PATH}/${indexName}/cancel`,
     });
   }
 }

@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates a distributed trace with a missing span destination to diagnose service map issues.
+ */
+
 import type { ApmFields, Serializable } from '@kbn/apm-synthtrace-client';
 import { apm, httpExitSpan } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'stream';

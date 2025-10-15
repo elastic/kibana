@@ -17,15 +17,15 @@ export const validate = (
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
-  if (!context?.fields.get('_id')) {
+  if (!context?.columns.get('_id')) {
     messages.push(buildMissingMetadataMessage(command, '_id'));
   }
 
-  if (!context?.fields.get('_index')) {
+  if (!context?.columns.get('_index')) {
     messages.push(buildMissingMetadataMessage(command, '_index'));
   }
 
-  if (!context?.fields.get('_score')) {
+  if (!context?.columns.get('_score')) {
     messages.push(buildMissingMetadataMessage(command, '_score'));
   }
 

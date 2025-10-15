@@ -8,15 +8,14 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {
-  CountryFlags,
-  MAX_COUNTRY_FLAGS_IN_TOOLTIP,
-  TEST_SUBJ_BADGE,
-  TEST_SUBJ_PLUS_COUNT,
-  TEST_SUBJ_TOOLTIP_CONTENT,
-  TEST_SUBJ_TOOLTIP_COUNTRY,
-} from './country_flags';
 import { i18n } from '@kbn/i18n';
+import {
+  GRAPH_FLAGS_BADGE_ID,
+  GRAPH_FLAGS_PLUS_COUNT_ID,
+  GRAPH_FLAGS_TOOLTIP_CONTENT_ID,
+  GRAPH_FLAGS_TOOLTIP_COUNTRY_ID,
+} from '../../test_ids';
+import { CountryFlags, MAX_COUNTRY_FLAGS_IN_TOOLTIP } from './country_flags';
 
 describe('CountryFlags', () => {
   test('render null when input array is empty', () => {
@@ -26,41 +25,41 @@ describe('CountryFlags', () => {
 
   test('renders badge with only country flags when below the limit', async () => {
     render(<CountryFlags countryCodes={['US']} />);
-    expect(screen.queryByTestId(TEST_SUBJ_BADGE)?.textContent).toStrictEqual('🇺🇸');
-    expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_FLAGS_BADGE_ID)?.textContent).toStrictEqual('🇺🇸');
+    expect(screen.queryByTestId(GRAPH_FLAGS_TOOLTIP_CONTENT_ID)).not.toBeInTheDocument();
 
-    await userEvent.hover(screen.getByTestId(TEST_SUBJ_BADGE));
+    await userEvent.hover(screen.getByTestId(GRAPH_FLAGS_BADGE_ID));
 
     await waitFor(() => {
-      expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(GRAPH_FLAGS_TOOLTIP_CONTENT_ID)).not.toBeInTheDocument();
     });
   });
 
   test('renders badge with only country flags when reaching the limit', async () => {
     render(<CountryFlags countryCodes={['US', 'FR']} />);
-    expect(screen.queryByTestId(TEST_SUBJ_BADGE)?.textContent).toStrictEqual('🇺🇸🇫🇷');
-    expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_FLAGS_BADGE_ID)?.textContent).toStrictEqual('🇺🇸🇫🇷');
+    expect(screen.queryByTestId(GRAPH_FLAGS_TOOLTIP_CONTENT_ID)).not.toBeInTheDocument();
 
-    await userEvent.hover(screen.getByTestId(TEST_SUBJ_BADGE));
+    await userEvent.hover(screen.getByTestId(GRAPH_FLAGS_BADGE_ID));
 
     await waitFor(() => {
-      expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
-      expect(screen.queryByTestId(TEST_SUBJ_PLUS_COUNT)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(GRAPH_FLAGS_TOOLTIP_CONTENT_ID)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(GRAPH_FLAGS_PLUS_COUNT_ID)).not.toBeInTheDocument();
     });
   });
 
   test('renders badge with counter, tooltip and two first country flags when over the visible limit and all are repeated the same amount', async () => {
     render(<CountryFlags countryCodes={['US', 'FR', 'DE', 'JP']} />);
-    expect(screen.queryByTestId(TEST_SUBJ_BADGE)?.textContent).toStrictEqual('🇺🇸🇫🇷+2');
-    expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_FLAGS_BADGE_ID)?.textContent).toStrictEqual('🇺🇸🇫🇷+2');
+    expect(screen.queryByTestId(GRAPH_FLAGS_TOOLTIP_CONTENT_ID)).not.toBeInTheDocument();
 
-    await userEvent.hover(screen.getByTestId(TEST_SUBJ_BADGE));
+    await userEvent.hover(screen.getByTestId(GRAPH_FLAGS_BADGE_ID));
 
     await waitFor(() => {
-      expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toBeInTheDocument();
+      expect(screen.queryByTestId(GRAPH_FLAGS_TOOLTIP_CONTENT_ID)).toBeInTheDocument();
     });
 
-    const tooltipContent = screen.getByTestId(TEST_SUBJ_TOOLTIP_CONTENT);
+    const tooltipContent = screen.getByTestId(GRAPH_FLAGS_TOOLTIP_CONTENT_ID);
     expect(Array.from(tooltipContent.children).map((li) => li.textContent)).toStrictEqual([
       '🇺🇸 United States of America',
       '🇫🇷 France',
@@ -73,18 +72,18 @@ describe('CountryFlags', () => {
     const countryCodes = ['US', 'FR', 'DE', 'JP', 'IL', 'GB', 'CA', 'BR', 'GR', 'IT', 'RU'];
     render(<CountryFlags countryCodes={countryCodes} />);
 
-    await userEvent.hover(screen.getByTestId(TEST_SUBJ_BADGE));
+    await userEvent.hover(screen.getByTestId(GRAPH_FLAGS_BADGE_ID));
 
     await waitFor(() => {
-      expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toBeInTheDocument();
+      expect(screen.queryByTestId(GRAPH_FLAGS_TOOLTIP_CONTENT_ID)).toBeInTheDocument();
     });
 
-    const tooltipCountries = screen.getAllByTestId(TEST_SUBJ_TOOLTIP_COUNTRY);
+    const tooltipCountries = screen.getAllByTestId(GRAPH_FLAGS_TOOLTIP_COUNTRY_ID);
 
     expect(countryCodes).toHaveLength(MAX_COUNTRY_FLAGS_IN_TOOLTIP + 1);
     expect(tooltipCountries).toHaveLength(MAX_COUNTRY_FLAGS_IN_TOOLTIP);
 
-    const tooltipContent = screen.getByTestId(TEST_SUBJ_TOOLTIP_CONTENT);
+    const tooltipContent = screen.getByTestId(GRAPH_FLAGS_TOOLTIP_CONTENT_ID);
     expect(Array.from(tooltipContent.children).map((li) => li.textContent)).toStrictEqual([
       '🇺🇸 United States of America',
       '🇫🇷 France',
@@ -142,14 +141,14 @@ describe('CountryFlags', () => {
           ]}
         />
       );
-      expect(screen.queryByTestId(TEST_SUBJ_BADGE)?.textContent).toStrictEqual('🇺🇸');
-      expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(GRAPH_FLAGS_BADGE_ID)?.textContent).toStrictEqual('🇺🇸');
+      expect(screen.queryByTestId(GRAPH_FLAGS_TOOLTIP_CONTENT_ID)).not.toBeInTheDocument();
 
-      await userEvent.hover(screen.getByTestId(TEST_SUBJ_BADGE));
+      await userEvent.hover(screen.getByTestId(GRAPH_FLAGS_BADGE_ID));
 
       await waitFor(() => {
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
-        expect(screen.queryByTestId(TEST_SUBJ_PLUS_COUNT)).not.toBeInTheDocument();
+        expect(screen.queryByTestId(GRAPH_FLAGS_TOOLTIP_CONTENT_ID)).not.toBeInTheDocument();
+        expect(screen.queryByTestId(GRAPH_FLAGS_PLUS_COUNT_ID)).not.toBeInTheDocument();
       });
     });
 
@@ -157,13 +156,13 @@ describe('CountryFlags', () => {
       const countryCodes = ['US', 'INVALID', 'FR', 'JP', 'UK']; // United Kingdom's country code is 'GB', not 'UK'
       render(<CountryFlags countryCodes={countryCodes} />);
 
-      await userEvent.hover(screen.getByTestId(TEST_SUBJ_BADGE));
+      await userEvent.hover(screen.getByTestId(GRAPH_FLAGS_BADGE_ID));
 
       await waitFor(() => {
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toBeInTheDocument();
+        expect(screen.queryByTestId(GRAPH_FLAGS_TOOLTIP_CONTENT_ID)).toBeInTheDocument();
       });
 
-      const tooltipContent = screen.getByTestId(TEST_SUBJ_TOOLTIP_CONTENT);
+      const tooltipContent = screen.getByTestId(GRAPH_FLAGS_TOOLTIP_CONTENT_ID);
       expect(Array.from(tooltipContent.children).map((li) => li.textContent)).toStrictEqual([
         '🇺🇸 United States of America',
         '🇫🇷 France',
@@ -174,16 +173,16 @@ describe('CountryFlags', () => {
 
   test('handles uppercase, lowercase, or mixed-case input', async () => {
     render(<CountryFlags countryCodes={['us', 'FR', 'eS']} />);
-    expect(screen.queryByTestId(TEST_SUBJ_BADGE)?.textContent).toStrictEqual('🇺🇸🇫🇷+1');
-    expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_FLAGS_BADGE_ID)?.textContent).toStrictEqual('🇺🇸🇫🇷+1');
+    expect(screen.queryByTestId(GRAPH_FLAGS_TOOLTIP_CONTENT_ID)).not.toBeInTheDocument();
 
-    await userEvent.hover(screen.getByTestId(TEST_SUBJ_BADGE));
+    await userEvent.hover(screen.getByTestId(GRAPH_FLAGS_BADGE_ID));
 
     await waitFor(() => {
-      expect(screen.getByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toBeInTheDocument();
+      expect(screen.getByTestId(GRAPH_FLAGS_TOOLTIP_CONTENT_ID)).toBeInTheDocument();
     });
 
-    const tooltipContent = screen.getByTestId(TEST_SUBJ_TOOLTIP_CONTENT);
+    const tooltipContent = screen.getByTestId(GRAPH_FLAGS_TOOLTIP_CONTENT_ID);
     expect(Array.from(tooltipContent.children).map((li) => li.textContent)).toStrictEqual([
       '🇺🇸 United States of America',
       '🇫🇷 France',
@@ -196,13 +195,13 @@ describe('CountryFlags', () => {
 
     render(<CountryFlags countryCodes={['us', 'fr', 'es']} />);
 
-    await userEvent.hover(screen.getByTestId(TEST_SUBJ_BADGE));
+    await userEvent.hover(screen.getByTestId(GRAPH_FLAGS_BADGE_ID));
 
     await waitFor(() => {
-      expect(screen.getByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toBeInTheDocument();
+      expect(screen.getByTestId(GRAPH_FLAGS_TOOLTIP_CONTENT_ID)).toBeInTheDocument();
     });
 
-    const tooltipContent = screen.getByTestId(TEST_SUBJ_TOOLTIP_CONTENT);
+    const tooltipContent = screen.getByTestId(GRAPH_FLAGS_TOOLTIP_CONTENT_ID);
     expect(Array.from(tooltipContent.children).map((li) => li.textContent)).toStrictEqual([
       "🇺🇸 États-Unis d'Amérique",
       '🇫🇷 France',

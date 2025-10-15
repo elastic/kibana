@@ -7,32 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useState, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiText,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCode,
-  EuiButtonIcon,
-  EuiButtonEmpty,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import type { Interpolation, Theme } from '@emotion/react';
 import { css } from '@emotion/react';
+import { getLimitFromESQLQuery } from '@kbn/esql-utils';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  LanguageDocumentationInline,
   LanguageDocumentationFlyout,
+  LanguageDocumentationInline,
 } from '@kbn/language-documentation';
-import { getLimitFromESQLQuery } from '@kbn/esql-utils';
-import { type MonacoMessage } from '../helpers';
-import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
-import { QueryHistoryAction, HistoryAndStarredQueriesTabs } from './history_starred_queries';
-import { SubmitFeedbackComponent } from './feedback_component';
-import { QueryWrapComponent } from './query_wrap_component';
-import { KeyboardShortcuts } from './keyboard_shortcuts';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import type { DataErrorsControl, ESQLEditorDeps } from '../types';
+import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
+import { SubmitFeedbackComponent } from './feedback_component';
+import { HistoryAndStarredQueriesTabs, QueryHistoryAction } from './history_starred_queries';
+import { KeyboardShortcuts } from './keyboard_shortcuts';
+import { QueryWrapComponent } from './query_wrap_component';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';

@@ -413,6 +413,7 @@ export const getRelocatingMigratorTestKit = async ({
       migrations: {
         discardUnknownObjects: nextMinor,
         discardCorruptObjects: nextMinor,
+        useCumulativeLogger: false,
         ...settings.migrations,
       },
     },

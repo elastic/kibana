@@ -11,8 +11,10 @@ import {
   isBinaryExpression,
   isColumn,
   isDoubleLiteral,
+  isIdentifier,
   isIntegerLiteral,
   isLiteral,
+  isParamLiteral,
   isProperNode,
 } from '../ast/is';
 import {
@@ -44,6 +46,13 @@ export interface BasicPrettyPrinterOptions {
    * to two spaces.
    */
   pipeTab?: string;
+
+  /**
+   * Whether to skip printing header commands (e.g., SET instructions).
+   *
+   * @default false
+   */
+  skipHeader?: boolean;
 
   /**
    * The default lowercase setting to use for all options. Defaults to `false`.
@@ -86,6 +95,8 @@ export class BasicPrettyPrinter {
       ? BasicPrettyPrinter.query(node, opts)
       : node.type === 'command'
       ? BasicPrettyPrinter.command(node, opts)
+      : node.type === 'header-command'
+      ? BasicPrettyPrinter.command(node as any, opts)
       : BasicPrettyPrinter.expression(node, opts);
   };
 
@@ -144,6 +155,7 @@ export class BasicPrettyPrinter {
     this.opts = {
       pipeTab: opts.pipeTab ?? '  ',
       multiline: opts.multiline ?? false,
+      skipHeader: opts.skipHeader ?? false,
       lowercase: opts.lowercase ?? false,
       lowercaseCommands: opts.lowercaseCommands ?? opts.lowercase ?? false,
       lowercaseOptions: opts.lowercaseOptions ?? opts.lowercase ?? false,
@@ -243,6 +255,22 @@ export class BasicPrettyPrinter {
   protected readonly visitor: Visitor<any> = new Visitor()
     .on('visitExpression', (ctx) => {
       return '<EXPRESSION>';
+    })
+
+    .on('visitHeaderCommand', (ctx) => {
+      const opts = this.opts;
+      const cmd = opts.lowercaseCommands ? ctx.node.name : ctx.node.name.toUpperCase();
+
+      let args = '';
+
+      for (const arg of ctx.visitArgs()) {
+        args += (args ? ', ' : '') + arg;
+      }
+
+      const argsFormatted = args ? ` ${args}` : '';
+      const cmdFormatted = `${cmd}${argsFormatted};`;
+
+      return this.decorateWithComments(ctx.node, cmdFormatted);
     })
 
     .on('visitIdentifierExpression', (ctx) => {
@@ -394,8 +422,14 @@ export class BasicPrettyPrinter {
           return this.decorateWithComments(ctx.node, formatted);
         }
         default: {
-          if (opts.lowercaseFunctions) {
-            operator = operator.toLowerCase();
+          // Check if function name is a parameter stored in node.operator
+          if (ctx.node.operator && isParamLiteral(ctx.node.operator)) {
+            operator = LeafPrinter.param(ctx.node.operator);
+          } else {
+            if (ctx.node.operator && isIdentifier(ctx.node.operator)) {
+              operator = ctx.node.operator.name;
+            }
+            operator = opts.lowercaseFunctions ? operator.toLowerCase() : operator.toUpperCase();
           }
 
           let args = '';
@@ -507,9 +541,27 @@ export class BasicPrettyPrinter {
       const cmdSeparator = useMultiLine ? `\n${opts.pipeTab ?? '  '}| ` : ' | ';
       let text = '';
 
+      // Print header commands first (e.g., SET instructions)
+      if (!opts.skipHeader) {
+        for (const headerCmd of ctx.visitHeaderCommands()) {
+          if (text) text += ' ';
+          text += headerCmd;
+        }
+      }
+
+      let hasCommands = false;
+
       for (const cmd of ctx.visitCommands()) {
-        if (text) text += cmdSeparator;
+        if (hasCommands) {
+          // Separate main commands with pipe `|`
+          text += cmdSeparator;
+        } else if (text) {
+          // Separate header commands from main commands with just a space
+          text += ' ';
+        }
+
         text += cmd;
+        hasCommands = true;
       }
 
       return text;

@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates a mix of infrastructure host metrics and APM data from services running on those hosts.
+ */
+
 import type { InfraDocument, Instance, ApmFields } from '@kbn/apm-synthtrace-client';
 import { apm, infra } from '@kbn/apm-synthtrace-client';
 import { random, times } from 'lodash';

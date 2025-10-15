@@ -7,6 +7,7 @@ products:
   - id: kibana
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/accessibility.html
+navigation_title: Accessibility
 ---
 
 # {{kib}} Accessibility Statement (USA, Europe, and Beyond)
@@ -62,16 +63,6 @@ Accessibility testing is integrated into:
 - Design reviews
 - Pre-release accessibility quality assurance checks
 - Quarterly post-release audits
-
-## Accessibility Audit Schedule (FY26)
-This section outlines our accessibility schedule for the 2026 fiscal year. We initiated audits for WCAG 2.2 Level A compliance, addressing baseline accessibility requirements such as text alternatives, keyboard navigation, and basic ARIA support. In the latter part of the year, we will conduct audits for WCAG 2.2 Level AA compliance, which includes additional requirements such as color contrast ratios, focus visibility, and error identification. In the following table, completed audit cycles are marked with a check.
-
-| Quarter   | Timeline         | Audit Items |
-|-----------|------------------|-------------|
-| **Q1 FY26** | By July 2025     | - {icon}`checkCircle` Cloud Console (Serverless + Stateful)<br>- {icon}`checkCircle` Observability Solution (Serverless + Stateful)<br>- {icon}`checkCircle` Security Solution (Serverless + Stateful) |
-| **Q2 FY26** | By October 2025  | - Search Solution (Serverless + Stateful)<br>- Platform A & AA |
-| **Q3 FY26** | By January 2026  | - Search Solution (AA)<br>- Security Solution (AA)<br>- Observability Solution (AA) |
-| **Q4 FY26** | By April 2026    | - Cloud Console (AA) |
 
 ## Accessibility Conformance Reports (VPATs)
 

@@ -37,6 +37,7 @@ export type {
   Schema,
   ISchemas,
   VisualizationClient,
+  BasicVisualizationClient,
   SerializableAttributes,
 } from './vis_types';
 export type { VisualizeEditorInput } from './embeddable/types';

@@ -16,6 +16,7 @@ import type {
   MessageCompleteEvent,
   ToolCallEvent,
   ToolResultEvent,
+  ReasoningEvent,
 } from '@kbn/onechat-common';
 import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
 import {
@@ -26,6 +27,7 @@ import {
   createMessageEvent,
   createToolCallEvent,
   createToolResultEvent,
+  createReasoningEvent,
   extractTextContent,
   extractToolCalls,
   extractToolReturn,
@@ -38,7 +40,8 @@ export type ConvertedEvents =
   | MessageChunkEvent
   | MessageCompleteEvent
   | ToolCallEvent
-  | ToolResultEvent;
+  | ToolResultEvent
+  | ReasoningEvent;
 
 export const convertGraphEvents = ({
   graphName,
@@ -70,34 +73,44 @@ export const convertGraphEvents = ({
 
         // emit tool calls or full message on each agent step
         if (matchEvent(event, 'on_chain_end') && matchName(event, 'agent')) {
+          const events: ConvertedEvents[] = [];
+
+          // process last emitted message
           const addedMessages: BaseMessage[] = event.data.output.addedMessages ?? [];
           const lastMessage = addedMessages[addedMessages.length - 1];
 
           const toolCalls = extractToolCalls(lastMessage);
           if (toolCalls.length > 0) {
             const toolCallEvents: ToolCallEvent[] = [];
+            const reasoningEvents: ReasoningEvent[] = [];
 
             for (const toolCall of toolCalls) {
               const toolId = toolIdentifierFromToolCall(toolCall, toolIdMapping);
               const { toolCallId, args } = toolCall;
+
+              const { _reasoning, ...toolCallArgs } = args;
+              if (_reasoning) {
+                reasoningEvents.push(createReasoningEvent(_reasoning));
+              }
+
               toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
               toolCallEvents.push(
                 createToolCallEvent({
                   toolId,
                   toolCallId,
-                  params: args,
+                  params: toolCallArgs,
                 })
               );
             }
-
-            return of(...toolCallEvents);
+            events.push(...reasoningEvents, ...toolCallEvents);
           } else {
             const messageEvent = createMessageEvent(extractTextContent(lastMessage), {
               messageId,
             });
-
-            return of(messageEvent);
+            events.push(messageEvent);
           }
+
+          return of(...events);
         }
 
         // emit tool result events

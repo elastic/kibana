@@ -9,14 +9,20 @@ components:
     MonitoringEngineDescriptor:
       type: object
       required:
-        - type
         - status
       properties:
         status:
           $ref: "#/components/schemas/PrivilegeMonitoringEngineStatus"
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              description: Error message typically only present if the engine is in error state
 
     PrivilegeMonitoringEngineStatus:
       type: string
+      description: The status of the Privilege Monitoring Engine
       enum:
         - started
         - error

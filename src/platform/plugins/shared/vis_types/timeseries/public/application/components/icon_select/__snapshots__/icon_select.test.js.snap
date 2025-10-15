@@ -2,6 +2,7 @@
 
 exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_select.js <IconSelect /> should render and match a snapshot 1`] = `
 <EuiComboBox
+  aria-label="Icon selection"
   async={false}
   compressed={false}
   fullWidth={false}

@@ -46,6 +46,7 @@ import type {
 import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type TracksOverlays } from '@kbn/presentation-util';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 import type { DashboardLocatorParams, DashboardSettings, DashboardState } from '../../common';
@@ -65,7 +66,7 @@ export interface DashboardCreationOptions {
 
   getPassThroughContext?: PassThroughContext['getPassThroughContext'];
 
-  getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
+  getIncomingEmbeddables?: () => EmbeddablePackageState[] | undefined;
 
   useSearchSessionsIntegration?: boolean;
   searchSessionSettings?: {
@@ -129,7 +130,7 @@ export type DashboardApi = CanExpandPanels &
     };
     getDashboardPanelFromId: (id: string) => {
       type: string;
-      gridData: GridData;
+      grid: GridData;
       serializedState: SerializedPanelState;
     };
     hasOverlays$: PublishingSubject<boolean>;
@@ -166,4 +167,11 @@ export interface DashboardInternalApi {
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
   serializeLayout: () => Pick<DashboardState, 'panels' | 'references'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
+  dashboardContainerRef$: BehaviorSubject<HTMLElement | null>;
+  setDashboardContainerRef: (ref: HTMLElement | null) => void;
+  serializeControls: () => {
+    controlGroupInput: ControlsGroupState | undefined;
+    controlGroupReferences: Reference[];
+  };
+  untilControlsInitialized: () => Promise<void>;
 }

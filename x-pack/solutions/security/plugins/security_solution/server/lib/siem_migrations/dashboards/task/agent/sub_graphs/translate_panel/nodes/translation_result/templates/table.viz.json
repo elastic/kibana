@@ -1,0 +1,76 @@
+{
+    "type": "lens",
+    "gridData": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 6,
+        "i": "6e0b498e-a8f5-4b5e-9307-9f6cc505e21c"
+    },
+    "panelIndex": "6e0b498e-a8f5-4b5e-9307-9f6cc505e21c",
+    "embeddableConfig": {
+        "attributes": {
+            "title": "",
+            "references": [
+                {
+                    "type": "index-pattern",
+                    "id": "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da",
+                    "name": "textBasedLanguages-datasource-layer-3a5310ab-2832-41db-bdbe-1b6939dd5651"
+                }
+            ],
+            "state": {
+                "datasourceStates": {
+                    "textBased": {
+                        "layers": {
+                            "3a5310ab-2832-41db-bdbe-1b6939dd5651": {
+                                "index": "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da",
+                                "query": {
+                                    "esql": ""
+                                },
+                                "columns": [],
+                                "timeField": "@timestamp"
+                            }
+                        },
+                        "indexPatternRefs": [
+                            {
+                                "id": "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da",
+                                "title": "logs-*",
+                                "timeField": "@timestamp"
+                            }
+                        ]
+                    }
+                },
+                "filters": [],
+                "query": {
+                    "esql": ""
+                },
+                "visualization": {
+                    "layerId": "3a5310ab-2832-41db-bdbe-1b6939dd5651",
+                    "layerType": "data",
+                    "columns": []
+                },
+                "adHocDataViews": {
+                    "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da": {
+                        "id": "d6c911aa50e2dafcebcedfa50190d5c03bbac0070c96d6b16feb18aa1f84b5da",
+                        "title": "logs-*",
+                        "timeFieldName": "@timestamp",
+                        "sourceFilters": [],
+                        "type": "esql",
+                        "fieldFormats": {},
+                        "runtimeFieldMap": {},
+                        "allowNoIndex":false,
+                        "name": "logs-*",
+                        "allowHidden":false
+                    }
+                }
+            },
+            "visualizationType": "lnsDatatable",
+            "type": "lens"
+        },
+        "disabledActions": [
+            "OPEN_FLYOUT_ADD_DRILLDOWN"
+        ],
+        "enhancements": {}
+    },
+    "title": ""
+}

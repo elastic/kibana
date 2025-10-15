@@ -85,7 +85,7 @@ export const Header: React.FC<HeaderProps> = ({
             <h2>
               <FormattedMessage
                 id="xpack.searchPlayground.unsaved.pageTitle"
-                defaultMessage="Unsaved RAG playground"
+                defaultMessage="Unsaved playground"
               />
             </h2>
           </EuiTitle>
@@ -98,6 +98,9 @@ export const Header: React.FC<HeaderProps> = ({
                 { value: PlaygroundPageMode.Search, text: 'Search' },
               ]}
               value={pageMode}
+              aria-label={i18n.translate('xpack.searchPlayground.header.pageModeSelectAriaLabel', {
+                defaultMessage: 'Page mode',
+              })}
               onChange={(e) => onSelectPageModeChange(e.target.value as PlaygroundPageMode)}
             />
           )}

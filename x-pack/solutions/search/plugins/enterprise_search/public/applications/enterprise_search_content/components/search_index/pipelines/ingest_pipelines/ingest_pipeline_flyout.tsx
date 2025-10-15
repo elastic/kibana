@@ -92,6 +92,7 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
           <EuiFlexItem>
             {extractionDisabled ? (
               <EuiCallOut
+                announceOnMount
                 title={i18n.translate(
                   'xpack.enterpriseSearch.content.index.pipelines.settings.extractBinaryDisabledWarningTitle',
                   {

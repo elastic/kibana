@@ -10,11 +10,13 @@ export type InstallationStatus = 'installed' | 'uninstalled' | 'installing' | 'e
 export interface StatusResponse {
   status: InstallationStatus;
   indexName?: string;
+  dashboardId?: string;
 }
 
 export interface InstallResponse {
   status: InstallationStatus;
   indexName: string;
+  dashboardId?: string;
 }
 
 export enum DatasetSampleType {

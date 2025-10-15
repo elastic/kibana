@@ -56,9 +56,9 @@ describe('Playground utils', () => {
         ...validSearchPlayground,
         name: '',
       };
-      expect(validatePlayground(playground)).toContain('RAG Playground name cannot be empty');
+      expect(validatePlayground(playground)).toContain('Playground name cannot be empty');
       playground.name = ' ';
-      expect(validatePlayground(playground)).toContain('RAG Playground name cannot be empty');
+      expect(validatePlayground(playground)).toContain('Playground name cannot be empty');
     });
     it('should return an error when elasticsearchQuery is invalid JSON', () => {
       const playground: PlaygroundSavedObject = {

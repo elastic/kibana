@@ -19,7 +19,7 @@ export function StreamDetailManagement() {
   }
 
   if (Streams.GroupStream.GetResponse.is(definition)) {
-    return <GroupStreamDetailManagement definition={definition} refreshDefinition={refresh} />;
+    return <GroupStreamDetailManagement definition={definition} />;
   }
 
   return <ClassicStreamDetailManagement definition={definition} refreshDefinition={refresh} />;

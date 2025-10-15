@@ -79,7 +79,7 @@ const AssistantComponent: React.FC<Props> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const {
-    assistantAvailability: { isAssistantEnabled, isAssistantSharingEnabled },
+    assistantAvailability: { isAssistantEnabled },
     assistantTelemetry,
     currentAppId,
     augmentMessageCodeBlocks,
@@ -91,6 +91,7 @@ const AssistantComponent: React.FC<Props> = ({
     showAnonymizedValues,
     setContentReferencesVisible,
     setShowAnonymizedValues,
+    settings,
   } = useAssistantContext();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
@@ -123,8 +124,12 @@ const AssistantComponent: React.FC<Props> = ({
   // Connector details
   const { data: connectors, isFetchedAfterMount: isFetchedConnectors } = useLoadConnectors({
     http,
+    settings,
   });
-  const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+  const defaultConnector = useMemo(
+    () => getDefaultConnector(connectors, settings),
+    [connectors, settings]
+  );
   const spaceId = useAssistantSpaceId();
   const { getLastConversation, setLastConversation } = useAssistantLastConversation({ spaceId });
   const lastConversationFromLocalStorage = useMemo(
@@ -441,11 +446,11 @@ const AssistantComponent: React.FC<Props> = ({
           >
             <ConversationSidePanel
               currentConversation={currentConversation}
+              currentUser={currentUser}
               onConversationSelected={handleOnConversationSelected}
               conversations={conversations}
               onConversationDeleted={handleOnConversationDeleted}
               onConversationCreate={handleCreateConversation}
-              isAssistantSharingEnabled={isAssistantSharingEnabled}
               isFetchingCurrentUserConversations={isFetchingCurrentUserConversations}
               refetchCurrentUserConversations={refetchCurrentUserConversations}
               setPaginationObserver={setPaginationObserver}
@@ -475,9 +480,9 @@ const AssistantComponent: React.FC<Props> = ({
                     conversations={conversations}
                     conversationsLoaded={isFetchedCurrentUserConversations}
                     conversationSharedState={conversationSharedState}
+                    currentUser={currentUser}
                     defaultConnector={defaultConnector}
                     isAssistantEnabled={isAssistantEnabled}
-                    isAssistantSharingEnabled={isAssistantSharingEnabled}
                     isConversationOwner={isConversationOwner}
                     isDisabled={isDisabled || isLoadingChatSend}
                     isLoading={isInitialLoad}

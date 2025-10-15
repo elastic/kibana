@@ -23,7 +23,7 @@ export interface SecondaryMenuItem {
 export interface SecondaryMenuSection {
   id: string;
   items: SecondaryMenuItem[];
-  label: string | null;
+  label?: string;
 }
 
 export interface MenuItem {

@@ -973,6 +973,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiModal.closeModal': i18n.translate('core.euiModal.closeModal', {
       defaultMessage: 'Closes this modal window',
     }),
+    'euiModal.screenReaderModalDialog': i18n.translate('core.euiModal.screenReaderModalDialog', {
+      defaultMessage:
+        'You are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.',
+    }),
     'euiErrorBoundary.error': i18n.translate('core.euiErrorBoundary.error', {
       defaultMessage: 'Error',
       description: 'Error boundary for uncaught exceptions when rendering part of the application',

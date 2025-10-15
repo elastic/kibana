@@ -24,7 +24,8 @@ describe('autocomplete.suggest', () => {
               type: ESQLVariableType.VALUES,
             },
           ],
-          getColumnsFor: () => Promise.resolve([{ name: 'agent.name', type: 'keyword' }]),
+          getColumnsFor: () =>
+            Promise.resolve([{ name: 'agent.name', type: 'keyword', userDefined: false }]),
         },
       });
 
@@ -54,7 +55,8 @@ describe('autocomplete.suggest', () => {
         callbacks: {
           canSuggestVariables: () => true,
           getVariables: () => [],
-          getColumnsFor: () => Promise.resolve([{ name: 'clientip', type: 'ip' }]),
+          getColumnsFor: () =>
+            Promise.resolve([{ name: 'clientip', type: 'ip', userDefined: false }]),
         },
       });
 
@@ -81,7 +83,8 @@ describe('autocomplete.suggest', () => {
               type: ESQLVariableType.FUNCTIONS,
             },
           ],
-          getColumnsFor: () => Promise.resolve([{ name: 'clientip', type: 'ip' }]),
+          getColumnsFor: () =>
+            Promise.resolve([{ name: 'clientip', type: 'ip', userDefined: false }]),
         },
       });
 
@@ -102,7 +105,8 @@ describe('autocomplete.suggest', () => {
         callbacks: {
           canSuggestVariables: () => true,
           getVariables: () => [],
-          getColumnsFor: () => Promise.resolve([{ name: 'clientip', type: 'ip' }]),
+          getColumnsFor: () =>
+            Promise.resolve([{ name: 'clientip', type: 'ip', userDefined: false }]),
         },
       });
 
@@ -129,7 +133,8 @@ describe('autocomplete.suggest', () => {
               type: ESQLVariableType.FIELDS,
             },
           ],
-          getColumnsFor: () => Promise.resolve([{ name: 'clientip', type: 'ip' }]),
+          getColumnsFor: () =>
+            Promise.resolve([{ name: 'clientip', type: 'ip', userDefined: false }]),
         },
       });
 
@@ -156,7 +161,8 @@ describe('autocomplete.suggest', () => {
               type: ESQLVariableType.TIME_LITERAL,
             },
           ],
-          getColumnsFor: () => Promise.resolve([{ name: '@timestamp', type: 'date' }]),
+          getColumnsFor: () =>
+            Promise.resolve([{ name: '@timestamp', type: 'date', userDefined: false }]),
         },
       });
 
@@ -177,7 +183,8 @@ describe('autocomplete.suggest', () => {
         callbacks: {
           canSuggestVariables: () => true,
           getVariables: () => [],
-          getColumnsFor: () => Promise.resolve([{ name: 'bytes', type: 'double' }]),
+          getColumnsFor: () =>
+            Promise.resolve([{ name: 'bytes', type: 'double', userDefined: false }]),
         },
       });
 
@@ -198,7 +205,8 @@ describe('autocomplete.suggest', () => {
         callbacks: {
           canSuggestVariables: () => true,
           getVariables: () => [],
-          getColumnsFor: () => Promise.resolve([{ name: 'agent.name', type: 'keyword' }]),
+          getColumnsFor: () =>
+            Promise.resolve([{ name: 'agent.name', type: 'keyword', userDefined: false }]),
         },
       });
 
@@ -225,7 +233,8 @@ describe('autocomplete.suggest', () => {
               type: ESQLVariableType.VALUES,
             },
           ],
-          getColumnsFor: () => Promise.resolve([{ name: 'agent.name', type: 'keyword' }]),
+          getColumnsFor: () =>
+            Promise.resolve([{ name: 'agent.name', type: 'keyword', userDefined: false }]),
         },
       });
 
@@ -246,7 +255,8 @@ describe('autocomplete.suggest', () => {
         callbacks: {
           canSuggestVariables: () => true,
           getVariables: () => [],
-          getColumnsFor: () => Promise.resolve([{ name: 'agent.name', type: 'keyword' }]),
+          getColumnsFor: () =>
+            Promise.resolve([{ name: 'agent.name', type: 'keyword', userDefined: false }]),
         },
       });
 
