@@ -9,6 +9,7 @@
 
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -751,10 +752,62 @@ describe('Actions Plugin', () => {
     describe('listTypes()', () => {
       it('passes through feature ID and sets exposeValidation to true', async () => {
         const actionTypeRegistryListMock = jest.spyOn(ActionTypeRegistry.prototype, 'list');
-        await plugin.setup(coreSetup as any, pluginsSetup);
+        const pluginSetup = await plugin.setup(coreSetup, pluginsSetup);
+        pluginSetup.registerType(
+          getConnectorType({
+            id: '.server-log',
+            name: 'Server log',
+            validate: {
+              config: { schema: z.object({}).strict() },
+              secrets: { schema: z.object({}).strict() },
+              params: {
+                schema: z
+                  .object({
+                    text: z.string().min(1),
+                  })
+                  .strict(),
+              },
+            },
+          })
+        );
         const pluginStart = plugin.start(coreStart, pluginsStart);
 
-        pluginStart.listTypes('alerting');
+        const result = pluginStart.listTypes('alerting');
+        expect(result).toEqual([
+          {
+            id: '.server-log',
+            name: 'Server log',
+            enabled: true,
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'basic',
+            supportedFeatureIds: ['alerting'],
+            isSystemActionType: false,
+            validate: { params: expect.any(Object) },
+          },
+        ]);
+
+        // check that validation works
+        try {
+          result[0].validate?.params.schema.parse({ text: '' });
+        } catch (err) {
+          expect(err.message).toMatchInlineSnapshot(`
+            "[
+              {
+                \\"code\\": \\"too_small\\",
+                \\"minimum\\": 1,
+                \\"type\\": \\"string\\",
+                \\"inclusive\\": true,
+                \\"exact\\": false,
+                \\"message\\": \\"String must contain at least 1 character(s)\\",
+                \\"path\\": [
+                  \\"text\\"
+                ]
+              }
+            ]"
+          `);
+        }
+
         expect(actionTypeRegistryListMock).toHaveBeenCalledWith({
           exposeValidation: true,
           featureId: 'alerting',

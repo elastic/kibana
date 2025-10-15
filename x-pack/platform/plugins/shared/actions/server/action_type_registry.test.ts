@@ -207,9 +207,15 @@ describe('actionTypeRegistry', () => {
       expect(rest).toMatchInlineSnapshot(`
               Object {
                 "executor": [Function],
+<<<<<<< HEAD
                 "id": "my-connector-type",
                 "minimumLicenseRequired": "basic",
                 "name": "My connector type",
+=======
+                "id": "my-action-type",
+                "minimumLicenseRequired": "basic",
+                "name": "My action type",
+>>>>>>> 865c6ef63f14c7e5d6fed9458262e6845b955527
                 "supportedFeatureIds": Array [
                   "alerting",
                 ],

@@ -39,7 +39,7 @@ export default function xsoarTest({ getService }: FtrProviderContext) {
     return body.id;
   };
 
-  describe('testtest XSOAR', () => {
+  describe('XSOAR', () => {
     describe('action creation', () => {
       const simulator = new XSOARSimulator({
         returnError: false,

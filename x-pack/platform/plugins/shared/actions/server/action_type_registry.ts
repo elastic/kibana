@@ -269,7 +269,7 @@ export class ActionTypeRegistry {
         ...(exposeValidation === true
           ? {
               validate: {
-                params: actionType.validate?.params,
+                params: actionType.validate.params,
               },
             }
           : {}),
