@@ -6,7 +6,6 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
@@ -50,6 +49,12 @@ import type {
   anomalySwimlaneEmbeddableUserInputSchema,
   anomalySwimlaneInitialInputSchema,
 } from '../../server/embeddable/schemas';
+import type {
+  MlEntity,
+  SingleMetricViewerEmbeddableCustomInput,
+  SingleMetricViewerEmbeddableState,
+  SingleMetricViewerEmbeddableUserInput,
+} from './single_metric_viewer/types';
 
 export type {
   AnomalySwimLaneEmbeddableState,
@@ -62,8 +67,6 @@ export type {
 export interface MlEmbeddableBaseApi<StateType extends object = object>
   extends DefaultEmbeddableApi<StateType>,
     PublishesTimeRange {}
-
-export type MlEntity = Record<string, MlEntityField['fieldValue']>;
 
 /** Manual input by the user */
 export type AnomalySwimlaneEmbeddableUserInput = TypeOf<
@@ -180,24 +183,6 @@ export interface AnomalyChartsEmbeddableState
     AnomalyChartsEmbeddableOverridableState {}
 
 /** Manual input by the user */
-export interface SingleMetricViewerEmbeddableUserInput {
-  forecastId?: string;
-  functionDescription?: string;
-  jobIds: JobId[];
-  selectedDetectorIndex: number;
-  selectedEntities?: MlEntity;
-  panelTitle?: string;
-}
-
-export interface SingleMetricViewerEmbeddableCustomInput
-  extends Omit<SingleMetricViewerEmbeddableUserInput, 'panelTitle'> {
-  id?: string;
-  filters?: Filter[];
-  query?: Query;
-  refreshConfig?: RefreshInterval;
-  timeRange: TimeRange | undefined;
-}
-
 export type SingleMetricViewerEmbeddableInput = SingleMetricViewerEmbeddableCustomInput & {
   title?: string;
 };
@@ -205,10 +190,6 @@ export type SingleMetricViewerEmbeddableInput = SingleMetricViewerEmbeddableCust
 /**
  * Persisted state for the Single Metric Embeddable.
  */
-export interface SingleMetricViewerEmbeddableState
-  extends SerializedTitles,
-    SingleMetricViewerEmbeddableCustomInput {}
-
 export type SingleMetricViewerEmbeddableApi =
   MlEmbeddableBaseApi<SingleMetricViewerEmbeddableState> &
     PublishesWritableTitle &
