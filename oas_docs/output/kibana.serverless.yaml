@@ -9479,8 +9479,9 @@ paths:
           example: 50
           in: query
           name: size
-          required: true
+          required: false
           schema:
+            default: 50
             minimum: 1
             type: number
         - description: Start of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").
