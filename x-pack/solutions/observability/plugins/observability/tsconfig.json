@@ -125,6 +125,7 @@
     "@kbn/core-pricing-browser-mocks",
     "@kbn/esql",
     "@kbn/react-query",
+    "@kbn/core-elasticsearch-server-utils",
   ],
   "exclude": [
     "target/**/*"

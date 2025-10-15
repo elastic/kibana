@@ -366,6 +366,8 @@
       "@kbn/core-elasticsearch-server-internal/*": ["src/core/packages/elasticsearch/server-internal/*"],
       "@kbn/core-elasticsearch-server-mocks": ["src/core/packages/elasticsearch/server-mocks"],
       "@kbn/core-elasticsearch-server-mocks/*": ["src/core/packages/elasticsearch/server-mocks/*"],
+      "@kbn/core-elasticsearch-server-utils": ["src/core/packages/elasticsearch/server-utils"],
+      "@kbn/core-elasticsearch-server-utils/*": ["src/core/packages/elasticsearch/server-utils/*"],
       "@kbn/core-environment-server-internal": ["src/core/packages/environment/server-internal"],
       "@kbn/core-environment-server-internal/*": ["src/core/packages/environment/server-internal/*"],
       "@kbn/core-environment-server-mocks": ["src/core/packages/environment/server-mocks"],
