@@ -18,14 +18,10 @@ export const calculateAverages = (evaluationData: EvaluationScore[]) => {
   const scoreCounts: Record<string, number> = {};
 
   // Process each result
-  evaluationData.forEach((result: any) => {
-    if (result.scores) {
-      Object.entries(result.scores).forEach(([scoreKey, scoreValue]) => {
-        if (typeof scoreValue === 'number') {
-          scoreSums[scoreKey] = (scoreSums[scoreKey] || 0) + scoreValue;
-          scoreCounts[scoreKey] = (scoreCounts[scoreKey] || 0) + 1;
-        }
-      });
+  evaluationData.forEach((result: EvaluationScore) => {
+    if (result && result.evaluatorId && typeof result.score === 'number') {
+      scoreSums[result.evaluatorId] = (scoreSums[result.evaluatorId] || 0) + result.score;
+      scoreCounts[result.evaluatorId] = (scoreCounts[result.evaluatorId] || 0) + 1;
     }
   });
 
