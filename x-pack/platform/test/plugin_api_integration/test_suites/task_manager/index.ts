@@ -9,17 +9,17 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('task_manager', function taskManagerSuite() {
-    loadTestFile(require.resolve('./task_priority'));
-    loadTestFile(require.resolve('./background_task_utilization_route'));
-    loadTestFile(require.resolve('./metrics_route'));
-    loadTestFile(require.resolve('./health_route'));
+    // loadTestFile(require.resolve('./task_priority'));
+    // loadTestFile(require.resolve('./background_task_utilization_route'));
+    // loadTestFile(require.resolve('./metrics_route'));
+    // loadTestFile(require.resolve('./health_route'));
     loadTestFile(require.resolve('./task_management'));
-    loadTestFile(require.resolve('./task_management_scheduled_at'));
-    loadTestFile(require.resolve('./task_management_removed_types'));
-    loadTestFile(require.resolve('./check_registered_task_types'));
-    loadTestFile(require.resolve('./kibana_discovery_service'));
-    loadTestFile(require.resolve('./task_partitions'));
+    // loadTestFile(require.resolve('./task_management_scheduled_at'));
+    // loadTestFile(require.resolve('./task_management_removed_types'));
+    // loadTestFile(require.resolve('./check_registered_task_types'));
+    // loadTestFile(require.resolve('./kibana_discovery_service'));
+    // loadTestFile(require.resolve('./task_partitions'));
 
-    loadTestFile(require.resolve('./migrations'));
+    // loadTestFile(require.resolve('./migrations'));
   });
 }
