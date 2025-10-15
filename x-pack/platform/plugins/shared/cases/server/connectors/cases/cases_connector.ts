@@ -18,6 +18,7 @@ import { CasesService } from './cases_service';
 import type { CasesClient } from '../../client';
 import {
   CasesConnectorError,
+  createAndThrowUserError,
   isCasesClientError,
   isCasesConnectorError,
 } from './cases_connector_error';
@@ -148,6 +149,7 @@ export class CasesConnector extends SubActionConnector<
 
   private handleError(error: Error) {
     if (isCasesConnectorError(error)) {
+      createAndThrowUserError(error);
       this.logError(error);
       throw error;
     }
@@ -158,6 +160,7 @@ export class CasesConnector extends SubActionConnector<
         error.boomify().output.statusCode
       );
 
+      createAndThrowUserError(caseConnectorError);
       this.logError(caseConnectorError);
       throw caseConnectorError;
     }
@@ -168,6 +171,7 @@ export class CasesConnector extends SubActionConnector<
         error.output.statusCode
       );
 
+      createAndThrowUserError(caseConnectorError);
       this.logError(caseConnectorError);
 
       throw caseConnectorError;

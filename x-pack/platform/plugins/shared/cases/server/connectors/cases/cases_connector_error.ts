@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 import { CaseError } from '../../common/error';
 
+export const httpResponseUserErrorCodes = [
+  400, 401, 402, 403, 407, 409, 412, 413, 417, 422, 423, 429, 451,
+];
 export class CasesConnectorError extends Error {
   public readonly statusCode: number;
 
@@ -22,3 +26,11 @@ export const isCasesConnectorError = (error: unknown): error is CasesConnectorEr
 
 export const isCasesClientError = (error: unknown): error is CaseError =>
   error instanceof CaseError;
+
+export const createAndThrowUserError = (error: CasesConnectorError) => {
+  const statusCode = error.statusCode;
+
+  if (statusCode != null && httpResponseUserErrorCodes.includes(Number(statusCode))) {
+    return createTaskRunError(error, TaskErrorSource.USER);
+  }
+};
