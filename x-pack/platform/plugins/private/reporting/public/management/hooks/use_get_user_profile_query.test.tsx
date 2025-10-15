@@ -9,8 +9,8 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useGetUserProfileQuery } from './use_get_user_profile_query';
 import type { UserProfileService } from '@kbn/core/public';
-import { QueryClientProvider } from '@tanstack/react-query';
-import * as reactQuery from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/official-react-query';
+import * as reactQuery from '@tanstack/official-react-query';
 import type { PropsWithChildren } from 'react';
 import { testQueryClient } from '../test_utils/test_query_client';
 
