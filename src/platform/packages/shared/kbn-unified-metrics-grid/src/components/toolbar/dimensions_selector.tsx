@@ -118,11 +118,13 @@ export const DimensionsSelector = ({
   );
 
   const buttonLabel = useMemo(() => {
-    if (selectedDimensions.length === 0) {
+    const count = selectedDimensions.length;
+    if (count === 0) {
       return (
         <FormattedMessage
           id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabel"
-          defaultMessage="No dimension selected"
+          defaultMessage="No {maxDimensions, plural, one {dimension} other {dimensions}} selected"
+          values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
         />
       );
     }
@@ -131,27 +133,35 @@ export const DimensionsSelector = ({
         <EuiFlexItem grow={false}>
           <FormattedMessage
             id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabelWithSelection"
-            defaultMessage="Dimension"
+            defaultMessage="{count, plural, one {Dimension} other {Dimensions}}"
+            values={{ count }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiNotificationBadge>{selectedDimensions.length}</EuiNotificationBadge>
+          <EuiNotificationBadge>{count}</EuiNotificationBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }, [selectedDimensions]);
 
   const popoverContentBelowSearch = useMemo(() => {
-    const statusMessage = i18n.translate(
-      'metricsExperience.dimensionsSelector.instructionMessage',
-      {
-        defaultMessage: 'Select a dimension to break down your metrics',
-      }
-    );
+    const count = selectedDimensions.length;
+    const statusMessage =
+      MAX_DIMENSIONS_SELECTIONS > 1 && count > 0
+        ? i18n.translate('metricsExperience.dimensionsSelector.selectedStatusMessage', {
+            defaultMessage:
+              '{count, plural, one {# dimension selected} other {# dimensions selected}}',
+            values: { count },
+          })
+        : i18n.translate('metricsExperience.dimensionsSelector.instructionMessage', {
+            defaultMessage:
+              'Select {maxDimensions, plural, one {a dimension} other {dimensions}} to break down your metrics',
+            values: { maxDimensions: MAX_DIMENSIONS_SELECTIONS },
+          });
 
     return (
       <ClearAllSection
-        selectedOptionsLength={selectedDimensions.length}
+        selectedOptionsLength={count}
         onClearAllAction={onClear}
         selectedOptionsMessage={statusMessage}
       />
