@@ -137,7 +137,6 @@ describe('pollEsNodesVersion', () => {
   });
 
   afterEach(() => {
-    // Ensure all subscriptions are cleaned up
     subscriptions.forEach((sub) => sub.unsubscribe());
     subscriptions.length = 0;
   });
@@ -155,11 +154,13 @@ describe('pollEsNodesVersion', () => {
     const expectedCompatibilityResults = [false, false, true];
     jest.clearAllMocks();
 
-    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0'));
-    nodeInfosErrorOnce('mock request error'); // initial call to ES
-    // Mock for retry attempt after error (healthCheckRetry: 1 means it will retry once)
-    nodeInfosErrorOnce('mock request error retry 1');
-    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1'));
+    // poll cycle 1
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // emit not compatible
+    // poll cycle 2
+    nodeInfosErrorOnce('mock request error'); // error
+    nodeInfosErrorOnce('mock request error'); // retry error, emit error
+    // poll cycle 3
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1')); // emit compatible
 
     const subscription = pollEsNodesVersion({
       internalClient,
@@ -212,7 +213,7 @@ describe('pollEsNodesVersion', () => {
     subscriptions.push(subscription);
   });
 
-  it.only('only emits when the error message changes between poll attempts', (done) => {
+  it('only emits when the error message changes between poll attempts', (done) => {
     expect.assertions(4); // 2 per result (isCompatible and message) x 2 results
     const expectedCompatibilityResults = [false, false];
     const expectedMessageResults = [
@@ -221,17 +222,17 @@ describe('pollEsNodesVersion', () => {
     ];
     jest.clearAllMocks();
 
-    // Poll Cycle 1:
+    // poll cycle 1:
     nodeInfosErrorOnce('mock request error'); // initial attempt - fails
     nodeInfosErrorOnce('mock request error'); // retry attempt - fails with same error
     // Result: emits error message "mock request error" (first emission)
 
-    // Poll Cycle 2:
+    // poll cycle 2:
     nodeInfosErrorOnce('mock request error'); // initial attempt - fails with same error as cycle 1
     nodeInfosErrorOnce('mock request error'); // retry attempt - fails with same error
     // Result: distinctUntilChanged blocks emission (same error message as previous)
 
-    // Poll Cycle 3:
+    // poll cycle 3:
     nodeInfosErrorOnce('mock request error 2'); // initial attempt - fails with different error
     nodeInfosErrorOnce('mock request error 2'); // retry attempt - fails (but different from cycle 1)
     // Result: emits error message "mock request error 2" (second emission)
@@ -255,8 +256,6 @@ describe('pollEsNodesVersion', () => {
       });
     subscriptions.push(subscription);
   });
-
-  it.todo('exhausts all retry attempts within a single poll cycle before emitting an error');
 
   it('returns isCompatible=false and keeps polling when requests fail, only emitting if the error message changes', (done) => {
     expect.assertions(8);
@@ -302,7 +301,7 @@ describe('pollEsNodesVersion', () => {
     subscriptions.push(subscription);
   });
 
-  it('eturns compatibility results from successful poll attempts', (done) => {
+  it('returns compatibility results from successful poll attempts', (done) => {
     expect.assertions(1);
     const nodes = createNodes('5.1.0', '5.2.0', '5.0.0');
 
@@ -420,7 +419,6 @@ describe('pollEsNodesVersion', () => {
         .pipe(take(2))
         .subscribe({
           complete: () => {
-            // Should have made exactly 2 calls
             expect(internalClient.nodes.info).toHaveBeenCalledTimes(2);
             // Second call should wait for first call to complete (100ms) before starting
             // So the delay between call starts should be at least 100ms
