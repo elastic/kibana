@@ -78092,11 +78092,6 @@ components:
                 type: object
                 properties:
                   content:
-                    discriminator:
-                      mapping:
-                        endpoint: '#/components/schemas/Security_Endpoint_Management_API_RunningProcessesOutputEndpoint'
-                        sentinel_one: '#/components/schemas/Security_Endpoint_Management_API_RunningProcessesOutputSentinelOne'
-                      propertyName: agentType
                     oneOf:
                       - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunningProcessesOutputEndpoint'
                       - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunningProcessesOutputSentinelOne'
@@ -78150,12 +78145,6 @@ components:
                             type: string
               type: object
             parameters:
-              discriminator:
-                mapping:
-                  crowdstrike: '#/components/schemas/Security_Endpoint_Management_API_RunscriptParamsCrowdStrike'
-                  microsoft_defender_endpoint: '#/components/schemas/Security_Endpoint_Management_API_RunscriptParamsMicrosoft'
-                  sentinel_one: '#/components/schemas/Security_Endpoint_Management_API_RunscriptParamsSentinelOne'
-                propertyName: agentType
               oneOf:
                 - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunscriptParamsCrowdStrike'
                 - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunscriptParamsMicrosoft'
