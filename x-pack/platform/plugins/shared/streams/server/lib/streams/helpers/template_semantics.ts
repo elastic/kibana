@@ -57,5 +57,3 @@ export function getTemplateFromRule(rule: unknown): JsonValue | undefined {
 
   return undefined;
 }
-
-

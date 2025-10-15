@@ -6,12 +6,12 @@
  */
 
 import type { ConsoleStart } from '@kbn/console-plugin/server';
+import type { JsonValue } from '@kbn/utility-types';
 import type {
   ProcessorSuggestion,
   ProcessorPropertySuggestion,
   ProcessorSuggestionsResponse,
 } from '../../../../common';
-import type { JsonValue } from '@kbn/utility-types';
 import { getTemplateFromRule } from '../helpers/template_semantics';
 
 type SpecJsonFetcher = () => ReturnType<ConsoleStart['getSpecJson']>;
@@ -150,5 +150,3 @@ export class ProcessorSuggestionsService {
     }
   }
 }
-
-

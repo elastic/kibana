@@ -17,7 +17,7 @@ describe('helpers', () => {
     });
 
     it('returns false after colon', () => {
-      const lineBefore = '  "grok": '; 
+      const lineBefore = '  "grok": ';
       const nearby = '{ "grok": ';
       expect(shouldSuggestProcessorKey(lineBefore, nearby)).toBe(false);
     });
@@ -66,5 +66,3 @@ describe('helpers', () => {
     });
   });
 });
-
-

@@ -59,7 +59,7 @@ function Wrapper() {
   );
 }
 
-type FakeModel = {
+interface FakeModel {
   getLineContent: (line: number) => string;
   getLineMaxColumn: (line: number) => number;
   getValueInRange: (r: {
@@ -73,7 +73,7 @@ type FakeModel = {
     startColumn: number;
     endColumn: number;
   };
-};
+}
 
 const createFakeModel = (lines: string[]): FakeModel => {
   const getLineContent = (line: number) => lines[line - 1] || '';
@@ -140,7 +140,12 @@ describe('JsonEditor autocomplete provider', () => {
     );
     await waitFor(() => expect(capturedProvider).toBeDefined());
 
-    const model = createFakeModel(['[', '  { "', '  }', ']']) as unknown as monaco.editor.ITextModel;
+    const model = createFakeModel([
+      '[',
+      '  { "',
+      '  }',
+      ']',
+    ]) as unknown as monaco.editor.ITextModel;
     const position = { lineNumber: 2, column: 6 } as monaco.Position; // after opening quote
 
     const res = await capturedProvider!.provideCompletionItems!(
@@ -161,8 +166,13 @@ describe('JsonEditor autocomplete provider', () => {
     );
     await waitFor(() => expect(capturedProvider).toBeDefined());
 
-    const model = createFakeModel(['[', '  { "grok": { "', '  }', ']']) as unknown as monaco.editor.ITextModel;
-    const position = { lineNumber: 2, column: 17 } as monaco.Position; 
+    const model = createFakeModel([
+      '[',
+      '  { "grok": { "',
+      '  }',
+      ']',
+    ]) as unknown as monaco.editor.ITextModel;
+    const position = { lineNumber: 2, column: 17 } as monaco.Position;
 
     const res = await capturedProvider!.provideCompletionItems!(
       model,
@@ -183,7 +193,12 @@ describe('JsonEditor autocomplete provider', () => {
     await waitFor(() => expect(capturedProvider).toBeDefined());
 
     // Include a closing quote at the cursor so the provider extends endColumn by 1
-    const withClosing = createFakeModel(['[', '  { ""', '  }', ']']) as unknown as monaco.editor.ITextModel;
+    const withClosing = createFakeModel([
+      '[',
+      '  { ""',
+      '  }',
+      ']',
+    ]) as unknown as monaco.editor.ITextModel;
     const position = { lineNumber: 2, column: 6 } as monaco.Position;
 
     const res = (await capturedProvider!.provideCompletionItems!(
@@ -198,5 +213,3 @@ describe('JsonEditor autocomplete provider', () => {
     expect(endColumn).toBeGreaterThan(position.column);
   });
 });
-
-

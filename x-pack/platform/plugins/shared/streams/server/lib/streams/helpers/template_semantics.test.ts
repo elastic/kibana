@@ -26,13 +26,12 @@ describe('getTemplateFromRule', () => {
   });
 
   it('honors __one_of by taking first candidate', () => {
-    expect(getTemplateFromRule({ __one_of: [{ __template: { a: 1 } }, { __template: { b: 2 } }] }))
-      .toEqual({ a: 1 });
+    expect(
+      getTemplateFromRule({ __one_of: [{ __template: { a: 1 } }, { __template: { b: 2 } }] })
+    ).toEqual({ a: 1 });
   });
 
   it('returns {} for plain rule objects without meta keys', () => {
     expect(getTemplateFromRule({ some: 'rule' })).toEqual({});
   });
 });
-
-

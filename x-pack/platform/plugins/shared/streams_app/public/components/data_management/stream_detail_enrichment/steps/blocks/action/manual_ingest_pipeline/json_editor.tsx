@@ -98,19 +98,22 @@ export const JsonEditor = () => {
   const suggestionsRef = React.useRef<ProcessorSuggestionsResponse | null>(null);
   const fetchRef = React.useRef<Promise<ProcessorSuggestionsResponse> | null>(null);
 
-  const loadProcessorSuggestions = React.useCallback(async (): Promise<ProcessorSuggestionsResponse> => {
-    if (suggestionsRef.current) return suggestionsRef.current;
-    if (!fetchRef.current) {
-      fetchRef.current = fetchProcessorSuggestions(streamsRepositoryClient, signal).finally(() => {});
-    }
-    const res = await fetchRef.current;
-    if (res && res.processors.length > 0) {
-      suggestionsRef.current = res;
-    } else {
-      fetchRef.current = null;
-    }
-    return res;
-  }, [streamsRepositoryClient, signal]);
+  const loadProcessorSuggestions =
+    React.useCallback(async (): Promise<ProcessorSuggestionsResponse> => {
+      if (suggestionsRef.current) return suggestionsRef.current;
+      if (!fetchRef.current) {
+        fetchRef.current = fetchProcessorSuggestions(streamsRepositoryClient, signal).finally(
+          () => {}
+        );
+      }
+      const res = await fetchRef.current;
+      if (res && res.processors.length > 0) {
+        suggestionsRef.current = res;
+      } else {
+        fetchRef.current = null;
+      }
+      return res;
+    }, [streamsRepositoryClient, signal]);
 
   const suggestionProvider = React.useMemo<monaco.languages.CompletionItemProvider>(() => {
     const isProcessorTypeKeyContext = (
