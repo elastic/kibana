@@ -362,7 +362,13 @@ export function DataTableDocumentToolbarBtn({
   );
 
   return (
-    <EuiFlexGroup responsive={false} gutterSize="s" wrap={false}>
+    <EuiFlexGroup
+      responsive={false}
+      gutterSize="none"
+      wrap={false}
+      className="unifiedDataTableToolbarControlGroup"
+      css={toolbarStyles.controlGroup}
+    >
       <EuiFlexItem
         className="unifiedDataTableToolbarControlButton"
         css={toolbarStyles.controlButton}
