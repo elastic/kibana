@@ -6,7 +6,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { useConfigureSORiskEngineMutation } from '../../../api/hooks/use_configure_risk_engine_saved_object';
@@ -55,18 +55,22 @@ const settingsAreEqual = (
   first?: Partial<RiskScoreConfiguration>,
   second?: Partial<RiskScoreConfiguration>
 ) => {
-  // Normalize filters for comparison (handle undefined/empty arrays)
   const normalizeFilters = (filters?: AlertFilter[]) => {
     if (!filters || filters.length === 0) return [];
-    return filters.map((f) => ({
-      entity_types: (f.entity_types || []).sort(),
-      filter: f.filter || '',
-    }));
+    return filters
+      .map((f) => ({
+        entity_types: [...(f.entity_types || [])].sort(),
+        filter: (f.filter || '').trim(),
+      }))
+      .sort((a, b) => {
+        const filterCompare = a.filter.localeCompare(b.filter);
+        if (filterCompare !== 0) return filterCompare;
+        return JSON.stringify(a.entity_types).localeCompare(JSON.stringify(b.entity_types));
+      });
   };
 
   const firstFilters = normalizeFilters(first?.alertFilters);
   const secondFilters = normalizeFilters(second?.alertFilters);
-
   const alertFiltersEqual = JSON.stringify(firstFilters) === JSON.stringify(secondFilters);
 
   return (
@@ -124,15 +128,11 @@ export const useConfigurableRiskEngineSettings = () => {
       const riskEngineSettings = await fetchRiskEngineSettings();
 
       // Transform filters from backend format to internal format for storage
-      // Handle case where backend doesn't have filters field yet (before backend PR merges)
+      const backendFilters = (riskEngineSettings as Record<string, unknown>)?.filters;
       const transformedSettings = riskEngineSettings
         ? {
             ...riskEngineSettings,
-            alertFilters:
-              (riskEngineSettings as Record<string, unknown>).filters &&
-              Array.isArray((riskEngineSettings as Record<string, unknown>).filters)
-                ? ((riskEngineSettings as Record<string, unknown>).filters as AlertFilter[])
-                : [],
+            alertFilters: Array.isArray(backendFilters) ? backendFilters : [],
           }
         : undefined;
 
@@ -151,6 +151,27 @@ export const useConfigurableRiskEngineSettings = () => {
     }
   }, [isError]);
 
+  // Track when we're waiting for a save to complete and refetch
+  const waitingForSaveRefetch = useRef(false);
+  const preSaveFilterCount = useRef<number>(0);
+
+  // Sync selected settings after a successful save and refetch completes
+  useEffect(() => {
+    const currentFilterCount = savedRiskEngineSettings?.alertFilters?.length || 0;
+
+    if (
+      waitingForSaveRefetch.current &&
+      !isLoadingRiskEngineSettings &&
+      savedRiskEngineSettings &&
+      currentFilterCount !== preSaveFilterCount.current
+    ) {
+      const savedWithDefaults = riskEngineSettingsWithDefaults(savedRiskEngineSettings);
+      setSelectedRiskEngineSettings(savedWithDefaults);
+      waitingForSaveRefetch.current = false;
+      preSaveFilterCount.current = 0;
+    }
+  }, [savedRiskEngineSettings, isLoadingRiskEngineSettings, selectedRiskEngineSettings]);
+
   const resetSelectedSettings = () => {
     setSelectedRiskEngineSettings(riskEngineSettingsWithDefaults(savedRiskEngineSettings));
   };
@@ -159,24 +180,29 @@ export const useConfigurableRiskEngineSettings = () => {
 
   const saveSelectedSettingsMutation = useMutation(async () => {
     if (selectedRiskEngineSettings) {
-      await mutateRiskEngineSettingsAsync(
-        {
-          includeClosedAlerts: selectedRiskEngineSettings.includeClosedAlerts,
-          range: {
-            start: selectedRiskEngineSettings.range.start,
-            end: selectedRiskEngineSettings.range.end,
-          },
-          enableResetToZero: selectedRiskEngineSettings.enableResetToZero,
-          filters: selectedRiskEngineSettings.alertFilters,
+      const settingsToSave = {
+        includeClosedAlerts: selectedRiskEngineSettings.includeClosedAlerts,
+        range: {
+          start: selectedRiskEngineSettings.range.start,
+          end: selectedRiskEngineSettings.range.end,
         },
-        {
-          onSuccess: () => {
-            addSuccess(i18n.RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS, {
-              toastLifeTimeMs: 5000,
-            });
-          },
-        }
-      );
+        enableResetToZero: selectedRiskEngineSettings.enableResetToZero,
+        filters: selectedRiskEngineSettings.alertFilters,
+      };
+
+      await mutateRiskEngineSettingsAsync(settingsToSave, {
+        onSuccess: () => {
+          addSuccess(i18n.RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS, {
+            toastLifeTimeMs: 5000,
+          });
+        },
+      });
+
+      // Track pre-save state to detect when refetch completes
+      preSaveFilterCount.current = savedRiskEngineSettings?.alertFilters?.length || 0;
+      waitingForSaveRefetch.current = true;
+
+      // Trigger refetch
       await invalidateRiskEngineSettingsQuery();
     }
   });
@@ -211,16 +237,16 @@ export const useConfigurableRiskEngineSettings = () => {
     const transformedFilters = transformFiltersForBackend(filters);
     setSelectedRiskEngineSettings((prevState) => {
       if (!prevState) return undefined;
-      return { ...prevState, ...{ alertFilters: transformedFilters } };
+      return { ...prevState, alertFilters: transformedFilters };
     });
   };
 
-  // Getter for UI-formatted filters
-  const getUIAlertFilters = (): UIAlertFilter[] => {
+  // Getter for UI-formatted filters - memoized to prevent unnecessary transformations
+  const getUIAlertFilters = useCallback((): UIAlertFilter[] => {
     return selectedRiskEngineSettings?.alertFilters
       ? transformFiltersFromBackend(selectedRiskEngineSettings.alertFilters)
       : [];
-  };
+  }, [selectedRiskEngineSettings?.alertFilters]);
 
   return {
     savedRiskEngineSettings,
