@@ -32,7 +32,7 @@ import {
 import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
-import type { ESQLAstAnyCommand } from '@kbn/esql-ast/src/types';
+import type { ESQLAstAnyCommand, ESQLCommand } from '@kbn/esql-ast/src/types';
 import { getAstContext } from '../shared/context';
 import { isHeaderCommand, isSourceCommand } from '../shared/helpers';
 import { QueryColumns, getSourcesHelper } from '../shared/resources_helpers';
@@ -274,7 +274,7 @@ async function getSuggestionsWithinCommandExpression(
   // does it make sense to have a different context per command?
   return commandDefinition.methods.autocomplete(
     fullText,
-    astContext.command,
+    astContext.command as ESQLCommand,
     {
       getByType: getColumnsByType,
       getSuggestedUserDefinedColumnName,
