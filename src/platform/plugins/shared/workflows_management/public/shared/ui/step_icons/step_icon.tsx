@@ -11,8 +11,9 @@ import { useEuiTheme, EuiLoadingSpinner, EuiBeacon, EuiToken, EuiIcon } from '@e
 import { ExecutionStatus } from '@kbn/workflows';
 import React from 'react';
 import { css } from '@emotion/react';
+import { getStackConnectorLogoLazy } from '@kbn/stack-connectors-plugin/public/common/logos';
 import { getStepIconType } from './get_step_icon_type';
-import { getExecutionStatusColors } from './status_badge';
+import { getExecutionStatusColors } from '../status_badge';
 
 export function StepIcon({
   stepType,
@@ -27,6 +28,10 @@ export function StepIcon({
   }
   if (executionStatus === ExecutionStatus.WAITING_FOR_INPUT) {
     return <EuiBeacon size={14} color="warning" />;
+  }
+  const stackConnectorIconComponent = getStackConnectorIcon(stepType);
+  if (stackConnectorIconComponent) {
+    return <EuiIcon type={stackConnectorIconComponent} size="m" />;
   }
   const iconType = getStepIconType(stepType);
   if (iconType.startsWith('token')) {
@@ -56,4 +61,10 @@ export function StepIcon({
       }
     />
   );
+}
+
+function getStackConnectorIcon(connectorType: string) {
+  const dotConnectorType = `.${connectorType}`;
+
+  return getStackConnectorLogoLazy(dotConnectorType);
 }

@@ -18,7 +18,11 @@ export const getStepIconType = (stepType: string) => {
     case 'console':
       iconType = 'console';
       break;
+    case 'email':
+      iconType = 'email';
+      break;
     case 'slack':
+    case 'slack_api':
       iconType = 'logoSlack';
       break;
     case 'inference':
@@ -52,7 +56,6 @@ export const getStepIconType = (stepType: string) => {
     case 'foreach-iteration':
       iconType = 'tokenNumber';
       break;
-
     case 'if-branch':
       iconType = 'tokenBoolean';
       break;
