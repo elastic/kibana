@@ -284,7 +284,7 @@ export const GetStartedWithElasticsearch = () => {
     {
       _id: 'console_tutorials_tsds',
       title: i18n.translate('xpack.searchHomepage.consoleTutorials.tsdsTitle', {
-        defaultMessage: 'Time Series Data streams',
+        defaultMessage: 'Time series data streams',
       }),
       dataTestSubj: 'console_tutorials_tsds',
       description: i18n.translate('xpack.searchHomepage.consoleTutorials.tsdsDescription', {
