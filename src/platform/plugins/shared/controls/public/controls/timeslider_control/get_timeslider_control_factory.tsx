@@ -23,6 +23,7 @@ import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { TimeSliderPopoverButton } from './components/time_slider_popover_button';
 import { TimeSliderPopoverContent } from './components/time_slider_popover_content';
 import { TimeSliderPrepend } from './components/time_slider_prepend';
@@ -248,8 +249,10 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
         },
         hasSelections$: hasTimeSliceSelection$ as PublishingSubject<boolean | undefined>,
         CustomPrependComponent: () => {
-          const autoApplySelections = true; // TODO Reimplement or remove
-          const [viewMode] = useBatchedPublishingSubjects(viewModeSubject);
+          const [autoApplySelections, viewMode] = useBatchedPublishingSubjects(
+            controlGroupApi.autoApplySelections$,
+            viewModeSubject
+          );
 
           return (
             <TimeSliderPrepend
@@ -295,14 +298,18 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
             return [from, to];
           }, [from, to]);
 
+          const styles = useMemoCss({
+            popover: css`
+              width: 100%;
+              height: 100%;
+              max-inline-size: 100%;
+            `,
+          });
+
           return (
             <EuiInputPopover
               {...controlPanelClassNames}
-              css={css`
-                width: 100%;
-                height: 100%;
-                max-inline-size: 100%;
-              `}
+              css={styles.popover}
               input={
                 <TimeSliderPopoverButton
                   onClick={() => {
