@@ -266,15 +266,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should correctly set fields when initial query returns no results', async () => {
-      await monacoEditor.setCodeEditorValue('from logstash-* | keep ip, @timestamp | limit 500');
       await timePicker.setCommonlyUsedTime('Last_1 hour');
+      await monacoEditor.setCodeEditorValue('from logstash-* | keep ip, @timestamp | limit 500');
       await testSubjects.click('querySubmitButton');
+      await discover.waitUntilTabIsLoaded();
       expect(await dataGrid.getHeaderFields()).to.eql([]);
       await browser.refresh();
-      await header.waitUntilLoadingHasFinished();
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
       await timePicker.setDefaultAbsoluteRange();
       await testSubjects.click('querySubmitButton');
+      await discover.waitUntilTabIsLoaded();
       expect(await dataGrid.getHeaderFields()).to.eql(['ip', '@timestamp']);
     });
   });
