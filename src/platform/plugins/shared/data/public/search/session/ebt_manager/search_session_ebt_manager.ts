@@ -9,7 +9,6 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { PublicContract } from '@kbn/utility-types';
 import type { SearchSessionSavedObject } from '../sessions_client';
 import {
@@ -48,10 +47,14 @@ export class SearchSessionEBTManager {
   }
 
   public trackBgsCompleted({
-    response,
+    trackingData,
     session,
   }: {
-    response: IKibanaSearchResponse;
+    trackingData: {
+      runtimeMs: number;
+      resultsCount: number;
+      resultsBytesSize: number;
+    };
     session: SearchSessionSavedObject;
   }) {
     this.reportEvent(BG_SEARCH_COMPLETE, {
@@ -59,9 +62,9 @@ export class SearchSessionEBTManager {
         session.attributes.restoreState?.query as Query | AggregateQuery | undefined
       ),
       session_id: session.id,
-      runtime_ms: response.rawResponse.took,
-      result_rows_bucket: response.rawResponse.values_loaded,
-      result_bytes_bucket: Buffer.byteLength(JSON.stringify(response.rawResponse)),
+      runtime_ms: trackingData.runtimeMs,
+      result_rows_bucket: trackingData.resultsCount,
+      result_bytes_bucket: trackingData.resultsBytesSize,
     });
   }
 

@@ -83,7 +83,7 @@ describe('waitUntilNextSessionCompletes$', () => {
         poll: async () => {},
       });
 
-      completeSearch({ rawResponse: {} });
+      completeSearch({ resultsBytesSize: 0, resultsCount: 0, runtimeMs: 0 });
 
       const next = jest.fn();
       const complete = jest.fn();
@@ -98,7 +98,7 @@ describe('waitUntilNextSessionCompletes$', () => {
         poll: async () => {},
       }).complete;
 
-      completeSearch({ rawResponse: {} });
+      completeSearch({ resultsBytesSize: 0, resultsCount: 0, runtimeMs: 0 });
 
       expect(next).not.toBeCalled();
       advance(500);
