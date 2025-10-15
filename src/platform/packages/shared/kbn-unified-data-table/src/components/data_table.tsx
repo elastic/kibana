@@ -19,7 +19,6 @@ import React, {
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { v4 as uuidv4 } from 'uuid';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
   EuiDataGridSorting,
@@ -54,6 +53,7 @@ import {
   getShouldShowFieldHandler,
   canPrependTimeFieldColumn,
   getVisibleColumns,
+  prepareDataViewForEditing,
 } from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -849,24 +849,17 @@ const InternalUnifiedDataTable = React.forwardRef<
       () =>
         onFieldEdited
           ? async (fieldName: string) => {
-              let dataViewInstance = dataView;
-              if (!dataViewInstance.isPersisted()) {
-                // Creating a "clean" copy of the data view to avoid side effects
-                dataViewInstance = await data.dataViews.create({
-                  ...dataViewInstance.toSpec(),
-                  id: uuidv4(),
-                });
-              }
+              const editedDataView = await prepareDataViewForEditing(dataView, data.dataViews);
               closeFieldEditor.current =
                 onFieldEdited &&
                 (await services?.dataViewFieldEditor?.openEditor({
                   ctx: {
-                    dataView: dataViewInstance,
+                    dataView: editedDataView,
                   },
                   fieldName,
                   onSave: async () => {
                     await onFieldEdited({
-                      editedDataView: dataViewInstance,
+                      editedDataView,
                     });
                   },
                 }));

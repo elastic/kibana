@@ -8,12 +8,15 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
-import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import {
+  DiscoverFlyouts,
+  dismissAllFlyoutsExceptFor,
+  prepareDataViewForEditing,
+} from '@kbn/discover-utils';
 import { css } from '@emotion/react';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -113,23 +116,19 @@ export const DiscoverTopNav = ({
       canEditDataView
         ? async (fieldName?: string) => {
             if (dataView?.id) {
-              let dataViewInstance = await data.dataViews.get(dataView.id);
-
-              if (!dataViewInstance.isPersisted()) {
-                // Creating a "clean" copy of the data view to avoid side effects
-                dataViewInstance = await data.dataViews.create({
-                  ...dataViewInstance.toSpec(),
-                  id: uuidv4(),
-                });
-              }
+              const dataViewInstance = await data.dataViews.get(dataView.id);
+              const editedDataView = await prepareDataViewForEditing(
+                dataViewInstance,
+                data.dataViews
+              );
 
               closeFieldEditor.current = await dataViewFieldEditor.openEditor({
                 ctx: {
-                  dataView: dataViewInstance,
+                  dataView: editedDataView,
                 },
                 fieldName,
                 onSave: async () => {
-                  await onFieldEdited({ editedDataView: dataViewInstance });
+                  await onFieldEdited({ editedDataView });
                 },
               });
             }
