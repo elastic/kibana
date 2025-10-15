@@ -57,6 +57,7 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
     compressed: true,
     showSidebarToggleButton: true,
     disableFieldsExistenceAutoFetching: true,
+    shouldKeepAdHocDataViewImmutable: true,
     buttonAddFieldVariant: 'toolbar',
     buttonAddFieldToWorkspaceProps: {
       'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {

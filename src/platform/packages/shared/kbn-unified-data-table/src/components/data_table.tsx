@@ -466,6 +466,11 @@ interface InternalUnifiedDataTableProps {
    * Custom bulk action
    */
   customBulkActions?: CustomBulkActions;
+
+  /**
+   * When editing fields, it will create a new ad-hoc data view instead of modifying the existing one.
+   */
+  shouldKeepAdHocDataViewImmutable?: boolean;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -549,6 +554,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       disableCellActions = false,
       disableCellPopover = false,
       customBulkActions,
+      shouldKeepAdHocDataViewImmutable,
     },
     ref
   ) => {
@@ -849,7 +855,9 @@ const InternalUnifiedDataTable = React.forwardRef<
       () =>
         onFieldEdited
           ? async (fieldName: string) => {
-              const editedDataView = await prepareDataViewForEditing(dataView, data.dataViews);
+              const editedDataView = shouldKeepAdHocDataViewImmutable
+                ? await prepareDataViewForEditing(dataView, data.dataViews)
+                : dataView;
               closeFieldEditor.current =
                 onFieldEdited &&
                 (await services?.dataViewFieldEditor?.openEditor({
@@ -865,7 +873,13 @@ const InternalUnifiedDataTable = React.forwardRef<
                 }));
             }
           : undefined,
-      [data.dataViews, dataView, onFieldEdited, services?.dataViewFieldEditor]
+      [
+        data.dataViews,
+        dataView,
+        onFieldEdited,
+        services?.dataViewFieldEditor,
+        shouldKeepAdHocDataViewImmutable,
+      ]
     );
 
     const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(

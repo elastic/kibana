@@ -507,7 +507,7 @@ describe('unified timeline', () => {
           expect(kibanaServiceMock.dataViewFieldEditor.openEditor).toHaveBeenNthCalledWith(1, {
             ctx: {
               dataView: expect.objectContaining({
-                title: mockDataView.title,
+                id: 'security-solution',
               }),
             },
             fieldName: 'message',

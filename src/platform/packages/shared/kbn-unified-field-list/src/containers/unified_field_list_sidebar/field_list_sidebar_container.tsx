@@ -181,6 +181,8 @@ const UnifiedFieldListSidebarContainer = forwardRef<
   const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
     createStateService({ options: getCreationOptions() })
   );
+  const shouldKeepAdHocDataViewImmutable =
+    stateService.creationOptions.shouldKeepAdHocDataViewImmutable ?? false;
   const { data, dataViewFieldEditor } = services;
   const [isFieldListFlyoutVisible, setIsFieldListFlyoutVisible] = useState<boolean>(false);
   const [sidebarVisibility] = useState(() =>
@@ -234,7 +236,9 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     () =>
       dataView && dataViewFieldEditor && searchMode === 'documents' && canEditDataView
         ? async (fieldName?: string) => {
-            const editedDataView = await prepareDataViewForEditing(dataView, data.dataViews);
+            const editedDataView = shouldKeepAdHocDataViewImmutable
+              ? await prepareDataViewForEditing(dataView, data.dataViews)
+              : dataView;
             const ref = await dataViewFieldEditor.openEditor({
               ctx: {
                 dataView: editedDataView,
@@ -258,9 +262,10 @@ const UnifiedFieldListSidebarContainer = forwardRef<
       dataViewFieldEditor,
       searchMode,
       canEditDataView,
+      shouldKeepAdHocDataViewImmutable,
+      data.dataViews,
       setFieldEditorRef,
       closeFieldListFlyout,
-      data.dataViews,
       onFieldEdited,
     ]
   );
@@ -269,7 +274,9 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     () =>
       dataView && dataViewFieldEditor && editField
         ? async (fieldName: string) => {
-            const editedDataView = await prepareDataViewForEditing(dataView, data.dataViews);
+            const editedDataView = shouldKeepAdHocDataViewImmutable
+              ? await prepareDataViewForEditing(dataView, data.dataViews)
+              : dataView;
             const ref = await dataViewFieldEditor.openDeleteModal({
               ctx: {
                 dataView: editedDataView,
@@ -292,9 +299,10 @@ const UnifiedFieldListSidebarContainer = forwardRef<
       dataView,
       dataViewFieldEditor,
       editField,
+      shouldKeepAdHocDataViewImmutable,
+      data.dataViews,
       setFieldEditorRef,
       closeFieldListFlyout,
-      data.dataViews,
       onFieldEdited,
     ]
   );

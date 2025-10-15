@@ -45,10 +45,12 @@ const createStartContract = (): Start => {
     getCanSaveSync: jest.fn(),
     getIdsWithTitle: jest.fn().mockResolvedValue([]),
     getFieldsForIndexPattern: jest.fn(),
-    create: jest.fn(({ title }) => ({
-      title,
-      fields: [],
-    })),
+    create: jest.fn().mockReturnValue(
+      Promise.resolve({
+        title: '',
+        fields: [],
+      })
+    ),
     toDataView: jest.fn().mockReturnValue(Promise.resolve({})),
     toDataViewLazy: jest.fn().mockReturnValue(Promise.resolve({})),
     clearInstanceCache: jest.fn(),
