@@ -152,14 +152,13 @@ export const Graph = memo<GraphProps>(
         const { initialNodes, initialEdges } = processGraph(nodes, edges, isGraphInteractive);
         const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
 
-        // Force ReactFlow to remount by changing the key
+        // Force ReactFlow to remount by changing the key first
         setReactFlowKey((prev) => prev + 1);
 
-        setNodes(layoutedNodes);
+        // Then set nodes and edges after a microtask to ensure ReactFlow has remounted
         setTimeout(() => {
-          // Moved setting of edges here to let the graph finish nodes positioning
+          setNodes(layoutedNodes);
           setEdges(initialEdges);
-          setReactFlowKey((prev) => prev + 1);
         }, 0);
 
         currNodesRef.current = nodes;

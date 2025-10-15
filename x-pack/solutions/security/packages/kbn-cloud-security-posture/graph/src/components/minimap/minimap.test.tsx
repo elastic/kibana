@@ -25,6 +25,8 @@ import { NODE_HEIGHT, NODE_WIDTH, NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from '..
 import type { NodeViewModel } from '../types';
 import { graphSample } from '../mock/graph_sample';
 
+const nextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
 describe('Minimap', () => {
   it('should render empty', () => {
     render(
@@ -262,12 +264,14 @@ describe('Minimap integrated with Graph', () => {
     });
   });
 
-  it('should render minimap nodes with the same dimensions as graph nodes', () => {
+  it('should render minimap nodes with the same dimensions as graph nodes', async () => {
     renderGraph({
       ...graphSample,
       interactive: true,
       showMinimap: true,
     });
+
+    await nextTick();
 
     const minimapEntityNodes = screen.getAllByTestId(GRAPH_MINIMAP_ENTITY_NODE_ID);
     const minimapLabelNodes = screen.getAllByTestId(GRAPH_MINIMAP_LABEL_NODE_ID);
