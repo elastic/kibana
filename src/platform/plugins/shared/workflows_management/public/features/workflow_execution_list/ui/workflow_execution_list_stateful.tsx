@@ -35,8 +35,10 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
   const [filters, setFilters] = useState<ExecutionListFiltersQueryParams>(DEFAULT_FILTERS);
   const {
     data: workflowExecutions,
-    isLoading: isLoadingWorkflowExecutions,
+    isInitialLoading: isLoadingWorkflowExecutions,
+    isLoadingMore: isLoadingMoreWorkflowExecutions,
     error,
+    setPaginationObserver,
   } = useWorkflowExecutions(
     { workflowId, statuses: filters.statuses, executionTypes: filters.executionTypes },
     {
@@ -75,10 +77,12 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       executions={workflowExecutions ?? null}
       onExecutionClick={handleViewWorkflowExecution}
       selectedId={selectedExecutionId ?? null}
-      isLoading={isLoadingWorkflowExecutions}
+      isInitialLoading={isLoadingWorkflowExecutions}
+      isLoadingMore={isLoadingMoreWorkflowExecutions}
       error={error as Error | null}
       filters={filters}
       onFiltersChange={setFilters}
+      setPaginationObserver={setPaginationObserver}
     />
   );
 }

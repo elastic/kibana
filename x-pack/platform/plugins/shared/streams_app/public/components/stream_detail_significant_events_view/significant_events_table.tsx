@@ -12,14 +12,15 @@ import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { TickFormatter } from '@elastic/charts';
-import type { StreamQuery, Streams } from '@kbn/streams-schema';
-import { StreamSystemDetailsFlyout } from '../data_management/stream_detail_management/stream_systems/stream_system_details_flyout';
+import type { Feature, StreamQuery, Streams } from '@kbn/streams-schema';
+import { StreamFeatureDetailsFlyout } from '../data_management/stream_detail_management/stream_features/stream_feature_details_flyout';
 import type { SignificantEventItem } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { formatChangePoint } from './utils/change_point';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';
 import { buildDiscoverParams } from './utils/discover_helpers';
 import { useTimefilter } from '../../hooks/use_timefilter';
+import { useStreamFeatures } from '../data_management/stream_detail_management/stream_features/hooks/use_stream_features';
 
 export function SignificantEventsTable({
   definition,
@@ -47,7 +48,8 @@ export function SignificantEventsTable({
   const [selectedDeleteItem, setSelectedDeleteItem] = useState<SignificantEventItem>();
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
-  const [isSystemDetailFlyoutOpen, setIsSystemDetailFlyoutOpen] = useState<string>('');
+  const [selectedFeature, setSelectedFeature] = useState<Feature>();
+  const { featuresByName } = useStreamFeatures(definition);
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
     {
@@ -70,37 +72,37 @@ export function SignificantEventsTable({
     },
     {
       field: 'query',
-      name: i18n.translate('xpack.streams.significantEventsTable.system', {
-        defaultMessage: 'System',
+      name: i18n.translate('xpack.streams.significantEventsTable.feature', {
+        defaultMessage: 'Feauture',
       }),
       render: (query: StreamQuery) => {
         return (
           <EuiBadge
             color="hollow"
             onClickAriaLabel={i18n.translate(
-              'xpack.streams.significantEventsTable.systemDetailsFlyoutAriaLabel',
+              'xpack.streams.significantEventsTable.featureDetailsFlyoutAriaLabel',
               {
-                defaultMessage: 'Open system details',
+                defaultMessage: 'Open feature details',
               }
             )}
             onClick={() => {
-              if (query.system?.name) {
-                setIsSystemDetailFlyoutOpen(query.system.name);
+              if (query.feature?.name) {
+                setSelectedFeature(featuresByName[query.feature.name]);
               }
             }}
             iconOnClick={() => {
-              if (query.system?.name) {
-                setIsSystemDetailFlyoutOpen(query.system.name);
+              if (query.feature?.name) {
+                setSelectedFeature(featuresByName[query.feature.name]);
               }
             }}
             iconOnClickAriaLabel={i18n.translate(
-              'xpack.streams.significantEventsTable.systemDetailsFlyoutAriaLabel',
+              'xpack.streams.significantEventsTable.featureDetailsFlyoutAriaLabel',
               {
-                defaultMessage: 'Open system details',
+                defaultMessage: 'Open feature details',
               }
             )}
           >
-            {query.system?.name ?? '--'}
+            {query.feature?.name ?? '--'}
           </EuiBadge>
         );
       },
@@ -214,12 +216,12 @@ export function SignificantEventsTable({
         tableLayout="auto"
         itemId="id"
       />
-      {isSystemDetailFlyoutOpen && (
-        <StreamSystemDetailsFlyout
+      {selectedFeature && (
+        <StreamFeatureDetailsFlyout
           definition={definition}
-          systemName={isSystemDetailFlyoutOpen}
+          feature={selectedFeature}
           closeFlyout={() => {
-            setIsSystemDetailFlyoutOpen('');
+            setSelectedFeature(undefined);
           }}
         />
       )}

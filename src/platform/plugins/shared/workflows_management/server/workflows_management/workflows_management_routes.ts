@@ -30,6 +30,20 @@ import {
 
 // Note: Display names are now fetched dynamically from the actions plugin
 
+// Pagination constants
+const MAX_PAGE_SIZE = 100; // Limit to prevent performance issues with large result sets
+
+/**
+ * Helper function to parse execution statuses from query parameters
+ * Handles both single string and array of strings
+ */
+function parseExecutionStatuses(
+  statuses: string | ExecutionStatus[] | undefined
+): ExecutionStatus[] | undefined {
+  if (!statuses) return undefined;
+  return typeof statuses === 'string' ? ([statuses] as ExecutionStatus[]) : statuses;
+}
+
 export function defineRoutes(
   router: IRouter,
   api: WorkflowsManagementApi,
@@ -690,6 +704,8 @@ export function defineRoutes(
               }
             )
           ),
+          page: schema.maybe(schema.number({ min: 1 })),
+          perPage: schema.maybe(schema.number({ min: 1, max: MAX_PAGE_SIZE })),
         }),
       },
     },
@@ -698,12 +714,11 @@ export function defineRoutes(
         const spaceId = spaces.getSpaceId(request);
         const params: SearchWorkflowExecutionsParams = {
           workflowId: request.query.workflowId,
-          statuses:
-            request.query.statuses && typeof request.query.statuses === 'string'
-              ? [request.query.statuses]
-              : request.query.statuses,
+          statuses: parseExecutionStatuses(request.query.statuses),
           // Execution type filter is not supported yet
           // executionTypes: parseExecutionTypes(request.query.executionTypes),
+          page: request.query.page,
+          perPage: request.query.perPage,
         };
         return response.ok({
           body: await api.getWorkflowExecutions(params, spaceId),
