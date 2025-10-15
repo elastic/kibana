@@ -182,8 +182,6 @@ export const getCloudConnectorRemoteRoleTemplate = ({
   let elasticResourceId: string | undefined;
   const accountType = getAccountTypeFromInput(input, provider);
 
-  if (!accountType) return undefined;
-
   const hostProvider = getCloudProviderFromCloudHost(cloud?.cloudHost);
   if (!hostProvider || (provider === AWS_PROVIDER && hostProvider !== provider)) return undefined;
 
@@ -199,7 +197,7 @@ export const getCloudConnectorRemoteRoleTemplate = ({
     elasticResourceId = kibanaComponentId;
   }
 
-  if (!elasticResourceId || !templateUrlFieldName) return undefined;
+  if (!elasticResourceId || !templateUrlFieldName || !accountType) return undefined;
 
   return getTemplateUrlFromPackageInfo(packageInfo, templateName, templateUrlFieldName)
     ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
