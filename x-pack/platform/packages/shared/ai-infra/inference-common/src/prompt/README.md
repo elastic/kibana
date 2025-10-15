@@ -33,7 +33,7 @@ const myPrompt = createPrompt({
     },
   })
   .version({
-    models: [{ family: 'Elastic', provider: 'Elastic', id: 'rainbow-sprinkles' }],
+    models: [{ family: 'Elastic', provider: 'Elastic', id: 'gp-llm-v1' }],
     system: `You are an advanced AI assistant, specifically Elastic LLM.`,
     template: {
       mustache: {

@@ -85,11 +85,11 @@ const inferenceEndpoints = [
     task_type: 'chat_completion',
     service: 'elastic',
     service_settings: {
-      model_id: 'rainbow-sprinkles',
+      model_id: 'gp-llm-v1',
     },
   },
   {
-    inference_id: '.elser-2-elastic',
+    inference_id: '.elastic-elser-v2',
     task_type: 'sparse_embedding',
     service: 'elastic',
     service_settings: {
@@ -136,7 +136,7 @@ describe('When the tabular page is loaded', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
     const rows = screen.getAllByRole('row');
-    expect(rows[1]).toHaveTextContent('.elser-2-elastic');
+    expect(rows[1]).toHaveTextContent('.elastic-elser-v2');
     expect(rows[2]).toHaveTextContent('.elser-2-elasticsearch');
     expect(rows[3]).toHaveTextContent('.multilingual-e5-small-elasticsearch');
     expect(rows[4]).toHaveTextContent('.multilingual-embed-v1-elastic');
@@ -233,7 +233,7 @@ describe('When the tabular page is loaded', () => {
     expect(rows[11]).not.toHaveTextContent(preconfigured);
   });
 
-  it('should show tech preview badge only for reranker-v1 model, rainbow-sprinkles, multilingual-embed-v1, rerank-v1, and preconfigured elser_model_2', () => {
+  it('should show tech preview badge only for reranker-v1 model, gp-llm-v1, multilingual-embed-v1, rerank-v1, and preconfigured elser_model_2', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
     const techPreview = 'TECH PREVIEW';

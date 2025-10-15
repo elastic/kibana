@@ -30,7 +30,7 @@ export interface EisGatewayConfig {
   };
 }
 
-const EIS_CHAT_MODEL_NAME = `rainbow-sprinkles`;
+const EIS_CHAT_MODEL_NAME = `gp-llm-v1`;
 
 interface AccessControlListConfig {
   [x: string]: {

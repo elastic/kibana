@@ -263,7 +263,7 @@ describe('get_prompt', () => {
         ...defaultConnector,
         config: {
           provider: 'elastic',
-          providerConfig: { model_id: 'rainbow-sprinkles' },
+          providerConfig: { model_id: 'gp-llm-v1' },
         },
       });
 
@@ -529,7 +529,7 @@ describe('get_prompt', () => {
           actionTypeId: '.inference',
           config: {
             provider: 'elastic',
-            providerConfig: { model_id: 'rainbow-sprinkles' },
+            providerConfig: { model_id: 'gp-llm-v1' },
           },
           id: 'connector-123',
           name: 'Inference',

@@ -10,7 +10,7 @@
  */
 export const defaultInferenceEndpoints = {
   ELSER: '.elser-2-elasticsearch',
-  ELSER_IN_EIS_INFERENCE_ID: '.elser-2-elastic',
+  ELSER_IN_EIS_INFERENCE_ID: '.elastic-elser-v2',
   MULTILINGUAL_E5_SMALL: '.multilingual-e5-small-elasticsearch',
 } as const;
 
@@ -31,5 +31,5 @@ export enum InferenceEndpointProvider {
 }
 
 export const elasticModelIds = {
-  RainbowSprinkles: 'rainbow-sprinkles',
+  GPLLMV1: 'gp-llm-v1',
 } as const;

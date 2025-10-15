@@ -46,11 +46,11 @@ describe('getGenAiConfig', () => {
   test('extracts defaultModel from inference config', () => {
     const connector = mockConnector({
       providerConfig: {
-        model_id: 'rainbow-sprinkles',
+        model_id: 'gp-llm-v1',
       },
     }) as ActionConnector;
     expect(getGenAiConfig(connector)).toEqual({
-      defaultModel: 'rainbow-sprinkles',
+      defaultModel: 'gp-llm-v1',
     });
   });
 

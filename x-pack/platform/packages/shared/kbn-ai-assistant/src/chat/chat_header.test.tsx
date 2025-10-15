@@ -48,9 +48,9 @@ const elasticManagedConnector = {
   config: {
     provider: 'elastic',
     taskType: 'chat_completion',
-    inferenceId: '.rainbow-sprinkles-elastic',
+    inferenceId: '.gp-llm-v1',
     providerConfig: {
-      model_id: 'rainbow-sprinkles',
+      model_id: 'gp-llm-v1',
     },
   },
   referencedByCount: 0,

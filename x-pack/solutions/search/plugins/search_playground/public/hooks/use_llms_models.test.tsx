@@ -45,7 +45,7 @@ const mockConnectors = [
     config: {
       taskType: 'chat_completion',
       provider: 'elastic',
-      providerConfig: { model_id: elasticModelIds.RainbowSprinkles },
+      providerConfig: { model_id: elasticModelIds.GPLLMV1 },
     },
   },
   { id: 'connectorId1', name: 'OpenAI Connector', type: LLMs.openai },
@@ -92,7 +92,7 @@ describe('useLLMsModels Query Hook', () => {
           isElasticConnector: true,
           name: 'Elastic Managed LLM',
           showConnectorName: true,
-          value: 'rainbow-sprinkles',
+          value: 'gp-llm-v1',
           promptTokenLimit: 200000,
         },
         {

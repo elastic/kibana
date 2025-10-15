@@ -15,13 +15,13 @@ import { applyProviderTransforms } from './apply_provider_transforms';
 import { createInferenceConnectorMock } from '../../../../test_utils';
 
 describe('applyProviderTransforms', () => {
-  it('fixes array schema definition for rainbow-sprinkles', () => {
+  it('fixes array schema definition for gp-llm-v1', () => {
     const connector = createInferenceConnectorMock({
       type: InferenceConnectorType.Inference,
       config: {
         provider: InferenceEndpointProvider.Elastic,
         providerConfig: {
-          model_id: elasticModelIds.RainbowSprinkles,
+          model_id: elasticModelIds.GPLLMV1,
         },
       },
     });

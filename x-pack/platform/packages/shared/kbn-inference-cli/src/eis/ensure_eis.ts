@@ -29,7 +29,7 @@ function getPreconfiguredConnectorConfig({ modelId }: { modelId: string }) {
     config:
       provider: 'elastic'
       taskType: 'chat_completion'
-      inferenceId: '.rainbow-sprinkles-elastic'
+      inferenceId: '.gp-llm-v1'
       providerConfig:
         model_id: '${modelId}'`;
 }

@@ -26,10 +26,10 @@ describe('Reranker Tech preview badge', () => {
     expect(isProviderTechPreview(mockProvider)).toEqual(true);
   });
 
-  it('return true for rainbow-sprinkles', () => {
+  it('return true for gp-llm-v1', () => {
     const elasticProviderServiceSettings = {
       ...mockProvider.service_settings,
-      model_id: 'rainbow-sprinkles',
+      model_id: 'gp-llm-v1',
     };
     const elasticProvider = {
       ...mockProvider,
