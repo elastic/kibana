@@ -387,7 +387,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const errorSavingMappings = saveMappingError && (
     <EuiFlexItem grow={false}>
       <EuiCallOut
-        announceOnMount
         color="danger"
         data-test-subj="indexDetailsSaveMappingsError"
         iconType="error"
