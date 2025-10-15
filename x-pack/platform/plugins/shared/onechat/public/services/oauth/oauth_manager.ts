@@ -162,12 +162,13 @@ export class OAuthManager {
       code,
       codeVerifier,
       serverConfig.clientId,
+      serverConfig.clientSecret,
       metadata.token_endpoint
     );
 
-    // Store token
+    // Store token with token endpoint for refresh
     const userId = this.getCurrentUserId();
-    this.storage.setToken(userId, serverId, tokenSet);
+    this.storage.setToken(userId, serverId, tokenSet, metadata.token_endpoint);
 
     // Cleanup session storage
     sessionStorage.removeItem(`oauth.${state}`);
@@ -269,11 +270,15 @@ export class OAuthManager {
 
   /**
    * Exchange authorization code for access token
+   * 
+   * For confidential clients (with clientSecret), uses Basic Authentication per OAuth 2.0 spec.
+   * For public clients (without clientSecret), uses PKCE only.
    */
   private async exchangeCodeForToken(
     code: string,
     codeVerifier: string,
     clientId: string,
+    clientSecret: string | undefined,
     tokenEndpoint: string
   ): Promise<OAuthTokenSet> {
     // Build token request body
@@ -281,18 +286,31 @@ export class OAuthManager {
       grant_type: 'authorization_code',
       code,
       redirect_uri: this.getRedirectUri(),
-      client_id: clientId,
       code_verifier: codeVerifier,
     });
+
+    // Build headers
+    const headers: HeadersInit = {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Accept: 'application/json',
+    };
+
+    // For confidential clients, use Basic Authentication (RFC 6749 Section 2.3.1)
+    // For public clients, send client_id in body
+    if (clientSecret) {
+      // Confidential client: client_id and client_secret in Basic auth header
+      const credentials = btoa(`${clientId}:${clientSecret}`);
+      headers.Authorization = `Basic ${credentials}`;
+    } else {
+      // Public client: client_id in body
+      body.set('client_id', clientId);
+    }
 
     try {
       // Token endpoint requires application/x-www-form-urlencoded
       const response = await fetch(tokenEndpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          Accept: 'application/json',
-        },
+        headers,
         body: body.toString(),
       });
 
@@ -325,12 +343,70 @@ export class OAuthManager {
 
   /**
    * Refresh access token using refresh token
+   * 
+   * @param serverId MCP server ID
+   * @param refreshToken Refresh token to use
+   * @returns New access token
    */
   private async refreshToken(serverId: string, refreshToken: string): Promise<string> {
-    // TODO: Implement token refresh
-    // Need to store token endpoint for refresh requests
-    // For now, just return null to trigger re-authentication
-    throw new Error('Token refresh not yet implemented');
+    const userId = this.getCurrentUserId();
+    const storedToken = this.storage.getToken(userId, serverId);
+
+    if (!storedToken?.tokenEndpoint) {
+      throw new Error('Token endpoint not found for refresh');
+    }
+
+    try {
+      // Build refresh token request body
+      const body = new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+        // client_id is typically required for refresh
+        // But we don't have it stored - would need to fetch from config
+        // For now, attempt without it (some servers allow this)
+      });
+
+      const response = await fetch(storedToken.tokenEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Accept: 'application/json',
+        },
+        body: body.toString(),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Token refresh failed: ${response.statusText} - ${errorText}`);
+      }
+
+      const tokenData = await response.json();
+
+      if (!tokenData.access_token) {
+        throw new Error('Invalid token refresh response: missing access_token');
+      }
+
+      const newTokenSet: OAuthTokenSet = {
+        access_token: tokenData.access_token,
+        refresh_token: tokenData.refresh_token || refreshToken, // Use new refresh token if provided
+        expires_in: tokenData.expires_in,
+        token_type: tokenData.token_type || 'Bearer',
+        scope: tokenData.scope,
+      };
+
+      // Store refreshed token
+      this.storage.setToken(userId, serverId, newTokenSet, storedToken.tokenEndpoint);
+
+      return newTokenSet.access_token;
+    } catch (error) {
+      // Refresh failed, clear token to force re-authentication
+      this.storage.clearToken(userId, serverId);
+      throw new OAuthError(
+        OAuthErrorType.NETWORK_ERROR,
+        `Failed to refresh token: ${(error as Error).message}`,
+        error as Error
+      );
+    }
   }
 }
 

@@ -10,7 +10,7 @@ import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import type { McpClient } from '@kbn/wci-server';
 import type { Logger } from '@kbn/logging';
-import type { McpServerConfig} from '../../config';
+import type { McpServerConfig } from '../../config';
 
 interface McpConnection {
   serverId: string;
@@ -19,6 +19,8 @@ interface McpConnection {
   connected: boolean;
   lastError?: Error;
   lastConnected?: Date;
+  accessToken?: string; // For OAuth client credentials
+  tokenExpiry?: number; // Unix timestamp
 }
 
 /**
@@ -69,7 +71,7 @@ export class McpConnectionManager {
    * Connect to a single MCP server
    */
   private async connectToServer(config: McpServerConfig): Promise<void> {
-    const { id, name, url, auth, options } = config;
+    const { id, name, url, auth, options, type } = config;
 
     try {
       this.logger.debug(`Connecting to MCP server "${id}" at ${url}`);
@@ -79,12 +81,124 @@ export class McpConnectionManager {
       let client: Client;
       let transportType: string;
 
-      // Try modern StreamableHTTP transport first
-      try {
-        this.logger.debug(`Trying StreamableHTTP transport for "${id}"`);
-        const customFetch = auth?.headers ? this.createAuthenticatedFetch(auth.headers) : undefined;
-        transport = new StreamableHTTPClientTransport(new URL(url), { fetch: customFetch });
-        
+      // Handle authentication
+      let authHeaders: Record<string, string> = {};
+      if (auth?.type === 'oauth' && auth.clientSecret) {
+        // OAuth with clientSecret: determine if we need token exchange or direct auth
+        const needsTokenExchange = auth.tokenEndpoint || url.includes('paypal.com');
+
+        if (needsTokenExchange) {
+          // OAuth Client Credentials flow: exchange clientId/clientSecret for access token
+          this.logger.debug(`Using OAuth token exchange for "${id}"`);
+          const accessToken = await this.getOAuthAccessToken(id, auth, url);
+          authHeaders.Authorization = `Bearer ${accessToken}`;
+        } else {
+          // Direct authentication: use clientId/clientSecret as HTTP Basic Auth
+          this.logger.debug(`Using direct client credentials auth for "${id}"`);
+          const credentials = Buffer.from(`${auth.clientId}:${auth.clientSecret}`).toString(
+            'base64'
+          );
+          authHeaders.Authorization = `Basic ${credentials}`;
+        }
+      } else if (auth?.type === 'apiKey') {
+        // Regular API key auth
+        authHeaders = auth.headers;
+      }
+
+      // Determine which transport(s) to try based on config.type
+      const transportPreference = type ?? 'auto';
+      const shouldTryHTTP = transportPreference === 'http' || transportPreference === 'auto';
+      const shouldTrySSE = transportPreference === 'sse' || transportPreference === 'auto';
+
+      // Try modern StreamableHTTP transport first (if enabled)
+      if (shouldTryHTTP) {
+        try {
+          this.logger.debug(`Trying StreamableHTTP transport for "${id}"`);
+          // For StreamableHTTP transport, pass headers via requestInit
+          const streamableOptions: any = {};
+          if (Object.keys(authHeaders).length > 0) {
+            streamableOptions.requestInit = { headers: authHeaders };
+          }
+          transport = new StreamableHTTPClientTransport(new URL(url), streamableOptions);
+
+          client = new Client(
+            {
+              name: 'kibana-onechat',
+              version: '1.0.0',
+            },
+            {
+              capabilities: {
+                tools: {},
+                prompts: {},
+                resources: {},
+              },
+            }
+          );
+
+          await Promise.race([
+            client.connect(transport),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('Connection timeout')), timeout)
+            ),
+          ]);
+
+          transportType = 'StreamableHTTP';
+          this.logger.debug(`Successfully connected using StreamableHTTP transport for "${id}"`);
+        } catch (streamableError) {
+          // Only fall back to SSE if it's allowed
+          if (!shouldTrySSE) {
+            // If SSE fallback is not allowed, throw the error
+            throw streamableError;
+          }
+
+          // Fall back to older SSE transport
+          this.logger.debug(
+            `StreamableHTTP failed for "${id}", trying SSE transport: ${streamableError}`
+          );
+
+          // For SSE transport, pass headers via eventSourceInit and requestInit
+          const sseOptions: any = {};
+          if (Object.keys(authHeaders).length > 0) {
+            sseOptions.eventSourceInit = { headers: authHeaders };
+            sseOptions.requestInit = { headers: authHeaders };
+          }
+          transport = new SSEClientTransport(new URL(url), sseOptions);
+
+          client = new Client(
+            {
+              name: 'kibana-onechat',
+              version: '1.0.0',
+            },
+            {
+              capabilities: {
+                tools: {},
+                prompts: {},
+                resources: {},
+              },
+            }
+          );
+
+          await Promise.race([
+            client.connect(transport),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('Connection timeout')), timeout)
+            ),
+          ]);
+
+          transportType = 'SSE';
+          this.logger.debug(`Successfully connected using SSE transport for "${id}"`);
+        }
+      } else if (shouldTrySSE) {
+        // Only try SSE (type: 'sse' was explicitly set)
+        this.logger.debug(`Using SSE transport for "${id}" (explicitly configured)`);
+        // For SSE transport, pass headers via eventSourceInit and requestInit
+        const sseOptions: any = {};
+        if (Object.keys(authHeaders).length > 0) {
+          sseOptions.eventSourceInit = { headers: authHeaders };
+          sseOptions.requestInit = { headers: authHeaders };
+        }
+        transport = new SSEClientTransport(new URL(url), sseOptions);
+
         client = new Client(
           {
             name: 'kibana-onechat',
@@ -105,39 +219,11 @@ export class McpConnectionManager {
             setTimeout(() => reject(new Error('Connection timeout')), timeout)
           ),
         ]);
-        
-        transportType = 'StreamableHTTP';
-        this.logger.debug(`Successfully connected using StreamableHTTP transport for "${id}"`);
-      } catch (streamableError) {
-        // Fall back to older SSE transport
-        this.logger.debug(`StreamableHTTP failed for "${id}", trying SSE transport: ${streamableError}`);
-        
-        const customFetch = auth?.headers ? this.createAuthenticatedFetch(auth.headers) : undefined;
-        transport = new SSEClientTransport(new URL(url), { fetch: customFetch });
-        
-        client = new Client(
-          {
-            name: 'kibana-onechat',
-            version: '1.0.0',
-          },
-          {
-            capabilities: {
-              tools: {},
-              prompts: {},
-              resources: {},
-            },
-          }
-        );
 
-        await Promise.race([
-          client.connect(transport),
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Connection timeout')), timeout)
-          ),
-        ]);
-        
         transportType = 'SSE';
         this.logger.debug(`Successfully connected using SSE transport for "${id}"`);
+      } else {
+        throw new Error('Invalid transport type configuration');
       }
 
       const mcpClient: McpClient = Object.assign(client, {
@@ -154,7 +240,9 @@ export class McpConnectionManager {
         lastConnected: new Date(),
       });
 
-      this.logger.info(`Successfully connected to MCP server "${id}" using ${transportType} transport`);
+      this.logger.info(
+        `Successfully connected to MCP server "${id}" using ${transportType} transport`
+      );
     } catch (error) {
       this.logger.error(`Failed to connect to MCP server "${id}": ${error}`);
 
@@ -171,23 +259,89 @@ export class McpConnectionManager {
   }
 
   /**
-   * Create a fetch function with authentication headers
-   * Ensures Accept header includes both application/json and text/event-stream for SSE
+   * Get OAuth access token using client credentials flow
+   * Caches token and reuses until expiry
    */
-  private createAuthenticatedFetch(headers: Record<string, string>): typeof fetch {
-    return async (input: RequestInfo | URL, init?: RequestInit) => {
-      const existingHeaders = init?.headers || {};
-      const customInit: RequestInit = {
-        ...init,
+  private async getOAuthAccessToken(
+    serverId: string,
+    auth: { type: 'oauth'; clientId: string; clientSecret?: string; tokenEndpoint?: string },
+    mcpServerUrl: string
+  ): Promise<string> {
+    const connection = this.connections.get(serverId);
+
+    // Check if we have a valid cached token
+    if (connection?.accessToken && connection.tokenExpiry) {
+      const now = Math.floor(Date.now() / 1000);
+      const bufferTime = 60; // Refresh 60 seconds before expiry
+      if (now < connection.tokenExpiry - bufferTime) {
+        this.logger.debug(`Using cached OAuth token for "${serverId}"`);
+        return connection.accessToken;
+      }
+    }
+
+    // Determine token endpoint
+    // For PayPal: sandbox uses api-m.sandbox.paypal.com, production uses api-m.paypal.com
+    let tokenEndpoint = auth.tokenEndpoint;
+    if (!tokenEndpoint) {
+      // Auto-detect PayPal token endpoint based on MCP URL
+      if (mcpServerUrl.includes('sandbox.paypal.com')) {
+        tokenEndpoint = 'https://api-m.sandbox.paypal.com/v1/oauth2/token';
+      } else if (mcpServerUrl.includes('paypal.com')) {
+        tokenEndpoint = 'https://api-m.paypal.com/v1/oauth2/token';
+      } else {
+        throw new Error(
+          'Cannot determine OAuth token endpoint. Please configure tokenEndpoint explicitly.'
+        );
+      }
+    }
+
+    this.logger.debug(`Fetching OAuth access token for "${serverId}" from ${tokenEndpoint}`);
+
+    try {
+      // OAuth Client Credentials flow (RFC 6749 Section 4.4)
+      const credentials = Buffer.from(`${auth.clientId}:${auth.clientSecret}`).toString('base64');
+
+      const response = await fetch(tokenEndpoint, {
+        method: 'POST',
         headers: {
-          ...existingHeaders,
-          // Ensure Accept header includes text/event-stream for SSE support
-          Accept: 'application/json, text/event-stream',
-          ...headers,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Accept: 'application/json',
+          'Accept-Language': 'en_US',
+          Authorization: `Basic ${credentials}`,
         },
-      };
-      return fetch(input, customInit);
-    };
+        body: 'grant_type=client_credentials',
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`OAuth token request failed: ${response.statusText} - ${errorText}`);
+      }
+
+      const tokenData = await response.json();
+
+      if (!tokenData.access_token) {
+        throw new Error('Invalid OAuth token response: missing access_token');
+      }
+
+      const accessToken = tokenData.access_token;
+      const expiresIn = tokenData.expires_in || 32400; // Default to 9 hours if not specified
+      const tokenExpiry = Math.floor(Date.now() / 1000) + expiresIn;
+
+      // Cache the token
+      const existingConnection = this.connections.get(serverId);
+      if (existingConnection) {
+        existingConnection.accessToken = accessToken;
+        existingConnection.tokenExpiry = tokenExpiry;
+      }
+
+      this.logger.info(
+        `Successfully obtained OAuth access token for "${serverId}" (expires in ${expiresIn}s)`
+      );
+      return accessToken;
+    } catch (error) {
+      this.logger.error(`Failed to obtain OAuth access token for "${serverId}": ${error}`);
+      throw error;
+    }
   }
 
   /**
@@ -268,19 +422,21 @@ export class McpConnectionManager {
     const { url, options } = serverConfig;
     const timeout = options?.timeout ?? 30000;
 
-    // Create fetch with OAuth bearer token
-    const oauthFetch = this.createAuthenticatedFetch({
-      Authorization: `Bearer ${accessToken}`,
-    });
-
     // Try StreamableHTTP first, fall back to SSE
     let transport;
     let client: Client;
     let transportType: string;
 
+    // Prepare auth headers for OAuth bearer token
+    const authHeaders = {
+      Authorization: `Bearer ${accessToken}`,
+    };
+
     try {
-      transport = new StreamableHTTPClientTransport(new URL(url), { fetch: oauthFetch });
-      
+      transport = new StreamableHTTPClientTransport(new URL(url), {
+        requestInit: { headers: authHeaders },
+      });
+
       client = new Client(
         {
           name: 'kibana-onechat',
@@ -301,13 +457,20 @@ export class McpConnectionManager {
           setTimeout(() => reject(new Error('Connection timeout')), timeout)
         ),
       ]);
-      
+
       transportType = 'StreamableHTTP';
     } catch (streamableError) {
-      this.logger.debug(`StreamableHTTP failed for OAuth client "${serverId}", trying SSE: ${streamableError}`);
-      
-      transport = new SSEClientTransport(new URL(url), { fetch: oauthFetch });
-      
+      this.logger.debug(
+        `StreamableHTTP failed for OAuth client "${serverId}", trying SSE: ${streamableError}`
+      );
+
+      // For SSE transport, pass the bearer token via headers
+      const sseOptions: any = {
+        eventSourceInit: { headers: authHeaders },
+        requestInit: { headers: authHeaders },
+      };
+      transport = new SSEClientTransport(new URL(url), sseOptions);
+
       client = new Client(
         {
           name: 'kibana-onechat',
@@ -328,7 +491,7 @@ export class McpConnectionManager {
           setTimeout(() => reject(new Error('Connection timeout')), timeout)
         ),
       ]);
-      
+
       transportType = 'SSE';
     }
 
@@ -390,4 +553,3 @@ export class McpConnectionManager {
     await this.connectToServer(serverConfig);
   }
 }
-

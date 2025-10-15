@@ -39,21 +39,35 @@ export function validateMcpServerConfigs(servers: McpServerConfig[]): string[] {
 
     // Validate OAuth configuration
     if (server.auth?.type === 'oauth') {
-      const hasExplicitEndpoints = Boolean(
-        server.auth.authorizationEndpoint && server.auth.tokenEndpoint
-      );
-      const hasDiscoveryUrl = Boolean(server.auth.discoveryUrl);
-
-      if (!hasExplicitEndpoints && !hasDiscoveryUrl) {
-        errors.push(
-          `OAuth configuration for MCP server "${server.id}" at index ${index} must provide either both authorizationEndpoint and tokenEndpoint, OR a discoveryUrl for automatic discovery.`
-        );
-      }
-
+      // Check if clientId is provided
       if (!server.auth.clientId) {
         errors.push(
           `OAuth configuration for MCP server "${server.id}" at index ${index} must provide a clientId.`
         );
+      }
+
+      // Distinguish between OAuth flows based on presence of clientSecret
+      const isClientCredentialsFlow = Boolean(server.auth.clientSecret);
+      
+      if (isClientCredentialsFlow) {
+        // Client Credentials flow (machine-to-machine)
+        // tokenEndpoint is OPTIONAL:
+        //   - If provided (or auto-detected for PayPal): performs OAuth token exchange
+        //   - If NOT provided: uses clientId/clientSecret as HTTP Basic Auth directly
+        // No validation error if tokenEndpoint is missing
+      } else {
+        // Authorization Code flow (user authentication)
+        // Requires either explicit endpoints OR discoveryUrl
+        const hasExplicitEndpoints = Boolean(
+          server.auth.authorizationEndpoint && server.auth.tokenEndpoint
+        );
+        const hasDiscoveryUrl = Boolean(server.auth.discoveryUrl);
+
+        if (!hasExplicitEndpoints && !hasDiscoveryUrl) {
+          errors.push(
+            `OAuth Authorization Code flow for MCP server "${server.id}" at index ${index} must provide either both authorizationEndpoint and tokenEndpoint, OR a discoveryUrl for automatic discovery.`
+          );
+        }
       }
     }
 

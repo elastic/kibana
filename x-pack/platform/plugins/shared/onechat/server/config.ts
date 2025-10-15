@@ -10,6 +10,14 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 
 /**
  * Authentication configuration for MCP servers
+ * 
+ * OAuth Client Credentials (clientId + clientSecret):
+ *   - If tokenEndpoint is provided: Performs OAuth token exchange flow
+ *   - If tokenEndpoint is omitted: Uses clientId/clientSecret as HTTP Basic Auth directly
+ * 
+ * OAuth Authorization Code (clientId only, no clientSecret):
+ *   - Requires authorizationEndpoint + tokenEndpoint OR discoveryUrl
+ *   - Used for per-user authentication with browser redirect flow
  */
 const mcpAuthSchema = schema.oneOf([
   schema.object({
@@ -21,6 +29,7 @@ const mcpAuthSchema = schema.oneOf([
   schema.object({
     type: schema.literal('oauth'),
     clientId: schema.string(),
+    clientSecret: schema.maybe(schema.string()), // For confidential clients (server-side apps)
     authorizationEndpoint: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     tokenEndpoint: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     scopes: schema.maybe(schema.arrayOf(schema.string())),
@@ -35,6 +44,7 @@ const mcpServerSchema = schema.object({
   id: schema.string({ minLength: 1 }),
   name: schema.string({ minLength: 1 }),
   enabled: schema.boolean({ defaultValue: true }),
+  type: schema.maybe(schema.oneOf([schema.literal('http'), schema.literal('sse'), schema.literal('auto')])),
   url: schema.uri({ scheme: ['http', 'https'] }),
   auth: schema.maybe(mcpAuthSchema),
   options: schema.maybe(

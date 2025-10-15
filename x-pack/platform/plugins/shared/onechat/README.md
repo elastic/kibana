@@ -86,7 +86,7 @@ and how to call it.
 Tools can come from multiple sources:
 - built-in from Kibana
 - created by users
-- from MCP servers (not implemented yet)
+- from external MCP servers (with API key or OAuth authentication)
 
 ### Type of tools
 
@@ -94,6 +94,7 @@ Tools can come from multiple sources:
 - esql: ES|QL tools, which are defined by a templated ES|QL query and its corresponding parameters.
 - index_search: An agentic search tool that can be scoped to an index pattern.
 - workflow: A tool that executes a workflow.
+- mcp: Tools exposed by external Model Context Protocol (MCP) servers.
 
 ### Registering a tool
 
@@ -174,6 +175,140 @@ Configure Claude Desktop by adding this to its configuration:
   }
 }
 ```
+
+## Connecting to External MCP Servers
+
+Onechat can connect to external MCP servers to expose their tools to your agents. External MCP servers support both API key and OAuth 2.1 authentication.
+
+### Configuration
+
+Add MCP server configurations to your `kibana.yml`:
+
+```yaml
+xpack.onechat.mcp.servers:
+  - id: context7
+    name: "Context7 Documentation"
+    enabled: true
+    url: "https://mcp.context7.com/mcp"
+    # No auth required for Context7
+  
+  - id: paypal
+    name: "PayPal MCP Server"
+    enabled: true
+    url: "https://api.paypal.com/mcp/v1"
+    auth:
+      type: oauth
+      clientId: "YOUR_PAYPAL_CLIENT_ID"
+      discoveryUrl: "https://api.paypal.com/.well-known/oauth-protected-resource"
+      scopes: ["openid", "mcp"]
+  
+  - id: custom_mcp
+    name: "Custom MCP Server"
+    enabled: true
+    url: "https://your-server.com/mcp"
+    auth:
+      type: apiKey
+      headers:
+        X-API-Key: "${CUSTOM_MCP_API_KEY}"
+```
+
+### OAuth Authentication
+
+For MCP servers requiring OAuth 2.1 authentication:
+
+1. **Register Your Application**: Register Kibana as an OAuth client with the MCP server provider (e.g., PayPal).
+   - Set the redirect URI to: `https://your-kibana-instance/app/onechat/oauth/callback`
+   - Note your `client_id`
+
+2. **Configure the Server**: Add the OAuth configuration to `kibana.yml` as shown above.
+
+3. **User Authentication**: 
+   - When enabling MCP tools in the Agent Builder, users will see the OAuth connection status
+   - Click "Connect to [Server Name]" to initiate the OAuth flow
+   - Users will be redirected to the OAuth provider for authorization
+   - After authorization, users are redirected back to Agent Builder
+   - Tokens are stored securely in browser localStorage per user
+
+4. **Automatic Token Management**:
+   - Access tokens are automatically attached to tool execution requests
+   - Expired tokens are automatically refreshed using refresh tokens
+   - Users are prompted to re-authenticate if refresh fails
+
+### OAuth Discovery
+
+Onechat automatically discovers OAuth endpoints using the MCP specification:
+- **RFC 9728**: Protected Resource Metadata
+- **RFC 8414**: OAuth 2.0 Authorization Server Metadata  
+- **OpenID Connect Discovery 1.0**: OIDC well-known endpoints
+
+You can provide explicit `authorizationEndpoint` and `tokenEndpoint` if auto-discovery is not supported:
+
+```yaml
+auth:
+  type: oauth
+  clientId: "your-client-id"
+  authorizationEndpoint: "https://provider.com/oauth/authorize"
+  tokenEndpoint: "https://provider.com/oauth/token"
+  scopes: ["openid", "mcp"]
+```
+
+### PayPal MCP Setup
+
+To connect to PayPal's MCP server:
+
+1. **Create a PayPal App**:
+   - Visit [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/)
+   - Create a new app or use an existing one
+   - Add `https://your-kibana-instance/app/onechat/oauth/callback` as a redirect URI
+   - Copy your `client_id`
+
+2. **Configure Kibana**:
+   ```yaml
+   xpack.onechat.mcp.servers:
+     - id: paypal
+       name: "PayPal MCP Server"
+       enabled: true
+       url: "https://api.paypal.com/mcp/v1"
+       auth:
+         type: oauth
+         clientId: "YOUR_CLIENT_ID"
+         discoveryUrl: "https://api.paypal.com/.well-known/oauth-protected-resource"
+         scopes: ["openid", "mcp"]
+   ```
+
+3. **Test the Connection**:
+   - Open Agent Builder > Agents > Edit Agent
+   - Go to "Enabled Tools" section
+   - Find PayPal tools and click "Connect to PayPal"
+   - Complete the OAuth flow
+   - Enable desired PayPal tools for your agent
+
+### Security Considerations
+
+- **Token Storage**: OAuth tokens are stored in browser localStorage, scoped per-user
+- **PKCE**: All OAuth flows use PKCE (Proof Key for Code Exchange) with S256 for enhanced security
+- **No Server-Side Tokens**: Kibana backend does not store OAuth tokens; they are passed from the frontend on each request
+- **XSS Protection**: Kibana's Content Security Policy (CSP) mitigates XSS risks to localStorage
+- **Token Expiry**: Tokens are automatically validated and refreshed before use
+
+### Troubleshooting
+
+**"Not connected" status for OAuth server**:
+- Ensure `clientId` is correct
+- Verify redirect URI is configured in OAuth provider
+- Check browser console for OAuth errors
+- Try clearing localStorage and re-authenticating
+
+**Tools not appearing**:
+- Check Kibana logs for MCP connection errors
+- Verify the MCP server URL is accessible
+- Ensure the server is enabled in configuration
+- Restart Kibana after configuration changes
+
+**Authentication errors during tool execution**:
+- Token may have expired - try disconnecting and reconnecting
+- Verify the OAuth scopes include necessary permissions
+- Check that the MCP server accepts the token format
 
 ## A2A Server
 

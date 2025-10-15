@@ -18,6 +18,7 @@ import { labels } from '../../../utils/i18n';
 import { OnechatToolTags } from '../../tools/tags/tool_tags';
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 import { isToolSelected } from '../../../utils/tool_selection_utils';
+import { OAuthConnectionStatus } from './oauth_connection_status';
 
 interface ToolsFlatViewProps {
   tools: ToolDefinition[];
@@ -85,6 +86,52 @@ const createTagsColumn = () => ({
   render: (tags: string[]) => <OnechatToolTags tags={tags} />,
 });
 
+/**
+ * Check if a tool is an MCP tool that requires OAuth
+ * MCP tools have format: mcp.{serverId}.{toolName}
+ * OAuth is required if the tool has provider metadata indicating OAuth
+ */
+const isOAuthMcpTool = (tool: ToolDefinition): boolean => {
+  // Check if it's an MCP tool
+  if (tool.type !== 'mcp' || !tool.id.startsWith('mcp.')) {
+    return false;
+  }
+
+  // Check if provider indicates OAuth requirement
+  // TODO: This should check actual server config to determine if OAuth is required
+  // For now, we'll assume all MCP tools might need OAuth and show status
+  return tool.provider?.type === 'mcp';
+};
+
+const createOAuthStatusColumn = () => ({
+  name: i18n.translate('xpack.onechat.tools.oauthStatusLabel', {
+    defaultMessage: 'Connection',
+  }),
+  width: '150px',
+  render: (tool: ToolDefinition) => {
+    if (!isOAuthMcpTool(tool)) {
+      return null;
+    }
+
+    // Extract server ID from tool ID (format: mcp.{serverId}.{toolName})
+    const parts = tool.id.split('.');
+    if (parts.length < 3) {
+      return null;
+    }
+
+    const serverId = parts[1];
+    const serverName = tool.provider?.name || serverId;
+
+    return (
+      <OAuthConnectionStatus
+        mcpServerId={serverId}
+        serverName={serverName}
+        compact={true}
+      />
+    );
+  },
+});
+
 export const ToolsFlatView: React.FC<ToolsFlatViewProps> = ({
   tools,
   selectedTools,
@@ -100,6 +147,7 @@ export const ToolsFlatView: React.FC<ToolsFlatViewProps> = ({
       createCheckboxColumn(selectedTools, onToggleTool, disabled),
       createToolDetailsColumn(),
       createTagsColumn(),
+      createOAuthStatusColumn(),
     ],
     [selectedTools, onToggleTool, disabled]
   );

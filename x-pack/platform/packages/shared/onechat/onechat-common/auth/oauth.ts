@@ -46,6 +46,7 @@ export interface ProtectedResourceMetadata {
 export interface McpOAuthConfig {
   type: 'oauth';
   clientId: string;
+  clientSecret?: string; // For confidential clients (server-side apps like Kibana)
   authorizationEndpoint?: string;
   tokenEndpoint?: string;
   scopes?: string[];

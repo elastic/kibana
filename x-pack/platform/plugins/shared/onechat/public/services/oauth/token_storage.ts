@@ -8,6 +8,13 @@
 import type { OAuthTokenSet } from '@kbn/onechat-common';
 
 /**
+ * Stored token data including metadata for refresh
+ */
+interface StoredTokenData extends OAuthTokenSet {
+  tokenEndpoint?: string; // Stored for token refresh
+}
+
+/**
  * OAuth Token Storage
  * 
  * Manages OAuth tokens in browser localStorage.
@@ -29,16 +36,23 @@ export class OAuthTokenStorage {
    * @param userId Current user ID
    * @param serverId MCP server ID
    * @param tokenSet OAuth token set to store
+   * @param tokenEndpoint Optional token endpoint for refresh
    */
-  setToken(userId: string, serverId: string, tokenSet: OAuthTokenSet): void {
+  setToken(
+    userId: string,
+    serverId: string,
+    tokenSet: OAuthTokenSet,
+    tokenEndpoint?: string
+  ): void {
     const key = this.storageKey(userId, serverId);
     
     // Calculate expires_at if expires_in is provided
-    const tokenToStore: OAuthTokenSet = {
+    const tokenToStore: StoredTokenData = {
       ...tokenSet,
       expires_at: tokenSet.expires_in
         ? Math.floor(Date.now() / 1000) + tokenSet.expires_in
         : tokenSet.expires_at,
+      tokenEndpoint,
     };
 
     try {
@@ -55,9 +69,9 @@ export class OAuthTokenStorage {
    * 
    * @param userId Current user ID
    * @param serverId MCP server ID
-   * @returns Token set or null if not found
+   * @returns Token set with metadata or null if not found
    */
-  getToken(userId: string, serverId: string): OAuthTokenSet | null {
+  getToken(userId: string, serverId: string): StoredTokenData | null {
     const key = this.storageKey(userId, serverId);
     
     try {
@@ -66,7 +80,7 @@ export class OAuthTokenStorage {
         return null;
       }
 
-      const tokenSet = JSON.parse(stored) as OAuthTokenSet;
+      const tokenSet = JSON.parse(stored) as StoredTokenData;
       
       // Validate token structure
       if (!tokenSet.access_token || tokenSet.token_type !== 'Bearer') {
