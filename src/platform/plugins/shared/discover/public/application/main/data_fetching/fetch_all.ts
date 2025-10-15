@@ -7,32 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Adapters } from "@kbn/inspector-plugin/common";
-import type { SavedSearch, SortOrder } from "@kbn/saved-search-plugin/public";
-import type { BehaviorSubject } from "rxjs";
-import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from "rxjs";
-import { isOfAggregateQueryType } from "@kbn/es-query";
-import { getTimeDifferenceInSeconds } from "@kbn/timerange";
-import type { DiscoverAppStateContainer } from "../state_management/discover_app_state_container";
-import { updateVolatileSearchSource } from "./update_search_source";
+import type { Adapters } from '@kbn/inspector-plugin/common';
+import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import type { BehaviorSubject } from 'rxjs';
+import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { getTimeDifferenceInSeconds } from '@kbn/timerange';
+import type { DiscoverAppStateContainer } from '../state_management/discover_app_state_container';
+import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
   sendCompleteMsg,
   sendErrorMsg,
   sendErrorTo,
-  sendLoadingMoreFinishedMsg,
-  sendLoadingMoreMsg,
   sendLoadingMsg,
-  sendResetMsg
-} from "../hooks/use_saved_search_messages";
-import { fetchDocuments } from "./fetch_documents";
-import { FetchStatus } from "../../types";
-import type { DataMain$, DataMsg, SavedSearchData } from "../state_management/discover_data_state_container";
-import type { DiscoverServices } from "../../../build_services";
-import { fetchEsql } from "./fetch_esql";
-import type { InternalStateStore, TabState } from "../state_management/redux";
-import type { ScopedProfilesManager } from "../../../context_awareness";
-import type { ScopedDiscoverEBTManager } from "../../../ebt_manager";
+  sendLoadingMoreMsg,
+  sendLoadingMoreFinishedMsg,
+  sendResetMsg,
+} from '../hooks/use_saved_search_messages';
+import { fetchDocuments } from './fetch_documents';
+import { FetchStatus } from '../../types';
+import type {
+  DataMain$,
+  DataMsg,
+  SavedSearchData,
+} from '../state_management/discover_data_state_container';
+import type { DiscoverServices } from '../../../build_services';
+import { fetchEsql } from './fetch_esql';
+import type { InternalStateStore, TabState } from '../state_management/redux';
+import type { ScopedProfilesManager } from '../../../context_awareness';
+import type { ScopedDiscoverEBTManager } from '../../../ebt_manager';
 
 export interface CommonFetchParams {
   dataSubjects: SavedSearchData;
@@ -82,7 +86,6 @@ export function fetchAll(
     const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
     const { query, sort } = appStateContainer.getState();
-    const prevQuery = dataSubjects.documents$.getValue().query;
     const isEsqlQuery = isOfAggregateQueryType(query);
     const currentTab = getCurrentTab();
 
