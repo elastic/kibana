@@ -937,6 +937,7 @@ export default function ({ getService }: FtrProviderContext) {
         const task = await currentTask(taskId);
         log.info(`task ${taskId} - ${JSON.stringify(task)}`);
         expect(task.schedule?.interval).to.eql('1d');
+        expect(task.status).to.eql('idle');
       });
 
       // call ensureScheduled with a different schedule
