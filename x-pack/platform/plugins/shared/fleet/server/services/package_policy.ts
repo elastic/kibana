@@ -29,7 +29,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { load } from 'js-yaml';
 import semverGt from 'semver/functions/gt';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import pMap from 'p-map';
 
@@ -3808,7 +3808,10 @@ function validateReusableIntegrationsAndSpaceAwareness(
     return;
   }
   for (const agentPolicy of agentPolicies) {
-    if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
+    if (
+      (agentPolicy?.space_ids?.length ?? 0) > 1 ||
+      agentPolicy?.space_ids?.includes(ALL_SPACES_ID)
+    ) {
       throw new FleetError(
         'Reusable integration policies cannot be used with agent policies belonging to multiple spaces.'
       );
