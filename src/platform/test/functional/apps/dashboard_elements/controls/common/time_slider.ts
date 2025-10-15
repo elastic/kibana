@@ -117,6 +117,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboard.clickCancelOutOfEditMode();
 
+        await dashboard.getIsInViewMode();
+
         // valueNow maybe grabbed before timeslider has reset
         await retry.try(async () => {
           const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
