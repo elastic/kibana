@@ -80,18 +80,18 @@ PUT kibana_sample_weather_data_stream/_bulk
 # ✅ The response includes a summary of successes and errors for each operation.
 
 # -----------------------------------------------
-# Step 3: Run a search query to get latest reading from the last 1 hour, sorted by temperature
+# Step 3: Run a search query to get latest 5 reading from the last 1 hour, sorted by temperature
 # -----------------------------------------------
 
 GET kibana_sample_weather_data_stream/_search
 {
-  "size": 10,
+  "size": 5,
   "query": {
     "range": {
       "@timestamp": {
         "gte": "now-1h",
         "lte": "now"
-      }
+    }
     }
   },
   "sort": [
@@ -108,8 +108,7 @@ GET kibana_sample_weather_data_stream/_search
   "aggs": {
     "by_sensor": {
       "terms": {
-        "field": "sensor_id",
-        "size": 10
+        "field": "sensor_id"
       },
       "aggs": {
         "hourly": {
@@ -149,8 +148,7 @@ GET kibana_sample_weather_data_stream/_search
   "aggs": {
     "by_sensor": {
       "terms": {
-        "field": "sensor_id",
-        "size": 10
+        "field": "sensor_id"
       },
       "aggs": {
         "by_location": {
@@ -188,7 +186,7 @@ GET kibana_sample_weather_data_stream/_search
 
 # -----------------------------------------------
 # Step 6: Lets create a pipeline aggregation with moving function on the aggregated buckets to execute custom script on each window of data.
-# Below query shows top 10 sensors and then splits them into hourly bucket of intervals, calculates average temperature per hour and then computes moving sum of last 3 hourly averages
+# Below query shows top 3 sensors and then splits them into hourly bucket of intervals, calculates average temperature per hour and then computes moving sum of last 3 hourly averages
 # -----------------------------------------------
 GET kibana_sample_weather_data_stream/_search
 {
@@ -197,7 +195,7 @@ GET kibana_sample_weather_data_stream/_search
     "by_sensor": {
       "terms": {
         "field": "sensor_id",
-        "size": 10
+        "size": 3
       },
       "aggs": {
         "hourly": {
