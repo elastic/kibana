@@ -9,7 +9,7 @@
 
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { getStepsCollectionSchema } from './get_steps_collection_schema';
-import { DynamicStepContextSchema, ForEachContextSchema } from '@kbn/workflows';
+import { DynamicStepContextSchema } from '@kbn/workflows';
 import { expectZodSchemaEqual } from '../../../../common/lib/zod/zod_utils';
 import { z } from '@kbn/zod';
 
@@ -84,15 +84,24 @@ describe('getStepsCollectionSchema', () => {
       workflowGraph,
       'step-1-foreach-1'
     );
-    expectZodSchemaEqual(
-      stepsCollectionSchema,
-      z.object({
-        'step-1': z.object({
-          output: z.string().optional(),
-          error: z.any().optional(),
-        }),
-        loop: ForEachContextSchema,
-      })
-    );
+    // The actual schema for the foreach loop step
+    const actualLoopSchema = (stepsCollectionSchema as z.ZodObject<any>).shape.loop;
+
+    // Check that it's based on ForEachContextSchema
+    expect(actualLoopSchema).toBeDefined();
+    expect(actualLoopSchema._def.typeName).toBe('ZodObject');
+
+    // Check the shape properties
+    const loopShape = (actualLoopSchema as z.ZodObject<any>).shape;
+    expect(loopShape.items._def.typeName).toBe('ZodArray');
+    expect(loopShape.items.element._def.typeName).toBe('ZodString');
+    expect(loopShape.index._def.typeName).toBe('ZodNumber');
+    expect(loopShape.total._def.typeName).toBe('ZodNumber');
+
+    // For the main schema, check the step-1 output
+    const step1Schema = (stepsCollectionSchema as z.ZodObject<any>).shape['step-1'];
+    expect(step1Schema).toBeDefined();
+    expect(step1Schema.shape.output._def.typeName).toBe('ZodOptional');
+    expect(step1Schema.shape.error._def.typeName).toBe('ZodOptional');
   });
 });

@@ -125,6 +125,12 @@ export const ForLastExpression = ({
                 onChangeWindowUnit(e.target.value);
               }}
               options={getTimeOptions(timeWindowSize ?? 1)}
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.common.expressionItems.forTheLast.timeWindowUnitAriaLabel',
+                {
+                  defaultMessage: 'Time unit',
+                }
+              )}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

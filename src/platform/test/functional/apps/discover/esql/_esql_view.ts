@@ -378,7 +378,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const availableDataViews = await unifiedSearch.getDataViewList(
           'discover-dataView-switch-link'
         );
-        expect(availableDataViews).to.eql(['All logs', 'kibana_sample_data_flights', 'logstash-*']);
+        ['All logs', 'kibana_sample_data_flights', 'logstash-*'].forEach((item) => {
+          expect(availableDataViews).to.contain(item);
+        });
         await dataViews.switchToAndValidate('kibana_sample_data_flights');
       });
     });

@@ -11,7 +11,6 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export const sampleDashboard = {
   contentTypeId: 'dashboard',
   data: {
-    kibanaSavedObjectMeta: {},
     title: 'Sample dashboard',
   },
   options: {

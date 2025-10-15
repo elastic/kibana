@@ -69,6 +69,7 @@ export function setupIntersectionObserverMock({
 
 export const mockControlGroupApi = {
   untilInitialized: async () => {},
+  untilFiltersPublished: async () => {},
   filters$: new BehaviorSubject(undefined),
   query$: new BehaviorSubject(undefined),
   timeslice$: new BehaviorSubject(undefined),
@@ -133,13 +134,13 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
 export function getMockPanels() {
   return [
     {
-      grid: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+      grid: { x: 0, y: 0, w: 6, h: 6 },
       config: { title: 'panel One' },
       uid: '1',
       type: 'testPanelType',
     },
     {
-      grid: { x: 6, y: 0, w: 6, h: 6, i: '2' },
+      grid: { x: 6, y: 0, w: 6, h: 6 },
       config: { title: 'panel Two' },
       uid: '2',
       type: 'testPanelType',
@@ -155,11 +156,11 @@ export function getMockPanelsWithSections() {
       collapsed: true,
       grid: {
         y: 6,
-        i: 'section1',
       },
+      uid: 'section1',
       panels: [
         {
-          grid: { x: 0, y: 0, w: 6, h: 6, i: '3' },
+          grid: { x: 0, y: 0, w: 6, h: 6 },
           config: { title: 'panel Three' },
           uid: '3',
           type: 'testPanelType',
@@ -171,11 +172,11 @@ export function getMockPanelsWithSections() {
       collapsed: false,
       grid: {
         y: 7,
-        i: 'section2',
       },
+      uid: 'section2',
       panels: [
         {
-          grid: { x: 0, y: 0, w: 6, h: 6, i: '4' },
+          grid: { x: 0, y: 0, w: 6, h: 6 },
           config: { title: 'panel Four' },
           uid: '4',
           type: 'testPanelType',

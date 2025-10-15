@@ -3425,6 +3425,10 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
+              },
+              {
                 "plugin": "@kbn/content-management-content-insights-server",
                 "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
               },
@@ -4079,22 +4083,6 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget/server/init_routes.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_post_auth_interceptor.test.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_request_interceptor.test.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_request_interceptor.test.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_request_interceptor.test.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -7806,6 +7794,10 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/clone/clone_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
               },
               {
@@ -7943,6 +7935,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/external/archive/archive_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/external/create/create_maintenance_window_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -9101,6 +9097,10 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/external/update/update_maintenance_window_route.test.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/external/update/update_maintenance_window_route.test.ts"
+              },
+              {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/platform/plugins/private/snapshot_restore/server/test/helpers/router_mock.ts"
               }
@@ -9507,6 +9507,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/delete/delete_backfill_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -12293,6 +12297,10 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
+              },
+              {
                 "plugin": "banners",
                 "path": "x-pack/platform/plugins/private/banners/server/routes/info.ts"
               },
@@ -14499,10 +14507,6 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/platform/plugins/private/canvas/server/routes/shareables/download.ts"
-              },
-              {
-                "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/workpad/find.ts"
               },
               {
@@ -15599,10 +15603,6 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/platform/plugins/private/canvas/server/routes/shareables/download.test.ts"
-              },
-              {
-                "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/templates/list.test.ts"
               },
               {
@@ -15926,6 +15926,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/entity_crud/upsert_entities_bulk.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/create_index.ts"
               },
               {
@@ -16174,10 +16178,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/custom_elements/create.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/platform/plugins/private/canvas/server/routes/shareables/zip.ts"
               },
               {
                 "plugin": "canvas",
@@ -17306,10 +17306,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/custom_elements/create.test.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/platform/plugins/private/canvas/server/routes/shareables/zip.test.ts"
               },
               {
                 "plugin": "canvas",

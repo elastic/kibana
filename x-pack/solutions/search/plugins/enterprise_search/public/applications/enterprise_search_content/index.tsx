@@ -15,8 +15,7 @@ import type { InitialAppData } from '../../../common/types';
 import { ConnectorsRouter } from './components/connectors/connectors_router';
 import { CrawlersRouter } from './components/connectors/crawlers_router';
 import { NotFound } from './components/not_found';
-import { SearchIndicesRouter } from './components/search_indices';
-import { CONNECTORS_PATH, CRAWLERS_PATH, ROOT_PATH, SEARCH_INDICES_PATH } from './routes';
+import { CONNECTORS_PATH, CRAWLERS_PATH, ROOT_PATH } from './routes';
 
 export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
   return (
@@ -31,10 +30,7 @@ export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
 export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData>> = () => {
   return (
     <Routes>
-      <Redirect exact from={ROOT_PATH} to={SEARCH_INDICES_PATH} />
-      <Route path={SEARCH_INDICES_PATH}>
-        <SearchIndicesRouter />
-      </Route>
+      <Redirect exact from={ROOT_PATH} to={CONNECTORS_PATH} />
       <Route path={CONNECTORS_PATH}>
         <ConnectorsRouter />
       </Route>

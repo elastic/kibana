@@ -21,14 +21,17 @@
       "inference",
       "kibanaUtils",
       "lens",
+      "licensing",
       "management",
-      "share"
+      "share",
+      "licensing"
     ],
     "requiredBundles": [
       "kibanaReact"
     ],
     "optionalPlugins": [
       "cloud",
+      "licenseManagement",
       "spaces",
       "workflowsManagement"
     ],

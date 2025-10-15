@@ -569,6 +569,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.DockerServersService.Unnamed.$4",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "disabled",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -3377,6 +3392,23 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.runJestAll",
+        "type": "Function",
+        "tags": [],
+        "label": "runJestAll",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_all.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },

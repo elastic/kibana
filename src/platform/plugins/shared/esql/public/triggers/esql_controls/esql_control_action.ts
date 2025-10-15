@@ -36,6 +36,7 @@ interface Context {
   onCancelControl?: () => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
+  parentApi?: unknown;
 }
 
 export class CreateESQLControlAction implements Action<Context> {
@@ -71,6 +72,7 @@ export class CreateESQLControlAction implements Action<Context> {
     onCancelControl,
     cursorPosition,
     initialState,
+    parentApi,
   }: Context) {
     if (!isActionCompatible(this.core, variableType)) {
       throw new IncompatibleActionError();
@@ -88,7 +90,7 @@ export class CreateESQLControlAction implements Action<Context> {
 
     openLazyFlyout({
       core: this.core,
-      parentApi: this.search,
+      parentApi,
       loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
         const { loadESQLControlFlyout } = await import('./esql_control_helpers');
         return await loadESQLControlFlyout({

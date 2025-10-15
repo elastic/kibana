@@ -26,15 +26,17 @@ export function createInterceptors(proxy: LlmProxy) {
         .completeAfterIntercept(),
 
     userMessage: ({
+      name,
       response,
       when,
     }: {
+      name?: string;
       response: LLMResponseFnOrString;
       when?: (body: ChatCompletionStreamParams) => boolean;
     }) =>
       proxy
         .intercept({
-          name: `userMessage`,
+          name: name ?? `userMessage`,
           when: (body) => {
             const isUserMessage = last(body.messages)?.role === 'user';
             if (when) {
@@ -47,15 +49,17 @@ export function createInterceptors(proxy: LlmProxy) {
         .completeAfterIntercept(),
 
     toolMessage: ({
+      name,
       response,
       when,
     }: {
+      name?: string;
       response: LLMResponseFnOrString;
       when?: (body: ChatCompletionStreamParams) => boolean;
     }) =>
       proxy
         .intercept({
-          name: `toolMessage`,
+          name: name ?? `toolMessage`,
           when: (body) => {
             const isToolMessage = last(body.messages)?.role === 'tool';
             if (when) {

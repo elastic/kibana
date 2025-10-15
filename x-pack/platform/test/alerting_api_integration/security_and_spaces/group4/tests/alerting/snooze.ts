@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { deleteRuleById } from '../../../../common/lib/rules';
 import { getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -36,6 +37,7 @@ const snoozeSchedule = {
 export default function createSnoozeRuleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const es = getService('es');
 
   describe('snooze', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -390,14 +392,14 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
           .send(rulePayload)
           .expect(200);
 
-        objectRemover.add('default', createdRule.id, 'rule', 'alerting');
-
         await supertest
           .post(`/api/alerting/rule/${createdRule.id}/snooze_schedule`)
           .set('kbn-xsrf', 'foo')
           .set('content-type', 'application/json')
           .send(snoozeSchedule)
           .expect(400);
+
+        await deleteRuleById(es, createdRule.id);
       });
     });
   });

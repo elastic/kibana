@@ -13,6 +13,7 @@ import { isIlmLifecycle } from '@kbn/streams-schema';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { EditLifecycleModal } from './modal';
@@ -23,6 +24,7 @@ import { getFormattedError } from '../../../../util/errors';
 import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
 import { IngestionCard } from './cards/ingestion_card';
+import { useAggregations } from '../hooks/use_ingestion_rate';
 export const StreamDetailGeneralData = ({
   definition,
   refreshDefinition,
@@ -40,6 +42,17 @@ export const StreamDetailGeneralData = ({
     services: { telemetryClient },
   } = useKibana();
 
+  const { timeState } = useTimefilter();
+
+  const {
+    aggregations,
+    isLoading: isLoadingAggregations,
+    error: aggregationsError,
+  } = useAggregations({
+    definition,
+    timeState,
+  });
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [updateInProgress, setUpdateInProgress] = useState(false);
 
@@ -47,7 +60,7 @@ export const StreamDetailGeneralData = ({
     stats,
     isLoading: isLoadingStats,
     error: statsError,
-  } = useDataStreamStats({ definition });
+  } = useDataStreamStats({ definition, timeState, aggregations });
 
   const { signal } = useAbortController();
 
@@ -134,7 +147,15 @@ export const StreamDetailGeneralData = ({
         </EuiPanel>
       ) : null}
       <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>
-        <IngestionRate definition={definition} isLoadingStats={isLoadingStats} stats={stats} />
+        <IngestionRate
+          definition={definition}
+          isLoadingStats={isLoadingStats}
+          stats={stats}
+          timeState={timeState}
+          isLoadingAggregations={isLoadingAggregations}
+          aggregationsError={aggregationsError}
+          aggregations={aggregations}
+        />
       </EuiPanel>
     </EuiFlexGroup>
   );
