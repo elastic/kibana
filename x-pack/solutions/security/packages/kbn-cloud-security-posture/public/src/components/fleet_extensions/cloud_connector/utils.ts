@@ -177,12 +177,13 @@ export const getCloudConnectorRemoteRoleTemplate = ({
   templateName,
   provider,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
-  if (!provider || (provider !== AWS_PROVIDER && provider !== AZURE_PROVIDER)) return undefined;
-
   let elasticResourceId: string | undefined;
   const accountType = getAccountTypeFromInput(input, provider);
 
+  if (!provider || (provider !== AWS_PROVIDER && provider !== AZURE_PROVIDER)) return undefined;
+
   const hostProvider = getCloudProviderFromCloudHost(cloud?.cloudHost);
+
   if (!hostProvider || (provider === AWS_PROVIDER && hostProvider !== provider)) return undefined;
 
   const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
