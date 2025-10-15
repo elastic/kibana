@@ -8,7 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiCanAddNewPanel, apiCanPinPanel } from '@kbn/presentation-containers';
+import {
+  apiCanAddNewPanel,
+  apiCanPinPanel,
+  apiCanAddPinnedPanel,
+} from '@kbn/presentation-containers';
 import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
@@ -29,22 +33,21 @@ export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext>
   id: ACTION_CREATE_TIME_SLIDER,
   order: 0,
   getIconType: () => 'controlsHorizontal',
-  couldBecomeCompatible: ({ embeddable }) =>
-    apiCanAddNewPanel(embeddable) && apiCanPinPanel(embeddable),
+  couldBecomeCompatible: ({ embeddable }) => apiCanAddPinnedPanel(embeddable),
   getCompatibilityChangesSubject: ({ embeddable }) =>
     apiPublishesLayout(embeddable) ? embeddable.layout$.pipe(map(() => undefined)) : undefined,
   isCompatible: async ({ embeddable }) => compatibilityCheck(embeddable),
   execute: async ({ embeddable }) => {
-    if (!apiCanAddNewPanel(embeddable) || !apiCanPinPanel(embeddable))
-      throw new IncompatibleActionError();
-    const newPanel = await embeddable.addNewPanel<{}, { uuid: string }>({
+    if (!apiCanAddPinnedPanel(embeddable)) throw new IncompatibleActionError();
+    await embeddable.addPinnedPanel({
       panelType: TIME_SLIDER_CONTROL,
       serializedState: {
-        rawState: {},
+        rawState: {
+          grow: true,
+          width: 'large',
+        },
       },
     });
-    if (!newPanel) throw new Error('Failed tp create time slider panel');
-    embeddable.pinPanel(newPanel.uuid);
   },
   getDisplayName: () =>
     i18n.translate('controls.timeSlider.displayNameAriaLabel', {

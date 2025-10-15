@@ -18,6 +18,7 @@ import type {
   CanAddNewSection,
   CanExpandPanels,
   CanPinPanel,
+  CanAddPinnedPanel,
   HasLastSavedChildState,
   HasSerializedChildState,
   PassThroughContext,
@@ -95,6 +96,7 @@ export interface DashboardCreationOptions {
 
 export type DashboardApi = CanExpandPanels &
   CanPinPanel &
+  CanAddPinnedPanel &
   CanAddNewSection &
   HasAppContext &
   HasExecutionContext &

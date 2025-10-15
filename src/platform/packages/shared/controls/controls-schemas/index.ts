@@ -10,6 +10,7 @@
 export { controlsGroupSchema } from './src/controls_group_schema';
 
 export type {
+  ControlWidth,
   ControlState,
   ControlsGroupState,
   DataControlState,

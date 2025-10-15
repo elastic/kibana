@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { filter, map as lodashMap, max } from 'lodash';
+import { filter, map as lodashMap, max, pick } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
@@ -43,6 +43,7 @@ import {
 import { asyncForEach } from '@kbn/std';
 import type { StickyControlLayoutState } from '@kbn/controls-schemas/src/types';
 
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import type { DashboardState } from '../../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/content_management';
 import type { DashboardPanel } from '../../../server';
@@ -60,7 +61,6 @@ import { areLayoutsEqual } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
 import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from './types';
-import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
@@ -179,11 +179,17 @@ export function initializeLayoutManager(
         beside,
       }
     );
+
+    // Store width and grow settings, if present, so they can be preserved if this panel is pinned
+    const stickyPanelDisplaySettings = serializedState
+      ? pick(serializedState?.rawState, 'grow', 'width')
+      : {};
+
     return {
       ...layout$.value,
       panels: {
         ...otherPanels,
-        [uuid]: { grid: newPanelPlacement, type },
+        [uuid]: { grid: newPanelPlacement, type, ...stickyPanelDisplaySettings },
       },
     };
   };
@@ -254,6 +260,7 @@ export function initializeLayoutManager(
     options?: {
       displaySuccessMessage?: boolean;
       beside?: string;
+      disableScrollTo?: boolean;
     },
     grid?: DashboardPanel['grid']
   ) => {
@@ -272,8 +279,10 @@ export function initializeLayoutManager(
         'data-test-subj': 'addEmbeddableToDashboardSuccess',
       });
     }
-    trackPanel.setScrollToPanelId(uuid);
-    trackPanel.setHighlightPanelId(uuid);
+    if (!options?.disableScrollTo) {
+      trackPanel.setScrollToPanelId(uuid);
+      trackPanel.setHighlightPanelId(uuid);
+    }
     return (await getChildApi(uuid)) as ApiType;
   };
 
@@ -356,6 +365,34 @@ export function initializeLayoutManager(
     });
     trackPanel.setScrollToPanelId(uuidOfDuplicate);
     trackPanel.setHighlightPanelId(uuidOfDuplicate);
+  };
+
+  const pinPanel = (uuid: string) => {
+    const controlToPin = layout$.getValue().panels[uuid];
+    if (!controlToPin) return;
+
+    // add control panel to the end of the pinned controls
+    const newControls = { ...layout$.getValue().controls };
+
+    newControls[uuid] = {
+      type: controlToPin.type as StickyControlLayoutState['type'],
+      order: Object.keys(newControls).length,
+      width: controlToPin.width ?? DEFAULT_CONTROL_WIDTH,
+      grow: controlToPin.grow ?? DEFAULT_CONTROL_GROW,
+    };
+    const newPanels = { ...layout$.getValue().panels };
+    delete newPanels[uuid];
+
+    // update the layout with the control panel removed and added as a pinned control
+    layout$.next({ ...layout$.getValue(), panels: newPanels, controls: newControls });
+  };
+
+  const addPinnedPanel = async (panelPackage: PanelPackage) => {
+    const newPanel = await addNewPanel<{ uuid: string }>(panelPackage, {
+      disableScrollTo: true,
+    });
+    pinPanel(newPanel.uuid);
+    return newPanel;
   };
 
   const getChildApi = async (uuid: string): Promise<DefaultEmbeddableApi | undefined> => {
@@ -487,25 +524,8 @@ export function initializeLayoutManager(
           controls: newControls,
         });
       },
-      pinPanel: (uuid: string) => {
-        const controlToPin = layout$.getValue().panels[uuid];
-        if (!controlToPin) return;
-
-        // add control panel to the end of the pinned controls
-        const newControls = { ...layout$.getValue().controls };
-        newControls[uuid] = {
-          type: controlToPin.type as StickyControlLayoutState['type'],
-          order: Object.keys(newControls).length,
-          // TODO Remove this when grow and width settings for pinned controls are implemented
-          // https://github.com/elastic/kibana/issues/234681
-          ...(controlToPin.type === TIME_SLIDER_CONTROL ? { width: 'large', grow: true } : {}),
-        };
-        const newPanels = { ...layout$.getValue().panels };
-        delete newPanels[uuid];
-
-        // update the layout with the control panel removed and added as a pinned control
-        layout$.next({ ...layout$.getValue(), panels: newPanels, controls: newControls });
-      },
+      pinPanel,
+      addPinnedPanel,
 
       /** Sections */
       addNewSection: () => {
