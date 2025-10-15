@@ -39,11 +39,6 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables Automated Endpoint Process actions
-   */
-  automatedProcessActionsEnabled: true,
-
-  /**
    * Enables use of SentinelOne response actions that complete asynchronously
    *
    * Release: v8.14.0
