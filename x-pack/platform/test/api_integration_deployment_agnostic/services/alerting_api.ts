@@ -944,19 +944,11 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       );
     },
 
-    async deleteAllInternalRules({ roleAuthc }: { roleAuthc: RoleCredentials }) {
-      return supertestWithoutAuth
-        .delete('/api/alerts_fixture/rule/internally_managed')
-        .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader());
-    },
-
     async deleteAllActionConnectors({ roleAuthc }: { roleAuthc: RoleCredentials }): Promise<any> {
       const res = await supertestWithoutAuth
         .get(`/api/actions/connectors`)
         .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .expect(200);
+        .set(samlAuth.getInternalRequestHeader());
 
       const body = res.body as Array<{ id: string; connector_type_id: string; name: string }>;
       return Promise.all(

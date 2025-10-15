@@ -75,11 +75,6 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
       '../../security_api_integration/plugins/saml_provider'
     );
 
-    const alertingPlugin = path.resolve(
-      __dirname,
-      '../../alerting_api_integration/common/plugins/alerts'
-    );
-
     const servers = {
       kibana: {
         ...kbnTestConfig.getUrlParts(systemIndicesSuperuser),
@@ -148,8 +143,6 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           // This ensures that we register the Security SAML API endpoints.
           // In the real world the SAML config is injected by control plane.
           `--plugin-path=${samlIdPPlugin}`,
-          // This ensures that we register the testing alerting endpoints.
-          `--plugin-path=${alertingPlugin}`,
           '--xpack.cloud.id=ftr_fake_cloud_id',
           // Ensure that SAML is used as the default authentication method whenever a user navigates to Kibana. In other
           // words, Kibana should attempt to authenticate the user using the provider with the lowest order if the Login

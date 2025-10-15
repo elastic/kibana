@@ -74,11 +74,6 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
       '../../security_api_integration/plugins/saml_provider'
     );
 
-    const alertingPlugin = path.resolve(
-      __dirname,
-      '../../alerting_api_integration/common/plugins/alerts'
-    );
-
     const servers = {
       kibana: {
         ...kbnTestConfig.getUrlParts(systemIndicesSuperuser),
@@ -169,8 +164,6 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
           ...(dockerRegistryPort
             ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
             : []),
-          // This ensures that we register the testing alerting endpoints.
-          `--plugin-path=${alertingPlugin}`,
           ...kbnServerArgs,
         ],
       },
