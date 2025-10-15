@@ -5021,6 +5021,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-elasticsearch-server-utils@link:src/core/packages/elasticsearch/server-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-elasticsearch-server@link:src/core/packages/elasticsearch/server":
   version "0.0.0"
   uid ""
@@ -7806,6 +7810,10 @@
   uid ""
 
 "@kbn/search-examples-plugin@link:examples/search_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/search-getting-started@link:x-pack/solutions/search/plugins/search_getting_started":
   version "0.0.0"
   uid ""
 
@@ -13519,7 +13527,7 @@
   dependencies:
     undici-types "~6.20.0"
 
-"@types/nodemailer@^7.0.1":
+"@types/nodemailer@^7.0.2":
   version "7.0.2"
   resolved "https://registry.yarnpkg.com/@types/nodemailer/-/nodemailer-7.0.2.tgz#4d5607f26a3dd45ae7078ff62fc945b87070ed30"
   integrity sha512-Zo6uOA9157WRgBk/ZhMpTQ/iCWLMk7OIs/Q9jvHarMvrzUUP/MDdPHL2U1zpf57HrrWGv4nYQn5uIxna0xY3xw==
