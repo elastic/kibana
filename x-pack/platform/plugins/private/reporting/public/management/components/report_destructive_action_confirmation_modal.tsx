@@ -14,11 +14,19 @@ interface ReportDestructiveActionConfirmationModalProps {
   message: string;
   onCancel: () => void;
   onConfirm: () => void;
+  confirmButtonText?: string;
 }
+
+const DEFAULT_CONFIRM_BUTTON_TEXT = i18n.translate(
+  'xpack.reporting.schedules.destructiveAction.confirm',
+  {
+    defaultMessage: 'Confirm',
+  }
+);
 
 const ReportDestructiveActionConfirmationModalComponent: React.FC<
   ReportDestructiveActionConfirmationModalProps
-> = ({ title, message, onCancel, onConfirm }) => {
+> = ({ title, message, onCancel, onConfirm, confirmButtonText = DEFAULT_CONFIRM_BUTTON_TEXT }) => {
   const titleId = useGeneratedHtmlId();
 
   return (
@@ -35,9 +43,7 @@ const ReportDestructiveActionConfirmationModalComponent: React.FC<
       titleProps={{
         id: titleId,
       }}
-      confirmButtonText={i18n.translate('xpack.reporting.schedules.destructiveAction.confirm', {
-        defaultMessage: 'Continue',
-      })}
+      confirmButtonText={confirmButtonText}
       aria-labelledby={titleId}
     >
       {message}

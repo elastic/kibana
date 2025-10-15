@@ -273,7 +273,7 @@ describe('ReportSchedulesTable', () => {
 
     expect(await screen.findByTestId('confirm-destructive-action-modal')).toBeInTheDocument();
 
-    await user.click(await screen.findByText('Continue'));
+    await user.click(await screen.findByText('Disable'));
 
     await waitFor(() => {
       expect(mockDisableScheduledReports).toHaveBeenCalledWith(
@@ -314,7 +314,7 @@ describe('ReportSchedulesTable', () => {
 
     expect(await screen.findByTestId('confirm-destructive-action-modal')).toBeInTheDocument();
 
-    await user.click(await screen.findByText('Continue'));
+    await user.click(await screen.findByText('Delete'));
 
     await waitFor(() => {
       expect(mockDeleteScheduledReports).toHaveBeenCalledWith(

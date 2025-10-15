@@ -38,7 +38,7 @@ import { useBulkDisable } from '../hooks/use_bulk_disable';
 import { NO_CREATED_REPORTS_DESCRIPTION } from '../../translations';
 import { ScheduledReportFlyout } from './scheduled_report_flyout';
 import { TruncatedTitle } from './truncated_title';
-import { ReportDestructiveActionConfirmationModal } from './disable_report_confirmation_modal';
+import { ReportDestructiveActionConfirmationModal } from './report_destructive_action_confirmation_modal';
 import { useBulkDelete } from '../hooks/use_bulk_delete';
 
 interface QueryParams {
@@ -386,6 +386,12 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
           })}
           onCancel={onCancelDestructiveAction}
           onConfirm={onDisableConfirm}
+          confirmButtonText={i18n.translate(
+            'xpack.reporting.schedules.table.disableSchedule.modalConfirmButtonText',
+            {
+              defaultMessage: 'Disable',
+            }
+          )}
         />
       ) : null}
       {selectedReport && isDeleteModalConfirmationOpen ? (
@@ -399,6 +405,12 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
           })}
           onCancel={onCancelDestructiveAction}
           onConfirm={onDeleteConfirm}
+          confirmButtonText={i18n.translate(
+            'xpack.reporting.schedules.table.deleteSchedule.modalConfirmButtonText',
+            {
+              defaultMessage: 'Delete',
+            }
+          )}
         />
       ) : null}
     </Fragment>
