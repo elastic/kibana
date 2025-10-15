@@ -9,10 +9,6 @@ export const ADD_INTEGRATION_BTN = '[data-test-subj="addIntegrationPolicyButton"
 
 export const SKIP_AGENT_INSTALLATION_BTN = '[data-test-subj="skipAgentInstallation"]';
 
-export const INTEGRATION_ADDED_POP_UP = '[data-test-subj="postInstallAddAgentModal"]';
-
-export const QUEUE_URL = '.euiFieldText';
-
 export const SAVE_AND_CONTINUE_BTN = '[data-test-subj="createPackagePolicySaveButton"]';
 
 export const MODAL_CONFIRMATION_TITLE = '[data-test-subj="confirmModalTitleText"]';

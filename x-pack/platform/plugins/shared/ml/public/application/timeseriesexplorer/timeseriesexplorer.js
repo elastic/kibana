@@ -82,7 +82,7 @@ import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
 import { isMetricDetector } from './get_function_description';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
 import { TimeseriesexplorerChartDataError } from './components/timeseriesexplorer_chart_data_error';
-import { ExplorerNoJobsSelected } from '../explorer/components';
+import { AnomalyDetectionNoJobsSelected } from '../components/anomaly_detection_no_jobs_selected';
 import { getDataViewsAndIndicesWithGeoFields } from '../explorer/explorer_utils';
 import { indexServiceFactory } from '../util/index_service';
 import { TimeSeriesExplorerControls } from './components/timeseriesexplorer_controls';
@@ -1017,7 +1017,7 @@ export class TimeSeriesExplorer extends React.Component {
           dateFormatTz={dateFormatTz}
           resizeRef={this.resizeRef}
         >
-          <ExplorerNoJobsSelected />
+          <AnomalyDetectionNoJobsSelected />
         </TimeSeriesExplorerPage>
       );
     }

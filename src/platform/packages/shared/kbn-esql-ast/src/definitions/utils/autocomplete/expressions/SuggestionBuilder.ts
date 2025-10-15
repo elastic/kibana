@@ -18,7 +18,6 @@ import { getCompatibleLiterals } from '../../literals';
 import { ensureKeywordAndText } from '../functions';
 import { SignatureAnalyzer } from './SignatureAnalyzer';
 
-
 /** Builder pattern to eliminate duplicated field/function/literal suggestion code. */
 export class SuggestionBuilder {
   private suggestions: ISuggestionItem[] = [];
@@ -36,7 +35,6 @@ export class SuggestionBuilder {
     promoteToTop?: boolean;
     openSuggestions?: boolean;
     values?: boolean;
-
   }): Promise<this> {
     const types = options?.types ?? ['any'];
     const addComma = options?.addComma ?? false;
@@ -72,7 +70,6 @@ export class SuggestionBuilder {
     const ignored = options?.ignoredFunctions ?? [];
     const addSpaceAfterFunction = options?.addSpaceAfterFunction;
     const openSuggestions = options?.openSuggestions;
-
 
     const functionSuggestions = getFunctionsSuggestions({
       location: this.context.location,
@@ -209,7 +206,6 @@ export class SuggestionBuilder {
     this.suggestions.push(...suggestions);
     return this;
   }
-
 
   build(): ISuggestionItem[] {
     return this.suggestions;

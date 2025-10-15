@@ -26,17 +26,12 @@ export type DashboardFilter = TypeOf<typeof filterSchema>;
 export type DashboardQuery = TypeOf<typeof querySchema>;
 export type DashboardOptions = TypeOf<typeof schema.optionsSchema>;
 
-export type DashboardPanel = Omit<TypeOf<typeof schema.panelSchema>, 'config'> & {
-  // Dashboard interacts with embeddables via the API returned from ReactEmbeddableRenderer.
-  // Dashboard should never directly access embeddable state.
-  // Typing as Record to enforce this contract.
-  config: Record<string, unknown>;
-};
-export type DashboardSection = TypeOf<typeof schema.sectionSchema>;
+export type DashboardPanel = TypeOf<ReturnType<typeof schema.getPanelSchema>>;
+export type DashboardSection = TypeOf<ReturnType<typeof schema.getSectionSchema>>;
 // TODO rename to DashboardState once DashboardState in src/platform/plugins/shared/dashboard/common/types.ts is merged with this type
-export type DashboardAttributes = TypeOf<typeof schema.dashboardDataSchema>;
+export type DashboardAttributes = TypeOf<ReturnType<typeof schema.getDashboardDataSchema>>;
 
-export type DashboardItem = TypeOf<typeof schema.dashboardItemSchema>;
+export type DashboardItem = TypeOf<ReturnType<typeof schema.getDashboardItemSchema>>;
 export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'> & {
   attributes: Partial<DashboardAttributes>;
   references: SavedObjectReference[] | undefined;
@@ -46,21 +41,21 @@ export type GridData = TypeOf<typeof schema.panelGridDataSchema>;
 
 export type DashboardGetIn = GetIn<typeof CONTENT_ID>;
 export type DashboardAPIGetOut = GetResult<
-  TypeOf<typeof schema.dashboardDataSchema>,
+  TypeOf<ReturnType<typeof schema.getDashboardDataSchema>>,
   TypeOf<typeof schema.dashboardGetResultMetaSchema>
 >;
-export type DashboardGetOut = TypeOf<typeof schema.dashboardGetResultSchema>;
+export type DashboardGetOut = TypeOf<ReturnType<typeof schema.getDashboardGetResultSchema>>;
 
 export type DashboardCreateIn = CreateIn<typeof CONTENT_ID, DashboardAttributes>;
 export type DashboardCreateOut = CreateResult<
-  TypeOf<typeof schema.dashboardItemSchema>,
+  TypeOf<ReturnType<typeof schema.getDashboardItemSchema>>,
   TypeOf<typeof schema.dashboardMetaSchema>
 >;
 export type DashboardCreateOptions = TypeOf<typeof schema.dashboardCreateOptionsSchema>;
 
 export type DashboardUpdateIn = UpdateIn<typeof CONTENT_ID, Partial<DashboardAttributes>>;
 export type DashboardUpdateOut = CreateResult<
-  TypeOf<typeof schema.dashboardItemSchema>,
+  TypeOf<ReturnType<typeof schema.getDashboardItemSchema>>,
   TypeOf<typeof schema.dashboardMetaSchema>
 >;
 export type DashboardUpdateOptions = TypeOf<typeof schema.dashboardUpdateOptionsSchema>;
@@ -68,5 +63,7 @@ export type DashboardUpdateOptions = TypeOf<typeof schema.dashboardUpdateOptions
 export type DashboardSearchIn = SearchIn<typeof CONTENT_ID>;
 export type DashboardSearchOptions = TypeOf<typeof schema.dashboardSearchOptionsSchema>;
 
-export type DashboardSearchAPIResult = SearchResult<TypeOf<typeof schema.dashboardItemSchema>>;
+export type DashboardSearchAPIResult = SearchResult<
+  TypeOf<ReturnType<typeof schema.getDashboardItemSchema>>
+>;
 export type DashboardSearchOut = DashboardSearchAPIResult;

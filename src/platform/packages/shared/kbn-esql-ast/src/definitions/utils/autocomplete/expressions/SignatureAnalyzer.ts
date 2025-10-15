@@ -165,7 +165,6 @@ export class SignatureAnalyzer {
     return this.currentParameterIndex >= this.maxParams - 1;
   }
 
-
   /**
    * Returns true if more parameters can be added.
    * Considers: mandatory args, variadic functions, max params.

@@ -28,8 +28,6 @@ export const INDICATORS_TABLE_FEED_NAME_CELL = '[data-gridcell-column-id="threat
 export const INDICATORS_TABLE_FIRST_SEEN_COLUMN_HEADER = getDataTestSubjectSelector(
   'dataGridHeaderCell-threat.indicator.first_seen'
 );
-export const INDICATORS_TABLE_INDICATOR_FIRST_SEEN_CELL =
-  '[data-gridcell-column-id="threat.indicator.first_seen"]';
 export const INDICATORS_TABLE_LAST_SEEN_COLUMN_HEADER = getDataTestSubjectSelector(
   'dataGridHeaderCell-threat.indicator.last_seen'
 );
@@ -120,4 +118,3 @@ export const INSPECTOR_BUTTON = getDataTestSubjectSelector('tiIndicatorsGridInsp
 export const INSPECTOR_PANEL = getDataTestSubjectSelector('inspectorPanel');
 export const ADD_INTEGRATIONS_BUTTON = getDataTestSubjectSelector('add-data');
 export const REFRESH_BUTTON = getDataTestSubjectSelector('querySubmitButton');
-export const ADDED_TO_TIMELINE_TOAST = getDataTestSubjectSelector('add-to-timeline-toast-success');
