@@ -25,10 +25,10 @@ describe('esql query utils', () => {
       const result = getESQLStatsQueryMeta(queryString);
       expect(result.groupByFields).toEqual(['type', 'url.keyword']);
       expect(result.appliedFunctions).toEqual([
-        { identifier: 'Visits', operator: 'COUNT' },
-        { identifier: 'Unique', operator: 'COUNT_DISTINCT' },
-        { identifier: 'p95', operator: 'PERCENTILE' },
-        { identifier: 'median', operator: 'MEDIAN' },
+        { identifier: 'Visits', aggregation: 'COUNT' },
+        { identifier: 'Unique', aggregation: 'COUNT_DISTINCT' },
+        { identifier: 'p95', aggregation: 'PERCENTILE' },
+        { identifier: 'median', aggregation: 'MEDIAN' },
       ]);
     });
   });

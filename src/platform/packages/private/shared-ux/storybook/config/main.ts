@@ -9,17 +9,15 @@
 
 import { defaultConfig } from '@kbn/storybook';
 
-const modifiedConfig = {
-  ...defaultConfig,
-  addons: [...(defaultConfig.addons ?? []), '@storybook/addon-docs'],
-};
-
 module.exports = {
-  ...modifiedConfig,
+  ...defaultConfig,
   stories: [
     '../../**/*.stories.+(tsx|mdx)',
     '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
     '../../../../shared/shared-ux/**/guide.mdx',
     '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
   ],
+  typescript: {
+    reactDocgen: 'react-docgen-typescript',
+  },
 };

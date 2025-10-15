@@ -226,7 +226,7 @@ export interface ESQLFunction<
   args: ESQLAstItem[];
 }
 
-export const isESQLAstBaseItem = (node: unknown): node is ESQLAstBaseItem =>
+const isESQLAstBaseItem = (node: unknown): node is ESQLAstBaseItem =>
   typeof node === 'object' &&
   node !== null &&
   Object.hasOwn(node, 'name') &&

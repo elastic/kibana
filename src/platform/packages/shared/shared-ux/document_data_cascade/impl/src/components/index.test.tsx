@@ -17,7 +17,7 @@ import {
   type DataCascadeRowProps,
   type DataCascadeRowCellProps,
 } from '.';
-import { getESQLStatsQueryMeta } from '../lib/parse_esql';
+import { getESQLStatsQueryMeta } from '../__stories__/helpers/parse_esql';
 import type { MockGroupData } from '../__fixtures__/types';
 
 interface RenderComponentProps
