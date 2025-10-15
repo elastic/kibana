@@ -162,7 +162,7 @@ pageLoadAssetSize:
   snapshotRestore: 28452
   spaces: 32135
   stackAlerts: 31499
-  stackConnectors: 68838
+  stackConnectors: 74000
   streams: 9000
   streamsApp: 17000
   synthetics: 31571
@@ -197,4 +197,4 @@ pageLoadAssetSize:
   visualizations: 41000
   watcher: 16031
   workchatApp: 12411
-  workflowsManagement: 6555
+  workflowsManagement: 6800
