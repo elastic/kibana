@@ -8,6 +8,9 @@
     "id": "cps",
     "server": true,
     "browser": false,
+    "configPath": [
+      "cps"
+    ],
     "optionalPlugins": [],
     "requiredPlugins": [],
     "requiredBundles": []

@@ -9,27 +9,35 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { registerRoutes } from './routes';
+import { Observable, firstValueFrom } from 'rxjs';
+import { CPSConfig } from './config';
+import { CPSServerSetup } from './types';
 
-// No setup contract needed for this plugin
-
-export class CPSServerPlugin implements Plugin<{}> {
+export class CPSServerPlugin implements Plugin<CPSServerSetup> {
   private readonly initContext: PluginInitializerContext;
   private readonly isServerless: boolean;
+  private readonly config$: Observable<CPSConfig>;
 
   constructor(initContext: PluginInitializerContext) {
     this.initContext = { ...initContext };
     this.isServerless = initContext.env.packageInfo.buildFlavor === 'serverless';
+    this.config$ = initContext.config.create();
   }
 
-  public setup(core: CoreSetup, plugins: {}) {
-    const { initContext } = this;
+  public setup(core: CoreSetup) {
+    const { initContext, config$ } = this;
 
     // Register route only for serverless
     if (this.isServerless) {
       registerRoutes(core, initContext);
     }
 
-    return {};
+    return {
+      getCpsEnabled: async () => {
+        const config = await firstValueFrom(config$);
+        return config.cpsEnabled;
+      }
+    };
   }
 
   public start(core: CoreStart) {
