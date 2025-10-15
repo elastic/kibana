@@ -30,7 +30,6 @@ import {
   DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../common';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-import { is } from 'cheerio/lib/api/traversing';
 
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
