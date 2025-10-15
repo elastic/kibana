@@ -45,8 +45,21 @@ export async function handleListOperator(ctx: ExpressionContext): Promise<ISugge
       return getLogicalContinuationSuggestions();
     }
 
-    // Cursor inside list
+    // Cursor inside list - try to find the column to determine type
+    let columnForType: ESQLColumn | undefined;
+
     if (isColumn(leftOperand)) {
+      columnForType = leftOperand;
+    } else {
+      // Try to extract the actual field from fn.args[0]
+      const firstArg = fn.args[0];
+
+      if (isColumn(firstArg)) {
+        columnForType = firstArg;
+      }
+    }
+
+    if (columnForType) {
       // After a value but not after comma: suggest comma
       if (
         shouldSuggestComma({
@@ -59,14 +72,16 @@ export async function handleListOperator(ctx: ExpressionContext): Promise<ISugge
       }
 
       // After comma or empty list: suggest values
-      const ignoredColumns = [
-        leftOperand.parts.join('.'),
-        ...(list.values || []).filter(isColumn).map((col: ESQLColumn) => col.parts.join('.')),
-      ].filter(Boolean);
+      // For empty lists, don't ignore the left column - we want to suggest fields of the same type
+      const isEmptyList = !list.values || list.values.length === 0;
+      const ignoredColumns = isEmptyList
+        ? []
+        : [
+            columnForType.parts.join('.'),
+            ...(list.values || []).filter(isColumn).map((col: ESQLColumn) => col.parts.join('.')),
+          ].filter(Boolean);
 
-      const suggestions = await getSuggestionsForColumn(leftOperand, ctx, ignoredColumns);
-
-      return suggestions;
+      return getSuggestionsForColumn(columnForType, ctx, ignoredColumns);
     }
   }
 
@@ -102,9 +117,7 @@ async function getSuggestionsForColumn(
       includeCompatibleLiterals: true,
     });
 
-  const result = builder.build();
-
-  return result;
+  return builder.build();
 }
 
 // ============================================================================

@@ -14,16 +14,13 @@ import type { ExpressionContext } from '../types';
 import { isLiteral, isFunctionExpression } from '../../../../../ast/is';
 import { isNumericType, FunctionDefinitionTypes } from '../../../../types';
 import { commaCompleteItem } from '../../../../../commands_registry/complete_items';
-import { shouldSuggestComma, type CommaContext } from '../commaDecisionEngine';
+import { shouldSuggestComma } from '../commaDecisionEngine';
 import { getExpressionType } from '../../../expressions';
 import { SignatureAnalyzer } from '../SignatureAnalyzer';
 import { getLogicalContinuationSuggestions } from '../operators/utils';
-import {
-  analyzeParameterState,
-  handleUnknownType,
-  getStandardOperatorSuggestions,
-} from './afterComplete/shared';
 import { shouldSuggestOperators } from './afterComplete/shouldSuggestOperators';
+import { SuggestionBuilder } from '../SuggestionBuilder';
+import { logicalOperators } from '../../../../all_operators';
 
 /**
  * Handler for autocomplete suggestions after complete expressions.
@@ -98,7 +95,9 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
 
   // Case 1: Unknown type handling within function parameter context
   if (functionParameterContext && expressionType === 'unknown') {
-    return handleUnknownType(enrichedCtx);
+    const builder = new SuggestionBuilder(enrichedCtx);
+    await builder.addUnknownTypeSuggestions();
+    return builder.build();
   }
 
   // Case 2: Time interval completions or standard operators
@@ -133,11 +132,15 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
     return timeUnitItems;
   }
 
-  const paramState = analyzeParameterState(
-    expressionRoot,
-    expressionType,
-    functionParameterContext
-  );
+  // Use SignatureAnalyzer for parameter state analysis if available
+  const paramState = signatureAnalysis
+    ? signatureAnalysis.getParameterState(expressionType, isLiteral(expressionRoot))
+    : {
+        typeMatches: false,
+        isLiteral: false,
+        hasMoreParams: false,
+        isVariadic: false,
+      };
 
   // Check if operators make sense in this context (intelligent filtering)
   const operatorDecision = shouldSuggestOperators({
@@ -146,41 +149,51 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
     ctx: enrichedCtx,
   });
 
-  // Get operator suggestions only if they make sense
-  const operatorSuggestions = operatorDecision.shouldSuggest
-    ? getStandardOperatorSuggestions(enrichedCtx, expressionType)
-    : [];
+  // Build suggestions using SuggestionBuilder
+  const builder = new SuggestionBuilder(enrichedCtx);
 
-  // Use rule engine to determine if comma should be suggested
-  const commaContext: CommaContext = {
-    position: 'after_complete',
-    typeMatches: paramState.typeMatches,
-    isLiteral: paramState.isLiteral,
-    hasMoreParams: paramState.hasMoreParams,
-    isVariadic: paramState.isVariadic,
-    firstArgumentType: functionParameterContext?.firstArgumentType,
-    shouldSuggestOperators: operatorDecision.shouldSuggest,
-    functionSignatures: functionParameterContext?.validSignatures,
-  };
-
-  const includeComma = shouldSuggestComma(commaContext);
-
-  // Build suggestions based on rule engine decision and context
+  // Special case: string/IP/version literals can't be extended with operators, only comma
+  // Numeric and boolean literals can have operators (arithmetic or logical)
   const isNonExtendableLiteral =
     paramState.isLiteral && !isNumericType(expressionType) && expressionType !== 'boolean';
 
-  if (isNonExtendableLiteral) {
-    if (includeComma) {
-      return [commaCompleteItem];
+  // Add operator suggestions if they make sense
+  if (operatorDecision.shouldSuggest && !isNonExtendableLiteral) {
+    const isBooleanLiteral =
+      expressionType === 'boolean' && expressionRoot && isLiteral(expressionRoot);
+
+    // Boolean literals (TRUE/FALSE) should only suggest logical operators (AND, OR)
+    // Other types use the decision engine's allowed list
+    let allowedOperators = operatorDecision.allowedOperators;
+
+    if (isBooleanLiteral) {
+      const { location } = ctx;
+      allowedOperators = logicalOperators
+        .filter(({ locationsAvailable }) => locationsAvailable.includes(location))
+        .map(({ name }) => name);
     }
 
-    return [];
+    builder.addOperators({
+      leftParamType: expressionType === 'param' ? undefined : expressionType,
+      allowed: allowedOperators,
+      ignored: ['='],
+    });
   }
 
-  // For non-literals, numeric literals, or boolean literals: include operators and optionally comma
-  if (includeComma) {
-    return [...operatorSuggestions, commaCompleteItem];
+  // Add comma if needed (only in function context)
+  if (functionParameterContext) {
+    builder.addCommaIfNeeded({
+      position: 'after_complete',
+      typeMatches: paramState.typeMatches,
+      isLiteral: paramState.isLiteral,
+      hasMoreParams: paramState.hasMoreParams,
+      isVariadic: paramState.isVariadic,
+      firstArgumentType: functionParameterContext.firstArgumentType,
+      shouldSuggestOperators: operatorDecision.shouldSuggest,
+      functionSignatures: functionParameterContext.validSignatures,
+      isCursorFollowedByComma: options.isCursorFollowedByComma,
+    });
   }
 
-  return operatorSuggestions;
+  return builder.build();
 }

@@ -154,6 +154,15 @@ export class SignatureAnalyzer {
     return Math.max(...this.signatures.map((sig) => sig.params.length));
   }
 
+  /** Returns true if current parameter index is at or beyond max params.*/
+  public get isAtMaxParams(): boolean {
+    if (this.isVariadic) {
+      return false;
+    }
+
+    return this.currentParameterIndex >= this.maxParams - 1;
+  }
+
   /**
    * Returns true if more parameters can be added.
    * Considers: mandatory args, variadic functions, max params.
@@ -167,9 +176,27 @@ export class SignatureAnalyzer {
       return true;
     }
 
-    const isAtMaxParams = this.currentParameterIndex >= this.maxParams - 1;
+    return !this.isAtMaxParams && this.maxParams > 0;
+  }
 
-    return !isAtMaxParams && this.maxParams > 0;
+  /**
+   * Checks if given type is compatible with current parameter position.
+   */
+  public isCurrentTypeCompatible(
+    givenType: SupportedDataType | 'unknown',
+    isLiteral: boolean
+  ): boolean {
+    if (this.paramDefinitions.length > 0) {
+      return this.paramDefinitions.some((def) =>
+        argMatchesParamType(givenType, def.type, isLiteral, false)
+      );
+    }
+
+    if (this.isVariadic && this.firstArgumentType) {
+      return argMatchesParamType(givenType, this.firstArgumentType, isLiteral, false);
+    }
+
+    return false;
   }
 
   /**
@@ -277,6 +304,24 @@ export class SignatureAnalyzer {
     return this.paramDefinitions.some((def) =>
       argMatchesParamType(expressionType, def.type, isLiteral, false)
     );
+  }
+
+  /** Returns complete parameter state for comma/operator decision engines. */
+  public getParameterState(
+    expressionType: SupportedDataType | 'unknown',
+    isLiteral: boolean
+  ): {
+    typeMatches: boolean;
+    isLiteral: boolean;
+    hasMoreParams: boolean;
+    isVariadic: boolean;
+  } {
+    return {
+      typeMatches: this.isCurrentTypeCompatible(expressionType, isLiteral),
+      isLiteral,
+      hasMoreParams: this.hasMoreParams,
+      isVariadic: this.isVariadic,
+    };
   }
 
   private ensureKeywordAndText(types: FunctionParameterType[]): FunctionParameterType[] {
