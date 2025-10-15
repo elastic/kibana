@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Visualization, Suggestion } from '../../types';
+import type { DatasourceMap, Visualization, VisualizationMap, Suggestion } from '../../types';
 import type { DatasourceMock } from '../../mocks';
 import {
   createMockVisualization,
@@ -52,6 +52,8 @@ describe('suggestion_panel', () => {
   const suggestion2State = { suggestion2: true };
 
   let defaultProps: SuggestionPanelProps;
+  let defaultVisualizationMap: VisualizationMap;
+  let defaultDatasourceMap: DatasourceMap;
 
   let preloadedState: Partial<LensAppState>;
 
@@ -102,18 +104,22 @@ describe('suggestion_panel', () => {
       nowProvider: { get: jest.fn(() => new Date()) },
       core: coreMock.createStart(),
     };
+
+    defaultVisualizationMap = {
+      testVis: mockVisualization,
+      vis2: createMockVisualization('vis2'),
+    };
+
+    defaultDatasourceMap = {
+      testDatasource: mockDatasource,
+    };
   });
 
   it('should avoid completely to render SuggestionPanel when in fullscreen mode', async () => {
     const { instance, lensStore } = mountWithReduxStore(
       <EditorFrameServiceProvider
-        visualizationMap={{
-          testVis: mockVisualization,
-          vis2: createMockVisualization(),
-        }}
-        datasourceMap={{
-          testDatasource: mockDatasource,
-        }}
+        visualizationMap={defaultVisualizationMap}
+        datasourceMap={defaultDatasourceMap}
       >
         <SuggestionPanelWrapper {...defaultProps} />
       </EditorFrameServiceProvider>
@@ -130,19 +136,27 @@ describe('suggestion_panel', () => {
   });
 
   it('should display apply-changes prompt when changes not applied', async () => {
-    const { instance, lensStore } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
-      preloadedState: {
-        ...preloadedState,
-        visualization: {
-          ...preloadedState.visualization,
-          state: {
-            something: 'changed',
-          },
-        } as VisualizationState,
-        changesApplied: false,
-        autoApplyDisabled: true,
-      },
-    });
+    const { instance, lensStore } = mountWithReduxStore(
+      <EditorFrameServiceProvider
+        visualizationMap={defaultVisualizationMap}
+        datasourceMap={defaultDatasourceMap}
+      >
+        <SuggestionPanelWrapper {...defaultProps} />
+      </EditorFrameServiceProvider>,
+      {
+        preloadedState: {
+          ...preloadedState,
+          visualization: {
+            ...preloadedState.visualization,
+            state: {
+              something: 'changed',
+            },
+          } as VisualizationState,
+          changesApplied: false,
+          autoApplyDisabled: true,
+        },
+      }
+    );
 
     expect(instance.exists(SELECTORS.APPLY_CHANGES_BUTTON)).toBeTruthy();
     expect(instance.exists(SELECTORS.SUGGESTION_TILE_BUTTON)).toBeFalsy();
@@ -162,9 +176,17 @@ describe('suggestion_panel', () => {
   });
 
   it('should list passed in suggestions', async () => {
-    const { instance } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
-      preloadedState,
-    });
+    const { instance } = mountWithReduxStore(
+      <EditorFrameServiceProvider
+        visualizationMap={defaultVisualizationMap}
+        datasourceMap={defaultDatasourceMap}
+      >
+        <SuggestionPanelWrapper {...defaultProps} />
+      </EditorFrameServiceProvider>,
+      {
+        preloadedState,
+      }
+    );
 
     expect(
       instance
@@ -198,9 +220,17 @@ describe('suggestion_panel', () => {
     });
 
     it('should not update suggestions if current state is moved to staged preview', async () => {
-      const { instance, lensStore } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
-        preloadedState,
-      });
+      const { instance, lensStore } = mountWithReduxStore(
+        <EditorFrameServiceProvider
+          visualizationMap={defaultVisualizationMap}
+          datasourceMap={defaultDatasourceMap}
+        >
+          <SuggestionPanelWrapper {...defaultProps} />
+        </EditorFrameServiceProvider>,
+        {
+          preloadedState,
+        }
+      );
       getSuggestionsMock.mockClear();
       lensStore.dispatch(setState({ stagedPreview }));
       instance.update();
@@ -208,9 +238,17 @@ describe('suggestion_panel', () => {
     });
 
     it('should update suggestions if staged preview is removed', async () => {
-      const { instance, lensStore } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
-        preloadedState,
-      });
+      const { instance, lensStore } = mountWithReduxStore(
+        <EditorFrameServiceProvider
+          visualizationMap={defaultVisualizationMap}
+          datasourceMap={defaultDatasourceMap}
+        >
+          <SuggestionPanelWrapper {...defaultProps} />
+        </EditorFrameServiceProvider>,
+        {
+          preloadedState,
+        }
+      );
       getSuggestionsMock.mockClear();
       lensStore.dispatch(setState({ stagedPreview, ...suggestionState }));
       instance.update();
@@ -222,16 +260,32 @@ describe('suggestion_panel', () => {
     it('should select currently active suggestion', async () => {
       const getSuggestionByName = (name: string) => screen.getByRole('listitem', { name });
 
-      renderWithReduxStore(<SuggestionPanel {...defaultProps} />, undefined, {
-        preloadedState,
-      });
+      renderWithReduxStore(
+        <EditorFrameServiceProvider
+          visualizationMap={defaultVisualizationMap}
+          datasourceMap={defaultDatasourceMap}
+        >
+          <SuggestionPanelWrapper {...defaultProps} />
+        </EditorFrameServiceProvider>,
+        undefined,
+        {
+          preloadedState,
+        }
+      );
       expect(getSuggestionByName('Current visualization')).toHaveAttribute('aria-current', 'true');
       await userEvent.click(getSuggestionByName('Suggestion1'));
       expect(getSuggestionByName('Suggestion1')).toHaveAttribute('aria-current', 'true');
     });
 
     it('should rollback suggestion if current panel is clicked', async () => {
-      const { instance, lensStore } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />);
+      const { instance, lensStore } = mountWithReduxStore(
+        <EditorFrameServiceProvider
+          visualizationMap={defaultVisualizationMap}
+          datasourceMap={defaultDatasourceMap}
+        >
+          <SuggestionPanelWrapper {...defaultProps} />
+        </EditorFrameServiceProvider>
+      );
 
       act(() => {
         instance.find(SELECTORS.SUGGESTION_TILE_BUTTON).at(2).simulate('click');
@@ -256,9 +310,17 @@ describe('suggestion_panel', () => {
   });
 
   it('should dispatch visualization switch action if suggestion is clicked', async () => {
-    const { instance, lensStore } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
-      preloadedState,
-    });
+    const { instance, lensStore } = mountWithReduxStore(
+      <EditorFrameServiceProvider
+        visualizationMap={defaultVisualizationMap}
+        datasourceMap={defaultDatasourceMap}
+      >
+        <SuggestionPanelWrapper {...defaultProps} />
+      </EditorFrameServiceProvider>,
+      {
+        preloadedState,
+      }
+    );
 
     act(() => {
       instance.find(SELECTORS.SUGGESTION_TILE_BUTTON).at(1).simulate('click');
@@ -310,9 +372,17 @@ describe('suggestion_panel', () => {
 
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
-    const { instance } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
-      preloadedState,
-    });
+    const { instance } = mountWithReduxStore(
+      <EditorFrameServiceProvider
+        visualizationMap={defaultVisualizationMap}
+        datasourceMap={defaultDatasourceMap}
+      >
+        <SuggestionPanelWrapper {...defaultProps} />
+      </EditorFrameServiceProvider>,
+      {
+        preloadedState,
+      }
+    );
 
     expect(instance.find(SELECTORS.SUGGESTIONS_PANEL).find(EuiIcon)).toHaveLength(1);
     expect(instance.find(SELECTORS.SUGGESTIONS_PANEL).find(EuiIcon).prop('type')).toEqual(
@@ -338,14 +408,29 @@ describe('suggestion_panel', () => {
       },
     };
 
-    const { instance } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />, {
-      preloadedState: newPreloadedState,
-    });
-    expect(instance.html()).toEqual(null);
+    const { instance } = mountWithReduxStore(
+      <EditorFrameServiceProvider
+        visualizationMap={defaultVisualizationMap}
+        datasourceMap={defaultDatasourceMap}
+      >
+        <SuggestionPanelWrapper {...defaultProps} />
+      </EditorFrameServiceProvider>,
+      {
+        preloadedState: newPreloadedState,
+      }
+    );
+    expect(instance.isEmptyRender()).toEqual(true);
   });
 
   it('should hide the selections when the accordion is hidden', async () => {
-    const { instance } = mountWithReduxStore(<SuggestionPanel {...defaultProps} />);
+    const { instance } = mountWithReduxStore(
+      <EditorFrameServiceProvider
+        visualizationMap={defaultVisualizationMap}
+        datasourceMap={defaultDatasourceMap}
+      >
+        <SuggestionPanelWrapper {...defaultProps} />
+      </EditorFrameServiceProvider>
+    );
     expect(instance.find(EuiAccordion)).toHaveLength(1);
     act(() => {
       instance.find(EuiAccordion).at(0).simulate('change');
@@ -380,7 +465,14 @@ describe('suggestion_panel', () => {
       .mockReturnValueOnce('test | expression');
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
-    mountWithReduxStore(<SuggestionPanel {...defaultProps} frame={createMockFramePublicAPI()} />);
+    mountWithReduxStore(
+      <EditorFrameServiceProvider
+        visualizationMap={defaultVisualizationMap}
+        datasourceMap={defaultDatasourceMap}
+      >
+        <SuggestionPanel {...defaultProps} frame={createMockFramePublicAPI()} />
+      </EditorFrameServiceProvider>
+    );
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
     const passedExpression = (expressionRendererMock as jest.Mock).mock.calls[0][0].expression;

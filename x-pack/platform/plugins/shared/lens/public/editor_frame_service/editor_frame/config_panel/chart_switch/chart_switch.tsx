@@ -52,6 +52,7 @@ interface VisualizationSelection {
 }
 
 export interface ChartSwitchProps {
+  filteredVisualizationMap: VisualizationMap;
   framePublicAPI: FramePublicAPI;
   layerId: string;
   onChartSelect: () => void;
@@ -82,11 +83,13 @@ function safeFnCall<TReturn>(action: () => TReturn, defaultReturnValue: TReturn)
 }
 
 export const ChartSwitch = memo(function ChartSwitch({
+  filteredVisualizationMap,
   framePublicAPI,
   layerId,
   onChartSelect,
 }: ChartSwitchProps) {
-  const { datasourceMap, visualizationMap } = useEditorFrameService();
+  const visualizationMap = filteredVisualizationMap;
+  const { datasourceMap } = useEditorFrameService();
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const visualization = useLensSelector(selectVisualization);

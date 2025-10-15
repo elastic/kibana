@@ -20,19 +20,22 @@ import { renderWithReduxStore } from '../../../mocks';
 import userEvent from '@testing-library/user-event';
 import type { LensAppState } from '../../../state_management';
 import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
+import type { DatasourceMap, VisualizationMap } from '../../../types';
 
 describe('LayerHeader', () => {
   const renderLayerSettings = (
     propsOverrides = {},
     { preloadedStateOverrides }: { preloadedStateOverrides: Partial<LensAppState> } = {
       preloadedStateOverrides: {},
-    }
+    },
+    datasourceMapOverrides?: DatasourceMap,
+    visualizationMapOverrides?: VisualizationMap
   ) => {
-    const datasourceMap = {
+    const datasourceMap = datasourceMapOverrides ?? {
       testDatasource: createMockDatasource(),
       testDatasource2: createMockDatasource('testDatasource2'),
     };
-    const visualizationMap = {
+    const visualizationMap = visualizationMapOverrides ?? {
       testVis: createMockVisualization(),
       testVis2: {
         ...createMockVisualization('testVis2'),
@@ -62,9 +65,8 @@ describe('LayerHeader', () => {
             onChangeIndexPattern: jest.fn(),
           }}
           {...propsOverrides}
-        />{' '}
+        />
       </EditorFrameServiceProvider>,
-
       {},
       {
         storeDeps: mockStoreDeps({ datasourceMap, visualizationMap }),
@@ -124,13 +126,11 @@ describe('LayerHeader', () => {
   });
 
   it('should render static header if only one visualization is available', () => {
-    renderLayerSettings({
-      visualizationMap: {
-        testVis: {
-          ...createMockVisualization(),
-          getDescription: () => ({ label: 'myVisualizationType', icon: 'empty' }),
-          visualizationTypes: ['testVis'],
-        },
+    renderLayerSettings({}, { preloadedStateOverrides: {} }, undefined, {
+      testVis: {
+        ...createMockVisualization(),
+        getDescription: () => ({ label: 'myVisualizationType', icon: 'empty' }),
+        visualizationTypes: ['testVis'],
       },
     });
     expect(screen.getByText('myVisualizationType')).toBeInTheDocument();

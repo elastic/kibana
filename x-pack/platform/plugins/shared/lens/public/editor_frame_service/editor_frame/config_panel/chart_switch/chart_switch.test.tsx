@@ -234,7 +234,12 @@ describe('chart_switch', () => {
   ) => {
     const { store, ...rtlRender } = renderWithReduxStore(
       <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
-        <ChartSwitchPopover framePublicAPI={frame} layerId="a" {...propsOverrides} />{' '}
+        <ChartSwitchPopover
+          filteredVisualizationMap={visualizationMap}
+          framePublicAPI={frame}
+          layerId="a"
+          {...propsOverrides}
+        />
       </EditorFrameServiceProvider>,
 
       {},

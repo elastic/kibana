@@ -130,7 +130,7 @@ describe('editor_frame', () => {
   ) => {
     const { store, ...rtlRender } = renderWithReduxStore(
       <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
-        <EditorFrame {...getDefaultProps()} {...propsOverrides} />{' '}
+        <EditorFrame {...getDefaultProps()} {...propsOverrides} />
       </EditorFrameServiceProvider>,
 
       {},

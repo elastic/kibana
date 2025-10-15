@@ -58,6 +58,7 @@ export function LayerHeader({
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
         <ChartSwitchPopover
+          filteredVisualizationMap={availableVisualizationMap}
           framePublicAPI={layerConfigProps.frame}
           layerId={layerConfigProps.layerId}
         />
@@ -68,6 +69,7 @@ export function LayerHeader({
     </EuiFlexGroup>
   ) : (
     <ChartSwitchPopover
+      filteredVisualizationMap={availableVisualizationMap}
       framePublicAPI={layerConfigProps.frame}
       layerId={layerConfigProps.layerId}
     />

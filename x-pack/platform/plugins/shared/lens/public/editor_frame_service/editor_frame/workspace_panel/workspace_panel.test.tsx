@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { UserMessage } from '../../../types';
+import type { DatasourceMap, UserMessage, VisualizationMap } from '../../../types';
 import { fireEvent, screen, act } from '@testing-library/react';
 import {
   createMockVisualization,
@@ -57,19 +57,19 @@ function createCoreStartWithPermissions(newCapabilities = defaultPermissions) {
   return core;
 }
 
-const mockVisualization = createMockVisualization();
-const mockVisualization2 = createMockVisualization();
-const mockDatasource = createMockDatasource();
+let mockVisualization: ReturnType<typeof createMockVisualization>;
+let mockVisualization2: ReturnType<typeof createMockVisualization>;
+let mockDatasource: ReturnType<typeof createMockDatasource>;
 
-let expressionRendererMock = createExpressionRendererMock();
+let expressionRendererMock: ReturnType<typeof createExpressionRendererMock>;
 const trigger = { exec: jest.fn() } as unknown as jest.Mocked<TriggerContract>;
 const uiActionsMock = uiActionsPluginMock.createStartContract();
 uiActionsMock.getTrigger.mockReturnValue(trigger);
 
 let instance: ReactWrapper;
 
-const defaultDatasourceMap = {};
-const defaultVisualizationMap = { testVis: mockVisualization };
+let defaultDatasourceMap: DatasourceMap;
+let defaultVisualizationMap: VisualizationMap;
 
 const defaultProps = {
   framePublicAPI: createMockFramePublicAPI(),
@@ -108,11 +108,22 @@ const SELECTORS = {
 describe('workspace_panel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockVisualization = createMockVisualization();
+    mockVisualization2 = createMockVisualization();
+    mockDatasource = createMockDatasource();
+    defaultDatasourceMap = {};
+    defaultVisualizationMap = { testVis: mockVisualization };
+    expressionRendererMock = createExpressionRendererMock();
   });
 
   it('should render an explanatory text if no visualization is active', async () => {
     renderWithReduxStore(
-      <WorkspacePanel {...defaultProps} />,
+      <EditorFrameServiceProvider
+        visualizationMap={defaultVisualizationMap}
+        datasourceMap={defaultDatasourceMap}
+      >
+        <WorkspacePanel {...defaultProps} />,
+      </EditorFrameServiceProvider>,
       {},
       { preloadedState: { visualization: { activeId: null, state: {} }, datasourceStates: {} } }
     );
