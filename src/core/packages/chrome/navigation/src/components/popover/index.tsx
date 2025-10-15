@@ -191,8 +191,9 @@ export const SideNavPopover = ({
       const isStayingInComponent =
         nextFocused &&
         (triggerRef.current?.contains(nextFocused) || popoverRef.current?.contains(nextFocused));
+      const isTrappedByFlyout = (nextFocused as HTMLElement)?.classList.contains('euiFlyout');
 
-      if (!isStayingInComponent) {
+      if (!isStayingInComponent && !isTrappedByFlyout) {
         handleClose();
       }
     },
