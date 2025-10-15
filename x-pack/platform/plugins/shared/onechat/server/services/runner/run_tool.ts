@@ -96,6 +96,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
   manager: RunnerManager;
 }): Promise<ToolHandlerContext> => {
   const { onEvent } = toolExecutionParams;
+
   const {
     request,
     defaultConnectorId,
@@ -103,6 +104,8 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     modelProviderFactory,
     toolsService,
     resultStore,
+    contentReferencesStore,
+
     logger,
   } = manager.deps;
   return {
@@ -118,5 +121,6 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     }),
     resultStore: resultStore.asReadonly(),
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
+    contentReferencesStore,
   };
 };

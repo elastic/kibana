@@ -14,6 +14,7 @@ import {
 } from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import type { ModelProvider, ScopedRunner, ToolProvider, WritableToolResultStore } from '../runner';
 
 export type AgentHandlerFn = (
@@ -72,6 +73,11 @@ export interface AgentHandlerContext {
    * Logger scoped to this execution
    */
   logger: Logger;
+  /**
+   * Content references store for managing content references during agent execution.
+   * Can be used to add and manage content references that will be included in the final response.
+   */
+  contentReferencesStore: ContentReferencesStore;
 }
 
 /**
@@ -95,6 +101,10 @@ export interface AgentParams {
    * The input triggering this round.
    */
   nextInput: RoundInput;
+  /**
+   * Optional tool parameters to pass to the agent.
+   */
+  toolParameters?: Record<string, any>;
   /**
    * Agent capabilities to enable.
    */

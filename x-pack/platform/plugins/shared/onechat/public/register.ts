@@ -11,7 +11,6 @@ import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
-import { eventTypes } from '../common/events';
 import {
   AGENT_BUILDER_FULL_TITLE,
   AGENT_BUILDER_SHORT_TITLE,
@@ -19,13 +18,14 @@ import {
   ONECHAT_PATH,
 } from '../common/features';
 import type { OnechatInternalService } from './services';
-import type { OnechatStartDependencies } from './types';
+import type { OnechatPluginStart, OnechatStartDependencies } from './types';
+import { eventTypes } from '../common/events';
 
 export const registerApp = ({
   core,
   getServices,
 }: {
-  core: CoreSetup<OnechatStartDependencies>;
+  core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>;
   getServices: () => OnechatInternalService;
 }) => {
   core.application.register({

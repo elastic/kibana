@@ -31,6 +31,7 @@ export {
   productDocumentationReference,
   esqlQueryReference,
   contentReferenceString,
+  hrefReference,
   contentReferenceBlock,
   removeContentReferences,
   pruneContentReferences,

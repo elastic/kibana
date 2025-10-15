@@ -12,6 +12,30 @@ import type { ChatService } from './chat';
 import type { ConversationsService } from './conversations';
 import type { ToolsService } from './tools';
 import type { NavigationService } from './navigation';
+import type { AIConnector } from '../application/components/settings/connector_selector';
+
+export interface StarterPrompt {
+  description: string;
+  title: string;
+  icon: string;
+  prompt: string;
+}
+
+export interface ConversationSettings {
+  isFlyoutMode?: boolean;
+  newConversationSubtitle?: string;
+  newConversationPrompts?: StarterPrompt[];
+  defaultAgentId?: string;
+  commentActionsMounter?: (args: { message: { content: string } }) => React.JSX.Element;
+  toolParameters?: Record<string, any>;
+  onConnectorSelectionChange?: (connector: AIConnector) => void;
+  customMenuItems?: React.ReactElement[];
+  onSelectPrompt?: (prompt: string, title: string) => void;
+  selectedConversationId?: string;
+  selectedContextComponent?: React.ReactElement;
+  contextPrompt?: string;
+  transformUserContextPrompt?: (promptText: string) => any;
+}
 
 export interface OnechatInternalService {
   agentService: AgentService;
@@ -19,6 +43,10 @@ export interface OnechatInternalService {
   conversationsService: ConversationsService;
   navigationService: NavigationService;
   toolsService: ToolsService;
+  conversationSettingsService: {
+    setConversationSettings: (conversationSettings: ConversationSettings) => () => void;
+    getConversationSettings$: () => any;
+  };
   startDependencies: OnechatStartDependencies;
   accessChecker: AgentBuilderAccessChecker;
 }

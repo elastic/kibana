@@ -16,7 +16,7 @@ import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/imp
 import { loggerMock } from '@kbn/logging-mocks';
 import { Document } from 'langchain/document';
 
-describe('KnowledgeBaseRetievalTool', () => {
+describe('KnowledgeBaseRetrievalTool', () => {
   const logger = loggerMock.create();
   const contentReferencesStore = newContentReferencesStoreMock();
   const getKnowledgeBaseDocumentEntries = jest.fn();

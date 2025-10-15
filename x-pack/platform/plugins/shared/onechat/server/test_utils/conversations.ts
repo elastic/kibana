@@ -25,6 +25,7 @@ export const createEmptyConversation = (): Conversation => {
       id: 'unknown',
       username: 'unknown',
     },
+    connector_id: undefined,
   };
 };
 

@@ -8,12 +8,17 @@
 import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import React, { Suspense } from 'react';
+import { createHashHistory } from 'history';
+import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
-import { AssistantOverlay } from '@kbn/elastic-assistant';
+import { AssistantOverlay, OneChatOverlay } from '@kbn/elastic-assistant';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AssistantNavLink } from '@kbn/elastic-assistant/impl/assistant_context/assistant_nav_link';
+import { OneChatNavLink } from '@kbn/elastic-assistant/impl/assistant_context/one_chat_nav_link';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { SecurityAlertReference } from './src/components/get_comments/content_reference/components/security_alert_reference';
+import { SecurityAlertsPageReference } from './src/components/get_comments/content_reference/components/security_alerts_page_reference';
 import type {
   ElasticAssistantPublicPluginSetupDependencies,
   ElasticAssistantPublicPluginStartDependencies,
@@ -25,6 +30,7 @@ import { licenseService } from './src/hooks/licence/use_licence';
 import { ReactQueryClientProvider } from './src/context/query_client_context/elastic_assistant_query_client_provider';
 import { AssistantSpaceIdProvider } from './src/context/assistant_space_id/assistant_space_id_provider';
 import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
+import { KnowledgeBaseEntryReference } from './src/components/get_comments/content_reference/components/knowledge_base_entry_reference';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
@@ -55,6 +61,17 @@ export class ElasticAssistantPublicPlugin
   }
 
   public start(coreStart: CoreStart, dependencies: ElasticAssistantPublicPluginStartDependencies) {
+    // Register security alert components with onechat content reference registry
+    dependencies.onechat.contentReferenceRegistry.register('SecurityAlert', SecurityAlertReference);
+    dependencies.onechat.contentReferenceRegistry.register(
+      'SecurityAlertsPage',
+      SecurityAlertsPageReference
+    );
+    dependencies.onechat.contentReferenceRegistry.register(
+      'KnowledgeBaseEntry',
+      KnowledgeBaseEntryReference
+    );
+
     const startServices = (): StartServices => {
       const { ...startPlugins } = coreStart.security;
       licenseService.start(dependencies.licensing.license$);
@@ -73,6 +90,7 @@ export class ElasticAssistantPublicPlugin
         spaces: dependencies.spaces,
         elasticAssistantSharedState: dependencies.elasticAssistantSharedState,
         aiAssistantManagementSelection: dependencies.aiAssistantManagementSelection,
+        onechat: dependencies.onechat,
       };
       return services;
     };
@@ -93,6 +111,7 @@ export class ElasticAssistantPublicPlugin
     coreStart: CoreStart,
     services: StartServices
   ) {
+    const history = createHashHistory();
     const { openChat$, completeOpenChat } = services.aiAssistantManagementSelection;
     ReactDOM.render(
       <I18nProvider>
@@ -113,6 +132,11 @@ export class ElasticAssistantPublicPlugin
                   >
                     <Suspense fallback={null}>
                       <AssistantNavLink />
+                      <Router history={history}>
+                        <span> </span>
+                        <OneChatNavLink />
+                        <OneChatOverlay />
+                      </Router>
                       <AssistantOverlay />
                     </Suspense>
                   </AssistantProvider>

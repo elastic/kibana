@@ -25,6 +25,7 @@ import { apiPrivileges } from '../../common/features';
 import type { ChatService } from '../services/chat';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
+import type { OnechatRequestHandlerContext } from '../types';
 
 export function registerChatRoutes({
   router,
@@ -35,6 +36,7 @@ export function registerChatRoutes({
   const wrapHandler = getHandlerWrapper({ logger });
 
   const conversePayloadSchema = schema.object({
+    tool_parameters: schema.maybe(schema.recordOf(schema.string(), schema.any())),
     agent_id: schema.string({
       defaultValue: oneChatDefaultAgentId,
       meta: {
@@ -85,17 +87,20 @@ export function registerChatRoutes({
     request,
     chatService,
     abortSignal,
+    spaceId,
   }: {
     chatService: ChatService;
     payload: ChatRequestBodyPayload;
     request: KibanaRequest;
     abortSignal: AbortSignal;
+    spaceId?: string;
   }) => {
     const {
       agent_id: agentId,
       connector_id: connectorId,
       conversation_id: conversationId,
       input,
+      tool_parameters: toolParameters,
       capabilities,
     } = payload;
 
@@ -107,6 +112,8 @@ export function registerChatRoutes({
       abortSignal,
       nextInput: { message: input },
       request,
+      spaceId,
+      toolParameters,
     });
   };
 
@@ -141,6 +148,8 @@ export function registerChatRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { chat: chatService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body;
+        const context = await (ctx as OnechatRequestHandlerContext).onechat;
+        const spaceId = context.spaces.getSpaceId();
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
@@ -152,6 +161,7 @@ export function registerChatRoutes({
           payload,
           request,
           abortSignal: abortController.signal,
+          spaceId,
         });
 
         const events = await firstValueFrom(chatEvents$.pipe(toArray()));
@@ -207,6 +217,8 @@ export function registerChatRoutes({
         const [, { cloud }] = await coreSetup.getStartServices();
         const { chat: chatService } = getInternalServices();
         const payload: ChatRequestBodyPayload = request.body;
+        const context = await (ctx as OnechatRequestHandlerContext).onechat;
+        const spaceId = context.spaces.getSpaceId();
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
@@ -218,6 +230,7 @@ export function registerChatRoutes({
           payload,
           request,
           abortSignal: abortController.signal,
+          spaceId,
         });
 
         return response.ok({

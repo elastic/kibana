@@ -14,9 +14,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useObservable from 'react-use/lib/useObservable';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 import { ConversationContentWithMargins } from './conversation_grid';
@@ -24,6 +25,9 @@ import { ConversationInputForm } from './conversation_input/conversation_input_f
 import { useConversationGridCenterColumnWidth } from './conversation_grid.styles';
 import { docLinks } from '../../../../common/doc_links';
 import { WelcomeText } from '../common/welcome_text';
+import type { ConversationSettings } from '../../../services/types';
+import { StarterPrompts } from './starter_prompts';
+import { useOnechatServices } from '../../hooks/use_onechat_service';
 
 const fullHeightStyles = css`
   height: 100%;
@@ -174,8 +178,21 @@ const WithMarginsContainer: React.FC<{ children: ReactNode }> = ({ children }) =
   <div css={withMarginContainerStyles}>{children}</div>
 );
 
-export const NewConversationPrompt: React.FC<{}> = () => {
+interface NewConversationPromptProps {
+  setStarterPrompt?: (prompt: string) => void;
+}
+
+export const NewConversationPrompt: React.FC<NewConversationPromptProps> = ({
+  setStarterPrompt,
+}) => {
   const { euiTheme } = useEuiTheme();
+  const { conversationSettingsService } = useOnechatServices();
+
+  // Subscribe to conversation settings to get the newConversationSubtitle
+  const conversationSettings = useObservable<ConversationSettings>(
+    conversationSettingsService.getConversationSettings$(),
+    {}
+  );
   const centerColumnWidth = useConversationGridCenterColumnWidth();
   const inputRowHeight = `calc(${euiTheme.size.l} * 7)`;
   const gridStyles = css`
@@ -184,12 +201,27 @@ export const NewConversationPrompt: React.FC<{}> = () => {
     grid-template-rows: auto ${inputRowHeight} auto;
     row-gap: ${euiTheme.size.l};
   `;
+
+  const handleSelectPrompt = useCallback(
+    (prompt: string, title: string) => {
+      setStarterPrompt?.(prompt);
+      conversationSettings?.onSelectPrompt?.(prompt, title);
+    },
+    [setStarterPrompt, conversationSettings]
+  );
   return (
     <ConversationContentWithMargins css={fullHeightStyles}>
       <div css={gridStyles} data-test-subj="agentBuilderWelcomePage">
         <MainContainer>
           <WelcomeText />
         </MainContainer>
+        <WithMarginsContainer>
+          <StarterPrompts
+            fetchedPromptGroups={conversationSettings?.newConversationPrompts || []}
+            onSelectPrompt={handleSelectPrompt}
+            compressed={true}
+          />
+        </WithMarginsContainer>
         <WithMarginsContainer>
           <ConversationInputForm />
         </WithMarginsContainer>

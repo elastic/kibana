@@ -8,7 +8,7 @@
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { ConversationInputTextArea } from './conversation_input_text_area';
@@ -18,17 +18,36 @@ import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id'
 import { ConversationInputActions } from './conversation_input_actions';
 
 interface ConversationInputFormProps {
-  onSubmit?: () => void;
+  onSubmit: () => void;
+  starterPrompt?: string;
+  contextPrompt?: string;
 }
 
 const fullHeightStyles = css`
   height: 100%;
 `;
 
-export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ onSubmit }) => {
+export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
+  onSubmit,
+  starterPrompt,
+  contextPrompt,
+}) => {
   const isSendingMessage = useIsSendingMessage();
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(contextPrompt ?? '');
   const { sendMessage, pendingMessage } = useSendMessage();
+
+  // Populate input with starter prompt when it changes
+  useEffect(() => {
+    if (starterPrompt) {
+      setInput(starterPrompt);
+    }
+  }, [starterPrompt]);
+
+  useEffect(() => {
+    if (contextPrompt) {
+      setInput(contextPrompt);
+    }
+  }, [contextPrompt]);
   const { euiTheme } = useEuiTheme();
   const { isFetched } = useOnechatAgents();
   const agentId = useAgentId();

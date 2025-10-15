@@ -6,13 +6,16 @@
  */
 
 import React from 'react';
-import { EuiPageHeaderSection, useEuiTheme } from '@elastic/eui';
+import { EuiPageHeaderSection, useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { NewConversationButton } from './new_conversation_button';
+import { SettingsContextMenu } from '../settings/settings_context_menu';
 
 export const ConversationActions: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
+  const hasActiveConversation = useHasActiveConversation();
 
   const actionsContainerStyles = css`
     display: flex;
@@ -30,7 +33,16 @@ export const ConversationActions: React.FC<{}> = () => {
 
   return (
     <EuiPageHeaderSection css={actionsContainerStyles} aria-label={labels.container}>
-      <NewConversationButton />
+      <EuiFlexGroup>
+        {hasActiveConversation && (
+          <EuiFlexItem grow={false}>
+            <NewConversationButton />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <SettingsContextMenu />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPageHeaderSection>
   );
 };

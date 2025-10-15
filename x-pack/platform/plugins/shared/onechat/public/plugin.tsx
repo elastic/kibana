@@ -17,6 +17,9 @@ import { docLinks } from '../common/doc_links';
 import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 import { registerLocators } from './locator/register_locators';
 import { registerAnalytics, registerApp, registerManagementSection } from './register';
+import { ConversationSettingsService } from './services/conversations/conversations_settings';
+import { contentReferenceRegistry } from './application/components/conversations/content_reference/content_reference_registry';
+
 import {
   AgentBuilderAccessChecker,
   AgentService,
@@ -46,12 +49,14 @@ export class OnechatPlugin
 {
   logger: Logger;
   private internalServices?: OnechatInternalService;
+  private conversationSettingsService: ConversationSettingsService;
   private setupServices?: {
     navigationService: NavigationService;
   };
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
+    this.conversationSettingsService = new ConversationSettingsService();
   }
   setup(
     core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
@@ -106,6 +111,7 @@ export class OnechatPlugin
     const agentService = new AgentService({ http });
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
+    const conversationSettingsService = this.conversationSettingsService.start();
     const toolsService = new ToolsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
@@ -122,11 +128,18 @@ export class OnechatPlugin
       navigationService,
       toolsService,
       startDependencies,
+      conversationSettingsService,
       accessChecker,
     };
 
     return {
+      internalServices: this.internalServices,
+      contentReferenceRegistry,
       tools: createPublicToolContract({ toolsService }),
     };
+  }
+
+  stop() {
+    this.conversationSettingsService.stop();
   }
 }

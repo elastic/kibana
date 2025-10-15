@@ -37,7 +37,7 @@ const BaseCommentActionsComponent: React.FC<Props> = ({ message, children }) => 
   const content = message.content ?? '';
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
+    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="flexEnd">
       {children}
       <EuiFlexItem grow={false} data-test-subj="copy-to-clipboard-action">
         <EuiToolTip position="top" content={COPY_TO_CLIPBOARD}>

@@ -51,6 +51,7 @@ export function AssistantProvider({
     chrome,
     productDocBase,
     elasticAssistantSharedState,
+    onechat: { internalServices: onechatServices },
     settings,
   } = useKibana().services;
 
@@ -107,6 +108,10 @@ export function AssistantProvider({
     basePath,
     basePromptContexts: Object.values(promptContext),
     getComments: memoizedGetComments,
+    commentActionsMounter: (args: { message: { content: string } }) =>
+      memoizedCommentActionsMounter({
+        message: { content: args.message.content, role: 'user', timestamp: Date.now().toString() },
+      }),
     http,
     inferenceEnabled,
     navigateToApp,
@@ -117,6 +122,7 @@ export function AssistantProvider({
     userProfileService: userProfile,
     chrome,
     getUrlForApp,
+    onechatServices,
     openChatTrigger$,
     settings,
     completeOpenChat,

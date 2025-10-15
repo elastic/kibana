@@ -7,13 +7,17 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import useObservable from 'react-use/lib/useObservable';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { queryKeys } from '../query_keys';
 import { newConversationId } from '../utils/new_conversation';
 import { useConversationId } from './use_conversation_id';
 import { useIsSendingMessage } from './use_is_sending_message';
 import { useOnechatServices } from './use_onechat_service';
+import { useOnechatLastConversation } from './use_space_aware_context/use_last_conversation';
+import { useOnechatSpaceId } from './use_space_aware_context/use_space_id';
+import type { ConversationSettings } from '../../services/types';
 import { storageKeys } from '../storage_keys';
 import { useSendMessage } from '../context/send_message/send_message_context';
 import { useValidateAgentId } from './agents/use_validate_agent_id';
@@ -21,6 +25,8 @@ import { useValidateAgentId } from './agents/use_validate_agent_id';
 export const useConversation = () => {
   const conversationId = useConversationId();
   const { conversationsService } = useOnechatServices();
+  const spaceId = useOnechatSpaceId();
+  const { setLastConversation } = useOnechatLastConversation({ spaceId });
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const isSendingMessage = useIsSendingMessage();
   const {
@@ -37,7 +43,12 @@ export const useConversation = () => {
       if (!conversationId) {
         return Promise.reject(new Error('Invalid conversation id'));
       }
-      return conversationsService.get({ conversationId });
+      return conversationsService.get({ conversationId }).catch((error) => {
+        // If conversation is not found on server, set localStorageLastConversation to empty string
+        if (error.response.status === 404) {
+          setLastConversation({ id: '' });
+        }
+      });
     },
   });
 
@@ -65,6 +76,13 @@ const useGetNewConversationAgentId = () => {
 
 export const useAgentId = () => {
   const { conversation } = useConversation();
+  const { conversationSettingsService } = useOnechatServices();
+
+  const conversationSettings = useObservable<ConversationSettings>(
+    conversationSettingsService.getConversationSettings$(),
+    {}
+  );
+
   const agentId = conversation?.agent_id;
   const conversationId = useConversationId();
   const isNewConversation = !conversationId;
@@ -79,12 +97,20 @@ export const useAgentId = () => {
     return getNewConversationAgentId();
   }
 
-  return undefined;
+  // Return the agent_id from conversation if available, otherwise return the defaultAgentId from settings
+  // If no defaultAgentId is set in settings, fall back to the oneChatDefaultAgentId constant
+  return conversation?.agent_id ?? conversationSettings?.defaultAgentId ?? oneChatDefaultAgentId;
 };
 
 export const useConversationTitle = () => {
   const { conversation, isLoading } = useConversation();
   return { title: conversation?.title ?? '', isLoading };
+};
+
+export const useConnectorId = () => {
+  const { conversation } = useConversation();
+  // Return the connector_id from conversation if available, otherwise return an empty string
+  return conversation?.connector_id;
 };
 
 export const useConversationRounds = () => {
@@ -119,5 +145,5 @@ export const useStepsFromPrevRounds = () => {
 export const useHasActiveConversation = () => {
   const conversationId = useConversationId();
   const conversationRounds = useConversationRounds();
-  return Boolean(conversationId || conversationRounds.length > 0);
+  return Boolean(conversationId && conversationRounds.length > 0);
 };

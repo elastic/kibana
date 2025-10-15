@@ -33,7 +33,8 @@
       "triggersActionsUi",
       "elasticAssistantSharedState",
       "aiAssistantManagementSelection",
-      "discover"
+      "discover",
+      "onechat"
     ],
     "requiredBundles": [
       "kibanaReact",
