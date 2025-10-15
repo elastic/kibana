@@ -61,21 +61,37 @@ POST _index_template/kibana_sample_weather_index_template
 
 PUT kibana_sample_weather_data_stream/_bulk
 { "create":{ } }
-{ "@timestamp": \"${getLatestTimeStamp(3600000)}\", "sensor_id":"STATION_1", "location": "base", "temperature": 24.1 }
+{ "@timestamp": \"${getLatestTimeStamp(
+  3600000
+)}\", "sensor_id":"STATION_1", "location": "base", "temperature": 24.1 }
 { "create":{ } }
-{ "@timestamp": \"${getLatestTimeStamp(6000)}\", "sensor_id":"STATION_2", "location": "base", "temperature": 34.2}
+{ "@timestamp": \"${getLatestTimeStamp(
+  6000
+)}\", "sensor_id":"STATION_2", "location": "base", "temperature": 34.2}
  { "create":{ } }
-{ "@timestamp": \"${getLatestTimeStamp(16000)}\", "sensor_id":"STATION_2", "location": "satellite", "temperature": 30.2}
+{ "@timestamp": \"${getLatestTimeStamp(
+  16000
+)}\", "sensor_id":"STATION_2", "location": "satellite", "temperature": 30.2}
 { "create":{ } }
-{ "@timestamp": \"${getLatestTimeStamp(10000)}\", "sensor_id":"STATION_3", "location": "satellite", "temperature": 20.4}
+{ "@timestamp": \"${getLatestTimeStamp(
+  10000
+)}\", "sensor_id":"STATION_3", "location": "satellite", "temperature": 20.4}
  { "create":{ } }
-{ "@timestamp": \"${getLatestTimeStamp(7000)}\", "sensor_id":"STATION_4", "location": "base", "temperature": 12.4}
+{ "@timestamp": \"${getLatestTimeStamp(
+  7000
+)}\", "sensor_id":"STATION_4", "location": "base", "temperature": 12.4}
   { "create":{ } }
-{ "@timestamp": \"${getLatestTimeStamp(17000)}\", "sensor_id":"STATION_4", "location": "base", "temperature": 44.4}
+{ "@timestamp": \"${getLatestTimeStamp(
+  17000
+)}\", "sensor_id":"STATION_4", "location": "base", "temperature": 44.4}
  { "create":{ } }
-{ "@timestamp": \"${getLatestTimeStamp(2000)}\", "sensor_id":"STATION_5", "location": "satellite", "temperature": 32.9}
+{ "@timestamp": \"${getLatestTimeStamp(
+  2000
+)}\", "sensor_id":"STATION_5", "location": "satellite", "temperature": 32.9}
   { "create":{ } }
-{ "@timestamp": \"${getLatestTimeStamp(12000)}\", "sensor_id":"STATION_5", "location": "base", "temperature": 23.5}
+{ "@timestamp": \"${getLatestTimeStamp(
+  12000
+)}\", "sensor_id":"STATION_5", "location": "base", "temperature": 23.5}
 
 # ✅ The response includes a summary of successes and errors for each operation.
 
