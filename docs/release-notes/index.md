@@ -28,6 +28,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 **Navigation and general interface**
 * Enhanced navigation menu for spaces that use a solution view. The new navigation experience provides more workspace for your data with an improved collapsed mode, hover menus, and responsiveness.
 * New Data Management menu. To ease the access to data-related management tasks, you can now find Fleet, Index Management, Integrations, and Ingest Pipelines in a dedicated menu, next to the Stack Management menu that previously hosted these pages.
+* Kibana is now available in German in Beta. To get started, set the locale in your kibana settings as follows: `i18n.locale: de-DE`. If you find any issues, please raise them on [Github](https://github.com/elastic/kibana/issues) [#236903]({{kib-pull}}236903).
 
 
 **Alerting**:
@@ -69,6 +70,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Discover**:
 * You can now manage multiple data explorations simultaneously in Discover using tabs. Navigate between them seamlessly, duplicate them to build on previous queries, and save them into a single Discover session to retrieve your queries, filters, and data configurations untouched at a later time [#235150]({{kib-pull}}235150).
+* You can now send long-running queries to run in the background. When a query runs in the background, you can perform other queries and tasks, then open it later from a new Background searches flyout to view cached results. This feature is in technical preview and disabled by default in this release. Check [this page](docs-content://explore-analyze/discover/background-search.md) for instructions [#236818]({{kib-pull}}236818).
 * Improves Discover’s {{esql}} LOOKUP JOIN experience with an index editor flyout supporting inline editing, CSV import, contextual actions based on privileges, and a query bar that opens Discover with a prefilled ES|QL query [#232686]({{kib-pull}}232686).
 * You can now add controls directly in Discover by typing variables (for example `?service` or `??host.name`) in your {{esql}} queries. Instead of having to maintain multiple similar queries, controls let you dynamically change parts of a single query using dropdowns, multi-selects, and date pickers with value suggestions [#229598]({{kib-pull}}229598).
 * Adds related errors count and failure badge when exploring traces in Discover [#227413]({{kib-pull}}227413).
@@ -112,27 +114,15 @@ For the Elastic Security 9.2.0 release information, refer to [Elastic Security S
 * Updates threads_per_allocation values in VCU ranges for Serverless [#227940]({{kib-pull}}227940).
 * Inference endpoints UI serverless: Enables adaptive allocations and allow user to set max allocations [#222726]({{kib-pull}}222726).
 
-**Management**:
+**Kibana platform and management**:
 * Data views managed by Elastic are now clearly identified in the UI. You can no longer edit them and instead have to duplicate them to apply any changes while preserving the original data view [#223451]({{kib-pull}}223451).
-* Enable the new background search UX [#236818]({{kib-pull}}236818).
-* Manually map new fields from schema editor [#235919]({{kib-pull}}235919).
-* Partitioning: AI-assisted suggestions [#235759]({{kib-pull}}235759).
-* Adds triple quotes support to Manual ingest pipeline processor editor [#236595]({{kib-pull}}236595).
-* Adds an option to convert an index to a lookup index in the manage index dropdown [#233998]({{kib-pull}}233998).
-* Remember mapped fields across simulations [#233799]({{kib-pull}}233799).
-* Disable running onboarding tour by default [#227978]({{kib-pull}}227978).
-% !!TODO!! The above PR had a lengthy release note description:
-% The console onboarding tour is now disabled by default. Users can manually start the tour at any time from the Help popover.
-
-**Platform**:
-* Integrate 9.0.3 Translations [#236903]({{kib-pull}}236903).
-% !!TODO!! The above PR had a lengthy release note description:
-% German Locale now available in Kibana. This is the first release of the German locale released under `Beta`. We did improve our testing of the translations quality, but since this is the first release of the German locale we are releasing it under Beta expecting further enhancements in every future release. To get started set the locale in the kibana settings `i18n.locale: de-DE`. If you find any issues please feel free to raise them on github in the Kibana repo.
-* The Rate-Limiter UX improvements [#227678]({{kib-pull}}227678).
+* Adds an option to convert an index to a lookup index [#233998]({{kib-pull}}233998).
+* The Console introduction tour is now disabled by default. You can manually start the tour at any time from the Help popover [#227978]({{kib-pull}}227978).
+* Improves the rate-limiter UX [#227678]({{kib-pull}}227678).
 
 **Search**:
 * Adds the ability to save Playgrounds within a space [#229511]({{kib-pull}}229511).
-* Improve code examples in Synonyms UI [#235944]({{kib-pull}}235944).
+* Improves code examples in the Synonyms interface [#235944]({{kib-pull}}235944).
 
 **TODO:Other entries to categorize**
 * Enable cases numerical id service [#238555]({{kib-pull}}238555).
@@ -158,6 +148,7 @@ For the Elastic Security 9.2.0 release information, refer to [Elastic Security S
 * Fixes loading saved query's query in the rule definition [#229964]({{kib-pull}}229964).
 
 **Dashboards and Visualizations**:
+* Null buckets and empty string values are now rendered in the UI as `(missing value)` and `(empty)` respectively. This is now aligned across charts and tables, including Discover and Lens charts [#233369]({{kib-pull}}233369).
 * Skips automatic scroll when interacting with a panel that is already visible [#233226]({{kib-pull}}233226).
 * Correctly show solid panel borders when a dashboard is in View mode [#232676]({{kib-pull}}232676).
 * Fixes error handling when saving a Links panel to the library from a dashboard [#231168]({{kib-pull}}231168).
@@ -181,26 +172,13 @@ For the Elastic Observability 9.2.0 release information, refer to [Elastic Obser
 **Elastic Security solution**:
 For the Elastic Security 9.2.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
-**Kibana security**:
-* Skipped spaces tests using esArchiver for MKI [#234061]({{kib-pull}}234061).
-
 **Machine Learning**:
 * Adds unique accessible labels for Show top field values buttons [#237972]({{kib-pull}}237972).
 * Single Metric Viewer: fixes partition field settings errors in the dashboard panel [#237046]({{kib-pull}}237046).
 * Alerting: Escape URL-like string from being displayed as links [#226849]({{kib-pull}}226849).
 
-**Management**:
-* Parse in streams button not handling smaller flyout well [#236548]({{kib-pull}}236548).
-* Improve streams badge accessibility [#235625]({{kib-pull}}235625).
-* Always show missing values instead of nulls [#233369]({{kib-pull}}233369).
-% !!TODO!! The above PR had a lengthy release note description:
-% Null buckets and empty string values are now rendered in the UI as `(missing value)` and `(empty)` respectively.  This is now aligned across charts and tables, including Discover and Lens charts.
-* Fixes code area responsiveness in Stream management [#232630]({{kib-pull}}232630).
-
 **Search**:
-* Announce changes when resetting terms in synonyms panel [#237877]({{kib-pull}}237877).
-% !!TODO!! The above PR had a lengthy release note description:
-% Fixes an accessibility issue where resetting changes or removing all terms in the Synonyms panel was not announced by screen readers. VoiceOver users on Safari will now hear updates when terms are reset.
+* Fixes an accessibility issue where resetting changes or removing all terms in the Synonyms panel was not announced by screen readers. VoiceOver users on Safari will now hear updates when terms are reset [#237877]({{kib-pull}}237877).
 
 **TODO: Other entries to categorize**
 * Improve performance of clustering [#238394]({{kib-pull}}238394).
