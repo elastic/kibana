@@ -8,26 +8,20 @@
  */
 
 import { useSelector } from 'react-redux';
-import { useMemo } from 'react';
-import { selectConnectorsData, selectSchemaLoose, selectWorkflowLookup } from '../../lib/store';
+import { useMemo, useRef } from 'react';
+import type { WorkflowEditorState } from '../../lib/store';
+import { selectWorkflowEditorState } from '../../lib/store';
 import { getCompletionItemProvider } from '../../lib/get_completion_item_provider';
 
 export const useCompletionProvider = () => {
-  const connectorsData = useSelector(selectConnectorsData);
-  const workflowYamlSchemaLoose = useSelector(selectSchemaLoose);
-  const workflowLookup = useSelector(selectWorkflowLookup);
+  const editorState = useSelector(selectWorkflowEditorState);
+  const editorStateRef = useRef<WorkflowEditorState>();
+  editorStateRef.current = editorState;
 
-  const completionProvider = useMemo(() => {
-    if (!workflowYamlSchemaLoose) {
-      return undefined;
-    }
-
-    return getCompletionItemProvider(
-      workflowYamlSchemaLoose,
-      //   () => {},
-      connectorsData?.connectorTypes
-    );
-  }, [workflowYamlSchemaLoose, connectorsData?.connectorTypes]);
+  const completionProvider = useMemo(
+    () => getCompletionItemProvider(() => editorStateRef.current),
+    []
+  );
 
   return completionProvider;
 };

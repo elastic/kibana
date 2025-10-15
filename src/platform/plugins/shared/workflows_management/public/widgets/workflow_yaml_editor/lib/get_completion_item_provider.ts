@@ -52,7 +52,7 @@ import {
   generateRRuleTriggerSnippet,
 } from './snippets/generate_trigger_snippet';
 import { getCachedAllConnectors } from './connectors_cache';
-import type { WorkflowEditorStore } from './store';
+import type { WorkflowEditorState, WorkflowEditorStore } from './store';
 
 // Cache for built-in step types extracted from schema
 let builtInStepTypesCache: Array<{
@@ -871,14 +871,30 @@ export function getSuggestion(
 }
 
 export function getCompletionItemProvider(
-  workflowYamlSchema: WorkflowZodSchemaLooseType,
-  // getStore: () => WorkflowEditorStore,
-  dynamicConnectorTypes?: Record<string, any>
+  getState: () => WorkflowEditorState | undefined
 ): monaco.languages.CompletionItemProvider {
   return {
     triggerCharacters: ['@', '.', ' '],
     provideCompletionItems: (model, position, completionContext) => {
       try {
+        const editorState = getState();
+        const dynamicConnectorTypes = editorState?.connectors?.connectorTypes;
+        const workflowYamlSchema = editorState?.schemaLoose;
+        const yamlDocument = editorState?.computed?.yamlDocument;
+
+        if (!workflowYamlSchema || !dynamicConnectorTypes || !yamlDocument) {
+          return {
+            suggestions: [],
+            incomplete: false,
+          };
+        }
+
+        console.log({
+          dynamicConnectorTypes,
+          workflowYamlSchema,
+          yamlDocument,
+        });
+
         // Get the latest connector data from cache instead of relying on closure
         const currentDynamicConnectorTypes =
           getCachedDynamicConnectorTypes() || dynamicConnectorTypes;
@@ -914,7 +930,6 @@ export function getCompletionItemProvider(
         const suggestions: monaco.languages.CompletionItem[] = [];
         const value = model.getValue();
 
-        const yamlDocument = parseDocument(value);
         // TODO: use the yaml document from the store
         // const yamlDocument = useSelector(selectYamlDocument);
 
@@ -969,7 +984,7 @@ export function getCompletionItemProvider(
           context = getContextSchemaForPath(workflowData, workflowGraph!, path);
         } catch (contextError) {
           // Fallback to the main workflow schema if context detection fails
-          context = workflowYamlSchema;
+          context = workflowYamlSchema as z.ZodType;
         }
 
         const lineUpToCursor = line.substring(0, position.column - 1);
