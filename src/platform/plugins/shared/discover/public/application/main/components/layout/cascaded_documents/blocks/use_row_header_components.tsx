@@ -29,8 +29,11 @@ import { type ESQLStatsQueryMeta } from '../utils';
 
 import type { ESQLDataGroupNode, DataTableRecord } from './types';
 import { constructCascadeQuery, type SupportedStatsFunction } from '../utils';
-import type { TabStateGlobalState } from '../../../../state_management/redux';
-import type { DiscoverAppLocator } from '../../../../../../../common/app_locator';
+import {
+  type TabStateGlobalState,
+  internalStateActions,
+  useInternalStateDispatch,
+} from '../../../../state_management/redux';
 
 interface RowContext {
   groupId: string;
@@ -44,10 +47,14 @@ interface RowClickActionContext {
   services: UnifiedDataTableProps['services'];
   closeActionMenu: () => void;
   globalState: TabStateGlobalState;
+  openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => void;
 }
 
 const contextRowActions: Array<
   NonNullable<EuiContextMenuPanelDescriptor['items']>[number] & {
+    /**
+     * The stats function type to render the action for.
+     */
     renderFor?: SupportedStatsFunction;
   }
 > = [
@@ -114,32 +121,41 @@ const contextRowActions: Array<
     onClick(this: RowClickActionContext, e) {
       e.preventDefault();
 
-      // @ts-expect-error -- brittle, locator exists on services, however unified table doesn't have it in its types
-      const discoverLink = (this.services.locator as DiscoverAppLocator).getRedirectUrl({
-        query: constructCascadeQuery({
-          query: this.editorQuery,
-          nodeType: 'leaf',
-          nodePath: [this.rowContext.groupId],
-          nodePathMap: { [this.rowContext.groupId]: this.rowContext.groupValue },
-        }),
-        timeRange: this.globalState.timeRange,
-        hideChart: false,
+      this.openInNewTab({
+        globalState: this.globalState,
+        appState: {
+          query: constructCascadeQuery({
+            query: this.editorQuery,
+            nodeType: 'leaf',
+            nodePath: [this.rowContext.groupId],
+            nodePathMap: { [this.rowContext.groupId]: this.rowContext.groupValue },
+          }),
+        },
       });
-
-      window.open(discoverLink, '_blank');
     },
   },
 ];
 
 interface ContextMenuProps
-  extends Pick<RowClickActionContext, 'editorQuery' | 'editorQueryMeta' | 'globalState'> {
+  extends Pick<
+    RowClickActionContext,
+    'editorQuery' | 'editorQueryMeta' | 'globalState' | 'openInNewTab'
+  > {
   row: RowContext;
   services: UnifiedDataTableProps['services'];
   close: RowClickActionContext['closeActionMenu'];
 }
 
 const ContextMenu = React.memo(
-  ({ row, services, editorQuery, editorQueryMeta, close, globalState }: ContextMenuProps) => {
+  ({
+    row,
+    services,
+    editorQuery,
+    editorQueryMeta,
+    close,
+    globalState,
+    openInNewTab,
+  }: ContextMenuProps) => {
     const groupType = editorQueryMeta.groupByFields.find(
       (field) => field.field === row.groupId
     )?.type;
@@ -148,8 +164,8 @@ const ContextMenu = React.memo(
       return [
         {
           id: `${row.groupId}-${row.groupValue}-context-menu`,
-          items: contextRowActions.reduce((acc, action) => {
-            if (action.renderFor && action.renderFor !== groupType) {
+          items: contextRowActions.reduce((acc, { renderFor, ...action }) => {
+            if (renderFor && renderFor !== groupType) {
               return acc;
             }
 
@@ -162,12 +178,13 @@ const ContextMenu = React.memo(
                 editorQuery,
                 closeActionMenu: close,
                 globalState,
+                openInNewTab,
               }),
             });
           }, [] as NonNullable<EuiContextMenuPanelDescriptor['items']>),
         },
       ];
-    }, [close, editorQuery, globalState, groupType, row, services]);
+    }, [close, editorQuery, globalState, groupType, openInNewTab, row, services]);
 
     return <EuiContextMenu initialPanelId={panels[0].id} panels={panels} />;
   }
@@ -181,8 +198,15 @@ export function useEsqlDataCascadeRowHeaderComponents(
 ) {
   const popoverRef = useRef<HTMLButtonElement | null>(null);
   const [popoverRowData, setPopoverRowData] = useState<RowContext | null>(null);
-
+  const dispatch = useInternalStateDispatch();
   const closePopover = useCallback(() => setPopoverRowData(null), [setPopoverRowData]);
+
+  const openInNewTab = useCallback(
+    (...args: Parameters<typeof internalStateActions.openInNewTab>) => {
+      dispatch(internalStateActions.openInNewTab(...args));
+    },
+    [dispatch]
+  );
 
   /**
    * Renders the popover for the row action (3 dots) button. Adopting this patterns avoids rendering multiple popovers
@@ -206,10 +230,19 @@ export function useEsqlDataCascadeRowHeaderComponents(
           globalState={globalState}
           row={popoverRowData!}
           services={services}
+          openInNewTab={openInNewTab}
         />
       </EuiWrappingPopover>
     ) : null;
-  }, [popoverRowData, closePopover, editorQuery, editorQueryMeta, globalState, services]);
+  }, [
+    popoverRowData,
+    closePopover,
+    editorQuery,
+    editorQueryMeta,
+    globalState,
+    services,
+    openInNewTab,
+  ]);
 
   /**
    * Renders the title part of the row header.
