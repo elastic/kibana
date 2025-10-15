@@ -81,16 +81,9 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
             <span data-test-subj="sloHealthCalloutDescription">
               <FormattedMessage
                 id="xpack.slo.sloList.healthCallout.description"
-                defaultMessage="The following {count, plural, one {transform is} other {transforms are}} in {stateText} state. You can inspect {count, plural, it {one} other {each one}} here:"
+                defaultMessage="The following {count, plural, one {SLO is} other {SLOs are}} in an unhealthy state. Data may be missing or incomplete. You can inspect {count, plural, one {it} other {each one}} here:"
                 values={{
-                  count: unhealthyAndMissingSloList.reduce(
-                    (acc, result) =>
-                      acc +
-                      (result.health.rollup !== 'healthy' ? 1 : 0) +
-                      (result.health.summary !== 'healthy' ? 1 : 0),
-                    0
-                  ),
-                  stateText,
+                  count: unhealthyAndMissingSloList.length,
                 }}
               />
             </span>
