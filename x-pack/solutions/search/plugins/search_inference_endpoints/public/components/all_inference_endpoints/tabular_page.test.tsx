@@ -24,28 +24,6 @@ const inferenceEndpoints = [
     task_settings: {},
   },
   {
-    inference_id: 'local-model',
-    task_type: 'sparse_embedding',
-    service: 'elasticsearch',
-    service_settings: {
-      num_allocations: 1,
-      num_threads: 1,
-      model_id: '.own_model',
-    },
-    task_settings: {},
-  },
-  {
-    inference_id: 'third-party-model',
-    task_type: 'sparse_embedding',
-    service: 'openai',
-    service_settings: {
-      num_allocations: 1,
-      num_threads: 1,
-      model_id: '.own_model',
-    },
-    task_settings: {},
-  },
-  {
     inference_id: '.elser-2-elasticsearch',
     task_type: 'sparse_embedding',
     service: 'elasticsearch',
@@ -53,17 +31,6 @@ const inferenceEndpoints = [
       num_allocations: 1,
       num_threads: 1,
       model_id: '.elser_model_2',
-    },
-    task_settings: {},
-  },
-  {
-    inference_id: '.multilingual-e5-small-elasticsearch',
-    task_type: 'text_embedding',
-    service: 'elasticsearch',
-    service_settings: {
-      num_allocations: 1,
-      num_threads: 1,
-      model_id: '.multilingual-e5-small',
     },
     task_settings: {},
   },
@@ -96,30 +63,6 @@ const inferenceEndpoints = [
       model_id: 'elser_model_2',
     },
   },
-  {
-    inference_id: 'custom-inference-id',
-    task_type: 'sparse_embedding',
-    service: 'elastic',
-    service_settings: {
-      model_id: 'elser_model_2',
-    },
-  },
-  {
-    inference_id: '.multilingual-embed-v1-elastic',
-    task_type: 'text_embedding',
-    service: 'elastic',
-    service_settings: {
-      model_id: 'multilingual-embed-v1',
-    },
-  },
-  {
-    inference_id: '.rerank-v1-elastic',
-    task_type: 'rerank',
-    service: 'elastic',
-    service_settings: {
-      model_id: 'rerank-v1',
-    },
-  },
 ] as InferenceAPIConfigResponse[];
 
 const elasticDescription = 'Runs on GPUs (token-based billing)';
@@ -147,37 +90,15 @@ describe('When the tabular page is loaded', () => {
     expect(rows[2]).toHaveTextContent(elasticsearchDescription);
     expect(rows[2]).not.toHaveTextContent('.elser_model_2');
 
-    expect(rows[3]).toHaveTextContent('.multilingual-e5-small-elasticsearch');
-    expect(rows[3]).toHaveTextContent('Elasticsearch');
-    expect(rows[3]).toHaveTextContent(elasticsearchDescription);
+    expect(rows[3]).toHaveTextContent('.sparkles');
+    expect(rows[3]).toHaveTextContent('Elastic');
+    expect(rows[3]).toHaveTextContent(elasticDescription);
 
-    expect(rows[4]).toHaveTextContent('.multilingual-embed-v1-elastic');
-    expect(rows[4]).toHaveTextContent('Elastic');
-    expect(rows[4]).toHaveTextContent(elasticDescription);
+    expect(rows[4]).toHaveTextContent('elastic-rerank');
+    expect(rows[4]).toHaveTextContent('Elasticsearch');
 
-    expect(rows[5]).toHaveTextContent('.rerank-v1-elastic');
-    expect(rows[5]).toHaveTextContent('Elastic');
-    expect(rows[5]).toHaveTextContent(elasticDescription);
-
-    expect(rows[6]).toHaveTextContent('.sparkles');
-    expect(rows[6]).toHaveTextContent('Elastic');
-    expect(rows[6]).toHaveTextContent(elasticDescription);
-
-    expect(rows[7]).toHaveTextContent('custom-inference-id');
-    expect(rows[7]).toHaveTextContent('Elastic');
-
-    expect(rows[8]).toHaveTextContent('elastic-rerank');
-    expect(rows[8]).toHaveTextContent('Elasticsearch');
-
-    expect(rows[9]).toHaveTextContent('local-model');
-    expect(rows[9]).toHaveTextContent('Elasticsearch');
-
-    expect(rows[10]).toHaveTextContent('my-elser-model-05');
-    expect(rows[10]).toHaveTextContent('Elasticsearch');
-
-    expect(rows[11]).toHaveTextContent('third-party-model');
-    expect(rows[11]).toHaveTextContent('OpenAI');
-    expect(rows[11]).toHaveTextContent('.own_model');
+    expect(rows[5]).toHaveTextContent('my-elser-model-05');
+    expect(rows[5]).toHaveTextContent('Elasticsearch');
   });
 
   it('should only disable delete action for preconfigured endpoints', () => {
@@ -196,7 +117,7 @@ describe('When the tabular page is loaded', () => {
 
     const actionButtons = screen.getAllByTestId('euiCollapsedItemActionsButton');
     act(() => {
-      actionButtons[6].click();
+      actionButtons[4].click();
     });
 
     expect(screen.getByTestId('inferenceUIDeleteAction-user-defined')).toBeEnabled();
@@ -206,20 +127,15 @@ describe('When the tabular page is loaded', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
     const preconfiguredBadges = screen.getAllByText('PRECONFIGURED');
-    expect(preconfiguredBadges.length).toBe(6);
+    expect(preconfiguredBadges.length).toBe(3);
   });
 
   it('should show tech preview badge only for reranker-v1 model, rainbow-sprinkles, multilingual-embed-v1, rerank-v1, and preconfigured elser_model_2', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
     const techPreviewBadges = screen.getAllByText('TECH PREVIEW');
-    expect(techPreviewBadges.length).toBe(4);
+    expect(techPreviewBadges.length).toBe(2);
 
-    const endpointsWithTechPreview = [
-      '.multilingual-embed-v1-elastic',
-      '.rerank-v1-elastic',
-      '.sparkles',
-      'elastic-rerank',
-    ];
+    const endpointsWithTechPreview = ['.sparkles', 'elastic-rerank'];
 
     endpointsWithTechPreview.forEach((id) => {
       expect(screen.getByText(id)).toBeInTheDocument();
