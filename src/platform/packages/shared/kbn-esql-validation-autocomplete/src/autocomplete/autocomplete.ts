@@ -16,7 +16,6 @@ import {
   getCommandAutocompleteDefinitions,
   parse,
   type ESQLAstItem,
-  type ESQLCommand,
   type ESQLCommandOption,
   type ESQLFunction,
 } from '@kbn/esql-ast';
@@ -33,6 +32,7 @@ import {
 import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
+import type { ESQLAstAnyCommand } from '@kbn/esql-ast/src/types';
 import { getAstContext } from '../shared/context';
 import { isHeaderCommand, isSourceCommand } from '../shared/helpers';
 import { QueryColumns, getSourcesHelper } from '../shared/resources_helpers';
@@ -51,8 +51,9 @@ export async function suggest(
   // Partition out to inner ast / ast context for the latest command
   const innerText = fullText.substring(0, offset);
   const correctedQuery = correctQuerySyntax(innerText);
-  const { ast, root } = parse(correctedQuery, { withFormatting: true });
-  const astContext = getAstContext(innerText, ast, offset);
+  const { root } = parse(correctedQuery, { withFormatting: true });
+
+  const astContext = getAstContext(innerText, root, offset);
 
   if (astContext.type === 'comment') {
     return [];
@@ -98,7 +99,7 @@ export async function suggest(
       .map((command) => command.name);
 
     const suggestions = getCommandAutocompleteDefinitions(commands);
-    if (!ast.length) {
+    if (!root.commands.length) {
       // Display the recommended queries if there are no commands (empty state)
       const recommendedQueriesSuggestions: ISuggestionItem[] = [];
       if (getSources) {
@@ -160,9 +161,10 @@ export async function suggest(
   }
 
   if (astContext.type === 'expression') {
+    const commands = [...(root.header ?? []), ...root.commands];
     const commandsSpecificSuggestions = await getSuggestionsWithinCommandExpression(
       fullText,
-      ast,
+      commands,
       astContext,
       getColumnsByType,
       getColumnMap,
@@ -225,9 +227,9 @@ function findNewUserDefinedColumn(userDefinedColumns: Set<string>) {
 
 async function getSuggestionsWithinCommandExpression(
   fullText: string,
-  commands: ESQLCommand[],
+  commands: ESQLAstAnyCommand[],
   astContext: {
-    command: ESQLCommand;
+    command: ESQLAstAnyCommand;
     node?: ESQLAstItem;
     option?: ESQLCommandOption;
     containingFunction?: ESQLFunction;

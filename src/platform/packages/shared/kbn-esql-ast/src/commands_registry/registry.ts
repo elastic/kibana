@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LicenseType } from '@kbn/licensing-types';
-import type { ESQLMessage, ESQLCommand, ESQLAst } from '../types';
+import type { ESQLMessage, ESQLCommand, ESQLAst, ESQLAstAnyCommand } from '../types';
 import type {
   ISuggestionItem,
   ICommandCallbacks,
@@ -48,7 +48,7 @@ export interface ICommandMethods<TContext = any> {
    */
   autocomplete: (
     query: string,
-    command: ESQLCommand,
+    command: ESQLAstAnyCommand,
     callbacks?: ICommandCallbacks,
     context?: TContext,
     cursorPosition?: number

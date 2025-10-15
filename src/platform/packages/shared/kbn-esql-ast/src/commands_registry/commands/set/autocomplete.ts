@@ -6,11 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand } from '../../../..';
+import { getSettingsCompletionItems } from '../../../definitions/utils/settings';
+import { isBinaryExpression, type ESQLCommand } from '../../../..';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 
-// FUSE <fuse_method> SCORE BY <score_column> GROUP BY <group_column> KEY BY <key_columns> WITH <options>
+// SET <setting> = <value>;
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
@@ -18,5 +19,25 @@ export async function autocomplete(
   context?: ICommandContext,
   cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
+  const settingArg = command.args[0];
+
+  // SET /
+  if (!settingArg) {
+    return getSettingsCompletionItems();
+  }
+
+  // SET <setting> = <value>/
+  if (isBinaryExpression(settingArg) && !settingArg.incomplete) {
+    return [
+      {
+        label: ';',
+        text: ';',
+        kind: 'Keyword',
+        detail: 'End of statement',
+        sortText: '1',
+      },
+    ];
+  }
+
   return [];
 }
