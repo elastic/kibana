@@ -49,7 +49,10 @@ export async function runAndValidateEsqlQuery({
   });
 
   try {
-    const res = await client.esql.query({ query, drop_null_columns: true }, { signal });
+    const res = await client.esql.query(
+      { query, drop_null_columns: true },
+      { signal, requestTimeout: '10s' }
+    );
     const esqlResponse = res as unknown as ESQLSearchResponse;
 
     const columns =
