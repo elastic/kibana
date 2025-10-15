@@ -118,16 +118,35 @@ export const getActionResultsRoute = (
           // Use query-specific agents if this is a query action_id, otherwise use parent action's agents
           const agentIds = matchingQuery?.agents || actionDetails._source?.agents || [];
 
+          logger.debug(
+            `Action ${request.params.actionId}: Found ${agentIds.length} agents (isQueryAction: ${!!matchingQuery}, queriesCount: ${queries.length})`
+          );
+
+          // Calculate pagination for agents (not ES responses)
+          const page = request.query.page ?? 0;
+          const pageSize = request.query.pageSize ?? 100;
+          const startIndex = page * pageSize;
+          const endIndex = startIndex + pageSize;
+          const agentsForCurrentPage = agentIds?.slice(startIndex, endIndex) ?? [];
+
+          // Build kuery filter for current page agents only
+          const agentIdsKuery = agentsForCurrentPage
+            .map((id) => `agent.id: "${id}"`)
+            .join(' OR ');
+          const combinedKuery = request.query.kuery
+            ? `(${agentIdsKuery}) AND (${request.query.kuery})`
+            : agentIdsKuery;
+
           const res = await lastValueFrom(
             search.search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
               {
                 actionId: request.params.actionId,
                 factoryQueryType: OsqueryQueries.actionResults,
-                kuery: request.query.kuery,
+                kuery: combinedKuery, // Filter by current page agents
                 startDate: request.query.startDate,
                 pagination: generateTablePaginationOptions(
-                  request.query.page ?? 0,
-                  request.query.pageSize ?? 100
+                  0, // Always fetch from 0 since we're filtering by specific agents
+                  pageSize // Fetch up to pageSize results
                 ),
                 sort: {
                   direction: request.query.sortOrder ?? Direction.desc,
@@ -148,11 +167,12 @@ export const getActionResultsRoute = (
           const aggsBuckets =
             res.rawResponse?.aggregations?.aggs.responses_by_action_id?.responses.buckets;
 
+          // Create placeholder edges for agents that haven't responded yet
           const previousEdges =
-            agentIds?.map(
+            agentsForCurrentPage.map(
               (agentId) =>
                 ({ fields: { agent_id: [agentId] } } as unknown as estypes.SearchHit<object>)
-            ) ?? [];
+            );
 
           const processedEdges = reverse(
             uniqBy('fields.agent_id[0]', flatten([res.edges, previousEdges]))
@@ -169,7 +189,7 @@ export const getActionResultsRoute = (
           return response.ok({
             body: {
               edges: processedEdges,
-              total: res.total,
+              total: agentIds.length, // Use total agent count for pagination, not ES response count
               aggregations,
               inspect: res.inspect,
             },

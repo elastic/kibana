@@ -16,6 +16,7 @@ import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ActionResultsArgs {
   edges: ResultEdges;
+  total: number;
   aggregations: {
     totalRowCount: number;
     totalResponded: number;
@@ -82,6 +83,7 @@ export const useActionResults = ({
     {
       select: (response) => ({
         edges: response.edges,
+        total: response.total,
         aggregations: response.aggregations,
         inspect: response.inspect || { dsl: [], response: [] },
       }),

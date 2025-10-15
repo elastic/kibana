@@ -22,6 +22,7 @@ export const buildActionResultsQuery = ({
   kuery,
   startDate,
   sort,
+  pagination,
   componentTemplateExists,
   useNewDataStream,
   integrationNamespaces,
@@ -106,8 +107,8 @@ export const buildActionResultsQuery = ({
       },
     },
     query: { bool: { filter: filterQuery } },
-    // from: activePage * querySize,
-    size: 10000, // querySize,
+    from: pagination.activePage * pagination.querySize,
+    size: pagination.querySize,
     track_total_hits: true,
     fields: ['*'],
     sort: [

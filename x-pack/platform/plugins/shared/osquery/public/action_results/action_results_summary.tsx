@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiInMemoryTable, EuiCodeBlock } from '@elastic/eui';
+import { EuiBasicTable, EuiCodeBlock } from '@elastic/eui';
+import type { Criteria, Pagination } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { AgentIdToName } from '../agents/agent_id_to_name';
@@ -34,15 +35,15 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   error,
   startDate,
 }) => {
-  const [pageIndex] = useState(0);
-  const [pageSize] = useState(50);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(50);
   const expired = useMemo(
     () => (!expirationDate ? false : new Date(expirationDate) < new Date()),
     [expirationDate]
   );
   const [isLive, setIsLive] = useState(true);
   const {
-    data: { aggregations, edges },
+    data: { aggregations, edges, total },
   } = useActionResults({
     actionId,
     startDate,
@@ -148,12 +149,21 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     [renderAgentIdColumn, renderRowsColumn, renderStatusColumn]
   );
 
-  const pagination = useMemo(
+  const onTableChange = useCallback(({ page }: Criteria<unknown>) => {
+    if (page) {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    }
+  }, []);
+
+  const pagination: Pagination = useMemo(
     () => ({
-      initialPageSize: 20,
+      pageIndex,
+      pageSize,
+      totalItemCount: total,
       pageSizeOptions: [10, 20, 50, 100],
     }),
-    []
+    [pageIndex, pageSize, total]
   );
 
   useEffect(() => {
@@ -165,7 +175,13 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   }, [agentIds?.length, aggregations.totalResponded, error, expired]);
 
   return edges.length ? (
-    <EuiInMemoryTable loading={isLive} items={edges} columns={columns} pagination={pagination} />
+    <EuiBasicTable
+      loading={isLive}
+      items={edges}
+      columns={columns}
+      pagination={pagination}
+      onChange={onTableChange}
+    />
   ) : null;
 };
 
