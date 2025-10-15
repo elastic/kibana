@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { i18n } from '@kbn/i18n';
 import type { ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import type { ICommandContext } from '../../types';
@@ -18,10 +19,12 @@ export const setCommand = {
   name: 'set',
   methods: setCommandMethods,
   metadata: {
-    description: 'Set a query setting', // HD imporeve
+    description: i18n.translate('kbn-esql-ast.esql.definitions.setDoc', {
+      defaultMessage: 'Sets a query setting',
+    }),
     declaration: `SET <setting> = <value>`,
-    examples: [], // HD SET example
-    hidden: false, // HD
+    examples: [], // TODO: add some CPS example.
+    hidden: true,
     preview: true,
     name: 'set',
   },
