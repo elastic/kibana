@@ -185,6 +185,8 @@ export function getZodTypeName(schema: z.ZodType) {
       return 'null';
     case 'ZodUnknown':
       return 'unknown';
+    case 'ZodLiteral':
+      return 'literal';
     default:
       return 'unknown';
   }
