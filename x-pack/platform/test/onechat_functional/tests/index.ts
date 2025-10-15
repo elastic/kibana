@@ -41,6 +41,7 @@ export default function ({ loadTestFile, getService }: OneChatUiFtrProviderConte
       llmSetup();
       loadTestFile(require.resolve('./agents/agents_list.ts'));
       loadTestFile(require.resolve('./agents/create_agent.ts'));
+      loadTestFile(require.resolve('./agents/edit_agent.ts'));
     });
   });
 }

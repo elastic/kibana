@@ -6,36 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import { chatSystemIndex } from '@kbn/onechat-server';
 import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
-
-const agents = [
-  { id: 'test_agent_1', name: 'Test Agent 1', labels: ['first'] },
-  { id: 'test_agent_2', name: 'Test Agent 2', labels: ['second'] },
-];
+import { setupAgents } from './setup/setup_agents';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { onechat } = getPageObjects(['onechat']);
   const testSubjects = getService('testSubjects');
-  const es = getService('es');
   const browser = getService('browser');
 
   describe('Agents List', function () {
-    before(async function () {
-      for (const agent of agents) {
-        await onechat.createAgentViaUI(agent);
-      }
-    });
-
-    after(async function () {
-      await es.deleteByQuery({
-        index: chatSystemIndex('agents'),
-        query: { match_all: {} },
-        wait_for_completion: true,
-        refresh: true,
-        conflicts: 'proceed',
-      });
-    });
+    const agents = setupAgents({ getPageObjects, getService });
 
     it('renders', async function () {
       await onechat.navigateToApp('agents');

@@ -465,6 +465,13 @@ export class OneChatPageObject extends FtrService {
     };
   }
 
+  getAgentRowDisplayName(agentId: string) {
+    const rowSelector = this.agentListRowSelector(agentId);
+    const nameAndDescriptionCellSelector = 'agentBuilderAgentsListNameAndDescription';
+    const displayNameSelector = `${rowSelector} > ${nameAndDescriptionCellSelector} > agentBuilderAgentsListName`;
+    return this.testSubjects.getVisibleText(displayNameSelector);
+  }
+
   async getAgentLabels(agentId: string) {
     const rowSelector = this.agentListRowSelector(agentId);
     const labelsTableCellSelector = 'agentBuilderAgentsListLabels';
@@ -495,6 +502,11 @@ export class OneChatPageObject extends FtrService {
     await this.agentAction(agentId, chatActionSelector).click();
   }
 
+  async clickAgentEdit(agentId: string) {
+    const editActionSelector = `agentBuilderAgentsListEdit-${agentId}`;
+    await this.agentAction(agentId, editActionSelector).click();
+  }
+
   async hasAgentEditLink(agentId: string) {
     const editActionSelector = `agentBuilderAgentsListEdit-${agentId}`;
     const href = await this.agentAction(agentId, editActionSelector).getHref();
@@ -502,6 +514,11 @@ export class OneChatPageObject extends FtrService {
       return false;
     }
     return href.includes(`/agents/${agentId}`);
+  }
+
+  async clickAgentClone(agentId: string) {
+    const cloneActionSelector = `agentBuilderAgentsListClone-${agentId}`;
+    await this.agentAction(agentId, cloneActionSelector).click();
   }
 
   async hasAgentCloneLink(agentId: string) {
@@ -531,6 +548,41 @@ export class OneChatPageObject extends FtrService {
         const confirmButtonSelector = 'onechatAgentDeleteConfirmButton';
         const confirmButton = await this.testSubjects.findDescendant(confirmButtonSelector, modal);
         await confirmButton.click();
+      },
+    };
+  }
+
+  /*
+   * ==========================
+   * Agents: form
+   * ==========================
+   */
+  getAgentFormPageTitle() {
+    return this.testSubjects.getVisibleText('agentFormPageTitle');
+  }
+
+  getAgentIdInput() {
+    const idInputSelector = 'agentSettingsIdInput';
+    return {
+      getValue: () => this.testSubjects.getAttribute(idInputSelector, 'value'),
+      isEnabled: () => this.testSubjects.isEnabled(idInputSelector),
+    };
+  }
+
+  getAgentFormDisplayName() {
+    return this.testSubjects.getAttribute('agentSettingsDisplayNameInput', 'value');
+  }
+
+  async setAgentFormDisplayName(name: string) {
+    await this.testSubjects.setValue('agentSettingsDisplayNameInput', name);
+  }
+
+  agentFormSaveButton() {
+    const saveButtonSelector = 'agentFormSaveButton';
+    return {
+      isEnabled: () => this.testSubjects.isEnabled(saveButtonSelector),
+      click: async () => {
+        await this.testSubjects.click(saveButtonSelector);
       },
     };
   }

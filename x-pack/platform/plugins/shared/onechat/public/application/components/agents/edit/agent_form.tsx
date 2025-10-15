@@ -401,7 +401,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                 />
               </EuiFlexItem>
             )}
-            <EuiFlexItem>{isCreateMode ? labels.agents.newAgent : agentName}</EuiFlexItem>
+            <EuiFlexItem data-test-subj="agentFormPageTitle">
+              {isCreateMode ? labels.agents.newAgent : agentName}
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
         description={
