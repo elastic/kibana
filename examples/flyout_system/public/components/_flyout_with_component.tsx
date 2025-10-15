@@ -34,7 +34,6 @@ const FlyoutSessionFromComponents: React.FC<FlyoutSessionFromComponents> = React
   const { title, mainSize, childSize, mainMaxWidth, childMaxWidth } = props;
 
   const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
-
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [isChildFlyoutVisible, setIsChildFlyoutVisible] = useState(false);
 
@@ -179,6 +178,66 @@ const FlyoutSessionFromComponents: React.FC<FlyoutSessionFromComponents> = React
 
 FlyoutSessionFromComponents.displayName = 'FlyoutSessionFromComponents';
 
+const NonSessionFlyout: React.FC = () => {
+  const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+
+  const handleOpenFlyout = () => {
+    setIsFlyoutVisible(true);
+  };
+
+  // BUG: EuiFlyout does not call onActive when session={false}
+  const flyoutOnActive = useCallback(() => {
+    console.log('activate non-session flyout'); // eslint-disable-line no-console
+  }, []);
+
+  const flyoutOnClose = useCallback(() => {
+    console.log('close non-session flyout'); // eslint-disable-line no-console
+    setIsFlyoutVisible(false);
+  }, []);
+
+  return (
+    <>
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label="Push"
+            checked={flyoutType === 'push'}
+            onChange={(e) => setFlyoutType(e.target.checked ? 'push' : 'overlay')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <EuiButton disabled={isFlyoutVisible} onClick={handleOpenFlyout}>
+              Open non-session flyout
+            </EuiButton>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {isFlyoutVisible && (
+        <EuiFlyout
+          aria-label="Non-session flyout"
+          onActive={flyoutOnActive}
+          onClose={flyoutOnClose}
+          type={flyoutType}
+          size="s"
+          side="left"
+          session={false}
+        >
+          <EuiFlyoutBody>
+            <EuiText>
+              <p>
+                This flyout is rendered using <EuiCode>EuiFlyout</EuiCode> directly without session
+                management.
+              </p>
+            </EuiText>
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      )}
+    </>
+  );
+};
+
 export const FlyoutWithComponent: React.FC = () => {
   return (
     <EuiDescriptionList
@@ -196,6 +255,10 @@ export const FlyoutWithComponent: React.FC = () => {
         {
           title: 'Session L: main size = fill',
           description: <FlyoutSessionFromComponents title="Session L" mainSize="fill" />,
+        },
+        {
+          title: 'Non-session flyout',
+          description: <NonSessionFlyout />,
         },
       ]}
     />
