@@ -145,31 +145,33 @@ export const streamRoutingMachine = setup({
           reenter: true,
         },
         'routingSamples.setDocumentMatchFilter': {
-          actions: enqueueActions(({ enqueue, event }) => {
-            enqueue.sendTo('routingSamplesMachine', {
-              type: 'routingSamples.setDocumentMatchFilter',
-              filter: event.filter,
-            });
-          }),
+          actions: sendTo('routingSamplesMachine', ({ event }) => ({
+            type: 'routingSamples.setDocumentMatchFilter',
+            filter: event.filter,
+          })),
         },
         'suggestion.preview': {
           target: '#idle',
-          actions: enqueueActions(({ enqueue, event }) => {
-            enqueue.sendTo('routingSamplesMachine', {
+          actions: [
+            sendTo('routingSamplesMachine', ({ event }) => ({
               type: 'routingSamples.setSelectedPreview',
               preview: event.toggle
                 ? { type: 'suggestion', name: event.name, index: event.index }
                 : undefined,
-            });
-            enqueue.sendTo('routingSamplesMachine', {
+            })),
+            sendTo('routingSamplesMachine', ({ event }) => ({
               type: 'routingSamples.updateCondition',
               condition: event.toggle ? event.condition : undefined,
-            });
-            enqueue.sendTo('routingSamplesMachine', {
+            })),
+            sendTo('routingSamplesMachine', {
               type: 'routingSamples.setDocumentMatchFilter',
               filter: 'matched',
-            });
-          }),
+            }),
+          ],
+        },
+        'routingRule.reviewSuggested': {
+          target: '#ready.reviewSuggestedRule',
+          actions: [{ type: 'storeSuggestedRuleId', params: ({ event }) => event }],
         },
       },
       invoke: {
@@ -197,10 +199,6 @@ export const streamRoutingMachine = setup({
               guard: 'canReorderRules',
               target: 'reorderingRules',
               actions: [{ type: 'reorderRouting', params: ({ event }) => event }],
-            },
-            'routingRule.reviewSuggested': {
-              target: 'reviewSuggestedRule',
-              actions: [{ type: 'storeSuggestedRuleId', params: ({ event }) => event }],
             },
           },
         },

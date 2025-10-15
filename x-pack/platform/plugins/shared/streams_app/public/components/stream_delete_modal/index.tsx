@@ -122,6 +122,7 @@ export function StreamDeleteModal({
             onChange={(e) => setStreamName(e.target.value)}
             fullWidth
             name={'stream-name-deletion'}
+            autoFocus
           />
         </EuiFormRow>
       </EuiModalBody>

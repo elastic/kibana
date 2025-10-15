@@ -29,7 +29,7 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { PLUGIN_ID } from '../../../../common';
 import { useKibana } from '../../../hooks/use_kibana';
 import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
@@ -100,6 +100,10 @@ export const WorkflowDetailHeader = ({
   const runWorkflowTooltipContent = useMemo(() => {
     return getRunWorkflowTooltipContent(isValid, canRunWorkflow, isEnabled, false);
   }, [isValid, canRunWorkflow, isEnabled]);
+
+  const handleSaveClick = useCallback<React.MouseEventHandler<HTMLButtonElement>>(() => {
+    handleSave();
+  }, [handleSave]);
 
   const handleRunClickWithUnsavedCheck = () => {
     if (hasUnsavedChanges) {
@@ -241,7 +245,7 @@ export const WorkflowDetailHeader = ({
                 fill
                 color="primary"
                 size="s"
-                onClick={handleSave}
+                onClick={handleSaveClick}
                 disabled={!canSaveWorkflow || isLoading}
               >
                 <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Save" ignoreTag />
