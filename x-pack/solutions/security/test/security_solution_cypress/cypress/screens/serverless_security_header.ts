@@ -7,6 +7,8 @@
 
 import { getDataTestSubjectSelectorMatch } from '../helpers/common';
 
+export const MORE_MENU_BTN = getDataTestSubjectSelectorMatch('sideNavMoreMenuItem');
+
 export const FOOTER_LAUNCHPAD = getDataTestSubjectSelectorMatch(
   'nav-item-security_solution_nav_footer.launchpad'
 );
@@ -34,45 +36,43 @@ export const THREAT_INTELLIGENCE =
 export const CASES = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:cases"]';
 
 // nested panel links
-export const TIMELINES = '[data-test-subj~="panelNavItem-id-timelines"]';
+export const TIMELINES = '[data-test-subj~="nav-item-id-timelines"]';
 
-export const OSQUERY = '[data-test-subj~="panelNavItem-id-osquery"]';
+export const OSQUERY = '[data-test-subj~="nav-item-id-osquery"]';
 
-export const HOSTS = '[data-test-subj~="panelNavItem-id-hosts"]';
+export const HOSTS = '[data-test-subj~="nav-item-id-hosts"]';
 
-export const FLEET = '[data-test-subj~="panelNavItem-id-fleet"]';
-export const ENDPOINTS = '[data-test-subj~="panelNavItem-id-endpoints"]';
+export const FLEET = '[data-test-subj~="nav-item-id-fleet"]';
+export const ENDPOINTS = '[data-test-subj~="nav-item-id-endpoints"]';
 
-export const POLICIES = '[data-test-subj~="panelNavItem-id-policy"]';
+export const POLICIES = '[data-test-subj~="nav-item-id-policy"]';
 
-export const TRUSTED_APPS = '[data-test-subj~="panelNavItem-id-trusted_apps"]';
+export const TRUSTED_APPS = '[data-test-subj~="nav-item-id-trusted_apps"]';
 
-export const TRUSTED_DEVICES = '[data-test-subj~="panelNavItem-id-trusted_devices"]';
+export const TRUSTED_DEVICES = '[data-test-subj~="nav-item-id-trusted_devices"]';
 
-export const EVENT_FILTERS = '[data-test-subj~="panelNavItem-id-event_filters"]';
+export const EVENT_FILTERS = '[data-test-subj~="nav-item-id-event_filters"]';
 
-export const BLOCKLIST = '[data-test-subj~="panelNavItem-id-blocklist"]';
+export const BLOCKLIST = '[data-test-subj~="nav-item-id-blocklist"]';
 
 export const HOST_ISOLATION_EXCEPTIONS =
-  '[data-test-subj~="panelNavItem-id-host_isolation_exceptions"]';
+  '[data-test-subj~="nav-item-id-host_isolation_exceptions"]';
 
-export const ENDPOINT_EXCEPTIONS = '[data-test-subj~="panelNavItem-id-endpoint_exceptions"]';
+export const ENDPOINT_EXCEPTIONS = '[data-test-subj~="nav-item-id-endpoint_exceptions"]';
 
-export const RESPONSE_ACTIONS_HISTORY =
-  '[data-test-subj~="panelNavItem-id-response_actions_history"]';
+export const RESPONSE_ACTIONS_HISTORY = '[data-test-subj~="nav-item-id-response_actions_history"]';
 
-export const CSP_BENCHMARKS =
-  '[data-test-subj~="panelNavItem-id-cloud_security_posture-benchmarks"]';
+export const CSP_BENCHMARKS = '[data-test-subj~="nav-item-id-cloud_security_posture-benchmarks"]';
 
-export const RULES_COVERAGE = '[data-test-subj~="panelNavItem-id-coverage-overview"]';
+export const RULES_COVERAGE = '[data-test-subj~="nav-item-id-coverage-overview"]';
 
-export const NETWORK = '[data-test-subj~="panelNavItem-id-network"]';
+export const NETWORK = '[data-test-subj~="nav-item-id-network"]';
 
-export const USERS = '[data-test-subj~="panelNavItem-id-users"]';
+export const USERS = '[data-test-subj~="nav-item-id-users"]';
 
-export const RULES = '[data-test-subj~="panelNavItem-id-rules"]';
+export const RULES = '[data-test-subj~="nav-item-id-rules"]';
 
-export const EXCEPTIONS = '[data-test-subj~="panelNavItem-id-exceptions"]';
+export const EXCEPTIONS = '[data-test-subj~="nav-item-id-exceptions"]';
 
 export const ONBOARDING = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:get_started"]';
 
