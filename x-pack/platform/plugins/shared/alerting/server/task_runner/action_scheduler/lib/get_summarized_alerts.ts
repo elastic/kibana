@@ -7,6 +7,7 @@
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { get } from 'lodash';
 import type { GetSummarizedAlertsParams, IAlertsClient } from '../../../alerts_client/types';
 import type {
   AlertInstanceContext,
@@ -66,7 +67,7 @@ export const getSummarizedAlerts = async <
   }, []);
 
   const newAlerts = alerts.new.data.filter((alert) => {
-    return !newAlertsWithMaintenanceWindowIds.includes(alert[ALERT_UUID]);
+    return !newAlertsWithMaintenanceWindowIds.includes(get(alert, ALERT_UUID));
   });
 
   const total = newAlerts.length + alerts.ongoing.count + alerts.recovered.count;

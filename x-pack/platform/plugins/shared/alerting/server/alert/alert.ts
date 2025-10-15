@@ -220,7 +220,12 @@ export class Alert<
     return this;
   }
 
-  updateLastScheduledActions(group: ActionGroupIds, actionHash?: string | null, uuid?: string) {
+  updateLastScheduledActions(
+    group: ActionGroupIds,
+    actionHash?: string | null,
+    uuid?: string,
+    allActionUuids: string[] = []
+  ) {
     if (!this.meta.lastScheduledActions) {
       this.meta.lastScheduledActions = {} as LastScheduledActions;
     }
@@ -228,12 +233,22 @@ export class Alert<
     this.meta.lastScheduledActions.group = group;
     this.meta.lastScheduledActions.date = date;
 
+    // action group has changed, clear out the actions history
     if (this.meta.lastScheduledActions.group !== group) {
       this.meta.lastScheduledActions.actions = {};
     } else if (uuid) {
+      // uuid is provided, this is an action on interval
       if (!this.meta.lastScheduledActions.actions) {
         this.meta.lastScheduledActions.actions = {};
       }
+
+      // clear out any action ids that are not in the current list of action ids
+      Object.keys(this.meta.lastScheduledActions.actions).forEach((id) => {
+        if (!allActionUuids.includes(id)) {
+          delete this.meta.lastScheduledActions!.actions![id];
+        }
+      });
+
       // remove deprecated actionHash
       if (!!actionHash && this.meta.lastScheduledActions.actions[actionHash]) {
         delete this.meta.lastScheduledActions.actions[actionHash];

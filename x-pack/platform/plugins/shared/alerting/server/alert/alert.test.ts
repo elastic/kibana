@@ -442,6 +442,42 @@ describe('updateLastScheduledActions()', () => {
       },
     });
   });
+
+  test('removes the outdated actions', () => {
+    const actionsOnTheRule = ['222-222', '333-333'];
+
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: {
+        flappingHistory: [],
+        maintenanceWindowIds: [],
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {
+            '111-111': { date: new Date().toISOString() },
+            '222-222': { date: new Date().toISOString() },
+          },
+        },
+      },
+    });
+    alert.updateLastScheduledActions('default', 'hash', '333-333', actionsOnTheRule);
+    expect(alert.toJSON()).toEqual({
+      state: {},
+      meta: {
+        flappingHistory: [],
+        maintenanceWindowIds: [],
+        uuid: expect.any(String),
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {
+            '222-222': { date: new Date().toISOString() },
+            '333-333': { date: new Date().toISOString() },
+          },
+        },
+      },
+    });
+  });
 });
 
 describe('getContext()', () => {

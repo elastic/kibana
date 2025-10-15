@@ -264,10 +264,12 @@ export class PerAlertActionScheduler<
 
       if (!this.isRecoveredAction(actionGroup)) {
         if (isActionOnInterval(action)) {
+          const allActionUuids = this.actions.map((a) => a.uuid!);
           alert.updateLastScheduledActions(
             action.group as ActionGroupIds,
             generateActionHash(action),
-            action.uuid
+            action.uuid,
+            allActionUuids
           );
         } else {
           alert.updateLastScheduledActions(action.group as ActionGroupIds);
