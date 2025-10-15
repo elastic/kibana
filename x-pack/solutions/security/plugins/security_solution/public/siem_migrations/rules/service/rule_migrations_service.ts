@@ -26,7 +26,7 @@ import {
   getNoConnectorToast,
 } from '../../common/service';
 import type { GetMigrationStatsParams, GetMigrationsStatsAllParams } from '../../common/types';
-import { getSuccessToast } from './notification/success_notification';
+import { raiseSuccessToast } from './notification/success_notification';
 import { START_STOP_POLLING_SLEEP_SECONDS } from '../../common/constants';
 
 const CREATE_MIGRATION_BODY_BATCH_SIZE = 50;
@@ -238,8 +238,6 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
   }
 
   protected sendFinishedMigrationNotification(taskStats: RuleMigrationStats) {
-    const toast = getSuccessToast(taskStats, this.core, this);
-    this.toastsByMigrationId[taskStats.id] = this.core.notifications.toasts.addSuccess(toast);
-    return toast;
+    raiseSuccessToast(taskStats, this.core);
   }
 }
