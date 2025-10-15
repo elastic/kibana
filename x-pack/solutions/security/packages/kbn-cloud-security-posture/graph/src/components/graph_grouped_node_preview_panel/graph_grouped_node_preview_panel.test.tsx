@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { GraphGroupedNodePreviewPanel } from '.';
+import { GraphGroupedNodePreviewPanel } from './graph_grouped_node_preview_panel';
 import type { AlertItem, EntityItem, EventItem } from './components/grouped_item/types';
 import { useFetchDocumentDetails } from './use_fetch_document_details';
 
