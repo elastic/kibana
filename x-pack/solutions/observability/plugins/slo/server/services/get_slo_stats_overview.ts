@@ -82,7 +82,7 @@ export class GetSLOStatsOverview {
       if (querySLOsForIds) {
         do {
           const sloIdCompositeQueryResponse = await this.scopedClusterClient.asCurrentUser.search({
-            index: '.slo-observability.summary-*',
+            index: indices,
             size: 0,
             aggs: {
               sloIds: {
