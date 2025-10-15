@@ -1,8 +1,7 @@
 ---
 applies_to:
-  deployment:
-    ess: preview 9.2
-    ece: preview 9.2
+  stack: preview 9.2
+  serverless: unavailable
 ---
 
 # Case analytics indices schema[case-analytics-indices-schema]
