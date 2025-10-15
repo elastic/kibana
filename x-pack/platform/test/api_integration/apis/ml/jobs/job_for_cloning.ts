@@ -42,7 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('job for cloning', () => {
+  describe('retrieve job for cloning', () => {
     before(async () => {
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
@@ -68,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.testResources.cleanMLSavedObjects();
     });
 
-    it('should create a job for cloning without retaining created by', async () => {
+    it('should retrieve a job for cloning without retaining created by', async () => {
       const originJobResponse = await ml.api.getAnomalyDetectionJob(jobIdSpace1);
       const originJob = JSON.parse(originJobResponse.text);
 
@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(jobCloneResponse.job.custom_settings).not.to.have.property('created_by');
     });
 
-    it('should create a job for cloning and retain created_by field', async () => {
+    it('should retrieve a job for cloning and retain created_by field', async () => {
       const jobCloneResponse: { job: Job; datafeed: Datafeed } = await jobForCloning(
         jobIdSpace1,
         true,
@@ -114,19 +114,35 @@ export default ({ getService }: FtrProviderContext) => {
       expect(jobCloneResponse.job.custom_settings.created_by).to.eql('user1');
     });
 
-    it('should create a job for cloning by ml viewer user', async () => {
-      await jobForCloning(jobIdSpace1, true, USER.ML_VIEWER_ALL_SPACES, 200, idSpace1);
+    it('should retrieve a job for cloning by ml viewer user', async () => {
+      const jobCloneResponse = await jobForCloning(
+        jobIdSpace1,
+        true,
+        USER.ML_VIEWER_ALL_SPACES,
+        200,
+        idSpace1
+      );
+
+      expect(jobCloneResponse.job).to.have.property('job_id', jobIdSpace1);
+      expect(jobCloneResponse.job).not.to.have.property('job_type');
+      expect(jobCloneResponse.job).not.to.have.property('job_version');
+      expect(jobCloneResponse.job).not.to.have.property('create_time');
+      expect(jobCloneResponse.job).not.to.have.property('datafeed_config');
+      expect(jobCloneResponse).to.have.property('datafeed');
+      expect(jobCloneResponse.job).to.have.property('custom_settings');
+      expect(jobCloneResponse.job.custom_settings).to.have.property('created_by');
+      expect(jobCloneResponse.job.custom_settings.created_by).to.eql('user1');
     });
 
-    it('should not create a job for cloning by ml unauthorized user', async () => {
+    it('should not retrieve a job for cloning by ml unauthorized user', async () => {
       await jobForCloning(jobIdSpace1, true, USER.ML_UNAUTHORIZED, 403, idSpace1);
     });
 
-    it('should not create a job for cloning by ml disabled user', async () => {
+    it('should not retrieve a job for cloning by ml disabled user', async () => {
       await jobForCloning(jobIdSpace1, true, USER.ML_DISABLED, 403, idSpace1);
     });
 
-    it('should not create a job for cloning with incorrect space', async () => {
+    it('should not retrieve a job for cloning with incorrect space', async () => {
       await jobForCloning(jobIdSpace1, true, USER.ML_POWERUSER_ALL_SPACES, 404, idSpace2);
     });
   });
