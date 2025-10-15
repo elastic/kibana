@@ -1364,12 +1364,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectType,
         id
       );
+      const isoDate = new Date().toISOString();
       const previousRevisionSO = {
         ...currentPackagePolicySO,
         id: `${id}:prev`,
         attributes: {
           ...currentPackagePolicySO.attributes,
           latest_revision: false,
+          updated_at: isoDate,
         },
       };
       try {
@@ -1382,7 +1384,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         if (error.output.statusCode === 404) {
           await soClient.create<PackagePolicySOAttributes>(
             savedObjectType,
-            previousRevisionSO.attributes,
+            { ...previousRevisionSO.attributes, created_at: isoDate },
             {
               id: `${id}:prev`,
             }
@@ -1647,12 +1649,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               savedObjectType,
               id
             );
+            const isoDate = new Date().toISOString();
             const previousRevisionSO = {
               ...currentPackagePolicySO,
               id: `${id}:prev`,
               attributes: {
                 ...currentPackagePolicySO.attributes,
                 latest_revision: false,
+                updated_at: isoDate,
               },
             };
             try {
@@ -1660,7 +1664,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               previousPolicyRevisionsToUpdate.push(previousRevisionSO);
             } catch (error) {
               if (error.output.statusCode === 404) {
-                previousPolicyRevisionsToCreate.push(previousRevisionSO);
+                previousPolicyRevisionsToCreate.push({
+                  ...previousRevisionSO,
+                  attributes: {
+                    ...previousRevisionSO.attributes,
+                    created_at: isoDate,
+                  },
+                });
               } else {
                 throw error;
               }

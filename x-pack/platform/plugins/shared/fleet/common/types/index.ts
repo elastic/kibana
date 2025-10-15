@@ -107,6 +107,10 @@ export interface FleetConfigType {
   agentStatusChange?: {
     taskInterval?: string;
   };
+  cleanupIntegrationRevisions?: {
+    taskInterval?: string;
+  };
+  integrationRollbackTTL?: string;
   integrationsHomeOverride?: string;
   prereleaseEnabledByDefault?: boolean;
   hideDashboards?: boolean;

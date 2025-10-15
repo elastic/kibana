@@ -155,6 +155,7 @@ import { registerPackagesBulkOperationTask } from './tasks/packages_bulk_operati
 import { AutoInstallContentPackagesTask } from './tasks/auto_install_content_packages_task';
 import { AgentStatusChangeTask } from './tasks/agent_status_change_task';
 import { registerSetupTasks } from './tasks/setup';
+import { CleanupIntegrationRevisionsTask } from './tasks/cleanup_integration_revisions_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -211,6 +212,7 @@ export interface FleetAppContext {
   automaticAgentUpgradeTask: AutomaticAgentUpgradeTask;
   autoInstallContentPackagesTask: AutoInstallContentPackagesTask;
   agentStatusChangeTask?: AgentStatusChangeTask;
+  cleanupIntegrationRevisionsTask: CleanupIntegrationRevisionsTask;
   taskManagerStart?: TaskManagerStartContract;
   fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   syncIntegrationsTask: SyncIntegrationsTask;
@@ -325,6 +327,7 @@ export class FleetPlugin
   private automaticAgentUpgradeTask?: AutomaticAgentUpgradeTask;
   private autoInstallContentPackagesTask?: AutoInstallContentPackagesTask;
   private agentStatusChangeTask?: AgentStatusChangeTask;
+  private cleanupIntegrationRevisionsTask?: CleanupIntegrationRevisionsTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -708,6 +711,15 @@ export class FleetPlugin
         taskInterval: config.agentStatusChange?.taskInterval,
       },
     });
+    this.cleanupIntegrationRevisionsTask = new CleanupIntegrationRevisionsTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+      config: {
+        taskInterval: config.cleanupIntegrationRevisions?.taskInterval,
+        integrationRollbackTTL: config.integrationRollbackTTL,
+      },
+    });
     this.lockManagerService = new LockManagerService(core, this.initializerContext.logger.get());
 
     // Register fields metadata extractors
@@ -766,6 +778,7 @@ export class FleetPlugin
       lockManagerService: this.lockManagerService,
       autoInstallContentPackagesTask: this.autoInstallContentPackagesTask!,
       agentStatusChangeTask: this.agentStatusChangeTask,
+      cleanupIntegrationRevisionsTask: this.cleanupIntegrationRevisionsTask!,
       alertingStart: plugins.alerting,
     });
     licenseService.start(plugins.licensing.license$);
@@ -789,6 +802,9 @@ export class FleetPlugin
       ?.start({ taskManager: plugins.taskManager })
       .catch(() => {});
     this.agentStatusChangeTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    this.cleanupIntegrationRevisionsTask
+      ?.start({ taskManager: plugins.taskManager })
+      .catch(() => {});
 
     const logger = appContextService.getLogger();
 

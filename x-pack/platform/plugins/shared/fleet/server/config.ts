@@ -338,6 +338,12 @@ export const config: PluginConfigDescriptor = {
           taskInterval: schema.maybe(schema.string()),
         })
       ),
+      cleanupIntegrationRevisions: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
+        })
+      ),
+      integrationRollbackTTL: schema.maybe(schema.string()),
       integrationsHomeOverride: schema.maybe(schema.string()),
       prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
       hideDashboards: schema.boolean({ defaultValue: false }),
