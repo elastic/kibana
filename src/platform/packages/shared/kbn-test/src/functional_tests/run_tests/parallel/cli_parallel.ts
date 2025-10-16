@@ -22,11 +22,18 @@ export function runTestsCliParallel() {
       const inherit = flagsReader.boolean('inherit');
       const stats = flagsReader.boolean('stats');
 
-      const extraArgs = Array.from(flagsReader.getUnused().entries())
-        .map(([key, value]) => {
-          return [`--${key}`, value];
-        })
-        .flat();
+      const installDir = flagsReader.string('kibana-install-dir');
+      const bail = flagsReader.boolean('bail');
+
+      const extraArgs: string[] = [];
+
+      if (installDir) {
+        extraArgs.push(`--kibana-install-dir`, installDir);
+      }
+
+      if (bail) {
+        extraArgs.push(`--bail`);
+      }
 
       const exitCode = await runTestsParallel(log, configs, {
         extraArgs,

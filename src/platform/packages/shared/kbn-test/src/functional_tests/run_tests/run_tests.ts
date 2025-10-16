@@ -51,6 +51,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     process.on('message', messageHandler);
   }
 
+  function sendWarmupDoneSignal() {
+    if (typeof process.send === 'function') {
+      process.send('FTR_WARMUP_DONE');
+    }
+  }
+
   if (!process.env.CI) {
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
@@ -117,6 +123,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         log,
       });
       if (!hasTests) {
+        sendWarmupDoneSignal();
         // just run the FTR, no Kibana or ES, which will quickly report a skipped test group to ci-stats and continue
         await runFtr({
           log,
@@ -137,6 +144,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
         let shutdownEs;
         const kibanaProcessNames: string[] = [];
+
         try {
           if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
             shutdownEs = await runElasticsearch({
@@ -145,39 +153,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               config,
               onEarlyExit,
             });
+            sendWarmupDoneSignal();
             if (abortCtrl.signal.aborted) {
               return;
             }
-          }
-
-          if (!pause$.closed) {
-            await new Promise<void>((resolve) => {
-              if (typeof process.send === 'function') {
-                try {
-                  process.send('FTR_WARMUP_DONE');
-                } catch (err) {
-                  log.error(
-                    new Error('Failed to notify parent process about warmup completion', {
-                      cause: err,
-                    })
-                  );
-                }
-              }
-
-              pause$.subscribe({
-                complete: () => {
-                  resolve();
-                },
-              });
-
-              abortCtrl.signal.addEventListener(
-                'abort',
-                () => {
-                  releasePause();
-                },
-                { once: true }
-              );
-            });
+          } else {
+            sendWarmupDoneSignal();
           }
 
           const mainKibanaProcesses = await runKibanaServer({
@@ -234,6 +215,24 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
           if (abortCtrl.signal.aborted) {
             return;
+          }
+
+          if (!pause$.closed) {
+            await new Promise<void>((resolve) => {
+              pause$.subscribe({
+                complete: () => {
+                  resolve();
+                },
+              });
+
+              abortCtrl.signal.addEventListener(
+                'abort',
+                () => {
+                  releasePause();
+                },
+                { once: true }
+              );
+            });
           }
 
           await runFtr({
