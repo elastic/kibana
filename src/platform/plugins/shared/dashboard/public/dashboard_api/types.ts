@@ -36,7 +36,6 @@ import type {
   PublishesDataViews,
   PublishesDescription,
   PublishesSavedObjectId,
-  PublishesStickyControls,
   PublishesTitle,
   PublishesUnifiedSearch,
   PublishesViewMode,
@@ -48,7 +47,11 @@ import type {
 import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type TracksOverlays } from '@kbn/presentation-util';
-import type { ControlsGroupState, TimeSlice } from '@kbn/controls-schemas';
+import type {
+  ControlsGroupState,
+  TimeSlice,
+  StickyControlLayoutState,
+} from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 import type { DashboardLocatorParams, DashboardSettings, DashboardState } from '../../common';
@@ -119,8 +122,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesViewMode &
   PublishesWritableViewMode &
   TrackContentfulRender &
-  TracksOverlays &
-  PublishesStickyControls & {
+  TracksOverlays & {
     asyncResetToLastSavedState: () => Promise<void>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
@@ -166,6 +168,12 @@ export type DashboardApi = CanExpandPanels &
     publishedTimeslice$: PublishingSubject<TimeSlice | undefined>;
     unpublishedTimeslice$: PublishingSubject<TimeSlice | undefined>;
     publishTimeslice: () => void;
+
+    layout$: PublishingSubject<{
+      controls: {
+        [id: string]: StickyControlLayoutState;
+      };
+    }>;
 
     registerChildApi: (api: DefaultEmbeddableApi) => void;
   };

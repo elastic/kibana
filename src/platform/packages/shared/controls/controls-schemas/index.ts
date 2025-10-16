@@ -27,4 +27,5 @@ export type {
   TimeSlice,
   HasCustomPrepend,
   LegacyIgnoreParentSettings,
+  StickyControlLayoutState,
 } from './src/types';

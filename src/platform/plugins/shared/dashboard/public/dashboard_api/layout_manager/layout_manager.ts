@@ -41,7 +41,6 @@ import {
   logStateDiff,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
-import type { StickyControlLayoutState } from '@kbn/controls-schemas/src/types';
 
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import type { DashboardState } from '../../../common';
@@ -103,15 +102,6 @@ export function initializeLayoutManager(
       }),
       startWith({}) // do not block rendering by waiting for these settings
     );
-
-  /**  A quicker accessor for sticky controls stored in the layout */
-  const stickyControls$ = new BehaviorSubject<StickyControlLayoutState[]>(
-    Object.values(initialLayout.controls)
-  );
-  /** Keep stickyControls$ in sync with layout$ */
-  const controlsSubscription = layout$.subscribe(({ controls }) =>
-    stickyControls$.next(Object.values(controls))
-  );
 
   /** Keep gridLayout$ in sync with layout$ + panelResizeSettings$ */
   const gridLayoutSubscription = combineLatest([layout$, panelResizeSettings$]).subscribe(
@@ -481,7 +471,6 @@ export function initializeLayoutManager(
     },
     api: {
       layout$,
-      stickyControls$,
       registerChildApi: (api: DefaultEmbeddableApi) => {
         children$.next({
           ...children$.value,

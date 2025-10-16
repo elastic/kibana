@@ -13,21 +13,29 @@ import {
   apiCanPinPanel,
   apiCanAddPinnedPanel,
 } from '@kbn/presentation-containers';
-import {
-  apiPublishesStickyControls,
-  type EmbeddableApiContext,
-} from '@kbn/presentation-publishing';
+import type { PublishingSubject, EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import { map } from 'rxjs';
+import type { StickyControlLayoutState } from '@kbn/controls-schemas';
 import { ACTION_CREATE_TIME_SLIDER } from './constants';
+
+export interface PublishesControlsLayout {
+  layout$: PublishingSubject<{
+    controls: {
+      [id: string]: StickyControlLayoutState;
+    };
+  }>;
+}
+const apiPublishesControlsLayout = (api: unknown): api is PublishesControlsLayout =>
+  Boolean((api as PublishesControlsLayout).layout$);
 
 const compatibilityCheck = (api: unknown | null) =>
   apiCanAddNewPanel(api) &&
   apiCanPinPanel(api) &&
-  apiPublishesStickyControls(api) &&
-  !Object.values(api.stickyControls$.getValue()).find(
+  apiPublishesControlsLayout(api) &&
+  !Object.values(api.layout$.getValue().controls).find(
     (control) => control.type === TIME_SLIDER_CONTROL
   );
 
@@ -37,8 +45,8 @@ export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext>
   getIconType: () => 'controlsHorizontal',
   couldBecomeCompatible: ({ embeddable }) => apiCanAddPinnedPanel(embeddable),
   getCompatibilityChangesSubject: ({ embeddable }) =>
-    apiPublishesStickyControls(embeddable)
-      ? embeddable.stickyControls$.pipe(map(() => undefined))
+    apiPublishesControlsLayout(embeddable)
+      ? embeddable.layout$.pipe(map(() => undefined))
       : undefined,
   isCompatible: async ({ embeddable }) => compatibilityCheck(embeddable),
   execute: async ({ embeddable }) => {
