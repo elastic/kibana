@@ -8262,6 +8262,7 @@ paths:
                  "kibana_alert_workflow_status": "acknowledged"
                }
              }'
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -8465,6 +8466,7 @@ paths:
              --request GET 'http://localhost:5601/api/attack_discovery/_find?end=now&include_unique_alert_ids=false&page=1&per_page=10&search=&sort_field=%40timestamp&sort_order=desc&start=now-24h&status=open&status=acknowledged' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9460,6 +9462,7 @@ paths:
                 "end": "now",
                 "start": "now-24h"
               }'
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9536,6 +9539,7 @@ paths:
              --request GET 'http://localhost:5601/api/attack_discovery/generations?size=50&start=now-24h&end=now' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9619,6 +9623,7 @@ paths:
              --request GET 'http://localhost:5601/api/attack_discovery/generations/2e13f386-46cf-4d65-9e2b-68609e132ba5' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9737,6 +9742,7 @@ paths:
              --request POST 'http://localhost:5601/api/attack_discovery/generations/46b218d5-535d-4329-be56-d0f6af6986b7/_dismiss' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9833,6 +9839,7 @@ paths:
                },
                "actions": []
              }'
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9929,6 +9936,7 @@ paths:
              --request GET 'http://localhost:5601/api/attack_discovery/schedules/_find?page=1&per_page=10&sort_field=name&sort_direction=asc' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9980,6 +9988,7 @@ paths:
              --request DELETE 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -10046,6 +10055,7 @@ paths:
              --request GET 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -10147,6 +10157,7 @@ paths:
                },
                "actions": []
              }'
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -10198,6 +10209,7 @@ paths:
              --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_disable' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -10249,6 +10261,7 @@ paths:
              --request PUT 'http://localhost:5601/api/attack_discovery/schedules/12345678-1234-1234-1234-123456789012/_enable' \
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
+      x-state: Technical Preview; added in 9.2.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
