@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { remove } from 'lodash';
 import type { EsQueryConfig, KueryNode } from '@kbn/es-query';
 import { nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
