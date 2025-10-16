@@ -76,10 +76,11 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
     }
   );
 
-  indexUpdateService.completed$.subscribe(({ indexName, isIndexCreated }) => {
+  indexUpdateService.completed$.subscribe(({ indexName, isIndexCreated, indexHasNewFields }) => {
     props.onClose?.({
       indexName,
       indexCreatedDuringFlyout: props.doesIndexExist ? false : isIndexCreated,
+      indexHasNewFields,
     });
     flyoutSession.close();
   });

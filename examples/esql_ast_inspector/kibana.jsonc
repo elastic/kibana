@@ -1,17 +1,19 @@
 {
-    "type": "plugin",
-    "id": "@kbn/esql-ast-inspector-plugin",
-    "owner": "@elastic/kibana-esql",
-    "plugin": {
-      "id": "esqlASTInspector",
-      "server": false,
-      "browser": true,
-      "configPath": [
-        "esql_ast_inspector"
-      ],
-      "requiredPlugins": [
-        "dataViews",
-        "developerExamples"
-      ]
-    }
+  "type": "plugin",
+  "id": "@kbn/esql-ast-inspector-plugin",
+  "owner": "@elastic/kibana-esql",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "esqlASTInspector",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "esql_ast_inspector"
+    ],
+    "requiredPlugins": [
+      "dataViews",
+      "developerExamples"
+    ]
   }
+}

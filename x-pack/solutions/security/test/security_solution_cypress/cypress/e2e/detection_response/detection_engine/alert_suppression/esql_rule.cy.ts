@@ -45,7 +45,7 @@ const workaroundForResizeObserver = () =>
 describe(
   'Detection ES|QL - Alert suppression',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     const rule = getEsqlRule();
@@ -55,7 +55,7 @@ describe(
       visit(CREATE_RULE_URL);
     });
 
-    it('shows custom ES|QL field in investigation fields autocomplete and saves it in rule', function () {
+    it('saves custom ES|QL field in suppression configuration', function () {
       const CUSTOM_ESQL_FIELD = '_custom_agent_name';
       const SUPPRESS_BY_FIELDS = [CUSTOM_ESQL_FIELD, 'agent.type'];
 

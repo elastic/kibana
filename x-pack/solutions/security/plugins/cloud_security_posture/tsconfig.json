@@ -69,6 +69,8 @@
     "@kbn/code-editor-mock",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/licensing-types",
+    "@kbn/shared-ux-page-no-data",
+    "@kbn/shared-ux-card-no-data",
     "@kbn/react-kibana-context-theme",
   ],
   "exclude": ["target/**/*"]
