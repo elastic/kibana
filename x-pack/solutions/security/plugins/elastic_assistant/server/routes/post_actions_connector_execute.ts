@@ -13,29 +13,29 @@ import { schema } from '@kbn/config-schema';
 import type { Message, Replacements } from '@kbn/elastic-assistant-common';
 import { v4 as uuidv4 } from 'uuid';
 import {
-  getIsConversationOwner,
   API_VERSIONS,
   newContentReferencesStore,
   ExecuteConnectorRequestBody,
   pruneContentReferences,
   ExecuteConnectorRequestQuery,
   POST_ACTIONS_CONNECTOR_EXECUTE,
-  INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
-  AGENT_BUILDER_ASSISTANT_ENABLED_FEATURE_FLAG,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { getPrompt } from '../lib/prompt';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { buildResponse } from '../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../types';
 import {
   appendAssistantMessageToConversation,
   getIsKnowledgeBaseInstalled,
-  getSystemPromptFromUserConversation,
   langChainExecute,
   performChecks,
 } from './helpers';
+import {
+  getFeatureFlags,
+  prepareConversationMessages,
+  prepareSystemPrompt,
+} from './execute_helpers';
 import { agentBuilderExecute } from './agent_builder_execute';
 import { isOpenSourceModel } from './utils';
 import type { ConfigSchema } from '../config_schema';
@@ -86,17 +86,9 @@ export const postActionsConnectorExecuteRoute = (
         let onLlmResponse;
 
         const coreContext = await context.core;
-        const inferenceChatModelDisabled =
-          (await coreContext?.featureFlags?.getBooleanValue(
-            INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
-            false
-          )) ?? false;
-
-        const agentBuilderEnabled =
-          (await coreContext?.featureFlags?.getBooleanValue(
-            AGENT_BUILDER_ASSISTANT_ENABLED_FEATURE_FLAG,
-            false
-          )) ?? false;
+        const { inferenceChatModelDisabled, agentBuilderEnabled } = await getFeatureFlags(
+          coreContext
+        );
 
         try {
           const checkResponse = await performChecks({
@@ -147,85 +139,20 @@ export const postActionsConnectorExecuteRoute = (
 
           // Get conversation messages for agent builder BEFORE saving the new message
           let conversationMessages: Array<Pick<Message, 'content' | 'role'>> = [];
-
-          if (agentBuilderEnabled) {
-            // Agent builder logic: get full conversation history and save user message before execution
-            if (conversationId) {
-              const conversation = await conversationsDataClient?.getConversation({
-                id: conversationId,
-              });
-              if (
-                conversation &&
-                !getIsConversationOwner(conversation, {
-                  name: checkResponse.currentUser?.username,
-                  id: checkResponse.currentUser?.profile_uid,
-                })
-              ) {
-                return resp.error({
-                  body: `Updating a conversation is only allowed for the owner of the conversation.`,
-                  statusCode: 403,
-                });
-              }
-
-              if (conversation && conversation.messages) {
-                conversationMessages = conversation.messages.map((msg) => ({
-                  content: msg.content,
-                  role: msg.role,
-                }));
-              }
-
-              // Add the new message to the conversation messages
-              if (newMessage) {
-                conversationMessages.push(newMessage);
-              }
-
-              // Save the user message to the conversation if it exists
-              if (newMessage && conversationsDataClient && conversation) {
-                await conversationsDataClient.appendConversationMessages({
-                  existingConversation: conversation,
-                  messages: [
-                    {
-                      ...newMessage,
-                      user: {
-                        id: checkResponse.currentUser?.profile_uid,
-                        name: checkResponse.currentUser?.username,
-                      },
-                      timestamp: new Date().toISOString(),
-                    },
-                  ],
-                  authenticatedUser: checkResponse.currentUser,
-                });
-              }
-            } else {
-              // No conversation exists, just use the new message
-              if (newMessage) {
-                conversationMessages.push(newMessage);
-              }
-            }
-          } else {
-            // Legacy langChain logic: only use the new message, don't save before execution
-            if (conversationId) {
-              const conversation = await conversationsDataClient?.getConversation({
-                id: conversationId,
-              });
-              if (
-                conversation &&
-                !getIsConversationOwner(conversation, {
-                  name: checkResponse.currentUser?.username,
-                  id: checkResponse.currentUser?.profile_uid,
-                })
-              ) {
-                return resp.error({
-                  body: `Updating a conversation is only allowed for the owner of the conversation.`,
-                  statusCode: 403,
-                });
-              }
-            }
-
-            // For langChain, only pass the new message
-            if (newMessage) {
-              conversationMessages.push(newMessage);
-            }
+          try {
+            conversationMessages = await prepareConversationMessages({
+              agentBuilderEnabled,
+              conversationId,
+              newMessage,
+              conversationsDataClient: conversationsDataClient ?? undefined,
+              currentUser: checkResponse.currentUser,
+            });
+          } catch (error) {
+            return resp.error({
+              body:
+                error instanceof Error ? error.message : 'Error preparing conversation messages',
+              statusCode: 403,
+            });
           }
 
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
@@ -256,28 +183,15 @@ export const postActionsConnectorExecuteRoute = (
             }
           };
           const promptIds = request.body.promptIds;
-          let systemPrompt;
-          if (conversationsDataClient && promptsDataClient && conversationId) {
-            systemPrompt = await getSystemPromptFromUserConversation({
-              conversationsDataClient,
-              conversationId,
-              promptsDataClient,
-            });
-          }
-          if (promptIds) {
-            const additionalSystemPrompt = await getPrompt({
-              actionsClient,
-              connectorId,
-              // promptIds is promptId and promptGroupId
-              ...promptIds,
-              savedObjectsClient,
-            });
-
-            systemPrompt =
-              systemPrompt && systemPrompt.length
-                ? `${systemPrompt}\n\n${additionalSystemPrompt}`
-                : additionalSystemPrompt;
-          }
+          const systemPrompt = await prepareSystemPrompt({
+            conversationsDataClient: conversationsDataClient ?? undefined,
+            promptsDataClient: promptsDataClient ?? undefined,
+            conversationId,
+            promptIds,
+            actionsClient,
+            connectorId,
+            savedObjectsClient,
+          });
 
           const timeout = new Promise((_, reject) => {
             setTimeout(() => {
