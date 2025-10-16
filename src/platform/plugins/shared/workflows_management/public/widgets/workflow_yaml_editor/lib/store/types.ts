@@ -23,7 +23,6 @@ export interface WorkflowEditorState {
   schemaLoose: WorkflowZodSchemaLooseType;
   computed?: {
     yamlDocument?: YAML.Document; // This will be handled specially for serialization
-    yamlJson?:
     yamlLineCounter?: LineCounter;
     workflowLookup?: WorkflowLookup;
     workflowGraph?: WorkflowGraph; // This will be handled specially for serialization

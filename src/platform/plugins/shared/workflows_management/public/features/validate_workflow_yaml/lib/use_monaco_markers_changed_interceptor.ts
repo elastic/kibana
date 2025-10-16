@@ -15,7 +15,6 @@ import { formatMonacoYamlMarker } from '../../../widgets/workflow_yaml_editor/li
 import type { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { getSeverityString } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { isYamlValidationMarkerOwner, type YamlValidationResult } from '../model/types';
-import { WorkflowZodSchemaLooseType } from '../../../../common/schema';
 
 export interface UseMonacoMarkersChangedInterceptorResult {
   transformMonacoMarkers: (
@@ -33,7 +32,7 @@ export interface UseMonacoMarkersChangedInterceptorResult {
 
 interface UseMonacoMarkersChangedInterceptorProps {
   yamlDocumentRef: React.RefObject<YAML.Document | null>;
-  workflowYamlSchema: WorkflowZodSchemaLooseType;
+  workflowYamlSchema: z.ZodSchema;
 }
 
 export function useMonacoMarkersChangedInterceptor({

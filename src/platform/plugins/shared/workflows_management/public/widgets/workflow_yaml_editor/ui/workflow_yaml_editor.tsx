@@ -64,7 +64,6 @@ import {
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useWorkflowsMonacoTheme } from '../styles/use_workflows_monaco_theme';
 import { useWorkflowEditorStyles } from '../styles/use_workflow_editor_styles';
-import { registerWorkflowYamlLanguage } from '../lib/monaco_language/workflow_yaml';
 import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
 import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_styles';
 import { useCompletionProvider } from './hooks/use_completion_provider';
@@ -157,12 +156,6 @@ export const WorkflowYAMLEditor = ({
   const {
     services: { http, notifications },
   } = useKibana<CoreStart>();
-
-  // Register the workflow YAML language (mostly theme) on first render
-  // TODO: should we move this to a plugin setup?
-  useEffect(() => {
-    registerWorkflowYamlLanguage();
-  }, []);
 
   // Refs
   const containerRef = useRef<HTMLDivElement | null>(null);

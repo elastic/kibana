@@ -879,7 +879,7 @@ export function getCompletionItemProvider(
     provideCompletionItems: async (model, position, completionContext) => {
       try {
         const editorState = getState();
-        const dynamicConnectorTypes = editorState?.connectors?.connectorTypes;
+        const currentDynamicConnectorTypes = editorState?.connectors?.connectorTypes;
         const workflowYamlSchema = editorState?.schemaLoose;
         const workflowGraph = editorState?.computed?.workflowGraph;
         const yamlDocument = editorState?.computed?.yamlDocument;
@@ -956,9 +956,6 @@ export function getCompletionItemProvider(
 
         const suggestions: monaco.languages.CompletionItem[] = [];
         const value = model.getValue();
-
-        // TODO: use the yaml document from the store
-        // const yamlDocument = useSelector(selectYamlDocument);
 
         // Try to parse with the strict schema first
         const result = parseWorkflowYamlToJSON(value, workflowYamlSchema as z.ZodSchema);
@@ -1056,7 +1053,7 @@ export function getCompletionItemProvider(
             const connectorIdSuggestions = getConnectorIdSuggestions(
               stepConnectorType,
               adjustedRange,
-              dynamicConnectorTypes
+              currentDynamicConnectorTypes
             );
 
             return {
@@ -1145,7 +1142,7 @@ export function getCompletionItemProvider(
               completionContext,
               scalarType,
               shouldBeQuoted,
-              dynamicConnectorTypes
+              currentDynamicConnectorTypes
             );
           }
 
@@ -1328,7 +1325,7 @@ export function getCompletionItemProvider(
         let schemaToUse: Record<string, z.ZodType> | null = null;
 
         if (connectorType) {
-          schemaToUse = getConnectorParamsSchema(connectorType, dynamicConnectorTypes);
+          schemaToUse = getConnectorParamsSchema(connectorType, currentDynamicConnectorTypes);
           // Schema lookup for connector type
 
           // Connector registry lookup
@@ -1518,7 +1515,7 @@ export function getCompletionItemProvider(
 
                 if (
                   stepConnectorType &&
-                  connectorTypeRequiresConnectorId(stepConnectorType, dynamicConnectorTypes)
+                  connectorTypeRequiresConnectorId(stepConnectorType, currentDynamicConnectorTypes)
                 ) {
                   // Check if connector-id already exists in this step
                   const stepPath = path.slice(
@@ -1550,7 +1547,10 @@ export function getCompletionItemProvider(
         if (shouldSuggestConnectorId && typeof shouldSuggestConnectorId === 'object') {
           const { connectorType: connectorTypeFromSuggestConnectorId } = shouldSuggestConnectorId;
           connectorType = connectorTypeFromSuggestConnectorId;
-          const instances = getConnectorInstancesForType(connectorType, dynamicConnectorTypes);
+          const instances = getConnectorInstancesForType(
+            connectorType,
+            currentDynamicConnectorTypes
+          );
 
           let insertText = 'connector-id: ';
           const insertTextRules = monaco.languages.CompletionItemInsertTextRule.None;
@@ -1633,7 +1633,7 @@ export function getCompletionItemProvider(
                   completionContext,
                   scalarType,
                   shouldBeQuoted,
-                  dynamicConnectorTypes
+                  currentDynamicConnectorTypes
                 );
               }
 
@@ -1676,8 +1676,7 @@ export function getCompletionItemProvider(
               scalarType,
               shouldBeQuoted,
               typeInfo.type,
-              typeInfo.description,
-              useCurlyBraces
+              typeInfo.description
             );
             const propertyTypeName = getDetailedTypeDescription(currentSchema, {
               singleLine: true,

@@ -27,7 +27,7 @@ export const FeatureEventsSparkline = ({
       id: 'feature-events-sparkline',
       title: feature.name,
     }),
-    [feature]
+    [feature.name, feature.filter]
   );
   return (
     <PreviewDataSparkPlot

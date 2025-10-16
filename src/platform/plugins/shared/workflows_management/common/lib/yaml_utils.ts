@@ -599,7 +599,7 @@ function unwrapToUnion(schema: z.ZodType): z.ZodUnion<any> | null {
  */
 export function formatValidationError(
   error: ZodError | MockZodError,
-  schema?: WorkflowZodSchemaLooseType,
+  schema?: z.ZodType,
   yamlDocument?: Document
 ): FormatValidationErrorResult {
   // If it's not a Zod error structure, return as-is
