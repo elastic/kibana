@@ -19,14 +19,9 @@ import type {
   ConnectorExamples,
 } from '../monaco_providers/provider_interfaces';
 
-// Cache for connectors (they don't change during runtime)
-let allConnectorsCache: any[] | null = null;
-
+// Use the global connector cache - no need for local caching
 function getCachedAllConnectors(): any[] {
-  if (allConnectorsCache === null) {
-    allConnectorsCache = getAllConnectors(); // Now uses lazy loading with require()
-  }
-  return allConnectorsCache;
+  return getAllConnectors();
 }
 
 /**

@@ -13,6 +13,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { createMockConnectorFindResult } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 function SettingsProbe({ onValue }: { onValue: (v: any) => void }) {
   const value = useSettingsContext();
@@ -26,24 +27,19 @@ const mockConnectors = {
   loading: false,
   reload: jest.fn(),
   connectors: [
-    {
+    createMockConnectorFindResult({
       actionTypeId: 'pre-configured.1',
       id: 'pre-configured1',
-      isDeprecated: false,
       isPreconfigured: true,
-      isSystemAction: false,
       name: 'Pre configured Connector',
       referencedByCount: 0,
-    },
-    {
+    }),
+    createMockConnectorFindResult({
       actionTypeId: 'custom.1',
       id: 'custom1',
-      isDeprecated: false,
-      isPreconfigured: false,
-      isSystemAction: false,
       name: 'Custom Connector 1',
       referencedByCount: 0,
-    },
+    }),
   ],
 };
 
@@ -274,7 +270,7 @@ describe('DefaultAIConnector', () => {
         loading: false,
         reload: jest.fn(),
         connectors: [
-          {
+          createMockConnectorFindResult({
             actionTypeId: 'custom.1',
             id: 'custom1',
             isDeprecated: false,
@@ -282,7 +278,7 @@ describe('DefaultAIConnector', () => {
             isSystemAction: false,
             name: 'Custom Connector 1',
             referencedByCount: 0,
-          },
+          }),
         ],
       };
 
