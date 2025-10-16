@@ -43,21 +43,15 @@ Create a new data view version when:
 
 2. **Migration Logic** in `server/saved_objects/data_views.ts`:
 
-   - The `migrateOldDataViews` function automatically handles all versions in the array
+   - The `migrateCdrDataViewsForAllSpaces()` function automatically handles all versions in the arrays
+   - Migration runs during plugin initialization when the CSP package is installed
+   - Both legacy (global) and versioned (space-specific) data views are supported
 
 3. **Add Tests** in `test/cloud_security_posture_functional/data_views/data_views.ts`:
-   - Test migration from old to new version
-   - Test fresh installations
-   - Test multi-space scenarios
-   - Test migration when multiple old versions exist (simulating version skipping)
-
-#### Migration System Features
-
-- **Array-based Migration**: All old versions are stored in arrays (`CDR_*_DATA_VIEW_ID_PREFIX_OLD_VERSIONS`)
-- **Skip-Version Support**: Users can upgrade from v1 directly to v3+ without issues
-- **Automatic Cleanup**: All old data views are automatically removed during migration
-- **Space-Aware**: Migration works across all Kibana spaces
-- **Idempotent**: Migration can run multiple times safely
+   - Test migration from v1 to current version (with space suffix)
+   - Test migration from legacy to current version (global to space-specific)
+   - Test migration across all spaces
+   - Test fresh installations with navigation-triggered data view creation
 
 #### Example: Moving from v2 to v3
 
@@ -71,6 +65,9 @@ export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS = [
 // Step 2: Update the current version
 export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX =
   'security_solution_cdr_latest_misconfigurations_v3'; // Now v3
+
+// Note: Legacy versions (global data views) are tracked separately and rarely change
+export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS = [];
 ```
 
 ## Testing
@@ -180,6 +177,13 @@ run ESS (stateful) e2e tests:
 ```bash
 yarn test:ftr:server --config x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
 yarn test:ftr:runner --config x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
+```
+
+run data view migration tests:
+
+```bash
+yarn test:ftr:server --config x-pack/solutions/security/test/cloud_security_posture_functional/data_views/config.ts
+yarn test:ftr:runner --config x-pack/solutions/security/test/cloud_security_posture_functional/data_views/config.ts
 ```
 
 run serverless api integration tests:

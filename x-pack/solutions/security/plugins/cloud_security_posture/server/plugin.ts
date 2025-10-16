@@ -244,9 +244,6 @@ export class CspPlugin
     const isIntegrationVersionIncludesTransformAsset =
       isTransformAssetIncluded(packagePolicyVersion);
 
-    // Migrate old data views for all spaces
-    await migrateCdrDataViewsForAllSpaces(soClient, this.logger);
-
     await initializeCspIndices(
       esClient,
       this.config,
@@ -258,8 +255,13 @@ export class CspPlugin
       isIntegrationVersionIncludesTransformAsset,
       this.logger
     );
+
     await scheduleFindingsStatsTask(taskManager, this.logger);
     await this.initializeIndexAlias(esClient, this.logger);
+
+    // Migrate old data views for all spaces
+    await migrateCdrDataViewsForAllSpaces(soClient, this.logger);
+
     this.#isInitialized = true;
   }
 

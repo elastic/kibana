@@ -19,6 +19,8 @@ import {
   CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX,
   CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS,
   CDR_VULNERABILITIES_DATA_VIEW_NAME,
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS,
+  CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS,
 } from '@kbn/cloud-security-posture-common';
 
 const DATA_VIEW_TIME_FIELD = '@timestamp';
@@ -57,7 +59,11 @@ const deleteDataViewSafe = async (
   logger: Logger
 ): Promise<void> => {
   try {
-    await soClient.delete('index-pattern', dataViewId, { namespace });
+    if (namespace === '*') {
+      await soClient.delete('index-pattern', dataViewId, { force: true });
+    } else {
+      await soClient.delete('index-pattern', dataViewId, { namespace });
+    }
     logger.info(`Deleted old data view: ${dataViewId}`);
   } catch (e) {
     // Ignore if doesn't exist - expected behavior for new installations
@@ -122,7 +128,9 @@ export const migrateCdrDataViewsForAllSpaces = async (
     // Get all data views matching old prefixes
     const oldMisconfigurationsPrefixes = CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS;
     const oldVulnerabilitiesPrefixes = CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS;
-
+    const legacyMisconfigurationsPrefixes =
+      CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS;
+    const legacyVulnerabilitiesPrefixes = CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS;
     // Search for all data views across all namespaces and filter by old prefixes
     // We can't use wildcard on _id field, so we fetch all index-patterns and filter in memory
     const allDataViewsResult = await soClient.find({
@@ -139,15 +147,39 @@ export const migrateCdrDataViewsForAllSpaces = async (
       );
     }
 
-    // Filter data views that match old prefixes
+    // Filter data views that match old prefixes and legacy ids
     // Include the dash (-) in the check to avoid matching current data views
     const oldMisconfigurationsDataViews = allDataViewsResult.saved_objects.filter((obj) =>
       oldMisconfigurationsPrefixes.some((prefix) => obj.id.startsWith(`${prefix}-`))
     );
 
+    const legacyMisconfigurationsDataViews = allDataViewsResult.saved_objects.filter((obj) =>
+      legacyMisconfigurationsPrefixes.some((prefix) => obj.id === prefix)
+    );
+
     const oldVulnerabilitiesDataViews = allDataViewsResult.saved_objects.filter((obj) =>
       oldVulnerabilitiesPrefixes.some((prefix) => obj.id.startsWith(`${prefix}-`))
     );
+
+    const legacyVulnerabilitiesDataViews = allDataViewsResult.saved_objects.filter((obj) =>
+      legacyVulnerabilitiesPrefixes.some((prefix) => obj.id === prefix)
+    );
+
+    // Delete legacy misconfigurations data views
+    for (const dataView of legacyMisconfigurationsDataViews) {
+      const namespace = dataView.namespaces?.[0] || DEFAULT_SPACE_ID;
+      logger.info(
+        `Found legacy misconfigurations data view: ${dataView.id} in namespace: ${dataView.namespaces}, migrating...`
+      );
+      await deleteDataViewSafe(soClient, dataView.id, namespace, logger);
+    }
+
+    // Delete legacy vulnerabilities data views
+    for (const dataView of legacyVulnerabilitiesDataViews) {
+      logger.info(`Found legacy vulnerabilities data view: ${dataView.id}, migrating...`);
+      const namespace = dataView.namespaces?.[0] || DEFAULT_SPACE_ID;
+      await deleteDataViewSafe(soClient, dataView.id, namespace, logger);
+    }
 
     // Delete old misconfigurations data views
     for (const dataView of oldMisconfigurationsDataViews) {

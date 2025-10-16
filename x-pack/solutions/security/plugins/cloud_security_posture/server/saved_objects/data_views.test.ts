@@ -14,10 +14,12 @@ import {
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
   CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS,
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS,
   CDR_MISCONFIGURATIONS_DATA_VIEW_NAME,
   CDR_VULNERABILITIES_INDEX_PATTERN,
   CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX,
   CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS,
+  CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS,
   CDR_VULNERABILITIES_DATA_VIEW_NAME,
 } from '@kbn/cloud-security-posture-common';
 import { installDataView, migrateCdrDataViewsForAllSpaces, setupCdrDataViews } from './data_views';
@@ -268,6 +270,68 @@ describe('data_views', () => {
       );
     });
 
+    it('should find and delete legacy misconfigurations data views (wildcard, not space-specific)', async () => {
+      const legacyDataViewId = CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS[0];
+
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: legacyDataViewId,
+            type: 'index-pattern',
+            attributes: {},
+            references: [],
+            score: 1,
+            namespaces: ['*'], // Legacy data views used wildcards
+          },
+        ],
+        total: 1,
+        per_page: 1000,
+        page: 1,
+      });
+
+      await migrateCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
+
+      // For wildcard namespaces, delete uses force: true instead of namespace: '*'
+      expect(mockSoClient.delete).toHaveBeenCalledWith('index-pattern', legacyDataViewId, {
+        force: true,
+      });
+
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        `Found legacy misconfigurations data view: ${legacyDataViewId} in namespace: *, migrating...`
+      );
+    });
+
+    it('should find and delete legacy vulnerabilities data views (wildcard, not space-specific)', async () => {
+      const legacyDataViewId = CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS[0];
+
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: legacyDataViewId,
+            type: 'index-pattern',
+            attributes: {},
+            references: [],
+            score: 1,
+            namespaces: ['*'], // Legacy data views used wildcards
+          },
+        ],
+        total: 1,
+        per_page: 1000,
+        page: 1,
+      });
+
+      await migrateCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
+
+      // For wildcard namespaces, delete uses force: true instead of namespace: '*'
+      expect(mockSoClient.delete).toHaveBeenCalledWith('index-pattern', legacyDataViewId, {
+        force: true,
+      });
+
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        `Found legacy vulnerabilities data view: ${legacyDataViewId}, migrating...`
+      );
+    });
+
     it('should handle multiple old data views across different spaces', async () => {
       const oldMisconfigId1 = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-${DEFAULT_SPACE_ID}`;
       const oldMisconfigId2 = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-custom-space`;
@@ -316,6 +380,160 @@ describe('data_views', () => {
       });
       expect(mockSoClient.delete).toHaveBeenCalledWith('index-pattern', oldVulnId, {
         namespace: DEFAULT_SPACE_ID,
+      });
+    });
+
+    it('should handle both legacy and old data views together', async () => {
+      // Legacy IDs don't have space suffix (wildcard)
+      const legacyMisconfigId = CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS[0];
+      const legacyVulnId = CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS[0];
+
+      // Old (v1) IDs have space suffix
+      const oldMisconfigId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-${DEFAULT_SPACE_ID}`;
+      const oldVulnId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-${DEFAULT_SPACE_ID}`;
+
+      // Current (v2) IDs have space suffix
+      const currentMisconfigId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${DEFAULT_SPACE_ID}`;
+      const currentVulnId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX}-${DEFAULT_SPACE_ID}`;
+
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: legacyMisconfigId,
+            type: 'index-pattern',
+            attributes: {},
+            references: [],
+            score: 1,
+            namespaces: ['*'], // Legacy used wildcards
+          },
+          {
+            id: oldMisconfigId,
+            type: 'index-pattern',
+            attributes: {},
+            references: [],
+            score: 1,
+            namespaces: [DEFAULT_SPACE_ID],
+          },
+          {
+            id: legacyVulnId,
+            type: 'index-pattern',
+            attributes: {},
+            references: [],
+            score: 1,
+            namespaces: ['*'], // Legacy used wildcards
+          },
+          {
+            id: oldVulnId,
+            type: 'index-pattern',
+            attributes: {},
+            references: [],
+            score: 1,
+            namespaces: [DEFAULT_SPACE_ID],
+          },
+          {
+            id: currentMisconfigId,
+            type: 'index-pattern',
+            attributes: {},
+            references: [],
+            score: 1,
+            namespaces: [DEFAULT_SPACE_ID],
+          },
+          {
+            id: currentVulnId,
+            type: 'index-pattern',
+            attributes: {},
+            references: [],
+            score: 1,
+            namespaces: [DEFAULT_SPACE_ID],
+          },
+        ],
+        total: 6,
+        per_page: 1000,
+        page: 1,
+      });
+
+      await migrateCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
+
+      // Should delete all 4 old/legacy data views but not the 2 current ones
+      expect(mockSoClient.delete).toHaveBeenCalledTimes(4);
+      // Legacy data views use force: true (because they have wildcard namespaces)
+      expect(mockSoClient.delete).toHaveBeenCalledWith('index-pattern', legacyMisconfigId, {
+        force: true,
+      });
+      // Old (v1) data views use namespace: space-id
+      expect(mockSoClient.delete).toHaveBeenCalledWith('index-pattern', oldMisconfigId, {
+        namespace: DEFAULT_SPACE_ID,
+      });
+      // Legacy data views use force: true (because they have wildcard namespaces)
+      expect(mockSoClient.delete).toHaveBeenCalledWith('index-pattern', legacyVulnId, {
+        force: true,
+      });
+      // Old (v1) data views use namespace: space-id
+      expect(mockSoClient.delete).toHaveBeenCalledWith('index-pattern', oldVulnId, {
+        namespace: DEFAULT_SPACE_ID,
+      });
+
+      // Should not delete current data views
+      expect(mockSoClient.delete).not.toHaveBeenCalledWith('index-pattern', currentMisconfigId, {
+        namespace: DEFAULT_SPACE_ID,
+      });
+      expect(mockSoClient.delete).not.toHaveBeenCalledWith('index-pattern', currentVulnId, {
+        namespace: DEFAULT_SPACE_ID,
+      });
+    });
+
+    it('should handle all legacy versions when multiple exist (wildcard namespaces)', async () => {
+      // Legacy IDs don't have space suffix - they used wildcards
+      const legacyIds = CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS;
+
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: legacyIds.map((id) => ({
+          id,
+          type: 'index-pattern',
+          attributes: {},
+          references: [],
+          score: 1,
+          namespaces: ['*'], // Legacy data views used wildcards
+        })),
+        total: legacyIds.length,
+        per_page: 1000,
+        page: 1,
+      });
+
+      await migrateCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
+
+      expect(mockSoClient.delete).toHaveBeenCalledTimes(legacyIds.length);
+      // Legacy data views with wildcard namespaces use force: true
+      legacyIds.forEach((legacyId) => {
+        expect(mockSoClient.delete).toHaveBeenCalledWith('index-pattern', legacyId, {
+          force: true,
+        });
+      });
+    });
+
+    it('should handle legacy data views in specific namespace (edge case)', async () => {
+      const legacyDataViewId = CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS[0];
+
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: legacyDataViewId,
+            type: 'index-pattern',
+            attributes: {},
+            references: [],
+            score: 1,
+            namespaces: ['custom-space'], // Edge case: legacy in specific space
+          },
+        ],
+        total: 1,
+        per_page: 1000,
+        page: 1,
+      });
+
+      await migrateCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
+
+      expect(mockSoClient.delete).toHaveBeenCalledWith('index-pattern', legacyDataViewId, {
+        namespace: 'custom-space',
       });
     });
 
