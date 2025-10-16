@@ -10,11 +10,10 @@ import {
   EuiFlexGroup,
   EuiText,
   EuiButtonIcon,
-  EuiSplitPanel,
   useEuiTheme,
-  EuiSpacer,
   EuiPanel,
   EuiFlexItem,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ConversationRound } from '@kbn/onechat-common';
@@ -50,49 +49,57 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
   )?.score;
   const regexScore = roundEvaluation?.find((score) => score.evaluatorId === 'regex')?.score;
   const criteriaScore = roundEvaluation?.find((score) => score.evaluatorId === 'criteria')?.score;
-  const showAdditionalContent =
-    relevanceScore ||
-    precisionScore ||
-    recallScore ||
-    groundednessScore ||
-    regexScore ||
-    criteriaScore;
+
+  const showAdditionalContent = [
+    relevanceScore,
+    precisionScore,
+    recallScore,
+    groundednessScore,
+    regexScore,
+    criteriaScore,
+  ].some((score) => score !== undefined && score !== null);
 
   const inputPanelStyles = css`
-    border-radius: ${euiTheme.border.radius.small};
-    background-color: ${euiTheme.colors.backgroundBasePrimary};
-    padding: ${euiTheme.size.m};
+    background-color: #f5f7fa;
+    border: 2px solid #d3dae6;
+    border-radius: 6px;
   `;
 
-  const responsePanelStyles = css`
-    border: ${euiTheme.border.thin};
-    border-radius: ${euiTheme.border.radius.small};
-    padding: ${euiTheme.size.m};
+  const roundContainerStyles = css`
+    border-radius: 8px;
+    background-color: ${euiTheme.colors.emptyShade};
+    padding: 24px;
   `;
 
   return (
-    <EuiSplitPanel.Outer>
-      {/* Header Panel */}
-      <EuiSplitPanel.Inner color="subdued">
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexGroup alignItems="center" gutterSize="m">
-            <EuiText>
-              <strong>Round {roundNumber}</strong>
-            </EuiText>
-          </EuiFlexGroup>
-        </EuiFlexGroup>
-      </EuiSplitPanel.Inner>
+    <div css={roundContainerStyles}>
+      {/* Round Header */}
+      <div
+        css={css`
+          margin-bottom: 12px;
+        `}
+      >
+        <EuiText>
+          <strong style={{ fontSize: '18px', color: euiTheme.colors.text }}>
+            Round {roundNumber}
+          </strong>
+        </EuiText>
+      </div>
 
-      {/* Content Panel */}
-      <EuiSplitPanel.Inner css={{ padding: euiTheme.size.l }}>
-        <EuiFlexGroup gutterSize="l">
-          {/* Left Column - 80% width */}
-          <EuiFlexItem direction="column" grow={4}>
+      {/* Main Content */}
+      <EuiFlexGroup gutterSize="l" alignItems="flexStart">
+        {/* Left Column - Input and Response */}
+        <EuiFlexItem grow={4}>
+          <EuiFlexGroup direction="column" gutterSize="l">
             {/* Input Section */}
-            <div>
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                <EuiText size="xs">
-                  <strong>INPUT</strong>
+            <div css={inputPanelStyles}>
+              <EuiFlexGroup
+                justifyContent="spaceBetween"
+                alignItems="center"
+                css={{ padding: '12px 16px' }}
+              >
+                <EuiText size="xs" css={{ fontWeight: 600, color: '#69707d' }}>
+                  INPUT
                 </EuiText>
                 <EuiButtonIcon
                   iconType="copy"
@@ -101,19 +108,27 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
                   aria-label="Copy input"
                 />
               </EuiFlexGroup>
-              <EuiSpacer size="s" />
-              <div css={inputPanelStyles}>
+              <div
+                css={{
+                  backgroundColor: euiTheme.colors.emptyShade,
+                  padding: '16px',
+                  borderBottomLeftRadius: '6px',
+                  borderBottomRightRadius: '6px',
+                }}
+              >
                 <EuiText size="s">{round.input.message}</EuiText>
               </div>
             </div>
 
-            <EuiSpacer size="l" />
-
             {/* Response Section */}
-            <div>
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                <EuiText size="xs">
-                  <strong>RESPONSE</strong>
+            <div css={inputPanelStyles}>
+              <EuiFlexGroup
+                justifyContent="spaceBetween"
+                alignItems="center"
+                css={{ padding: '12px 16px' }}
+              >
+                <EuiText size="xs" css={{ fontWeight: 600, color: '#69707d' }}>
+                  RESPONSE
                 </EuiText>
                 <EuiButtonIcon
                   iconType="copy"
@@ -122,39 +137,55 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
                   aria-label="Copy response"
                 />
               </EuiFlexGroup>
-              <EuiSpacer size="s" />
-              <div css={responsePanelStyles}>
+              <div
+                css={{
+                  backgroundColor: euiTheme.colors.emptyShade,
+                  padding: '16px',
+                  borderBottomLeftRadius: '6px',
+                  borderBottomRightRadius: '6px',
+                }}
+              >
                 <ChatMessageText content={round.response.message} steps={round.steps} />
               </div>
             </div>
 
             {/* Agent Thinking Section - Only show when toggle is enabled */}
             {showThinking && round.steps && round.steps.length > 0 && (
-              <>
-                <EuiSpacer size="l" />
-                <div>
-                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                    <EuiText size="xs">
-                      <strong>AGENT THINKING</strong>
-                    </EuiText>
-                  </EuiFlexGroup>
-                  <EuiSpacer size="m" />
-                  <EuiPanel paddingSize="l" hasShadow={false} hasBorder={false} color="subdued">
-                    <RoundSteps steps={round.steps} />
-                  </EuiPanel>
-                </div>
-              </>
+              <div>
+                <EuiText
+                  size="xs"
+                  css={{
+                    fontWeight: 600,
+                    color: euiTheme.colors.text,
+                    marginBottom: euiTheme.size.m,
+                  }}
+                >
+                  AGENT THINKING
+                </EuiText>
+                <EuiPanel paddingSize="l" hasShadow={false} hasBorder={false} color="subdued">
+                  <RoundSteps steps={round.steps} />
+                </EuiPanel>
+              </div>
             )}
-          </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
 
-          {/* Right Column - 20% width - Only render if there's content */}
-          {showAdditionalContent && (
-            <EuiFlexItem grow={false} style={{ width: '20%' }}>
-              <EuiText size="xs">
-                <strong>Quantitative Review</strong>
-              </EuiText>
-              <EuiSpacer size="s" />
-              <EuiFlexGroup direction="column" style={{ flexGrow: 0 }}>
+        {/* Right Column - Reviews - Only render if there's content */}
+        {showAdditionalContent && (
+          <EuiFlexItem grow={false} style={{ width: '300px' }}>
+            <EuiFlexGroup direction="column" gutterSize="l">
+              {/* Quantitative Review */}
+              <div>
+                <EuiText
+                  size="xs"
+                  css={{
+                    fontWeight: 600,
+                    color: euiTheme.colors.text,
+                    marginBottom: euiTheme.size.s,
+                  }}
+                >
+                  QUANTITATIVE REVIEW
+                </EuiText>
                 <EvaluatorBadgesGroup
                   relevance={relevanceScore}
                   precision={precisionScore}
@@ -163,28 +194,44 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
                   regex={regexScore}
                   criteria={criteriaScore}
                 />
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-              <EuiText size="xs">
-                <strong>Qualitative Review</strong>
-              </EuiText>
-              <EuiSpacer size="s" />
-              <div
-                style={{
-                  border: euiTheme.border.thin,
-                  borderRadius: euiTheme.border.radius.small,
-                  padding: euiTheme.size.m,
-                  height: '300px',
-                }}
-              >
-                <EuiText size="xs">
-                  Structured JSON for qualitative evaluators goes here....
-                </EuiText>
               </div>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiSplitPanel.Inner>
-    </EuiSplitPanel.Outer>
+              <EuiHorizontalRule margin="xs" />
+              {/* Qualitative Review */}
+              <div>
+                <EuiText
+                  size="xs"
+                  css={{
+                    fontWeight: 600,
+                    color: euiTheme.colors.text,
+                    marginBottom: euiTheme.size.s,
+                  }}
+                >
+                  QUALITATIVE REVIEW
+                </EuiText>
+                <div
+                  css={{
+                    border: `2px dashed ${euiTheme.colors.lightShade}`,
+                    borderRadius: euiTheme.border.radius.small,
+                    padding: euiTheme.size.m,
+                    height: '300px',
+                    backgroundColor: euiTheme.colors.lightestShade,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <EuiText
+                    size="xs"
+                    css={{ color: euiTheme.colors.subduedText, textAlign: 'center' }}
+                  >
+                    Structured JSON for qualitative evaluators goes here...
+                  </EuiText>
+                </div>
+              </div>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </div>
   );
 };

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 interface EvaluatorBadgesGroupProps {
@@ -19,8 +18,61 @@ interface EvaluatorBadgesGroupProps {
   variant?: 'default' | 'conversation-average';
 }
 
-const getBadgeColor = (score: number) => (score > 0.7 ? 'success' : 'danger');
-const getBadgeIcon = (score: number) => (score > 0.7 ? 'check' : 'alert');
+const getEvaluatorConfig = (key: string, value: number) => {
+  const configs: Record<string, { label: string; icon: React.ReactNode }> = {
+    relevance: {
+      label: 'Relevance',
+      icon: '📊',
+    },
+    precision: {
+      label: 'Precision',
+      icon: '🎯',
+    },
+    recall: {
+      label: 'Recall',
+      icon: '✔️',
+    },
+    groundedness: {
+      label: 'Groundedness',
+      icon: '🔗',
+    },
+    regex: {
+      label: 'Regex',
+      icon: '🔍',
+    },
+    criteria: {
+      label: 'Criteria',
+      icon: '📋',
+    },
+  };
+  return configs[key] || configs.relevance;
+};
+
+const colorMap = {
+  good: {
+    text: '#017d73',
+    background: '#d3f8d3',
+  },
+  bad: {
+    text: '#8b0000',
+    background: '#ffe6e6',
+  },
+};
+
+// eslint-disable-next-line @elastic/eui/no-css-color
+const badgeStyles = css`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: default;
+  width: 100%;
+  justify-content: flex-start;
+`;
 
 export const EvaluatorBadgesGroup: React.FC<EvaluatorBadgesGroupProps> = ({
   relevance,
@@ -31,57 +83,54 @@ export const EvaluatorBadgesGroup: React.FC<EvaluatorBadgesGroupProps> = ({
   criteria,
   variant = 'default',
 }) => {
-  const { euiTheme } = useEuiTheme();
-
-  const getBadgeColorForVariant = (score: number) => {
-    if (variant === 'conversation-average') {
-      return 'hollow'; // Neutral hollow style for conversation averages
-    }
-    return getBadgeColor(score);
-  };
-
-  const getBadgeIconForVariant = (score: number) => {
-    if (variant === 'conversation-average') {
-      return undefined; // No icons for conversation averages
-    }
-    return getBadgeIcon(score);
-  };
-
-  const averageBadgeStyles = css`
-    background-color: #dbeafe !important; /* light blue */
-    color: #1e3a8a !important; /* dark blue text */
-    border: 1px solid #93c5fd !important; /* light blue border */
-  `;
-
   // Create array of evaluation data for dynamic rendering
   const evaluations = [
-    { key: 'relevance', value: relevance, label: 'Relevance' },
-    { key: 'groundedness', value: groundedness, label: 'Groundedness' },
-    { key: 'criteria', value: criteria, label: 'Criteria' },
-    { key: 'regex', value: regex, label: 'Regex' },
-    { key: 'recall', value: recall, label: 'Recall' },
-    { key: 'precision', value: precision, label: 'Precision' },
+    { key: 'relevance', value: relevance },
+    { key: 'groundedness', value: groundedness },
+    { key: 'criteria', value: criteria },
+    { key: 'regex', value: regex },
+    { key: 'recall', value: recall },
+    { key: 'precision', value: precision },
   ].filter((x) => x.value !== undefined);
 
   return (
     <div
       style={{
         display: 'flex',
-        gap: euiTheme.size.s,
+        gap: '8px',
         flexDirection: variant === 'conversation-average' ? 'row' : 'column',
       }}
     >
-      {evaluations.map(({ key, value, label }) => (
-        <EuiBadge
-          key={key}
-          color={getBadgeColorForVariant(value!)}
-          iconType={getBadgeIconForVariant(value!)}
-          css={variant === 'conversation-average' ? averageBadgeStyles : undefined}
-          style={{ alignSelf: 'flex-start', marginInlineStart: 0 }}
-        >
-          {label}: {value!.toFixed(2)}/1
-        </EuiBadge>
-      ))}
+      {evaluations.map(({ key, value }) => {
+        const config = getEvaluatorConfig(key, value!);
+        const isGoodScore = value! >= 0.5;
+
+        return (
+          <div
+            key={key}
+            css={badgeStyles}
+            style={{
+              backgroundColor:
+                variant === 'conversation-average'
+                  ? '#f3f4f6'
+                  : isGoodScore
+                  ? colorMap.good.background
+                  : colorMap.bad.background,
+              color:
+                variant === 'conversation-average'
+                  ? '#6b7280'
+                  : isGoodScore
+                  ? colorMap.good.text
+                  : colorMap.bad.text,
+            }}
+          >
+            {config.icon}
+            <span>
+              {config.label}: {value!.toFixed(2)}/1
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 };
