@@ -12,6 +12,7 @@ import type { ConnectorContractUnion } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { getCompletionItemProvider, parseLineForCompletion } from './get_completion_item_provider';
 import { z } from '@kbn/zod';
+import { performComputation } from './store/utils/computation';
 
 // Mock Monaco editor model
 const createMockModel = (value: string, cursorOffset: number) => {
@@ -84,13 +85,19 @@ describe('getCompletionItemProvider', () => {
       }),
     },
   ];
+  let yamlContent;
+  let focusedStepId: string | null = null;
 
   const workflowSchema = generateYamlSchemaFromConnectors(mockConnectors, true);
-  const completionProvider = getCompletionItemProvider(workflowSchema);
+  const completionProvider = getCompletionItemProvider(() => ({
+    yamlString: yamlContent,
+    schemaLoose: workflowSchema,
+    computed: performComputation(yamlContent),
+  }));
 
   describe('Integration tests', () => {
     it('should provide basic completions inside variable expression', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 consts:
@@ -101,6 +108,7 @@ steps:
     with:
       message: "{{|<-}}"
 `.trim();
+      focusedStepId = 'step1';
 
       const suggestions = await getSuggestions(completionProvider, yamlContent);
       expect(suggestions.map((s) => s.label)).toEqual(
@@ -117,7 +125,7 @@ steps:
     });
 
     it('should provide completions after @ and quote insertText automatically if cursor is in plain scalar', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 consts:
@@ -135,7 +143,7 @@ steps:
     });
 
     it('should provide completions after @ and not quote insertText automatically if cursor is in plain scalar but not starting with { or @', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 consts:
@@ -153,7 +161,7 @@ steps:
     });
 
     it('should provide basic completions with @ and not quote insertText automatically if cursor is in string', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 consts:
@@ -180,7 +188,7 @@ steps:
     });
 
     it('should provide const completion with type', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 consts:
@@ -217,7 +225,7 @@ steps:
     });
 
     it('should provide const completion with type in array', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 consts:
@@ -248,7 +256,7 @@ steps:
     });
 
     it('should provide previous step completion', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 consts:
@@ -269,7 +277,7 @@ steps:
     });
 
     it('should not provide unreachable step', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 consts:
@@ -302,7 +310,7 @@ steps:
     });
 
     it('should autocomplete incomplete key', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 consts:
@@ -353,7 +361,7 @@ steps:
     });
 
     it('should provide rrule suggestions in empty scheduled trigger with block', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 triggers:
@@ -376,7 +384,7 @@ steps: []
     });
 
     it('should provide rrule suggestions in scheduled trigger with block with proper YAML', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 triggers:
@@ -399,7 +407,7 @@ steps: []
     });
 
     it('should provide rrule suggestions in scheduled trigger with block with empty map', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 triggers:
@@ -422,7 +430,7 @@ steps: []
     });
 
     it('should provide rrule suggestions in scheduled trigger with block with cursor inside', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 triggers:
@@ -445,7 +453,7 @@ steps: []
     });
 
     it('should NOT provide rrule suggestions when rrule already exists', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 triggers:
@@ -474,7 +482,7 @@ steps: []
     });
 
     it('should NOT provide rrule suggestions when every already exists', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 triggers:
@@ -498,7 +506,7 @@ steps: []
     });
 
     it('should provide timezone suggestions for tzid field in scheduled trigger', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 triggers:
@@ -523,7 +531,7 @@ triggers:
     });
 
     it('should filter timezone suggestions based on prefix', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 triggers:
@@ -546,7 +554,7 @@ triggers:
     });
 
     it('should prioritize UTC timezones in suggestions', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 triggers:
@@ -571,7 +579,7 @@ triggers:
     });
 
     it('should replace entire tzid value when selecting timezone', async () => {
-      const yamlContent = `
+      yamlContent = `
 version: "1"
 name: "test"
 triggers:

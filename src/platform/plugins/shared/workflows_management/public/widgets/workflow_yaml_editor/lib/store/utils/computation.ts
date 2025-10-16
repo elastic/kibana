@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AnyAction, Dispatch, MiddlewareAPI } from '@reduxjs/toolkit';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import YAML, { LineCounter } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
@@ -17,15 +16,12 @@ import {
   getCachedDynamicConnectorTypes,
 } from '../../../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../../../common/lib/yaml_utils';
-import { clearComputedData, _setComputedDataInternal } from '../slice';
-import type { RootState } from '../types';
+import type { WorkflowEditorState } from '../types';
 
 export const performComputation = (
-  store: MiddlewareAPI<Dispatch<AnyAction>, RootState>,
   yamlString: string | undefined
-) => {
+): WorkflowEditorState['computed'] | undefined => {
   if (!yamlString) {
-    store.dispatch(clearComputedData());
     return;
   }
 
@@ -48,20 +44,16 @@ export const performComputation = (
     // Create workflow graph
     const parsedWorkflow = parsingResult.success ? parsingResult.data : undefined;
     const graph = parsedWorkflow ? WorkflowGraph.fromWorkflowDefinition(parsedWorkflow) : undefined;
-
-    // Dispatch computed data
-    store.dispatch(
-      _setComputedDataInternal({
-        yamlLineCounter: lineCounter,
-        yamlDocument: yamlDoc,
-        workflowLookup: lookup,
-        workflowGraph: graph,
-        workflowDefinition: parsedWorkflow as WorkflowYaml,
-      })
-    );
+    return {
+      yamlLineCounter: lineCounter,
+      yamlDocument: yamlDoc,
+      workflowLookup: lookup,
+      workflowGraph: graph,
+      workflowDefinition: parsedWorkflow as WorkflowYaml,
+    };
   } catch (e) {
     // console.error('Error performing computation', e);
     // Clear computed data on error
-    store.dispatch(clearComputedData());
+    return;
   }
 };

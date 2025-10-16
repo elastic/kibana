@@ -9,7 +9,7 @@
 
 import type { AnyAction, Dispatch, Middleware, MiddlewareAPI } from '@reduxjs/toolkit';
 import type { RootState } from './types';
-import { setYamlString } from './slice';
+import { _setComputedDataInternal, clearComputedData, setYamlString } from './slice';
 import { performComputation } from './utils/computation';
 
 // Debounced computation function
@@ -28,7 +28,13 @@ const debounceComputation = (
 
   // Debounce the computation
   computationTimeoutId = setTimeout(() => {
-    performComputation(store, yamlString);
+    const computed = performComputation(yamlString);
+
+    if (computed) {
+      store.dispatch(_setComputedDataInternal(computed));
+    } else {
+      store.dispatch(clearComputedData());
+    }
     computationTimeoutId = null;
   }, COMPUTATION_DEBOUNCE_MS);
 };
@@ -45,7 +51,14 @@ export const workflowComputationMiddleware: Middleware =
 
       // Do computation immediately if yaml string is defined and no previous workflow graph exists
       if (yamlString && !state.workflow.computed) {
-        performComputation(store, yamlString);
+        const computed = performComputation(yamlString);
+
+        if (computed) {
+          store.dispatch(_setComputedDataInternal(computed));
+        } else {
+          store.dispatch(clearComputedData());
+        }
+
         return result;
       }
 

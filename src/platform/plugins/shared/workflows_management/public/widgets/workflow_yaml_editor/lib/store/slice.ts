@@ -40,22 +40,10 @@ const workflowEditorSlice = createSlice({
     _setComputedDataInternal: (
       state,
       action: {
-        payload: {
-          yamlDocument?: YAML.Document;
-          yamlLineCounter?: LineCounter;
-          workflowLookup?: WorkflowLookup;
-          workflowGraph?: WorkflowGraph;
-          workflowDefinition?: WorkflowYaml;
-        };
+        payload: WorkflowEditorState['computed'];
       }
     ) => {
-      state.computed = {
-        yamlLineCounter: action.payload.yamlLineCounter,
-        yamlDocument: action.payload.yamlDocument,
-        workflowLookup: action.payload.workflowLookup,
-        workflowGraph: action.payload.workflowGraph,
-        workflowDefinition: action.payload.workflowDefinition,
-      };
+      state.computed = action.payload;
     },
     _setGeneratedSchemaInternal: (
       state,

@@ -15,7 +15,6 @@ import { getWorkflowZodSchemaLoose } from '../../../../../common/schema';
 export const schemaGenerationMiddleware: Middleware =
   (store: MiddlewareAPI<Dispatch<AnyAction>, RootState>) => (next) => (action) => {
     const result = next(action);
-    const state = store.getState();
 
     // Only react to connectors changes
     if (action.type === setConnectors.type) {

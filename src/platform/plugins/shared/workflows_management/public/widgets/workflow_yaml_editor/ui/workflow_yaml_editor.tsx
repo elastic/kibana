@@ -67,6 +67,7 @@ import { useWorkflowEditorStyles } from '../styles/use_workflow_editor_styles';
 import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
 import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_styles';
 import { useCompletionProvider } from './hooks/use_completion_provider';
+import { z } from 'zod';
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
@@ -228,7 +229,7 @@ export const WorkflowYAMLEditor = ({
   const { validationErrors, transformMonacoMarkers, handleMarkersChanged } =
     useMonacoMarkersChangedInterceptor({
       yamlDocumentRef,
-      workflowYamlSchema: workflowYamlSchemaLoose!,
+      workflowYamlSchema: workflowYamlSchemaLoose as z.ZodSchema,
     });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
