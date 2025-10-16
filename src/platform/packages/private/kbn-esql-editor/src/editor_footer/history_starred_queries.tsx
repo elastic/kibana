@@ -37,6 +37,7 @@ import {
   getHistoryItems,
   dateFormat,
   getStorageStats,
+  getTrimmedQuery,
 } from '../history_local_storage';
 import { type ESQLEditorDeps, HistoryTabId } from '../types';
 import { getReducedSpaceStyling, swapArrayElements } from './history_starred_queries_helpers';
@@ -283,7 +284,9 @@ export function QueryList({
     return [
       {
         render: (item: QueryHistoryItem) => {
-          const isStarred = starredQueriesService?.checkIfQueryIsStarred(item.queryString) ?? false;
+          const isStarred =
+            starredQueriesService?.checkIfQueryIsStarred(getTrimmedQuery(item.queryString)) ??
+            false;
           return (
             <EuiFlexGroup gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
