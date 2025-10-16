@@ -25,6 +25,7 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { CheckPrivileges, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { AutomaticImportSavedObjectService } from './saved_objects/saved_objects_service';
 
 export const PLUGIN_ID = 'automaticImportV2' as const;
 
@@ -41,6 +42,7 @@ export interface AutomaticImportV2PluginStart {
   licensing: LicensingPluginStart;
   spaces?: SpacesPluginStart;
   security: SecurityPluginStart;
+  automaticImportSOService: AutomaticImportSavedObjectService;
 }
 
 export interface AutomaticImportV2PluginSetupDependencies {

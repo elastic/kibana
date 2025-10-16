@@ -17,16 +17,17 @@ import type {
   AutomaticImportV2PluginRequestHandlerContext,
 } from './types';
 import { RequestContextFactory } from './request_context_factory';
+import { dataStreamSavedObjectType, integrationSavedObjectType } from './saved_objects';
+import { AutomaticImportSavedObjectService } from './saved_objects/saved_objects_service';
 
 export class AutomaticImportV2Plugin
   implements
-    Plugin<
-      AutomaticImportV2PluginSetup,
-      AutomaticImportV2PluginStart,
-      AutomaticImportV2PluginSetupDependencies,
-      AutomaticImportV2PluginStartDependencies
-    >
-{
+  Plugin<
+    AutomaticImportV2PluginSetup,
+    AutomaticImportV2PluginStart,
+    AutomaticImportV2PluginSetupDependencies,
+    AutomaticImportV2PluginStartDependencies
+  > {
   private readonly logger: Logger;
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
@@ -60,7 +61,12 @@ export class AutomaticImportV2Plugin
       'automaticImportv2'
     >('automaticImportv2', (context, request) => requestContextFactory.create(context, request));
 
+    // check if I can register types in 1 line
+    core.savedObjects.registerType(integrationSavedObjectType);
+    core.savedObjects.registerType(dataStreamSavedObjectType);
+
     this.logger.debug('automaticImportV2: Setup complete');
+
     return {
       actions: plugins.actions,
     };
@@ -77,11 +83,19 @@ export class AutomaticImportV2Plugin
     plugins: AutomaticImportV2PluginStartDependencies
   ): AutomaticImportV2PluginStart {
     this.logger.debug('automaticImportV2: Started');
+
+    const savedObjectsClient = core.savedObjects.createInternalRepository();
+    const savedObjectService = new AutomaticImportSavedObjectService({
+      savedObjectsClient,
+      logger: this.logger.get('saved-objects-service'),
+    });
+
     return {
       actions: plugins.actions,
       inference: plugins.inference,
       licensing: plugins.licensing,
       security: plugins.security,
+      automaticImportSOService: savedObjectService,
     };
   }
 
