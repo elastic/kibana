@@ -152,6 +152,22 @@ export const getActPrompt = ({
 
         ${customInstructionsBlock(customInstructions)}
 
+        ### Linking to other conversations
+
+        When recalling memories from previous conversation (calls to the "recall_memory" tool),
+        you can render links to the conversations in the UI using the "<conversation id="" label=""/>"
+
+        **Example Usage:**
+
+        Recall result include:
+        {
+          "conversation_id": "ae3fa7c6-f0b7-46e0-ba75-e9031968ffde",
+          "content": "[Memory of the conversation...]"
+        }
+
+        To create a link to this conversation in the UI you can do:
+        <conversation id="ae3fa7c6-f0b7-46e0-ba75-e9031968ffde" label="here is the conversation you were looking for" />
+
         ADDITIONAL INFO
         - Current date: ${formatDate()}
 `,
