@@ -353,6 +353,42 @@
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant-connector-selector-action",
+            "id": "def-public.ConnectorSelectableComponentProps.renderOption",
+            "type": "Function",
+            "tags": [],
+            "label": "renderOption",
+            "description": [
+              "Render option component"
+            ],
+            "signature": [
+              "((option: (",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableGroupLabelOption",
+              "<{}>, ",
+              "EuiSelectableLIOption",
+              "<{}>> & ",
+              "CommonProps",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              "EuiTextTruncateProps",
+              ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+              "EuiToolTipProps",
+              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement>) | (",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableLIOption",
+              "<{}>, ",
+              "EuiSelectableGroupLabelOption",
+              "<{}>> & Omit<",
+              "EuiSelectableOptionBase",
+              ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; }), searchValue: string) => React.ReactNode) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -426,7 +462,7 @@
             "section": "def-public.ConnectorSelectableComponentProps",
             "text": "ConnectorSelectableComponentProps"
           },
-          "<{ value: string; }>, \"value\" | \"onValueChange\" | \"customConnectors\" | \"preConfiguredConnectors\" | \"defaultConnectorId\"> & Pick<",
+          "<{ value: string; }>, \"value\" | \"data-test-subj\" | \"renderOption\" | \"onValueChange\" | \"customConnectors\" | \"preConfiguredConnectors\" | \"defaultConnectorId\"> & Pick<",
           {
             "pluginId": "@kbn/ai-assistant-connector-selector-action",
             "scope": "public",

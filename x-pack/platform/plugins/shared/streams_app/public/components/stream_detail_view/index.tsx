@@ -20,6 +20,7 @@ import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailOverview } from '../stream_detail_overview';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { StreamDescription } from './description';
+import { FeedbackButton } from '../feedback_button';
 
 const getStreamDetailTabs = ({
   definition,
@@ -90,13 +91,21 @@ export function StreamDetailView() {
         bottomBorder="extended"
         description={<StreamDescription definition={definition} />}
         pageTitle={
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            {key}
-            <EuiBadgeGroup gutterSize="s">
-              {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
-              {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
-              <LifecycleBadge lifecycle={definition.effective_lifecycle} />
-            </EuiBadgeGroup>
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="s"
+            alignItems="center"
+            justifyContent="spaceBetween"
+          >
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              {key}
+              <EuiBadgeGroup gutterSize="s">
+                {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+                {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
+                <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+              </EuiBadgeGroup>
+            </EuiFlexGroup>
+            <FeedbackButton />
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabs ?? {}).map(([tabName, { label, href }]) => {

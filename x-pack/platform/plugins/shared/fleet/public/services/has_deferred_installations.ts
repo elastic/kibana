@@ -11,7 +11,8 @@ export const getDeferredInstallationsCnt = (pkg?: PackageInfo | PackageListItem 
   if (!pkg) return 0;
 
   return pkg && 'installationInfo' in pkg && pkg.installationInfo
-    ? pkg.installationInfo.installed_es?.filter((d) => d.deferred).length
+    ? (pkg.installationInfo.installed_es?.filter((d) => d.deferred).length ?? 0) +
+        (pkg.installationInfo.installed_kibana?.filter((d) => d.deferred).length ?? 0)
     : 0;
 };
 

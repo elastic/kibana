@@ -38,6 +38,7 @@ import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 import { DocumentEventTypes } from '../../common/lib/telemetry';
 import { AiForSOCAlertsTable } from '../components/ai_for_soc/wrapper';
 import { EventsTableForCases } from '../components/case_events/table';
+import { CASES_FEATURES } from '..';
 
 const CaseContainerComponent: React.FC = () => {
   const {
@@ -145,6 +146,7 @@ const CaseContainerComponent: React.FC = () => {
           basePath: CASES_PATH,
           owner: [APP_ID],
           features: {
+            ...CASES_FEATURES,
             metrics: [
               CaseMetricsFeature.ALERTS_COUNT,
               CaseMetricsFeature.ALERTS_USERS,

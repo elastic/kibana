@@ -29,6 +29,7 @@ export interface CaseConnector {
 
 export interface CaseSettings {
   syncAlerts: boolean;
+  extractObservables: boolean;
 }
 
 export interface CaseUserProfile {

@@ -137,12 +137,15 @@ class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState
       };
     });
 
+    const selectPlaceholderLabel = intl.formatMessage({
+      id: 'inputControl.vis.listControl.selectPlaceholder',
+      defaultMessage: 'Select...',
+    });
+
     return (
       <EuiComboBox
-        placeholder={intl.formatMessage({
-          id: 'inputControl.vis.listControl.selectPlaceholder',
-          defaultMessage: 'Select...',
-        })}
+        placeholder={selectPlaceholderLabel}
+        aria-label={selectPlaceholderLabel}
         options={options}
         isLoading={this.state.isLoading}
         async={this.props.dynamicOptions}

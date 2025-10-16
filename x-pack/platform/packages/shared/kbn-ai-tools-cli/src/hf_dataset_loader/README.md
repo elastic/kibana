@@ -27,7 +27,7 @@ node --require ./src/setup_node_env/index.js \
 | Flag           | Type      | Description                                                                                           |
 | -------------- | --------- | ----------------------------------------------------------------------------------------------------- |
 | `--datasets`   | `string`  | Comma-separated list of dataset **names** to load. Omit the flag to load **all** predefined datasets. |
-| `--limit`      | `number`  | Max docs per dataset (handy while testing). Defaults to 1k.                                           |
+| `--limit`      | `number`  | Max docs per dataset (handy while testing). When omitted, all rows will be loaded.                    |
 | `--clear`      | `boolean` | Delete the target index **before** indexing. Defaults to `false`.                                     |
 | `--kibana-url` | `string`  | Kibana URL to connect to (bypasses auto-discovery when provided).                                     |
 
@@ -48,6 +48,9 @@ The loader also supports **OneChat datasets** from the `elastic/OneChatAgent` re
 Use the format `onechat/<directory>/<dataset>` to load OneChat datasets:
 
 ```bash
+# Load all OneChat datasets
+--datasets onechat/knowledge-base/*
+
 # Load a single OneChat dataset
 --datasets onechat/knowledge-base/wix_knowledge_base
 
@@ -78,3 +81,12 @@ Run the loader without `--datasets` to see all available OneChat and regular Hug
 ## Disabling local cache
 
 Set the environment variable `DISABLE_KBN_CLI_CACHE=1` to force fresh downloads instead of using the on-disk cache.
+
+## Clearing the cache
+
+Remove the downloaded files and cached documents by deleting the cache directories:
+
+```bash
+rm -rf data/hugging_face_dataset_rows
+rm -rf data/hugging_face_dataset_embeddings
+```

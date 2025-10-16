@@ -105,13 +105,6 @@ export const ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_TITLE = i18n.tra
   }
 );
 
-export const ALERT_CLOSE_INFO_MODAL_LEARN_MORE_LINK = i18n.translate(
-  'xpack.securitySolution.alert.closeInfoModal.learnMoreLink',
-  {
-    defaultMessage: 'Learn more',
-  }
-);
-
 export const ALERT_CLOSE_INFO_MODAL_CONFIRM_LABEL = i18n.translate(
   'xpack.securitySolution.alert.closeInfoModal.confirmLabel',
   {

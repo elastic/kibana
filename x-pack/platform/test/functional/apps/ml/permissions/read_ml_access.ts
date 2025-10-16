@@ -398,10 +398,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await ml.testExecution.logTestStep(
               'should display components of the file details page'
             );
-            await ml.dataVisualizerFileBased.assertFileTitle(expectedUploadFileTitle);
-            await ml.dataVisualizerFileBased.assertFileContentPanelExists();
-            await ml.dataVisualizerFileBased.assertSummaryPanelExists();
-            await ml.dataVisualizerFileBased.assertFileStatsPanelExists();
+            await ml.dataVisualizerFileBased.assertFileTitle(expectedUploadFileTitle, 0);
+            await ml.dataVisualizerFileBased.assertFilePreviewPanelExists(0);
+            await ml.dataVisualizerFileBased.setIndexName('test');
             await ml.dataVisualizerFileBased.assertImportButtonEnabled(false);
           });
           it('should display elements on Settings home page correctly', async () => {

@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLCommand, ESQLAstRerankCommand, ESQLSingleAstItem } from '../../../types';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../../types';
 import { Location } from '../../types';
@@ -23,10 +24,10 @@ import {
   columnExists,
 } from '../../../definitions/utils/autocomplete/helpers';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
+import type { MapParameters } from '../../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import { pipeCompleteItem, commaCompleteItem, withCompleteItem } from '../../complete_items';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 
 export const QUERY_TEXT = 'Your search query' as const;
@@ -126,8 +127,11 @@ export async function autocomplete(
 
     case CaretPosition.WITHIN_MAP_EXPRESSION: {
       const endpoints = context?.inferenceEndpoints;
-      const availableParameters = {
-        inference_id: endpoints?.map(createInferenceEndpointToCompletionItem) || [],
+      const availableParameters: MapParameters = {
+        inference_id: {
+          type: 'string',
+          suggestions: endpoints?.map(createInferenceEndpointToCompletionItem) || [],
+        },
       };
 
       return getCommandMapExpressionSuggestions(innerText, availableParameters);
@@ -169,13 +173,10 @@ async function handleOnFieldList({
       );
 
       return [customFieldSuggestion, ...fieldSuggestions].map((suggestion) => {
-        // if there is already a command, we don't want to override it
-        if (suggestion.command) return suggestion;
-        return {
+        return withAutoSuggest({
           ...suggestion,
           rangeToReplace,
-          command: TRIGGER_SUGGESTION_COMMAND,
-        };
+        });
       });
     },
     // complete: get next actions suggestions for completed field
@@ -205,7 +206,7 @@ async function handleOnExpression({
   context: ICommandContext | undefined;
   expressionRoot: ESQLSingleAstItem | undefined;
 }): Promise<ISuggestionItem[]> {
-  let suggestions = await suggestForExpression({
+  const suggestions = await suggestForExpression({
     innerText,
     getColumnsByType: callbacks.getByType,
     expressionRoot,
@@ -220,8 +221,6 @@ async function handleOnExpression({
     const expressionType = getExpressionType(expressionRoot, context?.columns);
 
     if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
-      const allowed = new Set(['AND', 'OR']); // TODO: this filter should be unnecessary. Need to fix suggestForExpression
-      suggestions = suggestions.filter(({ label }) => allowed.has(label.toUpperCase()));
       suggestions.push(...buildNextActions());
     }
   }
@@ -240,12 +239,13 @@ export function buildNextActions(options?: { withSpaces?: boolean }): ISuggestio
     sortText: '01',
   });
 
-  items.push({
-    ...commaCompleteItem,
-    text: commaCompleteItem.text + ' ',
-    sortText: '02',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  });
+  items.push(
+    withAutoSuggest({
+      ...commaCompleteItem,
+      text: commaCompleteItem.text + ' ',
+      sortText: '02',
+    })
+  );
 
   items.push({
     ...pipeCompleteItem,

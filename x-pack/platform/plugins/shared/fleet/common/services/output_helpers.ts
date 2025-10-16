@@ -9,7 +9,7 @@ import { isObject } from 'lodash';
 
 import { getFlattenedObject } from '@kbn/std';
 
-import type { AgentPolicy, PackagePolicy, OutputType, ValueOf } from '../types';
+import type { AgentPolicy, PackagePolicy, OutputType, ValueOf, Output } from '../types';
 import {
   FLEET_APM_PACKAGE,
   FLEET_SERVER_PACKAGE,
@@ -18,6 +18,7 @@ import {
   OUTPUT_TYPES_WITH_PRESET_SUPPORT,
   RESERVED_CONFIG_YML_KEYS,
   AGENTLESS_ALLOWED_OUTPUT_TYPES,
+  DEFAULT_OUTPUT,
 } from '../constants';
 
 const sameClusterRestrictedPackages = [
@@ -110,4 +111,15 @@ export function getDefaultPresetForEsOutput(
 
 export function outputTypeSupportPresets(type: ValueOf<OutputType>) {
   return OUTPUT_TYPES_WITH_PRESET_SUPPORT.includes(type);
+}
+
+/**
+ * Get id used in full agent policy (sent to the agents)
+ * we use "default" for the default policy to avoid breaking changes
+ */
+export function getOutputIdForAgentPolicy(output: Pick<Output, 'id' | 'is_default' | 'type'>) {
+  if (output.is_default && output.type === outputType.Elasticsearch) {
+    return DEFAULT_OUTPUT.name;
+  }
+  return output.id;
 }

@@ -7,10 +7,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiIconTip } from '@elastic/eui';
 import { PrivilegesWarningIconWrapper } from '../../../../insufficient_privileges/insufficient_privileges';
 import { BaseMetricCard } from '../../common/base_metric_card';
 import { formatBytes } from '../../helpers/format_bytes';
-import type { FailureStoreStats } from '../../hooks/use_failure_store_stats';
+import type { EnhancedFailureStoreStats } from '../../hooks/use_data_stream_stats';
 
 export const IngestionCard = ({
   definition,
@@ -18,22 +20,48 @@ export const IngestionCard = ({
   statsError,
 }: {
   definition: Streams.ingest.all.GetResponse;
-  stats?: FailureStoreStats;
+  stats?: EnhancedFailureStoreStats;
   statsError?: Error;
 }) => {
   const hasPrivileges = definition.privileges?.manage_failure_store;
 
-  const title = i18n.translate(
-    'xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.title',
-    {
-      defaultMessage: 'Failed ingestion averages',
-    }
+  const title = (
+    <FormattedMessage
+      id="xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.title"
+      defaultMessage="Failed ingestion averages {tooltipIcon}"
+      values={{
+        tooltipIcon: (
+          <EuiIconTip
+            type="question"
+            title={i18n.translate(
+              'xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.tooltipTitle',
+              {
+                defaultMessage: 'How we calculate failed ingestion averages',
+              }
+            )}
+            content={i18n.translate(
+              'xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.tooltip',
+              {
+                defaultMessage:
+                  'Approximate average, calculated by extrapolating the ingestion rate from the failed documents on the selected time range and the average document size.',
+              }
+            )}
+          />
+        ),
+      }}
+    />
   );
 
   const metrics = [
     {
       data: (
-        <PrivilegesWarningIconWrapper hasPrivileges={hasPrivileges} title="storageSize">
+        <PrivilegesWarningIconWrapper
+          hasPrivileges={hasPrivileges}
+          title={i18n.translate(
+            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.dailyIngestionRateLabel',
+            { defaultMessage: 'Daily ingestion rate' }
+          )}
+        >
           {statsError || !stats || !stats.bytesPerDay ? '-' : formatBytes(stats.bytesPerDay)}
         </PrivilegesWarningIconWrapper>
       ),
@@ -41,21 +69,27 @@ export const IngestionCard = ({
       subtitle: i18n.translate(
         'xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.dailyAverage',
         {
-          defaultMessage: 'Daily Average',
+          defaultMessage: 'Daily average',
         }
       ),
       'data-test-subj': 'failureStoreIngestionDaily',
     },
     {
       data: (
-        <PrivilegesWarningIconWrapper hasPrivileges={hasPrivileges} title="storageSize">
+        <PrivilegesWarningIconWrapper
+          hasPrivileges={hasPrivileges}
+          title={i18n.translate(
+            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.monthlyIngestionRateLabel',
+            { defaultMessage: 'Monthly ingestion rate' }
+          )}
+        >
           {statsError || !stats || !stats.bytesPerDay ? '-' : formatBytes(stats.bytesPerDay * 30)}
         </PrivilegesWarningIconWrapper>
       ),
       subtitle: i18n.translate(
         'xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.monthlyAverage',
         {
-          defaultMessage: 'Monthly Average',
+          defaultMessage: 'Monthly average',
         }
       ),
       'data-test-subj': 'failureStoreIngestionMonthly',

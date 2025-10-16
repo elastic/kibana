@@ -43,8 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   // @skipInServerless: due to the fact that the serverless builtin roles are not yet updated with new privilege
   //                    and tests below are currently creating a new role/user
-  // Failing: See https://github.com/elastic/kibana/issues/235444
-  describe.skip('@ess @skipInServerless, @skipInServerlessMKI Endpoint Artifacts space awareness support', function () {
+  describe('@ess @skipInServerless, @skipInServerlessMKI Endpoint Artifacts space awareness support', function () {
     const afterEachDataCleanup: Array<Pick<ArtifactTestData, 'cleanup'>> = [];
     const spaceOneId = 'space_one';
     const spaceTwoId = 'space_two';
@@ -64,16 +63,14 @@ export default function ({ getService }: FtrProviderContext) {
         { name: 'artifactManager' }
       );
 
-      if (
-        artifactManagerRole.kibana[0].feature[SECURITY_FEATURE_ID].includes(
-          'global_artifact_management_all'
-        )
-      ) {
-        artifactManagerRole.kibana[0].feature[SECURITY_FEATURE_ID] =
-          artifactManagerRole.kibana[0].feature[SECURITY_FEATURE_ID].filter(
-            (privilege) => privilege !== 'global_artifact_management_all'
-          );
-      }
+      const siemFeatureId =
+        Object.keys(artifactManagerRole.kibana[0].feature).find((featureId) =>
+          featureId.startsWith('siem')
+        ) ?? SECURITY_FEATURE_ID;
+
+      artifactManagerRole.kibana[0].feature[siemFeatureId] = artifactManagerRole.kibana[0].feature[
+        siemFeatureId
+      ].filter((privilege) => privilege !== 'global_artifact_management_all');
 
       globalArtifactManagerRole = Object.assign(
         rolesUsersProvider.loader.getPreDefinedRole('t3_analyst'),
@@ -81,11 +78,11 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       if (
-        !globalArtifactManagerRole.kibana[0].feature[SECURITY_FEATURE_ID].includes(
+        !globalArtifactManagerRole.kibana[0].feature[siemFeatureId].includes(
           'global_artifact_management_all'
         )
       ) {
-        globalArtifactManagerRole.kibana[0].feature[SECURITY_FEATURE_ID].push(
+        globalArtifactManagerRole.kibana[0].feature[siemFeatureId].push(
           'global_artifact_management_all'
         );
       }

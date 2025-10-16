@@ -37,6 +37,16 @@ export const Default: StoryFn<{}> = () => {
       definition={logsStreamDefinition}
       onClose={() => {}}
       onSave={async (queries) => {}}
+      features={[
+        {
+          name: 'Test feature',
+          filter: {
+            field: 'host.name',
+            eq: 'test.host',
+          },
+          description: '',
+        },
+      ]}
     />
   );
 };
@@ -47,14 +57,24 @@ export const Edit: StoryFn<{}> = () => {
       definition={logsStreamDefinition}
       onClose={() => {}}
       onSave={async (queries) => {}}
+      features={[
+        {
+          name: 'Test feature',
+          filter: {
+            field: 'host.name',
+            eq: 'test.host',
+          },
+          description: '',
+        },
+      ]}
       query={{
         id: '123',
         title: 'Operational Event: Service Lifecycle - LockScreenActivity',
         kql: {
           query: 'message:"cmp=com.tencent.qqmusic/.business.lockscreen.LockScreenActivity"',
         },
-        system: {
-          name: 'Test system',
+        feature: {
+          name: 'Test feature',
           filter: {
             field: 'host.name',
             eq: 'test.host',

@@ -13,8 +13,14 @@ export type IndexSearchToolConfig = {
   pattern: string;
 };
 
-export type IndexSearchToolDefinition = ToolDefinition<IndexSearchToolConfig>;
-export type IndexSearchToolDefinitionWithSchema = ToolDefinitionWithSchema<IndexSearchToolConfig>;
+export type IndexSearchToolDefinition = ToolDefinition<
+  ToolType.index_search,
+  IndexSearchToolConfig
+>;
+export type IndexSearchToolDefinitionWithSchema = ToolDefinitionWithSchema<
+  ToolType.index_search,
+  IndexSearchToolConfig
+>;
 
 export function isIndexSearchTool(
   tool: ToolDefinitionWithSchema

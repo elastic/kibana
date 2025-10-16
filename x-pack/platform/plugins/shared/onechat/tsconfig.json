@@ -3,16 +3,8 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "../../../../../typings/**/*",
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-  ],
-  "exclude": [
-    "target/**/*",
-    ".storybook/**/*.js"
-  ],
+  "include": ["../../../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
+  "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
@@ -67,6 +59,7 @@
     "@kbn/data-views-plugin",
     "@kbn/expressions-plugin",
     "@kbn/lens-plugin",
+    "@kbn/license-management-plugin",
     "@kbn/scout",
     "@kbn/management-settings-field-definition",
     "@kbn/management-settings-types",
@@ -78,8 +71,11 @@
     "@kbn/workflows-management-plugin",
     "@kbn/spaces-plugin",
     "@kbn/doc-links",
+    "@kbn/ui-actions-plugin",
     "@kbn/workflows",
     "@kbn/spaces-utils",
     "@kbn/spaces-plugin",
+    "@kbn/licensing-types",
+    "@kbn/licensing-plugin",
   ]
 }

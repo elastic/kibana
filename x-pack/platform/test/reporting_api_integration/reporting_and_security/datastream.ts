@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
         generation: 1,
         health: 'green',
         ilmPolicyName: 'kibana-reporting',
-        maxTimeStamp: 0,
+        maxTimeStamp: expect.any(Number),
         privileges: {
           delete_index: true,
           manage_data_stream_lifecycle: true,

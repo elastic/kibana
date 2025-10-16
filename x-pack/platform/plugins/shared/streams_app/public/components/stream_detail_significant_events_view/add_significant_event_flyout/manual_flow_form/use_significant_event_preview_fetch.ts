@@ -14,17 +14,19 @@ import moment from 'moment';
 import type { Condition } from '@kbn/streamlang';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import { NO_SYSTEM } from '../utils/default_query';
+import { NO_FEATURE } from '../utils/default_query';
 
 export function useSignificantEventPreviewFetch({
   name,
-  system,
+  feature,
   kqlQuery,
   timeState,
   isQueryValid,
+  noOfBuckets = 10,
 }: {
+  noOfBuckets?: number;
   name: string;
-  system?: {
+  feature?: {
     name: string;
     filter: Condition;
   };
@@ -47,10 +49,10 @@ export function useSignificantEventPreviewFetch({
       const { from, to } = getAbsoluteTimeRange(timeState.timeRange);
 
       const bucketSize = calculateAuto
-        .near(10, moment.duration(moment(to).diff(from)))
+        .near(noOfBuckets, moment.duration(moment(to).diff(from)))
         ?.asSeconds()!;
 
-      const effectiveSystem = system && system.name === NO_SYSTEM.name ? undefined : system;
+      const effectiveFeature = feature && feature.name === NO_FEATURE.name ? undefined : feature;
 
       return streams.streamsRepositoryClient.fetch(
         `POST /api/streams/{name}/significant_events/_preview 2023-10-31`,
@@ -68,14 +70,22 @@ export function useSignificantEventPreviewFetch({
             body: {
               query: {
                 kql: { query: kqlQuery },
-                system: effectiveSystem,
+                feature: effectiveFeature,
               },
             },
           },
         }
       );
     },
-    [timeState, name, system, kqlQuery, streams.streamsRepositoryClient, isQueryValid]
+    [
+      isQueryValid,
+      timeState.timeRange,
+      noOfBuckets,
+      feature,
+      streams.streamsRepositoryClient,
+      name,
+      kqlQuery,
+    ]
   );
 
   return previewFetch;

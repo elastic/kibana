@@ -133,7 +133,7 @@ export const AlertsOverview = ({
           ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
           consumers={INFRA_ALERT_CONSUMERS}
           query={alertsEsQueryByStatus}
-          initialPageSize={5}
+          pageSize={5}
           services={{
             data,
             http,

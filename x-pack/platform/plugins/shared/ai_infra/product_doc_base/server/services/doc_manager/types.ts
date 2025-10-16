@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { InstallationStatus, ProductInstallState } from '../../../common/install_status';
+import type { PerformUpdateResponse } from '../../../common/http_api/installation';
 
 /**
  * APIs to manage the product documentation.
@@ -38,6 +39,15 @@ export interface DocumentationManagerAPI {
    * @param inferenceId - The inference ID to get the status for.
    */
   getStatus({ inferenceId }: { inferenceId: string }): Promise<DocGetStatusResponse>;
+  /**
+   * Returns the installation status of the documentation for the given inference IDs.
+   * @param inferenceIds - The inference IDs to get the status for.
+   */
+  getStatuses({
+    inferenceIds,
+  }: {
+    inferenceIds: string[];
+  }): Promise<Record<string, PerformUpdateResponse>>;
 }
 
 /**
@@ -114,6 +124,30 @@ export interface DocUpdateOptions {
    * If provided, the docs will be updated with the model indicated by Inference ID
    */
   inferenceId: string;
+  /**
+   * If true, the docs with the same version majorMinor version will be forced to updated regardless
+   */
+  forceUpdate?: boolean;
+}
+
+/**
+ * Options for {@link DocumentationManagerAPI.updateAll}
+ */
+export interface DocUpdateAllOptions {
+  /**
+   * When the operation was requested by a user, the request that initiated it.
+   *
+   * If not provided, the call will be considered as being done on behalf of system.
+   */
+  request?: KibanaRequest;
+  /**
+   * If true, the docs with the same version majorMinor version will be forced to updated regardless
+   */
+  forceUpdate?: boolean;
+  /**
+   * inferenceIds to update
+   */
+  inferenceIds?: string[];
 }
 
 /**

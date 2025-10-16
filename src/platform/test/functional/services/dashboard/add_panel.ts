@@ -14,62 +14,68 @@ export class DashboardAddPanelService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly flyout = this.ctx.getService('flyout');
-  private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
-  private readonly browser = this.ctx.getService('browser');
   private readonly toasts = this.ctx.getService('toasts');
 
-  async clickOpenAddPanel() {
-    this.log.debug('DashboardAddPanel.clickOpenAddPanel');
+  async clickTopNavAddMenu() {
+    this.log.debug('DashboardAddPanel.clickTopNavAddMenu');
+    await this.testSubjects.click('dashboardAddTopNavButton');
+  }
+
+  async clickAddFromLibrary() {
+    this.log.debug('DashboardAddPanel.clickAddFromLibrary');
+    await this.clickTopNavAddMenu();
     await this.testSubjects.click('dashboardAddFromLibraryButton');
-    // Give some time for the animation to complete
-    await this.common.sleep(500);
+    await this.testSubjects.existOrFail('savedObjectsFinderTable');
+    await this.savedObjectsFinder.waitForListLoading();
   }
 
   async clickCreateNewLink() {
     this.log.debug('DashboardAddPanel.clickAddNewPanelButton');
-    await this.retry.try(async () => {
-      // prevent query bar auto suggest from blocking button
-      await this.browser.pressKeys(this.browser.keys.ESCAPE);
-      await this.testSubjects.click('dashboardAddNewPanelButton');
-      await this.testSubjects.waitForDeleted('dashboardAddNewPanelButton');
-      await this.header.waitUntilLoadingHasFinished();
-      await this.testSubjects.existOrFail('lnsApp', {
-        timeout: 5000,
-      });
+    await this.clickTopNavAddMenu();
+    await this.testSubjects.click('dashboardCreateNewVisButton');
+    await this.testSubjects.waitForDeleted('dashboardCreateNewVisButton');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.testSubjects.existOrFail('lnsApp', {
+      timeout: 5000,
     });
   }
 
   async clickAddCustomVisualization() {
-    await this.clickEditorMenuButton();
+    await this.openAddPanelFlyout();
     await this.clickAddNewPanelFromUIActionLink('Custom visualization');
   }
   async clickAddMarkdownPanel() {
-    await this.clickEditorMenuButton();
+    this.log.debug('DashboardAddPanel.clickAddMarkdownPanel');
+    await this.openAddPanelFlyout();
     await this.clickAddNewPanelFromUIActionLink('Markdown text');
   }
 
   async clickAddMapPanel() {
-    await this.clickEditorMenuButton();
+    this.log.debug('DashboardAddPanel.clickAddMapPanel');
+    await this.openAddPanelFlyout();
     await this.clickAddNewPanelFromUIActionLink('Maps');
   }
 
   async clickAddLensPanel() {
-    await this.clickEditorMenuButton();
+    this.log.debug('DashboardAddPanel.clickAddLensPanel');
+    await this.openAddPanelFlyout();
     await this.clickAddNewPanelFromUIActionLink('Lens');
   }
 
-  async clickEditorMenuButton() {
-    this.log.debug('DashboardAddPanel.clickEditorMenuButton');
-    await this.testSubjects.click('dashboardEditorMenuButton');
+  async openAddPanelFlyout() {
+    this.log.debug('DashboardAddPanel.openAddPanelFlyout');
+    await this.clickTopNavAddMenu();
+    await this.testSubjects.click('dashboardOpenAddPanelFlyoutButton');
     await this.testSubjects.existOrFail('dashboardPanelSelectionFlyout');
     await this.retry.try(async () => {
       return await this.testSubjects.exists('dashboardPanelSelectionList');
     });
   }
 
-  async expectEditorMenuClosed() {
+  async expectAddPanelFlyoutClosed() {
+    this.log.debug('DashboardAddPanel.expectAddPanelFlyoutClosed');
     await this.testSubjects.missingOrFail('dashboardPanelSelectionFlyout');
   }
 
@@ -84,10 +90,12 @@ export class DashboardAddPanelService extends FtrService {
   }
 
   async clickAddNewEmbeddableLink(type: string) {
+    this.log.debug(`DashboardAddPanel.clickAddNewEmbeddableLink(${type})`);
     await this.testSubjects.click(`createNew-${type}`);
   }
 
   async clickAddNewPanelFromUIActionLink(type: string) {
+    this.log.debug(`DashboardAddPanel.clickAddNewPanelFromUIActionLink(${type})`);
     await this.testSubjects.setValue('dashboardPanelSelectionFlyout__searchInput', type);
     await this.testSubjects.click(`create-action-${type}`);
   }
@@ -115,6 +123,7 @@ export class DashboardAddPanelService extends FtrService {
   }
 
   async clickPagerNextButton() {
+    this.log.debug('DashboardAddPanel.clickPagerNextButton');
     // Clear all toasts that could hide pagination controls
     await this.toasts.dismissAll();
 
@@ -151,7 +160,7 @@ export class DashboardAddPanelService extends FtrService {
     const isOpen = await this.isAddPanelOpen();
     if (!isOpen) {
       await this.retry.try(async () => {
-        await this.clickOpenAddPanel();
+        await this.clickAddFromLibrary();
         const isNowOpen = await this.isAddPanelOpen();
         if (!isNowOpen) {
           throw new Error('Add panel still not open, trying again.');
@@ -175,10 +184,12 @@ export class DashboardAddPanelService extends FtrService {
   }
 
   async closeAddPanel() {
+    this.log.debug('DashboardAddPanel.closeAddPanel');
     await this.flyout.ensureAllClosed();
   }
 
   async filterEmbeddableNames(name: string) {
+    this.log.debug(`DashboardAddPanel.filterEmbeddableNames(${name})`);
     await this.savedObjectsFinder.filterEmbeddableNames(name);
   }
 

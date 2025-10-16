@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { OBSERVABILITY_PROJECT_SETTINGS } from '@kbn/serverless-observability-settings';
 import { isEditorFieldSetting } from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
+import { OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -37,6 +38,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         if (isEditorFieldSetting(settingId)) {
           continue;
         }
+        // This setting is read only for the time being
+        if (settingId === OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS) {
+          continue;
+        }
+
         it('renders ' + settingId + ' edit field', async () => {
           const fieldTestSubj = 'management-settings-editField-' + settingId;
           expect(await testSubjects.exists(fieldTestSubj)).to.be(true);

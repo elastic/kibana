@@ -11,19 +11,27 @@ import type { EuiDataGridColumn } from '@elastic/eui';
 import type { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { EuiFieldText, EuiButtonEmpty, EuiForm, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { KeyboardEvent } from 'react';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPlaceholderColumn } from '../../utils';
 import type { IndexUpdateService } from '../../index_update_service';
-import { useAddColumnName } from '../../hooks/use_add_column_name';
+import { useAddColumnName, errorMessages } from '../../hooks/use_add_column_name';
+import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
 
 export const getColumnInputRenderer = (
   columnName: string,
-  indexUpdateService: IndexUpdateService
+  indexUpdateService: IndexUpdateService,
+  telemetryService: IndexEditorTelemetryService
 ): ((props: CustomGridColumnProps) => EuiDataGridColumn) => {
   return ({ column }) => ({
     ...column,
-    display: <AddColumnHeader initialColumnName={columnName} containerId={column.id} />,
+    display: (
+      <AddColumnHeader
+        initialColumnName={columnName}
+        containerId={column.id}
+        telemetryService={telemetryService}
+      />
+    ),
     actions: {
       showHide: false,
       additional: [
@@ -49,9 +57,10 @@ export const getColumnInputRenderer = (
 interface AddColumnHeaderProps {
   initialColumnName: string;
   containerId: string;
+  telemetryService: IndexEditorTelemetryService;
 }
 
-export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => {
+export const AddColumnHeader = ({ initialColumnName, telemetryService }: AddColumnHeaderProps) => {
   const { euiTheme } = useEuiTheme();
   const { columnName, setColumnName, saveColumn, resetColumnName, validationError } =
     useAddColumnName(initialColumnName);
@@ -71,12 +80,18 @@ export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => 
     (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       event.stopPropagation();
+
       if (columnName && !validationError) {
         saveColumn();
         setIsEditing(false);
+      } else {
+        telemetryService.trackEditInteraction({
+          actionType: 'add_column',
+          failureReason: validationError || 'EMPTY_NAME',
+        });
       }
     },
-    [columnName, validationError, saveColumn]
+    [columnName, validationError, saveColumn, telemetryService]
   );
 
   const columnLabel = isPlaceholderColumn(initialColumnName) ? (
@@ -88,14 +103,17 @@ export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => 
     columnName
   );
 
+  const errorMessage = useMemo(() => {
+    if (!validationError) return;
+    return errorMessages[validationError]
+      ? errorMessages[validationError](columnName)
+      : validationError;
+  }, [validationError, columnName]);
+
   if (isEditing) {
     return (
       <EuiForm component="form" onSubmit={onSubmit}>
-        <EuiToolTip
-          position="top"
-          content={validationError}
-          anchorProps={{ css: { width: '100%' } }}
-        >
+        <EuiToolTip position="top" content={errorMessage} anchorProps={{ css: { width: '100%' } }}>
           <EuiFieldText
             data-test-subj="indexEditorindexEditorColumnNameInput"
             value={columnName}
@@ -103,8 +121,6 @@ export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => 
             fullWidth
             controlOnly
             compressed
-            required
-            isInvalid={!!validationError}
             onChange={(e) => {
               setColumnName(e.target.value);
             }}
