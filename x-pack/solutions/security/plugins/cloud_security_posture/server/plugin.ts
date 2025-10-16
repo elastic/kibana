@@ -126,12 +126,7 @@ export class CspPlugin
 
         // If package is installed we want to make sure all needed assets are installed
         if (packageInfo) {
-          this.initialize(
-            core,
-            plugins.taskManager,
-            packageInfo.install_version,
-            plugins.spaces
-          ).catch(() => {});
+          this.initialize(core, plugins.taskManager, packageInfo.install_version).catch(() => {});
         }
 
         plugins.fleet.registerExternalCallback(
@@ -198,12 +193,7 @@ export class CspPlugin
             soClient: SavedObjectsClientContract
           ): Promise<PackagePolicy> => {
             if (isCspPackage(packagePolicy.package?.name)) {
-              await this.initialize(
-                core,
-                plugins.taskManager,
-                packagePolicy.package!.version,
-                plugins.spaces
-              );
+              await this.initialize(core, plugins.taskManager, packagePolicy.package!.version);
               return packagePolicy;
             }
 
@@ -255,7 +245,7 @@ export class CspPlugin
       isTransformAssetIncluded(packagePolicyVersion);
 
     // Migrate old data views for all spaces
-    await migrateCdrDataViewsForAllSpaces(soClient, spacesService?.spacesService, this.logger);
+    await migrateCdrDataViewsForAllSpaces(soClient, this.logger);
 
     await initializeCspIndices(
       esClient,

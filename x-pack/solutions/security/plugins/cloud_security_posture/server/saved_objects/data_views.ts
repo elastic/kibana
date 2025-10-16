@@ -114,82 +114,53 @@ export const installDataView = async (
 
 export const migrateCdrDataViewsForAllSpaces = async (
   soClient: ISavedObjectsRepository,
-  spacesService: SpacesServiceStart | undefined,
   logger: Logger
 ) => {
   try {
     logger.info('Starting CDR data views migration across all spaces');
 
-    // Get all spaces from saved objects
-    let spaceIds: string[] = [DEFAULT_SPACE_ID];
-    
-    if (spacesService) {
-      try {
-        // Find all space saved objects
-        const spacesResult = await soClient.find({
-          type: 'space',
-          perPage: 1000,
-          namespaces: ['*'], // Search across all namespaces
-        });
-        
-        spaceIds = spacesResult.saved_objects.map((space) => space.id);
-        logger.info(`Found ${spaceIds.length} space(s) to migrate: ${spaceIds.join(', ')}`);
-      } catch (error) {
-        logger.warn('Failed to retrieve spaces, using default space only', error);
-        spaceIds = [DEFAULT_SPACE_ID];
-      }
-    } else {
-      logger.info('Spaces service not available, using default space only');
-    }
-
     // Get all data views matching old prefixes
     const oldMisconfigurationsPrefixes = CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS;
     const oldVulnerabilitiesPrefixes = CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS;
 
-    // Find and delete old misconfigurations data views
-    for (const oldPrefix of oldMisconfigurationsPrefixes) {
-      for (const spaceId of spaceIds) {
-        try {
-          const oldDataViewId = `${oldPrefix}-${spaceId}`;
-          logger.debug(`Checking for old misconfigurations data view: ${oldDataViewId} in space: ${spaceId}`);
+    // Search for all data views across all namespaces and filter by old prefixes
+    // We can't use wildcard on _id field, so we fetch all index-patterns and filter in memory
+    const allDataViewsResult = await soClient.find({
+      type: 'index-pattern',
+      namespaces: ['*'], // Search across all spaces
+      perPage: 1000,
+    });
 
-          const findResult = await getDataViewSafe(soClient, spaceId, oldDataViewId);
+    logger.info(`Found ${allDataViewsResult.saved_objects.length} total data views to check`);
 
-          if (findResult) {
-            logger.info(`Found old misconfigurations data view: ${oldDataViewId}, migrating...`);
-            const namespace = findResult.namespaces?.[0] || spaceId;
-            await deleteDataViewSafe(soClient, findResult.id, namespace, logger);
-          }
-        } catch (error) {
-          logger.warn(
-            `Failed to migrate old misconfigurations data view for prefix ${oldPrefix} in space ${spaceId}`,
-            error
-          );
-        }
-      }
+    if (allDataViewsResult.total > 1000) {
+      logger.warn(
+        `Total data views (${allDataViewsResult.total}) exceeds page limit (1000). Some old data views may not be migrated.`
+      );
     }
 
-    // Find and delete old vulnerabilities data views
-    for (const oldPrefix of oldVulnerabilitiesPrefixes) {
-      for (const spaceId of spaceIds) {
-        try {
-          const oldDataViewId = `${oldPrefix}-${spaceId}`;
-          logger.debug(`Checking for old vulnerabilities data view: ${oldDataViewId} in space: ${spaceId}`);
+    // Filter data views that match old prefixes
+    // Include the dash (-) in the check to avoid matching current data views
+    const oldMisconfigurationsDataViews = allDataViewsResult.saved_objects.filter((obj) =>
+      oldMisconfigurationsPrefixes.some((prefix) => obj.id.startsWith(`${prefix}-`))
+    );
 
-          const findResult = await getDataViewSafe(soClient, spaceId, oldDataViewId);
+    const oldVulnerabilitiesDataViews = allDataViewsResult.saved_objects.filter((obj) =>
+      oldVulnerabilitiesPrefixes.some((prefix) => obj.id.startsWith(`${prefix}-`))
+    );
 
-          if (findResult) {
-            logger.info(`Found old vulnerabilities data view: ${oldDataViewId}, migrating...`);
-            const namespace = findResult.namespaces?.[0] || spaceId;
-            await deleteDataViewSafe(soClient, findResult.id, namespace, logger);
-          }
-        } catch (error) {
-          logger.warn(
-            `Failed to migrate old vulnerabilities data view for prefix ${oldPrefix} in space ${spaceId}`,
-            error
-          );
-        }
-      }
+    // Delete old misconfigurations data views
+    for (const dataView of oldMisconfigurationsDataViews) {
+      logger.info(`Found old misconfigurations data view: ${dataView.id}, migrating...`);
+      const namespace = dataView.namespaces?.[0] || DEFAULT_SPACE_ID;
+      await deleteDataViewSafe(soClient, dataView.id, namespace, logger);
+    }
+
+    // Delete old vulnerabilities data views
+    for (const dataView of oldVulnerabilitiesDataViews) {
+      logger.info(`Found old vulnerabilities data view: ${dataView.id}, migrating...`);
+      const namespace = dataView.namespaces?.[0] || DEFAULT_SPACE_ID;
+      await deleteDataViewSafe(soClient, dataView.id, namespace, logger);
     }
 
     logger.info('CDR data views migration completed successfully');
