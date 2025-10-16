@@ -15,7 +15,13 @@ export interface StepInfo {
   stepYamlNode: YAML.YAMLMap<unknown, unknown>;
   lineStart: number;
   lineEnd: number;
-  propNodes: Record<string, YAML.Pair<unknown, unknown>>;
+  propInfos: Record<string, StepPropInfo>;
+}
+
+export interface StepPropInfo {
+  path: string[];
+  keyNode: YAML.Scalar<unknown>;
+  valueNode: YAML.Scalar<unknown>;
 }
 
 /**
@@ -70,10 +76,6 @@ export function buildWorkflowLookup(
     inspectStep(yamlDocument?.contents, lineCounter) // stepItems can be null if there are no steps defined yet
   );
 
-  console.log({
-    steps,
-  });
-
   return {
     steps,
   };
@@ -108,11 +110,11 @@ function inspectStep(node: any, lineCounter: LineCounter): Record<string, StepIn
 
   if (stepId && stepType) {
     const stepNode = node as YAML.YAMLMap<unknown, unknown>;
-    const propNodes: Record<string, YAML.Pair<unknown, unknown>> = {};
+    const propNodes: Record<string, StepPropInfo> = {};
     stepNode.items.forEach((innerNode) => {
       if (YAML.isPair(innerNode) && YAML.isScalar(innerNode.key)) {
         if (!['steps', 'else', 'fallback'].includes(innerNode.key.value as string)) {
-          propNodes[innerNode.key.value as string] = innerNode;
+          Object.assign(propNodes, visitStepProps(innerNode));
         }
       }
     });
@@ -124,7 +126,28 @@ function inspectStep(node: any, lineCounter: LineCounter): Record<string, StepIn
       stepYamlNode: node,
       lineStart,
       lineEnd,
-      propNodes,
+      propInfos: propNodes,
+    };
+  }
+
+  return result;
+}
+
+function visitStepProps(node: any, stack: string[] = []): Record<string, StepPropInfo> {
+  const result: Record<string, StepPropInfo> = {};
+  if (YAML.isMap(node.value)) {
+    stack.push(node.key.value);
+    node.value.items.forEach((childNode: any) => {
+      Object.assign(result, visitStepProps(childNode, stack));
+    });
+    stack.pop();
+  } else {
+    const path = [...stack, node.key.value];
+    const composedKey = path.join('.');
+    result[composedKey] = {
+      path,
+      keyNode: node.key,
+      valueNode: node.value,
     };
   }
 
