@@ -205,7 +205,6 @@ export const ProcessorErrors = ({ metrics }: { metrics: ProcessorMetrics }) => {
           <EuiCallOut
             key={id}
             {...getCalloutProps(error.type)}
-            iconType="warning"
             size="s"
             title={errorTitle}
           >
