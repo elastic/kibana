@@ -86,6 +86,28 @@ describe('utils', () => {
       ]);
     });
 
+    it('should return the appropriate metadata when there are multiple stats commands in the query if value of a group references a field that was defined by a preceding command', () => {
+      const queryString = `
+       FROM kibana_sample_data_logs 
+        | STATS count_per_day=COUNT(*) BY category=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day) 
+        | STATS count = SUM(count_per_day), Trend=VALUES(count_per_day) BY category
+      `;
+
+      const result = getESQLStatsQueryMeta(queryString);
+
+      expect(result.groupByFields).toEqual([
+        {
+          field: 'category',
+          type: 'categorize',
+        },
+      ]);
+
+      expect(result.appliedFunctions).toEqual([
+        { identifier: 'count', operator: 'SUM' },
+        { identifier: 'Trend', operator: 'VALUES' },
+      ]);
+    });
+
     it(`when the stats query provides unsupported functions as the by option, said functions should not be present in the returned metadata`, () => {
       const queryString = `FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY BUCKET(@timestamp, 1 hour), CATEGORIZE(bytes)`;
 
