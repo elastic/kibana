@@ -7813,6 +7813,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-getting-started@link:x-pack/solutions/search/plugins/search_getting_started":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-homepage@link:x-pack/solutions/search/plugins/search_homepage":
   version "0.0.0"
   uid ""
@@ -8069,14 +8073,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-chat-settings@link:src/platform/packages/shared/serverless/settings/chat_project":
-  version "0.0.0"
-  uid ""
-
-"@kbn/serverless-chat@link:x-pack/solutions/chat/plugins/serverless_chat":
-  version "0.0.0"
-  uid ""
-
 "@kbn/serverless-common-settings@link:src/platform/packages/shared/serverless/settings/common":
   version "0.0.0"
   uid ""
@@ -8106,6 +8102,14 @@
   uid ""
 
 "@kbn/serverless-types@link:src/platform/packages/shared/serverless/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-workplace-ai-settings@link:src/platform/packages/shared/serverless/settings/workplace_ai_project":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-workplace-ai@link:x-pack/solutions/workplace_ai/plugins/serverless_workplace_ai":
   version "0.0.0"
   uid ""
 
@@ -8553,10 +8557,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-suites-xpack-chat@link:x-pack/solutions/chat/test":
-  version "0.0.0"
-  uid ""
-
 "@kbn/test-suites-xpack-observability@link:x-pack/solutions/observability/test":
   version "0.0.0"
   uid ""
@@ -8574,6 +8574,10 @@
   uid ""
 
 "@kbn/test-suites-xpack-security@link:x-pack/solutions/security/test":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-suites-xpack-workplace-ai@link:x-pack/solutions/workplace_ai/test":
   version "0.0.0"
   uid ""
 
@@ -8913,15 +8917,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/wci-browser@link:x-pack/solutions/chat/packages/wci-browser":
+"@kbn/wci-browser@link:x-pack/solutions/workplace_ai/packages/wci-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/wci-common@link:x-pack/solutions/chat/packages/wci-common":
+"@kbn/wci-common@link:x-pack/solutions/workplace_ai/packages/wci-common":
   version "0.0.0"
   uid ""
 
-"@kbn/wci-server@link:x-pack/solutions/chat/packages/wci-server":
+"@kbn/wci-server@link:x-pack/solutions/workplace_ai/packages/wci-server":
   version "0.0.0"
   uid ""
 
@@ -8930,10 +8934,6 @@
   uid ""
 
 "@kbn/whereis-pkg-cli@link:packages/kbn-whereis-pkg-cli":
-  version "0.0.0"
-  uid ""
-
-"@kbn/workchat-app@link:x-pack/solutions/chat/plugins/workchat_app":
   version "0.0.0"
   uid ""
 
@@ -8946,6 +8946,10 @@
   uid ""
 
 "@kbn/workflows@link:src/platform/packages/shared/kbn-workflows":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workplace-ai-app@link:x-pack/solutions/workplace_ai/plugins/workplace_ai_app":
   version "0.0.0"
   uid ""
 
@@ -9839,10 +9843,10 @@
   resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.9.1.tgz#9925a04ed0745e92dd7b3793b35cff1ed89d54c1"
   integrity sha512-YySPtH4s/rKKnHRU0xyFGrqMU8XA+OIPNWDrlEFxE6DCVWCIrxE5YpiB94YD2jMFn6SSdA0cwQ8vLkCkl8lm8A==
 
-"@openfeature/launchdarkly-client-provider@^0.3.2":
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/@openfeature/launchdarkly-client-provider/-/launchdarkly-client-provider-0.3.2.tgz#0e4ca66da2a78ae70a5eae7143db88659f76af6f"
-  integrity sha512-wK/s4yBp5E+nBXJMVWRJOLqATOE1eReDkCHufjW6hJPy0rOJHTMaS52Tw5Qf2hZ3yGQOQos2iE9idm/QUZfsUQ==
+"@openfeature/launchdarkly-client-provider@^0.3.3":
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/@openfeature/launchdarkly-client-provider/-/launchdarkly-client-provider-0.3.3.tgz#68dd5435dbc69d2935beb1deddc0d2bdee0e7087"
+  integrity sha512-pAhUMC+rxd6SZMfCgqv9VtYnHpF0LOzDftEFz6FQCk/ZrYuK/8ycNCstxt2yA/xnDyb0Ki7Rwe56IXEfQwBuew==
   dependencies:
     lodash.isempty "^4.4.0"
 
@@ -13849,10 +13853,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
   integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
 
-"@types/selenium-webdriver@^4.1.28":
-  version "4.1.28"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.28.tgz#7b4f3c50a67494f8fd6d396a2eaab7d9df1f9f34"
-  integrity sha512-Au7CXegiS7oapbB16zxPToY4Cjzi9UQQMf3W2ZZM8PigMLTGR3iUAHjPUTddyE5g1SBjT/qpmvlsAQLBfNAdKg==
+"@types/selenium-webdriver@^4.35.1":
+  version "4.35.1"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.35.1.tgz#8823c2377aa3610f64f6ca7435216af24a9cf878"
+  integrity sha512-mAt5iZv1D2/9Sb9eCdwxh5ePxbgwvJGTkD7hGdgZOjemABF8Qrde7H0qI5GKSp9f4+wGvOY/yNdBOver817/6A==
   dependencies:
     "@types/node" "*"
     "@types/ws" "*"
@@ -14653,7 +14657,7 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@^12.8.5":
+"@xyflow/react@^12.8.6":
   version "12.8.6"
   resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.8.6.tgz#4cb80abe1bf7123dd989f2c8554bff679980bd8b"
   integrity sha512-SksAm2m4ySupjChphMmzvm55djtgMDPr+eovPDdTnyGvShf73cvydfoBfWDFllooIQ4IaiUL5yfxHRwU0c37EA==
@@ -15467,7 +15471,7 @@ axe-core@^4.2.0, axe-core@^4.6.2:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.7.2.tgz#040a7342b20765cb18bb50b628394c21bccc17a0"
   integrity sha512-zIURGIS1E1Q4pcrMjp+nnEh+16G56eG/MUllJH8yEvw7asDo7Ac9uhC9KIH5jzpITueEZolfYglnCGIuSBz39g==
 
-axios@^1.11.0, axios@^1.12.0, axios@^1.7.4, axios@^1.8.2:
+axios@^1.11.0, axios@^1.12.0, axios@^1.8.2:
   version "1.12.1"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.12.1.tgz#0747b39c5b615f81f93f2c138e6d82a71426937f"
   integrity sha512-Kn4kbSXpkFHCGE6rBFNwIv0GQs4AvDT80jlveJDKFxjbTYMUeB4QtsdPCv6H8Cm19Je7IU6VFtRl2zWZI0rudQ==
@@ -16644,13 +16648,13 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^140.0.0:
-  version "140.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-140.0.0.tgz#11db338c4cfa2c909eaee37c567f9e511a849162"
-  integrity sha512-mv41C2fi4YX27muRMWP035HJUnKatu7gMJqBcVD1tSmufWDxDy0m38YaieKG3pa2aAIYNVhlXqiOnHkvnqNMcw==
+chromedriver@^141.0.0:
+  version "141.0.2"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-141.0.2.tgz#071dded2f6fb4fc6ba403ed8e2e597ebf69abfe4"
+  integrity sha512-MNtgzm5SjTtbHDXlpuXkQ7brxkOYTK+qDbnmr7UrurfuhqJfIkL+nnKo7hev/hR6sFL8mV8r5+1Kn51Mo9zsDg==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
-    axios "^1.7.4"
+    axios "^1.12.0"
     compare-versions "^6.1.0"
     extract-zip "^2.0.1"
     proxy-agent "^6.4.0"
@@ -17499,10 +17503,10 @@ create-require@^1.1.0, create-require@^1.1.1:
   resolved "https://registry.yarnpkg.com/create-require/-/create-require-1.1.1.tgz#c1d7e8f1e5f6cfc9ff65f9cd352d37348756c333"
   integrity sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==
 
-cronstrue@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/cronstrue/-/cronstrue-3.0.0.tgz#6af0552db24bd37bbb9d72bc7dbd46d8bae7666e"
-  integrity sha512-acwNTPzndJUmfDmcUN2cpBH4EgVn30rg5BYDAP8n5ENPP8A3IH2Z0UbxaNjvCkKxccjtfsTVhF6d+eHhv/GK5g==
+cronstrue@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/cronstrue/-/cronstrue-3.3.0.tgz#0567a70e42ccf18c8877d52986775927b292cf1c"
+  integrity sha512-iwJytzJph1hosXC09zY8F5ACDJKerr0h3/2mOxg9+5uuFObYlgK0m35uUPk4GCvhHc2abK7NfnR9oMqY0qZFAg==
 
 cross-fetch@^3.1.5:
   version "3.2.0"
@@ -21031,17 +21035,17 @@ gcp-metadata@^6.1.0:
     gaxios "^6.0.0"
     json-bigint "^1.0.0"
 
-geckodriver@^6.0.1:
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-6.0.1.tgz#19ec4ce36502c6d497da824dcbe194b15f23027c"
-  integrity sha512-mtr5j+Bvc1QfaAsFTt3cbjOGvUihCQNP2/FqhUcIWoujjtO/SY0DVPU7Zsj2dukP2KmPMTUCqRyNP21dhBsA5Q==
+geckodriver@^6.0.2:
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-6.0.2.tgz#7ac62687b466d1777e2af7eba24f3712833092fb"
+  integrity sha512-5C4cejCvcz4yFiBHP0FEWKwSZKhr3WMkshNBQ7cSb9PqfrdSNVAbe2RTNxsdBkk3Fmqcu6PNnffiJa0T+JZGFQ==
   dependencies:
     "@wdio/logger" "^9.1.3"
     "@zip.js/zip.js" "^2.7.54"
     decamelize "^6.0.0"
     http-proxy-agent "^7.0.2"
     https-proxy-agent "^7.0.5"
-    tar-fs "^3.1.0"
+    modern-tar "^0.3.4"
 
 gensync@^1.0.0-beta.2:
   version "1.0.0-beta.2"
@@ -25721,6 +25725,11 @@ mock-property@^1.1.0:
     hasown "^2.0.2"
     isarray "^2.0.5"
     object-inspect "^1.13.2"
+
+modern-tar@^0.3.4:
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/modern-tar/-/modern-tar-0.3.5.tgz#73c539ee8b4a01873b0e014db0f142f395f2c31f"
+  integrity sha512-TIALaZ8AjtEHFOZj1wRreDfaobCybvzPkvevpup/XtKOha3TmJWSwrh0ghc/QwAdAtt6oqIN6z6eIlo+HbDnzg==
 
 module-definition@^5.0.1:
   version "5.0.1"
