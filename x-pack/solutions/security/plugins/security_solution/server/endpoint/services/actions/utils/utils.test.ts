@@ -278,6 +278,122 @@ describe('When using Actions service utilities', () => {
       });
     });
 
+    it('should return file download URI for successful agent responses', () => {
+      expect(
+        getActionCompletionInfo(
+          mapToNormalizedActionRequest(
+            endpointActionGenerator.generate({
+              agent: { id: ['123', '456'] },
+              EndpointActions: { data: { command: 'get-file' } },
+            })
+          ),
+          {
+            fleetResponses: [],
+            endpointResponses: [
+              // Success response
+              endpointActionGenerator.generateResponse({
+                agent: { id: '123' },
+                EndpointActions: {
+                  data: {
+                    command: 'get-file',
+                    output: { type: 'json', content: { code: 'success' } },
+                  },
+                },
+              }),
+
+              // Failure response
+              endpointActionGenerator.generateResponse({
+                agent: { id: '456' },
+                error: { message: 'this one failed' },
+                EndpointActions: {
+                  data: {
+                    command: 'get-file',
+                    output: { type: 'json', content: { code: 'failure' } },
+                  },
+                },
+              }),
+            ],
+          }
+        )
+      ).toEqual(
+        expect.objectContaining({
+          outputs: {
+            '123': {
+              content: {
+                code: 'success',
+                downloadUri:
+                  '/api/endpoint/action/90d62689-f72d-4a05-b5e3-500cad0dc366/file/90d62689-f72d-4a05-b5e3-500cad0dc366.123/download',
+              },
+              type: 'json',
+            },
+            '456': {
+              content: {
+                code: 'failure',
+              },
+              type: 'json',
+            },
+          },
+        })
+      );
+    });
+
+    it('should NOT return file download URI for actions with no file support', () => {
+      expect(
+        getActionCompletionInfo(
+          mapToNormalizedActionRequest(
+            endpointActionGenerator.generate({
+              agent: { id: ['123', '456'] },
+              EndpointActions: { data: { command: 'isolate' } },
+            })
+          ),
+          {
+            fleetResponses: [],
+            endpointResponses: [
+              // Success response
+              endpointActionGenerator.generateResponse({
+                agent: { id: '123' },
+                EndpointActions: {
+                  data: {
+                    command: 'isolate',
+                    output: { type: 'json', content: { code: 'success' } },
+                  },
+                },
+              }),
+
+              // Failure response
+              endpointActionGenerator.generateResponse({
+                agent: { id: '456' },
+                error: { message: 'this one failed' },
+                EndpointActions: {
+                  data: {
+                    command: 'isolate',
+                    output: { type: 'json', content: { code: 'failure' } },
+                  },
+                },
+              }),
+            ],
+          }
+        )
+      ).toEqual(
+        expect.objectContaining({
+          outputs: {
+            '123': {
+              content: {
+                code: 'success',
+              },
+              type: 'json',
+            },
+            '456': {
+              content: {
+                code: 'failure',
+              },
+              type: 'json',
+            },
+          },
+        })
+      );
+    });
+
     describe('and action failed', () => {
       let fleetResponseAtError: EndpointActionResponse;
       let endpointResponseAtError: LogsEndpointActionResponse;
