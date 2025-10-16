@@ -129,7 +129,7 @@ export class DiscoverPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
     await this.waitUntilSearchingHasFinished();
   }
-  
+
   public async closeLoadSaveSearchPanel() {
     await this.flyout.ensureClosed('loadSearchForm');
   }
