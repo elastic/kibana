@@ -157,7 +157,6 @@ export const isOsqueryComponentHealthy = (agent: {
     return false;
   }
 
-  console.log({ agentC: agent.components });
   // Find the osquery component by type
   const osqueryComponent = agent.components.find((component) => component.type === 'osquery');
 
