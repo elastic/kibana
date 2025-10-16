@@ -72,9 +72,9 @@ export function defineActionTypes(
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
-      config: { schema: schema.object({}, { defaultValue: {} }) },
-      secrets: { schema: schema.object({}, { defaultValue: {} }) },
-      params: { schema: schema.object({}, { defaultValue: {} }) },
+      config: { schema: z.object({}).strict().default({}) },
+      secrets: { schema: z.object({}).strict().default({}) },
+      params: { schema: z.object({}).strict().default({}) },
     },
     async executor() {
       return { status: 'ok', actionId: '' };
