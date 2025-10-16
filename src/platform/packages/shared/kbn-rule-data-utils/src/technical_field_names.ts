@@ -94,6 +94,7 @@ const ALERT_GROUPING = `${ALERT_NAMESPACE}.grouping` as const;
 const ALERT_GROUP = `${ALERT_NAMESPACE}.group` as const;
 const ALERT_GROUP_FIELD = `${ALERT_GROUP}.field` as const;
 const ALERT_GROUP_VALUE = `${ALERT_GROUP}.value` as const;
+const ALERT_INDEX_PATTERN = `${ALERT_NAMESPACE}.index_pattern` as const;
 
 // Fields pertaining to the rule associated with the alert
 const ALERT_RULE_EXCEPTIONS_LIST = `${ALERT_RULE_NAMESPACE}.exceptions_list` as const;
@@ -201,6 +202,7 @@ const fields = {
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_DOCS_COUNT,
+  ALERT_INDEX_PATTERN,
   SPACE_IDS,
   VERSION,
 };
@@ -215,6 +217,7 @@ export {
   ALERT_GROUP,
   ALERT_GROUP_FIELD,
   ALERT_GROUP_VALUE,
+  ALERT_INDEX_PATTERN,
   ALERT_RULE_EXCEPTIONS_LIST,
   ALERT_RULE_NAMESPACE_FIELD,
   ALERT_THREAT_FRAMEWORK,
