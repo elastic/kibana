@@ -19,11 +19,12 @@ paths:
           application/json:
             schema:
               type: object
+              additionalProperties: false
               required:
-                - name
+                - title
               properties:
-                name:
-                  description: The integration name
+                title:
+                  description: The integration title
                   $ref: '../primitive.schema.yaml#/components/schemas/NonEmptyString'
                 description:
                   description: The integration description
@@ -69,10 +70,8 @@ paths:
           application/json:
             schema:
               type: object
+              additionalProperties: false
               properties:
-                name:
-                  description: The integration name
-                  $ref: '../primitive.schema.yaml#/components/schemas/NonEmptyString'
                 description:
                   description: Integration description
                   type: string

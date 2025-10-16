@@ -21,20 +21,22 @@ import { NonEmptyString } from '../primitive.gen';
 export type CreateAutoImportIntegrationRequestBody = z.infer<
   typeof CreateAutoImportIntegrationRequestBody
 >;
-export const CreateAutoImportIntegrationRequestBody = z.object({
-  /**
-   * The integration name
-   */
-  name: NonEmptyString,
-  /**
-   * The integration description
-   */
-  description: z.string().optional(),
-  /**
-   * The integration logo
-   */
-  logo: z.string().optional(),
-});
+export const CreateAutoImportIntegrationRequestBody = z
+  .object({
+    /**
+     * The integration title
+     */
+    title: NonEmptyString,
+    /**
+     * The integration description
+     */
+    description: z.string().optional(),
+    /**
+     * The integration logo
+     */
+    logo: z.string().optional(),
+  })
+  .strict();
 export type CreateAutoImportIntegrationRequestBodyInput = z.input<
   typeof CreateAutoImportIntegrationRequestBody
 >;
@@ -65,20 +67,18 @@ export type UpdateAutoImportIntegrationRequestParamsInput = z.input<
 export type UpdateAutoImportIntegrationRequestBody = z.infer<
   typeof UpdateAutoImportIntegrationRequestBody
 >;
-export const UpdateAutoImportIntegrationRequestBody = z.object({
-  /**
-   * The integration name
-   */
-  name: NonEmptyString.optional(),
-  /**
-   * Integration description
-   */
-  description: z.string().optional(),
-  /**
-   * Integration logo image blob
-   */
-  logo: z.string().optional(),
-});
+export const UpdateAutoImportIntegrationRequestBody = z
+  .object({
+    /**
+     * Integration description
+     */
+    description: z.string().optional(),
+    /**
+     * Integration logo image blob
+     */
+    logo: z.string().optional(),
+  })
+  .strict();
 export type UpdateAutoImportIntegrationRequestBodyInput = z.input<
   typeof UpdateAutoImportIntegrationRequestBody
 >;

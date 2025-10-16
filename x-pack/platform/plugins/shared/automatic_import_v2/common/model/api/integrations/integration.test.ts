@@ -18,7 +18,7 @@ describe('integration schemas', () => {
   describe('CreateAutoImportIntegrationRequestBody', () => {
     it('accepts a valid payload', () => {
       const payload = {
-        name: 'integration-name',
+        title: 'integration-title',
         description: 'Integration description',
         logo: 'data:image/png;base64,abc123',
       };
@@ -29,35 +29,31 @@ describe('integration schemas', () => {
       expect(result.data).toEqual(payload);
     });
 
-    it('strips unknown properties', () => {
+    it('rejects unknown properties', () => {
       const payload = {
-        name: 'integration-name',
+        title: 'integration-title',
         unknown: 'should be stripped',
       };
 
       const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
-      expectParseSuccess(result);
-
-      expect(result.data).toEqual({ name: 'integration-name' });
-      expect((result.data as { unknown?: string }).unknown).toBeUndefined();
+      expectParseError(result);
     });
 
-    it('requires a name', () => {
+    it('requires a title', () => {
       const result = CreateAutoImportIntegrationRequestBody.safeParse({});
       expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain('name: Required');
+      expect(stringifyZodError(result.error)).toContain('title: Required');
     });
 
-    it('rejects an empty name', () => {
+    it('rejects an empty title', () => {
       const payload = {
-        name: '   ',
+        title: '   ',
       };
 
       const result = CreateAutoImportIntegrationRequestBody.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('name: No empty strings allowed');
+      expect(stringifyZodError(result.error)).toContain('title: No empty strings allowed');
     });
   });
 
@@ -131,15 +127,14 @@ describe('integration schemas', () => {
       expect(result.data).toEqual(payload);
     });
 
-    it('rejects empty name updates', () => {
+    it('rejects title updates', () => {
       const payload = {
-        name: '   ',
+        title: 'new title',
       };
 
       const result = UpdateAutoImportIntegrationRequestBody.safeParse(payload);
       expectParseError(result);
-
-      expect(stringifyZodError(result.error)).toContain('name: No empty strings allowed');
+      expect(stringifyZodError(result.error)).toContain("Unrecognized key(s) in object: 'title'");
     });
 
     it('strips unknown properties', () => {
@@ -149,10 +144,7 @@ describe('integration schemas', () => {
       };
 
       const result = UpdateAutoImportIntegrationRequestBody.safeParse(payload);
-      expectParseSuccess(result);
-
-      expect(result.data).toEqual({ description: 'updated description' });
-      expect((result.data as { unexpected?: string }).unexpected).toBeUndefined();
+      expectParseError(result);
     });
   });
 });
