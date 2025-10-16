@@ -582,6 +582,36 @@ export class AlertUtils {
 
     return response;
   }
+
+  public async deleteInternallyManagedRule(ruleId: string) {
+    let request = this.supertestWithoutAuth
+      .delete(`${getUrlPrefix(this.space.id)}/api/alerts_fixture/rule/internally_managed/${ruleId}`)
+      .set('kbn-xsrf', 'foo')
+      .set('content-type', 'application/json');
+
+    if (this.user) {
+      request = request.auth(this.user.username, this.user.password);
+    }
+
+    const response = await request.send();
+
+    return response;
+  }
+
+  public async deleteAllInternallyManagedRules() {
+    let request = this.supertestWithoutAuth
+      .delete(`${getUrlPrefix(this.space.id)}/api/alerts_fixture/rule/internally_managed`)
+      .set('kbn-xsrf', 'foo')
+      .set('content-type', 'application/json');
+
+    if (this.user) {
+      request = request.auth(this.user.username, this.user.password);
+    }
+
+    const response = await request.send();
+
+    return response;
+  }
 }
 
 export function getUnauthorizedErrorMessage(operation: string, alertType: string, scope: string) {
