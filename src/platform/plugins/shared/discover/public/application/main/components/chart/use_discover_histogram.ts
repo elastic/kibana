@@ -489,6 +489,12 @@ const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) =
   return stateContainer.dataState.data$.documents$.pipe(
     distinctUntilChanged((prev, curr) => prev.fetchStatus === curr.fetchStatus),
     filter(({ fetchStatus }) => [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(fetchStatus)),
+    filter(({ fetchStatus }) => {
+      const isAlreadyAborted = stateContainer.dataState.getAbortController()?.signal.aborted;
+      // skip updating the histogram props if the fetch was aborted
+      // this will prevent the redundant histogram fetching
+      return !(fetchStatus === FetchStatus.ERROR && isAlreadyAborted);
+    }),
     map((documentsValue) => {
       return getUnifiedHistogramPropsForEsql({
         documentsValue,

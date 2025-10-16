@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
-import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { Chart } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
 import { EmptyState } from './empty_state/empty_state';
@@ -107,7 +106,6 @@ export const MetricsGrid = ({
       const { rowIndex, colIndex } = getRowColFromIndex(chartIndex);
 
       setExpandedMetric({ metric, esqlQuery, chartId, rowIndex, colIndex });
-      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
     },
     [rows, getRowColFromIndex]
   );
@@ -209,7 +207,6 @@ export const MetricsGrid = ({
           chartRef={getChartRefForFocus()}
           metric={expandedMetric.metric}
           esqlQuery={expandedMetric.esqlQuery}
-          isOpen
           onClose={handleCloseFlyout}
         />
       )}

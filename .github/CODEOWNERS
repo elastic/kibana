@@ -2464,6 +2464,8 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/test/fixtures/es_archives/signals @elastic/security-detections-response
 /x-pack/solutions/security/test/fixtures/es_archives/rule_keyword_family @elastic/security-detections-response
 
+/x-pack/solutions/security/packages/test-api-clients/supertest/detections.gen.ts @elastic/security-detections-response
+
 # Security Solution sub teams
 
 ## Security Solution sub teams - security-engineering-productivity
@@ -2606,6 +2608,8 @@ x-pack/solutions/security/test/serverless/functional/configs/config.context_awar
 x-pack/solutions/security/test/security_solution_api_integration/test_suites/investigations @elastic/security-threat-hunting-investigations
 
 /x-pack/solutions/security/test/serverless/functional/configs/config.context_awareness.ts @elastic/security-threat-hunting-investigations
+
+/x-pack/solutions/security/packages/test-api-clients/supertest/timelines.gen.ts @elastic/security-threat-hunting-investigations
 
 ## Security Solution Threat Hunting areas - Kibana Cases
 
@@ -2756,6 +2760,10 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/server/usage/exceptions @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/usage/value_lists @elastic/security-detection-engine
 
+/x-pack/solutions/security/packages/test-api-clients/supertest/endpoint_exceptions.gen.ts @elastic/security-detection-engine
+/x-pack/solutions/security/packages/test-api-clients/supertest/exceptions.gen.ts @elastic/security-detection-engine
+/x-pack/solutions/security/packages/test-api-clients/supertest/lists.gen.ts @elastic/security-detection-engine
+
 ## Security Threat Intelligence - Under Security Platform
 /x-pack/solutions/security/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine
 
@@ -2793,6 +2801,8 @@ x-pack/solutions/security/plugins/elastic_assistant/server/knowledge_base/defend
 x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/common/components/response_actions @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/osquery_automated_response_actions.tsx @elastic/security-defend-workflows
+/x-pack/solutions/security/packages/test-api-clients/supertest/endpoint_management.gen.ts @elastic/security-defend-workflows
+/x-pack/solutions/security/packages/test-api-clients/supertest/osquery.gen.ts @elastic/security-defend-workflows
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/solutions/security/plugins/security_solution/server/usage/ @elastic/security-data-analytics
@@ -2835,6 +2845,8 @@ x-pack/platform/test/fixtures/es_archives/auditbeat/uncommon_processes @elastic/
 x-pack/platform/test/fixtures/es_archives/auditbeat/users @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_api_integration/test_suites/explore @elastic/security-entity-analytics
+
+/x-pack/solutions/security/packages/test-api-clients/supertest/entity_analytics.gen.ts @elastic/security-entity-analytics
 
 ## Security Solution sub teams - GenAI
 x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai @elastic/security-generative-ai
@@ -3026,3 +3038,7 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
+
+# See https://github.com/elastic/kibana/pull/199404
+# Prevent backport assignments
+* @kibanamachine
