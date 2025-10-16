@@ -163,10 +163,10 @@ export async function runTestsParallel(
     runners.push(runner);
   }
 
-  const MAX_CPUS = os.availableParallelism();
-  const AVAILABLE_MEM = Math.round(os.totalmem() / 1024 / 1024);
+  const MAX_CPUS = os.cpus().length - 1;
+  const AVAILABLE_MEM = Math.round(os.freemem() / 1024 / 1024);
   const MIN_MB_AVAILABLE = 2048;
-  const MIN_MB_PER_WARMING_SLOT = 3072;
+  const MIN_MB_PER_WARMING_SLOT = 4096;
   const MIN_MB_PER_IDLE_SLOT = 3072;
   const MIN_MB_PER_RUNNING_SLOT = 4096;
   const WARMING_MIN_CPU = 2;
@@ -208,7 +208,7 @@ export async function runTestsParallel(
     const formatSeconds = (microseconds: number) => (microseconds / 1_000_000).toFixed(2);
     const formatMb = (bytes: number) => (bytes / (1024 * 1024)).toFixed(1);
 
-    statsTimer = setInterval(() => {
+    function logStats() {
       const usage = process.resourceUsage();
       const memory = process.memoryUsage();
       const loadAvg = os.loadavg();
@@ -237,9 +237,13 @@ export async function runTestsParallel(
       ];
 
       log.info(`Stats: ${messageParts.join(' ')}`);
-    }, 10_000);
+    }
+
+    statsTimer = setInterval(logStats, 10_000);
 
     statsTimer.unref();
+
+    logStats();
   }
 
   const promises = runners.map(async (runner) => {
@@ -264,7 +268,7 @@ export async function runTestsParallel(
       const runProc = await runner.run();
       const runFinishTime = Date.now();
 
-      log.info(`Completed ${runner.getConfigPath()}`);
+      log.info(`Completed ${runner.getConfigPath()} (exitCode ${runProc.exitCode})`);
 
       const startDuration = startFinishTime - startTime!;
       const runDuration = runFinishTime - runStartTime!;
