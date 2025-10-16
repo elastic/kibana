@@ -17,6 +17,7 @@ import { type Dictionary, groupBy, keyBy } from 'lodash';
 import moment from 'moment';
 import {
   SUMMARY_DESTINATION_INDEX_PATTERN,
+  SUMMARY_INDEX_TEMPLATE_PATTERN,
   getSLOSummaryTransformId,
   getSLOTransformId,
 } from '../../common/constants';
@@ -56,7 +57,7 @@ export class GetSLOHealth {
 
     do {
       const sloIdCompositeQueryResponse = await this.scopedClusterClient.asCurrentUser.search({
-        index: '.slo-observability.summary-*',
+        index: SUMMARY_INDEX_TEMPLATE_PATTERN,
         size: 0,
         aggs: {
           sloIds: {
