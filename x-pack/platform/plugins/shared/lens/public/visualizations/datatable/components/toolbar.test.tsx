@@ -15,8 +15,6 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DataGridDensity } from '@kbn/unified-data-table';
 
-// TODO: Move this component into x-pack/platform/plugins/shared/lens/public/visualizations/datatable/components/toolbar folder
-
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

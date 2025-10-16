@@ -45,8 +45,8 @@ import {
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './toolbar';
-import { XyFlyoutToolbar } from './toolbar/flyout_toolbar'; // TODO: Update import
-import { updateLayer } from './toolbar'; // TODO: Update this import
+import { XyFlyoutToolbar } from './toolbar/flyout_toolbar';
+import { updateLayer } from './toolbar';
 import {
   DataDimensionEditor,
   DataDimensionEditorDataSectionExtra,

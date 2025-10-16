@@ -72,7 +72,6 @@ export function PartitionTitlesAndTextSettings(
         </EuiFormRow>
       ) : null}
 
-      {/* TODO: Instead of hidding the setting, we can disable it as we did with the metric appearance options */}
       {numberOptions.length && layer.categoryDisplay !== 'hide' ? (
         <>
           <EuiFormRow

@@ -17,8 +17,6 @@ import type { DatatableVisualizationState } from '../visualization';
 
 import { DatatableAppearanceSettings } from './toolbar/appearance_settings';
 
-// TODO: Move this component into x-pack/platform/plugins/shared/lens/public/visualizations/datatable/components/toolbar folder
-
 export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>

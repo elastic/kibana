@@ -41,7 +41,6 @@ const baseToolbarOptions: ToolbarOption[] = [
       defaultMessage: 'Style',
     }),
   },
-  // TODO: Add filters
   // {
   //   id: 'filters',
   //   label: i18n.translate('xpack.lens.flyoutToolbar.filtersTitle', {
