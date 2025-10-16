@@ -70,9 +70,11 @@ interface TrackSearchDescriptor {
   abort: () => void;
 
   /**
-   * Keep polling the search to keep it alive
+   * Used for polling after running in background (to ensure the search makes it into the background search saved
+   * object) and also to keep the search alive while other search requests in the session are still in progress
+   * @param abortSignal - signal that can be used to cancel the polling - otherwise the `searchAbortController.getSignal()` is used
    */
-  poll: () => Promise<void>;
+  poll: (abortSignal?: AbortSignal) => Promise<void>;
 
   /**
    * Notify search that session is being saved, could be used to restart the search with different params
@@ -625,7 +627,6 @@ export class SessionService {
       this.state.transitions.store(searchSessionSavedObject);
 
       // trigger a poll for all the searches that are not yet stored to propagate them into newly created search session saved object and extend their keepAlive
-      // TODO: Fix the bug here that filters out search requests where the HTTP request has been aborted but the task in ES is still running
       const searchesToExtend = this.state
         .get()
         .trackedSearches.filter(
@@ -634,7 +635,7 @@ export class SessionService {
 
       const extendSearchesPromise = Promise.all(
         searchesToExtend.map((s) =>
-          s.searchDescriptor.poll().catch((e) => {
+          s.searchDescriptor.poll(new AbortController().signal).catch((e) => {
             // eslint-disable-next-line no-console
             console.warn('Failed to extend search after session was saved', e);
           })
