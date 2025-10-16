@@ -506,6 +506,17 @@ describe('validation logic', () => {
       ]);
     });
 
+    describe('settings', () => {
+      testErrorsAndWarnings(`SET project_routing = "_alias:_origin"; FROM index`, []);
+      // Should return error if there is no query following SET
+      testErrorsAndWarnings(`SET project_routing = "_alias:_origin";`, [
+        expect.stringContaining('SyntaxError:'),
+      ]);
+      testErrorsAndWarnings(`SET ivalid_setting = "_alias:_origin"; FROM index`, [
+        expect.stringContaining('Unknown setting ivalid_setting'),
+      ]);
+    });
+
     describe('shadowing', () => {
       // fields shadowing validation removed
     });

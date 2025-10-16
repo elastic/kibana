@@ -674,6 +674,31 @@
       "warning": []
     },
     {
+      "query": "SET project_routing = \"_alias:_origin\";",
+      "error": [
+        {
+          "sample": "SyntaxError:",
+          "inverse": false
+        }
+      ],
+      "warning": []
+    },
+    {
+      "query": "SET project_routing = \"_alias:_origin\"; FROM index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "SET ivalid_setting = \"_alias:_origin\"; FROM index",
+      "error": [
+        {
+          "sample": "Unknown setting ivalid_setting",
+          "inverse": false
+        }
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval round(doubleField) + 1 | eval `round(doubleField) + 1` + 1 | keep ```round(doubleField) + 1`` + 1`",
       "error": [],
       "warning": []
