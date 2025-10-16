@@ -8,7 +8,7 @@
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { type IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
-import { ALERT_GROUPING, ALERT_INDEX_PATTERN } from '@kbn/rule-data-utils';
+import { ALERT_GROUPING } from '@kbn/rule-data-utils';
 import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
 import { registerMetricThresholdRuleType } from './metric_threshold/register_metric_threshold_rule_type';
 import { registerInventoryThresholdRuleType } from './inventory_metric_threshold/register_inventory_metric_threshold_rule_type';
@@ -47,10 +47,7 @@ export const METRICS_RULES_ALERT_CONTEXT = 'observability.metrics';
 export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts<MetricThresholdAlert> = {
   context: METRICS_RULES_ALERT_CONTEXT,
   mappings: {
-    fieldMap: {
-      ...legacyExperimentalFieldMap,
-      [ALERT_INDEX_PATTERN]: { type: 'keyword', array: false, required: false },
-    },
+    fieldMap: legacyExperimentalFieldMap,
     dynamicTemplates,
   },
   useEcs: true,
