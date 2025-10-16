@@ -1,12 +1,23 @@
 /*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Zod schema definitions extracted from the Kibana OpenAPI specification.
- * Generated at: 2025-10-16T14:57:41.307Z
+ * Generated at: 2025-10-16T16:02:59.523Z
  * Source: Kibana OpenAPI spec via openapi-zod-client (complete schemas)
  * 
  * To regenerate: npm run generate:kibana-connectors
  */
+
+// @ts-nocheck
 
 import { z } from '@kbn/zod';
 
@@ -16,7 +27,7 @@ import { z } from '@kbn/zod';
 export const bedrock_config = z
   .object({
     apiUrl: z.string(),
-    defaultModel: z.string().optional().default('us.anthropic.claude-3-7-sonnet-20250219-v1:0'),
+    defaultModel: z.string().optional().default('us.anthropic.claude-sonnet-4-5-20250929-v1:0'),
   })
   .passthrough();
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -6286,6 +6297,8 @@ export const Security_Endpoint_Management_API_Command = z.enum([
   'execute',
   'upload',
   'scan',
+  'runscript',
+  'cancel',
 ]);
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const agentIds = z.union([z.array(z.string().min(1)), z.string()]).optional();
@@ -6341,16 +6354,359 @@ export const Security_Endpoint_Management_API_ActionStatusSuccessResponse = z
   })
   .passthrough();
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const Security_Endpoint_Management_API_GetEndpointActionResponse = z
-  .object({})
-  .partial()
-  .passthrough();
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_AgentTypes = z.enum([
   'endpoint',
   'sentinel_one',
   'crowdstrike',
   'microsoft_defender_endpoint',
+]);
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_ResponseActionDetails = z
+  .object({
+    agents: z.array(z.string().uuid()),
+    agentState: z.record(
+      z
+        .object({ completedAt: z.string(), isCompleted: z.boolean(), wasSuccessful: z.boolean() })
+        .partial()
+        .passthrough()
+    ),
+    agentType: Security_Endpoint_Management_API_AgentTypes,
+    command: Security_Endpoint_Management_API_Command,
+    completedAt: z.string().datetime({ offset: true }),
+    createdBy: z.string(),
+    hosts: z.record(z.object({ name: z.string() }).partial().passthrough()),
+    id: z.string().uuid(),
+    isComplete: z.boolean(),
+    isExpired: z.boolean(),
+    outputs: z.record(
+      z
+        .object({
+          content: z.union([z.object({}).partial().passthrough(), z.string()]),
+          type: z.enum(['json', 'text']),
+        })
+        .passthrough()
+    ),
+    parameters: z.object({}).partial().passthrough(),
+    startedAt: z.string().datetime({ offset: true }),
+    status: z.string(),
+    wasSuccessful: z.boolean(),
+  })
+  .partial()
+  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_KillProcess =
+  Security_Endpoint_Management_API_ResponseActionDetails.and(
+    z
+      .object({
+        outputs: z.record(
+          z
+            .object({
+              content: z.union([
+                z
+                  .object({ code: z.string(), command: z.string(), pid: z.number() })
+                  .partial()
+                  .passthrough(),
+                z
+                  .object({ code: z.string(), command: z.string(), entity_id: z.string() })
+                  .partial()
+                  .passthrough(),
+                z
+                  .object({ code: z.string(), command: z.string(), process_name: z.string() })
+                  .partial()
+                  .passthrough(),
+              ]),
+            })
+            .partial()
+            .passthrough()
+        ),
+        parameters: z.union([
+          z
+            .object({ pid: z.number().gte(1) })
+            .partial()
+            .passthrough(),
+          z
+            .object({ entity_id: z.string().min(1) })
+            .partial()
+            .passthrough(),
+          z.object({ process_name: z.string() }).partial().passthrough(),
+        ]),
+      })
+      .partial()
+      .passthrough()
+  );
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_DownloadUri = z
+  .object({ downloadUri: z.string() })
+  .partial()
+  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_GetFile =
+  Security_Endpoint_Management_API_ResponseActionDetails.and(
+    z
+      .object({
+        outputs: z.record(
+          z
+            .object({
+              content: Security_Endpoint_Management_API_DownloadUri.and(
+                z
+                  .object({
+                    code: z.string(),
+                    contents: z.array(
+                      z
+                        .object({
+                          file_name: z.string(),
+                          path: z.string(),
+                          sha256: z.string(),
+                          size: z.number(),
+                          type: z.string(),
+                        })
+                        .partial()
+                        .passthrough()
+                    ),
+                    zip_size: z.number(),
+                  })
+                  .partial()
+                  .passthrough()
+              ),
+            })
+            .partial()
+            .passthrough()
+        ),
+        parameters: z.object({ path: z.string() }).partial().passthrough(),
+      })
+      .partial()
+      .passthrough()
+  );
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_Execute =
+  Security_Endpoint_Management_API_ResponseActionDetails.and(
+    z
+      .object({
+        outputs: z.record(
+          z
+            .object({
+              content: Security_Endpoint_Management_API_DownloadUri.and(
+                z
+                  .object({
+                    code: z.string(),
+                    cwd: z.string(),
+                    output_file_id: z.string(),
+                    output_file_stderr_truncated: z.boolean(),
+                    output_file_stdout_truncated: z.boolean(),
+                    shell_code: z.number(),
+                    stderr: z.string(),
+                    stderr_truncated: z.boolean(),
+                    stdout: z.string(),
+                    stdout_truncated: z.boolean(),
+                  })
+                  .partial()
+                  .passthrough()
+              ),
+            })
+            .partial()
+            .passthrough()
+        ),
+        parameters: z.object({ command: z.string(), timeout: z.number() }).partial().passthrough(),
+      })
+      .partial()
+      .passthrough()
+  );
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_RunscriptParamsCrowdStrike = z
+  .object({
+    cloudFile: z.string(),
+    commandLine: z.string(),
+    hostPath: z.string(),
+    raw: z.string(),
+    timeout: z.number(),
+  })
+  .partial()
+  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_RunscriptParamsMicrosoft = z
+  .object({ args: z.string(), scriptName: z.string() })
+  .partial()
+  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_RunscriptParamsSentinelOne = z
+  .object({ scriptId: z.string(), scriptInput: z.string() })
+  .partial()
+  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_Runscript =
+  Security_Endpoint_Management_API_ResponseActionDetails.and(
+    z
+      .object({
+        outputs: z.record(
+          z
+            .object({
+              content: Security_Endpoint_Management_API_DownloadUri.and(
+                z
+                  .object({ code: z.string(), stderr: z.string(), stdout: z.string() })
+                  .partial()
+                  .passthrough()
+              ),
+            })
+            .partial()
+            .passthrough()
+        ),
+        parameters: z.union([
+          Security_Endpoint_Management_API_RunscriptParamsCrowdStrike,
+          Security_Endpoint_Management_API_RunscriptParamsMicrosoft,
+          Security_Endpoint_Management_API_RunscriptParamsSentinelOne,
+        ]),
+      })
+      .partial()
+      .passthrough()
+  );
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_Upload =
+  Security_Endpoint_Management_API_ResponseActionDetails.and(
+    z
+      .object({
+        outputs: z.record(
+          z
+            .object({
+              content: z
+                .object({ code: z.string(), disk_free_space: z.number(), path: z.string() })
+                .partial()
+                .passthrough(),
+            })
+            .partial()
+            .passthrough()
+        ),
+        parameters: z
+          .object({
+            file_id: z.string(),
+            file_name: z.string(),
+            file_sha256: z.string(),
+            file_size: z.number(),
+          })
+          .partial()
+          .passthrough(),
+      })
+      .partial()
+      .passthrough()
+  );
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_Scan =
+  Security_Endpoint_Management_API_ResponseActionDetails.and(
+    z
+      .object({
+        outputs: z.record(
+          z
+            .object({ content: z.object({ code: z.string() }).partial().passthrough() })
+            .partial()
+            .passthrough()
+        ),
+        parameters: z.object({ path: z.string() }).partial().passthrough(),
+      })
+      .partial()
+      .passthrough()
+  );
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_Cancel =
+  Security_Endpoint_Management_API_ResponseActionDetails.and(
+    z
+      .object({
+        outputs: z.record(
+          z
+            .object({ content: z.object({ code: z.string() }).partial().passthrough() })
+            .partial()
+            .passthrough()
+        ),
+        parameters: z.object({ id: z.string().uuid() }).partial().passthrough(),
+      })
+      .partial()
+      .passthrough()
+  );
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_SuspendProcess =
+  Security_Endpoint_Management_API_ResponseActionDetails.and(
+    z
+      .object({
+        outputs: z.record(
+          z
+            .object({
+              content: z.union([
+                z
+                  .object({ code: z.string(), command: z.string(), pid: z.number() })
+                  .partial()
+                  .passthrough(),
+                z
+                  .object({ code: z.string(), command: z.string(), entity_id: z.string() })
+                  .partial()
+                  .passthrough(),
+              ]),
+            })
+            .partial()
+            .passthrough()
+        ),
+        parameters: z.union([
+          z
+            .object({ pid: z.number().gte(1) })
+            .partial()
+            .passthrough(),
+          z
+            .object({ entity_id: z.string().min(1) })
+            .partial()
+            .passthrough(),
+        ]),
+      })
+      .partial()
+      .passthrough()
+  );
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_RunningProcessesOutputEndpoint = z
+  .object({
+    code: z.string(),
+    entries: z.array(
+      z
+        .object({ command: z.string(), entity_id: z.string(), pid: z.number(), user: z.string() })
+        .partial()
+        .passthrough()
+    ),
+  })
+  .partial()
+  .passthrough();
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_RunningProcessesOutputSentinelOne =
+  Security_Endpoint_Management_API_DownloadUri.and(
+    z.object({ code: z.string() }).partial().passthrough()
+  );
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_RunningProcesses =
+  Security_Endpoint_Management_API_ResponseActionDetails.and(
+    z
+      .object({
+        outputs: z.record(
+          z
+            .object({
+              content: z.union([
+                Security_Endpoint_Management_API_RunningProcessesOutputEndpoint,
+                Security_Endpoint_Management_API_RunningProcessesOutputSentinelOne,
+              ]),
+            })
+            .partial()
+            .passthrough()
+        ),
+      })
+      .partial()
+      .passthrough()
+  );
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_ActionDetailsResponse = z.discriminatedUnion('command', [
+  Security_Endpoint_Management_API_KillProcess,
+  Security_Endpoint_Management_API_GetFile,
+  Security_Endpoint_Management_API_Execute,
+  Security_Endpoint_Management_API_Runscript,
+  Security_Endpoint_Management_API_Upload,
+  Security_Endpoint_Management_API_Scan,
+  Security_Endpoint_Management_API_Cancel,
+  Security_Endpoint_Management_API_ResponseActionDetails,
+  Security_Endpoint_Management_API_ResponseActionDetails,
+  Security_Endpoint_Management_API_SuspendProcess,
+  Security_Endpoint_Management_API_RunningProcesses,
 ]);
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_Comment = z.string();
@@ -6372,43 +6728,7 @@ export const Security_Endpoint_Management_API_CancelRouteRequestBody = z
   .and(z.object({ parameters: z.object({ id: z.string().min(1) }).passthrough() }).passthrough());
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_ResponseActionCreateSuccessResponse = z
-  .object({
-    data: z
-      .object({
-        agents: z.object({}).partial().passthrough(),
-        agentState: z.record(
-          z
-            .object({
-              completedAt: z.string(),
-              isCompleted: z.boolean(),
-              wasSuccessful: z.boolean(),
-            })
-            .partial()
-            .passthrough()
-        ),
-        agentType: z.string(),
-        command: z.string(),
-        createdBy: z.string(),
-        hosts: z.record(z.object({ name: z.string() }).partial().passthrough()),
-        id: z.string(),
-        isComplete: z.boolean(),
-        isExpired: z.boolean(),
-        outputs: z.record(
-          z
-            .object({
-              content: z.union([z.object({}).partial().passthrough(), z.string()]),
-              type: z.enum(['json', 'text']),
-            })
-            .passthrough()
-        ),
-        parameters: z.object({}).partial().passthrough(),
-        startedAt: z.string(),
-        status: z.string(),
-        wasSuccessful: z.boolean(),
-      })
-      .partial()
-      .passthrough(),
-  })
+  .object({ data: Security_Endpoint_Management_API_ResponseActionDetails })
   .partial()
   .passthrough();
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -15563,6 +15883,9 @@ export const Security_Endpoint_Management_API_HostStatuses = z.array(
   z.enum(['healthy', 'offline', 'updating', 'inactive', 'unenrolled'])
 );
 // eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_Isolate =
+  Security_Endpoint_Management_API_ResponseActionDetails;
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_Kuery = z.string();
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_Page = z.number();
@@ -15586,6 +15909,9 @@ export const Security_Endpoint_Management_API_SortField = z.enum([
 export const Security_Endpoint_Management_API_StartDate = z.string();
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_Types = z.array(Security_Endpoint_Management_API_Type);
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const Security_Endpoint_Management_API_Unisolate =
+  Security_Endpoint_Management_API_ResponseActionDetails;
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const Security_Endpoint_Management_API_UserIds = z.union([z.array(z.string().min(1)), z.string()]);
 // eslint-disable-next-line @typescript-eslint/naming-convention

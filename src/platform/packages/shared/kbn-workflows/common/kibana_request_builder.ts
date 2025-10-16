@@ -13,7 +13,6 @@
  * Builds a Kibana HTTP request from connector definitions
  * This is shared between the execution engine and the YAML editor copy functionality
  */
-// eslint-disable-next-line complexity
 export function buildKibanaRequestFromAction(
   actionType: string,
   params: Record<string, unknown>
@@ -26,14 +25,32 @@ export function buildKibanaRequestFromAction(
 } {
   // Support raw API format first - this always works
   if (params.request) {
-    const { method = 'GET', path, body, query, headers } = params.request;
-    return { method, path, body, query, headers };
+    const {
+      method = 'GET',
+      path,
+      body,
+      query,
+      headers,
+    } = params.request as Record<string, unknown>;
+    return {
+      method: method as string,
+      path: path as string,
+      body: body as Record<string, unknown>,
+      query: query as Record<string, unknown>,
+      headers: headers as Record<string, unknown>,
+    };
   }
 
   // Special case: kibana.request type uses raw API format at top level
   if (actionType === 'kibana.request') {
     const { method = 'GET', path, body, query, headers } = params;
-    return { method, path, body, query, headers };
+    return {
+      method: method as string,
+      path: path as string,
+      body: body as Record<string, unknown>,
+      query: query as Record<string, unknown>,
+      headers: headers as Record<string, unknown>,
+    };
   }
 
   // Lazy load the generated connectors to avoid main bundle bloat

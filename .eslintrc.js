@@ -2421,6 +2421,7 @@ module.exports = {
         'no-process-exit': 'off',
       },
     },
+
     /**
      * Disallow `export *` syntax in plugin/core public/server/common index files and instead
      * require that plugins/core explicitly export the APIs that should be accessible outside the plugin.

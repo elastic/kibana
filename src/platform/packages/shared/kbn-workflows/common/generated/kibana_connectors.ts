@@ -1,18 +1,26 @@
-// @ts-nocheck
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Kibana connector definitions generated from the Kibana OpenAPI specification.
- * Generated at: 2025-10-16T14:57:42.551Z
+ * Generated at: 2025-10-16T16:03:01.100Z
  * Source: Kibana OpenAPI spec (498 APIs)
  * 
  * To regenerate: npm run generate:kibana-connectors
  */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
+// @ts-nocheck
 
 import { z } from '@kbn/zod';
-import type { InternalConnectorContract } from '../../spec/lib/generate_yaml_schema';
+import type { InternalConnectorContract } from '../../types/v1';
 // Import schemas from generated schemas file
 import {
   post_actions_connector_id_Body,

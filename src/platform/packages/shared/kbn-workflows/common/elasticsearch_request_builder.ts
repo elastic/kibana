@@ -27,7 +27,11 @@ export function buildRequestFromConnector(
   // Special case: elasticsearch.request type uses raw API format at top level
   if (stepType === 'elasticsearch.request') {
     const { method = 'GET', path, body } = params;
-    return { method, path, body };
+    return {
+      method: method as string,
+      path: path as string,
+      body: body as Record<string, unknown>,
+    };
   }
 
   // Lazy load the generated connectors to avoid main bundle bloat
@@ -76,13 +80,6 @@ export function buildRequestFromConnector(
     const queryParams: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(params)) {
-      // eslint-disable-next-line no-console
-      console.log(
-        `DEBUG - Processing param: ${key}, isPathParam: ${pathParams.has(
-          key
-        )}, isUrlParam: ${urlParamKeys.has(key)}, isBodyParam: ${bodyParamKeys.has(key)}`
-      );
-
       // Skip path parameters (they're used in the URL) and meta parameters
       if (pathParams.has(key) || key === 'method') {
         // eslint-disable-next-line no-continue

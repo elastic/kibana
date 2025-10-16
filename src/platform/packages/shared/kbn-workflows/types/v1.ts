@@ -413,7 +413,7 @@ export interface InternalConnectorContract extends ConnectorContract {
 }
 
 export interface ConnectorExamples {
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
   snippet?: string;
 }
 

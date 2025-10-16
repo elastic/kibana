@@ -1,15 +1,24 @@
 /*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Elasticsearch connector definitions generated from Console's API specifications.
- * Generated at: 2025-10-16T14:57:47.319Z
+ * Generated at: 2025-10-16T16:02:49.530Z
  * Source: Console definitions (568 APIs)
  * 
  * To regenerate: npm run generate:es-connectors
  */
 
 import { z } from '@kbn/zod';
-import type { InternalConnectorContract } from '../../spec/lib/generate_yaml_schema';
+import type { InternalConnectorContract } from '../../types/v1';
 
 export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
   {

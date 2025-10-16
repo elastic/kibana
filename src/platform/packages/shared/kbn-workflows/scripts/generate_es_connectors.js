@@ -650,6 +650,15 @@ function generateElasticsearchConnectors() {
 
     // Generate the TypeScript file
     const fileContent = `/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Elasticsearch connector definitions generated from Console's API specifications.
@@ -660,7 +669,7 @@ function generateElasticsearchConnectors() {
  */
 
 import { z } from '@kbn/zod';
-import type { InternalConnectorContract } from '../../spec/lib/generate_yaml_schema';
+import type { InternalConnectorContract } from '../../types/v1';
 
 export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
 ${connectorDefinitions.join(',\n')}

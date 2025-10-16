@@ -1171,6 +1171,15 @@ function copyClientAsSchemas() {
   // No safe schema wrapper needed - fix the root cause instead
 
   const schemaFileContent = `/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Zod schema definitions extracted from the Kibana OpenAPI specification.
@@ -1179,6 +1188,8 @@ function copyClientAsSchemas() {
  * 
  * To regenerate: npm run generate:kibana-connectors
  */
+
+// @ts-nocheck
 
 import { z } from '@kbn/zod';
 
@@ -1321,7 +1332,15 @@ function generateKibanaConnectors() {
         : '';
 
     // Generate the TypeScript file
-    let fileContent = `// @ts-nocheck
+    let fileContent = `/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
@@ -1332,10 +1351,10 @@ function generateKibanaConnectors() {
  * To regenerate: npm run generate:kibana-connectors
  */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
+// @ts-nocheck
 
 import { z } from '@kbn/zod';
-import type { InternalConnectorContract } from '../../spec/lib/generate_yaml_schema';${schemaImportsSection}
+import type { InternalConnectorContract } from '../../types/v1';${schemaImportsSection}
 export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
 ${connectorDefinitions.join(',\n')}
 ];
