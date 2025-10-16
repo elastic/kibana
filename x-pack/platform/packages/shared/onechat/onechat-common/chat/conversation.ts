@@ -120,6 +120,7 @@ export type ConversationRoundStep = ToolCallStep | ReasoningStep;
 export interface EvaluationScore {
   evaluatorId: string;
   score: number;
+  analysis?: Record<string, any>;
 }
 
 /**

@@ -38,7 +38,8 @@ describe('regex_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result).toBe(1);
+      expect(result.score).toBe(1);
+      expect(result.analysis).toBeUndefined();
     });
 
     it('returns 0 when regex does not match response message', async () => {
@@ -50,7 +51,7 @@ describe('regex_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result).toBe(0);
+      expect(result.score).toBe(0);
     });
 
     it('handles case-sensitive patterns correctly', async () => {
@@ -62,14 +63,14 @@ describe('regex_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result).toBe(0);
+      expect(result.score).toBe(0);
 
       const contextInsensitive: EvaluatorContext = {
         ...context,
         customInstructions: 'world|World',
       };
       const resultInsensitive = await evaluator(contextInsensitive);
-      expect(resultInsensitive).toBe(1);
+      expect(resultInsensitive.score).toBe(1);
     });
 
     it('handles complex regex patterns with lookaheads', async () => {
@@ -81,7 +82,7 @@ describe('regex_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result).toBe(1);
+      expect(result.score).toBe(1);
     });
 
     it('handles regex patterns with groups', async () => {
@@ -93,7 +94,7 @@ describe('regex_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result).toBe(1);
+      expect(result.score).toBe(1);
     });
 
     it('handles regex patterns with special characters', async () => {
@@ -105,7 +106,7 @@ describe('regex_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result).toBe(1);
+      expect(result.score).toBe(1);
     });
 
     it('throws error when customInstructions is not a string', async () => {
@@ -141,7 +142,7 @@ describe('regex_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result).toBe(0);
+      expect(result.score).toBe(0);
     });
 
     it('handles empty regex pattern', async () => {
@@ -153,7 +154,7 @@ describe('regex_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result).toBe(1);
+      expect(result.score).toBe(1);
     });
   });
 });

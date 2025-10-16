@@ -118,7 +118,9 @@ describe('groundedness_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result).toBe(1.0);
+      expect(result.score).toBe(1.0);
+      expect(result.analysis).toBeDefined();
+      expect(result.analysis).toEqual(analysis);
     });
 
     it('returns 1.0 when there are no tool calls', async () => {
@@ -132,7 +134,8 @@ describe('groundedness_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result).toBe(1.0);
+      expect(result.score).toBe(1.0);
+      expect(result.analysis).toBeUndefined();
     });
 
     it('calculates score correctly for partially supported claims', async () => {
@@ -153,7 +156,9 @@ describe('groundedness_evaluator', () => {
 
       const result = await evaluator(context);
       // Score should be geometric mean of [1.0, 0.9] = sqrt(0.9) ≈ 0.9487
-      expect(result).toBeCloseTo(0.9487, 3);
+      expect(result.score).toBeCloseTo(0.9487, 3);
+      expect(result.analysis).toBeDefined();
+      expect(result.analysis).toEqual(analysis);
     });
 
     it('returns 0 for contradicted central claim', async () => {
@@ -174,7 +179,9 @@ describe('groundedness_evaluator', () => {
 
       const result = await evaluator(context);
       // Contradicted central claim has score 0.0, so geometric mean is 0
-      expect(result).toBe(0.0);
+      expect(result.score).toBe(0.0);
+      expect(result.analysis).toBeDefined();
+      expect(result.analysis).toEqual(analysis);
     });
 
     it('handles peripheral contradictions better than central ones', async () => {
@@ -195,7 +202,9 @@ describe('groundedness_evaluator', () => {
 
       const result = await evaluator(context);
       // Geometric mean of [1.0, 0.1] = sqrt(0.1) ≈ 0.3162
-      expect(result).toBeCloseTo(0.3162, 3);
+      expect(result.score).toBeCloseTo(0.3162, 3);
+      expect(result.analysis).toBeDefined();
+      expect(result.analysis).toEqual(analysis);
     });
 
     it('filters non-tool-call steps correctly', async () => {

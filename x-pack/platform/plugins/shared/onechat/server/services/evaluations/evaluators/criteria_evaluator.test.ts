@@ -49,7 +49,8 @@ describe('criteria_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result).toBe(0.8);
+      expect(result.score).toBe(0.8);
+      expect(result.analysis).toBeUndefined();
     });
 
     it('uses default criteria when customInstructions is not a string', async () => {
@@ -62,7 +63,7 @@ describe('criteria_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result).toBe(0.8);
+      expect(result.score).toBe(0.8);
 
       const chatCompleteMock = mockClient.chatComplete as jest.Mock;
       const callArgs = chatCompleteMock.mock.calls[0][0];
@@ -81,7 +82,7 @@ describe('criteria_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result).toBe(0.8);
+      expect(result.score).toBe(0.8);
 
       const chatCompleteMock = mockClient.chatComplete as jest.Mock;
       const callArgs = chatCompleteMock.mock.calls[0][0];

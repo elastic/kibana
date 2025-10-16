@@ -14,7 +14,7 @@ export const createCriteriaEvaluator = ({
 }: {
   inferenceClient: BoundInferenceClient;
 }): EvaluatorFunction => {
-  return async (context): Promise<number> => {
+  return async (context) => {
     const { currentRound, customInstructions } = context;
 
     const criteria =
@@ -57,7 +57,7 @@ Score (0-1):`,
         throw new Error(`LLM returned score outside valid range [0, 1]. Received: ${score}`);
       }
 
-      return score;
+      return { score };
     } catch (error) {
       if (error instanceof Error && error.message.includes('Failed to parse')) {
         throw error;

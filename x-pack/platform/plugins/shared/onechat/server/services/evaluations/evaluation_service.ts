@@ -69,15 +69,20 @@ export class EvaluationServiceImpl implements EvaluationService {
       const scores = await Promise.all(
         evaluatorConfigs.map(async (config) => {
           const evaluator = evaluators[config.evaluatorId];
-          let score: number;
 
           if (evaluator) {
             try {
-              score = await evaluator({
+              const result = await evaluator({
                 conversation,
                 currentRound: round,
                 customInstructions: config.customInstructions ?? '',
               });
+
+              return {
+                evaluatorId: config.evaluatorIdOverride || config.evaluatorId,
+                score: result.score,
+                ...(result.analysis && { analysis: result.analysis }),
+              };
             } catch (error) {
               this.logger.error(
                 `Error running evaluator ${config.evaluatorId} for round ${round.id}: ${
@@ -87,13 +92,11 @@ export class EvaluationServiceImpl implements EvaluationService {
               throw error;
             }
           } else {
-            score = Math.random();
+            return {
+              evaluatorId: config.evaluatorIdOverride || config.evaluatorId,
+              score: Math.random(),
+            };
           }
-
-          return {
-            evaluatorId: config.evaluatorIdOverride || config.evaluatorId,
-            score,
-          };
         })
       );
 

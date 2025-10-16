@@ -8,7 +8,7 @@
 import type { EvaluatorFunction } from '../types';
 
 export const createRegexEvaluator = (): EvaluatorFunction => {
-  return async (context): Promise<number> => {
+  return async (context) => {
     const { currentRound, customInstructions } = context;
 
     if (typeof customInstructions !== 'string') {
@@ -31,6 +31,6 @@ export const createRegexEvaluator = (): EvaluatorFunction => {
     const responseMessage = currentRound.response.message;
     const match = regex.test(responseMessage);
 
-    return match ? 1 : 0;
+    return { score: match ? 1 : 0 };
   };
 };

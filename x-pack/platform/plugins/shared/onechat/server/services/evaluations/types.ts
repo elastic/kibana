@@ -14,6 +14,11 @@ export interface EvaluatorContext {
   customInstructions: string | number;
 }
 
-export type EvaluatorFunction = (context: EvaluatorContext) => Promise<number>;
+export interface EvaluatorResult {
+  score: number;
+  analysis?: Record<string, any>;
+}
+
+export type EvaluatorFunction = (context: EvaluatorContext) => Promise<EvaluatorResult>;
 
 export type EvaluatorRegistry = Record<EvaluatorId, EvaluatorFunction>;

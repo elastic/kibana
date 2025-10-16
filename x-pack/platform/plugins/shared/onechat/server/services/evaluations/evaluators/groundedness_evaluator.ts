@@ -22,7 +22,7 @@ export const createGroundednessEvaluator = ({
   inferenceClient: BoundInferenceClient;
   logger: Logger;
 }): EvaluatorFunction => {
-  return async (context): Promise<number> => {
+  return async (context) => {
     const { currentRound } = context;
 
     const userQuery = currentRound.input.message;
@@ -34,11 +34,6 @@ export const createGroundednessEvaluator = ({
       params: step.params,
       results: step.results,
     }));
-
-    if (toolCallHistory.length === 0) {
-      logger.debug('No tool calls found in conversation round for groundedness evaluation');
-      return 1.0;
-    }
 
     try {
       const response = await inferenceClient.prompt({
@@ -59,7 +54,10 @@ export const createGroundednessEvaluator = ({
 
       const score = calculateGroundednessScore(analysis);
 
-      return score;
+      return {
+        score,
+        analysis: analysis as Record<string, any>,
+      };
     } catch (error) {
       logger.error(
         `Error in groundedness evaluation: ${
