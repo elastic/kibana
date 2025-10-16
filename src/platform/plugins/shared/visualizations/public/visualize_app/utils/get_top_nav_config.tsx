@@ -12,7 +12,6 @@ import moment from 'moment';
 import type EventEmitter from 'events';
 import { i18n } from '@kbn/i18n';
 import type { EuiBetaBadgeProps } from '@elastic/eui';
-import { EuiCallOut } from '@elastic/eui';
 import { parse } from 'query-string';
 
 import type { Capabilities } from '@kbn/core/public';
@@ -329,61 +328,13 @@ export const getTopNavConfig = (
             integration: {
               export: {
                 pdfReports: {
-                  draftModeCallOut: (
-                    <EuiCallOut
-                      announceOnMount
-                      color="warning"
-                      iconType="warning"
-                      title={i18n.translate('visualizations.exports.pdfReports.warning.title', {
-                        defaultMessage: 'Unsaved changes',
-                      })}
-                    >
-                      {i18n.translate(
-                        'visualizations.exports.pdfReports.postURLWatcherMessage.unsavedChanges',
-                        {
-                          defaultMessage: 'URL may change if you upgrade Kibana.',
-                        }
-                      )}
-                    </EuiCallOut>
-                  ),
+                  draftModeCallOut: true,
                 },
                 imageReports: {
-                  draftModeCallOut: (
-                    <EuiCallOut
-                      announceOnMount
-                      color="warning"
-                      iconType="warning"
-                      title={i18n.translate('visualizations.exports.imageReports.warning.title', {
-                        defaultMessage: 'Unsaved changes',
-                      })}
-                    >
-                      {i18n.translate(
-                        'visualizations.exports.imageReports.postURLWatcherMessage.unsavedChanges',
-                        {
-                          defaultMessage: 'URL may change if you upgrade Kibana.',
-                        }
-                      )}
-                    </EuiCallOut>
-                  ),
+                  draftModeCallOut: true,
                 },
                 csvReports: {
-                  draftModeCallOut: (
-                    <EuiCallOut
-                      announceOnMount
-                      color="warning"
-                      iconType="warning"
-                      title={i18n.translate('visualizations.exports.csvReports.warning.title', {
-                        defaultMessage: 'Unsaved changes',
-                      })}
-                    >
-                      {i18n.translate(
-                        'visualizations.exports.csvReports.postURLWatcherMessage.unsavedChanges',
-                        {
-                          defaultMessage: 'URL may change if you upgrade Kibana.',
-                        }
-                      )}
-                    </EuiCallOut>
-                  ),
+                  draftModeCallOut: true,
                 },
               },
             },
