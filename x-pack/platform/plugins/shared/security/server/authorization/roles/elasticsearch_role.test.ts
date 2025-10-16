@@ -276,12 +276,57 @@ describe('#transformElasticsearchRoleToRole', () => {
     { name: 'global-base-read', _transform_error: [] },
     { name: 'global-foo-all', _transform_error: [] },
     { name: 'global-foo-read', _transform_error: [] },
-    { name: 'global-malformed', _transform_error: ['kibana:transformation_exception'] },
+    {
+      name: 'global-malformed',
+      _transform_error: [
+        {
+          reason: 'kibana:transformation_exception',
+          state: [
+            {
+              application: 'kibana-.kibana',
+              privileges: ['feature_securitySolutionCasesV2.a;;'],
+              resources: ['*'],
+            },
+          ],
+        },
+      ],
+    },
     { name: 'default-base-all', _transform_error: [] },
     { name: 'default-base-read', _transform_error: [] },
-    { name: 'default-foo-all', _transform_error: ['kibana:feature_requires_all_spaces'] },
-    { name: 'default-foo-read', _transform_error: [] },
-    { name: 'default-malformed', _transform_error: ['kibana:transformation_exception'] },
+    {
+      name: 'default-foo-all',
+      _transform_error: [
+        {
+          reason: 'kibana:feature_requires_all_spaces',
+          state: [
+            {
+              application: 'kibana-.kibana',
+              privileges: ['feature_foo.all'],
+              resources: ['space:default'],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'default-foo-read',
+      _transform_error: [],
+    },
+    {
+      name: 'default-malformed',
+      _transform_error: [
+        {
+          reason: 'kibana:transformation_exception',
+          state: [
+            {
+              application: 'kibana-.kibana',
+              privileges: ['feature_securitySolutionCasesV2.a;;'],
+              resources: ['space:default'],
+            },
+          ],
+        },
+      ],
+    },
   ]);
 
   testRoles(
@@ -292,13 +337,65 @@ describe('#transformElasticsearchRoleToRole', () => {
       { name: 'global-base-all', _transform_error: [] },
       { name: 'global-base-read', _transform_error: [] },
       { name: 'global-foo-all', _transform_error: [] },
-      { name: 'global-foo-read', _transform_error: ['kibana:disabled_feature_privileges'] },
-      { name: 'global-malformed', _transform_error: ['kibana:transformation_exception'] },
+      {
+        name: 'global-foo-read',
+        _transform_error: [
+          {
+            reason: 'kibana:disabled_feature_privileges',
+            state: [
+              { application: 'kibana-.kibana', privileges: ['feature_foo.read'], resources: ['*'] },
+            ],
+          },
+        ],
+      },
+      {
+        name: 'global-malformed',
+        _transform_error: [
+          {
+            reason: 'kibana:transformation_exception',
+            state: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['feature_securitySolutionCasesV2.a;;'],
+                resources: ['*'],
+              },
+            ],
+          },
+        ],
+      },
       { name: 'default-base-all', _transform_error: [] },
       { name: 'default-base-read', _transform_error: [] },
       { name: 'default-foo-all', _transform_error: [] },
-      { name: 'default-foo-read', _transform_error: ['kibana:disabled_feature_privileges'] },
-      { name: 'default-malformed', _transform_error: ['kibana:transformation_exception'] },
+      {
+        name: 'default-foo-read',
+        _transform_error: [
+          {
+            reason: 'kibana:disabled_feature_privileges',
+            state: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['feature_foo.read'],
+                resources: ['space:default'],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: 'default-malformed',
+        _transform_error: [
+          {
+            reason: 'kibana:transformation_exception',
+            state: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['feature_securitySolutionCasesV2.a;;'],
+                resources: ['space:default'],
+              },
+            ],
+          },
+        ],
+      },
     ]
   );
 
