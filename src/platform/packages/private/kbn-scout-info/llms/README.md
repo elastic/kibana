@@ -71,16 +71,26 @@ Alternatively, you can search for these files manually, or attempt to have the A
 Then, use a similar prompt:
 
 ```
-Can you generate Scout API helpers for these files:
+Can you generate a Scout API helper based on these existing files:
 
-src/platform/plugins/shared/data_views/server/routes.ts - Main route registration file
-src/platform/plugins/shared/data_views/server/rest_api_routes/public/index.ts - Public routes index
-src/platform/plugins/shared/data_views/server/constants.ts - Path constants
-src/platform/plugins/shared/data_views/common/constants.ts - Common constants including internal paths
-src/platform/plugins/shared/data_views/server/rest_api_routes/internal/existing_indices.ts - Existing indices endpoint
-src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields_for.ts - Fields for wildcard endpoint
-src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields.ts - Fields endpoint
-src/platform/plugins/shared/data_views/server/rest_api_routes/internal/has_es_data.ts - Has ES data endpoint
+@src/platform/plugins/shared/data_views/server/routes.ts - Main route registration file
+@src/platform/plugins/shared/data_views/server/rest_api_routes/public/index.ts - Public routes index
+@src/platform/plugins/shared/data_views/server/constants.ts - Path constants
+@src/platform/plugins/shared/data_views/common/constants.ts - Common constants including internal paths
+@src/platform/plugins/shared/data_views/server/rest_api_routes/internal/existing_indices.ts - Existing indices endpoint
+@src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields_for.ts - Fields for wildcard endpoint
+@src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields.ts - Fields endpoint
+@src/platform/plugins/shared/data_views/server/rest_api_routes/internal/has_es_data.ts - Has ES data endpoint
+
+Guidelines:
+- Don't import existing interfaces. Rather, create a separate `types.ts` file which contains all the interfaces and types that the API helper needs.
+- Take inspiration from the existing Scout platform API helpers: `src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis`, and add them there (follow the same structure).
+- Add support for all the available endpoints, and design the API service to be intuitive to use.
+- Register the new API helper in the `index.ts` file.
+
+Instructions:
+@src/platform/packages/private/kbn-scout-info/llms/what-is-scout.md contains a high-level description of the Scout framework
+@src/platform/packages/private/kbn-scout-info/llms/scout-api-services.md contains a high-level overview of API services in Scout
 ```
 
 ## Step 4: Implement the test logic
