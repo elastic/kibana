@@ -8,6 +8,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
+import type { TimeSlice } from '@kbn/controls-schemas';
 import type { PublishingSubject } from '../../publishing_subject';
 
 export interface AppliesFilters {
@@ -17,4 +18,12 @@ export interface AppliesFilters {
 
 export const apiAppliesFilters = (unknownApi: unknown): unknownApi is AppliesFilters => {
   return Boolean(unknownApi && (unknownApi as AppliesFilters)?.appliedFilters$ !== undefined);
+};
+
+export interface AppliesTimeslice {
+  appliedTimeslice$: PublishingSubject<TimeSlice | undefined>;
+}
+
+export const apiAppliesTimeslice = (unknownApi: unknown): unknownApi is AppliesTimeslice => {
+  return Boolean(unknownApi && (unknownApi as AppliesTimeslice)?.appliedTimeslice$ !== undefined);
 };

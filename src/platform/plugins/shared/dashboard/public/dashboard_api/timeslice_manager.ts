@@ -7,34 +7,61 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import {
-  apiPublishesTimeslice,
-  type PublishesTimeslice,
-  type PublishingSubject,
-} from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import type { AppliesTimeslice } from '@kbn/presentation-publishing';
+import { apiAppliesTimeslice, type PublishingSubject } from '@kbn/presentation-publishing';
+import { BehaviorSubject, combineLatestWith, filter } from 'rxjs';
+import type { TimeSlice } from '@kbn/controls-schemas';
+import type { initializeSettingsManager } from './settings_manager';
 
-type Timeslice = [number, number] | undefined;
 export const initializeTimesliceManager = (
-  children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>
+  children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>,
+  settingsManager: ReturnType<typeof initializeSettingsManager>
 ) => {
-  const timeslice$ = new BehaviorSubject<Timeslice>(undefined);
+  const unpublishedTimeslice$ = new BehaviorSubject<TimeSlice | undefined>(undefined);
+
+  const timeslice$ = new BehaviorSubject<TimeSlice | undefined>(undefined);
+  const publishTimeslice = () => {
+    if (!deepEqual(unpublishedTimeslice$.value, timeslice$.value))
+      timeslice$.next(unpublishedTimeslice$.value);
+  };
+
   const childrenTimesliceSubscription = combineCompatibleChildrenApis<
-    PublishesTimeslice,
-    Timeslice
-  >({ children$ }, 'timeslice$', apiPublishesTimeslice, undefined).subscribe((newTimeslice) => {
+    AppliesTimeslice,
+    TimeSlice | undefined
+  >(
+    { children$ },
+    'appliedTimeslice$',
+    apiAppliesTimeslice,
+    undefined, // flatten method
+    (values) => {
+      // dashboard should never allow multiple timeslider controls
+      // return last timeslider control value
+      return values.length === 0 ? undefined : values[values.length - 1];
+    }
+  ).subscribe((newTimeslice) => {
     // Guard against children that publish an empty timeslice
     const [from, to] = newTimeslice ?? [];
     if (typeof from !== 'number' || typeof to !== 'number') timeslice$.next(undefined);
-    else timeslice$.next(newTimeslice);
+    else unpublishedTimeslice$.next(newTimeslice);
   });
 
+  const autoPublishTimesliceSubscription = unpublishedTimeslice$
+    .pipe(
+      combineLatestWith(settingsManager.api.settings.autoApplyFilters$),
+      filter(([_, autoApplyFilters]) => autoApplyFilters)
+    )
+    .subscribe(() => {
+      publishTimeslice();
+    });
+
   return {
-    api: { timeslice$ },
+    api: { timeslice$, publishedTimeslice$: timeslice$, unpublishedTimeslice$, publishTimeslice },
     cleanup: () => {
       childrenTimesliceSubscription.unsubscribe();
+      autoPublishTimesliceSubscription.unsubscribe();
     },
   };
 };

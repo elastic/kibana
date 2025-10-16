@@ -76,7 +76,7 @@ export function getDashboardApi({
   const settingsManager = initializeSettingsManager(initialState);
 
   const esqlVariablesManager = initializeESQLVariablesManager(layoutManager.api.children$);
-  const timesliceManager = initializeTimesliceManager(layoutManager.api.children$);
+  const timesliceManager = initializeTimesliceManager(layoutManager.api.children$, settingsManager);
 
   const unifiedSearchManager = initializeUnifiedSearchManager(
     initialState,

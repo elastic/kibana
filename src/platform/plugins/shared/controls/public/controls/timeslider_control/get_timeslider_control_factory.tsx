@@ -19,7 +19,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { apiPublishesSettings, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';
@@ -77,6 +77,19 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
         }
 
         const { stepSize, timeRange, timeRangeBounds } = timeRangeMeta$.value;
+        if (
+          apiPublishesSettings(parentApi) &&
+          !parentApi.settings.autoApplyFilters$.value &&
+          timeslice$.value
+        ) {
+          // If filters are not auto-applied, only sync the timeslice if it's out of bounds of the new time range
+          // This prevents the timeslice from changing slightly to a value the user didn't intend when using
+          // relative time ranges
+          const [prevFrom, prevTo] = timeslice$.value;
+          const [boundsFrom, boundsTo] = timeRangeBounds;
+          if (prevFrom >= boundsFrom && prevTo <= boundsTo) return;
+        }
+
         const from = timeRangeBounds[FROM_INDEX] + startPercentage * timeRange;
         const to = timeRangeBounds[FROM_INDEX] + endPercentage * timeRange;
         timeslice$.next([
@@ -241,7 +254,7 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
         ...unsavedChangesApi,
         isPinnable: false, // Disable the user-facing unpin action; panel can still be pinned programatically when it's created
         defaultTitle$: new BehaviorSubject<string | undefined>(displayName),
-        timeslice$,
+        appliedTimeslice$: timeslice$,
         serializeState,
         clearSelections: () => {
           setTimeslice(undefined);
@@ -249,8 +262,11 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
         },
         hasSelections$: hasTimeSliceSelection$ as PublishingSubject<boolean | undefined>,
         CustomPrependComponent: () => {
-          const [autoApplySelections, viewMode] = useBatchedPublishingSubjects(
-            controlGroupApi.autoApplySelections$,
+          const autoApplyFiltersSubject = apiPublishesSettings(parentApi)
+            ? parentApi.settings.autoApplyFilters$
+            : new BehaviorSubject<boolean>(true);
+          const [autoApplyFilters, viewMode] = useBatchedPublishingSubjects(
+            autoApplyFiltersSubject,
             viewModeSubject
           );
 
@@ -259,7 +275,7 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
               onNext={onNext}
               onPrevious={onPrevious}
               viewMode={viewMode}
-              disablePlayButton={!autoApplySelections}
+              disablePlayButton={!autoApplyFilters}
               setIsPopoverOpen={(value) => isPopoverOpen$.next(value)}
               waitForControlOutputConsumersToLoad$={waitForDashboardPanelsToLoad$}
             />

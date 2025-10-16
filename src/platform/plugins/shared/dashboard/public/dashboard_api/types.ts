@@ -47,7 +47,7 @@ import type {
 import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type TracksOverlays } from '@kbn/presentation-util';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
+import type { ControlsGroupState, TimeSlice } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 import type { DashboardLocatorParams, DashboardSettings, DashboardState } from '../../common';
@@ -162,6 +162,10 @@ export type DashboardApi = CanExpandPanels &
     publishedChildFilters$: PublishingSubject<Filter[] | undefined>;
     unpublishedChildFilters$: PublishingSubject<Filter[] | undefined>;
     publishFilters: () => void;
+
+    publishedTimeslice$: PublishingSubject<TimeSlice | undefined>;
+    unpublishedTimeslice$: PublishingSubject<TimeSlice | undefined>;
+    publishTimeslice: () => void;
 
     registerChildApi: (api: DefaultEmbeddableApi) => void;
   };
