@@ -9,11 +9,10 @@
 import { ESQLVariableType } from '@kbn/esql-types';
 import { Walker } from '../../../walker';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
-import { isAssignment, isColumn, isCommand } from '../../../ast/is';
+import { isAssignment, isColumn } from '../../../ast/is';
 import type { ICommandCallbacks } from '../../types';
 import { Location } from '../../types';
 import type {
-  ESQLCommand,
   ESQLCommandOption,
   ESQLColumn,
   ESQLFunction,
@@ -41,7 +40,7 @@ import { ESQL_VARIABLES_PREFIX } from '../../constants';
 import { getPosition, getCommaAndPipe, rightAfterColumn } from './utils';
 import { isMarkerNode } from '../../../definitions/utils/ast';
 
-function alreadyUsedColumns(command: ESQLCommand) {
+function alreadyUsedColumns(command: ESQLAstAllCommands) {
   const byOption = command.args.find((arg) => !Array.isArray(arg) && arg.name === 'by') as
     | ESQLCommandOption
     | undefined;
@@ -60,10 +59,6 @@ export async function autocomplete(
   context?: ICommandContext,
   cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
-  if (!isCommand(command)) {
-    return [];
-  }
-
   if (!callbacks?.getByType) {
     return [];
   }

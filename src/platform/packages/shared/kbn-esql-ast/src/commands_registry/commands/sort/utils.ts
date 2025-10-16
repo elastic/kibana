@@ -9,13 +9,8 @@
 
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import { getFragmentData } from '../../../definitions/utils/autocomplete/helpers';
-import {
-  pipeCompleteItem,
-  type ESQLCommand,
-  type ESQLSingleAstItem,
-  commaCompleteItem,
-  isColumn,
-} from '../../../..';
+import { pipeCompleteItem, type ESQLSingleAstItem, commaCompleteItem, isColumn } from '../../../..';
+import type { ESQLAstAllCommands } from '../../../types';
 import type { ISuggestionItem } from '../../types';
 
 export type SortPosition =
@@ -26,7 +21,10 @@ export type SortPosition =
   | 'nulls_complete'
   | 'after_nulls';
 
-export const getSortPos = (query: string, command: ESQLCommand): SortPosition | undefined => {
+export const getSortPos = (
+  query: string,
+  command: ESQLAstAllCommands
+): SortPosition | undefined => {
   const lastArg = command.args[command.args.length - 1];
   if (!lastArg || /,\s+$/.test(query)) {
     return 'empty_expression';

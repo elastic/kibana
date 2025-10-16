@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isCommand } from '../../../ast/is';
 import type { ESQLAstAllCommands } from '../../../types';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
@@ -34,10 +33,6 @@ export async function autocomplete(
   context?: ICommandContext,
   cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
-  if (!isCommand(command)) {
-    return [];
-  }
-
   if (!callbacks?.getByType) {
     return [];
   }

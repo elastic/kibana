@@ -25,10 +25,6 @@ export async function autocomplete(
   context?: ICommandContext,
   cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
-  if (!isCommand(command)) {
-    return [];
-  }
-
   const innerText = query.substring(0, cursorPosition);
   if (
     /\s/.test(innerText[innerText.length - 1]) &&
@@ -38,7 +34,9 @@ export async function autocomplete(
     return [pipeCompleteItem, commaCompleteItem];
   }
 
-  const alreadyDeclaredFields = command.args.filter(isColumn).map((arg) => arg.name);
+  const alreadyDeclaredFields = command.args
+    .filter(isColumn)
+    .map((arg) => (isCommand(arg) ? arg.name : ''));
   const fieldSuggestions = (await callbacks?.getByType?.('any', alreadyDeclaredFields)) ?? [];
 
   return handleFragment(
