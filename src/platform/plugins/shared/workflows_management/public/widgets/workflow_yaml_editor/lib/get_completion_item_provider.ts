@@ -876,7 +876,7 @@ export function getCompletionItemProvider(
 ): monaco.languages.CompletionItemProvider {
   return {
     triggerCharacters: ['@', '.', ' '],
-    provideCompletionItems: async (model, position, completionContext) => {
+    provideCompletionItems: (model, position, completionContext) => {
       try {
         const editorState = getState();
         const currentDynamicConnectorTypes = editorState?.connectors?.connectorTypes;

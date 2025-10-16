@@ -17,7 +17,6 @@ export type { ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
 import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
 
 export * from './src/languages';
-export { registerLanguage } from './src/helpers';
 
 export { BarePluginApi };
 export type * from './src/types';
