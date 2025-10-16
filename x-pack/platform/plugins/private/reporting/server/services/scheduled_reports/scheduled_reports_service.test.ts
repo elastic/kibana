@@ -1397,23 +1397,6 @@ describe('ScheduledReportsService', () => {
 
       expect(auditLogger.log).toHaveBeenCalledTimes(2);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
-        event: {
-          action: 'scheduled_report_delete',
-          category: ['database'],
-          outcome: 'unknown',
-          type: ['deletion'],
-        },
-        kibana: {
-          saved_object: {
-            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
-            name: '[Logs] Web Traffic',
-            type: 'scheduled_report',
-          },
-        },
-        message:
-          'User is deleting scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] [name=[Logs] Web Traffic]',
-      });
-      expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
         error: {
           code: 'Error',
           message: 'Not found.',
@@ -1433,6 +1416,23 @@ describe('ScheduledReportsService', () => {
         },
         message:
           'Failed attempt to delete scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=Another cool dashboard]',
+      });
+      expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+        event: {
+          action: 'scheduled_report_delete',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['deletion'],
+        },
+        kibana: {
+          saved_object: {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            name: '[Logs] Web Traffic',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'User is deleting scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] [name=[Logs] Web Traffic]',
       });
     });
 

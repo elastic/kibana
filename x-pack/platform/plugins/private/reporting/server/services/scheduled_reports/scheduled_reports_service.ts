@@ -10,13 +10,15 @@ import type {
   IClusterClient,
   KibanaRequest,
   KibanaResponseFactory,
+  Logger,
   SavedObject,
+  SavedObjectsBulkDeleteStatus,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { Logger } from '@kbn/core/server';
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { groupBy } from 'lodash';
 import type { ReportingCore } from '../..';
 import type { ListScheduledReportApiJSON, ReportingUser, ScheduledReportType } from '../../types';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -26,7 +28,8 @@ import {
   scheduledReportAuditEvent,
 } from '../audit_events/audit_events';
 import { DEFAULT_SCHEDULED_REPORT_LIST_SIZE } from './constants';
-import { transformResponse } from './transforms';
+import { transformBulkDeleteResponse, transformListResponse } from './transforms';
+import type { BulkOperationError } from './types';
 
 const SCHEDULED_REPORT_ID_FIELD = 'scheduled_report_id';
 const CREATED_AT_FIELD = 'created_at';
@@ -36,12 +39,6 @@ interface ListScheduledReportsApiResponse {
   per_page: number;
   total: number;
   data: ListScheduledReportApiJSON[];
-}
-
-interface BulkOperationError {
-  message: string;
-  status?: number;
-  id: string;
 }
 
 interface BulkDisableResult {
@@ -171,7 +168,7 @@ export class ScheduledReportsService {
         this.logger.warn(`Error getting next run for scheduled reports: ${error.message}`);
       }
 
-      return transformResponse(this.logger, response, lastRunResponse, nextRunResponse);
+      return transformListResponse(this.logger, response, lastRunResponse, nextRunResponse);
     } catch (error) {
       throw this.responseFactory.customError({
         statusCode: 500,
@@ -313,118 +310,70 @@ export class ScheduledReportsService {
     user: ReportingUser;
   }): Promise<BulkDeleteResult> {
     try {
-      const bulkErrors: BulkOperationError[] = [];
-      const deletedScheduledReportIds: Set<string> = new Set();
-      const taskIdsToRemove: string[] = [];
-
       const username = this.getUsername(user);
 
       const bulkGetResult = await this.savedObjectsClient.bulkGet<ScheduledReportType>(
         ids.map((id) => ({ id, type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE }))
       );
 
-      const scheduledReportSavedObjectsToDelete: Array<SavedObject<ScheduledReportType>> = [];
-      for (const so of bulkGetResult.saved_objects) {
-        if (so.error) {
-          bulkErrors.push({
-            message: so.error.message,
-            status: so.error.statusCode,
-            id: so.id,
-          });
-        } else {
-          // check if user is allowed to delete this scheduled report
-          if (so.attributes.createdBy !== username && !this.userCanManageReporting) {
-            bulkErrors.push({
-              message: `Not found.`,
-              status: 404,
-              id: so.id,
-            });
-            this.logger.warn(
-              `User "${username}" attempted to delete scheduled report "${so.id}" created by "${so.attributes.createdBy}" without sufficient privileges.`
-            );
-            this.auditLogger.log(
-              scheduledReportAuditEvent({
-                action: ScheduledReportAuditAction.DELETE,
-                savedObject: {
-                  type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
-                  id: so.id,
-                  name: so?.attributes?.title,
-                },
-                error: new Error(`Not found.`),
-              })
-            );
-          } else {
-            this.auditLogger.log(
-              scheduledReportAuditEvent({
-                action: ScheduledReportAuditAction.DELETE,
-                savedObject: {
-                  type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
-                  id: so.id,
-                  name: so.attributes.title,
-                },
-                outcome: 'unknown',
-              })
-            );
-            scheduledReportSavedObjectsToDelete.push(so);
-          }
-        }
+      const {
+        readErrors = [],
+        unauthorizedSavedObjects = [],
+        authorizedSavedObjects = [],
+      } = groupBy(bulkGetResult.saved_objects, (so) =>
+        so.error
+          ? 'readErrors'
+          : so.attributes.createdBy !== username && !this.userCanManageReporting
+          ? 'unauthorizedSavedObjects'
+          : 'authorizedSavedObjects'
+      );
+
+      const authErrors = this.formatAndAuditBulkDeleteAuthErrors({
+        readErrors,
+        unauthorizedSavedObjects,
+        username,
+      });
+      this.auditBulkActionStart({
+        action: ScheduledReportAuditAction.DELETE,
+        authorizedSavedObjects,
+      });
+
+      if (authorizedSavedObjects.length === 0) {
+        return transformBulkDeleteResponse({
+          deletedSchedulesIds: [],
+          errors: authErrors,
+        });
       }
 
-      if (scheduledReportSavedObjectsToDelete.length > 0) {
-        const bulkDeleteResult = await this.savedObjectsClient.bulkDelete(
-          scheduledReportSavedObjectsToDelete.map((so) => ({
-            id: so.id,
-            type: so.type,
-          }))
-        );
+      const bulkDeleteResult = await this.savedObjectsClient.bulkDelete(
+        authorizedSavedObjects.map((so) => ({
+          id: so.id,
+          type: so.type,
+        }))
+      );
+      const { deleteErrors = [], deletedSavedObjects = [] } = groupBy(
+        bulkDeleteResult.statuses,
+        (status) => (status.error ? 'deleteErrors' : 'deletedSavedObjects')
+      );
+      const executionErrors = this.formatAndAuditBulkDeleteSOErrors({
+        errorStatuses: deleteErrors,
+      });
 
-        for (const status of bulkDeleteResult.statuses) {
-          if (status.error) {
-            bulkErrors.push({
-              message: status.error.message,
-              status: status.error.statusCode,
-              id: status.id,
-            });
-            this.auditLogger.log(
-              scheduledReportAuditEvent({
-                action: ScheduledReportAuditAction.DELETE,
-                savedObject: {
-                  type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
-                  id: status.id,
-                },
-                error: new Error(status.error.message),
-              })
-            );
-          } else {
-            taskIdsToRemove.push(status.id);
-          }
-        }
-      } else {
-        return {
-          scheduled_report_ids: [...deletedScheduledReportIds],
-          errors: bulkErrors,
-          total: deletedScheduledReportIds.size + bulkErrors.length,
-        };
-      }
+      const removeTasksResult = await this.taskManager.bulkRemove(
+        deletedSavedObjects.map((so) => so.id)
+      );
+      const { removedTasks = [], erroredTasks = [] } = groupBy(
+        removeTasksResult.statuses,
+        (status) => (Boolean(status.success) ? 'removedTasks' : 'erroredTasks')
+      );
+      const taskErrors = this.formatBulkDeleteTaskErrors({
+        errorStatuses: erroredTasks,
+      });
 
-      const resultFromRemoveTasks = await this.taskManager.bulkRemove(taskIdsToRemove);
-      for (const status of resultFromRemoveTasks.statuses) {
-        if (status.success) {
-          deletedScheduledReportIds.add(status.id);
-        } else if (status.error) {
-          bulkErrors.push({
-            message: `Scheduled report deleted but task deleting failed due to: ${status.error.message}`,
-            status: status.error.statusCode,
-            id: status.id,
-          });
-        }
-      }
-
-      return {
-        scheduled_report_ids: [...deletedScheduledReportIds],
-        errors: bulkErrors,
-        total: deletedScheduledReportIds.size + bulkErrors.length,
-      };
+      return transformBulkDeleteResponse({
+        deletedSchedulesIds: removedTasks.map((task) => task.id),
+        errors: [...authErrors, ...executionErrors, ...taskErrors],
+      });
     } catch (error) {
       throw this.responseFactory.customError({
         statusCode: 500,
@@ -433,7 +382,107 @@ export class ScheduledReportsService {
     }
   }
 
-  private getUsername(user: ReportingUser): string | Boolean {
+  private auditBulkActionStart({
+    action,
+    authorizedSavedObjects,
+  }: {
+    action: ScheduledReportAuditAction;
+    authorizedSavedObjects: SavedObject<ScheduledReportType>[];
+  }) {
+    authorizedSavedObjects.forEach((so) => {
+      this.auditLog({
+        action,
+        id: so.id,
+        name: so.attributes.title,
+        outcome: 'unknown',
+      });
+    });
+  }
+
+  private formatAndAuditBulkDeleteAuthErrors({
+    readErrors,
+    unauthorizedSavedObjects,
+    username,
+  }: {
+    readErrors: SavedObject<ScheduledReportType>[];
+    unauthorizedSavedObjects: SavedObject<ScheduledReportType>[];
+    username: string | boolean;
+  }) {
+    const bulkErrors: BulkOperationError[] = [];
+    readErrors.forEach((so) => {
+      if (!so.error) {
+        return;
+      }
+      bulkErrors.push({
+        message: so.error.message,
+        status: so.error.statusCode,
+        id: so.id,
+      });
+    });
+    unauthorizedSavedObjects.forEach((so) => {
+      bulkErrors.push({
+        message: `Not found.`,
+        status: 404,
+        id: so.id,
+      });
+      this.logger.warn(
+        `User "${username}" attempted to delete scheduled report "${so.id}" created by "${so.attributes.createdBy}" without sufficient privileges.`
+      );
+      this.auditLog({
+        action: ScheduledReportAuditAction.DELETE,
+        id: so.id,
+        name: so?.attributes?.title,
+        outcome: 'failure',
+        error: new Error(`Not found.`),
+      });
+    });
+    return bulkErrors;
+  }
+
+  private formatAndAuditBulkDeleteSOErrors({
+    errorStatuses,
+  }: {
+    errorStatuses: SavedObjectsBulkDeleteStatus[];
+  }) {
+    const bulkErrors: BulkOperationError[] = [];
+    errorStatuses.forEach((status) => {
+      if (!status.error) {
+        return;
+      }
+      bulkErrors.push({
+        message: status.error.message,
+        status: status.error.statusCode,
+        id: status.id,
+      });
+      this.auditLog({
+        action: ScheduledReportAuditAction.DELETE,
+        id: status.id,
+        error: new Error(status.error.message),
+      });
+    });
+    return bulkErrors;
+  }
+
+  private formatBulkDeleteTaskErrors({
+    errorStatuses,
+  }: {
+    errorStatuses: SavedObjectsBulkDeleteStatus[];
+  }) {
+    const bulkErrors: BulkOperationError[] = [];
+    errorStatuses.forEach((error) => {
+      if (error.error == null) {
+        return;
+      }
+      bulkErrors.push({
+        message: `Scheduled report deleted but task deleting failed due to: ${error.error.message}`,
+        status: error.error.statusCode,
+        id: error.id,
+      });
+    });
+    return bulkErrors;
+  }
+
+  private getUsername(user: ReportingUser): string | boolean {
     return user ? user.username : false;
   }
 
@@ -452,7 +501,7 @@ export class ScheduledReportsService {
     name,
     outcome,
     error,
-  }: ScheduledReportAuditEventParams & { id: string; name: string | undefined }) {
+  }: ScheduledReportAuditEventParams & { id: string; name?: string }) {
     this.auditLogger.log(
       scheduledReportAuditEvent({
         action,
