@@ -20,6 +20,7 @@ import {
 } from '@kbn/controls-constants';
 import { optionsListDSLControlSchema } from './options_list_schema';
 import { rangeSliderControlSchema } from './range_slider_schema';
+import { timeSliderControlSchema } from './time_slider_schema';
 
 export const controlWidthSchema = schema.oneOf(
   [
@@ -42,6 +43,7 @@ export const stickyControlSchema = schema.object({
       meta: { description: 'Expand width of the control panel to fit available space.' },
     })
   ),
+  order: schema.maybe(schema.number()),
 });
 
 export const controlsGroupSchema = schema.object({
@@ -64,6 +66,7 @@ export const controlsGroupSchema = schema.object({
         .extendsDeep({ unknowns: 'allow' }),
       schema.allOf([
         schema.object({ type: schema.literal(TIME_SLIDER_CONTROL) }),
+        timeSliderControlSchema,
         stickyControlSchema,
       ]),
     ]),
