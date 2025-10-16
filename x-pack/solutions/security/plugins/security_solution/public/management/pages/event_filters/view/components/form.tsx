@@ -535,12 +535,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         processChanged(updatedItem);
         if (!hasFormChanged) setHasFormChanged(true);
       },
-      [
-        exception,
-        hasFormChanged,
-        isFilterProcessDescendantsSelected,
-        processChanged,
-      ]
+      [exception, hasFormChanged, isFilterProcessDescendantsSelected, processChanged]
     );
     const exceptionBuilderComponentMemo = useMemo(
       () =>
