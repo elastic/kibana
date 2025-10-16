@@ -33,7 +33,7 @@ export function extractConfigFiles(
 
       copyFileSync(value, destPath);
 
-      options?.log.info('moved %s in config to %s', value, destPath);
+      options?.log.info('copied %s in config to %s', value, destPath);
 
       localConfig.push(`${key}=${filename}`);
     } else {

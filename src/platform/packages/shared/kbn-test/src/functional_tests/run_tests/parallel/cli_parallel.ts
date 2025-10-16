@@ -22,8 +22,14 @@ export function runTestsCliParallel() {
       const inherit = flagsReader.boolean('inherit');
       const stats = flagsReader.boolean('stats');
 
+      const extraArgs = Array.from(flagsReader.getUnused().entries())
+        .map(([key, value]) => {
+          return [`--${key}`, value];
+        })
+        .flat();
+
       const exitCode = await runTestsParallel(log, configs, {
-        extraArgs: flagsReader.getPositionals(),
+        extraArgs,
         stdio:
           buffer === true
             ? 'buffer'
@@ -47,7 +53,13 @@ export function runTestsCliParallel() {
       `,
       flags: {
         ...FLAG_OPTIONS,
-        boolean: [...(FLAG_OPTIONS.boolean ?? []), 'suppress', 'buffer', 'inherit', 'stats'],
+        boolean: [
+          ...(FLAG_OPTIONS.boolean ?? []).filter((flag) => flag !== 'pause'),
+          'suppress',
+          'buffer',
+          'inherit',
+          'stats',
+        ],
         help: (FLAG_OPTIONS.help ?? '').concat(
           dedent(`
             --suppress            Suppress logs from configs
