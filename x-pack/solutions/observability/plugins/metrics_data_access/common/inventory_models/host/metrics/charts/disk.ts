@@ -90,9 +90,9 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
     legend: {
       ...DEFAULT_XY_LEGEND.legend,
       legendStats: [
+        LegendValue.Average,
         LegendValue.Min,
         LegendValue.Max,
-        LegendValue.Average,
         LegendValue.LastNonNullValue,
       ],
     },
