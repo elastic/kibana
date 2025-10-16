@@ -126,19 +126,39 @@ export function initializeESQLControlSelections(
     });
 
   // derive ESQL control variable from state.
-  const getEsqlVariable = () => ({
-    key: variableName$.value,
-    value: isNaN(Number(selectedOptions$.value[0]))
-      ? selectedOptions$.value[0]
-      : Number(selectedOptions$.value[0]),
-    type: variableType$.value,
-  });
+  const getEsqlVariable = () => {
+    const isSingleSelect = singleSelect$.value;
+    const selectedValues = selectedOptions$.value;
+
+    // For single select, return the first value; for multi-select, return the array
+    let value: string | number | (string | number)[];
+
+    if (isSingleSelect) {
+      // Single select: return the first value or empty string if none selected
+      const firstValue = selectedValues[0];
+      if (firstValue !== undefined) {
+        value = isNaN(Number(firstValue)) ? firstValue : Number(firstValue);
+      } else {
+        value = '';
+      }
+    } else {
+      // Multi-select: return array of all selected values
+      value = selectedValues.map((val) => (isNaN(Number(val)) ? val : Number(val)));
+    }
+
+    return {
+      key: variableName$.value,
+      value,
+      type: variableType$.value,
+    };
+  };
   const esqlVariable$ = new BehaviorSubject<ESQLControlVariable>(getEsqlVariable());
   const variableSubscriptions = combineLatest([
     variableName$,
     variableType$,
     selectedOptions$,
     availableOptions$,
+    singleSelect$,
   ]).subscribe(() => esqlVariable$.next(getEsqlVariable()));
 
   return {

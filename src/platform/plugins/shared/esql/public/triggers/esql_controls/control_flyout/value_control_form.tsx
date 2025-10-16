@@ -197,12 +197,14 @@ export function ValueControlForm({
   );
 
   useEffect(() => {
-    if (!selectedValues?.length && controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY) {
+    if (
+      !selectedValues?.length &&
+      controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY &&
+      valuesRetrieval
+    ) {
       const queryForValues =
         variableName !== ''
-          ? valuesRetrieval
-            ? `FROM ${getIndexPatternFromESQLQuery(queryString)} | STATS BY ${valuesRetrieval}`
-            : valuesQuery
+          ? `FROM ${getIndexPatternFromESQLQuery(queryString)} | STATS BY ${valuesRetrieval}`
           : '';
       onValuesQuerySubmit(queryForValues);
     }

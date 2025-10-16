@@ -35,7 +35,7 @@ export enum EsqlControlType {
 
 export interface ESQLControlVariable {
   key: string;
-  value: string | number;
+  value: string | number | (string | number)[];
   type: ESQLVariableType;
 }
 
