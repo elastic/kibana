@@ -1102,8 +1102,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         expect(res.statusCode).to.eql(200);
       });
 
-      it('should throw 400 error when trying to bulk update an internally managed rule type using the filter param', async () => {
-        const { body: createdRule } = await supertest
+      it('should ignore internal rule types when trying to bulk update using the filter param', async () => {
+        const { body: internalRuleType } = await supertest
           .post('/api/alerts_fixture/rule/internally_managed')
           .set('kbn-xsrf', 'foo')
           .send({ ...rulePayload, tags: ['internally-managed'] })
@@ -1122,28 +1122,20 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send(payloadWithFilter);
 
-        expect(bulkEditResponse.status).to.eql(400);
+        expect(bulkEditResponse.status).to.eql(200);
 
-        const res = await alertUtils.deleteInternallyManagedRule(createdRule.id);
-
-        expect(res.statusCode).to.eql(200);
-      });
-
-      it('should throw 400 error when supplying both ids and filter', async () => {
-        const { body: createdRule } = await supertest
-          .post('/api/alerts_fixture/rule/internally_managed')
+        const { body: updatedInternalRuleType } = await supertest
+          .get(`/api/alerting/rule/${internalRuleType.id}`)
           .set('kbn-xsrf', 'foo')
           .expect(200);
 
         const { body: updatedNonInternalRuleType } = await supertest
-          .get(`/api/alerting/rule/${createdRule.id}`)
+          .get(`/api/alerting/rule/${nonInternalRuleType.id}`)
           .set('kbn-xsrf', 'foo')
-          .send({
-            ids: [createdRule.id],
-            ...payloadWithFilter,
-          });
+          .expect(200);
 
-        expect(updatedNonInternalRuleType.status).to.eql(400);
+        expect(updatedInternalRuleType.tags).to.eql(['internally-managed']);
+        expect(updatedNonInternalRuleType.tags).to.eql(['internally-managed', 'tag-A']);
 
         const res = await alertUtils.deleteInternallyManagedRule(createdRule.id);
 
