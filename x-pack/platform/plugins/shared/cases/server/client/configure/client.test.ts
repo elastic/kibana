@@ -22,6 +22,10 @@ import { ConnectorTypes } from '../../../common';
 import type { TemplatesConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import type { ConfigurationRequest } from '../../../common/types/api';
+import {
+  createMockConnectorType,
+  createMockConnectorFindResult,
+} from '@kbn/actions-plugin/server/application/connector/mocks';
 
 describe('client', () => {
   const clientArgs = createCasesClientMockArgs();
@@ -38,80 +42,50 @@ describe('client', () => {
     const args = { actionsClient, logger } as unknown as CasesClientArgs;
 
     const actionTypes = [
-      {
+      createMockConnectorType({
         id: '.jira',
         name: '1',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-        minimumLicenseRequired: 'basic' as const,
         supportedFeatureIds: ['alerting', 'cases'],
-        isSystemActionType: false,
-      },
-      {
+      }),
+      createMockConnectorType({
         id: '.servicenow',
         name: '2',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-        minimumLicenseRequired: 'basic' as const,
         supportedFeatureIds: ['alerting', 'cases'],
-        isSystemActionType: false,
-      },
-      {
+      }),
+      createMockConnectorType({
         id: '.unsupported',
         name: '3',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-        minimumLicenseRequired: 'basic' as const,
         supportedFeatureIds: ['alerting'],
-        isSystemActionType: false,
-      },
-      {
+      }),
+      createMockConnectorType({
         id: '.swimlane',
         name: 'swimlane',
-        enabled: true,
-        enabledInConfig: true,
         enabledInLicense: false,
-        minimumLicenseRequired: 'basic' as const,
         supportedFeatureIds: ['alerting', 'cases'],
-        isSystemActionType: false,
-      },
+      }),
     ];
 
     const connectors = [
-      {
+      createMockConnectorFindResult({
         id: '1',
         actionTypeId: '.jira',
         name: '1',
         config: {},
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
         referencedByCount: 1,
-      },
-      {
+      }),
+      createMockConnectorFindResult({
         id: '2',
         actionTypeId: '.servicenow',
         name: '2',
         config: {},
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-
         referencedByCount: 1,
-      },
-      {
+      }),
+      createMockConnectorFindResult({
         id: '3',
         actionTypeId: '.unsupported',
         name: '3',
-        config: {},
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
         referencedByCount: 1,
-      },
+      }),
     ];
 
     beforeEach(() => {
@@ -132,6 +106,7 @@ describe('client', () => {
           isDeprecated: false,
           isSystemAction: false,
           referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: '2',
@@ -142,6 +117,7 @@ describe('client', () => {
           isSystemAction: false,
           isDeprecated: false,
           referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
         },
       ]);
     });
@@ -159,6 +135,7 @@ describe('client', () => {
           isDeprecated: false,
           isSystemAction: false,
           referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
         },
       ]);
 
@@ -172,6 +149,7 @@ describe('client', () => {
           isDeprecated: false,
           isSystemAction: false,
           referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: '2',
@@ -182,6 +160,7 @@ describe('client', () => {
           isDeprecated: false,
           isSystemAction: false,
           referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: '4',
@@ -192,6 +171,7 @@ describe('client', () => {
           isSystemAction: false,
           isDeprecated: false,
           referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
         },
       ]);
     });
@@ -209,6 +189,7 @@ describe('client', () => {
           isDeprecated: false,
           isSystemAction: false,
           referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
         },
       ]);
 
@@ -222,6 +203,7 @@ describe('client', () => {
           isDeprecated: false,
           isSystemAction: false,
           referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
         },
         {
           id: '2',
@@ -232,6 +214,7 @@ describe('client', () => {
           isDeprecated: false,
           isSystemAction: false,
           referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
         },
       ]);
     });
