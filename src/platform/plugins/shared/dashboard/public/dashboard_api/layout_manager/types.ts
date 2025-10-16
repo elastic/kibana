@@ -40,10 +40,3 @@ export interface DashboardLayout {
 export interface DashboardChildState {
   [uuid: string]: SerializedPanelState<object>;
 }
-
-export interface PublishesLayout {
-  layout$: BehaviorSubject<DashboardLayout>;
-}
-
-export const apiPublishesLayout = (api: unknown): api is PublishesLayout =>
-  Boolean((api as PublishesLayout).layout$);

@@ -36,6 +36,7 @@ import type {
   PublishesDataViews,
   PublishesDescription,
   PublishesSavedObjectId,
+  PublishesStickyControls,
   PublishesTitle,
   PublishesUnifiedSearch,
   PublishesViewMode,
@@ -56,7 +57,6 @@ import type {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
-import type { PublishesLayout } from './layout_manager';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -120,7 +120,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesWritableViewMode &
   TrackContentfulRender &
   TracksOverlays &
-  PublishesLayout & {
+  PublishesStickyControls & {
     asyncResetToLastSavedState: () => Promise<void>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;

@@ -168,6 +168,10 @@ export {
   type SerializedTitles,
 } from './interfaces/titles/title_manager';
 export {
+  type PublishesStickyControls,
+  apiPublishesStickyControls,
+} from './interfaces/publishes_sticky_controls';
+export {
   useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
   usePublishingSubject,

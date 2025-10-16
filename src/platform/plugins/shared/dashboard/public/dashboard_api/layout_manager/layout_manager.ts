@@ -104,6 +104,15 @@ export function initializeLayoutManager(
       startWith({}) // do not block rendering by waiting for these settings
     );
 
+  /**  A quicker accessor for sticky controls stored in the layout */
+  const stickyControls$ = new BehaviorSubject<StickyControlLayoutState[]>(
+    Object.values(initialLayout.controls)
+  );
+  /** Keep stickyControls$ in sync with layout$ */
+  const controlsSubscription = layout$.subscribe(({ controls }) =>
+    stickyControls$.next(Object.values(controls))
+  );
+
   /** Keep gridLayout$ in sync with layout$ + panelResizeSettings$ */
   const gridLayoutSubscription = combineLatest([layout$, panelResizeSettings$]).subscribe(
     ([layout, panelResizeSettings]) => {
@@ -472,6 +481,7 @@ export function initializeLayoutManager(
     },
     api: {
       layout$,
+      stickyControls$,
       registerChildApi: (api: DefaultEmbeddableApi) => {
         children$.next({
           ...children$.value,
@@ -582,6 +592,7 @@ export function initializeLayoutManager(
     },
     cleanup: () => {
       gridLayoutSubscription.unsubscribe();
+      controlsSubscription.unsubscribe();
     },
   };
 }

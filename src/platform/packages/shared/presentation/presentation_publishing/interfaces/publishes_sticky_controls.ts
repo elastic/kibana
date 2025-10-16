@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DashboardLayout, DashboardLayoutPanel } from './types';
-export { areLayoutsEqual } from './are_layouts_equal';
-export { initializeLayoutManager } from './layout_manager';
+import type { StickyControlLayoutState } from '@kbn/controls-schemas/src/types';
+import type { BehaviorSubject } from 'rxjs';
+
+export interface PublishesStickyControls {
+  stickyControls$: BehaviorSubject<StickyControlLayoutState[]>;
+}
+
+export const apiPublishesStickyControls = (api: unknown): api is PublishesStickyControls =>
+  Boolean((api as PublishesStickyControls).stickyControls$);
