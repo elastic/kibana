@@ -18,7 +18,7 @@ import { workspaceSlice } from './workspace/slice';
 import {
   closeSidebar,
   openSidebar,
-  setSidebarSize,
+  setSidebarWidth,
   sidebarReducer,
   sidebarSlice,
 } from './sidebar/slice';
@@ -55,7 +55,7 @@ export const createStore = () => {
   });
 
   listenerMiddleware.startListening({
-    matcher: isAnyOf(setIsNavigationCollapsed, openSidebar, closeSidebar, setSidebarSize),
+    matcher: isAnyOf(setIsNavigationCollapsed, openSidebar, closeSidebar, setSidebarWidth),
     effect: () => {
       sessionStorage.setItem('workspace', JSON.stringify(store.getState()));
     },

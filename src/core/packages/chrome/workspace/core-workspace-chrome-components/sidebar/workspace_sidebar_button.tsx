@@ -14,7 +14,7 @@ import {
   useIsSidebarOpen,
   useIsCurrentSidebarApp,
   closeSidebar,
-  setSidebarSize,
+  setSidebarWidth,
   openSidebar,
   type SidebarSize,
 } from '@kbn/core-workspace-chrome-state';
@@ -46,7 +46,7 @@ export const WorkspaceSidebarButton = ({
       dispatch(closeSidebar());
     } else {
       dispatch(openSidebar(appId));
-      dispatch(setSidebarSize(size));
+      dispatch(setSidebarWidth(size));
     }
   };
 

@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type SidebarSize = 'regular' | 'wide' | 'fullWidth';
+export type SidebarSize = 'regular' | 'wide' | number;

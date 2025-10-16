@@ -20,3 +20,7 @@ export const useHasHeaderBanner = () => {
 export const useHasAppMenu = () => {
   return useWorkspaceSelector((state) => state.layout.hasAppMenu);
 };
+
+export const useApplicationWidth = () => {
+  return useWorkspaceSelector((state) => state.layout.applicationWidth);
+};

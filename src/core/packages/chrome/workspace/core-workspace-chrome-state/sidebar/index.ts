@@ -7,13 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { closeSidebar, openSidebar, setSidebarSize, sidebarReducer } from './slice';
+export {
+  closeSidebar,
+  openSidebar,
+  setSidebarWidth,
+  setSidebarFullscreen,
+  sidebarReducer,
+} from './slice';
 
 export {
   useCurrentSidebarApp,
   useIsCurrentSidebarApp,
   useIsSidebarOpen,
-  useSidebarSize,
+  useIsSidebarFullSize,
+  useSidebarWidth,
   useSidebarState,
 } from './hooks';
 

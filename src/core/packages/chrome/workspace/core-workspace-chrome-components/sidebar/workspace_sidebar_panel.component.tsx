@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { styles } from './workspace_sidebar_panel.styles';
+import { ResizableButton } from './resizable_button.component';
 
 export interface WorkspaceSidebarPanelComponentProps
   extends Pick<EuiPanelProps, 'color' | 'hasShadow' | 'hasBorder'> {
@@ -33,12 +34,22 @@ export interface WorkspaceSidebarPanelComponentProps
   isScrollable?: boolean;
   containerPadding?: 'none' | 's' | 'm' | 'l';
   isRight?: boolean;
+  isFullSize?: boolean;
+  onSetFullSize: (isFullSize: boolean) => void;
+  onResize?: (delta: number) => void;
+  onResizeStart?: () => void;
+  onResizeEnd?: () => void;
 }
 
 export const WorkspaceSidebarPanelComponent = ({
   children,
   title,
   onClose,
+  onSetFullSize,
+  onResize,
+  onResizeStart,
+  onResizeEnd,
+  isFullSize = false,
   isScrollable = true,
   containerPadding = 's',
 }: WorkspaceSidebarPanelComponentProps) => {
@@ -57,29 +68,74 @@ export const WorkspaceSidebarPanelComponent = ({
 
   const panelStyle = css`
     ${styles.root(theme)}
+    ${isFullSize ? styles.fullScreenRoot : ''}
   `;
 
   return (
-    <EuiPanel
-      paddingSize="none"
-      color="transparent"
-      css={panelStyle}
-      hasBorder={false}
-      hasShadow={false}
+    <EuiFlexGroup
+      direction="row"
+      gutterSize="none"
+      css={css`
+        width: 100%;
+      `}
     >
-      <EuiFlexGroup css={styles.header}>
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h3>{title}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon iconType="cross" onClick={onClose} aria-label="Close toolbar" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiPanel css={containerStyle} borderRadius="m">
-        {children}
-      </EuiPanel>
-    </EuiPanel>
+      <EuiFlexItem grow={false}>
+        <ResizableButton
+          isHorizontal={true}
+          onResize={onResize}
+          onResizeStart={onResizeStart}
+          onResizeEnd={onResizeEnd}
+          css={css`
+            margin-inline: ${isFullSize ? '-8px' : '-12px'};
+          `}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={true}>
+        <EuiPanel
+          paddingSize="none"
+          color="transparent"
+          css={panelStyle}
+          hasBorder={false}
+          hasShadow={false}
+        >
+          <EuiFlexGroup
+            css={[
+              styles.header,
+              isFullSize
+                ? css`
+                    margin-left: ${euiTheme.size.m};
+                  `
+                : '',
+            ]}
+          >
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h3>{title}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="xs">
+                <EuiFlexItem>
+                  <EuiButtonIcon iconType="boxesVertical" onClick={() => {}} aria-label="More" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButtonIcon
+                    iconType={isFullSize ? 'fullScreenExit' : 'fullScreen'}
+                    onClick={() => onSetFullSize(!isFullSize)}
+                    aria-label="Full screen"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButtonIcon iconType="cross" onClick={onClose} aria-label="Close toolbar" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiPanel css={containerStyle} borderRadius="m">
+            {children}
+          </EuiPanel>
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

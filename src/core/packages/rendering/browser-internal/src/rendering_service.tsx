@@ -35,6 +35,7 @@ import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
 import { LegacyFixedLayout } from '@kbn/core-chrome-layout/layouts/legacy-fixed';
 import { WorkspaceLayout } from '@kbn/core-chrome-layout/layouts/workspace';
 import type { ChromeStyle } from '@kbn/core-chrome-browser/src/types';
+import type { WorkspaceService } from '@kbn/core-chrome-browser';
 import {
   WORKSPACE_SIDEBAR_APP_FEEDBACK,
   WORKSPACE_SIDEBAR_APP_RECENT,
@@ -76,6 +77,7 @@ export interface RenderingServiceInternalStart extends IRenderingService {
  */
 export class RenderingService implements IRenderingService {
   private contextDeps = new BehaviorSubject<RenderingServiceContextDeps | null>(null);
+  private workspaceService: WorkspaceService | null = null;
 
   /**
    * @internal
@@ -199,6 +201,17 @@ export class RenderingService implements IRenderingService {
    */
   public addContext(element: React.ReactNode): React.ReactElement<string> {
     const { ContextWrapper } = this;
+    if (this.workspaceService) {
+      return (
+        <ContextWrapper>
+          {this.workspaceService.getStoreProvider()({ children: element })}
+        </ContextWrapper>
+      );
+    }
     return <ContextWrapper>{element}</ContextWrapper>;
+  }
+
+  public setWorkspaceService(workspaceService: WorkspaceService) {
+    this.workspaceService = workspaceService;
   }
 }

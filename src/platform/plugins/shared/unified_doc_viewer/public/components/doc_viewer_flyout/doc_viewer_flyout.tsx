@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, type ComponentType } from 'react';
+import React, { useMemo, useCallback, type ComponentType, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -32,6 +32,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type { DocViewerProps } from '@kbn/unified-doc-viewer';
+import { useApplicationWidth } from '@kbn/core-workspace-chrome-state/layout/hooks';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
 
@@ -74,6 +75,68 @@ function getIndexByDocId(hits: DataTableRecord[], id: string) {
 
 export const FLYOUT_WIDTH_KEY = 'unifiedDocViewer:flyoutWidth';
 
+type BreakpointKey = 'xs' | 's' | 'm' | 'l' | 'xl';
+
+const useFlyoutTypeFromContainerWidth = (minBreakpoint: BreakpointKey = 'xl') => {
+  const { euiTheme } = useEuiTheme();
+  const applicationWidth = useApplicationWidth();
+  const minPx = euiTheme.breakpoint[minBreakpoint];
+  const type = useRef<'push' | 'overlay'>('overlay');
+
+  useEffect(() => {
+    if (applicationWidth) {
+      type.current = applicationWidth >= minPx ? 'push' : 'overlay';
+    }
+  }, [applicationWidth, minPx]);
+
+  return type.current;
+};
+
+// const [applicationWidth, setApplicationWidth] = useState(() => {
+//   // Cache getComputedStyle - it's very expensive
+//   const styles = getComputedStyle(document.documentElement);
+//   const appLeft = parseFloat(styles.getPropertyValue(layoutVarName('application.left')));
+//   const appMargin = parseFloat(styles.getPropertyValue(layoutVarName('application.margin')));
+//   const sidebarWidth = parseFloat(styles.getPropertyValue(layoutVarName('sidebar.width')));
+//   return window.innerWidth - (appLeft + appMargin + sidebarWidth);
+// });
+
+// useEffect(() => {
+//   const appElement = document.getElementById('app-main-scroll');
+//   if (!appElement) return;
+
+//   let timeoutId: ReturnType<typeof setTimeout>;
+//   let lastWidth: number | null = null;
+
+//   const calculateAndUpdate = () => {
+//     // Cache getComputedStyle - only call it once per update instead of 3 times
+//     const styles = getComputedStyle(document.documentElement);
+//     const appLeft = parseFloat(styles.getPropertyValue(layoutVarName('application.left')));
+//     const appMargin = parseFloat(styles.getPropertyValue(layoutVarName('application.margin')));
+//     const sidebarWidth = parseFloat(styles.getPropertyValue(layoutVarName('sidebar.width')));
+//     const newWidth = window.innerWidth - (appLeft + appMargin + sidebarWidth);
+
+//     // Only update if the width actually changed
+//     if (newWidth !== lastWidth) {
+//       lastWidth = newWidth;
+//       setApplicationWidth(newWidth);
+//     }
+//   };
+
+//   const resizeObserver = new ResizeObserver(() => {
+//     // Debounce to avoid excessive calculations during transitions
+//     clearTimeout(timeoutId);
+//     timeoutId = setTimeout(calculateAndUpdate, 100);
+//   });
+
+//   resizeObserver.observe(appElement);
+
+//   return () => {
+//     clearTimeout(timeoutId);
+//     resizeObserver.disconnect();
+//   };
+// }, []);
+
 /**
  * Flyout displaying an expanded row details
  */
@@ -114,6 +177,8 @@ export function UnifiedDocViewerFlyout({
   // Get actual hit with updated highlighted searches
   const actualHit = useMemo(() => hits?.find(({ id }) => id === hit?.id) || hit, [hit, hits]);
   const pageCount = useMemo<number>(() => (hits ? hits.length : 0), [hits]);
+  const containerType = useFlyoutTypeFromContainerWidth('xl');
+  const effectiveType = flyoutType ?? containerType;
   const activePage = useMemo<number>(() => {
     const id = hit.id;
     if (!hits || pageCount <= 1) {
@@ -266,7 +331,7 @@ export function UnifiedDocViewerFlyout({
       <EuiFlyoutResizable
         className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
         onClose={onClose}
-        type={flyoutType ?? 'push'}
+        type={effectiveType}
         size={flyoutWidth}
         pushMinBreakpoint="xl"
         data-test-subj={dataTestSubj ?? 'docViewerFlyout'}

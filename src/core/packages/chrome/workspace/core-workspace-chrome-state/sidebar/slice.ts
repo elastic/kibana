@@ -12,16 +12,34 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 
 import type { SidebarSize } from '../types';
 
+// Helper function to convert SidebarSize to width in pixels
+const getSidebarWidth = (size: SidebarSize | number): number => {
+  if (typeof size === 'number') {
+    return size;
+  }
+
+  switch (size) {
+    case 'regular':
+      return 400;
+    case 'wide':
+      return 800;
+    default:
+      return 400; // Default to regular size
+  }
+};
+
 export interface SidebarState {
   currentSidebarAppId: string | null;
   isOpen: boolean;
-  size: SidebarSize;
+  width: number;
+  isFullscreen: boolean;
 }
 
 const initialState: SidebarState = {
   currentSidebarAppId: null,
   isOpen: false,
-  size: 'regular',
+  width: 400, // Default to regular size (400px)
+  isFullscreen: false,
 };
 
 export const sidebarSlice = createSlice({
@@ -32,8 +50,11 @@ export const sidebarSlice = createSlice({
       state.currentSidebarAppId = null;
       state.isOpen = false;
     },
-    setSidebarSize: (state, action: PayloadAction<SidebarState['size']>) => {
-      state.size = action.payload;
+    setSidebarWidth: (state, action: PayloadAction<SidebarSize | number>) => {
+      state.width = getSidebarWidth(action.payload);
+    },
+    setSidebarFullscreen: (state, action: PayloadAction<boolean>) => {
+      state.isFullscreen = action.payload;
     },
     openSidebar: (state, action: PayloadAction<SidebarState['currentSidebarAppId']>) => {
       state.currentSidebarAppId = action.payload;
@@ -42,6 +63,7 @@ export const sidebarSlice = createSlice({
   },
 });
 
-export const { closeSidebar, setSidebarSize, openSidebar } = sidebarSlice.actions;
+export const { closeSidebar, setSidebarWidth, setSidebarFullscreen, openSidebar } =
+  sidebarSlice.actions;
 
 export const sidebarReducer = sidebarSlice.reducer;

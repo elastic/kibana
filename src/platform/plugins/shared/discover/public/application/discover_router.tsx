@@ -29,6 +29,8 @@ export interface DiscoverRouterProps {
 }
 
 export const DiscoverRouter = ({ services, ...routeProps }: DiscoverRouterProps) => {
+  const { workspace } = services.core.chrome;
+  const WorkspaceProvider = workspace.getStoreProvider();
   return (
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
@@ -38,7 +40,9 @@ export const DiscoverRouter = ({ services, ...routeProps }: DiscoverRouterProps)
               application: services.core.application,
             }}
           >
-            <DiscoverRoutes {...routeProps} />
+            <WorkspaceProvider>
+              <DiscoverRoutes {...routeProps} />
+            </WorkspaceProvider>
           </RedirectAppLinks>
         </Router>
       </EuiErrorBoundary>

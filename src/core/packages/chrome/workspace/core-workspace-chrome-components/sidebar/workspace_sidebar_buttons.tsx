@@ -12,8 +12,6 @@ import { css } from '@emotion/react';
 
 import { useEuiTheme } from '@elastic/eui';
 
-import { useIsSidebarOpen } from '@kbn/core-workspace-chrome-state';
-
 import {
   WorkspaceSidebarButtonsComponent,
   type WorkspaceSidebarButtonsComponentProps,
@@ -23,25 +21,10 @@ export type WorkspaceSidebarButtonsProps = WorkspaceSidebarButtonsComponentProps
 
 export const WorkspaceSidebarButtons = ({ apps }: WorkspaceSidebarButtonsProps) => {
   const { euiTheme } = useEuiTheme();
-  const isSidebarOpen = useIsSidebarOpen();
-
-  const separator = css`
-    &::after {
-      content: '';
-      display: block;
-      width: ${euiTheme.border.width.thin};
-      background-color: ${euiTheme.colors.borderBaseSubdued};
-      position: absolute;
-      right: -${euiTheme.size.m};
-      top: ${euiTheme.size.xs};
-      bottom: ${euiTheme.size.xs};
-    }
-  `;
 
   const root = css`
     margin-right: ${euiTheme.size.s};
     position: relative;
-    ${isSidebarOpen ? separator : ''}
   `;
 
   return <WorkspaceSidebarButtonsComponent apps={apps} css={root} />;

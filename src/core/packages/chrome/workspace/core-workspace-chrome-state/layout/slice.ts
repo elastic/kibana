@@ -14,12 +14,14 @@ export interface WorkspaceLayoutState {
   isChromeVisible: boolean;
   hasHeaderBanner: boolean;
   hasAppMenu: boolean;
+  applicationWidth: number;
 }
 
 const initialState: WorkspaceLayoutState = {
   isChromeVisible: false,
   hasHeaderBanner: false,
   hasAppMenu: false,
+  applicationWidth: 0,
 };
 
 export const layoutSlice = createSlice({
@@ -35,9 +37,13 @@ export const layoutSlice = createSlice({
     setHasAppMenu: (state, action: PayloadAction<boolean>) => {
       state.hasAppMenu = action.payload;
     },
+    setApplicationWidth: (state, action: PayloadAction<number>) => {
+      state.applicationWidth = action.payload;
+    },
   },
 });
 
-export const { setIsChromeVisible, setHasHeaderBanner, setHasAppMenu } = layoutSlice.actions;
+export const { setIsChromeVisible, setHasHeaderBanner, setHasAppMenu, setApplicationWidth } =
+  layoutSlice.actions;
 
 export const layoutReducer = layoutSlice.reducer;

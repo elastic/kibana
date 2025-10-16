@@ -384,6 +384,10 @@ export class CoreSystem {
         analytics,
         featureFlags,
       });
+
+      // TODO: clintandrewhall - this is such a HACK.  It's ok for the PoC, but we
+      // need to untangle the chrome and rendering services.
+      this.rendering.setWorkspaceService(chrome.workspace);
       const deprecations = this.deprecations.start({ http });
 
       this.coreApp.start({

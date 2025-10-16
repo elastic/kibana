@@ -13,5 +13,11 @@ export {
   setIsChromeVisible,
   setHasHeaderBanner,
   setHasAppMenu,
+  setApplicationWidth,
 } from './slice';
-export { useIsChromeVisible, useHasHeaderBanner, useHasAppMenu } from './hooks';
+export {
+  useIsChromeVisible,
+  useHasHeaderBanner,
+  useHasAppMenu,
+  useApplicationWidth,
+} from './hooks';

@@ -20,7 +20,12 @@ export const useCurrentSidebarApp = () => {
 };
 export const useIsCurrentSidebarApp = (toolId?: string) => useCurrentSidebarApp() === toolId;
 
-export const useSidebarSize = () => {
-  const { size } = useSidebarState();
-  return useIsSidebarOpen() ? size : null;
+export const useSidebarWidth = () => {
+  const { width } = useSidebarState();
+  return useIsSidebarOpen() ? width : null;
+};
+
+export const useIsSidebarFullSize = () => {
+  const { isFullscreen } = useSidebarState();
+  return useIsSidebarOpen() ? isFullscreen : false;
 };

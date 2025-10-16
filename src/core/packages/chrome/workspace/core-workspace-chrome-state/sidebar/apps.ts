@@ -10,6 +10,8 @@
 import type { EuiButtonIconPropsForButton, EuiPanelProps } from '@elastic/eui';
 import type { ReactNode } from 'react';
 
+import type { SidebarSize } from '../types';
+
 export const WORKSPACE_SIDEBAR_APP_PROFILE = 'profile';
 export const WORKSPACE_SIDEBAR_APP_RECENT = 'recent';
 export const WORKSPACE_SIDEBAR_APP_FEEDBACK = 'feedback';
@@ -29,7 +31,7 @@ export const WORKSPACE_KNOWN_SIDEBAR_APPS = [
 export type WorkspaceKnownSidebarApp = (typeof WORKSPACE_KNOWN_SIDEBAR_APPS)[number];
 
 export interface WorkspaceButtonProps extends Pick<EuiButtonIconPropsForButton, 'iconType'> {
-  size?: 'regular' | 'wide' | 'fullWidth';
+  size?: SidebarSize;
   'aria-label'?: string;
   /**
    * Optional function that wraps the rendered button in a custom container.
@@ -50,7 +52,7 @@ export interface WorkspaceSidebarApp {
   appId: WorkspaceKnownSidebarApp | string;
   button: WorkspaceButtonProps;
   app: WorkspaceSidebarAppProps;
-  size?: 'regular' | 'wide' | 'fullWidth';
+  size?: SidebarSize;
   isAvailable?: () => boolean;
   // TODO: reducer?: (state: any, action: any) => any;
 }

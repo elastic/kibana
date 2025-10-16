@@ -20,12 +20,32 @@ const root: EmotionFn = ({ euiTheme }) =>
     width: calc(${layoutVar('sidebar.width')} - ${euiTheme.size.s});
     margin-bottom: ${euiTheme.size.s};
     align-self: start;
+    position: relative;
 
     .euiFlyoutFooter {
       border-bottom-right-radius: ${euiTheme.border.radius.small};
       border-bottom-left-radius: ${euiTheme.border.radius.small};
     }
+
+    &::before {
+      content: '';
+      display: block;
+      width: ${euiTheme.border.width.thin};
+      background-color: ${euiTheme.colors.borderBaseSubdued};
+      position: absolute;
+      left: -${euiTheme.size.xs};
+      top: ${euiTheme.size.m};
+      height: ${euiTheme.size.l};
+    }
   `;
+
+const fullScreenRoot = css`
+  width: 100%;
+
+  &:before {
+    left: 0;
+  }
+`;
 
 const container = css`
   flex-grow: 1;
@@ -33,7 +53,7 @@ const container = css`
   flex-direction: column;
 `;
 
-const header: EmotionFn = ({ euiTheme, colorMode }) => css`
+const header: EmotionFn = ({ euiTheme }) => css`
   margin: ${euiTheme.size.s} 0 ${euiTheme.size.s} ${euiTheme.size.s};
   height: ${euiTheme.size.xl};
   align-items: center;
@@ -44,4 +64,5 @@ export const styles = {
   root,
   container,
   header,
+  fullScreenRoot,
 };
