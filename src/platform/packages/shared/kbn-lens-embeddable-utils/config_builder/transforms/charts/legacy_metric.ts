@@ -52,12 +52,12 @@ function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisuali
     size: layer.metric.size,
     titlePosition: layer.metric.alignments?.labels,
     textAlign: layer.metric.alignments?.value,
-    ...(layer.metric.apply_color_to
-      ? layer.metric.apply_color_to === 'background'
-        ? { colorMode: 'Background' }
-        : { colorMode: 'Labels' }
+    ...(layer.metric.apply_color_to && layer.metric.color
+      ? {
+          colorMode: layer.metric.apply_color_to === 'background' ? 'Background' : 'Labels',
+          palette: fromColorByValueAPIToLensState(layer.metric.color),
+        }
       : { colorMode: 'None' }),
-    ...(layer.metric.color ? { palette: fromColorByValueAPIToLensState(layer.metric.color) } : {}),
   };
 }
 
@@ -112,12 +112,10 @@ function reverseBuildVisualizationState(
       };
     }
 
-    if (visualization.colorMode && visualization.colorMode !== 'None') {
+    if (visualization.colorMode && visualization.colorMode !== 'None' && visualization.palette) {
       props.metric.apply_color_to =
         visualization.colorMode === 'Background' ? 'background' : 'value';
-    }
 
-    if (visualization.palette) {
       const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
       if (colorByValue?.range === 'absolute') {
         props.metric.color = colorByValue;

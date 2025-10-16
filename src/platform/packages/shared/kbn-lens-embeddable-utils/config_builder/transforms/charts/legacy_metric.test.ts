@@ -117,6 +117,11 @@ describe('legacy metric chart transformations', () => {
           operation: 'sum',
           // @ts-expect-error - Need to figure out how get the right input type
           field: 'response_time',
+          alignments: {
+            labels: 'bottom',
+            value: 'right',
+          },
+          size: 'l',
           apply_color_to: 'value',
           color: {
             type: 'dynamic',
@@ -188,12 +193,109 @@ describe('legacy metric chart transformations', () => {
             labels: 'top',
             value: 'right',
           },
+          size: 'm',
+          apply_color_to: 'background',
+          color: {
+            type: 'dynamic',
+            steps: [
+              { type: 'from', from: 0, color: '#00FF00' },
+              { type: 'exact', value: 300, color: '#FFFF00' },
+              { type: 'to', to: 300, color: '#FF0000' },
+            ],
+            range: 'absolute',
+          },
         },
       };
 
       // Convert API config to Lens state and back
       const finalAPIState = validateAndApiToApiTransforms(esqlLegacyMetricConfig);
       expect(mergeWithDefaults(esqlLegacyMetricConfig)).toEqual(finalAPIState);
+    });
+
+    it('legacy metric chart with data view and apply_color_to, without color', () => {
+      const comprehensiveLegacyMetricConfig: InputTypeLegacyMetricChart = {
+        type: 'legacy_metric',
+        title: 'Comprehensive Test Metric',
+        description: 'A comprehensive metric chart with all features',
+        dataset: {
+          type: 'dataView',
+          id: 'my-custom-data-view-id',
+        },
+        metric: {
+          operation: 'average',
+          // @ts-expect-error - Need to figure out how get the right input type
+          field: 'response_time',
+          label: 'Avg Response Time',
+          alignments: {
+            labels: 'bottom',
+            value: 'right',
+          },
+          apply_color_to: 'value',
+          size: 'l',
+        },
+      };
+
+      const finalAPIState = validateAndApiToApiTransforms(comprehensiveLegacyMetricConfig);
+
+      const {
+        metric: { apply_color_to: _omitted, ...metricWithoutApplyColorTo },
+        ...rest
+      } = comprehensiveLegacyMetricConfig;
+
+      const comprehensiveLegacyMetricConfigWithoutApplyColorTo = {
+        ...rest,
+        metric: metricWithoutApplyColorTo,
+      };
+
+      expect(mergeWithDefaults(comprehensiveLegacyMetricConfigWithoutApplyColorTo)).toEqual(
+        finalAPIState
+      );
+    });
+
+    it('legacy metric chart with data view and color, without apply_color_to', () => {
+      const comprehensiveLegacyMetricConfig: InputTypeLegacyMetricChart = {
+        type: 'legacy_metric',
+        title: 'Comprehensive Test Metric',
+        description: 'A comprehensive metric chart with all features',
+        dataset: {
+          type: 'dataView',
+          id: 'my-custom-data-view-id',
+        },
+        metric: {
+          operation: 'average',
+          // @ts-expect-error - Need to figure out how get the right input type
+          field: 'response_time',
+          label: 'Avg Response Time',
+          alignments: {
+            labels: 'bottom',
+            value: 'right',
+          },
+          size: 'l',
+          color: {
+            type: 'dynamic',
+            steps: [
+              { type: 'from', from: 0, color: '#00FF00' },
+              { type: 'exact', value: 300, color: '#FFFF00' },
+              { type: 'to', to: 300, color: '#FF0000' },
+            ],
+            range: 'absolute',
+          },
+        },
+      };
+
+      const finalAPIState = validateAndApiToApiTransforms(comprehensiveLegacyMetricConfig);
+
+      const {
+        metric: { color, ...metricWithoutColor },
+        ...rest
+      } = comprehensiveLegacyMetricConfig;
+
+      const comprehensiveLegacyMetricConfigWithoutColor = {
+        ...rest,
+        metric: metricWithoutColor,
+      };
+
+      expect(mergeWithDefaults(comprehensiveLegacyMetricConfigWithoutColor)).toEqual(finalAPIState);
     });
   });
 });
