@@ -492,7 +492,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
       dispatch(
         dataTableActions.updateExpandedAlertIndex({
           id: tableType,
-          expandedAlertIndex: typeof newIndex === 'number' ? newIndex : undefined,
+          expandedAlertIndex: newIndex ?? undefined,
         })
       );
     },
