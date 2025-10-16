@@ -16,6 +16,7 @@ import {
   EuiText,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/types';
@@ -23,6 +24,20 @@ import type { CommandArgumentValueSelectorProps } from '../../console/types';
 
 interface TextareaInputArgumentState {
   isPopoverOpen: boolean;
+}
+
+interface TextareaInputArgumentProps
+  extends CommandArgumentValueSelectorProps<
+    string,
+    TextareaInputArgumentState,
+    EndpointCommandDefinitionMeta
+  > {
+  width?: string;
+  openLabel?: string;
+  noInputEnteredMessage?: string;
+  textareaLabel?: string;
+  textareaPlaceholderLabel?: string;
+  helpContent?: React.ReactNode;
 }
 
 const OPEN_INPUT = i18n.translate(
@@ -43,13 +58,7 @@ const NO_INPUT_ENTERED_MESSAGE = i18n.translate(
 /**
  * Console argument component that displays a popup textarea for user to enter free-form data.
  */
-export const TextareaInputArgument = memo<
-  CommandArgumentValueSelectorProps<
-    string,
-    TextareaInputArgumentState,
-    EndpointCommandDefinitionMeta
-  >
->(
+export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
   ({
     value = '',
     valueText = '',
@@ -60,7 +69,12 @@ export const TextareaInputArgument = memo<
     argIndex,
     onChange,
     command,
-    requestFocus,
+    openLabel = OPEN_INPUT,
+    noInputEnteredMessage = NO_INPUT_ENTERED_MESSAGE,
+    textareaPlaceholderLabel = TEXTAREA_PLACEHOLDER_TEXT,
+    width,
+    textareaLabel,
+    helpContent,
   }) => {
     const testId = useTestIdGenerator(
       `textareaInputArgument-${command.commandDefinition.name}-${argName}-${argIndex}`
@@ -69,6 +83,13 @@ export const TextareaInputArgument = memo<
     const textAreaHtmlId = useMemo(() => {
       return htmlIdGenerator('textarea')();
     }, []);
+
+    const textareaContainerCss = useMemo(() => {
+      return css`
+        width: ${width ?? '20vw'};
+        min-width: 275px;
+      `;
+    }, [width]);
 
     const handleClosePopover = useCallback(() => {
       onChange({
@@ -118,7 +139,7 @@ export const TextareaInputArgument = memo<
               <div className="eui-textTruncate">
                 {valueText || (
                   <EuiText color="subdued" size="xs">
-                    {NO_INPUT_ENTERED_MESSAGE}
+                    {noInputEnteredMessage}
                   </EuiText>
                 )}
               </div>
@@ -128,24 +149,35 @@ export const TextareaInputArgument = memo<
                 iconType="pencil"
                 size="xs"
                 onClick={handleOpenPopover}
-                title={OPEN_INPUT}
-                aria-label={OPEN_INPUT}
+                disabled={state.isPopoverOpen}
+                title={openLabel}
+                aria-label={openLabel}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
         }
       >
-        {state.isPopoverOpen && (
-          <EuiFormRow fullWidth>
-            <EuiTextArea
-              value={value}
-              placeholder={TEXTAREA_PLACEHOLDER_TEXT}
-              onChange={handleTextAreaOnChange}
-              className={textAreaHtmlId}
-              resize="none"
-            />
-          </EuiFormRow>
-        )}
+        {
+          // FIXME:PT implement `help` below
+          state.isPopoverOpen && (
+            <div css={textareaContainerCss}>
+              <EuiFormRow
+                fullWidth
+                label={textareaLabel ?? argName}
+                labelAppend={<div>{'help'}</div>}
+              >
+                <EuiTextArea
+                  value={value}
+                  placeholder={textareaPlaceholderLabel}
+                  onChange={handleTextAreaOnChange}
+                  className={textAreaHtmlId}
+                  resize="none"
+                  fullWidth
+                />
+              </EuiFormRow>
+            </div>
+          )
+        }
       </EuiPopover>
     );
   }
