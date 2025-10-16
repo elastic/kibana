@@ -138,6 +138,7 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
         ) as string & React.ReactElement,
       },
       type: flyoutType,
+      ownFocus: false,
       size: mainSize,
       maxWidth: mainMaxWidth,
       onActive: mainFlyoutOnActive,
