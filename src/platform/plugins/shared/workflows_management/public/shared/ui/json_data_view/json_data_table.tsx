@@ -175,7 +175,7 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
 
     const staticDataGridSettings: Pick<
       EuiDataGridProps,
-      'columnVisibility' | 'sorting' | 'gridStyle'
+      'columnVisibility' | 'sorting' | 'gridStyle' | 'rowHeightsOptions'
     > = useMemo(
       () => ({
         columnVisibility: { visibleColumns: ['name', 'value'], setVisibleColumns: () => {} },
