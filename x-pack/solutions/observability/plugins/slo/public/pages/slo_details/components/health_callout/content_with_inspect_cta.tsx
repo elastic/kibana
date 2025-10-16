@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiLink, EuiIcon, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-export function ExternalLinkDisplayText({
+export function ContentWithInspectCta({
+  url,
   textSize,
   content,
-  url,
 }: {
+  url: string;
   textSize: 's' | 'xs';
   content: string;
-  url: string;
 }) {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
