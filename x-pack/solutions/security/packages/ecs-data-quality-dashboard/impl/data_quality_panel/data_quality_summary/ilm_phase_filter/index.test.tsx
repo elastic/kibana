@@ -33,7 +33,7 @@ describe('IlmPhaseFilter', () => {
       </TestExternalProviders>
     );
     expect(screen.getByTestId('selectIlmPhases')).toBeInTheDocument();
-    expect(screen.getByLabelText('ILM phase')).toBeInTheDocument();
+    expect(screen.getByTestId('comboBoxSearchInput')).toBeInTheDocument();
     expect(screen.getByText('hot')).toBeInTheDocument();
     expect(screen.getByText('warm')).toBeInTheDocument();
     expect(screen.getByText('unmanaged')).toBeInTheDocument();
@@ -84,7 +84,9 @@ describe('IlmPhaseFilter', () => {
       await userEvent.hover(screen.getByTestId('comboBoxSearchInput'));
 
       await waitFor(() =>
-        expect(screen.getByRole('tooltip')).toHaveTextContent(INDEX_LIFECYCLE_MANAGEMENT_PHASES)
+        expect(
+          screen.getByText(INDEX_LIFECYCLE_MANAGEMENT_PHASES).closest('[role="tooltip"]')
+        ).toBeInTheDocument()
       );
     });
   });
@@ -122,9 +124,11 @@ describe('IlmPhaseFilter', () => {
         await userEvent.click(searchInput);
         await userEvent.hover(screen.getByText(option.toLowerCase()), { pointerEventsCheck: 0 });
 
-        await waitFor(() =>
-          expect(screen.getByRole('tooltip')).toHaveTextContent(tooltipDescription)
-        );
+        await waitFor(() => {
+          return expect(
+            screen.getByText(`${option}: ${tooltipDescription}`).closest('[role="tooltip"]')
+          ).toBeInTheDocument();
+        });
       });
     });
   });

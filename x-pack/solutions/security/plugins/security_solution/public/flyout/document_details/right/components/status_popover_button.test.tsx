@@ -96,7 +96,7 @@ describe('StatusPopoverButton', () => {
 
   test('Status should be text when user does not have write priveleges', () => {
     (useAlertsPrivileges as jest.Mock<AlertsPriveleges>).mockReturnValue(readPriveleges);
-    const { getByText, queryByRole, container } = render(
+    const { getByText, container } = render(
       <TestProviders>
         <StatusPopoverButton {...props} />
       </TestProviders>
@@ -108,6 +108,6 @@ describe('StatusPopoverButton', () => {
     expect(container.querySelector('.euiBadge__icon')).toBeNull();
 
     // popover should not open when hence checking that popover is not open
-    expect(queryByRole('dialog')).not.toBeInTheDocument();
+    expect(container.querySelector('[role="dialog"]')).not.toBeInTheDocument();
   });
 });
