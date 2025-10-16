@@ -18,9 +18,9 @@ import {
   ALERT_RULE_EXECUTION_UUID,
   ALERT_STATUS_UNTRACKED,
   TIMESTAMP,
-  ALERT_LAST_SCHEDULED_ACTIONS_GROUP,
-  ALERT_LAST_SCHEDULED_ACTIONS_DATE,
-  ALERT_LAST_SCHEDULED_ACTIONS_THROTTLED,
+  ALERT_SCHEDULED_ACTION_GROUP,
+  ALERT_SCHEDULED_ACTION_DATE,
+  ALERT_SCHEDULED_ACTION_THROTTLING,
 } from '@kbn/rule-data-utils';
 import { flatMap, get, isEmpty, keys } from 'lodash';
 import type {
@@ -700,7 +700,7 @@ export class AlertsClient<
           acc[meta.uuid] = {
             group,
             date,
-            ...(actions ? { throttled: actions } : {}),
+            ...(actions ? { actions } : {}),
           };
         }
 
@@ -729,10 +729,10 @@ export class AlertsClient<
             script: {
               source: `
             if (params.containsKey(ctx._source['${ALERT_UUID}'])) {
-              ctx._source['${ALERT_LAST_SCHEDULED_ACTIONS_GROUP}'] = params[ctx._source['${ALERT_UUID}']].group;
-              ctx._source['${ALERT_LAST_SCHEDULED_ACTIONS_DATE}'] = params[ctx._source['${ALERT_UUID}']].date;
-              if (params[ctx._source['${ALERT_UUID}']].containsKey('throttled')) {
-                ctx._source['${ALERT_LAST_SCHEDULED_ACTIONS_THROTTLED}'] = params[ctx._source['${ALERT_UUID}']].throttled;
+              ctx._source['${ALERT_SCHEDULED_ACTION_GROUP}'] = params[ctx._source['${ALERT_UUID}']].group;
+              ctx._source['${ALERT_SCHEDULED_ACTION_DATE}'] = params[ctx._source['${ALERT_UUID}']].date;
+              if (params[ctx._source['${ALERT_UUID}']].containsKey('actions')) {
+                ctx._source['${ALERT_SCHEDULED_ACTION_THROTTLING}'] = params[ctx._source['${ALERT_UUID}']].actions;
               }
             }
           `,

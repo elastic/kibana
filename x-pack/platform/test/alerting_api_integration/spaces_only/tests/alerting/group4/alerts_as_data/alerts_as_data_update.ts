@@ -10,9 +10,9 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_UUID,
-  ALERT_LAST_SCHEDULED_ACTIONS_GROUP,
-  ALERT_LAST_SCHEDULED_ACTIONS_DATE,
-  ALERT_LAST_SCHEDULED_ACTIONS_THROTTLED,
+  ALERT_SCHEDULED_ACTION_GROUP,
+  ALERT_SCHEDULED_ACTION_DATE,
+  ALERT_SCHEDULED_ACTION_THROTTLING,
 } from '@kbn/rule-data-utils';
 import { RuleNotifyWhen } from '@kbn/alerting-types';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
@@ -34,7 +34,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
   type PatternFiringAlert = Alert & {
     patternIndex: number;
     instancePattern: boolean[];
-    [ALERT_LAST_SCHEDULED_ACTIONS_THROTTLED]?: object;
+    [ALERT_SCHEDULED_ACTION_THROTTLING]?: object;
   };
 
   const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
@@ -126,16 +126,16 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(alertDocs.length).to.equal(1);
         const source: PatternFiringAlert = alertDocs[0]._source!;
         expect(source[ALERT_UUID]).to.equal(lastScheduledActionsUUID);
-        expect(source[ALERT_LAST_SCHEDULED_ACTIONS_DATE]).to.match(timestampPattern);
-        expect(source[ALERT_LAST_SCHEDULED_ACTIONS_GROUP]).to.equal('default');
-        expect(source[ALERT_LAST_SCHEDULED_ACTIONS_THROTTLED]).to.eql({
-          [actionUuid]: { date: source[ALERT_LAST_SCHEDULED_ACTIONS_DATE] },
+        expect(source[ALERT_SCHEDULED_ACTION_DATE]).to.match(timestampPattern);
+        expect(source[ALERT_SCHEDULED_ACTION_GROUP]).to.equal('default');
+        expect(source[ALERT_SCHEDULED_ACTION_THROTTLING]).to.eql({
+          [actionUuid]: { date: source[ALERT_SCHEDULED_ACTION_DATE] },
         });
 
         // we will remove these when we remove alerts from task state
-        expect(source[ALERT_LAST_SCHEDULED_ACTIONS_DATE]).to.equal(lastScheduledActionsDate);
-        expect(source[ALERT_LAST_SCHEDULED_ACTIONS_GROUP]).to.equal(lastScheduledActionsGroup);
-        expect(source[ALERT_LAST_SCHEDULED_ACTIONS_THROTTLED]).eql(lastScheduledActionsActions);
+        expect(source[ALERT_SCHEDULED_ACTION_DATE]).to.equal(lastScheduledActionsDate);
+        expect(source[ALERT_SCHEDULED_ACTION_GROUP]).to.equal(lastScheduledActionsGroup);
+        expect(source[ALERT_SCHEDULED_ACTION_THROTTLING]).eql(lastScheduledActionsActions);
       });
     });
   });
