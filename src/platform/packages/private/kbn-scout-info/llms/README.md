@@ -11,7 +11,7 @@ For best results, we recommend the tools below.
 
 ### Claude Code
 
-We recommend **Claude Code** (and the **Claude Sonnet 4.5** model). The [**VS Code extension**](https://docs.claude.com/en/docs/claude-code/vs-code) is a user-friendly way to use Claude Code. The prompts below use Claude's `@path/to/file.md` [syntax](https://docs.claude.com/en/docs/claude-code/memory) syntax to reference specific files in the codebase. Check if your AI assitant of choice supports this syntax.
+We recommend **Claude Code** (and the **Claude Sonnet 4.5** model). The [**VS Code extension**](https://docs.claude.com/en/docs/claude-code/vs-code) is a user-friendly way to use Claude Code. The prompts below use Claude's `@path/to/file.md` [syntax](https://docs.claude.com/en/docs/claude-code/memory) to reference specific files in the codebase. Check if your AI assitant of choice supports this syntax.
 
 ### Semantic Code Search MCP server
 
