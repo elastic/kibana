@@ -207,6 +207,7 @@ export const useDiscoverHistogram = (
    * Request params
    */
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
+  const currentTabControlState = useCurrentTabSelector((tab) => tab.controlGroupState);
   const {
     timeRangeRelative: relativeTimeRange,
     timeRangeAbsolute: timeRange,
@@ -420,6 +421,7 @@ export const useDiscoverHistogram = (
     onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
     breakdownField,
     esqlVariables,
+    controlsState: currentTabControlState,
     onBreakdownFieldChange,
     searchSessionId,
     getModifiedVisAttributes,

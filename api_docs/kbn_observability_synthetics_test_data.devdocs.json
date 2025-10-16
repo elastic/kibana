@@ -478,7 +478,7 @@
         "label": "readKibanaConfig",
         "description": [],
         "signature": [
-          "() => Record<string, string>"
+          "() => Record<string, any>"
         ],
         "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/tasks/read_kibana_config.ts",
         "deprecated": false,

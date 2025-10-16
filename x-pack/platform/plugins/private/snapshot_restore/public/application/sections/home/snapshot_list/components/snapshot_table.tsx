@@ -27,21 +27,6 @@ import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../.
 import { SnapshotSearchBar } from './snapshot_search_bar';
 import { SnapshotState } from '../snapshot_details/tabs/snapshot_state';
 
-const getLastSuccessfulManagedSnapshot = (
-  snapshots: SnapshotDetails[]
-): SnapshotDetails | undefined => {
-  const successfulSnapshots = snapshots
-    .filter(
-      ({ state, repository, managedRepository }) =>
-        repository === managedRepository && state === 'SUCCESS'
-    )
-    .sort((a, b) => {
-      return +new Date(b.endTime) - +new Date(a.endTime);
-    });
-
-  return successfulSnapshots[0];
-};
-
 interface Props {
   snapshots: SnapshotDetails[];
   repositories: string[];
@@ -68,8 +53,6 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
   } = props;
   const { i18n, uiMetricService, history } = useServices();
   const [selectedItems, setSelectedItems] = useState<SnapshotDetails[]>([]);
-
-  const lastSuccessfulManagedSnapshot = getLastSuccessfulManagedSnapshot(snapshots);
 
   const columns = [
     {
@@ -230,13 +213,17 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
           },
         },
         {
-          render: ({ snapshot, repository }: SnapshotDetails) => {
+          render: (snapshotDetails: SnapshotDetails) => {
+            const { snapshot, repository, managedRepository, isLastSuccessfulSnapshot } =
+              snapshotDetails;
             return (
               <SnapshotDeleteProvider>
                 {(deleteSnapshotPrompt) => {
-                  const isDeleteDisabled = Boolean(lastSuccessfulManagedSnapshot)
-                    ? snapshot === lastSuccessfulManagedSnapshot!.snapshot
-                    : false;
+                  const isDeleteDisabled = Boolean(
+                    managedRepository &&
+                      repository === managedRepository &&
+                      isLastSuccessfulSnapshot
+                  );
                   const label = isDeleteDisabled
                     ? i18n.translate(
                         'xpack.snapshotRestore.snapshotList.table.deleteManagedRepositorySnapshotTooltip',
@@ -295,10 +282,8 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
 
   const selection = {
     onSelectionChange: (newSelectedItems: SnapshotDetails[]) => setSelectedItems(newSelectedItems),
-    selectable: ({ snapshot }: SnapshotDetails) =>
-      Boolean(lastSuccessfulManagedSnapshot)
-        ? snapshot !== lastSuccessfulManagedSnapshot!.snapshot
-        : true,
+    selectable: ({ repository, managedRepository, isLastSuccessfulSnapshot }: SnapshotDetails) =>
+      !(managedRepository && repository === managedRepository && isLastSuccessfulSnapshot),
     selectableMessage: (selectable: boolean) => {
       if (!selectable) {
         return i18n.translate(
