@@ -27,7 +27,8 @@ import {
   TEST_KIBANA_PORT,
 } from '../../../service_addresses';
 import { ConfigRunner } from './config_runner';
-import { ResourcePool } from './resource_pool';
+import { ResourcePool, Phase } from './resource_pool';
+import type { Slot } from './resource_pool';
 import { prepareChrome } from './prepare_chrome';
 
 function booleanFromEnv(varName: string, defaultValue: boolean = false): boolean {
@@ -40,6 +41,14 @@ function msToDuration(duration: number) {
   const timeSec = Math.floor(duration / 1000);
   const display = timeSec > 60 ? `${Math.floor(timeSec / 60)}m ${timeSec % 60}s` : `${timeSec}s`;
   return display;
+}
+
+interface RunnerState {
+  slot: Slot;
+  startedAt: number;
+  runStartedAt?: number;
+  runDurationMs?: number;
+  completedAt?: number;
 }
 
 /*
@@ -57,7 +66,7 @@ function msToDuration(duration: number) {
  * invokes node scripts just like the shell script.
  */
 export interface ParallelRunOptions {
-  extraArgs: string[];
+  extraArgs: Array<string | number | boolean | string[]>;
   stdio?: 'suppress' | 'buffer' | 'inherit';
   stats?: boolean;
 }
@@ -69,10 +78,7 @@ export async function runTestsParallel(
 ): Promise<number> {
   const { extraArgs, stdio = 'inherit', stats = false } = options;
 
-  const extraArgsList = [
-    ...extraArgs,
-    process.env.FTR_EXTRA_ARGS ?? process.env.EXTRA_ARGS ?? '',
-  ].filter(Boolean);
+  const extraArgsList = [...extraArgs, process.env.FTR_EXTRA_ARGS ?? process.env.EXTRA_ARGS ?? ''];
 
   const runBuildkiteMetaGet = (key: string, defaultVal = ''): string => {
     try {
@@ -99,7 +105,7 @@ export async function runTestsParallel(
 
   if (booleanFromEnv('USE_CHROME_BETA', false)) {
     await prepareChrome().catch((err) => {
-      process.stdout.write(format(err));
+      process.stdout.write(format(err) + '\n');
     });
   }
 
@@ -134,6 +140,7 @@ export async function runTestsParallel(
 
   const failedConfigs: string[] = [];
   const results: string[] = [];
+  const runnerStates = new Map<string, RunnerState>();
 
   for (const config of configs) {
     if (!config) continue;
@@ -155,7 +162,13 @@ export async function runTestsParallel(
       path: config,
       command: {
         exec: 'node',
-        args: [`scripts/functional_tests`, `--config=${config}`, ...extraArgsList],
+        args: [
+          `scripts/functional_tests`,
+          `--config=${config}`,
+          ...extraArgsList.flat().map((arg) => {
+            return String(arg);
+          }),
+        ],
       },
       stdio,
     });
@@ -166,10 +179,10 @@ export async function runTestsParallel(
   const MAX_CPUS = os.cpus().length - 1;
   const AVAILABLE_MEM = Math.round(os.freemem() / 1024 / 1024);
   const MIN_MB_AVAILABLE = 2048;
-  const MIN_MB_PER_WARMING_SLOT = 4096;
+  // const MIN_MB_PER_WARMING_SLOT = 4096;
   const MIN_MB_PER_IDLE_SLOT = 3072;
   const MIN_MB_PER_RUNNING_SLOT = 5120;
-  const WARMING_MIN_CPU = 2;
+  // const WARMING_MIN_CPU = 2;
   const IDLE_MIN_CPU = 0.5;
   const RUNNING_MIN_CPU = 1;
 
@@ -177,9 +190,9 @@ export async function runTestsParallel(
 
   const availableMemory = Math.max(AVAILABLE_MEM - MIN_MB_AVAILABLE, MIN_MB_PER_RUNNING_SLOT);
 
-  const maxWarmingByCpu = Math.max(1, Math.floor(MAX_CPUS / WARMING_MIN_CPU));
-  const maxWarmingByMemory = Math.max(1, Math.floor(availableMemory / MIN_MB_PER_WARMING_SLOT));
-  const maxWarming = Math.max(1, Math.min(maxWarmingByCpu, maxWarmingByMemory));
+  // const maxWarmingByCpu = Math.max(1, Math.floor(MAX_CPUS / WARMING_MIN_CPU));
+  // const maxWarmingByMemory = Math.max(1, Math.floor(availableMemory / MIN_MB_PER_WARMING_SLOT));
+  const maxWarming = 1; // Math.max(1, Math.min(maxWarmingByCpu, maxWarmingByMemory));
 
   const maxStartedByCpu = Math.max(1, Math.floor(MAX_CPUS / IDLE_MIN_CPU));
   const maxStartedByMemory = Math.max(1, Math.floor(availableMemory / MIN_MB_PER_IDLE_SLOT));
@@ -196,7 +209,7 @@ export async function runTestsParallel(
   const pool = new ResourcePool({
     log,
     maxStarted,
-    maxWarming,
+    maxWarming: 1,
     maxRunning,
   });
 
@@ -237,6 +250,29 @@ export async function runTestsParallel(
       ];
 
       log.info(`Stats: ${messageParts.join(' ')}`);
+
+      const now = Date.now();
+      const runningConfigs: string[] = [];
+      const completedConfigs: string[] = [];
+
+      for (const [path, state] of runnerStates.entries()) {
+        const phase = state.slot.getPhase();
+        if (phase === Phase.Running) {
+          const runtimeMs = state.runStartedAt ? now - state.runStartedAt : 0;
+          runningConfigs.push(`${path} (phase=${phase} runtime=${msToDuration(runtimeMs)})`);
+        } else if (phase === Phase.Done) {
+          const durationMs = state.runDurationMs ?? 0;
+          completedConfigs.push(`${path} (phase=${phase} runtime=${msToDuration(durationMs)})`);
+        }
+      }
+
+      if (runningConfigs.length > 0) {
+        log.info(`Running configs:\n${runningConfigs.map((line) => `  ${line}`).join('\n')}`);
+      }
+
+      if (completedConfigs.length > 0) {
+        log.info(`Completed configs:\n${completedConfigs.map((line) => `  ${line}`).join('\n')}`);
+      }
     }
 
     statsTimer = setInterval(logStats, 10_000);
@@ -249,6 +285,11 @@ export async function runTestsParallel(
   const promises = runners.map(async (runner) => {
     const slot = pool.acquire();
     const path = runner.getConfigPath();
+    const state: RunnerState = {
+      slot,
+      startedAt: Date.now(),
+    };
+    runnerStates.set(path, state);
     let released = false;
 
     try {
@@ -265,6 +306,7 @@ export async function runTestsParallel(
       log.info(`Running slot acquired for ${runner.getConfigPath()}`);
 
       const runStartTime = Date.now();
+      state.runStartedAt = runStartTime;
       const runProc = await runner.run();
       const runFinishTime = Date.now();
 
@@ -272,6 +314,8 @@ export async function runTestsParallel(
 
       const startDuration = startFinishTime - startTime!;
       const runDuration = runFinishTime - runStartTime!;
+      state.runDurationMs = runDuration;
+      state.completedAt = runFinishTime;
 
       const result = dedent(
         `- ${path}
@@ -282,6 +326,10 @@ export async function runTestsParallel(
       );
 
       results.push(result);
+
+      if (runProc.all && (stdio === 'buffer' || (stdio === 'suppress' && runProc.failed))) {
+        process.stdout.write(runProc.all + '\n');
+      }
 
       if (!runProc.failed) {
         runBuildkiteMetaSet(`config_${runner.getConfigPath()}`, 'true');

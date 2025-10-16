@@ -53,15 +53,11 @@ export class ConfigRunner {
       all: boolean;
       stdio: StdioOption[];
     } = {
-      buffer: this.options.stdio === 'buffer',
-      all: this.options.stdio === 'buffer',
+      buffer: this.options.stdio !== 'inherit',
+      all: this.options.stdio !== 'inherit',
       stdio: [
         'inherit',
-        ...(this.options.stdio === 'buffer'
-          ? ['pipe', 'pipe']
-          : this.options.stdio === 'inherit'
-          ? ['inherit', 'inherit']
-          : ['ignore', 'ignore']),
+        ...(this.options.stdio !== 'inherit' ? ['pipe', 'pipe'] : ['inherit', 'inherit']),
         'ipc',
       ] as StdioOption[],
     };
@@ -129,10 +125,6 @@ export class ConfigRunner {
 
     this.proc.disconnect();
 
-    return this.proc.finally(() => {
-      if (this.all || !!this.proc?.exitCode) {
-        process.stdout.write(this.all);
-      }
-    });
+    return this.proc;
   }
 }

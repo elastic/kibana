@@ -148,6 +148,16 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             }
           }
 
+          if (typeof process.send === 'function') {
+            try {
+              process.send('FTR_WARMUP_DONE');
+            } catch (err) {
+              log.error(
+                new Error('Failed to notify parent process about warmup completion', { cause: err })
+              );
+            }
+          }
+
           const kibanaProcName = `${CI_PARALLEL_PROCESS_PREFIX}kibana-ftr`;
 
           const mainKibanaProcesses = await runKibanaServer({
@@ -202,16 +212,6 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             });
 
             kibanaProcessNames.push(...remoteKibanaProcesses);
-          }
-
-          if (typeof process.send === 'function') {
-            try {
-              process.send('FTR_WARMUP_DONE');
-            } catch (err) {
-              log.error(
-                new Error('Failed to notify parent process about warmup completion', { cause: err })
-              );
-            }
           }
 
           if (abortCtrl.signal.aborted) {
