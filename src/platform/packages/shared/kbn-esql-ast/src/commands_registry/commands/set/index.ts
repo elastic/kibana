@@ -23,7 +23,11 @@ export const setCommand = {
       defaultMessage: 'Sets a query setting',
     }),
     declaration: `SET <setting> = <value>`,
-    examples: [], // TODO: add some CPS example.
+    examples: [
+      'SET project_routing = "_alias:_origin";',
+      'SET project_routing = "_alias: *";',
+      'SET project_routing = "_alias:* AND NOT _alias:_origin";',
+    ],
     hidden: true,
     preview: true,
     name: 'set',
