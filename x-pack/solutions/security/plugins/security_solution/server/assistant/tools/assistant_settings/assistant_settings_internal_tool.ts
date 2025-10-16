@@ -23,6 +23,34 @@ interface ExtendedKibanaRequest {
   };
 }
 
+// Helper function to create user-friendly settings display
+const createUserFriendlySettings = (settings: Record<string, unknown>, toolId: string) => {
+  const userFriendly: Record<string, unknown> = {};
+
+  // Always include alertsIndexPattern if present
+  if (settings.alertsIndexPattern) {
+    userFriendly.alertsIndexPattern = settings.alertsIndexPattern;
+  }
+
+  // Always include size if present
+  if (settings.size) {
+    userFriendly.size = settings.size;
+  }
+
+  // Handle anonymization fields - show only field names being anonymized
+  if (settings.anonymizationFields && Array.isArray(settings.anonymizationFields)) {
+    const anonymizedFields = settings.anonymizationFields
+      .filter((field: Record<string, unknown>) => field.anonymized === true)
+      .map((field: Record<string, unknown>) => field.field);
+
+    if (anonymizedFields.length > 0) {
+      userFriendly.anonymizedFields = anonymizedFields;
+    }
+  }
+
+  return userFriendly;
+};
+
 // Schema to specify which tool settings to retrieve
 const assistantSettingsToolSchema = z.object({
   toolId: z
@@ -37,8 +65,12 @@ export const ASSISTANT_SETTINGS_INTERNAL_TOOL_DESCRIPTION =
   'Call this tool to retrieve current assistant settings for a specific tool. Use this when you need to get configuration parameters for a specific tool before calling it. ' +
   'This tool requires a toolId parameter specifying which tool you need settings for. It provides only the relevant configuration for that specific tool. ' +
   'The tool dynamically fetches the current settings from the request and data client. ' +
-  'IMPORTANT: Ask the user to confirm these settings ONCE, then proceed immediately to call the specified tool. Do not ask for confirmation multiple times. ' +
-  'CRITICAL: After user confirms, IMMEDIATELY call the tool specified in toolId to answer their original question. Do NOT ask for more information.';
+  'CRITICAL WORKFLOW: After calling this tool, you MUST:\n' +
+  '1. Display the settings to the user\n' +
+  '2. Ask for explicit confirmation of the settings\n' +
+  '3. WAIT for the user to confirm before proceeding\n' +
+  '4. Only after user confirmation, call the tool specified in toolId\n' +
+  'DO NOT proceed to call the target tool until the user has explicitly confirmed the settings.';
 
 /**
  * Returns a tool for retrieving assistant settings using the InternalToolDefinition pattern.
@@ -160,14 +192,12 @@ export const assistantSettingsInternalTool = (
 
         // Return settings specific to the requested tool
         let toolSpecificSettings: Record<string, unknown> = {};
-        let toolName = '';
 
         switch (toolId) {
           case 'core.security.alert_counts':
             toolSpecificSettings = {
               alertsIndexPattern,
             };
-            toolName = 'Alert Counts';
             break;
           case 'core.security.open_and_acknowledged_alerts':
             toolSpecificSettings = {
@@ -175,14 +205,12 @@ export const assistantSettingsInternalTool = (
               size,
               anonymizationFields,
             };
-            toolName = 'Open and Acknowledged Alerts';
             break;
           case 'core.security.entity_risk_score':
             toolSpecificSettings = {
               alertsIndexPattern,
               anonymizationFields,
             };
-            toolName = 'Entity Risk Score';
             break;
           default:
             // For unknown tools, return basic settings
@@ -190,19 +218,19 @@ export const assistantSettingsInternalTool = (
               alertsIndexPattern,
               anonymizationFields,
             };
-            toolName = 'Unknown Tool';
         }
+
+        // Create user-friendly settings display
+        const userFriendlySettings = createUserFriendlySettings(toolSpecificSettings, toolId);
 
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
-                message: `Current settings for ${toolName} tool retrieved successfully. Please confirm these settings before proceeding:`,
-                toolId,
-                toolName,
-                settings: toolSpecificSettings,
-                guidance: `These are the current settings for the ${toolName} tool. Please confirm if these settings are correct for your analysis. After confirmation, I will proceed with your original question using these settings.`,
+                message: `Current settings retrieved successfully. Please confirm these settings before proceeding:`,
+                settings: userFriendlySettings,
+                guidance: `These are the current settings for your analysis. Please confirm if these settings are correct. I will wait for your explicit confirmation before proceeding with your original question using these settings.`,
               },
             },
           ],

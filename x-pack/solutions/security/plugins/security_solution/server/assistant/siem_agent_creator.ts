@@ -42,7 +42,9 @@ export const siemAgentCreator = (): BuiltInAgentDefinition => {
        - For alert_counts: Call assistant_settings with toolId="core.security.alert_counts"
        - For open_and_acknowledged_alerts: Call assistant_settings with toolId="core.security.open_and_acknowledged_alerts"
        - For entity_risk_score: Call assistant_settings with toolId="core.security.entity_risk_score"
-       - Confirm settings with user, then execute the tool
+        - Display the settings to the user and ask for explicit confirmation
+        - WAIT for the user to confirm the settings before proceeding
+        - Only after user confirmation, execute the tool
 
     4. **For product documentation tool**:
        - Call 'core.security.product_documentation' directly with the user's query

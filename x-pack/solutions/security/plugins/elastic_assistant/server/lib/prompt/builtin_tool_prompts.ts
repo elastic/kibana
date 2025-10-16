@@ -17,7 +17,7 @@ export const builtinToolPrompts: Prompt[] = [
     promptGroupId: builtinPromptGroupId,
     prompt: {
       default:
-        'Call this for the counts of last 24 hours of open and acknowledged alerts in the environment, grouped by their severity and workflow status. The response will be JSON and from it you can summarize the information to answer the question.\n\nIMPORTANT: This tool requires NO parameters. All configuration (alertsIndexPattern) is automatically retrieved from the assistant_settings tool. Always call the assistant_settings tool first to get current configuration and confirm with the user before calling this tool.',
+        'Call this for the counts of last 24 hours of open and acknowledged alerts in the environment, grouped by their severity and workflow status. The response will be JSON and from it you can summarize the information to answer the question.\n\nCRITICAL WORKFLOW: This tool requires NO parameters. You MUST follow this exact sequence:\n1. First call the assistant_settings tool with toolId="core.security.alert_counts"\n2. Display the settings to the user and ask for explicit confirmation\n3. WAIT for the user to confirm the settings before proceeding\n4. Only after user confirmation, call this tool to answer their question\n\nDO NOT proceed to call this tool until the user has explicitly confirmed the settings.',
     },
   },
   {
@@ -25,7 +25,7 @@ export const builtinToolPrompts: Prompt[] = [
     promptGroupId: builtinPromptGroupId,
     prompt: {
       default:
-        'Call this for knowledge about the latest n open and acknowledged alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts. Do not call this tool for alert count or quantity. The output is an array of the latest n open and acknowledged alerts.\n\nIMPORTANT: This tool requires NO parameters. All configuration (alertsIndexPattern) is automatically retrieved from the assistant_settings tool. Always call the assistant_settings tool first to get current configuration and confirm with the user before calling this tool.',
+        'Call this for knowledge about the latest n open and acknowledged alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts. Do not call this tool for alert count or quantity. The output is an array of the latest n open and acknowledged alerts.\n\nCRITICAL WORKFLOW: This tool requires NO parameters. You MUST follow this exact sequence:\n1. First call the assistant_settings tool with toolId="core.security.open_and_acknowledged_alerts"\n2. Display the settings to the user and ask for explicit confirmation\n3. WAIT for the user to confirm the settings before proceeding\n4. Only after user confirmation, call this tool to answer their question\n\nDO NOT proceed to call this tool until the user has explicitly confirmed the settings.',
     },
   },
   {
@@ -103,7 +103,7 @@ If no relevant information is found, inform the user you could not locate the re
     promptGroupId: builtinPromptGroupId,
     prompt: {
       default:
-        "Call this for knowledge about the latest entity risk score and the inputs that contributed to the calculation (sorted by 'kibana.alert.risk_score') in the environment, or when answering questions about how critical or risky an entity is. When informing the risk score value for a entity you must use the normalized field 'calculated_score_norm'.\n\nIMPORTANT: This tool requires identifier_type and identifier parameters. All configuration (alertsIndexPattern) is automatically retrieved from the assistant_settings tool. Always call the assistant_settings tool first to get current configuration and confirm with the user before calling this tool.",
+        "Call this for knowledge about the latest entity risk score and the inputs that contributed to the calculation (sorted by 'kibana.alert.risk_score') in the environment, or when answering questions about how critical or risky an entity is. When informing the risk score value for a entity you must use the normalized field 'calculated_score_norm'.\n\nCRITICAL WORKFLOW: This tool requires identifier_type and identifier parameters. You MUST follow this exact sequence:\n1. First call the assistant_settings tool with toolId=\"core.security.entity_risk_score\"\n2. Display the settings to the user and ask for explicit confirmation\n3. WAIT for the user to confirm the settings before proceeding\n4. Only after user confirmation, call this tool with the required parameters\n\nDO NOT proceed to call this tool until the user has explicitly confirmed the settings.",
     },
   },
 ];
