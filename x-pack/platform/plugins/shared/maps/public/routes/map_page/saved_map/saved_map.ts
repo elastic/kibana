@@ -465,21 +465,25 @@ export class SavedMap {
         });
         return;
       }
-      await this._getStateTransfer().navigateToWithEmbeddablePackage(this._originatingApp, {
-        state: {
-          embeddableId: newCopyOnSave ? undefined : this._embeddableId,
-          type: MAP_SAVED_OBJECT_TYPE,
-          serializedState: { rawState: mapEmbeddableState },
-        },
+      await this._getStateTransfer().navigateToWithEmbeddablePackages(this._originatingApp, {
+        state: [
+          {
+            embeddableId: newCopyOnSave ? undefined : this._embeddableId,
+            type: MAP_SAVED_OBJECT_TYPE,
+            serializedState: { rawState: mapEmbeddableState },
+          },
+        ],
         path: this._originatingPath,
       });
       return;
     } else if (dashboardId) {
-      await this._getStateTransfer().navigateToWithEmbeddablePackage('dashboards', {
-        state: {
-          type: MAP_SAVED_OBJECT_TYPE,
-          serializedState: { rawState: mapEmbeddableState },
-        },
+      await this._getStateTransfer().navigateToWithEmbeddablePackages('dashboards', {
+        state: [
+          {
+            type: MAP_SAVED_OBJECT_TYPE,
+            serializedState: { rawState: mapEmbeddableState },
+          },
+        ],
         path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
       });
       return;
