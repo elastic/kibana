@@ -52,7 +52,7 @@ export function validateLiquidTemplate(yamlString: string): YamlValidationResult
     return [
       {
         id: `liquid-template-${startPos.line}-${startPos.column}-${endPos.line}-${endPos.column}`,
-        source: 'liquid-template-validation',
+        owner: 'liquid-template-validation',
         message: customerFacingErrorMessage,
         startLineNumber: startPos.line,
         startColumn: startPos.column,
