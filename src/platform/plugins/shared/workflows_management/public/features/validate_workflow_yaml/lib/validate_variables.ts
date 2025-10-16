@@ -35,7 +35,7 @@ export function validateVariables(
         ...variableItem,
         message: 'Failed to get context schema for path',
         severity: 'error',
-        source: 'variable-validation',
+        owner: 'variable-validation',
         hoverMessage: null,
       });
     }

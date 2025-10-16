@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
@@ -16,7 +16,7 @@ import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { memoizedGetTimelineColumnHeaders } from './utils';
 
 export const useTimelineColumns = (columns: ColumnHeaderOptions[]) => {
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { browserFields: oldBrowserFields } = useSourcererDataView(SourcererScopeName.timeline);
   const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
 
