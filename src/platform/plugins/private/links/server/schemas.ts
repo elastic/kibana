@@ -10,30 +10,12 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
-import {
-  dashboardLinkSchema,
-  externalLinkSchema,
-} from './content_management/schema/v1/cm_services';
-import {
-  LINKS_HORIZONTAL_LAYOUT,
-  LINKS_VERTICAL_LAYOUT,
-} from '../common/content_management/v1/constants';
+import { linksArraySchema, layoutSchema } from './content_management/schema/v1/cm_services';
 
 // Links by-value state schema (contains layout and links)
 const linksByValueStateSchema = schema.object({
-  layout: schema.maybe(
-    schema.oneOf(
-      [schema.literal(LINKS_HORIZONTAL_LAYOUT), schema.literal(LINKS_VERTICAL_LAYOUT)],
-      {
-        meta: {
-          description: 'Denote whether to display the links in a horizontal or vertical layout',
-        },
-      }
-    )
-  ),
-  links: schema.arrayOf(schema.oneOf([dashboardLinkSchema, externalLinkSchema]), {
-    meta: { description: 'The list of links to display' },
-  }),
+  layout: layoutSchema,
+  links: linksArraySchema,
 });
 
 // Links by-reference state schema (contains savedObjectId)
