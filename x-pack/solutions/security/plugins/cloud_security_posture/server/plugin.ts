@@ -49,6 +49,7 @@ import type {
 } from './types';
 import { setupRoutes } from './routes/setup_routes';
 import { cspBenchmarkRule, cspSettings } from './saved_objects';
+import { migrateCdrDataViewsForAllSpaces } from './saved_objects/data_views';
 import { initializeCspIndices } from './create_indices/create_indices';
 import {
   deletePreviousTransformsVersions,
@@ -125,7 +126,12 @@ export class CspPlugin
 
         // If package is installed we want to make sure all needed assets are installed
         if (packageInfo) {
-          this.initialize(core, plugins.taskManager, packageInfo.install_version).catch(() => {});
+          this.initialize(
+            core,
+            plugins.taskManager,
+            packageInfo.install_version,
+            plugins.spaces
+          ).catch(() => {});
         }
 
         plugins.fleet.registerExternalCallback(
@@ -192,7 +198,12 @@ export class CspPlugin
             soClient: SavedObjectsClientContract
           ): Promise<PackagePolicy> => {
             if (isCspPackage(packagePolicy.package?.name)) {
-              await this.initialize(core, plugins.taskManager, packagePolicy.package!.version);
+              await this.initialize(
+                core,
+                plugins.taskManager,
+                packagePolicy.package!.version,
+                plugins.spaces
+              );
               return packagePolicy;
             }
 
@@ -239,8 +250,13 @@ export class CspPlugin
   ): Promise<void> {
     this.logger.debug('initialize');
     const esClient = core.elasticsearch.client.asInternalUser;
+    const soClient = core.savedObjects.createInternalRepository();
     const isIntegrationVersionIncludesTransformAsset =
       isTransformAssetIncluded(packagePolicyVersion);
+
+    // Migrate old data views for all spaces
+    await migrateCdrDataViewsForAllSpaces(soClient, spacesService?.spacesService, this.logger);
+
     await initializeCspIndices(
       esClient,
       this.config,

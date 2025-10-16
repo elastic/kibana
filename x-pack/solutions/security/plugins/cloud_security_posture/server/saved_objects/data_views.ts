@@ -65,29 +65,6 @@ const deleteDataViewSafe = async (
   }
 };
 
-const migrateOldDataViews = async (
-  soClient: ISavedObjectsRepository,
-  spacesService: SpacesServiceStart | undefined,
-  request: KibanaRequest,
-  oldDataViewIdPrefixes: string[],
-  logger: Logger
-): Promise<void> => {
-  const currentSpaceId = getCurrentSpaceId(spacesService, request);
-
-  // Iterate through all old data view versions
-  for (const oldDataViewIdPrefix of oldDataViewIdPrefixes) {
-    const oldDataViewId = `${oldDataViewIdPrefix}-${currentSpaceId}`;
-
-    // Check if old data view exists in the current space before attempting deletion
-    const oldDataView = await getDataViewSafe(soClient, currentSpaceId, oldDataViewId);
-
-    if (oldDataView) {
-      logger.info(`Migrating data view from ${oldDataViewId} to new version`);
-      await deleteDataViewSafe(soClient, oldDataViewId, currentSpaceId, logger);
-    }
-  }
-};
-
 export const installDataView = async (
   esClient: ElasticsearchClient,
   soClient: ISavedObjectsRepository,
@@ -135,6 +112,93 @@ export const installDataView = async (
   }
 };
 
+export const migrateCdrDataViewsForAllSpaces = async (
+  soClient: ISavedObjectsRepository,
+  spacesService: SpacesServiceStart | undefined,
+  logger: Logger
+) => {
+  try {
+    logger.info('Starting CDR data views migration across all spaces');
+
+    // Get all spaces from saved objects
+    let spaceIds: string[] = [DEFAULT_SPACE_ID];
+    
+    if (spacesService) {
+      try {
+        // Find all space saved objects
+        const spacesResult = await soClient.find({
+          type: 'space',
+          perPage: 1000,
+          namespaces: ['*'], // Search across all namespaces
+        });
+        
+        spaceIds = spacesResult.saved_objects.map((space) => space.id);
+        logger.info(`Found ${spaceIds.length} space(s) to migrate: ${spaceIds.join(', ')}`);
+      } catch (error) {
+        logger.warn('Failed to retrieve spaces, using default space only', error);
+        spaceIds = [DEFAULT_SPACE_ID];
+      }
+    } else {
+      logger.info('Spaces service not available, using default space only');
+    }
+
+    // Get all data views matching old prefixes
+    const oldMisconfigurationsPrefixes = CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS;
+    const oldVulnerabilitiesPrefixes = CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS;
+
+    // Find and delete old misconfigurations data views
+    for (const oldPrefix of oldMisconfigurationsPrefixes) {
+      for (const spaceId of spaceIds) {
+        try {
+          const oldDataViewId = `${oldPrefix}-${spaceId}`;
+          logger.debug(`Checking for old misconfigurations data view: ${oldDataViewId} in space: ${spaceId}`);
+
+          const findResult = await getDataViewSafe(soClient, spaceId, oldDataViewId);
+
+          if (findResult) {
+            logger.info(`Found old misconfigurations data view: ${oldDataViewId}, migrating...`);
+            const namespace = findResult.namespaces?.[0] || spaceId;
+            await deleteDataViewSafe(soClient, findResult.id, namespace, logger);
+          }
+        } catch (error) {
+          logger.warn(
+            `Failed to migrate old misconfigurations data view for prefix ${oldPrefix} in space ${spaceId}`,
+            error
+          );
+        }
+      }
+    }
+
+    // Find and delete old vulnerabilities data views
+    for (const oldPrefix of oldVulnerabilitiesPrefixes) {
+      for (const spaceId of spaceIds) {
+        try {
+          const oldDataViewId = `${oldPrefix}-${spaceId}`;
+          logger.debug(`Checking for old vulnerabilities data view: ${oldDataViewId} in space: ${spaceId}`);
+
+          const findResult = await getDataViewSafe(soClient, spaceId, oldDataViewId);
+
+          if (findResult) {
+            logger.info(`Found old vulnerabilities data view: ${oldDataViewId}, migrating...`);
+            const namespace = findResult.namespaces?.[0] || spaceId;
+            await deleteDataViewSafe(soClient, findResult.id, namespace, logger);
+          }
+        } catch (error) {
+          logger.warn(
+            `Failed to migrate old vulnerabilities data view for prefix ${oldPrefix} in space ${spaceId}`,
+            error
+          );
+        }
+      }
+    }
+
+    logger.info('CDR data views migration completed successfully');
+  } catch (error) {
+    logger.error('Failed to migrate CDR data views', error);
+    // Don't throw - migration failure shouldn't block initialization
+  }
+};
+
 export const setupCdrDataViews = async (
   esClient: ElasticsearchClient,
   soClient: ISavedObjectsRepository,
@@ -143,26 +207,6 @@ export const setupCdrDataViews = async (
   request: KibanaRequest,
   logger: Logger
 ) => {
-  // Migrate all old misconfigurations data view versions
-  // This ensures users upgrading from any old version get the latest data view
-  await migrateOldDataViews(
-    soClient,
-    spacesService,
-    request,
-    CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS,
-    logger
-  );
-
-  // Migrate all old vulnerabilities data view versions
-  // This ensures users upgrading from any old version get the latest data view
-  await migrateOldDataViews(
-    soClient,
-    spacesService,
-    request,
-    CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS,
-    logger
-  );
-
   await installDataView(
     esClient,
     soClient,
