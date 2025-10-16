@@ -8,7 +8,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
 import type { PublicContract } from '@kbn/utility-types';
 import type { SearchSessionSavedObject } from '../sessions_client';
 import {
@@ -122,15 +122,15 @@ export class SearchSessionEBTManager {
 
   private getQueryLanguage(query: Query | AggregateQuery | undefined) {
     if (!query) return '';
-    if ('language' in query) return query.language;
-    return 'esql';
+    if (isOfAggregateQueryType(query)) return 'esql';
+    return query.language;
   }
 
   private getQueryString(query: Query | AggregateQuery | undefined) {
     if (!query) return '';
-    if ('query' in query && typeof query.query === 'string') return query.query;
-    if ('esql' in query) return query.esql;
-    return '';
+    if (isOfAggregateQueryType(query)) return query.esql;
+    if (typeof query.query === 'string') return query.query;
+    return Object.values(query.query).join('');
   }
 
   private getQueryStringCharCount(queryString: string) {
