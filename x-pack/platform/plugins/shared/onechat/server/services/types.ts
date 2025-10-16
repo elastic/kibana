@@ -20,6 +20,7 @@ import type { ConversationService } from './conversation';
 import type { ChatService } from './chat';
 import type { McpConnectionManager } from './mcp/mcp_connection_manager';
 import type { ComposioConnectionManager } from './composio/composio_connection_manager';
+import type { UserMcpConnectionManager } from './user_mcp/connection_manager';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -41,6 +42,7 @@ export interface ServiceSetupDeps {
   workflowsManagement?: WorkflowsPluginSetup;
   mcpConnectionManager: McpConnectionManager;
   composioConnectionManager?: ComposioConnectionManager;
+  userMcpConnectionManager: UserMcpConnectionManager;
 }
 
 export interface ServicesStartDeps {

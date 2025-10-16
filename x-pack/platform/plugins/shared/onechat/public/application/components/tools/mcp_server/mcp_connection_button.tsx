@@ -17,12 +17,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../../../common/doc_links';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { appPaths } from '../../../utils/app_paths';
 import { MCP_SERVER_PATH } from '../../../../../common/mcp';
 
 export const McpConnectionButton = () => {
   const [isContextOpen, setIsContextOpen] = useState(false);
 
   const { kibanaUrl } = useKibanaUrl();
+  const { createOnechatUrl } = useNavigation();
 
   const mcpServerUrl = `${kibanaUrl}${MCP_SERVER_PATH}`;
 
@@ -48,6 +51,16 @@ export const McpConnectionButton = () => {
     >
       <EuiContextMenuPanel
         items={[
+          <EuiContextMenuItem
+            key="manage"
+            icon="gear"
+            href={createOnechatUrl(appPaths.mcpServers.list)}
+          >
+            {i18n.translate('xpack.onechat.tools.manageMcpServersButton', {
+              defaultMessage: 'Manage MCP Servers',
+            })}
+          </EuiContextMenuItem>,
+
           <EuiCopy
             key="copy"
             textToCopy={mcpServerUrl}

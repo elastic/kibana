@@ -30,4 +30,7 @@ export const appPaths = {
     new: '/tools/new',
     details: ({ toolId }: { toolId: string }) => `/tools/${toolId}`,
   },
+  mcpServers: {
+    list: '/mcp-servers',
+  },
 };

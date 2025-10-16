@@ -48,7 +48,7 @@ export function validateMcpServerConfigs(servers: McpServerConfig[]): string[] {
 
       // Distinguish between OAuth flows based on presence of clientSecret
       const isClientCredentialsFlow = Boolean(server.auth.clientSecret);
-      
+
       if (isClientCredentialsFlow) {
         // Client Credentials flow (machine-to-machine)
         // tokenEndpoint is OPTIONAL:
@@ -80,4 +80,3 @@ export function validateMcpServerConfigs(servers: McpServerConfig[]): string[] {
 
   return errors;
 }
-

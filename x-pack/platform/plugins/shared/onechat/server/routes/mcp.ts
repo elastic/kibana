@@ -247,9 +247,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         });
 
         // Use HTTP Basic Auth for confidential clients
-        const credentials = Buffer.from(`${auth.clientId}:${auth.clientSecret}`).toString(
-          'base64'
-        );
+        const credentials = Buffer.from(`${auth.clientId}:${auth.clientSecret}`).toString('base64');
 
         const tokenResponse = await fetch(tokenEndpoint, {
           method: 'POST',

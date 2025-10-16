@@ -27,16 +27,20 @@ import { getToolTypeDefinitions } from './tool_types';
 import { createPersistedProviderFn } from './persisted';
 import { createMcpProviderFn } from './mcp/mcp_provider';
 import { createComposioProviderFn } from './composio/composio_provider';
+import { createUserMcpProviderFn } from './user_mcp/provider';
 import { createToolRegistry } from './tool_registry';
 import { getToolTypeInfo } from './utils';
 import type { McpConnectionManager } from '../mcp/mcp_connection_manager';
 import type { ComposioConnectionManager } from '../composio/composio_connection_manager';
+import type { UserMcpConnectionManager } from '../user_mcp/connection_manager';
+import { USER_MCP_SERVER_SAVED_OBJECT_TYPE } from '../../saved_objects/user_mcp_server';
 
 export interface ToolsServiceSetupDeps {
   logger: Logger;
   workflowsManagement?: WorkflowsPluginSetup;
   mcpConnectionManager: McpConnectionManager;
   composioConnectionManager?: ComposioConnectionManager;
+  userMcpConnectionManager: UserMcpConnectionManager;
 }
 
 export interface ToolsServiceStartDeps {
@@ -81,15 +85,14 @@ export class ToolsService {
     savedObjects,
     composioConnectionManager,
   }: ToolsServiceStartDeps): ToolsServiceStart {
-    const { logger, workflowsManagement, mcpConnectionManager } = this.setupDeps!;
+    const { logger, workflowsManagement, mcpConnectionManager, userMcpConnectionManager } =
+      this.setupDeps!;
 
     const toolTypes = getToolTypeDefinitions({ workflowsManagement });
 
     const builtinProviderFn = createBuiltinProviderFn({
       registry: this.builtinRegistry,
       toolTypes,
-      uiSettings,
-      savedObjects,
     });
     const persistedProviderFn = createPersistedProviderFn({
       logger,
@@ -109,6 +112,14 @@ export class ToolsService {
         })
       : undefined;
 
+    // Create user MCP provider factory
+    const userMcpProviderFn = createUserMcpProviderFn({
+      connectionManager: userMcpConnectionManager,
+      getScopedRepository: (req) =>
+        savedObjects.createScopedRepository(req, [USER_MCP_SERVER_SAVED_OBJECT_TYPE]),
+      logger: logger.get('user-mcp-provider'),
+    });
+
     const getRegistry: ToolsServiceStart['getRegistry'] = async ({ request }) => {
       const space = getCurrentSpaceId({ request, spaces });
       const builtinProvider = await builtinProviderFn({ request, space });
@@ -118,6 +129,9 @@ export class ToolsService {
         ? await composioProviderFn({ request, space })
         : undefined;
 
+      // Create user MCP provider with request-scoped repository
+      const userMcpProvider = await userMcpProviderFn({ request, space });
+
       return createToolRegistry({
         getRunner,
         space,
@@ -126,6 +140,7 @@ export class ToolsService {
         persistedProvider,
         mcpProvider,
         composioProvider,
+        userMcpProvider,
       });
     };
 

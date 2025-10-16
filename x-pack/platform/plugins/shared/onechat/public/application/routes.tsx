@@ -14,6 +14,7 @@ import { OnechatConversationsPage } from './pages/conversations';
 import { OnechatToolCreatePage } from './pages/tool_create';
 import { OnechatToolDetailsPage } from './pages/tool_details';
 import { OnechatToolsPage } from './pages/tools';
+import { McpServersPage } from './pages/mcp_servers';
 import { OAuthCallbackPage } from './pages/oauth_callback';
 
 export const OnechatRoutes: React.FC<{}> = () => {
@@ -50,6 +51,10 @@ export const OnechatRoutes: React.FC<{}> = () => {
 
       <Route path="/tools">
         <OnechatToolsPage />
+      </Route>
+
+      <Route path="/mcp-servers">
+        <McpServersPage />
       </Route>
 
       {/* Default to conversations page */}

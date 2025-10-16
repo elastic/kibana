@@ -62,7 +62,9 @@ export const runTool = async <TParams = Record<string, unknown>>({
         return await toolHandler(validation.data as Record<string, any>, toolHandlerContext);
       } catch (err) {
         return {
-          results: [{ type: ToolResultType.error, data: { message: (err as Error).message } }] as ToolResult[],
+          results: [
+            { type: ToolResultType.error, data: { message: (err as Error).message } },
+          ] as ToolResult[],
         };
       }
     }

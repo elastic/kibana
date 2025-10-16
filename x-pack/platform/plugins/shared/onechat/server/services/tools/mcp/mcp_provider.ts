@@ -11,7 +11,11 @@ import { createToolNotFoundError } from '@kbn/onechat-common';
 import { z } from '@kbn/zod';
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { McpClient } from '@kbn/wci-server';
-import type { ReadonlyToolProvider, InternalToolDefinition, ToolProviderFn } from '../tool_provider';
+import type {
+  ReadonlyToolProvider,
+  InternalToolDefinition,
+  ToolProviderFn,
+} from '../tool_provider';
 import type { McpConnectionManager } from '../../mcp/mcp_connection_manager';
 
 interface McpToolConfiguration {
@@ -183,13 +187,17 @@ function convertMcpToolToInternal({
           // Check if this server requires per-user authentication
           if (connectionManager.requiresUserAuth(serverId)) {
             const userToken = context?.userToken;
-            
+
             if (!userToken) {
-              throw new Error(`OAuth authentication required for MCP server "${serverName}". Please connect to the server first.`);
+              throw new Error(
+                `OAuth authentication required for MCP server "${serverName}". Please connect to the server first.`
+              );
             }
 
             // Create per-request OAuth client with user's token
-            logger.debug(`Creating OAuth client for tool "${mcpTool.name}" on server "${serverId}"`);
+            logger.debug(
+              `Creating OAuth client for tool "${mcpTool.name}" on server "${serverId}"`
+            );
             clientToUse = await connectionManager.createOAuthClient(serverId, userToken);
             shouldDisconnect = true;
           } else {
@@ -268,7 +276,7 @@ function convertMcpToolToInternal({
  * Convert JSON Schema to Zod schema
  * Supports basic JSON Schema types commonly used in MCP tools
  */
-function jsonSchemaToZodSchema(jsonSchema: any): z.ZodObject<any> {
+export function jsonSchemaToZodSchema(jsonSchema: any): z.ZodObject<any> {
   if (!jsonSchema || typeof jsonSchema !== 'object') {
     return z.object({});
   }

@@ -14,6 +14,7 @@ import type {
 } from './types';
 import type { McpConnectionManager } from './mcp/mcp_connection_manager';
 import type { ComposioConnectionManager } from './composio/composio_connection_manager';
+import type { UserMcpConnectionManager } from './user_mcp/connection_manager';
 import { ToolsService } from './tools';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './runner';
@@ -29,6 +30,7 @@ export class ServiceManager {
   private services?: ServiceInstances;
   private mcpConnectionManager?: McpConnectionManager;
   private composioConnectionManager?: ComposioConnectionManager;
+  private userMcpConnectionManager?: UserMcpConnectionManager;
   public internalSetup?: InternalSetupServices;
   public internalStart?: InternalStartServices;
 
@@ -37,9 +39,11 @@ export class ServiceManager {
     workflowsManagement,
     mcpConnectionManager,
     composioConnectionManager,
+    userMcpConnectionManager,
   }: ServiceSetupDeps): InternalSetupServices {
     this.mcpConnectionManager = mcpConnectionManager;
     this.composioConnectionManager = composioConnectionManager;
+    this.userMcpConnectionManager = userMcpConnectionManager;
     this.services = {
       tools: new ToolsService(),
       agents: new AgentsService(),
@@ -51,6 +55,7 @@ export class ServiceManager {
         workflowsManagement,
         mcpConnectionManager,
         composioConnectionManager,
+        userMcpConnectionManager,
       }),
       agents: this.services.agents.setup({ logger }),
     };

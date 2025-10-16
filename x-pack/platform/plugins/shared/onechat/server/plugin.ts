@@ -11,6 +11,7 @@ import type { OnechatConfig } from './config';
 import { validateMcpServerConfigs } from './config_validation';
 import { McpConnectionManager } from './services/mcp/mcp_connection_manager';
 import { ComposioConnectionManager } from './services/composio/composio_connection_manager';
+import { UserMcpConnectionManager } from './services/user_mcp/connection_manager';
 import { ServiceManager } from './services';
 import type {
   OnechatPluginSetup,
@@ -23,6 +24,10 @@ import { registerRoutes } from './routes';
 import { registerUISettings } from './ui_settings';
 import type { OnechatHandlerContext } from './request_handler_context';
 import { registerOnechatHandlerContext } from './request_handler_context';
+import {
+  userMcpServerSavedObjectType,
+  USER_MCP_SERVER_SAVED_OBJECT_TYPE,
+} from './saved_objects/user_mcp_server';
 
 export class OnechatPlugin
   implements
@@ -38,6 +43,7 @@ export class OnechatPlugin
   private serviceManager = new ServiceManager();
   private mcpConnectionManager?: McpConnectionManager;
   private composioConnectionManager?: ComposioConnectionManager;
+  private userMcpConnectionManager: UserMcpConnectionManager;
 
   constructor(context: PluginInitializerContext<OnechatConfig>) {
     this.logger = context.logger.get();
@@ -68,6 +74,29 @@ export class OnechatPlugin
       this.logger.error(`Failed to initialize MCP connections: ${error}`);
     });
 
+    // Initialize User MCP connection manager (no startup initialization needed)
+    this.userMcpConnectionManager = new UserMcpConnectionManager({
+      logger: this.logger.get('user-mcp'),
+    });
+
+    // Register saved object types
+    coreSetup.savedObjects.registerType(userMcpServerSavedObjectType);
+
+    // Register encrypted fields for user MCP servers
+    if (setupDeps.encryptedSavedObjects) {
+      setupDeps.encryptedSavedObjects.registerType({
+        type: USER_MCP_SERVER_SAVED_OBJECT_TYPE,
+        attributesToEncrypt: new Set(['auth_config']),
+      });
+      // Store the client factory for later use
+      this.encryptedSavedObjectsClientFactory = () => setupDeps.encryptedSavedObjects!.getClient();
+      this.logger.info('Registered encrypted saved object type for user MCP servers');
+    } else {
+      this.logger.warn(
+        'Encrypted saved objects plugin not available - user MCP server credentials will not be encrypted'
+      );
+    }
+
     // Note: Composio initialization happens in start() phase when Elasticsearch client is available
 
     const serviceSetups = this.serviceManager.setupServices({
@@ -75,6 +104,7 @@ export class OnechatPlugin
       workflowsManagement: setupDeps.workflowsManagement,
       mcpConnectionManager: this.mcpConnectionManager,
       composioConnectionManager: undefined, // Will be initialized in start()
+      userMcpConnectionManager: this.userMcpConnectionManager,
     });
 
     registerFeatures({ features: setupDeps.features });

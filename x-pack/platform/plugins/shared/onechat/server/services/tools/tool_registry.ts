@@ -48,6 +48,7 @@ interface CreateToolClientParams {
   builtinProvider: ReadonlyToolProvider;
   mcpProvider: ReadonlyToolProvider;
   composioProvider?: ReadonlyToolProvider;
+  userMcpProvider?: ReadonlyToolProvider;
   request: KibanaRequest;
   space: string;
 }
@@ -61,6 +62,7 @@ class ToolRegistryImpl implements ToolRegistry {
   private readonly builtinProvider: ReadonlyToolProvider;
   private readonly mcpProvider: ReadonlyToolProvider;
   private readonly composioProvider?: ReadonlyToolProvider;
+  private readonly userMcpProvider?: ReadonlyToolProvider;
   private readonly request: KibanaRequest;
   private readonly getRunner: () => Runner;
 
@@ -69,6 +71,7 @@ class ToolRegistryImpl implements ToolRegistry {
     builtinProvider,
     mcpProvider,
     composioProvider,
+    userMcpProvider,
     request,
     getRunner,
   }: CreateToolClientParams) {
@@ -76,6 +79,7 @@ class ToolRegistryImpl implements ToolRegistry {
     this.builtinProvider = builtinProvider;
     this.mcpProvider = mcpProvider;
     this.composioProvider = composioProvider;
+    this.userMcpProvider = userMcpProvider;
     this.request = request;
     this.getRunner = getRunner;
   }
@@ -84,6 +88,9 @@ class ToolRegistryImpl implements ToolRegistry {
     const providers = [this.builtinProvider, this.mcpProvider];
     if (this.composioProvider) {
       providers.push(this.composioProvider);
+    }
+    if (this.userMcpProvider) {
+      providers.push(this.userMcpProvider);
     }
     providers.push(this.persistedProvider);
     return providers;
