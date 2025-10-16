@@ -32,6 +32,7 @@ export const getCloud = ({ isCloudEnabled }: { isCloudEnabled: boolean }) => {
     ...cloudBasicUrls({ isCloudEnabled }),
     getUrls: () => cloudBasicUrls({ isCloudEnabled }),
     getPrivilegedUrls: () => Promise.resolve({}),
+    getInTrial: () => false,
   };
 
   return cloud;
