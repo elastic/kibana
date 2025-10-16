@@ -30,7 +30,6 @@
     "@kbn/react-hooks",
     "@kbn/data-grid-in-table-search",
     "@kbn/es-query",
-    "@kbn/discover-utils",
     "@kbn/fields-metadata-plugin",
     "@kbn/esql-utils",
     "@kbn/field-utils"

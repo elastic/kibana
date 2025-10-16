@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
-import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { Chart } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
 import { EmptyState } from './empty_state/empty_state';
@@ -107,7 +106,6 @@ export const MetricsGrid = ({
       const { rowIndex, colIndex } = getRowColFromIndex(chartIndex);
 
       setExpandedMetric({ metric, esqlQuery, chartId, rowIndex, colIndex });
-      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
     },
     [rows, getRowColFromIndex]
   );
@@ -131,26 +129,6 @@ export const MetricsGrid = ({
     }
     return { current: null };
   }, [expandedMetric?.chartId]);
-
-  // TODO: find a better way to handle conflicts with other flyouts
-  // https://github.com/elastic/kibana/issues/237965
-  useEffect(() => {
-    const handleClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-
-      if (target.closest('[data-test-subj="embeddablePanelAction-openInspector"]')) {
-        if (expandedMetric) {
-          handleCloseFlyout();
-        }
-      }
-    };
-
-    document.addEventListener('click', handleClick);
-
-    return () => {
-      document.removeEventListener('click', handleClick);
-    };
-  }, [expandedMetric, handleCloseFlyout]);
 
   const normalizedFields = useMemo(() => (Array.isArray(fields) ? fields : [fields]), [fields]);
 
@@ -229,7 +207,6 @@ export const MetricsGrid = ({
           chartRef={getChartRefForFocus()}
           metric={expandedMetric.metric}
           esqlQuery={expandedMetric.esqlQuery}
-          isOpen
           onClose={handleCloseFlyout}
         />
       )}
