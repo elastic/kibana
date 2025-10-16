@@ -28,27 +28,18 @@ export function useTraceWaterfall({
   serviceName?: string;
   filterByServiceName: boolean;
 }) {
-  const isFullTrace = useMemo(
-    () => (serviceName ? traceItems.every((item) => item.serviceName === serviceName) : true),
-    [traceItems, serviceName]
-  );
-
   const waterfall = useMemo(() => {
-    const isFilteredTrace = !isFullTrace && !!serviceName && filterByServiceName;
-    const filteredTraceItems = isFilteredTrace
-      ? traceItems.filter((item) => item.serviceName === serviceName)
-      : traceItems;
-
-    const legends = getLegends(filteredTraceItems);
+    const isFilteredTrace = !!serviceName && filterByServiceName;
+    const legends = getLegends(traceItems);
     const colorBy =
       legends.filter(({ type }) => type === WaterfallLegendType.ServiceName).length > 1
         ? WaterfallLegendType.ServiceName
         : WaterfallLegendType.Type;
     const colorMap = createColorLookupMap(legends);
-    const traceParentChildrenMap = getTraceParentChildrenMap(filteredTraceItems, isFilteredTrace);
+    const traceParentChildrenMap = getTraceParentChildrenMap(traceItems, isFilteredTrace);
     const { rootItem, traceState, orphans } = getRootItemOrFallback(
       traceParentChildrenMap,
-      filteredTraceItems
+      traceItems
     );
 
     const traceWaterfall = rootItem
@@ -70,7 +61,7 @@ export function useTraceWaterfall({
       legends,
       colorBy,
     };
-  }, [traceItems, serviceName, isFullTrace, filterByServiceName]);
+  }, [traceItems, serviceName, filterByServiceName]);
 
   return waterfall;
 }
