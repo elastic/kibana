@@ -285,7 +285,7 @@ export const initUiSettings = (
         }
       ),
       type: 'boolean',
-      value: false,
+      value: true,
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
@@ -625,34 +625,27 @@ export const initUiSettings = (
 export const getDefaultAIConnectorSetting = (
   connectors: Connector[],
   readonlyMode?: ReadonlyModeType
-): SettingsConfig | null =>
-  connectors.length > 0
-    ? {
-        [DEFAULT_AI_CONNECTOR]: {
-          name: i18n.translate('xpack.securitySolution.uiSettings.defaultAIConnectorLabel', {
-            defaultMessage: 'Default AI Connector',
-          }),
-          // TODO, make Elastic LLM the default value once fully available in serverless
-          value: connectors[0].id,
-          description: i18n.translate(
-            'xpack.securitySolution.uiSettings.defaultAIConnectorDescription',
-            {
-              defaultMessage:
-                'Default AI connector for serverless AI features (Elastic AI SOC Engine)',
-            }
-          ),
-          type: 'select',
-          options: connectors.map(({ id }) => id),
-          optionLabels: Object.fromEntries(connectors.map(({ id, name }) => [id, name])),
-          category: [APP_ID],
-          requiresPageReload: true,
-          schema: schema.string(),
-          solutionViews: ['classic', 'security'],
-          readonlyMode,
-          readonly: readonlyMode !== undefined,
-        },
-      }
-    : null;
+): SettingsConfig => ({
+  [DEFAULT_AI_CONNECTOR]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.defaultAIConnectorLabel', {
+      defaultMessage: 'Default AI Connector',
+    }),
+    // TODO, make Elastic LLM the default value once fully available in serverless
+    value: connectors.at(0)?.id,
+    description: i18n.translate('xpack.securitySolution.uiSettings.defaultAIConnectorDescription', {
+      defaultMessage: 'Default AI connector for serverless AI features (Elastic AI SOC Engine)',
+    }),
+    type: 'select',
+    options: connectors.map(({ id }) => id),
+    optionLabels: Object.fromEntries(connectors.map(({ id, name }) => [id, name])),
+    category: [APP_ID],
+    requiresPageReload: true,
+    schema: schema.string(),
+    solutionViews: ['classic', 'security'],
+    readonlyMode,
+    readonly: readonlyMode !== undefined,
+  },
+});
 
 export const getDefaultValueReportSettings = (): SettingsConfig => ({
   [DEFAULT_VALUE_REPORT_MINUTES]: {

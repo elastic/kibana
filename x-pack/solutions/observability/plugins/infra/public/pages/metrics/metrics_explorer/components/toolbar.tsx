@@ -110,6 +110,7 @@ export const MetricsExplorerToolbar = ({
             <EuiSuperDatePicker
               start={timeRange.from}
               end={timeRange.to}
+              compressed
               onTimeChange={({ start, end }) => onTimeChange(start, end)}
               onRefresh={onRefresh}
               commonlyUsedRanges={commonlyUsedRanges}

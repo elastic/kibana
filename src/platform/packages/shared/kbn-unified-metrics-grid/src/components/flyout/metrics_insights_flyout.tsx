@@ -36,12 +36,13 @@ interface MetricInsightsFlyoutProps {
   esqlQuery?: string;
   isOpen: boolean;
   onClose: () => void;
+  chartRef: { current: HTMLDivElement | null };
 }
 
 export const MetricInsightsFlyout = ({
   metric,
   esqlQuery,
-
+  chartRef,
   isOpen,
   onClose,
 }: MetricInsightsFlyoutProps) => {
@@ -85,6 +86,15 @@ export const MetricInsightsFlyout = ({
           { defaultMessage: 'Metric Insights Flyout' }
         )}
         ownFocus
+        focusTrapProps={{
+          returnFocus: () => {
+            if (chartRef.current) {
+              chartRef.current.focus();
+              return false;
+            }
+            return true;
+          },
+        }}
         minWidth={minWidth}
         maxWidth={maxWidth}
         onResize={setFlyoutWidth}

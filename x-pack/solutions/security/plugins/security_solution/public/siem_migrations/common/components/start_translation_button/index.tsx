@@ -37,6 +37,7 @@ export const StartTranslationButton = React.memo<StartTranslationButtonProps>(
     return (
       <EuiButton
         data-test-subj={'startMigrationButton'}
+        aria-label={text}
         fill={!isStopped}
         onClick={onStartMigration}
         isLoading={isStarting}
