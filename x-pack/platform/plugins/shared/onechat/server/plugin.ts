@@ -94,7 +94,7 @@ export class OnechatPlugin
       savedObjects,
     });
 
-    const { tools, agents, runnerFactory } = startServices;
+    const { tools, agents, chat, runnerFactory } = startServices;
     const runner = runnerFactory.getRunner();
 
     return {
@@ -104,6 +104,9 @@ export class OnechatPlugin
       },
       agents: {
         execute: agents.execute.bind(agents),
+      },
+      chat: {
+        converse: chat.converse.bind(chat),
       },
     };
   }

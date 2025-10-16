@@ -188,7 +188,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   telemetry: AnalyticsServiceSetup;
   checkPrivileges: () => CheckPrivileges;
   userProfile: UserProfileServiceStart;
-  getOnechatAgents: () => OnechatPluginStart['agents'];
+  getOnechatServices: () => OnechatPluginStart;
 }
 /**
  * @internal

@@ -152,7 +152,7 @@ export const openAndAcknowledgedAlertsInternalTool = (
     getLlmDescription: async ({ config, description }, context) => {
       return getLlmDescriptionHelper({
         description,
-        context,
+        context: context as unknown as Parameters<typeof getLlmDescriptionHelper>[0]['context'],
         promptId: 'OpenAndAcknowledgedAlertsTool',
         promptGroupId: 'builtin-security-tools',
         getStartServices,
@@ -220,6 +220,8 @@ export const openAndAcknowledgedAlertsInternalTool = (
           rawData,
         });
 
+        // Return the transformed string content for the LLM to see
+        // The _id is stored separately for citation handling
         return transformed;
       });
 

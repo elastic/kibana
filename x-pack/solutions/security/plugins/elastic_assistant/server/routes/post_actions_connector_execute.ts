@@ -263,13 +263,7 @@ export const postActionsConnectorExecuteRoute = (
           const executeFunction = agentBuilderEnabled ? agentBuilderExecute : langChainExecute;
 
           logger.debug(`🚀 [ROUTE] agentBuilderEnabled: ${agentBuilderEnabled}`);
-          logger.debug(
-            `🚀 [ROUTE] Using executeFunction: ${
-              executeFunction === agentBuilderExecute ? 'agentBuilderExecute' : 'langChainExecute'
-            }`
-          );
           logger.debug(`🚀 [ROUTE] isStream: ${request.body.subAction !== 'invokeAI'}`);
-          logger.debug(`🚀 [ROUTE] request.body.subAction: ${request.body.subAction}`);
 
           return await Promise.race([
             executeFunction({
@@ -283,7 +277,7 @@ export const postActionsConnectorExecuteRoute = (
               isOssModel,
               inferenceChatModelDisabled,
               conversationId,
-              context: context,
+              context,
               logger,
               inference,
               messages: conversationMessages,
