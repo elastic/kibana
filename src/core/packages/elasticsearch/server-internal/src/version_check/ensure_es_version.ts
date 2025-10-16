@@ -27,7 +27,7 @@ import {
   startWith,
   shareReplay,
   retry,
-  take,
+  timer,
 } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -179,16 +179,18 @@ export const pollEsNodesVersion = ({
 
   const isStartup$ = new BehaviorSubject(hasStartupInterval);
 
+  let currentInterval = 0;
   const checkInterval$ = isStartup$.pipe(
     distinctUntilChanged(),
     map((useStartupInterval) =>
       useStartupInterval ? healthCheckStartupInterval! : healthCheckInterval
-    )
+    ),
+    tap((ms) => (currentInterval = ms))
   );
 
   const tick$ = checkInterval$.pipe(
     switchMap((checkInterval) => interval(checkInterval).pipe(startWith(0))),
-    shareReplay({ refCount: true, bufferSize: 1 })
+    shareReplay({ refCount: true })
   );
 
   return tick$.pipe(
@@ -203,7 +205,15 @@ export const pollEsNodesVersion = ({
           { requestTimeout: HEALTH_CHECK_REQUEST_TIMEOUT }
         )
       ).pipe(
-        retry({ count: healthCheckRetry, delay: () => tick$.pipe(take(1)) }),
+        retry({
+          count: healthCheckRetry,
+          delay: (e) => {
+            log.debug(
+              () => `Error checking Elasticsearch version, retrying in ${currentInterval}ms: ${e}`
+            );
+            return timer(currentInterval);
+          },
+        }),
         catchError((nodesInfoRequestError) => {
           return of({ nodes: {}, nodesInfoRequestError });
         })
