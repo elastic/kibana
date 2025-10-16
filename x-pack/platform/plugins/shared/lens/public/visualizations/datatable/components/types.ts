@@ -9,42 +9,31 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { IAggType } from '@kbn/data-plugin/public';
 import type { Datatable, DatatableColumnMeta, RenderMode } from '@kbn/expressions-plugin/common';
-import type {
-  ILensInterpreterRenderHandlers,
-  LensCellValueAction,
-  LensEditEvent,
-} from '../../../types';
-import type {
-  LENS_EDIT_SORT_ACTION,
-  LENS_EDIT_RESIZE_ACTION,
-  LENS_TOGGLE_ACTION,
-  LENS_EDIT_PAGESIZE_ACTION,
-} from './constants';
 import type { FormatFactory } from '../../../../common/types';
-import type { DatatableProps, LensGridDirection } from '../../../../common/expressions';
+import type { DatatableProps } from '../../../../common/expressions';
 
-export interface LensSortActionData {
-  columnId: string | undefined;
-  direction: LensGridDirection;
-}
+// export interface LensSortActionData {
+//   columnId: string | undefined;
+//   direction: LensGridDirection;
+// }
 
-export interface LensResizeActionData {
-  columnId: string;
-  width: number | undefined;
-}
+// export interface LensResizeActionData {
+//   columnId: string;
+//   width: number | undefined;
+// }
 
-export interface LensToggleActionData {
-  columnId: string;
-}
+// export interface LensToggleActionData {
+//   columnId: string;
+// }
 
-export interface LensPagesizeActionData {
-  size: number;
-}
+// export interface LensPagesizeActionData {
+//   size: number;
+// }
 
-export type LensSortAction = LensEditEvent<typeof LENS_EDIT_SORT_ACTION>;
-export type LensResizeAction = LensEditEvent<typeof LENS_EDIT_RESIZE_ACTION>;
-export type LensToggleAction = LensEditEvent<typeof LENS_TOGGLE_ACTION>;
-export type LensPagesizeAction = LensEditEvent<typeof LENS_EDIT_PAGESIZE_ACTION>;
+// export type LensSortAction = LensEditEvent<typeof LENS_EDIT_SORT_ACTION>;
+// export type LensResizeAction = LensEditEvent<typeof LENS_EDIT_RESIZE_ACTION>;
+// export type LensToggleAction = LensEditEvent<typeof LENS_TOGGLE_ACTION>;
+// export type LensPagesizeAction = LensEditEvent<typeof LENS_EDIT_PAGESIZE_ACTION>;
 
 export type DatatableRenderProps = DatatableProps & {
   formatFactory: FormatFactory;

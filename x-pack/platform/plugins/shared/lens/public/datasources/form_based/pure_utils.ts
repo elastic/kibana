@@ -7,16 +7,14 @@
 
 import type {
   DataType,
-  IndexPattern,
-  IndexPatternField,
-  VisualizationDimensionGroupConfig,
-} from '../../types';
-import type { FormBasedLayer } from './types';
-import type {
   BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,
+  FormBasedLayer,
   GenericIndexPatternColumn,
-} from './operations/definitions/column_types';
+  IndexPattern,
+  IndexPatternField,
+} from '@kbn/lens-common';
+import type { VisualizationDimensionGroupConfig } from '../../types';
 
 /**
  * Normalizes the specified operation type. (e.g. document operations

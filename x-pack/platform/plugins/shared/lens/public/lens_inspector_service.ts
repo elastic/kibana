@@ -32,4 +32,8 @@ export const getLensInspectorService = (inspector: InspectorStartContract) => {
   };
 };
 
-export type LensInspector = ReturnType<typeof getLensInspectorService>;
+export interface LensInspector {
+  getInspectorAdapters: () => Adapters;
+  inspect: (options?: InspectorOptions) => OverlayRef;
+  closeInspector: () => Promise<void | undefined>;
+}

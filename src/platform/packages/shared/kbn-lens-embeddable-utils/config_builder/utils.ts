@@ -10,15 +10,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
 import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/public';
-import type {
-  FormBasedPersistedState,
-  GenericIndexPatternColumn,
-  PersistedIndexPatternLayer,
-} from '@kbn/lens-plugin/public';
-import type {
-  TextBasedLayerColumn,
-  TextBasedPersistedState,
-} from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+import type { TextBasedLayerColumn, TextBasedPersistedState } from '@kbn/lens-common';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DataViewsCommon } from './types';

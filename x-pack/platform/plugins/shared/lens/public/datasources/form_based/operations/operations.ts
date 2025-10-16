@@ -6,12 +6,9 @@
  */
 
 import { memoize } from 'lodash';
-import type { IndexPattern, IndexPatternField, OperationMetadata } from '../../../types';
-import type {
-  GenericOperationDefinition,
-  OperationType,
-  BaseIndexPatternColumn,
-} from './definitions';
+import type { BaseIndexPatternColumn, OperationMetadata } from '@kbn/lens-common';
+import type { IndexPattern, IndexPatternField } from '../../../types';
+import type { GenericOperationDefinition, OperationType } from './definitions';
 import {
   operationDefinitionMap,
   operationDefinitions,

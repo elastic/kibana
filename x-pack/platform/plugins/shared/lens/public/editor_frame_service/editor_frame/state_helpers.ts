@@ -355,13 +355,13 @@ export function initializeDatasources({
   return states;
 }
 
-export interface DocumentToExpressionReturnType {
-  ast: Ast | null;
-  indexPatterns: IndexPatternMap;
-  indexPatternRefs: IndexPatternRef[];
-  activeVisualizationState: unknown;
-  activeDatasourceState: unknown;
-}
+// export interface DocumentToExpressionReturnType {
+//   ast: Ast | null;
+//   indexPatterns: IndexPatternMap;
+//   indexPatternRefs: IndexPatternRef[];
+//   activeVisualizationState: unknown;
+//   activeDatasourceState: unknown;
+// }
 
 export async function persistedStateToExpression(
   datasourceMap: DatasourceMap,

@@ -14,17 +14,12 @@ import {
   sections as formulasSections,
 } from '@kbn/lens-formula-docs';
 import { groupBy } from 'lodash';
+import type { FormulaIndexPatternColumn, GenericIndexPatternColumn } from '@kbn/lens-common';
 import type { IndexPattern } from '../../../../../../types';
 import { getPossibleFunctions } from './math_completion';
 import { hasFunctionFieldArgument } from '../validation';
 
-import type {
-  GenericOperationDefinition,
-  GenericIndexPatternColumn,
-  OperationDefinition,
-  ParamEditorProps,
-} from '../..';
-import type { FormulaIndexPatternColumn } from '../formula';
+import type { GenericOperationDefinition, OperationDefinition, ParamEditorProps } from '../..';
 
 function createNewSection(
   label: string,

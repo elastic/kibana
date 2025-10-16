@@ -16,12 +16,12 @@ import {
 import type { TypedUseSelectorHook } from 'react-redux';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeLensReducer, lensActions, getPreloadedState } from './lens_slice';
-import type { LensState, LensStoreDeps } from './types';
+// import type { LensState, LensStoreDeps } from './types';
 import { initMiddleware } from './init_middleware';
 import { optimizingMiddleware } from './optimizing_middleware';
 import { contextMiddleware } from './context_middleware';
 import { fullscreenMiddleware } from './fullscreen_middleware';
-export type * from './types';
+// export type * from './types';
 export * from './selectors';
 
 export const {

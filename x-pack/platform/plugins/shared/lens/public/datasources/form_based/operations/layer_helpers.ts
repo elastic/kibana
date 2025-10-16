@@ -11,14 +11,21 @@ import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import type {
+  TimeScaleUnit,
+  ReferenceBasedIndexPatternColumn,
+  DateRange,
+  FormBasedLayer,
+  GenericIndexPatternColumn,
+  FormBasedPrivateState,
+  TermsIndexPatternColumn,
+} from '@kbn/lens-common';
 import { nonNullable } from '../../../utils';
-import type { DateRange } from '../../../../common/types';
 import type {
   DatasourceFixAction,
   FramePublicAPI,
   IndexPattern,
   IndexPatternField,
-  OperationMetadata,
   VisualizationDimensionGroupConfig,
 } from '../../../types';
 import {
@@ -28,23 +35,17 @@ import {
   type RequiredReference,
   type OperationDefinition,
   type GenericOperationDefinition,
-  type TermsIndexPatternColumn,
   type FieldBasedOperationErrorMessage,
 } from './definitions';
-import type { DataViewDragDropOperation, FormBasedLayer, FormBasedPrivateState } from '../types';
+import type { DataViewDragDropOperation } from '../types';
 import { getSortScoreByPriorityForField } from './operations';
 import { generateId } from '../../../id_generator';
-import type {
-  GenericIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
-  BaseIndexPatternColumn,
-} from './definitions/column_types';
 import type { FormulaIndexPatternColumn } from './definitions/formula';
 import { insertOrReplaceFormulaColumn } from './definitions/formula';
-import type { TimeScaleUnit } from '../../../../common/expressions';
 import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';
-import type { DataType } from '../../..';
+import type { DataType, OperationMetadata } from '../../..';
+import type { BaseIndexPatternColumn } from '.';
 
 export interface ColumnAdvancedParams {
   filter?: Query | undefined;

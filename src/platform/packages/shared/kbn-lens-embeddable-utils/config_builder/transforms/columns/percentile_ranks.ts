@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PercentileRanksIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { PercentileRanksIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiPercentileRanksOperation } from '../../schema/metric_ops';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';

@@ -10,7 +10,7 @@
 import type {
   PersistedIndexPatternLayer,
   FormulaIndexPatternColumn,
-} from '@kbn/lens-plugin/public';
+} from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FormulaValueConfig } from '../types';
 

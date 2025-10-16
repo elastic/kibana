@@ -7,12 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import type {
-  BaseIndexPatternColumn,
-  FieldBasedOperationErrorMessage,
-  OperationDefinition,
-} from '..';
-import type { ReferenceBasedIndexPatternColumn } from '../column_types';
+import type { BaseIndexPatternColumn, FormulaIndexPatternColumn } from '@kbn/lens-common';
+import type { FieldBasedOperationErrorMessage, OperationDefinition } from '..';
 import type { IndexPattern } from '../../../../../types';
 import { runASTValidation, tryToParse } from './validation';
 import { WrappedFormulaEditor } from './editor';
@@ -26,21 +22,6 @@ import { FORMULA_LAYER_ONLY_STATIC_VALUES } from '../../../../../user_messages_i
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',
 });
-
-export interface FormulaIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
-  operationType: 'formula';
-  params: {
-    formula?: string;
-    isFormulaBroken?: boolean;
-    // last value on numeric fields can be formatted
-    format?: {
-      id: string;
-      params?: {
-        decimals: number;
-      };
-    };
-  };
-}
 
 export function isFormulaIndexPatternColumn(
   column: BaseIndexPatternColumn

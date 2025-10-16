@@ -12,6 +12,7 @@ import type { IAggConfig } from '@kbn/data-plugin/common';
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataViewFieldBase } from '@kbn/es-query';
+import type { LensColumnWithMeta } from '@kbn/lens-common';
 import type { SchemaConfig } from '../../types';
 import type {
   AggBasedColumn,
@@ -19,7 +20,6 @@ import type {
   ParentPipelineMetric,
   SiblingPipelineMetric,
 } from './convert';
-import type { ColumnWithMeta } from '../types';
 import { convertToSchemaConfig } from '../../vis_schemas';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
@@ -76,9 +76,9 @@ export const isSchemaConfig = (agg: SchemaConfig | IAggConfig): agg is SchemaCon
 };
 
 export const isColumnWithMeta = (
-  column: AggBasedColumn | ColumnWithMeta
-): column is ColumnWithMeta => {
-  if ((column as ColumnWithMeta).meta) {
+  column: AggBasedColumn | LensColumnWithMeta
+): column is LensColumnWithMeta => {
+  if ((column as LensColumnWithMeta).meta) {
     return true;
   }
   return false;

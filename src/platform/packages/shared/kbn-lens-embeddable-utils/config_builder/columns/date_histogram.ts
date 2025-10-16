@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DateHistogramIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { DateHistogramIndexPatternColumn } from '@kbn/lens-common';
 
 export type DateHistogramColumnParams = DateHistogramIndexPatternColumn['params'];
 export const getHistogramColumn = ({

@@ -26,33 +26,31 @@ import { getSortingCriteria } from '@kbn/sort-predicates';
 import { DataGridDensity } from '@kbn/unified-data-table';
 import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import type { FormBasedPersistedState } from '../../datasources/form_based/types';
-import type {
-  SuggestionRequest,
-  Visualization,
-  VisualizationSuggestion,
-  DatasourceLayers,
-  Suggestion,
-} from '../../types';
+// import type { FormBasedPersistedState } from '../../datasources/form_based/types';
+// import type {
+//   SuggestionRequest,
+//   Visualization,
+//   VisualizationSuggestion,
+//   DatasourceLayers,
+//   Suggestion,
+// } from '../../types';
 import { TableDimensionDataExtraEditor, TableDimensionEditor } from './components/dimension_editor';
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
-import type { FormatFactory, LayerType } from '../../../common/types';
-import { RowHeightMode } from '../../../common/types';
+import type { FormatFactory } from '../../../common/types';
+// import { RowHeightMode } from '../../../common/types';
 import { getDefaultSummaryLabel } from '../../../common/expressions/impl/datatable/summary';
 import {
   type ColumnState,
-  type SortingState,
-  type PagingState,
   type CollapseExpressionFunction,
   type DatatableColumnFn,
   type DatatableExpressionFunction,
 } from '../../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
-import {
-  DEFAULT_HEADER_ROW_HEIGHT,
-  DEFAULT_HEADER_ROW_HEIGHT_LINES,
-  DEFAULT_ROW_HEIGHT_LINES,
-} from './components/constants';
+// import {
+//   DEFAULT_HEADER_ROW_HEIGHT,
+//   DEFAULT_HEADER_ROW_HEIGHT_LINES,
+//   DEFAULT_ROW_HEIGHT_LINES,
+// } from './components/constants';
 import {
   defaultPaletteParams,
   findMinMaxByColumnId,
@@ -63,19 +61,6 @@ import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_te
 import { DatatableInspectorTables } from '../../../common/expressions/defs/datatable/datatable';
 import { getSimpleColumnType } from './components/table_actions';
 import { convertToRuntimeState } from './runtime_state';
-
-export interface DatatableVisualizationState {
-  columns: ColumnState[];
-  layerId: string;
-  layerType: LayerType;
-  sorting?: SortingState;
-  rowHeight?: RowHeightMode;
-  headerRowHeight?: RowHeightMode;
-  rowHeightLines?: number;
-  headerRowHeightLines?: number;
-  paging?: PagingState;
-  density?: DataGridDensity;
-}
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
   defaultMessage: 'Table',

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { TermsIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiTermsOperation } from '../../schema/bucket_ops';
 import { fromFormatAPIToLensState } from './format';
 import { isColumnOfReferableType } from './utils';

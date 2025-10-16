@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ValueFormatConfig } from '@kbn/lens-plugin/common';
+import type { ValueFormatConfig } from '@kbn/lens-common';
 import type { LensApiMetricOperation } from '../../schema/metric_ops';
 
 export function fromFormatAPIToLensState(

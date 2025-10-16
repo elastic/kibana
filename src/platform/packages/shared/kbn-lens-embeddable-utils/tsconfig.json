@@ -9,7 +9,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-views-plugin",
-    "@kbn/lens-plugin",
     "@kbn/maps-plugin",
     "@kbn/event-annotation-common",
     "@kbn/es-query",

@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Column } from './columns';
-import type { Configuration } from './configurations';
+import type { LensColumn } from './datasources/operations';
+import type { LensConfiguration } from './visualizations/types';
 
-export interface Layer {
+export type NavigateToLensSortingHint = 'version';
+
+export interface NavigateToLensLayer {
   indexPatternId: string;
   layerId: string;
-  columns: Column[];
+  columns: LensColumn[];
   columnOrder: string[];
   ignoreGlobalFilters: boolean;
 }
 
-export interface NavigateToLensContext<T extends Configuration = Configuration> {
-  layers: Layer[];
+export interface NavigateToLensContext<T extends LensConfiguration = LensConfiguration> {
+  layers: NavigateToLensLayer[];
   type: string;
   configuration: T;
   indexPatternIds: string[];

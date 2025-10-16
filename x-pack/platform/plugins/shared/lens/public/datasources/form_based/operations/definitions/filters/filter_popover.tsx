@@ -12,10 +12,10 @@ import type { Query } from '@kbn/es-query';
 // import { QueryInput } from '../../../../shared_components/query_input';
 import { isQueryValid, QueryInput } from '@kbn/visualization-ui-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { LensAggFilterValue as FilterValue } from '@kbn/lens-common';
 import { LENS_APP_NAME } from '../../../../../../common/constants';
 import type { IndexPattern } from '../../../../../types';
-import type { FilterValue } from '.';
-import { defaultLabel } from '.';
+import { defaultLabel } from './filters';
 import { LabelInput } from '../shared_components';
 import type { LensAppServices } from '../../../../../app_plugin/types';
 

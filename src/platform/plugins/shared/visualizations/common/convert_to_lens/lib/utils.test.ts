@@ -10,8 +10,6 @@
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { IAggConfig } from '@kbn/data-plugin/common';
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import type { AggBasedColumn, ColumnWithMeta } from '../..';
-import { Operations } from '../..';
 import type { SchemaConfig } from '../../types';
 import {
   getCustomBucketsFromSiblingAggs,
@@ -29,6 +27,9 @@ import {
   isSiblingPipeline,
   isStdDevAgg,
 } from './utils';
+import { Operations } from '../constants';
+import type { AggBasedColumn } from './convert/types';
+import type { LensColumnWithMeta } from '@kbn/lens-common';
 
 describe('getLabel', () => {
   const label = 'some label';
@@ -185,7 +186,7 @@ describe('isColumnWithMeta', () => {
     dataType: 'string',
   } as AggBasedColumn;
 
-  const columnWithMeta: ColumnWithMeta = {
+  const columnWithMeta: LensColumnWithMeta = {
     sourceField: '',
     columnId: '',
     operationType: 'average',

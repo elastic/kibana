@@ -6,45 +6,26 @@
  */
 
 import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
-import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type {
-  UsageCollectionSetup,
-  UsageCollectionStart,
-} from '@kbn/usage-collection-plugin/public';
+import type { FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type {
-  ExpressionsServiceSetup,
-  ExpressionsSetup,
-  ExpressionsStart,
-} from '@kbn/expressions-plugin/public';
-import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import type { ExpressionsServiceSetup, ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import {
   ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
   ACTION_CONVERT_TO_LENS,
   DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
   ACTION_CONVERT_AGG_BASED_TO_LENS,
 } from '@kbn/visualizations-plugin/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
-import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type {
-  EventAnnotationPluginStart,
-  EventAnnotationServiceType,
-} from '@kbn/event-annotation-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import {
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
@@ -56,20 +37,26 @@ import {
   AGG_BASED_VISUALIZATION_TRIGGER,
 } from '@kbn/visualizations-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { SharePluginSetup, SharePluginStart, ExportShare } from '@kbn/share-plugin/public';
-import type {
-  ContentManagementPublicSetup,
-  ContentManagementPublicStart,
-} from '@kbn/content-management-plugin/public';
+import type { SharePluginSetup, ExportShare } from '@kbn/share-plugin/public';
+import type { ContentManagementPublicSetup } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { ChartType } from '@kbn/visualization-utils';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type {
+  VisualizationType,
+  LensAppLocator,
+  DatasourceMap,
+  VisualizationMap,
+} from '@kbn/lens-common';
+import type { LensEmbeddableStartServices } from '@kbn/lens-common/lens/embeddable/types';
+import type {
+  LensTopNavMenuEntryGenerator,
+  VisualizeEditorContext,
+  EditorFrameSetup,
+  LensPluginStartDependencies,
+  LensDocument,
+} from '@kbn/lens-common/lens/types';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -106,31 +93,16 @@ import {
   NOT_INTERNATIONALIZED_PRODUCT_NAME,
 } from '../common/constants';
 import type { FormatFactory } from '../common/types';
-import type {
-  Visualization,
-  VisualizationType,
-  EditorFrameSetup,
-  LensTopNavMenuEntryGenerator,
-  VisualizeEditorContext,
-  Suggestion,
-  DatasourceMap,
-  VisualizationMap,
-} from './types';
 import { lensVisTypeAlias } from './vis_type_alias';
 import { inAppEmbeddableEditTrigger } from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_trigger';
-import type {
-  LensEmbeddableStartServices,
-  LensSerializedState,
-  TypedLensByValueInput,
-} from './react_embeddable/types';
+
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
 import { setupExpressions } from './expressions';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import type { ChartInfoApi } from './chart_info_api';
-import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
-import type { LensDocument } from './persistence';
+import { LensAppLocatorDefinition } from '../common/locator/locator';
 import { LENS_CONTENT_TYPE, LENS_ITEM_LATEST_VERSION } from '../common/constants';
 import type { LensAttributes } from '../server/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
@@ -141,6 +113,7 @@ import {
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
 } from './trigger_actions/open_lens_config/constants';
 import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
+import type { Visualization, LensSerializedState, TypedLensByValueInput, Suggestion } from '.';
 
 export type { SaveProps } from './app_plugin';
 
@@ -157,35 +130,6 @@ export interface LensPluginSetupDependencies {
   uiActionsEnhanced: AdvancedUiActionsSetup;
   share?: SharePluginSetup;
   contentManagement: ContentManagementPublicSetup;
-}
-
-export interface LensPluginStartDependencies {
-  data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
-  fieldFormats: FieldFormatsStart;
-  expressions: ExpressionsStart;
-  navigation: NavigationPublicPluginStart;
-  uiActions: UiActionsStart;
-  visualizations: VisualizationsStart;
-  embeddable: EmbeddableStart;
-  charts: ChartsPluginStart;
-  eventAnnotation: EventAnnotationPluginStart;
-  savedObjectsTagging?: SavedObjectTaggingPluginStart;
-  presentationUtil: PresentationUtilPluginStart;
-  dataViewFieldEditor: IndexPatternFieldEditorStart;
-  dataViewEditor: DataViewEditorStart;
-  inspector: InspectorStartContract;
-  spaces?: SpacesPluginStart;
-  usageCollection?: UsageCollectionStart;
-  docLinks: DocLinksStart;
-  share?: SharePluginStart;
-  eventAnnotationService: EventAnnotationServiceType;
-  contentManagement: ContentManagementPublicStart;
-  serverless?: ServerlessPluginStart;
-  licensing?: LicensingPluginStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
-  fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 export interface LensPublicSetup {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export const layerTypes = {
-  DATA: 'data',
-  REFERENCELINE: 'referenceLine',
-  ANNOTATIONS: 'annotations',
-  METRIC_TRENDLINE: 'metricTrendline',
-} as const;
+// export const layerTypes = {
+//   DATA: 'data',
+//   REFERENCELINE: 'referenceLine',
+//   ANNOTATIONS: 'annotations',
+//   METRIC_TRENDLINE: 'metricTrendline',
+// } as const;

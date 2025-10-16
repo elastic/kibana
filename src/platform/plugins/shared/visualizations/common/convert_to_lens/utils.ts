@@ -8,16 +8,16 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { CollapseFunctions } from './constants';
+// import { CollapseFunctions } from './constants';
 import type { SupportedMetric } from './lib/convert/supported_metrics';
-import type {
-  CollapseFunction,
-  Column,
-  ColumnWithMeta,
-  Layer,
-  XYAnnotationsLayerConfig,
-  XYLayerConfig,
-} from './types';
+// import type {
+//   CollapseFunction,
+//   Column,
+//   ColumnWithMeta,
+//   Layer,
+//   XYAnnotationsLayerConfig,
+//   XYLayerConfig,
+// } from './types';
 
 export const isAnnotationsLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>
