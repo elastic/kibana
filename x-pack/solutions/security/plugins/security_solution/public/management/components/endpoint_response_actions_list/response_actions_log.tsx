@@ -64,9 +64,6 @@ export const ResponseActionsLog = memo<
 
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled(
-      'responseActionsCrowdstrikeManualHostIsolationEnabled'
-    );
     const isMicrosoftDefenderEnabled = useIsExperimentalFeatureEnabled(
       'responseActionsMSDefenderEndpointEnabled'
     );
@@ -114,7 +111,6 @@ export const ResponseActionsLog = memo<
       commandsFromUrl,
       agentIdsFromUrl,
       isFlyout,
-      isCrowdstrikeEnabled,
       isMicrosoftDefenderEnabled,
       statusesFromUrl,
       setQueryParams,

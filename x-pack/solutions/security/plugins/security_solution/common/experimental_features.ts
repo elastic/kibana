@@ -49,12 +49,6 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneKillProcessEnabled: true,
 
   /**
-   * Enables the ability to send Response actions to Crowdstrike and persist the results
-   * in ES.
-   */
-  responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-
-  /**
    * `runscript` response actions for SentinelOne hosts.
    *
    * Release: 9.2.0 (earlier for serverless)
