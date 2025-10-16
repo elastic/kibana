@@ -18,6 +18,7 @@ import { ConditionPanel } from '../../shared';
 import { FeatureEventsSparkline } from './feature_events_sparkline';
 import { FeatureDetailExpanded } from './feature_detail_expanded';
 import { TableTitle } from './table_title';
+import { useStreamFeaturesTable } from './hooks/use_stream_features_table';
 
 // Helper function to generate unique copy name
 const generateCopyName = (originalName: string, existingFeatures: Feature[]) => {
@@ -69,6 +70,8 @@ export function StreamFeaturesTable({
     [setSelectedFeatureNames]
   );
 
+  const { descriptionColumn } = useStreamFeaturesTable();
+
   const columns: Array<EuiBasicTableColumn<Feature>> = [
     {
       field: 'name',
@@ -79,16 +82,7 @@ export function StreamFeaturesTable({
       sortable: true,
       truncateText: true,
     },
-    {
-      field: 'description',
-      name: i18n.translate('xpack.streams.streamFeatureTable.columns.description', {
-        defaultMessage: 'Description',
-      }),
-      width: '30%',
-      truncateText: {
-        lines: 4,
-      },
-    },
+    descriptionColumn,
     {
       field: 'filter',
       name: i18n.translate('xpack.streams.streamFeatureTable.columns.filter', {
