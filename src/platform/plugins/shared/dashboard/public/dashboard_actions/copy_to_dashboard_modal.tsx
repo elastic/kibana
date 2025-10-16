@@ -67,8 +67,8 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
         : `#${CREATE_NEW_DASHBOARD_URL}`;
 
     closeModal();
-    stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-      state,
+    stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+      state: [state],
       path,
     });
   }, [api, dashboardOption, selectedDashboard, closeModal, stateTransfer]);

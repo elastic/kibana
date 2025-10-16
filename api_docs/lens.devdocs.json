@@ -2209,7 +2209,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined) => { error: string; } | Record<\"disabled\" | \"enabled\", { kuery: ",
+              " | undefined) => { error: string; } | Record<\"enabled\" | \"disabled\", { kuery: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
