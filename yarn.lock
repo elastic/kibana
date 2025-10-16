@@ -8073,14 +8073,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-chat-settings@link:src/platform/packages/shared/serverless/settings/chat_project":
-  version "0.0.0"
-  uid ""
-
-"@kbn/serverless-chat@link:x-pack/solutions/chat/plugins/serverless_chat":
-  version "0.0.0"
-  uid ""
-
 "@kbn/serverless-common-settings@link:src/platform/packages/shared/serverless/settings/common":
   version "0.0.0"
   uid ""
@@ -8110,6 +8102,14 @@
   uid ""
 
 "@kbn/serverless-types@link:src/platform/packages/shared/serverless/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-workplace-ai-settings@link:src/platform/packages/shared/serverless/settings/workplace_ai_project":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-workplace-ai@link:x-pack/solutions/workplace_ai/plugins/serverless_workplace_ai":
   version "0.0.0"
   uid ""
 
@@ -8557,10 +8557,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-suites-xpack-chat@link:x-pack/solutions/chat/test":
-  version "0.0.0"
-  uid ""
-
 "@kbn/test-suites-xpack-observability@link:x-pack/solutions/observability/test":
   version "0.0.0"
   uid ""
@@ -8578,6 +8574,10 @@
   uid ""
 
 "@kbn/test-suites-xpack-security@link:x-pack/solutions/security/test":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-suites-xpack-workplace-ai@link:x-pack/solutions/workplace_ai/test":
   version "0.0.0"
   uid ""
 
@@ -8917,15 +8917,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/wci-browser@link:x-pack/solutions/chat/packages/wci-browser":
+"@kbn/wci-browser@link:x-pack/solutions/workplace_ai/packages/wci-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/wci-common@link:x-pack/solutions/chat/packages/wci-common":
+"@kbn/wci-common@link:x-pack/solutions/workplace_ai/packages/wci-common":
   version "0.0.0"
   uid ""
 
-"@kbn/wci-server@link:x-pack/solutions/chat/packages/wci-server":
+"@kbn/wci-server@link:x-pack/solutions/workplace_ai/packages/wci-server":
   version "0.0.0"
   uid ""
 
@@ -8934,10 +8934,6 @@
   uid ""
 
 "@kbn/whereis-pkg-cli@link:packages/kbn-whereis-pkg-cli":
-  version "0.0.0"
-  uid ""
-
-"@kbn/workchat-app@link:x-pack/solutions/chat/plugins/workchat_app":
   version "0.0.0"
   uid ""
 
@@ -8950,6 +8946,10 @@
   uid ""
 
 "@kbn/workflows@link:src/platform/packages/shared/kbn-workflows":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workplace-ai-app@link:x-pack/solutions/workplace_ai/plugins/workplace_ai_app":
   version "0.0.0"
   uid ""
 
@@ -9843,10 +9843,10 @@
   resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.9.1.tgz#9925a04ed0745e92dd7b3793b35cff1ed89d54c1"
   integrity sha512-YySPtH4s/rKKnHRU0xyFGrqMU8XA+OIPNWDrlEFxE6DCVWCIrxE5YpiB94YD2jMFn6SSdA0cwQ8vLkCkl8lm8A==
 
-"@openfeature/launchdarkly-client-provider@^0.3.2":
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/@openfeature/launchdarkly-client-provider/-/launchdarkly-client-provider-0.3.2.tgz#0e4ca66da2a78ae70a5eae7143db88659f76af6f"
-  integrity sha512-wK/s4yBp5E+nBXJMVWRJOLqATOE1eReDkCHufjW6hJPy0rOJHTMaS52Tw5Qf2hZ3yGQOQos2iE9idm/QUZfsUQ==
+"@openfeature/launchdarkly-client-provider@^0.3.3":
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/@openfeature/launchdarkly-client-provider/-/launchdarkly-client-provider-0.3.3.tgz#68dd5435dbc69d2935beb1deddc0d2bdee0e7087"
+  integrity sha512-pAhUMC+rxd6SZMfCgqv9VtYnHpF0LOzDftEFz6FQCk/ZrYuK/8ycNCstxt2yA/xnDyb0Ki7Rwe56IXEfQwBuew==
   dependencies:
     lodash.isempty "^4.4.0"
 
@@ -14657,7 +14657,7 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@^12.8.5":
+"@xyflow/react@^12.8.6":
   version "12.8.6"
   resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.8.6.tgz#4cb80abe1bf7123dd989f2c8554bff679980bd8b"
   integrity sha512-SksAm2m4ySupjChphMmzvm55djtgMDPr+eovPDdTnyGvShf73cvydfoBfWDFllooIQ4IaiUL5yfxHRwU0c37EA==
