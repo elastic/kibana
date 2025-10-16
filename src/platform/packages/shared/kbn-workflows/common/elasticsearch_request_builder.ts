@@ -20,7 +20,7 @@ export function buildRequestFromConnector(
   method: string;
   path: string;
   body?: Record<string, unknown>;
-  params?: Record<string, unknown>;
+  params?: Record<string, string>;
 } {
   // console.log('DEBUG - Input params:', JSON.stringify(params, null, 2));
 
@@ -77,7 +77,7 @@ export function buildRequestFromConnector(
 
     // Build body and query parameters
     const body: Record<string, unknown> = {};
-    const queryParams: Record<string, unknown> = {};
+    const queryParams: Record<string, string> = {};
 
     for (const [key, value] of Object.entries(params)) {
       // Skip path parameters (they're used in the URL) and meta parameters
@@ -96,14 +96,7 @@ export function buildRequestFromConnector(
       } else if (urlParamKeys.has(key)) {
         // This parameter should go in URL query parameters
         const queryValue = Array.isArray(value) ? value.join(',') : value;
-        queryParams[key] = queryValue;
-        /*
-        console.log(
-          `DEBUG - Added to queryParams: ${key} = ${queryValue} (original: ${JSON.stringify(
-            value
-          )})`
-        );
-        */
+        queryParams[key] = String(queryValue);
       } else if (key === 'body') {
         // Handle explicit body parameter
         if (typeof value === 'object' && value !== null) {

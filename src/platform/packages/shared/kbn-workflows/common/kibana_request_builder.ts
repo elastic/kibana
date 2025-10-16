@@ -21,7 +21,7 @@ export function buildKibanaRequestFromAction(
   path: string;
   body?: Record<string, unknown>;
   query?: Record<string, unknown>;
-  headers?: Record<string, unknown>;
+  headers?: Record<string, string>;
 } {
   // Support raw API format first - this always works
   if (params.request) {
@@ -37,7 +37,7 @@ export function buildKibanaRequestFromAction(
       path: path as string,
       body: body as Record<string, unknown>,
       query: query as Record<string, unknown>,
-      headers: headers as Record<string, unknown>,
+      headers: headers as Record<string, string>,
     };
   }
 
@@ -49,7 +49,7 @@ export function buildKibanaRequestFromAction(
       path: path as string,
       body: body as Record<string, unknown>,
       query: query as Record<string, unknown>,
-      headers: headers as Record<string, unknown>,
+      headers: headers as Record<string, string>,
     };
   }
 
@@ -92,7 +92,7 @@ export function buildKibanaRequestFromAction(
     // Build body, query parameters, and headers
     const body: Record<string, unknown> = {};
     const queryParams: Record<string, unknown> = {};
-    const headers: Record<string, unknown> = {};
+    const headers: Record<string, string> = {};
 
     for (const [key, value] of Object.entries(params)) {
       // Skip path parameters (they're used in the URL) and meta parameters
@@ -103,7 +103,7 @@ export function buildKibanaRequestFromAction(
 
       // Handle headers (like kbn-xsrf)
       if (headerParamKeys.has(key)) {
-        headers[key] = value;
+        headers[key] = String(value);
       }
       // Prioritize body parameters over URL parameters when both are available
       else if (bodyParamKeys.has(key)) {

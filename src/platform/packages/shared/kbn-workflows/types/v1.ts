@@ -65,7 +65,7 @@ export interface EsWorkflowExecution {
   workflowId: string;
   isTestRun: boolean;
   status: ExecutionStatus;
-  context: Record<string, unknown>;
+  context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   workflowDefinition: WorkflowYaml;
   yaml: string;
   currentNodeId?: string; // The node currently being executed
