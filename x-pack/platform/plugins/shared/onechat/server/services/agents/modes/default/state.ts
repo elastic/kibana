@@ -15,7 +15,15 @@ export const StateAnnotation = Annotation.Root({
     reducer: messagesStateReducer,
     default: () => [],
   }),
+  cycleLimit: Annotation<number>({
+    reducer: (a, b) => b,
+    default: () => 10,
+  }),
   // internals
+  currentCycle: Annotation<number>({
+    reducer: (a, b) => b,
+    default: () => 0,
+  }),
   nextMessage: Annotation<AIMessage>(),
   handoverNote: Annotation<string>(),
   // outputs

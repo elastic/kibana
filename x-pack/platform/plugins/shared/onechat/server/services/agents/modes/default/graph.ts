@@ -53,16 +53,19 @@ export const createAgentGraph = ({
       })
     );
     return {
+      currentCycle: state.currentCycle + 1,
       nextMessage: response,
     };
   };
 
   const shouldContinue = async (state: StateType) => {
-    const lastMessage = state.nextMessage;
-    if (lastMessage && lastMessage.tool_calls?.length) {
+    const hasToolCalls = state.nextMessage && (state.nextMessage.tool_calls ?? []).length > 0;
+    const maxCycleReached = state.currentCycle > state.cycleLimit;
+    if (hasToolCalls && !maxCycleReached) {
       return steps.executeTool;
+    } else {
+      return steps.prepareToAnswer;
     }
-    return steps.prepareToAnswer;
   };
 
   const executeTool = async (state: StateType) => {
@@ -73,10 +76,17 @@ export const createAgentGraph = ({
   };
 
   const prepareToAnswer = async (state: StateType) => {
-    const handoverMessage = state.nextMessage;
-    const messageContent = extractTextContent(handoverMessage);
+    const maxCycleReached = state.currentCycle > state.cycleLimit;
+    let handoverNote: string;
+    if (maxCycleReached) {
+      handoverNote = `Researcher agent has reached the maximum number of cycles (${state.cycleLimit}) and was forced to stop.
+        It may not have found all the information it needed to answer the user question.`;
+    } else {
+      const handoverMessage = state.nextMessage;
+      handoverNote = extractTextContent(handoverMessage);
+    }
     return {
-      handoverNote: messageContent,
+      handoverNote,
     };
   };
 

@@ -69,6 +69,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     sendEvent: eventEmitter,
   });
 
+  const cycleLimit = 10;
+  const graphRecursionLimit = cycleLimit * 2 + 5;
+
   const initialMessages = conversationToLangchainMessages({
     nextInput,
     previousRounds: conversation,
@@ -86,7 +89,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
 
   const eventStream = agentGraph.streamEvents(
-    { initialMessages },
+    { initialMessages, cycleLimit },
     {
       version: 'v2',
       signal: abortSignal,
@@ -96,7 +99,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         agentId,
         runId,
       },
-      recursionLimit: 25,
+      recursionLimit: graphRecursionLimit,
       callbacks: [],
     }
   );
