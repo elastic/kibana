@@ -17,10 +17,8 @@ paths:
       x-labels: [ess, serverless]
       operationId: PostAttackDiscoveryGenerationsDismiss
       description: Dismisses an attack discovery generation for the current user, indicating that it's status should not be reported in the UI. This sets the generation's
-        status to "dismissed" and affects how the generation appears in subsequent queries.
+        status to "dismissed" and affects how the generation appears in subsequent queries. `Technical preview`
       summary: Dismiss an attack discovery generation
-      tags:
-        - Attack discovery API
       parameters:
         - name: execution_uuid
           in: path

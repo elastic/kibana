@@ -19,7 +19,7 @@
  */
 
 import { z } from '@kbn/zod';
-import type { InternalConnectorContract } from '../spec/lib/generate_yaml_schema';
+import type { InternalConnectorContract } from '..';
 // Import schemas from generated schemas file
 import {
   post_actions_connector_id_Body,
