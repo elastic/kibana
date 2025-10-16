@@ -159,7 +159,9 @@ export class CstToAstConverter {
     const query = this.fromSingleStatement(singleStatement);
 
     if (!query) {
-      return Builder.expression.query([], this.getParserFields(ctx), header);
+      const emptyQuery = Builder.expression.query([], this.getParserFields(ctx), header);
+      emptyQuery.incomplete = true;
+      return emptyQuery;
     }
 
     query.header = header;
