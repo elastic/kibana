@@ -42,7 +42,7 @@ import { SyntheticsPrivateLocation } from '../synthetics_service/private_locatio
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
 export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
-const TASK_SCHEDULE = '1m';
+const TASK_SCHEDULE = '10m';
 
 interface TaskState extends Record<string, unknown> {
   lastStartedAt: string;
