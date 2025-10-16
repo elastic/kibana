@@ -168,7 +168,7 @@ export async function runTestsParallel(
   const MIN_MB_AVAILABLE = 2048;
   const MIN_MB_PER_WARMING_SLOT = 4096;
   const MIN_MB_PER_IDLE_SLOT = 3072;
-  const MIN_MB_PER_RUNNING_SLOT = 4096;
+  const MIN_MB_PER_RUNNING_SLOT = 5120;
   const WARMING_MIN_CPU = 2;
   const IDLE_MIN_CPU = 0.5;
   const RUNNING_MIN_CPU = 1;
