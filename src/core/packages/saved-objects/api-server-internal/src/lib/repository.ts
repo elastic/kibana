@@ -88,6 +88,7 @@ import {
   performResolve,
   performUpdateObjectsSpaces,
   performCollectMultiNamespaceReferences,
+  performSearch,
 } from './apis';
 import { createRepositoryHelpers } from './utils';
 
@@ -338,7 +339,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   async search<A = unknown>(
     options: SavedObjectsSearchOptions
   ): Promise<SavedObjectsSearchResponse<A>> {
-    return {} as SavedObjectsSearchResponse<A>;
+    return performSearch({ options }, this.apiExecutionContext);
   }
 
   /**

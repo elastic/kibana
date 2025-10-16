@@ -155,6 +155,25 @@ const toArray = (val: unknown) => {
   return !Array.isArray(val) ? [val] : val;
 };
 
+export function getNamespacesBoolFilter({
+  namespaces,
+  registry,
+  types,
+  typeToNamespacesMap,
+}: Pick<QueryParams, 'namespaces' | 'registry' | 'typeToNamespacesMap'> & { types: string[] }) {
+  return {
+    bool: {
+      should: types.map((shouldType) => {
+        const deduplicatedNamespaces = uniqNamespaces(
+          typeToNamespacesMap ? typeToNamespacesMap.get(shouldType) : namespaces
+        );
+        return getClauseForType(registry, deduplicatedNamespaces, shouldType);
+      }),
+      minimum_should_match: 1,
+    },
+  };
+}
+
 /**
  *  Get the "query" related keys for the search body
  */
@@ -202,17 +221,7 @@ export function getQueryParams({
             }),
           ]
         : []),
-      {
-        bool: {
-          should: types.map((shouldType) => {
-            const deduplicatedNamespaces = uniqNamespaces(
-              typeToNamespacesMap ? typeToNamespacesMap.get(shouldType) : namespaces
-            );
-            return getClauseForType(registry, deduplicatedNamespaces, shouldType);
-          }),
-          minimum_should_match: 1,
-        },
-      },
+      getNamespacesBoolFilter({ namespaces, registry, types, typeToNamespacesMap }),
     ],
   };
 
