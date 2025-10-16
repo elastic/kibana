@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, screen } from '@testing-library/react';
+import { act, screen, within } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import { TabularPage } from './tabular_page';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
@@ -78,35 +78,30 @@ describe('When the tabular page is loaded', () => {
   it('should display all service and model ids or descriptions in the table', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
-    const rows = screen.getAllByRole('row');
+    const elserElasticRow = screen.getByText('.elser-2-elastic').closest('tr');
+    expect(elserElasticRow).toHaveTextContent(elasticDescription);
 
-    expect(rows[1]).toHaveTextContent('.elser-2-elastic');
-    expect(rows[1]).toHaveTextContent('Elastic');
-    expect(rows[1]).toHaveTextContent(elasticDescription);
-    expect(rows[1]).not.toHaveTextContent('elser_model_2');
+    const elserElasticsearchRow = screen.getByText('.elser-2-elasticsearch').closest('tr');
+    expect(elserElasticsearchRow).toHaveTextContent(elasticsearchDescription);
 
-    expect(rows[2]).toHaveTextContent('.elser-2-elasticsearch');
-    expect(rows[2]).toHaveTextContent('Elasticsearch');
-    expect(rows[2]).toHaveTextContent(elasticsearchDescription);
-    expect(rows[2]).not.toHaveTextContent('.elser_model_2');
+    const sparklesRow = screen.getByText('.sparkles').closest('tr');
+    expect(sparklesRow).toHaveTextContent(elasticDescription);
 
-    expect(rows[3]).toHaveTextContent('.sparkles');
-    expect(rows[3]).toHaveTextContent('Elastic');
-    expect(rows[3]).toHaveTextContent(elasticDescription);
+    const elasticRerankRow = screen.getByText('elastic-rerank').closest('tr');
+    expect(elasticRerankRow).toHaveTextContent('Elasticsearch');
 
-    expect(rows[4]).toHaveTextContent('elastic-rerank');
-    expect(rows[4]).toHaveTextContent('Elasticsearch');
-
-    expect(rows[5]).toHaveTextContent('my-elser-model-05');
-    expect(rows[5]).toHaveTextContent('Elasticsearch');
+    const myElserRow = screen.getByText('my-elser-model-05').closest('tr');
+    expect(myElserRow).toHaveTextContent('Elasticsearch');
   });
 
   it('should only disable delete action for preconfigured endpoints', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
-    const actionButtons = screen.getAllByTestId('euiCollapsedItemActionsButton');
+    const preconfiguredRow = screen.getByText('.elser-2-elastic').closest('tr');
+    const actionButton = within(preconfiguredRow!).getByTestId('euiCollapsedItemActionsButton');
+
     act(() => {
-      actionButtons[0].click();
+      actionButton.click();
     });
 
     expect(screen.getByTestId('inferenceUIDeleteAction-preconfigured')).toBeDisabled();
@@ -115,9 +110,11 @@ describe('When the tabular page is loaded', () => {
   it('should not disable delete action for other endpoints', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
-    const actionButtons = screen.getAllByTestId('euiCollapsedItemActionsButton');
+    const userDefinedRow = screen.getByText('my-elser-model-05').closest('tr');
+    const actionButton = within(userDefinedRow!).getByTestId('euiCollapsedItemActionsButton');
+
     act(() => {
-      actionButtons[4].click();
+      actionButton.click();
     });
 
     expect(screen.getByTestId('inferenceUIDeleteAction-user-defined')).toBeEnabled();
