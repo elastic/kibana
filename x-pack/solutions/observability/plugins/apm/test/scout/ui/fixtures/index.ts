@@ -15,6 +15,7 @@ import type {
 import { test as base, createLazyPageObject } from '@kbn/scout-oblt';
 import { ServiceMapPage } from './page_objects/service_map';
 import { ServiceInventoryPage } from './page_objects/service_inventory';
+import { StorageExplorerPage } from './page_objects/storage_explorer';
 import { ServiceGroupsPage } from './page_objects/service_groups';
 import { GeneralSettingsPage } from './page_objects/general_settings';
 import { CustomLinksPage } from './page_objects/custom_links';
@@ -35,6 +36,7 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
     serviceMapPage: ServiceMapPage;
     serviceInventoryPage: ServiceInventoryPage;
+    storageExplorerPage: StorageExplorerPage;
     serviceGroupsPage: ServiceGroupsPage;
     generalSettingsPage: GeneralSettingsPage;
     agentConfigurationsPage: AgentConfigurationsPage;
@@ -64,6 +66,7 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
       ...pageObjects,
       serviceMapPage: createLazyPageObject(ServiceMapPage, page, kbnUrl),
       serviceInventoryPage: createLazyPageObject(ServiceInventoryPage, page, kbnUrl),
+      storageExplorerPage: createLazyPageObject(StorageExplorerPage, page, kbnUrl),
       serviceGroupsPage: createLazyPageObject(ServiceGroupsPage, page, kbnUrl),
       generalSettingsPage: createLazyPageObject(GeneralSettingsPage, page, kbnUrl),
       agentConfigurationsPage: createLazyPageObject(AgentConfigurationsPage, page, kbnUrl),
