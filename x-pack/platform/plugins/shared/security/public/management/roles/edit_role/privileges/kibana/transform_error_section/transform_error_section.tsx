@@ -79,6 +79,9 @@ const transformErrorMessages: Record<string, string> = {
       defaultMessage: 'Role uses disabled feature privileges.',
     }
   ),
+  default: i18n.translate('xpack.security.management.editRole.transformErrorSectionDescription', {
+    defaultMessage: 'This role definition is invalid, and cannot be edited through this screen.',
+  }),
 };
 
 const KIBANA_ERROR_PREFIX = 'kibana:';
@@ -89,15 +92,12 @@ export class TransformErrorSection extends PureComponent<TransformErrorSectionPr
     const { reason, state } =
       transformErrors.find((error) => error.reason.startsWith(KIBANA_ERROR_PREFIX)) ?? {};
 
-    const normalizedReason = reason?.replace(KIBANA_ERROR_PREFIX, '');
+    const normalizedReason = reason?.replace(
+      KIBANA_ERROR_PREFIX,
+      ''
+    ) as keyof typeof transformErrorMessages;
 
-    const errorMessage =
-      normalizedReason && transformErrorMessages[normalizedReason]
-        ? transformErrorMessages[normalizedReason]
-        : i18n.translate('xpack.security.management.editRole.transformErrorSectionDescription', {
-            defaultMessage:
-              'This role definition is invalid, and cannot be edited through this screen.',
-          });
+    const errorMessage = transformErrorMessages[normalizedReason] ?? transformErrorMessages.default;
 
     return (
       <div>
