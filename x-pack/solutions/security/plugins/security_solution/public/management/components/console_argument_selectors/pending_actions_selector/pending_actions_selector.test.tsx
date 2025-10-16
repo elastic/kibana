@@ -423,6 +423,18 @@ describe('PendingActionsSelector', () => {
         page: 1,
         pageSize: 200,
         statuses: ['pending'],
+        commands: [
+          'isolate',
+          'unisolate',
+          'kill-process',
+          'suspend-process',
+          'running-processes',
+          'get-file',
+          'execute',
+          'upload',
+          'scan',
+          'runscript',
+        ],
       },
       {
         enabled: true,
@@ -621,6 +633,25 @@ describe('PendingActionsSelector', () => {
       expect(commandElement.parentElement).toHaveAttribute('class');
       expect(commandElement.parentElement?.className).toContain('css-');
     });
+  });
+
+  test('excludes cancel actions from the pending actions query', async () => {
+    await renderAndWaitForComponent(<PendingActionsSelector {...defaultProps} />);
+
+    expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        commands: expect.any(Array),
+      }),
+      expect.any(Object)
+    );
+
+    // Get the actual commands array that was passed
+    const callArgs = mockUseGetEndpointActionList.mock.calls[0][0];
+    const commandsArray = callArgs.commands;
+
+    expect(commandsArray).toBeDefined();
+    expect(commandsArray).not.toContain('cancel');
+    expect(commandsArray!.length).toBeGreaterThan(0);
   });
 
   describe('Unified tooltip for disabled options', () => {
