@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, merge } from 'rxjs';
 import type { ESQLControlState } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { initializeStateManager } from '@kbn/presentation-publishing';
+import { initializeStateManager, type PublishingSubject } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListSelection } from '../../../common/options_list';
@@ -115,7 +115,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
       });
 
       const componentStaticState = {
-        singleSelect: true,
+        singleSelect: initialState.singleSelect ?? true,
         exclude: false,
         existsSelected: false,
         requestSize: 0,
@@ -140,6 +140,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         },
         // Pass no-ops and default values for all of the features of OptionsList that ES|QL controls don't currently use
         ...componentStaticStateManager.api,
+        singleSelect$: selections.api.singleSelect$ as PublishingSubject<boolean | undefined>,
         deselectOption: () => {},
         selectAll: () => {},
         deselectAll: () => {},

@@ -102,9 +102,8 @@ export function ValueControlForm({
   );
   const [label, setLabel] = useState(initialState?.title ?? '');
   const [minimumWidth, setMinimumWidth] = useState(initialState?.width ?? 'medium');
-  const [selectionType, setSelectionType] = useState<'single' | 'multi'>(
-    initialState?.selectionType ?? 'single'
-  );
+  const [singleSelect, setSingleSelect] = useState<boolean>(initialState?.singleSelect ?? true);
+
   const [grow, setGrow] = useState(initialState?.grow ?? false);
 
   const onValuesChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
@@ -148,10 +147,8 @@ export function ValueControlForm({
     }
   }, []);
 
-  const onSelectionTypeChange = useCallback((type: 'single' | 'multi') => {
-    if (type) {
-      setSelectionType(type);
-    }
+  const onSelectionTypeChange = useCallback((isSingleSelect: boolean) => {
+    setSingleSelect(isSingleSelect);
   }, []);
 
   const onGrowChange = useCallback((e: EuiSwitchEvent) => {
@@ -200,14 +197,12 @@ export function ValueControlForm({
   );
 
   useEffect(() => {
-    if (
-      !selectedValues?.length &&
-      controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY &&
-      valuesRetrieval
-    ) {
+    if (!selectedValues?.length && controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY) {
       const queryForValues =
         variableName !== ''
-          ? `FROM ${getIndexPatternFromESQLQuery(queryString)} | STATS BY ${valuesRetrieval}`
+          ? valuesRetrieval
+            ? `FROM ${getIndexPatternFromESQLQuery(queryString)} | STATS BY ${valuesRetrieval}`
+            : valuesQuery
           : '';
       onValuesQuerySubmit(queryForValues);
     }
@@ -215,9 +210,10 @@ export function ValueControlForm({
     controlFlyoutType,
     onValuesQuerySubmit,
     queryString,
-    selectedValues?.length,
+    selectedValues,
     valuesRetrieval,
     variableName,
+    valuesQuery,
   ]);
 
   useEffect(() => {
@@ -228,7 +224,7 @@ export function ValueControlForm({
       availableOptions,
       selectedOptions: [availableOptions[0]],
       width: minimumWidth,
-      selectionType,
+      singleSelect,
       title: label || variableNameWithoutQuestionmark,
       variableName: variableNameWithoutQuestionmark,
       variableType,
@@ -240,7 +236,7 @@ export function ValueControlForm({
       setControlState(state);
     }
   }, [
-    selectionType,
+    singleSelect,
     controlFlyoutType,
     grow,
     initialState,
@@ -384,7 +380,7 @@ export function ValueControlForm({
       />
 
       <ControlSelectionType
-        selectionType={selectionType}
+        singleSelect={singleSelect}
         onSelectionTypeChange={onSelectionTypeChange}
       />
     </>

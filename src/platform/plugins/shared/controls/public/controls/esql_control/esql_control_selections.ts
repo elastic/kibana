@@ -32,6 +32,7 @@ export const selectionComparators: StateComparators<
     | 'selectedOptions'
     | 'availableOptions'
     | 'variableName'
+    | 'singleSelect'
     | 'variableType'
     | 'controlType'
     | 'esqlQuery'
@@ -54,6 +55,7 @@ export const selectionComparators: StateComparators<
   controlType: 'referenceEquality',
   esqlQuery: 'referenceEquality',
   title: 'referenceEquality',
+  singleSelect: 'referenceEquality',
 };
 
 export function initializeESQLControlSelections(
@@ -64,6 +66,7 @@ export function initializeESQLControlSelections(
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
   const hasSelections$ = new BehaviorSubject<boolean>(false); // hardcoded to false to prevent clear action from appearing.
+  const singleSelect$ = new BehaviorSubject<boolean>(initialState.singleSelect ?? true);
   const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
   const variableType$ = new BehaviorSubject<ESQLVariableType>(
     initialState.variableType ?? ESQLVariableType.VALUES
@@ -147,11 +150,13 @@ export function initializeESQLControlSelections(
     api: {
       hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
       esqlVariable$: esqlVariable$ as PublishingSubject<ESQLControlVariable>,
+      singleSelect$: singleSelect$ as PublishingSubject<boolean>,
     },
     anyStateChange$: merge(
       selectedOptions$,
       availableOptions$,
       variableName$,
+      singleSelect$,
       variableType$,
       controlType$,
       esqlQuery$,
@@ -161,6 +166,7 @@ export function initializeESQLControlSelections(
       setSelectedOptions(lastSaved?.selectedOptions ?? []);
       availableOptions$.next(lastSaved?.availableOptions ?? []);
       variableName$.next(lastSaved?.variableName ?? '');
+      singleSelect$.next(lastSaved?.singleSelect ?? true);
       variableType$.next(lastSaved?.variableType ?? ESQLVariableType.VALUES);
       if (lastSaved?.controlType) controlType$.next(lastSaved?.controlType);
       esqlQuery$.next(lastSaved?.esqlQuery ?? '');
@@ -173,6 +179,7 @@ export function initializeESQLControlSelections(
           ? { availableOptions: availableOptions$.getValue() ?? [] }
           : {}),
         variableName: variableName$.getValue() ?? '',
+        singleSelect: singleSelect$.getValue() ?? true,
         variableType: variableType$.getValue() ?? ESQLVariableType.VALUES,
         controlType: controlType$.getValue(),
         esqlQuery: esqlQuery$.getValue() ?? '',

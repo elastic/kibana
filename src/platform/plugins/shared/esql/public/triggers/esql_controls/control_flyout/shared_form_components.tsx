@@ -336,11 +336,11 @@ export function ControlWidth({
 }
 
 export function ControlSelectionType({
-  selectionType,
+  singleSelect,
   onSelectionTypeChange,
 }: {
-  selectionType: 'single' | 'multi';
-  onSelectionTypeChange: (type: 'single' | 'multi') => void;
+  singleSelect: boolean;
+  onSelectionTypeChange: (isSingleSelect: boolean) => void;
 }) {
   return (
     <>
@@ -354,16 +354,16 @@ export function ControlSelectionType({
         <EuiRadioGroup
           compressed
           options={selectionTypeOptions}
-          idSelected={selectionType}
+          idSelected={singleSelect ? 'single' : 'multi'}
           onChange={(id) => {
-            const newSelectionType = id === 'single' ? 'single' : 'multi';
-            onSelectionTypeChange(newSelectionType);
+            const newSingleSelect = id === 'single';
+            onSelectionTypeChange(newSingleSelect);
           }}
           name="selectionType"
           data-test-subj="esqlControlSelectionType"
         />
       </EuiFormRow>
-      {selectionType === 'multi' ? (
+      {!singleSelect ? (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
