@@ -55,9 +55,12 @@ export function ServiceLogs() {
     [environment, kuery, serviceName, start, end]
   );
 
-  const logFilters = useMemo(() => {
+  const internalLogFilters = useMemo(() => {
+    return assetFilter != null ? [assetFilter] : [];
+  }, [assetFilter]);
+
+  const documentLogFilters = useMemo(() => {
     return [
-      ...(assetFilter != null ? [assetFilter] : []),
       buildEsQuery(
         undefined,
         {
@@ -68,11 +71,20 @@ export function ServiceLogs() {
         getEsQueryConfig(uiSettings)
       ),
     ];
-  }, [assetFilter, kuery, uiSettings]);
+  }, [kuery, uiSettings]);
 
-  if (status === FETCH_STATUS.SUCCESS || (status === FETCH_STATUS.LOADING && logFilters != null)) {
+  if (
+    status === FETCH_STATUS.SUCCESS ||
+    (status === FETCH_STATUS.LOADING &&
+      (internalLogFilters.length > 0 || documentLogFilters.length > 0))
+  ) {
     return (
-      <logsShared.LogsOverview documentFilters={logFilters} timeRange={timeRange} height="60vh" />
+      <logsShared.LogsOverview
+        documentFilters={documentLogFilters}
+        nonHighlightingFilters={internalLogFilters}
+        timeRange={timeRange}
+        height="60vh"
+      />
     );
   } else if (status === FETCH_STATUS.FAILURE) {
     return (

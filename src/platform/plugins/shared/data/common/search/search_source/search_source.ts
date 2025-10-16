@@ -879,13 +879,27 @@ export class SearchSource {
       });
     }
 
+    const allFilters =
+      typeof searchRequest.filters === 'function'
+        ? searchRequest.filters()
+        : searchRequest.filters || [];
+
     const builtQuery = this.getBuiltEsQuery({
       index: searchRequest.index,
       query: searchRequest.query,
-      filters: searchRequest.filters,
+      filters: allFilters,
       getConfig,
       sort: body.sort,
     });
+
+    const highlightQuery = searchRequest.highlightAll
+      ? this.buildHighlightQuery({
+          index: searchRequest.index,
+          query: searchRequest.query,
+          filters: allFilters,
+          getConfig,
+        })
+      : undefined;
 
     const bodyToReturn = {
       ...body,
@@ -893,7 +907,12 @@ export class SearchSource {
       query: builtQuery,
       highlight:
         searchRequest.highlightAll && builtQuery
-          ? getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT))
+          ? highlightQuery
+            ? {
+                ...getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT)),
+                highlight_query: highlightQuery,
+              }
+            : getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT))
           : undefined,
       // remove _source, since everything's coming from fields API, scripted, or stored fields
       _source: fieldListProvided && !sourceFieldsProvided ? false : body._source,
@@ -976,6 +995,26 @@ export class SearchSource {
       typeof filters === 'function' ? filters() : filters,
       esQueryConfigs
     );
+  }
+
+  /**
+   * Build a highlight query excluding filters with skipHighlight metadata.
+   * Used to prevent non-highlighting filters (context filters) from being highlighted.
+   */
+  private buildHighlightQuery({
+    index,
+    query = [],
+    filters = [],
+    getConfig,
+  }: SearchRequest & { filters: Filter[] }) {
+    const highlightFilters = filters.filter((f) => !f.meta?.skipHighlight);
+
+    if (highlightFilters.length === 0 && (!query || query.length === 0)) {
+      return undefined;
+    }
+
+    const esQueryConfigs = getEsQueryConfig({ get: getConfig });
+    return buildEsQuery(this.getDataView(index), query, highlightFilters, esQueryConfigs);
   }
 
   private getRemainingFields({
