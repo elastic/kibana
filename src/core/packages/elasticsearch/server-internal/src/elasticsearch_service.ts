@@ -64,6 +64,7 @@ export class ElasticsearchService
   private clusterInfo$?: Observable<ClusterInfo>;
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
   private agentManager?: AgentManager;
+  private cpsEnabledPlugins = new Map<string, boolean>();
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
@@ -138,6 +139,16 @@ export class ElasticsearchService
         getAgentsStats: agentManager.getAgentsStats.bind(agentManager),
       },
       publicBaseUrl: config.publicBaseUrl,
+      setCpsFeatureFlag: (_) => {
+        // this is the public method, will be set in plugin_context.ts
+        return;
+      },
+      setCpsFeatureFlagInternal: (pluginName, enabled) => {
+        this.cpsEnabledPlugins.set(pluginName, enabled);
+        this.log.debug(
+          `CPS feature flag ${enabled ? 'enabled' : 'disabled'} for plugin: ${pluginName}`
+        );
+      },
     };
   }
 

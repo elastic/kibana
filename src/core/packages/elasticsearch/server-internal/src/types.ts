@@ -27,6 +27,7 @@ export interface InternalElasticsearchServiceSetup extends ElasticsearchServiceS
   clusterInfo$: Observable<ClusterInfo>;
   esNodesCompatibility$: Observable<NodesVersionCompatibility>;
   status$: Observable<ServiceStatus<ElasticsearchStatusMeta>>;
+  setCpsFeatureFlagInternal: (pluginName: string, enabled: boolean) => void;
 }
 
 /**

@@ -214,6 +214,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       legacy: deps.elasticsearch.legacy,
       publicBaseUrl: deps.elasticsearch.publicBaseUrl,
       setUnauthorizedErrorHandler: deps.elasticsearch.setUnauthorizedErrorHandler,
+      setCpsFeatureFlag: (enabled: boolean) => {
+        deps.elasticsearch.setCpsFeatureFlagInternal(plugin.name, enabled);
+      },
     },
     executionContext: {
       withContext: deps.executionContext.withContext,
