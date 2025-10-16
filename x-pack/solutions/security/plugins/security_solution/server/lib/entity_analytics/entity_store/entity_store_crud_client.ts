@@ -26,6 +26,7 @@ import {
   EngineNotRunningError,
   CapabilityNotEnabledError,
   DocumentVersionConflictError,
+  EntityNotFoundError,
 } from './errors';
 import { getEntitiesIndexName } from './utils';
 import { buildUpdateEntityPainlessScript } from './painless/build_update_script';
@@ -151,6 +152,39 @@ export class EntityStoreCrudClient {
       index: getEntityUpdatesDataStreamName(type, this.namespace),
       document: buildDocumentToUpdate(type, normalizedDocToECS),
     });
+  }
+
+  public async deleteEntity(type: APIEntityType, id: string) {
+    await this.assertEngineIsRunning(type);
+    await this.assertCRUDApiIsEnabled(type);
+
+    if (id === '') {
+      throw new BadCRUDRequestError(`The entity ID cannot be blank`);
+    }
+
+    const deleteByQueryResp = await this.esClient.deleteByQuery({
+      index: getEntitiesIndexName(type, this.namespace),
+      query: {
+        term: {
+          'entity.id': id,
+        },
+      },
+      conflicts: 'proceed',
+    });
+
+    if (!deleteByQueryResp.deleted) {
+      throw new EntityNotFoundError(type, id);
+    }
+
+    if (deleteByQueryResp.failures) {
+      throw new Error(`Failed to delete entity of type '${type}' and ID '${id}'`);
+    }
+
+    if (deleteByQueryResp.version_conflicts) {
+      throw new DocumentVersionConflictError();
+    }
+
+    return { deleted: true };
   }
 
   private async assertEngineIsRunning(type: APIEntityType) {
