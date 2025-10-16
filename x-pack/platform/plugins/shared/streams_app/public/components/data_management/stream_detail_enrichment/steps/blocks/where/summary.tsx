@@ -26,6 +26,10 @@ export const WhereBlockSummary = ({
 }: StepConfigurationProps) => {
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
+  const handleTitleClick = () => {
+    stepRef.send({ type: 'step.edit' });
+  };
+
   if (!isWhereBlock(step)) return null;
 
   return (
@@ -47,7 +51,12 @@ export const WhereBlockSummary = ({
           overflow: hidden;
         `}
       >
-        <ConditionDisplay condition={step.where} showKeyword={true} keyword="WHERE" />
+        <ConditionDisplay
+          condition={step.where}
+          showKeyword={true}
+          keyword="WHERE"
+          onTitleClick={handleTitleClick}
+        />
       </EuiFlexItem>
 
       <EuiFlexItem
