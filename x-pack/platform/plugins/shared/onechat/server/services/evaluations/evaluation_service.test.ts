@@ -12,16 +12,21 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import type { Conversation, ConversationRound } from '@kbn/onechat-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { ToolType } from '@kbn/onechat-common';
 import { EvaluatorId } from '../../../common/http_api/evaluations';
 import type { EvaluatorConfig } from '../../../common/http_api/evaluations';
 import type { EvaluationService } from './evaluation_service';
 import { EvaluationServiceImpl } from './evaluation_service';
+import type { AgentsServiceStart } from '../agents';
+import type { ToolsServiceStart } from '../tools';
 
 describe('EvaluationService', () => {
   let logger: MockedLogger;
   let service: EvaluationService;
   let mockInference: jest.Mocked<InferenceServerStart>;
   let mockInferenceClient: jest.Mocked<BoundInferenceClient>;
+  let mockAgentsService: jest.Mocked<AgentsServiceStart>;
+  let mockToolsService: jest.Mocked<ToolsServiceStart>;
   let mockRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
   beforeEach(() => {
@@ -42,7 +47,41 @@ describe('EvaluationService', () => {
       getClient: jest.fn().mockReturnValue(mockInferenceClient),
     } as any;
 
-    service = new EvaluationServiceImpl({ logger, inference: mockInference });
+    const mockAgentRegistry = {
+      get: jest.fn().mockResolvedValue({
+        id: 'agent-1',
+        name: 'Test Agent',
+        configuration: {
+          instructions: 'You are a helpful assistant.',
+          tools: [{ tool_ids: ['tool1'] }],
+        },
+      }),
+    };
+
+    mockAgentsService = {
+      getRegistry: jest.fn().mockResolvedValue(mockAgentRegistry),
+    } as any;
+
+    const mockToolRegistry = {
+      list: jest.fn().mockResolvedValue([
+        {
+          id: 'tool1',
+          type: 'builtin' as ToolType,
+          description: 'A test tool',
+        },
+      ]),
+    };
+
+    mockToolsService = {
+      getRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+    } as any;
+
+    service = new EvaluationServiceImpl({
+      logger,
+      inference: mockInference,
+      agentsService: mockAgentsService,
+      toolsService: mockToolsService,
+    });
   });
 
   const createMockConversation = (rounds: ConversationRound[]): Conversation => ({

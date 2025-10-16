@@ -51,7 +51,7 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
   const groundednessResult = roundEvaluation?.find((score) => score.evaluatorId === 'groundedness');
   const regexResult = roundEvaluation?.find((score) => score.evaluatorId === 'regex');
   const criteriaResult = roundEvaluation?.find((score) => score.evaluatorId === 'criteria');
-
+  const optimizerResult = roundEvaluation?.find((score) => score.evaluatorId === 'optimizer');
   const showAdditionalContent = [
     relevanceResult?.score,
     precisionResult?.score,
@@ -59,6 +59,7 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
     groundednessResult?.score,
     regexResult?.score,
     criteriaResult?.score,
+    optimizerResult?.score,
   ].some((score) => score !== undefined && score !== null);
 
   const inputPanelStyles = css`
@@ -205,6 +206,7 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
                   groundedness={groundednessResult}
                   regex={regexResult}
                   criteria={criteriaResult}
+                  optimizer={optimizerResult}
                   openFlyout={openFlyout}
                 />
               </div>

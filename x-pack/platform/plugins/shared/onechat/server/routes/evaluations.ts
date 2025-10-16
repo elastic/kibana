@@ -91,6 +91,13 @@ export function registerEvaluationRoutes({
                 description: 'Evaluates response against custom criteria using LLM as a judge.',
                 type: 'text',
               },
+              {
+                id: EvaluatorId.Optimizer,
+                name: 'Optimizer Evaluator',
+                description:
+                  'Analyzes agent system prompt and tool usage to provide optimization feedback',
+                type: 'text',
+              },
             ],
           },
         });
@@ -135,6 +142,7 @@ export function registerEvaluationRoutes({
                     schema.literal(EvaluatorId.Precision),
                     schema.literal(EvaluatorId.Regex),
                     schema.literal(EvaluatorId.Criteria),
+                    schema.literal(EvaluatorId.Optimizer),
                   ]),
                   evaluatorIdOverride: schema.maybe(
                     schema.string({

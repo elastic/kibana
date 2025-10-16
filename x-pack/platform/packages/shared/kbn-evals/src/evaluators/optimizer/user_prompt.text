@@ -1,0 +1,34 @@
+[USER QUERY]
+{{user_query}}
+
+[AGENT RESPONSE]
+{{agent_response}}
+
+[SYSTEM INSTRUCTIONS]
+{{#system_instructions}}
+{{system_instructions}}
+{{/system_instructions}}
+{{^system_instructions}}
+No system instructions were provided for this agent.
+{{/system_instructions}}
+
+[AVAILABLE TOOLS]
+{{#available_tools}}
+{{available_tools}}
+{{/available_tools}}
+{{^available_tools}}
+No tools were available to this agent.
+{{/available_tools}}
+
+[TOOL CALL HISTORY]
+{{#tool_call_history}}
+{{tool_call_history}}
+{{/tool_call_history}}
+{{^tool_call_history}}
+No tools were called during this interaction.
+{{/tool_call_history}}
+
+---
+
+Please analyze the agent's configuration and performance based on the system instructions, available tools, and actual tool usage. Provide detailed, actionable feedback.
+

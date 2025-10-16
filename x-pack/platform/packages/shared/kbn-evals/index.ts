@@ -14,4 +14,6 @@ export { createQuantitativeGroundednessEvaluator } from './src/evaluators/ground
 export type { EvaluationDataset } from './src/types';
 export { LlmGroundednessEvaluationPrompt } from './src/evaluators/groundedness/prompt';
 export { calculateGroundednessScore } from './src/evaluators/groundedness/scoring';
+export { LlmOptimizerEvaluationPrompt, calculateOptimizerScore } from './src/evaluators/optimizer';
+export type { OptimizerAnalysis } from './src/evaluators/optimizer';
 export type { GroundednessAnalysis } from './src/evaluators/groundedness/types';

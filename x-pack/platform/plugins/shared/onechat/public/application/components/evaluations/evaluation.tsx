@@ -80,6 +80,7 @@ export const Evaluation: React.FC = () => {
                 groundednessScore={averages.groundedness ?? undefined}
                 regexScore={averages.regex ?? undefined}
                 criteriaScore={averages.criteria ?? undefined}
+                optimizerScore={averages.optimizer ?? undefined}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

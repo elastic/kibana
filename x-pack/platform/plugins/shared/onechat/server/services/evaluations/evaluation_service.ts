@@ -19,7 +19,10 @@ import {
   createRegexEvaluator,
   createCriteriaEvaluator,
   createGroundednessEvaluator,
+  createOptimizerEvaluator,
 } from './evaluators';
+import type { AgentsServiceStart } from '../agents';
+import type { ToolsServiceStart } from '../tools';
 
 export interface EvaluationService {
   evaluateConversation(
@@ -32,15 +35,21 @@ export interface EvaluationService {
 interface EvaluationServiceDeps {
   logger: Logger;
   inference: InferenceServerStart;
+  agentsService: AgentsServiceStart;
+  toolsService: ToolsServiceStart;
 }
 
 export class EvaluationServiceImpl implements EvaluationService {
   private readonly logger: Logger;
   private readonly inference: InferenceServerStart;
+  private readonly agentsService: AgentsServiceStart;
+  private readonly toolsService: ToolsServiceStart;
 
-  constructor({ logger, inference }: EvaluationServiceDeps) {
+  constructor({ logger, inference, agentsService, toolsService }: EvaluationServiceDeps) {
     this.logger = logger;
     this.inference = inference;
+    this.agentsService = agentsService;
+    this.toolsService = toolsService;
   }
 
   async evaluateConversation(
@@ -60,6 +69,13 @@ export class EvaluationServiceImpl implements EvaluationService {
       [EvaluatorId.Groundedness]: createGroundednessEvaluator({
         inferenceClient,
         logger: this.logger,
+      }),
+      [EvaluatorId.Optimizer]: createOptimizerEvaluator({
+        inferenceClient,
+        logger: this.logger,
+        agentsService: this.agentsService,
+        toolsService: this.toolsService,
+        request,
       }),
     };
 

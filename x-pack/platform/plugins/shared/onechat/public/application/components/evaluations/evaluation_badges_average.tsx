@@ -15,6 +15,7 @@ interface EvaluatorBadgesGroupProps {
   groundednessScore?: number;
   regexScore?: number;
   criteriaScore?: number;
+  optimizerScore?: number;
 }
 
 const getEvaluatorConfig = (key: string, value: number) => {
@@ -43,6 +44,10 @@ const getEvaluatorConfig = (key: string, value: number) => {
       label: 'Criteria',
       icon: '📋',
     },
+    optimizer: {
+      label: 'Optimizer',
+      icon: '🚀',
+    },
   };
   return configs[key] || configs.relevance;
 };
@@ -69,6 +74,7 @@ export const EvaluatorBadgesAverage: React.FC<EvaluatorBadgesGroupProps> = ({
   groundednessScore,
   regexScore,
   criteriaScore,
+  optimizerScore,
 }) => {
   // Create array of evaluation data for dynamic rendering
   const evaluations = [
@@ -78,6 +84,7 @@ export const EvaluatorBadgesAverage: React.FC<EvaluatorBadgesGroupProps> = ({
     { key: 'regex', value: regexScore },
     { key: 'recall', value: recallScore },
     { key: 'precision', value: precisionScore },
+    { key: 'optimizer', value: optimizerScore },
   ].filter((x) => x.value !== undefined);
 
   return (

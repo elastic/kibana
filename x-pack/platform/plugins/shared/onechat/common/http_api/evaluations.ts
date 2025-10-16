@@ -12,6 +12,7 @@ export enum EvaluatorId {
   Precision = 'precision',
   Regex = 'regex',
   Criteria = 'criteria',
+  Optimizer = 'optimizer',
 }
 
 export interface Evaluator {

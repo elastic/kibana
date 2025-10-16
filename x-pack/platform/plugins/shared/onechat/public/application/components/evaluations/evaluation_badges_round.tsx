@@ -16,6 +16,7 @@ interface EvaluatorBadgesRoundProps {
   groundedness?: EvaluationScore;
   regex?: EvaluationScore;
   criteria?: EvaluationScore;
+  optimizer?: EvaluationScore;
   variant?: 'default' | 'conversation-average';
   openFlyout?: (content: Record<string, any>) => void;
 }
@@ -45,6 +46,10 @@ const getEvaluatorConfig = (key: string, value: number) => {
     criteria: {
       label: 'Criteria',
       icon: '📋',
+    },
+    optimizer: {
+      label: 'Optimizer',
+      icon: '🚀',
     },
   };
   return configs[key] || configs.relevance;
@@ -83,6 +88,7 @@ export const EvaluatorBadgesRound: React.FC<EvaluatorBadgesRoundProps> = ({
   groundedness,
   regex,
   criteria,
+  optimizer,
   variant = 'default',
   openFlyout,
 }) => {
@@ -94,6 +100,7 @@ export const EvaluatorBadgesRound: React.FC<EvaluatorBadgesRoundProps> = ({
     { key: 'regex', value: regex?.score, analysis: regex?.analysis },
     { key: 'recall', value: recall?.score, analysis: recall?.analysis },
     { key: 'precision', value: precision?.score, analysis: precision?.analysis },
+    { key: 'optimizer', value: optimizer?.score, analysis: optimizer?.analysis },
   ].filter((x) => x.value !== undefined);
 
   return (
