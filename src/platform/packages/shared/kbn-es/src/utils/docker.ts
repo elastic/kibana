@@ -296,7 +296,7 @@ export const getServerlessNodeArgs = async (
   primaryPort: number | undefined,
   namePrefix: string | undefined
 ): Promise<Array<{ name: string; params: string[]; esArgs?: [string, string][] }>> => {
-  primaryPort = primaryPort || DEFAULT_PORT;
+  primaryPort = Number(primaryPort || DEFAULT_PORT);
 
   const ports: [number[], number[], number[]] = [
     [await getPort({ port: primaryPort + 1 })],
