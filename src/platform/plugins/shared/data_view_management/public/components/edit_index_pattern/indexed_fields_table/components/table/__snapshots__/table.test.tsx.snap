@@ -85,7 +85,7 @@ exports[`Table render name 1`] = `
     gutterSize="s"
   >
     <WrappedFieldIcon
-      type="keyword"
+      type="string"
     />
     customer
   </EuiFlexGroup>
@@ -101,7 +101,7 @@ exports[`Table render name 2`] = `
     gutterSize="s"
   >
     <WrappedFieldIcon
-      type="keyword"
+      type="string"
     />
     customer
     <EuiIconTip
@@ -147,7 +147,7 @@ exports[`Table should render normal field name 1`] = `
     gutterSize="s"
   >
     <WrappedFieldIcon
-      type="name"
+      type="string"
     />
     Elastic
   </EuiFlexGroup>

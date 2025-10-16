@@ -9,7 +9,7 @@
 
 import React, { PureComponent } from 'react';
 import type { OverlayModalStart } from '@kbn/core/public';
-import { FieldDescription, FieldIcon, getFieldIconProps } from '@kbn/field-utils';
+import { FieldDescription, FieldIcon, getFieldIconType } from '@kbn/field-utils';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiIcon,
@@ -237,7 +237,7 @@ const getItems = (conflictDescriptions: IndexedFieldItem['conflictDescriptions']
 export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string) => (
   <span data-test-subj={`field-name-${field.name}`}>
     <EuiFlexGroup gutterSize="s" alignItems="center">
-      <FieldIcon {...getFieldIconProps(field)} />
+      <FieldIcon type={getFieldIconType(field, (f) => f?.kbnType)} />
       {field.name}
       {field.info && field.info.length ? (
         <EuiIconTip
