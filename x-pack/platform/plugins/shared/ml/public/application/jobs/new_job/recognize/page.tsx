@@ -303,7 +303,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       {displayQueryWarning && (
         <>
           <EuiCallOut
-            announceOnMount
+            announceOnMount={false}
             title={
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.searchWillBeOverwrittenLabel"
