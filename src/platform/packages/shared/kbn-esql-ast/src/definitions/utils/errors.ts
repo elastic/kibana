@@ -61,7 +61,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unknownSetting', {
           defaultMessage: 'Unknown setting {name}',
-          values: { name: out.name.toUpperCase() },
+          values: { name: out.name },
         }),
       };
     case 'noMatchingCallSignature':

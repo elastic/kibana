@@ -9,14 +9,14 @@
 import { getMessageFromId } from '../../../definitions/utils';
 import { settings } from '../../../definitions/generated/settings';
 import { isBinaryExpression, isIdentifier } from '../../../ast/is';
-import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
+import type { ESQLCommand, ESQLMessage } from '../../../types';
 import type { ICommandContext } from '../../types';
 
 const validSettingNames = settings.map((s) => s.name);
 
 export const validate = (
   command: ESQLCommand,
-  ast: ESQLAst,
+  commands: ESQLCommand[],
   context?: ICommandContext
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
