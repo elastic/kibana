@@ -43,16 +43,16 @@ export function DiscoverFlyoutStreamProcessingLink({
     doc,
   });
 
-  if (!doc.raw._id) return null;
-
   if (loading) return <EuiLoadingSpinner size="s" />;
 
   if (!value || error) return null;
 
+  const hasDocumentId = !!doc.raw._id;
+
   const href = locator.getRedirectUrl({
     name: value,
     managementTab: 'processing',
-    pageState: {
+    pageState: hasDocumentId ? {
       v: 1,
       dataSources: [
         {
@@ -67,12 +67,16 @@ export function DiscoverFlyoutStreamProcessingLink({
           },
         },
       ],
-    },
+    } : undefined,
   });
 
-  const message = i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
-    defaultMessage: 'Parse content in Streams',
-  });
+  const message = hasDocumentId 
+    ? i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
+        defaultMessage: 'Parse content in Streams',
+      })
+    : i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLinkEdit', {
+        defaultMessage: 'Edit processing in Streams',
+      });
 
   return (
     <RedirectAppLinks
