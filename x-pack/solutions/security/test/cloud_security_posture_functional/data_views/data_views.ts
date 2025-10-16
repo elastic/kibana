@@ -480,6 +480,81 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         );
         expect(newDataViewExists).to.be(true);
       });
+
+      it('Should not delete other dataviews during migration', async () => {
+        await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
+
+        // Create a random unrelated data view that should not be deleted
+        const unrelatedDataViewId = 'test-unrelated-dataview-id';
+        await kibanaServer.request({
+          path: `/s/${TEST_SPACE}/internal/ftr/kbn_client_so/index-pattern/${unrelatedDataViewId}`,
+          method: 'POST',
+          query: { overwrite: true },
+          body: {
+            attributes: {
+              title: 'logs-test-pattern-*',
+              name: 'Unrelated Test Data View',
+              timeFieldName: '@timestamp',
+              allowNoIndex: true,
+            },
+          },
+        });
+
+        // Verify the unrelated data view exists before migration
+        const unrelatedDataViewExistsBeforeMigration = await getDataViewSafe(
+          kibanaServer.savedObjects,
+          unrelatedDataViewId,
+          TEST_SPACE
+        );
+        expect(unrelatedDataViewExistsBeforeMigration).to.be(true);
+
+        // Create old CSP data view to trigger migration
+        const oldDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-${TEST_SPACE}`;
+        await kibanaServer.request({
+          path: `/s/${TEST_SPACE}/internal/ftr/kbn_client_so/index-pattern/${oldDataViewId}`,
+          method: 'POST',
+          query: { overwrite: true },
+          body: {
+            attributes: {
+              title: 'security_solution-*.misconfiguration_latest',
+              name: 'Old Misconfiguration Data View v1',
+              timeFieldName: '@timestamp',
+              allowNoIndex: true,
+            },
+          },
+        });
+
+        // Install CSP package - this triggers plugin initialization which runs the migration
+        await installCspPackage();
+
+        // Wait for plugin initialization (and migration) to complete
+        await waitForPluginInitialized();
+
+        // Verify old CSP data view is deleted as expected
+        await retry.tryForTime(20000, async () => {
+          const oldDataViewExists = await getDataViewSafe(
+            kibanaServer.savedObjects,
+            oldDataViewId,
+            TEST_SPACE
+          );
+          expect(oldDataViewExists).to.be(false);
+        });
+
+        // Verify the unrelated data view still exists after migration
+        const unrelatedDataViewExistsAfterMigration = await getDataViewSafe(
+          kibanaServer.savedObjects,
+          unrelatedDataViewId,
+          TEST_SPACE
+        );
+        expect(unrelatedDataViewExistsAfterMigration).to.be(true);
+
+        // Clean up the unrelated data view
+        await kibanaServer.savedObjects.delete({
+          type: 'index-pattern',
+          id: unrelatedDataViewId,
+          space: TEST_SPACE,
+        });
+      });
     });
 
     describe('Vulnerabilities Data View Migration', () => {
