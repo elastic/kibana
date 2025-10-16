@@ -90,7 +90,6 @@ describe('When displaying Endpoint Response Actions', () => {
       (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
         responseActionsCrowdstrikeManualHostIsolationEnabled: true,
         responseActionsSentinelOneV1Enabled: true,
-        responseActionsSentinelOneProcessesEnabled: true,
         responseActionsSentinelOneRunScriptEnabled: true,
       });
 

@@ -164,7 +164,7 @@ export function ClassicStreamDetailManagement({
         <>
           {otherTabs.significantEvents ? (
             <>
-              <StreamDescription definition={definition} />
+              <StreamDescription definition={definition} refreshDefinition={refreshDefinition} />
               <EuiSpacer />
             </>
           ) : null}

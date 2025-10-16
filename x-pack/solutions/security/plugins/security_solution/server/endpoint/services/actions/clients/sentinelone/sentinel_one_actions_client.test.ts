@@ -2280,21 +2280,7 @@ describe('SentinelOneActionsClient class', () => {
     let processesActionRequest: GetProcessesRequestBody;
 
     beforeEach(() => {
-      // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled =
-        true;
-
       processesActionRequest = responseActionsClientMock.createRunningProcessesOptions();
-    });
-
-    it('should error if feature flag is disabled', async () => {
-      // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneProcessesEnabled =
-        false;
-
-      await expect(s1ActionsClient.runningProcesses(processesActionRequest)).rejects.toThrow(
-        `processes not supported for sentinel_one agent type. Feature disabled`
-      );
     });
 
     it('should error if host is running Windows', async () => {
