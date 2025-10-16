@@ -13,6 +13,7 @@ import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { getCompletionItemProvider, parseLineForCompletion } from './get_completion_item_provider';
 import { z } from '@kbn/zod';
 import { performComputation } from './store/utils/computation';
+import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
 
 // Mock Monaco editor model
 const createMockModel = (value: string, cursorOffset: number) => {
@@ -86,13 +87,14 @@ describe('getCompletionItemProvider', () => {
     },
   ];
   let yamlContent;
-  let focusedStepId: string | null = null;
+  let focusedStepId: string | undefined;
 
   const workflowSchema = generateYamlSchemaFromConnectors(mockConnectors, true);
   const completionProvider = getCompletionItemProvider(() => ({
     yamlString: yamlContent,
     schemaLoose: workflowSchema,
-    computed: performComputation(yamlContent),
+    focusedStepId,
+    computed: performComputation(yamlContent, getWorkflowZodSchemaLoose({})),
   }));
 
   describe('Integration tests', () => {
@@ -104,12 +106,10 @@ consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step1
-    type: console.log
+    type: console
     with:
       message: "{{|<-}}"
 `.trim();
-      focusedStepId = 'step1';
-
       const suggestions = await getSuggestions(completionProvider, yamlContent);
       expect(suggestions.map((s) => s.label)).toEqual(
         expect.arrayContaining([
@@ -125,6 +125,7 @@ steps:
     });
 
     it('should provide completions after @ and quote insertText automatically if cursor is in plain scalar', async () => {
+      focusedStepId = 'step1';
       yamlContent = `
 version: "1"
 name: "test"
@@ -132,7 +133,7 @@ consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step1
-    type: console.log
+    type: console
     with:
       message: @|<-
 `.trim();
@@ -150,7 +151,7 @@ consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step1
-    type: console.log
+    type: console
     with:
       message: hey, this is @|<-
 `.trim();
@@ -168,7 +169,7 @@ consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step1
-    type: console.log
+    type: console
     with:
       message: "@<-"
 `.trim();
@@ -201,7 +202,7 @@ consts:
         body: 'Go look at the activity'
 steps:
   - name: step1
-    type: console.log
+    type: console
     with:
       message: "{{consts.|<-}}"
 `.trim();
@@ -238,7 +239,7 @@ consts:
         body: 'Go look at the activity'
 steps:
   - name: step1
-    type: console.log
+    type: console
     with:
       message: "{{consts.templates[0].|<-}}"
 `.trim();
@@ -263,11 +264,11 @@ consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step0
-    type: console.log
+    type: console
     with:
       message: "hello"
   - name: step1
-    type: console.log
+    type: console
     with:
       message: "{{steps.|<-}}"
 `.trim();
@@ -289,16 +290,16 @@ steps:
       condition: "{{steps.step0.output.message == 'hello'}}"
     steps:
       - name: first-true-step
-        type: console.log
+        type: console
         with:
           message: "im true"
       - name: second-true-step
-        type: console.log
+        type: console
         with:
           message: "im true, {{steps.|<-}}"
     else:
       - name: false-step
-        type: console.log
+        type: console
         with:
           message: "im unreachable"
 `.trim();
@@ -317,7 +318,7 @@ consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step0
-    type: console.log
+    type: console
     with:
       message: "{{consts.a|<-}}"
 `.trim();
@@ -327,34 +328,35 @@ steps:
     });
 
     it('should provide completions with brackets for keys in kebab-case and use quote type opposite to the one in the string', async () => {
-      const yamlContentDoubleQuote = `
+      focusedStepId = 'step0';
+      yamlContent = `
 version: "1"
 name: "test"
 consts:
   api-url: "https://api.example.com"
 steps:
   - name: step0
-    type: console.log
+    type: console
     with:
       message: "{{consts.|<-}}"
 `.trim();
-      const suggestions1 = await getSuggestions(completionProvider, yamlContentDoubleQuote);
+      const suggestions1 = await getSuggestions(completionProvider, yamlContent);
       expect(suggestions1.map((s) => s.insertText)).toEqual(
         expect.arrayContaining(["['api-url']"])
       );
 
-      const yamlContentSingleQuote = `
-      version: "1"
-      name: "test"
-      consts:
-        api-url: "https://api.example.com"
-      steps:
-        - name: step0
-          type: console.log
-          with:
-            message: '{{consts.|<-}}'
+      yamlContent = `
+version: "1"
+name: "test"
+consts:
+  api-url: "https://api.example.com"
+steps:
+  - name: step0
+    type: console
+    with:
+      message: '{{consts.|<-}}'
       `.trim();
-      const suggestions2 = await getSuggestions(completionProvider, yamlContentSingleQuote);
+      const suggestions2 = await getSuggestions(completionProvider, yamlContent);
       expect(suggestions2.map((s) => s.insertText)).toEqual(
         expect.arrayContaining(['["api-url"]'])
       );

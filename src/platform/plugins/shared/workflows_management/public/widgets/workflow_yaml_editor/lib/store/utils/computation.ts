@@ -10,16 +10,15 @@
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import YAML, { LineCounter } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
+import type { z } from '@kbn/zod';
 import { buildWorkflowLookup } from './build_workflow_lookup';
-import {
-  getWorkflowZodSchemaLoose,
-  getCachedDynamicConnectorTypes,
-} from '../../../../../../common/schema';
+import type { WorkflowZodSchemaLooseType } from '../../../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../../../common/lib/yaml_utils';
 import type { WorkflowEditorState } from '../types';
 
 export const performComputation = (
-  yamlString: string | undefined
+  yamlString: string | undefined,
+  schemLoose: WorkflowZodSchemaLooseType
 ): WorkflowEditorState['computed'] | undefined => {
   if (!yamlString) {
     return;
@@ -32,11 +31,7 @@ export const performComputation = (
     const yamlDoc = YAML.parseDocument(yamlString, { lineCounter, keepSourceTokens: true });
 
     // Parse workflow JSON for graph creation
-    const dynamicConnectorTypes = getCachedDynamicConnectorTypes() || {};
-    const parsingResult = parseWorkflowYamlToJSON(
-      yamlString,
-      getWorkflowZodSchemaLoose(dynamicConnectorTypes)
-    );
+    const parsingResult = parseWorkflowYamlToJSON(yamlString, schemLoose as z.ZodSchema);
 
     // Build workflow lookup
     const lookup = buildWorkflowLookup(yamlDoc, lineCounter);
