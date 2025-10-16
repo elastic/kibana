@@ -50,7 +50,7 @@ const isValidConnectionMock = isValidConnection as jest.Mock;
 
 const TICK = 10;
 const tick = (ticks = 1) => jest.advanceTimersByTime(TICK * ticks);
-// const tickAsync = (ticks = 1) => jest.advanceTimersByTimeAsync(TICK * ticks);
+const tickAsync = (ticks = 1) => jest.advanceTimersByTimeAsync(TICK * ticks);
 
 const configService = configServiceMock.create();
 
@@ -269,7 +269,31 @@ describe('#setup', () => {
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
   });
 
-  it('esNodeVersionCompatibility$ only emits new values when something changes', async () => {});
+  it('esNodeVersionCompatibility$ only emits error after retries have been exhausted', async () => {
+    const mockClient = mockClusterClientInstance.asInternalUser;
+    mockClient.nodes.info.mockRejectedValue(new Error('Test error'));
+
+    expect(mockClient.nodes.info).toHaveBeenCalledTimes(0);
+
+    const setupContract = await elasticsearchService.setup(setupDeps);
+
+    expect(mockClient.nodes.info).toHaveBeenCalledTimes(1);
+
+    await tickAsync();
+
+    await tickAsync();
+    // retry set to 1
+    expect(mockClient.nodes.info).toHaveBeenCalledTimes(2);
+
+    const result = await firstValueFrom(setupContract.esNodesCompatibility$);
+
+    expect(result.isCompatible).toBe(false);
+    expect(result.nodesInfoRequestError).toBeDefined();
+    expect(result.nodesInfoRequestError?.message).toBe('Test error');
+    expect(result.message).toContain(
+      'Unable to retrieve version information from Elasticsearch nodes'
+    );
+  });
 
   describe('#start', () => {
     it('throws if called before `setup`', async () => {
