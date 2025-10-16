@@ -124,10 +124,10 @@ export class LensConfigBuilder {
     const visType = config.visualizationType;
     const type = compatibilityMap[visType];
 
-    if (!type) {
+    if (!type || !(type in this.apiConvertersByChart)) {
       throw new Error(`No API converter found for chart type: ${visType}`);
     }
-    const converter = this.apiConvertersByChart[type];
+    const converter = this.apiConvertersByChart[type as keyof typeof this.apiConvertersByChart];
     return {
       ...converter.fromLensStateToAPI(config),
       ...filtersAndQueryToApiFormat(config),
