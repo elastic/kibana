@@ -13,7 +13,6 @@ import { ResponseActionsNotSupportedError } from '../errors';
 import type { SentinelOneActionsClientOptionsMock } from './mocks';
 import { sentinelOneMock } from './mocks';
 import {
-  ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
@@ -141,82 +140,7 @@ describe('SentinelOneActionsClient class', () => {
       });
     });
 
-    it('should write action request and response to endpoint indexes when `responseActionsSentinelOneV2Enabled` FF is Disabled', async () => {
-      // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
-        false;
-      await s1ActionsClient.isolate(createS1IsolationOptions());
-
-      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);
-      expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(
-        1,
-        {
-          document: {
-            '@timestamp': expect.any(String),
-            EndpointActions: {
-              action_id: expect.any(String),
-              data: {
-                command: 'isolate',
-                comment: 'test comment',
-                parameters: undefined,
-                hosts: {
-                  '1-2-3': {
-                    name: 'sentinelone-1460',
-                  },
-                },
-              },
-              expiration: expect.any(String),
-              input_type: 'sentinel_one',
-              type: 'INPUT_ACTION',
-            },
-            agent: {
-              id: ['1-2-3'],
-              policy: [
-                {
-                  agentId: '1-2-3',
-                  agentPolicyId: expect.any(String),
-                  elasticAgentId: '1-2-3',
-                  integrationPolicyId: expect.any(String),
-                },
-              ],
-            },
-            originSpaceId: 'default',
-            tags: [],
-            user: { id: 'foo' },
-            meta: {
-              agentId: '1-2-3',
-              agentUUID: '1-2-3',
-              hostName: 'sentinelone-1460',
-            },
-          },
-          index: ENDPOINT_ACTIONS_INDEX,
-          refresh: 'wait_for',
-        },
-        { meta: true }
-      );
-
-      expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(2, {
-        document: {
-          '@timestamp': expect.any(String),
-          EndpointActions: {
-            action_id: expect.any(String),
-            data: { command: 'isolate' },
-            input_type: 'sentinel_one',
-            started_at: expect.any(String),
-            completed_at: expect.any(String),
-          },
-          agent: { id: ['1-2-3'] },
-          error: undefined,
-        },
-        index: ENDPOINT_ACTION_RESPONSES_INDEX,
-        refresh: 'wait_for',
-      });
-    });
-
-    it('should write action request (only) to endpoint indexes when `responseActionsSentinelOneV2Enabled` FF is Enabled', async () => {
-      // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
-        true;
+    it('should write action request (only) to endpoint indexes', async () => {
       await s1ActionsClient.isolate(createS1IsolationOptions());
 
       expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(1);
@@ -316,81 +240,7 @@ describe('SentinelOneActionsClient class', () => {
       });
     });
 
-    it('should write action request and response to endpoint indexes when `responseActionsSentinelOneV2Enabled` is Disabled', async () => {
-      // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
-        false;
-      await s1ActionsClient.release(createS1IsolationOptions());
-
-      expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(2);
-      expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(
-        1,
-        {
-          document: {
-            '@timestamp': expect.any(String),
-            EndpointActions: {
-              action_id: expect.any(String),
-              data: {
-                command: 'unisolate',
-                comment: 'test comment',
-                parameters: undefined,
-                hosts: {
-                  '1-2-3': {
-                    name: 'sentinelone-1460',
-                  },
-                },
-              },
-              expiration: expect.any(String),
-              input_type: 'sentinel_one',
-              type: 'INPUT_ACTION',
-            },
-            agent: {
-              id: ['1-2-3'],
-              policy: [
-                {
-                  agentId: '1-2-3',
-                  agentPolicyId: expect.any(String),
-                  elasticAgentId: '1-2-3',
-                  integrationPolicyId: expect.any(String),
-                },
-              ],
-            },
-            originSpaceId: 'default',
-            tags: [],
-            user: { id: 'foo' },
-            meta: {
-              agentId: '1-2-3',
-              agentUUID: '1-2-3',
-              hostName: 'sentinelone-1460',
-            },
-          },
-          index: ENDPOINT_ACTIONS_INDEX,
-          refresh: 'wait_for',
-        },
-        { meta: true }
-      );
-      expect(classConstructorOptions.esClient.index).toHaveBeenNthCalledWith(2, {
-        document: {
-          '@timestamp': expect.any(String),
-          EndpointActions: {
-            action_id: expect.any(String),
-            data: { command: 'unisolate' },
-            input_type: 'sentinel_one',
-            started_at: expect.any(String),
-            completed_at: expect.any(String),
-          },
-          agent: { id: ['1-2-3'] },
-          error: undefined,
-        },
-        index: ENDPOINT_ACTION_RESPONSES_INDEX,
-        refresh: 'wait_for',
-      });
-    });
-
-    it('should write action request (only) to endpoint indexes when `responseActionsSentinelOneV2Enabled` is Enabled', async () => {
-      // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
-        true;
+    it('should write action request (only) to endpoint indexes', async () => {
       await s1ActionsClient.release(createS1IsolationOptions());
 
       expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(1);
