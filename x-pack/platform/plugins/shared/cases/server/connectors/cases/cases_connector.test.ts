@@ -178,6 +178,7 @@ describe('CasesConnector', () => {
       caughtError = error;
     }
     expect(caughtError.message).toBe('Bad request');
+
     expect(getErrorSource(caughtError)).toBe('user');
     expect(logger.error.mock.calls[0][0]).toBe(
       '[CasesConnector][run] Execution of case connector failed. Message: Bad request. Status code: 400'
@@ -292,9 +293,8 @@ describe('CasesConnector', () => {
       casesParams,
       connectorParams: { ...connectorParams, request: undefined },
     });
-
-    await expect(() =>
-      connector.run({
+    try {
+      await connector.run({
         alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
         groupedAlerts,
         groupingBy,
@@ -305,8 +305,13 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Kibana request is not defined"`);
+      });
+    } catch (err) {
+      caughtError = err;
+    }
+
+    expect(caughtError.message).toBe('Kibana request is not defined');
+    expect(getErrorSource(caughtError)).toBe('user');
 
     expect(logger.error.mock.calls[0][0]).toBe(
       '[CasesConnector][run] Execution of case connector failed. Message: Kibana request is not defined. Status code: 400'
