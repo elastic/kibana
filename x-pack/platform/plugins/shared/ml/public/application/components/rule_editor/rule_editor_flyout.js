@@ -690,7 +690,7 @@ class RuleEditorFlyoutUI extends Component {
             />
 
             <EuiCallOut
-              announceOnMount
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.ml.ruleEditor.ruleEditorFlyout.rerunJobTitle"
