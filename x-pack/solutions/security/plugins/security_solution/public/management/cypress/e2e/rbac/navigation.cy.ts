@@ -166,10 +166,7 @@ describe(
         cy.get(allPages[0].selector).click(); // open the Assets anv panel by clicking the first item in more>assets popover
 
         for (const page of allPages) {
-          if (page.selector !== Selectors.TRUSTED_DEVICES) {
-            // Skip Trusted Devices for now — soc_manager does not yet have the required privilege in controller (MKI would fail otherwise).
-            cy.get(page.selector);
-          }
+          cy.get(page.selector);
         }
       });
     });
