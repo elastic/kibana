@@ -269,7 +269,7 @@ export default function (providerContext: FtrProviderContext) {
     });
   }
 
-  describe('Package rollback', () => {
+  describe('Package rollback and cleanup', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
@@ -281,7 +281,69 @@ export default function (providerContext: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    assertPackageRollback('multiple_versions', 'integration', '0.1.0', '0.2.0', '0.3.0');
-    assertPackageRollback('input_package_upgrade', 'input', '1.0.0', '1.1.0', '1.2.0');
+    describe('Package rollback', () => {
+      assertPackageRollback('multiple_versions', 'integration', '0.1.0', '0.2.0', '0.3.0');
+      assertPackageRollback('input_package_upgrade', 'input', '1.0.0', '1.1.0', '1.2.0');
+    });
+
+    describe('Cleanup previous integration revisions', () => {
+      const pkgName = 'multiple_versions';
+      const oldPkgVersion = '0.1.0';
+      const newPkgVersion = '0.2.0';
+      const policyIds = [`${pkgName}-1`, `${pkgName}-2`];
+      const TASK_INTERVAL = 31000; // as set in the config
+
+      async function waitForTask() {
+        // Sleep for the duration of the task interval.
+        // In case of test flakiness, the sleep duration can be increased.
+        await new Promise((resolve) => setTimeout(resolve, TASK_INTERVAL));
+      }
+
+      beforeEach(async () => {
+        await installPackage(pkgName, oldPkgVersion);
+        await createPackagePolicies(policyIds, pkgName, oldPkgVersion, {});
+      });
+
+      afterEach(async () => {
+        await deletePackage(pkgName, newPkgVersion);
+        await deletePackagePolicies(policyIds);
+      });
+
+      it('should succeed when the package and its policies have matching previous versions', async () => {
+        await upgradePackage(pkgName, oldPkgVersion, newPkgVersion, policyIds, true);
+
+        // Verify saved objects before the cleanup
+        const packagePolicySORes = await kibanaServer.savedObjects.find({
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+        expect(packagePolicySORes.saved_objects.map((so) => so.id).sort()).to.eql([
+          `${pkgName}-1`,
+          `${pkgName}-1:prev`,
+          `${pkgName}-2`,
+          `${pkgName}-2:prev`,
+        ]);
+
+        const packageSOres = await kibanaServer.savedObjects.get({
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          id: pkgName,
+        });
+        expect(packageSOres.attributes.previous_version).to.eql(oldPkgVersion);
+
+        await waitForTask();
+
+        const packagePolicySOResAfterCleanup = await kibanaServer.savedObjects.find({
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+        expect(packagePolicySOResAfterCleanup.saved_objects.map((so) => so.id).sort()).to.eql([
+          `${pkgName}-1`,
+          `${pkgName}-2`,
+        ]);
+        const packageSOresAfterCleanup = await kibanaServer.savedObjects.get({
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          id: pkgName,
+        });
+        expect(packageSOresAfterCleanup.attributes.previous_version).to.eql(null);
+      });
+    });
   });
 }
