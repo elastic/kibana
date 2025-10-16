@@ -48,6 +48,7 @@ import type {
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
+import { StepExecutionRuntimeFactory } from './workflow_context_manager/step_execution_runtime_factory';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -88,6 +89,7 @@ export class WorkflowsExecutionEnginePlugin
 
               const {
                 workflowRuntime,
+                stepExecutionRuntimeFactory,
                 workflowExecutionState,
                 workflowLogger,
                 nodesFactory,
@@ -111,6 +113,7 @@ export class WorkflowsExecutionEnginePlugin
 
               await workflowExecutionLoop({
                 workflowRuntime,
+                stepExecutionRuntimeFactory,
                 workflowExecutionState,
                 workflowExecutionRepository,
                 workflowLogger,
@@ -152,6 +155,7 @@ export class WorkflowsExecutionEnginePlugin
 
               const {
                 workflowRuntime,
+                stepExecutionRuntimeFactory,
                 workflowExecutionState,
                 workflowLogger,
                 nodesFactory,
@@ -175,6 +179,7 @@ export class WorkflowsExecutionEnginePlugin
 
               await workflowExecutionLoop({
                 workflowRuntime,
+                stepExecutionRuntimeFactory,
                 workflowExecutionState,
                 workflowExecutionRepository,
                 workflowLogger,
@@ -241,6 +246,7 @@ export class WorkflowsExecutionEnginePlugin
 
         const {
           workflowRuntime,
+          stepExecutionRuntimeFactory,
           workflowExecutionState,
           workflowLogger,
           nodesFactory,
@@ -264,6 +270,7 @@ export class WorkflowsExecutionEnginePlugin
         await workflowRuntime.start();
         await workflowExecutionLoop({
           workflowRuntime,
+          stepExecutionRuntimeFactory,
           workflowExecutionState,
           workflowExecutionRepository,
           workflowLogger,
@@ -487,19 +494,29 @@ async function createContainer(
     allowedHosts: config.http.allowedHosts,
   });
 
+  const stepExecutionRuntimeFactory = new StepExecutionRuntimeFactory({
+    workflowExecutionGraph,
+    workflowExecutionState,
+    workflowLogger,
+    esClient,
+    fakeRequest,
+    coreStart,
+  });
+
   const nodesFactory = new NodesFactory(
     connectorExecutor,
     workflowRuntime,
-    workflowExecutionState,
     workflowLogger,
     workflowTaskManager,
     urlValidator,
-    workflowExecutionGraph
+    workflowExecutionGraph,
+    stepExecutionRuntimeFactory
   );
 
   return {
     workflowExecutionGraph,
     workflowRuntime,
+    stepExecutionRuntimeFactory,
     workflowExecutionState,
     connectorExecutor,
     workflowLogger,

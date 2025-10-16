@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { ConnectorContract } from '@kbn/workflows';
+import type { ConnectorContractUnion } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { getCompletionItemProvider, parseLineForCompletion } from './get_completion_item_provider';
 import { z } from '@kbn/zod';
@@ -73,7 +73,7 @@ async function getSuggestions(
 }
 
 describe('getCompletionItemProvider', () => {
-  const mockConnectors: ConnectorContract[] = [
+  const mockConnectors: ConnectorContractUnion[] = [
     {
       type: 'console.log',
       paramsSchema: z.object({
@@ -494,6 +494,105 @@ steps: []
           'Monthly on 1st and 15th',
           'Custom RRule',
         ])
+      );
+    });
+
+    it('should provide timezone suggestions for tzid field in scheduled trigger', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - name: scheduled-trigger
+    type: scheduled
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: |<-
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+
+      // Should include timezone suggestions
+      expect(suggestions.length).toBeGreaterThan(0);
+
+      // Should have timezone documentation
+      const firstSuggestion = suggestions[0];
+      expect(firstSuggestion?.documentation).toBeDefined();
+      expect(firstSuggestion?.detail).toContain('Timezone:');
+    });
+
+    it('should filter timezone suggestions based on prefix', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - name: scheduled-trigger
+    type: scheduled
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: Amer|<-
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+
+      // Should only include American timezones
+      expect(suggestions.length).toBeGreaterThan(0);
+      expect(
+        suggestions.every((s) => typeof s.label === 'string' && s.label.startsWith('America/'))
+      ).toBe(true);
+    });
+
+    it('should prioritize UTC timezones in suggestions', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - name: scheduled-trigger
+    type: scheduled
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: |<-
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+
+      // Should have timezone suggestions
+      expect(suggestions.length).toBeGreaterThan(0);
+
+      // Should have timezone documentation
+      const firstSuggestion = suggestions[0];
+      expect(firstSuggestion?.documentation).toBeDefined();
+      expect(firstSuggestion?.detail).toContain('Timezone:');
+    });
+
+    it('should replace entire tzid value when selecting timezone', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - name: scheduled-trigger
+    type: scheduled
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: UTC |<-
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+
+      // Should have timezone suggestions
+      expect(suggestions.length).toBeGreaterThan(0);
+
+      // Check that suggestions have InsertAsSnippet insertTextRules
+      const firstSuggestion = suggestions[0];
+      expect(firstSuggestion?.insertTextRules).toBe(
+        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
       );
     });
   });
