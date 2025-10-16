@@ -39,7 +39,7 @@ export function StreamExistingFeaturesTable({
 }) {
   const router = useStreamsAppRouter();
 
-  const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState<Feature>();
+  const [selectedFeature, setSelectedFeature] = useState<Feature>();
   const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
   const { removeFeaturesFromStream } = useStreamFeaturesApi(definition);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -94,7 +94,7 @@ export function StreamExistingFeaturesTable({
           type: 'icon',
           icon: 'pencil',
           onClick: (feature) => {
-            setIsDetailFlyoutOpen(feature);
+            setSelectedFeature(feature);
           },
         },
         {
@@ -119,7 +119,7 @@ export function StreamExistingFeaturesTable({
   ];
 
   const toggleDetails = (feature: Feature) => {
-    setIsDetailFlyoutOpen(feature);
+    setSelectedFeature(feature);
   };
 
   const columnsWithExpandingRowToggle: Array<EuiBasicTableColumn<Feature>> = [
@@ -136,8 +136,8 @@ export function StreamExistingFeaturesTable({
         return (
           <EuiButtonIcon
             onClick={() => toggleDetails(feature)}
-            aria-label={isDetailFlyoutOpen ? COLLAPSE_DETAILS_LABEL : EXPAND_DETAILS_LABEL}
-            iconType={isDetailFlyoutOpen ? 'minimize' : 'expand'}
+            aria-label={selectedFeature ? COLLAPSE_DETAILS_LABEL : EXPAND_DETAILS_LABEL}
+            iconType={selectedFeature ? 'minimize' : 'expand'}
           />
         );
       },
@@ -239,14 +239,14 @@ export function StreamExistingFeaturesTable({
           },
         }}
       />
-      {isDetailFlyoutOpen && (
+      {selectedFeature && (
         <StreamFeatureDetailsFlyout
           definition={definition}
-          feature={isDetailFlyoutOpen}
+          feature={selectedFeature}
           closeFlyout={() => {
-            setIsDetailFlyoutOpen(undefined);
-            refreshFeatures();
+            setSelectedFeature(undefined);
           }}
+          refreshFeatures={refreshFeatures}
         />
       )}
     </div>
