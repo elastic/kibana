@@ -25,10 +25,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ### Features and enhancements [kibana-9.2.0-features-enhancements]
 
-**Navigation and general interface**
+**Navigation and general interface**:
 * Enhanced navigation menu for spaces that use a solution view. The new navigation experience provides more workspace for your data with an improved collapsed mode, hover menus, and responsiveness.
-* New Data Management menu. To ease the access to data-related management tasks, you can now find Fleet, Index Management, Integrations, and Ingest Pipelines in a dedicated menu, next to the Stack Management menu that previously hosted these pages.
-* Kibana is now available in German in Beta. To get started, set the locale in your kibana settings as follows: `i18n.locale: de-DE`. If you find any issues, please raise them on [Github](https://github.com/elastic/kibana/issues) [#236903]({{kib-pull}}236903).
+* New Data Management menu. For easier access to data-related management tasks, you can now find Fleet, Index Management, Integrations, and Ingest Pipelines in a dedicated menu next to the Stack Management menu that previously hosted these pages.
+* {{kib}} is now available in German in Beta. To get started, set the locale in your {{kib}} settings as follows: `i18n.locale: de-DE`. If you find any issues, please raise them on [Github](https://github.com/elastic/kibana/issues) [#236903]({{kib-pull}}236903).
 * Adds a table list view mode to the space selection screen for a more scalable design when a user has access to many spaces [#229046]({{kib-pull}}229046).
 
 **Alerting**:
@@ -47,10 +47,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Dashboards and Visualizations**:
 * Adds the ability to configure index settings when importing geospatial files in Maps [#232308]({{kib-pull}}232308).
-* Adds a new Inline Markdown editor to edit your text while switching between **Editing** and **Preview** mode[#229191]({{kib-pull}}229191).
-* Updates the toolbar popover for Metric charts, which is now called **Appearance**. [#233992]({{kib-pull}}233992).
+* Adds a new inline Markdown editor to edit your text while switching between **Editing** and **Preview** modes [#229191]({{kib-pull}}229191).
+* Updates the toolbar popover for Metric charts, which is now called **Appearance** [#233992]({{kib-pull}}233992).
 * Improves ES|QL suggestions logic when an {{esql}} visualization query changes [#231767]({{kib-pull}}231767).
-* Adds a new **Add** menu to the toolbar that lets you populate your dashboard with visualizations, panels, sections, and controls.[#230324]({{kib-pull}}230324).
+* Adds a new **Add** menu to the toolbar that lets you populate your dashboard with visualizations, panels, sections, and controls [#230324]({{kib-pull}}230324).
 * Improves perceived performance of dashboard flyouts [#226052]({{kib-pull}}226052).
 * Adds the **Select all** functionality for Options list controls [#221010]({{kib-pull}}221010).
 
@@ -73,25 +73,25 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds the **Add / remove tags** action on the agent details page [#225433]({{kib-pull}}225433).
 
 **Discover**:
-* You can now manage multiple data explorations simultaneously in Discover using tabs. Navigate between them seamlessly, duplicate them to build on previous queries, and save them into a single Discover session to retrieve your queries, filters, and data configurations untouched at a later time [#235150]({{kib-pull}}235150).
-* You can now send long-running queries to run in the background. When a query runs in the background, you can perform other queries and tasks, then open it later from a new Background searches flyout to view cached results. This feature is in technical preview and disabled by default in this release. Check [this page](docs-content://explore-analyze/discover/background-search.md) for instructions [#236818]({{kib-pull}}236818).
+* You can now manage multiple data explorations simultaneously in Discover using tabs. Navigate between them seamlessly, duplicate them to build on previous queries, and save them into a single Discover session to retrieve your queries, filters, and configurations untouched at a later time [#235150]({{kib-pull}}235150).
+* You can now send long-running queries to the background. When a query runs in the background, you can perform other queries and tasks, then open it later from a new Background searches flyout to view cached results. This feature is in technical preview and disabled by default in this release. Check [this page](docs-content://explore-analyze/discover/background-search.md) for instructions [#236818]({{kib-pull}}236818).
 * Improves Discover’s {{esql}} LOOKUP JOIN experience with an index editor flyout supporting inline editing, CSV import, contextual actions based on privileges, and a query bar that opens Discover with a prefilled ES|QL query [#232686]({{kib-pull}}232686).
 * You can now add controls directly in Discover by typing variables (for example `?service` or `??host.name`) in your {{esql}} queries. Instead of having to maintain multiple similar queries, controls let you dynamically change parts of a single query using dropdowns, multi-selects, and date pickers with value suggestions [#229598]({{kib-pull}}229598).
 * Adds related errors count and failure badge when exploring traces in Discover [#227413]({{kib-pull}}227413).
-* Shows logs related to the current document when exploring Traces in Discover [#232784]({{kib-pull}}232784).
+* Shows logs related to the current document when exploring traces in Discover [#232784]({{kib-pull}}232784).
 * Adds a warning when navigating away from Discover with unsaved changes [#225252]({{kib-pull}}225252).
 * Adds the ability to view the currently active profiles, such as the detected solution and data source contexts, which determine Discover's context-aware experiences [#222999]({{kib-pull}}222999).
 * Appends the casting only when necessary in Discover's {{esql}} mode filtering [#234748]({{kib-pull}}234748).
 * Removes the default limit of `10` added to the query base query when switching to {{esql}} mode in Discover [#234349]({{kib-pull}}234349).
 
-**{{esql}} editor**
+**{{esql}} editor**:
 * Extends the {{esql}} query history size to 50 KB, which represents between 200 to 300 queries instead of 20 [#232955]({{kib-pull}}232955).
 * Adds support for lookup indices from remote clusters [#232907]({{kib-pull}}232907).
 * The {{esql}} autocomplete feature has been extended so that fields from the selected lookup index are suggested when using the `LOOKUP JOIN` command. The same enhancement was applied to column suggestions when using the `ENRICH` command [#233221]({{kib-pull}}233221).
 * Improves function validation [#230139]({{kib-pull}}230139).
 * Adds support for expressions in the STATS command [#229513]({{kib-pull}}229513).
 * Enhances GROK semantics extraction with Onigurama regex patterns [#229409]({{kib-pull}}229409).
-* Adds a "Prettify" button that automatically formats queries to make them more readable [#228159]({{kib-pull}}228159).
+* Adds a **Prettify** button that formats queries to make them more readable [#228159]({{kib-pull}}228159).
 * Displays function license requirements in the in-product {{esql}} help reference [#229961]({{kib-pull}}229961).
 
 **Elastic Observability solution**:
@@ -141,7 +141,7 @@ For the Elastic Security 9.2.0 release information, refer to [Elastic Security S
 **Dashboards and Visualizations**:
 * Null buckets and empty string values are now rendered in the UI as `(missing value)` and `(empty)` respectively. This is now aligned across charts and tables, including Discover and Lens charts [#233369]({{kib-pull}}233369).
 * Skips automatic scroll when interacting with a panel that is already visible [#233226]({{kib-pull}}233226).
-* Correctly show solid panel borders when a dashboard is in View mode [#232676]({{kib-pull}}232676).
+* Shows solid panel borders when a dashboard is in **View** mode [#232676]({{kib-pull}}232676).
 * Fixes error handling when saving a Links panel to the library from a dashboard [#231168]({{kib-pull}}231168).
 * Logs a warning instead of throwing an error if a filter and query state can not be read or written due to missing or malformed references [#230088]({{kib-pull}}230088).
 
@@ -154,7 +154,6 @@ For the Elastic Security 9.2.0 release information, refer to [Elastic Security S
 **{{esql}} editor**:
 * Fixes controls' trigger across various commands [#236121]({{kib-pull}}236121).
 * Fixes lookup index route failures on read permissions [#233282]({{kib-pull}}233282).
-* Fixes incorrect filtering logic when removing a comment field [#230116]({{kib-pull}}230116).
 * Fixes an issue on Firefox where the {{esql}} inline editor could prevent scrolling [#228849]({{kib-pull}}228849).
 
 **Elastic Observability solution**:
