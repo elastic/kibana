@@ -8073,14 +8073,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-chat-settings@link:src/platform/packages/shared/serverless/settings/chat_project":
-  version "0.0.0"
-  uid ""
-
-"@kbn/serverless-chat@link:x-pack/solutions/chat/plugins/serverless_chat":
-  version "0.0.0"
-  uid ""
-
 "@kbn/serverless-common-settings@link:src/platform/packages/shared/serverless/settings/common":
   version "0.0.0"
   uid ""
@@ -8110,6 +8102,14 @@
   uid ""
 
 "@kbn/serverless-types@link:src/platform/packages/shared/serverless/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-workplace-ai-settings@link:src/platform/packages/shared/serverless/settings/workplace_ai_project":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-workplace-ai@link:x-pack/solutions/workplace_ai/plugins/serverless_workplace_ai":
   version "0.0.0"
   uid ""
 
@@ -8557,10 +8557,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-suites-xpack-chat@link:x-pack/solutions/chat/test":
-  version "0.0.0"
-  uid ""
-
 "@kbn/test-suites-xpack-observability@link:x-pack/solutions/observability/test":
   version "0.0.0"
   uid ""
@@ -8578,6 +8574,10 @@
   uid ""
 
 "@kbn/test-suites-xpack-security@link:x-pack/solutions/security/test":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-suites-xpack-workplace-ai@link:x-pack/solutions/workplace_ai/test":
   version "0.0.0"
   uid ""
 
@@ -8917,15 +8917,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/wci-browser@link:x-pack/solutions/chat/packages/wci-browser":
+"@kbn/wci-browser@link:x-pack/solutions/workplace_ai/packages/wci-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/wci-common@link:x-pack/solutions/chat/packages/wci-common":
+"@kbn/wci-common@link:x-pack/solutions/workplace_ai/packages/wci-common":
   version "0.0.0"
   uid ""
 
-"@kbn/wci-server@link:x-pack/solutions/chat/packages/wci-server":
+"@kbn/wci-server@link:x-pack/solutions/workplace_ai/packages/wci-server":
   version "0.0.0"
   uid ""
 
@@ -8934,10 +8934,6 @@
   uid ""
 
 "@kbn/whereis-pkg-cli@link:packages/kbn-whereis-pkg-cli":
-  version "0.0.0"
-  uid ""
-
-"@kbn/workchat-app@link:x-pack/solutions/chat/plugins/workchat_app":
   version "0.0.0"
   uid ""
 
@@ -8950,6 +8946,10 @@
   uid ""
 
 "@kbn/workflows@link:src/platform/packages/shared/kbn-workflows":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workplace-ai-app@link:x-pack/solutions/workplace_ai/plugins/workplace_ai_app":
   version "0.0.0"
   uid ""
 
