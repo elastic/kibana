@@ -129,10 +129,10 @@ export class ConfigRunner {
 
     this.proc.disconnect();
 
-    if (this.all) {
-      process.stdout.write(this.all);
-    }
-
-    return this.proc;
+    return this.proc.finally(() => {
+      if (this.all || !!this.proc?.exitCode) {
+        process.stdout.write(this.all);
+      }
+    });
   }
 }
