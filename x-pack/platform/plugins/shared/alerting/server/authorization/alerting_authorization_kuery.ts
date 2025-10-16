@@ -101,18 +101,30 @@ export function asFiltersBySpaceId(
 }
 
 export function ensureFieldIsSafeForQuery(field: string, value: string): boolean {
-  const matches = value.match(/([>=<\*:()]+|\s+)/g);
-  if (matches) {
-    const invalid = Array.from(matches);
-    const whitespace = remove(invalid, (chars) => chars.trim().length === 0);
-    const errors = [];
-    if (whitespace.length) {
-      errors.push(`whitespace`);
-    }
-    if (invalid.length) {
-      errors.push(`invalid character${invalid.length > 1 ? `s` : ``}: ${invalid?.join(`, `)}`);
-    }
+  const invalidChars = '>=<*:()';
+  const errors = [];
+
+  const containsWhitespace = (str: string): boolean =>
+    str.split('').some((char) => char === ' ' || char === '\t' || char === '\n' || char === '\r');
+
+  if (containsWhitespace(value)) {
+    errors.push('whitespace');
+  }
+
+  const foundInvalidChars = [
+    ...new Set(value.split('').filter((char) => invalidChars.includes(char))),
+  ];
+
+  if (foundInvalidChars.length > 0) {
+    const charsDescription = `invalid character${
+      foundInvalidChars.length > 1 ? 's' : ''
+    }: ${foundInvalidChars.join(', ')}`;
+    errors.push(charsDescription);
+  }
+
+  if (errors.length > 0) {
     throw new Error(`expected ${field} not to include ${errors.join(' and ')}`);
   }
+
   return true;
 }

@@ -674,11 +674,11 @@ describe('ensureFieldIsSafeForQuery', () => {
     );
 
     expect(() => ensureFieldIsSafeForQuery('id', '<=""')).toThrowError(
-      `expected id not to include invalid character: <=`
+      `expected id not to include invalid characters: <, =`
     );
 
     expect(() => ensureFieldIsSafeForQuery('id', '>=""')).toThrowError(
-      `expected id not to include invalid character: >=`
+      `expected id not to include invalid characters: >, =`
     );
 
     expect(() => ensureFieldIsSafeForQuery('id', '1 or alertid:123')).toThrowError(
