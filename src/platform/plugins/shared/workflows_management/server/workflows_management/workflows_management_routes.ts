@@ -19,14 +19,16 @@ import {
   UpdateWorkflowCommandSchema,
 } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
+import type { SearchWorkflowExecutionsParams } from './workflows_management_service';
+import { type GetWorkflowsParams } from './workflows_management_api';
+import type { WorkflowsManagementApi } from './workflows_management_api';
 import {
   InvalidYamlSchemaError,
   InvalidYamlSyntaxError,
   isWorkflowValidationError,
 } from '../../common/lib/errors';
-import type { WorkflowsManagementApi } from './workflows_management_api';
-import { type GetWorkflowsParams } from './workflows_management_api';
-import type { SearchWorkflowExecutionsParams } from './workflows_management_service';
+
+// Note: Display names are now fetched dynamically from the actions plugin
 
 // Pagination constants
 const MAX_PAGE_SIZE = 100; // Limit to prevent performance issues with large result sets
@@ -159,6 +161,50 @@ export function defineRoutes(
       }
     }
   );
+
+  // Get available connectors for dynamic schema generation
+  router.get(
+    {
+      path: '/api/workflows/connectors',
+      options: {
+        tags: ['api', 'workflows'],
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: ['read', 'workflow_read'],
+            },
+          ],
+        },
+      },
+      validate: false,
+    },
+    async (context, request, response) => {
+      try {
+        const spaceId = spaces.getSpaceId(request);
+        const { connectorsByType, totalConnectors } = await api.getAvailableConnectors(
+          spaceId,
+          request
+        );
+        return response.ok({
+          body: {
+            connectorTypes: connectorsByType,
+            totalConnectors,
+          },
+        });
+      } catch (error) {
+        logger.error(`Failed to fetch connectors: ${error.message}`);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
+
   router.post(
     {
       path: '/api/workflows/search',
@@ -575,7 +621,8 @@ export function defineRoutes(
           request.body.workflowYaml,
           request.body.stepId,
           request.body.contextOverride,
-          spaceId
+          spaceId,
+          request
         );
 
         return response.ok({
@@ -854,6 +901,41 @@ export function defineRoutes(
         }
         return response.ok({
           body: stepExecution,
+        });
+      } catch (error) {
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
+  router.get(
+    {
+      path: '/api/workflows/workflow-json-schema',
+      options: {
+        tags: ['api', 'workflows'],
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['all'],
+        },
+      },
+      validate: {
+        query: schema.object({
+          loose: schema.boolean(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { loose } = request.query;
+        const spaceId = spaces.getSpaceId(request);
+        const jsonSchema = await api.getWorkflowJsonSchema({ loose }, spaceId, request);
+        return response.ok({
+          body: jsonSchema,
         });
       } catch (error) {
         return response.customError({
