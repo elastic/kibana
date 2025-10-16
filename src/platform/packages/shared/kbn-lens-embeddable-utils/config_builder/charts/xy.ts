@@ -47,6 +47,7 @@ function buildVisualizationState(config: LensXYConfig): XYState {
     legend: {
       isVisible: config.legend?.show ?? true,
       position: config.legend?.position ?? 'left',
+      ...(config.legend?.legendStats ? { legendStats: config.legend.legendStats } : {}),
     },
     hideEndzones: true,
     preferredSeriesType: 'line',
