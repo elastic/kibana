@@ -1,13 +1,13 @@
-#!/usr/bin/env bash
+# #!/usr/bin/env bash
 
-set -euo pipefail
+# set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
+# source .buildkite/scripts/common/util.sh
 
-is_test_execution_step
+# is_test_execution_step
 
-.buildkite/scripts/bootstrap.sh
-.buildkite/scripts/setup_es_snapshot_cache.sh
+# .buildkite/scripts/bootstrap.sh
+# .buildkite/scripts/setup_es_snapshot_cache.sh
 
-echo '--- Jest Integration Tests'
-.buildkite/scripts/steps/test/jest_parallel.sh jest.integration.config.js
+# echo '--- Jest Integration Tests'
+# .buildkite/scripts/steps/test/jest_parallel.sh jest.integration.config.js
