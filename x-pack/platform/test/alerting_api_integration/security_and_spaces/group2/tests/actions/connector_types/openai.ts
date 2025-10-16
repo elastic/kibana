@@ -93,6 +93,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             ...config,
             defaultModel: 'gpt-4.1',
           },
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -123,6 +124,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             ...config,
             defaultModel: 'gpt-3.5-turbo',
           },
+          is_connector_type_deprecated: false,
         });
       });
 
