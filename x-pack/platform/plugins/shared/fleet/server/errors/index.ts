@@ -241,5 +241,50 @@ export class ArtifactsElasticsearchError extends FleetError {
   }
 }
 
+export class FleetElasticsearchValidationError extends FleetError {
+  constructor(esError: Error) {
+    let message = 'Invalid search parameter';
+
+    if (isESClientError(esError)) {
+      const errorBody = esError.meta.body as ElasticsearchErrorDetails;
+
+      // Try root_cause first (most specific error), then main reason
+      if ((errorBody?.error as any)?.root_cause?.[0]?.reason) {
+        message = (errorBody.error as any).root_cause[0].reason;
+      } else if ((errorBody?.error as any)?.reason) {
+        message = (errorBody.error as any).reason;
+      }
+    }
+
+    super(`Invalid search parameter: ${message}`, esError);
+  }
+
+  /**
+   * Determines if an Elasticsearch error should be treated as a validation error (400-level)
+   */
+  static isValidationError(error: Error): boolean {
+    if (!isESClientError(error)) {
+      return false;
+    }
+
+    const errorBody = error.meta.body as ElasticsearchErrorDetails;
+    const errorType = errorBody?.error?.type;
+
+    // Get the most specific error message for content-based checks
+    let errorMessage = errorBody?.error?.reason || '';
+    if ((errorBody?.error as any)?.root_cause?.[0]?.reason) {
+      errorMessage = (errorBody.error as any).root_cause[0].reason;
+    }
+
+    return (
+      errorType === 'parsing_exception' ||
+      errorType === 'illegal_argument_exception' ||
+      errorType === 'search_phase_execution_exception' ||
+      errorMessage.includes('No mapping found for') ||
+      errorMessage.includes('Unknown field')
+    );
+  }
+}
+
 export class FleetFilesClientError extends FleetError {}
 export class FleetFileNotFound extends FleetFilesClientError {}

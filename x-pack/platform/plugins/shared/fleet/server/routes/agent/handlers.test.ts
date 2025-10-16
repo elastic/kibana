@@ -106,7 +106,7 @@ describe('Handlers', () => {
       });
     });
 
-    it('should return 400 for parsing_exception errors', async () => {
+    it('should let ES validation errors bubble up to global error handler', async () => {
       const elasticsearchError = createMockESError({
         error: {
           type: 'parsing_exception',
@@ -122,14 +122,12 @@ describe('Handlers', () => {
         },
       };
 
-      await getAgentsHandler(mockContext, request as any, mockResponse);
-
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
-        body: { message: 'Invalid search parameter: Invalid query syntax' },
-      });
+      await expect(getAgentsHandler(mockContext, request as any, mockResponse)).rejects.toEqual(
+        elasticsearchError
+      );
     });
 
-    it('should return 400 for illegal_argument_exception errors', async () => {
+    it('should let illegal_argument_exception errors bubble up to global error handler', async () => {
       const elasticsearchError = createMockESError({
         error: {
           type: 'illegal_argument_exception',
@@ -145,17 +143,12 @@ describe('Handlers', () => {
         },
       };
 
-      await getAgentsHandler(mockContext, request as any, mockResponse);
-
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
-        body: {
-          message:
-            'Invalid search parameter: No mapping found for [non_existent_field] in order to sort on',
-        },
-      });
+      await expect(getAgentsHandler(mockContext, request as any, mockResponse)).rejects.toEqual(
+        elasticsearchError
+      );
     });
 
-    it('should return 400 for search_phase_execution_exception errors', async () => {
+    it('should let search_phase_execution_exception errors bubble up to global error handler', async () => {
       const elasticsearchError = createMockESError({
         error: {
           type: 'search_phase_execution_exception',
@@ -171,14 +164,12 @@ describe('Handlers', () => {
         },
       };
 
-      await getAgentsHandler(mockContext, request as any, mockResponse);
-
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
-        body: { message: 'Invalid search parameter: Unknown field [bad_field]' },
-      });
+      await expect(getAgentsHandler(mockContext, request as any, mockResponse)).rejects.toEqual(
+        elasticsearchError
+      );
     });
 
-    it('should return 400 for field mapping errors', async () => {
+    it('should let field mapping errors bubble up to global error handler', async () => {
       const elasticsearchError = createMockESError({
         error: {
           type: 'some_error_type',
@@ -194,14 +185,12 @@ describe('Handlers', () => {
         },
       };
 
-      await getAgentsHandler(mockContext, request as any, mockResponse);
-
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
-        body: { message: 'Invalid search parameter: No mapping found for field [invalid_field]' },
-      });
+      await expect(getAgentsHandler(mockContext, request as any, mockResponse)).rejects.toEqual(
+        elasticsearchError
+      );
     });
 
-    it('should return 400 for unknown field errors', async () => {
+    it('should let unknown field errors bubble up to global error handler', async () => {
       const elasticsearchError = createMockESError({
         error: {
           type: 'some_error_type',
@@ -217,13 +206,9 @@ describe('Handlers', () => {
         },
       };
 
-      await getAgentsHandler(mockContext, request as any, mockResponse);
-
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
-        body: {
-          message: 'Invalid search parameter: Unknown field [mystery_field] in sort criteria',
-        },
-      });
+      await expect(getAgentsHandler(mockContext, request as any, mockResponse)).rejects.toEqual(
+        elasticsearchError
+      );
     });
 
     it('should re-throw non-validation errors', async () => {
@@ -263,7 +248,7 @@ describe('Handlers', () => {
       );
     });
 
-    it('should extract error message from root_cause array', async () => {
+    it('should let root_cause errors bubble up to global error handler', async () => {
       const elasticsearchError = createMockESError({
         error: {
           type: 'search_phase_execution_exception',
@@ -285,16 +270,12 @@ describe('Handlers', () => {
         },
       };
 
-      await getAgentsHandler(mockContext, request as any, mockResponse);
-
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
-        body: {
-          message: 'Invalid search parameter: No mapping found for [hostname] in order to sort on',
-        },
-      });
+      await expect(getAgentsHandler(mockContext, request as any, mockResponse)).rejects.toEqual(
+        elasticsearchError
+      );
     });
 
-    it('should handle missing error reason gracefully', async () => {
+    it('should let errors with missing reasons bubble up to global error handler', async () => {
       const elasticsearchError = createMockESError({
         error: {
           type: 'parsing_exception',
@@ -310,11 +291,9 @@ describe('Handlers', () => {
         },
       };
 
-      await getAgentsHandler(mockContext, request as any, mockResponse);
-
-      expect(mockResponse.badRequest).toHaveBeenCalledWith({
-        body: { message: 'Invalid search parameter: ResponseError' },
-      });
+      await expect(getAgentsHandler(mockContext, request as any, mockResponse)).rejects.toEqual(
+        elasticsearchError
+      );
     });
   });
 

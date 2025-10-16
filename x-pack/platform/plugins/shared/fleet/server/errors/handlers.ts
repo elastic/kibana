@@ -26,6 +26,7 @@ import {
   AgentPolicyNameExistsError,
   ConcurrentInstallOperationError,
   FleetError,
+  FleetElasticsearchValidationError,
   PackageUnsupportedMediaTypeError,
   RegistryConnectionError,
   RegistryError,
@@ -104,6 +105,9 @@ const getHTTPResponseCode = (error: FleetError): number => {
     return 400;
   }
   if (error instanceof PackageRollbackError) {
+    return 400;
+  }
+  if (error instanceof FleetElasticsearchValidationError) {
     return 400;
   }
   // Unauthorized
@@ -231,6 +235,12 @@ export const defaultFleetErrorHandler: IngestErrorHandler = async ({
   error,
   response,
 }: IngestErrorHandlerParams): Promise<IKibanaResponse> => {
-  const options = fleetErrorToResponseOptions(error);
+  // Convert Elasticsearch validation errors to Fleet errors
+  let processedError = error;
+  if (FleetElasticsearchValidationError.isValidationError(error)) {
+    processedError = new FleetElasticsearchValidationError(error);
+  }
+
+  const options = fleetErrorToResponseOptions(processedError);
   return response.customError(options);
 };
