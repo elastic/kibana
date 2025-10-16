@@ -114,3 +114,7 @@ Guidelines:
 ## Step 5: Run your tests
 
 Finally, run your new Scout tests. We recommend using the `--ui` mode to easily troubleshoot any failures.
+
+> [!IMPORTANT]
+> Some tests may fail because they rely on an **advanced setting** being set to enable a specific feature or set a specific timezone (e.g., `UTC`). This means the failure isn't specific to the test file itself. Take a careful look at the FTR test config of the original tests to see which setting must be enabled.
+> At this time, Scout doesn't support overriding the Kibana configuration per test config file, but you can take a look at the current [stateful](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-scout/src/config/stateful) and [serverless](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-scout/src/config/serverless) config files (they apply to all Scout test configs).
