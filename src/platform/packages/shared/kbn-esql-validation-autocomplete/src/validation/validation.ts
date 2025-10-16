@@ -16,7 +16,7 @@ import type {
 import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import type { LicenseType } from '@kbn/licensing-types';
 
-import type { ESQLAstAnyCommand } from '@kbn/esql-ast/src/types';
+import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { QueryColumns } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { retrievePolicies, retrieveSources } from './resources';
@@ -189,7 +189,7 @@ async function validateAst(
 function validateCommand(
   command: ESQLCommand,
   references: ReferenceMaps,
-  rootCommands: ESQLAstAnyCommand[],
+  rootCommands: ESQLAstAllCommands[],
   callbacks?: ICommandCallbacks
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
@@ -243,7 +243,7 @@ function validateCommand(
 
 function validateUnsupportedTypeFields(
   fields: Map<string, ESQLFieldWithMetadata>,
-  commands: ESQLAstAnyCommand[]
+  commands: ESQLAstAllCommands[]
 ) {
   const usedColumnsInQuery: string[] = [];
 

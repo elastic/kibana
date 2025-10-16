@@ -8,14 +8,14 @@
  */
 
 import type { ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
-import type { ESQLAstAnyCommand } from '@kbn/esql-ast/src/types';
+import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { createMapFromList } from '../shared/helpers';
 import { getPolicyHelper, getSourcesHelper } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { getEnrichCommands } from './helpers';
 
 export async function retrievePolicies(
-  commands: ESQLAstAnyCommand[],
+  commands: ESQLAstAllCommands[],
   callbacks?: ESQLCallbacks
 ): Promise<Map<string, ESQLPolicy>> {
   const enrichCommands = getEnrichCommands(commands);
@@ -28,7 +28,7 @@ export async function retrievePolicies(
 }
 
 export async function retrieveSources(
-  commands: ESQLAstAnyCommand[],
+  commands: ESQLAstAllCommands[],
   callbacks?: ESQLCallbacks
 ): Promise<Set<string>> {
   if (!callbacks || commands.length < 1) {

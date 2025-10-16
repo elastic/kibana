@@ -9,7 +9,7 @@
 
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
 import { type ESQLCommand, type FunctionDefinition, Walker, Builder } from '@kbn/esql-ast';
-import type { ESQLAstAnyCommand } from '@kbn/esql-ast/src/types';
+import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { expandEvals } from '../shared/expand_evals';
 
 /**
@@ -37,14 +37,14 @@ export function getMaxMinNumberOfParams(definition: FunctionDefinition) {
  * This function traverses the provided ESQL commands and collects all commands with the name 'enrich'.
  * @returns {ESQLCommand[]} - An array of ESQLCommand objects that represent the 'enrich' commands found in the input.
  */
-export const getEnrichCommands = (commands: ESQLAstAnyCommand[]): ESQLCommand[] =>
+export const getEnrichCommands = (commands: ESQLAstAllCommands[]): ESQLCommand[] =>
   Walker.matchAll(commands, { type: 'command', name: 'enrich' }) as ESQLCommand[];
 
 /**
  * Returns a list of subqueries to validate
  * @param rootCommands
  */
-export function getSubqueriesToValidate(rootCommands: ESQLAstAnyCommand[]) {
+export function getSubqueriesToValidate(rootCommands: ESQLAstAllCommands[]) {
   const subsequences = [];
   const expandedCommands = expandEvals(rootCommands);
   for (let i = 0; i < expandedCommands.length; i++) {
