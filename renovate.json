@@ -3796,7 +3796,7 @@
     {
       "groupName": "react-query",
       "matchDepNames": [
-        "@tanstack/react-query",
+        "@tanstack/official-react-query",
         "@tanstack/react-query-devtools"
       ],
       "reviewers": [
