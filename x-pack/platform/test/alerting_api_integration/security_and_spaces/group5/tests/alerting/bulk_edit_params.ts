@@ -11,9 +11,8 @@ import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { deleteRuleById } from '../../../../common/lib/rules';
 import { getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
-import { GlobalReadAtSpace1, Space1AllAtSpace1 } from '../../../scenarios';
+import { DefaultSpace, GlobalReadAtSpace1, Space1AllAtSpace1, Superuser } from '../../../scenarios';
 import { checkAAD, getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { AlertUtils } from '../../../../common/lib';
@@ -26,11 +25,6 @@ export default function createBulkEditRuleParamsWithReadAuthTests({
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const objectRemover = new ObjectRemover(supertest);
-  const alertUtils = new AlertUtils({
-    user: GlobalReadAtSpace1.user,
-    space: GlobalReadAtSpace1.space,
-    supertestWithoutAuth,
-  });
 
   async function createDetectionRule({
     actions,
@@ -94,6 +88,12 @@ export default function createBulkEditRuleParamsWithReadAuthTests({
   }
 
   describe('bulkEditRuleParamsWithReadAuth', () => {
+    const alertUtils = new AlertUtils({
+      user: GlobalReadAtSpace1.user,
+      space: GlobalReadAtSpace1.space,
+      supertestWithoutAuth,
+    });
+
     afterEach(async () => {
       await objectRemover.removeAll();
     });
@@ -580,6 +580,12 @@ export default function createBulkEditRuleParamsWithReadAuthTests({
         ],
       };
 
+      const alertUtilsSuperUser = new AlertUtils({
+        user: Superuser,
+        space: DefaultSpace,
+        supertestWithoutAuth: supertest,
+      });
+
       it('should ignore internal rule types when trying to bulk update using the filter param', async () => {
         const { body: internalRuleType } = await supertest
           .post('/api/alerts_fixture/rule/internally_managed')
@@ -613,7 +619,9 @@ export default function createBulkEditRuleParamsWithReadAuthTests({
           { id: 'new', list_id: 'foo', namespace_type: 'single', type: 'rule_default' },
         ]);
 
-        await deleteRuleById(es, internalRuleType.id);
+        const res = await alertUtilsSuperUser.deleteInternallyManagedRule(internalRuleType.id);
+
+        expect(res.statusCode).toEqual(200);
       });
     });
   });

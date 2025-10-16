@@ -6,9 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { deleteRuleById } from '../../../../common/lib/rules';
-import { getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
-import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
+import { AlertUtils, getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
+import {
+  UserAtSpaceScenarios,
+  SuperuserAtSpace1,
+  Superuser,
+  DefaultSpace,
+} from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getUrlPrefix,
@@ -685,6 +689,12 @@ export default ({ getService }: FtrProviderContext) => {
         ids,
       });
 
+      const alertUtils = new AlertUtils({
+        user: Superuser,
+        space: DefaultSpace,
+        supertestWithoutAuth: supertest,
+      });
+
       it('should throw 400 error when trying to bulk delete an internally managed rule type using the ids param', async () => {
         const { body: createdRule } = await supertest
           .post('/api/alerts_fixture/rule/internally_managed')
@@ -699,7 +709,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.status).to.eql(400);
 
-        await deleteRuleById(es, createdRule.id);
+        const res = await alertUtils.deleteInternallyManagedRule(createdRule.id);
+
+        expect(res.statusCode).to.eql(200);
       });
 
       it('should ignore internal rule types when trying to bulk delete using the filter param', async () => {
@@ -731,7 +743,9 @@ export default ({ getService }: FtrProviderContext) => {
           .set('kbn-xsrf', 'foo')
           .expect(404);
 
-        await deleteRuleById(es, internalRuleType.id);
+        const res = await alertUtils.deleteInternallyManagedRule(internalRuleType.id);
+
+        expect(res.statusCode).to.eql(200);
       });
     });
   });
