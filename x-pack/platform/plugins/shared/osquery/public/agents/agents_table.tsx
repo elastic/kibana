@@ -58,6 +58,7 @@ interface AgentsTableProps {
 
 const perPage = 10;
 const DEBOUNCE_DELAY = 300; // ms
+const DEGRADED_ICON_STYLE = { marginLeft: '4px' };
 
 const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onChange, error }) => {
   const { docLinks } = useKibana().services;
@@ -101,8 +102,9 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
         }
       });
     }
+
     return map;
-  }, [agentList?.agents?.length]);
+  }, [agentList?.agents]);
 
   const numAgentsSelected = useMemo(() => {
     const { newAgentSelection, selectedAgents, selectedGroups } =
@@ -229,7 +231,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
             <span className={contentClassName}>
               <EuiHighlight search={searchVal}>{label}</EuiHighlight>
               {availability === 'degraded' && (
-                <span style={{ marginLeft: '4px' }}>
+                <span style={DEGRADED_ICON_STYLE}>
                   <EuiIcon type="alert" size="s" color="warning" />
                 </span>
               )}
@@ -251,6 +253,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
       // For groups (platform, policy, all agents)
       const groupValue = value as GroupOptionValue;
+
       return (
         <span className={contentClassName}>
           <span>[{groupValue?.size ?? 0}]</span>
@@ -305,6 +308,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     if (!agentsFetched || !agentList?.agents || agentList.agents.length === 0) {
       return false;
     }
+
     return (agentList.agents as Agent[]).some(
       (agent) => getAgentOsqueryAvailability(agent) === 'degraded'
     );
