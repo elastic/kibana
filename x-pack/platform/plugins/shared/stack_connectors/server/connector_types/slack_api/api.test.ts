@@ -106,12 +106,42 @@ describe('api', () => {
     });
   });
 
+  test('postMessage with channelNames params', async () => {
+    const res = await api.postMessage({
+      externalService,
+      params: { channelIds: ['general'], channelNames: ['#general'], text: 'a message' },
+    });
+
+    expect(res).toEqual({
+      channel: 'general',
+      message: {
+        text: 'a message',
+        type: 'message',
+      },
+      ok: true,
+    });
+  });
+
   test('postBlockkit with channelIds params', async () => {
     const res = await api.postBlockkit({
       externalService,
       params: { channelIds: ['general'], text: 'a blockkit message' },
     });
 
+    expect(res).toEqual({
+      channel: 'general',
+      message: {
+        text: 'a blockkit message',
+      },
+      ok: true,
+    });
+  });
+
+  test('postBlockkit with channelNames params', async () => {
+    const res = await api.postBlockkit({
+      externalService,
+      params: { channelIds: ['general'], channelNames: ['#general'], text: 'a blockkit message' },
+    });
     expect(res).toEqual({
       channel: 'general',
       message: {
