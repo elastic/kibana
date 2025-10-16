@@ -57,6 +57,13 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           values: { name: out.name.toUpperCase() },
         }),
       };
+    case 'unknownSetting':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.unknownSetting', {
+          defaultMessage: 'Unknown setting {name}',
+          values: { name: out.name.toUpperCase() },
+        }),
+      };
     case 'noMatchingCallSignature':
       const signatureList = (out.validSignatures as unknown as string[])
         .map((sig) => `- (${sig})`)

@@ -16,6 +16,7 @@ import type {
 import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import type { LicenseType } from '@kbn/licensing-types';
 
+import type { ESQLAstAnyCommand } from '@kbn/esql-ast/src/types';
 import { QueryColumns } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { retrievePolicies, retrieveSources } from './resources';
@@ -104,7 +105,9 @@ async function validateAst(
   const messages: ESQLMessage[] = [];
 
   const parsingResult = EsqlQuery.fromSrc(queryString);
-  const rootCommands = parsingResult.ast.commands;
+
+  const headerCommands = parsingResult.ast.header ? [parsingResult.ast.header] : [];
+  const rootCommands = [...parsingResult.ast.commands, ...headerCommands].flat();
 
   const [sources, availablePolicies, joinIndices] = await Promise.all([
     // retrieve the list of available sources
@@ -186,7 +189,7 @@ async function validateAst(
 function validateCommand(
   command: ESQLCommand,
   references: ReferenceMaps,
-  ast: ESQLAst,
+  rootCommands: ESQLAstAnyCommand[],
   callbacks?: ICommandCallbacks
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
@@ -228,7 +231,9 @@ function validateCommand(
   };
 
   if (commandDefinition.methods.validate) {
-    messages.push(...commandDefinition.methods.validate(command, ast, context, callbacks));
+    messages.push(
+      ...commandDefinition.methods.validate(command, rootCommands as ESQLAst, context, callbacks) // //HD don't cast
+    );
   }
 
   // no need to check for mandatory options passed
@@ -236,10 +241,13 @@ function validateCommand(
   return messages;
 }
 
-function validateUnsupportedTypeFields(fields: Map<string, ESQLFieldWithMetadata>, ast: ESQLAst) {
+function validateUnsupportedTypeFields(
+  fields: Map<string, ESQLFieldWithMetadata>,
+  commands: ESQLAstAnyCommand[]
+) {
   const usedColumnsInQuery: string[] = [];
 
-  walk(ast, {
+  walk(commands, {
     visitColumn: (node) => usedColumnsInQuery.push(node.name),
   });
   const messages: ESQLMessage[] = [];
