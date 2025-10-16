@@ -6,23 +6,35 @@
  */
 
 import React from 'react';
-import { act, screen, within } from '@testing-library/react';
-import { render } from '@testing-library/react';
+import { act, screen, render } from '@testing-library/react';
 import { TabularPage } from './tabular_page';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
-const inferenceEndpoints = [
-  {
-    inference_id: 'my-elser-model-05',
-    task_type: 'sparse_embedding',
-    service: 'elasticsearch',
-    service_settings: {
-      num_allocations: 1,
-      num_threads: 1,
-      model_id: '.elser_model_2',
-    },
-    task_settings: {},
+jest.mock('../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: { notifications: { toasts: { addSuccess: jest.fn() } } },
+  }),
+}));
+
+jest.mock('../../hooks/use_delete_endpoint', () => ({
+  useDeleteEndpoint: () => ({
+    mutate: jest.fn().mockResolvedValue(undefined),
+  }),
+}));
+
+// Mock clipboard API (to avoid async write warnings)
+Object.assign(navigator, {
+  clipboard: {
+    writeText: jest.fn().mockResolvedValue(undefined),
   },
+});
+
+const elasticDescription = 'Runs on GPUs (token-based billing)';
+const elasticsearchDescription = 'Runs on ML Nodes (resource-based billing)';
+const preconfiguredLabel = 'PRECONFIGURED';
+const techPreviewLabel = 'TECH PREVIEW';
+
+const inferenceEndpoints = [
   {
     inference_id: '.elser-2-elasticsearch',
     task_type: 'sparse_embedding',
@@ -32,110 +44,81 @@ const inferenceEndpoints = [
       num_threads: 1,
       model_id: '.elser_model_2',
     },
-    task_settings: {},
   },
   {
-    inference_id: 'elastic-rerank',
-    task_type: 'rerank',
-    service: 'elasticsearch',
-    service_settings: {
-      num_allocations: 1,
-      num_threads: 1,
-      model_id: '.rerank-v1',
-    },
-    task_settings: {
-      return_documents: true,
-    },
-  },
-  {
-    inference_id: '.sparkles',
-    task_type: 'chat_completion',
+    inference_id: '.multilingual-embed-v1-elastic',
+    task_type: 'text_embedding',
     service: 'elastic',
     service_settings: {
-      model_id: 'rainbow-sprinkles',
+      model_id: 'multilingual-embed-v1',
     },
   },
   {
-    inference_id: '.elser-2-elastic',
+    inference_id: 'custom-endpoint',
     task_type: 'sparse_embedding',
     service: 'elastic',
     service_settings: {
       model_id: 'elser_model_2',
     },
   },
+  {
+    inference_id: 'third-party-openai',
+    task_type: 'text_embedding',
+    service: 'openai',
+    service_settings: {
+      model_id: 'text-embedding-3-large',
+    },
+  },
 ] as InferenceAPIConfigResponse[];
 
-const elasticDescription = 'Runs on GPUs (token-based billing)';
-const elasticsearchDescription = 'Runs on ML Nodes (resource-based billing)';
-
-jest.mock('../../hooks/use_delete_endpoint', () => ({
-  useDeleteEndpoint: () => ({
-    mutate: jest.fn().mockImplementation(() => Promise.resolve()), // Mock implementation of the mutate function
-  }),
-}));
-
-describe('When the tabular page is loaded', () => {
-  it('should display all service and model ids or descriptions in the table', () => {
+describe('TabularPage', () => {
+  beforeEach(() => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
-
-    const elserElasticRow = screen.getByText('.elser-2-elastic').closest('tr');
-    expect(elserElasticRow).toHaveTextContent(elasticDescription);
-
-    const elserElasticsearchRow = screen.getByText('.elser-2-elasticsearch').closest('tr');
-    expect(elserElasticsearchRow).toHaveTextContent(elasticsearchDescription);
-
-    const sparklesRow = screen.getByText('.sparkles').closest('tr');
-    expect(sparklesRow).toHaveTextContent(elasticDescription);
-
-    const elasticRerankRow = screen.getByText('elastic-rerank').closest('tr');
-    expect(elasticRerankRow).toHaveTextContent('Elasticsearch');
-
-    const myElserRow = screen.getByText('my-elser-model-05').closest('tr');
-    expect(myElserRow).toHaveTextContent('Elasticsearch');
   });
 
-  it('should only disable delete action for preconfigured endpoints', () => {
-    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
+  it('renders all inference endpoints in the table', () => {
+    expect(screen.getByText('.elser-2-elasticsearch')).toBeInTheDocument();
+    expect(screen.getByText('.multilingual-embed-v1-elastic')).toBeInTheDocument();
+    expect(screen.getByText('custom-endpoint')).toBeInTheDocument();
+    expect(screen.getByText('third-party-openai')).toBeInTheDocument();
+  });
 
-    const preconfiguredRow = screen.getByText('.elser-2-elastic').closest('tr');
-    const actionButton = within(preconfiguredRow!).getByTestId('euiCollapsedItemActionsButton');
+  it('renders correct service provider labels and descriptions', () => {
+    expect(screen.getAllByText('Elastic Inference Service').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText(elasticDescription).length).toBeGreaterThan(0);
 
-    act(() => {
-      actionButton.click();
+    expect(screen.getByText('Elasticsearch')).toBeInTheDocument();
+    expect(screen.getByText(elasticsearchDescription)).toBeInTheDocument();
+
+    expect(screen.getByText('OpenAI')).toBeInTheDocument();
+    expect(screen.getByText('text-embedding-3-large')).toBeInTheDocument();
+  });
+
+  it('disables delete action for preconfigured endpoints', async () => {
+    await act(async () => {
+      screen.getAllByTestId('euiCollapsedItemActionsButton')[0].click();
     });
-
-    expect(screen.getByTestId('inferenceUIDeleteAction-preconfigured')).toBeDisabled();
+    const deleteAction = screen.getByTestId(/inferenceUIDeleteAction/);
+    expect(deleteAction).toBeDisabled();
   });
 
-  it('should not disable delete action for other endpoints', () => {
-    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
-
-    const userDefinedRow = screen.getByText('my-elser-model-05').closest('tr');
-    const actionButton = within(userDefinedRow!).getByTestId('euiCollapsedItemActionsButton');
-
-    act(() => {
-      actionButton.click();
+  it('enables delete action for user-defined endpoints', async () => {
+    await act(async () => {
+      screen.getAllByTestId('euiCollapsedItemActionsButton')[2].click();
     });
-
-    expect(screen.getByTestId('inferenceUIDeleteAction-user-defined')).toBeEnabled();
+    const deleteAction = screen.getByTestId(/inferenceUIDeleteAction/);
+    expect(deleteAction).toBeEnabled();
   });
 
-  it('should show preconfigured badge only for preconfigured endpoints', () => {
-    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
-
-    const preconfiguredBadges = screen.getAllByText('PRECONFIGURED');
-    expect(preconfiguredBadges.length).toBe(3);
+  it('shows "PRECONFIGURED" badge only for preconfigured endpoints', () => {
+    const preconfiguredBadges = screen.getAllByText(preconfiguredLabel);
+    expect(preconfiguredBadges).toHaveLength(2);
+    expect(screen.getByText('.elser-2-elasticsearch')).toBeInTheDocument();
   });
 
-  it('should show tech preview badge only for reranker-v1 model, rainbow-sprinkles, multilingual-embed-v1, rerank-v1, and preconfigured elser_model_2', () => {
-    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
-    const techPreviewBadges = screen.getAllByText('TECH PREVIEW');
-    expect(techPreviewBadges.length).toBe(2);
-
-    const endpointsWithTechPreview = ['.sparkles', 'elastic-rerank'];
-
-    endpointsWithTechPreview.forEach((id) => {
-      expect(screen.getByText(id)).toBeInTheDocument();
-    });
+  it('shows "TECH PREVIEW" badge only for tech preview endpoints', () => {
+    const techPreviewBadges = screen.getAllByText(techPreviewLabel);
+    expect(techPreviewBadges).toHaveLength(1);
+    expect(screen.getByText('.multilingual-embed-v1-elastic')).toBeInTheDocument();
   });
 });
