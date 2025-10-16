@@ -98,6 +98,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.tour.reset();
       await svlCommonNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
       await svlCommonNavigation.sidenav.tour.nextStep();
+      // TODO: "more" step is currently flaky in security due to initial rendering without "more" button
+      // https://github.com/elastic/kibana/issues/239331
       if (await svlCommonNavigation.sidenav.tour.isTourStepVisible('sidenav-more')) {
         await svlCommonNavigation.sidenav.tour.nextStep();
       }

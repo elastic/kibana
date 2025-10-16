@@ -121,12 +121,14 @@ export const openNavigationPanel = (pageName: string) => {
 };
 
 export const showMoreItems = () => {
-  // ensure nav items are rendered
+  // TODO: more menu item is flaky in security because of initial rendering and heigh measurement
+  // so we really try to get a stable reference here before proceeding
+  // https://github.com/elastic/kibana/issues/239331
   cy.get('[data-test-subj~="nav-item"]').should('exist');
   cy.get('[data-test-subj="globalLoadingIndicator-hidden"').should('exist');
   cy.get('[data-test-subj="globalLoadingIndicator"').should('not.exist');
 
-  // more item is unstable on initial rendering of security solution because of page height measurement
+  // TODO: https://github.com/elastic/kibana/issues/239331
   // eslint-disable-next-line cypress/no-unnecessary-waiting
   cy.wait(1000);
   cy.get(MORE_MENU_BTN).click();
