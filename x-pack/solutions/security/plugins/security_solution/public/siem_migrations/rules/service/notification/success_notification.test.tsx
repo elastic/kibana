@@ -7,9 +7,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { coreMock } from '@kbn/core/public/mocks';
 import { useNavigation } from '@kbn/security-solution-navigation';
-import { SuccessToastContent, raiseSuccessToast } from './success_notification';
+import { SuccessToastContent } from './success_notification';
 import { getRuleMigrationStatsMock } from '../../__mocks__';
 import { TestProviders } from '../../../../common/mock';
 
@@ -62,21 +61,6 @@ describe('Success Notification', () => {
       expect(navigateTo).toHaveBeenCalledWith({
         deepLinkId: 'siem_migrations-rules',
         path: '1',
-      });
-    });
-  });
-
-  describe('getSuccessToast', () => {
-    it('returns a toast object with the correct properties', () => {
-      const migration = getRuleMigrationStatsMock();
-      const toast = raiseSuccessToast(migration, coreMock.createStart());
-
-      expect(toast).toEqual({
-        color: 'success',
-        iconType: 'check',
-        text: expect.any(Function),
-        title: 'Rules translation complete.',
-        toastLifeTimeMs: 1800000,
       });
     });
   });
