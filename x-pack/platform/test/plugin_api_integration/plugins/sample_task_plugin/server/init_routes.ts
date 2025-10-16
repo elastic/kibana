@@ -280,7 +280,16 @@ export function initRoutes(
       validate: {
         body: schema.object({
           taskIds: schema.arrayOf(schema.string()),
-          schedule: schema.object({ interval: schema.string() }),
+          schedule: schema.oneOf([
+            schema.object({ interval: schema.maybe(schema.string()) }),
+            schema.object({
+              rrule: schema.object({
+                freq: schema.number(),
+                interval: schema.number(),
+                tzid: schema.string(),
+              }),
+            }),
+          ]),
         }),
       },
     },

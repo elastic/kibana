@@ -243,6 +243,7 @@ export class TaskScheduling {
         return { ...task, schedule, runAt: new Date(newRunAtInMs) };
       },
       validate: false,
+      mergeAttributes: false,
     });
   }
 

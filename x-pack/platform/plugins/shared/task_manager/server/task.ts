@@ -259,13 +259,13 @@ export interface IntervalSchedule {
    * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
    * */
   interval: Interval;
-  rrule?: never;
+  rrule?: never | null;
 }
 
 export type Rrule = RruleMonthly | RruleWeekly | RruleDaily;
 export interface RruleSchedule {
   rrule: Rrule;
-  interval?: never;
+  interval?: never | null;
 }
 
 interface RruleCommon {
