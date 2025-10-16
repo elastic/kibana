@@ -27,7 +27,7 @@ export const isCasesConnectorError = (error: unknown): error is CasesConnectorEr
 export const isCasesClientError = (error: unknown): error is CaseError =>
   error instanceof CaseError;
 
-export const createAndThrowUserError = (error: CasesConnectorError) => {
+export const markAsUserError = (error: CasesConnectorError) => {
   const statusCode = error.statusCode;
 
   if (statusCode != null && httpResponseUserErrorCodes.includes(Number(statusCode))) {
