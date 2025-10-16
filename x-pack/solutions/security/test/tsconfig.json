@@ -61,7 +61,6 @@
     "@kbn/session-view-plugin",
     "@kbn/repo-info",
     "@kbn/es-archiver",
-    "@kbn/task-manager-plugin",
     "@kbn/serverless-security-settings",
     "@kbn/rison",
     "@kbn/core-chrome-browser",
