@@ -8,7 +8,7 @@
  */
 
 import type { Scalar, Document, Pair, Node } from 'yaml';
-import { YAMLParseError, isPair, isScalar, parseDocument, visit } from 'yaml';
+import { YAMLParseError, isPair, isScalar, visit } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
 import type { BuiltInStepType, TriggerType, ConnectorTypeInfo } from '@kbn/workflows';
@@ -24,11 +24,9 @@ import {
   ScheduledTriggerSchema,
   ManualTriggerSchema,
 } from '@kbn/workflows';
-import { WorkflowGraph } from '@kbn/workflows/graph';
 import { getDetailedTypeDescription, getSchemaAtPath, parsePath } from '../../../../common/lib/zod';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
-import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
 import {
   VARIABLE_REGEX_GLOBAL,
   PROPERTY_PATH_REGEX,
@@ -49,7 +47,8 @@ import {
   generateRRuleTriggerSnippet,
 } from './snippets/generate_trigger_snippet';
 import { getCachedAllConnectors } from './connectors_cache';
-import type { WorkflowEditorState, WorkflowEditorStore } from './store';
+import type { WorkflowEditorState } from './store';
+import type { StepPropInfo } from './store/utils/build_workflow_lookup';
 
 // Cache for built-in step types extracted from schema
 let builtInStepTypesCache: Array<{
@@ -827,6 +826,19 @@ export function getSuggestion(
   const isAt = context.triggerCharacter === '@';
   const keyCouldAccessedByDot = PROPERTY_PATH_REGEX.test(key);
   const removeDot = isAt || !keyCouldAccessedByDot;
+  console.log('getSuggestion CALLED!!!!!!!!!!!', {
+    key,
+    context,
+    range,
+    scalarType,
+    shouldBeQuoted,
+    type,
+    description,
+    useCurlyBraces,
+    keyCouldAccessedByDot,
+    isAt,
+    removeDot,
+  });
 
   if (!keyCouldAccessedByDot) {
     // we need to use opposite quote type if we are in a string
@@ -884,11 +896,18 @@ export function getCompletionItemProvider(
         const editorState = getState();
         const dynamicConnectorTypes = editorState?.connectors?.connectorTypes;
         const workflowYamlSchema = editorState?.schemaLoose;
+        const workflowGraph = editorState?.computed?.workflowGraph;
         const yamlDocument = editorState?.computed?.yamlDocument;
         const workflowLookup = editorState?.computed?.workflowLookup;
         const focusedStepId = editorState?.focusedStepId;
 
-        if (!workflowYamlSchema || !dynamicConnectorTypes || !yamlDocument || !workflowLookup) {
+        if (
+          !workflowYamlSchema ||
+          !dynamicConnectorTypes ||
+          !yamlDocument ||
+          !workflowLookup ||
+          !workflowGraph
+        ) {
           return {
             suggestions: [],
             incomplete: false,
@@ -901,29 +920,36 @@ export function getCompletionItemProvider(
             incomplete: false,
           };
         }
-
-        const focusedStepInfo = workflowLookup.steps[focusedStepId]!;
         const absolutePosition = model.getOffsetAt(position);
 
-        let xka: { propName: string; value: unknown } | undefined;
-        for (const [propName, node] of Object.entries(focusedStepInfo.propNodes)) {
-          const range: [number, number, number] | undefined = (node as any).value?.range;
-          if (!range) {
-            continue;
-          }
+        // const focusedStepInfo = workflowLookup.steps[focusedStepId]!;
 
-          if (range[0] <= absolutePosition && absolutePosition <= range[2]) {
-            xka = { propName, value: node };
-            break;
-          }
-        }
-        const isForeach = xka?.propName !== 'foreach';
-        console.log({
-          absolutePosition,
-          xka,
-          steps: workflowLookup.steps,
-        });
+        // let focusedProp: StepPropInfo | undefined;
+        // for (const [, stepPropInfo] of Object.entries(focusedStepInfo.propInfos)) {
+        //   const range = stepPropInfo.valueNode.range;
+        //   if (!range) {
+        //     continue;
+        //   }
 
+        //   if (range[0] <= absolutePosition && absolutePosition <= range[2]) {
+        //     focusedProp = stepPropInfo;
+        //     break;
+        //   }
+        // }
+        // if (!focusedProp) {
+        //   return {
+        //     suggestions: [],
+        //     incomplete: false,
+        //   };
+        // }
+
+        // const useCurlyBraces = focusedProp?.keyNode.value !== 'foreach';
+        // console.log({
+        //   absolutePosition,
+        //   focusedProp,
+        //   steps: workflowLookup.steps,
+        // });
+        const useCurlyBraces = true;
         const { lineNumber } = position;
         const line = model.getLineContent(lineNumber);
         const wordUntil = model.getWordUntilPosition(position);
@@ -988,10 +1014,6 @@ export function getCompletionItemProvider(
           }
         }
 
-        const workflowGraph =
-          workflowData && workflowData.steps
-            ? WorkflowGraph.fromWorkflowDefinition(workflowData)
-            : null;
         const path = getCurrentPath(yamlDocument, absolutePosition);
         const yamlNode = yamlDocument.getIn(path, true);
         const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;
@@ -1099,7 +1121,7 @@ export function getCompletionItemProvider(
                   shouldBeQuoted,
                   propertyTypeName,
                   keySchema?.description,
-                  isForeach
+                  useCurlyBraces
                 )
               );
             }
@@ -1656,7 +1678,7 @@ export function getCompletionItemProvider(
                 shouldBeQuoted,
                 propertyTypeName,
                 'Connector type - choose from available connectors',
-                isForeach
+                useCurlyBraces
               );
 
               // Override the completion to trigger suggest after insertion
@@ -1678,7 +1700,7 @@ export function getCompletionItemProvider(
               shouldBeQuoted,
               typeInfo.type,
               typeInfo.description,
-              isForeach
+              useCurlyBraces
             );
             const propertyTypeName = getDetailedTypeDescription(currentSchema, {
               singleLine: true,
@@ -1692,7 +1714,7 @@ export function getCompletionItemProvider(
                 shouldBeQuoted,
                 propertyTypeName,
                 currentSchema?.description,
-                isForeach
+                useCurlyBraces
               )
             );
 
