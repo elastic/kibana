@@ -25,6 +25,7 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { useIndexMappings } from './use_index_mappings';
+import { extractSearchableFields, extractAllFields } from './field_extraction_utils';
 import * as i18n from './translations';
 import { isGlobalEntry } from './helpers';
 
@@ -133,24 +134,22 @@ export const IndexEntryEditor: React.FC<Props> = React.memo<Props>(
 
     const fieldOptions = useMemo(
       () =>
-        Object.entries(mappingData?.mappings?.properties ?? {})
-          .filter(([, m]) => m.type === 'text' || m.type === 'semantic_text')
-          .map(([name, details]) => ({
-            'data-test-subj': `field-option-${name}`,
-            label: name,
-            value: name,
-            append: <EuiBadge color={'hollow'}>{details.type}</EuiBadge>,
-          })),
+        extractSearchableFields(mappingData ?? {}).map((field) => ({
+          'data-test-subj': `field-option-${field.fullPath}`,
+          label: field.fullPath,
+          value: field.fullPath,
+          append: <EuiBadge color={'hollow'}>{field.type}</EuiBadge>,
+        })),
       [mappingData]
     );
 
     const outputFieldOptions = useMemo(
       () =>
-        Object.entries(mappingData?.mappings?.properties ?? {}).map(([name, details]) => ({
-          'data-test-subj': `output-field-option-${name}`,
-          label: name,
-          value: name,
-          append: <EuiBadge color={'hollow'}>{details.type}</EuiBadge>,
+        extractAllFields(mappingData ?? {}).map((field) => ({
+          'data-test-subj': `output-field-option-${field.fullPath}`,
+          label: field.fullPath,
+          value: field.fullPath,
+          append: <EuiBadge color={'hollow'}>{field.type}</EuiBadge>,
         })),
       [mappingData]
     );
