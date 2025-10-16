@@ -16,6 +16,7 @@ import getPort from 'get-port';
 import os from 'os';
 import Path from 'path';
 import { format } from 'util';
+import chalk from 'chalk';
 
 import { uniqueId } from 'lodash';
 import {
@@ -46,9 +47,15 @@ function msToDuration(duration: number) {
 interface RunnerState {
   slot: Slot;
   startedAt: number;
+  warmStartedAt?: number;
+  warmDurationMs?: number;
+  warmFinishedAt?: number;
+  idleStartedAt?: number;
+  idleDurationMs?: number;
   runStartedAt?: number;
   runDurationMs?: number;
   completedAt?: number;
+  exitCode?: number | string;
 }
 
 /*
@@ -181,7 +188,7 @@ export async function runTestsParallel(
   const MIN_MB_AVAILABLE = 2048;
   // const MIN_MB_PER_WARMING_SLOT = 4096;
   const MIN_MB_PER_IDLE_SLOT = 3072;
-  const MIN_MB_PER_RUNNING_SLOT = 5120;
+  const MIN_MB_PER_RUNNING_SLOT = 4096;
   // const WARMING_MIN_CPU = 2;
   const IDLE_MIN_CPU = 0.5;
   const RUNNING_MIN_CPU = 1;
@@ -194,13 +201,16 @@ export async function runTestsParallel(
   // const maxWarmingByMemory = Math.max(1, Math.floor(availableMemory / MIN_MB_PER_WARMING_SLOT));
   const maxWarming = 1; // Math.max(1, Math.min(maxWarmingByCpu, maxWarmingByMemory));
 
-  const maxStartedByCpu = Math.max(1, Math.floor(MAX_CPUS / IDLE_MIN_CPU));
-  const maxStartedByMemory = Math.max(1, Math.floor(availableMemory / MIN_MB_PER_IDLE_SLOT));
-  const maxStarted = Math.max(maxWarming, Math.min(maxStartedByCpu, maxStartedByMemory));
-
   const maxRunningByCpu = Math.max(1, Math.floor(MAX_CPUS / RUNNING_MIN_CPU));
   const maxRunningByMemory = Math.max(1, Math.floor(availableMemory / MIN_MB_PER_RUNNING_SLOT));
-  const maxRunning = Math.max(1, Math.min(maxRunningByCpu, maxRunningByMemory));
+  const maxRunning = Math.max(2, Math.min(maxRunningByCpu, maxRunningByMemory));
+
+  const maxStartedByCpu = Math.max(1, Math.floor(MAX_CPUS / IDLE_MIN_CPU));
+  const maxStartedByMemory = Math.max(1, Math.floor(availableMemory / MIN_MB_PER_IDLE_SLOT));
+  const maxStarted = Math.max(
+    maxWarming + maxRunning,
+    Math.min(maxStartedByCpu, maxStartedByMemory)
+  );
 
   log.info(
     `Resource limits -> started: ${maxStarted}, warming: ${maxWarming}, running: ${maxRunning}`
@@ -252,26 +262,65 @@ export async function runTestsParallel(
       log.info(`Stats: ${messageParts.join(' ')}`);
 
       const now = Date.now();
-      const runningConfigs: string[] = [];
-      const completedConfigs: string[] = [];
+      const configLines: string[] = [];
 
       for (const [path, state] of runnerStates.entries()) {
         const phase = state.slot.getPhase();
-        if (phase === Phase.Running) {
-          const runtimeMs = state.runStartedAt ? now - state.runStartedAt : 0;
-          runningConfigs.push(`${path} (phase=${phase} runtime=${msToDuration(runtimeMs)})`);
-        } else if (phase === Phase.Done) {
-          const durationMs = state.runDurationMs ?? 0;
-          completedConfigs.push(`${path} (phase=${phase} runtime=${msToDuration(durationMs)})`);
+        const parts: string[] = [`phase=${phase}`];
+
+        const warmMs =
+          state.warmDurationMs ??
+          (state.warmStartedAt ? Math.max(0, now - state.warmStartedAt) : undefined);
+        if (warmMs !== undefined) {
+          parts.push(`warm=${msToDuration(warmMs)}`);
         }
+
+        const idleMs =
+          state.idleDurationMs ??
+          (state.idleStartedAt && phase !== Phase.Warming
+            ? Math.max(0, now - state.idleStartedAt)
+            : undefined);
+        if (idleMs !== undefined && (phase === Phase.IdleBeforeRun || phase === Phase.Running)) {
+          parts.push(`idle=${msToDuration(idleMs)}`);
+        }
+
+        const runningMs =
+          state.runDurationMs ??
+          (state.runStartedAt && phase === Phase.Running
+            ? Math.max(0, now - state.runStartedAt)
+            : undefined);
+        if (runningMs !== undefined && (phase === Phase.Running || phase === Phase.Done)) {
+          parts.push(`run=${msToDuration(runningMs)}`);
+        }
+
+        if (phase === Phase.Done && state.exitCode !== undefined) {
+          parts.push(`exit=${state.exitCode}`);
+        }
+
+        const baseLine = `${path}: ${parts.join(' ')}`;
+
+        let coloredLine: string;
+
+        if (phase === Phase.Running) {
+          coloredLine = chalk.cyan(baseLine);
+        } else if (phase === Phase.IdleBeforeRun) {
+          coloredLine = chalk.cyan.dim(baseLine);
+        } else if (phase === Phase.Warming) {
+          coloredLine = chalk.yellow(baseLine);
+        } else if (phase === Phase.BeforeStart) {
+          coloredLine = chalk.yellow.dim(baseLine);
+        } else if (phase === Phase.Done) {
+          const isSuccess = state.exitCode === 0;
+          coloredLine = isSuccess ? chalk.greenBright(baseLine) : chalk.redBright(baseLine);
+        } else {
+          coloredLine = baseLine;
+        }
+
+        configLines.push(coloredLine);
       }
 
-      if (runningConfigs.length > 0) {
-        log.info(`Running configs:\n${runningConfigs.map((line) => `  ${line}`).join('\n')}`);
-      }
-
-      if (completedConfigs.length > 0) {
-        log.info(`Completed configs:\n${completedConfigs.map((line) => `  ${line}`).join('\n')}`);
+      if (configLines.length > 0) {
+        log.info(`Configs:\n${configLines.map((line) => `  ${line}`).join('\n')}`);
       }
     }
 
@@ -293,19 +342,24 @@ export async function runTestsParallel(
     let released = false;
 
     try {
-      log.info(`Waiting for warming slot for ${runner.getConfigPath()}`);
+      log.debug(`Waiting for warming slot for ${runner.getConfigPath()}`);
       await slot.waitForWarming();
       log.info(`Warming slot acquired for ${runner.getConfigPath()}`);
 
       const startTime = Date.now();
+      state.warmStartedAt = startTime;
       await runner.start();
       const startFinishTime = Date.now();
+      state.warmDurationMs = startFinishTime - startTime;
+      state.warmFinishedAt = startFinishTime;
+      state.idleStartedAt = startFinishTime;
 
-      log.info(`Waiting for running slot for ${runner.getConfigPath()}`);
+      log.debug(`Waiting for running slot for ${runner.getConfigPath()}`);
       await slot.waitForRunning();
       log.info(`Running slot acquired for ${runner.getConfigPath()}`);
 
       const runStartTime = Date.now();
+      state.idleDurationMs = Math.max(0, runStartTime - (state.idleStartedAt ?? runStartTime));
       state.runStartedAt = runStartTime;
       const runProc = await runner.run();
       const runFinishTime = Date.now();
@@ -316,6 +370,7 @@ export async function runTestsParallel(
       const runDuration = runFinishTime - runStartTime!;
       state.runDurationMs = runDuration;
       state.completedAt = runFinishTime;
+      state.exitCode = runProc.exitCode ?? runProc.signal ?? -1;
 
       const result = dedent(
         `- ${path}

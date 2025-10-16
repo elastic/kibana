@@ -148,14 +148,34 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             }
           }
 
-          if (typeof process.send === 'function') {
-            try {
-              process.send('FTR_WARMUP_DONE');
-            } catch (err) {
-              log.error(
-                new Error('Failed to notify parent process about warmup completion', { cause: err })
+          if (!pause$.closed) {
+            await new Promise<void>((resolve) => {
+              if (typeof process.send === 'function') {
+                try {
+                  process.send('FTR_WARMUP_DONE');
+                } catch (err) {
+                  log.error(
+                    new Error('Failed to notify parent process about warmup completion', {
+                      cause: err,
+                    })
+                  );
+                }
+              }
+
+              pause$.subscribe({
+                complete: () => {
+                  resolve();
+                },
+              });
+
+              abortCtrl.signal.addEventListener(
+                'abort',
+                () => {
+                  releasePause();
+                },
+                { once: true }
               );
-            }
+            });
           }
 
           const kibanaProcName = `${CI_PARALLEL_PROCESS_PREFIX}kibana-ftr`;
@@ -216,24 +236,6 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
           if (abortCtrl.signal.aborted) {
             return;
-          }
-
-          if (!pause$.closed) {
-            await new Promise<void>((resolve) => {
-              pause$.subscribe({
-                complete: () => {
-                  resolve();
-                },
-              });
-
-              abortCtrl.signal.addEventListener(
-                'abort',
-                () => {
-                  releasePause();
-                },
-                { once: true }
-              );
-            });
           }
 
           await runFtr({
