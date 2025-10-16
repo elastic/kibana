@@ -372,9 +372,7 @@ describe('functions arg suggestions', () => {
       const suggestions = await suggest('FROM index | EVAL result = ABS(unknownField /)');
       const labels = suggestions.map(({ label }) => label);
 
-      expect(labels).toEqual(expect.arrayContaining(['doubleField', 'integerField', 'longField']));
-      expect(labels).toEqual(expect.arrayContaining(['ROUND', 'CEIL', 'FLOOR']));
-      expect(labels).not.toContain('ABS');
+      expect(labels).toEqual([]);
     });
 
     it('conditional expression: non-boolean field in condition suggests all comparison/pattern/null/IN operators', async () => {

@@ -451,7 +451,7 @@ describe('EVAL Autocomplete', () => {
     );
 
     await evalExpectSuggestions(
-      'from a | eval col0 = abs(b ) | eval abs(col0) ',
+      'from a | eval col0 = abs(doubleField ) | eval abs(col0) ',
       [
         ...getFieldNamesByType(['double', 'integer', 'long', 'unsigned_long']),
         ...getFunctionSignaturesByReturnType(

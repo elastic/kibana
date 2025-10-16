@@ -38,7 +38,9 @@ export class SuggestionBuilder {
     const addSpaceAfterField = options?.addSpaceAfterField ?? addComma;
     const promoteToTop = options?.promoteToTop ?? true;
     const ignoredColumns = options?.ignoredColumns ?? [];
-    const openSuggestions = options?.openSuggestions ?? (addSpaceAfterField || addComma);
+    const isInsideFunction = Boolean(this.context.options.functionParameterContext);
+    const openSuggestions =
+      options?.openSuggestions ?? (addSpaceAfterField || addComma || !isInsideFunction);
     const values = options?.values;
 
     const getByType = this.context.callbacks?.getByType ?? (() => Promise.resolve([]));

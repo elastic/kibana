@@ -15,6 +15,8 @@ import { pipeCompleteItem, colonCompleteItem, semiColonCompleteItem } from '../.
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
+import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
+import { Parser } from '../../../parser';
 
 const appendSeparatorCompletionItem: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-ast.esql.definitions.appendSeparatorDoc', {
@@ -36,6 +38,15 @@ export async function autocomplete(
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
   const commandArgs = command.args.filter((arg) => !Array.isArray(arg) && arg.type !== 'unknown');
+
+  // If cursor is inside a string literal, don't suggest anything
+  const correctedQuery = correctQuerySyntax(innerText);
+  const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+  const { node } = findAstPosition(root.commands, innerText.length);
+
+  if (node?.type === 'literal' && node.literalType === 'keyword') {
+    return [];
+  }
 
   // DISSECT field/
   if (commandArgs.length === 1 && /\s$/.test(innerText)) {

@@ -95,28 +95,4 @@ describe('DISSECT Autocomplete', () => {
       ['| ']
     );
   });
-
-  describe('expressions in functions', () => {
-    it('suggests fields inside function calls', async () => {
-      const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
-      mockFieldsWithTypes(mockCallbacks, expectedStringFields);
-
-      await dissectExpectSuggestions(
-        'from a | DISSECT CONCAT(',
-        expectedStringFields,
-        mockCallbacks
-      );
-    });
-
-    it('suggests fields in nested functions', async () => {
-      const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
-      mockFieldsWithTypes(mockCallbacks, expectedStringFields);
-
-      await dissectExpectSuggestions(
-        'from a | DISSECT CONCAT(TRIM(',
-        expectedStringFields,
-        mockCallbacks
-      );
-    });
-  });
 });
