@@ -56,6 +56,7 @@ function getStateContainer({
     dataSource: createDataViewDataSource({ dataViewId: dataView?.id! }),
     interval: 'auto',
     hideChart: false,
+    query: { query: '', language: 'kuery' },
   };
 
   stateContainer.appState.update(appState);

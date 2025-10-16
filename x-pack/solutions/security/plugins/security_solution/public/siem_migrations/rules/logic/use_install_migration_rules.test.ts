@@ -37,7 +37,7 @@ const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 const invalidateRules = jest.fn();
 const invalidateStats = jest.fn();
-const mockReportTranslatedRuleBulkInstall = jest.fn();
+const mockReportTranslatedItemBulkInstall = jest.fn();
 
 describe('useInstallMigrationRules', () => {
   beforeEach(() => {
@@ -53,7 +53,7 @@ describe('useInstallMigrationRules', () => {
         siemMigrations: {
           rules: {
             telemetry: {
-              reportTranslatedRuleBulkInstall: mockReportTranslatedRuleBulkInstall,
+              reportTranslatedItemBulkInstall: mockReportTranslatedItemBulkInstall,
             },
           },
         },

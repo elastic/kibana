@@ -182,6 +182,10 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click('discoverOpenButton');
   }
 
+  public async hasUnsavedChangesBadge() {
+    return await this.testSubjects.exists('unsavedChangesBadge');
+  }
+
   public async revertUnsavedChanges() {
     await this.testSubjects.moveMouseTo('unsavedChangesBadge');
     await this.testSubjects.click('unsavedChangesBadge');
@@ -471,6 +475,15 @@ export class DiscoverPageObject extends FtrService {
 
   public async expectSourceViewerToExist() {
     return await this.find.byClassName('monaco-editor');
+  }
+
+  public async expectDocTableToBeLoaded() {
+    const renderComplete = await this.testSubjects.getAttribute(
+      'discoverDocTable',
+      'data-render-complete'
+    );
+
+    expect(renderComplete).to.be('true');
   }
 
   public async findFieldByNameOrValueInDocViewer(name: string) {

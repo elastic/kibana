@@ -62,8 +62,8 @@ export default function searchSolutionNavigation({
         // TODO: enable when available
         // {
         //   link: { navId: 'agent_builder' },
-        //   breadcrumbs: ['Agent Chat'],
-        //   pageTestSubject: 'onechatPageConversations',
+        //   breadcrumbs: [],
+        //   pageTestSubject: 'agentBuilderWrapper',
         // },
         {
           link: { deepLinkId: 'discover' },

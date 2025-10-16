@@ -60,6 +60,9 @@ export const i18nTexts = {
   cancel: i18n.translate('sharedUXPackages.filePicker.cancel', {
     defaultMessage: 'Cancel',
   }),
+  filesPagination: i18n.translate('sharedUXPackages.filePicker.paginationControls.ariaLabel', {
+    defaultMessage: 'Files pagination',
+  }),
   deleteFileQuestion: (fileName: string) =>
     i18n.translate('sharedUXPackages.filePicker.deleteFileQuestion', {
       defaultMessage: 'Are you sure you want to delete "{fileName}"?',

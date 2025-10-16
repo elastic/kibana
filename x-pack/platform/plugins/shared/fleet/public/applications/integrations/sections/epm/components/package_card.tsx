@@ -118,7 +118,9 @@ export function PackageCard({
             content={DEFERRED_ASSETS_WARNING_MSG}
             title={DEFERRED_ASSETS_WARNING_LABEL}
           >
-            <EuiBadge color="warning">{DEFERRED_ASSETS_WARNING_LABEL} </EuiBadge>
+            <EuiBadge color="warning" tabIndex={0}>
+              {DEFERRED_ASSETS_WARNING_LABEL}{' '}
+            </EuiBadge>
           </EuiToolTip>
         </span>
       </EuiFlexItem>

@@ -103,6 +103,49 @@ describe('extractPanelsState', () => {
     });
   });
 
+  describe('8.19', () => {
+    test('should migrate panels in sections', () => {
+      const { panels } = extractPanelsState({
+        panels: [
+          {
+            title: 'Section 1',
+            gridData: {},
+            panels: [
+              {
+                embeddableConfig: {
+                  timeRange: {
+                    from: 'now-7d/d',
+                    to: 'now',
+                  },
+                },
+                gridData: {},
+                type: 'map',
+              },
+            ],
+          },
+        ],
+      });
+      expect(panels).toEqual([
+        {
+          title: 'Section 1',
+          grid: {},
+          panels: [
+            {
+              config: {
+                timeRange: {
+                  from: 'now-7d/d',
+                  to: 'now',
+                },
+              },
+              grid: {},
+              type: 'map',
+            },
+          ],
+        },
+      ]);
+    });
+  });
+
   describe('< 8.19 panels state', () => {
     test('should move id and title to config', () => {
       const { panels } = extractPanelsState({

@@ -162,6 +162,7 @@ export function UnifiedHistogramChart({
     fetch$,
     onTotalHitsChange,
     isPlainRecord,
+    abortController: histogramProps.abortController,
   });
 
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();

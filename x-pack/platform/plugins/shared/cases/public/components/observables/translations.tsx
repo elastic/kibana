@@ -77,7 +77,7 @@ export const CANCEL = i18n.translate('xpack.cases.caseView.observables.cancel', 
 export const SELECT_OBSERVABLE_VALUE_PLACEHOLDER = i18n.translate(
   'xpack.cases.caseView.observables.addObservableModal.selectValue',
   {
-    defaultMessage: 'Name',
+    defaultMessage: 'Enter value name',
   }
 );
 
@@ -91,7 +91,7 @@ export const SELECT_OBSERVABLE_TYPE_PLACEHOLDER = i18n.translate(
 export const SELECT_OBSERVABLE_DESCRIPTION_PLACEHOLDER = i18n.translate(
   'xpack.cases.caseView.observables.addObservableModal.selectDescription',
   {
-    defaultMessage: 'Describe what was observed',
+    defaultMessage: 'Provide additional information about the observable',
   }
 );
 
@@ -175,5 +175,13 @@ export const DEFAULT_OBSERVABLE_TYPES_MODAL_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.cases.caseView.observables.defaultObservableTypesModalButtonAriaLabel',
   {
     defaultMessage: 'Default observable types modal button',
+  }
+);
+
+export const DEFAULT_OBSERVABLE_TYPES_MODAL_DESCRIPTION = i18n.translate(
+  'xpack.cases.caseView.observables.defaultObservableTypesModalDescription',
+  {
+    defaultMessage:
+      'When auto-extract observables is on, available values from the following ECS fields are added as observables.',
   }
 );

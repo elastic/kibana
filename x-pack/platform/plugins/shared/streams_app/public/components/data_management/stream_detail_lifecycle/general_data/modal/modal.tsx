@@ -7,8 +7,19 @@
 
 import React, { useState, useMemo } from 'react';
 import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
-import type { IngestStreamLifecycle, IngestStreamLifecycleDSL } from '@kbn/streams-schema';
-import { isDslLifecycle, isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
+import type {
+  IngestStreamLifecycle,
+  IngestStreamLifecycleAll,
+  IngestStreamLifecycleDSL,
+} from '@kbn/streams-schema';
+import {
+  effectiveToIngestLifecycle,
+  isDisabledLifecycle,
+  isDslLifecycle,
+  isErrorLifecycle,
+  isIlmLifecycle,
+  isInheritLifecycle,
+} from '@kbn/streams-schema';
 import { Streams, isRoot } from '@kbn/streams-schema';
 import {
   EuiButton,
@@ -60,8 +71,8 @@ export function EditLifecycleModal({
 
   const [isInheritToggleOn, setIsInheritToggleOn] = useState<boolean>(isCurrentLifecycleInherit);
   const [selectedAction, setSelectedAction] = useState<LifecycleEditAction>(initialSelectedAction);
-  const [lifecycle, setLifecycle] = useState<IngestStreamLifecycle>(
-    definition.effective_lifecycle as IngestStreamLifecycle
+  const [lifecycle, setLifecycle] = useState<IngestStreamLifecycleAll>(
+    effectiveToIngestLifecycle(definition.effective_lifecycle)
   );
 
   const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState<boolean>(
@@ -155,7 +166,7 @@ export function EditLifecycleModal({
                 onChange={(event) => {
                   if (event.target.checked) {
                     if (isCurrentLifecycleInherit) {
-                      setLifecycle(definition.effective_lifecycle as IngestStreamLifecycle);
+                      setLifecycle(effectiveToIngestLifecycle(definition.effective_lifecycle));
                       setSelectedAction(initialSelectedAction);
                     }
                     setIsInheritToggleOn(true);
@@ -257,7 +268,18 @@ export function EditLifecycleModal({
               fill
               disabled={isSaveButtonDisabled}
               isLoading={updateInProgress}
-              onClick={() => updateLifecycle(isInheritToggleOn ? { inherit: {} } : lifecycle)}
+              onClick={() => {
+                if (isInheritToggleOn) {
+                  updateLifecycle({ inherit: {} });
+                  return;
+                }
+
+                if (isDisabledLifecycle(lifecycle) || isErrorLifecycle(lifecycle)) {
+                  return;
+                }
+
+                updateLifecycle(lifecycle);
+              }}
             >
               {i18n.translate('xpack.streams.streamDetailLifecycle.saveButton', {
                 defaultMessage: 'Save',
