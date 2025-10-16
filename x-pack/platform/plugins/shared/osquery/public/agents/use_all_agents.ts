@@ -43,11 +43,11 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
 
         if (searchValue) {
           kuery += ` and (local_metadata.host.hostname.keyword:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}* or policy_id: *${searchValue}* or local_metadata.os.platform: *${searchValue}* or policy_name:${searchValue} )`;
-        } else {
-          kuery += ` and (status:online ${
-            agentIds?.length ? `or local_metadata.elastic.agent.id:(${agentIds.join(' or ')})` : ''
-          })`;
+        } else if (agentIds?.length) {
+          // Include explicitly selected agents even if they don't have osquery policy or are offline
+          kuery += ` or local_metadata.elastic.agent.id:(${agentIds.join(' or ')})`;
         }
+        // Removed status:online filter to allow unhealthy agents
       }
 
       return http.get(`/internal/osquery/fleet_wrapper/agents`, {

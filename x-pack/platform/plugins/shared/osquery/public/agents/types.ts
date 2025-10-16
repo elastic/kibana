@@ -21,7 +21,10 @@ export interface SelectedGroups {
   [groupType: string]: { [groupName: string]: number };
 }
 
-export type GroupedAgent = Pick<Agent, 'local_metadata' | 'policy_id' | 'status'>;
+export type GroupedAgent = Pick<
+  Agent,
+  'local_metadata' | 'policy_id' | 'status' | 'components' | 'last_checkin'
+>;
 
 export type GroupOption = EuiComboBoxOptionOption<AgentOptionValue | GroupOptionValue>;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { generateColorPicker } from './helpers';
+import { generateColorPicker, getAgentOsqueryAvailability } from './helpers';
 import {
   ALL_AGENTS_LABEL,
   AGENT_PLATFORMS_LABEL,
@@ -31,21 +31,43 @@ export const generateAgentOption = (
   data: GroupedAgent[]
 ) => ({
   label,
-  options: data.map((agent) => ({
-    disabled: agent.status !== 'online',
-    label: `${agent.local_metadata.host.hostname} (${agent.local_metadata.elastic.agent.id})`,
-    key: agent.local_metadata.elastic.agent.id,
-    color: agent.status !== 'online' ? 'danger' : getColor(groupType),
-    value: {
-      groupType,
-      groups: {
-        policy: agent.policy_id ?? '',
-        platform: agent.local_metadata.os.platform,
+  options: data.map((agent) => {
+    const availability = getAgentOsqueryAvailability(agent);
+
+    // Determine if agent should be disabled and its color based on availability
+    // Disabled: offline (not checking in) OR osquery_unavailable (Osquery component failed)
+    // Enabled: online OR degraded (with healthy Osquery)
+    const isDisabled = availability === 'offline' || availability === 'osquery_unavailable';
+
+    // Color coding:
+    // - success (green): Agent fully healthy
+    // - warning (orange): Agent degraded but Osquery works (queries will succeed)
+    // - danger (red): Agent offline or Osquery unavailable (queries won't work)
+    let color: string;
+    if (availability === 'online') {
+      color = getColor(groupType); // Normal green
+    } else if (availability === 'degraded') {
+      color = 'warning'; // Orange for degraded but operational
+    } else {
+      color = 'danger'; // Red for offline or osquery_unavailable
+    }
+
+    return {
+      disabled: isDisabled,
+      label: `${agent.local_metadata.host.hostname} (${agent.local_metadata.elastic.agent.id})`,
+      key: agent.local_metadata.elastic.agent.id,
+      color,
+      value: {
+        groupType,
+        groups: {
+          policy: agent.policy_id ?? '',
+          platform: agent.local_metadata.os.platform,
+        },
+        id: agent.local_metadata.elastic.agent.id,
+        status: agent.status ?? 'unknown',
       },
-      id: agent.local_metadata.elastic.agent.id,
-      status: agent.status ?? 'unknown',
-    },
-  })),
+    };
+  }),
 });
 
 export const generateGroupOption = (label: string, groupType: AGENT_GROUP_KEY, data: Group[]) => ({

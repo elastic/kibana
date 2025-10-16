@@ -137,3 +137,76 @@ export const generateAgentSelection = (
 
   return { newAgentSelection, selectedGroups, selectedAgents };
 };
+
+/**
+ * Check if the Osquery component is healthy for a given agent
+ */
+export const isOsqueryComponentHealthy = (agent: {
+  components?: Array<{ id: string; status: string }>;
+}): boolean => {
+  if (!agent.components || agent.components.length === 0) {
+    return false;
+  }
+
+  // Find the osquery component
+  const osqueryComponent = agent.components.find(
+    (component) => component.id === 'osquery' || component.type === 'osquery'
+  );
+
+  // Component is healthy if status is HEALTHY or DEGRADED (degraded means partially working)
+  return osqueryComponent?.status === 'HEALTHY' || osqueryComponent?.status === 'DEGRADED';
+};
+
+/**
+ * Determine agent availability status for Osquery queries
+ *
+ * Status Mapping Table:
+ * ┌────────────────────┬─────────────────────┬────────────────────┬─────────────┬──────────────┐
+ * │ Status             │ Agent Checking In?  │ Osquery Working?   │ Visual      │ Selectable?  │
+ * ├────────────────────┼─────────────────────┼────────────────────┼─────────────┼──────────────┤
+ * │ 'online'           │ ✅ Yes              │ ✅ Yes             │ 🟢 Green    │ ✅ Yes       │
+ * │ 'degraded'         │ ✅ Yes              │ ✅ Yes             │ 🟠 Orange+⚠│ ✅ Yes       │
+ * │ 'osquery_unavail'  │ ✅ Yes              │ ❌ No              │ 🔴 Red      │ ❌ No        │
+ * │ 'offline'          │ ❌ No               │ ❌ No              │ 🔴 Red      │ ❌ No        │
+ * └────────────────────┴─────────────────────┴────────────────────┴─────────────┴──────────────┘
+ *
+ * Returns:
+ * - 'online': Agent fully healthy and Osquery component healthy
+ * - 'degraded': Agent unhealthy but Osquery component is healthy (queries will work)
+ * - 'osquery_unavailable': Agent checking in but Osquery component failed (queries won't work)
+ * - 'offline': Agent not checking in at all (completely unreachable)
+ */
+export const getAgentOsqueryAvailability = (agent: {
+  status?: string;
+  components?: Array<{ id: string; status: string }>;
+  last_checkin?: string;
+}): 'online' | 'degraded' | 'osquery_unavailable' | 'offline' => {
+  const now = Date.now();
+  const lastCheckinTime = agent.last_checkin ? new Date(agent.last_checkin).getTime() : 0;
+  const timeSinceLastCheckin = now - lastCheckinTime;
+
+  // Agent is truly offline if no recent check-in (more than 5 minutes)
+  const isOffline = !agent.last_checkin || timeSinceLastCheckin > 5 * 60 * 1000;
+
+  if (isOffline || agent.status === 'offline') {
+    return 'offline';
+  }
+
+  // At this point: agent is checking in
+  // Check if Osquery component is healthy
+  const osqueryHealthy = isOsqueryComponentHealthy(agent);
+
+  // If Osquery is NOT healthy, agent is reachable but Osquery won't work
+  if (!osqueryHealthy) {
+    return 'osquery_unavailable';
+  }
+
+  // At this point: agent is checking in AND Osquery is healthy
+  // Check if agent overall is degraded
+  if (agent.status !== 'online') {
+    return 'degraded'; // Agent degraded but Osquery works - queries will succeed
+  }
+
+  // Agent is online and Osquery is healthy
+  return 'online';
+};

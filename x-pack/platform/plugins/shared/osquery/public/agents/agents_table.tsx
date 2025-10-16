@@ -15,6 +15,8 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiLink,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 
@@ -29,6 +31,7 @@ import {
   generateAgentCheck,
   getNumOverlapped,
   generateAgentSelection,
+  getAgentOsqueryAvailability,
 } from './helpers';
 
 import {
@@ -82,6 +85,20 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
   const [options, setOptions] = useState<GroupOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<GroupOption[]>([]);
   const defaultValueInitialized = useRef(false);
+
+  // Create a memoized agent lookup map for O(1) access instead of O(n) find
+  const agentMap = useMemo(() => {
+    const map = new Map();
+    if (agentList?.agents) {
+      agentList.agents.forEach((agent: any) => {
+        const agentId = agent.local_metadata?.elastic?.agent?.id;
+        if (agentId) {
+          map.set(agentId, agent);
+        }
+      });
+    }
+    return map;
+  }, [agentList?.agents]);
 
   const numAgentsSelected = useMemo(() => {
     const { newAgentSelection, selectedAgents, selectedGroups } =
@@ -173,23 +190,68 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     }
   }, [agentList?.agents, agentList?.groups, agentList?.total, agentsFetched, searchValue]);
 
-  const renderOption = useCallback((option: any, searchVal: any, contentClassName: any) => {
-    const { label, value } = option;
+  const renderOption = useCallback(
+    (option: any, searchVal: any, contentClassName: any) => {
+      const { label, value } = option;
 
-    return value?.groupType === AGENT_GROUP_KEY.Agent ? (
-      <EuiHealth color={value?.status === 'online' ? 'success' : 'danger'}>
+      if (value?.groupType === AGENT_GROUP_KEY.Agent) {
+        // For individual agents, determine health color based on Osquery availability
+        // Use O(1) Map lookup instead of O(n) array find
+        const agent = agentMap.get(value.id);
+
+        let healthColor: 'success' | 'warning' | 'danger' = 'danger';
+        let availability: 'online' | 'degraded' | 'osquery_unavailable' | 'offline' = 'offline';
+
+        if (agent) {
+          availability = getAgentOsqueryAvailability(agent);
+          if (availability === 'online') {
+            healthColor = 'success'; // Green: fully healthy
+          } else if (availability === 'degraded') {
+            healthColor = 'warning'; // Orange: degraded but Osquery works
+          } else {
+            healthColor = 'danger'; // Red: offline or osquery_unavailable
+          }
+        }
+
+        const healthContent = (
+          <EuiHealth color={healthColor}>
+            <span className={contentClassName}>
+              <EuiHighlight search={searchVal}>{label}</EuiHighlight>
+              {availability === 'degraded' && (
+                <span style={{ marginLeft: '4px' }}>
+                  <EuiIcon type="alert" size="s" color="warning" />
+                </span>
+              )}
+            </span>
+          </EuiHealth>
+        );
+
+        // Add tooltip for degraded agents with healthy Osquery
+        if (availability === 'degraded') {
+          return (
+            <EuiToolTip
+              position="right"
+              content="Agent is degraded but Osquery component is healthy. Queries should work normally."
+            >
+              {healthContent}
+            </EuiToolTip>
+          );
+        }
+
+        return healthContent;
+      }
+
+      // For groups (platform, policy, all agents)
+      return (
         <span className={contentClassName}>
+          <span>[{value?.size ?? 0}]</span>
+          &nbsp;
           <EuiHighlight search={searchVal}>{label}</EuiHighlight>
         </span>
-      </EuiHealth>
-    ) : (
-      <span className={contentClassName}>
-        <span>[{value?.size ?? 0}]</span>
-        &nbsp;
-        <EuiHighlight search={searchVal}>{label}</EuiHighlight>
-      </span>
-    );
-  }, []);
+      );
+    },
+    [agentMap]
+  );
 
   const onSearchChange = useCallback((v: string) => {
     // set the typing flag and update the search value
@@ -229,11 +291,46 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     return null;
   };
 
+  // Memoize the check for degraded agents to avoid iterating on every render
+  const hasDegradedAgents = useMemo(() => {
+    if (!agentList?.agents || agentList.agents.length === 0) {
+      return false;
+    }
+    return agentList.agents.some(
+      (agent: any) => getAgentOsqueryAvailability(agent) === 'degraded'
+    );
+  }, [agentList?.agents]);
+
+  const renderAgentStatusInfo = () => {
+    // Only show if we have degraded agents (with healthy Osquery)
+    if (agentsFetched && hasDegradedAgents) {
+      return (
+        <>
+          <EuiCallOut
+            color="warning"
+            size="s"
+            iconType="alert"
+            title="Degraded agents with healthy Osquery"
+          >
+            <p>
+              Some agents are degraded but their Osquery component is healthy. These agents are
+              marked with an orange indicator and can still run queries successfully.
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <div>
       <EuiFormRow label={AGENT_SELECTION_LABEL} fullWidth isInvalid={!!error} error={error}>
         <>
           {renderNoAgentAvailableWarning()}
+          {renderAgentStatusInfo()}
           <EuiComboBox
             data-test-subj="agentSelection"
             placeholder={SELECT_AGENT_LABEL}

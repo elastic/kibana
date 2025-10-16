@@ -95,7 +95,9 @@ export const parseAgentSelection = async (
     .getAgentService()
     ?.asInternalScopedUser(agentSelection.spaceId);
   const packagePolicyService = context.service.getPackagePolicyService();
-  const kueryFragments = ['status:online'];
+  // Exclude truly offline agents (not checking in) but include degraded agents that are checking in
+  // This filters out agents with status:offline or agents that haven't checked in recently
+  const kueryFragments: string[] = ['NOT status:offline'];
 
   if (agentService && packagePolicyService) {
     const osqueryPolicies = await aggregateResults(
@@ -128,7 +130,7 @@ export const parseAgentSelection = async (
           return {
             results: res.agents.map((agent) => agent.id),
             total: res.total,
-            searchAfter: res.agents[res.agents.length - 1].sort,
+            searchAfter: res.agents.length > 0 ? res.agents[res.agents.length - 1].sort : undefined,
           };
         },
         esClient,
@@ -162,7 +164,7 @@ export const parseAgentSelection = async (
             return {
               results: res.agents.map((agent) => agent.id),
               total: res.total,
-              searchAfter: res.agents[res.agents.length - 1].sort,
+              searchAfter: res.agents.length > 0 ? res.agents[res.agents.length - 1].sort : undefined,
             };
           },
           esClient,
