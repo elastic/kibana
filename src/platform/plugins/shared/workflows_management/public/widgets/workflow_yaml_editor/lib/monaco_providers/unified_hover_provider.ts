@@ -10,6 +10,7 @@
 import { monaco } from '@kbn/monaco';
 import type YAML from 'yaml';
 import { i18n } from '@kbn/i18n';
+import { isYamlValidationMarkerOwner } from '../../../../features/validate_workflow_yaml/model/types';
 import { getCurrentPath } from '../../../../../common/lib/yaml_utils';
 import { getMonacoConnectorHandler } from './provider_registry';
 import type { HoverContext, ProviderConfig } from './provider_interfaces';
@@ -165,7 +166,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       const validationMarkersNearby = markers.filter(
         (marker) =>
           marker.startLineNumber === position.lineNumber && // Same line
-          marker.owner === 'yaml' && // Only check YAML validation errors
+          isYamlValidationMarkerOwner(marker.owner) && // Only check YAML validation errors
           // Check if the position is within or very close to the marker range
           ((marker.startColumn <= position.column && marker.endColumn >= position.column) ||
             Math.abs(marker.startColumn - position.column) <= 3 || // Within 3 columns

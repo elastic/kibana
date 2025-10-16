@@ -19,6 +19,7 @@ import type { ActionsConfigurationUtilities } from './actions_config';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
+import { createMockInMemoryConnector } from './application/connector/mocks';
 
 const mockTaskManager = taskManagerMock.createSetup();
 const inMemoryMetrics = inMemoryMetricsMock.create();
@@ -46,26 +47,18 @@ describe('actionTypeRegistry', () => {
       actionsConfigUtils: mockedActionsConfig,
       licenseState: mockedLicenseState,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           actionTypeId: 'foo',
-          config: {},
           id: 'my-slack1',
           name: 'Slack #xyz',
-          secrets: {},
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
-        {
+        }),
+        createMockInMemoryConnector({
           actionTypeId: 'test.system-action',
-          config: {},
           id: 'system-connector-test.system-action',
           name: 'System action: test.system-action',
-          secrets: {},
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-        },
+        }),
       ],
     };
   });
@@ -299,16 +292,16 @@ describe('actionTypeRegistry', () => {
       const { validate, ...rest } = actionTypeRegistry.get('my-action-type');
       expect(validate).toBeDefined();
       expect(rest).toMatchInlineSnapshot(`
-      Object {
-        "executor": [Function],
-        "id": "my-action-type",
-        "minimumLicenseRequired": "basic",
-        "name": "My action type",
-        "supportedFeatureIds": Array [
-          "alerting",
-        ],
-      }
-    `);
+              Object {
+                "executor": [Function],
+                "id": "my-action-type",
+                "minimumLicenseRequired": "basic",
+                "name": "My action type",
+                "supportedFeatureIds": Array [
+                  "alerting",
+                ],
+              }
+          `);
     });
 
     test(`throws an error when action type doesn't exist`, () => {
@@ -346,8 +339,122 @@ describe('actionTypeRegistry', () => {
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: ['alerting'],
           isSystemActionType: false,
+          isDeprecated: false,
         },
       ]);
+      expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
+      expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
+    });
+
+    test('returns list of connector types with parameter schema', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const connectorTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      connectorTypeRegistry.register({
+        id: 'my-connector-type',
+        name: 'My connector type',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: {
+            schema: schema.object({
+              text: schema.string({ minLength: 1 }),
+            }),
+          },
+        },
+        executor,
+      });
+      connectorTypeRegistry.register({
+        id: 'my-connector-type-with-subaction',
+        name: 'My connector type with subaction',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: {
+            schema: schema.oneOf([
+              schema.object({
+                subAction: schema.literal('subaction1'),
+                subActionParams: schema.object({ value: schema.number({ min: 5 }) }),
+              }),
+              schema.object({
+                subAction: schema.literal('subaction2'),
+                subActionParams: schema.object({ message: schema.string({ minLength: 5 }) }),
+              }),
+            ]),
+          },
+        },
+        executor,
+      });
+      const connectorTypes = connectorTypeRegistry.list({ exposeValidation: true });
+      expect(connectorTypes).toEqual([
+        {
+          id: 'my-connector-type',
+          name: 'My connector type',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          isSystemActionType: false,
+          validate: { params: expect.any(Object) },
+          isDeprecated: false,
+        },
+        {
+          id: 'my-connector-type-with-subaction',
+          name: 'My connector type with subaction',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          isSystemActionType: false,
+          validate: { params: expect.any(Object) },
+          isDeprecated: false,
+        },
+      ]);
+
+      // check that validation works
+      try {
+        connectorTypes[0].validate?.params.schema.validate({ text: '' });
+      } catch (err) {
+        expect(err.message).toMatchInlineSnapshot(
+          `"[text]: value has length [0] but it must have a minimum length of [1]."`
+        );
+      }
+      try {
+        connectorTypes[0].validate?.params.schema.validate({ another_field: 'test_message' });
+      } catch (err) {
+        expect(err.message).toMatchInlineSnapshot(
+          `"[text]: expected value of type [string] but got [undefined]"`
+        );
+      }
+      try {
+        connectorTypes[1].validate?.params.schema.validate({
+          subAction: 'subaction1',
+          subActionParams: { value: 3 },
+        });
+      } catch (err) {
+        expect(err.message).toMatchInlineSnapshot(`
+          "types that failed validation:
+          - [0.subActionParams.value]: Value must be equal to or greater than [5].
+          - [1.subAction]: expected value to equal [subaction2]"
+        `);
+      }
+      try {
+        connectorTypes[1].validate?.params.schema.validate({
+          subAction: 'subaction4',
+          subActionParams: { value: 10 },
+        });
+      } catch (err) {
+        expect(err.message).toMatchInlineSnapshot(`
+          "types that failed validation:
+          - [0.subAction]: expected value to equal [subaction1]
+          - [1.subAction]: expected value to equal [subaction2]"
+        `);
+      }
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
       expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
     });
@@ -379,7 +486,7 @@ describe('actionTypeRegistry', () => {
         },
         executor,
       });
-      const actionTypes = actionTypeRegistry.list('alerting');
+      const actionTypes = actionTypeRegistry.list({ featureId: 'alerting' });
       expect(actionTypes).toEqual([
         {
           id: 'my-action-type',
@@ -390,6 +497,7 @@ describe('actionTypeRegistry', () => {
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: ['alerting'],
           isSystemActionType: false,
+          isDeprecated: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -426,6 +534,7 @@ describe('actionTypeRegistry', () => {
           minimumLicenseRequired: 'platinum',
           supportedFeatureIds: ['alerting'],
           isSystemActionType: true,
+          isDeprecated: false,
         },
       ]);
     });
@@ -462,6 +571,7 @@ describe('actionTypeRegistry', () => {
           name: 'Test',
           subFeature: 'endpointSecurity',
           supportedFeatureIds: ['siem'],
+          isDeprecated: false,
         },
       ]);
     });
@@ -725,7 +835,7 @@ describe('actionTypeRegistry', () => {
   });
 
   describe('getAllTypes()', () => {
-    test('should return empty when notihing is registered', () => {
+    test('should return empty when nothing is registered', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
       const result = registry.getAllTypes();
       expect(result).toEqual([]);
@@ -993,6 +1103,30 @@ describe('actionTypeRegistry', () => {
         params: { foo: 'bar' },
         source: ActionExecutionSourceType.HTTP_REQUEST,
       });
+    });
+  });
+
+  describe('isDeprecated', () => {
+    it('should return true if the action type is deprecated', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      registry.register({
+        id: 'test.action',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: false,
+        isDeprecated: true,
+        executor,
+      });
+
+      const result = registry.isDeprecated('test.action');
+      expect(result).toBe(true);
     });
   });
 });
