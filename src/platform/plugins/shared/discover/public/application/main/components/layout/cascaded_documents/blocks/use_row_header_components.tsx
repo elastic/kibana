@@ -24,11 +24,14 @@ import { NumberBadge, type DataCascadeRowProps } from '@kbn/shared-ux-document-d
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
+import {
+  type ESQLStatsQueryMeta,
+  type SupportedStatsFunction,
+} from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
+import { constructCascadeQuery } from '@kbn/esql-utils';
 import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns/pattern_cell_renderer';
-import { type ESQLStatsQueryMeta } from '../utils';
 
 import type { ESQLDataGroupNode, DataTableRecord } from './types';
-import { constructCascadeQuery, type SupportedStatsFunction } from '../utils';
 import {
   type TabStateGlobalState,
   internalStateActions,

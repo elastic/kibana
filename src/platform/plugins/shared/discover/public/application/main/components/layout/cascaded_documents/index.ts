@@ -9,4 +9,3 @@
 
 export { ESQLDataCascade, useGroupBySelectorRenderer } from './esql_data_cascade';
 export type { ESQLDataCascadeProps } from './esql_data_cascade';
-export { getESQLStatsQueryMeta } from './utils';
