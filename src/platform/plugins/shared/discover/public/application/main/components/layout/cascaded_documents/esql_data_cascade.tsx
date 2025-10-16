@@ -20,12 +20,13 @@ import {
 } from '@kbn/shared-ux-document-data-cascade';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { constructCascadeQuery, getESQLStatsQueryMeta } from '@kbn/esql-utils';
+import type { CascadeQueryArgs } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import { useScopedServices } from '../../../../../components/scoped_services_provider/scoped_services_provider';
 import { useAppStateSelector } from '../../../state_management/discover_app_state_container';
 import { useCurrentTabSelector } from '../../../state_management/redux';
 import { fetchEsql } from '../../../data_fetching/fetch_esql';
-import { constructCascadeQuery, type CascadeQueryArgs, getESQLStatsQueryMeta } from './utils';
 import {
   useEsqlDataCascadeRowHeaderComponents,
   useEsqlDataCascadeHeaderComponent,
@@ -36,7 +37,7 @@ import {
 import { esqlCascadeStyles } from './esql_data_cascade.styles';
 import type { CascadeDocumentsRestorableState } from './esql_data_cascade_restorable_state';
 
-export { getESQLStatsQueryMeta } from './utils';
+export { getESQLStatsQueryMeta };
 export { useGetGroupBySelectorRenderer as useGroupBySelectorRenderer } from './blocks/use_table_header_components';
 
 export interface ESQLDataCascadeProps extends Omit<UnifiedDataTableProps, 'ref'> {

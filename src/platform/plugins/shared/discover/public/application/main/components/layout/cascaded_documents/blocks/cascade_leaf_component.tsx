@@ -21,7 +21,7 @@ import {
 import type { CascadeRowCellNestedVirtualizationAnchorProps } from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ESQLStatsQueryMeta } from '../utils';
+import { type ESQLStatsQueryMeta } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 
 interface ESQLDataCascadeLeafCellProps
   extends Omit<
