@@ -115,7 +115,6 @@ printf "%s\n" "${results[@]}"
 echo ""
 
 # Scout reporter
-echo "--- Upload Scout reporter events to AppEx QA's team cluster"
-node scripts/scout upload-events --dontFailOnError
+source .buildkite/scripts/steps/test/scout_upload_report_events.sh
 
 exit $exitCode
