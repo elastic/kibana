@@ -10,10 +10,6 @@
 import type { SerializedTitles } from '@kbn/presentation-publishing';
 import type { StoredLinksState } from '../../server';
 
-export type {
-  LinksByReferenceState,
-  LinksByValueState,
-  LinksEmbeddableState,
-} from '../../server';
+export type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../../server';
 
 export type StoredLinksEmbeddableState = SerializedTitles & StoredLinksState;
