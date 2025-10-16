@@ -14,7 +14,9 @@ import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack-platform/functi
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { setupKnowledgeBase, waitForKnowledgeBaseReady } from './knowledge_base';
 
-// Cache for the dynamically imported p-timeout module
+// Dynamic import required: p-timeout v6+ is ESM-only, incompatible with Kibana's CommonJS compilation.
+// Cached to avoid repeated imports on every retryOnTimeout() call.
+// TODO: Remove when tsconfig.base.json "module" changes from "commonjs" to "esnext" or "node16".
 const getPTimeoutModule = (() => {
   let cached: Promise<typeof import('p-timeout')> | null = null;
   return () => {

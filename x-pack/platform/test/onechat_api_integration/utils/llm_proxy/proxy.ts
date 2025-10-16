@@ -27,7 +27,9 @@ interface RequestInterceptor {
 }
 
 export class LlmProxy {
-  // Cache for the dynamically imported p-timeout module
+  // Dynamic import required: p-timeout v6+ is ESM-only, incompatible with Kibana's CommonJS compilation.
+  // Cached to avoid repeated imports on every intercept() call.
+  // TODO: Remove when tsconfig.base.json "module" changes from "commonjs" to "esnext" or "node16".
   private static pTimeoutModule: Promise<typeof import('p-timeout')> | null = null;
 
   server: Server;
