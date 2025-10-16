@@ -79,7 +79,6 @@ import {
   FINDINGS_PAGE,
   THREAT_INTELLIGENCE_PAGE,
 } from '../../../screens/kibana_navigation';
-import { showMoreItems } from '../../../screens/serverless_security_header';
 
 describe('top-level navigation common to all pages in the Security app', { tags: '@ess' }, () => {
   beforeEach(() => {
