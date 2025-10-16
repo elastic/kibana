@@ -6,6 +6,7 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { AgentStatus } from '@kbn/fleet-plugin/common';
 import type { Agent } from '../../common/shared_imports';
 
 export interface Group {
@@ -43,7 +44,7 @@ interface BaseGroupOption {
 
 export type AgentOptionValue = BaseGroupOption & {
   groups: { [groupType: string]: string };
-  status: string;
+  status: AgentStatus | 'unknown';
 };
 
 export type GroupOptionValue = BaseGroupOption & {
@@ -56,3 +57,13 @@ export enum AGENT_GROUP_KEY {
   Policy,
   Agent,
 }
+
+/**
+ * Agent status color constants for UI display
+ * Maps agent availability states to EUI color types
+ */
+export const AGENT_STATUS_COLORS = {
+  ONLINE: 'success',
+  DEGRADED: 'warning',
+  UNAVAILABLE: 'danger',
+} as const;

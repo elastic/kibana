@@ -48,7 +48,7 @@ import {
 } from './translations';
 
 import type { GroupOption, AgentSelection } from './types';
-import { AGENT_GROUP_KEY } from './types';
+import { AGENT_GROUP_KEY, AGENT_STATUS_COLORS } from './types';
 
 interface AgentsTableProps {
   agentSelection: AgentSelection;
@@ -200,20 +200,27 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
       if (value?.groupType === AGENT_GROUP_KEY.Agent) {
         // For individual agents, determine health color based on Osquery availability
-        // Use O(1) Map lookup instead of O(n) array find
-        const agent: Agent | undefined = agentMap.get(value.id);
-
-        let healthColor: 'success' | 'warning' | 'danger' = 'danger';
+        let healthColor: 'success' | 'warning' | 'danger' = AGENT_STATUS_COLORS.UNAVAILABLE;
         let availability: 'online' | 'degraded' | 'osquery_unavailable' | 'offline' = 'offline';
 
-        if (agent) {
-          availability = getAgentOsqueryAvailability(agent);
-          if (availability === 'online') {
-            healthColor = 'success'; // Green: fully healthy
-          } else if (availability === 'degraded') {
-            healthColor = 'warning'; // Orange: degraded but Osquery works
-          } else {
-            healthColor = 'danger'; // Red: offline or osquery_unavailable
+        // Validate that value.id exists before attempting lookup
+        if (!value?.id) {
+          // If no ID, treat as offline/unavailable
+          healthColor = AGENT_STATUS_COLORS.UNAVAILABLE;
+          availability = 'offline';
+        } else {
+          // Use O(1) Map lookup instead of O(n) array find
+          const agent: Agent | undefined = agentMap.get(value.id);
+
+          if (agent) {
+            availability = getAgentOsqueryAvailability(agent);
+            if (availability === 'online') {
+              healthColor = AGENT_STATUS_COLORS.ONLINE; // Green: fully healthy
+            } else if (availability === 'degraded') {
+              healthColor = AGENT_STATUS_COLORS.DEGRADED; // Orange: degraded but Osquery works
+            } else {
+              healthColor = AGENT_STATUS_COLORS.UNAVAILABLE; // Red: offline or osquery_unavailable
+            }
           }
         }
 

@@ -18,7 +18,8 @@ const checkAgentsLength = (agentsSelection: AgentSelection) => {
     // Only warn if truly offline agents are selected
     if (agentsSelection.offlineAgentsSelected) {
       return i18n.translate('xpack.osquery.pack.queryFlyoutForm.osqueryAgentsOfflineErrorMessage', {
-        defaultMessage: 'Some agents are offline and may not respond to queries',
+        defaultMessage:
+          'Some selected agents are offline or have unhealthy Osquery components and may not respond to queries',
       });
     }
 

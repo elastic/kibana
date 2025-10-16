@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AgentStatus } from '@kbn/fleet-plugin/common';
 import { generateColorPicker, getAgentOsqueryAvailability } from './helpers';
 import {
   ALL_AGENTS_LABEL,
@@ -13,7 +14,7 @@ import {
   AGENT_SELECTION_LABEL,
 } from './translations';
 import type { Group, GroupOption, GroupedAgent } from './types';
-import { AGENT_GROUP_KEY } from './types';
+import { AGENT_GROUP_KEY, AGENT_STATUS_COLORS } from './types';
 
 const getColor = generateColorPicker();
 
@@ -47,9 +48,9 @@ export const generateAgentOption = (
     if (availability === 'online') {
       color = getColor(groupType); // Normal green
     } else if (availability === 'degraded') {
-      color = 'warning'; // Orange for degraded but operational
+      color = AGENT_STATUS_COLORS.DEGRADED; // Orange for degraded but operational
     } else {
-      color = 'danger'; // Red for offline or osquery_unavailable
+      color = AGENT_STATUS_COLORS.UNAVAILABLE; // Red for offline or osquery_unavailable
     }
 
     return {
@@ -64,7 +65,7 @@ export const generateAgentOption = (
           platform: agent.local_metadata.os.platform,
         },
         id: agent.local_metadata.elastic.agent.id,
-        status: agent.status ?? 'unknown',
+        status: (agent.status ?? 'unknown') as AgentStatus | 'unknown',
       },
     };
   }),
