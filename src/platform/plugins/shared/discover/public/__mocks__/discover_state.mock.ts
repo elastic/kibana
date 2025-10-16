@@ -7,55 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createBrowserHistory } from 'history';
 import { getDiscoverStateContainer } from '../application/main/state_management/discover_state';
 import { savedSearchMockWithTimeField, savedSearchMock } from './saved_search';
-import { discoverServiceMock } from './services';
+import { createDiscoverServicesMock } from './services';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
-import type { RuntimeStateManager } from '../application/main/state_management/redux';
+import type { RuntimeStateManager, TabState } from '../application/main/state_management/redux';
 import {
   createInternalStateStore,
   createRuntimeStateManager,
   fromSavedSearchToSavedObjectTab,
+  selectAllTabs,
   selectTabRuntimeState,
 } from '../application/main/state_management/redux';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import type { History } from 'history';
-import type { DiscoverCustomizationContext } from '../customizations';
+import {
+  getConnectedCustomizationService,
+  type DiscoverCustomizationContext,
+} from '../customizations';
 import { createCustomizationService } from '../customizations/customization_service';
 import { createTabsStorageManager } from '../application/main/state_management/tabs_storage_manager';
 import { internalStateActions } from '../application/main/state_management/redux';
 import { DEFAULT_TAB_STATE } from '../application/main/state_management/redux';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { DiscoverSearchSessionManager } from '../application/main/state_management/discover_search_session';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
-export function getDiscoverStateMock({
-  isTimeBased = true,
-  savedSearch,
-  additionalPersistedTabs = [],
-  stateStorageContainer,
-  runtimeStateManager,
-  history,
-  customizationContext = mockCustomizationContext,
-  services: originalServices = discoverServiceMock,
-}: {
-  isTimeBased?: boolean;
-  savedSearch?: SavedSearch | false;
-  additionalPersistedTabs?: DiscoverSessionTab[];
+interface CreateInternalStateStoreMockOptions {
   runtimeStateManager?: RuntimeStateManager;
   stateStorageContainer?: IKbnUrlStateStorage;
-  history?: History<HistoryLocationState>;
   customizationContext?: DiscoverCustomizationContext;
   services?: DiscoverServices;
-} = {}) {
-  if (!history) {
-    history = createBrowserHistory<HistoryLocationState>();
-    history.push('/');
-  }
-  const services = { ...originalServices, history };
+}
+
+function createInternalStateStoreMock({
+  runtimeStateManager,
+  stateStorageContainer,
+  customizationContext = mockCustomizationContext,
+  services = createDiscoverServicesMock(),
+}: CreateInternalStateStoreMockOptions = {}) {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
   stateStorageContainer ??= createKbnUrlStateStorage({
@@ -80,6 +73,128 @@ export function getDiscoverStateMock({
     urlStateStorage: stateStorageContainer,
     tabsStorageManager,
     searchSessionManager,
+  });
+
+  return {
+    internalState,
+    services,
+    customizationContext,
+    runtimeStateManager,
+    stateStorageContainer,
+    tabsStorageManager,
+    searchSessionManager,
+  };
+}
+
+export function getDiscoverInternalStateMock({
+  persistedDataViews,
+  ...options
+}: CreateInternalStateStoreMockOptions & { persistedDataViews?: DataView[] } = {}) {
+  const {
+    internalState,
+    services,
+    customizationContext,
+    runtimeStateManager,
+    stateStorageContainer,
+    searchSessionManager,
+  } = createInternalStateStoreMock(options);
+
+  jest.spyOn(services.dataViews, 'get').mockImplementation((id) => {
+    const dataView = persistedDataViews?.find((dv) => dv.id === id);
+
+    if (!dataView) {
+      throw new Error(
+        `Data view with ID "${id}" not found in provided persistedDataViews mock array`
+      );
+    }
+
+    return Promise.resolve(dataView);
+  });
+
+  return {
+    internalState,
+    initializeTabs: async ({
+      persistedDiscoverSession,
+    }: { persistedDiscoverSession?: DiscoverSession } = {}) => {
+      if (persistedDiscoverSession) {
+        jest
+          .spyOn(services.savedSearch, 'getDiscoverSession')
+          .mockResolvedValueOnce(persistedDiscoverSession);
+      }
+
+      await internalState.dispatch(
+        internalStateActions.initializeTabs({
+          discoverSessionId: persistedDiscoverSession?.id,
+        })
+      );
+    },
+    addTab: async ({ tab }: { tab: TabState }) => {
+      const currentState = internalState.getState();
+
+      await internalState.dispatch(
+        internalStateActions.updateTabs({
+          items: [...selectAllTabs(currentState), tab],
+          selectedItem: tab,
+        })
+      );
+    },
+    initializeSingleTab: async ({ tabId }: { tabId: string }) => {
+      const stateContainer = getDiscoverStateContainer({
+        tabId: internalState.getState().tabs.unsafeCurrentId,
+        services,
+        customizationContext,
+        stateStorageContainer,
+        internalState,
+        runtimeStateManager,
+        searchSessionManager,
+      });
+      const customizationService = await getConnectedCustomizationService({
+        stateContainer,
+        customizationCallbacks: [],
+      });
+
+      await internalState.dispatch(
+        internalStateActions.initializeSingleTab({
+          tabId,
+          initializeSingleTabParams: {
+            stateContainer,
+            customizationService,
+            dataViewSpec: undefined,
+            defaultUrlState: undefined,
+          },
+        })
+      );
+    },
+  };
+}
+
+export function getDiscoverStateMock({
+  isTimeBased = true,
+  savedSearch,
+  additionalPersistedTabs = [],
+  history,
+  services = createDiscoverServicesMock(),
+  ...options
+}: CreateInternalStateStoreMockOptions & {
+  isTimeBased?: boolean;
+  savedSearch?: SavedSearch | false;
+  additionalPersistedTabs?: DiscoverSessionTab[];
+  history?: History<HistoryLocationState>;
+} = {}) {
+  if (history) {
+    services = { ...services, history };
+  }
+
+  const {
+    internalState,
+    customizationContext,
+    runtimeStateManager,
+    stateStorageContainer,
+    tabsStorageManager,
+    searchSessionManager,
+  } = createInternalStateStoreMock({
+    ...options,
+    services,
   });
   const finalSavedSearch =
     savedSearch === false
@@ -112,6 +227,7 @@ export function getDiscoverStateMock({
     persistedDiscoverSession,
     defaultTabState: DEFAULT_TAB_STATE,
   });
+
   if (!persistedDiscoverSession) {
     const stableTabId = 'stable-test-initial-tab-id';
     const selectedTab = initialTabsState.allTabs.find(
@@ -122,6 +238,7 @@ export function getDiscoverStateMock({
     }
     initialTabsState.selectedTabId = stableTabId;
   }
+
   // TODO: This should really be called async (or preferably the full `initializeTabs` thunk),
   // but doing so would make the whole function async, which would require a lot of test refactoring
   void tabsStorageManager.pushSelectedTabIdToUrl(initialTabsState.selectedTabId);
@@ -137,6 +254,7 @@ export function getDiscoverStateMock({
       { discoverSessionId: finalSavedSearch?.id }
     )
   );
+
   const container = getDiscoverStateContainer({
     tabId: internalState.getState().tabs.unsafeCurrentId,
     services,
@@ -150,11 +268,13 @@ export function getDiscoverStateMock({
     runtimeStateManager,
     internalState.getState().tabs.unsafeCurrentId
   );
+
   tabRuntimeState.customizationService$.next({
     ...createCustomizationService(),
     cleanup: async () => {},
   });
   tabRuntimeState.stateContainer$.next(container);
+
   if (finalSavedSearch) {
     container.savedSearchState.set(finalSavedSearch);
   }
