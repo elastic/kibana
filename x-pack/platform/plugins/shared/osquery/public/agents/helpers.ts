@@ -151,16 +151,18 @@ export const generateAgentSelection = (
 /**
  * Get the Osquery component status from an agent
  * @param agent - Agent object containing components array
- * @returns Uppercase status string or undefined if component not found
+ * @returns Component status (Fleet API returns uppercase: HEALTHY, DEGRADED, FAILED, STOPPED) or undefined if component not found
  */
-const getOsqueryStatus = (agent: { components?: AgentComponent[] }): string | undefined => {
+const getOsqueryStatus = (
+  agent: { components?: AgentComponent[] }
+): FleetServerAgentComponentStatus | undefined => {
   if (!agent.components || agent.components.length === 0) {
     return undefined;
   }
   const osqueryComponent = agent.components.find(
     (component) => component.type === OSQUERY_COMPONENT_TYPE
   );
-  return osqueryComponent?.status?.toUpperCase();
+  return osqueryComponent?.status;
 };
 
 /**

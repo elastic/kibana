@@ -102,7 +102,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
       });
     }
     return map;
-  }, [agentList?.agents]);
+  }, [agentList?.agents?.length]);
 
   const numAgentsSelected = useMemo(() => {
     const { newAgentSelection, selectedAgents, selectedGroups } =

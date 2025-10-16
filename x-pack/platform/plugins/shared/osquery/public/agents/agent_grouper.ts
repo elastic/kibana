@@ -35,6 +35,10 @@ export const generateAgentOption = (
   options: data.map((agent) => {
     const availability = getAgentOsqueryAvailability(agent);
 
+    // NOTE: Agent availability is evaluated at UI render time. Agent status may change between
+    // dropdown selection and query execution. Queries will fail gracefully if the agent becomes
+    // unavailable during this time.
+
     // Determine if agent should be disabled and its color based on availability
     // Disabled: offline (not checking in) OR osquery_unavailable (Osquery component failed)
     // Enabled: online OR degraded (with healthy Osquery)
