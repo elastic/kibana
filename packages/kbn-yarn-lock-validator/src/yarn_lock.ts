@@ -11,8 +11,8 @@ import Fsp from 'fs/promises';
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-// @ts-expect-error published types are worthless
-import * as YarnLockFile from '@yarnpkg/lockfile';
+// eslint-disable-next-line depend/ban-dependencies
+import jsYaml from 'js-yaml';
 
 /**
  * Parsed yarn.lock file contents mapping `name@versionRange` strings to information from
@@ -20,21 +20,40 @@ import * as YarnLockFile from '@yarnpkg/lockfile';
  */
 export interface YarnLock {
   /** a simple map of `name@versionrange` tags to metadata about a package */
+  /**
+   */
   [key: string]: {
     /** resolved version installed for this pacakge */
     version: string;
     /** resolved url for this pacakge */
-    resolved: string;
+    resolution: string;
     /** yarn calculated integrity value for this package */
-    integrity: string;
+    checksum: string;
+    languageName: 'node' | 'unknown' | string;
+    linkType: 'hard' | 'soft';
     dependencies?: {
       /** name => versionRange dependencies listed in package's manifest */
       [key: string]: string;
     };
-    optionalDependencies?: {
+    bin?: {
+      [key: string]: string;
+    };
+    peerDependencies?: {
       /** name => versionRange dependencies listed in package's manifest */
       [key: string]: string;
     };
+    peerDependenciesMeta?: Record<
+      string,
+      Partial<{
+        optional: boolean;
+      }>
+    >;
+    dependenciesMeta?: Record<
+      string,
+      Partial<{
+        optional: boolean;
+      }>
+    >;
   };
 }
 
@@ -42,19 +61,21 @@ export interface YarnLock {
  * Parse any yarn.lock content into a YarnLock map
  */
 export function parseLockfile(content: string): YarnLock {
-  const result = YarnLockFile.parse(content);
-  if (result.type === 'success') {
-    return result.object;
+  try {
+    const lockFile = jsYaml.load(content);
+    return lockFile as YarnLock;
+  } catch (e) {
+    throw new Error('unable to read yarn.lock file, please run `yarn kbn bootstrap`', {
+      cause: e,
+    } as any);
   }
-
-  throw new Error('unable to read yarn.lock file, please run `yarn kbn bootstrap`');
 }
 
 /**
  * Convert a parsed yarn.lock file back to a string
  */
 export function stringifyLockFile(yarnLock: YarnLock): string {
-  return YarnLockFile.stringify(yarnLock);
+  return jsYaml.dump(yarnLock, {});
 }
 
 /**

@@ -10,12 +10,7 @@
 import { run } from '../../lib/spawn.mjs';
 import External from '../../lib/external_packages.js';
 
-import {
-  areNodeModulesPresent,
-  checkYarnIntegrity,
-  removeYarnIntegrityFileIfExists,
-  yarnInstallDeps,
-} from './yarn.mjs';
+import { removeYarnIntegrityFileIfExists, yarnInstallDeps } from './yarn.mjs';
 import { sortPackageJson } from './sort_package_json.mjs';
 import { regeneratePackageMap } from './regenerate_package_map.mjs';
 import { regenerateTsconfigPaths } from './regenerate_tsconfig_paths.mjs';
@@ -64,8 +59,6 @@ export const command = {
       !IS_CI && (args.getBooleanValue('vscode') ?? !process.env.KBN_BOOTSTRAP_NO_VSCODE);
     const allowRoot = args.getBooleanValue('allow-root') ?? false;
     const forceInstall = args.getBooleanValue('force-install');
-    const shouldInstall =
-      forceInstall || !(await areNodeModulesPresent()) || !(await checkYarnIntegrity(log));
 
     const { packageManifestPaths, tsConfigRepoRels } = await time('discovery', discovery);
 
@@ -97,12 +90,10 @@ export const command = {
      * node_modules present, with an up-to-date yarn integrity file: only an integrity check is done, and module installs are skipped
      */
     await time('install dependencies', async () => {
-      if (shouldInstall) {
-        if (forceInstall) {
-          await removeYarnIntegrityFileIfExists();
-        }
-        await yarnInstallDeps(log, { offline, quiet });
+      if (forceInstall) {
+        await removeYarnIntegrityFileIfExists();
       }
+      await yarnInstallDeps(log, { offline, quiet });
     });
 
     await time('pre-build webpack bundles for packages', async () => {

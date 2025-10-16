@@ -11,14 +11,14 @@ import Path from 'path';
 import Fsp from 'fs/promises';
 
 import { REPO_ROOT } from '../../lib/paths.mjs';
-import { maybeRealpath, isFile, isDirectory } from '../../lib/fs.mjs';
+import { maybeRealpath, isFile } from '../../lib/fs.mjs';
 import { run } from '../../lib/spawn.mjs';
 
 // yarn integrity file checker
 export async function removeYarnIntegrityFileIfExists() {
   try {
     const nodeModulesRealPath = await maybeRealpath(Path.resolve(REPO_ROOT, 'node_modules'));
-    const yarnIntegrityFilePath = Path.resolve(nodeModulesRealPath, '.yarn-integrity');
+    const yarnIntegrityFilePath = Path.resolve(nodeModulesRealPath, '.yarn-state.yml');
 
     // check if the file exists and delete it in that case
     if (await isFile(yarnIntegrityFilePath)) {
@@ -29,10 +29,6 @@ export async function removeYarnIntegrityFileIfExists() {
   }
 }
 
-export async function areNodeModulesPresent() {
-  return await isDirectory(Path.resolve(REPO_ROOT, 'node_modules'));
-}
-
 /**
  * Installs project dependencies, using yarn
  * @param {import('@kbn/some-dev-log').SomeDevLog} log
@@ -40,7 +36,7 @@ export async function areNodeModulesPresent() {
  * @returns {Promise<void>}
  */
 export async function yarnInstallDeps(log, { offline, quiet }) {
-  const args = ['install', '--non-interactive'];
+  const args = ['install'];
   if (offline) args.push('--offline');
   if (quiet) args.push('--silent');
 

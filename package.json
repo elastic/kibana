@@ -47,6 +47,7 @@
     "dev-docs": "scripts/dev_docs.sh",
     "es": "node --no-experimental-require-module scripts/es",
     "preinstall": "node --no-experimental-require-module ./preinstall_check",
+    "prekbn": "echo hello!",
     "kbn": "node --no-experimental-require-module scripts/kbn",
     "lint": "yarn run lint:es && yarn run lint:style",
     "lint:es": "node --no-experimental-require-module scripts/eslint",
@@ -76,23 +77,6 @@
     "yarn": "^1.22.19"
   },
   "resolutions": {
-    "**/@babel/parser": "7.24.7",
-    "**/@hello-pangea/dnd": "18.0.1",
-    "**/@langchain/core": "^0.3.57",
-    "**/@langchain/google-common": "^0.1.8",
-    "**/@types/node": "22.15.3",
-    "**/@typescript-eslint/utils": "8.16.0",
-    "**/chokidar": "^3.5.3",
-    "**/d3-scale/**/d3-color": "npm:@elastic/kibana-d3-color@2.0.1",
-    "**/globule/minimatch": "^3.1.2",
-    "**/hoist-non-react-statics": "^3.3.2",
-    "**/isomorphic-fetch/node-fetch": "^2.6.7",
-    "**/langchain": "^0.3.15",
-    "**/remark-parse/trim": "1.0.1",
-    "**/sharp": "0.32.6",
-    "**/typescript": "5.4.5",
-    "**/util": "^0.12.5",
-    "**/yauzl": "^3.2.0",
     "@aws-sdk/client-bedrock-agent-runtime": "^3.744.0",
     "@aws-sdk/client-bedrock-runtime": "^3.744.0",
     "@aws-sdk/client-kendra": "3.744.0",
@@ -100,11 +84,15 @@
     "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.cd77847.0",
     "@types/react": "~18.2.0",
     "@types/react-dom": "~18.2.0",
-    "@xstate5/react/**/xstate": "^5.19.2",
     "apache-arrow": "20.x - 21.x",
     "globby/fast-glob": "^3.3.2",
     "pkce-challenge": "3.1.0"
   },
+  "workspaces": [
+    "src/platform/packages/shared/kbn-monaco",
+    "src/platform/packages/private/kbn-ui-shared-deps-src",
+    "src/platform/packages/private/kbn-ui-shared-deps-npm"
+  ],
   "dependencies": {
     "@a2a-js/sdk": "^0.3.0",
     "@apidevtools/json-schema-ref-parser": "^14.1.1",
@@ -1833,7 +1821,6 @@
     "@typescript-eslint/parser": "^8.16.0",
     "@typescript-eslint/typescript-estree": "^8.16.0",
     "@wojtekmaj/enzyme-adapter-react-17": "^0.6.7",
-    "@yarnpkg/lockfile": "^1.1.0",
     "aggregate-error": "^3.1.0",
     "argsplit": "^1.0.5",
     "autoprefixer": "^10.4.7",
@@ -2019,5 +2006,5 @@
     "yargs": "^15.4.1",
     "yarn-deduplicate": "^6.0.2"
   },
-  "packageManager": "yarn@1.22.21"
+  "packageManager": "yarn@3.3.0"
 }
