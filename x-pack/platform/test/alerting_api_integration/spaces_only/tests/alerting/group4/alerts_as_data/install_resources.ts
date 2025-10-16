@@ -153,7 +153,6 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(contextIndexTemplate.index_template.composed_of).to.eql([
           '.alerts-test.patternfiring.alerts-mappings',
           '.alerts-framework-mappings',
-          'fast_refresh', // injected by indexRefreshInterval optimization
         ]);
         expect(contextIndexTemplate.index_template.template!.mappings?.dynamic).to.eql(false);
         expect(contextIndexTemplate.index_template.template!.mappings?._meta?.managed).to.eql(true);
