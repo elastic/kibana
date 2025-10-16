@@ -10,6 +10,7 @@ import { chunk, flatten, omit } from 'lodash';
 import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import { RRule } from '@kbn/rrule';
+import _ from 'lodash';
 import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
 import type {
@@ -25,7 +26,6 @@ import type { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
 import type { ErrorOutput } from './lib/bulk_operation_buffer';
-import _ from 'lodash';
 
 const VERSION_CONFLICT_STATUS = 409;
 const BULK_ACTION_SIZE = 100;
