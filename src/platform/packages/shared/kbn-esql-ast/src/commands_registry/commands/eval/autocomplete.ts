@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
+import type { ESQLAstAllCommands, ESQLSingleAstItem } from '../../../types';
 import {
   pipeCompleteItem,
   commaCompleteItem,
@@ -25,7 +25,7 @@ import { isMarkerNode } from '../../../definitions/utils/ast';
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number

@@ -32,7 +32,7 @@ import {
 import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
-import type { ESQLAstAnyCommand, ESQLCommand } from '@kbn/esql-ast/src/types';
+import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { getAstContext } from '../shared/context';
 import { isHeaderCommandSuggestion, isSourceCommandSuggestion } from '../shared/helpers';
 import { QueryColumns, getSourcesHelper } from '../shared/resources_helpers';
@@ -229,9 +229,9 @@ function findNewUserDefinedColumn(userDefinedColumns: Set<string>) {
 
 async function getSuggestionsWithinCommandExpression(
   fullText: string,
-  commands: ESQLAstAnyCommand[],
+  commands: ESQLAstAllCommands[],
   astContext: {
-    command: ESQLAstAnyCommand;
+    command: ESQLAstAllCommands;
     node?: ESQLAstItem;
     option?: ESQLCommandOption;
     containingFunction?: ESQLFunction;
@@ -276,7 +276,7 @@ async function getSuggestionsWithinCommandExpression(
   // does it make sense to have a different context per command?
   return commandDefinition.methods.autocomplete(
     fullText,
-    astContext.command as ESQLCommand,
+    astContext.command,
     {
       getByType: getColumnsByType,
       getSuggestedUserDefinedColumnName,

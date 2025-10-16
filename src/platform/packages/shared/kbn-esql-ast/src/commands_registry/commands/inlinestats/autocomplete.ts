@@ -8,18 +8,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isCommand } from '../../../ast/is';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommand } from '../../../types';
+import type { ESQLAstAllCommands } from '../../../types';
 import type { ISuggestionItem, ICommandCallbacks, ICommandContext } from '../../types';
 import { autocomplete as statsAutocomplete } from '../stats/autocomplete';
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
+  if (!isCommand(command)) {
+    return [];
+  }
+
   if (!callbacks?.getByType || !callbacks?.getColumnsForQuery) {
     return [];
   }

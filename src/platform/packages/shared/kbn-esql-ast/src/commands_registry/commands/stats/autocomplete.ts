@@ -9,7 +9,7 @@
 import { ESQLVariableType } from '@kbn/esql-types';
 import { Walker } from '../../../walker';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
-import { isAssignment, isColumn } from '../../../ast/is';
+import { isAssignment, isColumn, isCommand } from '../../../ast/is';
 import type { ICommandCallbacks } from '../../types';
 import { Location } from '../../types';
 import type {
@@ -19,6 +19,7 @@ import type {
   ESQLFunction,
   ESQLAstItem,
   ESQLSingleAstItem,
+  ESQLAstAllCommands,
 } from '../../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import {
@@ -54,11 +55,15 @@ function alreadyUsedColumns(command: ESQLCommand) {
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
+  if (!isCommand(command)) {
+    return [];
+  }
+
   if (!callbacks?.getByType) {
     return [];
   }

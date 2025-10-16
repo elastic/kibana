@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommand } from '../../../types';
+import type { ESQLAstAllCommands } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
@@ -16,15 +16,19 @@ import {
   getLastNonWhitespaceChar,
   handleFragment,
 } from '../../../definitions/utils/autocomplete/helpers';
-import { isColumn } from '../../../ast/is';
+import { isColumn, isCommand } from '../../../ast/is';
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
+  if (!isCommand(command)) {
+    return [];
+  }
+
   const innerText = query.substring(0, cursorPosition);
   if (
     /\s/.test(innerText[innerText.length - 1]) &&

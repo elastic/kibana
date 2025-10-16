@@ -24,7 +24,7 @@ import { pipePrecedesCurrentWord } from '@kbn/esql-ast/src/definitions/utils';
 import { within } from '@kbn/esql-ast/src/definitions/utils/autocomplete/helpers';
 import type {
   ESQLAstExpression,
-  ESQLAstAnyCommand,
+  ESQLAstAllCommands,
   ESQLAstQueryExpression,
   ESQLAstHeaderCommand,
 } from '@kbn/esql-ast/src/types';
@@ -106,7 +106,7 @@ function mapToNonMarkerNode(arg: ESQLAstItem): ESQLAstItem {
   return Array.isArray(arg) ? arg.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode) : arg;
 }
 
-export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLAstAnyCommand>(
+export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLAstAllCommands>(
   node: T | undefined
 ) {
   if (!node) {

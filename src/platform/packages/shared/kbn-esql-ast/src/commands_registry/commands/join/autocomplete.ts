@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { isCommand } from '../../../ast/is';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import {
   getLookupIndexCreateSuggestion,
   handleFragment,
 } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommand } from '../../../types';
+import type { ESQLAstAllCommands } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
@@ -22,11 +23,15 @@ import { esqlCommandRegistry } from '../..';
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
+  if (!isCommand(command)) {
+    return [];
+  }
+
   if (!callbacks?.getByType || !callbacks?.getColumnsForQuery) {
     return [];
   }
