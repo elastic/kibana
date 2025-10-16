@@ -147,54 +147,82 @@ export const postActionsConnectorExecuteRoute = (
 
           // Get conversation messages for agent builder BEFORE saving the new message
           let conversationMessages: Array<Pick<Message, 'content' | 'role'>> = [];
-          if (conversationId) {
-            const conversation = await conversationsDataClient?.getConversation({
-              id: conversationId,
-            });
-            if (
-              conversation &&
-              !getIsConversationOwner(conversation, {
-                name: checkResponse.currentUser?.username,
-                id: checkResponse.currentUser?.profile_uid,
-              })
-            ) {
-              return resp.error({
-                body: `Updating a conversation is only allowed for the owner of the conversation.`,
-                statusCode: 403,
+
+          if (agentBuilderEnabled) {
+            // Agent builder logic: get full conversation history and save user message before execution
+            if (conversationId) {
+              const conversation = await conversationsDataClient?.getConversation({
+                id: conversationId,
               });
-            }
+              if (
+                conversation &&
+                !getIsConversationOwner(conversation, {
+                  name: checkResponse.currentUser?.username,
+                  id: checkResponse.currentUser?.profile_uid,
+                })
+              ) {
+                return resp.error({
+                  body: `Updating a conversation is only allowed for the owner of the conversation.`,
+                  statusCode: 403,
+                });
+              }
 
-            if (conversation && conversation.messages) {
-              conversationMessages = conversation.messages.map((msg) => ({
-                content: msg.content,
-                role: msg.role,
-              }));
-            }
+              if (conversation && conversation.messages) {
+                conversationMessages = conversation.messages.map((msg) => ({
+                  content: msg.content,
+                  role: msg.role,
+                }));
+              }
 
-            // Add the new message to the conversation messages
-            if (newMessage) {
-              conversationMessages.push(newMessage);
-            }
+              // Add the new message to the conversation messages
+              if (newMessage) {
+                conversationMessages.push(newMessage);
+              }
 
-            // Save the user message to the conversation if it exists
-            if (newMessage && conversationsDataClient && conversation) {
-              await conversationsDataClient.appendConversationMessages({
-                existingConversation: conversation,
-                messages: [
-                  {
-                    ...newMessage,
-                    user: {
-                      id: checkResponse.currentUser?.profile_uid,
-                      name: checkResponse.currentUser?.username,
+              // Save the user message to the conversation if it exists
+              if (newMessage && conversationsDataClient && conversation) {
+                await conversationsDataClient.appendConversationMessages({
+                  existingConversation: conversation,
+                  messages: [
+                    {
+                      ...newMessage,
+                      user: {
+                        id: checkResponse.currentUser?.profile_uid,
+                        name: checkResponse.currentUser?.username,
+                      },
+                      timestamp: new Date().toISOString(),
                     },
-                    timestamp: new Date().toISOString(),
-                  },
-                ],
-                authenticatedUser: checkResponse.currentUser,
-              });
+                  ],
+                  authenticatedUser: checkResponse.currentUser,
+                });
+              }
+            } else {
+              // No conversation exists, just use the new message
+              if (newMessage) {
+                conversationMessages.push(newMessage);
+              }
             }
           } else {
-            // No conversation exists, just use the new message
+            // Legacy langChain logic: only use the new message, don't save before execution
+            if (conversationId) {
+              const conversation = await conversationsDataClient?.getConversation({
+                id: conversationId,
+              });
+              if (
+                conversation &&
+                !getIsConversationOwner(conversation, {
+                  name: checkResponse.currentUser?.username,
+                  id: checkResponse.currentUser?.profile_uid,
+                })
+              ) {
+                return resp.error({
+                  body: `Updating a conversation is only allowed for the owner of the conversation.`,
+                  statusCode: 403,
+                });
+              }
+            }
+
+            // For langChain, only pass the new message
             if (newMessage) {
               conversationMessages.push(newMessage);
             }
@@ -277,7 +305,7 @@ export const postActionsConnectorExecuteRoute = (
               isOssModel,
               inferenceChatModelDisabled,
               conversationId,
-              context,
+              context:,
               logger,
               inference,
               messages: conversationMessages,
