@@ -74,11 +74,11 @@ export const Evaluation: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EvaluatorBadgesGroup
-                relevance={averages.relevance || undefined}
-                precision={averages.precision || undefined}
-                recall={averages.recall || undefined}
-                groundedness={averages.groundedness || undefined}
-                regex={averages.regex || undefined}
+                relevance={averages.relevance ?? undefined}
+                precision={averages.precision ?? undefined}
+                recall={averages.recall ?? undefined}
+                groundedness={averages.groundedness ?? undefined}
+                regex={averages.regex ?? undefined}
                 variant="conversation-average"
               />
             </EuiFlexItem>

@@ -54,20 +54,27 @@ export const EvaluatorBadgesGroup: React.FC<EvaluatorBadgesGroupProps> = ({
   // Create array of evaluation data for dynamic rendering
   const evaluations = [
     { key: 'relevance', value: relevance, label: 'Relevance' },
-    { key: 'precision', value: precision, label: 'Precision' },
-    { key: 'recall', value: recall, label: 'Recall' },
     { key: 'groundedness', value: groundedness, label: 'Groundedness' },
     { key: 'regex', value: regex, label: 'Regex' },
+    { key: 'recall', value: recall, label: 'Recall' },
+    { key: 'precision', value: precision, label: 'Precision' },
   ].filter((x) => x.value !== undefined);
 
   return (
-    <div style={{ display: 'flex', gap: euiTheme.size.s }}>
+    <div
+      style={{
+        display: 'flex',
+        gap: euiTheme.size.s,
+        flexDirection: variant === 'conversation-average' ? 'row' : 'column',
+      }}
+    >
       {evaluations.map(({ key, value, label }) => (
         <EuiBadge
           key={key}
           color={getBadgeColorForVariant(value!)}
           iconType={getBadgeIconForVariant(value!)}
           css={variant === 'conversation-average' ? averageBadgeStyles : undefined}
+          style={{ alignSelf: 'flex-start', marginInlineStart: 0 }}
         >
           {label}: {value!.toFixed(2)}/1
         </EuiBadge>
