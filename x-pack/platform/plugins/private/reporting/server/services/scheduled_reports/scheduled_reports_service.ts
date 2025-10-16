@@ -20,7 +20,12 @@ import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { partition } from 'lodash';
 import type { ReportingCore } from '../..';
-import type { ListScheduledReportApiJSON, ReportingUser, ScheduledReportType } from '../../types';
+import type {
+  ListScheduledReportApiJSON,
+  ReportingUser,
+  ScheduledReportApiJSON,
+  ScheduledReportType,
+} from '../../types';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { ScheduledReportAuditEventParams } from '../audit_events/audit_events';
 import {
@@ -30,6 +35,7 @@ import {
 import { DEFAULT_SCHEDULED_REPORT_LIST_SIZE } from './constants';
 import { transformBulkDeleteResponse, transformListResponse } from './transforms';
 import type { BulkOperationError } from './types';
+import { transformSingleResponse } from './transforms';
 
 const SCHEDULED_REPORT_ID_FIELD = 'scheduled_report_id';
 const CREATED_AT_FIELD = 'created_at';
@@ -92,6 +98,36 @@ export class ScheduledReportsService {
       savedObjectsClient,
       taskManager
     );
+  }
+
+  public async update({
+    user,
+    id,
+  }: {
+    user: ReportingUser;
+    id: string;
+  }): Promise<ScheduledReportApiJSON> {
+    try {
+      const username = this.getUsername(user);
+      const response = await this.savedObjectsClient.get<ScheduledReportType>(
+        SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+        id
+      );
+
+      if (!this.userCanManageReporting && response.attributes.createdBy !== username) {
+        // TODO
+        return this.responseFactory.forbidden({
+          body: `The current user is not allowed to update the scheduled report with id: ${id}.`,
+        });
+      }
+
+      return transformSingleResponse(this.logger, response);
+    } catch (error) {
+      throw this.responseFactory.customError({
+        statusCode: 500,
+        body: `Error listing scheduled reports: ${error.message}`,
+      });
+    }
   }
 
   public async list({
