@@ -91,6 +91,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
           connector_type_id: connectorTypeId,
           is_missing_secrets: false,
           config,
+          is_connector_type_deprecated: false,
         });
       });
 

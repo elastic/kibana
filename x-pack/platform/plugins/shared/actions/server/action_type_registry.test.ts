@@ -20,6 +20,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
 import { getConnectorType } from './fixtures';
+import { createMockInMemoryConnector } from './application/connector/mocks';
 
 const mockTaskManager = taskManagerMock.createSetup();
 const inMemoryMetrics = inMemoryMetricsMock.create();
@@ -55,26 +56,18 @@ describe('actionTypeRegistry', () => {
       actionsConfigUtils: mockedActionsConfig,
       licenseState: mockedLicenseState,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           actionTypeId: 'foo',
-          config: {},
           id: 'my-slack1',
           name: 'Slack #xyz',
-          secrets: {},
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
-        },
-        {
+        }),
+        createMockInMemoryConnector({
           actionTypeId: 'test.system-action',
-          config: {},
           id: 'system-connector-test.system-action',
           name: 'System action: test.system-action',
-          secrets: {},
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-        },
+        }),
       ],
     };
   });
@@ -241,6 +234,7 @@ describe('actionTypeRegistry', () => {
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: ['alerting'],
           isSystemActionType: false,
+          isDeprecated: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -297,6 +291,7 @@ describe('actionTypeRegistry', () => {
           supportedFeatureIds: ['alerting'],
           isSystemActionType: false,
           validate: { params: expect.any(Object) },
+          isDeprecated: false,
         },
         {
           id: 'my-connector-type-with-subaction',
@@ -308,6 +303,7 @@ describe('actionTypeRegistry', () => {
           supportedFeatureIds: ['alerting'],
           isSystemActionType: false,
           validate: { params: expect.any(Object) },
+          isDeprecated: false,
         },
       ]);
 
@@ -452,6 +448,7 @@ describe('actionTypeRegistry', () => {
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: ['alerting'],
           isSystemActionType: false,
+          isDeprecated: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -483,6 +480,7 @@ describe('actionTypeRegistry', () => {
           minimumLicenseRequired: 'platinum',
           supportedFeatureIds: ['alerting'],
           isSystemActionType: true,
+          isDeprecated: false,
         },
       ]);
     });
@@ -515,6 +513,7 @@ describe('actionTypeRegistry', () => {
           name: 'Test',
           subFeature: 'endpointSecurity',
           supportedFeatureIds: ['siem'],
+          isDeprecated: false,
         },
       ]);
     });
@@ -914,6 +913,25 @@ describe('actionTypeRegistry', () => {
         params: { foo: 'bar' },
         source: ActionExecutionSourceType.HTTP_REQUEST,
       });
+    });
+  });
+
+  describe('isDeprecated', () => {
+    it('should return true if the action type is deprecated', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      registry.register(
+        getConnectorType({
+          id: 'test.action',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          isSystemActionType: false,
+          isDeprecated: true,
+        })
+      );
+
+      const result = registry.isDeprecated('test.action');
+      expect(result).toBe(true);
     });
   });
 });

@@ -101,6 +101,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           config: {
             url: 'https://example.com',
           },
+          is_connector_type_deprecated: false,
         });
       });
     });

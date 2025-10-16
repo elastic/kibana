@@ -126,6 +126,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             jwtKeyId: null,
             userIdentifierValue: null,
           },
+          is_connector_type_deprecated: false,
         });
 
         const { body: fetchedAction } = await supertest
@@ -147,6 +148,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             jwtKeyId: null,
             userIdentifierValue: null,
           },
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -180,6 +182,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             jwtKeyId: mockServiceNowOAuth.config.jwtKeyId,
             userIdentifierValue: mockServiceNowOAuth.config.userIdentifierValue,
           },
+          is_connector_type_deprecated: false,
         });
 
         const { body: fetchedConnector } = await supertest
@@ -201,6 +204,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             jwtKeyId: mockServiceNowOAuth.config.jwtKeyId,
             userIdentifierValue: mockServiceNowOAuth.config.userIdentifierValue,
           },
+          is_connector_type_deprecated: false,
         });
       });
 

@@ -157,6 +157,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
           is_system_action: false,
           is_deprecated: false,
           name: 'A swimlane action',
+          is_connector_type_deprecated: false,
         });
 
         expect(typeof createdAction.id).to.be('string');
@@ -177,6 +178,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             ...mockSwimlane.config,
             apiUrl: swimlaneSimulatorURL,
           },
+          is_connector_type_deprecated: false,
         });
       });
 
