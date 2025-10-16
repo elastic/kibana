@@ -826,19 +826,6 @@ export function getSuggestion(
   const isAt = context.triggerCharacter === '@';
   const keyCouldAccessedByDot = PROPERTY_PATH_REGEX.test(key);
   const removeDot = isAt || !keyCouldAccessedByDot;
-  console.log('getSuggestion CALLED!!!!!!!!!!!', {
-    key,
-    context,
-    range,
-    scalarType,
-    shouldBeQuoted,
-    type,
-    description,
-    useCurlyBraces,
-    keyCouldAccessedByDot,
-    isAt,
-    removeDot,
-  });
 
   if (!keyCouldAccessedByDot) {
     // we need to use opposite quote type if we are in a string
@@ -884,68 +871,12 @@ export function getSuggestion(
   };
 }
 
-export function handleAtCompletion(
-  getState: () => WorkflowEditorState | undefined,
-  model: monaco.editor.ITextModel,
-  position: monaco.Position,
-  completionContext: monaco.languages.CompletionContext
-): ProviderResult<CompletionList> {
-  const editorState = getState();
-  const dynamicConnectorTypes = editorState?.connectors?.connectorTypes;
-  const workflowYamlSchema = editorState?.schemaLoose;
-  const workflowGraph = editorState?.computed?.workflowGraph;
-  const yamlDocument = editorState?.computed?.yamlDocument;
-  const workflowLookup = editorState?.computed?.workflowLookup;
-  const focusedStepId = editorState?.focusedStepId;
-
-  if (
-    !workflowYamlSchema ||
-    !dynamicConnectorTypes ||
-    !yamlDocument ||
-    !workflowLookup ||
-    !workflowGraph ||
-    !focusedStepId
-  ) {
-    return {
-      suggestions: [],
-      incomplete: false,
-    };
-  }
-
-  const absolutePosition = model.getOffsetAt(position);
-
-  const focusedStepInfo = workflowLookup.steps[focusedStepId]!;
-
-  let focusedProp: StepPropInfo | undefined;
-  for (const [, stepPropInfo] of Object.entries(focusedStepInfo.propInfos)) {
-    const range = stepPropInfo.valueNode.range;
-    if (!range) {
-      continue;
-    }
-
-    if (range[0] <= absolutePosition && absolutePosition <= range[2]) {
-      focusedProp = stepPropInfo;
-      break;
-    }
-  }
-  if (!focusedProp) {
-    return {
-      suggestions: [],
-      incomplete: false,
-    };
-  }
-
-  const useCurlyBraces = focusedProp?.keyNode.value !== 'foreach';
-}
-
 export function getCompletionItemProvider(
   getState: () => WorkflowEditorState | undefined
 ): monaco.languages.CompletionItemProvider {
   return {
     triggerCharacters: ['@', '.', ' '],
     provideCompletionItems: async (model, position, completionContext) => {
-      // Slight delay to allow state updates since computation are debounced at 500ms
-      await new Promise((resolve) => setTimeout(resolve, 510));
       try {
         const editorState = getState();
         const dynamicConnectorTypes = editorState?.connectors?.connectorTypes;
@@ -954,60 +885,48 @@ export function getCompletionItemProvider(
         const yamlDocument = editorState?.computed?.yamlDocument;
         const workflowLookup = editorState?.computed?.workflowLookup;
         const focusedStepId = editorState?.focusedStepId;
+        const absolutePosition = model.getOffsetAt(position);
+        let useCurlyBraces = true;
 
-        if (completionContext.triggerCharacter === '@') {
-          return handleAtCompletion(getState, model, position, completionContext);
+        if (!yamlDocument) {
+          return {
+            suggestions: [],
+            incomplete: false,
+          };
         }
 
-        // if (
-        //   !workflowYamlSchema ||
-        //   !dynamicConnectorTypes ||
-        //   !yamlDocument ||
-        //   !workflowLookup ||
-        //   !workflowGraph
-        // ) {
-        //   return {
-        //     suggestions: [],
-        //     incomplete: false,
-        //   };
-        // }
+        if (completionContext.triggerCharacter === '@') {
+          if (!workflowLookup || !focusedStepId) {
+            return {
+              suggestions: [],
+              incomplete: false,
+            };
+          }
 
-        // if (!focusedStepId) {
-        //   return {
-        //     suggestions: [],
-        //     incomplete: false,
-        //   };
-        // }
-        const absolutePosition = model.getOffsetAt(position);
+          const focusedStepInfo = workflowLookup.steps[focusedStepId]!;
 
-        // const focusedStepInfo = workflowLookup.steps[focusedStepId]!;
+          let focusedProp: StepPropInfo | undefined;
+          for (const [, stepPropInfo] of Object.entries(focusedStepInfo.propInfos)) {
+            const range = stepPropInfo.valueNode.range;
+            if (!range) {
+              continue;
+            }
 
-        // let focusedProp: StepPropInfo | undefined;
-        // for (const [, stepPropInfo] of Object.entries(focusedStepInfo.propInfos)) {
-        //   const range = stepPropInfo.valueNode.range;
-        //   if (!range) {
-        //     continue;
-        //   }
+            if (range[0] <= absolutePosition && absolutePosition <= range[2]) {
+              focusedProp = stepPropInfo;
+              break;
+            }
+          }
+          if (!focusedProp) {
+            return {
+              suggestions: [],
+              incomplete: false,
+            };
+          }
 
-        //   if (range[0] <= absolutePosition && absolutePosition <= range[2]) {
-        //     focusedProp = stepPropInfo;
-        //     break;
-        //   }
-        // }
-        // if (!focusedProp) {
-        //   return {
-        //     suggestions: [],
-        //     incomplete: false,
-        //   };
-        // }
+          useCurlyBraces = focusedProp.keyNode.value !== 'foreach';
+        }
 
-        // const useCurlyBraces = focusedProp?.keyNode.value !== 'foreach';
-        // console.log({
-        //   absolutePosition,
-        //   focusedProp,
-        //   steps: workflowLookup.steps,
-        // });
-        const useCurlyBraces = true;
         const { lineNumber } = position;
         const line = model.getLineContent(lineNumber);
         const wordUntil = model.getWordUntilPosition(position);
