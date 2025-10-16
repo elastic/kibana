@@ -6,4 +6,3 @@
  */
 
 export { Toolbar } from './toolbar';
-export { MetricFlyoutToolbar } from './flyout_toolbar';

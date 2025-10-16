@@ -47,7 +47,6 @@ import {
   type DatatableColumnFn,
   type DatatableExpressionFunction,
 } from '../../../common/expressions';
-import { DatatableFlyoutToolbar } from './components/toolbar/flyout_toolbar';
 import { DataTableToolbar } from './components/toolbar';
 import {
   DEFAULT_HEADER_ROW_HEIGHT,
@@ -64,6 +63,8 @@ import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_te
 import { DatatableInspectorTables } from '../../../common/expressions/defs/datatable/datatable';
 import { getSimpleColumnType } from './components/table_actions';
 import { convertToRuntimeState } from './runtime_state';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { DatatableAppearanceSettings } from './components/toolbar/appearance_settings';
 
 export interface DatatableVisualizationState {
   columns: ColumnState[];
@@ -712,7 +713,7 @@ export const getDatatableVisualization = ({
   },
 
   FlyoutToolbarComponent(props) {
-    return <DatatableFlyoutToolbar {...props} />;
+    return <FlyoutToolbar {...props} contentMap={{ style: DatatableAppearanceSettings }} />;
   },
 
   onEditAction(state, event) {

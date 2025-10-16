@@ -6,4 +6,3 @@
  */
 
 export { TagcloudToolbar } from './tagcloud_toolbar';
-export { TagcloudFlyoutToolbar } from './flyout_toolbar';
