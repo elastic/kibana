@@ -10,11 +10,11 @@
 import type { ISuggestionItem } from '../../../../../commands_registry/types';
 import type { ExpressionPosition } from '../position';
 import type { ExpressionContext } from '../types';
-import { suggestAfterComplete } from './afterComplete';
-import { suggestAfterNot } from './afterNot';
-import { suggestAfterOperator } from './afterOperator';
-import { suggestForEmptyExpression } from './emptyExpression';
-import { suggestInFunction } from './inFunction';
+import { suggestAfterComplete } from './after_complete';
+import { suggestAfterNot } from './after_not';
+import { suggestAfterOperator } from './after_operator';
+import { suggestForEmptyExpression } from './empty_expression';
+import { suggestInFunction } from './in_function';
 
 const handlers: Record<ExpressionPosition, (ctx: ExpressionContext) => Promise<ISuggestionItem[]>> =
   {

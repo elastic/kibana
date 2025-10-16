@@ -12,7 +12,7 @@ import { listCompleteItem } from '../../../../../commands_registry/complete_item
 import type { ESQLAstItem, ESQLFunction } from '../../../../../types';
 import type { FunctionDefinition, SupportedDataType } from '../../../../types';
 import { FunctionDefinitionTypes, isArrayType } from '../../../../types';
-import { SignatureAnalyzer } from '../SignatureAnalyzer';
+import { SignatureAnalyzer } from '../signature_analyzer';
 import {
   getExpressionType,
   getRightmostNonVariadicOperator,
@@ -24,8 +24,8 @@ import { logicalOperators } from '../../../../all_operators';
 import { dispatchOperators } from '../operators/dispatcher';
 import { isLiteral } from '../../../../../ast/is';
 import type { ExpressionContext } from '../types';
-import { SuggestionBuilder } from '../SuggestionBuilder';
-import { shouldSuggestOperators } from './afterComplete/shouldSuggestOperators';
+import { SuggestionBuilder } from '../suggestion_builder';
+import { shouldSuggestOperators } from './after_complete/should_suggest_operators';
 
 /**
  * Suggests completions after an operator (e.g., field = |, field IN |)

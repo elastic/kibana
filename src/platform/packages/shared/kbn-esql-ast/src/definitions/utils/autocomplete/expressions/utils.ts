@@ -12,7 +12,7 @@ import { nullCheckOperators, inOperators } from '../../../all_operators';
 import type { FunctionParameterContext } from './types';
 import type { ICommandContext } from '../../../../commands_registry/types';
 import { getFunctionDefinition } from '../..';
-import { SignatureAnalyzer } from './SignatureAnalyzer';
+import { SignatureAnalyzer } from './signature_analyzer';
 import type { Signature } from '../../../types';
 
 export type SpecialFunctionName = 'case' | 'count' | 'bucket';

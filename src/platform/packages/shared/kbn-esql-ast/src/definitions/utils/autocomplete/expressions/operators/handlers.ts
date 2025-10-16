@@ -17,9 +17,9 @@ import type { ESQLColumn, ESQLFunction } from '../../../../../types';
 import { getBinaryExpressionOperand, getExpressionType } from '../../../expressions';
 import type { ExpressionContext } from '../types';
 import { getLogicalContinuationSuggestions, shouldSuggestOpenListForOperand } from './utils';
-import { shouldSuggestComma } from '../commaDecisionEngine';
+import { shouldSuggestComma } from '../comma_decision_engine';
 import { buildConstantsDefinitions } from '../../../literals';
-import { SuggestionBuilder } from '../SuggestionBuilder';
+import { SuggestionBuilder } from '../suggestion_builder';
 
 // ============================================================================
 // eg. IN / NOT IN Operators

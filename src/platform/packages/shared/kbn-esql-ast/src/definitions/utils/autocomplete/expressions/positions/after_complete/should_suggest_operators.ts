@@ -10,7 +10,7 @@
 import type { SupportedDataType } from '../../../../../types';
 import { supportsArithmeticOperations } from '../../../../../types';
 import type { ExpressionContext, FunctionParameterContext } from '../../types';
-import { SignatureAnalyzer } from '../../SignatureAnalyzer';
+import { SignatureAnalyzer } from '../../signature_analyzer';
 import { arithmeticOperators, logicalOperators } from '../../../../../all_operators';
 
 export interface OperatorRuleContext {

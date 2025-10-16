@@ -14,12 +14,12 @@ import type { ExpressionContext } from '../types';
 import { isLiteral, isFunctionExpression } from '../../../../../ast/is';
 import { isNumericType, FunctionDefinitionTypes } from '../../../../types';
 import { commaCompleteItem } from '../../../../../commands_registry/complete_items';
-import { shouldSuggestComma } from '../commaDecisionEngine';
+import { shouldSuggestComma } from '../comma_decision_engine';
 import { getExpressionType } from '../../../expressions';
-import { SignatureAnalyzer } from '../SignatureAnalyzer';
+import { SignatureAnalyzer } from '../signature_analyzer';
 import { getLogicalContinuationSuggestions } from '../operators/utils';
-import { shouldSuggestOperators } from './afterComplete/shouldSuggestOperators';
-import { SuggestionBuilder } from '../SuggestionBuilder';
+import { shouldSuggestOperators } from './after_complete/should_suggest_operators';
+import { SuggestionBuilder } from '../suggestion_builder';
 import { logicalOperators } from '../../../../all_operators';
 
 /**

@@ -11,7 +11,7 @@ import { isFunctionExpression } from '../../../../../ast/is';
 import type { ISuggestionItem } from '../../../../../commands_registry/types';
 import { getOperatorSuggestion } from '../../../operators';
 import type { ExpressionContext } from '../types';
-import { SuggestionBuilder } from '../SuggestionBuilder';
+import { SuggestionBuilder } from '../suggestion_builder';
 import { operatorsDefinitions } from '../../../../all_operators';
 
 /**

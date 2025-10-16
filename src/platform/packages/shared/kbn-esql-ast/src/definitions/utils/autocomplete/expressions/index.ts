@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { suggestForExpression } from './suggestionEngine';
+export { suggestForExpression } from './suggestion_engine';
 export { getPosition as getExpressionPosition, type ExpressionPosition } from './position';
 export { buildExpressionFunctionParameterContext } from './utils';

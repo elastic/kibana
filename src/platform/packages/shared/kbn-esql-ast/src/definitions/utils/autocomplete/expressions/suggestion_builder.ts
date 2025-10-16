@@ -13,7 +13,7 @@ import { getFieldsSuggestions, getFunctionsSuggestions, getLiteralsSuggestions }
 import { getOperatorSuggestions } from '../../operators';
 import type { ExpressionContext } from './types';
 import { commaCompleteItem } from '../../../../commands_registry/complete_items';
-import { shouldSuggestComma, type CommaContext } from './commaDecisionEngine';
+import { shouldSuggestComma, type CommaContext } from './comma_decision_engine';
 
 /** Builder pattern to eliminate duplicated field/function/literal suggestion code. */
 export class SuggestionBuilder {
@@ -38,9 +38,7 @@ export class SuggestionBuilder {
     const addSpaceAfterField = options?.addSpaceAfterField ?? addComma;
     const promoteToTop = options?.promoteToTop ?? true;
     const ignoredColumns = options?.ignoredColumns ?? [];
-    const isInsideFunction = Boolean(this.context.options.functionParameterContext);
-    const openSuggestions =
-      options?.openSuggestions ?? (addSpaceAfterField || addComma || !isInsideFunction);
+    const openSuggestions = options?.openSuggestions ?? (addSpaceAfterField || addComma);
     const values = options?.values;
 
     const getByType = this.context.callbacks?.getByType ?? (() => Promise.resolve([]));

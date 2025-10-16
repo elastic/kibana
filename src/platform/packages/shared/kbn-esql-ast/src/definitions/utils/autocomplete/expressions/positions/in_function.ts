@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { suggestForExpression } from '../suggestionEngine';
+import { suggestForExpression } from '../suggestion_engine';
 import type { ExpressionContext, FunctionParameterContext } from '../types';
 import { getFunctionDefinition } from '../../../functions';
 import type { ISuggestionItem } from '../../../../../commands_registry/types';
 import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../../../../types';
-import { SignatureAnalyzer } from '../SignatureAnalyzer';
+import { SignatureAnalyzer } from '../signature_analyzer';
 
 /** Matches comma followed by optional whitespace at end of text */
 const STARTING_NEW_PARAM_REGEX = /,\s*$/;

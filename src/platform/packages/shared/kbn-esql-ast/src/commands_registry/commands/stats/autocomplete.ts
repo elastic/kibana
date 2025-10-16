@@ -264,6 +264,7 @@ export async function autocomplete(
         afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
         addSpaceAfterFirstField: false,
         ignoredColumns,
+        openSuggestions: true,
       });
     }
 
@@ -297,6 +298,7 @@ export async function autocomplete(
         afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
         addSpaceAfterFirstField: false,
         ignoredColumns,
+        openSuggestions: true,
       });
     }
 
@@ -323,6 +325,7 @@ async function getExpressionSuggestions({
   suggestFunctions = true,
   controlType,
   ignoredColumns = [],
+  openSuggestions,
 }: {
   query: string;
   command: ESQLCommand;
@@ -339,6 +342,7 @@ async function getExpressionSuggestions({
   suggestFunctions?: boolean;
   controlType?: ESQLVariableType;
   ignoredColumns?: string[];
+  openSuggestions?: boolean;
 }): Promise<ISuggestionItem[]> {
   const suggestions: ISuggestionItem[] = [];
   const innerText = query.substring(0, cursorPosition);
@@ -361,6 +365,7 @@ async function getExpressionSuggestions({
           suggestFields: suggestColumns,
           suggestFunctions,
           controlType,
+          openSuggestions,
         },
       }))
     );

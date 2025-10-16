@@ -10,11 +10,11 @@
 import { ESQLVariableType } from '@kbn/esql-types';
 import { uniq } from 'lodash';
 import { matchesSpecialFunction } from '../utils';
-import { shouldSuggestComma, type CommaContext } from '../commaDecisionEngine';
+import { shouldSuggestComma, type CommaContext } from '../comma_decision_engine';
 import type { ExpressionContext } from '../types';
 import { ensureKeywordAndText } from '../../functions';
-import { SuggestionBuilder } from '../SuggestionBuilder';
-import { SignatureAnalyzer } from '../SignatureAnalyzer';
+import { SuggestionBuilder } from '../suggestion_builder';
+import { SignatureAnalyzer } from '../signature_analyzer';
 import { getControlSuggestion, getVariablePrefix, getLiteralsSuggestions } from '../../helpers';
 import { buildValueDefinitions } from '../../../values';
 import { getCompatibleLiterals } from '../../../literals';
@@ -249,6 +249,7 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
         ignoredColumns,
         addSpaceAfterField,
         promoteToTop: true,
+        ...(options.openSuggestions !== undefined && { openSuggestions: options.openSuggestions }),
       });
     }
 
@@ -256,6 +257,7 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
       builder.addFunctions({
         types: acceptedTypes,
         ignoredFunctions: [],
+        ...(options.openSuggestions !== undefined && { openSuggestions: options.openSuggestions }),
       });
     }
 
