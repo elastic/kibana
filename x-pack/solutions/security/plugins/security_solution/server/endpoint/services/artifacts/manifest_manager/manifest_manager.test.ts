@@ -219,7 +219,6 @@ describe('ManifestManager', () => {
       const savedObjectsClient = savedObjectsClientMock.create();
       const manifestManagerContext = buildManifestManagerContextMock({
         savedObjectsClient,
-        experimentalFeatures: ['unifiedManifestEnabled'],
       });
       const manifestManager = new ManifestManager(manifestManagerContext);
 
