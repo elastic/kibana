@@ -169,6 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:automatic-agent-upgrade-task',
         'fleet:bump_agent_policies',
         'fleet:check-deleted-files-task',
+        'fleet:cleanup-integration-revisions-task',
         'fleet:delete-unenrolled-agents-task',
         'fleet:deploy_agent_policies',
         'fleet:migrate_action:retry',
