@@ -884,6 +884,60 @@ export function getSuggestion(
   };
 }
 
+export function handleAtCompletion(
+  getState: () => WorkflowEditorState | undefined,
+  model: monaco.editor.ITextModel,
+  position: monaco.Position,
+  completionContext: monaco.languages.CompletionContext
+): ProviderResult<CompletionList> {
+  const editorState = getState();
+  const dynamicConnectorTypes = editorState?.connectors?.connectorTypes;
+  const workflowYamlSchema = editorState?.schemaLoose;
+  const workflowGraph = editorState?.computed?.workflowGraph;
+  const yamlDocument = editorState?.computed?.yamlDocument;
+  const workflowLookup = editorState?.computed?.workflowLookup;
+  const focusedStepId = editorState?.focusedStepId;
+
+  if (
+    !workflowYamlSchema ||
+    !dynamicConnectorTypes ||
+    !yamlDocument ||
+    !workflowLookup ||
+    !workflowGraph ||
+    !focusedStepId
+  ) {
+    return {
+      suggestions: [],
+      incomplete: false,
+    };
+  }
+
+  const absolutePosition = model.getOffsetAt(position);
+
+  const focusedStepInfo = workflowLookup.steps[focusedStepId]!;
+
+  let focusedProp: StepPropInfo | undefined;
+  for (const [, stepPropInfo] of Object.entries(focusedStepInfo.propInfos)) {
+    const range = stepPropInfo.valueNode.range;
+    if (!range) {
+      continue;
+    }
+
+    if (range[0] <= absolutePosition && absolutePosition <= range[2]) {
+      focusedProp = stepPropInfo;
+      break;
+    }
+  }
+  if (!focusedProp) {
+    return {
+      suggestions: [],
+      incomplete: false,
+    };
+  }
+
+  const useCurlyBraces = focusedProp?.keyNode.value !== 'foreach';
+}
+
 export function getCompletionItemProvider(
   getState: () => WorkflowEditorState | undefined
 ): monaco.languages.CompletionItemProvider {
@@ -901,25 +955,29 @@ export function getCompletionItemProvider(
         const workflowLookup = editorState?.computed?.workflowLookup;
         const focusedStepId = editorState?.focusedStepId;
 
-        if (
-          !workflowYamlSchema ||
-          !dynamicConnectorTypes ||
-          !yamlDocument ||
-          !workflowLookup ||
-          !workflowGraph
-        ) {
-          return {
-            suggestions: [],
-            incomplete: false,
-          };
+        if (completionContext.triggerCharacter === '@') {
+          return handleAtCompletion(getState, model, position, completionContext);
         }
 
-        if (!focusedStepId) {
-          return {
-            suggestions: [],
-            incomplete: false,
-          };
-        }
+        // if (
+        //   !workflowYamlSchema ||
+        //   !dynamicConnectorTypes ||
+        //   !yamlDocument ||
+        //   !workflowLookup ||
+        //   !workflowGraph
+        // ) {
+        //   return {
+        //     suggestions: [],
+        //     incomplete: false,
+        //   };
+        // }
+
+        // if (!focusedStepId) {
+        //   return {
+        //     suggestions: [],
+        //     incomplete: false,
+        //   };
+        // }
         const absolutePosition = model.getOffsetAt(position);
 
         // const focusedStepInfo = workflowLookup.steps[focusedStepId]!;
