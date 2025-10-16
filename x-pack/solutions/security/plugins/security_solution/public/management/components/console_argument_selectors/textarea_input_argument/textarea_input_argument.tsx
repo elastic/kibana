@@ -15,9 +15,11 @@ import {
   EuiTextArea,
   EuiText,
   htmlIdGenerator,
+  EuiIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/types';
 import type { CommandArgumentValueSelectorProps } from '../../console/types';
@@ -91,6 +93,13 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
       `;
     }, [width]);
 
+    // Because the console supports multiple instances of the same argument, we need to ensure that
+    // if the command was defined to now allow multiples, that we only render the first one.
+    const shouldRender = useMemo<boolean>(() => {
+      const argDefinition = command.commandDefinition.args?.[argName];
+      return argDefinition?.allowMultiples || argIndex === 0;
+    }, [argIndex, argName, command.commandDefinition.args]);
+
     const handleClosePopover = useCallback(() => {
       onChange({
         value,
@@ -125,7 +134,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
       [onChange, state, valueText]
     );
 
-    return (
+    return shouldRender ? (
       <EuiPopover
         isOpen={state.isPopoverOpen}
         anchorPosition="upCenter"
@@ -179,6 +188,14 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
           )
         }
       </EuiPopover>
+    ) : (
+      <EuiText size="s" color="subdued" data-test-subj={testId('noMultipleArgs')}>
+        <EuiIcon type="warning" size="s" color="subdued" />{' '}
+        <FormattedMessage
+          id="xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.noMultipleArgs"
+          defaultMessage="Argument is only supported once per command"
+        />
+      </EuiText>
     );
   }
 );
