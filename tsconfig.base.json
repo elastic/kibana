@@ -1804,6 +1804,8 @@
       "@kbn/search-errors/*": ["src/platform/packages/shared/kbn-search-errors/*"],
       "@kbn/search-examples-plugin": ["examples/search_examples"],
       "@kbn/search-examples-plugin/*": ["examples/search_examples/*"],
+      "@kbn/search-getting-started": ["x-pack/solutions/search/plugins/search_getting_started"],
+      "@kbn/search-getting-started/*": ["x-pack/solutions/search/plugins/search_getting_started/*"],
       "@kbn/search-homepage": ["x-pack/solutions/search/plugins/search_homepage"],
       "@kbn/search-homepage/*": ["x-pack/solutions/search/plugins/search_homepage/*"],
       "@kbn/search-index-documents": ["x-pack/platform/packages/shared/kbn-search-index-documents"],

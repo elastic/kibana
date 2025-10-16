@@ -10,6 +10,7 @@ import { EuiText, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { RoundedBadge } from '../styles';
 import type { DocumentAnalysisOutput } from './analyze_documents';
 
@@ -27,7 +28,7 @@ const defaultEventsText = i18n.translate(
   }
 );
 
-interface LabelNodeTooltipProps {
+interface LabelNodePopoverProps {
   analysis: DocumentAnalysisOutput;
 }
 
@@ -56,6 +57,8 @@ const Section: React.FC<{ testSubj: string; badge: React.ReactNode; label: strin
   label,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const isDarkMode = useKibanaIsDarkMode();
+
   return (
     <div
       data-test-subj={testSubj}
@@ -68,7 +71,7 @@ const Section: React.FC<{ testSubj: string; badge: React.ReactNode; label: strin
       {badge}
       <EuiText
         size="s"
-        color="ghost"
+        color={isDarkMode ? 'ghost' : 'text'}
         css={css`
           font-weight: ${euiTheme.font.weight.medium};
         `}
@@ -97,7 +100,7 @@ const EventBadge: React.FC<{ count: number }> = ({ count }) => (
   </RoundedBadge>
 );
 
-export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => {
+export const LabelNodePopoverContent = ({ analysis }: LabelNodePopoverProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <div
@@ -105,7 +108,6 @@ export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => 
         display: flex;
         flex-direction: column;
         gap: ${euiTheme.size.s};
-        margin-top: ${euiTheme.size.s};
       `}
     >
       {analysis.uniqueAlertsCount > 0 && (
