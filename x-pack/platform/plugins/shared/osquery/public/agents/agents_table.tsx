@@ -47,7 +47,7 @@ import {
   DEGRADED_AGENTS_CALLOUT_DESCRIPTION,
 } from './translations';
 
-import type { GroupOption, AgentSelection } from './types';
+import type { GroupOption, AgentSelection, GroupOptionValue } from './types';
 import { AGENT_GROUP_KEY, AGENT_STATUS_COLORS } from './types';
 
 interface AgentsTableProps {
@@ -195,7 +195,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
   }, [agentList?.agents, agentList?.groups, agentList?.total, agentsFetched, searchValue]);
 
   const renderOption = useCallback(
-    (option: any, searchVal: any, contentClassName: any) => {
+    (option: GroupOption, searchVal: string, contentClassName: string) => {
       const { label, value } = option;
 
       if (value?.groupType === AGENT_GROUP_KEY.Agent) {
@@ -250,9 +250,10 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
       }
 
       // For groups (platform, policy, all agents)
+      const groupValue = value as GroupOptionValue;
       return (
         <span className={contentClassName}>
-          <span>[{value?.size ?? 0}]</span>
+          <span>[{groupValue?.size ?? 0}]</span>
           &nbsp;
           <EuiHighlight search={searchVal}>{label}</EuiHighlight>
         </span>
