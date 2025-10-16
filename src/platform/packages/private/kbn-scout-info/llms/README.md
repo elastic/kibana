@@ -5,7 +5,20 @@ This guide provides prompts to help you migrate existing FTR tests to the [Scout
 > [!IMPORTANT]
 > These prompts are experimental. Please carefully review all AI-generated code for mistakes before merging.
 
-For best results, we recommend using **Claude Sonnet 4.5**, which has a helpful [**VS Code extension**](https://docs.claude.com/en/docs/claude-code/vs-code). The prompts below use Claude's `@path/to/file.md` [syntax](https://docs.claude.com/en/docs/claude-code/memory) syntax to reference specific files in the codebase. Check if your LLM of choice also supports this syntax.
+## Recommended tools
+
+For best results, we recommend the tools below.
+
+### Claude Code
+
+Claude Code, coupled with **Claude Sonnet 4.5** and optionally with the helpful [**VS Code extension**](https://docs.claude.com/en/docs/claude-code/vs-code). The prompts below use Claude's `@path/to/file.md` [syntax](https://docs.claude.com/en/docs/claude-code/memory) syntax to reference specific files in the codebase. Check if your LLM of choice also supports this syntax.
+
+### Semantic Code Search MCP server
+
+The **[Semantic Code Search MCP server](https://github.com/elastic/semantic-code-search-mcp-server)** is a powerful tool for navigating large codebases like Kibana, and it helps you find relevant files using natural language queries. For example, you might want to **search for existing FTR page objects or API helpers** (e.g. "Uptime page objects" or "data views API helpers") to provide as input to the steps below. While you can find files manually, this approach is often faster and more comprehensive.
+
+> [!NOTE]
+> Elastic employees should have access to a dedicated Elasticsearch cluster with the Kibana project already indexed and ready for use. Search Slack for more information.
 
 ## Step 1: Generate Scout boilerplate files
 
@@ -43,7 +56,15 @@ Instructions:
 
 **Checkpoint**: the AI will generate or modify Scout page objects. For this step, you may need to manually move these files to the correct directory (either the plugin's page objects folder, or one of the Scout packages), and register them in the `pageObjects` fixture. Refer to the official Scout documentation.
 
-## Step 3: Implement the test logic
+## Step 3 (optional): Create or update Scout API helpers
+
+If your FTR tests rely on API helpers to prepare the test environment, use this prompt to create or update Scout API helpers:
+
+```
+
+```
+
+## Step 4: Implement the test logic
 
 With the boilerplate and page objects in place, you can now fill in the test logic. For the best results, run this prompt for **each Scout test file individually** (this way we don't _saturate_ the LLM's context window).
 
@@ -71,6 +92,6 @@ Guidelines:
 
 **Checkpoint**: the LLM should now populate the Scout test files from Step 1 with implementation code based on the original FTR tests.
 
-## Step 4: Run your tests
+## Step 5: Run your tests
 
 Finally, run your new Scout tests. We recommend using the `--ui` mode to easily troubleshoot any failures.
