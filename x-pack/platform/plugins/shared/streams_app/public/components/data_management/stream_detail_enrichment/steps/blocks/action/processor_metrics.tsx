@@ -202,12 +202,7 @@ export const ProcessorErrors = ({ metrics }: { metrics: ProcessorMetrics }) => {
         `}
       >
         {visibleErrors.map((error, id) => (
-          <EuiCallOut
-            key={id}
-            {...getCalloutProps(error.type)}
-            size="s"
-            title={errorTitle}
-          >
+          <EuiCallOut key={id} {...getCalloutProps(error.type)} size="s" title={errorTitle}>
             <ProcessorErrorMessage message={error.message} />
           </EuiCallOut>
         ))}
