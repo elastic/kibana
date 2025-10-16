@@ -2,7 +2,7 @@
 
 This guide provides prompts to help you migrate existing FTR tests to the [Scout](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-scout) framework.
 
-> [!IMPORTANT]
+> [!WARNING]
 > These prompts are experimental. Please carefully review all AI-generated code for mistakes before merging.
 
 ## Recommended tools
