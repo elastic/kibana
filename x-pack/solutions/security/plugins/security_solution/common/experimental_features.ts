@@ -38,9 +38,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   socTrendsEnabled: false,
 
-  /** Enables the `kill-process` response action for SentinelOne */
-  responseActionsSentinelOneKillProcessEnabled: true,
-
   /**
    * Enables the ability to send Response actions to Crowdstrike and persist the results
    * in ES.
