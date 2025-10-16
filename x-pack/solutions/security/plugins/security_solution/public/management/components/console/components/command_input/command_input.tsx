@@ -140,6 +140,21 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
 
   const handleTypingAreaClick = useCallback<MouseEventHandler>(
     (ev) => {
+      // We don't want to trigger input area focus if the click was done from a component that
+      // resides OUTSIDE of the typing areas. This can be the case with commands that have an argument
+      // value component (aka: argument selector), where events done from inside those components
+      // all bubble up through the input area - and this includes events from components inside
+      // Portals - like popups - where the HTML element is NOT inside this typing area.
+      const { currentTarget, target } = ev;
+
+      if (currentTarget !== target && target instanceof Node && !currentTarget.contains(target)) {
+        if (isKeyInputBeingCaptured && keyCaptureFocusRef.current) {
+          keyCaptureFocusRef.current.blur();
+        }
+
+        return;
+      }
+
       if (keyCaptureFocusRef.current) {
         keyCaptureFocusRef.current.focus();
       }
@@ -148,7 +163,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
       }
     },
-    [dispatch, isPopoverOpen, keyCaptureFocusRef]
+    [dispatch, isKeyInputBeingCaptured, isPopoverOpen, keyCaptureFocusRef]
   );
 
   const handleInputCapture = useCallback<InputCaptureProps['onCapture']>(
