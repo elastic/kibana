@@ -10,6 +10,7 @@
 import { buildXY } from './xy';
 import { mockDataViewsService } from './mock_utils';
 import type { XYState } from '@kbn/lens-plugin/public';
+import { LegendValue } from '@elastic/charts';
 
 test('generates xy chart config', async () => {
   const result = await buildXY(
@@ -135,6 +136,160 @@ test('generates xy chart config', async () => {
           "legend": Object {
             "isVisible": true,
             "position": "left",
+          },
+          "preferredSeriesType": "line",
+          "tickLabelsVisibilitySettings": Object {
+            "x": true,
+            "yLeft": true,
+            "yRight": true,
+          },
+          "valueLabels": "hide",
+          "yLeftExtent": Object {
+            "lowerBound": undefined,
+            "mode": "full",
+            "upperBound": undefined,
+          },
+        },
+      },
+      "title": "test",
+      "visualizationType": "lnsXY",
+    }
+  `);
+});
+
+test('generates xy chart config with legend stats', async () => {
+  const result = await buildXY(
+    {
+      chartType: 'xy',
+      title: 'test',
+      dataset: {
+        esql: 'from test | count=count() by @timestamp',
+      },
+      layers: [
+        {
+          type: 'series',
+          seriesType: 'bar',
+          xAxis: '@timestamp',
+          yAxis: [
+            {
+              label: 'test',
+              value: 'count',
+            },
+          ],
+        },
+      ],
+      legend: {
+        show: true,
+        position: 'right',
+        legendStats: [LegendValue.Average, LegendValue.Max],
+      },
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  expect(result).toMatchInlineSnapshot(`
+    Object {
+      "references": Array [
+        Object {
+          "id": "test",
+          "name": "indexpattern-datasource-layer-layer_0",
+          "type": "index-pattern",
+        },
+      ],
+      "state": Object {
+        "adHocDataViews": Object {
+          "test": Object {},
+        },
+        "datasourceStates": Object {
+          "textBased": Object {
+            "layers": Object {
+              "layer_0": Object {
+                "allColumns": Array [
+                  Object {
+                    "columnId": "x_metric_formula_accessor0",
+                    "fieldName": "@timestamp",
+                  },
+                  Object {
+                    "columnId": "metric_formula_accessor0_0",
+                    "fieldName": "count",
+                    "meta": Object {
+                      "type": "number",
+                    },
+                  },
+                ],
+                "columns": Array [
+                  Object {
+                    "columnId": "x_metric_formula_accessor0",
+                    "fieldName": "@timestamp",
+                  },
+                  Object {
+                    "columnId": "metric_formula_accessor0_0",
+                    "fieldName": "count",
+                    "meta": Object {
+                      "type": "number",
+                    },
+                  },
+                ],
+                "index": "test",
+                "query": Object {
+                  "esql": "from test | count=count() by @timestamp",
+                },
+                "timeField": undefined,
+              },
+            },
+          },
+        },
+        "filters": Array [],
+        "internalReferences": Array [],
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
+        "visualization": Object {
+          "axisTitlesVisibilitySettings": Object {
+            "x": true,
+            "yLeft": true,
+            "yRight": true,
+          },
+          "emphasizeFitting": true,
+          "fittingFunction": "Linear",
+          "gridlinesVisibilitySettings": Object {
+            "x": true,
+            "yLeft": true,
+            "yRight": true,
+          },
+          "hideEndzones": true,
+          "labelsOrientation": Object {
+            "x": 0,
+            "yLeft": 0,
+            "yRight": 0,
+          },
+          "layers": Array [
+            Object {
+              "accessors": Array [
+                "metric_formula_accessor0_0",
+              ],
+              "layerId": "layer_0",
+              "layerType": "data",
+              "seriesType": "bar",
+              "xAccessor": "x_metric_formula_accessor0",
+              "yConfig": Array [
+                Object {
+                  "color": undefined,
+                  "forAccessor": "metric_formula_accessor0_0",
+                },
+              ],
+            },
+          ],
+          "legend": Object {
+            "isVisible": true,
+            "legendStats": Array [
+              "average",
+              "max",
+            ],
+            "position": "right",
           },
           "preferredSeriesType": "line",
           "tickLabelsVisibilitySettings": Object {
