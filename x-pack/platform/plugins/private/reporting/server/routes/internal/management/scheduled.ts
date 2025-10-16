@@ -121,7 +121,7 @@ export function registerScheduledRoutesInternal(reporting: ReportingCore, logger
         },
         validate: {
           body: schema.object({
-            ids: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 50 }),
+            ids: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 }),
           }),
         },
         options: { access: 'internal' },
@@ -182,7 +182,7 @@ export function registerScheduledRoutesInternal(reporting: ReportingCore, logger
         },
         validate: {
           body: schema.object({
-            ids: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 }),
+            ids: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 50 }),
           }),
         },
         options: { access: 'internal' },
