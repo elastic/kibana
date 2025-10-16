@@ -22,6 +22,7 @@ export {
 export type {
   ChatCompletionChunkEvent,
   ChatCompletionMessageEvent,
+  ConfirmationRequiredEvent,
   ConversationCreateEvent,
   ConversationUpdateEvent,
   MessageAddEvent,

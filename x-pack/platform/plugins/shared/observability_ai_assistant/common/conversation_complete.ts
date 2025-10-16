@@ -18,6 +18,7 @@ export enum StreamingChatResponseEventType {
   MessageAdd = 'messageAdd',
   ChatCompletionError = 'chatCompletionError',
   BufferFlush = 'bufferFlush',
+  ConfirmationRequired = 'confirmationRequired',
 }
 
 type BaseChatCompletionEvent<TType extends StreamingChatResponseEventType> = ServerSentEventBase<
@@ -72,6 +73,19 @@ export type MessageAddEvent = ServerSentEventBase<
   deanonymized_output?: DeanonymizationOutput;
 };
 
+export type ConfirmationRequiredEvent = ServerSentEventBase<
+  StreamingChatResponseEventType.ConfirmationRequired,
+  {
+    functionName: string;
+    functionCallArguments: string;
+    confirmationConfig: {
+      message: string;
+      type: 'destructive' | 'warning';
+      confirmButtonText?: string;
+    };
+  }
+>;
+
 export type ChatCompletionErrorEvent = ServerSentEventBase<
   StreamingChatResponseEventType.ChatCompletionError,
   {
@@ -98,7 +112,8 @@ export type StreamingChatResponseEvent =
   | ConversationUpdateEvent
   | MessageAddEvent
   | ChatCompletionErrorEvent
-  | BufferFlushEvent;
+  | BufferFlushEvent
+  | ConfirmationRequiredEvent;
 
 export type StreamingChatResponseEventWithoutError = Exclude<
   StreamingChatResponseEvent,
@@ -106,7 +121,7 @@ export type StreamingChatResponseEventWithoutError = Exclude<
 >;
 
 export type ChatEvent = ChatCompletionChunkEvent | ChatCompletionMessageEvent;
-export type MessageOrChatEvent = ChatEvent | MessageAddEvent;
+export type MessageOrChatEvent = ChatEvent | MessageAddEvent | ConfirmationRequiredEvent;
 
 export enum ChatCompletionErrorCode {
   InternalError = 'internalError',

@@ -20,6 +20,7 @@ import {
 import {
   MessageRole,
   StreamingChatResponseEventType,
+  type ConfirmationRequiredEvent,
   type ConversationCreateEvent,
   type ConversationUpdateEvent,
   type Message,
@@ -81,6 +82,23 @@ export function complete(
       last()
     );
 
+    const lastMessageEvent$ = response$.pipe(
+      filter(
+        (event): event is MessageAddEvent =>
+          event.type === StreamingChatResponseEventType.MessageAdd
+      ),
+      last()
+    );
+
+    const confirmationRequired$ = response$.pipe(
+      filter(
+        (event): event is ConfirmationRequiredEvent =>
+          event.type === StreamingChatResponseEventType.ConfirmationRequired
+      ),
+      toArray(),
+      map((events) => events.length > 0)
+    );
+
     const conversationId$ = response$.pipe(
       last(
         (event): event is ConversationCreateEvent | ConversationUpdateEvent =>
@@ -102,11 +120,22 @@ export function complete(
       },
     });
 
-    combineLatest([conversationId$, messages$, response$.pipe(last())]).subscribe({
-      next: ([nextConversationId, allMessages]) => {
+    combineLatest([
+      conversationId$,
+      messages$,
+      lastMessageEvent$,
+      confirmationRequired$,
+      response$.pipe(last()),
+    ]).subscribe({
+      next: ([nextConversationId, allMessages, lastMessageEvent, confirmationRequired]) => {
         const functionCall = allMessages[allMessages.length - 1]?.message.function_call;
 
         if (!functionCall?.name) {
+          subscriber.complete();
+          return;
+        }
+
+        if (confirmationRequired) {
           subscriber.complete();
           return;
         }

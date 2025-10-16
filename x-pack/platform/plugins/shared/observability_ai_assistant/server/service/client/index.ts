@@ -368,7 +368,23 @@ export class ObservabilityAIAssistantClient {
                 return nextEvents$.pipe(
                   addAnonymizationData(initialMessages.concat(addedMessages)),
                   switchMap((deanonymizedMessages) => {
-                    const lastMessage = last(deanonymizedMessages);
+                    // Filter out confirmation messages before persisting
+                    // These are transient control messages that shouldn't be stored
+                    const messagesToPersist = deanonymizedMessages.filter((msg) => {
+                      if (msg.message.role === 'user' && msg.message.name) {
+                        try {
+                          const content = JSON.parse(msg.message.content || '{}');
+                          if (content.confirmed !== undefined) {
+                            return false; // Exclude confirmation messages
+                          }
+                        } catch (e) {
+                          // Not JSON, keep the message
+                        }
+                      }
+                      return true;
+                    });
+
+                    const lastMessage = last(messagesToPersist);
 
                     // if a function request is at the very end, close the stream to consumer
                     // without persisting or updating the conversation. we need to wait
@@ -391,7 +407,7 @@ export class ObservabilityAIAssistantClient {
                             omit(conversation._source, 'messages'),
 
                             // update messages and system message
-                            { messages: deanonymizedMessages, systemMessage },
+                            { messages: messagesToPersist, systemMessage },
 
                             // update title
                             {
@@ -422,7 +438,7 @@ export class ObservabilityAIAssistantClient {
                         labels: {},
                         numeric_labels: {},
                         systemMessage,
-                        messages: deanonymizedMessages,
+                        messages: messagesToPersist,
                         archived: false,
                       })
                     ).pipe(
