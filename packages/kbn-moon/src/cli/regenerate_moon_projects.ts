@@ -19,57 +19,59 @@ import type { Package } from '@kbn/repo-packages';
 import { getPackages } from '@kbn/repo-packages';
 import type { ToolingLog } from '@kbn/tooling-log';
 
+import {
+  ESLINT_IGNORE_NAME,
+  KIBANA_JSONC_FILENAME,
+  MOON_CONFIG_KEY_ORDER,
+  MOON_CONST,
+} from '../const';
 import type { MoonProjectConfig } from './moon_project_type';
-import { readFile, readJsonWithComments } from '../util';
+import {
+  filterPackages,
+  readFile,
+  readJsonWithComments,
+  resolveFirstExisting,
+  sortObjectByKeyPriority,
+  writeYaml,
+} from '../util';
 
-const KIBANA_JSONC_FILENAME = 'kibana.jsonc';
-const MOON_CONST = {
-  MOON_CONFIG_FILE_NAME: 'moon.yml',
-  EXTENSION_FILE_NAME: 'moon.extend.yml',
-  JEST_CONFIG_FILES: ['jest.config.js', 'jest.config.cjs', 'jest.config.json'],
-  ESLINT_CONFIG_FILES: ['.eslintrc.js', '.eslintrc.json'],
-  PROJECT_TYPE_UNKNOWN: 'unknown',
-  DEFAULT_TOOLCHAIN: 'node',
-  TAG_JEST_UNIT: 'jest-unit-tests',
-  TAG_DEV: 'dev',
-  TAG_PROD: 'prod',
-  TASK_NAME_JEST: 'jest',
-  TASK_NAME_JEST_CI: 'jestCI',
-  TASK_NAME_LINT: 'lint',
-  FILE_GROUP_SRC: 'src',
-};
-
+const scriptName = path.relative(REPO_ROOT, process.argv[1]);
 const cliOptions = {
-  usage: `node ${path.relative(REPO_ROOT, process.argv[1])}`,
+  usage: `node ${scriptName}`,
   description: `
         Generates Moon project configuration for a package/plugin from available hints around the package/plugin.
       `,
   flags: {
     string: ['filter'],
-    boolean: ['dry-run', 'update', 'dependencies', 'clear'],
-    default: {},
+    boolean: ['update', 'dependencies', 'dry-run', 'clear'],
+    default: {
+      dependencies: true,
+    },
     alias: {},
     help: `
           --filter                    Filter packages by name or directory
           --update                    Update existing project configuration(s)
-          --dependencies              Include dependsOn section in the project configuration
+          --no-dependencies           Do not include dependsOn section in the project configuration
           --dry-run                   Do not write to disk
           --clear                     Clear the project configuration
         `,
   },
 };
 
+let logger: ToolingLog;
+
 export function regenerateMoonProjects() {
   return run(async ({ log, flags, flagsReader }) => {
+    logger = log;
+
     const filter = flagsReader.arrayOfStrings('filter');
     const update = flags.update as boolean | undefined;
     const dryRun = flags['dry-run'] as boolean | undefined;
     const clear = flags.clear as boolean | undefined;
+    const includeDependencies = !!flags.dependencies;
 
-    const implicitDependencies = !!flags.dependencies;
-
-    const template = readFile(path.resolve(__dirname, './moon.template.yml'));
-    const eslintIgnore = readFile(path.resolve(REPO_ROOT, '.eslintignore'));
+    const template = readFile(path.resolve(__dirname, MOON_CONST.TEMPLATE_FILE_NAME));
+    const eslintIgnore = readFile(path.resolve(REPO_ROOT, ESLINT_IGNORE_NAME));
 
     const projectResults: Record<ProjectCreationResult, string[]> = {
       create: [],
@@ -91,36 +93,27 @@ export function regenerateMoonProjects() {
       const kibanaJsonc = readJsonWithComments(pathInPackage(KIBANA_JSONC_FILENAME));
       const projectConfig = buildBaseProjectConfig(template, pkg, kibanaJsonc);
 
-      const tsConfigPath = pathInPackage('tsconfig.json');
-      if (fs.existsSync(tsConfigPath)) {
-        applyTsConfigSettings(projectConfig, {
-          tsConfigPath,
-          implicitDependencies,
-          log,
-          allPackageIds: packageIds,
-        });
-      } else {
-        projectConfig.language = 'javascript';
-        log.warning(`Skipping ${pkg.name} - no tsconfig.json found.`);
-      }
-
-      await applyJestTaskConfig(projectConfig, { log });
-
-      await applyLintTaskConfig(projectConfig, { eslintIgnore, log });
-
-      applyDevOverrides(projectConfig, {
-        log,
-        devOverridesPath: pathInPackage(MOON_CONST.EXTENSION_FILE_NAME),
+      applyTsConfigSettings(projectConfig, {
+        tsConfigPath: pathInPackage('tsconfig.json'),
+        allPackageIds: packageIds,
+        includeDependencies,
       });
 
-      const targetPath = pathInPackage(MOON_CONST.MOON_CONFIG_FILE_NAME);
+      applyJestTaskConfig(projectConfig);
 
-      const result = writeProjectConfigFile(targetPath, projectConfig, {
-        update,
-        clear,
-        dryRun,
-        log,
-      });
+      applyLintTaskConfig(projectConfig, eslintIgnore);
+
+      applyDevOverrides(projectConfig, pathInPackage(MOON_CONST.EXTENSION_FILE_NAME));
+
+      const result = writeProjectConfigFile(
+        pathInPackage(MOON_CONST.MOON_CONFIG_FILE_NAME),
+        projectConfig,
+        {
+          update,
+          clear,
+          dryRun,
+        }
+      );
       projectResults[result].push(pkg.name);
     }
 
@@ -141,26 +134,8 @@ const getGeneratedPreambleForProject = (projectId: string) =>
   [
     '# This file is generated by the @kbn/moon package. Any manual edits will be erased!',
     `#  To extend this, write your extensions/overrides to '${MOON_CONST.EXTENSION_FILE_NAME}'`,
-    `#  then regenerate this file with: 'node scripts/regenerate_moon_projects --update --filter ${projectId}'`,
+    `#  then regenerate this file with: 'node ${scriptName} --update --filter ${projectId}'`,
   ].join('\n');
-
-const writeYaml = (filePath: string, obj: any, preamble: string | null = null) => {
-  let fileContent = yaml.dump(obj, {
-    lineWidth: 300,
-    noRefs: true,
-  });
-
-  if (preamble) {
-    fileContent = preamble + '\n\n' + fileContent;
-  }
-
-  if (fs.existsSync(filePath) && readFile(filePath) === fileContent) {
-    return false;
-  } else {
-    fs.writeFileSync(filePath, fileContent);
-    return true;
-  }
-};
 
 function buildBaseProjectConfig(
   projectConfigTemplate: string,
@@ -195,8 +170,7 @@ function buildBaseProjectConfig(
 
 interface ApplyTsConfigParams {
   tsConfigPath: string;
-  implicitDependencies: boolean;
-  log: ToolingLog;
+  includeDependencies: boolean;
   allPackageIds: string[];
 }
 
@@ -205,14 +179,20 @@ const hasSourceRoot = (obj: any): obj is { project: { metadata: { sourceRoot: st
 
 function applyTsConfigSettings(
   projectConfig: MoonProjectConfig,
-  { log, tsConfigPath, implicitDependencies, allPackageIds }: ApplyTsConfigParams
+  { tsConfigPath, allPackageIds, includeDependencies }: ApplyTsConfigParams
 ) {
-  if (!hasSourceRoot(projectConfig)) {
-    log.warning('Skipping tsconfig settings - no sourceRoot found in project metadata');
+  if (!fs.existsSync(tsConfigPath)) {
+    projectConfig.language = 'javascript';
+    logger.warning(`Skipping ${projectConfig.id} - no tsconfig.json found.`);
     return;
   }
 
-  log.verbose(`Reading tsconfig from ${tsConfigPath}`);
+  if (!hasSourceRoot(projectConfig)) {
+    logger.warning('Skipping tsconfig settings - no sourceRoot found in project metadata');
+    return;
+  }
+
+  logger.verbose(`Reading tsconfig from ${tsConfigPath}`);
   const tsConfig = readJsonWithComments(tsConfigPath);
 
   const rootRelativeTypings = path.join(
@@ -229,7 +209,7 @@ function applyTsConfigSettings(
   projectConfig.fileGroups = { [MOON_CONST.FILE_GROUP_SRC]: src };
 
   const dependencies = tsConfig.kbn_references;
-  if (implicitDependencies && dependencies) {
+  if (includeDependencies && dependencies) {
     projectConfig.dependsOn = dependencies
       // TODO: some dependencies are referenced as objects
       .filter((e: any) => typeof e === 'string')
@@ -237,16 +217,9 @@ function applyTsConfigSettings(
   }
 }
 
-async function applyJestTaskConfig(
-  projectConfig: MoonProjectConfig,
-  {
-    log,
-  }: {
-    log: ToolingLog;
-  }
-) {
+function applyJestTaskConfig(projectConfig: MoonProjectConfig) {
   if (!hasSourceRoot(projectConfig)) {
-    log.warning('Skipping jest task config - no sourceRoot found in project metadata');
+    logger.warning('Skipping jest task config - no sourceRoot found in project metadata');
     return;
   }
 
@@ -256,7 +229,7 @@ async function applyJestTaskConfig(
   );
 
   if (!jestConfigName) {
-    log.warning(
+    logger.warning(
       `Could not find jest config for ${projectConfig.id} @ ${projectConfig.project.metadata.sourceRoot}`
     );
   } else {
@@ -273,24 +246,15 @@ async function applyJestTaskConfig(
   }
 }
 
-async function applyLintTaskConfig(
-  projectConfig: MoonProjectConfig,
-  {
-    log,
-    eslintIgnore,
-  }: {
-    log: ToolingLog;
-    eslintIgnore: string;
-  }
-) {
+function applyLintTaskConfig(projectConfig: MoonProjectConfig, eslintIgnore: string) {
   if (!projectConfig.project?.metadata?.sourceRoot) {
-    log.warning('Skipping lint task config - no sourceRoot found in project metadata');
+    logger.warning('Skipping lint task config - no sourceRoot found in project metadata');
     return;
   }
   const sourceRoot = projectConfig.project?.metadata?.sourceRoot!;
 
   if (eslintIgnore.split('\n').includes('/' + sourceRoot)) {
-    log.info(
+    logger.info(
       `Skipping lint task for project ${projectConfig.id}. It's explicitly ignored in .eslintignore`
     );
     if (projectConfig.tasks) {
@@ -325,28 +289,27 @@ function writeProjectConfigFile(
     clear,
     update,
     dryRun,
-    log,
   }: {
     clear?: boolean;
     update?: boolean;
     dryRun?: boolean;
-    log: ToolingLog;
   }
 ): ProjectCreationResult {
-  reorderKeysByPriority(projectConfig);
+  sortObjectByKeyPriority(projectConfig, MOON_CONFIG_KEY_ORDER);
+
   const name = projectConfig.id;
   const projectExists = fs.existsSync(targetPath);
   if (projectExists) {
     if (update) {
       if (dryRun) {
-        log.info(`Would update ${name} project configuration.`);
+        logger.info(`Would update ${name} project configuration.`);
       } else {
         const didUpdate = writeYaml(
           targetPath,
           projectConfig,
           getGeneratedPreambleForProject(projectConfig.id)
         );
-        log.info(`Updated ${name} project configuration.`);
+        logger.info(`Updated ${name} project configuration.`);
         if (!didUpdate) {
           return 'intact';
         }
@@ -354,95 +317,45 @@ function writeProjectConfigFile(
       return 'update';
     } else if (clear) {
       if (dryRun) {
-        log.info(`Would clear ${name} project configuration.`);
+        logger.info(`Would clear ${name} project configuration.`);
       } else {
-        log.info(`Deleting ${name} project configuration @ ${targetPath}`);
+        logger.info(`Deleting ${name} project configuration @ ${targetPath}`);
         fs.unlinkSync(targetPath);
       }
       return 'delete';
     } else {
-      log.info(
+      logger.info(
         `'${MOON_CONST.MOON_CONFIG_FILE_NAME}' already exists at ${targetPath} - skipping creation.`
       );
       return 'skip';
     }
   } else {
     if (dryRun) {
-      log.info(`Would create ${name} project configuration.`);
+      logger.info(`Would create ${name} project configuration.`);
     } else {
-      log.info(`Creating ${name} project configuration @ ${targetPath}`);
+      logger.info(`Creating ${name} project configuration @ ${targetPath}`);
       writeYaml(targetPath, projectConfig, getGeneratedPreambleForProject(projectConfig.id));
     }
     return 'create';
   }
 }
 
-function filterPackages(allPackages: Package[], filter: string[]): Package[] {
-  return allPackages.filter((pkg) => {
-    if (!filter) {
-      return true;
-    } else if (Array.isArray(filter)) {
-      return filter.some((f) => pkg.name.includes(f) || pkg.normalizedRepoRelativeDir.includes(f));
-    } else {
-      return false;
-    }
-  });
-}
-
-function resolveFirstExisting(dir: string, files: string[]) {
-  return files.find((f) => fs.existsSync(path.resolve(dir, f)));
-}
-
-function reorderKeysByPriority(obj: any) {
-  const KEY_ORDER = [
-    '$schema',
-    'id',
-    'type',
-    'owners',
-    'toolchain',
-    '*', // everything else
-    'tags',
-    'fileGroups',
-    'tasks',
-  ];
-  const kvPairs = Object.entries(obj);
-  kvPairs.sort(([a], [b]) => {
-    const aIdx = KEY_ORDER.indexOf(a) === -1 ? KEY_ORDER.indexOf('*') : KEY_ORDER.indexOf(a);
-    const bIdx = KEY_ORDER.indexOf(b) === -1 ? KEY_ORDER.indexOf('*') : KEY_ORDER.indexOf(b);
-    return aIdx - bIdx;
-  });
-  for (const [k] of kvPairs) {
-    delete obj[k];
+function applyDevOverrides(projectConfig: MoonProjectConfig, devOverridesPath: string) {
+  if (!fs.existsSync(devOverridesPath)) {
+    return;
   }
-  for (const [k, v] of kvPairs) {
-    obj[k] = v;
-  }
-}
 
-function applyDevOverrides(
-  projectConfig: MoonProjectConfig,
-  {
-    log,
-    devOverridesPath,
-  }: {
-    log: ToolingLog;
-    devOverridesPath: string;
-  }
-) {
-  if (fs.existsSync(devOverridesPath)) {
-    log.info(`Applying development overrides from ${path.relative(REPO_ROOT, devOverridesPath)}`);
-    try {
-      const devOverrides = yaml.load(readFile(devOverridesPath));
-      merge(projectConfig, devOverrides);
-    } catch (e) {
-      log.error(
-        `Failed to apply development overrides from ${path.relative(
-          REPO_ROOT,
-          devOverridesPath
-        )}: ${e.message}`
-      );
-      throw e;
-    }
+  logger.info(`Applying development overrides from ${path.relative(REPO_ROOT, devOverridesPath)}`);
+  try {
+    const devOverrides = yaml.load(readFile(devOverridesPath));
+    merge(projectConfig, devOverrides);
+  } catch (e) {
+    logger.error(
+      `Failed to apply development overrides from ${path.relative(REPO_ROOT, devOverridesPath)}: ${
+        e.message
+      }`
+    );
+    throw e;
   }
 }
 

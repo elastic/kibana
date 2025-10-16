@@ -7,27 +7,68 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync, writeFileSync } from 'fs';
+import path from 'path';
+
+import json5 from 'json5';
+import _ from 'lodash';
+
+import jsYaml from 'js-yaml';
+
+import type { Package } from '@kbn/repo-packages';
 
 export function readFile(filePath: string) {
   return readFileSync(filePath, 'utf8');
 }
 
 export function readJsonWithComments(filePath: string) {
-  let fileCleaned;
+  let file;
   try {
-    const file = readFile(filePath);
-    fileCleaned = file
-      .split('\n')
-      .filter((l) => !l.match(/^\s*\/\//))
-      .map((l) => l.replace(/\/\/.*$/g, ''))
-      .join('')
-      .replace(/(\s)*/g, '')
-      .replace(/,([}\]])/g, '$1');
-    return JSON.parse(fileCleaned);
+    file = readFile(filePath);
+    return json5.parse(file);
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error(`Failed to read ${filePath}: `, fileCleaned);
+    e.message = `${e.message}\n in ${filePath}\n\n${file}`;
     throw e;
+  }
+}
+
+export function sortObjectByKeyPriority(obj: any, keyOrder: string[] = []) {
+  const kvPairs = _.sortBy(Object.entries(obj), ([key]) => {
+    const idx = keyOrder.indexOf(key);
+    return idx === -1 ? keyOrder.indexOf('*') : idx;
+  });
+  const sortedObj = _.fromPairs(kvPairs);
+  Object.keys(obj).forEach((k) => delete obj[k]);
+  Object.assign(obj, sortedObj);
+}
+
+export function resolveFirstExisting(dir: string, files: string[]) {
+  return files.find((f) => existsSync(path.resolve(dir, f)));
+}
+
+export function filterPackages(allPackages: Package[], filter: string[]): Package[] {
+  return allPackages.filter((pkg) => {
+    return filter.some(
+      (filterAllow) =>
+        pkg.name.includes(filterAllow) || pkg.normalizedRepoRelativeDir.includes(filterAllow)
+    );
+  });
+}
+
+export function writeYaml(filePath: string, obj: any, preamble: string | null = null) {
+  let fileContent = jsYaml.dump(obj, {
+    lineWidth: 300,
+    noRefs: true,
+  });
+
+  if (preamble) {
+    fileContent = preamble + '\n\n' + fileContent;
+  }
+
+  if (existsSync(filePath) && readFile(filePath) === fileContent) {
+    return false;
+  } else {
+    writeFileSync(filePath, fileContent);
+    return true;
   }
 }
