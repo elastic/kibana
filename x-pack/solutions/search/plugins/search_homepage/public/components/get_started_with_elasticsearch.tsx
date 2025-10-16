@@ -281,32 +281,33 @@ export const GetStartedWithElasticsearch = () => {
         defaultMessage: 'NEW',
       }),
     },
-    {
-      _id: 'console_tutorials_tsds',
-      title: i18n.translate('xpack.searchHomepage.consoleTutorials.tsdsTitle', {
-        defaultMessage: 'Time series data streams',
-      }),
-      dataTestSubj: 'console_tutorials_tsds',
-      description: i18n.translate('xpack.searchHomepage.consoleTutorials.tsdsDescription', {
-        defaultMessage:
-          'Learn how to use a time series data stream (TSDS) to store timestamped metrics data.',
-      }),
-      buttonComponent: (
-        <TryInConsoleButton
-          request={consoleTutorials.timeSeriesDataStreams}
-          color="text"
-          type="button"
-          application={application}
-          consolePlugin={consolePlugin}
-          sharePlugin={share}
-          telemetryId="console_tutorials_tsds_console_btn"
-          data-test-subj="console_tutorials_tsds_console_btn"
-        />
-      ),
-      badgeText: i18n.translate('xpack.searchHomepage.getStarted.newBadge', {
-        defaultMessage: 'NEW',
-      }),
-    },
+    // TODO:  uncomment below lines when we are ready to show TSDS tutorial. review https://github.com/elastic/kibana/pull/237384#issuecomment-3411670210
+    // {
+    //   _id: 'console_tutorials_tsds',
+    //   title: i18n.translate('xpack.searchHomepage.consoleTutorials.tsdsTitle', {
+    //     defaultMessage: 'Time series data streams',
+    //   }),
+    //   dataTestSubj: 'console_tutorials_tsds',
+    //   description: i18n.translate('xpack.searchHomepage.consoleTutorials.tsdsDescription', {
+    //     defaultMessage:
+    //       'Learn how to use a time series data stream (TSDS) to store timestamped metrics data.',
+    //   }),
+    //   buttonComponent: (
+    //     <TryInConsoleButton
+    //       request={consoleTutorials.timeSeriesDataStreams}
+    //       color="text"
+    //       type="button"
+    //       application={application}
+    //       consolePlugin={consolePlugin}
+    //       sharePlugin={share}
+    //       telemetryId="console_tutorials_tsds_console_btn"
+    //       data-test-subj="console_tutorials_tsds_console_btn"
+    //     />
+    //   ),
+    //   badgeText: i18n.translate('xpack.searchHomepage.getStarted.newBadge', {
+    //     defaultMessage: 'NEW',
+    //   }),
+    // },
   ];
 
   return (
