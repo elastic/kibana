@@ -454,7 +454,7 @@ export function createLiquidSyntaxCompletions(
       kind: monaco.languages.CompletionItemKind.Keyword,
       detail: 'Liquid block',
       documentation: 'Creates a liquid block for multiple liquid statements without tag wrappers',
-      insertText: '- liquid\n  ${1:assign variable = value}\n  ${2:echo variable}\n-%}',
+      insertText: ' liquid\n  ${1:assign variable = value}\n  ${2:echo variable}\n-%}',
       insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
       range,
     },
