@@ -52,6 +52,7 @@ function getReloadTimeFetchContext(api: unknown, reloadTimestamp?: number): Relo
 
   const uuid = apiHasUniqueId(typeApi) ? typeApi.uuid : undefined;
   const section = typeApi.parentApi?.layout$.getValue().panels[uuid]?.grid?.sectionId;
+  // console.log({ section });
   const allFilters = typeApi?.parentApi?.filters$?.value;
   const filters = uuid
     ? allFilters?.filter(
@@ -94,13 +95,7 @@ function getBatchedObservables(api: unknown): Array<Observable<unknown>> {
     observables.push(
       combineLatest([api.parentApi.filters$, api.parentApi.query$, sectionId$]).pipe(
         skip(1),
-        filter(() => {
-          console.log('hasSearchSession', hasSearchSession(api));
-          return !hasSearchSession(api);
-        }),
-        tap(() => {
-          console.log('AFTER GILTER');
-        })
+        filter(() => !hasSearchSession(api))
       )
     );
   }
@@ -128,20 +123,13 @@ function getBatchedObservables(api: unknown): Array<Observable<unknown>> {
 function getImmediateObservables(api: unknown): Array<Observable<unknown>> {
   const observables: Array<Observable<unknown>> = [];
   if (apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)) {
-    observables.push(
-      api.parentApi.searchSessionId$.pipe(
-        skip(1),
-        tap((id) => {
-          console.log('SEARCH SESSION', id);
-        })
-      )
-    );
+    observables.push(api.parentApi.searchSessionId$.pipe(skip(1)));
   }
   if (apiHasParentApi(api) && apiPublishesReload(api.parentApi)) {
     observables.push(api.parentApi.reload$.pipe(filter(() => !hasSearchSession(api))));
   }
   // const sectionId$: Observable<string | undefined> = api.parentApi?.getPanelSection$(api.uuid);
-  // observables.push(api.parentApi?.getPanelSection$(api.uuid));
+  observables.push(api.parentApi?.getPanelSection$(api.uuid));
   return observables;
 }
 
@@ -206,7 +194,10 @@ export function fetch$(api: unknown): Observable<FetchContext> {
       timeRange: reloadTimeFetchContext.timeRange,
       timeslice: reloadTimeFetchContext.timeslice,
       searchSessionId: reloadTimeFetchContext.searchSessionId,
-    }))
+    })),
+    tap((context) => {
+      if (api.uuid === '6664ab4d-b360-4a00-9a9f-849cd752f9d5') console.log({ context });
+    })
   );
 }
 

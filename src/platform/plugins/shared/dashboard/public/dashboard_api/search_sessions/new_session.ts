@@ -28,11 +28,6 @@ export function newSession$(api: unknown) {
     observables.push(
       api.filters$.pipe(
         distinctUntilChanged((previous: Filter[] | undefined, current: Filter[] | undefined) => {
-          console.log({
-            previous,
-            current,
-            test: onlyDisabledFiltersChanged(previous, current, shouldRefreshFilterCompareOptions),
-          });
           return onlyDisabledFiltersChanged(previous, current, shouldRefreshFilterCompareOptions);
         })
       )

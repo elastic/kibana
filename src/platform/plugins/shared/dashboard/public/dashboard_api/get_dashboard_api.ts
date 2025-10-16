@@ -136,7 +136,7 @@ export function getDashboardApi({
   }
 
   const trackOverlayApi = initializeTrackOverlay(trackPanel.setFocusedPanelId);
-  console.log(layoutManager.api);
+
   const dashboardApi = {
     ...viewModeManager.api,
     ...dataLoadingManager.api,

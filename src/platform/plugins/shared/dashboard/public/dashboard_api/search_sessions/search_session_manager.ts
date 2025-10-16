@@ -51,7 +51,6 @@ export function initializeSearchSessionManager(
       dashboardInternalApi,
       searchSessionSettings,
       (searchSessionId: string) => {
-        console.log('HERE!!!!!!!!');
         searchSessionId$.next(searchSessionId);
       }
     );

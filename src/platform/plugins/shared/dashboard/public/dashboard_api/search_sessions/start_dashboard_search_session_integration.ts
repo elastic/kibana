@@ -78,11 +78,9 @@ export function startDashboardSearchSessionIntegration(
           dataService.search.session.restore(searchSessionIdFromURL);
         }
       }
-      console.log({ searchSessionIdFromURL });
       return searchSessionIdFromURL ?? dataService.search.session.start();
     })();
     if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
-      console.log('SET', updatedSearchSessionId);
       setSearchSessionId(updatedSearchSessionId);
     }
   });
