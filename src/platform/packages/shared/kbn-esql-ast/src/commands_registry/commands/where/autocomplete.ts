@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
+import type { ESQLAstAllCommands, ESQLSingleAstItem } from '../../../types';
 import { pipeCompleteItem } from '../../complete_items';
 import { suggestForExpression } from '../../../definitions/utils/autocomplete/helpers';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
@@ -16,7 +16,7 @@ import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autoco
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number

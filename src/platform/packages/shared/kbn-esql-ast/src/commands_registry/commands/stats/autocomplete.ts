@@ -13,12 +13,12 @@ import { isAssignment, isColumn } from '../../../ast/is';
 import type { ICommandCallbacks } from '../../types';
 import { Location } from '../../types';
 import type {
-  ESQLCommand,
   ESQLCommandOption,
   ESQLColumn,
   ESQLFunction,
   ESQLAstItem,
   ESQLSingleAstItem,
+  ESQLAstAllCommands,
 } from '../../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import {
@@ -40,7 +40,7 @@ import { ESQL_VARIABLES_PREFIX } from '../../constants';
 import { getPosition, getCommaAndPipe, rightAfterColumn } from './utils';
 import { isMarkerNode } from '../../../definitions/utils/ast';
 
-function alreadyUsedColumns(command: ESQLCommand) {
+function alreadyUsedColumns(command: ESQLAstAllCommands) {
   const byOption = command.args.find((arg) => !Array.isArray(arg) && arg.name === 'by') as
     | ESQLCommandOption
     | undefined;
@@ -54,7 +54,7 @@ function alreadyUsedColumns(command: ESQLCommand) {
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number

@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommand } from '../../../types';
+import type { ESQLAstAllCommands } from '../../../types';
 import { pipeCompleteItem } from '../../complete_items';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
@@ -18,7 +18,7 @@ import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autoco
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number
