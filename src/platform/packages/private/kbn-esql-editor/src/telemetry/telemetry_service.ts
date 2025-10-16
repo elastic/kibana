@@ -9,21 +9,21 @@
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import {
   ESQL_LOOKUP_JOIN_ACTION_SHOWN,
-  ESQL_QUERY_EXECUTION_ERROR,
   ESQL_QUERY_HISTORY_CLICKED,
   ESQL_QUERY_HISTORY_OPENED,
   ESQL_QUERY_SUBMITTED,
-  ESQL_QUERY_SUCCESS,
   ESQL_STARRED_QUERY_CLICKED,
   ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN,
-  ESQL_FALSE_VALIDATION_ERROR,
 } from './events_registration';
 import type { IndexEditorCommandArgs } from '../custom_commands/use_lookup_index_editor';
 import { COMMAND_ID as LOOKUP_INDEX_EDITOR_COMMAND } from '../custom_commands/use_lookup_index_editor';
 
 export interface TelemetryQuerySubmittedProps {
-  exec_source: 'manual' | 'recommended' | 'history' | 'starred';
-  exec_source_ui: 'help' | 'autocomplete' | 'history' | 'starred' | 'manual' | 'external';
+  exec_source: 'manual' | 'help' | 'history' | 'starred';
+  query_length: string;
+  query_lines: string;
+  anti_limit_before_aggregate: boolean;
+  anti_missing_sort_before_limit: boolean;
 }
 
 export class ESQLEditorTelemetryService {
@@ -110,21 +110,10 @@ export class ESQLEditorTelemetryService {
   public trackQuerySubmitted(props: TelemetryQuerySubmittedProps) {
     this._reportEvent(ESQL_QUERY_SUBMITTED, {
       exec_source: props.exec_source,
-      exec_source_ui: props.exec_source_ui,
+      query_length: props.query_length,
+      query_lines: props.query_lines,
+      anti_limit_before_aggregate: props.anti_limit_before_aggregate,
+      anti_missing_sort_before_limit: props.anti_missing_sort_before_limit,
     });
-  }
-
-  public trackQuerySuccess() {
-    this._reportEvent(ESQL_QUERY_SUCCESS, {});
-  }
-
-  public trackQueryError(errorType: string) {
-    this._reportEvent(ESQL_QUERY_EXECUTION_ERROR, {
-      error_type: errorType,
-    });
-  }
-
-  public tranckFalseValidationError() {
-    this._reportEvent(ESQL_FALSE_VALIDATION_ERROR, {});
   }
 }

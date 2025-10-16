@@ -20,9 +20,6 @@ export const ESQL_QUERY_HISTORY_OPENED = 'esql.query_history_opened';
 export const ESQL_QUERY_HISTORY_CLICKED = 'esql.query_history_clicked';
 export const ESQL_STARRED_QUERY_CLICKED = 'esql.starred_query_clicked';
 export const ESQL_QUERY_SUBMITTED = 'esql.query_submitted';
-export const ESQL_QUERY_SUCCESS = 'esql.query_success';
-export const ESQL_QUERY_EXECUTION_ERROR = 'esql.query_execution_error';
-export const ESQL_FALSE_VALIDATION_ERROR = 'esql.false_validation_error';
 
 /**
  * Registers the esql editor analytics events.
@@ -92,24 +89,17 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
         type: 'keyword',
         _meta: {
           description:
-            'The source of the execution. Possible values are: manual|recommended|history|starred',
+            'The source of the execution. Possible values are: manual|help|history|starred',
         },
       },
-      exec_source_ui: {
+      query_length: {
         type: 'keyword',
-        _meta: {
-          description:
-            'The UI element that triggered the execution. Possible values are: help|autocomplete|history|starred|manual',
-        },
+        _meta: { description: 'The length of the query.' },
       },
-      // query_length_bucket: {
-      //   type: 'keyword',
-      //   _meta: { description: 'The length of the query bucket.' },
-      // },
-      // query_lines_bucket: {
-      //   type: 'keyword',
-      //   _meta: { description: 'The number of lines in the query bucket.' },
-      // },
+      query_lines: {
+        type: 'keyword',
+        _meta: { description: 'The number of lines in the query.' },
+      },
       // query_modified_before_run: {
       //   type: 'boolean',
       //   _meta: { description: 'Whether the query was modified before execution.' },
@@ -129,34 +119,14 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
       //   type: 'keyword',
       //   _meta: { description: 'The size of the execution result.' },
       // },
-      // anti_limit_before_aggregate: {
-      //   type: 'boolean',
-      //   _meta: { description: 'Whether the query had a limit before the aggregate.' },
-      // },
-      // anti_missing_sort_before_limit: {
-      //   type: 'boolean',
-      //   _meta: { description: 'Whether the query was missing a sort before the limit.' },
-      // },
-    },
-  });
-  analytics.registerEventType({
-    eventType: ESQL_QUERY_SUCCESS,
-    schema: {},
-  });
-  analytics.registerEventType({
-    eventType: ESQL_QUERY_EXECUTION_ERROR,
-    schema: {
-      error_type: {
-        type: 'keyword',
-        _meta: {
-          description:
-            'The reason for the error. Possible errors are: parse, validation, timeout, unknown',
-        },
+      anti_limit_before_aggregate: {
+        type: 'boolean',
+        _meta: { description: 'Whether the query had a limit before the aggregate.' },
+      },
+      anti_missing_sort_before_limit: {
+        type: 'boolean',
+        _meta: { description: 'Whether the query was missing a sort before the limit.' },
       },
     },
-  });
-  analytics.registerEventType({
-    eventType: ESQL_FALSE_VALIDATION_ERROR,
-    schema: {},
   });
 });

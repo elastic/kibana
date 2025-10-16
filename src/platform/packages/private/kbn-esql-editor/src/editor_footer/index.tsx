@@ -52,10 +52,7 @@ interface EditorFooterProps {
   warnings?: MonacoMessage[];
   detectedTimestamp?: string;
   onErrorClick: (error: MonacoMessage) => void;
-  runQuery: (
-    source: TelemetryQuerySubmittedProps['exec_source'],
-    sourceUI: TelemetryQuerySubmittedProps['exec_source_ui']
-  ) => void;
+  runQuery: (source: TelemetryQuerySubmittedProps['exec_source']) => void;
   updateQuery: (qs: string) => void;
   isHistoryOpen: boolean;
   setIsHistoryOpen: (status: boolean) => void;
@@ -115,9 +112,8 @@ export const EditorFooter = memo(function EditorFooter({
       // if I do it immediately there is some race condition until
       // the state is updated and it won't be sumbitted correctly
       const source = isStarred ? 'starred' : 'history';
-      const sourceUI = isStarred ? 'starred' : 'history';
       setTimeout(() => {
-        runQuery(source, sourceUI);
+        runQuery(source);
       }, 300);
     },
     [runQuery, updateQuery]
