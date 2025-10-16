@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pTimeout from 'p-timeout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import http, { type Server } from 'http';
@@ -160,25 +159,28 @@ export class LlmProxy {
       return responseMock;
     };
 
-    const waitForInterceptPromise = pTimeout(
-      new Promise<LlmSimulator>((outerResolve) => {
-        this.requestInterceptors.push({
-          name,
-          when,
-          handle: (request, response, requestBody) => {
-            const simulator = new LlmSimulator(requestBody, response, this.log, name);
-            const llmMessage = getMockedLlmMessage(requestBody);
-            outerResolve(simulator);
+    const waitForInterceptPromise = (async () => {
+      const pTimeout = (await import('p-timeout')).default;
+      return pTimeout(
+        new Promise<LlmSimulator>((outerResolve) => {
+          this.requestInterceptors.push({
+            name,
+            when,
+            handle: (request, response, requestBody) => {
+              const simulator = new LlmSimulator(requestBody, response, this.log, name);
+              const llmMessage = getMockedLlmMessage(requestBody);
+              outerResolve(simulator);
 
-            return llmMessage;
-          },
-        });
-      }),
-      {
-        milliseconds: 30000,
-        message: `Interceptor "${name}" timed out after 30000ms`,
-      }
-    );
+              return llmMessage;
+            },
+          });
+        }),
+        {
+          milliseconds: 30000,
+          message: `Interceptor "${name}" timed out after 30000ms`,
+        }
+      );
+    })();
 
     return {
       waitForIntercept: () => waitForInterceptPromise,
