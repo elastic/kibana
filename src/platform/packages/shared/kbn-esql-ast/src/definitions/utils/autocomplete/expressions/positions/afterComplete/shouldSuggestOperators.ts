@@ -175,6 +175,15 @@ const rules: Rule[] = [
           reason: 'Can still switch signature at subsequent param',
         };
       }
+
+      // This enables expressions like COALESCE(bytes, bytes + 10)
+      if (supportsArithmeticOperations(firstType) && supportsArithmeticOperations(expressionType)) {
+        return {
+          shouldSuggest: true,
+          allowedOperators: arithmeticOperators.map(({ name }) => name),
+          reason: 'Numeric homogeneous function - allow arithmetic operators',
+        };
+      }
     }
 
     return {

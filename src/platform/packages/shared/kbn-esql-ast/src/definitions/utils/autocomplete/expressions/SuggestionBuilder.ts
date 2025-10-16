@@ -14,9 +14,6 @@ import { getOperatorSuggestions } from '../../operators';
 import type { ExpressionContext } from './types';
 import { commaCompleteItem } from '../../../../commands_registry/complete_items';
 import { shouldSuggestComma, type CommaContext } from './commaDecisionEngine';
-import { getCompatibleLiterals } from '../../literals';
-import { ensureKeywordAndText } from '../functions';
-import { SignatureAnalyzer } from './SignatureAnalyzer';
 
 /** Builder pattern to eliminate duplicated field/function/literal suggestion code. */
 export class SuggestionBuilder {
@@ -41,7 +38,7 @@ export class SuggestionBuilder {
     const addSpaceAfterField = options?.addSpaceAfterField ?? addComma;
     const promoteToTop = options?.promoteToTop ?? true;
     const ignoredColumns = options?.ignoredColumns ?? [];
-    const openSuggestions = options?.openSuggestions ?? true;
+    const openSuggestions = options?.openSuggestions ?? (addSpaceAfterField || addComma);
     const values = options?.values;
 
     const getByType = this.context.callbacks?.getByType ?? (() => Promise.resolve([]));
@@ -141,62 +138,6 @@ export class SuggestionBuilder {
   addCommaIfNeeded(commaContext: CommaContext): this {
     if (shouldSuggestComma(commaContext)) {
       this.suggestions.push(commaCompleteItem);
-    }
-
-    return this;
-  }
-
-  /**
-   * Handles suggestions for unknown type expressions within function parameters.
-   */
-  async addUnknownTypeSuggestions(): Promise<this> {
-    const { context, options } = this.context;
-    const { functionParameterContext } = options;
-
-    if (!functionParameterContext?.functionDefinition) {
-      return this;
-    }
-
-    const {
-      paramDefinitions,
-      hasMoreMandatoryArgs = false,
-      functionsToIgnore,
-    } = functionParameterContext;
-
-    const constantOnlyParamDefs = paramDefinitions.filter(({ constantOnly }) => constantOnly);
-    const nonConstantParamDefs = paramDefinitions.filter(({ constantOnly }) => !constantOnly);
-
-    if (constantOnlyParamDefs.length > 0) {
-      const literalTypes = ensureKeywordAndText(constantOnlyParamDefs.map(({ type }) => type));
-      this.suggestions.push(
-        ...getCompatibleLiterals(
-          literalTypes,
-          { supportsControls: context?.supportsControls },
-          context?.variables
-        )
-      );
-    }
-
-    if (
-      paramDefinitions.length === 0 ||
-      nonConstantParamDefs.length > 0 ||
-      paramDefinitions.every(({ constantOnly }) => constantOnly)
-    ) {
-      const analyzer = SignatureAnalyzer.from(functionParameterContext);
-      const acceptedTypes = analyzer
-        ? analyzer.getAcceptedTypes()
-        : ensureKeywordAndText(paramDefinitions.map(({ type }) => type));
-
-      await this.addFields({
-        types: acceptedTypes,
-        addComma: hasMoreMandatoryArgs,
-        promoteToTop: true,
-      });
-
-      this.addFunctions({
-        types: acceptedTypes,
-        ignoredFunctions: functionsToIgnore,
-      });
     }
 
     return this;

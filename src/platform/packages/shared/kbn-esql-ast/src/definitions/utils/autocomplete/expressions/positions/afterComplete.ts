@@ -95,9 +95,7 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
 
   // Case 1: Unknown type handling within function parameter context
   if (functionParameterContext && expressionType === 'unknown') {
-    const builder = new SuggestionBuilder(enrichedCtx);
-    await builder.addUnknownTypeSuggestions();
-    return builder.build();
+    return [];
   }
 
   // Case 2: Time interval completions or standard operators

@@ -87,7 +87,7 @@ async function trySuggestForPartialOperators(
 }
 
 /** Derives innerText and option flags from the incoming params.*/
-export function buildContext(params: SuggestForExpressionParams): ExpressionContext {
+function buildContext(params: SuggestForExpressionParams): ExpressionContext {
   const { query, cursorPosition } = params;
   const innerText = query.slice(0, cursorPosition);
   const isCursorFollowedByComma = query.slice(cursorPosition).trimStart().startsWith(',');

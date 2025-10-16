@@ -8,15 +8,13 @@
  */
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import { suggestForExpression } from '../../../definitions/utils';
 
-import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
+import type { ESQLCommand } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { pipeCompleteItem, colonCompleteItem, semiColonCompleteItem } from '../../complete_items';
-import { type ISuggestionItem, type ICommandContext, Location } from '../../types';
+import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
-import { isLiteral, isFunctionExpression } from '../../../ast/is';
 
 const appendSeparatorCompletionItem: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-ast.esql.definitions.appendSeparatorDoc', {
@@ -38,22 +36,6 @@ export async function autocomplete(
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
   const commandArgs = command.args.filter((arg) => !Array.isArray(arg) && arg.type !== 'unknown');
-
-  const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
-
-  // DISSECT uses suggestForExpression with Location.DISSECT (unlike GROK which doesn't)
-  // because DISSECT has command options (APPEND_SEPARATOR) that require location-aware autocomplete
-  if (expressionRoot && (isLiteral(expressionRoot) || isFunctionExpression(expressionRoot))) {
-    return await suggestForExpression({
-      query,
-      expressionRoot,
-      command,
-      cursorPosition,
-      location: Location.DISSECT,
-      context,
-      callbacks,
-    });
-  }
 
   // DISSECT field/
   if (commandArgs.length === 1 && /\s$/.test(innerText)) {

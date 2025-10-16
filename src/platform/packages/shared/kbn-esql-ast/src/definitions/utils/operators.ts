@@ -62,7 +62,7 @@ export const getOperatorSuggestions = (
       ? filteredDefinitions.filter(({ signatures }) =>
           signatures.some(
             ({ params }) =>
-              !params.length ||
+              (!params.length || params.length > 1) &&
               params.some((pArg) => pArg.type === predicates?.leftParamType || pArg.type === 'any')
           )
         )
