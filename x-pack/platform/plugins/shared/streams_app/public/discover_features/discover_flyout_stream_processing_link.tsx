@@ -52,25 +52,27 @@ export function DiscoverFlyoutStreamProcessingLink({
   const href = locator.getRedirectUrl({
     name: value,
     managementTab: 'processing',
-    pageState: hasDocumentId ? {
-      v: 1,
-      dataSources: [
-        {
-          type: 'kql-samples',
-          enabled: true,
-          name: i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
-            defaultMessage: 'Discover document',
-          }),
-          query: {
-            language: 'kuery',
-            query: `_id: ${doc.raw._id}`,
-          },
-        },
-      ],
-    } : undefined,
+    pageState: hasDocumentId
+      ? {
+          v: 1,
+          dataSources: [
+            {
+              type: 'kql-samples',
+              enabled: true,
+              name: i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
+                defaultMessage: 'Discover document',
+              }),
+              query: {
+                language: 'kuery',
+                query: `_id: ${doc.raw._id}`,
+              },
+            },
+          ],
+        }
+      : undefined,
   });
 
-  const message = hasDocumentId 
+  const message = hasDocumentId
     ? i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
         defaultMessage: 'Parse content in Streams',
       })
