@@ -87,7 +87,7 @@ describe('validateLiquidTemplate', () => {
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
         id: 'liquid-template-1-16-1-28',
-        source: 'liquid-template-validation',
+        owner: 'liquid-template-validation',
         message: 'undefined filter: unknownFilter',
         startLineNumber: 1,
         startColumn: 16,
@@ -111,7 +111,7 @@ describe('validateLiquidTemplate', () => {
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
         id: 'liquid-template-1-9-1-21',
-        source: 'liquid-template-validation',
+        owner: 'liquid-template-validation',
         message: 'tag "unknownTag" not found',
         startLineNumber: 1,
         startColumn: 9,
@@ -135,7 +135,7 @@ describe('validateLiquidTemplate', () => {
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
         id: 'liquid-template-1-9-1-24',
-        source: 'liquid-template-validation',
+        owner: 'liquid-template-validation',
         message: 'output "{{ unclosed world" not closed',
         startLineNumber: 1,
         startColumn: 9,
@@ -159,7 +159,7 @@ describe('validateLiquidTemplate', () => {
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
         id: 'liquid-template-1-9-1-24',
-        source: 'liquid-template-validation',
+        owner: 'liquid-template-validation',
         message: 'tag "{% unclosed world" not closed',
         startLineNumber: 1,
         startColumn: 9,
