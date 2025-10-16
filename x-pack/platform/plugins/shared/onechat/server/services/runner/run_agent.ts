@@ -14,6 +14,7 @@ import { withAgentSpan } from '../../tracing';
 import { registryToProvider } from '../tools/utils';
 import { createAgentHandler } from '../agents/modes/create_handler';
 import { createAgentEventEmitter, forkContextForAgentRun } from './utils';
+import { createMemoryProvider } from './memory_provider';
 import type { RunnerManager } from './runner';
 
 export const createAgentHandlerContext = async <TParams = Record<string, unknown>>({
@@ -30,20 +31,23 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     elasticsearch,
     modelProviderFactory,
     toolsService,
+    conversationsService,
     resultStore,
     logger,
   } = manager.deps;
+  const modelProvider = modelProviderFactory({ request, defaultConnectorId });
   return {
     request,
     logger,
     esClient: elasticsearch.client.asScoped(request),
-    modelProvider: modelProviderFactory({ request, defaultConnectorId }),
+    modelProvider,
     runner: manager.getRunner(),
     toolProvider: registryToProvider({
       registry: await toolsService.getRegistry({ request }),
       getRunner: manager.getRunner,
       request,
     }),
+    memoryProvider: createMemoryProvider({ request, conversationsService, modelProvider }),
     resultStore,
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };

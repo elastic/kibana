@@ -78,6 +78,14 @@ export class ServiceManager {
       toolsService: tools,
     });
 
+    const conversations = new ConversationServiceImpl({
+      logger: logger.get('conversations'),
+      security,
+      elasticsearch,
+      inference,
+      spaces,
+    });
+
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
       security,
@@ -85,15 +93,9 @@ export class ServiceManager {
       inference,
       toolsService: tools,
       agentsService: agents,
+      conversationsService: conversations,
     });
     runner = runnerFactory.getRunner();
-
-    const conversations = new ConversationServiceImpl({
-      logger: logger.get('conversations'),
-      security,
-      elasticsearch,
-      spaces,
-    });
 
     const chat = createChatService({
       logger: logger.get('chat'),

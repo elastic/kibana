@@ -11,6 +11,7 @@ import {
   type RoundInput,
   type ChatAgentEvent,
   type AgentCapabilities,
+  type Conversation,
 } from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -56,6 +57,10 @@ export interface AgentHandlerContext {
    */
   toolProvider: ToolProvider;
   /**
+   * Memory provider for recall
+   */
+  memoryProvider: AgentMemoryProvider;
+  /**
    * Onechat runner scoped to the current execution.
    * Can be used to run other workchat primitive as part of the tool execution.
    */
@@ -74,6 +79,19 @@ export interface AgentHandlerContext {
   logger: Logger;
 }
 
+export interface AgentMemory {
+  conversation_id: string;
+  content: string;
+}
+
+export interface AgentMemoryProvider {
+  recall(opts: {
+    message: string;
+    previousRounds?: ConversationRound[];
+    conversationId?: string;
+  }): Promise<AgentMemory[]>;
+}
+
 /**
  * Event handler function to listen to run events during execution of tools, agents or other onechat primitives.
  */
@@ -87,10 +105,10 @@ export interface AgentEventEmitter {
 
 export interface AgentParams {
   /**
-   * Previous rounds of conversation.
+   * Current conversation.
    * Defaults to an empty list (new conversation)
    */
-  conversation?: ConversationRound[];
+  conversation?: Conversation;
   /**
    * The input triggering this round.
    */

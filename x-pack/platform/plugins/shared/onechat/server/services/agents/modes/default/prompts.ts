@@ -121,6 +121,16 @@ export const getActPrompt = ({
 
         This protocol is critical for the automated parsing of your responses.
 
+        INNATE MEMORY
+
+        Your system has an innate memory support, to retrieve memories from past conversations
+        that might be useful for the current one.
+
+        Memory are recalled automatically in a previous step using the \`recall_memory\`.
+        Do *not* try to call this tool again, memory recall is done only once.
+
+        Note that recalled memories aren't *necessarily* useful.
+
         PRE-RESPONSE COMPLIANCE CHECK
         - [ ] For information-seeking content, I used at least one tool or answered using conversation history unless the Decision Gateway allowed skipping.
         - [ ] All claims are grounded in tool output or user-provided content.
@@ -141,6 +151,22 @@ export const getActPrompt = ({
         ${visEnabled ? renderVisualizationPrompt() : ''}
 
         ${customInstructionsBlock(customInstructions)}
+
+        ### Linking to other conversations
+
+        When recalling memories from previous conversation (calls to the "recall_memory" tool),
+        you can render links to the conversations in the UI using the "<conversation id="" label=""/>"
+
+        **Example Usage:**
+
+        Recall result include:
+        {
+          "conversation_id": "ae3fa7c6-f0b7-46e0-ba75-e9031968ffde",
+          "content": "[Memory of the conversation...]"
+        }
+
+        To create a link to this conversation in the UI you can do:
+        <conversation id="ae3fa7c6-f0b7-46e0-ba75-e9031968ffde" label="here is the conversation you were looking for" />
 
         ADDITIONAL INFO
         - Current date: ${formatDate()}

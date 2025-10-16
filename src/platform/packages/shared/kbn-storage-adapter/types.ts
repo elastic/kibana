@@ -15,6 +15,7 @@ type AllMappingPropertyType = Required<MappingProperty>['type'];
 type StorageMappingPropertyType = AllMappingPropertyType &
   (
     | 'text'
+    | 'semantic_text'
     | 'match_only_text'
     | 'keyword'
     | 'boolean'
@@ -24,6 +25,7 @@ type StorageMappingPropertyType = AllMappingPropertyType &
     | 'double'
     | 'long'
     | 'object'
+    | 'nested'
   );
 
 type StorageMappingPropertyObjectType = Required<MappingObjectProperty, 'type'>;
@@ -66,6 +68,7 @@ const types = {
   keyword: createFactory('keyword', { ignore_above: 1024 }),
   match_only_text: createFactory('match_only_text'),
   text: createFactory('text'),
+  semantic_text: createFactory('semantic_text'),
   double: createFactory('double'),
   long: createFactory('long'),
   boolean: createFactory('boolean'),
@@ -73,6 +76,7 @@ const types = {
   byte: createFactory('byte'),
   float: createFactory('float'),
   object: createFactory('object'),
+  nested: createFactory('nested'),
 } satisfies {
   [TKey in StorageMappingPropertyType]: MappingPropertyFactory<TKey, any>;
 };
@@ -85,6 +89,7 @@ type PrimitiveOf<TProperty extends StorageMappingProperty> = {
     : string;
   match_only_text: string;
   text: string;
+  semantic_text: string;
   boolean: boolean;
   date: TProperty extends { format: 'strict_date_optional_time' } ? string : string | number;
   double: number;
@@ -92,6 +97,11 @@ type PrimitiveOf<TProperty extends StorageMappingProperty> = {
   byte: number;
   float: number;
   object: TProperty extends { properties: Record<string, StorageMappingProperty> }
+    ? {
+        [key in keyof TProperty['properties']]?: StorageFieldTypeOf<TProperty['properties'][key]>;
+      }
+    : object;
+  nested: TProperty extends { properties: Record<string, StorageMappingProperty> }
     ? {
         [key in keyof TProperty['properties']]?: StorageFieldTypeOf<TProperty['properties'][key]>;
       }

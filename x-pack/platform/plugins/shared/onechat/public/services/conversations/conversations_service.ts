@@ -16,7 +16,8 @@ import type {
   ConversationGetOptions,
   ConversationDeleteOptions,
 } from '../../../common/conversations';
-import { publicApiPath } from '../../../common/constants';
+import { publicApiPath, internalApiPath } from '../../../common/constants';
+import type { ConversationSummary } from '../../../server/services/conversation/summarization';
 
 export class ConversationsService {
   private readonly http: HttpSetup;
@@ -45,5 +46,14 @@ export class ConversationsService {
     return await this.http.delete<DeleteConversationResponse>(
       `${publicApiPath}/conversations/${conversationId}`
     );
+  }
+
+  // summaries
+
+  async getSummary({ conversationId }: { conversationId: string }) {
+    const res = await this.http.get<{ summary: ConversationSummary }>(
+      `${internalApiPath}/conversation_summaries/${conversationId}`
+    );
+    return res.summary;
   }
 }

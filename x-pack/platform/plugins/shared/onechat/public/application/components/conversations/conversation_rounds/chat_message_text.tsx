@@ -30,6 +30,8 @@ import {
   createVisualizationRenderer,
   loadingCursorPlugin,
   visualizationTagParser,
+  discussionLinkTagParser,
+  createConversationLinkRenderer,
 } from './markdown_plugins';
 import { useStepsFromPrevRounds } from '../../../hooks/use_conversation';
 
@@ -123,6 +125,7 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
         stepsFromCurrentRound,
         stepsFromPrevRounds,
       }),
+      conversation: createConversationLinkRenderer({ startDependencies }),
     };
 
     return {
@@ -130,6 +133,7 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
         loadingCursorPlugin,
         esqlLanguagePlugin,
         visualizationTagParser,
+        discussionLinkTagParser,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,

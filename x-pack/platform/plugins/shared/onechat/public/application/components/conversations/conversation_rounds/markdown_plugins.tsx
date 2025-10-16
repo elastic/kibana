@@ -16,15 +16,111 @@ import {
 import type { ConversationRoundStep } from '@kbn/onechat-common';
 import classNames from 'classnames';
 import { EuiCode, EuiText, useEuiTheme } from '@elastic/eui';
-
 import type { OnechatStartDependencies } from '../../../../types';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
+import { ConversationSummaryLink } from './conversation_summary_link';
 
 type MutableNode = Node & {
   value?: string;
   toolResultId?: string;
   chartType?: string;
 };
+
+export const discussionLinkTagParser = () => {
+  const extractAttribute = (value: string, attr: string) => {
+    const regex = new RegExp(`${attr}="([^"]*)"`, 'i');
+    return value.match(regex)?.[1];
+  };
+
+  const getAttributes = (value: string) => ({
+    conversationId: extractAttribute(value, 'id'),
+    label: extractAttribute(value, 'label'),
+  });
+
+  const assignAttributes = (node: MutableNode, attributes: ReturnType<typeof getAttributes>) => {
+    node.type = 'conversation';
+    node.conversationId = attributes.conversationId;
+    node.label = attributes.label;
+    delete node.value;
+  };
+
+  const visualizationTagRegex = new RegExp(`<conversation\\b[^>]*\\/?>`, 'gi');
+
+  const createVisualizationNode = (
+    attributes: ReturnType<typeof getAttributes>,
+    position: MutableNode['position']
+  ): MutableNode => ({
+    type: 'conversation',
+    conversationId: attributes.conversationId,
+    label: attributes.label,
+    position,
+  });
+
+  const visitParent = (parent: Parent) => {
+    for (let index = 0; index < parent.children.length; index++) {
+      const child = parent.children[index] as MutableNode;
+
+      if ('children' in child) {
+        visitParent(child as Parent);
+      }
+
+      if (child.type !== 'html') {
+        continue; // terminate iteration if not html node
+      }
+
+      const rawValue = child.value;
+      if (!rawValue) {
+        continue; // terminate iteration if no value attribute
+      }
+
+      const trimmedValue = rawValue.trim();
+      if (!trimmedValue.toLowerCase().startsWith(`<conversation`)) {
+        continue; // terminate iteration if not starting with visualization tag
+      }
+
+      const matches = Array.from(trimmedValue.matchAll(visualizationTagRegex));
+      if (matches.length === 0) {
+        continue; // terminate iteration if no matches found
+      }
+
+      const nodeAttributes = matches.map((match) => getAttributes(match[0]));
+      const leftoverContent = trimmedValue.replace(visualizationTagRegex, '').trim();
+
+      assignAttributes(child, nodeAttributes[0]);
+
+      if (nodeAttributes.length === 1 || leftoverContent.length > 0) {
+        continue;
+      }
+
+      const additionalNodes = nodeAttributes
+        .slice(1)
+        .map((attributes) => createVisualizationNode(attributes, child.position));
+
+      const siblings = parent.children as Node[];
+      siblings.splice(index + 1, 0, ...additionalNodes);
+      index += additionalNodes.length;
+      continue;
+    }
+  };
+
+  return (tree: Node) => {
+    if ('children' in tree) {
+      visitParent(tree as Parent);
+    }
+  };
+};
+
+export function createConversationLinkRenderer({
+  startDependencies,
+}: {
+  startDependencies: OnechatStartDependencies;
+}) {
+  return (props: { conversationId: string; label: string }) => {
+    const { label, conversationId } = props;
+
+    return <ConversationSummaryLink conversationId={conversationId} label={label} />;
+  };
+}
 
 export const visualizationTagParser = () => {
   const extractAttribute = (value: string, attr: string) => {
