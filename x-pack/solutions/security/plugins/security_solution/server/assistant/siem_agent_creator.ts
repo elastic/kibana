@@ -6,7 +6,6 @@
  */
 
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
-import { DEFAULT_SYSTEM_PROMPT } from '@kbn/elastic-assistant-plugin/server/lib/prompt/prompts';
 
 /**
  * Creates the SIEM Security Analyst agent definition for the new registry mechanism.
@@ -31,13 +30,19 @@ export const siemAgentCreator = (): BuiltInAgentDefinition => {
        - This includes questions like "What is Elastic Painless?", "How do I use EQL?", "What are Elasticsearch aggregations?"
        - Do NOT rely on general knowledge - always retrieve official documentation
 
-    2. **For security-specific tools**:
+    2. **For Elastic Security Labs content**:
+       - When users ask about "Elastic Security Labs", "Security Labs research", "latest from Security Labs", "Security Labs updates", "threat intelligence from Security Labs", or "Security Labs content"
+       - ALWAYS use 'core.security.security_labs_knowledge' tool FIRST
+       - DO NOT use product_documentation for Security Labs queries
+       - This tool contains threat research, malware analysis, and attack techniques from Elastic Security Labs
+
+    3. **For security-specific tools**:
        - Use 'core.security.alert_counts' for alert statistics and counts (e.g., "How many alerts do I have?")
        - Use 'core.security.open_and_acknowledged_alerts' for specific alerts or alert details (e.g., "What are the latest alerts?", "What is the most common host?")
        - Use 'core.security.entity_risk_score' for entity risk analysis (requires identifier_type and identifier parameters)
        - Use 'core.security.knowledge_base_retrieval' for saved knowledge
 
-    3. **Workflow for security tools that require settings**:
+    4. **Workflow for security tools that require settings**:
        - Get tool-specific settings by calling 'core.security.assistant_settings' with the toolId parameter
        - For alert_counts: Call assistant_settings with toolId="core.security.alert_counts"
        - For open_and_acknowledged_alerts: Call assistant_settings with toolId="core.security.open_and_acknowledged_alerts"
@@ -69,7 +74,7 @@ export const siemAgentCreator = (): BuiltInAgentDefinition => {
         // Include the product-documentation-internal-tool
         { tool_ids: ['core.security.product_documentation'] },
         // Include the security-labs-knowledge-internal-tool
-        { tool_ids: ['security-labs-knowledge-internal-tool'] },
+        { tool_ids: ['core.security.security_labs_knowledge'] },
         // Include the knowledge-base-write-internal-tool
         { tool_ids: ['core.security.knowledge_base_write'] },
         // Include the entity-risk-score-tool-internal

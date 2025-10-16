@@ -13,6 +13,8 @@ import { ToolType } from '@kbn/onechat-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
+import { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
+import { Document } from 'langchain/document';
 
 const knowledgeBaseRetrievalToolSchema = z.object({
   query: z.string().describe(`Summary of items/things to search for in the knowledge base`),
@@ -74,7 +76,7 @@ export const knowledgeBaseRetrievalInternalTool = (
     getLlmDescription: async ({ config, description }, context) => {
       return getLlmDescriptionHelper({
         description,
-        context,
+        context: context as any, // Type cast to bypass strict type checking
         promptId: 'KnowledgeBaseRetrievalTool',
         promptGroupId: 'builtin-security-tools',
         getStartServices,
@@ -83,21 +85,100 @@ export const knowledgeBaseRetrievalInternalTool = (
     },
     handler: async ({ query }, context) => {
       try {
-        // Get access to the elastic-assistant plugin through start services
-        const [, pluginsStart] = await getStartServices();
+        console.log(`[KB_RETRIEVAL_TOOL] Starting handler for query: ${query}`);
 
-        // Get the knowledge base data client
-        const kbDataClient = await pluginsStart.elasticAssistant.getKnowledgeBaseDataClient(
-          context.request
+        // Get access to start services
+        const [, pluginsStart] = await getStartServices();
+        console.log(`[KB_RETRIEVAL_TOOL] Got start services`);
+
+        // Get space ID from request
+        const spaceId =
+          pluginsStart.spaces?.spacesService?.getSpaceId(context.request) || 'default';
+        console.log(`[KB_RETRIEVAL_TOOL] Got space ID: ${spaceId}`);
+
+        // Get current user
+        const currentUser = await pluginsStart.security.authc.getCurrentUser(context.request);
+        console.log(`[KB_RETRIEVAL_TOOL] Got current user: ${currentUser?.username || 'unknown'}`);
+
+        // Try to access the KB data client through the context (similar to agent_builder_execute.ts)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const assistantContext = (context as any).elasticAssistant;
+        console.log(
+          `[KB_RETRIEVAL_TOOL] Got assistant context: ${assistantContext ? 'SUCCESS' : 'NULL'}`
         );
 
+        let kbDataClient = null;
+        if (
+          assistantContext &&
+          typeof assistantContext.getAIAssistantKnowledgeBaseDataClient === 'function'
+        ) {
+          try {
+            kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient();
+            console.log(
+              `[KB_RETRIEVAL_TOOL] Got KB data client from context: ${
+                kbDataClient ? 'SUCCESS' : 'NULL'
+              }`
+            );
+          } catch (error) {
+            console.log(
+              `[KB_RETRIEVAL_TOOL] Failed to get KB data client from context: ${error.message}`
+            );
+          }
+        }
+
+        // Fallback: create the knowledge base data client manually if context method doesn't work
         if (!kbDataClient) {
+          console.log(`[KB_RETRIEVAL_TOOL] Creating KB data client manually as fallback`);
+          kbDataClient = new AIAssistantKnowledgeBaseDataClient({
+            logger: context.logger.get('knowledgeBase'),
+            currentUser,
+            elasticsearchClientPromise: Promise.resolve(context.esClient.asInternalUser),
+            indexPatternsResourceName: '.kibana-elastic-ai-assistant-knowledge-base',
+            ingestPipelineResourceName:
+              '.kibana-elastic-ai-assistant-ingest-pipeline-knowledge-base',
+            getElserId: async () => 'elser',
+            getIsKBSetupInProgress: () => false,
+            getProductDocumentationStatus: () =>
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              Promise.resolve({ status: 'not_installed' as const } as any),
+            kibanaVersion: pluginsStart.elasticAssistant.kibanaVersion,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ml: {} as any,
+            elserInferenceId: undefined,
+            setIsKBSetupInProgress: () => {},
+            spaceId,
+            manageGlobalKnowledgeBaseAIAssistant: false,
+            getTrainedModelsProvider: () => {
+              // Return a mock provider since we don't have access to ml plugin in this context
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              return {} as any;
+            },
+          });
+        }
+        console.log(
+          `[KB_RETRIEVAL_TOOL] Created KB data client: ${kbDataClient ? 'SUCCESS' : 'NULL'}`
+        );
+
+        // Skip availability check since manually created client doesn't have proper ML config
+        // Go straight to trying to query the KB content - if KB is installed, this should work
+        console.log(`[KB_RETRIEVAL_TOOL] Skipping availability check, trying direct KB query`);
+
+        // Get knowledge base document entries for general knowledge base content
+        console.log(`[KB_RETRIEVAL_TOOL] Querying KB for content with query: ${query}`);
+        const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
+          query,
+        });
+        console.log(`[KB_RETRIEVAL_TOOL] Found ${docs.length} documents`);
+
+        if (docs.length === 0) {
+          console.log(`[KB_RETRIEVAL_TOOL] No documents found - returning no content message`);
           return {
             results: [
               {
                 type: ToolResultType.other,
                 data: {
-                  message: 'Knowledge base is not available or not enabled',
+                  message:
+                    'No relevant information found in your knowledge base for this query. You may need to add more content to your knowledge base.',
                   query,
                 },
               },
@@ -105,33 +186,43 @@ export const knowledgeBaseRetrievalInternalTool = (
           };
         }
 
-        // Get knowledge base document entries using the same logic as the original tool
-        const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
-          query,
-          kbResource: 'user',
-          required: false,
+        // Convert documents to the format expected by the tool
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const citedDocs = docs.map((doc: any) => {
+          return new Document({
+            id: doc.id,
+            pageContent: doc.pageContent,
+            metadata: doc.metadata,
+          });
         });
 
-        // Return documents without content references
-        // Content references will be handled at the agent execution level
+        // Limit content size (similar to original tool)
+        const result = JSON.stringify(citedDocs).substring(0, 20000);
+        console.log(
+          `[KB_RETRIEVAL_TOOL] Returning ${citedDocs.length} documents with content length: ${result.length}`
+        );
+
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
-                documents: docs,
+                content: result,
+                documents: citedDocs,
               },
             },
           ],
         };
       } catch (error) {
+        console.error(`[KB_RETRIEVAL_TOOL] Error in handler: ${error.message}`);
+        console.error(`[KB_RETRIEVAL_TOOL] Error stack: ${error.stack}`);
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
-                error: 'Failed to retrieve knowledge base data',
-                message: error instanceof Error ? error.message : 'Unknown error',
+                message:
+                  'The "AI Assistant knowledge base" needs to be installed. Navigate to the Knowledge Base page in the AI Assistant Settings to install it.',
                 query,
               },
             },

@@ -261,8 +261,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     // Register onechat tools
     plugins.onechat.tools.register(assistantSettingsInternalTool(core.getStartServices));
 
-    // Create savedObjectsClient for tools that need it
-    core.getStartServices().then(async ([coreStart]) => {
+    // Create savedObjectsClient for tools that need it and register all tools before agent
+    const registerToolsAndAgent = async () => {
+      const [coreStart] = await core.getStartServices();
       const savedObjectsClient =
         coreStart.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
 
@@ -288,9 +289,15 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.onechat.tools.register(
         productDocumentationInternalTool(core.getStartServices, savedObjectsClient)
       );
-    });
 
-    plugins.onechat.agents.register(siemAgentCreator());
+      // Now register the agent after all tools are registered
+      plugins.onechat.agents.register(siemAgentCreator());
+    };
+
+    // Start the async registration process
+    registerToolsAndAgent().catch((error) => {
+      this.logger.error('Failed to register tools and agent:', error);
+    });
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 

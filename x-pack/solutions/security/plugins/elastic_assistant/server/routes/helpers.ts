@@ -508,6 +508,25 @@ export const performChecks = async ({
 };
 
 /**
+ * Check if knowledge base inference endpoint is available
+ * @param kbDataClient
+ */
+export const getIsKnowledgeBaseAvailable = async (
+  kbDataClient?: AIAssistantKnowledgeBaseDataClient | null
+): Promise<boolean> => {
+  if (kbDataClient == null) {
+    return false;
+  }
+
+  try {
+    return await kbDataClient.isInferenceEndpointExists();
+  } catch (e) {
+    /* if requests fail, fallback to false */
+    return false;
+  }
+};
+
+/**
  * Telemetry function to determine whether knowledge base has been installed
  * @param kbDataClient
  */

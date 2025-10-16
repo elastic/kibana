@@ -34,6 +34,7 @@ import type { PublicMethodsOf, AwaitedProperties } from '@kbn/utility-types';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/server';
 import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
 import type { ElasticAssistantRequestHandlerContext } from '../types';
+import { getIsKnowledgeBaseAvailable } from './helpers';
 
 // Extended request type to store tool replacements temporarily
 interface ExtendedKibanaRequest {
@@ -250,6 +251,7 @@ const executeStreaming = async ({
   startTime,
   logger,
   response,
+  isEnabledKnowledgeBase,
 }: {
   onechatServices: OnechatPluginStart;
   connectorId: string;
@@ -269,6 +271,7 @@ const executeStreaming = async ({
   startTime: number;
   logger: Logger;
   response: KibanaResponseFactory;
+  isEnabledKnowledgeBase: boolean;
 }): Promise<StreamResponseWithHeaders> => {
   logger.debug(`🚀 [AGENT_BUILDER] Starting streaming chat execution`);
 
@@ -389,7 +392,7 @@ const executeStreaming = async ({
           telemetry.reportEvent('invoke_assistant_success', {
             assistantStreamingEnabled: true,
             actionTypeId,
-            isEnabledKnowledgeBase: false, // TODO: Get this from context
+            isEnabledKnowledgeBase,
             durationMs,
             toolsInvoked,
             model: 'unknown', // TODO: Get this from the response
@@ -450,6 +453,7 @@ const executeNonStreaming = async ({
   logger,
   response,
   conversationId,
+  isEnabledKnowledgeBase,
 }: {
   onechatServices: OnechatPluginStart;
   connectorId: string;
@@ -470,6 +474,7 @@ const executeNonStreaming = async ({
   logger: Logger;
   response: KibanaResponseFactory;
   conversationId?: string;
+  isEnabledKnowledgeBase: boolean;
 }) => {
   logger.debug(`🚀 [AGENT_BUILDER] Starting non-streaming agent execution`);
 
@@ -520,7 +525,7 @@ const executeNonStreaming = async ({
     actionTypeId,
     model: (request.body as { model?: string }).model,
     assistantStreamingEnabled: false,
-    isEnabledKnowledgeBase: false,
+    isEnabledKnowledgeBase,
     durationMs,
     toolsInvoked,
   });
@@ -683,6 +688,10 @@ export async function agentBuilderExecute({
     const assistantContext = context.elasticAssistant;
     const onechatServices = assistantContext.getOnechatServices();
 
+    // Check if knowledge base is available for telemetry
+    const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient();
+    const isEnabledKnowledgeBase = await getIsKnowledgeBaseAvailable(kbDataClient);
+
     // Execute based on streaming preference
     if (isStream) {
       const result = await executeStreaming({
@@ -700,6 +709,7 @@ export async function agentBuilderExecute({
         startTime,
         logger,
         response,
+        isEnabledKnowledgeBase,
       });
       return response.ok<StreamResponseWithHeaders['body']>(result);
     } else {
@@ -719,6 +729,7 @@ export async function agentBuilderExecute({
         logger,
         response,
         conversationId,
+        isEnabledKnowledgeBase,
       });
     }
   } catch (error) {

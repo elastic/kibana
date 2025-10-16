@@ -16,7 +16,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   'core.security.alert_counts',
   'core.security.knowledge_base_retrieval',
   'core.security.product_documentation',
-  'security-labs-knowledge-internal-tool',
+  'core.security.security_labs_knowledge',
   'core.security.knowledge_base_write',
   'core.security.entity_risk_score',
 ];
