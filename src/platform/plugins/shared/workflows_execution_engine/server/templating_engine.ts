@@ -19,7 +19,7 @@ export class WorkflowTemplatingEngine {
     });
 
     // register json filter that converts JSON string to object
-    this.engine.registerFilter('json', (value: any) => {
+    this.engine.registerFilter('json', (value: unknown): unknown => {
       if (typeof value !== 'string') {
         return value;
       }
@@ -30,14 +30,14 @@ export class WorkflowTemplatingEngine {
       }
     });
     // register dump filter that converts an object to a JSON string
-    this.engine.registerFilter('dump', (value: any) => {
-      if (typeof value !== 'object') {
-        return value;
+    this.engine.registerFilter('dump', (value: unknown): string => {
+      if (typeof value !== 'object' || value === null) {
+        return String(value);
       }
       try {
         return JSON.stringify(value, null, 2);
       } catch (error) {
-        return value;
+        return String(value);
       }
     });
   }
