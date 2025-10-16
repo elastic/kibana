@@ -238,22 +238,21 @@ export async function createAgentPolicyWithPackages({
   }
 
   await ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id);
-  await agentPolicyService.deployPolicy(soClient, agentPolicy.id, undefined, {
-    skipAgentless: true,
-  });
 
-  // Create the agentless agent
-  if (agentPolicy.supports_agentless) {
-    try {
-      await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
-    } catch (err) {
+  try {
+    // Deploy policy will create the agentless agent if needed
+    await agentPolicyService.deployPolicy(soClient, agentPolicy.id, undefined, {
+      throwOnAgentlessError: true,
+    });
+  } catch (err) {
+    if (agentPolicy.supports_agentless) {
       await agentPolicyService.delete(soClient, esClient, agentPolicy.id).catch(() => {
         appContextService
           .getLogger()
           .error(`Error deleting agentless policy`, { error: agentPolicy });
       });
-      throw err;
     }
+    throw err;
   }
 
   return agentPolicy;

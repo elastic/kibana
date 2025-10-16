@@ -1801,10 +1801,12 @@ describe('Agent policy', () => {
       );
     });
 
-    it('should not call agentless API for agentless policies if called with skipAgentless', async () => {
+    it('should throw on error during agentless API calls for agentless policies', async () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
+      jest
+        .mocked(agentlessAgentService.createAgentlessAgent)
+        .mockRejectedValueOnce(new Error('createAgentlessAgent error'));
       mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
       mockedOutputService.getDefaultDataOutputId.mockResolvedValueOnce('default-output');
       mockedGetFullAgentPolicy.mockResolvedValue({
@@ -1855,11 +1857,11 @@ describe('Agent policy', () => {
 
       jest.spyOn(agentlessAgentService, 'createAgentlessAgent');
 
-      await agentPolicyService.deployPolicy(soClient, 'test-agentless-policy', undefined, {
-        skipAgentless: true,
-      });
-      expect(esClient.bulk).toBeCalled();
-      expect(jest.mocked(agentlessAgentService.createAgentlessAgent)).not.toBeCalled();
+      await expect(
+        agentPolicyService.deployPolicy(soClient, 'test-agentless-policy', undefined, {
+          throwOnAgentlessError: true,
+        })
+      ).rejects.toThrow('createAgentlessAgent error');
     });
   });
 

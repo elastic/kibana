@@ -49,10 +49,7 @@ export async function agentPolicyUpdateEventHandler(
       forceRecreate: true,
     });
     if (!options?.skipDeploy) {
-      await agentPolicyService.deployPolicy(internalSoClient, agentPolicyId, options?.agentPolicy, {
-        // Do not call agentless API on creation it's already done in the agentPolicy create service
-        skipAgentless: true,
-      });
+      await agentPolicyService.deployPolicy(internalSoClient, agentPolicyId, options?.agentPolicy);
     }
   }
 

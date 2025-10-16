@@ -1621,7 +1621,7 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     agentPolicyId: string,
     agentPolicy?: AgentPolicy | null,
-    options?: { skipAgentless?: boolean }
+    options?: { throwOnAgentlessError?: boolean }
   ) {
     await this.deployPolicies(
       soClient,
@@ -1635,7 +1635,7 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     agentPolicyIds: string[],
     agentPolicies?: AgentPolicy[],
-    options?: { skipAgentless?: boolean }
+    options?: { throwOnAgentlessError?: boolean }
   ) {
     const logger = this.getLogger('deployPolicies');
     logger.debug(
@@ -1759,7 +1759,7 @@ class AgentPolicyService {
     }
 
     for (const agentPolicy of policies) {
-      if (!agentPolicy.supports_agentless || options?.skipAgentless) {
+      if (!agentPolicy.supports_agentless) {
         continue;
       }
       try {
@@ -1773,6 +1773,9 @@ class AgentPolicyService {
           `[Agentless API] Error deploying agentless deployment for single agent policy id ${agentPolicy.id}`,
           { error }
         );
+        if (options?.throwOnAgentlessError) {
+          throw error;
+        }
       }
     }
 
