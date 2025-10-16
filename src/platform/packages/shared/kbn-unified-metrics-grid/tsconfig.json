@@ -30,7 +30,6 @@
     "@kbn/data-grid-in-table-search",
     "@kbn/es-query",
     "@kbn/fields-metadata-plugin",
-    "@kbn/esql-utils",
     "@kbn/field-utils"
   ]
 }
