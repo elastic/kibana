@@ -59,7 +59,7 @@ export const AlertHeaderTitle = memo(() => {
   );
   const dispatch = useDispatch();
 
-  const { expandedAlertIndex, totalCount } = useDeepEqualSelector((state) => {
+  const { expandedAlertIndex, itemsPerPage } = useDeepEqualSelector((state) => {
     return dataTableSelectors.getTableByIdSelector()(state, scopeId) ?? tableDefaults;
   });
 
@@ -157,7 +157,7 @@ export const AlertHeaderTitle = memo(() => {
         <EuiFlexItem grow={false}>
           <EuiPagination
             aria-label=""
-            pageCount={totalCount}
+            pageCount={itemsPerPage}
             activePage={expandedAlertIndex}
             onPageClick={onPaginate}
             compressed

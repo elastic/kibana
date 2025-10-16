@@ -126,5 +126,5 @@ export const updateShowThreatIndicatorAlertsFilter = actionCreator<{
 
 export const updateExpandedAlertIndex = actionCreator<{
   id: string;
-  expandedAlertIndex?: number | null;
+  expandedAlertIndex?: number;
 }>('UPDATE_EXPANDED_ALERT_INDEX');

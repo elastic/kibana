@@ -62,7 +62,7 @@ export interface DataTableModel extends DataTableModelSettings {
   viewMode: ViewSelection;
   /* custom filters applicable to */
   additionalFilters: Record<AlertPageFilterType, boolean>;
-  expandedAlertIndex?: number | null;
+  expandedAlertIndex?: number;
 }
 
 export type SubsetDataTableModel = Readonly<

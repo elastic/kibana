@@ -81,6 +81,8 @@ const DEFAULT_DATA_GRID_HEIGHT = 600;
 
 const ALERT_TABLE_CONSUMERS: ResponseOpsAlertsTableProps['consumers'] = [AlertConsumers.SIEM];
 
+const DEFAULT_TABLE_PAGE_SIZE = 50;
+
 // Highlight rows with building block alerts
 const shouldHighlightRow = (alert: Alert) => !!alert[ALERT_BUILDING_BLOCK_TYPE];
 
@@ -250,6 +252,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
     columns,
     totalCount: count,
     expandedAlertIndex,
+    itemsPerPage,
   } = useSelector((state: State) => getTable(state, tableType) ?? licenseDefaults);
 
   const timeRangeFilter = useMemo(() => buildTimeRangeFilter(from, to), [from, to]);
@@ -429,7 +432,17 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
         })),
       })
     );
+    dispatch(
+      dataTableActions.updateItemsPerPage({ id: tableType, itemsPerPage: DEFAULT_TABLE_PAGE_SIZE })
+    );
   }, [dispatch, tableType, finalColumns, isDataTableInitialized]);
+
+  const onPageSizeChange = useCallback(
+    (newPageSize: number) => {
+      dispatch(dataTableActions.updateItemsPerPage({ id: tableType, itemsPerPage: newPageSize }));
+    },
+    [dispatch, tableType]
+  );
 
   const toolbarVisibility = useMemo(
     () => ({
@@ -485,7 +498,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
 
   const onExpandedAlertFlyoutClose = useCallback(() => {
     dispatch(
-      dataTableActions.updateExpandedAlertIndex({ id: tableType, expandedAlertIndex: null })
+      dataTableActions.updateExpandedAlertIndex({ id: tableType, expandedAlertIndex: undefined })
     );
   }, [dispatch, tableType]);
 
@@ -529,7 +542,8 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
               onLoaded={onLoaded}
               additionalContext={additionalContext}
               height={alertTableHeight}
-              pageSize={50}
+              pageSize={itemsPerPage}
+              onPageSizeChange={onPageSizeChange}
               runtimeMappings={runtimeMappings}
               toolbarVisibility={toolbarVisibility}
               renderCellValue={CellValue}
