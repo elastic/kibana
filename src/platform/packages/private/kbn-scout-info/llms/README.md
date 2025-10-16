@@ -58,10 +58,29 @@ Instructions:
 
 ## Step 3 (optional): Create or update Scout API helpers
 
-If your FTR tests rely on API helpers to prepare the test environment, use this prompt to create or update Scout API helpers:
+If your FTR tests rely on API helpers to prepare the test environment, use this prompt to create or update Scout API helpers.
+
+First you may use the Semantic code search MCP server to find existing API helpers:
 
 ```
+Use semantic code search to find existing data views API helpers.
+```
 
+Alternatively, you can search for these files manually, or attempt to have the AI assistant search them for you (without semantic search).
+
+Then, use a similar prompt:
+
+```
+Can you generate Scout API helpers for these files:
+
+src/platform/plugins/shared/data_views/server/routes.ts - Main route registration file
+src/platform/plugins/shared/data_views/server/rest_api_routes/public/index.ts - Public routes index
+src/platform/plugins/shared/data_views/server/constants.ts - Path constants
+src/platform/plugins/shared/data_views/common/constants.ts - Common constants including internal paths
+src/platform/plugins/shared/data_views/server/rest_api_routes/internal/existing_indices.ts - Existing indices endpoint
+src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields_for.ts - Fields for wildcard endpoint
+src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields.ts - Fields endpoint
+src/platform/plugins/shared/data_views/server/rest_api_routes/internal/has_es_data.ts - Has ES data endpoint
 ```
 
 ## Step 4: Implement the test logic
