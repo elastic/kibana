@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Automatic Import Create Integration API endpoint
+  title: Automatic Import Integrations API endpoint
   version: "1"
 paths:
   /internal/automatic_import/integrations:
