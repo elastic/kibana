@@ -11,6 +11,7 @@
 // This is a Node.js-only webpack config generator that imports build-time dependencies
 
 import path from 'path';
+import type { Configuration } from 'webpack';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
@@ -103,7 +104,7 @@ export interface StandaloneWebpackOptions {
  * });
  * ```
  */
-export function createStandaloneWebpackConfig(options: StandaloneWebpackOptions): any {
+export function createStandaloneWebpackConfig(options: StandaloneWebpackOptions): Configuration {
   const {
     entry,
     outputPath,
@@ -327,5 +328,5 @@ export function createStandaloneWebpackConfig(options: StandaloneWebpackOptions)
       runtimeChunk: false,
     },
     plugins,
-  };
+  } as Configuration;
 }
