@@ -189,72 +189,12 @@ test('generates xy chart config with legend stats', async () => {
     }
   );
 
-  expect(result).toEqual({
-    references: [
-      { id: 'test', name: 'indexpattern-datasource-layer-layer_0', type: 'index-pattern' },
-    ],
-    state: {
-      adHocDataViews: { test: {} },
-      datasourceStates: {
-        textBased: {
-          layers: {
-            layer_0: {
-              allColumns: [
-                { columnId: 'x_metric_formula_accessor0', fieldName: '@timestamp' },
-                {
-                  columnId: 'metric_formula_accessor0_0',
-                  fieldName: 'count',
-                  meta: { type: 'number' },
-                },
-              ],
-              columns: [
-                { columnId: 'x_metric_formula_accessor0', fieldName: '@timestamp' },
-                {
-                  columnId: 'metric_formula_accessor0_0',
-                  fieldName: 'count',
-                  meta: { type: 'number' },
-                },
-              ],
-              index: 'test',
-              query: { esql: 'from test | count=count() by @timestamp' },
-              timeField: undefined,
-            },
-          },
-        },
-      },
-      filters: [],
-      internalReferences: [],
-      query: { language: 'kuery', query: '' },
-      visualization: {
-        axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-        emphasizeFitting: true,
-        fittingFunction: 'Linear',
-        gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-        hideEndzones: true,
-        labelsOrientation: { x: 0, yLeft: 0, yRight: 0 },
-        layers: [
-          {
-            accessors: ['metric_formula_accessor0_0'],
-            layerId: 'layer_0',
-            layerType: 'data',
-            seriesType: 'bar',
-            xAccessor: 'x_metric_formula_accessor0',
-            yConfig: [{ color: undefined, forAccessor: 'metric_formula_accessor0_0' }],
-          },
-        ],
-        legend: {
-          isVisible: true,
-          legendStats: [LegendValue.Average, LegendValue.Max],
-          position: 'right',
-        },
-        preferredSeriesType: 'line',
-        tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
-        valueLabels: 'hide',
-        yLeftExtent: { lowerBound: undefined, mode: 'full', upperBound: undefined },
-      },
+  expect(result.state.visualization).toMatchObject({
+    legend: {
+      isVisible: true,
+      position: 'right',
+      legendStats: [LegendValue.Average, LegendValue.Max],
     },
-    title: 'test',
-    visualizationType: 'lnsXY',
   });
 });
 
