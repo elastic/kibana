@@ -14,6 +14,17 @@ import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack-platform/functi
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { setupKnowledgeBase, waitForKnowledgeBaseReady } from './knowledge_base';
 
+// Cache for the dynamically imported p-timeout module
+const getPTimeoutModule = (() => {
+  let cached: Promise<typeof import('p-timeout')> | null = null;
+  return () => {
+    if (!cached) {
+      cached = import('p-timeout');
+    }
+    return cached;
+  };
+})();
+
 // tiny models
 export const TINY_ELSER_MODEL_ID = SUPPORTED_TRAINED_MODELS.TINY_ELSER.name;
 export const TINY_TEXT_EMBEDDING_MODEL_ID = SUPPORTED_TRAINED_MODELS.TINY_TEXT_EMBEDDING.name;
@@ -256,7 +267,7 @@ export async function stopTinyElserModel(
 }
 
 async function retryOnTimeout<T>(fn: () => Promise<T>, timeout = 60_000): Promise<T> {
-  const { default: pTimeout, TimeoutError } = await import('p-timeout');
+  const { default: pTimeout, TimeoutError } = await getPTimeoutModule();
   return pRetry(
     async () => {
       try {

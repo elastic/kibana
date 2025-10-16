@@ -27,6 +27,9 @@ interface RequestInterceptor {
 }
 
 export class LlmProxy {
+  // Cache for the dynamically imported p-timeout module
+  private static pTimeoutModule: Promise<typeof import('p-timeout')> | null = null;
+
   server: Server;
   interval: NodeJS.Timeout;
   private requestInterceptors: Array<RequestInterceptor & { handle: RequestHandler }> = [];
@@ -116,6 +119,13 @@ export class LlmProxy {
     this.clear();
   }
 
+  private static getPTimeout() {
+    if (!LlmProxy.pTimeoutModule) {
+      LlmProxy.pTimeoutModule = import('p-timeout');
+    }
+    return LlmProxy.pTimeoutModule;
+  }
+
   waitForAllInterceptorsToHaveBeenCalled() {
     return pRetry(
       async () => {
@@ -160,7 +170,8 @@ export class LlmProxy {
     };
 
     const waitForInterceptPromise = (async () => {
-      const pTimeout = (await import('p-timeout')).default;
+      const pTimeoutModule = await LlmProxy.getPTimeout();
+      const pTimeout = pTimeoutModule.default;
       return pTimeout(
         new Promise<LlmSimulator>((outerResolve) => {
           this.requestInterceptors.push({
