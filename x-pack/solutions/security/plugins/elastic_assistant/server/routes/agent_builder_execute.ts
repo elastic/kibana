@@ -55,14 +55,20 @@ export interface AgentBuilderExecuteParams {
   contentReferencesStore: ContentReferencesStore;
   inferenceChatModelDisabled?: boolean;
   isOssModel?: boolean;
-  context: ElasticAssistantRequestHandlerContext;
+  context: AwaitedProperties<
+    Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
+  >;
   actionsClient: PublicMethodsOf<ActionsClient>;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   logger: Logger;
   conversationId?: string;
-  onLlmResponse?: (content: string, traceData: unknown, isError: boolean) => Promise<void>;
+  onLlmResponse?: (
+    content: string,
+    traceData?: Message['traceData'],
+    isError?: boolean
+  ) => Promise<void>;
   response: KibanaResponseFactory;
   responseLanguage?: string;
   isStream?: boolean;
@@ -84,7 +90,7 @@ const generateConversationTitle = async (
   if (!conversationId || messages.length === 0) return;
 
   try {
-    const assistantContext = await context.elasticAssistant;
+    const assistantContext = context.elasticAssistant;
     const onechatServices = assistantContext.getOnechatServices();
     const conversationsDataClient = await assistantContext.getAIAssistantConversationsDataClient();
 
@@ -251,7 +257,11 @@ const executeStreaming = async ({
   abortSignal: AbortSignal;
   contentReferencesStore: ContentReferencesStore;
   onNewReplacements: (newReplacements: Replacements) => void;
-  onLlmResponse?: (content: string, traceData: unknown, isError: boolean) => Promise<void>;
+  onLlmResponse?: (
+    content: string,
+    traceData?: Message['traceData'],
+    isError?: boolean
+  ) => Promise<void>;
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   startTime: number;
@@ -447,7 +457,11 @@ const executeNonStreaming = async ({
   abortSignal: AbortSignal;
   contentReferencesStore: ContentReferencesStore;
   onNewReplacements: (newReplacements: Replacements) => void;
-  onLlmResponse?: (content: string, traceData: unknown, isError: boolean) => Promise<void>;
+  onLlmResponse?: (
+    content: string,
+    traceData?: Message['traceData'],
+    isError?: boolean
+  ) => Promise<void>;
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   startTime: number;
@@ -664,7 +678,7 @@ export async function agentBuilderExecute({
     const conversationRounds = convertMessagesToConversationRounds(messages);
 
     // Get the onechat services
-    const assistantContext = await context.elasticAssistant;
+    const assistantContext = context.elasticAssistant;
     const onechatServices = assistantContext.getOnechatServices();
 
     // Execute based on streaming preference
