@@ -24,7 +24,12 @@ export interface Params {
   list?: SLOWithSummaryResponse[];
 }
 
-export function useFetchSloHealth({ list, page, perPage }: Params): UseFetchSloHealth {
+export function useFetchSloHealth({
+  list,
+  page,
+  perPage,
+  statusFilter = 'unhealthy',
+}: Params): UseFetchSloHealth {
   const { sloClient } = usePluginContext();
   const payload = list
     ? list.map((slo) => ({
@@ -38,7 +43,7 @@ export function useFetchSloHealth({ list, page, perPage }: Params): UseFetchSloH
     queryFn: async ({ signal }) => {
       try {
         return await sloClient.fetch('POST /internal/observability/slos/_health', {
-          params: { body: { list: payload, page, perPage, statusFilter: 'unhealthy' } },
+          params: { body: { list: payload, page, perPage, statusFilter } },
           signal,
         });
       } catch (error) {

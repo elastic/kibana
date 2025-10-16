@@ -14,9 +14,14 @@ import { ContentWithInspectCta } from '../../../slo_details/components/health_ca
 import { paths } from '../../../../../common/locators/paths';
 
 const CALLOUT_SESSION_STORAGE_KEY = 'slo_health_callout_hidden';
+const MAX_SLOS_IN_CALLOUT = 10;
 
 export function HealthCallout() {
-  const { isLoading, isError, data: resultData } = useFetchSloHealth({ page: 0, perPage: 10 });
+  const {
+    isLoading,
+    isError,
+    data: resultData,
+  } = useFetchSloHealth({ page: 0, perPage: MAX_SLOS_IN_CALLOUT });
   const { data: results, total } = resultData ?? {};
   const [showCallOut, setShowCallOut] = useState(
     !sessionStorage.getItem(CALLOUT_SESSION_STORAGE_KEY)
