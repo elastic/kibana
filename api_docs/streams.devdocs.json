@@ -854,7 +854,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; status?: \"disabled\" | \"enabled\" | undefined; }, { stream: { name: string; }; where: ",
+            "; status?: \"enabled\" | \"disabled\" | undefined; }, { stream: { name: string; }; where: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -862,7 +862,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; status?: \"disabled\" | \"enabled\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; body: { stream: { name: string; }; where: ",
+            "; status?: \"enabled\" | \"disabled\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; body: { stream: { name: string; }; where: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -870,7 +870,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; status?: \"disabled\" | \"enabled\" | undefined; }; }, { path: { name: string; }; body: { stream: { name: string; }; where: ",
+            "; status?: \"enabled\" | \"disabled\" | undefined; }; }, { path: { name: string; }; body: { stream: { name: string; }; where: ",
             {
               "pluginId": "@kbn/streamlang",
               "scope": "common",
@@ -878,7 +878,7 @@
               "section": "def-common.Condition",
               "text": "Condition"
             },
-            "; status?: \"disabled\" | \"enabled\" | undefined; }; }>, ",
+            "; status?: \"enabled\" | \"disabled\" | undefined; }; }>, ",
             "StreamsRouteHandlerResources",
             ", { acknowledged: true; }, undefined>; \"POST /api/streams/_disable 2023-10-31\": ",
             {
@@ -2627,7 +2627,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; status?: \"disabled\" | \"enabled\" | undefined; }, { stream: { name: string; }; where: ",
+          "; status?: \"enabled\" | \"disabled\" | undefined; }, { stream: { name: string; }; where: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -2635,7 +2635,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; status?: \"disabled\" | \"enabled\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; body: { stream: { name: string; }; where: ",
+          "; status?: \"enabled\" | \"disabled\" | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; body: { stream: { name: string; }; where: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -2643,7 +2643,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; status?: \"disabled\" | \"enabled\" | undefined; }; }, { path: { name: string; }; body: { stream: { name: string; }; where: ",
+          "; status?: \"enabled\" | \"disabled\" | undefined; }; }, { path: { name: string; }; body: { stream: { name: string; }; where: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -2651,7 +2651,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          "; status?: \"disabled\" | \"enabled\" | undefined; }; }>, ",
+          "; status?: \"enabled\" | \"disabled\" | undefined; }; }>, ",
           "StreamsRouteHandlerResources",
           ", { acknowledged: true; }, undefined>; \"POST /api/streams/_disable 2023-10-31\": ",
           {

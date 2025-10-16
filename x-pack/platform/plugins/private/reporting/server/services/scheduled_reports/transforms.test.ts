@@ -7,7 +7,7 @@
 
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { CreatedAtSearchResponse } from './scheduled_query';
+import type { CreatedAtSearchResponse } from './scheduled_reports_service';
 import { transformResponse, transformSingleResponse } from './transforms';
 import type { ScheduledReportType } from '../../types';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';

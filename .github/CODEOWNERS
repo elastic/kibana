@@ -166,6 +166,7 @@ src/core/packages/elasticsearch/client-server-mocks @elastic/kibana-core
 src/core/packages/elasticsearch/server @elastic/kibana-core
 src/core/packages/elasticsearch/server-internal @elastic/kibana-core
 src/core/packages/elasticsearch/server-mocks @elastic/kibana-core
+src/core/packages/elasticsearch/server-utils @elastic/kibana-core
 src/core/packages/environment/server-internal @elastic/kibana-core
 src/core/packages/environment/server-mocks @elastic/kibana-core
 src/core/packages/execution-context/browser @elastic/kibana-core
@@ -1138,6 +1139,7 @@ x-pack/solutions/search/packages/kbn-search-queries @elastic/search-kibana
 x-pack/solutions/search/packages/shared-ui @elastic/search-kibana
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
 x-pack/solutions/search/plugins/search_assistant @elastic/search-kibana
+x-pack/solutions/search/plugins/search_getting_started @elastic/search-kibana
 x-pack/solutions/search/plugins/search_homepage @elastic/search-kibana
 x-pack/solutions/search/plugins/search_indices @elastic/search-kibana
 x-pack/solutions/search/plugins/search_inference_endpoints @elastic/search-kibana
@@ -1663,8 +1665,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/observability_onboarding_api_integration @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/test/serverless/api_integration/configs/index.feature_flags.ts @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/test/api_integration/apis/logs_ui @elastic/obs-ux-logs-team
-/x-pack/solutions/observability/test/dataset_quality_api_integration @elastic/obs-ux-logs-team
-/x-pack/solutions/observability/test/serverless/api_integration/test_suites/dataset_quality_api_integration @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/test/serverless/functional/test_suites/observability_logs_explorer @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/test/functional/apps/dataset_quality @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/test/serverless/functional/test_suites/dataset_quality @elastic/obs-ux-logs-team
@@ -2134,6 +2134,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 
 # Kibana Platform Security
 /scripts/uiam_dev.js
+/src/setup_node_env/harden @elastic/kibana-security
 
 /x-pack/platform/test/fixtures/es_archives/security @elastic/kibana-security
 /x-pack/platform/test/functional/fixtures/kbn_archives/spaces @elastic/kibana-security

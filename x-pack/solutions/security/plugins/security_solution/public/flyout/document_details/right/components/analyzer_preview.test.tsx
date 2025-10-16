@@ -15,7 +15,7 @@ import { DocumentDetailsContext } from '../../shared/context';
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 import * as mock from '../mocks/mock_analyzer_data';
 
@@ -48,9 +48,7 @@ const NO_DATA_MESSAGE = 'An error is preventing this alert from being analyzed.'
 describe('<AnalyzerPreview />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useEnableExperimental as jest.Mock).mockReturnValue({
-      newDataViewPickerEnabled: true,
-    });
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
       indexPatterns: ['index'],
     });

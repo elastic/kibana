@@ -34,6 +34,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         name: 'A slack api action',
         connector_type_id: '.slack_api',
         config: {},
+        is_connector_type_deprecated: false,
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -51,6 +52,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         name: 'A slack api action',
         connector_type_id: '.slack_api',
         config: {},
+        is_connector_type_deprecated: false,
       });
     });
 

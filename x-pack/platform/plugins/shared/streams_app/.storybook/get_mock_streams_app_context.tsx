@@ -95,11 +95,6 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
         indexManagement: {},
         ingestPipelines: {},
         discoverShared: {},
-        discover: {
-          locator: {
-            getRedirectUrl: () => '',
-          },
-        },
         observabilityAIAssistant: {
           service: {
             isEnabled: () => true,

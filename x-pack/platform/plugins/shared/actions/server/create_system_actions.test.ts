@@ -5,45 +5,36 @@
  * 2.0.
  */
 
+import {
+  createMockConnectorType,
+  createMockInMemoryConnector,
+} from './application/connector/mocks';
 import { createSystemConnectors } from './create_system_actions';
 
 const actionTypes = [
-  {
+  createMockConnectorType({
     id: 'action-type',
     name: 'My action type',
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
-    minimumLicenseRequired: 'basic' as const,
     supportedFeatureIds: ['alerting'],
-    isSystemActionType: false,
-  },
-  {
+  }),
+  createMockConnectorType({
     id: 'system-action-type-2',
     name: 'My system action type',
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
-    minimumLicenseRequired: 'basic' as const,
     supportedFeatureIds: ['alerting'],
     isSystemActionType: true,
-  },
+  }),
 ];
 
 describe('createSystemConnectors', () => {
   it('creates the system actions correctly', () => {
     expect(createSystemConnectors(actionTypes)).toEqual([
-      {
+      createMockInMemoryConnector({
         id: 'system-connector-system-action-type-2',
         actionTypeId: 'system-action-type-2',
         name: 'My system action type',
-        secrets: {},
-        config: {},
-        isDeprecated: false,
         isMissingSecrets: false,
-        isPreconfigured: false,
         isSystemAction: true,
-      },
+      }),
     ]);
   });
 });

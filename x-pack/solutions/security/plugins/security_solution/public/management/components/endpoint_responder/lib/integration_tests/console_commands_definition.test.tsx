@@ -91,7 +91,6 @@ describe('When displaying Endpoint Response Actions', () => {
         responseActionsCrowdstrikeManualHostIsolationEnabled: true,
         responseActionsSentinelOneV1Enabled: true,
         responseActionsSentinelOneKillProcessEnabled: true,
-        responseActionsSentinelOneProcessesEnabled: true,
         responseActionsSentinelOneRunScriptEnabled: true,
       });
 

@@ -45,7 +45,7 @@ import type {
 } from '../../../../common/api/timeline';
 import type { TimelineModel } from '../model';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
-import { refreshTimelines } from './helpers';
+import { extractTimelineIdsAndVersions, refreshTimelines } from './helpers';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 function isSaveTimelineAction(action: Action): action is ReturnType<typeof saveTimeline> {
@@ -66,6 +66,7 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
     const timeline = selectTimelineById(storeState, localTimelineId);
     const { timelineId, timelineVersion, templateTimelineId, templateTimelineVersion } =
       extractTimelineIdsAndVersions(timeline);
+
     const timelineTimeRange = inputsSelectors.timelineTimeRangeSelector(storeState);
     const selectedDataViewIdSourcerer = sourcererSelectors.sourcererScopeSelectedDataViewId(
       storeState,
@@ -339,16 +340,4 @@ function getErrorFromResponse(response: TimelineErrorResponse) {
   } else if ('statusCode' in response) {
     return { errorCode: response.statusCode, message: response.message };
   }
-}
-
-function extractTimelineIdsAndVersions(timeline: TimelineModel) {
-  // When a timeline hasn't been saved yet, its `savedObectId` is not defined.
-  // In that case, we want to overwrite all locally created properties for the
-  // timeline id, the timeline template id and the timeline template version.
-  return {
-    timelineId: timeline.savedObjectId ?? null,
-    timelineVersion: timeline.version,
-    templateTimelineId: timeline.savedObjectId ? timeline.templateTimelineId : null,
-    templateTimelineVersion: timeline.savedObjectId ? timeline.templateTimelineVersion : null,
-  };
 }

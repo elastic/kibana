@@ -110,6 +110,19 @@ const COMMANDS_WITH_ACCESS_TO_FILES: CommandsWithFileAccess = deepFreeze<Command
 });
 
 /**
+ * Returns boolean indicating if the response action has access to files.
+ * NOTE that this utility DOES NOT check privileges.
+ * @param agentType
+ * @param action
+ */
+export const doesActionHaveFileAccess = (
+  agentType: ResponseActionAgentType,
+  action: ResponseActionsApiCommandNames
+): boolean => {
+  return get(COMMANDS_WITH_ACCESS_TO_FILES, `${action}.${agentType}`, false);
+};
+
+/**
  * Checks to ensure that the user has the correct authz for the response action associated with the action id.
  *
  * FYI: Additional check is needed because the File info and download APIs are used by multiple response actions,

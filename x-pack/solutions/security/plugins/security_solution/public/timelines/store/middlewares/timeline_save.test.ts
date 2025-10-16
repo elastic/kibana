@@ -45,7 +45,10 @@ jest.mock('../actions', () => {
   };
 });
 jest.mock('../../containers/api');
-jest.mock('./helpers');
+jest.mock('./helpers', () => ({
+  refreshTimelines: jest.fn(),
+  extractTimelineIdsAndVersions: jest.requireActual('./helpers').extractTimelineIdsAndVersions,
+}));
 
 const startTimelineSavingMock = startTimelineSaving as unknown as jest.Mock;
 const endTimelineSavingMock = endTimelineSaving as unknown as jest.Mock;

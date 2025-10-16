@@ -211,9 +211,7 @@ ${
       ),
     "}",
   "}")
-// Map host and source values to enriched contextual data
-| EVAL sourceIps = source.ip
-| EVAL sourceCountryCodes = source.geo.country_iso_code`
+`
     : `
 // Fallback to null string with non-enriched actor
 | EVAL actorEntityType = TO_STRING(null)
@@ -226,12 +224,11 @@ ${
 | EVAL targetEntitySubType = TO_STRING(null)
 | EVAL targetHostIp = TO_STRING(null)
 | EVAL targetDocData = TO_STRING(null)
-
-// Fallback to null string with non-enriched host and source data
-| EVAL sourceIps = TO_STRING(null)
-| EVAL sourceCountryCodes = TO_STRING(null)
 `
 }
+// Map host and source values to enriched contextual data
+| EVAL sourceIps = source.ip
+| EVAL sourceCountryCodes = source.geo.country_iso_code
 // Origin event and alerts allow us to identify the start position of graph traversal
 | EVAL isOrigin = ${
     originEventIds.length > 0

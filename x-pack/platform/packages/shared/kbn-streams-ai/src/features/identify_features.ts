@@ -103,6 +103,7 @@ export async function identifyFeatures({
               condition: system.filter as Condition,
             };
           }),
+          dropUnmapped,
         });
 
         return {

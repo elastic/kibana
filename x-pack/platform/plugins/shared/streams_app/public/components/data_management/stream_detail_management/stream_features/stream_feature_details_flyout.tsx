@@ -9,6 +9,7 @@ import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -22,7 +23,8 @@ import {
 import type { Streams, Feature } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ConditionPanel } from '../../shared';
+import useToggle from 'react-use/lib/useToggle';
+import { EditableConditionPanel } from '../../shared';
 import { FeatureEventsData } from './feature_events_data';
 import { useStreamFeaturesApi } from '../../../../hooks/use_stream_features_api';
 
@@ -30,22 +32,27 @@ export const StreamFeatureDetailsFlyout = ({
   feature,
   definition,
   closeFlyout,
+  refreshFeatures,
 }: {
   feature: Feature;
   definition: Streams.all.Definition;
   closeFlyout: () => void;
+  refreshFeatures: () => void;
 }) => {
   const [featureDescription, setFeatureDescription] = React.useState(feature.description);
   const { upsertQuery } = useStreamFeaturesApi(definition);
   const [isUpdating, setIsUpdating] = React.useState(false);
+  const [featureFilter, setFeatureFilter] = React.useState(feature.filter);
+  const [isEditingCondition, toggleIsEditingCondition] = useToggle(false);
 
   const updateFeature = () => {
     setIsUpdating(true);
     upsertQuery(feature.name, {
       description: featureDescription,
-      filter: feature.filter,
+      filter: featureFilter,
     }).finally(() => {
       setIsUpdating(false);
+      refreshFeatures();
       closeFlyout();
     });
   };
@@ -90,14 +97,32 @@ export const StreamFeatureDetailsFlyout = ({
             initialViewMode="viewing"
           />
           <EuiSpacer size="m" />
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.filter', {
-                defaultMessage: 'Filter',
-              })}
-            </h3>
-          </EuiTitle>
-          <ConditionPanel condition={feature.filter} />
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexGroup justifyContent="flexStart" gutterSize="xs" alignItems="center">
+              <EuiTitle size="xs">
+                <h3>
+                  {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.filter', {
+                    defaultMessage: 'Filter',
+                  })}
+                </h3>
+              </EuiTitle>
+              <EuiButtonIcon
+                iconType="pencil"
+                onClick={toggleIsEditingCondition}
+                aria-label={i18n.translate(
+                  'xpack.streams.streamDetailView.featureDetailExpanded.filter.edit',
+                  {
+                    defaultMessage: 'Edit filter',
+                  }
+                )}
+              />
+            </EuiFlexGroup>
+            <EditableConditionPanel
+              condition={featureFilter}
+              isEditingCondition={isEditingCondition}
+              setCondition={setFeatureFilter}
+            />
+          </EuiFlexGroup>
           <EuiSpacer size="m" />
           <FeatureEventsData feature={feature} />
         </div>

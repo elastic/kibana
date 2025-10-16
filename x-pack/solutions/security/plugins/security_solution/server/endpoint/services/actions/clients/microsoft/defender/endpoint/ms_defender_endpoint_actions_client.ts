@@ -616,6 +616,14 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
             ),
           };
         }
+
+        // Check if we're trying to cancel a cancel action (business rule validation)
+        if (originalAction.command === 'cancel') {
+          return {
+            isValid: false,
+            error: new ResponseActionsClientError(`Cannot cancel a cancel action.`, 400),
+          };
+        }
       } catch (error) {
         // If we can't fetch the action details (e.g., action not found),
         // return a validation error

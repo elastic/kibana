@@ -14,6 +14,7 @@ export const DEFAULT_ALLOW = [
   'actions.status',
   'actions.context',
   'agent.id',
+  'asset.criticality',
   'cloud.account.name',
   'cloud.availability_zone',
   'cloud.provider',

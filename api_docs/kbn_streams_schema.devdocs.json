@@ -1147,7 +1147,7 @@
         "label": "isRoutingEnabled",
         "description": [],
         "signature": [
-          "<TValue extends \"disabled\" | \"enabled\">(value: TValue) => value is Extract<TValue, \"enabled\">"
+          "<TValue extends \"enabled\" | \"disabled\">(value: TValue) => value is Extract<TValue, \"enabled\">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/routing/index.ts",
         "deprecated": false,
@@ -2133,7 +2133,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"disabled\" | \"enabled\" | undefined"
+              "\"enabled\" | \"disabled\" | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/routing/index.ts",
             "deprecated": false,
@@ -2592,7 +2592,7 @@
         "label": "RoutingStatus",
         "description": [],
         "signature": [
-          "\"disabled\" | \"enabled\""
+          "\"enabled\" | \"disabled\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/routing/index.ts",
         "deprecated": false,

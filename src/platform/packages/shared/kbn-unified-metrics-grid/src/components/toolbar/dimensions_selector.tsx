@@ -12,8 +12,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { ClearAllSection } from './clear_all_section';
-import { MAX_DIMENSIONS_SELECTIONS } from '../../common/constants';
+import {
+  MAX_DIMENSIONS_SELECTIONS,
+  METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
+} from '../../common/constants';
 
 interface DimensionsFilterProps {
   fields: Array<{
@@ -155,15 +159,11 @@ export const DimensionsSelector = ({
 
   return (
     <ToolbarSelector
-      data-test-subj="metricsExperienceBreakdownSelector"
+      data-test-subj={METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}
       data-selected-value={selectedDimensions}
       searchable
       buttonLabel={buttonLabel}
-      optionMatcher={({ option, normalizedSearchValue }) => {
-        return 'name' in option
-          ? String(option.name ?? '').includes(normalizedSearchValue)
-          : option.label.includes(normalizedSearchValue);
-      }}
+      optionMatcher={comboBoxFieldOptionMatcher}
       options={options}
       singleSelection={false}
       onChange={handleChange}

@@ -11,18 +11,16 @@ import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/publ
 import { WelcomeMessage } from './welcome_message';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
+import { createMockConnectorFindResult } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const mockConnectors: UseGenAIConnectorsResult = {
   connectors: [
-    {
+    createMockConnectorFindResult({
       id: 'test-connector',
       name: 'Test Connector',
       actionTypeId: '.gen-ai',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
       referencedByCount: 0,
-    },
+    }),
   ],
   loading: false,
   selectedConnector: 'test-connector',

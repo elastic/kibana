@@ -60,20 +60,24 @@ export const ChartSectionTemplate = ({
               ))}
             </EuiFlexGroup>
           </EuiFlexItem>
-          {toolbar?.additionalControls?.prependRight ? (
-            <EuiFlexItem grow={false}>{toolbar.additionalControls.prependRight}</EuiFlexItem>
-          ) : null}
-          {rightSide.length > 0 && (
-            <EuiFlexItem grow={false}>
-              <IconButtonGroup
-                legend={i18n.translate('unifiedHistogram.chartActionsGroupLegend', {
-                  defaultMessage: 'Chart actions',
-                })}
-                buttonSize="s"
-                buttons={rightSide}
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="row" gutterSize="none" responsive={false}>
+              {toolbar?.additionalControls?.prependRight ? (
+                <EuiFlexItem grow={false}>{toolbar.additionalControls.prependRight}</EuiFlexItem>
+              ) : null}
+              {rightSide.length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <IconButtonGroup
+                    legend={i18n.translate('unifiedHistogram.chartActionsGroupLegend', {
+                      defaultMessage: 'Chart actions',
+                    })}
+                    buttonSize="s"
+                    buttons={rightSide}
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       {children}

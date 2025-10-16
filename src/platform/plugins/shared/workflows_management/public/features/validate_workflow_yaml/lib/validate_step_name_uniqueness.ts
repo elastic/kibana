@@ -33,7 +33,7 @@ export function validateStepNameUniqueness(yamlDocument: any): YamlValidationRes
       for (const occurrence of occurrences) {
         errors.push({
           id: `${stepName}-${occurrence.startLineNumber}-${occurrence.startColumn}-${occurrence.endLineNumber}-${occurrence.endColumn}`,
-          source: 'step-name-validation',
+          owner: 'step-name-validation',
           message: `Step name "${stepName}" is not unique. Found ${occurrences.length} steps with this name.`,
           startLineNumber: occurrence.startLineNumber,
           startColumn: occurrence.startColumn,
