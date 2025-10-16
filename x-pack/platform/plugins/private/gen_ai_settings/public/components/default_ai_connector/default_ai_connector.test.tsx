@@ -312,12 +312,5 @@ describe('DefaultAIConnector', () => {
         expect(settingsValue()!.setValidationErrors).toBeInstanceOf(Function);
       });
     });
-
-    it('throws error when trying to set validation errors for fields not managed by this component', () => {
-      // This test would need to be written differently since the field validation
-      // happens inside useFieldSettingsContext, but the concept is that attempting
-      // to set validation errors for unmanaged fields should throw an error
-      expect(true).toBe(true); // Placeholder - the validation is enforced by the hook
-    });
   });
 });

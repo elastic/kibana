@@ -32,7 +32,7 @@ export interface ValidationError {
   field?: string;
 }
 
-type SettingsContext = ReturnType<typeof Settings>;
+type SettingsContext = ReturnType<typeof useSettings>;
 
 const SettingsContext = createContext<null | SettingsContext>(null);
 
@@ -51,7 +51,7 @@ const SETTING_KEYS = [
 ];
 
 export const SettingsContextProvider = ({ children }: { children: React.ReactNode }) => {
-  const value = Settings({ settingsKeys: SETTING_KEYS });
+  const value = useSettings({ settingsKeys: SETTING_KEYS });
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
 };
 
@@ -88,7 +88,7 @@ function getSettingsFields({
   }, {});
 }
 
-const Settings = ({ settingsKeys }: { settingsKeys: string[] }) => {
+const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
   const {
     services: { settings, notifications },
   } = useKibana();
