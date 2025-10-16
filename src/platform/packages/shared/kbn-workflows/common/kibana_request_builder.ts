@@ -13,10 +13,17 @@
  * Builds a Kibana HTTP request from connector definitions
  * This is shared between the execution engine and the YAML editor copy functionality
  */
+// eslint-disable-next-line complexity
 export function buildKibanaRequestFromAction(
   actionType: string,
-  params: any
-): { method: string; path: string; body?: any; query?: any; headers?: any } {
+  params: Record<string, unknown>
+): {
+  method: string;
+  path: string;
+  body?: Record<string, unknown>;
+  query?: Record<string, unknown>;
+  headers?: Record<string, unknown>;
+} {
   // Support raw API format first - this always works
   if (params.request) {
     const { method = 'GET', path, body, query, headers } = params.request;
@@ -31,9 +38,10 @@ export function buildKibanaRequestFromAction(
 
   // Lazy load the generated connectors to avoid main bundle bloat
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { GENERATED_KIBANA_CONNECTORS } = require('./generated_kibana_connectors');
+  const { GENERATED_KIBANA_CONNECTORS } = require('./generated/kibana_connectors');
 
   // Find the connector definition for this action type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const connector = GENERATED_KIBANA_CONNECTORS.find((c: any) => c.type === actionType);
 
   if (connector && connector.patterns && connector.methods) {
@@ -65,16 +73,16 @@ export function buildKibanaRequestFromAction(
     }
 
     // Build body, query parameters, and headers
-    const body: any = {};
-    const queryParams: any = {};
-    const headers: any = {};
+    const body: Record<string, unknown> = {};
+    const queryParams: Record<string, unknown> = {};
+    const headers: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(params)) {
-      // Skip path parameters (they're used in the URL)
-      if (pathParams.has(key)) continue;
-
-      // Skip meta parameters that control request building
-      if (key === 'method') continue;
+      // Skip path parameters (they're used in the URL) and meta parameters
+      if (pathParams.has(key) || key === 'method') {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
 
       // Handle headers (like kbn-xsrf)
       if (headerParamKeys.has(key)) {
@@ -116,7 +124,7 @@ export function buildKibanaRequestFromAction(
   );
 }
 
-function selectBestPattern(patterns: string[], params: any): string {
+function selectBestPattern(patterns: string[], params: Record<string, unknown>): string {
   // Strategy: Prefer patterns where all path parameters are provided
 
   // Score each pattern based on how well it matches the provided parameters

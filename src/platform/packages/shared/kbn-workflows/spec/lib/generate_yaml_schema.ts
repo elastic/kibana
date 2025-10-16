@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import { z } from '@kbn/zod';
 import {
   BaseConnectorStepSchema,
   getForEachStepSchema,
@@ -117,25 +117,21 @@ export function generateYamlSchemaFromConnectors(
 }
 
 export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType) {
-  try {
-    // Generate the full schema - this should work and give us the full schema
-    const jsonSchema = zodToJsonSchema(yamlSchema, {
-      name: 'WorkflowSchema',
-      target: 'jsonSchema7',
-    });
+  // Generate the full schema - this should work and give us the full schema
+  const jsonSchema = zodToJsonSchema(yamlSchema, {
+    name: 'WorkflowSchema',
+    target: 'jsonSchema7',
+  });
 
-    // Apply targeted fixes to make it valid for JSON Schema validators
-    return fixBrokenSchemaReferencesAndEnforceStrictValidation(jsonSchema);
-  } catch (error) {
-    // console.error('Schema generation failed:', error.message);
-    throw error; // Don't use fallback - we need to fix the root cause
-  }
+  // Apply targeted fixes to make it valid for JSON Schema validators
+  return fixBrokenSchemaReferencesAndEnforceStrictValidation(jsonSchema);
 }
 
 /**
  * Recursively fix additionalProperties in the schema object
  * This ensures all object schemas have additionalProperties: false for strict validation
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function fixAdditionalPropertiesInSchema(obj: any, path: string = '', visited = new Set()): void {
   // Prevent infinite recursion with circular references
   if (typeof obj !== 'object' || obj === null || visited.has(obj)) {
@@ -202,6 +198,7 @@ function fixAdditionalPropertiesInSchema(obj: any, path: string = '', visited = 
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
   const schemaString = JSON.stringify(schema);
   let fixedSchemaString = schemaString;

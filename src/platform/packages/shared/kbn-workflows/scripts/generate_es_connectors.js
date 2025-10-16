@@ -22,7 +22,7 @@ const CONSOLE_DEFINITIONS_PATH = path.resolve(
   __dirname,
   '../../../../plugins/shared/console/server/lib/spec_definitions/json/generated'
 );
-const OUTPUT_PATH = path.resolve(__dirname, '../common/generated_es_connectors.ts');
+const OUTPUT_PATH = path.resolve(__dirname, '../common/generated/elasticsearch_connectors.ts');
 
 console.log('🔧 Generating Elasticsearch connectors from Console definitions...');
 console.log(`📁 Reading from: ${CONSOLE_DEFINITIONS_PATH}`);
@@ -529,10 +529,8 @@ function convertBodyParamToZodString(paramName, isRequired = false) {
       return `z.array(z.object({}).passthrough())${optionalSuffix}.describe('Failure processors${requiredMarker}')`;
 
     // Search template parameters
-    case 'template':
-      return `z.object({}).passthrough()${optionalSuffix}.describe('Template configuration${requiredMarker}')`;
-    case 'params':
-      return `z.object({}).passthrough()${optionalSuffix}.describe('Template parameters${requiredMarker}')`;
+    // Note: 'template' and 'params' are already handled above with different types
+    // Removed duplicate case labels to fix ESLint error
     case 'explain':
       return `z.boolean()${optionalSuffix}.describe('Explain query${requiredMarker}')`;
 
@@ -662,7 +660,7 @@ function generateElasticsearchConnectors() {
  */
 
 import { z } from '@kbn/zod';
-import type { InternalConnectorContract } from '../spec/lib/generate_yaml_schema';
+import type { InternalConnectorContract } from '../../spec/lib/generate_yaml_schema';
 
 export const GENERATED_ELASTICSEARCH_CONNECTORS: InternalConnectorContract[] = [
 ${connectorDefinitions.join(',\n')}

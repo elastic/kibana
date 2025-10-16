@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { type EsWorkflow, ExecutionStatus } from './v1';
 import type {
   BuiltInStepType,
   ElasticsearchStep,
@@ -22,7 +23,6 @@ import type {
   WorkflowYaml,
 } from '../spec/schema';
 import { BuiltInStepTypes, TriggerTypes } from '../spec/schema';
-import { type EsWorkflow, ExecutionStatus } from './v1';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml

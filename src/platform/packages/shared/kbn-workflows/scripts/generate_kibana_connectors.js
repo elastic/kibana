@@ -14,9 +14,9 @@
  * This reads the Kibana OpenAPI spec and generates static connector data for the browser
  */
 
+const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 /**
  * Helper function to safely quote parameter names if needed
@@ -34,9 +34,9 @@ const KIBANA_OPENAPI_SPEC_PATH = path.resolve(
   __dirname,
   '../../../../../../oas_docs/output/kibana.yaml'
 );
-const OUTPUT_PATH = path.resolve(__dirname, '../common/generated_kibana_connectors.ts');
-const SCHEMAS_OUTPUT_PATH = path.resolve(__dirname, '../common/generated_kibana_schemas.ts');
-const TEMP_OUTPUT_PATH = path.resolve(__dirname, '../common/temp_kibana_api.ts');
+const OUTPUT_PATH = path.resolve(__dirname, '../common/generated/kibana_connectors.ts');
+const SCHEMAS_OUTPUT_PATH = path.resolve(__dirname, '../common/generated/kibana_schemas.ts');
+const TEMP_OUTPUT_PATH = path.resolve(__dirname, '../common/generated/temp_kibana_api.ts');
 
 console.log('🔧 Generating Kibana connectors from OpenAPI spec...');
 console.log(`📁 Reading from: ${KIBANA_OPENAPI_SPEC_PATH}`);
@@ -341,6 +341,7 @@ function parseExampleForParams(exampleContent) {
 
       for (const line of lines) {
         const trimmed = line.trim();
+        // eslint-disable-next-line no-continue
         if (!trimmed || trimmed.startsWith('#')) continue;
 
         const indent = line.length - line.trimLeft().length;
@@ -358,7 +359,7 @@ function parseExampleForParams(exampleContent) {
 
           if (value && !value.startsWith('-')) {
             // Store the parameter value
-            const fullKey = currentPath.length > 0 ? currentPath.join('.') + '.' + key : key;
+            const fullKey = currentPath.length > 0 ? `${currentPath.join('.')}.${key}` : key;
             params[fullKey] = value.replace(/['"]/g, '');
           }
 
@@ -435,7 +436,7 @@ function extractEndpointInfo(content) {
       currentObject = line;
       braceDepth = openBraces - closeBraces;
     } else if (inObject) {
-      currentObject += '\n' + line;
+      currentObject += `\n${line}`;
       braceDepth += openBraces - closeBraces;
 
       // Check if we've closed the object
@@ -1043,10 +1044,12 @@ function copyClientAsSchemas() {
     // Skip the endpoints and API client sections
     if (line.includes('const endpoints = makeApi')) {
       inEndpointsSection = true;
+      // eslint-disable-next-line no-continue
       continue;
     }
 
     if (inEndpointsSection) {
+      // eslint-disable-next-line no-continue
       continue; // Skip everything after endpoints definition
     }
 
@@ -1314,7 +1317,7 @@ function generateKibanaConnectors() {
       existingSchemas.length > 0
         ? `\n// Import schemas from generated schemas file\nimport {\n  ${existingSchemas.join(
             ',\n  '
-          )}\n} from './generated_kibana_schemas';\n`
+          )}\n} from './kibana_schemas';\n`
         : '';
 
     // Generate the TypeScript file
@@ -1332,7 +1335,7 @@ function generateKibanaConnectors() {
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { z } from '@kbn/zod';
-import type { InternalConnectorContract } from '../spec/lib/generate_yaml_schema';${schemaImportsSection}
+import type { InternalConnectorContract } from '../../spec/lib/generate_yaml_schema';${schemaImportsSection}
 export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
 ${connectorDefinitions.join(',\n')}
 ];

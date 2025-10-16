@@ -15,8 +15,13 @@
  */
 export function buildRequestFromConnector(
   stepType: string,
-  params: any
-): { method: string; path: string; body?: any; params?: any } {
+  params: Record<string, unknown>
+): {
+  method: string;
+  path: string;
+  body?: Record<string, unknown>;
+  params?: Record<string, unknown>;
+} {
   // console.log('DEBUG - Input params:', JSON.stringify(params, null, 2));
 
   // Special case: elasticsearch.request type uses raw API format at top level
@@ -27,9 +32,10 @@ export function buildRequestFromConnector(
 
   // Lazy load the generated connectors to avoid main bundle bloat
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { GENERATED_ELASTICSEARCH_CONNECTORS } = require('./generated_es_connectors');
+  const { GENERATED_ELASTICSEARCH_CONNECTORS } = require('./generated/elasticsearch_connectors');
 
   // Find the connector definition for this step type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const connector = GENERATED_ELASTICSEARCH_CONNECTORS.find((c: any) => c.type === stepType);
 
   if (connector && connector.patterns && connector.methods) {
@@ -66,8 +72,8 @@ export function buildRequestFromConnector(
     }
 
     // Build body and query parameters
-    const body: any = {};
-    const queryParams: any = {};
+    const body: Record<string, unknown> = {};
+    const queryParams: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(params)) {
       // eslint-disable-next-line no-console
@@ -77,11 +83,11 @@ export function buildRequestFromConnector(
         )}, isUrlParam: ${urlParamKeys.has(key)}, isBodyParam: ${bodyParamKeys.has(key)}`
       );
 
-      // Skip path parameters (they're used in the URL)
-      if (pathParams.has(key)) continue;
-
-      // Skip meta parameters that control request building
-      if (key === 'method') continue;
+      // Skip path parameters (they're used in the URL) and meta parameters
+      if (pathParams.has(key) || key === 'method') {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
 
       // Prioritize body parameters over URL parameters when both are available
       // This is important for search APIs where parameters like 'size' can go in either place
@@ -130,7 +136,7 @@ export function buildRequestFromConnector(
   );
 }
 
-function selectBestPattern(patterns: string[], params: any): string {
+function selectBestPattern(patterns: string[], params: Record<string, unknown>): string {
   // Strategy: Prefer patterns where all path parameters are provided
 
   // Score each pattern based on how well it matches the provided parameters
