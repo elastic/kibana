@@ -27,6 +27,7 @@ interface DimensionsFilterProps {
   selectedDimensions: string[];
   onChange: (dimensions: string[]) => void;
   onClear: () => void;
+  singleSelection?: boolean;
 }
 
 export const DimensionsSelector = ({
@@ -34,6 +35,7 @@ export const DimensionsSelector = ({
   selectedDimensions,
   onChange,
   onClear,
+  singleSelection = false,
 }: DimensionsFilterProps) => {
   // Extract all unique dimensions from fields that match the search term
   const allDimensions = useMemo(() => {
@@ -88,19 +90,18 @@ export const DimensionsSelector = ({
     return allDimensions.map<SelectableEntry>((dimension) => {
       const isSelected = selectedDimensions.includes(dimension.name);
       const isIntersecting = intersectingDimensions.has(dimension.name);
-      const isDisabledByLimit =
-        MAX_DIMENSIONS_SELECTIONS === 1 ? false : !isSelected && isAtMaxLimit;
+      const isDisabledByLimit = singleSelection ? false : !isSelected && isAtMaxLimit;
 
       return {
         value: dimension.name,
         label: dimension.name,
         checked: isSelected ? 'on' : undefined,
         // In single-selection mode, don't check intersections since we're replacing, not adding
-        disabled: MAX_DIMENSIONS_SELECTIONS === 1 ? false : !isIntersecting || isDisabledByLimit,
+        disabled: singleSelection ? false : !isIntersecting || isDisabledByLimit,
         key: dimension.name,
       };
     });
-  }, [allDimensions, selectedDimensions, intersectingDimensions]);
+  }, [allDimensions, selectedDimensions, intersectingDimensions, singleSelection]);
 
   const handleChange = useCallback(
     (chosenOption?: SelectableEntry | SelectableEntry[]) => {
@@ -144,14 +145,15 @@ export const DimensionsSelector = ({
   const popoverContentBelowSearch = useMemo(() => {
     const count = selectedDimensions.length;
     const isAtMaxLimit = count >= MAX_DIMENSIONS_SELECTIONS;
+    const allowMultiple = MAX_DIMENSIONS_SELECTIONS > 1;
 
     let statusMessage: string;
-    if (MAX_DIMENSIONS_SELECTIONS > 1 && isAtMaxLimit) {
+    if (allowMultiple && isAtMaxLimit) {
       statusMessage = i18n.translate('metricsExperience.dimensionsSelector.maxLimitStatusMessage', {
         defaultMessage: 'Maximum of {maxDimensions} dimensions selected ({count}/{maxDimensions})',
         values: { count, maxDimensions: MAX_DIMENSIONS_SELECTIONS },
       });
-    } else if (MAX_DIMENSIONS_SELECTIONS > 1 && count > 0) {
+    } else if (allowMultiple && count > 0) {
       statusMessage = i18n.translate('metricsExperience.dimensionsSelector.selectedStatusMessage', {
         defaultMessage: '{count, plural, one {# dimension selected} other {# dimensions selected}}',
         values: { count },
@@ -181,7 +183,7 @@ export const DimensionsSelector = ({
       buttonLabel={buttonLabel}
       optionMatcher={comboBoxFieldOptionMatcher}
       options={options}
-      singleSelection={MAX_DIMENSIONS_SELECTIONS === 1}
+      singleSelection={singleSelection}
       onChange={handleChange}
       popoverContentBelowSearch={popoverContentBelowSearch}
     />

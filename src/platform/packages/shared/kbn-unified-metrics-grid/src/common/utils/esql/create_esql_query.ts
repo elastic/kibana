@@ -90,7 +90,7 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
     ),
     ...((dimensions ?? []).length > 0
       ? dimensions.length === 1
-        ? [] // No RENAME needed for single dimension - use original dimension name
+        ? []
         : [
             evaluate(
               `${DIMENSIONS_COLUMN} = CONCAT(${dimensions
