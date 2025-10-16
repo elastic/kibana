@@ -117,9 +117,11 @@ export function FlyoutToolbar<S>({
           setFlyoutVisible(false);
         }}
       >
-        <div id={idSelected} css={flyoutContentStyles}>
-          {FlyoutContent ? <FlyoutContent {...flyoutContentProps} /> : null}
-        </div>
+        {FlyoutContent ? (
+          <div id={idSelected} css={flyoutContentStyles}>
+            <FlyoutContent {...flyoutContentProps} />
+          </div>
+        ) : null}
       </FlyoutContainer>
     </EuiFlexItem>
   );
