@@ -228,7 +228,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Trusted Devices artifact management for device control protections.
    * Allows users to manage trusted USB and external devices
    */
-  trustedDevices: false,
+  trustedDevices: true,
 
   /**
    * Enables the ability to import and migration dashboards through automatic migration service
