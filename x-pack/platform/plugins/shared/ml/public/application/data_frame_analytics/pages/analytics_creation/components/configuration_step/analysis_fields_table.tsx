@@ -255,7 +255,7 @@ export const AnalysisFieldsTable: FC<{
         )}
         {tableItems.length === 0 && (
           <EuiCallOut
-            announceOnMount
+            announceOnMount={false}
             title={i18n.translate('xpack.ml.dataframe.analytics.create.calloutTitle', {
               defaultMessage: 'Analysis fields not available',
             })}
