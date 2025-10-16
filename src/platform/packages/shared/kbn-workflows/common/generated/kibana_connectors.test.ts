@@ -9,7 +9,7 @@
 
 import { z } from '@kbn/zod';
 import { GENERATED_KIBANA_CONNECTORS, KIBANA_CONNECTOR_COUNT } from './kibana_connectors';
-import type { InternalConnectorContract } from '../../spec/lib/generate_yaml_schema';
+import type { InternalConnectorContract } from '../../types/v1';
 
 describe('Generated Kibana Connectors', () => {
   // Test samples covering different types of endpoints

@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JsonSchema7Type } from 'zod-to-json-schema';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { z } from '@kbn/zod';
+import type { ConnectorContractUnion } from '../..';
 import {
   BaseConnectorStepSchema,
   getForEachStepSchema,
@@ -22,36 +24,8 @@ import {
   WorkflowSchema,
 } from '../schema';
 
-export interface ConnectorContract {
-  type: string;
-  paramsSchema: z.ZodType;
-  connectorIdRequired?: boolean;
-  outputSchema: z.ZodType;
-  description?: string;
-  summary?: string;
-}
-
-export interface InternalConnectorContract extends ConnectorContract {
-  /** HTTP method(s) for this API endpoint */
-  methods?: string[];
-  /** Summary for this API endpoint */
-  summary?: string;
-  /** URL pattern(s) for this API endpoint */
-  patterns?: string[];
-  /** Whether this is an internal connector with hardcoded endpoint details */
-  isInternal?: boolean;
-  /** Documentation URL for this API endpoint */
-  documentation?: string | null;
-  /** Parameter type metadata for proper request building */
-  parameterTypes?: {
-    pathParams?: string[];
-    urlParams?: string[];
-    bodyParams?: string[];
-  };
-}
-
 function generateStepSchemaForConnector(
-  connector: ConnectorContract,
+  connector: ConnectorContractUnion,
   stepSchema: z.ZodType,
   loose: boolean = false
 ) {
@@ -64,7 +38,7 @@ function generateStepSchemaForConnector(
 }
 
 function createRecursiveStepSchema(
-  connectors: ConnectorContract[],
+  connectors: ConnectorContractUnion[],
   loose: boolean = false
 ): z.ZodType {
   // Use a simpler approach to avoid infinite recursion during validation
@@ -99,7 +73,7 @@ function createRecursiveStepSchema(
 }
 
 export function generateYamlSchemaFromConnectors(
-  connectors: ConnectorContract[],
+  connectors: ConnectorContractUnion[],
   loose: boolean = false
 ) {
   const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
@@ -116,15 +90,21 @@ export function generateYamlSchemaFromConnectors(
   });
 }
 
-export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType) {
-  // Generate the full schema - this should work and give us the full schema
-  const jsonSchema = zodToJsonSchema(yamlSchema, {
-    name: 'WorkflowSchema',
-    target: 'jsonSchema7',
-  });
+export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): JsonSchema7Type {
+  // eslint-disable-next-line no-useless-catch
+  try {
+    // Generate the full schema - this should work and give us the full schema
+    const jsonSchema = zodToJsonSchema(yamlSchema, {
+      name: 'WorkflowSchema',
+      target: 'jsonSchema7',
+    });
 
-  // Apply targeted fixes to make it valid for JSON Schema validators
-  return fixBrokenSchemaReferencesAndEnforceStrictValidation(jsonSchema);
+    // Apply targeted fixes to make it valid for JSON Schema validators
+    return fixBrokenSchemaReferencesAndEnforceStrictValidation(jsonSchema);
+  } catch (error) {
+    // console.error('Schema generation failed:', error.message);
+    throw error; // Don't use fallback - we need to fix the root cause
+  }
 }
 
 /**
