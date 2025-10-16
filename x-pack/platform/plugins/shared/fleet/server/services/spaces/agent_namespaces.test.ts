@@ -118,7 +118,7 @@ describe('agentsKueryNamespaceFilter', () => {
 
     it('returns a kuery for the default space', async () => {
       expect(await agentsKueryNamespaceFilter('default')).toEqual(
-        '(namespaces:"default" or not namespaces:*)'
+        '(namespaces:"default" or namespaces:"*" or not namespaces:*)'
       );
     });
 

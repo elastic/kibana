@@ -103,11 +103,12 @@ export const SpaceSelectorComponent: React.FC<SpaceSelectorProps> = ({
       const existingSpace = allSpaces.find((space) => space.id === v);
       const color = existingSpace?.color;
       const label =
-        existingSpace?.name ?? v === ALL_SPACES_ID
+        existingSpace?.name ??
+        (v === ALL_SPACES_ID
           ? i18n.translate('xpack.fleet.agentPolicies.allSpacesLabel', {
               defaultMessage: 'All spaces',
             })
-          : v;
+          : v);
 
       return existingOption
         ? existingOption
