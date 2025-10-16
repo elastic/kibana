@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
 import type { CustomTaskInstance } from './sync_private_locations_monitors_task';
 import {
   SyncPrivateLocationMonitorsTask,
@@ -84,7 +83,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     jest.clearAllMocks();
     task = new SyncPrivateLocationMonitorsTask(
       mockServerSetup as any,
-      mockTaskManager as unknown as TaskManagerSetupContract,
       mockSyntheticsMonitorClient as unknown as SyntheticsMonitorClient
     );
     mockSoClient.createInternalRepository.mockReturnValue(mockSoClient as any);
@@ -92,6 +90,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
   describe('constructor', () => {
     it('should register task definitions correctly', () => {
+      task.registerTaskDefinition(mockTaskManager as any);
       expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledWith({
         'Synthetics:Sync-Private-Location-Monitors': expect.objectContaining({
           title: 'Synthetics Sync Global Params Task',
@@ -150,6 +149,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(mockSyntheticsMonitorClient.privateLocationAPI.editMonitors).not.toHaveBeenCalled();
       expect(result.error).toBeUndefined();
       expect(result.state).toEqual({
+        disableAutoSync: false,
         hasAlreadyDoneCleanup: false,
         startedAt: expect.anything(),
         lastStartedAt: expect.anything(),
@@ -191,6 +191,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(task.syncGlobalParams).toHaveBeenCalled();
       expect(result.error).toBeUndefined();
       expect(result.state).toEqual({
+        disableAutoSync: false,
         lastTotalParams: 1,
         lastTotalMWs: 1,
         maxCleanUpRetries: 2,
@@ -229,6 +230,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       );
       expect(result.error).toBe(error);
       expect(result.state).toEqual({
+        disableAutoSync: false,
         startedAt: expect.anything(),
         lastStartedAt: expect.anything(),
         lastTotalParams: 1,
@@ -390,7 +392,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       await task.syncGlobalParams({
         allPrivateLocations: mockAllPrivateLocations as any,
-        encryptedSavedObjects: mockEncryptedSoClient as any,
         soClient: mockSoClient as any,
       });
 
@@ -421,7 +422,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       await task.syncGlobalParams({
         allPrivateLocations: [],
         soClient: mockSoClient as any,
-        encryptedSavedObjects: mockEncryptedSoClient as any,
       });
 
       expect(mockSyntheticsMonitorClient.privateLocationAPI.editMonitors).not.toHaveBeenCalled();
@@ -482,7 +482,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       mockSoClient.createPointInTimeFinder = jest.fn().mockReturnValue(mockFinder);
       task = new SyncPrivateLocationMonitorsTask(
         mockServerSetup as any,
-        mockTaskManager as unknown as TaskManagerSetupContract,
         mockSyntheticsMonitorClient as unknown as SyntheticsMonitorClient
       );
     });

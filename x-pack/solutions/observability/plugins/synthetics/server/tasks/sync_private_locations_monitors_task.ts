@@ -42,7 +42,7 @@ import { SyntheticsPrivateLocation } from '../synthetics_service/private_locatio
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
 export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
-const TASK_SCHEDULE = '10m';
+const TASK_SCHEDULE = '1m';
 
 interface TaskState extends Record<string, unknown> {
   lastStartedAt: string;
@@ -50,6 +50,7 @@ interface TaskState extends Record<string, unknown> {
   lastTotalMWs: number;
   hasAlreadyDoneCleanup: boolean;
   maxCleanUpRetries: number;
+  disableAutoSync?: boolean;
 }
 
 export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
@@ -59,9 +60,10 @@ export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
 export class SyncPrivateLocationMonitorsTask {
   constructor(
     public serverSetup: SyntheticsServerSetup,
-    public taskManager: TaskManagerSetupContract,
     public syntheticsMonitorClient: SyntheticsMonitorClient
-  ) {
+  ) {}
+
+  registerTaskDefinition(taskManager: TaskManagerSetupContract) {
     taskManager.registerTaskDefinitions({
       [TASK_TYPE]: {
         title: 'Synthetics Sync Global Params Task',
@@ -87,7 +89,6 @@ export class SyncPrivateLocationMonitorsTask {
   }): Promise<{ state: TaskState; error?: Error; schedule?: IntervalSchedule | RruleSchedule }> {
     const {
       coreStart: { savedObjects },
-      encryptedSavedObjects,
       logger,
     } = this.serverSetup;
     const lastStartedAt =
@@ -101,6 +102,7 @@ export class SyncPrivateLocationMonitorsTask {
       lastTotalMWs: taskInstance.state.lastTotalMWs || 0,
       hasAlreadyDoneCleanup: taskInstance.state.hasAlreadyDoneCleanup || false,
       maxCleanUpRetries: taskInstance.state.maxCleanUpRetries || 3,
+      disableAutoSync: taskInstance.state.disableAutoSync ?? false,
     };
 
     try {
@@ -119,10 +121,13 @@ export class SyncPrivateLocationMonitorsTask {
         taskState,
       });
 
-      if (hasDataChanged || performSync) {
-        if (hasDataChanged) {
+      // Only perform syncGlobalParams if:
+      // - hasDataChanged and disableAutoSync is false
+      // - OR performSync is true (from cleanup), regardless of disableAutoSync
+      if ((hasDataChanged && !taskState.disableAutoSync) || performSync) {
+        if (hasDataChanged && !taskState.disableAutoSync) {
           this.debugLog(`Syncing private location monitors because data has changed`);
-        } else {
+        } else if (performSync) {
           this.debugLog(`Syncing private location monitors because cleanup performed a change`);
         }
 
@@ -130,14 +135,17 @@ export class SyncPrivateLocationMonitorsTask {
           await this.syncGlobalParams({
             allPrivateLocations,
             soClient,
-            encryptedSavedObjects,
           });
         }
         this.debugLog(`Sync of private location monitors succeeded`);
       } else {
-        this.debugLog(
-          `No data has changed since last run ${lastStartedAt}, skipping sync of private location monitors`
-        );
+        if (taskState.disableAutoSync) {
+          this.debugLog(`Auto sync is disabled, skipping sync of private location monitors`);
+        } else {
+          this.debugLog(
+            `No data has changed since last run ${lastStartedAt}, skipping sync of private location monitors`
+          );
+        }
       }
     } catch (error) {
       logger.error(`Sync of private location monitors failed: ${error.message}`);
@@ -202,18 +210,16 @@ export class SyncPrivateLocationMonitorsTask {
 
   async syncGlobalParams({
     allPrivateLocations,
-    encryptedSavedObjects,
     soClient,
   }: {
     soClient: SavedObjectsClientContract;
     allPrivateLocations: PrivateLocationAttributes[];
-    encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   }) {
     const { privateLocationAPI } = this.syntheticsMonitorClient;
 
     const { configsBySpaces, paramsBySpace, spaceIds, maintenanceWindows } =
       await this.getAllMonitorConfigs({
-        encryptedSavedObjects,
+        encryptedSavedObjects: this.serverSetup.encryptedSavedObjects,
         soClient,
       });
 
@@ -573,4 +579,25 @@ export const resetSyncPrivateCleanUpState = async ({
   }));
   await runSynPrivateLocationMonitorsTaskSoon({ server });
   logger.debug(`Synthetics sync private location monitors cleanup state reset successfully`);
+};
+
+export const disableSyncPrivateLocationTask = async ({
+  server,
+  disableAutoSync,
+}: {
+  server: SyntheticsServerSetup;
+  disableAutoSync: boolean;
+}) => {
+  const {
+    logger,
+    pluginsStart: { taskManager },
+  } = server;
+  logger.debug(
+    `Setting Synthetics sync private location monitors disableAutoSync to ${disableAutoSync}`
+  );
+  await taskManager.bulkUpdateState([PRIVATE_LOCATIONS_SYNC_TASK_ID], (state) => ({
+    ...state,
+    disableAutoSync,
+  }));
+  logger.debug(`Synthetics sync private location monitors disableAutoSync set successfully`);
 };
