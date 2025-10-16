@@ -169,7 +169,7 @@ export class EmbeddableStateTransfer {
   }
 
   /**
-   * Retrieves incoming embeddable package states from session storage, handling both single items and arrays.
+   * Retrieves incoming embeddable package states from session storage, handling arrays.
    * Always returns an array format. Filters results using the provided type guard.
    *
    * @param guard - Type guard function to validate state items
