@@ -64,7 +64,7 @@ Description
 Additional comments
 :   Extra information for the client, such as how to troubleshoot the issue.
 
-Additional fields
+Additional fields {applies_to}`stack: ga 9.2`
 :   An object that contains custom field identifiers and their values. These fields must exist in the {{ibm-r}} application and must be specified in JSON format.
 
 
