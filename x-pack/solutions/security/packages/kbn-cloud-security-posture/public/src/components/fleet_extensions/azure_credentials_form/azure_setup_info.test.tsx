@@ -6,8 +6,8 @@
  */
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { AzureSetupInfoContent } from './azure_setup_info';
-import { TestProvider } from '../test/test_provider';
 
 // Mock the cloud setup hook
 jest.mock('../hooks/use_cloud_setup_context', () => ({
@@ -20,12 +20,15 @@ describe('AzureSetupInfoContent', () => {
   const mockDocumentationLink =
     'https://www.elastic.co/guide/en/security/current/cspm-get-started.html';
 
-  it('should render setup info content correctly', () => {
+  const renderComponent = (documentationLink: string) =>
     render(
-      <TestProvider>
-        <AzureSetupInfoContent documentationLink={mockDocumentationLink} />
-      </TestProvider>
+      <I18nProvider>
+        <AzureSetupInfoContent documentationLink={documentationLink} />
+      </I18nProvider>
     );
+
+  it('should render setup info content correctly', () => {
+    renderComponent(mockDocumentationLink);
 
     // Check title
     expect(screen.getByRole('heading', { name: /setup access/i })).toBeInTheDocument();
@@ -47,11 +50,7 @@ describe('AzureSetupInfoContent', () => {
   });
 
   it('should use shortName from cloud setup context', () => {
-    render(
-      <TestProvider>
-        <AzureSetupInfoContent documentationLink={mockDocumentationLink} />
-      </TestProvider>
-    );
+    renderComponent(mockDocumentationLink);
 
     // Verify that the shortName "CSPM" appears in the text
     expect(screen.getByText(/deploy CSPM for assessing/i)).toBeInTheDocument();
@@ -59,11 +58,7 @@ describe('AzureSetupInfoContent', () => {
 
   it('should render with custom documentation link', () => {
     const customLink = 'https://example.com/custom-docs';
-    render(
-      <TestProvider>
-        <AzureSetupInfoContent documentationLink={customLink} />
-      </TestProvider>
-    );
+    renderComponent(customLink);
 
     expect(screen.getByRole('link', { name: /getting started/i })).toHaveAttribute(
       'href',

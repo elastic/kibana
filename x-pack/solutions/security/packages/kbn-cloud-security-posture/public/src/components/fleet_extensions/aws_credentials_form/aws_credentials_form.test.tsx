@@ -17,9 +17,61 @@ import type {
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
 import { AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS } from '@kbn/cloud-security-posture-common';
-import { getMockPolicyAWS } from '../test/mock';
 import { createAwsCloudSetupMock } from '../test/cloud_setup_mocks';
 import type { UpdatePolicy } from '../types';
+import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+
+// Internal test mocks
+const CLOUDBEAT_AWS = 'cloudbeat/cis_aws';
+const TEMPLATE_NAME = 'cspm';
+const AWS_PROVIDER = 'aws';
+
+const getMockPolicyAWS = (): NewPackagePolicy => {
+  const mockPackagePolicy = createNewPackagePolicyMock();
+
+  const awsVarsMock = {
+    access_key_id: { type: 'text' },
+    secret_access_key: { type: 'password', isSecret: true },
+    session_token: { type: 'text' },
+    shared_credential_file: { type: 'text' },
+    credential_profile_name: { type: 'text' },
+    role_arn: { type: 'text' },
+    'aws.credentials.type': { value: 'cloud_formation', type: 'text' },
+  };
+
+  const dataStream = { type: 'logs', dataset: 'cloud_security_posture.findings' };
+
+  return {
+    ...mockPackagePolicy,
+    name: 'cloud_security_posture-policy',
+    package: {
+      name: 'cloud_security_posture',
+      title: 'Security Posture Management',
+      version: '1.1.1',
+    },
+    vars: {
+      posture: {
+        value: TEMPLATE_NAME,
+        type: 'text',
+      },
+      deployment: { value: AWS_PROVIDER, type: 'text' },
+    },
+    inputs: [
+      {
+        type: CLOUDBEAT_AWS,
+        policy_template: TEMPLATE_NAME,
+        enabled: true,
+        streams: [
+          {
+            enabled: true,
+            data_stream: dataStream,
+            vars: awsVarsMock,
+          },
+        ],
+      },
+    ],
+  } as NewPackagePolicy;
+};
 
 // Mock dependencies
 jest.mock('../hooks/use_cloud_setup_context');

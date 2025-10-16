@@ -6,7 +6,7 @@
  */
 
 import type { CloudSetupContextValue } from '../hooks/use_cloud_setup_context';
-import { CloudSetupConfig } from '../types';
+import type { CloudSetupConfig } from '../types';
 
 /**
  * Creates a mock CloudSetupContextValue with all required properties.

@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from '@kbn/cloud-security-posture-common';
 import { AwsAccountTypeSelect } from './aws_account_type_selector';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
+import { createAwsCloudSetupMock } from '../test/cloud_setup_mocks';
 import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
@@ -18,10 +19,8 @@ import type {
 } from '@kbn/fleet-plugin/common';
 
 jest.mock('../hooks/use_cloud_setup_context');
-(useCloudSetup as jest.Mock).mockReturnValue({
-  awsOrganizationEnabled: true,
-  awsPolicyType: 'aws-policy-type',
-});
+
+const mockUseCloudSetup = useCloudSetup as jest.Mock;
 
 const mockUpdatePolicy = jest.fn();
 
@@ -65,26 +64,32 @@ const renderComponent = (props = {}) => {
 describe('AwsAccountTypeSelect', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseCloudSetup.mockReturnValue(
+      createAwsCloudSetupMock({
+        awsOrganizationEnabled: true,
+        awsPolicyType: 'aws-policy-type',
+      })
+    );
   });
 
-  it('renders radio options', () => {
+  it('renders both account type options with correct default selection', () => {
     renderComponent();
+
+    // Both radio options should be available
     expect(screen.getByText('AWS Organization')).toBeInTheDocument();
     expect(screen.getByText('Single Account')).toBeInTheDocument();
-  });
 
-  it('selects the correct radio based on input', () => {
-    renderComponent();
+    // Single Account should be selected by default
     const singleRadio = screen.getByLabelText('Single Account');
-    expect(singleRadio).toBeChecked();
-  });
-
-  it('calls updatePolicy when radio is changed', async () => {
-    renderComponent();
-    const singleRadio = screen.getByLabelText('Single Account');
-    expect(singleRadio).toBeChecked();
     const orgRadio = screen.getByLabelText('AWS Organization');
+    expect(singleRadio).toBeChecked();
     expect(orgRadio).not.toBeChecked();
+  });
+
+  it('handles user interaction and calls updatePolicy when selection changes', async () => {
+    renderComponent();
+    const orgRadio = screen.getByLabelText('AWS Organization');
+
     await userEvent.click(orgRadio);
     await waitFor(() =>
       expect(mockUpdatePolicy).toHaveBeenCalledWith(
@@ -95,23 +100,15 @@ describe('AwsAccountTypeSelect', () => {
     );
   });
 
-  it('disables AWS Organization radio if awsOrganizationEnabled is false', () => {
-    (useCloudSetup as jest.Mock).mockReturnValue({
-      awsOrganizationEnabled: false,
-      awsPolicyType: 'aws',
-    });
-    renderComponent({
-      packageInfo: { version: '3.0.0' },
-    });
-    const orgRadio = screen.getByLabelText('AWS Organization');
-    expect(orgRadio).toBeDisabled();
+  it('displays correct descriptions based on selected account type', () => {
+    // Single account description (default)
+    renderComponent();
     expect(
-      screen.getByText(/AWS Organization not supported in current integration version/)
+      screen.getByText(/Deploying to a single account is suitable for an initial POC/)
     ).toBeInTheDocument();
-  });
 
-  it('shows organization description when AWS Organization is selected', () => {
-    const input = {
+    // Organization account description
+    const orgInput = {
       streams: [
         {
           vars: {
@@ -122,20 +119,31 @@ describe('AwsAccountTypeSelect', () => {
         },
       ],
     };
-    renderComponent({ input });
+    renderComponent({ input: orgInput });
     expect(screen.getByText(/Connect Elastic to every AWS Account/)).toBeInTheDocument();
   });
 
-  it('shows single account description when Single Account is selected', () => {
-    renderComponent();
-    expect(
-      screen.getByText(/Deploying to a single account is suitable for an initial POC/)
-    ).toBeInTheDocument();
-  });
-
-  it('disables all radios if disabled prop is true', () => {
+  it('handles disabled states correctly', () => {
+    // Disabled prop affects all radios
     renderComponent({ disabled: true });
     expect(screen.getByLabelText('Single Account')).toBeDisabled();
     expect(screen.getByLabelText('AWS Organization')).toBeDisabled();
+  });
+
+  it('disables AWS Organization when not enabled in cloud setup', () => {
+    mockUseCloudSetup.mockReturnValue(
+      createAwsCloudSetupMock({
+        awsOrganizationEnabled: false,
+        awsPolicyType: 'aws',
+      })
+    );
+
+    renderComponent({ packageInfo: { version: '3.0.0' } });
+
+    const orgRadio = screen.getByLabelText('AWS Organization');
+    expect(orgRadio).toBeDisabled();
+    expect(
+      screen.getByText(/AWS Organization not supported in current integration version/)
+    ).toBeInTheDocument();
   });
 });

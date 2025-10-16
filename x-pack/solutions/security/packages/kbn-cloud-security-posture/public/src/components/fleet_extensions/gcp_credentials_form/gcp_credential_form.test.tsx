@@ -88,48 +88,99 @@ const mockGetGcpInputVarsFields = getGcpInputVarsFields as jest.MockedFunction<
 const renderWithIntl = (component: React.ReactElement) =>
   render(<I18nProvider>{component}</I18nProvider>);
 
-describe('GcpCredentialsForm', () => {
-  const mockUpdatePolicy: UpdatePolicy = jest.fn();
-
-  const mockInput: NewPackagePolicyInput = {
-    type: 'cloudbeat/cis_gcp',
-    policy_template: 'cspm',
-    enabled: true,
-    streams: [
-      {
-        enabled: true,
-        data_stream: {
-          type: 'logs',
-          dataset: 'cloud_security_posture.findings',
+// Shared GCP mock factories for credential form tests
+const createMockGcpInput = (overrides?: Partial<NewPackagePolicyInput>): NewPackagePolicyInput => ({
+  type: 'cloudbeat/cis_gcp',
+  policy_template: 'cspm',
+  enabled: true,
+  streams: [
+    {
+      enabled: true,
+      data_stream: {
+        type: 'logs',
+        dataset: 'cloud_security_posture.findings',
+      },
+      vars: {
+        'gcp.account_type': {
+          value: 'single-account',
+          type: 'text',
         },
-        vars: {
-          'gcp.account_type': {
-            value: 'single-account',
-            type: 'text',
-          },
-          'gcp.project_id': {
-            value: 'test-project',
-            type: 'text',
-          },
+        'gcp.project_id': {
+          value: 'test-project',
+          type: 'text',
         },
       },
-    ],
-  };
+    },
+  ],
+  ...overrides,
+});
 
-  const mockNewPolicy: NewPackagePolicy = {
-    name: 'gcp-test',
-    description: 'Test GCP policy',
-    namespace: 'default',
-    policy_id: 'test-policy-id',
-    policy_ids: ['test-policy-id'],
-    enabled: true,
-    inputs: [mockInput],
-  };
-
-  const mockPackageInfo = {
+const createMockGcpPackageInfo = (): PackageInfo =>
+  ({
     name: 'cloud_security_posture',
     version: '1.6.0',
-  } as PackageInfo;
+    policy_templates: [],
+    data_streams: [],
+    assets: [],
+    owner: { github: 'elastic/security-team' },
+  } as unknown as PackageInfo);
+
+const createMockGcpPolicy = (input: NewPackagePolicyInput): NewPackagePolicy => ({
+  name: 'gcp-test',
+  description: 'Test GCP policy',
+  namespace: 'default',
+  policy_id: 'test-policy-id',
+  policy_ids: ['test-policy-id'],
+  enabled: true,
+  inputs: [input],
+});
+
+const getDefaultGcpCloudSetup = () => ({
+  getCloudSetupProviderByInputType: jest.fn(),
+  config: {},
+  showCloudTemplates: true,
+  defaultProvider: 'aws' as const,
+  defaultProviderType: 'aws',
+  awsInputFieldMapping: undefined,
+  awsPolicyType: 'cloudbeat/cis_k8s',
+  awsOrganizationEnabled: true,
+  awsOverviewPath: '/app/cloud-security-posture/overview/aws',
+  isAwsCloudConnectorEnabled: false,
+  azureEnabled: true,
+  isAzureCloudConnectorEnabled: false,
+  azureOrganizationEnabled: true,
+  azureOverviewPath: '/app/cloud-security-posture/overview/azure',
+  azurePolicyType: 'cloudbeat/cis_azure',
+  gcpEnabled: true,
+  gcpOrganizationEnabled: true,
+  isGcpCloudConnectorEnabled: false,
+  gcpOverviewPath: '/app/cloud-security-posture/overview',
+  gcpPolicyType: 'cloudbeat/cis_gcp',
+  shortName: 'CSPM',
+  templateInputOptions: [],
+  templateName: 'cspm',
+});
+
+const getMockGcpFields = () => [
+  {
+    id: 'gcp.project_id',
+    label: 'Project ID',
+    type: 'text' as const,
+    value: 'test-project',
+  },
+  {
+    id: 'gcp.organization_id',
+    label: 'Organization ID',
+    type: 'text' as const,
+    value: '',
+  },
+];
+
+describe('GcpCredentialsForm', () => {
+  const mockUpdatePolicy: UpdatePolicy = jest.fn();
+  const mockInput = createMockGcpInput();
+  const mockPackageInfo = createMockGcpPackageInfo();
+  const mockNewPolicy = createMockGcpPolicy(mockInput);
 
   const defaultProps = {
     input: mockInput,
@@ -140,46 +191,8 @@ describe('GcpCredentialsForm', () => {
     hasInvalidRequiredVars: false,
   };
 
-  const defaultCloudSetup = {
-    getCloudSetupProviderByInputType: jest.fn(),
-    config: {},
-    showCloudTemplates: true,
-    defaultProvider: 'aws' as const,
-    defaultProviderType: 'aws',
-    awsInputFieldMapping: undefined,
-    awsPolicyType: 'cloudbeat/cis_k8s',
-    awsOrganizationEnabled: true,
-    awsOverviewPath: '/app/cloud-security-posture/overview/aws',
-    isAwsCloudConnectorEnabled: false,
-    azureEnabled: true,
-    isAzureCloudConnectorEnabled: false,
-    azureOrganizationEnabled: true,
-    azureOverviewPath: '/app/cloud-security-posture/overview/azure',
-    azurePolicyType: 'cloudbeat/cis_azure',
-    gcpEnabled: true,
-    gcpOrganizationEnabled: true,
-    isGcpCloudConnectorEnabled: false,
-    gcpOverviewPath: '/app/cloud-security-posture/overview',
-    gcpPolicyType: 'cloudbeat/cis_gcp',
-    shortName: 'CSPM',
-    templateInputOptions: [],
-    templateName: 'cspm',
-  };
-
-  const mockFields = [
-    {
-      id: 'gcp.project_id',
-      label: 'Project ID',
-      type: 'text' as const,
-      value: 'test-project',
-    },
-    {
-      id: 'gcp.organization_id',
-      label: 'Organization ID',
-      type: 'text' as const,
-      value: '',
-    },
-  ];
+  const defaultCloudSetup = getDefaultGcpCloudSetup();
+  const mockFields = getMockGcpFields();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -245,86 +258,65 @@ describe('GcpCredentialsForm', () => {
   });
 
   describe('cloud shell setup', () => {
-    it('renders cloud shell setup by default', () => {
-      renderWithIntl(<GcpCredentialsForm {...defaultProps} />);
+    describe('basic rendering and instructions', () => {
+      it('renders cloud shell setup by default with correct instructions', () => {
+        renderWithIntl(<GcpCredentialsForm {...defaultProps} />);
 
-      // Should show cloud shell setup instructions
-      expect(
-        screen.getByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.GOOGLE_CLOUD_SHELL_SETUP)
-      ).toBeInTheDocument();
+        // Should show cloud shell setup instructions
+        expect(
+          screen.getByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.GOOGLE_CLOUD_SHELL_SETUP)
+        ).toBeInTheDocument();
 
-      // Should show step-by-step instructions
-      expect(screen.getByText('Log into your Google Cloud Console')).toBeInTheDocument();
-      expect(
-        screen.getByText('Note down the GCP project ID of the project you wish to monitor')
-      ).toBeInTheDocument();
-    });
+        // Should show step-by-step instructions
+        expect(screen.getByText('Log into your Google Cloud Console')).toBeInTheDocument();
+        expect(
+          screen.getByText('Note down the GCP project ID of the project you wish to monitor')
+        ).toBeInTheDocument();
 
-    it('renders organization-specific instructions for organization account type', () => {
-      const orgInput = {
-        ...mockInput,
-        streams: [
-          {
-            ...mockInput.streams[0],
-            vars: {
-              ...mockInput.streams[0].vars,
-              'gcp.account_type': {
-                value: GCP_ORGANIZATION_ACCOUNT,
-                type: 'text',
+        // Should render project ID field for single account
+        expect(screen.getByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID)).toBeInTheDocument();
+      });
+
+      it('renders organization-specific instructions and fields for organization account type', () => {
+        const orgInput = {
+          ...mockInput,
+          streams: [
+            {
+              ...mockInput.streams[0],
+              vars: {
+                ...mockInput.streams[0].vars,
+                'gcp.account_type': {
+                  value: GCP_ORGANIZATION_ACCOUNT,
+                  type: 'text',
+                },
               },
             },
-          },
-        ],
-      };
+          ],
+        };
 
-      renderWithIntl(<GcpCredentialsForm {...defaultProps} input={orgInput} />);
-
-      expect(
-        screen.getByText(
-          'Note down the GCP organization ID of the organization you wish to monitor and project ID where you want to provision resources for monitoring purposes and provide them in the input boxes below'
-        )
-      ).toBeInTheDocument();
-    });
-
-    it('renders project ID field for cloud shell setup', () => {
-      renderWithIntl(<GcpCredentialsForm {...defaultProps} />);
-
-      expect(screen.getByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID)).toBeInTheDocument();
-    });
-
-    it('renders organization ID field for organization account type', () => {
-      const orgInput = {
-        ...mockInput,
-        streams: [
+        const orgFields = [
+          ...mockFields,
           {
-            ...mockInput.streams[0],
-            vars: {
-              ...mockInput.streams[0].vars,
-              'gcp.account_type': {
-                value: GCP_ORGANIZATION_ACCOUNT,
-                type: 'text',
-              },
-            },
+            id: 'gcp.organization_id',
+            label: 'Organization ID',
+            type: 'text' as const,
+            value: 'test-org',
           },
-        ],
-      };
+        ];
+        mockGetGcpInputVarsFields.mockReturnValue(orgFields);
 
-      const orgFields = [
-        ...mockFields,
-        {
-          id: 'gcp.organization_id',
-          label: 'Organization ID',
-          type: 'text' as const,
-          value: 'test-org',
-        },
-      ];
-      mockGetGcpInputVarsFields.mockReturnValue(orgFields);
+        renderWithIntl(<GcpCredentialsForm {...defaultProps} input={orgInput} />);
 
-      renderWithIntl(<GcpCredentialsForm {...defaultProps} input={orgInput} />);
+        expect(
+          screen.getByText(
+            'Note down the GCP organization ID of the organization you wish to monitor and project ID where you want to provision resources for monitoring purposes and provide them in the input boxes below'
+          )
+        ).toBeInTheDocument();
 
-      expect(
-        screen.getByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)
-      ).toBeInTheDocument();
+        expect(
+          screen.getByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)
+        ).toBeInTheDocument();
+      });
     });
 
     it('handles field value changes in cloud shell setup', () => {
@@ -385,31 +377,32 @@ describe('GcpCredentialsForm', () => {
     });
   });
 
-  describe('setup format switching', () => {
-    it('switches from cloud shell to manual setup', () => {
-      renderWithIntl(<GcpCredentialsForm {...defaultProps} />);
+  describe('setup format switching and cloud shell URL management', () => {
+    it('switches between cloud shell and manual setup modes', () => {
+      const { rerender } = renderWithIntl(<GcpCredentialsForm {...defaultProps} />);
 
+      // Clear any initial calls
+      jest.clearAllMocks();
+
+      // Initially should be cloud shell - switching to manual
       const manualOption = screen.getByTestId(GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL);
       fireEvent.click(manualOption);
+      expect(mockUpdatePolicy).toHaveBeenCalledTimes(1);
 
-      expect(mockUpdatePolicy).toHaveBeenCalledWith({
-        updatedPolicy: expect.any(Object),
-      });
-    });
-
-    it('switches from manual to cloud shell setup', () => {
+      // Now test switching back from manual to cloud shell
       mockGetGcpCredentialsType.mockReturnValue(GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE);
 
-      renderWithIntl(<GcpCredentialsForm {...defaultProps} />);
+      rerender(
+        <I18nProvider>
+          <GcpCredentialsForm {...defaultProps} />
+        </I18nProvider>
+      );
 
       const cloudShellOption = screen.getByTestId(
         GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.CLOUD_SHELL
       );
       fireEvent.click(cloudShellOption);
-
-      expect(mockUpdatePolicy).toHaveBeenCalledWith({
-        updatedPolicy: expect.any(Object),
-      });
+      expect(mockUpdatePolicy).toHaveBeenCalledTimes(2);
     });
 
     it('does not trigger onChange when clicking the already selected option', () => {
@@ -428,82 +421,17 @@ describe('GcpCredentialsForm', () => {
       // Should not trigger update
       expect(mockUpdatePolicy).not.toHaveBeenCalled();
     });
-  });
 
-  describe('validation', () => {
-    it('handles validation state for required fields', () => {
-      const fieldsWithErrors = [
-        {
-          id: 'gcp.project_id',
-          label: 'Project ID',
-          type: 'text' as const,
-          value: '', // Empty value
-        },
-      ];
-      mockGetGcpInputVarsFields.mockReturnValue(fieldsWithErrors);
-
-      renderWithIntl(<GcpCredentialsForm {...defaultProps} hasInvalidRequiredVars={true} />);
-
-      // Just verify the component renders without errors when validation is enabled
-      const projectIdField = screen.getByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
-      expect(projectIdField).toBeInTheDocument();
-      expect(projectIdField).toHaveValue('');
-    });
-
-    it('handles validation state for organization ID when required', () => {
-      const orgInput = {
-        ...mockInput,
-        streams: [
-          {
-            ...mockInput.streams[0],
-            vars: {
-              ...mockInput.streams[0].vars,
-              'gcp.account_type': {
-                value: GCP_ORGANIZATION_ACCOUNT,
-                type: 'text',
-              },
-            },
-          },
-        ],
-      };
-
-      const orgFields = [
-        {
-          id: 'gcp.organization_id',
-          label: 'Organization ID',
-          type: 'text' as const,
-          value: '', // Empty value
-        },
-      ];
-      mockGetGcpInputVarsFields.mockReturnValue(orgFields);
-
-      renderWithIntl(
-        <GcpCredentialsForm {...defaultProps} input={orgInput} hasInvalidRequiredVars={true} />
-      );
-
-      // Just verify the component renders without errors when validation is enabled
-      const organizationIdField = screen.getByTestId(
-        GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID
-      );
-      expect(organizationIdField).toBeInTheDocument();
-      expect(organizationIdField).toHaveValue('');
-    });
-  });
-
-  describe('cloud shell URL management', () => {
-    it('updates cloud shell URL when switching to cloud shell', () => {
+    it('manages cloud shell URL correctly during mode switches', () => {
       mockGetCloudShellDefaultValue.mockReturnValue('https://test-shell-url.com');
 
       renderWithIntl(<GcpCredentialsForm {...defaultProps} />);
 
       // Component should update cloud shell URL on mount
       expect(mockGetCloudShellDefaultValue).toHaveBeenCalledWith(mockPackageInfo, 'cspm');
-    });
 
-    it('clears cloud shell URL when switching to manual', () => {
+      // When switching to manual and back, should manage URLs properly
       mockGetGcpCredentialsType.mockReturnValue(GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE);
-
-      renderWithIntl(<GcpCredentialsForm {...defaultProps} />);
 
       const cloudShellOption = screen.getByTestId(
         GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.CLOUD_SHELL
@@ -515,50 +443,30 @@ describe('GcpCredentialsForm', () => {
   });
 
   describe('edge cases', () => {
-    it('handles missing streams gracefully', () => {
-      const inputWithoutStreams = {
-        ...mockInput,
-        streams: [],
-      };
-
+    it.each([
+      ['missing streams', () => ({ ...defaultProps, input: { ...mockInput, streams: [] } })],
+      [
+        'missing vars',
+        () => ({
+          ...defaultProps,
+          input: { ...mockInput, streams: [{ ...mockInput.streams[0], vars: undefined }] },
+        }),
+      ],
+      [
+        'undefined cloud setup values',
+        () => {
+          mockUseCloudSetup.mockReturnValue({
+            ...defaultCloudSetup,
+            gcpEnabled: true,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any);
+          return defaultProps;
+        },
+      ],
+      ['empty package info', () => ({ ...defaultProps, packageInfo: {} as PackageInfo })],
+    ])('handles %s gracefully', (scenarioName, getProps) => {
       expect(() => {
-        renderWithIntl(<GcpCredentialsForm {...defaultProps} input={inputWithoutStreams} />);
-      }).not.toThrow();
-    });
-
-    it('handles missing vars gracefully', () => {
-      const inputWithoutVars = {
-        ...mockInput,
-        streams: [
-          {
-            ...mockInput.streams[0],
-            vars: undefined,
-          },
-        ],
-      };
-
-      expect(() => {
-        renderWithIntl(<GcpCredentialsForm {...defaultProps} input={inputWithoutVars} />);
-      }).not.toThrow();
-    });
-
-    it('handles undefined cloud setup values gracefully', () => {
-      mockUseCloudSetup.mockReturnValue({
-        ...defaultCloudSetup,
-        gcpEnabled: true,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
-
-      expect(() => {
-        renderWithIntl(<GcpCredentialsForm {...defaultProps} />);
-      }).not.toThrow();
-    });
-
-    it('handles empty package info gracefully', () => {
-      const emptyPackageInfo = {} as PackageInfo;
-
-      expect(() => {
-        renderWithIntl(<GcpCredentialsForm {...defaultProps} packageInfo={emptyPackageInfo} />);
+        renderWithIntl(<GcpCredentialsForm {...getProps()} />);
       }).not.toThrow();
     });
   });

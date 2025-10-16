@@ -44,34 +44,53 @@ jest.mock('../utils', () => ({
 const renderWithIntl = (component: React.ReactElement) =>
   render(<I18nProvider>{component}</I18nProvider>);
 
-describe('GcpAccountTypeSelect', () => {
-  const mockUpdatePolicy = jest.fn();
-  const mockInput: NewPackagePolicyInput = {
-    type: 'gcp',
-    policy_template: 'cloudbeat/cis_gcp',
-    enabled: true,
-    streams: [
-      {
-        enabled: true,
-        data_stream: { type: 'logs', dataset: 'cloudbeat.cis_gcp' },
-        vars: {
-          'gcp.account_type': { value: 'single-account' },
-        },
+// Shared GCP mock factories for account type selector tests
+const createMockGcpAccountInput = (): NewPackagePolicyInput => ({
+  type: 'gcp',
+  policy_template: 'cloudbeat/cis_gcp',
+  enabled: true,
+  streams: [
+    {
+      enabled: true,
+      data_stream: { type: 'logs', dataset: 'cloudbeat.cis_gcp' },
+      vars: {
+        'gcp.account_type': { value: 'single-account' },
       },
-    ],
-  };
-  const mockNewPolicy: NewPackagePolicy = {
+    },
+  ],
+});
+
+const createMockGcpAccountPackageInfo = (): PackageInfo =>
+  ({
+    name: 'cloud_security_posture',
+    version: '1.6.0',
+    title: 'Cloud Security Posture',
+    policy_templates: [],
+    data_streams: [],
+    assets: [],
+    owner: { github: 'elastic/security-team' },
+  } as unknown as PackageInfo);
+
+const createMockGcpAccountPolicy = (input: NewPackagePolicyInput): NewPackagePolicy =>
+  ({
     name: 'test-policy',
     namespace: 'default',
     policy_id: 'policy-123',
     enabled: true,
-    inputs: [mockInput],
-  } as NewPackagePolicy;
-  const mockPackageInfo: PackageInfo = {
-    name: 'cloud_security_posture',
-    version: '1.6.0',
-    title: 'Cloud Security Posture',
-  } as PackageInfo;
+    inputs: [input],
+  } as NewPackagePolicy);
+
+const getDefaultGcpAccountCloudSetup = () => ({
+  gcpOrganizationEnabled: true,
+  gcpPolicyType: 'cloudbeat/cis_gcp',
+  shortName: 'CSPM',
+});
+
+describe('GcpAccountTypeSelect', () => {
+  const mockUpdatePolicy = jest.fn();
+  const mockInput = createMockGcpAccountInput();
+  const mockPackageInfo = createMockGcpAccountPackageInfo();
+  const mockNewPolicy = createMockGcpAccountPolicy(mockInput);
 
   const defaultProps = {
     input: mockInput,
@@ -81,11 +100,7 @@ describe('GcpAccountTypeSelect', () => {
     disabled: false,
   };
 
-  const defaultCloudSetup = {
-    gcpOrganizationEnabled: true,
-    gcpPolicyType: 'cloudbeat/cis_gcp',
-    shortName: 'CSPM',
-  };
+  const defaultCloudSetup = getDefaultGcpAccountCloudSetup();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -278,42 +293,35 @@ describe('GcpAccountTypeSelect', () => {
   });
 
   describe('edge cases', () => {
-    it('handles missing streams gracefully', () => {
-      const inputWithoutStreams = {
-        ...mockInput,
-        streams: [
-          {
-            ...mockInput.streams[0],
-            vars: undefined,
-          },
-        ],
-      };
-
-      // Mock the function to return empty array to prevent errors
-      mockGetGcpInputVarsFields.mockReturnValue([]);
-
+    it.each([
+      [
+        'missing streams',
+        () => {
+          mockGetGcpInputVarsFields.mockReturnValue([]);
+          return {
+            ...defaultProps,
+            input: { ...mockInput, streams: [{ ...mockInput.streams[0], vars: undefined }] },
+          };
+        },
+      ],
+      [
+        'undefined cloud setup values',
+        () => {
+          mockUseCloudSetup.mockReturnValue({
+            gcpOrganizationEnabled: undefined,
+            gcpPolicyType: undefined,
+            shortName: undefined,
+          });
+          return defaultProps;
+        },
+      ],
+      [
+        'empty package info',
+        () => ({ ...defaultProps, packageInfo: null as unknown as PackageInfo }),
+      ],
+    ])('handles %s gracefully', (scenarioName, getProps) => {
       expect(() => {
-        renderWithIntl(<GcpAccountTypeSelect {...defaultProps} input={inputWithoutStreams} />);
-      }).not.toThrow();
-    });
-
-    it('handles undefined cloud setup values gracefully', () => {
-      mockUseCloudSetup.mockReturnValue({
-        gcpOrganizationEnabled: undefined,
-        gcpPolicyType: undefined,
-        shortName: undefined,
-      });
-
-      expect(() => {
-        renderWithIntl(<GcpAccountTypeSelect {...defaultProps} />);
-      }).not.toThrow();
-    });
-
-    it('handles empty package info gracefully', () => {
-      expect(() => {
-        renderWithIntl(
-          <GcpAccountTypeSelect {...defaultProps} packageInfo={null as unknown as PackageInfo} />
-        );
+        renderWithIntl(<GcpAccountTypeSelect {...getProps()} />);
       }).not.toThrow();
     });
   });

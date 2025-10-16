@@ -125,86 +125,99 @@ const {
 const renderWithIntl = (component: React.ReactElement) =>
   render(<I18nProvider>{component}</I18nProvider>);
 
+// Shared Azure mock factories for agentless tests
+const createMockAzureInput = (): NewPackagePolicyInput => ({
+  type: 'cloudbeat/cis_azure',
+  policy_template: 'cspm',
+  enabled: true,
+  streams: [
+    {
+      enabled: true,
+      data_stream: {
+        type: 'logs',
+        dataset: 'cloud_security_posture.findings',
+      },
+      vars: {
+        'azure.credentials.tenant_id': { value: 'test-tenant', type: 'text' },
+        'azure.credentials.client_id': { value: 'test-client', type: 'text' },
+        'azure.credentials.client_secret': { value: 'test-secret', type: 'password' },
+      },
+    },
+  ],
+});
+
+const createMockAzurePackageInfo = (): PackageInfo =>
+  ({
+    name: 'cloud_security_posture',
+    version: '1.0.0',
+    policy_templates: [],
+    data_streams: [],
+    assets: [],
+    owner: { github: 'elastic/security-team' },
+  } as unknown as PackageInfo);
+
+const createMockAzurePolicy = (input: NewPackagePolicyInput): NewPackagePolicy =>
+  ({
+    name: 'test-policy',
+    namespace: 'default',
+    inputs: [input],
+    policy_id: 'test-policy-id',
+    enabled: true,
+    package: {
+      name: 'cloud_security_posture',
+      title: 'Cloud Security Posture',
+      version: '1.0.0',
+    },
+  } as NewPackagePolicy);
+
+const getDefaultCloudSetup = () => ({
+  isCloudEnabled: true,
+  cloudHost: 'aws',
+  isServerlessEnabled: false,
+  azureOverviewPath: '/app/cloud-security-posture/overview/azure',
+  azurePolicyType: 'cspm',
+  isAzureCloudConnectorEnabled: true,
+  azureCloudConnectorRemoteRoleTemplate: 'cloud-connector-template',
+});
+
+const getMockAzureFields = () => [
+  {
+    id: 'azure.credentials.tenant_id',
+    label: 'Tenant ID',
+    type: 'text' as const,
+    value: 'test-tenant',
+  },
+  {
+    id: 'azure.credentials.client_id',
+    label: 'Client ID',
+    type: 'text' as const,
+    value: 'test-client',
+  },
+  {
+    id: 'azure.credentials.client_secret',
+    label: 'Client Secret',
+    type: 'password' as const,
+    value: 'test-secret',
+  },
+];
+
 describe('AzureCredentialsFormAgentless', () => {
   const mockUpdatePolicy = jest.fn();
-
-  const mockInput: NewPackagePolicyInput = {
-    type: 'cloudbeat/cis_azure',
-    policy_template: 'cspm',
-    enabled: true,
-    streams: [
-      {
-        enabled: true,
-        data_stream: {
-          type: 'logs',
-          dataset: 'cloud_security_posture.findings',
-        },
-        vars: {
-          'azure.credentials.tenant_id': { value: 'test-tenant', type: 'text' },
-          'azure.credentials.client_id': { value: 'test-client', type: 'text' },
-          'azure.credentials.client_secret': { value: 'test-secret', type: 'password' },
-        },
-      },
-    ],
-  };
+  const mockInput = createMockAzureInput();
+  const mockPackageInfo = createMockAzurePackageInfo();
+  const mockNewPolicy = createMockAzurePolicy(mockInput);
 
   const defaultProps = {
     input: mockInput,
-    newPolicy: {
-      name: 'test-policy',
-      namespace: 'default',
-      inputs: [mockInput],
-      policy_id: 'test-policy-id',
-      enabled: true,
-      package: {
-        name: 'cloud_security_posture',
-        title: 'Cloud Security Posture',
-        version: '1.0.0',
-      },
-    } as NewPackagePolicy,
+    newPolicy: mockNewPolicy,
     updatePolicy: mockUpdatePolicy,
-    packageInfo: {
-      name: 'cloud_security_posture',
-      version: '1.0.0',
-      policy_templates: [],
-      data_streams: [],
-      assets: [],
-      owner: { github: 'elastic/security-team' },
-    } as unknown as PackageInfo,
+    packageInfo: mockPackageInfo,
     setupTechnology: SetupTechnology.AGENTLESS,
     hasInvalidRequiredVars: false,
   };
 
-  const defaultCloudSetup = {
-    isCloudEnabled: true,
-    cloudHost: 'aws',
-    isServerlessEnabled: false,
-    azureOverviewPath: '/app/cloud-security-posture/overview/azure',
-    azurePolicyType: 'cspm',
-    isAzureCloudConnectorEnabled: true,
-    azureCloudConnectorRemoteRoleTemplate: 'cloud-connector-template',
-  };
-
-  const mockFields = [
-    {
-      id: 'azure.credentials.tenant_id',
-      label: 'Tenant ID',
-      type: 'text' as const,
-      value: 'test-tenant',
-    },
-    {
-      id: 'azure.credentials.client_id',
-      label: 'Client ID',
-      type: 'text' as const,
-      value: 'test-client',
-    },
-    {
-      id: 'azure.credentials.client_secret',
-      label: 'Client Secret',
-      type: 'password' as const,
-      value: 'test-secret',
-    },
-  ];
+  const defaultCloudSetup = getDefaultCloudSetup();
+  const mockFields = getMockAzureFields();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -270,100 +283,63 @@ describe('AzureCredentialsFormAgentless', () => {
       }).not.toThrow();
     });
 
-    it('renders agentless form with setup info and fields', () => {
-      renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
+    describe('basic form elements', () => {
+      beforeEach(() => {
+        renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
+      });
 
-      expect(screen.getByTestId('azure-setup-info')).toBeInTheDocument();
-      expect(screen.getByTestId('azure-input-var-fields')).toBeInTheDocument();
-      expect(screen.getByTestId('azure-selected-credentials-guide')).toBeInTheDocument();
-    });
+      it('renders agentless form with setup info and fields', () => {
+        expect(screen.getByTestId('azure-setup-info')).toBeInTheDocument();
+        expect(screen.getByTestId('azure-input-var-fields')).toBeInTheDocument();
+        expect(screen.getByTestId('azure-selected-credentials-guide')).toBeInTheDocument();
+      });
 
-    it('renders credential type selector when cloud connectors are enabled', () => {
-      renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
+      it('renders credential type selector when cloud connectors are enabled', () => {
+        expect(screen.getByTestId('azure-credentials-type-selector')).toBeInTheDocument();
+      });
 
-      expect(screen.getByTestId('azure-credentials-type-selector')).toBeInTheDocument();
-    });
-
-    it('renders service principal fields by default', () => {
-      renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
-
-      expect(screen.getByTestId('azure.credentials.tenant_id')).toBeInTheDocument();
-      expect(screen.getByTestId('azure.credentials.client_id')).toBeInTheDocument();
-      expect(screen.getByTestId('azure.credentials.client_secret')).toBeInTheDocument();
+      it('renders service principal fields by default', () => {
+        expect(screen.getByTestId('azure.credentials.tenant_id')).toBeInTheDocument();
+        expect(screen.getByTestId('azure.credentials.client_id')).toBeInTheDocument();
+        expect(screen.getByTestId('azure.credentials.client_secret')).toBeInTheDocument();
+      });
     });
   });
 
-  describe('cloud connector functionality', () => {
-    it('shows cloud connector option when enabled', () => {
-      renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
-
-      const selector = screen.getByTestId('azure-credentials-type-selector');
-      expect(selector).toHaveValue('cloud_connectors');
-    });
-
-    it('can switch between credential types', () => {
-      renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
-
-      const selector = screen.getByTestId('azure-credentials-type-selector');
-      fireEvent.change(selector, { target: { value: 'service_principal_with_client_secret' } });
-
-      expect(mockUpdatePolicy).toHaveBeenCalled();
-    });
-
-    it('shows client, tenant and secret key when selecting service principal with client secret credential', async () => {
-      renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
-
-      const selector = screen.getByTestId('azure-credentials-type-selector');
-      fireEvent.change(selector, {
-        target: { value: 'service_principal_with_client_secret' },
+  describe('cloud connector and credential management', () => {
+    describe('when cloud connectors are enabled', () => {
+      beforeEach(() => {
+        renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
       });
 
-      expect(screen.getByTestId('azure.credentials.client_id')).toBeInTheDocument();
-      expect(screen.getByTestId('azure.credentials.tenant_id')).toBeInTheDocument();
-      expect(screen.getByTestId('azure.credentials.client_secret')).toBeInTheDocument();
-    });
-
-    it('allows switching between credential types when cloud connectors enabled', async () => {
-      renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
-
-      const credentialSelector = screen.getByTestId('azure-credentials-type-selector');
-
-      // Switch to cloud connectors
-      fireEvent.change(credentialSelector, { target: { value: 'cloud_connectors' } });
-
-      await waitFor(() => {
-        expect(credentialSelector).toHaveValue('cloud_connectors');
+      it('shows cloud connector option and ARM template button', () => {
+        const selector = screen.getByTestId('azure-credentials-type-selector');
+        expect(selector).toHaveValue('cloud_connectors');
+        expect(screen.getByTestId('azureLaunchCloudConnectorArmTemplate')).toBeInTheDocument();
       });
 
-      // Cloud connector ARM template button should be visible
-      expect(screen.getByTestId('azureLaunchCloudConnectorArmTemplate')).toBeInTheDocument();
-    });
+      it('can switch to service principal and shows appropriate fields', () => {
+        const selector = screen.getByTestId('azure-credentials-type-selector');
+        fireEvent.change(selector, { target: { value: 'service_principal_with_client_secret' } });
 
-    it('maintains form state when credential type changes', async () => {
-      renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
-
-      const credentialSelector = screen.getByTestId('azure-credentials-type-selector');
-
-      // Switch to service principal
-      fireEvent.change(credentialSelector, {
-        target: { value: 'service_principal_with_client_secret' },
+        expect(mockUpdatePolicy).toHaveBeenCalled();
+        expect(screen.getByTestId('azure.credentials.client_id')).toBeInTheDocument();
+        expect(screen.getByTestId('azure.credentials.tenant_id')).toBeInTheDocument();
+        expect(screen.getByTestId('azure.credentials.client_secret')).toBeInTheDocument();
       });
 
-      await waitFor(() => {
-        expect(credentialSelector).toHaveValue('service_principal_with_client_secret');
+      it('allows switching back to cloud connectors', async () => {
+        const credentialSelector = screen.getByTestId('azure-credentials-type-selector');
+
+        // Switch to cloud connectors
+        fireEvent.change(credentialSelector, { target: { value: 'cloud_connectors' } });
+
+        await waitFor(() => {
+          expect(credentialSelector).toHaveValue('cloud_connectors');
+        });
+
+        expect(screen.getByTestId('azureLaunchCloudConnectorArmTemplate')).toBeInTheDocument();
       });
-
-      // Form fields should be present and functional
-      const clientIdField = screen.getByTestId('azure.credentials.client_id');
-      const tenantIdField = screen.getByTestId('azure.credentials.tenant_id');
-      const clientSecretField = screen.getByTestId('azure.credentials.client_secret');
-
-      expect(clientIdField).toBeInTheDocument();
-      expect(tenantIdField).toBeInTheDocument();
-      expect(clientSecretField).toBeInTheDocument();
-
-      // Verify updatePolicy was called
-      expect(mockUpdatePolicy).toHaveBeenCalled();
     });
 
     it('renders without credential type selector when cloud connectors are disabled', () => {
@@ -380,14 +356,6 @@ describe('AzureCredentialsFormAgentless', () => {
       expect(screen.getByTestId('azure.credentials.client_id')).toBeInTheDocument();
       expect(screen.getByTestId('azure.credentials.tenant_id')).toBeInTheDocument();
       expect(screen.getByTestId('azure.credentials.client_secret')).toBeInTheDocument();
-    });
-  });
-
-  describe('ARM template integration', () => {
-    it('renders ARM template launch button when cloud connectors enabled', () => {
-      renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
-
-      expect(screen.getByTestId('azureLaunchCloudConnectorArmTemplate')).toBeInTheDocument();
     });
 
     it('handles missing ARM template URL gracefully', () => {
@@ -409,145 +377,123 @@ describe('AzureCredentialsFormAgentless', () => {
     });
   });
 
-  describe('edge cases', () => {
-    it('handles missing streams gracefully', () => {
-      const inputWithoutStreams = { ...mockInput, streams: [] };
-
+  describe('edge cases and environment scenarios', () => {
+    it.each([
+      ['missing streams', () => ({ ...defaultProps, input: { ...mockInput, streams: [] } })],
+      [
+        'missing vars',
+        () => ({
+          ...defaultProps,
+          input: { ...mockInput, streams: [{ ...mockInput.streams[0], vars: {} }] },
+        }),
+      ],
+      [
+        'undefined cloud setup values',
+        () => {
+          mockUseCloudSetup.mockReturnValue({
+            isCloudEnabled: undefined,
+            cloudHost: undefined,
+            isServerlessEnabled: undefined,
+            azureOverviewPath: undefined,
+            azurePolicyType: undefined,
+            isAzureCloudConnectorEnabled: false,
+            azureCloudConnectorRemoteRoleTemplate: undefined,
+          });
+          return defaultProps;
+        },
+      ],
+      ['empty package info', () => ({ ...defaultProps, packageInfo: {} as PackageInfo })],
+    ])('handles %s gracefully', (scenarioName, getProps) => {
       expect(() => {
-        renderWithIntl(
-          <AzureCredentialsFormAgentless {...defaultProps} input={inputWithoutStreams} />
-        );
+        renderWithIntl(<AzureCredentialsFormAgentless {...getProps()} />);
       }).not.toThrow();
     });
 
-    it('handles missing vars gracefully', () => {
-      const inputWithoutVars = {
-        ...mockInput,
-        streams: [{ ...mockInput.streams[0], vars: {} }],
-      };
-
-      expect(() => {
-        renderWithIntl(
-          <AzureCredentialsFormAgentless {...defaultProps} input={inputWithoutVars} />
-        );
-      }).not.toThrow();
-    });
-
-    it('handles undefined cloud setup values gracefully', () => {
-      mockUseCloudSetup.mockReturnValue({
-        isCloudEnabled: undefined,
-        cloudHost: undefined,
-        isServerlessEnabled: undefined,
-        azureOverviewPath: undefined,
-        azurePolicyType: undefined,
-        isAzureCloudConnectorEnabled: false, // Provide fallback to prevent component error
-        azureCloudConnectorRemoteRoleTemplate: undefined,
+    describe('credential mode switching and environment compatibility', () => {
+      beforeEach(() => {
+        mockUseCloudSetup.mockReturnValue(defaultCloudSetup);
+        mockGetAgentlessCredentialsType.mockReturnValue('cloud_connectors');
       });
 
-      expect(() => {
+      it('switches between service principal and cloud connector modes based on feature enablement', () => {
+        // Test when cloud connectors are disabled (service principal only)
+        mockGetAgentlessCredentialsType.mockReturnValue('service_principal_with_client_secret');
+
+        const { rerender } = render(
+          <I18nProvider>
+            <AzureCredentialsFormAgentless {...defaultProps} />
+          </I18nProvider>
+        );
+
+        expect(screen.getByTestId('azure.credentials.client_id')).toBeInTheDocument();
+        expect(screen.getByTestId('azure.credentials.tenant_id')).toBeInTheDocument();
+        expect(screen.getByTestId('azure.credentials.client_secret')).toBeInTheDocument();
+        expect(screen.getByTestId('azure-setup-info')).toBeInTheDocument();
+
+        // Test when cloud connectors are enabled
+        mockGetAgentlessCredentialsType.mockReturnValue('cloud_connectors');
+
+        rerender(
+          <I18nProvider>
+            <AzureCredentialsFormAgentless {...defaultProps} />
+          </I18nProvider>
+        );
+
+        expect(screen.getByTestId('azure-credentials-type-selector')).toBeInTheDocument();
+        expect(screen.getByTestId('azureLaunchCloudConnectorArmTemplate')).toBeInTheDocument();
+      });
+
+      it.each([
+        [
+          'serverless AWS environment',
+          {
+            isCloudEnabled: true,
+            cloudHost: 'aws',
+            isServerlessEnabled: true,
+            isAzureCloudConnectorEnabled: true,
+          },
+        ],
+        [
+          'GCP cloud environment',
+          {
+            isCloudEnabled: true,
+            cloudHost: 'gcp',
+            isServerlessEnabled: false,
+            isAzureCloudConnectorEnabled: true,
+          },
+        ],
+        [
+          'regular cloud environment with connectors disabled',
+          {
+            isCloudEnabled: false,
+            cloudHost: 'aws',
+            isServerlessEnabled: false,
+            isAzureCloudConnectorEnabled: false,
+          },
+        ],
+      ])('works correctly in %s', (environmentName, cloudSetupOverrides) => {
+        mockUseCloudSetup.mockReturnValue({
+          ...defaultCloudSetup,
+          ...cloudSetupOverrides,
+        });
+
+        if (!cloudSetupOverrides.isAzureCloudConnectorEnabled) {
+          mockGetAgentlessCredentialsType.mockReturnValue('service_principal_with_client_secret');
+        }
+
         renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
-      }).not.toThrow();
-    });
 
-    it('handles empty package info gracefully', () => {
-      const emptyPackageInfo = {} as PackageInfo;
-
-      expect(() => {
-        renderWithIntl(
-          <AzureCredentialsFormAgentless {...defaultProps} packageInfo={emptyPackageInfo} />
-        );
-      }).not.toThrow();
-    });
-  });
-
-  describe('version compatibility', () => {
-    it('handles older package versions without cloud connector support', () => {
-      // Mock older package version behavior
-      mockGetAgentlessCredentialsType.mockReturnValue('service_principal_with_client_secret');
-
-      renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
-
-      expect(screen.getByTestId('azure-setup-info')).toBeInTheDocument();
-    });
-
-    it('does not show cloud credentials when package version is less than enabled version', () => {
-      // Test version compatibility
-      mockGetAgentlessCredentialsType.mockReturnValue('service_principal_with_client_secret');
-
-      renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
-
-      // Should show service principal fields
-      expect(screen.getByTestId('azure.credentials.client_id')).toBeInTheDocument();
-      expect(screen.getByTestId('azure.credentials.tenant_id')).toBeInTheDocument();
-      expect(screen.getByTestId('azure.credentials.client_secret')).toBeInTheDocument();
-    });
-
-    it('enables advanced features for newer package versions', () => {
-      // Test newer package version features
-      renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
-
-      expect(screen.getByTestId('azure-credentials-type-selector')).toBeInTheDocument();
-      expect(screen.getByTestId('azureLaunchCloudConnectorArmTemplate')).toBeInTheDocument();
-    });
-  });
-
-  describe('serverless and cloud environment tests', () => {
-    it('shows cloud connector credential type in serverless environment', () => {
-      mockUseCloudSetup.mockReturnValue({
-        isCloudEnabled: true,
-        cloudHost: 'aws',
-        isServerlessEnabled: true,
-        azureOverviewPath: '/app/cloud-security-posture/overview/azure',
-        azurePolicyType: 'cspm',
-        isAzureCloudConnectorEnabled: true,
-        azureCloudConnectorRemoteRoleTemplate: 'cloud-connector-template',
+        if (cloudSetupOverrides.isAzureCloudConnectorEnabled) {
+          expect(screen.getByTestId('azure-credentials-type-selector')).toHaveValue(
+            'cloud_connectors'
+          );
+          expect(screen.getByTestId('azureLaunchCloudConnectorArmTemplate')).toBeInTheDocument();
+        } else {
+          expect(screen.getByTestId('azure.credentials.client_id')).toBeInTheDocument();
+          expect(screen.getByTestId('azure.credentials.tenant_id')).toBeInTheDocument();
+          expect(screen.getByTestId('azure.credentials.client_secret')).toBeInTheDocument();
+        }
       });
-
-      renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
-
-      expect(screen.getByTestId('azure-credentials-type-selector')).toHaveValue('cloud_connectors');
-      expect(screen.getByTestId('azureLaunchCloudConnectorArmTemplate')).toBeInTheDocument();
-    });
-
-    it('shows cloud connectors when cloudHost provider is different than azure', () => {
-      mockUseCloudSetup.mockReturnValue({
-        isCloudEnabled: true,
-        cloudHost: 'gcp',
-        isServerlessEnabled: false,
-        azureOverviewPath: '/app/cloud-security-posture/overview/azure',
-        azurePolicyType: 'cspm',
-        isAzureCloudConnectorEnabled: true,
-        azureCloudConnectorRemoteRoleTemplate: 'cloud-connector-template',
-      });
-
-      renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
-
-      expect(screen.getByTestId('azure-credentials-type-selector')).toHaveValue('cloud_connectors');
-      expect(screen.getByTestId('azureLaunchCloudConnectorArmTemplate')).toBeInTheDocument();
-      expect(screen.getByTestId('azure.credentials.client_id')).toBeInTheDocument();
-      expect(screen.getByTestId('azure.credentials.tenant_id')).toBeInTheDocument();
-    });
-
-    it('handles serverless vs regular cloud environments', () => {
-      mockUseCloudSetup.mockReturnValue({
-        isCloudEnabled: false,
-        cloudHost: 'aws',
-        isServerlessEnabled: false,
-        azureOverviewPath: '/app/cloud-security-posture/overview/azure',
-        azurePolicyType: 'cspm',
-        isAzureCloudConnectorEnabled: false,
-        azureCloudConnectorRemoteRoleTemplate: 'cloud-connector-template',
-      });
-
-      // Mock to return service principal when cloud connectors are disabled
-      mockGetAgentlessCredentialsType.mockReturnValue('service_principal_with_client_secret');
-
-      renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
-
-      // Should render standard Azure fields for regular cloud
-      expect(screen.getByTestId('azure.credentials.client_id')).toBeInTheDocument();
-      expect(screen.getByTestId('azure.credentials.tenant_id')).toBeInTheDocument();
-      expect(screen.getByTestId('azure.credentials.client_secret')).toBeInTheDocument();
     });
   });
 });

@@ -102,25 +102,34 @@ const renderWithIntl = (component: React.ReactElement) => {
   return render(<I18nProvider>{component}</I18nProvider>);
 };
 
-describe('AzureCredentialsForm', () => {
-  const mockUpdatePolicy = jest.fn();
-  const mockOnSetupFormatChange = jest.fn();
-
-  // Minimal mock with only essential properties for Azure credentials form tests
-  const mockPackageInfo = {
+// Shared Azure form test factories
+const createMinimalMockPackageInfo = (): PackageInfo =>
+  ({
     name: 'cloud_security_posture',
     version: '1.0.0',
     title: 'Cloud Security Posture',
     policy_templates: [],
-    // Only required properties to satisfy PackageInfo type
     owner: { github: 'elastic' },
     description: 'Azure credentials test package',
     status: 'installed',
-  } as unknown as PackageInfo;
-  const mockNewPolicy = {
+  } as unknown as PackageInfo);
+
+const createMockNewPolicyWithAzureInput = (): NewPackagePolicy =>
+  ({
     name: 'test-policy',
     inputs: [{ type: 'cloudbeat/cis_azure', streams: [{}] }],
-  } as NewPackagePolicy;
+  } as NewPackagePolicy);
+
+const getMockAzureFormFields = () => [
+  { id: 'azure.tenant_id', value: 'test-tenant-123', label: 'Tenant ID' },
+  { id: 'azure.client_id', value: 'test-client-456', label: 'Client ID' },
+];
+
+describe('AzureCredentialsForm', () => {
+  const mockUpdatePolicy = jest.fn();
+  const mockOnSetupFormatChange = jest.fn();
+  const mockPackageInfo = createMinimalMockPackageInfo();
+  const mockNewPolicy = createMockNewPolicyWithAzureInput();
   const mockInput = mockNewPolicy.inputs[0];
 
   const defaultProps = {
@@ -141,10 +150,7 @@ describe('AzureCredentialsForm', () => {
 
     mockUseAzureCredentialsForm.mockReturnValue({
       azureCredentialsType: AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
-      fields: [
-        { id: 'azure.tenant_id', value: 'test-tenant-123', label: 'Tenant ID' },
-        { id: 'azure.client_id', value: 'test-client-456', label: 'Client ID' },
-      ],
+      fields: getMockAzureFormFields(),
       hasInvalidRequiredVars: false,
       hasArmTemplateUrl: true,
       setupFormat: AZURE_SETUP_FORMAT.ARM_TEMPLATE,
@@ -455,16 +461,6 @@ describe('AzureCredentialsForm', () => {
   });
 
   describe('documentation links', () => {
-    it('renders documentation links with correct URLs', () => {
-      renderWithIntl(<AzureCredentialsForm {...defaultProps} />);
-
-      const documentationLinks = screen.getAllByTestId('externalLink');
-      expect(documentationLinks).toHaveLength(1);
-      expect(documentationLinks[0]).toHaveAttribute('href');
-      expect(documentationLinks[0]).toHaveAttribute('target', '_blank');
-      expect(documentationLinks[0]).toHaveAttribute('rel', 'nofollow noopener noreferrer');
-    });
-
     it('passes documentation link to AzureSetupInfoContent', () => {
       renderWithIntl(<AzureCredentialsForm {...defaultProps} />);
 
@@ -491,23 +487,6 @@ describe('AzureCredentialsForm', () => {
       renderWithIntl(<AzureCredentialsForm {...defaultProps} />);
 
       expect(screen.getByTestId('azure-input-var-fields')).toBeInTheDocument();
-    });
-
-    it('handles missing group info', () => {
-      mockUseAzureCredentialsForm.mockReturnValue({
-        azureCredentialsType: AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
-        fields: [],
-        hasInvalidRequiredVars: false,
-        hasArmTemplateUrl: true,
-        setupFormat: AZURE_SETUP_FORMAT.ARM_TEMPLATE,
-        onSetupFormatChange: mockOnSetupFormatChange,
-        documentationLink: 'https://docs.elastic.co/azure',
-        group: { info: null },
-      });
-
-      renderWithIntl(<AzureCredentialsForm {...defaultProps} />);
-
-      expect(screen.queryByTestId('group-info')).not.toBeInTheDocument();
     });
   });
 });

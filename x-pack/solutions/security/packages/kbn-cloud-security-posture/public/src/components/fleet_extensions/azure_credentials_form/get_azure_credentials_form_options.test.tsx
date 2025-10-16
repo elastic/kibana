@@ -20,6 +20,59 @@ jest.mock('../utils', () => ({
 
 const { getAzureCredentialsType } = jest.requireMock('../utils');
 
+// Shared mock factories for Azure tests
+const createBaseMockInput = (): NewPackagePolicyInput => ({
+  type: 'cloudbeat/azure',
+  enabled: true,
+  streams: [
+    {
+      id: 'cloudbeat-azure-stream',
+      enabled: true,
+      data_stream: { type: 'logs', dataset: 'cloud_security_posture.findings' },
+      vars: {},
+    },
+  ],
+});
+
+const createMockInputWithVars = (
+  vars: Record<string, { value: string }>
+): NewPackagePolicyInput => ({
+  ...createBaseMockInput(),
+  streams: [
+    {
+      ...createBaseMockInput().streams[0],
+      vars,
+    },
+  ],
+});
+
+const createMockInputWithAzureCredentials = (): NewPackagePolicyInput =>
+  createMockInputWithVars({
+    'azure.credentials.tenant_id': { value: 'test-tenant-id' },
+    'azure.credentials.client_id': { value: 'test-client-id' },
+    'azure.credentials.client_secret': { value: 'test-client-secret' },
+    'unknown.field': { value: 'should-be-filtered' },
+  });
+
+const getStandardAzureFields = () => ({
+  'azure.credentials.tenant_id': {
+    label: 'Tenant ID',
+    type: 'text' as const,
+    testSubj: 'azure-tenant-id',
+  },
+  'azure.credentials.client_id': {
+    label: 'Client ID',
+    type: 'text' as const,
+    testSubj: 'azure-client-id',
+  },
+  'azure.credentials.client_secret': {
+    label: 'Client Secret',
+    type: 'password' as const,
+    testSubj: 'azure-client-secret',
+    isSecret: true,
+  },
+});
+
 describe('get_azure_credentials_form_options', () => {
   describe('getAzureCredentialsFormOptions', () => {
     it('should return all Azure credential options with correct structure', () => {
@@ -107,42 +160,8 @@ describe('get_azure_credentials_form_options', () => {
 
   describe('getInputVarsFields', () => {
     it('should map input vars to fields correctly', () => {
-      const mockInput: NewPackagePolicyInput = {
-        type: 'cloudbeat/azure',
-        enabled: true,
-        streams: [
-          {
-            id: 'cloudbeat-azure-stream',
-            enabled: true,
-            data_stream: { type: 'logs', dataset: 'cloud_security_posture.findings' },
-            vars: {
-              'azure.credentials.tenant_id': { value: 'test-tenant-id' },
-              'azure.credentials.client_id': { value: 'test-client-id' },
-              'azure.credentials.client_secret': { value: 'test-client-secret' },
-              'unknown.field': { value: 'should-be-filtered' },
-            },
-          },
-        ],
-      };
-
-      const fields = {
-        'azure.credentials.tenant_id': {
-          label: 'Tenant ID',
-          type: 'text' as const,
-          testSubj: 'azure-tenant-id',
-        },
-        'azure.credentials.client_id': {
-          label: 'Client ID',
-          type: 'text' as const,
-          testSubj: 'azure-client-id',
-        },
-        'azure.credentials.client_secret': {
-          label: 'Client Secret',
-          type: 'password' as const,
-          testSubj: 'azure-client-secret',
-          isSecret: true,
-        },
-      };
+      const mockInput = createMockInputWithAzureCredentials();
+      const fields = getStandardAzureFields();
 
       const result = getInputVarsFields(mockInput, fields);
 
@@ -170,19 +189,7 @@ describe('get_azure_credentials_form_options', () => {
     });
 
     it('should handle empty input vars', () => {
-      const mockInput: NewPackagePolicyInput = {
-        type: 'cloudbeat/azure',
-        enabled: true,
-        streams: [
-          {
-            id: 'cloudbeat-azure-stream',
-            enabled: true,
-            data_stream: { type: 'logs', dataset: 'cloud_security_posture.findings' },
-            vars: {},
-          },
-        ],
-      };
-
+      const mockInput = createBaseMockInput();
       const fields = {
         'azure.credentials.tenant_id': {
           label: 'Tenant ID',
@@ -202,12 +209,7 @@ describe('get_azure_credentials_form_options', () => {
 
     it('should return CLOUD_CONNECTORS when showCloudConnectors is true and no credentials type', () => {
       getAzureCredentialsType.mockReturnValue(null);
-
-      const mockInput: NewPackagePolicyInput = {
-        type: 'cloudbeat/azure',
-        enabled: true,
-        streams: [],
-      };
+      const mockInput = createBaseMockInput();
 
       const result = getAgentlessCredentialsType(mockInput, true);
       expect(result).toBe(AZURE_CREDENTIALS_TYPE.CLOUD_CONNECTORS);
@@ -215,12 +217,7 @@ describe('get_azure_credentials_form_options', () => {
 
     it('should return CLOUD_CONNECTORS when showCloudConnectors is true and credentials type is ARM_TEMPLATE', () => {
       getAzureCredentialsType.mockReturnValue(AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE);
-
-      const mockInput: NewPackagePolicyInput = {
-        type: 'cloudbeat/azure',
-        enabled: true,
-        streams: [],
-      };
+      const mockInput = createBaseMockInput();
 
       const result = getAgentlessCredentialsType(mockInput, true);
       expect(result).toBe(AZURE_CREDENTIALS_TYPE.CLOUD_CONNECTORS);
@@ -228,12 +225,7 @@ describe('get_azure_credentials_form_options', () => {
 
     it('should return SERVICE_PRINCIPAL_WITH_CLIENT_SECRET when no credentials type and showCloudConnectors is false', () => {
       getAzureCredentialsType.mockReturnValue(null);
-
-      const mockInput: NewPackagePolicyInput = {
-        type: 'cloudbeat/azure',
-        enabled: true,
-        streams: [],
-      };
+      const mockInput = createBaseMockInput();
 
       const result = getAgentlessCredentialsType(mockInput, false);
       expect(result).toBe(AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET);
@@ -241,12 +233,7 @@ describe('get_azure_credentials_form_options', () => {
 
     it('should return SERVICE_PRINCIPAL_WITH_CLIENT_SECRET when credentials type is ARM_TEMPLATE and showCloudConnectors is false', () => {
       getAzureCredentialsType.mockReturnValue(AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE);
-
-      const mockInput: NewPackagePolicyInput = {
-        type: 'cloudbeat/azure',
-        enabled: true,
-        streams: [],
-      };
+      const mockInput = createBaseMockInput();
 
       const result = getAgentlessCredentialsType(mockInput, false);
       expect(result).toBe(AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET);
@@ -254,12 +241,7 @@ describe('get_azure_credentials_form_options', () => {
 
     it('should return the existing credentials type when it exists and is not ARM_TEMPLATE', () => {
       getAzureCredentialsType.mockReturnValue(AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY);
-
-      const mockInput: NewPackagePolicyInput = {
-        type: 'cloudbeat/azure',
-        enabled: true,
-        streams: [],
-      };
+      const mockInput = createBaseMockInput();
 
       const result = getAgentlessCredentialsType(mockInput, false);
       expect(result).toBe(AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY);

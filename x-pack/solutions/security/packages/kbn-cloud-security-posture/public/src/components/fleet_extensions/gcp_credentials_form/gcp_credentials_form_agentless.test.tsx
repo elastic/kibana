@@ -100,49 +100,38 @@ const {
 const renderWithIntl = (component: React.ReactElement) =>
   render(<I18nProvider>{component}</I18nProvider>);
 
-describe('GcpCredentialsFormAgentless', () => {
-  const mockUpdatePolicy = jest.fn();
-
-  const mockInput: NewPackagePolicyInput = {
-    type: 'cloudbeat/cis_gcp',
-    policy_template: 'cspm',
-    enabled: true,
-    streams: [
-      {
-        enabled: true,
-        data_stream: {
-          type: 'logs',
-          dataset: 'cloud_security_posture.findings',
+// Shared GCP mock factories for agentless tests
+const createMockGcpAgentlessInput = (): NewPackagePolicyInput => ({
+  type: 'cloudbeat/cis_gcp',
+  policy_template: 'cspm',
+  enabled: true,
+  streams: [
+    {
+      enabled: true,
+      data_stream: {
+        type: 'logs',
+        dataset: 'cloud_security_posture.findings',
+      },
+      vars: {
+        'gcp.account_type': {
+          value: 'single-account',
+          type: 'text',
         },
-        vars: {
-          'gcp.account_type': {
-            value: 'single-account',
-            type: 'text',
-          },
-          'gcp.project_id': {
-            value: 'test-project',
-            type: 'text',
-          },
-          'gcp.credentials.json': {
-            value: '{"type":"service_account"}',
-            type: 'password',
-          },
+        'gcp.project_id': {
+          value: 'test-project',
+          type: 'text',
+        },
+        'gcp.credentials.json': {
+          value: '{"type":"service_account"}',
+          type: 'password',
         },
       },
-    ],
-  };
+    },
+  ],
+});
 
-  const mockNewPolicy: NewPackagePolicy = {
-    name: 'gcp-agentless-test',
-    description: 'Test GCP agentless policy',
-    namespace: 'default',
-    policy_id: 'test-policy-id',
-    policy_ids: ['test-policy-id'],
-    enabled: true,
-    inputs: [mockInput],
-  };
-
-  const mockPackageInfo = {
+const createMockGcpAgentlessPackageInfo = (): PackageInfo =>
+  ({
     name: 'cloud_security_posture',
     version: '1.6.0',
     owner: { github: 'elastic' },
@@ -162,7 +151,47 @@ describe('GcpCredentialsFormAgentless', () => {
         ],
       },
     ],
-  } as unknown as PackageInfo;
+    data_streams: [],
+    assets: [],
+  } as unknown as PackageInfo);
+
+const createMockGcpAgentlessPolicy = (input: NewPackagePolicyInput): NewPackagePolicy => ({
+  name: 'gcp-agentless-test',
+  description: 'Test GCP agentless policy',
+  namespace: 'default',
+  policy_id: 'test-policy-id',
+  policy_ids: ['test-policy-id'],
+  enabled: true,
+  inputs: [input],
+});
+
+const getDefaultGcpAgentlessCloudSetup = () => ({
+  showCloudTemplates: true,
+  templateName: 'cspm',
+  gcpPolicyType: 'cloudbeat/cis_gcp',
+  gcpOverviewPath: '/app/cloud-security-posture/overview/gcp',
+});
+
+const getMockGcpAgentlessFields = () => [
+  {
+    id: 'gcp.project_id',
+    label: 'Project ID',
+    type: 'text' as const,
+    value: 'test-project',
+  },
+  {
+    id: 'gcp.credentials.json',
+    label: 'Credentials JSON',
+    type: 'password' as const,
+    value: '{"type":"service_account"}',
+  },
+];
+
+describe('GcpCredentialsFormAgentless', () => {
+  const mockUpdatePolicy = jest.fn();
+  const mockInput = createMockGcpAgentlessInput();
+  const mockPackageInfo = createMockGcpAgentlessPackageInfo();
+  const mockNewPolicy = createMockGcpAgentlessPolicy(mockInput);
 
   const defaultProps = {
     input: mockInput,
@@ -173,27 +202,8 @@ describe('GcpCredentialsFormAgentless', () => {
     hasInvalidRequiredVars: false,
   };
 
-  const defaultCloudSetup = {
-    showCloudTemplates: true,
-    templateName: 'cspm',
-    gcpPolicyType: 'cloudbeat/cis_gcp',
-    gcpOverviewPath: '/app/cloud-security-posture/overview/gcp',
-  };
-
-  const mockFields = [
-    {
-      id: 'gcp.project_id',
-      label: 'Project ID',
-      type: 'text' as const,
-      value: 'test-project',
-    },
-    {
-      id: 'gcp.credentials.json',
-      label: 'Credentials JSON',
-      type: 'password' as const,
-      value: '{"type":"service_account"}',
-    },
-  ];
+  const defaultCloudSetup = getDefaultGcpAgentlessCloudSetup();
+  const mockFields = getMockGcpAgentlessFields();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -209,20 +219,27 @@ describe('GcpCredentialsFormAgentless', () => {
   });
 
   describe('rendering', () => {
-    it('renders agentless form with setup info and fields', () => {
-      renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} />);
+    describe('basic form elements and cloud shell integration', () => {
+      beforeEach(() => {
+        renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} />);
+      });
 
-      expect(screen.getByTestId('gcp-setup-info')).toBeInTheDocument();
-      expect(screen.getByTestId('agentless-state')).toHaveTextContent('true');
-      expect(screen.getByTestId('gcp-input-var-fields')).toBeInTheDocument();
-      expect(screen.getByTestId('read-documentation')).toBeInTheDocument();
-    });
+      it('renders agentless form with core components', () => {
+        expect(screen.getByTestId('gcp-setup-info')).toBeInTheDocument();
+        expect(screen.getByTestId('agentless-state')).toHaveTextContent('true');
+        expect(screen.getByTestId('gcp-input-var-fields')).toBeInTheDocument();
+        expect(screen.getByTestId('read-documentation')).toBeInTheDocument();
+      });
 
-    it('renders cloud shell launch button when templates are supported', () => {
-      renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} />);
+      it('renders cloud shell integration when templates are supported', () => {
+        expect(screen.getByTestId('launchGoogleCloudShellAgentlessButton')).toBeInTheDocument();
+        expect(screen.getByText('Launch Google Cloud Shell')).toBeInTheDocument();
 
-      expect(screen.getByTestId('launchGoogleCloudShellAgentlessButton')).toBeInTheDocument();
-      expect(screen.getByText('Launch Google Cloud Shell')).toBeInTheDocument();
+        expect(
+          screen.getByTestId('launchGoogleCloudShellAccordianInstructions')
+        ).toBeInTheDocument();
+        expect(screen.getByText('Steps to Generate GCP Account Credentials')).toBeInTheDocument();
+      });
     });
 
     it('renders warning callout when cloud templates are not supported', () => {
@@ -240,13 +257,6 @@ describe('GcpCredentialsFormAgentless', () => {
       ).toBeInTheDocument();
 
       expect(screen.queryByTestId('launchGoogleCloudShellAgentlessButton')).not.toBeInTheDocument();
-    });
-
-    it('renders credentials guide accordion when templates are supported', () => {
-      renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} />);
-
-      expect(screen.getByTestId('launchGoogleCloudShellAccordianInstructions')).toBeInTheDocument();
-      expect(screen.getByText('Steps to Generate GCP Account Credentials')).toBeInTheDocument();
     });
 
     it('renders form as disabled when disabled prop is true', () => {
@@ -321,14 +331,6 @@ describe('GcpCredentialsFormAgentless', () => {
       },
     ];
 
-    it('renders organization fields for organization account type', () => {
-      mockGetGcpInputVarsFields.mockReturnValue(orgFields);
-
-      renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} input={orgInput} />);
-
-      expect(screen.getByTestId('organization-state')).toHaveTextContent('true');
-    });
-
     it('generates correct cloud shell URL for organization account', () => {
       mockGetTemplateUrlFromPackageInfo.mockReturnValue(
         'https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/elastic/cloudbeat&cloudshell_workspace=deploy/cloud&shellonly=true&cloudshell_tutorial=deploy/cloud/cloud-shell-gcp.md&env_vars=CLOUD_SHELL_DEPLOYMENT_TYPE=cspm,CLOUD_SHELL_CSPM_ACCOUNT_TYPE=organization-account'
@@ -369,55 +371,58 @@ describe('GcpCredentialsFormAgentless', () => {
       });
     });
 
-    it('filters fields correctly for single account', () => {
-      renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} />);
+    describe('field filtering by account type', () => {
+      it('filters fields correctly for single account', () => {
+        renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} />);
 
-      // Should call getGcpInputVarsFields and then filter for single account fields
-      expect(mockGetGcpInputVarsFields).toHaveBeenCalled();
-    });
+        expect(mockGetGcpInputVarsFields).toHaveBeenCalled();
+      });
 
-    it('filters fields correctly for organization account', () => {
-      const orgInput = {
-        ...mockInput,
-        streams: [
-          {
-            ...mockInput.streams[0],
-            vars: {
-              ...mockInput.streams[0].vars,
-              'gcp.account_type': {
-                value: ORGANIZATION_ACCOUNT,
-                type: 'text',
+      it('filters fields correctly for organization account', () => {
+        const orgInput = {
+          ...mockInput,
+          streams: [
+            {
+              ...mockInput.streams[0],
+              vars: {
+                ...mockInput.streams[0].vars,
+                'gcp.account_type': {
+                  value: ORGANIZATION_ACCOUNT,
+                  type: 'text',
+                },
               },
             },
-          },
-        ],
-      };
+          ],
+        };
 
-      renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} input={orgInput} />);
+        renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} input={orgInput} />);
 
-      expect(mockGetGcpInputVarsFields).toHaveBeenCalled();
+        expect(mockGetGcpInputVarsFields).toHaveBeenCalled();
+      });
     });
   });
 
   describe('cloud shell integration', () => {
-    it('renders cloud shell button with correct target and icon', () => {
-      renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} />);
-
-      const launchButton = screen.getByTestId('launchGoogleCloudShellAgentlessButton');
-      expect(launchButton).toHaveAttribute('target', '_blank');
-      expect(launchButton.querySelector('[data-euiicon-type="launch"]')).toBeInTheDocument();
-    });
-
-    it('handles missing cloud shell URL gracefully', () => {
-      mockGetTemplateUrlFromPackageInfo.mockReturnValue(undefined);
-
-      expect(() => {
+    describe('button configuration and behavior', () => {
+      it('renders cloud shell button with correct target and icon', () => {
         renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} />);
-      }).not.toThrow();
 
-      const launchButton = screen.getByTestId('launchGoogleCloudShellAgentlessButton');
-      // When cloudShellUrl is undefined, the href attribute is not set (null)
-      expect(launchButton.getAttribute('href')).toBeNull();
+        const launchButton = screen.getByTestId('launchGoogleCloudShellAgentlessButton');
+        expect(launchButton).toHaveAttribute('target', '_blank');
+        expect(launchButton.querySelector('[data-euiicon-type="launch"]')).toBeInTheDocument();
+      });
+
+      it('handles missing cloud shell URL gracefully', () => {
+        mockGetTemplateUrlFromPackageInfo.mockReturnValue(undefined);
+
+        expect(() => {
+          renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} />);
+        }).not.toThrow();
+
+        const launchButton = screen.getByTestId('launchGoogleCloudShellAgentlessButton');
+        // When cloudShellUrl is undefined, the href attribute is not set (null)
+        expect(launchButton.getAttribute('href')).toBeNull();
+      });
     });
   });
 
@@ -433,55 +438,31 @@ describe('GcpCredentialsFormAgentless', () => {
   });
 
   describe('edge cases', () => {
-    it('handles missing streams gracefully', () => {
-      const inputWithoutStreams = {
-        ...mockInput,
-        streams: [],
-      };
-
+    it.each([
+      ['missing streams', () => ({ ...defaultProps, input: { ...mockInput, streams: [] } })],
+      [
+        'missing vars',
+        () => ({
+          ...defaultProps,
+          input: { ...mockInput, streams: [{ ...mockInput.streams[0], vars: undefined }] },
+        }),
+      ],
+      [
+        'undefined cloud setup values',
+        () => {
+          mockUseCloudSetup.mockReturnValue({
+            showCloudTemplates: true,
+            templateName: undefined,
+            gcpPolicyType: undefined,
+            gcpOverviewPath: undefined,
+          });
+          return defaultProps;
+        },
+      ],
+      ['empty package info', () => ({ ...defaultProps, packageInfo: {} as PackageInfo })],
+    ])('handles %s gracefully', (scenarioName, getProps) => {
       expect(() => {
-        renderWithIntl(
-          <GcpCredentialsFormAgentless {...defaultProps} input={inputWithoutStreams} />
-        );
-      }).not.toThrow();
-    });
-
-    it('handles missing vars gracefully', () => {
-      const inputWithoutVars = {
-        ...mockInput,
-        streams: [
-          {
-            ...mockInput.streams[0],
-            vars: undefined,
-          },
-        ],
-      };
-
-      expect(() => {
-        renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} input={inputWithoutVars} />);
-      }).not.toThrow();
-    });
-
-    it('handles undefined cloud setup values gracefully', () => {
-      mockUseCloudSetup.mockReturnValue({
-        showCloudTemplates: true,
-        templateName: undefined,
-        gcpPolicyType: undefined,
-        gcpOverviewPath: undefined,
-      });
-
-      expect(() => {
-        renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} />);
-      }).not.toThrow();
-    });
-
-    it('handles empty package info gracefully', () => {
-      const emptyPackageInfo = {} as PackageInfo;
-
-      expect(() => {
-        renderWithIntl(
-          <GcpCredentialsFormAgentless {...defaultProps} packageInfo={emptyPackageInfo} />
-        );
+        renderWithIntl(<GcpCredentialsFormAgentless {...getProps()} />);
       }).not.toThrow();
     });
   });
