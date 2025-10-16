@@ -121,33 +121,24 @@ export class GetSLOHealth {
       sloName: item.sloName,
     }));
 
-    let count = 0;
-    let i = 0;
-    let transformStats: Dictionary<TransformGetTransformStatsTransformStats> = {};
-
-    do {
-      const tempTransformStats = await this.getTransformStats(i);
-      transformStats = { ...transformStats, ...tempTransformStats.data };
-      count = tempTransformStats.count;
-      i += ES_PAGESIZE_LIMIT;
-    } while (i <= count);
-
-    const transformStatsById = await this.getTransformStats(0);
     const summaryDocsById = await this.getSummaryDocsById(filteredList);
 
-    const results = filteredList.map((item) => {
-      const health = computeHealth(transformStatsById.data, item);
-      const state = computeState(summaryDocsById, item);
+    const results = await Promise.all(
+      filteredList.map(async (item) => {
+        const transformStatsById = await this.getTransformStatsForSLO(item);
+        const health = computeHealth(transformStatsById, item);
+        const state = computeState(summaryDocsById, item);
 
-      return {
-        sloId: item.sloId,
-        sloName: item.sloName,
-        sloInstanceId: item.sloInstanceId,
-        sloRevision: item.sloRevision,
-        state,
-        health,
-      };
-    });
+        return {
+          sloId: item.sloId,
+          sloName: item.sloName,
+          sloInstanceId: item.sloInstanceId,
+          sloRevision: item.sloRevision,
+          state,
+          health,
+        };
+      })
+    );
 
     const mappedResults = Array.from(
       new Map(results.map((item) => [`${item.sloId}-${item.sloRevision}`, item])).values()
@@ -191,27 +182,36 @@ export class GetSLOHealth {
     return summaryDocsById;
   }
 
-  private async getTransformStats(from: number = 0): Promise<{
-    data: Dictionary<TransformGetTransformStatsTransformStats>;
-    count: number;
-    from: number;
-  }> {
-    const transformStats =
+  private async getTransformStatsForSLO(item: {
+    sloId: string;
+    sloRevision: number;
+  }): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
+    const rollupTransformStats =
       await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
         {
-          transform_id: 'slo-*',
+          transform_id: getSLOTransformId(item.sloId, item.sloRevision),
           allow_no_match: true,
-          size: ES_PAGESIZE_LIMIT,
-          from,
+          size: 1,
         },
         { ignore: [404] }
       );
 
-    return {
-      data: keyBy(transformStats.transforms, (transform) => transform.id),
-      count: transformStats.count ?? 0,
-      from,
-    };
+    const summaryTransformStats =
+      await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
+        {
+          transform_id: getSLOSummaryTransformId(item.sloId, item.sloRevision),
+          allow_no_match: true,
+          size: 1,
+        },
+        { ignore: [404] }
+      );
+
+    const allTransforms = [
+      ...(rollupTransformStats.transforms || []),
+      ...(summaryTransformStats.transforms || []),
+    ];
+
+    return keyBy(allTransforms, (transform) => transform.id);
   }
 }
 
