@@ -30,7 +30,7 @@ export const createKubernetesContainerLogsDataSourceProfileProvider = (
         ],
       }),
       getRecommendedFields: createRecommendedFields({
-        defaultFields: KUBERNETES_CONTAINER_LOGS_PROFILE.fields,
+        defaultFields: KUBERNETES_CONTAINER_LOGS_PROFILE.recommendedFields,
       }),
     },
     resolve: createResolve(KUBERNETES_CONTAINER_LOGS_PROFILE.pattern),

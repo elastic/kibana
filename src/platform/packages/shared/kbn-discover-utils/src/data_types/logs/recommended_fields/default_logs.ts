@@ -15,7 +15,7 @@
  */
 export const DEFAULT_LOGS_PROFILE = {
   pattern: 'logs-*',
-  fields: ['event.dataset', 'host.name', 'log.level', 'message', 'service.name'],
+  recommendedFields: ['event.dataset', 'host.name', 'log.level', 'message', 'service.name'],
 } as const;
 
 export type DefaultLogsProfile = typeof DEFAULT_LOGS_PROFILE;

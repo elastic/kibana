@@ -18,6 +18,6 @@ export const createRecommendedFields = ({
   return (prev) => () => ({
     ...(prev ? prev() : {}),
 
-    recommendedFields: [...(defaultFields ?? DEFAULT_LOGS_PROFILE.fields)],
+    recommendedFields: [...(defaultFields ?? DEFAULT_LOGS_PROFILE.recommendedFields)],
   });
 };

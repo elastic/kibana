@@ -12,7 +12,7 @@
  */
 export const APACHE_ERROR_LOGS_PROFILE = {
   pattern: 'logs-apache.error',
-  fields: [
+  recommendedFields: [
     'client.ip',
     'destination.ip',
     'http.request.method',

@@ -24,7 +24,7 @@ export const createApacheErrorLogsDataSourceProfileProvider = (
         defaultColumns: [LOG_LEVEL_COLUMN, CLIENT_IP_COLUMN, MESSAGE_COLUMN],
       }),
       getRecommendedFields: createRecommendedFields({
-        defaultFields: APACHE_ERROR_LOGS_PROFILE.fields,
+        defaultFields: APACHE_ERROR_LOGS_PROFILE.recommendedFields,
       }),
     },
     resolve: createResolve(APACHE_ERROR_LOGS_PROFILE.pattern),
