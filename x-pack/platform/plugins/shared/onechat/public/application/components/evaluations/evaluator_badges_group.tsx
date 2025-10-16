@@ -15,6 +15,7 @@ interface EvaluatorBadgesGroupProps {
   recall?: number;
   groundedness?: number;
   regex?: number;
+  criteria?: number;
   variant?: 'default' | 'conversation-average';
 }
 
@@ -27,6 +28,7 @@ export const EvaluatorBadgesGroup: React.FC<EvaluatorBadgesGroupProps> = ({
   recall,
   groundedness,
   regex,
+  criteria,
   variant = 'default',
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -55,6 +57,7 @@ export const EvaluatorBadgesGroup: React.FC<EvaluatorBadgesGroupProps> = ({
   const evaluations = [
     { key: 'relevance', value: relevance, label: 'Relevance' },
     { key: 'groundedness', value: groundedness, label: 'Groundedness' },
+    { key: 'criteria', value: criteria, label: 'Criteria' },
     { key: 'regex', value: regex, label: 'Regex' },
     { key: 'recall', value: recall, label: 'Recall' },
     { key: 'precision', value: precision, label: 'Precision' },

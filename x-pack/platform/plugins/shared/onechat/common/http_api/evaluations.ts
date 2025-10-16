@@ -11,6 +11,7 @@ export enum EvaluatorId {
   Recall = 'recall',
   Precision = 'precision',
   Regex = 'regex',
+  Criteria = 'criteria',
 }
 
 export interface Evaluator {

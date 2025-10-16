@@ -56,7 +56,7 @@ export class EvaluationServiceImpl implements EvaluationService {
 
     const evaluators: Partial<EvaluatorRegistry> = {
       [EvaluatorId.Regex]: createRegexEvaluator(),
-      [EvaluatorId.Relevance]: createCriteriaEvaluator({ inferenceClient }),
+      [EvaluatorId.Criteria]: createCriteriaEvaluator({ inferenceClient }),
       [EvaluatorId.Groundedness]: createGroundednessEvaluator({
         inferenceClient,
         logger: this.logger,

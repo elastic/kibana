@@ -85,6 +85,12 @@ export function registerEvaluationRoutes({
                 description: 'Uses regex patterns to validate response format',
                 type: 'text',
               },
+              {
+                id: EvaluatorId.Criteria,
+                name: 'Criteria Evaluator',
+                description: 'Evaluates response against custom criteria using LLM as a judge',
+                type: 'text',
+              },
             ],
           },
         });
@@ -128,6 +134,7 @@ export function registerEvaluationRoutes({
                     schema.literal(EvaluatorId.Recall),
                     schema.literal(EvaluatorId.Precision),
                     schema.literal(EvaluatorId.Regex),
+                    schema.literal(EvaluatorId.Criteria),
                   ]),
                   evaluatorIdOverride: schema.maybe(
                     schema.string({

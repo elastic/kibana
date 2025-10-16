@@ -49,8 +49,14 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
     (score) => score.evaluatorId === 'groundedness'
   )?.score;
   const regexScore = roundEvaluation?.find((score) => score.evaluatorId === 'regex')?.score;
+  const criteriaScore = roundEvaluation?.find((score) => score.evaluatorId === 'criteria')?.score;
   const showAdditionalContent =
-    relevanceScore || precisionScore || recallScore || groundednessScore || regexScore;
+    relevanceScore ||
+    precisionScore ||
+    recallScore ||
+    groundednessScore ||
+    regexScore ||
+    criteriaScore;
 
   const inputPanelStyles = css`
     border-radius: ${euiTheme.border.radius.small};
@@ -155,6 +161,7 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
                   recall={recallScore}
                   groundedness={groundednessScore}
                   regex={regexScore}
+                  criteria={criteriaScore}
                 />
               </EuiFlexGroup>
               <EuiSpacer size="m" />

@@ -17,15 +17,10 @@ export const createCriteriaEvaluator = ({
   return async (context): Promise<number> => {
     const { currentRound, customInstructions } = context;
 
-    if (typeof customInstructions !== 'string') {
-      throw new Error(
-        `Criteria evaluator requires customInstructions to be a string, got ${typeof customInstructions}`
-      );
-    }
-
-    if (!customInstructions.trim()) {
-      throw new Error('Criteria evaluator requires non-empty customInstructions');
-    }
+    const criteria =
+      typeof customInstructions === 'string' && customInstructions.trim()
+        ? customInstructions
+        : "The agent provided a clear answer to the user's question";
 
     const responseMessage = currentRound.response.message;
 
@@ -42,7 +37,7 @@ Do not include any explanation, just the numeric score.`,
         messages: [
           {
             role: MessageRole.User,
-            content: `Criteria: ${customInstructions}
+            content: `Criteria: ${criteria}
 
 Agent Response: ${responseMessage}
 

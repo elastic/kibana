@@ -79,6 +79,7 @@ export const Evaluation: React.FC = () => {
                 recall={averages.recall ?? undefined}
                 groundedness={averages.groundedness ?? undefined}
                 regex={averages.regex ?? undefined}
+                criteria={averages.criteria ?? undefined}
                 variant="conversation-average"
               />
             </EuiFlexItem>

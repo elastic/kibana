@@ -52,7 +52,7 @@ describe('criteria_evaluator', () => {
       expect(result).toBe(0.8);
     });
 
-    it('throws error when customInstructions is not a string', async () => {
+    it('uses default criteria when customInstructions is not a string', async () => {
       const mockClient = createMockInferenceClient('0.8');
       const evaluator = createCriteriaEvaluator({ inferenceClient: mockClient });
       const context: EvaluatorContext = {
@@ -61,12 +61,17 @@ describe('criteria_evaluator', () => {
         customInstructions: 123,
       };
 
-      await expect(evaluator(context)).rejects.toThrow(
-        'Criteria evaluator requires customInstructions to be a string, got number'
+      const result = await evaluator(context);
+      expect(result).toBe(0.8);
+
+      const chatCompleteMock = mockClient.chatComplete as jest.Mock;
+      const callArgs = chatCompleteMock.mock.calls[0][0];
+      expect(callArgs.messages[0].content).toContain(
+        "The agent provided a clear answer to the user's question"
       );
     });
 
-    it('throws error when customInstructions is empty', async () => {
+    it('uses default criteria when customInstructions is empty', async () => {
       const mockClient = createMockInferenceClient('0.8');
       const evaluator = createCriteriaEvaluator({ inferenceClient: mockClient });
       const context: EvaluatorContext = {
@@ -75,8 +80,13 @@ describe('criteria_evaluator', () => {
         customInstructions: '   ',
       };
 
-      await expect(evaluator(context)).rejects.toThrow(
-        'Criteria evaluator requires non-empty customInstructions'
+      const result = await evaluator(context);
+      expect(result).toBe(0.8);
+
+      const chatCompleteMock = mockClient.chatComplete as jest.Mock;
+      const callArgs = chatCompleteMock.mock.calls[0][0];
+      expect(callArgs.messages[0].content).toContain(
+        "The agent provided a clear answer to the user's question"
       );
     });
 
