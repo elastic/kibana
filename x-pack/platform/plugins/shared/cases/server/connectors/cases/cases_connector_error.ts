@@ -6,8 +6,8 @@
  */
 
 import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
-import { CaseError } from '../../common/error';
 import { httpResponseUserErrorCodes } from '@kbn/actions-plugin/server/lib/create_and_throw_user_error';
+import { CaseError } from '../../common/error';
 
 export class CasesConnectorError extends Error {
   public readonly statusCode: number;
