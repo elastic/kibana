@@ -25,22 +25,23 @@ describe('KibanaErrorBoundary Error Service', () => {
     });
 
     it('construction', () => {
-      expect(service).toHaveProperty('registerError');
+      expect(service).toHaveProperty('enqueueError');
+      expect(service).toHaveProperty('commitError');
     });
 
     it('decorates fatal error object', () => {
       const testFatal = new Error('This is an unrecognized and fatal error');
-      const serviceError = service.registerError(testFatal, { componentStack: '' });
+      const enqueued = service.enqueueError(testFatal, { componentStack: '' });
 
-      expect(serviceError.isFatal).toBe(true);
+      expect(enqueued.isFatal).toBe(true);
     });
 
     it('decorates recoverable error object', () => {
       const testRecoverable = new Error('Could not load chunk blah blah');
       testRecoverable.name = 'ChunkLoadError';
-      const serviceError = service.registerError(testRecoverable, { componentStack: '' });
+      const enqueued = service.enqueueError(testRecoverable, { componentStack: '' });
 
-      expect(serviceError.isFatal).toBe(false);
+      expect(enqueued.isFatal).toBe(false);
     });
 
     it('derives component name', () => {
@@ -58,9 +59,9 @@ describe('KibanaErrorBoundary Error Service', () => {
     at http://localhost:9001/kbn-ui-shared-deps-npm.dll.js`,
       };
 
-      const serviceError = service.registerError(testFatal, errorInfo);
+      const enqueued = service.enqueueError(testFatal, errorInfo);
 
-      expect(serviceError.name).toBe('BadComponent');
+      expect(enqueued.name).toBe('BadComponent');
     });
 
     it('passes the common helper utility when deriving component name', () => {
@@ -79,10 +80,10 @@ describe('KibanaErrorBoundary Error Service', () => {
     at http://localhost:9001/kbn-ui-shared-deps-npm.dll.js`,
       };
 
-      const serviceError = service.registerError(testFatal, errorInfo);
+      const enqueued = service.enqueueError(testFatal, errorInfo);
 
       // should not be "ThrowIfError"
-      expect(serviceError.name).toBe('BadComponent');
+      expect(enqueued.name).toBe('BadComponent');
     });
 
     it('captures the error event for telemetry', () => {
@@ -97,10 +98,13 @@ describe('KibanaErrorBoundary Error Service', () => {
     `,
       };
 
-      service.registerError(testFatal, errorInfo);
+      const enqueued = service.enqueueError(testFatal, errorInfo);
 
-      // Fast-forward time by the monitoring navigation window to ensure error is committed
+      // Fast-forward time by the monitoring navigation window to ensure error can be committed
       jest.advanceTimersByTime(TRANSIENT_NAVIGATION_WINDOW_MS);
+
+      // Commit after transient navigation window
+      service.commitError(enqueued.id);
 
       expect(mockDeps.analytics.reportEvent).toHaveBeenCalledTimes(1);
       expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
@@ -125,10 +129,13 @@ describe('KibanaErrorBoundary Error Service', () => {
     `,
       };
 
-      service.registerError(testFatal, errorInfo);
+      const enqueued = service.enqueueError(testFatal, errorInfo);
 
-      // Fast-forward time by the monitoring navigation window to ensure error is committed
+      // Fast-forward time by the monitoring navigation window to ensure error can be committed
       jest.advanceTimersByTime(TRANSIENT_NAVIGATION_WINDOW_MS);
+
+      // Commit after transient navigation window
+      service.commitError(enqueued.id);
 
       expect(mockDeps.analytics.reportEvent).toHaveBeenCalledTimes(1);
       expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');

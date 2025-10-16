@@ -152,9 +152,8 @@ export class KibanaErrorService {
 
     // Check for transient navigation
     const currentPathname = this.getCurrentPathname();
-    const navigationOccurred = enqueuedError.initialPathname !== currentPathname;
 
-    enqueuedError.hasTransientNavigation = navigationOccurred;
+    enqueuedError.hasTransientNavigation = enqueuedError.initialPathname !== currentPathname;
     enqueuedError.transientNavigationDetermined = true;
 
     // If external commit was already requested, commit immediately
@@ -223,9 +222,7 @@ export class KibanaErrorService {
           component_stack: enqueuedError.errorInfo?.componentStack || '',
           error_message: enqueuedError.error.toString(),
           error_stack:
-            enqueuedError.error instanceof Error && typeof enqueuedError.error.stack === 'string'
-              ? enqueuedError.error.stack
-              : '',
+            typeof enqueuedError.error.stack === 'string' ? enqueuedError.error.stack : '',
           component_render_min_duration_ms:
             (enqueuedError.committedAt ?? Date.now()) - enqueuedError.enqueuedAt,
           has_transient_navigation: enqueuedError.hasTransientNavigation,
@@ -242,27 +239,5 @@ export class KibanaErrorService {
       isFatal: enqueuedError.isFatal,
       name: enqueuedError.name,
     };
-  }
-
-  /**
-   * Creates a decorated error object and reports it immediately
-   * @deprecated Use enqueueError and commitError for better timing information
-   */
-  public registerError(error: Error, errorInfo?: React.ErrorInfo): ErrorServiceError {
-    // Enqueue and immediately commit the error
-    const enqueuedError = this.enqueueError(error, errorInfo);
-    const result = this.commitError(enqueuedError.id);
-
-    if (!result) {
-      // Fallback in case of any issues with the enqueue/commit flow
-      return {
-        error,
-        errorInfo,
-        isFatal: this.getIsFatal(error),
-        name: this.getErrorComponentName(errorInfo),
-      };
-    }
-
-    return result;
   }
 }
