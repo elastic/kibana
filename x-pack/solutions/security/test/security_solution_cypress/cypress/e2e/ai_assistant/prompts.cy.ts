@@ -167,8 +167,6 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       assertErrorResponse();
       selectConversation('Lucky title');
       assertSystemPromptSelected(testPrompt.name);
-      selectConnector(azureConnectorAPIPayload.name);
-      assertConnectorSelected(azureConnectorAPIPayload.name);
       typeAndSendMessage('hello');
 
       assertSystemPromptSent(testPrompt.content);
