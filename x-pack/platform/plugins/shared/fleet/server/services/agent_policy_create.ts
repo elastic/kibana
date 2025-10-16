@@ -26,7 +26,6 @@ import { type AgentPolicyServiceInterface, appContextService, packagePolicyServi
 import { incrementPackageName } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
-import { agentlessAgentService } from './agents/agentless_agent';
 
 async function getFleetServerAgentPolicyId(
   soClient: SavedObjectsClientContract,
