@@ -104,11 +104,11 @@ export const DimensionsSelector = ({
 
   const handleChange = useCallback(
     (chosenOption?: SelectableEntry | SelectableEntry[]) => {
-      const opts = Array.isArray(chosenOption)
+      const opts = chosenOption == null
+        ? []
+        : Array.isArray(chosenOption)
         ? chosenOption
-        : chosenOption != null
-        ? [chosenOption]
-        : [];
+        : [chosenOption];
       const newSelection = opts.map((p) => p.value);
       // Enforce the maximum limit
       const limitedSelection = newSelection.slice(0, MAX_DIMENSIONS_SELECTIONS);
