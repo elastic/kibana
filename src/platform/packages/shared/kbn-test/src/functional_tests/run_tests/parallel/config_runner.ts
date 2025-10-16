@@ -90,30 +90,28 @@ export class ConfigRunner {
 
     let isResolved = false;
 
-    await Promise.race([
-      new Promise<void>((resolve) => {
-        const complete = () => {
-          isResolved = true;
-          this.proc?.off('message', onMessage);
-          resolve();
-        };
+    await new Promise<void>((resolve) => {
+      const complete = () => {
+        isResolved = true;
+        this.proc?.off('message', onMessage);
+        resolve();
+      };
 
-        const onMessage = (msg: unknown) => {
-          if (msg === 'FTR_WARMUP_DONE') {
-            this.options.log.info('warmup done');
-            complete();
-          }
-        };
-
-        this.proc?.finally(() => {
-          if (!isResolved) {
-            this.options.log.info(`Process prematurely closed`);
-          }
+      const onMessage = (msg: unknown) => {
+        if (msg === 'FTR_WARMUP_DONE') {
+          this.options.log.info('warmup done');
           complete();
-        });
-        this.proc?.on('message', onMessage);
-      }),
-    ]);
+        }
+      };
+
+      this.proc?.finally(() => {
+        if (!isResolved) {
+          this.options.log.info(`Process prematurely closed`);
+        }
+        complete();
+      });
+      this.proc?.on('message', onMessage);
+    });
   }
 
   async run(): Promise<ExecaReturnValue<string>> {
