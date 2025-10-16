@@ -369,6 +369,7 @@ export class ChromeService {
       navLinks,
       hasHeaderBanner$,
       hasAppMenu$: application.currentActionMenu$.pipe(map((menu) => !!menu)),
+      navControls,
     });
 
     // erase chrome fields from a previous app while switching to a next app

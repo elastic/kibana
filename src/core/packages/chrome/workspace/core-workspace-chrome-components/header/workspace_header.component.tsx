@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import { EuiHeader, EuiHeaderSection, EuiAvatar } from '@elastic/eui';
-import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
+import { EuiHeader, EuiHeaderSection, EuiHeaderSectionItem } from '@elastic/eui';
+import type { ChromeBreadcrumb, ChromeNavControl } from '@kbn/core-chrome-browser';
+import { HeaderExtension } from '@kbn/core-chrome-browser-internal/src/ui/header/header_extension';
 
 import { WorkspaceBreadcrumbs } from './workspace_breadcrumbs';
 import { WorkspaceHeaderLogo } from './workspace_header_logo';
@@ -20,12 +21,16 @@ export interface WorkspaceHeaderComponentProps {
   headerLogo?: JSX.Element;
   breadcrumbs?: ChromeBreadcrumb[];
   children?: React.ReactNode;
+  navControls?: {
+    left: ChromeNavControl[];
+  };
 }
 
 export const WorkspaceHeaderComponent = ({
   breadcrumbs = [],
   children,
   headerLogo = <WorkspaceHeaderLogo />,
+  navControls = { left: [] },
 }: WorkspaceHeaderComponentProps) => {
   return (
     <EuiHeader css={styles.root}>
@@ -33,7 +38,11 @@ export const WorkspaceHeaderComponent = ({
         {headerLogo}
       </EuiHeaderSection>
       <EuiHeaderSection side="left" css={styles.spaceSection}>
-        <EuiAvatar size="s" type="space" name="Kibana" css={styles.spaceAvatar} />
+        {navControls.left.map((navControl) => (
+          <EuiHeaderSectionItem key={navControl.order}>
+            <HeaderExtension extension={navControl.mount} />
+          </EuiHeaderSectionItem>
+        ))}
       </EuiHeaderSection>
       <EuiHeaderSection side="left" css={styles.breadcrumbsSection}>
         <WorkspaceBreadcrumbs {...{ breadcrumbs }} />

@@ -89,6 +89,8 @@ const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
       ${logicalCSS('top', layoutVar('application.top', '0px'))};
       ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
       ${logicalCSS('right', layoutVar('application.right', '0px'))};
+      border-top-right-radius: ${euiTheme.border.radius.small};
+      border-bottom-right-radius: ${euiTheme.border.radius.small};
     }
 
     // overlay mask "belowHeader" should only cover the application area

@@ -12,6 +12,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { WORKSPACE_SIDEBAR_APP_AI_ASSISTANT } from '@kbn/core-chrome-browser';
+import { combineLatest, map } from 'rxjs';
 import type {
   ElasticAssistantPublicPluginSetupDependencies,
   ElasticAssistantPublicPluginStartDependencies,
@@ -23,6 +24,7 @@ import { licenseService } from './src/hooks/licence/use_licence';
 import { ReactQueryClientProvider } from './src/context/query_client_context/elastic_assistant_query_client_provider';
 import { AssistantSpaceIdProvider } from './src/context/assistant_space_id/assistant_space_id_provider';
 import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
+import { getVisibility } from './src/hooks/is_nav_control_visible/use_is_nav_control_visible';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
@@ -74,6 +76,7 @@ export class ElasticAssistantPublicPlugin
       };
       return services;
     };
+
     const ContextWrapper = ({
       children,
       isServerless,
@@ -107,9 +110,36 @@ export class ElasticAssistantPublicPlugin
       );
     };
 
+    const services = startServices();
+
+    // Create a reactive isAvailable function that combines the observables
+    let currentVisibility = false;
+
+    combineLatest([
+      services.application.currentAppId$,
+      services.application.applications$,
+      services.aiAssistantManagementSelection.aiAssistantType$,
+      services.spaces.getActiveSpace$(),
+    ])
+      .pipe(
+        map(([appId, applications, preferredAssistantType, space]) => {
+          return getVisibility(
+            appId,
+            applications,
+            preferredAssistantType,
+            space,
+            this.isServerless
+          );
+        })
+      )
+      .subscribe((visibility) => {
+        currentVisibility = visibility;
+      });
+
     coreStart.chrome.workspace.sidebar.registerSidebarApp({
       appId: WORKSPACE_SIDEBAR_APP_AI_ASSISTANT,
       size: 'wide',
+      isAvailable: () => currentVisibility,
       button: {
         iconType: AssistantIcon,
         'aria-label': 'Elastic Assistant',

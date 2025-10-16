@@ -51,5 +51,6 @@ export interface WorkspaceSidebarApp {
   button: WorkspaceButtonProps;
   app: WorkspaceSidebarAppProps;
   size?: 'regular' | 'wide' | 'fullWidth';
+  isAvailable?: () => boolean;
   // TODO: reducer?: (state: any, action: any) => any;
 }

@@ -13,8 +13,8 @@ import type { EmotionFn } from '../types';
 
 const root: EmotionFn = ({ euiTheme }) => css`
   align-items: center;
-  background: none;
-  border: none;
+  background-color: transparent;
+  border-width: 0;
   box-shadow: none;
   gap: ${euiTheme.size.xs};
   height: ${euiTheme.size.xl};
@@ -54,6 +54,12 @@ const spaceSection: EmotionFn = ({ euiTheme }) => css`
   position: relative;
   position: relative;
   width: ${euiTheme.size.xxxl};
+
+  .euiButtonEmpty {
+    min-inline-size: ${euiTheme.size.xl};
+    block-size: ${euiTheme.size.xl};
+    padding-inline: 0;
+  }
 
   &::after {
     content: '';

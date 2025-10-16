@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
 import type { EuiBreadcrumb } from '@elastic/eui';
 import type { NavigationStructure } from '@kbn/core-chrome-navigation';
 import type { WorkspaceSidebarApp } from '@kbn/core-workspace-chrome-state';
+import type { ChromeNavControl } from './nav_controls';
 
 interface StateService<T> {
   getState: () => T;
@@ -18,6 +19,9 @@ interface StateService<T> {
 
 export interface WorkspaceHeaderState {
   breadcrumbs: EuiBreadcrumb[];
+  navControls: {
+    left: ChromeNavControl[];
+  };
 }
 
 export interface WorkspaceHeaderService extends StateService<WorkspaceHeaderState> {

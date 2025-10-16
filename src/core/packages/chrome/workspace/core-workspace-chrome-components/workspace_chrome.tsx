@@ -53,7 +53,7 @@ const extractChildren = (children: React.ReactNode, ...components: React.Compone
 
 const WorkspaceChromeComponent = ({ children }: WorkspaceChromeProps) => {
   const { euiTheme } = useEuiTheme();
-  const shadow = useEuiShadow('s');
+  const shadow = useEuiShadow('m');
   const navigationWidth = useNavigationWidth();
   const sidebarSize = useSidebarSize();
 

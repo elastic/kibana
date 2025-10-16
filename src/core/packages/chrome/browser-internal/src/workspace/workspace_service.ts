@@ -17,7 +17,7 @@ import {
   shareReplay,
   takeUntil,
 } from 'rxjs';
-import type { ChromeNavLinks } from '@kbn/core-chrome-browser';
+import type { ChromeNavControls, ChromeNavLinks } from '@kbn/core-chrome-browser';
 import type {
   WorkspaceHeaderService,
   WorkspaceNavigationService,
@@ -95,6 +95,7 @@ export interface WorkspaceServiceStartDeps {
   hasAppMenu$: Observable<boolean>;
   recentlyAccessed: RecentlyAccessed;
   navLinks: ChromeNavLinks;
+  navControls: ChromeNavControls;
 }
 
 /** @internal */
@@ -112,6 +113,9 @@ export class WorkspaceService {
     this.serviceState = {
       header: {
         breadcrumbs: [],
+        navControls: {
+          left: [],
+        },
       },
       sidebar: {
         apps: [],
@@ -135,6 +139,7 @@ export class WorkspaceService {
     http,
     projectNavigation,
     navLinks,
+    navControls,
     isVisible$,
     hasHeaderBanner$,
     hasAppMenu$,
@@ -213,6 +218,18 @@ export class WorkspaceService {
           },
         };
         this.notifyServiceListeners();
+      })
+    );
+
+    this.serviceSubscriptions.add(
+      navControls.getLeft$().subscribe((left) => {
+        this.serviceState = {
+          ...this.serviceState,
+          header: {
+            ...this.serviceState.header,
+            navControls: { ...this.serviceState.header.navControls, left },
+          },
+        };
       })
     );
 

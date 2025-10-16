@@ -23,9 +23,14 @@ export const WorkspaceSidebarButtonsComponent = ({
   apps,
   ...props
 }: WorkspaceSidebarButtonsComponentProps) => {
+  // Filter apps based on isAvailable function
+  const availableApps = apps.filter((app) => {
+    return app.isAvailable ? app.isAvailable() : true;
+  });
+
   return (
     <EuiFlexGroup gutterSize="s" {...props}>
-      {apps.map((app) => (
+      {availableApps.map((app) => (
         <EuiFlexItem key={app.appId}>
           <WorkspaceSidebarButton
             appId={app.appId}

@@ -8,7 +8,7 @@
  */
 
 import React, { useSyncExternalStore } from 'react';
-import { WorkspaceAppTopBar, WorkspaceChrome } from '@kbn/core-workspace-chrome-components';
+import { WorkspaceChrome } from '@kbn/core-workspace-chrome-components';
 
 import {
   useHasAppMenu,
@@ -54,7 +54,7 @@ export class WorkspaceLayout implements LayoutService {
       const homeHref = useHomeHref();
 
       const {
-        header: { breadcrumbs },
+        header: { breadcrumbs, navControls },
         sidebar: { apps },
         navigation: { items },
       } = useSyncExternalStore(
@@ -66,7 +66,7 @@ export class WorkspaceLayout implements LayoutService {
 
       // Assign main layout parts first
       // let banner: React.ReactNode;
-      let applicationTopBar: React.ReactNode;
+      let applicationTopBar: React.ReactNode | null = null;
 
       if (isChromeVisible) {
         // If project style, we use the project header and navigation;
@@ -85,7 +85,7 @@ export class WorkspaceLayout implements LayoutService {
         <>
           <GridLayoutGlobalStyles />
           <WorkspaceChrome>
-            <WorkspaceChrome.Header {...{ breadcrumbs, navigateToUrl }}>
+            <WorkspaceChrome.Header {...{ breadcrumbs, navigateToUrl, navControls }}>
               <WorkspaceSidebarButtons apps={apps} />
             </WorkspaceChrome.Header>
             <WorkspaceChrome.Navigation
@@ -97,9 +97,9 @@ export class WorkspaceLayout implements LayoutService {
               }}
             />
             <WorkspaceChrome.SidebarPanel apps={apps} />
-            <WorkspaceChrome.AppTopBar>
-              <WorkspaceAppTopBar>{applicationTopBar}</WorkspaceAppTopBar>
-            </WorkspaceChrome.AppTopBar>
+            {applicationTopBar && (
+              <WorkspaceChrome.AppTopBar>{applicationTopBar}</WorkspaceChrome.AppTopBar>
+            )}
             {!isChromeVisible && chromelessHeader}
             <div id="globalBannerList">{appBannerComponent}</div>
             <AppWrapper chromeVisible={isChromeVisible}>

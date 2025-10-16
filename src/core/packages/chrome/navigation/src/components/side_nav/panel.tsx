@@ -42,10 +42,12 @@ export const SideNavPanel = ({ children, footer, openerNode }: SideNavPanelProps
     flex-direction: column;
     width: ${SIDE_PANEL_WIDTH}px;
     border-left: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+    background-color: transparent;
   `;
 
   const navigationPanelStyles = css`
     ${scrollStyles}
+    background-color: transparent;
   `;
 
   return (
