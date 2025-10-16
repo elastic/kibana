@@ -820,6 +820,29 @@ export default function (providerContext: FtrProviderContext) {
         let dataView: ReturnType<typeof dataViewRouteHelpersFactory>;
         let customSpaceDataView: ReturnType<typeof dataViewRouteHelpersFactory>;
 
+        /**
+         * Waits for the enrich index to be created and populated with data.
+         * This is a reusable helper to avoid duplicate polling logic.
+         * @param spaceId - Optional space ID (undefined for default space)
+         */
+        const waitForEnrichIndexPopulated = async (spaceId?: string) => {
+          const spaceIdentifier = spaceId || 'default';
+          await retry.waitFor(
+            `enrich index to be created and populated for ${spaceIdentifier} space`,
+            async () => {
+              try {
+                // Check if the index has data (policy has been executed)
+                const count = await es.count({
+                  index: `.enrich-entity_store_field_retention_generic_${spaceIdentifier}_v1.0.0`,
+                });
+                return count.count > 0;
+              } catch (e) {
+                return false;
+              }
+            }
+          );
+        };
+
         const cleanupSpaceEnrichResources = async (spaceId?: string) => {
           const spacePath = spaceId ? `/s/${spaceId}` : '';
 
@@ -838,32 +861,21 @@ export default function (providerContext: FtrProviderContext) {
             // Ignore 404 errors if the engine doesn't exist
             if (e.status !== 404) {
               logger.debug(
-                `Error deleting entity store for space ${spaceId || 'default'}:`,
-                e.message || e
+                `Error deleting entity store for space ${spaceId || 'default'}: ${
+                  e && e.message ? e.message : JSON.stringify(e)
+                }`
               );
             }
           }
-
-          // Wait for deletion to complete
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-        };
-
-        const cleanupEnrichResources = async () => {
-          // Clean up both default and test spaces
-          await cleanupSpaceEnrichResources(); // default space
-          await cleanupSpaceEnrichResources(customNamespaceId); // test space
         };
 
         before(async () => {
           // Clean up any leftover resources from previous runs
-          await cleanupEnrichResources();
+          await cleanupSpaceEnrichResources(); // default space
+          await cleanupSpaceEnrichResources(customNamespaceId); // test space
 
           // Delete test space if it exists from previous run
-          try {
-            await spacesService.delete(customNamespaceId);
-          } catch (e) {
-            // Ignore error if space doesn't exist
-          }
+          await spacesService.delete(customNamespaceId);
 
           // Create a test space
           await spacesService.create({
@@ -879,17 +891,6 @@ export default function (providerContext: FtrProviderContext) {
             { 'securitySolution:enableAssetInventory': true },
             { space: customNamespaceId }
           );
-
-          // Clean up any old entity data
-          try {
-            await es.deleteByQuery({
-              index: entitiesIndex,
-              query: { match_all: {} },
-              conflicts: 'proceed',
-            });
-          } catch (e) {
-            logger.debug('Error cleaning up old entity data:', e);
-          }
 
           // Load fresh entity data
           await esArchiver.load(
@@ -917,7 +918,8 @@ export default function (providerContext: FtrProviderContext) {
 
         after(async () => {
           // Clean up all enrich resources
-          await cleanupEnrichResources();
+          await cleanupSpaceEnrichResources(); // default space
+          await cleanupSpaceEnrichResources(customNamespaceId); // test space
 
           await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': false });
           await kibanaServer.uiSettings.update(
@@ -931,20 +933,9 @@ export default function (providerContext: FtrProviderContext) {
             conflicts: 'proceed',
           });
 
-          // Only delete dataviews if they were created
-          if (dataView) {
-            await dataView.delete('security-solution');
-          }
-          if (customSpaceDataView) {
-            await customSpaceDataView.delete('security-solution');
-          }
-
-          // Delete test space
-          try {
-            await spacesService.delete(customNamespaceId);
-          } catch (e) {
-            // Ignore error if space doesn't exist
-          }
+          await dataView.delete('security-solution');
+          await customSpaceDataView.delete('security-solution');
+          await spacesService.delete(customNamespaceId);
         });
 
         it('should contain entity data when asset inventory is enabled', async () => {
@@ -956,18 +947,7 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200);
 
           // Wait for enrich index to be created AND populated with data
-          await retry.waitFor('enrich index to be created and populated', async () => {
-            try {
-              const enrichIndexName = '.enrich-entity_store_field_retention_generic_default_v1.0.0';
-              await es.indices.get({ index: enrichIndexName });
-
-              // Check if the index has data (policy has been executed)
-              const count = await es.count({ index: enrichIndexName });
-              return count.count > 0;
-            } catch (e) {
-              return false;
-            }
-          });
+          await waitForEnrichIndexPopulated();
 
           // although enrich policy is already create via 'api/asset_inventory/enable'
           // we still would like to replicate as if cloud asset discovery integration was fully installed
@@ -1076,21 +1056,7 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200);
 
           // Wait for enrich index to be created AND populated with data
-          await retry.waitFor(
-            'enrich index to be created and populated for test space',
-            async () => {
-              try {
-                const enrichIndexName = `.enrich-entity_store_field_retention_generic_${customNamespaceId}_v1.0.0`;
-                await es.indices.get({ index: enrichIndexName });
-
-                // Check if the index has data (policy has been executed)
-                const count = await es.count({ index: enrichIndexName });
-                return count.count > 0;
-              } catch (e) {
-                return false;
-              }
-            }
-          );
+          await waitForEnrichIndexPopulated(customNamespaceId);
 
           await supertest
             .post(`/s/${customNamespaceId}/api/fleet/epm/packages/_bulk`)
