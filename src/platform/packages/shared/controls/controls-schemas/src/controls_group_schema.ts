@@ -43,7 +43,6 @@ export const stickyControlSchema = schema.object({
       meta: { description: 'Expand width of the control panel to fit available space.' },
     })
   ),
-  order: schema.maybe(schema.number()),
 });
 
 export const controlsGroupSchema = schema.object({

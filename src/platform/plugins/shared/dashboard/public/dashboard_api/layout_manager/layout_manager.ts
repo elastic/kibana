@@ -581,7 +581,6 @@ export function initializeLayoutManager(
     },
     cleanup: () => {
       gridLayoutSubscription.unsubscribe();
-      controlsSubscription.unsubscribe();
     },
   };
 }
