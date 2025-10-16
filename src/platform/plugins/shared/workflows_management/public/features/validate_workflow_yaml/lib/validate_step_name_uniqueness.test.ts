@@ -46,7 +46,7 @@ steps:
     expect(result.every((r) => r?.message?.includes('Duplicate Step'))).toBe(true);
     expect(result.every((r) => r?.message?.includes('Found 2 steps with this name'))).toBe(true);
     expect(result.every((r) => r.severity === 'error')).toBe(true);
-    expect(result.every((r) => r.source === 'step-name-validation')).toBe(true);
+    expect(result.every((r) => r.owner === 'step-name-validation')).toBe(true);
   });
 
   it('should handle multiple different duplicates', () => {
