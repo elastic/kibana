@@ -57,7 +57,7 @@ export const ConversationSidebarNav: React.FC<{}> = () => {
         label={
           <FormattedMessage
             id="xpack.onechat.conversationSidebar.navigation.evaluations"
-            defaultMessage="Evaluations"
+            defaultMessage="Evaluations History"
           />
         }
       />

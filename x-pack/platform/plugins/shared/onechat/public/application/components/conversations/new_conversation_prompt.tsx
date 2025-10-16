@@ -92,11 +92,11 @@ const cards: Array<{
   },
   // Evaluations
   {
-    key: 'evaluations',
+    key: 'evaluations_history',
     title: (
       <FormattedMessage
         id="xpack.onechat.welcome.quickNavigation.evaluations.title"
-        defaultMessage="Evaluations"
+        defaultMessage="Evaluations History"
       />
     ),
     description: (

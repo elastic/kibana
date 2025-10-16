@@ -143,15 +143,11 @@ export const EvaluatorSelectionModal: React.FC<EvaluatorSelectionModalProps> = (
                   })}
                 </div>
               )}
+              <SelectionSummary selectedEvaluators={selectedEvaluators} />
             </EuiFlexItem>
           </EuiFlexGroup>
 
           <EuiSpacer size="l" />
-
-          <SelectionSummary
-            selectedEvaluators={selectedEvaluators}
-            customInstructions={customInstructions}
-          />
         </>
       </EuiModalBody>
 

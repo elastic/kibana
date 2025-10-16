@@ -50,10 +50,10 @@ export const EvaluatorDetails: React.FC<EvaluatorDetailsProps> = ({
         <EuiFieldNumber
           value={customInstructions}
           onChange={(e) => onInstructionsChange(e.target.value)}
-          placeholder="Enter threshold value (0-1)"
-          min={0}
-          max={1}
-          step={0.01}
+          placeholder="Enter threshold value (1-10)"
+          min={1}
+          max={10}
+          step={1}
           fullWidth
         />
       );

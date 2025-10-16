@@ -13,13 +13,9 @@ import type { Evaluator } from './types';
 
 interface SelectionSummaryProps {
   selectedEvaluators: Evaluator[];
-  customInstructions: Record<string, string>;
 }
 
-export const SelectionSummary: React.FC<SelectionSummaryProps> = ({
-  selectedEvaluators,
-  customInstructions,
-}) => {
+export const SelectionSummary: React.FC<SelectionSummaryProps> = ({ selectedEvaluators }) => {
   const { euiTheme } = useEuiTheme();
 
   const summaryStyles = css`
@@ -74,15 +70,6 @@ export const SelectionSummary: React.FC<SelectionSummaryProps> = ({
         </div>
 
         <EuiSpacer size="m" />
-
-        <EuiText size="s">
-          <strong>
-            {i18n.translate('xpack.onechat.evaluations.customInstructionsCount', {
-              defaultMessage: 'Custom Instructions',
-            })}
-          </strong>
-        </EuiText>
-        <EuiSpacer size="s" />
       </EuiPanel>
     </div>
   );
