@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
+import type { ActionTypeRegistry } from '../../../../../action_type_registry';
 import type { InMemoryConnector } from '../../../../..';
 import type { ActionsClientContext } from '../../../../../actions_client';
 import type { Connector } from '../../../types';
@@ -25,6 +26,7 @@ export interface GetAllUnsecuredParams {
   kibanaIndices: string[];
   logger: Logger;
   spaceId: string;
+  connectorTypeRegistry: ActionTypeRegistry;
 }
 
 export interface InjectExtraFindDataParams {
