@@ -76,6 +76,19 @@ function getStatsCommandToOperateOn(esqlQuery: EsqlQuery): StatsCommandSummary |
   return summarizedStatsCommand;
 }
 
+/**
+ * Returns the summary of the stats command at the given command index in the esql query
+ */
+function getStatsCommandAtIndexSummary(esqlQuery: EsqlQuery, commandIndex: number) {
+  const declarationCommand = mutate.commands.stats.byIndex(esqlQuery.ast, commandIndex);
+
+  if (!declarationCommand) {
+    return null;
+  }
+
+  return mutate.commands.stats.summarizeCommand(esqlQuery, declarationCommand);
+}
+
 export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
   const groupByFields: ESQLStatsQueryMeta['groupByFields'] = [];
   const appliedFunctions: ESQLStatsQueryMeta['appliedFunctions'] = [];
@@ -88,6 +101,12 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
     return { groupByFields, appliedFunctions };
   }
 
+  // get all the new fields created by the stats commands in the query,
+  // so we might tell if the command we are operating on is referencing a field that was defined by a preceding command
+  const queryRuntimeFields = Array.from(mutate.commands.stats.summarize(esqlQuery)).map(
+    (command) => command.newFields
+  );
+
   const grouping = Object.values(summarizedStatsCommand.grouping);
 
   for (let j = 0; j < grouping.length; j++) {
@@ -99,6 +118,24 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
     }
 
     const groupFieldName = removeBackticks(group.field);
+    let groupFieldNode = group;
+
+    const groupDeclarationCommandIndex = queryRuntimeFields.findIndex((field) =>
+      field.has(groupFieldName)
+    );
+
+    let groupDeclarationCommandSummary: StatsCommandSummary | null = null;
+
+    if (
+      groupDeclarationCommandIndex !== -1 &&
+      (groupDeclarationCommandSummary = getStatsCommandAtIndexSummary(
+        esqlQuery,
+        groupDeclarationCommandIndex
+      ))
+    ) {
+      // update the group field node to it's actual definition
+      groupFieldNode = groupDeclarationCommandSummary.grouping[groupFieldName];
+    }
 
     // check if there is a where command targeting the group field in the stats command
     const whereCommandGroupFieldSearch = mutate.commands.where.byField(
@@ -121,14 +158,17 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       // as they are not valid in this context
       groupByFields.push({
         field: groupFieldName,
-        type: group.definition.type === 'function' ? group.definition.name : group.definition.type,
+        type:
+          groupFieldNode.definition.type === 'function'
+            ? groupFieldNode.definition.name
+            : groupFieldNode.definition.type,
       });
 
       break;
     }
 
-    if (isFunctionExpression(group.definition)) {
-      const functionName = group.definition.name;
+    if (isFunctionExpression(groupFieldNode.definition)) {
+      const functionName = groupFieldNode.definition.name;
       if (!isSupportedStatsFunction(functionName)) {
         continue;
       }
@@ -136,7 +176,10 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
 
     groupByFields.push({
       field: groupFieldName,
-      type: group.definition.type === 'function' ? group.definition.name : group.definition.type,
+      type:
+        groupFieldNode.definition.type === 'function'
+          ? groupFieldNode.definition.name
+          : groupFieldNode.definition.type,
     });
   }
 
@@ -186,6 +229,10 @@ CascadeQueryArgs): AggregateQuery => {
     (cmd) => cmd.name === 'from'
   ) as ESQLCommand<'from'> | undefined;
 
+  const queryRuntimeFields = Array.from(mutate.commands.stats.summarize(EditorESQLQuery)).map(
+    (command) => command.newFields
+  );
+
   if (!dataSourceCommand) {
     throw new Error('Query does not have a data source');
   }
@@ -199,10 +246,24 @@ CascadeQueryArgs): AggregateQuery => {
   if (nodeType === 'leaf') {
     const pathSegment = nodePath[nodePath.length - 1];
 
+    const groupDeclarationCommandIndex = queryRuntimeFields.findIndex((field) =>
+      field.has(pathSegment)
+    );
+
+    let groupDeclarationCommandSummary: StatsCommandSummary | null = null;
+
+    if (groupDeclarationCommandIndex !== -1) {
+      groupDeclarationCommandSummary = getStatsCommandAtIndexSummary(
+        EditorESQLQuery,
+        groupDeclarationCommandIndex
+      );
+    }
+
     const groupValue =
-      summarizedStatsCommand.grouping[pathSegment] ??
+      (groupDeclarationCommandSummary ?? summarizedStatsCommand).grouping[pathSegment] ??
       // when a column name is not assigned, one is created automatically that includes backticks
-      summarizedStatsCommand.grouping[`\`${pathSegment}\``];
+      (groupDeclarationCommandSummary ?? summarizedStatsCommand).grouping[`\`${pathSegment}\``];
+
     const isOperable = groupValue && nodePathMap[pathSegment];
 
     if (isOperable && isColumn(groupValue.definition)) {
