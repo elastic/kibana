@@ -35,7 +35,8 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
   );
 
   const refreshInterval = config.get('indexRefreshInterval');
-  if (refreshInterval === false) {
+  // do not optimize for cloud runs or if explicitly disabled
+  if (!!process.env.TEST_CLOUD || refreshInterval === false) {
     return client;
   }
 
