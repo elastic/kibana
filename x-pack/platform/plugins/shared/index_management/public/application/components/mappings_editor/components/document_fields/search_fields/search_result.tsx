@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { FixedSizeList as VirtualList, areEqual } from 'react-window';
+import { List, type RowComponentProps } from 'react-window';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -24,18 +24,12 @@ interface Props {
 const ITEM_HEIGHT = 64;
 
 interface RowProps {
-  index: number;
-  style: React.CSSProperties;
-  data: {
-    result: Props['result'];
-    status: Props['documentFieldsState']['status'];
-    fieldToEdit: Props['documentFieldsState']['fieldToEdit'];
-  };
+  result: Props['result'];
+  status: Props['documentFieldsState']['status'];
+  fieldToEdit: Props['documentFieldsState']['fieldToEdit'];
 }
 
-const Row = React.memo<RowProps>(({ data, index, style }) => {
-  // Data passed to List as "itemData" is available as props.data
-  const { fieldToEdit, result, status } = data;
+const Row = ({ index, result, status, fieldToEdit, style }: RowComponentProps<RowProps>) => {
   const item = result[index];
 
   return (
@@ -48,7 +42,7 @@ const Row = React.memo<RowProps>(({ data, index, style }) => {
       />
     </div>
   );
-}, areEqual);
+};
 
 export const SearchResult = React.memo(
   ({
@@ -95,17 +89,14 @@ export const SearchResult = React.memo(
         }
       />
     ) : (
-      <VirtualList
+      <List<RowProps>
         data-test-subj="mappingsEditorSearchResult"
-        style={{ overflowX: 'hidden', ...virtualListStyle }}
-        width="100%"
-        height={listHeight}
-        itemData={itemData}
-        itemCount={result.length}
-        itemSize={ITEM_HEIGHT}
-      >
-        {Row}
-      </VirtualList>
+        rowComponent={Row}
+        style={{ overflowX: 'hidden', width: '100%', height: listHeight, ...virtualListStyle }}
+        rowProps={itemData}
+        rowCount={result.length}
+        rowHeight={ITEM_HEIGHT}
+      />
     );
   }
 );

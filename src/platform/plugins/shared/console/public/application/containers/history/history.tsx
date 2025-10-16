@@ -8,7 +8,8 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { FixedSizeList } from 'react-window';
+import type { RowComponentProps } from 'react-window';
+import { List } from 'react-window';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import {
@@ -83,8 +84,6 @@ interface HistoryProps {
 }
 
 interface RowProps {
-  index: number;
-  style: React.CSSProperties;
   data: HistoryProps[];
 }
 
@@ -166,7 +165,7 @@ export function History() {
   }, [initialize]);
 
   const Row = useCallback(
-    ({ data, index, style }: RowProps) => (
+    ({ data, index, style }: RowComponentProps<RowProps>) => (
       <EuiFormFieldset key={index} data-test-subj="historyItemFieldset" style={style}>
         <EuiCheckableCard
           id={`${CHILD_ELEMENT_PREFIX}${index}`}
@@ -243,15 +242,13 @@ export function History() {
                       {requests.length > 0 && (
                         <EuiAutoSizer>
                           {({ height, width }) => (
-                            <FixedSizeList
-                              height={height}
-                              itemCount={requests.length}
-                              itemSize={62}
-                              itemData={requests}
-                              width={width}
-                            >
-                              {Row}
-                            </FixedSizeList>
+                            <List<RowProps>
+                              rowComponent={Row}
+                              style={{ height, width }}
+                              rowCount={requests.length}
+                              rowHeight={62}
+                              rowProps={{ data: requests }}
+                            />
                           )}
                         </EuiAutoSizer>
                       )}

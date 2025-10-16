@@ -17,8 +17,7 @@ import {
 import { transparentize } from 'polished';
 import React, { useEffect, useRef } from 'react';
 import { WindowScroller, AutoSizer } from 'react-virtualized';
-import type { ListChildComponentProps } from 'react-window';
-import { areEqual, VariableSizeList as List } from 'react-window';
+import { List, type RowComponentProps, type ListImperativeAPI } from 'react-window';
 import { css } from '@emotion/react';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
 import { asBigNumber } from '../../../../../../../common/utils/formatters';
@@ -81,7 +80,7 @@ export function AccordionWaterfall({
 }
 
 function Waterfall(props: WaterfallProps) {
-  const listRef = useRef<List>(null);
+  const listRef = useRef<ListImperativeAPI>(null);
   const rowSizeMapRef = useRef(new Map<number, number>());
   const { traceList } = useWaterfallContext();
   const visibleTraceList = props.displayLimit ? traceList.slice(0, props.displayLimit) : traceList;
@@ -96,7 +95,7 @@ function Waterfall(props: WaterfallProps) {
   };
 
   const onScroll = ({ scrollTop }: { scrollTop: number }) => {
-    listRef.current?.scrollTo(scrollTop);
+    listRef.current?.scrollToRow({ index: scrollTop });
   };
 
   return (
@@ -108,17 +107,14 @@ function Waterfall(props: WaterfallProps) {
               data-test-subj="waterfall"
               ref={registerChild as unknown as React.Ref<HTMLDivElement>}
             >
-              <List
-                ref={listRef}
-                style={{ height: '100%' }}
-                itemCount={visibleTraceList.length}
-                itemSize={getRowSize}
-                height={window.innerHeight}
-                width={width}
-                itemData={{ ...props, traceList: visibleTraceList, onLoad: onRowLoad }}
-              >
-                {VirtualRow}
-              </List>
+              <List<RowProps>
+                rowComponent={VirtualRow}
+                listRef={listRef}
+                style={{ height: window.innerHeight, width }}
+                rowCount={visibleTraceList.length}
+                rowHeight={getRowSize}
+                rowProps={{ ...props, traceList: visibleTraceList, onLoad: onRowLoad }}
+              />
             </div>
           )}
         </AutoSizer>
@@ -127,6 +123,11 @@ function Waterfall(props: WaterfallProps) {
   );
 }
 
+interface RowProps extends Omit<WaterfallNodeProps, 'node'> {
+  traceList: IWaterfallNodeFlatten[];
+  onLoad: (index: number, size: number) => void;
+}
+/*
 const VirtualRow = React.memo(
   ({
     index,
@@ -153,6 +154,20 @@ const VirtualRow = React.memo(
   },
   areEqual
 );
+*/
+
+function VirtualRow({ index, style, onLoad, traceList, ...props }: RowComponentProps<RowProps>) {
+  const ref = React.useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    onLoad(index, ref.current?.getBoundingClientRect().height ?? ACCORDION_HEIGHT);
+  }, [index, onLoad]);
+
+  return (
+    <div style={style} ref={ref}>
+      <WaterfallNode {...props} node={traceList[index]} />
+    </div>
+  );
+}
 
 const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
   const { euiTheme } = useEuiTheme();

@@ -6,8 +6,8 @@
  */
 
 import { type EuiAutoSize, EuiAutoSizer, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import InfiniteLoader from 'react-window-infinite-loader';
-import { FixedSizeList, type ListChildComponentProps } from 'react-window';
+import { InfiniteLoader } from 'react-window-infinite-loader';
+import { List, type RowComponentProps } from 'react-window';
 import React, { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { CardsViewFooter } from './cards_view_footer';
@@ -76,62 +76,64 @@ export const OverviewCardView = ({
             <EuiAutoSizer>
               {({ width }: EuiAutoSize) => (
                 <InfiniteLoader
+                  /*
                   isItemLoaded={(idx: number) =>
                     listItems[idx].every((m) => !!trendData[m.configId + m.locationId])
                   }
+                    */
                   itemCount={listItems.length}
-                  loadMoreItems={(_, stop: number) => setMaxItem(Math.max(maxItem, stop))}
+                  loadMoreRows={(_, stop: number) => setMaxItem(Math.max(maxItem, stop))}
                   minimumBatchSize={MIN_BATCH_SIZE}
                   threshold={LIST_THRESHOLD}
                 >
-                  {({ onItemsRendered, ref }) => {
+                  {({ onRowsRendered, ref }) => {
                     // set min row count to based on width to ensure cards are not too small
                     // min is 1 and max is 5
                     setRowCount(Math.max(1, Math.min(5, Math.floor(width / MIN_CARD_WIDTH))));
 
-                    return (
-                      <FixedSizeList
-                        // pad computed height to avoid clipping last row's drop shadow
-                        height={listHeight + 16}
-                        width={width}
-                        onItemsRendered={onItemsRendered}
-                        itemSize={ITEM_HEIGHT}
-                        itemCount={listItems.length}
-                        itemData={listItems}
-                        ref={ref}
-                      >
-                        {({
-                          index: listIndex,
-                          style,
-                          data: listData,
-                        }: React.PropsWithChildren<ListChildComponentProps<ListItem[][]>>) => {
-                          setCurrentIndex(listIndex);
-                          return (
-                            <EuiFlexGroup
-                              data-test-subj={`overview-grid-row-${listIndex}`}
-                              gutterSize="m"
-                              css={{ ...style, marginLeft: 5 }}
+                    interface RowProps {
+                      listData: ListItem[][];
+                    }
+
+                    function Row({ index, style, listData }: RowComponentProps<RowProps>) {
+                      // setCurrentIndex(listIndex);
+                      return (
+                        <EuiFlexGroup
+                          data-test-subj={`overview-grid-row-${index}`}
+                          gutterSize="m"
+                          css={{ ...style, marginLeft: 5 }}
+                        >
+                          {listData[index].map((_, idx) => (
+                            <EuiFlexItem
+                              data-test-subj="syntheticsOverviewGridItem"
+                              key={index * rowCount + idx}
                             >
-                              {listData[listIndex].map((_, idx) => (
-                                <EuiFlexItem
-                                  data-test-subj="syntheticsOverviewGridItem"
-                                  key={listIndex * rowCount + idx}
-                                >
-                                  <MetricItem
-                                    monitor={monitorsSortedByStatus[listIndex * rowCount + idx]}
-                                    onClick={setFlyoutConfigCallback}
-                                  />
-                                </EuiFlexItem>
-                              ))}
-                              {listData[listIndex].length % rowCount !== 0 &&
-                                // Adds empty items to fill out row
-                                Array.from({
-                                  length: rowCount - listData[listIndex].length,
-                                }).map((_, idx) => <EuiFlexItem key={idx} />)}
-                            </EuiFlexGroup>
-                          );
-                        }}
-                      </FixedSizeList>
+                              <MetricItem
+                                monitor={monitorsSortedByStatus[index * rowCount + idx]}
+                                onClick={setFlyoutConfigCallback}
+                              />
+                            </EuiFlexItem>
+                          ))}
+                          {listData[index].length % rowCount !== 0 &&
+                            // Adds empty items to fill out row
+                            Array.from({
+                              length: rowCount - listData[index].length,
+                            }).map((_, idx) => <EuiFlexItem key={idx} />)}
+                        </EuiFlexGroup>
+                      );
+                    }
+
+                    return (
+                      <List<RowProps>
+                        rowComponent={Row}
+                        // pad computed height to avoid clipping last row's drop shadow
+                        style={{ height: listHeight + 16, width }}
+                        onRowsRendered={onRowsRendered}
+                        rowHeight={ITEM_HEIGHT}
+                        rowCount={listItems.length}
+                        rowProps={{ listData: listItems }}
+                        listRef={ref}
+                      />
                     );
                   }}
                 </InfiniteLoader>

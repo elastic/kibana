@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useMemo, useCallback, useRef } from 'react';
-import { FixedSizeList as VirtualList, areEqual } from 'react-window';
+import { List, type RowComponentProps, type ListImperativeAPI } from 'react-window';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { get, isEqual } from 'lodash';
@@ -60,14 +60,11 @@ const currentDocumentSelector = (s: PreviewState) => s.documents[s.currentIdx];
 const fieldMapSelector = (s: PreviewState) => s.fieldMap;
 
 interface RowProps {
-  index: number;
-  style: React.CSSProperties;
-  data: { filteredFields: DocumentField[]; toggleIsPinned: PreviewListItemProps['toggleIsPinned'] };
+  filteredFields: DocumentField[];
+  toggleIsPinned: PreviewListItemProps['toggleIsPinned'];
 }
 
-const Row = React.memo<RowProps>(({ data, index, style }) => {
-  // Data passed to List as "itemData" is available as props.data
-  const { filteredFields, toggleIsPinned } = data;
+const Row = ({ index, filteredFields, toggleIsPinned, style }: RowComponentProps<RowProps>) => {
   const field = filteredFields[index];
 
   return (
@@ -75,13 +72,13 @@ const Row = React.memo<RowProps>(({ data, index, style }) => {
       <PreviewListItem key={field.key} field={field} toggleIsPinned={toggleIsPinned} />
     </div>
   );
-}, areEqual);
+};
 
 export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchValue = '' }) => {
   const styles = useMemoCss(componentStyles);
   const { dataView } = useFieldEditorContext();
   const { controller } = useFieldPreviewContext();
-  const virtualListRef = useRef<VirtualList>(null);
+  const virtualListRef = useRef<ListImperativeAPI>(null);
   const pinnedFields = useStateSelector(controller.state$, pinnedFieldsSelector, isEqual);
   const currentDocument = useStateSelector(controller.state$, currentDocumentSelector);
   const fieldMap = useStateSelector(controller.state$, fieldMapSelector);
@@ -217,7 +214,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
       // If the field is currently pinned and it goes over the limit of the fields to show we need to show all of them
       if (newIndex >= INITIAL_MAX_NUMBER_OF_FIELDS && !showAllFields) toggleShowAllFields();
       requestAnimationFrame(() => {
-        virtualListRef.current?.scrollToItem(newIndex, 'smart');
+        virtualListRef.current?.scrollToRow({ index: newIndex });
         // We need to wait for the scroll to finish so the element is in the DOM before focusing it
         requestAnimationFrame(() => {
           document.getElementById(keyboardEvent.buttonId)?.focus();
@@ -244,18 +241,15 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
       {isEmptySearchResultVisible ? (
         renderEmptyResult()
       ) : (
-        <VirtualList
+        <List<RowProps>
+          rowComponent={Row}
           className="eui-scrollBar"
-          style={{ overflowX: 'hidden' }}
-          width="100%"
-          ref={virtualListRef}
-          height={listHeight}
-          itemData={itemData}
-          itemCount={filteredFields.length}
-          itemSize={ITEM_HEIGHT}
-        >
-          {Row}
-        </VirtualList>
+          style={{ overflowX: 'hidden', width: '100%', height: listHeight }}
+          listRef={virtualListRef}
+          rowProps={itemData}
+          rowCount={filteredFields.length}
+          rowHeight={ITEM_HEIGHT}
+        />
       )}
 
       {renderToggleFieldsButton()}

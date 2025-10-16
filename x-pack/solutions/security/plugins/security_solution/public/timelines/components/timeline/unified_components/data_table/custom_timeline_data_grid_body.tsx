@@ -13,7 +13,7 @@ import type { CSSProperties, FC, PropsWithChildren } from 'react';
 import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
 import { css } from '@emotion/react';
-import { VariableSizeList } from 'react-window';
+import { List } from 'react-window';
 import { EuiAutoSizer, useEuiTheme } from '@elastic/eui';
 import type { RowRenderer } from '../../../../../../common/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
@@ -194,6 +194,28 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
       <VirtualizedCustomDataGridContainer $maxWidth={calculatedWidth}>
         <EuiAutoSizer className="autosizer" disableWidth>
           {({ height }) => {
+            const Row = ({ index, style }) => {
+              return (
+                <div
+                  role="row"
+                  style={style}
+                  css={{ width: 'fit-content' }}
+                  key={`${gridWidth}-${index}`}
+                >
+                  <CustomDataGridSingleRow
+                    rowData={visibleRows[index]}
+                    rowIndex={index}
+                    visibleColumns={visibleColumns}
+                    Cell={Cell}
+                    enabledRowRenderers={enabledRowRenderers}
+                    refetch={refetch}
+                    setRowHeight={setRowHeight}
+                    rowHeight={rowHeight}
+                  />
+                </div>
+              );
+            };
+
             return (
               <>
                 {
@@ -203,7 +225,8 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
                    */
                   gridWidth !== 0 && (
                     <>
-                      <VariableSizeList
+                      <List
+                        rowComponent={Row}
                         className="variable__list"
                         /* available space on the screen */
                         width={gridWidth}
@@ -218,29 +241,7 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
                           overflow: auto;
                         `}
                         innerElementType={innerRowContainer}
-                      >
-                        {({ index, style }) => {
-                          return (
-                            <div
-                              role="row"
-                              style={style}
-                              css={{ width: 'fit-content' }}
-                              key={`${gridWidth}-${index}`}
-                            >
-                              <CustomDataGridSingleRow
-                                rowData={visibleRows[index]}
-                                rowIndex={index}
-                                visibleColumns={visibleColumns}
-                                Cell={Cell}
-                                enabledRowRenderers={enabledRowRenderers}
-                                refetch={refetch}
-                                setRowHeight={setRowHeight}
-                                rowHeight={rowHeight}
-                              />
-                            </div>
-                          );
-                        }}
-                      </VariableSizeList>
+                      />
                     </>
                   )
                 }
