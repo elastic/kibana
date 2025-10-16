@@ -12,9 +12,11 @@ import {
   CDR_VULNERABILITIES_INDEX_PATTERN,
   CDR_EXTENDED_VULN_RETENTION_POLICY,
   LATEST_FINDINGS_RETENTION_POLICY,
+  LATEST_VULNERABILITIES_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { UseCspOptions } from '../types';
+import { CSP_VULN_DATASET } from './get_vendor_name';
 
 const MISCONFIGURATIONS_SOURCE_FIELDS = ['result.*', 'rule.*', 'resource.*'];
 interface AggregationBucket {
@@ -193,22 +195,45 @@ export const getVulnerabilitiesQuery = ({ query, sort }: UseCspOptions, isPrevie
   sort,
 });
 
+export const getVulnerabilityConditionalRetentionFilterContent = () => ({
+  should: [
+    {
+      bool: {
+        filter: [
+          { term: { 'data_stream.dataset': CSP_VULN_DATASET } },
+          {
+            range: {
+              '@timestamp': { gte: `now-${LATEST_VULNERABILITIES_RETENTION_POLICY}` },
+            },
+          },
+        ],
+      },
+    },
+    {
+      bool: {
+        filter: [
+          { bool: { must_not: { term: { 'data_stream.dataset': CSP_VULN_DATASET } } } },
+          {
+            range: {
+              '@timestamp': { gte: `now-${CDR_EXTENDED_VULN_RETENTION_POLICY}` },
+            },
+          },
+        ],
+      },
+    },
+  ],
+});
+
+export const getVulnerabilityConditionalRetentionFilter = () => ({
+  bool: getVulnerabilityConditionalRetentionFilterContent(),
+});
+
 export const buildVulnerabilityFindingsQueryWithFilters = (query: UseCspOptions['query']) => {
   return {
     ...query,
     bool: {
       ...query?.bool,
-      filter: [
-        ...(query?.bool?.filter ?? []),
-        {
-          range: {
-            '@timestamp': {
-              gte: `now-${CDR_EXTENDED_VULN_RETENTION_POLICY}`,
-              lte: 'now',
-            },
-          },
-        },
-      ],
+      filter: [...(query?.bool?.filter ?? []), getVulnerabilityConditionalRetentionFilter()],
     },
   };
 };

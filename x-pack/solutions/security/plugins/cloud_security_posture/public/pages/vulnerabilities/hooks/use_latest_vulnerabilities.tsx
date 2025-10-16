@@ -19,12 +19,12 @@ import type { EsHitRecord } from '@kbn/discover-utils/types';
 import {
   MAX_FINDINGS_TO_LOAD,
   CDR_VULNERABILITIES_INDEX_PATTERN,
-  CDR_EXTENDED_VULN_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
 import type { BaseEsQuery } from '@kbn/cloud-security-posture';
 import { showErrorToast } from '@kbn/cloud-security-posture';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
+import { buildVulnerabilityFindingsQueryWithFilters } from '@kbn/cloud-security-posture/src/utils/findings_query_builders';
 import {
   CDR_VULNERABILITY_DATA_TABLE_RUNTIME_MAPPING_FIELDS,
   VULNERABILITY_FIELDS,
@@ -81,23 +81,7 @@ export const getVulnerabilitiesQuery = (
   sort: getMultiFieldsSort(sort),
   runtime_mappings: getRuntimeMappingsFromSort(sort),
   size: MAX_FINDINGS_TO_LOAD,
-  query: {
-    ...query,
-    bool: {
-      ...query?.bool,
-      filter: [
-        ...(query?.bool?.filter ?? []),
-        {
-          range: {
-            '@timestamp': {
-              gte: `now-${CDR_EXTENDED_VULN_RETENTION_POLICY}`,
-              lte: 'now',
-            },
-          },
-        },
-      ],
-    },
-  },
+  query: buildVulnerabilityFindingsQueryWithFilters(query),
   ...(pageParam ? { from: pageParam } : {}),
 });
 

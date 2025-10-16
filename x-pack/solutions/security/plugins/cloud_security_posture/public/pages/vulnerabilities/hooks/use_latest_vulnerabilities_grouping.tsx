@@ -15,10 +15,13 @@ import { isNoneGroup, parseGroupingQuery, MAX_RUNTIME_FIELD_SIZE } from '@kbn/gr
 import { useMemo } from 'react';
 import {
   CDR_EXTENDED_VULN_RETENTION_POLICY,
+  LATEST_VULNERABILITIES_RETENTION_POLICY,
   VULNERABILITIES_SEVERITY,
 } from '@kbn/cloud-security-posture-common';
+import { CSP_VULN_DATASET } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
 import type { VulnerabilitiesGroupingAggregation } from '@kbn/cloud-security-posture';
 import type { Filter } from '@kbn/es-query';
+import type { BoolAgg } from '@kbn/grouping/src';
 import { buildEsQuery } from '@kbn/es-query';
 import { checkIsFlattenResults } from '@kbn/grouping/src/containers/query/helpers';
 import {
@@ -245,14 +248,46 @@ export const useLatestVulnerabilitiesGrouping = ({
   const additionalFilters = buildEsQuery(dataView, [], groupFilters);
   const currentSelectedGroup = selectedGroup || grouping.selectedGroups[0];
 
+  const conditionalRetentionFilter = {
+    bool: {
+      should: [
+        {
+          bool: {
+            filter: [
+              { term: { 'data_stream.dataset': CSP_VULN_DATASET } },
+              {
+                range: {
+                  '@timestamp': { gte: `now-${LATEST_VULNERABILITIES_RETENTION_POLICY}` },
+                },
+              },
+            ],
+          },
+        },
+        {
+          bool: {
+            filter: [
+              { bool: { must_not: { term: { 'data_stream.dataset': CSP_VULN_DATASET } } } },
+              {
+                range: {
+                  '@timestamp': { gte: `now-${CDR_EXTENDED_VULN_RETENTION_POLICY}` },
+                },
+              },
+            ],
+          },
+        },
+      ],
+      must: [],
+      must_not: [],
+      filter: [],
+    },
+  };
+
   const groupingQuery = getGroupingQuery({
-    additionalFilters: query ? [query, additionalFilters] : [additionalFilters],
+    additionalFilters: query
+      ? [query, additionalFilters, conditionalRetentionFilter]
+      : [additionalFilters, conditionalRetentionFilter],
     groupByField: currentSelectedGroup,
     uniqueValue,
-    timeRange: {
-      from: `now-${CDR_EXTENDED_VULN_RETENTION_POLICY}`,
-      to: 'now',
-    },
     pageNumber: activePageIndex * pageSize,
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }],

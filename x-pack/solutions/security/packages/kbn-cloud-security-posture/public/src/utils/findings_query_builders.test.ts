@@ -11,6 +11,8 @@ import {
   getVulnerabilitiesAggregationCount,
   VULNERABILITIES_RESULT_EVALUATION,
   createGetVulnerabilityFindingsQuery,
+  buildVulnerabilityFindingsQueryWithFilters,
+  getVulnerabilityConditionalRetentionFilter,
 } from './findings_query_builders';
 
 describe('getVulnerabilitiesAggregationCount', () => {
@@ -150,6 +152,175 @@ describe('createGetVulnerabilityFindingsQuery', () => {
           {
             exists: {
               field: 'package.version',
+            },
+          },
+        ],
+      },
+    });
+  });
+});
+
+describe('buildVulnerabilityFindingsQueryWithFilters', () => {
+  it('should create query with conditional retention logic for native and 3rd-party integrations', () => {
+    const query = {
+      bool: {
+        filter: [{ term: { 'vulnerability.severity': 'HIGH' } }],
+      },
+    };
+
+    const result = buildVulnerabilityFindingsQueryWithFilters(query);
+
+    expect(result).toEqual({
+      bool: {
+        filter: [
+          { term: { 'vulnerability.severity': 'HIGH' } },
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    filter: [
+                      { term: { 'data_stream.dataset': 'cloud_security_posture.vulnerabilities' } },
+                      { range: { '@timestamp': { gte: 'now-3d' } } },
+                    ],
+                  },
+                },
+                {
+                  bool: {
+                    filter: [
+                      {
+                        bool: {
+                          must_not: {
+                            term: {
+                              'data_stream.dataset': 'cloud_security_posture.vulnerabilities',
+                            },
+                          },
+                        },
+                      },
+                      { range: { '@timestamp': { gte: 'now-90d' } } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('should handle empty query', () => {
+    const result = buildVulnerabilityFindingsQueryWithFilters({ bool: { filter: [] } });
+
+    expect(result).toEqual({
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    filter: [
+                      { term: { 'data_stream.dataset': 'cloud_security_posture.vulnerabilities' } },
+                      { range: { '@timestamp': { gte: 'now-3d' } } },
+                    ],
+                  },
+                },
+                {
+                  bool: {
+                    filter: [
+                      {
+                        bool: {
+                          must_not: {
+                            term: {
+                              'data_stream.dataset': 'cloud_security_posture.vulnerabilities',
+                            },
+                          },
+                        },
+                      },
+                      { range: { '@timestamp': { gte: 'now-90d' } } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('should handle undefined query', () => {
+    const result = buildVulnerabilityFindingsQueryWithFilters(undefined);
+
+    expect(result).toEqual({
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    filter: [
+                      { term: { 'data_stream.dataset': 'cloud_security_posture.vulnerabilities' } },
+                      { range: { '@timestamp': { gte: 'now-3d' } } },
+                    ],
+                  },
+                },
+                {
+                  bool: {
+                    filter: [
+                      {
+                        bool: {
+                          must_not: {
+                            term: {
+                              'data_stream.dataset': 'cloud_security_posture.vulnerabilities',
+                            },
+                          },
+                        },
+                      },
+                      { range: { '@timestamp': { gte: 'now-90d' } } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
+});
+
+describe('getVulnerabilityConditionalRetentionFilter', () => {
+  it('should return conditional retention filter for native and 3rd-party integrations', () => {
+    const result = getVulnerabilityConditionalRetentionFilter();
+
+    expect(result).toEqual({
+      bool: {
+        should: [
+          {
+            bool: {
+              filter: [
+                { term: { 'data_stream.dataset': 'cloud_security_posture.vulnerabilities' } },
+                { range: { '@timestamp': { gte: 'now-3d' } } },
+              ],
+            },
+          },
+          {
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    must_not: {
+                      term: {
+                        'data_stream.dataset': 'cloud_security_posture.vulnerabilities',
+                      },
+                    },
+                  },
+                },
+                { range: { '@timestamp': { gte: 'now-90d' } } },
+              ],
             },
           },
         ],
