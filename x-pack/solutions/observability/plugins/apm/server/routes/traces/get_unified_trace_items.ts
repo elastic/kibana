@@ -7,7 +7,6 @@
 
 import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import type { APMConfig } from '../..';
@@ -176,36 +175,49 @@ export async function getUnifiedTraceItems({
   return {
     traceItems: unifiedTraces.hits.hits
       .map((hit) => {
-        const event = unflattenKnownApmEventFields(hit.fields, fields);
-        const apmDuration = event.span?.duration?.us || event.transaction?.duration?.us;
-        const id = event.span?.id || event.transaction?.id;
+        const event = hit.fields;
+        const apmDuration = getField(SPAN_DURATION, event) || getField(TRANSACTION_DURATION, event);
+        const id = getField(SPAN_ID, event) || getField(TRANSACTION_ID, event);
+
         if (!id) {
           return undefined;
         }
 
-        const docErrors = errorsByDocId[id] || [];
+        const docErrors = errorsByDocId[id as string] || [];
+
         return {
-          id: event.span?.id ?? event.transaction?.id,
-          timestampUs: event.timestamp?.us ?? toMicroseconds(event[AT_TIMESTAMP]),
-          name: event.span?.name ?? event.transaction?.name,
-          traceId: event.trace.id,
-          duration: resolveDuration(apmDuration, event.duration),
-          ...((event.event?.outcome || event.status?.code) && {
-            status: {
-              fieldName: event.event?.outcome ? EVENT_OUTCOME : STATUS_CODE,
-              value: event.event?.outcome || event.status?.code,
-            },
-          }),
+          id,
+          timestampUs:
+            getField(TIMESTAMP_US, event) ??
+            toMicroseconds(getField(AT_TIMESTAMP, event) as string),
+          name: getField(SPAN_NAME, event) ?? getField(TRANSACTION_NAME, event),
+          traceId: getField(TRACE_ID, event),
+          duration: resolveDuration(apmDuration as number, getField(DURATION, event) as string),
+          ...(getField(EVENT_OUTCOME, event) || getField(STATUS_CODE, event)
+            ? {
+                status: {
+                  fieldName: getField(EVENT_OUTCOME, event) ? EVENT_OUTCOME : STATUS_CODE,
+                  value: getField(EVENT_OUTCOME, event) || getField(STATUS_CODE, event),
+                },
+              }
+            : {}),
           errors: docErrors,
-          parentId: event.parent?.id,
-          serviceName: event.service.name,
-          type: event.span?.subtype || event.span?.type || event.kind,
-        } as TraceItem;
+          parentId: getField(PARENT_ID, event),
+          serviceName: getField(SERVICE_NAME, event),
+          type:
+            getField(SPAN_SUBTYPE, event) || getField(SPAN_TYPE, event) || getField(KIND, event),
+        } as unknown as TraceItem;
       })
       .filter((item): item is TraceItem => !!item),
     unifiedTraceErrors,
   };
 }
+
+const getField = <T>(field: string, record: Record<string, unknown[]>): T => {
+  const fieldValue = record[field];
+
+  return (Array.isArray(fieldValue) ? fieldValue[0] : fieldValue) as T;
+};
 
 /**
  * Resolve either an APM or OTEL duration and if OTEL, format the duration from nanoseconds to microseconds.
