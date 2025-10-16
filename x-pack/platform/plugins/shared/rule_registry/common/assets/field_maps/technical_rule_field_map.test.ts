@@ -90,16 +90,6 @@ it('matches snapshot', () => {
         "required": false,
         "type": "date",
       },
-      "kibana.alert.last_scheduled_actions.date": Object {
-        "array": false,
-        "required": false,
-        "type": "keyword",
-      },
-      "kibana.alert.last_scheduled_actions.group": Object {
-        "array": false,
-        "required": false,
-        "type": "keyword",
-      },
       "kibana.alert.maintenance_window_ids": Object {
         "array": true,
         "required": false,
@@ -274,6 +264,16 @@ it('matches snapshot', () => {
         "type": "keyword",
       },
       "kibana.alert.rule.version": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.scheduled_action.date": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.scheduled_action.group": Object {
         "array": false,
         "required": false,
         "type": "keyword",

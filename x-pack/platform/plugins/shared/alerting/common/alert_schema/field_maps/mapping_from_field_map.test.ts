@@ -236,16 +236,6 @@ describe('mappingFromFieldMap', () => {
                 flapping_history: {
                   type: 'boolean',
                 },
-                last_scheduled_actions: {
-                  properties: {
-                    date: {
-                      type: 'keyword',
-                    },
-                    group: {
-                      type: 'keyword',
-                    },
-                  },
-                },
                 maintenance_window_ids: {
                   type: 'keyword',
                 },
@@ -317,6 +307,16 @@ describe('mappingFromFieldMap', () => {
                       type: 'keyword',
                     },
                     uuid: {
+                      type: 'keyword',
+                    },
+                  },
+                },
+                scheduled_action: {
+                  properties: {
+                    date: {
+                      type: 'keyword',
+                    },
+                    group: {
                       type: 'keyword',
                     },
                   },

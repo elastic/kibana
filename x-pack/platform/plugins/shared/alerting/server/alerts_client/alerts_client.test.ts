@@ -1848,10 +1848,10 @@ describe('Alerts Client', () => {
               },
               source: `
             if (params.containsKey(ctx._source['kibana.alert.uuid'])) {
-              ctx._source['kibana.alert.last_scheduled_actions.group'] = params[ctx._source['kibana.alert.uuid']].group;
-              ctx._source['kibana.alert.last_scheduled_actions.date'] = params[ctx._source['kibana.alert.uuid']].date;
-              if (params[ctx._source['kibana.alert.uuid']].containsKey('throttled')) {
-                ctx._source['kibana.alert.last_scheduled_actions.throttled'] = params[ctx._source['kibana.alert.uuid']].throttled;
+              ctx._source['kibana.alert.scheduled_action.group'] = params[ctx._source['kibana.alert.uuid']].group;
+              ctx._source['kibana.alert.scheduled_action.date'] = params[ctx._source['kibana.alert.uuid']].date;
+              if (params[ctx._source['kibana.alert.uuid']].containsKey('actions')) {
+                ctx._source['kibana.alert.scheduled_action.throttling'] = params[ctx._source['kibana.alert.uuid']].actions;
               }
             }
           `,
