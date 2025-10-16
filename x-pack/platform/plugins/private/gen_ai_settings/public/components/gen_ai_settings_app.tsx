@@ -96,7 +96,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
 
   const showDefaultLlmSetting = featureFlags.getBooleanValue(
     AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-    false
+    true
   );
 
   const connectorDescription = useMemo(() => {
