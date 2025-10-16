@@ -12,6 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import userEvent from '@testing-library/user-event';
 import type { ConfigEntryView } from '../types/types';
+import { FieldType } from '../types/types';
 
 const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   const { form } = useForm();
@@ -35,7 +36,7 @@ const mockOptionalProviderFormFields: ConfigEntryView[] = [
     required: false,
     sensitive: false,
     updatable: true,
-    type: 'map',
+    type: FieldType.MAP,
     supported_task_types: ['completion', 'chat_completion'],
   },
   {
@@ -49,7 +50,7 @@ const mockOptionalProviderFormFields: ConfigEntryView[] = [
     required: false,
     sensitive: false,
     updatable: false,
-    type: 'str',
+    type: FieldType.STRING,
     supported_task_types: ['text_embedding', 'completion', 'chat_completion'],
   },
   {
@@ -64,7 +65,7 @@ const mockOptionalProviderFormFields: ConfigEntryView[] = [
     required: false,
     sensitive: false,
     updatable: false,
-    type: 'int',
+    type: FieldType.INTEGER,
     supported_task_types: ['text_embedding', 'completion', 'chat_completion'],
   },
   {
@@ -78,7 +79,7 @@ const mockOptionalProviderFormFields: ConfigEntryView[] = [
     required: false,
     sensitive: false,
     updatable: false,
-    type: 'str',
+    type: FieldType.STRING,
     supported_task_types: ['text_embedding', 'completion', 'chat_completion'],
   },
 ];
