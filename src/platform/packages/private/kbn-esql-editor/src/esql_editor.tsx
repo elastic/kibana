@@ -80,6 +80,10 @@ import type {
   ESQLEditorDeps,
   ESQLEditorProps as ESQLEditorPropsInternal,
 } from './types';
+import {
+  hasLimitBeforeAggregate,
+  missingSortBeforeLimit,
+} from '@kbn/esql-utils/src/utils/query_parsing_helpers';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -198,10 +202,7 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   const onQuerySubmit = useCallback(
-    (
-      source: TelemetryQuerySubmittedProps['exec_source'],
-      sourceUI: TelemetryQuerySubmittedProps['exec_source_ui']
-    ) => {
+    (source: TelemetryQuerySubmittedProps['exec_source']) => {
       if (isQueryLoading && isLoading && allowQueryCancellation) {
         abortController?.abort();
         setIsQueryLoading(false);
@@ -216,10 +217,15 @@ const ESQLEditorInternal = function ESQLEditor({
         }
 
         //TODO: add rest of options
-        telemetryService.trackQuerySubmitted({
-          exec_source: source,
-          exec_source_ui: sourceUI,
-        });
+        if (currentValue) {
+          telemetryService.trackQuerySubmitted({
+            exec_source: source,
+            query_length: editor1.current?.getModel()?.getValueLength().toString() ?? '0',
+            query_lines: editor1.current?.getModel()?.getLineCount().toString() ?? '0',
+            anti_limit_before_aggregate: hasLimitBeforeAggregate(currentValue),
+            anti_missing_sort_before_limit: missingSortBeforeLimit(currentValue),
+          });
+        }
         onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
       }
     },
@@ -379,7 +385,7 @@ const ESQLEditorInternal = function ESQLEditor({
   editor1.current?.addCommand(
     // eslint-disable-next-line no-bitwise
     monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-    () => onQuerySubmit('manual', 'manual')
+    () => onQuerySubmit('manual')
   );
 
   const styles = esqlEditorStyles(
@@ -961,7 +967,7 @@ const ESQLEditorInternal = function ESQLEditor({
               >
                 <EuiButton
                   color={queryRunButtonProperties.color as EuiButtonColor}
-                  onClick={() => onQuerySubmit('manual', 'external')}
+                  onClick={() => onQuerySubmit('manual')}
                   iconType={queryRunButtonProperties.iconType}
                   size="s"
                   isLoading={isLoading && !allowQueryCancellation}
