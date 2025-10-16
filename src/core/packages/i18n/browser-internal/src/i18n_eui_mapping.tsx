@@ -799,6 +799,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'You can still continue tabbing through other global page landmarks.',
       }
     ),
+    'euiFlyoutMenu.back': i18n.translate('core.euiFlyoutMenu.back', {
+      defaultMessage: 'Back',
+    }),
+    'euiFlyoutMenu.history': i18n.translate('core.euiFlyoutMenu.history', {
+      defaultMessage: 'History',
+    }),
     'euiForm.addressFormErrors': i18n.translate('core.euiForm.addressFormErrors', {
       defaultMessage: 'Please address the highlighted errors.',
     }),

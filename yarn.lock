@@ -2498,13 +2498,11 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@107.0.0":
+"@elastic/eui@file:./elastic_eui_107.0.0_feat_flyout_system_0029.tgz":
   version "107.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-107.0.0.tgz#31a9d6ebe90495224fd136b9ae89318271b014cd"
-  integrity sha512-rFcO5Tdb46HHgNf6L3UH1lR+wZrm4a4qTuGbDM/Pru6Mc9/3vhoxGzpA8VlHIad3BaokVHRL+UqySiPl36WL+A==
+  resolved "file:./elastic_eui_107.0.0_feat_flyout_system_0029.tgz#d29a3c44bcb0d0ad4c3e37615f92b58da62100d7"
   dependencies:
-    "@elastic/eui-theme-common" "5.0.0"
-    "@elastic/prismjs-esql" "^1.1.0"
+    "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
     "@types/numeral" "^2.0.5"
@@ -2536,6 +2534,7 @@
     unified "^9.2.2"
     unist-util-visit "^2.0.3"
     url-parse "^1.5.10"
+    use-sync-external-store "^1.6.0"
     uuid "^8.3.0"
     vfile "^4.2.1"
 
@@ -2662,10 +2661,10 @@
     json-bigint "^1.0.0"
     safe-stable-stringify "^2.4.3"
 
-"@elastic/prismjs-esql@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/prismjs-esql/-/prismjs-esql-1.1.0.tgz#c7f84de21bb453831df7e8565be7430b1b078836"
-  integrity sha512-k2zZfCL4l+qCXfmc9jrnDdEWW2jDPFAHlCq1JAh3x7zWN6Eyc6ACn3oj9oy49xsuAO+BAhQ345uueL8K/3UIKg==
+"@elastic/prismjs-esql@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@elastic/prismjs-esql/-/prismjs-esql-1.1.2.tgz#0f16d98d73b49117b50a22f8a38a2938d34b7b05"
+  integrity sha512-cW/fYEfB/mkqURmEhxz7AX1yqxexKNwSO2VQOAWCkwvXLQirg9AnjDgMZIVTsPc8s4JdI3grA5p5rUruJq9GpA==
 
 "@elastic/react-search-ui-views@1.24.1", "@elastic/react-search-ui-views@^1.24.0":
   version "1.24.1"
@@ -32972,6 +32971,11 @@ use-sync-external-store@^1.0.0, use-sync-external-store@^1.2.0, use-sync-externa
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.4.0.tgz#adbc795d8eeb47029963016cefdf89dc799fcebc"
   integrity sha512-9WXSPC5fMv61vaupRkCKCxsPxBocVnwakBEkMIHHpkTTg6icbJtg6jzgtLDm4bl3cSHAca52rYWih0k4K3PfHw==
+
+use-sync-external-store@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.6.0.tgz#b174bfa65cb2b526732d9f2ac0a408027876f32d"
+  integrity sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==
 
 use@^2.0.0:
   version "2.0.2"
