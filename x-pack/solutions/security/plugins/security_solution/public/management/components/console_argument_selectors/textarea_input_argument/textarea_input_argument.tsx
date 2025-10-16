@@ -94,13 +94,13 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
     const handleClosePopover = useCallback(() => {
       onChange({
         value,
-        valueText,
+        valueText: value.replace(/\r?\n/g, ' ').trim(),
         store: {
           ...state,
           isPopoverOpen: false,
         },
       });
-    }, [onChange, state, value, valueText]);
+    }, [onChange, state, value]);
 
     const handleOpenPopover = useCallback(() => {
       onChange({
@@ -117,12 +117,12 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
       (ev) => {
         const newValue = ev.target.value || '';
         onChange({
+          valueText, // We leave the display text as is until the popup is closed - to avoid UI jankiness
           value: newValue,
-          valueText: newValue.replace(/\r?\n/g, ' ').trim(),
           store: state,
         });
       },
-      [onChange, state]
+      [onChange, state, valueText]
     );
 
     return (
