@@ -7,7 +7,7 @@
 
 import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
 import { setup, assign, fromObservable, fromEventObservable } from 'xstate5';
-import { Observable, filter, map, switchMap, timeout, catchError, throwError } from 'rxjs';
+import { Observable, filter, map, switchMap, timeout, catchError, throwError, of } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { SampleDocument, Streams } from '@kbn/streams-schema';
 import { isEmpty, isNumber } from 'lodash';
@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Condition } from '@kbn/streamlang';
 import { conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
-import { getPercentageFormatter } from '../../../../../util/formatters';
 import { processCondition } from '../../utils';
 
 export interface RoutingSamplesMachineDeps {
@@ -42,7 +41,7 @@ export interface RoutingSamplesContext {
   definition: Streams.WiredStream.GetResponse;
   documents: SampleDocument[];
   documentsError?: Error;
-  approximateMatchingPercentage?: string;
+  approximateMatchingPercentage?: number | null;
   approximateMatchingPercentageError?: Error;
   documentMatchFilter: DocumentMatchFilterOptions;
   selectedPreview?:
@@ -95,7 +94,7 @@ export const routingSamplesMachine = setup({
     storeDocumentsError: assign((_, params: { error: Error | undefined }) => ({
       documentsError: params.error,
     })),
-    storeDocumentCounts: assign((_, params: { count: string }) => ({
+    storeDocumentCounts: assign((_, params: { count?: number | null }) => ({
       approximateMatchingPercentage: params.count,
       approximateMatchingPercentageError: undefined,
     })),
@@ -115,7 +114,7 @@ export const routingSamplesMachine = setup({
     conditionUpdateDebounceTime: 500,
   },
   guards: {
-    isValidSnapshot: (_, params: { context?: SampleDocument[] | string }) =>
+    isValidSnapshot: (_, params: { context?: SampleDocument[] | number | null }) =>
       params.context !== undefined,
   },
 }).createMachine({
@@ -244,7 +243,7 @@ export const routingSamplesMachine = setup({
                   actions: [
                     {
                       type: 'storeDocumentCounts',
-                      params: ({ event }) => ({ count: event.snapshot.context ?? '' }),
+                      params: ({ event }) => ({ count: event.snapshot.context }),
                     },
                   ],
                 },
@@ -296,7 +295,7 @@ export function createDocumentsCountCollectorActor({
   data,
 }: Pick<RoutingSamplesMachineDeps, 'data'>) {
   return fromObservable<
-    string | undefined,
+    number | null | undefined,
     Pick<SearchParams, 'condition' | 'definition' | 'documentMatchFilter'>
   >(({ input }) => {
     return collectDocumentCounts({ data, input });
@@ -333,9 +332,10 @@ function collectDocuments({ data, input }: CollectorParams): Observable<SampleDo
   });
 }
 
-const percentageFormatter = getPercentageFormatter({ precision: 2 });
-
-function collectDocumentCounts({ data, input }: CollectorParams): Observable<string | undefined> {
+function collectDocumentCounts({
+  data,
+  input,
+}: CollectorParams): Observable<number | null | undefined> {
   const abortController = new AbortController();
 
   const { start, end } = getAbsoluteTimestamps(data);
@@ -353,6 +353,10 @@ function collectDocumentCounts({ data, input }: CollectorParams): Observable<str
             !countResult.rawResponse.hits.total || isNumber(countResult.rawResponse.hits.total)
               ? countResult.rawResponse.hits.total
               : countResult.rawResponse.hits.total.value;
+
+          if (!docCount) {
+            return of(null);
+          }
 
           return data.search
             .search(
@@ -377,9 +381,12 @@ function collectDocumentCounts({ data, input }: CollectorParams): Observable<str
                     probability: number;
                     matching_docs: { doc_count: number };
                   };
+
                   const randomSampleDocCount = sampleAgg.doc_count / sampleAgg.probability;
                   const matchingDocCount = sampleAgg.matching_docs.doc_count;
-                  return percentageFormatter.format(matchingDocCount / randomSampleDocCount);
+                  const percentage =
+                    randomSampleDocCount === 0 ? 0 : matchingDocCount / randomSampleDocCount;
+                  return percentage;
                 }
                 return undefined;
               }),

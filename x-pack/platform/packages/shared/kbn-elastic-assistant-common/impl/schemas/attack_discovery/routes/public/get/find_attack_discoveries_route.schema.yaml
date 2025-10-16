@@ -17,9 +17,7 @@ paths:
       x-labels: [ess, serverless]
       operationId: AttackDiscoveryFind
       summary: Finds Attack discoveries that match the search criteria
-      description: Finds Attack discoveries that match the search criteria. Supports free text search, filtering, pagination, and sorting.
-      tags:
-        - Attack discovery API
+      description: Finds Attack discoveries that match the search criteria. Supports free text search, filtering, pagination, and sorting. `Technical preview`
       parameters:
         - name: 'alert_ids'
           description: Filter results to Attack discoveries that include any of the provided alert IDs
