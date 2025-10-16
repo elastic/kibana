@@ -6,7 +6,7 @@
  */
 
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
-import { SecurityPageName, SecurityGroupName } from '../constants';
+import { SecurityGroupName, SecurityPageName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 
@@ -18,7 +18,7 @@ export const createExploreNavigationTree = (
   id: SecurityGroupName.explore,
   title: SecurityLinkGroup[SecurityGroupName.explore].title,
   renderAs: 'panelOpener',
-  iconV2: 'aggregate',
+  iconV2: 'globe',
   sideNavVersion,
   children: [
     {

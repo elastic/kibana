@@ -79,7 +79,7 @@ export const MetricsExperienceGrid = ({
   const {
     currentPageFields = [],
     totalPages = 0,
-    filteredFieldsBySearch = [],
+    filteredFieldsCount = 0,
   } = usePaginatedFields({
     fields,
     dimensions,
@@ -102,8 +102,8 @@ export const MetricsExperienceGrid = ({
   }, [metricsGridWidth, euiTheme]);
 
   const columns = useMemo<EuiFlexGridProps['columns']>(
-    () => Math.min(currentPageFields.length, maxColumns) as EuiFlexGridProps['columns'],
-    [currentPageFields, maxColumns]
+    () => Math.min(filteredFieldsCount, maxColumns) as EuiFlexGridProps['columns'],
+    [filteredFieldsCount, maxColumns]
   );
 
   const handleResize: EuiResizeObserverProps['onResize'] = useCallback(({ width }) => {
@@ -155,7 +155,7 @@ export const MetricsExperienceGrid = ({
                   <strong>
                     {i18n.translate('metricsExperience.grid.metricsCount.label', {
                       defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
-                      values: { count: filteredFieldsBySearch.length },
+                      values: { count: filteredFieldsCount },
                     })}
                   </strong>
                 </EuiText>
