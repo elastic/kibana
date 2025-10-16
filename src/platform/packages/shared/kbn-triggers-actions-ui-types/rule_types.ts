@@ -8,6 +8,7 @@
  */
 
 import type { RuleType as CommonRuleType } from '@kbn/alerting-types';
+import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { ActionVariables } from './action_variable_types';
 
 export interface RuleType<
@@ -34,6 +35,7 @@ export interface RuleType<
   enabledInLicense: boolean;
   hasAlertsMappings?: boolean;
   isInternallyManaged: boolean;
+  getDescriptionFields?: GetDescriptionFieldsFn;
 }
 
 export type RuleTypeIndex = Map<string, RuleType>;
