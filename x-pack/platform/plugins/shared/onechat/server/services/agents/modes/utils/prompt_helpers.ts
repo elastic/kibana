@@ -12,14 +12,14 @@ export const customInstructionsBlock = (instructions: string | undefined): strin
     return '';
   }
 
-  return `CUSTOM INSTRUCTIONS
+  return `## CUSTOM INSTRUCTIONS
 
 - Apply the organization-specific custom instructions below. If they conflict with the NON-NEGOTIABLE RULES, the NON-NEGOTIABLE RULES take precedence.
 
 Custom Instruction:
-\`\`\`text
+"""
 ${instructions}
-\`\`\``;
+"""`;
 };
 
 export const formatDate = (date: Date = new Date()): string => {
