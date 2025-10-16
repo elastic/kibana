@@ -63,7 +63,7 @@ export interface HookServices {
 
 export interface ActionsApiRequestHandlerContext {
   getActionsClient: () => ActionsClient;
-  listTypes: ActionTypeRegistry['list'];
+  listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
 }
 
 export type ActionsRequestHandlerContext = CustomRequestHandlerContext<{
@@ -200,6 +200,7 @@ export interface ActionType<
   };
   isSystemActionType?: boolean;
   subFeature?: SubFeature;
+  isDeprecated?: boolean;
   /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.

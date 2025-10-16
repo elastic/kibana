@@ -22,11 +22,6 @@
       "branchType": "release"
     },
     {
-      "version": "8.18.9",
-      "branch": "8.18",
-      "branchType": "release"
-    },
-    {
       "version": "7.17.30",
       "branch": "7.17",
       "branchType": "unmaintained"
