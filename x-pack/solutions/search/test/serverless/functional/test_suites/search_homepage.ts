@@ -101,11 +101,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.click('console_tutorials_esql');
           await testSubjects.existOrFail('consoleEditorContainer');
         });
-        it('clicking on tsds tutorial open console', async () => {
-          await testSubjects.existOrFail('console_tutorials_tsds');
-          await testSubjects.click('console_tutorials_tsds');
-          await testSubjects.existOrFail('consoleEditorContainer');
-        });
+        // TODO:  uncomment below lines when we are ready to show TSDS tutorial. review https://github.com/elastic/kibana/pull/237384#issuecomment-3411670210
+        // it('clicking on tsds tutorial open console', async () => {
+        //   await testSubjects.existOrFail('console_tutorials_tsds');
+        //   await testSubjects.click('console_tutorials_tsds');
+        //   await testSubjects.existOrFail('consoleEditorContainer');
+        // });
       });
 
       describe('Alternate Solutions', function () {
