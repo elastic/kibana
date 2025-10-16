@@ -22,6 +22,7 @@ import deepEqual from 'fast-deep-equal';
 
 import useDebounce from 'react-use/lib/useDebounce';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Agent } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../common/lib/kibana';
 import { useAllAgents } from './use_all_agents';
 
@@ -41,6 +42,9 @@ import {
   AGENT_POLICY_LABEL,
   AGENT_SELECTION_LABEL,
   NO_AGENT_AVAILABLE_TITLE,
+  DEGRADED_AGENT_TOOLTIP,
+  DEGRADED_AGENTS_CALLOUT_TITLE,
+  DEGRADED_AGENTS_CALLOUT_DESCRIPTION,
 } from './translations';
 
 import type { GroupOption, AgentSelection } from './types';
@@ -88,9 +92,9 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
   // Create a memoized agent lookup map for O(1) access instead of O(n) find
   const agentMap = useMemo(() => {
-    const map = new Map();
+    const map = new Map<string, Agent>();
     if (agentList?.agents) {
-      agentList.agents.forEach((agent: any) => {
+      (agentList.agents as Agent[]).forEach((agent) => {
         const agentId = agent.local_metadata?.elastic?.agent?.id;
         if (agentId) {
           map.set(agentId, agent);
@@ -197,7 +201,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
       if (value?.groupType === AGENT_GROUP_KEY.Agent) {
         // For individual agents, determine health color based on Osquery availability
         // Use O(1) Map lookup instead of O(n) array find
-        const agent = agentMap.get(value.id);
+        const agent: Agent | undefined = agentMap.get(value.id);
 
         let healthColor: 'success' | 'warning' | 'danger' = 'danger';
         let availability: 'online' | 'degraded' | 'osquery_unavailable' | 'offline' = 'offline';
@@ -229,10 +233,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
         // Add tooltip for degraded agents with healthy Osquery
         if (availability === 'degraded') {
           return (
-            <EuiToolTip
-              position="right"
-              content="Agent is degraded but Osquery component is healthy. Queries should work normally."
-            >
+            <EuiToolTip position="right" content={DEGRADED_AGENT_TOOLTIP}>
               {healthContent}
             </EuiToolTip>
           );
@@ -293,13 +294,13 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
   // Memoize the check for degraded agents to avoid iterating on every render
   const hasDegradedAgents = useMemo(() => {
-    if (!agentList?.agents || agentList.agents.length === 0) {
+    if (!agentsFetched || !agentList?.agents || agentList.agents.length === 0) {
       return false;
     }
-    return agentList.agents.some(
-      (agent: any) => getAgentOsqueryAvailability(agent) === 'degraded'
+    return (agentList.agents as Agent[]).some(
+      (agent) => getAgentOsqueryAvailability(agent) === 'degraded'
     );
-  }, [agentList?.agents]);
+  }, [agentsFetched, agentList?.agents]);
 
   const renderAgentStatusInfo = () => {
     // Only show if we have degraded agents (with healthy Osquery)
@@ -310,12 +311,9 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
             color="warning"
             size="s"
             iconType="alert"
-            title="Degraded agents with healthy Osquery"
+            title={DEGRADED_AGENTS_CALLOUT_TITLE}
           >
-            <p>
-              Some agents are degraded but their Osquery component is healthy. These agents are
-              marked with an orange indicator and can still run queries successfully.
-            </p>
+            <p>{DEGRADED_AGENTS_CALLOUT_DESCRIPTION}</p>
           </EuiCallOut>
           <EuiSpacer size="s" />
         </>
