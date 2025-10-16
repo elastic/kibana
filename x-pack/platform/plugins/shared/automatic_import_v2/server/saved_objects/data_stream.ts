@@ -33,10 +33,10 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
             type: "keyword",
           },
           job_type: {
-            type: "keyword", // TODO update to an enum of supported job types,
+            type: "keyword",
           },
           status: {
-            type: "keyword", // e.g., 'pending', 'processing', 'completed', 'failed'
+            type: "keyword",
           },
         },
       },

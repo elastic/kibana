@@ -14,7 +14,7 @@ export const dataStreamSchemaV1 = schema.object({
   data_stream_id: schema.string({ maxLength: 50, minLength: 1 }),
   job_info: schema.object({
     job_id: schema.string({ maxLength: 50, minLength: 1 }),
-    job_type: schema.string({ maxLength: 50, minLength: 1 }),
+    job_type: schema.string({ maxLength: 50, minLength: 1 }), // TODO: Add Enum
     status: schema.oneOf([
       schema.literal('pending'),
       schema.literal('processing'),
