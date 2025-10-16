@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { VisualizationToolbarProps } from '../../../types';
-import type { ContentMap } from '../../../shared_components/flyout_toolbar';
+import type { ToolbarContentMap } from '../../../shared_components/flyout_toolbar';
 import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
 import type { HeatmapVisualizationState } from '../types';
 import {
@@ -20,7 +20,7 @@ import {
 } from './style_settings';
 
 export function HeatmapFlyoutToolbar(props: VisualizationToolbarProps<HeatmapVisualizationState>) {
-  const datatableToolbarContentMap: ContentMap<HeatmapVisualizationState> = {
+  const datatableToolbarContentMap: ToolbarContentMap<HeatmapVisualizationState> = {
     style: HeatmapStyleSettings,
   };
   return <FlyoutToolbar {...props} contentMap={datatableToolbarContentMap} />;

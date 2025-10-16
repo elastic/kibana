@@ -17,12 +17,12 @@ import type { VisualizationToolbarProps } from '../../../types';
 import { type GaugeVisualizationState } from '../constants';
 import { AppearanceSettings } from './appearance_settings';
 import { TitlesAndTextSettings } from './titles_and_text_settings';
-import { FlyoutToolbar, type ContentMap } from '../../../shared_components/flyout_toolbar';
+import { FlyoutToolbar, type ToolbarContentMap } from '../../../shared_components/flyout_toolbar';
 
 type GaugeToolbarProps = VisualizationToolbarProps<GaugeVisualizationState>;
 
 export function GaugeFlyoutToolbar(props: GaugeToolbarProps) {
-  const gaugeToolbarContentMap: ContentMap<GaugeVisualizationState> = {
+  const gaugeToolbarContentMap: ToolbarContentMap<GaugeVisualizationState> = {
     style: GaugeStyleSettings,
   };
   return <FlyoutToolbar {...props} contentMap={gaugeToolbarContentMap} />;

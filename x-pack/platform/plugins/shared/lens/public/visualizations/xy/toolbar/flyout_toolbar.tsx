@@ -18,7 +18,7 @@ import {
   hasNumericHistogramDimension,
   type AxesSettingsConfigKeys,
 } from '../../../shared_components';
-import type { ContentMap } from '../../../shared_components/flyout_toolbar';
+import type { ToolbarContentMap } from '../../../shared_components/flyout_toolbar';
 import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
 import type { VisualizationToolbarProps } from '../../../types';
 import type { XYState } from '../types';
@@ -39,7 +39,7 @@ import { getScaleType } from '../to_expression';
 type Props = VisualizationToolbarProps<XYState>;
 
 export const XyFlyoutToolbar: React.FC<Props> = (props) => {
-  const xyToolbarContentMap: ContentMap<XYState> = {
+  const xyToolbarContentMap: ToolbarContentMap<XYState> = {
     style: XyStyleSettings,
   };
   return <FlyoutToolbar {...props} contentMap={xyToolbarContentMap} />;

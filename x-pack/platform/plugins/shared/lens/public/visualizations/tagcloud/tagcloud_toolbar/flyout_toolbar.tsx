@@ -7,14 +7,14 @@
 
 import React from 'react';
 
-import type { ContentMap } from '../../../shared_components/flyout_toolbar';
+import type { ToolbarContentMap } from '../../../shared_components/flyout_toolbar';
 import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
 import type { VisualizationToolbarProps } from '../../../types';
 import type { TagcloudState } from '../types';
 import { TagcloudAppearanceSettings } from './appearance_settings';
 
 export function TagcloudFlyoutToolbar(props: VisualizationToolbarProps<TagcloudState>) {
-  const flyoutToolbarContentMap: ContentMap<TagcloudState> = {
+  const flyoutToolbarContentMap: ToolbarContentMap<TagcloudState> = {
     style: TagcloudAppearanceSettings,
   };
   return <FlyoutToolbar {...props} contentMap={flyoutToolbarContentMap} />;

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ContentMap } from '../../../shared_components/flyout_toolbar';
+import type { ToolbarContentMap } from '../../../shared_components/flyout_toolbar';
 import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
 import type { VisualizationToolbarProps } from '../../../types';
 import { EmptySizeRatios, type PieVisualizationState } from '../../../../common/types';
@@ -20,7 +20,7 @@ import { PartitionChartsMeta } from '../partition_charts_meta';
 export function PartitionFlyoutToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
   const { isDisabled: hasDisabledSytleSettings } =
     PartitionChartsMeta[props.state.shape].toolbarPopover;
-  const datatableToolbarContentMap: ContentMap<PieVisualizationState> = {
+  const datatableToolbarContentMap: ToolbarContentMap<PieVisualizationState> = {
     style: hasDisabledSytleSettings ? undefined : PartitionStyleSettings,
   };
   return <FlyoutToolbar {...props} contentMap={datatableToolbarContentMap} />;

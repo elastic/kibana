@@ -8,13 +8,13 @@
 import React from 'react';
 
 import type { VisualizationToolbarProps } from '../../../types';
-import type { ContentMap } from '../../../shared_components/flyout_toolbar';
+import type { ToolbarContentMap } from '../../../shared_components/flyout_toolbar';
 import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
 import { MetricAppearanceSettings } from './appearance_settings';
 import type { MetricVisualizationState } from '../types';
 
 export function MetricFlyoutToolbar(props: VisualizationToolbarProps<MetricVisualizationState>) {
-  const metricToolbarContentMap: ContentMap<MetricVisualizationState> = {
+  const metricToolbarContentMap: ToolbarContentMap<MetricVisualizationState> = {
     style: MetricAppearanceSettings,
   };
   return <FlyoutToolbar {...props} contentMap={metricToolbarContentMap} />;

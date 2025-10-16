@@ -54,25 +54,18 @@ const baseToolbarOptions: ToolbarOption[] = [
   // },
 ];
 
-// A component that will be rendered as content
-type ContentComponent<VisualizationState> = React.ComponentType<
-  VisualizationToolbarProps<VisualizationState>
->;
-
-// The map of options to their corresponding components
-export type ContentMap<VisualizationState> = Partial<
-  Record<Options, ContentComponent<VisualizationState>>
->;
-
-interface FlyoutToolbarProps<VisualizationState>
-  extends VisualizationToolbarProps<VisualizationState> {
-  contentMap: ContentMap<VisualizationState>;
+export interface ToolbarContentMap<S> {
+  style?: React.ComponentType<VisualizationToolbarProps<S>>;
+  legend?: React.ComponentType<VisualizationToolbarProps<S>>;
+  filters?: React.ComponentType<VisualizationToolbarProps<S>>;
 }
 
-export function FlyoutToolbar<VisualizationState>({
+export function FlyoutToolbar<S>({
   contentMap,
   ...flyoutContentProps
-}: FlyoutToolbarProps<VisualizationState>) {
+}: VisualizationToolbarProps<S> & {
+  contentMap: ToolbarContentMap<S>;
+}) {
   const [isFlyoutVisible, setFlyoutVisible] = useState(false);
   const [idSelected, setIdSelected] = useState<Options | ''>('');
 
