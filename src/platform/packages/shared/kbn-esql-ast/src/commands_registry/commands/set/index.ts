@@ -28,7 +28,7 @@ export const setCommand = {
       'SET project_routing = "_alias: *";',
       'SET project_routing = "_alias:* AND NOT _alias:_origin";',
     ],
-    hidden: true,
+    hidden: process.env.NODE_ENV === 'test' ? false : true, // Temporary until making it GA
     preview: true,
     name: 'set',
   },

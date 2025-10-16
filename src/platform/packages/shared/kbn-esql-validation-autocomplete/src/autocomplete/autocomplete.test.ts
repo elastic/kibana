@@ -36,21 +36,6 @@ import { suggest } from './autocomplete';
 import { editorExtensions } from '../__tests__/helpers';
 import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
 
-// Mock the setCommand to have hidden: false
-jest.mock('@kbn/esql-ast/src/commands_registry/commands/set', () => {
-  const actual = jest.requireActual('@kbn/esql-ast/src/commands_registry/commands/set');
-  return {
-    ...actual,
-    setCommand: {
-      ...actual.setCommand,
-      metadata: {
-        ...actual.setCommand.metadata,
-        hidden: false,
-      },
-    },
-  };
-});
-
 const getRecommendedQueriesSuggestionsFromTemplates = (
   fromCommand: string,
   timeField?: string,
