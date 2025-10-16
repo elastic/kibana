@@ -9,13 +9,12 @@ import React from 'react';
 import { css } from '@emotion/react';
 
 interface EvaluatorBadgesGroupProps {
-  relevance?: number;
-  precision?: number;
-  recall?: number;
-  groundedness?: number;
-  regex?: number;
-  criteria?: number;
-  variant?: 'default' | 'conversation-average';
+  relevanceScore?: number;
+  precisionScore?: number;
+  recallScore?: number;
+  groundednessScore?: number;
+  regexScore?: number;
+  criteriaScore?: number;
 }
 
 const getEvaluatorConfig = (key: string, value: number) => {
@@ -48,17 +47,6 @@ const getEvaluatorConfig = (key: string, value: number) => {
   return configs[key] || configs.relevance;
 };
 
-const colorMap = {
-  good: {
-    text: '#017d73',
-    background: '#d3f8d3',
-  },
-  bad: {
-    text: '#8b0000',
-    background: '#ffe6e6',
-  },
-};
-
 // eslint-disable-next-line @elastic/eui/no-css-color
 const badgeStyles = css`
   display: flex;
@@ -74,23 +62,22 @@ const badgeStyles = css`
   justify-content: flex-start;
 `;
 
-export const EvaluatorBadgesGroup: React.FC<EvaluatorBadgesGroupProps> = ({
-  relevance,
-  precision,
-  recall,
-  groundedness,
-  regex,
-  criteria,
-  variant = 'default',
+export const EvaluatorBadgesAverage: React.FC<EvaluatorBadgesGroupProps> = ({
+  relevanceScore,
+  precisionScore,
+  recallScore,
+  groundednessScore,
+  regexScore,
+  criteriaScore,
 }) => {
   // Create array of evaluation data for dynamic rendering
   const evaluations = [
-    { key: 'relevance', value: relevance },
-    { key: 'groundedness', value: groundedness },
-    { key: 'criteria', value: criteria },
-    { key: 'regex', value: regex },
-    { key: 'recall', value: recall },
-    { key: 'precision', value: precision },
+    { key: 'relevance', value: relevanceScore },
+    { key: 'groundedness', value: groundednessScore },
+    { key: 'criteria', value: criteriaScore },
+    { key: 'regex', value: regexScore },
+    { key: 'recall', value: recallScore },
+    { key: 'precision', value: precisionScore },
   ].filter((x) => x.value !== undefined);
 
   return (
@@ -98,30 +85,21 @@ export const EvaluatorBadgesGroup: React.FC<EvaluatorBadgesGroupProps> = ({
       style={{
         display: 'flex',
         gap: '8px',
-        flexDirection: variant === 'conversation-average' ? 'row' : 'column',
+        flexDirection: 'row',
       }}
     >
       {evaluations.map(({ key, value }) => {
         const config = getEvaluatorConfig(key, value!);
-        const isGoodScore = value! >= 0.5;
 
         return (
           <div
             key={key}
-            css={badgeStyles}
+            css={[badgeStyles]}
             style={{
-              backgroundColor:
-                variant === 'conversation-average'
-                  ? '#f3f4f6'
-                  : isGoodScore
-                  ? colorMap.good.background
-                  : colorMap.bad.background,
-              color:
-                variant === 'conversation-average'
-                  ? '#6b7280'
-                  : isGoodScore
-                  ? colorMap.good.text
-                  : colorMap.bad.text,
+              // eslint-disable-next-line @elastic/eui/no-css-color
+              backgroundColor: '#f3f4f6',
+              // eslint-disable-next-line @elastic/eui/no-css-color
+              color: '#6b7280',
             }}
           >
             {config.icon}

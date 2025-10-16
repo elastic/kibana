@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlexGroup,
   EuiText,
@@ -21,7 +21,8 @@ import type { EvaluationScore } from '../../../../common/http_api/evaluations';
 import { ChatMessageText } from '../conversations/conversation_rounds/chat_message_text';
 import { useEvaluations } from '../../context/evaluations/evaluations_context';
 import { RoundSteps } from '../conversations/conversation_rounds/round_thinking/steps/round_steps';
-import { EvaluatorBadgesGroup } from './evaluator_badges_group';
+import { EvaluatorBadgesRound } from './evaluation_badges_round';
+import { EvaluationFlyout } from './evaluation_flyout';
 
 interface EvaluationRoundProps {
   round: ConversationRound;
@@ -41,22 +42,23 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
   const { euiTheme } = useEuiTheme();
   const { showThinking } = useEvaluations();
 
-  const relevanceScore = roundEvaluation?.find((score) => score.evaluatorId === 'relevance')?.score;
-  const precisionScore = roundEvaluation?.find((score) => score.evaluatorId === 'precision')?.score;
-  const recallScore = roundEvaluation?.find((score) => score.evaluatorId === 'recall')?.score;
-  const groundednessScore = roundEvaluation?.find(
-    (score) => score.evaluatorId === 'groundedness'
-  )?.score;
-  const regexScore = roundEvaluation?.find((score) => score.evaluatorId === 'regex')?.score;
-  const criteriaScore = roundEvaluation?.find((score) => score.evaluatorId === 'criteria')?.score;
+  const [isOpen, setIsOpen] = useState(false);
+  const [analysis, setAnalysis] = useState<Record<string, any> | undefined>();
+
+  const relevanceResult = roundEvaluation?.find((score) => score.evaluatorId === 'relevance');
+  const precisionResult = roundEvaluation?.find((score) => score.evaluatorId === 'precision');
+  const recallResult = roundEvaluation?.find((score) => score.evaluatorId === 'recall');
+  const groundednessResult = roundEvaluation?.find((score) => score.evaluatorId === 'groundedness');
+  const regexResult = roundEvaluation?.find((score) => score.evaluatorId === 'regex');
+  const criteriaResult = roundEvaluation?.find((score) => score.evaluatorId === 'criteria');
 
   const showAdditionalContent = [
-    relevanceScore,
-    precisionScore,
-    recallScore,
-    groundednessScore,
-    regexScore,
-    criteriaScore,
+    relevanceResult?.score,
+    precisionResult?.score,
+    recallResult?.score,
+    groundednessResult?.score,
+    regexResult?.score,
+    criteriaResult?.score,
   ].some((score) => score !== undefined && score !== null);
 
   const inputPanelStyles = css`
@@ -70,6 +72,16 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
     background-color: ${euiTheme.colors.emptyShade};
     padding: 24px;
   `;
+
+  const openFlyout = (roundAnalysis: Record<string, any>) => {
+    setAnalysis(roundAnalysis);
+    setIsOpen(true);
+  };
+
+  const closeFlyout = () => {
+    setAnalysis(undefined);
+    setIsOpen(false);
+  };
 
   return (
     <div css={roundContainerStyles}>
@@ -186,13 +198,14 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
                 >
                   QUANTITATIVE REVIEW
                 </EuiText>
-                <EvaluatorBadgesGroup
-                  relevance={relevanceScore}
-                  precision={precisionScore}
-                  recall={recallScore}
-                  groundedness={groundednessScore}
-                  regex={regexScore}
-                  criteria={criteriaScore}
+                <EvaluatorBadgesRound
+                  relevance={relevanceResult}
+                  precision={precisionResult}
+                  recall={recallResult}
+                  groundedness={groundednessResult}
+                  regex={regexResult}
+                  criteria={criteriaResult}
+                  openFlyout={openFlyout}
                 />
               </div>
               <EuiHorizontalRule margin="xs" />
@@ -232,6 +245,7 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      <EvaluationFlyout isOpen={isOpen} onClose={closeFlyout} content={analysis} />
     </div>
   );
 };

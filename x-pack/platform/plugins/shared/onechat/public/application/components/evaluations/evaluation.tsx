@@ -14,8 +14,8 @@ import {
   useConversationTitle,
 } from '../../hooks/use_conversation';
 import { EvaluationRound } from './evaluation_round';
-import { EvaluatorBadgesGroup } from './evaluator_badges_group';
 import { calculateAverages } from './utils/calculateEvaluationAverages';
+import { EvaluatorBadgesAverage } from './evaluation_badges_average';
 
 export const Evaluation: React.FC = () => {
   const conversationRounds = useConversationRounds();
@@ -73,14 +73,13 @@ export const Evaluation: React.FC = () => {
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EvaluatorBadgesGroup
-                relevance={averages.relevance ?? undefined}
-                precision={averages.precision ?? undefined}
-                recall={averages.recall ?? undefined}
-                groundedness={averages.groundedness ?? undefined}
-                regex={averages.regex ?? undefined}
-                criteria={averages.criteria ?? undefined}
-                variant="conversation-average"
+              <EvaluatorBadgesAverage
+                relevanceScore={averages.relevance ?? undefined}
+                precisionScore={averages.precision ?? undefined}
+                recallScore={averages.recall ?? undefined}
+                groundednessScore={averages.groundedness ?? undefined}
+                regexScore={averages.regex ?? undefined}
+                criteriaScore={averages.criteria ?? undefined}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
