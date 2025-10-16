@@ -35,7 +35,7 @@ const scheduledReportEventTypes: Record<
   scheduled_report_delete: 'deletion',
 };
 
-interface ScheduledReportAuditEventParams {
+export interface ScheduledReportAuditEventParams {
   action: ScheduledReportAuditAction;
   outcome?: EcsEvent['outcome'];
   savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];

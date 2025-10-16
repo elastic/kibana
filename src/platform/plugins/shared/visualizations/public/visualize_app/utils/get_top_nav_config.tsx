@@ -189,17 +189,19 @@ export const getTopNavConfig = (
           }
 
           if (stateTransfer) {
-            stateTransfer.navigateToWithEmbeddablePackage(app, {
-              state: {
-                type: VISUALIZE_EMBEDDABLE_TYPE,
-                serializedState: {
-                  rawState: {
-                    savedObjectId: id,
+            stateTransfer.navigateToWithEmbeddablePackages(app, {
+              state: [
+                {
+                  type: VISUALIZE_EMBEDDABLE_TYPE,
+                  serializedState: {
+                    rawState: {
+                      savedObjectId: id,
+                    },
                   },
+                  embeddableId: saveOptions.copyOnSave ? undefined : embeddableId,
+                  searchSessionId: data.search.session.getSessionId(),
                 },
-                embeddableId: saveOptions.copyOnSave ? undefined : embeddableId,
-                searchSessionId: data.search.session.getSessionId(),
-              },
+              ],
               path,
             });
           } else {
@@ -253,15 +255,17 @@ export const getTopNavConfig = (
       return;
     }
 
-    stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
-      state: {
-        serializedState: serializeState({
-          serializedVis: vis.serialize(),
-        }),
-        embeddableId,
-        type: VISUALIZE_EMBEDDABLE_TYPE,
-        searchSessionId: data.search.session.getSessionId(),
-      },
+    stateTransfer.navigateToWithEmbeddablePackages(originatingApp, {
+      state: [
+        {
+          serializedState: serializeState({
+            serializedVis: vis.serialize(),
+          }),
+          embeddableId,
+          type: VISUALIZE_EMBEDDABLE_TYPE,
+          searchSessionId: data.search.session.getSessionId(),
+        },
+      ],
       path: originatingPath,
     });
   };
@@ -327,6 +331,7 @@ export const getTopNavConfig = (
                 pdfReports: {
                   draftModeCallOut: (
                     <EuiCallOut
+                      announceOnMount
                       color="warning"
                       iconType="warning"
                       title={i18n.translate('visualizations.exports.pdfReports.warning.title', {
@@ -345,6 +350,7 @@ export const getTopNavConfig = (
                 imageReports: {
                   draftModeCallOut: (
                     <EuiCallOut
+                      announceOnMount
                       color="warning"
                       iconType="warning"
                       title={i18n.translate('visualizations.exports.imageReports.warning.title', {
@@ -363,6 +369,7 @@ export const getTopNavConfig = (
                 csvReports: {
                   draftModeCallOut: (
                     <EuiCallOut
+                      announceOnMount
                       color="warning"
                       iconType="warning"
                       title={i18n.translate('visualizations.exports.csvReports.warning.title', {
@@ -602,19 +609,21 @@ export const getTopNavConfig = (
                   history.replace(appPath);
                   setActiveUrl(appPath);
 
-                  stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-                    state: {
-                      serializedState: serializeState({
-                        serializedVis: vis.serialize(),
-                        titles: {
-                          title: newTitle,
-                          description: newDescription,
-                        },
-                      }),
-                      embeddableId,
-                      type: VISUALIZE_EMBEDDABLE_TYPE,
-                      searchSessionId: data.search.session.getSessionId(),
-                    },
+                  stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+                    state: [
+                      {
+                        serializedState: serializeState({
+                          serializedVis: vis.serialize(),
+                          titles: {
+                            title: newTitle,
+                            description: newDescription,
+                          },
+                        }),
+                        embeddableId,
+                        type: VISUALIZE_EMBEDDABLE_TYPE,
+                        searchSessionId: data.search.session.getSessionId(),
+                      },
+                    ],
                     path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
                   });
 
