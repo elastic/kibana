@@ -9,11 +9,13 @@ import pMap from 'p-map';
 import { chunk, flatten, omit } from 'lodash';
 import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
+import { RRule } from '@kbn/rrule';
 import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
 import type {
   ConcreteTaskInstance,
   IntervalSchedule,
+  RruleSchedule,
   ScheduleOptions,
   TaskInstanceWithDeprecatedFields,
   TaskInstanceWithId,
@@ -23,6 +25,7 @@ import type { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
 import type { ErrorOutput } from './lib/bulk_operation_buffer';
+import _ from 'lodash';
 
 const VERSION_CONFLICT_STATUS = 409;
 const BULK_ACTION_SIZE = 100;
@@ -207,28 +210,35 @@ export class TaskScheduling {
    * `schedule` and `runAt` will be recalculated after task run finishes
    *
    * @param {string[]} taskIds  - list of task ids
-   * @param {IntervalSchedule} schedule  - new schedule
+   * @param {IntervalSchedule | RruleSchedule} schedule  - new schedule
    * @returns {Promise<BulkUpdateTaskResult>}
    */
   public async bulkUpdateSchedules(
     taskIds: string[],
-    schedule: IntervalSchedule
+    schedule: IntervalSchedule | RruleSchedule
   ): Promise<BulkUpdateTaskResult> {
     return retryableBulkUpdate({
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
-      filter: (task) =>
-        task.status === TaskStatus.Idle && task.schedule?.interval !== schedule.interval,
+      filter: (task) => task.status === TaskStatus.Idle && !_.isEqual(task.schedule, schedule),
       map: (task) => {
-        const oldIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
+        const { rrule, interval } = schedule || {};
+        let nextRunAt: number | undefined;
 
-        // computing new runAt using formula:
-        // newRunAt = oldRunAt - oldInterval + newInterval
-        const newRunAtInMs = Math.max(
-          Date.now(),
-          task.runAt.getTime() - oldIntervalInMs + parseIntervalAsMillisecond(schedule.interval)
-        );
+        if (interval) {
+          nextRunAt = task.scheduledAt.getTime() + parseIntervalAsMillisecond(interval);
+        } else if (rrule) {
+          const _rrule = new RRule({
+            ...rrule,
+            dtstart: task.scheduledAt,
+          });
+
+          // adding 1ms for the slim chance that scheduled.At === now
+          nextRunAt = _rrule.after(new Date(Date.now() + 1))?.getTime();
+        }
+
+        const newRunAtInMs = Math.max(Date.now(), nextRunAt!);
 
         return { ...task, schedule, runAt: new Date(newRunAtInMs) };
       },
