@@ -584,8 +584,18 @@ describe('StatusRuleExecutor', () => {
     const maxPeriod = 60000; // 1 minute
 
     it('should return the correct range for a default rule', () => {
-      const range = statusRule.getRange(maxPeriod);
-      statusRule.params = {};
+      const defaultStatusRule = new StatusRuleExecutor(esClient, serverMock, monitorClient, {
+        params: {},
+        services: {
+          uiSettingsClient,
+          savedObjectsClient: soClient,
+          scopedClusterClient: { asCurrentUser: mockEsClient },
+        },
+        rule: {
+          name: 'test',
+        },
+      } as any);
+      const range = defaultStatusRule.getRange(maxPeriod);
       const expectedFrom = moment()
         .subtract(maxPeriod * 1, 'milliseconds')
         .subtract(5, 'minutes')
