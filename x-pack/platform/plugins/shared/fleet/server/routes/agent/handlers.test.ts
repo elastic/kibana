@@ -42,9 +42,12 @@ jest.mock('../../services/agents/agent_metrics', () => ({
 
 describe('Handlers', () => {
   // Helper function to create mock Elasticsearch errors
-  const createMockESError = (errorBody: any) => {
+  const createMockESError = (errorBody: any, statusCode: number = 400) => {
     const error = new Error('ResponseError') as any;
-    error.meta = { body: errorBody };
+    error.meta = {
+      body: errorBody,
+      statusCode: statusCode,
+    };
     Object.setPrototypeOf(error, errors.ResponseError.prototype);
     return error;
   };
@@ -106,7 +109,7 @@ describe('Handlers', () => {
       });
     });
 
-    it('should let ES validation errors bubble up to global error handler', async () => {
+    it('should let ES parsing errors bubble up to global error handler', async () => {
       const elasticsearchError = createMockESError({
         error: {
           type: 'parsing_exception',
@@ -127,7 +130,7 @@ describe('Handlers', () => {
       );
     });
 
-    it('should let illegal_argument_exception errors bubble up to global error handler', async () => {
+    it('should let ES argument errors bubble up to global error handler', async () => {
       const elasticsearchError = createMockESError({
         error: {
           type: 'illegal_argument_exception',

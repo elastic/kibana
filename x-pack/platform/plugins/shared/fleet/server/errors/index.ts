@@ -241,48 +241,20 @@ export class ArtifactsElasticsearchError extends FleetError {
   }
 }
 
-export class FleetElasticsearchValidationError extends FleetError {
+export class FleetElasticsearchValidationError extends FleetErrorWithStatusCode {
   constructor(esError: Error) {
-    let message = 'Invalid search parameter';
+    let statusCode: number | undefined;
+    let message = esError.message;
 
+    // Extract the original ES status code and ensure we have meta with statusCode
     if (isESClientError(esError)) {
-      const errorBody = esError.meta.body as ElasticsearchErrorDetails;
-
-      // Try root_cause first (most specific error), then main reason
-      if ((errorBody?.error as any)?.root_cause?.[0]?.reason) {
-        message = (errorBody.error as any).root_cause[0].reason;
-      } else if ((errorBody?.error as any)?.reason) {
-        message = (errorBody.error as any).reason;
-      }
+      statusCode = esError.meta.statusCode;
+      // Use the ES client's formatted message if available
+      message = esError.message;
     }
 
-    super(`Invalid search parameter: ${message}`, esError);
-  }
-
-  /**
-   * Determines if an Elasticsearch error should be treated as a validation error (400-level)
-   */
-  static isValidationError(error: Error): boolean {
-    if (!isESClientError(error)) {
-      return false;
-    }
-
-    const errorBody = error.meta.body as ElasticsearchErrorDetails;
-    const errorType = errorBody?.error?.type;
-
-    // Get the most specific error message for content-based checks
-    let errorMessage = errorBody?.error?.reason || '';
-    if ((errorBody?.error as any)?.root_cause?.[0]?.reason) {
-      errorMessage = (errorBody.error as any).root_cause[0].reason;
-    }
-
-    return (
-      errorType === 'parsing_exception' ||
-      errorType === 'illegal_argument_exception' ||
-      errorType === 'search_phase_execution_exception' ||
-      errorMessage.includes('No mapping found for') ||
-      errorMessage.includes('Unknown field')
-    );
+    // Pass through the ES error message, status code, and original error as meta
+    super(message, statusCode, esError);
   }
 }
 
