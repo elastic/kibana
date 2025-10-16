@@ -47,9 +47,7 @@ export const siemAgentCreator = (): BuiltInAgentDefinition => {
        - For alert_counts: Call assistant_settings with toolId="core.security.alert_counts"
        - For open_and_acknowledged_alerts: Call assistant_settings with toolId="core.security.open_and_acknowledged_alerts"
        - For entity_risk_score: Call assistant_settings with toolId="core.security.entity_risk_score"
-        - Display the settings to the user and ask for explicit confirmation
-        - WAIT for the user to confirm the settings before proceeding
-        - Only after user confirmation, execute the tool
+       - Use the retrieved settings to execute the tool directly
 
     4. **For product documentation tool**:
        - Call 'core.security.product_documentation' directly with the user's query
@@ -58,7 +56,7 @@ export const siemAgentCreator = (): BuiltInAgentDefinition => {
 
     EXAMPLES:
     - "What is Elastic Painless?" → Call product_documentation with query="Elastic Painless scripting language"
-    - "How many open alerts do I have?" → Call assistant_settings(toolId="core.security.alert_counts"), confirm settings, then call alert_counts
+    - "How many open alerts do I have?" → Call assistant_settings(toolId="core.security.alert_counts"), then call alert_counts
     - "What is EQL?" → Call product_documentation with query="EQL Event Query Language"
 
     Remember: Always use tools to get accurate, up-to-date information rather than relying on general knowledge.`,

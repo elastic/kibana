@@ -65,12 +65,7 @@ export const ASSISTANT_SETTINGS_INTERNAL_TOOL_DESCRIPTION =
   'Call this tool to retrieve current assistant settings for a specific tool. Use this when you need to get configuration parameters for a specific tool before calling it. ' +
   'This tool requires a toolId parameter specifying which tool you need settings for. It provides only the relevant configuration for that specific tool. ' +
   'The tool dynamically fetches the current settings from the request and data client. ' +
-  'CRITICAL WORKFLOW: After calling this tool, you MUST:\n' +
-  '1. Display the settings to the user\n' +
-  '2. Ask for explicit confirmation of the settings\n' +
-  '3. WAIT for the user to confirm before proceeding\n' +
-  '4. Only after user confirmation, call the tool specified in toolId\n' +
-  'DO NOT proceed to call the target tool until the user has explicitly confirmed the settings.';
+  'WORKFLOW: After calling this tool, use the retrieved settings to call the tool specified in toolId.';
 
 /**
  * Returns a tool for retrieving assistant settings using the InternalToolDefinition pattern.

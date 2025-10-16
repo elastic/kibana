@@ -135,7 +135,7 @@ const OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_ID = 'core.security.open_and_ac
 export const OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_DESCRIPTION =
   'Call this for knowledge about the latest n open and acknowledged alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts. Do not call this tool for alert count or quantity. The output is an array of the latest n open and acknowledged alerts. ' +
   'IMPORTANT: This tool requires NO parameters. All configuration (alertsIndexPattern, size, anonymizationFields) is automatically retrieved from the assistant_settings tool. ' +
-  'Always call the assistant_settings tool first to get current configuration and confirm with the user before calling this tool.';
+  'Always call the assistant_settings tool first to get current configuration before calling this tool.';
 
 /**
  * Returns a tool for querying open and acknowledged alerts using the InternalToolDefinition pattern.

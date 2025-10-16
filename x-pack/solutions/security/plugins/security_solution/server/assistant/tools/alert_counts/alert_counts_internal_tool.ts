@@ -23,7 +23,7 @@ export const ALERT_COUNTS_INTERNAL_TOOL_ID = 'core.security.alert_counts';
 export const ALERT_COUNTS_INTERNAL_TOOL_DESCRIPTION =
   'Call this for the counts of last 24 hours of open and acknowledged alerts in the environment, grouped by their severity and workflow status. The response will be JSON and from it you can summarize the information to answer the question. ' +
   'IMPORTANT: This tool requires NO parameters. All configuration (alertsIndexPattern) is automatically retrieved from the assistant_settings tool. ' +
-  'Always call the assistant_settings tool first to get current configuration and confirm with the user before calling this tool.';
+  'Always call the assistant_settings tool first to get current configuration before calling this tool.';
 
 /**
  * Returns a tool for querying alert counts using the InternalToolDefinition pattern.
