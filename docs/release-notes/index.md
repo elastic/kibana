@@ -127,7 +127,9 @@ For the Elastic Security 9.2.0 release information, refer to [Elastic Security S
 * Improves the rate-limiter UX [#227678]({{kib-pull}}227678).
 
 **Elasticsearch solution**:
-* Agent Builder is now available in technical preview. Agent Builder is a set of capabilities for simplifying the development of AI agents based on your enterprise data. Learn more and get started from [this page](docs-content://solutions/search/agent-builder/get-started.md).
+* [Agent Builder](docs-content://solutions/search/elastic-agent-builder.md) is now available in technical preview. Build custom agents and tools to explore your Elastic data using natural language, in real time or programmatically using MCP, A2A, or REST APIs. You must [enable the feature](docs-content://solutions/search/agent-builder/get-started.md#enable-agent-builder) to get started.
+
+---
 * Adds the ability to save Playgrounds within a space [#229511]({{kib-pull}}229511).
 * Improves code examples in the Synonyms interface [#235944]({{kib-pull}}235944).
 
