@@ -214,11 +214,11 @@ export const getObservablesTotalsByType = (
     total: 0,
   };
 
-  if (!observablesAggs || !observablesAggs.buckets) {
+  if (!observablesAggs || !observablesAggs.byDescription?.buckets) {
     return result;
   }
 
-  observablesAggs.buckets.forEach((bucket) => {
+  observablesAggs.byDescription.buckets.forEach((bucket) => {
     const description = bucket.key;
 
     bucket.byType.buckets.forEach((typeBucket) => {
@@ -239,16 +239,15 @@ export const getObservablesTotalsByType = (
 export const getTotalWithMaxObservables = (
   totalWithMaxObservables?: TotalWithMaxObservablesAggregationResult
 ) => {
-  if (!totalWithMaxObservables || !totalWithMaxObservables.buckets) {
+  if (!totalWithMaxObservables || !totalWithMaxObservables.observables?.hits?.hits) {
     return 0;
   }
-
-  return totalWithMaxObservables.buckets.reduce((acc, bucket) => {
-    if (bucket.cardinality.value >= MAX_OBSERVABLES_PER_CASE) {
-      return acc + 1;
-    }
+  const flattenedHits = totalWithMaxObservables.observables.hits.hits.map((hit) => hit._id);
+  const aggregatedHits = flattenedHits.reduce<Record<string, number>>((acc, hit) => {
+    acc[hit] = (acc[hit] || 0) + 1;
     return acc;
-  }, 0);
+  }, {});
+  return Object.values(aggregatedHits).filter((value) => value >= MAX_OBSERVABLES_PER_CASE).length;
 };
 
 interface CountsAndMaxAlertsAggRes {

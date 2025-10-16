@@ -265,21 +265,33 @@ const getStatusAggregation = () => ({
 
 const getObservablesAggregations = () => ({
   observables: {
-    terms: { field: `${CASE_SAVED_OBJECT}.attributes.observables.description` },
+    nested: {
+      path: `${CASE_SAVED_OBJECT}.attributes.observables`,
+    },
     aggs: {
-      byType: {
-        terms: { field: `${CASE_SAVED_OBJECT}.attributes.observables.typeKey` },
+      byDescription: {
+        terms: {
+          field: `${CASE_SAVED_OBJECT}.attributes.observables.description`,
+        },
+        aggs: {
+          byType: {
+            terms: {
+              field: `${CASE_SAVED_OBJECT}.attributes.observables.typeKey`,
+            },
+          },
+        },
       },
     },
   },
   totalWithMaxObservables: {
-    terms: {
-      field: `${CASE_SAVED_OBJECT}.id`,
+    nested: {
+      path: `${CASE_SAVED_OBJECT}.attributes.observables`,
     },
     aggs: {
-      cardinality: {
-        cardinality: {
-          field: `${CASE_SAVED_OBJECT}.attributes.observables.typeKey`,
+      observables: {
+        top_hits: {
+          size: 10000,
+          _source: [`${CASE_SAVED_OBJECT}.attributes.observables.id`],
         },
       },
     },

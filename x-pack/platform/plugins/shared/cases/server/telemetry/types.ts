@@ -67,26 +67,28 @@ export interface AssigneesFilters {
 }
 
 export interface ObservablesAggregationResult {
-  buckets: Array<{
-    key: string;
-    doc_count: number;
-    byType: {
-      buckets: Array<{
-        key: string;
-        doc_count: number;
-      }>;
-    };
-  }>;
+  doc_count: number;
+  byDescription: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+      byType: {
+        buckets: Array<{
+          key: string;
+          doc_count: number;
+        }>;
+      };
+    }>;
+  };
 }
 
 export interface TotalWithMaxObservablesAggregationResult {
-  buckets: Array<{
-    key: string;
-    doc_count: number;
-    cardinality: {
-      value: number;
+  doc_count: number;
+  observables: {
+    hits: {
+      hits: Array<{ _id: string }>;
     };
-  }>;
+  };
 }
 
 export interface FileAttachmentAggsResult {

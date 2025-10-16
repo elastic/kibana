@@ -100,10 +100,6 @@ const observablesSchema: ObservablesSchema = {
     type: 'long',
     _meta: { description: 'Total number of observables' },
   },
-  casesWithMaxObservables: {
-    type: 'long',
-    _meta: { description: 'Number of cases with maximum observables' },
-  },
 };
 
 const solutionTelemetry: SolutionTelemetrySchema = {
@@ -113,7 +109,10 @@ const solutionTelemetry: SolutionTelemetrySchema = {
   totalWithAlerts: long,
   status: statusSchema,
   observables: observablesSchema,
-  totalWithMaxObservables: long,
+  totalWithMaxObservables: {
+    type: 'long',
+    _meta: { description: 'Number of cases with maximum observables' },
+  },
 };
 
 const customFieldsSolutionTelemetrySchema: CustomFieldsSolutionTelemetrySchema = {

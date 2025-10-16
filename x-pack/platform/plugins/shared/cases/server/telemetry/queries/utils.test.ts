@@ -38,6 +38,7 @@ import {
   getUniqueAlertCommentsCountQuery,
   processWithAlertsByOwner,
   getObservablesTotalsByType,
+  getTotalWithMaxObservables,
 } from './utils';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 
@@ -67,31 +68,31 @@ describe('utils', () => {
 
     const observables = {
       observables: {
-        buckets: [
-          {
-            key: 'Auto extract observables',
-            doc_count: 1,
-            byType: {
-              buckets: [
-                {
-                  key: OBSERVABLE_TYPE_IPV4.key,
-                  doc_count: 1,
-                },
-              ],
+        doc_count: 1,
+        byDescription: {
+          buckets: [
+            {
+              key: 'Auto extract observables',
+              doc_count: 1,
+              byType: {
+                buckets: [
+                  {
+                    key: OBSERVABLE_TYPE_IPV4.key,
+                    doc_count: 1,
+                  },
+                ],
+              },
             },
-          },
-        ],
+          ],
+        },
       },
       totalWithMaxObservables: {
-        buckets: [
-          {
-            key: '1',
-            doc_count: 1,
-            cardinality: {
-              value: 1,
-            },
+        doc_count: 60,
+        observables: {
+          hits: {
+            hits: Array(60).map(() => ({ _id: '1' })),
           },
-        ],
+        },
       },
     };
 
@@ -1829,50 +1830,80 @@ describe('utils', () => {
     it('returns the correct observables totals by type', () => {
       expect(
         getObservablesTotalsByType({
-          buckets: [
-            {
-              key: 'Auto extract observables',
-              doc_count: 1,
-              byType: {
-                buckets: [
-                  {
-                    key: OBSERVABLE_TYPE_IPV4.key,
-                    doc_count: 2,
-                  },
-                ],
+          doc_count: 6,
+          byDescription: {
+            buckets: [
+              {
+                key: 'Auto extract observables',
+                doc_count: 2,
+                byType: {
+                  buckets: [
+                    {
+                      key: OBSERVABLE_TYPE_IPV4.key,
+                      doc_count: 2,
+                    },
+                  ],
+                },
               },
-            },
-            {
-              key: 'Bad host',
-              doc_count: 1,
-              byType: {
-                buckets: [
-                  {
-                    key: OBSERVABLE_TYPE_HOSTNAME.key,
-                    doc_count: 3,
-                  },
-                ],
+              {
+                key: 'Bad host',
+                doc_count: 3,
+                byType: {
+                  buckets: [
+                    {
+                      key: OBSERVABLE_TYPE_HOSTNAME.key,
+                      doc_count: 3,
+                    },
+                  ],
+                },
               },
-            },
-            {
-              key: 'User added',
-              doc_count: 1,
-              byType: {
-                buckets: [
-                  {
-                    key: 'key1',
-                    doc_count: 1,
-                  },
-                ],
+              {
+                key: 'User added',
+                doc_count: 1,
+                byType: {
+                  buckets: [
+                    {
+                      key: 'key1',
+                      doc_count: 1,
+                    },
+                  ],
+                },
               },
-            },
-          ],
+            ],
+          },
         })
       ).toEqual({
         manual: { default: 3, custom: 1 },
         auto: { default: 2, custom: 0 },
         total: 6,
       });
+    });
+  });
+
+  describe('getTotalWithMaxObservables', () => {
+    it('returns the correct total when no case has max observables', () => {
+      expect(
+        getTotalWithMaxObservables({
+          doc_count: 1,
+          observables: { hits: { hits: [{ _id: '1' }] } },
+        })
+      ).toEqual(0);
+    });
+
+    it('returns the correct total when there are cases with max observables', () => {
+      expect(
+        getTotalWithMaxObservables({
+          doc_count: 160,
+          observables: {
+            hits: {
+              hits: [
+                ...Array.from({ length: 60 }, () => ({ _id: '1' })),
+                ...Array.from({ length: 100 }, () => ({ _id: '2' })),
+              ],
+            },
+          },
+        })
+      ).toEqual(2);
     });
   });
 });
