@@ -31,6 +31,8 @@ import { ConfigRunner } from './config_runner';
 import { ResourcePool, Phase } from './resource_pool';
 import type { Slot } from './resource_pool';
 import { prepareChrome } from './prepare_chrome';
+import { EsVersion, readConfigFile } from '../../../functional_test_runner';
+import { getSlotResources, type SlotResources } from '../get_slot_resources';
 
 function booleanFromEnv(varName: string, defaultValue: boolean = false): boolean {
   const envValue = process.env[varName];
@@ -56,6 +58,14 @@ interface RunnerState {
   runDurationMs?: number;
   completedAt?: number;
   exitCode?: number | string;
+  slotIndex?: number;
+}
+
+interface RunnerEntry {
+  path: string;
+  runner: ConfigRunner;
+  resources: SlotResources;
+  slotIndex?: number;
 }
 
 /*
@@ -143,7 +153,7 @@ export async function runTestsParallel(
 
   const portConfigs = Object.fromEntries(portConfigEntries);
 
-  const runners: ConfigRunner[] = [];
+  const runnerEntries: RunnerEntry[] = [];
 
   const failedConfigs: string[] = [];
   const results: string[] = [];
@@ -151,6 +161,13 @@ export async function runTestsParallel(
 
   for (const config of configs) {
     if (!config) continue;
+
+    const readConfig = await readConfigFile(
+      log,
+      EsVersion.getDefault(),
+      require.resolve(Path.join(REPO_ROOT, config)),
+      {}
+    );
 
     const ports = portConfigs[config];
 
@@ -180,48 +197,128 @@ export async function runTestsParallel(
       stdio,
     });
 
-    runners.push(runner);
+    const resources = getSlotResources(readConfig.getAll());
+    runnerEntries.push({ path: config, runner, resources });
   }
 
-  const MAX_CPUS = os.cpus().length - 1;
+  const MAX_CPUS = Math.max(1, os.cpus().length - 1);
   const AVAILABLE_MEM = Math.round(os.freemem() / 1024 / 1024);
-  const MIN_MB_AVAILABLE = 2048;
-  // const MIN_MB_PER_WARMING_SLOT = 4096;
-  const MIN_MB_PER_IDLE_SLOT = 3072;
-  const MIN_MB_PER_RUNNING_SLOT = 4096;
-  // const WARMING_MIN_CPU = 2;
-  const IDLE_MIN_CPU = 0.5;
-  const RUNNING_MIN_CPU = 1;
+  const MIN_MB_RESERVED = 2048;
+  const usableMemory = Math.max(AVAILABLE_MEM - MIN_MB_RESERVED, MIN_MB_RESERVED);
 
-  log.info(`Available resources: ${MAX_CPUS} cpus, ${AVAILABLE_MEM}mb`);
+  log.info(`Host capacity -> cpu=${MAX_CPUS}, memory=${usableMemory}mb`);
 
-  const availableMemory = Math.max(AVAILABLE_MEM - MIN_MB_AVAILABLE, MIN_MB_PER_RUNNING_SLOT);
+  const hostCapacity: SlotResources = {
+    warming: { cpu: MAX_CPUS, memory: usableMemory },
+    idle: { cpu: MAX_CPUS, memory: usableMemory },
+    running: { cpu: MAX_CPUS, memory: usableMemory },
+  };
 
-  // const maxWarmingByCpu = Math.max(1, Math.floor(MAX_CPUS / WARMING_MIN_CPU));
-  // const maxWarmingByMemory = Math.max(1, Math.floor(availableMemory / MIN_MB_PER_WARMING_SLOT));
-  const maxWarming = 1; // Math.max(1, Math.min(maxWarmingByCpu, maxWarmingByMemory));
+  type PhaseName = keyof SlotResources;
+  const phases: PhaseName[] = ['warming', 'idle', 'running'];
 
-  const maxRunningByCpu = Math.max(1, Math.floor(MAX_CPUS / RUNNING_MIN_CPU));
-  const maxRunningByMemory = Math.max(1, Math.floor(availableMemory / MIN_MB_PER_RUNNING_SLOT));
-  const maxRunning = Math.max(2, Math.min(maxRunningByCpu, maxRunningByMemory));
-
-  const maxStartedByCpu = Math.max(1, Math.floor(MAX_CPUS / IDLE_MIN_CPU));
-  const maxStartedByMemory = Math.max(1, Math.floor(availableMemory / MIN_MB_PER_IDLE_SLOT));
-  const maxStarted = Math.max(
-    maxWarming + maxRunning,
-    Math.min(maxStartedByCpu, maxStartedByMemory)
-  );
-
-  log.info(
-    `Resource limits -> started: ${maxStarted}, warming: ${maxWarming}, running: ${maxRunning}`
-  );
-
-  const pool = new ResourcePool({
-    log,
-    maxStarted,
-    maxWarming: 1,
-    maxRunning,
+  const createEmptyUsage = (): SlotResources => ({
+    warming: { cpu: 0, memory: 0 },
+    idle: { cpu: 0, memory: 0 },
+    running: { cpu: 0, memory: 0 },
   });
+
+  const cloneResources = (resources: SlotResources): SlotResources => ({
+    warming: { ...resources.warming },
+    idle: { ...resources.idle },
+    running: { ...resources.running },
+  });
+
+  const canFitWithinCapacity = (current: SlotResources, addition: SlotResources) =>
+    phases.every((phase) => {
+      const phaseUsage = current[phase];
+      const phaseAddition = addition[phase];
+      const capacity = hostCapacity[phase];
+      return (
+        phaseUsage.cpu + phaseAddition.cpu <= capacity.cpu &&
+        phaseUsage.memory + phaseAddition.memory <= capacity.memory
+      );
+    });
+
+  const accumulateUsage = (target: SlotResources, addition: SlotResources) => {
+    phases.forEach((phase) => {
+      target[phase].cpu += addition[phase].cpu;
+      target[phase].memory += addition[phase].memory;
+    });
+  };
+
+  interface SlotBin {
+    runners: RunnerEntry[];
+    usage: SlotResources;
+  }
+
+  const bins: SlotBin[] = [];
+
+  const sortedEntries = [...runnerEntries].sort((a, b) => {
+    const memoryDiff = b.resources.running.memory - a.resources.running.memory;
+    if (memoryDiff !== 0) {
+      return memoryDiff;
+    }
+    return b.resources.running.cpu - a.resources.running.cpu;
+  });
+
+  for (const entry of sortedEntries) {
+    let placed = false;
+    for (let i = 0; i < bins.length; i++) {
+      const bin = bins[i];
+      if (canFitWithinCapacity(bin.usage, entry.resources)) {
+        bin.runners.push(entry);
+        accumulateUsage(bin.usage, entry.resources);
+        entry.slotIndex = i;
+        placed = true;
+        break;
+      }
+    }
+
+    if (!placed) {
+      if (!canFitWithinCapacity(createEmptyUsage(), entry.resources)) {
+        log.warning(
+          `Config ${entry.path} exceeds host capacity; scheduling it alone. ` +
+            `running(cpu=${entry.resources.running.cpu}, memory=${entry.resources.running.memory}mb)`
+        );
+      }
+
+      const newIndex = bins.length;
+      bins.push({
+        runners: [entry],
+        usage: cloneResources(entry.resources),
+      });
+      entry.slotIndex = newIndex;
+    }
+  }
+
+  const maxConcurrentConfigs = bins.reduce((max, bin) => Math.max(max, bin.runners.length), 0);
+
+  const slotGroupsLabel = bins.length === 1 ? '' : 's';
+  log.info(
+    `Planned ${bins.length} slot group${slotGroupsLabel}; max concurrent configs ${maxConcurrentConfigs}`
+  );
+
+  bins.forEach((bin, index) => {
+    const usage = bin.usage;
+    log.debug(
+      `Slot group ${index + 1}: configs=${bin.runners.length}, ` +
+        `warming=${usage.warming.cpu.toFixed(2)}cpu/${usage.warming.memory.toFixed(1)}mb, ` +
+        `running=${usage.running.cpu.toFixed(2)}cpu/${usage.running.memory.toFixed(1)}mb`
+    );
+  });
+
+  const concurrencyLimit = maxConcurrentConfigs > 0 ? maxConcurrentConfigs : 0;
+
+  let pool: ResourcePool | undefined;
+  if (concurrencyLimit > 0) {
+    pool = new ResourcePool({
+      log,
+      maxStarted: concurrencyLimit,
+      maxWarming: concurrencyLimit,
+      maxRunning: concurrencyLimit,
+    });
+  }
 
   let statsTimer: NodeJS.Timeout | undefined;
 
@@ -331,12 +428,18 @@ export async function runTestsParallel(
     logStats();
   }
 
-  const promises = runners.map(async (runner) => {
+  const runEntry = async (entry: RunnerEntry) => {
+    if (!pool) {
+      throw new Error('Resource pool not initialized');
+    }
+
+    const runner = entry.runner;
     const slot = pool.acquire();
     const path = runner.getConfigPath();
     const state: RunnerState = {
       slot,
       startedAt: Date.now(),
+      slotIndex: entry.slotIndex,
     };
     runnerStates.set(path, state);
     let released = false;
@@ -408,9 +511,17 @@ export async function runTestsParallel(
         released = true;
       }
     }
-  });
+  };
 
-  await Promise.all(promises);
+  if (pool) {
+    for (const [index, bin] of bins.entries()) {
+      const configLabel = bin.runners.length === 1 ? 'config' : 'configs';
+      log.info(
+        `Starting slot group ${index + 1}/${bins.length} (${bin.runners.length} ${configLabel})`
+      );
+      await Promise.all(bin.runners.map((entry) => runEntry(entry)));
+    }
+  }
 
   if (statsTimer) {
     clearInterval(statsTimer);
