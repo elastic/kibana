@@ -20,7 +20,7 @@ export const UpgradeWarning: FC = () => {
     return (
       <React.Fragment>
         <EuiCallOut
-          announceOnMount
+          announceOnMount={false}
           title={
             <FormattedMessage
               id="xpack.ml.upgrade.upgradeWarning.upgradeInProgressWarningTitle"
