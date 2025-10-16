@@ -79,6 +79,7 @@ import {
   FINDINGS_PAGE,
   THREAT_INTELLIGENCE_PAGE,
 } from '../../../screens/kibana_navigation';
+import { showMoreItems } from '../../../screens/serverless_security_header';
 
 describe('top-level navigation common to all pages in the Security app', { tags: '@ess' }, () => {
   beforeEach(() => {
@@ -326,6 +327,7 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
   });
 
   it('navigates to the Endpoints page', () => {
+    ServerlessHeaders.showMoreItems();
     navigateFromHeaderTo(ServerlessHeaders.ENDPOINTS, true);
     cy.url().should('include', ENDPOINTS_URL);
   });

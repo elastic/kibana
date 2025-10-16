@@ -80,6 +80,7 @@ const disableNewFeaturesTours = (window: Window) => {
   });
 
   // other keys in incompatible format
+  // TODO: remove in https://github.com/elastic/kibana/issues/239313
   window.localStorage.setItem('solutionNavigationTour:completed', 'true');
 };
 

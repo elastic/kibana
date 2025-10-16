@@ -28,6 +28,7 @@ export const loadPage = (url: string, options: Partial<Cypress.VisitOptions> = {
     ...options,
     onBeforeLoad: (win) => {
       // disable new feature tours
+      // TODO: remove in https://github.com/elastic/kibana/issues/239313
       win.localStorage.setItem('solutionNavigationTour:completed', 'true');
       options.onBeforeLoad?.(win);
     },
