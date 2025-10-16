@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './convert_types';
-export * from './date_formats';
-export * from './dissect';
+export const convertTypes = ['integer', 'long', 'double', 'boolean', 'string'] as const;
+
+export type ConvertType = (typeof convertTypes)[number];

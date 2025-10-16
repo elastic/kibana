@@ -19,6 +19,8 @@ import {
 } from './fields';
 import type { ElasticsearchProcessorType } from './manual_ingest_pipeline_processors';
 import { elasticsearchProcessorTypes } from './manual_ingest_pipeline_processors';
+import type { ConvertType } from '../formats/convert_types';
+import { convertTypes } from '../formats/convert_types';
 
 /**
  * Base processor
@@ -194,6 +196,26 @@ export const appendProcessorSchema = processorBaseWithWhereSchema.extend({
   allow_duplicates: z.optional(z.boolean()),
 }) satisfies z.Schema<AppendProcessor>;
 
+/**
+ * Convert processor
+ */
+
+export interface ConvertProcessor extends ProcessorBaseWithWhere {
+  action: 'convert';
+  from: string;
+  to?: string;
+  type: ConvertType;
+  ignore_missing?: boolean;
+}
+
+export const convertProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('convert'),
+  from: StreamlangSourceField,
+  to: z.optional(StreamlangTargetField),
+  type: z.enum(convertTypes),
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<ConvertProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
@@ -201,6 +223,7 @@ export type StreamlangProcessorDefinition =
   | RenameProcessor
   | SetProcessor
   | AppendProcessor
+  | ConvertProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.discriminatedUnion('action', [
@@ -210,6 +233,7 @@ export const streamlangProcessorSchema = z.discriminatedUnion('action', [
   renameProcessorSchema,
   setProcessorSchema.innerType(),
   appendProcessorSchema,
+  convertProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
@@ -220,7 +244,12 @@ export const isProcessWithOverrideOption = createIsNarrowSchema(
 
 export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
   processorBaseSchema,
-  z.union([renameProcessorSchema, grokProcessorSchema, dissectProcessorSchema])
+  z.union([
+    renameProcessorSchema,
+    grokProcessorSchema,
+    dissectProcessorSchema,
+    convertProcessorSchema,
+  ])
 );
 
 export const isGrokProcessorDefinition = createIsNarrowSchema(
