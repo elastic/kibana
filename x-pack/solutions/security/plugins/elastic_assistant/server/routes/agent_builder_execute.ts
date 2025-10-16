@@ -30,7 +30,7 @@ import {
   type ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf, AwaitedProperties } from '@kbn/utility-types';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/server';
 import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
 import type { ElasticAssistantRequestHandlerContext } from '../types';
@@ -84,13 +84,15 @@ const generateConversationTitle = async (
   messages: Array<Pick<Message, 'content' | 'role'>>,
   request: KibanaRequest,
   connectorId: string,
-  context: ElasticAssistantRequestHandlerContext,
+  context: AwaitedProperties<
+    Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
+  >,
   logger: Logger
 ) => {
   if (!conversationId || messages.length === 0) return;
 
   try {
-    const assistantContext = context.elasticAssistant;
+    const assistantContext = await context.elasticAssistant;
     const onechatServices = assistantContext.getOnechatServices();
     const conversationsDataClient = await assistantContext.getAIAssistantConversationsDataClient();
 
