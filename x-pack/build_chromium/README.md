@@ -215,6 +215,7 @@ Start elasticsearch
 $ cd ${es dir}
 $ bin/elasticsearch.bat
 ...
+```
 
 Reset passwords for elastic and kibana_system
 
