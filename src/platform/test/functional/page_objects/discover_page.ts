@@ -125,6 +125,11 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
+  public async waitUntilTabIsLoaded() {
+    await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilSearchingHasFinished();
+  }
+
   public async closeLoadSaveSearchPanel() {
     await this.flyout.ensureClosed('loadSearchForm');
   }
