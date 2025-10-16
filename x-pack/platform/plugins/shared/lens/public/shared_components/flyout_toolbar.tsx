@@ -23,31 +23,34 @@ type ToolbarOption = EuiButtonGroupOptionProps & { id: Options; label: string };
 const baseToolbarOptions: ToolbarOption[] = [
   {
     id: 'legend',
-    label: i18n.translate('xpack.lens.visualization.toolbar.legend', {
+    label: i18n.translate('xpack.lens.flyoutToolbar.legend.title', {
       defaultMessage: 'Legend',
     }),
     iconType: EuiIconLegend as IconType,
-    toolTipContent: i18n.translate('xpack.lens.visualization.toolbar.legend', {
+    toolTipContent: i18n.translate('xpack.lens.flyoutToolbar.legend.tooltip', {
       defaultMessage: 'Legend',
     }),
   },
   {
     id: 'style',
-    label: i18n.translate('xpack.lens.visualization.toolbar.style', {
+    label: i18n.translate('xpack.lens.flyoutToolbar.style.title', {
       defaultMessage: 'Style',
     }),
     iconType: 'brush',
-    toolTipContent: i18n.translate('xpack.lens.visualization.toolbar.style', {
+    toolTipContent: i18n.translate('xpack.lens.flyoutToolbar.style.tooltip', {
       defaultMessage: 'Style',
     }),
   },
   // TODO: Add filters
   // {
   //   id: 'filters',
-  //   label: i18n.translate('xpack.lens.visualization.toolbar.filters', {
+  //   label: i18n.translate('xpack.lens.flyoutToolbar.filtersTitle', {
   //     defaultMessage: 'Filters',
   //   }),
   //   iconType: 'filter',
+  //   toolTipContent: i18n.translate('xpack.lens.flyoutToolbar.filtersOptionTooltip', {
+  //     defaultMessage: 'Filters',
+  //   }),
   // },
 ];
 
@@ -73,7 +76,7 @@ export function FlyoutToolbar<VisualizationState>({
   const [isFlyoutVisible, setFlyoutVisible] = useState(false);
   const [idSelected, setIdSelected] = useState<Options | ''>('');
 
-  // NOTE: Remove the option if it doesn not have a content
+  // Filter out toolbar options that don't have corresponding content components
   const toolbarOptions = useMemo(
     () => baseToolbarOptions.filter((option) => !!contentMap[option.id]),
     [contentMap]
@@ -103,7 +106,7 @@ export function FlyoutToolbar<VisualizationState>({
       `}
     >
       <EuiButtonGroup
-        legend={i18n.translate('xpack.lens.visualization.toolbar.title', {
+        legend={i18n.translate('xpack.lens.flyoutToolbar.buttonGroup.legend', {
           defaultMessage: 'Toolbar options',
         })}
         options={toolbarOptions}
