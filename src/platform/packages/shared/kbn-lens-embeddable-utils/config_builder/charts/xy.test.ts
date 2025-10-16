@@ -189,126 +189,73 @@ test('generates xy chart config with legend stats', async () => {
     }
   );
 
-  expect(result).toMatchInlineSnapshot(`
-    Object {
-      "references": Array [
-        Object {
-          "id": "test",
-          "name": "indexpattern-datasource-layer-layer_0",
-          "type": "index-pattern",
-        },
-      ],
-      "state": Object {
-        "adHocDataViews": Object {
-          "test": Object {},
-        },
-        "datasourceStates": Object {
-          "textBased": Object {
-            "layers": Object {
-              "layer_0": Object {
-                "allColumns": Array [
-                  Object {
-                    "columnId": "x_metric_formula_accessor0",
-                    "fieldName": "@timestamp",
-                  },
-                  Object {
-                    "columnId": "metric_formula_accessor0_0",
-                    "fieldName": "count",
-                    "meta": Object {
-                      "type": "number",
-                    },
-                  },
-                ],
-                "columns": Array [
-                  Object {
-                    "columnId": "x_metric_formula_accessor0",
-                    "fieldName": "@timestamp",
-                  },
-                  Object {
-                    "columnId": "metric_formula_accessor0_0",
-                    "fieldName": "count",
-                    "meta": Object {
-                      "type": "number",
-                    },
-                  },
-                ],
-                "index": "test",
-                "query": Object {
-                  "esql": "from test | count=count() by @timestamp",
-                },
-                "timeField": undefined,
-              },
-            },
-          },
-        },
-        "filters": Array [],
-        "internalReferences": Array [],
-        "query": Object {
-          "language": "kuery",
-          "query": "",
-        },
-        "visualization": Object {
-          "axisTitlesVisibilitySettings": Object {
-            "x": true,
-            "yLeft": true,
-            "yRight": true,
-          },
-          "emphasizeFitting": true,
-          "fittingFunction": "Linear",
-          "gridlinesVisibilitySettings": Object {
-            "x": true,
-            "yLeft": true,
-            "yRight": true,
-          },
-          "hideEndzones": true,
-          "labelsOrientation": Object {
-            "x": 0,
-            "yLeft": 0,
-            "yRight": 0,
-          },
-          "layers": Array [
-            Object {
-              "accessors": Array [
-                "metric_formula_accessor0_0",
-              ],
-              "layerId": "layer_0",
-              "layerType": "data",
-              "seriesType": "bar",
-              "xAccessor": "x_metric_formula_accessor0",
-              "yConfig": Array [
-                Object {
-                  "color": undefined,
-                  "forAccessor": "metric_formula_accessor0_0",
+  expect(result).toEqual({
+    references: [
+      { id: 'test', name: 'indexpattern-datasource-layer-layer_0', type: 'index-pattern' },
+    ],
+    state: {
+      adHocDataViews: { test: {} },
+      datasourceStates: {
+        textBased: {
+          layers: {
+            layer_0: {
+              allColumns: [
+                { columnId: 'x_metric_formula_accessor0', fieldName: '@timestamp' },
+                {
+                  columnId: 'metric_formula_accessor0_0',
+                  fieldName: 'count',
+                  meta: { type: 'number' },
                 },
               ],
+              columns: [
+                { columnId: 'x_metric_formula_accessor0', fieldName: '@timestamp' },
+                {
+                  columnId: 'metric_formula_accessor0_0',
+                  fieldName: 'count',
+                  meta: { type: 'number' },
+                },
+              ],
+              index: 'test',
+              query: { esql: 'from test | count=count() by @timestamp' },
+              timeField: undefined,
             },
-          ],
-          "legend": Object {
-            "isVisible": true,
-            "legendStats": Array [
-              "average",
-              "max",
-            ],
-            "position": "right",
-          },
-          "preferredSeriesType": "line",
-          "tickLabelsVisibilitySettings": Object {
-            "x": true,
-            "yLeft": true,
-            "yRight": true,
-          },
-          "valueLabels": "hide",
-          "yLeftExtent": Object {
-            "lowerBound": undefined,
-            "mode": "full",
-            "upperBound": undefined,
           },
         },
       },
-      "title": "test",
-      "visualizationType": "lnsXY",
-    }
-  `);
+      filters: [],
+      internalReferences: [],
+      query: { language: 'kuery', query: '' },
+      visualization: {
+        axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+        emphasizeFitting: true,
+        fittingFunction: 'Linear',
+        gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+        hideEndzones: true,
+        labelsOrientation: { x: 0, yLeft: 0, yRight: 0 },
+        layers: [
+          {
+            accessors: ['metric_formula_accessor0_0'],
+            layerId: 'layer_0',
+            layerType: 'data',
+            seriesType: 'bar',
+            xAccessor: 'x_metric_formula_accessor0',
+            yConfig: [{ color: undefined, forAccessor: 'metric_formula_accessor0_0' }],
+          },
+        ],
+        legend: {
+          isVisible: true,
+          legendStats: [LegendValue.Average, LegendValue.Max],
+          position: 'right',
+        },
+        preferredSeriesType: 'line',
+        tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
+        valueLabels: 'hide',
+        yLeftExtent: { lowerBound: undefined, mode: 'full', upperBound: undefined },
+      },
+    },
+    title: 'test',
+    visualizationType: 'lnsXY',
+  });
 });
 
 test('it generates xy chart with multiple reference lines', async () => {
