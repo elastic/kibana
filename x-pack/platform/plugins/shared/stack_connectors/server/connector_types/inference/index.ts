@@ -74,10 +74,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
 
       const serviceSettings = {
         ...(isUpdate === false ? unflattenObject(providerConfig ?? {}) : {}),
-        // Update accepts secrets and adaptive_allocations (if the inference endpoint API was used to create the trained model) in service_settings
-        ...(isUpdate === true && providerConfig && 'adaptive_allocations' in providerConfig
-          ? { adaptive_allocations: providerConfig.adaptive_allocations }
-          : {}),
+        // Update accepts only secrets in service_settings
         ...unflattenObject(secrets?.providerSecrets ?? {}),
       };
 
