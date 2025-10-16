@@ -39,13 +39,6 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables use of SentinelOne response actions that complete asynchronously
-   *
-   * Release: v8.14.0
-   */
-  responseActionsSentinelOneV2Enabled: true,
-
-  /**
    * Enables the ability to send Response actions to Crowdstrike and persist the results
    * in ES.
    */
