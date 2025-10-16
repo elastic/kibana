@@ -34,7 +34,7 @@ import { ESQLVariableType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLAstAnyCommand, ESQLCommand } from '@kbn/esql-ast/src/types';
 import { getAstContext } from '../shared/context';
-import { isHeaderCommand, isSourceCommand } from '../shared/helpers';
+import { isHeaderCommandSuggestion, isSourceCommandSuggestion } from '../shared/helpers';
 import { QueryColumns, getSourcesHelper } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { getCommandContext } from './get_command_context';
@@ -134,8 +134,8 @@ export async function suggest(
           ...recommendedQueriesSuggestionsFromStaticTemplates
         );
       }
-      const sourceCommandsSuggestions = suggestions.filter(isSourceCommand);
-      const headerCommandsSuggestions = suggestions.filter(isHeaderCommand);
+      const sourceCommandsSuggestions = suggestions.filter(isSourceCommandSuggestion);
+      const headerCommandsSuggestions = suggestions.filter(isHeaderCommandSuggestion);
       return [
         ...headerCommandsSuggestions,
         ...sourceCommandsSuggestions,
@@ -143,7 +143,9 @@ export async function suggest(
       ];
     }
 
-    return suggestions.filter((def) => !isSourceCommand(def) && !isHeaderCommand(def));
+    return suggestions.filter(
+      (def) => !isSourceCommandSuggestion(def) && !isHeaderCommandSuggestion(def)
+    );
   }
 
   // ToDo: Reconsider where it belongs when this is resolved https://github.com/elastic/kibana/issues/216492

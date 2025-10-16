@@ -30,11 +30,11 @@ export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
 }
 
-export function isSourceCommand({ label }: { label: string }) {
+export function isSourceCommandSuggestion({ label }: { label: string }) {
   return ['FROM', 'ROW', 'SHOW', 'TS'].includes(label);
 }
 
-export function isHeaderCommand({ label }: { label: string }) {
+export function isHeaderCommandSuggestion({ label }: { label: string }) {
   return label === 'SET';
 }
 

@@ -47,7 +47,7 @@ export class QueryColumns {
     private readonly originalQueryText: string,
     private readonly resourceRetriever?: ESQLCallbacks
   ) {
-    this.fullQueryCacheKey = BasicPrettyPrinter.print(this.query);
+    this.fullQueryCacheKey = BasicPrettyPrinter.print(this.query, { skipHeader: true });
   }
 
   /**
@@ -99,9 +99,7 @@ export class QueryColumns {
 
     const subqueries = [];
     for (let i = 0; i < this.query.commands.length; i++) {
-      subqueries.push(
-        Builder.expression.query(this.query.commands.slice(0, i + 1), undefined, this.query.header)
-      );
+      subqueries.push(Builder.expression.query(this.query.commands.slice(0, i + 1)));
     }
 
     const getPolicies = async () => {

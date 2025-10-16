@@ -31,7 +31,7 @@ export async function autocomplete(
     return [
       {
         ...semiColonCompleteItem,
-        text: ';\n',
+        text: ';\n', // Add a new line so the actual query starts in the line below.
       },
     ];
   }
