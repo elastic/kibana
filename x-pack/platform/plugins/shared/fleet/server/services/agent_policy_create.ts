@@ -238,7 +238,9 @@ export async function createAgentPolicyWithPackages({
   }
 
   await ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id);
-  await agentPolicyService.deployPolicy(soClient, agentPolicy.id);
+  await agentPolicyService.deployPolicy(soClient, agentPolicy.id, undefined, {
+    skipAgentless: true,
+  });
 
   // Create the agentless agent
   if (agentPolicy.supports_agentless) {

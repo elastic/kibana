@@ -1800,6 +1800,67 @@ describe('Agent policy', () => {
         })
       );
     });
+
+    it('should not call agentless API for agentless policies if called with skipAgentless', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
+      mockedOutputService.getDefaultDataOutputId.mockResolvedValueOnce('default-output');
+      mockedGetFullAgentPolicy.mockResolvedValue({
+        id: 'policy123',
+        revision: 1,
+        namespaces: ['mySpace'],
+        inputs: [
+          {
+            id: 'input-123',
+          },
+        ],
+      } as FullAgentPolicy);
+      const mockFleetServerHost = {
+        id: 'id1',
+        name: 'fleet server 1',
+        host_urls: ['https://host1.fr:8220', 'https://host2-with-a-longer-name.fr:8220'],
+        is_default: false,
+        is_preconfigured: false,
+      };
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'existing-fleet-server-host',
+            type: 'fleet-fleet-server-host',
+            score: 1,
+            references: [],
+            version: '1.0.0',
+            attributes: mockFleetServerHost,
+          },
+        ],
+        page: 0,
+        per_page: 0,
+        total: 0,
+      });
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: {
+              supports_agentless: true,
+            },
+            references: [],
+            id: 'test-agentless-policy',
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+          },
+        ],
+      });
+
+      jest.spyOn(agentlessAgentService, 'createAgentlessAgent');
+
+      await agentPolicyService.deployPolicy(soClient, 'test-agentless-policy', undefined, {
+        skipAgentless: true,
+      });
+      expect(esClient.bulk).toBeCalled();
+      expect(jest.mocked(agentlessAgentService.createAgentlessAgent)).not.toBeCalled();
+    });
   });
 
   describe('ensurePreconfiguredAgentPolicy', () => {

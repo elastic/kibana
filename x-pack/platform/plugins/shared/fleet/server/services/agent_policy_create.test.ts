@@ -73,6 +73,7 @@ describe('createAgentPolicyWithPackages', () => {
         id: options?.id || 'new_id',
       } as AgentPolicy)
     );
+    mockedAgentPolicyService.deployPolicy.mockReset();
     mockedAgentPolicyService.deployPolicy.mockResolvedValue();
 
     mockedPackagePolicyService.buildPackagePolicyFromPackage.mockImplementation(
@@ -249,6 +250,54 @@ describe('createAgentPolicyWithPackages', () => {
     );
 
     expect(agentlessAgentService.createAgentlessAgent).toHaveBeenCalled();
+  });
+
+  it('should call deployPolicy with skipAgentless', async () => {
+    const response = await createAgentPolicyWithPackages({
+      esClient: esClientMock,
+      soClient: soClientMock,
+      agentPolicyService: mockedAgentPolicyService,
+      newPolicy: {
+        name: 'Agent policy 1',
+        namespace: 'default',
+        supports_agentless: true,
+        monitoring_enabled: [],
+      },
+      withSysMonitoring: true,
+      monitoringEnabled: ['logs', 'metrics'],
+      spaceId: 'default',
+    });
+
+    expect(response.id).toEqual('new_id');
+    expect(mockedBulkInstallPackages).not.toHaveBeenCalled();
+    expect(mockedPackagePolicyService.create).not.toHaveBeenCalled();
+
+    expect(agentPolicyService.create).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      {
+        name: 'Agent policy 1',
+        namespace: 'default',
+        supports_agentless: true,
+        monitoring_enabled: [],
+      },
+      expect.objectContaining({ skipDeploy: true })
+    );
+
+    expect(appContextService.getLogger().info).toHaveBeenCalledWith(
+      'Disabling system monitoring for agentless policy [Agent policy 1]'
+    );
+    expect(appContextService.getLogger().info).toHaveBeenCalledWith(
+      'Disabling monitoring for agentless policy [Agent policy 1]'
+    );
+
+    expect(agentlessAgentService.createAgentlessAgent).toHaveBeenCalled();
+    expect(mockedAgentPolicyService.deployPolicy).toHaveBeenCalledWith(
+      expect.anything(),
+      'new_id',
+      undefined,
+      { skipAgentless: true }
+    );
   });
 
   it('should call deploy policy once when create policy with system package', async () => {

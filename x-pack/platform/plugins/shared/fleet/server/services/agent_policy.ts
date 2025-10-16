@@ -1620,15 +1620,22 @@ class AgentPolicyService {
   public async deployPolicy(
     soClient: SavedObjectsClientContract,
     agentPolicyId: string,
-    agentPolicy?: AgentPolicy | null
+    agentPolicy?: AgentPolicy | null,
+    options?: { skipAgentless?: boolean }
   ) {
-    await this.deployPolicies(soClient, [agentPolicyId], agentPolicy ? [agentPolicy] : undefined);
+    await this.deployPolicies(
+      soClient,
+      [agentPolicyId],
+      agentPolicy ? [agentPolicy] : undefined,
+      options
+    );
   }
 
   public async deployPolicies(
     soClient: SavedObjectsClientContract,
     agentPolicyIds: string[],
-    agentPolicies?: AgentPolicy[]
+    agentPolicies?: AgentPolicy[],
+    options?: { skipAgentless?: boolean }
   ) {
     const logger = this.getLogger('deployPolicies');
     logger.debug(
@@ -1752,7 +1759,7 @@ class AgentPolicyService {
     }
 
     for (const agentPolicy of policies) {
-      if (!agentPolicy.supports_agentless) {
+      if (!agentPolicy.supports_agentless || options?.skipAgentless) {
         continue;
       }
       try {
