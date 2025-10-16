@@ -1231,6 +1231,10 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     props: VisualizationToolbarProps<T>
   ) => null | ReactElement<VisualizationToolbarProps<T>>;
 
+  /**
+   * Optional flyout toolbar component that renders visualization-specific controls
+   * in a flyout panel. Provides configuration options for style, legend and filters.
+   */
   FlyoutToolbarComponent?: (
     props: VisualizationToolbarProps<T>
   ) => null | ReactElement<VisualizationToolbarProps<T>>;
