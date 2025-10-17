@@ -312,10 +312,9 @@ function getTabContainerCss(
 
   return css`
     position: relative;
-    border-right: ${euiTheme.border.thin};
-    border-color: ${isDragging ? 'transparent' : euiTheme.colors.lightShade};
     min-width: ${tabsSizeConfig.regularTabMinWidth}px;
     max-width: ${tabsSizeConfig.regularTabMaxWidth}px;
+    margin-right: 4px;
 
     .unifiedTabs__tabActions {
       position: absolute;

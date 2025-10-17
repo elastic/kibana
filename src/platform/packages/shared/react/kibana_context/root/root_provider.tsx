@@ -20,6 +20,7 @@ import { useIsNestedEuiProvider } from '@elastic/eui/lib/components/provider/nes
 // @ts-expect-error EUI exports this component internally, but Kibana isn't picking it up its types
 import { emitEuiProviderWarning } from '@elastic/eui/lib/services/theme/warning';
 
+import type { WorkspaceServiceStart } from '@kbn/core-chrome-browser';
 import { KibanaEuiProvider, type KibanaEuiProviderProps } from './eui_provider';
 
 /** Props for the KibanaRootContextProvider */
@@ -30,6 +31,8 @@ export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
   analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
   /** The `ExecutionContextStart` API from `CoreStart`. */
   executionContext?: ExecutionContextStart;
+  /** The `WorkspaceServiceStart` API from `CoreStart`. */
+  workspace?: WorkspaceServiceStart;
 }
 
 /**
@@ -50,12 +53,14 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
   children,
   i18n,
   executionContext,
+  workspace,
   ...props
 }) => {
   const hasEuiProvider = useIsNestedEuiProvider();
+  const workspaceProvider = workspace?.getStoreProvider();
   const rootContextProvider = (
     <SharedUXRouterContext.Provider value={{ services: { executionContext } }}>
-      <i18n.Context>{children}</i18n.Context>
+      <i18n.Context>{workspaceProvider ? workspaceProvider({ children }) : children}</i18n.Context>
     </SharedUXRouterContext.Provider>
   );
 

@@ -114,6 +114,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     [useEuiMinBreakpoint('xl')]: {
       width: mathWithUnits(euiTheme.size.xxl, (x) => x * 15),
     },
+    marginRight: '8px',
   });
   // Initialize searchableTypes data
   useEffect(() => {
@@ -347,6 +348,13 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         data-test-subj="nav-search-reveal"
         onClick={() => {
           setIsVisible(true);
+        }}
+        style={{
+          lineHeight: 'normal',
+          blockSize: '32px',
+          minInlineSize: '32px',
+          paddingInline: '4px',
+          marginRight: '8px',
         }}
       >
         <EuiIcon type="search" size="m" />

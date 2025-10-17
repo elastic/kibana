@@ -5721,6 +5721,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-workspace-chrome-components@link:src/core/packages/chrome/workspace/core-workspace-chrome-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-workspace-chrome-state@link:src/core/packages/chrome/workspace/core-workspace-chrome-state":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core@link:src/core":
   version "0.0.0"
   uid ""

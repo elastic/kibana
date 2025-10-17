@@ -74,6 +74,7 @@ import { GridLayoutProjectSideNavV2 } from './ui/project/sidenav_v2/grid_layout_
 import { FixedLayoutProjectSideNavV2 } from './ui/project/sidenav_v2/fixed_layout_sidenav';
 import { SideNavV2CollapseButton } from './ui/project/sidenav_v2/collapse_button';
 import type { NavigationProps as SideNavV2NavigationProps } from './ui/project/sidenav_v2/types';
+import { WorkspaceService } from './workspace';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -112,6 +113,7 @@ export class ChromeService {
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
+  private readonly workspace = new WorkspaceService();
   private readonly projectNavigation: ProjectNavigationService;
   private mutationObserver: MutationObserver | undefined;
   private readonly isSideNavCollapsed$ = new BehaviorSubject(
@@ -350,6 +352,25 @@ export class ChromeService {
     const docTitle = this.docTitle.start();
     const { customBranding$ } = customBranding;
     const helpMenuLinks$ = navControls.getHelpMenuLinks$();
+
+    const hasHeaderBanner$ = headerBanner$.pipe(
+      takeUntil(this.stop$),
+      map((banner) => Boolean(banner))
+    );
+
+    const workspace = this.workspace.start({
+      featureFlags,
+      http,
+      customBranding,
+      projectNavigation,
+      isVisible$: this.isVisible$,
+      application,
+      recentlyAccessed,
+      navLinks,
+      hasHeaderBanner$,
+      hasAppMenu$: application.currentActionMenu$.pipe(map((menu) => !!menu)),
+      navControls,
+    });
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -761,12 +782,7 @@ export class ChromeService {
         headerBanner$.next(headerBanner);
       },
 
-      hasHeaderBanner$: () => {
-        return headerBanner$.pipe(
-          takeUntil(this.stop$),
-          map((banner) => Boolean(banner))
-        );
-      },
+      hasHeaderBanner$: () => hasHeaderBanner$,
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
       setChromeStyle,
@@ -796,6 +812,7 @@ export class ChromeService {
         changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
         navigationTourManager: projectNavigation.tourManager,
       },
+      workspace,
     };
   }
 

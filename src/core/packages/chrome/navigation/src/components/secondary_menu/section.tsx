@@ -36,17 +36,26 @@ export const SecondaryMenuSectionComponent = ({
 
   const sectionId = label ? label.replace(/\s+/g, '-').toLowerCase() : undefined;
 
-  return (
-    <nav
-      css={css`
-        padding: ${euiTheme.size.m};
+  const style = css`
+    &:not(:last-child) {
+      position: relative;
 
-        &:not(:last-child) {
-          border-bottom: 1px ${euiTheme.colors.borderBaseSubdued} solid;
-        }
-      `}
-      aria-labelledby={sectionId || undefined}
-    >
+      &::before {
+        content: '';
+        display: block;
+        right: ${euiTheme.size.m};
+        left: ${euiTheme.size.m};
+        height: 1px;
+        background-color: ${euiTheme.colors.borderBaseSubdued};
+        position: absolute;
+        bottom: 0;
+      }
+    }
+    padding: ${euiTheme.size.m};
+  `;
+
+  return (
+    <nav css={style} aria-labelledby={sectionId || undefined}>
       {label && (
         <EuiText
           id={sectionId}

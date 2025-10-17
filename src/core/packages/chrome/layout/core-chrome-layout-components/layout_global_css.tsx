@@ -82,12 +82,17 @@ export const LayoutGlobalCSS = () => {
   `;
 
   const application = css`
+    ${layoutVarName('application.margin')}: 8px;
     ${layoutVarName('application.top')}: calc(
       ${layoutVar('banner.height')} + ${layoutVar('header.height')}
     );
-    ${layoutVarName('application.bottom')}: ${layoutVar('footer.height')};
+    ${layoutVarName('application.bottom')}: calc(
+      ${layoutVar('footer.height')} + ${layoutVar('application.margin')}
+    );
     ${layoutVarName('application.left')}: ${navigationWidth}px;
-    ${layoutVarName('application.right')}: ${sidebarWidth}px;
+    ${layoutVarName('application.right')}: calc(
+      ${sidebarWidth}px + ${layoutVar('application.margin')}
+    );
     ${layoutVarName('application.height')}: calc(
       100vh - ${layoutVar('application.top')} - ${layoutVar('application.bottom')}
     );

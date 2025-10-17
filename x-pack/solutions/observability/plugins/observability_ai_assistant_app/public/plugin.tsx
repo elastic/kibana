@@ -20,6 +20,9 @@ import { AI_ASSISTANT_APP_ID } from '@kbn/deeplinks-observability';
 import type { AIAssistantAppService } from '@kbn/ai-assistant';
 import { createAppService } from '@kbn/ai-assistant';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { combineLatest, map } from 'rxjs';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { WORKSPACE_SIDEBAR_APP_AI_ASSISTANT } from '@kbn/core-chrome-browser';
 import type {
   ObservabilityAIAssistantAppPluginSetupDependencies,
   ObservabilityAIAssistantAppPluginStartDependencies,
@@ -27,8 +30,8 @@ import type {
   ObservabilityAIAssistantAppPublicStart,
 } from './types';
 import { getObsAIAssistantConnectorType } from './rule_connector';
-import { NavControlInitiator } from './components/nav_control/lazy_nav_control';
 import { SharedProviders } from './utils/shared_providers';
+import { getVisibility } from './hooks/is_nav_control_visible';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ConfigSchema {}
@@ -112,25 +115,45 @@ export class ObservabilityAIAssistantAppPlugin
     const isEnabled = appService.isEnabled();
 
     if (isEnabled) {
-      coreStart.chrome.navControls.registerRight({
-        mount: (element) => {
-          ReactDOM.render(
-            <NavControlInitiator
-              appService={appService}
-              coreStart={coreStart}
-              pluginsStart={pluginsStart}
-              isServerless={this.isServerless}
-            />,
-            element,
-            () => {}
-          );
+      let currentVisibility = false;
 
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
+      combineLatest([
+        coreStart.application.currentAppId$,
+        coreStart.application.applications$,
+        pluginsStart.aiAssistantManagementSelection.aiAssistantType$,
+        pluginsStart.spaces.getActiveSpace$(),
+      ])
+        .pipe(
+          map(([appId, applications, preferredAssistantType, space]) => {
+            return getVisibility(
+              appId,
+              applications,
+              preferredAssistantType,
+              space,
+              this.isServerless
+            );
+          })
+        )
+        .subscribe((visibility) => {
+          currentVisibility = visibility;
+        });
+
+      coreStart.chrome.workspace.sidebar.registerSidebarApp({
+        appId: WORKSPACE_SIDEBAR_APP_AI_ASSISTANT,
+        size: 'wide',
+        isAvailable: () => currentVisibility,
+        button: {
+          iconType: AssistantIcon,
+          'aria-label': 'Observability AI Assistant',
         },
-        // right before the user profile
-        order: 1001,
+        app: {
+          title: 'Observability AI Assistant',
+          color: 'plain',
+          isScrollable: false,
+          hasBorder: true,
+          containerPadding: 'none',
+          children: <>{/* I need the chat component here */}</>,
+        },
       });
     }
 

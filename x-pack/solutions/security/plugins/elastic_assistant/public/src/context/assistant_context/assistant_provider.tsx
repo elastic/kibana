@@ -122,6 +122,9 @@ export function AssistantProvider({
     completeOpenChat,
   });
 
+  // This is poorly conceived. It assumes this provider is always mounted somewhere in the
+  // app, and sets this value.  If this provider is never mounted, pages that render the
+  // _other_ AssistantProvider will return null, rendering a blank page.
   useEffect(() => {
     elasticAssistantSharedState.assistantContextValue.setAssistantContextValue(
       assistantContextValue

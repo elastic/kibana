@@ -130,6 +130,8 @@ src/core/packages/chrome/layout/core-chrome-layout-constants @elastic/appex-shar
 src/core/packages/chrome/layout/core-chrome-layout-feature-flags @elastic/appex-sharedux
 src/core/packages/chrome/navigation @elastic/eui-team
 src/core/packages/chrome/navigation-tour @elastic/appex-sharedux
+src/core/packages/chrome/workspace/core-workspace-chrome-components @elastic/appex-sharedux
+src/core/packages/chrome/workspace/core-workspace-chrome-state @elastic/appex-sharedux
 src/core/packages/config/server-internal @elastic/kibana-core
 src/core/packages/custom-branding/browser @elastic/appex-sharedux
 src/core/packages/custom-branding/browser-internal @elastic/appex-sharedux

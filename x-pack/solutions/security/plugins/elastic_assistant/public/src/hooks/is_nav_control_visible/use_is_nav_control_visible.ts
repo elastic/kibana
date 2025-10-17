@@ -12,7 +12,7 @@ import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/common';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
 
-function getVisibility(
+export function getVisibility(
   appId: string | undefined,
   applications: ReadonlyMap<string, PublicAppInfo>,
   preferredAssistantType: AIAssistantType,

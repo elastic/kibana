@@ -14,9 +14,10 @@ import type { EmotionFn } from '../types';
 const root: EmotionFn = ({ euiTheme }) =>
   css`
     grid-area: application;
-    height: 100%;
+    height: ${layoutVar('application.height')};
     position: relative;
-    width: 100%;
+    width: ${layoutVar('application.width')};
+    block-size: ${layoutVar('application.height')};
     z-index: ${layoutLevels.content};
 
     display: flex;

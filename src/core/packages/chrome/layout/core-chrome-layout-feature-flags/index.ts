@@ -9,7 +9,7 @@
 
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 
-export type LayoutFeatureFlag = 'legacy-fixed' | 'grid';
+export type LayoutFeatureFlag = 'legacy-fixed' | 'grid' | 'workspace';
 export const LAYOUT_FEATURE_FLAG_KEY = 'core.chrome.layoutType';
 export const LAYOUT_DEBUG_FEATURE_FLAG_KEY = 'core.chrome.layoutDebug';
 export type LayoutProjectSideNavVersion = 'v1' | 'v2';
@@ -28,20 +28,21 @@ export const getSideNavVersion = (featureFlags: FeatureFlagsStart): LayoutProjec
     );
   }
 
-  return featureFlag;
+  return 'v2';
 };
 
 export const getLayoutVersion = (featureFlags: FeatureFlagsStart): LayoutFeatureFlag => {
   const featureFlag = featureFlags.getStringValue<LayoutFeatureFlag>(
     LAYOUT_FEATURE_FLAG_KEY,
-    'legacy-fixed'
+    'workspace'
   );
-  if (featureFlag !== 'legacy-fixed' && featureFlag !== 'grid') {
+  if (featureFlag !== 'legacy-fixed' && featureFlag !== 'grid' && featureFlag !== 'workspace') {
     throw new Error(
-      `Invalid layout feature flag value: ${featureFlag}. Expected 'legacy-fixed' or 'grid'.`
+      `Invalid layout feature flag value: ${featureFlag}. Expected 'legacy-fixed' or 'grid' or 'workspace'.`
     );
   }
-  return featureFlag;
+
+  return 'workspace';
 };
 
 export const getLayoutDebugFlag = (featureFlags: FeatureFlagsStart): boolean => {

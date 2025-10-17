@@ -62,3 +62,29 @@ export type {
   EuiSideNavItemTypeEnhanced,
   RenderAs,
 } from './project_navigation';
+
+export {
+  WORKSPACE_KNOWN_SIDEBAR_APPS,
+  WORKSPACE_SIDEBAR_APP_AI_ASSISTANT,
+  WORKSPACE_SIDEBAR_APP_FEEDBACK,
+  WORKSPACE_SIDEBAR_APP_HELP,
+  WORKSPACE_SIDEBAR_APP_NEWSFEED,
+  WORKSPACE_SIDEBAR_APP_PROFILE,
+  WORKSPACE_SIDEBAR_APP_RECENT,
+} from './workspace';
+
+export type {
+  WorkspaceSidebarAppProps,
+  WorkspaceKnownSidebarApp,
+  WorkspaceHeaderService,
+  WorkspaceHeaderState,
+  WorkspaceServiceStart,
+  WorkspaceSidebarApp,
+  WorkspaceButtonProps,
+  WorkspaceSidebarService,
+  WorkspaceSidebarState,
+  WorkspaceNavigationService,
+  WorkspaceService,
+  WorkspaceServiceState,
+  WorkspaceNavigationState,
+} from './workspace';

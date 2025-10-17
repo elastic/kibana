@@ -123,49 +123,16 @@ export const useResponsiveTabs = ({
     ]
   );
 
-  const tabsContainerCss = useMemo(() => {
-    let overflowGradient = '';
-    if (scrollState?.isScrollableLeft && scrollState?.isScrollableRight) {
-      overflowGradient = `
-        mask-image: linear-gradient(
-          to right,
-          rgba(255, 0, 0, 0.1) 0%,
-          rgb(255, 0, 0) ${euiTheme.size.s},
-          rgb(255, 0, 0) calc(100% - ${euiTheme.size.s}),
-          rgba(255, 0, 0, 0.1) 100%
-        );
-      `;
-    } else if (scrollState?.isScrollableLeft) {
-      overflowGradient = `
-        mask-image: linear-gradient(
-          to right,
-          rgba(255, 0, 0, 0.1) 0%,
-          rgb(255, 0, 0) ${euiTheme.size.s}
-        );
-      `;
-    } else if (scrollState?.isScrollableRight) {
-      overflowGradient = `
-        mask-image: linear-gradient(
-          to right,
-          rgb(255, 0, 0) calc(100% - ${euiTheme.size.s}),
-          rgba(255, 0, 0, 0.1) 100%
-        );
-      `;
+  const tabsContainerCss = css`
+    max-width: 100%;
+    user-select: none;
+    scrollbar-width: none; // hide the scrollbar
+    scroll-behavior: smooth;
+    &::-webkit-scrollbar {
+      display: none;
     }
-
-    return css`
-      overflow-x: auto;
-      max-width: 100%;
-      user-select: none;
-      scrollbar-width: none; // hide the scrollbar
-      scroll-behavior: smooth;
-      &::-webkit-scrollbar {
-        display: none;
-      }
-      transform: translateZ(0);
-      ${overflowGradient}
-    `;
-  }, [scrollState, euiTheme.size.s]);
+    transform: translateZ(0);
+  `;
 
   return {
     tabsSizeConfig,

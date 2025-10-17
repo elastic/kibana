@@ -36,7 +36,9 @@
     "@kbn/core-feature-flags-browser",
     "@kbn/core-chrome-layout",
     "@kbn/core-feature-flags-browser-mocks",
-    "@kbn/core-chrome-layout-feature-flags"
+    "@kbn/core-chrome-layout-feature-flags",
+    "@kbn/core-chrome-browser",
+    "@kbn/core-workspace-chrome-components"
   ],
   "exclude": [
     "target/**/*"

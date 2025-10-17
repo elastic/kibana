@@ -72,6 +72,7 @@
     "@kbn/core-chrome-layout-feature-flags",
     "@kbn/shared-ux-feedback-snippet",
     "@kbn/core-chrome-navigation-tour",
+    "@kbn/core-workspace-chrome-state",
   ],
   "exclude": [
     "target/**/*",

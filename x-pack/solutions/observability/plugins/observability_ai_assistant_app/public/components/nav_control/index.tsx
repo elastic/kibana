@@ -29,6 +29,7 @@ interface NavControlWithProviderDeps {
   isServerless?: boolean;
 }
 
+// I can't believe this is all in the button.
 export const NavControlWithProvider = ({
   appService,
   coreStart,

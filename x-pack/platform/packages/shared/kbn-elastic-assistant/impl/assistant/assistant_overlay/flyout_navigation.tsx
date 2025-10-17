@@ -91,6 +91,7 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
         borderRadius="none"
         paddingSize="s"
         grow={false}
+        color="transparent"
         css={css`
           border-bottom: ${euiTheme.border.thin};
         `}

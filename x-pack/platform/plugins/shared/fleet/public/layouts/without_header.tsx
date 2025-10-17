@@ -8,12 +8,13 @@
 import React from 'react';
 import styled from 'styled-components';
 import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import { layoutVar } from '@kbn/core-chrome-layout-constants';
 
 export const Wrapper = styled.div`
   background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
 
   // Set the min height to the viewport size minus the height of any global Kibana headers
-  min-height: calc(100vh - var(--euiFixedHeadersOffset, 0));
+  min-height: ${layoutVar('application.content.height', '100vh')};
 `;
 
 export const Page = styled(EuiPage)`

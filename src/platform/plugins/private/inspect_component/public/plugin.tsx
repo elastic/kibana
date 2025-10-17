@@ -37,10 +37,15 @@ export class InspectComponentPluginPublic implements Plugin {
         import('@kbn/react-kibana-mount'),
       ])
         .then(([{ InspectButton }, { toMountPoint }]) => {
-          core.chrome.navControls.registerRight({
-            order: 1002,
-            mount: toMountPoint(<InspectButton core={core} branch={this.branch} />, core.rendering),
-          });
+          if (!core.chrome.workspace.isEnabled()) {
+            core.chrome.navControls.registerRight({
+              order: 1002,
+              mount: toMountPoint(
+                <InspectButton core={core} branch={this.branch} />,
+                core.rendering
+              ),
+            });
+          }
         })
         .catch(() => {
           this.logger.error('Failed to import plugin files.');

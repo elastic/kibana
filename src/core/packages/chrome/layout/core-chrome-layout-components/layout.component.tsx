@@ -20,8 +20,8 @@ import type { ChromeLayoutSlots, Slot } from './layout.types';
 import { useLayoutState } from './layout_state_context';
 
 export interface ChromeLayoutComponentProps extends ChromeLayoutSlots {
-  // application
   children: Slot;
+  className?: string;
 }
 
 /**
@@ -30,7 +30,11 @@ export interface ChromeLayoutComponentProps extends ChromeLayoutSlots {
  * @param props - ChromeLayoutComponentProps
  * @returns The rendered ChromeLayoutComponent.
  */
-export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutComponentProps) => {
+export const ChromeLayoutComponent = ({
+  children,
+  className,
+  ...props
+}: ChromeLayoutComponentProps & { className?: string }) => {
   const layoutState = useLayoutState();
   const styles = useLayoutStyles(layoutState);
 
@@ -63,15 +67,15 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
 
   const application = (
     <LayoutApplication
-      topBar={renderSlot(props.applicationTopBar)}
       bottomBar={renderSlot(props.applicationBottomBar)}
+      topBar={renderSlot(props.applicationTopBar)}
     >
       {renderSlot(children)}
     </LayoutApplication>
   );
 
   return (
-    <div css={styles.css} style={styles.style}>
+    <div {...{ className, ...styles }}>
       {banner}
       {header}
       {navigation}

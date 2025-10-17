@@ -31,21 +31,23 @@ export interface SideNavPanelProps {
  * Shows only in expanded mode.
  */
 export const SideNavPanel = ({ children, footer, openerNode }: SideNavPanelProps): JSX.Element => {
-  const { euiTheme } = useEuiTheme();
   const scrollStyles = useScroll();
+  const { euiTheme } = useEuiTheme();
 
   const wrapperStyles = css`
     // > For instance, only plain or transparent panels can have a border and/or shadow.
     // source: https://eui.elastic.co/docs/components/containers/panel/
     box-sizing: border-box;
-    border-right: ${euiTheme.border.width.thin} ${euiTheme.colors.borderBaseSubdued} solid;
     display: flex;
     flex-direction: column;
     width: ${SIDE_PANEL_WIDTH}px;
+    border-left: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+    background-color: transparent;
   `;
 
   const navigationPanelStyles = css`
     ${scrollStyles}
+    background-color: transparent;
   `;
 
   return (

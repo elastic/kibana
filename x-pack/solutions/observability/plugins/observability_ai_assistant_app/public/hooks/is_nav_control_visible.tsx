@@ -19,7 +19,7 @@ interface UseIsNavControlVisibleProps {
   isServerless?: boolean;
 }
 
-function getVisibility(
+export function getVisibility(
   appId: string | undefined,
   applications: ReadonlyMap<string, PublicAppInfo>,
   preferredAssistantType: AIAssistantType,

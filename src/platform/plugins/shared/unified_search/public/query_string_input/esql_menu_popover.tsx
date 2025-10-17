@@ -29,6 +29,11 @@ import {
 } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import { getCategorizationField } from '@kbn/aiops-utils';
+import {
+  WORKSPACE_SIDEBAR_APP_HELP,
+  openSidebar,
+  useWorkspaceDispatch,
+} from '@kbn/core-workspace-chrome-state';
 import type { IUnifiedSearchPluginServices } from '../types';
 
 export interface ESQLMenuPopoverProps {
@@ -44,6 +49,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
 }) => {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { docLinks, http, chrome } = kibana.services;
+  const workspaceDispatch = useWorkspaceDispatch();
 
   const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
@@ -109,11 +115,6 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     };
   }, [activeSolutionId, http, queryForRecommendedQueries]);
 
-  const toggleLanguageComponent = useCallback(() => {
-    setIsLanguageComponentOpen(!isLanguageComponentOpen);
-    setIsESQLMenuPopoverOpen(false);
-  }, [isLanguageComponentOpen]);
-
   const onHelpMenuVisibilityChange = useCallback(
     (status: boolean) => {
       setIsLanguageComponentOpen(status);
@@ -164,7 +165,10 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
                 key="quickReference"
                 icon="documentation"
                 data-test-subj="esql-quick-reference"
-                onClick={() => toggleLanguageComponent()}
+                onClick={() => {
+                  workspaceDispatch(openSidebar(WORKSPACE_SIDEBAR_APP_HELP));
+                  setIsESQLMenuPopoverOpen(false);
+                }}
               >
                 {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.quickReference', {
                   defaultMessage: 'Quick Reference',
@@ -248,7 +252,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     onESQLQuerySubmit,
     queryForRecommendedQueries,
     timeFieldName,
-    toggleLanguageComponent,
+    workspaceDispatch,
     solutionsRecommendedQueries, // This dependency is fine here, as it *uses* the state
     categorizationField,
   ]);
