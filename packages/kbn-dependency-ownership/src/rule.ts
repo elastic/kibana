@@ -51,7 +51,9 @@ export function packageFilter(pkg: string) {
     pkg !== '@elastic/eui' &&
     pkg !== '@elastic/eui-theme-borealis' &&
     // Operations owns node, and is not covered by renovate
-    pkg !== '@types/node'
+    pkg !== '@types/node' &&
+    // SharedUX owns the @tanstack/react-query wrapper, not covered by renovate
+    pkg !== '@tanstack/react-query'
   );
 }
 
