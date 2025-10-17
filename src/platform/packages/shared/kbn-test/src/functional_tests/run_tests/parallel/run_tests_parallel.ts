@@ -311,6 +311,13 @@ export async function runTestsParallel(
       if (configLines.length > 0) {
         log.info(`Configs:\n${configLines.map((line) => `  ${line}`).join('\n')}`);
       }
+
+      log.info(
+        execSync(
+          (process.platform === 'linux' ? `top -b -n 1 -o %MEM` : `top -l 1 -o mem`) +
+            ` | head -30 `
+        ).toString('utf-8')
+      );
     }
 
     statsTimer = setInterval(logStats, 10_000);
