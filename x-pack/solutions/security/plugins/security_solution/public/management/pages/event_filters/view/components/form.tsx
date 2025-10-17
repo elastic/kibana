@@ -79,7 +79,7 @@ import { ExceptionItemComments } from '../../../../../detection_engine/rule_exce
 import { EventFiltersApiClient } from '../../service/api_client';
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
 import { ProcessDescendantsTooltip } from './process_descendant_tooltip';
-import type { EventFilterItemAndAdvancedTrustedAppsEntries } from '../../../../../../common/endpoint/types/exception_list_items';
+import type { ExceptionEntries } from '../../../../../../common/endpoint/types/exception_list_items';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -172,9 +172,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         !hasNameError &&
         !hasCommentError &&
         !!exception.entries.length &&
-        (exception.entries as EventFilterItemAndAdvancedTrustedAppsEntries).some(
-          (e) => e.value !== '' || e.value.length
-        )
+        (exception.entries as ExceptionEntries).some((e) => e.value !== '' || e.value.length)
       );
     }, [hasCommentError, hasNameError, exception.entries]);
 
