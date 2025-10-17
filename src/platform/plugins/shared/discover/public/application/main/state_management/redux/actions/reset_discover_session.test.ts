@@ -37,7 +37,6 @@ const createPersistedTab = ({
   fromTabStateToSavedObjectTab({
     tab: getTabStateMock({
       id: tabId,
-      label: tabId,
       initialInternalState: {
         serializedSearchSource: { index: dataView.id },
       },
@@ -111,6 +110,7 @@ describe('resetDiscoverSession', () => {
 
     await internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap();
 
+    expect(internalState.getState().persistedDiscoverSession).toBeUndefined();
     expect(updateTabsSpy).not.toHaveBeenCalled();
   });
 
