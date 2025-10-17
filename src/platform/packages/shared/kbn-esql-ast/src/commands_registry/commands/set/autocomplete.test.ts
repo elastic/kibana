@@ -52,6 +52,34 @@ describe('SET Autocomplete', () => {
     it('suggests settings for partial setting name', async () => {
       await testSetAutocomplete('SET project', ['project_routing = ']);
     });
+
+    it('suggests assignment operator after setting name', async () => {
+      await testSetAutocomplete('SET project_routing ', ['= ']);
+    });
+  });
+
+  describe('Setting value suggestions', () => {
+    it('suggests nothing if setting name is unknown', async () => {
+      await testSetAutocomplete('SET unknown_setting = ', []);
+    });
+
+    describe('Project routing setting', () => {
+      it('suggests common project routing values after assignment operator', async () => {
+        await testSetAutocomplete('SET project_routing = ', [
+          '"_alias: *";',
+          '"_alias:* AND NOT _alias:_origin";',
+          '"_alias:_origin";',
+        ]);
+      });
+
+      it('suggests common project routing values for partial input', async () => {
+        await testSetAutocomplete('SET project_routing = "_alias:', [
+          '"_alias: *";',
+          '"_alias:* AND NOT _alias:_origin";',
+          '"_alias:_origin";',
+        ]);
+      });
+    });
   });
 
   describe('After setting assignment', () => {
@@ -63,28 +91,12 @@ describe('SET Autocomplete', () => {
       await testSetAutocomplete('SET project_routing = "test"', [';\n']);
     });
 
-    it('suggests semicolon with newline after quoted value', async () => {
-      // Note: Single quotes might not parse as complete binary expression in all cases
-      await testSetAutocomplete("SET project_routing = 'test'", []);
-    });
-
     it('suggests semicolon with newline after boolean value', async () => {
       await testSetAutocomplete('SET project_routing = true', [';\n']);
     });
 
     it('suggests semicolon with newline after numeric value', async () => {
       await testSetAutocomplete('SET project_routing = 123', [';\n']);
-    });
-  });
-
-  // For now we don't suggest anything for settings values
-  describe('Incomplete expressions', () => {
-    it('suggests nothing for incomplete binary expression', async () => {
-      await testSetAutocomplete('SET project_routing = ', []);
-    });
-
-    it('suggests nothing for setting name followed by equals but no value', async () => {
-      await testSetAutocomplete('SET project_routing =', []);
     });
   });
 });
