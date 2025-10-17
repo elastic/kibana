@@ -36,9 +36,6 @@ const getServices = () => ({
         getRedirectUrl: mockGetRedirectUrl,
       },
     },
-    uiSettings: {
-      get: jest.fn().mockReturnValue(['logs-*', 'logs-*-*']),
-    },
   },
 });
 
@@ -291,7 +288,7 @@ describe('useDiscoverUrl', () => {
   describe('inventory threshold rule', () => {
     it('builds Discover url when alert has metricAlias', () => {
       const expectedMetricAlias = 'metricbeat-*';
-      const alertWithDataViewId = {
+      const alertWithIndexPattern = {
         ...MOCK_ALERT,
         fields: {
           [ALERT_INDEX_PATTERN]: expectedMetricAlias,
@@ -308,7 +305,7 @@ describe('useDiscoverUrl', () => {
         to: moment(MOCK_ALERT.start).add(30, 'minutes').toISOString(),
       };
 
-      renderHook(() => useDiscoverUrl({ alert: alertWithDataViewId, rule }));
+      renderHook(() => useDiscoverUrl({ alert: alertWithIndexPattern, rule }));
 
       expect(mockGetRedirectUrl).toHaveBeenCalledWith({
         dataViewSpec: { title: expectedMetricAlias, timeFieldName: '@timestamp' },
@@ -324,7 +321,7 @@ describe('useDiscoverUrl', () => {
   describe('metric threshold rule', () => {
     it('builds Discover url when alert has metricAlias', () => {
       const expectedMetricAlias = 'metricbeat-*';
-      const alertWithDataViewId = {
+      const alertWithIndexPattern = {
         ...MOCK_ALERT,
         fields: {
           [ALERT_INDEX_PATTERN]: expectedMetricAlias,
@@ -341,7 +338,7 @@ describe('useDiscoverUrl', () => {
         to: moment(MOCK_ALERT.start).add(30, 'minutes').toISOString(),
       };
 
-      renderHook(() => useDiscoverUrl({ alert: alertWithDataViewId, rule }));
+      renderHook(() => useDiscoverUrl({ alert: alertWithIndexPattern, rule }));
 
       expect(mockGetRedirectUrl).toHaveBeenCalledWith({
         dataViewSpec: { title: expectedMetricAlias, timeFieldName: '@timestamp' },
@@ -352,8 +349,16 @@ describe('useDiscoverUrl', () => {
 
   describe('log threshold rule', () => {
     it('builds Discover url when alert has log sources', () => {
+      const expectedIndexPattern = 'logs-*,logs-*-*';
+      const alertWithIndexPattern = {
+        ...MOCK_ALERT,
+        fields: {
+          [ALERT_INDEX_PATTERN]: expectedIndexPattern,
+        },
+      } as unknown as TopAlert;
       const rule = {
         ruleTypeId: LOG_THRESHOLD_ALERT_TYPE_ID,
+        params: {},
       } as unknown as Rule;
 
       const expectedTimeRange = {
@@ -361,10 +366,10 @@ describe('useDiscoverUrl', () => {
         to: moment(MOCK_ALERT.start).add(30, 'minutes').toISOString(),
       };
 
-      renderHook(() => useDiscoverUrl({ alert: MOCK_ALERT, rule }));
+      renderHook(() => useDiscoverUrl({ alert: alertWithIndexPattern, rule }));
 
       expect(mockGetRedirectUrl).toHaveBeenCalledWith({
-        dataViewSpec: { title: 'logs-*,logs-*-*', timeFieldName: '@timestamp' },
+        dataViewSpec: { title: expectedIndexPattern, timeFieldName: '@timestamp' },
         timeRange: expectedTimeRange,
       });
     });

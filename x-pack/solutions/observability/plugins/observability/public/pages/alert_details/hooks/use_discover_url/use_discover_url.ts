@@ -18,7 +18,6 @@ import {
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TopAlert } from '../../../../typings/alerts';
 import { useKibana } from '../../../../utils/kibana_react';
 import {
@@ -27,8 +26,7 @@ import {
   getSLOBurnRateRuleData,
   getSyntheticsStatusRuleData,
   getSyntheticsTlsRuleData,
-  getInventoryOrMetricThresholdRuleData,
-  getLogThresholdRuleData,
+  getAlertsIndexPatternRuleData,
 } from './get_rule_data';
 
 const viewInDiscoverSupportedRuleTypes = [
@@ -55,7 +53,7 @@ const isViewInDiscoverSupportedRuleType = (
 
 const getLocatorParamsMap: Record<
   (typeof viewInDiscoverSupportedRuleTypes)[number],
-  (params: { rule: Rule; alert: TopAlert; uiSettings: IUiSettingsClient }) => {
+  (params: { rule: Rule; alert: TopAlert }) => {
     discoverAppLocatorParams?: DiscoverAppLocatorParams;
     discoverUrl?: string;
   }
@@ -65,18 +63,18 @@ const getLocatorParamsMap: Record<
   [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID]: getCustomThresholdRuleData,
   [ES_QUERY_ID]: getEsQueryRuleData,
   [SLO_BURN_RATE_RULE_TYPE_ID]: getSLOBurnRateRuleData,
-  [METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID]: getInventoryOrMetricThresholdRuleData,
-  [METRIC_THRESHOLD_ALERT_TYPE_ID]: getInventoryOrMetricThresholdRuleData,
-  [LOG_THRESHOLD_ALERT_TYPE_ID]: getLogThresholdRuleData,
+  [METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID]: getAlertsIndexPatternRuleData,
+  [METRIC_THRESHOLD_ALERT_TYPE_ID]: getAlertsIndexPatternRuleData,
+  [LOG_THRESHOLD_ALERT_TYPE_ID]: getAlertsIndexPatternRuleData,
 };
 
 export const useDiscoverUrl = ({ alert, rule }: { alert: TopAlert | null; rule?: Rule }) => {
   const { services } = useKibana();
-  const { discover, uiSettings } = services;
+  const { discover } = services;
 
   const { discoverUrl, discoverAppLocatorParams } =
     isViewInDiscoverSupportedRuleType(rule?.ruleTypeId) && alert
-      ? getLocatorParamsMap[rule.ruleTypeId]({ rule, alert, uiSettings })
+      ? getLocatorParamsMap[rule.ruleTypeId]({ rule, alert })
       : { discoverUrl: undefined, discoverAppLocatorParams: undefined };
 
   if (discoverUrl) return { discoverUrl };

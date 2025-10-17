@@ -10,23 +10,17 @@ import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { ALERT_INDEX_PATTERN } from '@kbn/rule-data-utils';
 import type { TopAlert } from '../../../../../typings/alerts';
 
-export const getInventoryOrMetricThresholdRuleData = ({
-  alert,
-  rule,
-}: {
-  alert: TopAlert;
-  rule: Rule;
-}) => {
-  const metricAlias =
+export const getAlertsIndexPatternRuleData = ({ alert, rule }: { alert: TopAlert; rule: Rule }) => {
+  const indexPattern =
     ALERT_INDEX_PATTERN in alert.fields ? alert.fields[ALERT_INDEX_PATTERN] : undefined;
 
-  if (typeof metricAlias !== 'string') {
+  if (typeof indexPattern !== 'string') {
     return {};
   }
 
   const discoverAppLocatorParams: DiscoverAppLocatorParams = {
     dataViewSpec: {
-      title: metricAlias,
+      title: indexPattern,
       timeFieldName: '@timestamp',
     },
   };
