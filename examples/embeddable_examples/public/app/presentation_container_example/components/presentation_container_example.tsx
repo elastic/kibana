@@ -109,7 +109,6 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
               type={type}
               maybeId={id}
               getParentApi={() => pageApi}
-              hidePanelChrome={false}
               onApiAvailable={(api) => {
                 componentApi.setChild(id, api);
               }}

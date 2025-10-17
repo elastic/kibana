@@ -38,7 +38,7 @@ export function SearchEmbeddableRenderer(props: Props) {
         ...searchApi,
         getSerializedStateForChild: () => initialState,
       })}
-      hidePanelChrome={true}
+      panelProps={{ hidePanelChrome: true }}
     />
   );
 }

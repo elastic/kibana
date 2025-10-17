@@ -124,6 +124,7 @@ export function LensRenderer({
 
   const panelProps: PanelProps = useMemo(() => {
     return {
+      hidePanelChrome: !showPanelChrome,
       hideInspector: !showInspector,
       showNotifications: false,
       showShadow: false,
@@ -136,7 +137,7 @@ export function LensRenderer({
         return (extraActions ?? []).concat(actions || []);
       },
     };
-  }, [showInspector, withDefaultActions, extraActions, lensApi]);
+  }, [showInspector, showPanelChrome, withDefaultActions, extraActions, lensApi]);
 
   return (
     <EmbeddableRenderer<LensSerializedState, LensApi>
@@ -167,7 +168,6 @@ export function LensRenderer({
         reload$, // trigger a reload (replacement for deprepcated searchSessionId)
       })}
       onApiAvailable={setLensApi}
-      hidePanelChrome={!showPanelChrome}
       panelProps={panelProps}
     />
   );

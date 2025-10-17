@@ -10,9 +10,10 @@
 import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
-import type { PublishesTitle } from '@kbn/presentation-publishing';
+import type { HasType, PublishesTitle } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
+  apiPublishesRendered,
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
@@ -23,13 +24,16 @@ import { PresentationPanelErrorInternal } from './presentation_panel_error_inter
 import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
 import { usePanelErrorCss } from './use_panel_error_css';
 import { PresentationPanelHoverActionsWrapper } from './panel_header/presentation_panel_hover_actions_wrapper';
+import { useReporting } from './use_reporting';
 
 export const PresentationPanelInternal = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
   ComponentPropsType extends {} = {}
 >({
+  disableReportingAttributes,
   index,
   hideHeader,
+  hidePanelChrome,
   showShadow,
   showBorder,
 
@@ -56,6 +60,7 @@ export const PresentationPanelInternal = <
 
   const [
     dataLoading,
+    rendered,
     blockingError,
     panelTitle,
     hidePanelTitle,
@@ -66,6 +71,7 @@ export const PresentationPanelInternal = <
     parentHidePanelTitle,
   ] = useBatchedOptionalPublishingSubjects(
     api?.dataLoading$,
+    apiPublishesRendered(api) ? api.rendered$ : undefined,
     api?.blockingError$,
     api?.title$,
     api?.hideTitle$,
@@ -87,16 +93,14 @@ export const PresentationPanelInternal = <
     Boolean(parentHidePanelTitle) ||
     !Boolean(panelTitle ?? defaultPanelTitle);
 
-  const contentAttrs = useMemo(() => {
-    const attrs: { [key: string]: boolean } = {};
-    if (dataLoading) {
-      attrs['data-loading'] = true;
-    } else {
-      attrs['data-render-complete'] = true;
-    }
-    if (blockingError) attrs['data-error'] = true;
-    return attrs;
-  }, [dataLoading, blockingError]);
+  const { reportingAttributes, reportingRef } = useReporting({
+    apiReady: Boolean(api),
+    blockingError,
+    dataLoading: dataLoading ?? false,
+    rendered: rendered ?? true,
+    title: panelTitle ?? defaultPanelTitle,
+    description: defaultPanelTitle ?? defaultPanelDescription,
+  });
 
   const setDragHandle = useCallback(
     (id: string, ref: HTMLElement | null) => {
@@ -106,7 +110,52 @@ export const PresentationPanelInternal = <
     [setDragHandles]
   );
 
-  return (
+  const panelContent = useMemo(() => {
+    const componentWithErrorBoundary = (
+      <EuiErrorBoundary>
+        <Component
+          {...(componentProps as React.ComponentProps<typeof Component>)}
+          ref={(newApi) => {
+            if (newApi && !api) setApi(newApi);
+          }}
+        />
+      </EuiErrorBoundary>
+    );
+
+    return disableReportingAttributes && hidePanelChrome ? (
+      componentWithErrorBoundary
+    ) : (
+      <div
+        {...(!hidePanelChrome
+          ? {
+              className: blockingError ? 'embPanel__content--hidden' : 'embPanel__content',
+              css: styles.embPanelContent,
+            }
+          : {})}
+        {...(!disableReportingAttributes &&
+        api &&
+        ['image', 'lens', 'links', 'visualization'].includes((api as unknown as HasType).type)
+          ? reportingAttributes
+          : {})}
+        ref={(ref) => (reportingRef.current = ref as HTMLElement)}
+      >
+        {componentWithErrorBoundary}
+      </div>
+    );
+  }, [
+    Component,
+    api,
+    blockingError,
+    componentProps,
+    disableReportingAttributes,
+    hidePanelChrome,
+    reportingAttributes,
+    reportingRef,
+  ]);
+
+  return hidePanelChrome ? (
+    panelContent
+  ) : (
     <PresentationPanelHoverActionsWrapper
       {...{
         index,
@@ -128,7 +177,7 @@ export const PresentationPanelInternal = <
         hasShadow={showShadow}
         aria-labelledby={headerId}
         data-test-subj="embeddablePanel"
-        {...contentAttrs}
+        {...(blockingError ? { 'data-error': true } : {})}
         css={styles.embPanel}
       >
         {!hideHeader && api && (
@@ -157,19 +206,7 @@ export const PresentationPanelInternal = <
           </EuiFlexGroup>
         )}
         {!initialLoadComplete && <PanelLoader />}
-        <div
-          className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
-          css={styles.embPanelContent}
-        >
-          <EuiErrorBoundary>
-            <Component
-              {...(componentProps as React.ComponentProps<typeof Component>)}
-              ref={(newApi) => {
-                if (newApi && !api) setApi(newApi);
-              }}
-            />
-          </EuiErrorBoundary>
-        </div>
+        {panelContent}
       </EuiPanel>
     </PresentationPanelHoverActionsWrapper>
   );
