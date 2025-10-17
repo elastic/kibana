@@ -31,10 +31,6 @@ export function DiscoverFlyoutStreamField(props: DiscoverFlyoutStreamFieldProps)
         title={i18n.translate('xpack.streams.discoverFlyoutStreamField.title', {
           defaultMessage: 'Stream',
         })}
-        isTechPreview={true}
-        description={i18n.translate('xpack.streams.betaBadgeLabel', {
-          defaultMessage: 'Streams is currently in tech preview',
-        })}
       >
         <DiscoverFlyoutStreamFieldContent {...props} />
       </ContentFrameworkSection>
