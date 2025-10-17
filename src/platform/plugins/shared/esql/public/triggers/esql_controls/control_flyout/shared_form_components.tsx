@@ -29,6 +29,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiLink,
   EuiFlyoutHeader,
   EuiTitle,
   EuiBetaBadge,
@@ -37,6 +38,7 @@ import {
   EuiTextColor,
   EuiCode,
   EuiCallOut,
+  useEuiTheme,
 } from '@elastic/eui';
 import { checkVariableExistence } from './helpers';
 
@@ -342,6 +344,9 @@ export function ControlSelectionType({
   singleSelect: boolean;
   onSelectionTypeChange: (isSingleSelect: boolean) => void;
 }) {
+  const theme = useEuiTheme();
+  const link =
+    'https://www.elastic.co/docs/explore-analyze/dashboards/add-controls#add-esql-control';
   return (
     <>
       <EuiSpacer size="m" />
@@ -371,11 +376,26 @@ export function ControlSelectionType({
             size="s"
             color="primary"
             iconType="info"
-            title={i18n.translate('esql.flyout.selectionType.callout', {
-              defaultMessage:
-                'You must use MV_CONTAINS in your ES|QL query for multi-select controls to work.',
-            })}
-          />
+            css={css`
+              .euiText {
+                color: ${theme.euiTheme.colors.textPrimary} !important;
+              }
+            `}
+          >
+            <EuiText size="s">
+              <FormattedMessage
+                id="esql.flyout.selectionType.callout"
+                defaultMessage="You must use {mvContainsLink} in your ES|QL query for multi-select controls to work."
+                values={{
+                  mvContainsLink: (
+                    <EuiLink href={link} target="_blank">
+                      MV_CONTAINS
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </EuiText>
+          </EuiCallOut>
         </>
       ) : null}
     </>
