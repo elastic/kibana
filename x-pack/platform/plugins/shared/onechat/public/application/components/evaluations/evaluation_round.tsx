@@ -215,7 +215,7 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
               </div>
               <EuiHorizontalRule margin="xs" />
               {/* Qualitative Review */}
-              <div>
+              {/* <div>
                 <EuiText
                   size="xs"
                   css={{
@@ -245,7 +245,7 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
                     Structured JSON for qualitative evaluators goes here...
                   </EuiText>
                 </div>
-              </div>
+              </div> */}
             </EuiFlexGroup>
           </EuiFlexItem>
         )}
