@@ -39,24 +39,6 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables Automated Endpoint Process actions
-   */
-  automatedProcessActionsEnabled: true,
-
-  /**
-   * Enables use of SentinelOne response actions that complete asynchronously
-   *
-   * Release: v8.14.0
-   */
-  responseActionsSentinelOneV2Enabled: true,
-
-  /** Enables the `kill-process` response action for SentinelOne */
-  responseActionsSentinelOneKillProcessEnabled: true,
-
-  /** Enable the `processes` response actions for SentinelOne */
-  responseActionsSentinelOneProcessesEnabled: true,
-
-  /**
    * Enables the ability to send Response actions to Crowdstrike and persist the results
    * in ES.
    */
@@ -144,11 +126,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
   malwareOnWriteScanOptionAvailable: true,
-
-  /**
-   * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
-   */
-  unifiedManifestEnabled: true,
 
   /**
    * Enables the new modal for the value list items
@@ -251,12 +228,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Trusted Devices artifact management for device control protections.
    * Allows users to manage trusted USB and external devices
    */
-  trustedDevices: false,
+  trustedDevices: true,
 
   /**
    * Enables the ability to import and migration dashboards through automatic migration service
    */
-  automaticDashboardsMigration: false,
+  automaticDashboardsMigration: true,
 
   /**
    * Enables the SIEM Readiness Dashboard feature
