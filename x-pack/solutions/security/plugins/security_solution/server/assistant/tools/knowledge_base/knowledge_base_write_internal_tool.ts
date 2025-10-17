@@ -49,7 +49,8 @@ const KB_WRITE_INTERNAL_TOOL_ID = 'core.security.knowledge_base_write';
  */
 export const knowledgeBaseWriteInternalTool = (
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>,
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  mlPlugin?: MlPluginSetup
 ): BuiltinToolDefinition<typeof knowledgeBaseWriteToolSchema> => {
   return {
     id: KB_WRITE_INTERNAL_TOOL_ID,
@@ -84,13 +85,13 @@ export const knowledgeBaseWriteInternalTool = (
 
         // Fallback: use data clients provider if assistant context is not available
         if (!kbDataClient) {
-          const dataClientsProvider = getDataClientsProvider(getStartServices);
+          const dataClientsProvider = getDataClientsProvider(getStartServices, mlPlugin);
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           await initializeDataClients(context as any);
           kbDataClient = dataClientsProvider.getKnowledgeBaseDataClient();
+          const isInferenceEndpointExists = await kbDataClient?.isInferenceEndpointExists();
 
-          // Check if data clients provider is initialized
-          if (!dataClientsProvider.isInitialized()) {
+          if (!kbDataClient || !isInferenceEndpointExists) {
             return {
               results: [
                 {
@@ -107,73 +108,56 @@ export const knowledgeBaseWriteInternalTool = (
           }
         }
 
-        if (kbDataClient) {
-          try {
-            // Use createKnowledgeBaseEntry to preserve the custom name
-            const entry = {
-              name,
-              text: query,
-              type: 'document' as const,
-              required: required ?? false,
-              global: false, // User-specific entry, not global
-              kbResource: 'user' as const,
-              source: 'conversation' as const,
-            };
+        try {
+          // Use createKnowledgeBaseEntry to preserve the custom name
+          const entry = {
+            name,
+            text: query,
+            type: 'document' as const,
+            required: required ?? false,
+            global: false, // User-specific entry, not global
+            kbResource: 'user' as const,
+            source: 'conversation' as const,
+          };
 
-            // Get real telemetry from the data clients provider context
-            const [coreStart] = await getStartServices();
-            const realTelemetry = coreStart.analytics;
+          // Get real telemetry from the data clients provider context
+          const [coreStart] = await getStartServices();
+          const realTelemetry = coreStart.analytics;
 
-            const result = await kbDataClient.createKnowledgeBaseEntry({
-              knowledgeBaseEntry: entry,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              telemetry: realTelemetry as any,
-            });
+          const result = await kbDataClient.createKnowledgeBaseEntry({
+            knowledgeBaseEntry: entry,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            telemetry: realTelemetry as any,
+          });
 
-            return {
-              results: [
-                {
-                  type: ToolResultType.other,
-                  data: {
-                    message: `Successfully saved "${name}" to your knowledge base. You can reference this information in future conversations.`,
-                    entryId: result?.id,
-                    name,
-                    query,
-                  },
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  message: `Successfully saved "${name}" to your knowledge base. You can reference this information in future conversations.`,
+                  entryId: result?.id,
+                  name,
+                  query,
                 },
-              ],
-            };
-          } catch (createError) {
-            // If there's an error, return the error message
-            return {
-              results: [
-                {
-                  type: ToolResultType.other,
-                  data: {
-                    message: `Failed to save "${name}" to your knowledge base: ${createError.message}`,
-                    name,
-                    query,
-                  },
-                },
-              ],
-            };
-          }
-        }
-
-        // If we can't get the KB data client, return error
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                message:
-                  'The "AI Assistant knowledge base" needs to be installed. Navigate to the Knowledge Base page in the AI Assistant Settings to install it.',
-                name,
-                query,
               },
-            },
-          ],
-        };
+            ],
+          };
+        } catch (createError) {
+          // If there's an error, return the error message
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  message: `Failed to save "${name}" to your knowledge base: ${createError.message}`,
+                  name,
+                  query,
+                },
+              },
+            ],
+          };
+        }
       } catch (error) {
         return {
           results: [

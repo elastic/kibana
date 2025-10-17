@@ -11,6 +11,7 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { ToolType } from '@kbn/onechat-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
 import { getDataClientsProvider, initializeDataClients } from '../data_clients_provider';
@@ -65,7 +66,8 @@ const KB_RETRIEVAL_INTERNAL_TOOL_ID = 'core.security.knowledge_base_retrieval';
  */
 export const knowledgeBaseRetrievalInternalTool = (
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>,
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  mlPlugin?: MlPluginSetup
 ): BuiltinToolDefinition<typeof knowledgeBaseRetrievalToolSchema> => {
   return {
     id: KB_RETRIEVAL_INTERNAL_TOOL_ID,
@@ -99,13 +101,13 @@ export const knowledgeBaseRetrievalInternalTool = (
 
         // Fallback: use data clients provider if assistant context is not available
         if (!kbDataClient) {
-          const dataClientsProvider = getDataClientsProvider(getStartServices);
+          const dataClientsProvider = getDataClientsProvider(getStartServices, mlPlugin);
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           await initializeDataClients(context as any);
           kbDataClient = dataClientsProvider.getKnowledgeBaseDataClient();
 
-          // Check if data clients provider is initialized
-          if (!dataClientsProvider.isInitialized()) {
+          const isInferenceEndpointExists = await kbDataClient?.isInferenceEndpointExists();
+          if (!kbDataClient || !isInferenceEndpointExists) {
             return {
               results: [
                 {
@@ -121,53 +123,37 @@ export const knowledgeBaseRetrievalInternalTool = (
           }
         }
 
-        if (kbDataClient) {
-          // Get knowledge base document entries
-          const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
-            kbResource: 'user',
-            query,
-          });
+        // Get knowledge base document entries
+        const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
+          kbResource: 'user',
+          query,
+        });
 
-          if (docs && docs.length > 0) {
-            return {
-              results: [
-                {
-                  type: ToolResultType.other,
-                  data: {
-                    content: docs.map((doc: any) => doc.pageContent).join('\n\n'),
-                    query,
-                  },
+        if (docs && docs.length > 0) {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  content: docs.map((doc: any) => doc.pageContent).join('\n\n'),
+                  query,
                 },
-              ],
-            };
-          } else {
-            return {
-              results: [
-                {
-                  type: ToolResultType.other,
-                  data: {
-                    message: 'No knowledge base entries found for your query.',
-                    query,
-                  },
-                },
-              ],
-            };
-          }
-        }
-
-        // If we can't get the KB data client, return error
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                message:
-                  'The "AI Assistant knowledge base" needs to be installed. Navigate to the Knowledge Base page in the AI Assistant Settings to install it.',
-                query,
               },
-            },
-          ],
-        };
+            ],
+          };
+        } else {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  message: 'No knowledge base entries found for your query.',
+                  query,
+                },
+              },
+            ],
+          };
+        }
       } catch (error) {
         return {
           results: [

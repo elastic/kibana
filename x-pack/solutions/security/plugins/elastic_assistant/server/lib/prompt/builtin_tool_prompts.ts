@@ -49,9 +49,9 @@ Use this tool **only in the following cases**:
 - "Using my saved investigation notes, what did I find about the incident last Thursday?"
 - "What are my preferred index patterns?"
 - "What did I say about isolating hosts?"
-- "What is my favorite coffee spot near the office?" *(non-security example)*
+- "What is my favorite [something]?" *(non-security example)*
 
-2. Always call this tool when the user's query includes phrases like:**
+2. Always call this tool when the user's query includes phrases like:
 - "my favorite"
 - "what did I say about"
 - "my saved"
@@ -60,6 +60,11 @@ Use this tool **only in the following cases**:
 - "using my"
 - "what do I know about"
 - "based on my saved knowledge"
+- "what did I remember"
+- "what did I store"
+- "what did I save"
+- "my previous"
+- "my earlier"
 
 3. When you need to retrieve saved information the user has stored in their knowledge base, whether it's security-related or not.
 
@@ -86,8 +91,35 @@ If no relevant information is found, inform the user you could not locate the re
     promptId: 'KnowledgeBaseWriteTool',
     promptGroupId: builtinPromptGroupId,
     prompt: {
-      default:
-        "Call this for writing details to the user's knowledge base. The knowledge base contains useful information the user wants to store between conversation contexts. Input will be the summarized knowledge base entry to store, a short UI friendly name for the entry, and whether or not the entry is required.",
+      default: `Call this tool for writing details to the user's knowledge base. The knowledge base contains useful information the user wants to store between conversation contexts.
+
+Use this tool when:
+1. **User explicitly requests to save information** with phrases like:
+   - "remember that"
+   - "remember my"
+   - "save this"
+   - "store this"
+   - "keep this"
+   - "write down"
+   - "note that"
+
+2. **You sense important information is being discussed** that would be valuable to remember, such as:
+   - User preferences, settings, or configurations
+   - Personal details, contact information, or team structures
+   - Workflow processes, procedures, or methodologies
+   - Investigation findings, insights, or conclusions
+   - Technical solutions, troubleshooting steps, or best practices
+   - Project details, timelines, or important decisions
+
+**When calling this tool**:
+- Provide a clear, descriptive name that the user can use to refer to this entry later
+- Include the complete information to be saved in the query field
+- Set required to true only if the user explicitly asks for this information to always be included in conversations
+
+**Important**:
+- Be proactive in identifying valuable information worth saving
+- Choose descriptive names that will help the user find the information later
+- The saved information will be available for retrieval in future conversations`,
     },
   },
   {

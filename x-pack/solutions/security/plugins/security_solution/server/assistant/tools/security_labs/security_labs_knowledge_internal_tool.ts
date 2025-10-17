@@ -30,7 +30,8 @@ export const SECURITY_LABS_KNOWLEDGE_INTERNAL_TOOL_DESCRIPTION =
 
 export const securityLabsKnowledgeInternalTool = (
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>,
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  mlPlugin?: MlPluginSetup
 ): BuiltinToolDefinition<typeof securityLabsKnowledgeToolSchema> => {
   return {
     type: ToolType.builtin,
@@ -67,16 +68,16 @@ export const securityLabsKnowledgeInternalTool = (
         ) {
           kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient();
         }
-
         // Fallback: use data clients provider if assistant context is not available
         if (!kbDataClient) {
-          const dataClientsProvider = getDataClientsProvider(getStartServices);
+          const dataClientsProvider = getDataClientsProvider(getStartServices, mlPlugin);
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           await initializeDataClients(context as any);
           kbDataClient = dataClientsProvider.getKnowledgeBaseDataClient();
+          const isInferenceEndpointExists = await kbDataClient?.isInferenceEndpointExists();
 
           // Check if data clients provider is initialized
-          if (!dataClientsProvider.isInitialized()) {
+          if (!kbDataClient || !isInferenceEndpointExists) {
             return {
               results: [
                 {
@@ -92,54 +93,38 @@ export const securityLabsKnowledgeInternalTool = (
           }
         }
 
-        if (kbDataClient) {
-          // Get knowledge base document entries for Security Labs
-          const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
-            kbResource: SECURITY_LABS_RESOURCE,
-            query: question,
-          });
+        // Get knowledge base document entries for Security Labs
+        const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
+          kbResource: SECURITY_LABS_RESOURCE,
+          query: question,
+        });
 
-          if (docs && docs.length > 0) {
-            return {
-              results: [
-                {
-                  type: ToolResultType.other,
-                  data: {
-                    content: docs.map((doc: any) => doc.pageContent).join('\n\n'),
-                    question,
-                  },
+        if (docs && docs.length > 0) {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  content: docs.map((doc: any) => doc.pageContent).join('\n\n'),
+                  question,
                 },
-              ],
-            };
-          } else {
-            return {
-              results: [
-                {
-                  type: ToolResultType.other,
-                  data: {
-                    message:
-                      'No Security Labs content found for your question. The knowledge base may not contain the Security Labs content yet.',
-                    question,
-                  },
-                },
-              ],
-            };
-          }
-        }
-
-        // If we can't get the KB data client, return error
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                message:
-                  'The "AI Assistant knowledge base" needs to be installed, containing the Security Labs content. Navigate to the Knowledge Base page in the AI Assistant Settings to install it.',
-                question,
               },
-            },
-          ],
-        };
+            ],
+          };
+        } else {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  message:
+                    'No Security Labs content found for your question. The knowledge base may not contain the Security Labs content yet.',
+                  question,
+                },
+              },
+            ],
+          };
+        }
       } catch (error) {
         return {
           results: [

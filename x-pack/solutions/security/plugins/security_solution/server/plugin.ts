@@ -275,13 +275,13 @@ export class Plugin implements ISecuritySolutionPlugin {
         alertCountsInternalTool(core.getStartServices, savedObjectsClient)
       );
       plugins.onechat.tools.register(
-        knowledgeBaseRetrievalInternalTool(core.getStartServices, savedObjectsClient)
+        knowledgeBaseRetrievalInternalTool(core.getStartServices, savedObjectsClient, plugins.ml)
       );
       plugins.onechat.tools.register(
-        knowledgeBaseWriteInternalTool(core.getStartServices, savedObjectsClient)
+        knowledgeBaseWriteInternalTool(core.getStartServices, savedObjectsClient, plugins.ml)
       );
       plugins.onechat.tools.register(
-        securityLabsKnowledgeInternalTool(core.getStartServices, savedObjectsClient)
+        securityLabsKnowledgeInternalTool(core.getStartServices, savedObjectsClient, plugins.ml)
       );
       plugins.onechat.tools.register(
         entityRiskScoreToolInternal(core.getStartServices, savedObjectsClient)
