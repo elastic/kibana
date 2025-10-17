@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+
 export interface ServerCapabilities {
+  testConfigCategory: ScoutTestRunConfigCategory;
   servers: {
     elasticsearch: {
       from: 'serverless' | 'snapshot';
@@ -94,7 +97,7 @@ export function getSlotResources(capabilities: ServerCapabilities): SlotResource
 
   const containerMemory = numContainers * 0.75 * 1024;
 
-  const hasBrowser = !!capabilities.browser;
+  const hasBrowser = capabilities.testConfigCategory === ScoutTestRunConfigCategory.UI_TEST;
 
   const browserMemory = hasBrowser ? 1.2 * 1024 : 0;
 
@@ -113,7 +116,7 @@ export function getSlotResources(capabilities: ServerCapabilities): SlotResource
     warming: {
       cpu: numNodes,
       memory: esMemory,
-      exclusive: !isServerless,
+      exclusive: false,
     },
     running: {
       cpu: hasBrowser ? 2 : 1,
