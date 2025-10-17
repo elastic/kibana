@@ -7,11 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ComponentProps } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import type { LanguageDocumentationSections } from '@kbn/language-documentation';
+import { getESQLDocsSections } from '@kbn/language-documentation/src/sections';
+import { getFilteredGroups } from '@kbn/language-documentation/src/utils/get_filtered_groups';
+import { DocumentationNavigation } from '@kbn/language-documentation/src/components/shared/documentation_navigation';
+import { DocumentationMainContent } from '@kbn/language-documentation/src/components/shared';
+import { EuiSpacer } from '@elastic/eui';
+import { WORKSPACE_SIDEBAR_APP_HELP } from '@kbn/core-chrome-browser';
 import { createQueryStringInput } from './query_string_input/get_query_string_input';
 import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from './triggers';
 import type { ConfigSchema } from '../server/config';
@@ -104,6 +113,73 @@ export class UnifiedSearchPublicPlugin
         return createUpdateFilterReferencesAction(data.query.filterManager);
       }
     );
+
+    if (core.chrome.workspace.isEnabled()) {
+      const Documentation = () => {
+        const [documentationSections, setDocumentationSections] =
+          useState<LanguageDocumentationSections>();
+        const [selectedSection, setSelectedSection] = useState<string | undefined>();
+        const [searchText, setSearchText] = useState('');
+
+        const scrollTargets = useRef<Record<string, HTMLElement>>({});
+
+        useEffect(() => {
+          async function getDocumentation() {
+            const sections = await getESQLDocsSections();
+            setDocumentationSections(sections);
+          }
+          if (!documentationSections) {
+            getDocumentation();
+          }
+        }, [documentationSections]);
+
+        const filteredGroups = useMemo(() => {
+          return getFilteredGroups(searchText, true, documentationSections, 1);
+        }, [documentationSections, searchText]);
+
+        const onNavigationChange = useCallback<
+          NonNullable<ComponentProps<typeof DocumentationNavigation>>['onNavigationChange']
+        >((selectedOptions) => {
+          setSelectedSection(selectedOptions.length ? selectedOptions[0].label : undefined);
+          if (selectedOptions.length) {
+            const scrollToElement = scrollTargets.current[selectedOptions[0].label];
+            scrollToElement.scrollIntoView();
+          }
+        }, []);
+
+        return (
+          <>
+            <DocumentationNavigation
+              searchText={searchText}
+              setSearchText={setSearchText}
+              onNavigationChange={onNavigationChange}
+              filteredGroups={filteredGroups}
+              selectedSection={selectedSection}
+            />
+            <EuiSpacer size="s" />
+            <DocumentationMainContent
+              searchText={searchText}
+              scrollTargets={scrollTargets}
+              filteredGroups={filteredGroups}
+              sections={documentationSections}
+            />
+          </>
+        );
+      };
+
+      core.chrome.workspace.sidebar.registerSidebarApp({
+        appId: WORKSPACE_SIDEBAR_APP_HELP,
+        size: 'wide',
+        button: {
+          iconType: 'documentation',
+        },
+        app: {
+          title: 'ES|QL quick reference',
+          isScrollable: false,
+          children: <Documentation />,
+        },
+      });
+    }
 
     return {
       ui: {

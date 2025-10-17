@@ -13,7 +13,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import type { SidebarSize } from '../types';
 
 // Helper function to convert SidebarSize to width in pixels
-const getSidebarWidth = (size: SidebarSize | number): number => {
+export const getSidebarWidth = (size: SidebarSize | number): number => {
   if (typeof size === 'number') {
     return size;
   }
@@ -22,7 +22,7 @@ const getSidebarWidth = (size: SidebarSize | number): number => {
     case 'regular':
       return 400;
     case 'wide':
-      return 800;
+      return 500;
     default:
       return 400; // Default to regular size
   }

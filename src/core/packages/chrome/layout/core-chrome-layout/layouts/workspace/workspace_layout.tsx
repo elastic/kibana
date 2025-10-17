@@ -67,6 +67,9 @@ export class WorkspaceLayout implements LayoutService {
       // Assign main layout parts first
       // let banner: React.ReactNode;
       let applicationTopBar: React.ReactNode | null = null;
+      let header: React.ReactNode | null = null;
+      let navigation: React.ReactNode | null = null;
+      let sidebar: React.ReactNode | null = null;
 
       if (isChromeVisible) {
         // If project style, we use the project header and navigation;
@@ -74,6 +77,22 @@ export class WorkspaceLayout implements LayoutService {
           // If project app menu is present, we use it as the application top bar
           applicationTopBar = projectAppMenu;
         }
+        header = (
+          <WorkspaceChrome.Header {...{ breadcrumbs, navigateToUrl, navControls }}>
+            <WorkspaceSidebarButtons apps={apps} />
+          </WorkspaceChrome.Header>
+        );
+        navigation = (
+          <WorkspaceChrome.Navigation
+            {...{
+              items,
+              logo: { ...logo, href: homeHref },
+              sidebarApps: apps,
+              navigateToUrl,
+            }}
+          />
+        );
+        sidebar = <WorkspaceChrome.SidebarPanel apps={apps} />;
       }
 
       if (hasHeaderBanner) {
@@ -85,18 +104,9 @@ export class WorkspaceLayout implements LayoutService {
         <>
           <GridLayoutGlobalStyles />
           <WorkspaceChrome>
-            <WorkspaceChrome.Header {...{ breadcrumbs, navigateToUrl, navControls }}>
-              <WorkspaceSidebarButtons apps={apps} />
-            </WorkspaceChrome.Header>
-            <WorkspaceChrome.Navigation
-              {...{
-                items,
-                logo: { ...logo, href: homeHref },
-                sidebarApps: apps,
-                navigateToUrl,
-              }}
-            />
-            <WorkspaceChrome.SidebarPanel apps={apps} />
+            {header}
+            {navigation}
+            {sidebar}
             {applicationTopBar && (
               <WorkspaceChrome.AppTopBar>{applicationTopBar}</WorkspaceChrome.AppTopBar>
             )}

@@ -23,6 +23,8 @@ export interface WorkspaceHeaderComponentProps {
   children?: React.ReactNode;
   navControls?: {
     left: ChromeNavControl[];
+    right: ChromeNavControl[];
+    middle: ChromeNavControl[];
   };
 }
 
@@ -30,7 +32,7 @@ export const WorkspaceHeaderComponent = ({
   breadcrumbs = [],
   children,
   headerLogo = <WorkspaceHeaderLogo />,
-  navControls = { left: [] },
+  navControls = { left: [], right: [], middle: [] },
 }: WorkspaceHeaderComponentProps) => {
   return (
     <EuiHeader css={styles.root}>
@@ -47,7 +49,19 @@ export const WorkspaceHeaderComponent = ({
       <EuiHeaderSection side="left" css={styles.breadcrumbsSection}>
         <WorkspaceBreadcrumbs {...{ breadcrumbs }} />
       </EuiHeaderSection>
-      <EuiHeaderSection side="right">{children}</EuiHeaderSection>
+      <EuiHeaderSection side="right" css={styles.rightSection}>
+        {navControls.middle.map((navControl) => (
+          <EuiHeaderSectionItem key={navControl.order}>
+            <HeaderExtension extension={navControl.mount} />
+          </EuiHeaderSectionItem>
+        ))}
+        {children}
+        {navControls.right.map((navControl) => (
+          <EuiHeaderSectionItem key={navControl.order}>
+            <HeaderExtension extension={navControl.mount} />
+          </EuiHeaderSectionItem>
+        ))}
+      </EuiHeaderSection>
     </EuiHeader>
   );
 };

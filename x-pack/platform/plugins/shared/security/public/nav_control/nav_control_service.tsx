@@ -8,11 +8,11 @@
 import { sortBy } from 'lodash';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
+import ReactDOM from 'react-dom';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject, map, ReplaySubject, takeUntil } from 'rxjs';
 
 import type { CoreStart } from '@kbn/core/public';
-import { WORKSPACE_SIDEBAR_APP_PROFILE } from '@kbn/core-chrome-browser';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type {
   AuthenticationServiceSetup,
@@ -21,8 +21,7 @@ import type {
 } from '@kbn/security-plugin-types-public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
-import { ProfileSidebarApp } from './sidebar_app';
-import { ProfileSidebarButton } from './sidebar_button';
+import { SecurityNavControl } from './nav_control_component';
 import type { SecurityLicense } from '../../common';
 import type { SecurityApiClients } from '../components';
 import { AuthenticationProvider, SecurityApiClientsProvider } from '../components';
@@ -107,25 +106,23 @@ export class SecurityNavControlService {
   }
 
   private registerSecurityNavControl(core: CoreStart, authc: AuthenticationServiceSetup) {
-    core.chrome.workspace.sidebar.registerSidebarApp({
-      appId: WORKSPACE_SIDEBAR_APP_PROFILE,
-      button: {
-        iconType: () => (
-          <AuthenticationProvider authc={authc}>
-            <SecurityApiClientsProvider {...this.securityApiClients}>
-              <ProfileSidebarButton />
-            </SecurityApiClientsProvider>
-          </AuthenticationProvider>
-        ),
-      },
-      app: {
-        title: 'Profile',
-        containerPadding: 'm',
-        children: (
-          <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
-            <ProfileSidebarApp {...{ logoutUrl: this.logoutUrl }} />
-          </Providers>
-        ),
+    core.chrome.navControls.registerRight({
+      order: 4000,
+      mount: (element: HTMLElement) => {
+        ReactDOM.render(
+          core.rendering.addContext(
+            <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
+              <SecurityNavControl
+                editProfileUrl={core.http.basePath.prepend('/security/account')}
+                logoutUrl={this.logoutUrl}
+                userMenuLinks$={this.userMenuLinks$}
+              />
+            </Providers>
+          ),
+          element
+        );
+
+        return () => ReactDOM.unmountComponentAtNode(element);
       },
     });
 

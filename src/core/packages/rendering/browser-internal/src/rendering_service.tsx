@@ -38,11 +38,11 @@ import type { ChromeStyle } from '@kbn/core-chrome-browser/src/types';
 import type { WorkspaceService } from '@kbn/core-chrome-browser';
 import {
   WORKSPACE_SIDEBAR_APP_FEEDBACK,
-  WORKSPACE_SIDEBAR_APP_RECENT,
+  // WORKSPACE_SIDEBAR_APP_RECENT,
 } from '@kbn/core-chrome-browser';
 import {
   FeedbackSidebarApp,
-  RecentlyAccessedSidebarApp,
+  // RecentlyAccessedSidebarApp,
 } from '@kbn/core-workspace-chrome-components';
 
 export interface RenderingServiceContextDeps {
@@ -99,7 +99,7 @@ export class RenderingService implements IRenderingService {
     renderCoreDeps: RenderingServiceRenderCoreDeps,
     targetDomElement: HTMLDivElement
   ) {
-    const { chrome, featureFlags, application } = renderCoreDeps;
+    const { chrome, featureFlags } = renderCoreDeps;
     const layoutType = getLayoutVersion(featureFlags);
     const debugLayout = getLayoutDebugFlag(featureFlags);
     const projectSideNavVersion = getSideNavVersion(featureFlags);
@@ -135,19 +135,19 @@ export class RenderingService implements IRenderingService {
     const Layout = layout.getComponent();
     const WorkspaceProvider = chrome.workspace.getStoreProvider();
 
-    chrome.workspace.sidebar.registerSidebarApp({
-      appId: WORKSPACE_SIDEBAR_APP_RECENT,
-      button: { iconType: 'clock' },
-      app: {
-        title: 'Recently viewed',
-        children: (
-          <RecentlyAccessedSidebarApp
-            recentlyAccessed$={chrome.recentlyAccessed.get$()}
-            navigateToUrl={application.navigateToUrl}
-          />
-        ),
-      },
-    });
+    // chrome.workspace.sidebar.registerSidebarApp({
+    //   appId: WORKSPACE_SIDEBAR_APP_RECENT,
+    //   button: { iconType: 'clock' },
+    //   app: {
+    //     title: 'Recently viewed',
+    //     children: (
+    //       <RecentlyAccessedSidebarApp
+    //         recentlyAccessed$={chrome.recentlyAccessed.get$()}
+    //         navigateToUrl={application.navigateToUrl}
+    //       />
+    //     ),
+    //   },
+    // });
 
     chrome.workspace.sidebar.registerSidebarApp({
       appId: WORKSPACE_SIDEBAR_APP_FEEDBACK,

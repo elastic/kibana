@@ -8,7 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { combineLatest, timer, of } from 'rxjs';
+import { combineLatest, timer, of, BehaviorSubject } from 'rxjs';
 import { map, catchError, filter, mergeMap, tap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { FetchResult, NewsfeedPluginBrowserConfig } from '../types';
@@ -88,8 +88,15 @@ export function getApi(
     })
   );
 
+  // Create a BehaviorSubject to hold the last emitted value
+  // This ensures new subscribers get the last known result immediately
+  const fetchResultsSubject = new BehaviorSubject<FetchResult | null | void>(null);
+
+  // Subscribe to merged$ and push values to the BehaviorSubject
+  merged$.subscribe(fetchResultsSubject);
+
   return {
-    fetchResults$: merged$,
+    fetchResults$: fetchResultsSubject.asObservable(),
     markAsRead: (itemHashes) => {
       storage.markItemsAsRead(itemHashes);
     },

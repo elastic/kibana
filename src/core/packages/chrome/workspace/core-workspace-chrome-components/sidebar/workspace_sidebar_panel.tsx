@@ -20,6 +20,7 @@ import {
   useIsSidebarFullSize,
   useSidebarWidth,
   useNavigationWidth,
+  getSidebarWidth,
 } from '@kbn/core-workspace-chrome-state';
 
 import {
@@ -30,7 +31,8 @@ import {
 import { WorkspaceSidebarPanelLoading } from './panel_loading';
 
 // Constants for sidebar resizing behavior
-const MIN_SIDEBAR_WIDTH = 360;
+const MIN_SIDEBAR_WIDTH = 320;
+// const MAX_SIDEBAR_WIDTH = 40% of application space;
 
 export interface WorkspaceSidebarPanelProps
   extends Omit<
@@ -80,7 +82,7 @@ export const WorkspaceSidebarPanel = ({ apps }: WorkspaceSidebarPanelProps) => {
         dispatch(setSidebarFullscreen(false));
 
         // Set to a fixed width (400px) when exiting fullscreen
-        const newWidth = 400;
+        const newWidth = getSidebarWidth(definition?.size || 'regular');
         currentWidthRef.current = newWidth;
         dispatch(setSidebarWidth(newWidth));
         return;
@@ -93,7 +95,7 @@ export const WorkspaceSidebarPanel = ({ apps }: WorkspaceSidebarPanelProps) => {
       // Calculate max width as half of available window width
       const totalWindowWidth = window.innerWidth;
       const availableWidth = totalWindowWidth - navigationWidth - 8; // 8px for margins
-      const maxWidth = availableWidth * 0.5; // 50% of available width
+      const maxWidth = availableWidth * 0.4;
 
       // Apply normal constraints - clamp the width between min and max
       const finalWidth = Math.max(MIN_SIDEBAR_WIDTH, Math.min(newWidth, maxWidth));
@@ -101,7 +103,7 @@ export const WorkspaceSidebarPanel = ({ apps }: WorkspaceSidebarPanelProps) => {
       currentWidthRef.current = finalWidth;
       dispatch(setSidebarWidth(finalWidth));
     },
-    [dispatch, isFullSize, navigationWidth]
+    [dispatch, isFullSize, navigationWidth, definition?.size]
   );
 
   const onResizeStart = useCallback((): void => {

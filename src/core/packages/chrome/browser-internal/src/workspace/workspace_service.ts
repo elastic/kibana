@@ -115,6 +115,8 @@ export class WorkspaceService {
         breadcrumbs: [],
         navControls: {
           left: [],
+          right: [],
+          middle: [],
         },
       },
       sidebar: {
@@ -208,6 +210,8 @@ export class WorkspaceService {
 
     const breadcrumbs$ = projectNavigation.getProjectBreadcrumbs$().pipe(takeUntil(this.stop$));
 
+    const rightNavControls$ = navControls.getRight$().pipe(takeUntil(this.stop$));
+
     this.serviceSubscriptions.add(
       breadcrumbs$.subscribe((breadcrumbs) => {
         this.serviceState = {
@@ -234,6 +238,18 @@ export class WorkspaceService {
     );
 
     this.serviceSubscriptions.add(
+      navControls.getCenter$().subscribe((middle) => {
+        this.serviceState = {
+          ...this.serviceState,
+          header: {
+            ...this.serviceState.header,
+            navControls: { ...this.serviceState.header.navControls, middle },
+          },
+        };
+      })
+    );
+
+    this.serviceSubscriptions.add(
       navigationState$.subscribe((state) => {
         this.serviceState = {
           ...this.serviceState,
@@ -246,6 +262,18 @@ export class WorkspaceService {
         this.store.dispatch(setLogo(state.logoItem));
         this.store.dispatch(setActiveItemId(state.activeItemId));
         this.notifyServiceListeners();
+      })
+    );
+
+    this.serviceSubscriptions.add(
+      rightNavControls$.subscribe((right) => {
+        this.serviceState = {
+          ...this.serviceState,
+          header: {
+            ...this.serviceState.header,
+            navControls: { ...this.serviceState.header.navControls, right },
+          },
+        };
       })
     );
 
@@ -290,7 +318,7 @@ export class WorkspaceService {
         () =>
         ({ children }) =>
           React.createElement<ProviderProps>(Provider, { store: this.store }, children),
-      isEnabled: () => featureFlags.getBooleanValue('workbench', false),
+      isEnabled: () => true, // featureFlags.getBooleanValue('workbench', false),
       header,
       sidebar,
       navigation,

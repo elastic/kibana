@@ -51,18 +51,23 @@ export const WorkspaceSidebarPanelComponent = ({
   onResizeEnd,
   isFullSize = false,
   isScrollable = true,
-  containerPadding = 's',
+  containerPadding = 'm',
 }: WorkspaceSidebarPanelComponentProps) => {
   const theme = useEuiTheme();
   const scrolling = euiScrollBarStyles(theme);
   const { euiTheme } = theme;
   const shadow = useEuiShadow('s');
 
+  const scrollableStyle = css`
+    ${scrolling}
+    overflow-y: auto;
+  `;
+
   const containerStyle = css`
     ${styles.container}
+    height: calc(100vh - ${euiTheme.size.xl} - 24px);
     padding: ${containerPadding === 'none' ? '0' : euiTheme.size[containerPadding]};
-    ${isScrollable ? scrolling : ''}
-    ${isScrollable ? 'overflow-y: auto;' : ''}
+    ${isScrollable ? scrollableStyle : ''}
     ${shadow}
   `;
 
@@ -123,6 +128,7 @@ export const WorkspaceSidebarPanelComponent = ({
                     iconType={isFullSize ? 'fullScreenExit' : 'fullScreen'}
                     onClick={() => onSetFullSize(!isFullSize)}
                     aria-label="Full screen"
+                    color="text"
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>

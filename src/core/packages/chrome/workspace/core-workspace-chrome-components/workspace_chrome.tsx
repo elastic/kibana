@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -35,6 +35,7 @@ import { setApplicationWidth } from '@kbn/core-workspace-chrome-state/layout/sli
 
 // Constants for sidebar resizing behavior
 const MAX_SIDEBAR_WIDTH_RATIO = 0.5; // 50% of available width
+
 import { WorkspaceHeader as Header, type WorkspaceHeaderProps } from './header';
 import { WorkspaceNavigation as Navigation, type WorkspaceNavigationProps } from './navigation';
 import { WorkspaceSidebarPanel as SidebarPanel, type WorkspaceSidebarPanelProps } from './sidebar';
@@ -78,6 +79,7 @@ const WorkspaceChromeComponent = ({ children }: WorkspaceChromeProps) => {
   const sidebarWidth = useSidebarWidth();
   const isSidebarFullSize = useIsSidebarFullSize();
   const dispatch = useWorkspaceDispatch();
+  const forcedFullscreen = useRef<boolean>(false);
 
   useEffect(() => {
     const calculateWidth = () => {
@@ -89,7 +91,15 @@ const WorkspaceChromeComponent = ({ children }: WorkspaceChromeProps) => {
 
       // If sidebar width exceeds 50% of available width, go fullscreen
       if (currentSidebarWidth > availableWidth * MAX_SIDEBAR_WIDTH_RATIO && !isSidebarFullSize) {
+        forcedFullscreen.current = true;
         dispatch(setSidebarFullscreen(true));
+      } else if (
+        currentSidebarWidth < availableWidth * MAX_SIDEBAR_WIDTH_RATIO &&
+        isSidebarFullSize &&
+        forcedFullscreen.current
+      ) {
+        forcedFullscreen.current = false;
+        dispatch(setSidebarFullscreen(false));
       }
     };
 
@@ -103,8 +113,9 @@ const WorkspaceChromeComponent = ({ children }: WorkspaceChromeProps) => {
 
   const fullScreenStyles = css`
     .kbnChromeLayoutApplication,
-    .kbnChromeLayoutHeader {
-      display: none;
+    .kbnChromeLayoutHeader,
+    .unifiedDataTable {
+      visibility: hidden;
     }
 
     .kbnChromeLayoutSidebar {

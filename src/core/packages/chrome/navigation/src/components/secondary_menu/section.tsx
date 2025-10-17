@@ -43,8 +43,8 @@ export const SecondaryMenuSectionComponent = ({
       &::before {
         content: '';
         display: block;
-        right: ${euiTheme.size.l};
-        left: ${euiTheme.size.xl};
+        right: ${euiTheme.size.m};
+        left: ${euiTheme.size.m};
         height: 1px;
         background-color: ${euiTheme.colors.borderBaseSubdued};
         position: absolute;

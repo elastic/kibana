@@ -404,7 +404,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         styles.dscPage,
         css`
           ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-            ${kbnFullBodyHeightCss(tabsEnabled ? '33px' : undefined)}
+            ${kbnFullBodyHeightCss(tabsEnabled ? '41px' : undefined)}
           }
         `,
       ]}

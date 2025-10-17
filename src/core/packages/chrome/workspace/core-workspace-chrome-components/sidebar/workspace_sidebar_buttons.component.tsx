@@ -30,14 +30,9 @@ export const WorkspaceSidebarButtonsComponent = ({
 
   return (
     <EuiFlexGroup gutterSize="s" {...props}>
-      {availableApps.map((app) => (
-        <EuiFlexItem key={app.appId}>
-          <WorkspaceSidebarButton
-            appId={app.appId}
-            {...app.button}
-            size={app.size}
-            context={app.button.wrapper}
-          />
+      {availableApps.map(({ appId, size, button: { wrapper, ...buttonProps } }) => (
+        <EuiFlexItem key={appId}>
+          <WorkspaceSidebarButton {...{ appId, size, ...buttonProps }} context={wrapper} />
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

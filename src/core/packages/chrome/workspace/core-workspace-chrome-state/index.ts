@@ -41,6 +41,7 @@ export {
   openSidebar,
   setSidebarWidth,
   setSidebarFullscreen,
+  getSidebarWidth,
   useCurrentSidebarApp,
   useIsCurrentSidebarApp,
   useIsSidebarOpen,

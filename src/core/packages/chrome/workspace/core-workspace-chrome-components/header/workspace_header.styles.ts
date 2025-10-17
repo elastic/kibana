@@ -73,7 +73,7 @@ const spaceSection: EmotionFn = ({ euiTheme }) => css`
     ${logicalCSS('height', euiTheme.size.base)}
     ${logicalCSS('border-right-width', euiTheme.border.width.thin)}
     ${logicalCSS('border-right-style', 'solid')}
-    ${logicalCSS('border-right-color', euiTheme.colors.textSubdued)}
+    ${logicalCSS('border-right-color', euiTheme.colors.borderBaseSubdued)}
     transform: translateY(-${euiTheme.border.width.thin}) rotate(15deg);
   }
 `;
@@ -82,10 +82,15 @@ const spaceAvatar: EmotionFn = ({ euiTheme }) => css`
   margin: 0 ${euiTheme.size.xs};
 `;
 
+const rightSection: EmotionFn = ({ euiTheme }) => css`
+  margin-right: ${euiTheme.size.s};
+`;
+
 export const styles = {
   root,
   spaceAvatar,
   breadcrumbsSection,
   logoSection,
   spaceSection,
+  rightSection,
 };

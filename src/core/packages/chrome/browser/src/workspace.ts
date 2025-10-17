@@ -21,6 +21,8 @@ export interface WorkspaceHeaderState {
   breadcrumbs: EuiBreadcrumb[];
   navControls: {
     left: ChromeNavControl[];
+    middle: ChromeNavControl[];
+    right: ChromeNavControl[];
   };
 }
 

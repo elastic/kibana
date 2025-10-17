@@ -13,6 +13,7 @@ export {
   setSidebarWidth,
   setSidebarFullscreen,
   sidebarReducer,
+  getSidebarWidth,
 } from './slice';
 
 export {
