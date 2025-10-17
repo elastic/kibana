@@ -10,7 +10,7 @@ import type { Condition } from '@kbn/streamlang';
 import type { Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
-import { EditableConditionPanel } from '../../shared/condition_display';
+import { EditableConditionPanel } from '../../data_management/shared';
 
 export const FeatureDetailExpanded = ({
   feature,

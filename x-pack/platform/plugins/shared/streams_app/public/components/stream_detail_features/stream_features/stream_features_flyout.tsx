@@ -24,8 +24,8 @@ import type { Streams, Feature } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import { useWaitingForAiMessage } from '../../../../hooks/use_waiting_for_ai_message';
-import { useStreamFeaturesApi } from '../../../../hooks/use_stream_features_api';
+import { useWaitingForAiMessage } from '../../../hooks/use_waiting_for_ai_message';
+import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
 import { StreamFeaturesTable } from './stream_features_table';
 
 export const StreamFeaturesFlyout = ({

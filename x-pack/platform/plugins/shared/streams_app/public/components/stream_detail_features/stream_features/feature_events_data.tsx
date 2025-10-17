@@ -17,8 +17,8 @@ import { conditionToESQL } from '@kbn/streamlang';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { useStreamFeatureEventsData } from './hooks/use_stream_feature_events_data';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useStreamDetail } from '../../../../hooks/use_stream_detail';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useStreamDetail } from '../../../hooks/use_stream_detail';
 
 export const FeatureEventsData = ({ feature }: { feature: Feature }) => {
   const chartBaseTheme = useElasticChartsTheme();
