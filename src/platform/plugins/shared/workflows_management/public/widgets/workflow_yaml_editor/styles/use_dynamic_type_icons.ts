@@ -134,7 +134,7 @@ async function injectDynamicConnectorIcons(connectorTypes: ConnectorTypeInfoMini
           /* Target by aria-label content */
           ${selector} {
             background-image: url("data:image/svg+xml;base64,${iconBase64}") !important;
-            background-size: 16px 16px !important;
+            background-size: 12px 12px !important;
             background-repeat: no-repeat !important;
             background-position: center !important;
             content: " " !important;
