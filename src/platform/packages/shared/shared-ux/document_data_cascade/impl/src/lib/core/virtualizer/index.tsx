@@ -85,7 +85,9 @@ export const useCascadeVirtualizerRangeExtractor = <G extends GroupNode>({
           !Boolean(rangeStartRow.subRows.length) && rangeStartRow.getIsExpanded();
 
         activeStickyIndexRef.current = isExpandedLeafRow
-          ? nearestExpandedParentIndex + rangeStartRow.index
+          ? // we add 1 to the index to account for the fact that
+            // we get an zero based index for children in relation to the parent
+            nearestExpandedParentIndex + rangeStartRow.index + 1
           : nearestExpandedParentIndex;
       }
 
