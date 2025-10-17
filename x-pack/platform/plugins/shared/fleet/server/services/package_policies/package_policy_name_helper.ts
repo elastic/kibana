@@ -12,18 +12,25 @@ import { getMaxPackageName } from '../../../common/services';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 
 import { packagePolicyService } from '../package_policy';
+import { appContextService } from '..';
 
 export async function incrementPackageName(
-  soClient: SavedObjectsClientContract,
-  packageName: string
+  packageName: string,
+  spaceIds: string[]
 ): Promise<string> {
+  const allSpacesSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
   // Fetch all packagePolicies having the package name
-  const packagePolicyData = await packagePolicyService.list(soClient, {
+  const packagePoliciesResult = await packagePolicyService.list(allSpacesSoClient, {
     perPage: SO_SEARCH_LIMIT,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${packageName}"`,
+    spaceId: '*',
   });
 
-  return getMaxPackageName(packageName, packagePolicyData?.items);
+  const packagePolicies = packagePoliciesResult.items.filter((packagePolicy) => {
+    return packagePolicy.spaceIds?.some((spaceId) => spaceIds.includes(spaceId));
+  });
+
+  return getMaxPackageName(packageName, packagePolicies);
 }
 
 export async function incrementPackagePolicyCopyName(
