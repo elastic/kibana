@@ -34,11 +34,21 @@ export const LogsTabContent = () => {
 
   const [filterQuery] = useLogsSearchUrlState();
 
-  const logFilters = useMemo(
+  // User search filters - these should be highlighted
+  const documentLogFilters = useMemo(
+    () =>
+      filterQuery && filterQuery.query
+        ? [buildEsQuery(undefined, filterQuery, [], getEsQueryConfig(uiSettings))]
+        : [],
+    [filterQuery, uiSettings]
+  );
+
+  // Host name context filters - these should NOT be highlighted
+  const nonHighlightingLogFilters = useMemo(
     () => [
       buildEsQuery(
         undefined,
-        filterQuery,
+        [],
         buildCombinedAssetFilter({
           field: 'host.name',
           values: hostNodes.map((p) => p.name),
@@ -46,7 +56,7 @@ export const LogsTabContent = () => {
         getEsQueryConfig(uiSettings)
       ),
     ],
-    [filterQuery, hostNodes, uiSettings]
+    [hostNodes, uiSettings]
   );
 
   if (loading) {
@@ -60,7 +70,12 @@ export const LogsTabContent = () => {
           <LogsSearchBar />
         </EuiFlexItem>
         <EuiFlexItem>
-          <LogsOverview documentFilters={logFilters} timeRange={timeRange} height="60vh" />
+          <LogsOverview
+            documentFilters={documentLogFilters}
+            nonHighlightingFilters={nonHighlightingLogFilters}
+            timeRange={timeRange}
+            height="60vh"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
