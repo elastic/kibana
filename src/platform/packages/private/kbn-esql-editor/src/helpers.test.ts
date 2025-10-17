@@ -299,6 +299,34 @@ describe('helpers', function () {
       ]);
     });
 
+    it('should mark the time_series indices correctly', async function () {
+      const dataViewsMock = dataViewPluginMocks.createStartContract();
+      const updatedDataViewsMock = {
+        ...dataViewsMock,
+        getIndices: jest.fn().mockResolvedValue([
+          {
+            name: 'logs',
+            title: 'logs',
+            item: {
+              mode: 'time_series',
+            },
+          },
+          {
+            name: 'metrics',
+            title: 'metrics',
+            item: {
+              mode: 'normal',
+            },
+          },
+        ]),
+      };
+      const indices = await getIndicesList(updatedDataViewsMock);
+      expect(indices).toStrictEqual([
+        { name: 'logs', hidden: false, type: 'Timeseries' },
+        { name: 'metrics', hidden: false, type: 'Index' },
+      ]);
+    });
+
     it('should type correctly the aliases', async function () {
       const dataViewsMock = dataViewPluginMocks.createStartContract();
       const updatedDataViewsMock = {

@@ -210,7 +210,9 @@ export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
 
   return indices.map((index) => {
     const [tag] = index?.tags ?? [];
-    return { name: index.name, hidden: index.name.startsWith('.'), type: tag?.name ?? 'Index' };
+    const mode = index?.item?.mode;
+    const type = mode === 'time_series' ? 'Timeseries' : tag?.name ?? 'Index';
+    return { name: index.name, hidden: index.name.startsWith('.'), type };
   });
 };
 
@@ -233,7 +235,9 @@ export const getRemoteIndicesList = async (
 
   return finalIndicesList.map((source) => {
     const [tag] = source?.tags ?? [];
-    return { name: source.name, hidden: false, type: tag?.name ?? 'Index' };
+    const mode = source?.item?.mode;
+    const type = mode === 'time_series' ? 'Timeseries' : tag?.name ?? 'Index';
+    return { name: source.name, hidden: false, type };
   });
 };
 

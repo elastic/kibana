@@ -49,12 +49,26 @@ function getSafeInsertSourceText(text: string) {
 }
 
 export const buildSourcesDefinitions = (
-  sources: Array<{ name: string; isIntegration: boolean; title?: string; type?: string }>
+  sources: Array<{ name: string; isIntegration: boolean; title?: string; type?: string }>,
+  queryString?: string
 ): ISuggestionItem[] =>
-  sources.map(({ name, isIntegration, title, type }) =>
-    withAutoSuggest({
+  sources.map(({ name, isIntegration, title, type }) => {
+    let text = getSafeInsertSourceText(name);
+    const isTimeseries = type === 'Timeseries';
+    let rangeToReplace: { start: number; end: number } | undefined;
+
+    // If this is a timeseries source we should replace FROM with TS
+    if (isTimeseries && queryString) {
+      text = `TS ${text}`;
+      rangeToReplace = {
+        start: 0,
+        end: queryString.length + 1,
+      };
+    }
+
+    return withAutoSuggest({
       label: title ?? name,
-      text: getSafeInsertSourceText(name),
+      text,
       asSnippet: isIntegration,
       kind: isIntegration ? 'Class' : 'Issue',
       detail: isIntegration
@@ -68,8 +82,12 @@ export const buildSourcesDefinitions = (
             },
           }),
       sortText: 'A',
-    })
-  );
+      // with filterText we are explicitly telling the Monaco editor's filtering engine
+      //  to display the item when the text FROM  is present in the editor at the specified range,
+      // even though the label is different.
+      ...(rangeToReplace && { rangeToReplace, filterText: queryString }),
+    });
+  });
 
 /**
  * Checks if the source exists in the provided sources set.
@@ -110,14 +128,19 @@ export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'ind
   );
 }
 
-export function getSourceSuggestions(sources: ESQLSourceResult[], alreadyUsed: string[]) {
+export function getSourceSuggestions(
+  sources: ESQLSourceResult[],
+  alreadyUsed: string[],
+  queryString?: string
+) {
   // hide indexes that start with .
   return buildSourcesDefinitions(
     sources
       .filter(({ hidden, name }) => !hidden && !alreadyUsed.includes(name))
       .map(({ name, dataStreams, title, type }) => {
         return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
-      })
+      }),
+    queryString
   );
 }
 
