@@ -8,6 +8,7 @@
 import { BehaviorSubject } from 'rxjs';
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import type {
+  FileUploadTelemetryService,
   FindFileStructureResponse,
   FormattedOverrides,
   ImportFailure,
@@ -24,6 +25,7 @@ import { analyzeTikaFile } from './tika_analyzer';
 import { FileSizeChecker } from './file_size_check';
 import { processResults, readFile, isSupportedFormat } from '../src/utils';
 import { getSampleDocs } from './doc_count_service';
+import type { FileClash } from './merge_tools';
 
 interface FileSizeInfo {
   fileSize: number;
@@ -91,6 +93,8 @@ export class FileWrapper {
     },
   });
 
+  private fileId: string;
+
   private pipeline$ = new BehaviorSubject<IngestPipeline | undefined>(undefined);
   public readonly pipelineObvs$ = this.pipeline$.asObservable();
   private pipelineJsonValid$ = new BehaviorSubject<boolean>(true);
@@ -101,8 +105,11 @@ export class FileWrapper {
   constructor(
     private file: File,
     private fileUpload: FileUploadStartApi,
-    private data: DataPublicPluginStart
+    private data: DataPublicPluginStart,
+    private fileUploadTelemetryService: FileUploadTelemetryService,
+    private uploadSessionId: string
   ) {
+    this.fileId = Math.random().toString(36).substring(2, 15);
     this.fileSizeChecker = new FileSizeChecker(fileUpload, file);
     this.analyzedFile$.next({
       ...this.analyzedFile$.getValue(),
@@ -150,6 +157,44 @@ export class FileWrapper {
         supportedFormat,
       });
       this.setPipeline(analysisResults.results?.ingest_pipeline);
+      if (analysisResults.results) {
+        // TODO: change this to take in analysisResults and whatever else.
+        // Make it cleaner
+        // make it trackAnalyzeFileSuccess
+        this.fileUploadTelemetryService.trackAnalyzeFile({
+          analysis_success: true,
+          upload_session_id: this.uploadSessionId,
+          file_id: this.fileId,
+          file_type: analysisResults.results.format,
+          file_extension: this.file.name.split('.').pop() ?? 'unknown',
+          file_size: this.file.size ?? 0,
+          num_lines_analyzed: analysisResults.results.num_lines_analyzed,
+          num_messages_analyzed: analysisResults.results.num_messages_analyzed,
+          java_timestamp_formats: analysisResults.results.java_timestamp_formats?.join(',') ?? '',
+          num_fields_found: Object.keys(analysisResults.results.field_stats).length,
+          delimiter: analysisResults.results.delimiter ?? '',
+          preview_success: analysisResults.sampleDocs.length > 0,
+          overrides_used: Object.keys(overrides).length > 0,
+        });
+      } else {
+        // TODO: change this to a failure function
+        // make it trackAnalyzeFileFailure
+        this.fileUploadTelemetryService.trackAnalyzeFile({
+          upload_session_id: this.uploadSessionId,
+          file_id: this.fileId,
+          file_type: 'unknown',
+          file_extension: this.file.name.split('.').pop() ?? 'unknown',
+          file_size: this.file.size ?? 0,
+          num_lines_analyzed: 0,
+          num_messages_analyzed: 0,
+          java_timestamp_formats: '',
+          num_fields_found: 0,
+          delimiter: '',
+          preview_success: false,
+          analysis_success: false,
+          overrides_used: Object.keys(overrides).length > 0,
+        });
+      }
     });
   }
 
@@ -264,7 +309,9 @@ export class FileWrapper {
   public getData() {
     return this.analyzedFile$.getValue().data;
   }
-
+  public getSizeInBytes() {
+    return this.file.size;
+  }
   public getFileSizeInfo() {
     return {
       fileSizeFormatted: this.fileSizeChecker.fileSizeFormatted(),
@@ -273,7 +320,12 @@ export class FileWrapper {
     };
   }
 
-  public async import(index: string, mappings: MappingTypeMapping, pipelineId: string | undefined) {
+  public async import(
+    index: string,
+    mappings: MappingTypeMapping,
+    pipelineId: string | undefined,
+    getFileClashes: () => FileClash | null
+  ) {
     this.setStatus({ importStatus: STATUS.STARTED });
     const format = this.analyzedFile$.getValue().results!.format;
     const importer = await this.fileUpload.importerFactory(format, {
@@ -289,6 +341,7 @@ export class FileWrapper {
       return;
     }
     importer.read(data);
+    const startTime = new Date().getTime();
     try {
       const resp = await importer.import(index, pipelineId, (p) => {
         this.setStatus({ importProgress: p });
@@ -299,6 +352,21 @@ export class FileWrapper {
         failures: resp.failures ?? [],
         importStatus: STATUS.COMPLETED,
       });
+      const failureCount = resp.failures ? resp.failures.length : 0;
+      const fileClash = getFileClashes();
+      // TODO: change this to take in resp and whatever else.
+      // Make it cleaner
+      this.fileUploadTelemetryService.trackUploadFile({
+        upload_session_id: this.uploadSessionId,
+        file_id: this.fileId,
+        mapping_clash_new_fields: fileClash?.newFields?.length ?? 0,
+        mapping_clash_missing_fields: fileClash?.missingFields?.length ?? 0,
+        documents_success: resp.docCount !== undefined ? resp.docCount - failureCount : 0,
+        documents_failed: failureCount,
+        upload_success: resp.success,
+        upload_time_ms: new Date().getTime() - startTime,
+      });
+
       return resp;
     } catch (error) {
       this.setStatus({ importStatus: STATUS.FAILED });
