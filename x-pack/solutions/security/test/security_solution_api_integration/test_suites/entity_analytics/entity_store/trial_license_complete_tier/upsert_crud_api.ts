@@ -26,7 +26,8 @@ export default function (providerContext: FtrProviderContext) {
   const dataView = dataViewRouteHelpersFactory(supertest);
   const entityAnalyticsApi = providerContext.getService('entityAnalyticsApi');
 
-  describe('@ess CRUD API - Upsert', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/236172
+  describe.skip('@ess CRUD API - Upsert', () => {
     describe('upsert user', () => {
       before(async () => {
         await cleanUpEntityStore(providerContext);

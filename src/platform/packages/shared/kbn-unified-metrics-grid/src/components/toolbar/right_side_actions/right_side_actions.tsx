@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   EuiFieldSearch,
   EuiFlexGroup,
@@ -53,6 +53,12 @@ export const RightSideActions = ({
     renderToggleActions,
     requestParams,
   });
+
+  useEffect(() => {
+    if (searchTerm) {
+      onShowSearch();
+    }
+  }, [onShowSearch, searchTerm]);
 
   const onSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
