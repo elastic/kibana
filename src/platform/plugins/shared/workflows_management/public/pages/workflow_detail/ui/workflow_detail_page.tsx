@@ -26,7 +26,10 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditor } from './workflow_editor';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
-import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import {
+  getCachedDynamicConnectorTypes,
+  getWorkflowZodSchemaLoose,
+} from '../../../../common/schema';
 import { WorkflowEditorStoreProvider } from '../../../widgets/workflow_yaml_editor/lib/store';
 
 export function WorkflowDetailPage({ id }: { id: string }) {
@@ -47,6 +50,11 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
   const [hasChanges, setHasChanges] = useState(false);
   const [highlightDiff, setHighlightDiff] = useState(false);
+
+  const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
+  const closeModal = useCallback(() => {
+    setWorkflowExecuteModalOpen(false);
+  }, []);
 
   const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
 
@@ -78,10 +86,12 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     [id, workflowYaml, updateWorkflow, notifications?.toasts]
   );
 
-  const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
-
   const definitionFromCurrentYaml: WorkflowYaml | null = useMemo(() => {
-    const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
+    const dynamicConnectorTypes = getCachedDynamicConnectorTypes() || {};
+    const parsingResult = parseWorkflowYamlToJSON(
+      workflowYaml,
+      getWorkflowZodSchemaLoose(dynamicConnectorTypes)
+    );
 
     if (!parsingResult.success) {
       return null;
@@ -240,10 +250,10 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           />
         </EuiFlexItem>
 
-        {workflowExecuteModalOpen && workflow && (
+        {workflowExecuteModalOpen && definitionFromCurrentYaml && (
           <WorkflowExecuteModal
             definition={definitionFromCurrentYaml}
-            onClose={() => setWorkflowExecuteModalOpen(false)}
+            onClose={closeModal}
             onSubmit={handleRunWorkflow}
           />
         )}
