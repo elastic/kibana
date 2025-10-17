@@ -17,6 +17,7 @@ interface EvaluatorBadgesRoundProps {
   regex?: EvaluationScore;
   criteria?: EvaluationScore;
   optimizer?: EvaluationScore;
+  pii?: EvaluationScore;
   variant?: 'default' | 'conversation-average';
   openFlyout?: (content: Record<string, any>) => void;
 }
@@ -50,6 +51,10 @@ const getEvaluatorConfig = (key: string, value: number) => {
     optimizer: {
       label: 'Optimizer',
       icon: '🚀',
+    },
+    pii: {
+      label: 'PII Detection',
+      icon: '🔒',
     },
   };
   return configs[key] || configs.relevance;
@@ -89,6 +94,7 @@ export const EvaluatorBadgesRound: React.FC<EvaluatorBadgesRoundProps> = ({
   regex,
   criteria,
   optimizer,
+  pii,
   variant = 'default',
   openFlyout,
 }) => {
@@ -101,6 +107,7 @@ export const EvaluatorBadgesRound: React.FC<EvaluatorBadgesRoundProps> = ({
     { key: 'recall', value: recall?.score, analysis: recall?.analysis },
     { key: 'precision', value: precision?.score, analysis: precision?.analysis },
     { key: 'optimizer', value: optimizer?.score, analysis: optimizer?.analysis },
+    { key: 'pii', value: pii?.score, analysis: pii?.analysis },
   ].filter((x) => x.value !== undefined);
 
   return (

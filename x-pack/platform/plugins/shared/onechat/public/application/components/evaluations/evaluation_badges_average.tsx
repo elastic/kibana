@@ -16,6 +16,7 @@ interface EvaluatorBadgesGroupProps {
   regexScore?: number;
   criteriaScore?: number;
   optimizerScore?: number;
+  piiScore?: number;
   direction?: 'row' | 'column';
 }
 
@@ -49,6 +50,10 @@ const getEvaluatorConfig = (key: string, value: number) => {
       label: 'Optimizer',
       icon: '🚀',
     },
+    pii: {
+      label: 'PII Detection',
+      icon: '🔒',
+    },
   };
   return configs[key] || configs.relevance;
 };
@@ -76,6 +81,7 @@ export const EvaluatorBadgesAverage: React.FC<EvaluatorBadgesGroupProps> = ({
   regexScore,
   criteriaScore,
   optimizerScore,
+  piiScore,
   direction = 'row',
 }) => {
   // Create array of evaluation data for dynamic rendering
@@ -87,6 +93,7 @@ export const EvaluatorBadgesAverage: React.FC<EvaluatorBadgesGroupProps> = ({
     { key: 'recall', value: recallScore },
     { key: 'precision', value: precisionScore },
     { key: 'optimizer', value: optimizerScore },
+    { key: 'pii', value: piiScore },
   ].filter((x) => x.value !== undefined);
 
   return (

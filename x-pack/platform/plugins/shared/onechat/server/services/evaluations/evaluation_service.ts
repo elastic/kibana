@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { Conversation } from '@kbn/onechat-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type {
   EvaluatorConfig,
   ConversationRoundEvaluation,
@@ -20,6 +21,7 @@ import {
   createCriteriaEvaluator,
   createGroundednessEvaluator,
   createOptimizerEvaluator,
+  createPIIEvaluator,
 } from './evaluators';
 import type { AgentsServiceStart } from '../agents';
 import type { ToolsServiceStart } from '../tools';
@@ -37,6 +39,7 @@ interface EvaluationServiceDeps {
   inference: InferenceServerStart;
   agentsService: AgentsServiceStart;
   toolsService: ToolsServiceStart;
+  elasticsearch: ElasticsearchServiceStart;
 }
 
 export class EvaluationServiceImpl implements EvaluationService {
@@ -44,12 +47,20 @@ export class EvaluationServiceImpl implements EvaluationService {
   private readonly inference: InferenceServerStart;
   private readonly agentsService: AgentsServiceStart;
   private readonly toolsService: ToolsServiceStart;
+  private readonly elasticsearch: ElasticsearchServiceStart;
 
-  constructor({ logger, inference, agentsService, toolsService }: EvaluationServiceDeps) {
+  constructor({
+    logger,
+    inference,
+    agentsService,
+    toolsService,
+    elasticsearch,
+  }: EvaluationServiceDeps) {
     this.logger = logger;
     this.inference = inference;
     this.agentsService = agentsService;
     this.toolsService = toolsService;
+    this.elasticsearch = elasticsearch;
   }
 
   async evaluateConversation(
@@ -62,6 +73,7 @@ export class EvaluationServiceImpl implements EvaluationService {
       request,
       bindTo: { connectorId: defaultConnector.connectorId },
     });
+    const esClient = this.elasticsearch.client.asScoped(request).asInternalUser;
 
     const evaluators: Partial<EvaluatorRegistry> = {
       [EvaluatorId.Regex]: createRegexEvaluator(),
@@ -76,6 +88,10 @@ export class EvaluationServiceImpl implements EvaluationService {
         agentsService: this.agentsService,
         toolsService: this.toolsService,
         request,
+      }),
+      [EvaluatorId.PII]: createPIIEvaluator({
+        esClient,
+        logger: this.logger,
       }),
     };
 

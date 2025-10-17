@@ -110,6 +110,7 @@ export class ServiceManager {
       inference,
       agentsService: agents,
       toolsService: tools,
+      elasticsearch,
     });
 
     this.internalStart = {

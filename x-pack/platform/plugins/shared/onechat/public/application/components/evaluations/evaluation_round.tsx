@@ -52,6 +52,7 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
   const regexResult = roundEvaluation?.find((score) => score.evaluatorId === 'regex');
   const criteriaResult = roundEvaluation?.find((score) => score.evaluatorId === 'criteria');
   const optimizerResult = roundEvaluation?.find((score) => score.evaluatorId === 'optimizer');
+  const piiResult = roundEvaluation?.find((score) => score.evaluatorId === 'pii');
   const showAdditionalContent = [
     relevanceResult?.score,
     precisionResult?.score,
@@ -60,6 +61,7 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
     regexResult?.score,
     criteriaResult?.score,
     optimizerResult?.score,
+    piiResult?.score,
   ].some((score) => score !== undefined && score !== null);
 
   const inputPanelStyles = css`
@@ -207,6 +209,7 @@ export const EvaluationRound: React.FC<EvaluationRoundProps> = ({
                   regex={regexResult}
                   criteria={criteriaResult}
                   optimizer={optimizerResult}
+                  pii={piiResult}
                   openFlyout={openFlyout}
                 />
               </div>

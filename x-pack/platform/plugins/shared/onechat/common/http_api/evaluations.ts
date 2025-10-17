@@ -13,6 +13,7 @@ export enum EvaluatorId {
   Regex = 'regex',
   Criteria = 'criteria',
   Optimizer = 'optimizer',
+  PII = 'pii',
 }
 
 export interface Evaluator {

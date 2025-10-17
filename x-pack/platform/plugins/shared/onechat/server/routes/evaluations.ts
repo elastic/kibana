@@ -98,6 +98,13 @@ export function registerEvaluationRoutes({
                   'Analyzes agent system prompt and tool usage to provide optimization feedback',
                 type: 'text',
               },
+              {
+                id: EvaluatorId.PII,
+                name: 'PII Detection',
+                description:
+                  'Detects personally identifiable information in agent responses and steps using NER.',
+                type: 'number',
+              },
             ],
           },
         });
@@ -143,6 +150,7 @@ export function registerEvaluationRoutes({
                     schema.literal(EvaluatorId.Regex),
                     schema.literal(EvaluatorId.Criteria),
                     schema.literal(EvaluatorId.Optimizer),
+                    schema.literal(EvaluatorId.PII),
                   ]),
                   evaluatorIdOverride: schema.maybe(
                     schema.string({

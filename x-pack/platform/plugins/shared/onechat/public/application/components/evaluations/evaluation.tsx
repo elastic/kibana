@@ -81,6 +81,7 @@ export const Evaluation: React.FC = () => {
                 regexScore={averages.regex ?? undefined}
                 criteriaScore={averages.criteria ?? undefined}
                 optimizerScore={averages.optimizer ?? undefined}
+                piiScore={averages.pii ?? undefined}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
