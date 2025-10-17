@@ -215,8 +215,8 @@ export const ProjectPicker = ({ projectRouting, onProjectRoutingChange }: Projec
   const [showProjectPickerPopover, setShowProjectPickerPopover] = useState(false);
   const [linkedProjects, setProjects] = useState<Project[]>([]);
 
-  // Derive crossProjectSearchScope from projectRouting prop, defaulting to 'all'
-  const crossProjectSearchScope = projectRouting?.type ?? 'all';
+  // Derive crossProjectSearchScope from projectRouting prop, defaulting to 'origin'
+  const crossProjectSearchScope = projectRouting?.type ?? 'origin';
 
   const { euiTheme } = useEuiTheme();
 
