@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+export interface AnonymizationField {
+  '@timestamp': string;
+  created_at: string;
+  created_by: string;
+  field: string;
+  anonymized: boolean;
+  allowed: boolean;
+  namespace: string;
+}
+
 /** By default, these fields are allowed to be sent to the assistant */
 export const DEFAULT_ALLOW = [
   '_id',
@@ -134,7 +144,7 @@ export const DEFAULT_ALLOW_REPLACEMENT = [
   'user.target.name',
 ];
 
-export const getDefaultAnonymizationFields = (spaceId: string) => {
+export const getDefaultAnonymizationFields = (spaceId: string): AnonymizationField[] => {
   const changedAt = new Date().toISOString();
   return DEFAULT_ALLOW.map((field) => ({
     '@timestamp': changedAt,

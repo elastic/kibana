@@ -23,6 +23,7 @@ import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/s
 import type {
   IndicesIndexSettings,
   IndicesSimulateTemplateResponse,
+  SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { omit, some } from 'lodash';
 import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
@@ -34,6 +35,7 @@ import { ElasticSearchSaver } from '@kbn/langgraph-checkpoint-saver/server/elast
 import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
 import { defendInsightsFieldMap } from '../lib/defend_insights/persistence/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
+import type { AnonymizationField } from '../../common/anonymization';
 import type { AssistantResourceNames, GetElser } from '../types';
 import type { GetAIAssistantConversationsDataClientParams } from '../ai_assistant_data_clients/conversations';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
@@ -893,16 +895,21 @@ export class AIAssistantService {
       currentUser: null,
     });
 
+    const defaultFields = getDefaultAnonymizationFields(spaceId);
     const existingAnonymizationFields = await (
       await dataClient?.getReader()
-    ).search({
-      size: 1,
+    ).search<SearchRequest, AnonymizationField>({
+      size: defaultFields.length,
       allow_no_indices: true,
     });
-    if (existingAnonymizationFields.hits.total.value === 0) {
+    const existingFields = new Set(
+      existingAnonymizationFields.hits.hits.map((hit) => hit._source.field)
+    );
+    const missingFields = defaultFields.filter((anonField) => !existingFields.has(anonField.field));
+    if (missingFields.length) {
       const writer = await dataClient?.getWriter();
       const res = await writer?.bulk({
-        documentsToCreate: getDefaultAnonymizationFields(spaceId),
+        documentsToCreate: missingFields,
       });
       this.options.logger.info(`Created default anonymization fields: ${res?.docs_created.length}`);
     }
