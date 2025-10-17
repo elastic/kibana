@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type SuperTest from 'supertest';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
@@ -44,6 +45,20 @@ const getDataViewSafe = async (
   }
 };
 
+const createDataView = async (
+  supertest: SuperTest.Agent,
+  id: string,
+  name: string,
+  title: string
+): Promise<{ data_view: { id: string } }> => {
+  const { body } = await supertest
+    .post(`/api/data_views/data_view`)
+    .set('kbn-xsrf', 'foo')
+    .send({ data_view: { id, title, name, timeFieldName: '@timestamp', allowNoIndex: true } })
+    .expect(200);
+  return body;
+};
+
 // eslint-disable-next-line import/no-default-export
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
@@ -72,21 +87,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     log.debug('CSP package installed successfully');
     return response.body;
   };
-
-  /**
-   * Waits for the CSP plugin to complete initialization (which includes running migrations)
-   */
-  const waitForPluginInitialized = (): Promise<void> =>
-    retry.try(async () => {
-      log.debug('Checking if CSP plugin is initialized');
-      const response = await supertest
-        .get('/internal/cloud_security_posture/status?check=init')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set('x-elastic-internal-origin', 'kibana')
-        .expect(200);
-      expect(response.body).to.eql({ isPluginInitialized: true });
-      log.debug('CSP plugin is initialized');
-    });
 
   const pageObjects = getPageObjects([
     'common',
@@ -235,7 +235,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           });
         }
 
-        // Navigate directly to findings page in the test space
         await findings.navigateToLatestFindingsPage(TEST_SPACE);
         await waitForDataViews({
           timeout: fetchingOfDataViewsTimeout,
@@ -339,27 +338,14 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         const oldDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-${TEST_SPACE}`;
 
         // Create old v1 data view in test space
-        await kibanaServer.request({
-          path: `/s/${TEST_SPACE}/internal/ftr/kbn_client_so/index-pattern/${oldDataViewId}`,
-          method: 'POST',
-          query: { overwrite: true },
-          body: {
-            attributes: {
-              title: 'security_solution-*.misconfiguration_latest',
-              name: 'Old Misconfiguration Data View v1',
-              timeFieldName: '@timestamp',
-              allowNoIndex: true,
-            },
-          },
-        });
-
-        // Verify old v1 data view exists
-        const oldDataViewExists = await getDataViewSafe(
-          kibanaServer.savedObjects,
+        createDataView(
+          supertest,
           oldDataViewId,
-          TEST_SPACE
-        );
-        expect(oldDataViewExists).to.be(true);
+          'Old Misconfiguration Data View v1',
+          'security_solution-*.misconfiguration_latest'
+        ).then((body) => {
+          expect(body.data_view.id).to.eql(oldDataViewId);
+        });
 
         // Install CSP package - this triggers plugin initialization which runs the migration
         await installCspPackage();
@@ -382,33 +368,17 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         const legacyDataViewId = CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS[0];
 
         // Create legacy data view (no space suffix, uses wildcard namespace)
-        await kibanaServer.request({
-          path: `/internal/ftr/kbn_client_so/index-pattern/${legacyDataViewId}`,
-          method: 'POST',
-          query: { overwrite: true },
-          body: {
-            attributes: {
-              title: 'logs-cloud_security_posture.findings_latest-*',
-              name: 'Old Legacy Misconfiguration Data View',
-              timeFieldName: '@timestamp',
-              allowNoIndex: true,
-            },
-          },
-        });
-
-        // Verify legacy data view exists
-        const legacyDataViewExists = await getDataViewSafe(
-          kibanaServer.savedObjects,
+        createDataView(
+          supertest,
           legacyDataViewId,
-          'default'
-        );
-        expect(legacyDataViewExists).to.be(true);
+          'Old Legacy Misconfiguration Data View',
+          'logs-cloud_security_posture.findings_latest-*'
+        ).then((body) => {
+          expect(body.data_view.id).to.eql(legacyDataViewId);
+        });
 
         // Install CSP package - this triggers plugin initialization which runs the migration
         await installCspPackage();
-
-        // Wait for plugin initialization (and migration) to complete
-        await waitForPluginInitialized();
 
         // Verify legacy data view is deleted (check in default space as it was global)
         await retry.tryForTime(60000, async () => {
@@ -426,42 +396,26 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         // Create a random unrelated data view that should not be deleted
         const unrelatedDataViewId = 'test-unrelated-dataview-id';
-        await kibanaServer.request({
-          path: `/s/${TEST_SPACE}/internal/ftr/kbn_client_so/index-pattern/${unrelatedDataViewId}`,
-          method: 'POST',
-          query: { overwrite: true },
-          body: {
-            attributes: {
-              title: 'logs-test-pattern-*',
-              name: 'Unrelated Test Data View',
-              timeFieldName: '@timestamp',
-              allowNoIndex: true,
-            },
-          },
-        });
 
-        // Verify the unrelated data view exists before migration
-        const unrelatedDataViewExistsBeforeMigration = await getDataViewSafe(
-          kibanaServer.savedObjects,
+        createDataView(
+          supertest,
           unrelatedDataViewId,
-          TEST_SPACE
-        );
-        expect(unrelatedDataViewExistsBeforeMigration).to.be(true);
+          'Test Unrelated Data View',
+          'test-unrelated-dataview-id'
+        ).then((body) => {
+          expect(body.data_view.id).to.eql(unrelatedDataViewId);
+        });
 
         // Create old CSP data view to trigger migration
         const oldDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-${TEST_SPACE}`;
-        await kibanaServer.request({
-          path: `/s/${TEST_SPACE}/internal/ftr/kbn_client_so/index-pattern/${oldDataViewId}`,
-          method: 'POST',
-          query: { overwrite: true },
-          body: {
-            attributes: {
-              title: 'security_solution-*.misconfiguration_latest',
-              name: 'Old Misconfiguration Data View v1',
-              timeFieldName: '@timestamp',
-              allowNoIndex: true,
-            },
-          },
+
+        createDataView(
+          supertest,
+          oldDataViewId,
+          'Old Misconfiguration Data View v1',
+          'security_solution-*.misconfiguration_latest'
+        ).then((body) => {
+          expect(body.data_view.id).to.eql(oldDataViewId);
         });
 
         // Install CSP package - this triggers plugin initialization which runs the migration
@@ -501,34 +455,17 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         const oldDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-${TEST_SPACE}`;
 
         // Create old v1 vulnerabilities data view in test space
-        await kibanaServer.request({
-          path: `/s/${TEST_SPACE}/internal/ftr/kbn_client_so/index-pattern/${oldDataViewId}`,
-          method: 'POST',
-          query: { overwrite: true },
-          body: {
-            attributes: {
-              title:
-                'security_solution-*.vulnerability_latest,logs-cloud_security_posture.vulnerabilities_latest-default',
-              name: 'Old Vulnerabilities Data View v1',
-              timeFieldName: '@timestamp',
-              allowNoIndex: true,
-            },
-          },
-        });
-
-        // Verify old v1 data view exists
-        const oldDataViewExists = await getDataViewSafe(
-          kibanaServer.savedObjects,
+        createDataView(
+          supertest,
           oldDataViewId,
-          TEST_SPACE
-        );
-        expect(oldDataViewExists).to.be(true);
+          'Old Vulnerabilities Data View v1',
+          'security_solution-*.vulnerability_latest,logs-cloud_security_posture.vulnerabilities_latest-default'
+        ).then((body) => {
+          expect(body.data_view.id).to.eql(oldDataViewId);
+        });
 
         // Install CSP package - this triggers plugin initialization which runs the migration
         await installCspPackage();
-
-        // Wait for plugin initialization (and migration) to complete
-        await waitForPluginInitialized();
 
         // Verify old v1 vulnerabilities data view is deleted
         await retry.tryForTime(60000, async () => {
@@ -548,27 +485,14 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         const legacyDataViewId = CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS[0];
 
         // Create legacy vulnerabilities data view (no space suffix, uses wildcard namespace)
-        await kibanaServer.request({
-          path: `/internal/ftr/kbn_client_so/index-pattern/${legacyDataViewId}`,
-          method: 'POST',
-          query: { overwrite: true },
-          body: {
-            attributes: {
-              title: 'logs-cloud_security_posture.vulnerabilities-*',
-              name: 'Old Legacy Vulnerabilities Data View',
-              timeFieldName: '@timestamp',
-              allowNoIndex: true,
-            },
-          },
-        });
-
-        // Verify legacy data view exists
-        const legacyDataViewExists = await getDataViewSafe(
-          kibanaServer.savedObjects,
+        createDataView(
+          supertest,
           legacyDataViewId,
-          'default'
-        );
-        expect(legacyDataViewExists).to.be(true);
+          'Old Legacy Vulnerabilities Data View',
+          'logs-cloud_security_posture.vulnerabilities-*'
+        ).then((body) => {
+          expect(body.data_view.id).to.eql(legacyDataViewId);
+        });
 
         // Install CSP package - this triggers plugin initialization which runs the migration
         await installCspPackage();
