@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLAstAllCommands } from '../../../types';
+import { getSettingsCompletionItems } from '../../../definitions/utils/settings';
+import { isBinaryExpression, semiColonCompleteItem } from '../../../..';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
-import { pipeCompleteItem } from '../../complete_items';
-import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 
+// SET <setting> = <value>;
 export async function autocomplete(
   query: string,
   command: ESQLAstAllCommands,
@@ -19,12 +20,22 @@ export async function autocomplete(
   context?: ICommandContext,
   cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
-  const innerText = query.substring(0, cursorPosition);
-  if (/[0-9]\s+$/.test(innerText)) {
-    return [pipeCompleteItem];
+  const settingArg = command.args[0];
+
+  // SET /
+  if (!settingArg) {
+    return getSettingsCompletionItems();
   }
 
-  return buildConstantsDefinitions(['10', '100', '1000'], '', undefined, {
-    advanceCursorAndOpenSuggestions: true,
-  });
+  // SET <setting> = <value>/
+  if (isBinaryExpression(settingArg) && !settingArg.incomplete) {
+    return [
+      {
+        ...semiColonCompleteItem,
+        text: ';\n', // Add a new line so the actual query starts in the line below.
+      },
+    ];
+  }
+
+  return [];
 }

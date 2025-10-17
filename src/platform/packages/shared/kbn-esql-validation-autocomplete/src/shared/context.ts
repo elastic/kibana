@@ -15,25 +15,50 @@ import {
   isSource,
   isColumn,
   isList,
-  type ESQLAst,
   type ESQLAstItem,
-  type ESQLCommand,
   type ESQLFunction,
   type ESQLSingleAstItem,
   within,
 } from '@kbn/esql-ast';
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
 import { pipePrecedesCurrentWord } from '@kbn/esql-ast/src/definitions/utils';
-import type { ESQLAstExpression } from '@kbn/esql-ast/src/types';
+import type {
+  ESQLAstExpression,
+  ESQLAstAllCommands,
+  ESQLAstQueryExpression,
+  ESQLAstHeaderCommand,
+} from '@kbn/esql-ast/src/types';
 
-function findCommand(ast: ESQLAst, offset: number) {
-  const commandIndex = ast.findIndex(
+function findCommand(ast: ESQLAstQueryExpression, offset: number) {
+  const queryCommands = ast.commands;
+  const commandIndex = queryCommands.findIndex(
     ({ location }) => location.min <= offset && location.max >= offset
   );
 
-  const command = ast[commandIndex] || ast[ast.length - 1];
+  const command = queryCommands[commandIndex] || queryCommands[queryCommands.length - 1];
+
+  if (!command) {
+    return findHeaderCommand(ast, offset);
+  }
 
   return command;
+}
+
+function findHeaderCommand(
+  ast: ESQLAstQueryExpression,
+  offset: number
+): ESQLAstHeaderCommand | undefined {
+  if (!ast.header || ast.header.length === 0) {
+    return;
+  }
+
+  const commandIndex = ast.header.findIndex(
+    ({ location }) => location.min <= offset && location.max >= offset
+  );
+
+  const targetHeader = ast.header[commandIndex] || ast.header[ast.header.length - 1];
+
+  return targetHeader.incomplete ? targetHeader : undefined;
 }
 
 function findOption(nodes: ESQLAstItem[], offset: number): ESQLCommandOption | undefined {
@@ -81,13 +106,18 @@ function mapToNonMarkerNode(arg: ESQLAstItem): ESQLAstItem {
   return Array.isArray(arg) ? arg.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode) : arg;
 }
 
-export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLCommand>(
+export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLAstAllCommands>(
   node: T | undefined
 ) {
   if (!node) {
     return;
   }
-  if (node.type === 'command' || node.type === 'option' || node.type === 'function') {
+  if (
+    node.type === 'command' ||
+    node.type === 'header-command' ||
+    node.type === 'option' ||
+    node.type === 'function'
+  ) {
     return {
       ...node,
       args: node.args.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode),
@@ -108,7 +138,7 @@ const removeMarkerNode = (node: ESQLAstExpression) => {
   });
 };
 
-function findAstPosition(ast: ESQLAst, offset: number) {
+function findAstPosition(ast: ESQLAstQueryExpression, offset: number) {
   const command = findCommand(ast, offset);
   if (!command) {
     return { command: undefined, node: undefined };
@@ -163,10 +193,14 @@ function findAstPosition(ast: ESQLAst, offset: number) {
  * * "expression": the cursor is inside a command expression (i.e. `command ... <here>` or `command a = ... <here>`)
  * * "newCommand": the cursor is at the beginning of a new command (i.e. `command1 | command2 | <here>`)
  */
-export function getAstContext(queryString: string, ast: ESQLAst, offset: number) {
+export function getAstContext(
+  queryString: string,
+  queryAst: ESQLAstQueryExpression,
+  offset: number
+) {
   let inComment = false;
 
-  Walker.visitComments(ast, (node) => {
+  Walker.visitComments(queryAst, (node) => {
     // if the cursor (offset) is within the range of a comment node
     if (within(offset, node)) {
       inComment = true;
@@ -186,7 +220,7 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
     };
   }
 
-  const { command, option, node, containingFunction } = findAstPosition(ast, offset);
+  const { command, option, node, containingFunction } = findAstPosition(queryAst, offset);
   if (
     !command ||
     (queryString.length <= offset &&
