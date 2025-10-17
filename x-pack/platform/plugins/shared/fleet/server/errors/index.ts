@@ -244,13 +244,11 @@ export class ArtifactsElasticsearchError extends FleetError {
 export class FleetElasticsearchValidationError extends FleetErrorWithStatusCode {
   constructor(esError: Error) {
     let statusCode: number | undefined;
-    let message = esError.message;
+    const message = esError.message;
 
     // Extract the original ES status code and ensure we have meta with statusCode
     if (isESClientError(esError)) {
       statusCode = esError.meta.statusCode;
-      // Use the ES client's formatted message if available
-      message = esError.message;
     }
 
     // Pass through the ES error message, status code, and original error as meta

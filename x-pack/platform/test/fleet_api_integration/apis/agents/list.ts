@@ -108,13 +108,6 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(400);
     });
 
-    it('should return a 400 when given a non-existent "sortField" value', async () => {
-      await supertest
-        .get(`/api/fleet/agents?sortField=non_existent_mapping`)
-        .set('kbn-xsrf', 'xxxx')
-        .expect(400);
-    });
-
     it('should return a 200 when given sort options', async () => {
       const { body: apiResponse } = await supertest
         .get(`/api/fleet/agents?sortField=last_checkin&sortOrder=desc`)

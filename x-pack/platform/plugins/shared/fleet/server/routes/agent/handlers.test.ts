@@ -46,7 +46,7 @@ describe('Handlers', () => {
     const error = new Error('ResponseError') as any;
     error.meta = {
       body: errorBody,
-      statusCode: statusCode,
+      statusCode,
     };
     Object.setPrototypeOf(error, errors.ResponseError.prototype);
     return error;
