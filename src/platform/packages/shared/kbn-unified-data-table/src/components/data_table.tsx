@@ -18,7 +18,7 @@ import React, {
 } from 'react';
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
+import { Global, css } from '@emotion/react';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
   EuiDataGridSorting,
@@ -1309,6 +1309,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     return (
       <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
         <span className="unifiedDataTable__inner" css={styles.dataTableInner}>
+          <Global styles={styles.dataTableGlobal} />
           <div
             ref={setDataGridWrapper}
             key={isCompareActive ? 'comparisonTable' : 'docTable'}
@@ -1429,6 +1430,21 @@ const componentStyles = {
     height: '100%',
     width: '100%',
   }),
+  dataTableGlobal: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      // Custom styles for data grid header cell.
+      // It can also be inside a portal (outside of `unifiedDataTable__inner`) when dragged.
+      '.unifiedDataTable__headerCell': {
+        alignItems: 'start !important',
+
+        '.euiDataGridHeaderCell__draggableIcon': {
+          paddingBlock: `calc(${euiTheme.size.xs} / 2) !important`, // to align with a token height
+        },
+        '.euiDataGridHeaderCell__button': {
+          marginTop: `-${euiTheme.size.xs} !important`, // to override Eui value for Density "Expanded"
+        },
+      },
+    }),
   dataTableInner: ({ euiTheme }: UseEuiTheme) =>
     css({
       display: 'flex',
@@ -1441,6 +1457,23 @@ const componentStyles = {
       '.unifiedDataTable__cell--expanded': {
         backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
       },
+      '.unifiedDataTable__cellValue': {
+        fontFamily: euiTheme.font.familyCode,
+      },
+      '.unifiedDataTable__rowControl': {
+        marginTop: -1, // fine-tuning the vertical alignment with the text for any row height setting
+      },
+      // Compact density - 'auto & custom' row height
+      '.euiDataGrid--fontSizeSmall .euiDataGridRowCell__content:not(.euiDataGridRowCell__content--defaultHeight) .unifiedDataTable__rowControl':
+        {
+          marginTop: -2.5,
+        },
+      // Compact density - 'single' row height
+      '.euiDataGrid--fontSizeSmall .euiDataGridRowCell__content--defaultHeight .unifiedDataTable__rowControl':
+        {
+          alignSelf: 'flex-start',
+          marginTop: -3,
+        },
       '.euiDataGrid__content': {
         background: 'transparent',
       },
