@@ -8,22 +8,34 @@
  */
 import Fs from 'fs';
 import Os from 'os';
+import { execSync } from 'child_process';
 
 export function getAvailableMemory(): number {
   if (process.platform === 'linux') {
-    try {
-      const memInfo = Fs.readFileSync('/proc/meminfo', 'utf8');
-      const match = memInfo.match(/^MemAvailable:\s+(\d+)\s+kB$/m);
-      if (match) {
-        const kb = Number(match[1]);
-        if (Number.isFinite(kb)) {
-          return Math.max(0, Math.floor(kb / 1024));
-        }
-      }
-    } catch (err) {
-      // fall through to fallback
-    }
+    return getAvailableMemoryLinux();
+  }
+
+  if (process.platform === 'darwin') {
+    return getAvailableMemoryDarwin();
   }
 
   return Math.round(Os.freemem() / 1024 / 1024);
+}
+
+function getAvailableMemoryLinux() {
+  const memInfo = Fs.readFileSync('/proc/meminfo', 'utf8');
+  const match = memInfo.match(/^MemAvailable:\s+(\d+)\s+kB$/m);
+  const kb = Number(match![1]);
+  return Math.max(0, Math.floor(kb / 1024));
+}
+
+function getAvailableMemoryDarwin() {
+  const vmStat = execSync('vm_stat').toString();
+  if (!vmStat) {
+    throw new Error(`vm_stat not set`);
+  }
+  const pageSize = 4096; // usually 4 KiB
+  const freePages = parseInt(vmStat.match(/Pages free:\s+(\d+)/)![1], 10);
+  const inactivePages = parseInt(vmStat.match(/Pages inactive:\s+(\d+)/)![1], 10);
+  return ((freePages + inactivePages) * pageSize) / 1024 / 1024;
 }

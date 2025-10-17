@@ -155,7 +155,7 @@ const getDockerBaseCmd = (options: DockerOptions) => [
   '-t',
 
   '--net',
-  'elastic',
+  options.namePrefix ? `elastic-${options.namePrefix}` : 'elastic',
 
   '--name',
   `${getEsContainerName(1, options.namePrefix)}`,
@@ -199,11 +199,11 @@ const DEFAULT_DOCKER_ESARGS: Array<[string, string]> = [
 // Temporary workaround for https://github.com/elastic/elasticsearch/issues/118583
 if (process.arch === 'arm64') {
   DEFAULT_DOCKER_ESARGS.push(
-    ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m -XX:UseSVE=0'],
+    ['ES_JAVA_OPTS', '-Xms1024m -Xmx1024m -XX:UseSVE=0'],
     ['CLI_JAVA_OPTS', '-XX:UseSVE=0']
   );
 } else {
-  DEFAULT_DOCKER_ESARGS.push(['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m']);
+  DEFAULT_DOCKER_ESARGS.push(['ES_JAVA_OPTS', '-Xms1024m -Xmx1024m']);
 }
 
 export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
@@ -442,12 +442,16 @@ export async function verifyDockerInstalled(log: ToolingLog) {
 /**
  * Setup elastic Docker network if needed
  */
-export async function maybeCreateDockerNetwork(log: ToolingLog) {
+export async function maybeCreateDockerNetwork(
+  log: ToolingLog,
+  options: DockerOptions | ServerlessOptions
+) {
   log.info(chalk.bold('Checking status of elastic Docker network.'));
   log.indent(4);
 
-  const process = await execa('docker', ['network', 'create', 'elastic']).catch(({ message }) => {
-    if (message.includes('network with name elastic already exists')) {
+  const networkName = options.namePrefix ? `elastic-${options.namePrefix}` : `elastic`;
+  const process = await execa('docker', ['network', 'create', networkName]).catch(({ message }) => {
+    if (message.includes(`network with name ${networkName} already exists`)) {
       log.info('Using existing network.');
     } else {
       throw createCliError(message);
@@ -543,7 +547,7 @@ async function cleanUpDanglingContainers(
   log: ToolingLog,
   options: ServerlessOptions | DockerOptions
 ) {
-  log.info(chalk.bold('Cleaning up dangling Docker containers.'));
+  log.info(chalk.bold('Cleaning up dangling Docker containers for ' + options.namePrefix));
 
   try {
     const serverlessContainerNames = await getEsContainers(options.namePrefix, true);
@@ -554,7 +558,11 @@ async function cleanUpDanglingContainers(
       });
     }
 
-    log.success('Cleaned up dangling Docker containers.');
+    if (serverlessContainerNames.length) {
+      log.success('Cleaned up dangling Docker containers.');
+    } else {
+      log.info(`No dangling containers found`);
+    }
   } catch (e) {
     log.error(e);
   }
@@ -595,7 +603,7 @@ async function setupDocker({
   await verifyDockerInstalled(log);
   await detectRunningNodes(log, options);
   await cleanUpDanglingContainers(log, options);
-  await maybeCreateDockerNetwork(log);
+  await maybeCreateDockerNetwork(log, options);
   await maybePullDockerImage(log, image);
   await printESImageInfo(log, image);
 }
@@ -1046,7 +1054,7 @@ export async function stopServerlessCluster(log: ToolingLog, nodes: string[]) {
  * Kill any serverless ES nodes which are running.
  */
 export function teardownServerlessClusterSync(log: ToolingLog, options: ServerlessOptions) {
-  const { stdout } = execa.commandSync(
+  const { stdout, command } = execa.commandSync(
     `docker ps --filter status=running --filter name=${CONTAINER_NAME_PREFIX}${
       options.namePrefix || 'default'
     } --quiet`
@@ -1055,9 +1063,10 @@ export function teardownServerlessClusterSync(log: ToolingLog, options: Serverle
   const runningNodes = stdout.split(/\r?\n/).filter((s) => s);
 
   if (runningNodes.length) {
+    log.info({ stdout, command });
     log.info('Killing running serverless ES nodes.');
 
-    execa.commandSync(`docker kill ${runningNodes.join(' ')}`);
+    // execa.commandSync(`docker kill ${runningNodes.join(' ')}`);
   }
 }
 
