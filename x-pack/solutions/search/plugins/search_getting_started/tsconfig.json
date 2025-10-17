@@ -25,7 +25,10 @@
     "@kbn/search-navigation",
     "@kbn/cloud-plugin",
     "@kbn/serverless",
-    "@kbn/analytics"
+    "@kbn/analytics",
+    "@kbn/config-schema",
+    "@kbn/search-shared-ui",
+    "@kbn/search-code-examples",
   ],
   "exclude": [
     "target/**/*"
