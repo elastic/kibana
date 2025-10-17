@@ -52,7 +52,7 @@ export const ToolFormSection: FC<PropsWithChildren<ToolFormSectionProps>> = memo
             {content && <EuiFlexItem grow={0}>{content}</EuiFlexItem>}
             {documentation && (
               <EuiFlexItem>
-                <EuiLink href={documentation.href} external>
+                <EuiLink href={documentation.href} target="_blank">
                   {i18nMessages.documentationLinkLabel} - {documentation.title}
                 </EuiLink>
               </EuiFlexItem>

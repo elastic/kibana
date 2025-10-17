@@ -168,6 +168,7 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]lists[\/\\]public[\/\\]exceptions[\/\\]components[\/\\]builder[\/\\]logic_buttons.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]app[\/\\]home[\/\\]template_wrapper[\/\\]global_kql_header[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]app[\/\\]home[\/\\]template_wrapper[\/\\]index.tsx/,
+    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]cases[\/\\]components[\/\\]case_events[\/\\]table.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]and_or_badge[\/\\]__examples__[\/\\]index.stories.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]and_or_badge[\/\\]index.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]and_or_badge[\/\\]rounded_badge.tsx/,

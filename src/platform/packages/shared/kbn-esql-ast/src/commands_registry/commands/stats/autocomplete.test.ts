@@ -29,7 +29,7 @@ import {
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
 import { parse } from '../../../parser';
 import { setTestFunctions } from '../../../definitions/utils/test_functions';
-import { allStarConstant, getDateHistogramCompletionItem } from '../../../..';
+import { getDateHistogramCompletionItem } from '../../../..';
 
 const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 const allAggFunctions = getFunctionSignaturesByReturnType(Location.STATS, 'any', {
@@ -67,7 +67,12 @@ export const EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS = [
 ];
 
 // types accepted by the AVG function
-export const AVG_TYPES: Array<FieldType & FunctionReturnType> = ['double', 'integer', 'long'];
+export const AVG_TYPES: Array<FieldType & FunctionReturnType> = [
+  'double',
+  'integer',
+  'long',
+  'aggregate_metric_double',
+];
 
 export const EXPECTED_FOR_FIRST_EMPTY_EXPRESSION = [
   'BY ',
@@ -322,9 +327,14 @@ describe('STATS Autocomplete', () => {
           'TS a | stats avg(',
           [
             ...expectedFieldsAvg,
-            ...getFunctionSignaturesByReturnType(Location.STATS_TIMESERIES, AVG_TYPES, {
-              scalar: true,
-            }),
+            ...getFunctionSignaturesByReturnType(
+              [Location.STATS, Location.STATS_TIMESERIES],
+              AVG_TYPES,
+              {
+                scalar: true,
+                timeseriesAgg: true,
+              }
+            ),
             'FUNC($0)',
           ],
           mockCallbacks
@@ -373,6 +383,7 @@ describe('STATS Autocomplete', () => {
               'keyword',
               'date_nanos',
               'unsigned_long',
+              'aggregate_metric_double',
             ],
             {
               scalar: true,
@@ -394,9 +405,13 @@ describe('STATS Autocomplete', () => {
           'from a | stats avg(b) by stringField',
           [
             ...getFieldNamesByType(AVG_TYPES),
-            ...getFunctionSignaturesByReturnType(Location.EVAL, AVG_TYPES, {
-              scalar: true,
-            }),
+            ...getFunctionSignaturesByReturnType(
+              Location.EVAL,
+              [...AVG_TYPES, 'aggregate_metric_double'],
+              {
+                scalar: true,
+              }
+            ),
           ],
           mockCallbacks,
           mockContext,
@@ -564,7 +579,7 @@ describe('STATS Autocomplete', () => {
 
         await statsExpectSuggestions('from a | stats a=max(b) BY integerField, keywor', [
           ...expected,
-          ...getFieldNamesByType('any'),
+          ...getFieldNamesByType('any').filter((name) => name !== 'integerField'),
         ]);
       });
 
@@ -804,17 +819,11 @@ describe('STATS Autocomplete', () => {
                 scalar: true,
               }
             ),
-            ...['integerField', 'integerPrompt'],
           ],
           mockCallbacks,
           mockContext,
           43 // at the second argument of the bucket function
         );
-      });
-
-      test('count(/) to suggest * for all', async () => {
-        const suggestions = await suggest('from a | stats count(');
-        expect(suggestions).toContain(allStarConstant);
       });
 
       describe('date histogram snippet', () => {

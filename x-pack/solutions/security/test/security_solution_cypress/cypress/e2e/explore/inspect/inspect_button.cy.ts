@@ -19,7 +19,6 @@ import {
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
-import { selectDataView } from '../../../tasks/sourcerer';
 import { postDataView } from '../../../tasks/api_calls/common';
 import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 
@@ -50,7 +49,6 @@ describe.skip('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => 
         visitOptions: {
           onLoad: () => {
             waitForWelcomePanelToBeLoaded();
-            selectDataView(DATA_VIEW);
           },
         },
       });

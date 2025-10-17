@@ -27,6 +27,7 @@ export const AWS_INPUT_TEST_SUBJECTS = {
   TEMP_ACCESS_SESSION_TOKEN: 'awsTemporaryKeysSessionToken',
   SHARED_CREDENTIALS_FILE: 'awsSharedCredentialFile',
   SHARED_CREDENTIALS_PROFILE_NAME: 'awsCredentialProfileName',
+  EXTERNAL_ID: 'passwordInput-external-id',
 };
 
 export const GCP_PROVIDER_TEST_SUBJ = 'cloudSetupGcpTestId';
@@ -51,7 +52,11 @@ export const GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS = {
 export const AZURE_PROVIDER_TEST_SUBJ = 'cloudSetupAzureTestId';
 export const AZURE_ORGANIZATION_ACCOUNT_TEST_SUBJ = 'azureOrganizationAccountTestId';
 export const AZURE_SINGLE_ACCOUNT_TEST_SUBJ = 'azureSingleAccountTestId';
-export const AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'azure-credentials-type-selector';
+export const AZURE_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ =
+  'launchCloudConnectorArmAccordianInstructions';
+export const AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'azureCredentialsTypeSelector';
+export const AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ =
+  'azureLaunchCloudConnectorArmTemplate';
 
 export const AZURE_SETUP_FORMAT_TEST_SUBJECTS = {
   ARM_TEMPLATE: 'cloudSetupAzureArmTemplate',
@@ -59,13 +64,14 @@ export const AZURE_SETUP_FORMAT_TEST_SUBJECTS = {
 };
 
 export const AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
-  TENANT_ID: 'cloudSetupAzureTenantId',
-  CLIENT_ID: 'cloudSetupAzureClientId',
+  TENANT_ID: 'textInput-tenant-id',
+  CLIENT_ID: 'textInput-client-id',
   CLIENT_SECRET: 'passwordInput-client-secret',
   CLIENT_CERTIFICATE_PATH: 'cloudSetupAzureClientCertificatePath',
   CLIENT_CERTIFICATE_PASSWORD: 'passwordInput-client-certificate-password',
   CLIENT_USERNAME: 'cloudSetupAzureClientUsername',
   CLIENT_PASSWORD: 'cloudSetupAzureClientPassword',
+  CLOUD_CONNECTOR_ID: 'cloudSetupAzureCloudConnectorId',
 };
 
 export const ADVANCED_OPTION_ACCORDION_TEST_SUBJ = 'advancedOptionsAccordion';

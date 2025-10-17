@@ -19,7 +19,8 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
       euiFieldProps: {
         'data-test-subj': 'observable-type-label-input',
         fullWidth: true,
-        autoFocus: true,
+        // Setting autoFocus to false in order to preserve the correct focus when modal is closed
+        autoFocus: false,
         isLoading: isSubmitting,
       },
     }),

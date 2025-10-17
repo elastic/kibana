@@ -15,20 +15,16 @@ import type { EventNonEcsData } from '../../../common/typings';
 export const useCaseActions = ({
   alerts,
   onAddToCase,
-  onRemoveAlertFromCase,
   services,
-  caseId,
 }: {
   alerts: Alert[];
   onAddToCase?: ({ isNewCase }: { isNewCase: boolean }) => void;
-  onRemoveAlertFromCase: () => void;
   services: {
     /**
      * The cases service is optional: cases features will be disabled if not provided
      */
     cases?: CasesService;
   };
-  caseId?: string;
 }) => {
   const { cases } = services;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -37,10 +33,6 @@ export const useCaseActions = ({
     onAddToCase?.({ isNewCase: false });
   }, [onAddToCase]);
 
-  const handleRemoveAlertsFromCaseClick = () => {
-    removeAlertModal?.open();
-  };
-
   const onAddToNewCase = useCallback(() => {
     onAddToCase?.({ isNewCase: true });
   }, [onAddToCase]);
@@ -48,17 +40,6 @@ export const useCaseActions = ({
   const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({
     onSuccess: onAddToExistingCase,
   });
-
-  const removeAlertModal = caseId
-    ? cases?.hooks.useRemoveAlertFromCaseModal({
-        caseId,
-        alertId: alerts.map((alert) => alert._id),
-        onSuccess: onRemoveAlertFromCase,
-        onClose: () => {
-          closeActionsPopover();
-        },
-      })
-    : undefined;
 
   function getCaseAttachments(): CaseAttachmentsWithoutOwner {
     return alerts.map((alert) => ({
@@ -98,6 +79,5 @@ export const useCaseActions = ({
     setIsPopoverOpen,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,
-    handleRemoveAlertsFromCaseClick,
   };
 };

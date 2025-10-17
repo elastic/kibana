@@ -39,6 +39,7 @@ export const AnalyticsCollectionNoEventsCallout: React.FC<
 
   return hasEvents || isLoading ? null : (
     <EuiCallOut
+      announceOnMount
       color="primary"
       iconType="download"
       title={i18n.translate(

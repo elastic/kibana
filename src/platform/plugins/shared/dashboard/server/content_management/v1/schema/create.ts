@@ -7,16 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { schema } from '@kbn/config-schema';
-import { createOptionsSchemas } from '@kbn/content-management-utils';
+import { createOptionsSchemas, referenceSchema } from '@kbn/content-management-utils';
 
-import {
-  searchResultsAttributes,
-  dashboardAdditionalAttributes,
-  referenceSchema,
-  dashboardDataAttributesSchema,
-  dashboardMetaSchema,
-  dashboardResolveMetaSchema,
-} from './common';
+import { getDashboardDataSchema, dashboardMetaSchema, dashboardResolveMetaSchema } from './common';
 
 export const dashboardCreateOptionsSchema = schema.object({
   id: schema.maybe(createOptionsSchemas.id),
@@ -25,16 +18,14 @@ export const dashboardCreateOptionsSchema = schema.object({
   initialNamespaces: schema.maybe(createOptionsSchemas.initialNamespaces),
 });
 
-export const dashboardCreateSchema = schema
-  .object(searchResultsAttributes)
-  .extends(dashboardAdditionalAttributes);
-
-export const dashboardStorageCreateResultSchema = schema.object(
-  {
-    id: schema.string(),
-    type: schema.string(),
-    data: dashboardDataAttributesSchema,
-    meta: dashboardMetaSchema.extends(dashboardResolveMetaSchema),
-  },
-  { unknowns: 'forbid' }
-);
+export function getDashboardStorageCreateResultSchema() {
+  return schema.object(
+    {
+      id: schema.string(),
+      type: schema.string(),
+      data: getDashboardDataSchema(),
+      meta: dashboardMetaSchema.extends(dashboardResolveMetaSchema),
+    },
+    { unknowns: 'forbid' }
+  );
+}

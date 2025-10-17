@@ -58,6 +58,7 @@ export const GlobalRead: User = {
           rulesSettings: ['read', READ_FLAPPING_SETTINGS_SUB_FEATURE_ID],
           maintenanceWindow: ['read'],
           siem: ['read'],
+          stackAlerts: ['read'],
         },
         spaces: ['*'],
       },
@@ -88,6 +89,7 @@ const Space1All: User = {
           rulesSettings: ['all', ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID],
           maintenanceWindow: ['all'],
           siem: ['all'],
+          stackAlerts: ['all'],
         },
         spaces: ['space1'],
       },
@@ -246,6 +248,12 @@ const OtherSpace: Space = {
   disabledFeatures: [],
 };
 
+export const DefaultSpace: Space = {
+  id: 'default',
+  name: 'Default Space',
+  disabledFeatures: [],
+};
+
 export const Spaces: Space[] = [Space1, Space2, OtherSpace];
 
 // For all scenarios, we define both an instance in addition
@@ -260,7 +268,7 @@ export interface Scenario {
 interface NoKibanaPrivilegesAtSpace1 extends Scenario {
   id: 'no_kibana_privileges at space1';
 }
-const NoKibanaPrivilegesAtSpace1: NoKibanaPrivilegesAtSpace1 = {
+export const NoKibanaPrivilegesAtSpace1: NoKibanaPrivilegesAtSpace1 = {
   id: 'no_kibana_privileges at space1',
   user: NoKibanaPrivileges,
   space: Space1,

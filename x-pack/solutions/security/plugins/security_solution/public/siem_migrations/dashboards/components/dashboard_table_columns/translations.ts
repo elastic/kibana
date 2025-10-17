@@ -48,3 +48,46 @@ export const INSTALLED_STATUS_TITLE = i18n.translate(
     defaultMessage: 'Installed',
   }
 );
+
+export const ACTIONS_VIEW_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.tableColumn.actionsViewLabel',
+  {
+    defaultMessage: 'View',
+  }
+);
+
+export const ACTIONS_INSTALL_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.tableColumn.actionsInstallLabel',
+  {
+    defaultMessage: 'Install',
+  }
+);
+
+export const COLUMN_ACTIONS = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.tableColumn.actionsLabel',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
+export const VIEW_DASHBOARD_TRANSLATION_SUMMARY_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.viewDashboardTranslationSummaryTooltip',
+  {
+    defaultMessage: 'View dashboard translation summary',
+  }
+);
+
+export const UPDATE_COLUMN_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.updateColumnTooltip',
+  {
+    defaultMessage:
+      'This column references the date in the dashboard when last modified in the source platform.',
+  }
+);
+
+export const TAGS_COLUMN_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.tagsColumnTooltip',
+  {
+    defaultMessage: 'Tags reference the app the dashboard originated from.',
+  }
+);

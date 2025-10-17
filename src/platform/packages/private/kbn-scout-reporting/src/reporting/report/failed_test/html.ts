@@ -18,7 +18,7 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
     command,
     location,
     owner,
-    plugin,
+    kibanaModule,
     duration,
     error,
     stdout,
@@ -148,11 +148,12 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
               </td>
             </tr>
             <tr>
-              <td><strong>Plugin</strong></td>
+              <td><strong>Kibana Module</strong></td>
               <td>
-                ID: <em>${plugin?.id}</em>,
-                Visibility: <em>${plugin?.visibility}</em>,
-                Group: <em>${plugin?.group}</em>
+                ID: <em>${kibanaModule?.id}</em>,
+                Type: <em>${kibanaModule?.type}</em>,
+                Visibility: <em>${kibanaModule?.visibility}</em>,
+                Group: <em>${kibanaModule?.group}</em>
               </td>
             </tr>
           </table>

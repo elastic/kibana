@@ -10,7 +10,11 @@ import { EuiSpacer, EuiPortal } from '@elastic/eui';
 
 import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
 import { FLEET_SERVER_PACKAGE } from '../../../../../../common';
-
+import {
+  isAgentMigrationSupported,
+  isAgentPrivilegeLevelChangeSupported,
+  isRootPrivilegeRequired,
+} from '../../../../../../common/services';
 import type { Agent } from '../../../types';
 
 import {
@@ -44,9 +48,10 @@ import {
   SearchAndFilterBar,
   TableRowActions,
   TagsAddRemove,
+  AgentActivityFlyout,
   AgentMigrateFlyout,
+  ChangeAgentPrivilegeLevelFlyout,
 } from './components';
-import { AgentActivityFlyout } from './components/agent_activity_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
@@ -83,13 +88,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [agentToRequestDiagnostics, setAgentToRequestDiagnostics] = useState<Agent | undefined>(
     undefined
   );
+  const [agentToMigrate, setAgentToMigrate] = useState<Agent | undefined>(undefined);
+  const [agentToChangePrivilege, setAgentToChangePrivilege] = useState<Agent | undefined>(
+    undefined
+  );
 
   const [showAgentActivityTour, setShowAgentActivityTour] = useState(false);
-
-  // migrateAgentState
-  const [agentsToMigrate, setAgentsToMigrate] = useState<Agent[] | undefined>(undefined);
-  const [protectedAndFleetAgents, setProtectedAndFleetAgents] = useState<Agent[]>([]);
-  const [migrateFlyoutOpen, setMigrateFlyoutOpen] = useState(false);
 
   const {
     allTags,
@@ -124,7 +128,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     draftKuery,
     setDraftKuery,
     fetchData,
-    currentRequestRef,
+    queryHasChanged,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
   } = useFetchAgentsData();
@@ -181,21 +185,55 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSortOrder(sort!.direction);
   };
 
-  const openMigrateFlyout = (agents: Agent[]) => {
-    const protectedAgents = agents.filter(
-      (agent) => agentPoliciesIndexedById[agent.policy_id as string]?.is_protected
-    );
-    const fleetAgents = agents.filter((agent) =>
-      agentPoliciesIndexedById[agent.policy_id as string]?.package_policies?.some(
-        (p) => p.package?.name === FLEET_SERVER_PACKAGE
-      )
-    );
+  const unsupportedMigrateAgents = useMemo(() => {
+    const protectedAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter(
+          (agent) => agentPoliciesIndexedById[agent.policy_id as string]?.is_protected
+        )
+      : [];
+    const fleetAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) =>
+          agentPoliciesIndexedById[agent.policy_id as string]?.package_policies?.some(
+            (p) => p.package?.name === FLEET_SERVER_PACKAGE
+          )
+        )
+      : [];
+    const unsupportedVersionAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) => !isAgentMigrationSupported(agent))
+      : [];
+    return [...protectedAgents, ...fleetAgents, ...unsupportedVersionAgents];
+  }, [selectedAgents, agentPoliciesIndexedById]);
 
-    const unallowedAgents = [...protectedAgents, ...fleetAgents];
-    setProtectedAndFleetAgents(unallowedAgents);
-    setAgentsToMigrate(agents.filter((agent) => !unallowedAgents.some((a) => a.id === agent.id)));
-    setMigrateFlyoutOpen(true);
-  };
+  const unsupportedPrivilegeLevelChangeAgents = useMemo(() => {
+    const alreadyUnprivilegedAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter(
+          (agent) => agent.local_metadata?.elastic?.agent?.unprivileged === true
+        )
+      : [];
+    const rootAccessNeededAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) =>
+          isRootPrivilegeRequired(
+            agentPoliciesIndexedById[agent.policy_id as string]?.package_policies || []
+          )
+        )
+      : [];
+    const fleetServerAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) =>
+          agentPoliciesIndexedById[agent.policy_id as string]?.package_policies?.some(
+            (p) => p.package?.name === FLEET_SERVER_PACKAGE
+          )
+        )
+      : [];
+    const unsupportedVersionAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) => !isAgentPrivilegeLevelChangeSupported(agent))
+      : [];
+    return [
+      ...alreadyUnprivilegedAgents,
+      ...rootAccessNeededAgents,
+      ...fleetServerAgents,
+      ...unsupportedVersionAgents,
+    ];
+  }, [selectedAgents, agentPoliciesIndexedById]);
 
   const renderActions = (agent: Agent) => {
     const agentPolicy =
@@ -219,7 +257,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         }}
         onGetUninstallCommandClick={() => setAgentToGetUninstallCommand(agent)}
         onRequestDiagnosticsClick={() => setAgentToRequestDiagnostics(agent)}
-        onMigrateAgentClick={() => openMigrateFlyout([agent])}
+        onMigrateAgentClick={() => setAgentToMigrate(agent)}
+        onChangeAgentPrivilegeLevelClick={() => setAgentToChangePrivilege(agent)}
       />
     );
   };
@@ -303,8 +342,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     fetchData({ refreshTags });
     setShowAgentActivityTour(true);
   };
-
-  const isCurrentRequestIncremented = currentRequestRef?.current === 1;
 
   return (
     <>
@@ -427,20 +464,33 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           }}
         />
       )}
-      {migrateFlyoutOpen && (
+      {agentToMigrate && (
         <EuiPortal>
           <AgentMigrateFlyout
-            agents={agentsToMigrate ?? []}
-            protectedAndFleetAgents={protectedAndFleetAgents ?? []}
+            agents={[agentToMigrate]}
+            agentCount={1}
+            unsupportedMigrateAgents={[]}
             onClose={() => {
-              setAgentsToMigrate(undefined);
-              setProtectedAndFleetAgents([]);
-              setMigrateFlyoutOpen(false);
+              setAgentToMigrate(undefined);
             }}
             onSave={() => {
-              setAgentsToMigrate(undefined);
-              setProtectedAndFleetAgents([]);
-              setMigrateFlyoutOpen(false);
+              setAgentToMigrate(undefined);
+              refreshAgents();
+            }}
+          />
+        </EuiPortal>
+      )}
+      {agentToChangePrivilege && (
+        <EuiPortal>
+          <ChangeAgentPrivilegeLevelFlyout
+            agents={[agentToChangePrivilege]}
+            agentCount={1}
+            unsupportedAgents={[]}
+            onClose={() => {
+              setAgentToChangePrivilege(undefined);
+            }}
+            onSave={() => {
+              setAgentToChangePrivilege(undefined);
               refreshAgents();
             }}
           />
@@ -498,7 +548,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         latestAgentActionErrors={latestAgentActionErrors.length}
         sortField={sortField}
         sortOrder={sortOrder}
-        onBulkMigrateClicked={(agents: Agent[]) => openMigrateFlyout(agents)}
+        unsupportedMigrateAgents={unsupportedMigrateAgents}
+        unsupportedPrivilegeLevelChangeAgents={unsupportedPrivilegeLevelChangeAgents}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}
@@ -537,7 +588,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         isUsingFilter={isUsingFilter}
         setEnrollmentFlyoutState={setEnrollmentFlyoutState}
         clearFilters={clearFilters}
-        isCurrentRequestIncremented={isCurrentRequestIncremented}
+        queryHasChanged={queryHasChanged}
       />
     </>
   );

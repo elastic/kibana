@@ -217,6 +217,8 @@ export {
   contextToSchemaName,
 } from './alert_schema';
 
+export { getMaxAlertLimit, ALLOWED_MAX_ALERTS } from './max_alert_limit';
+
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
 export const BASE_MAINTENANCE_WINDOW_API_PATH = '/api/maintenance_window';
@@ -265,6 +267,7 @@ export const CREATE_MAINTENANCE_WINDOW_API_PATH = BASE_MAINTENANCE_WINDOW_API_PA
 export const GET_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`;
 export const UPDATE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`;
 export const DELETE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`;
+export const FIND_MAINTENANCE_WINDOWS_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/_find`;
 
 export const ALERTING_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;

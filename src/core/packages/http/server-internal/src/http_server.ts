@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Server, Request } from '@hapi/hapi';
+import type { Request, Server } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
-import { createServer, getServerOptions, setTlsConfig, getRequestId } from '@kbn/server-http-tools';
+import { createServer, getRequestId, getServerOptions, setTlsConfig } from '@kbn/server-http-tools';
 import type { Duration } from 'moment';
 import type { Observable, Subscription } from 'rxjs';
 import { firstValueFrom, pairwise, take } from 'rxjs';
@@ -22,23 +22,23 @@ import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import { isSafeMethod } from '@kbn/core-http-router-server-internal';
 import type {
-  IRouter,
-  RouteConfigOptions,
-  KibanaRouteOptions,
-  KibanaRequestState,
-  RouterRoute,
   AuthenticationHandler,
-  OnPreAuthHandler,
-  OnPostAuthHandler,
-  OnPreRoutingHandler,
-  OnPreResponseHandler,
-  SessionStorageCookieOptions,
-  HttpServiceSetup,
-  HttpServerInfo,
   HttpAuth,
+  HttpServerInfo,
+  HttpServiceSetup,
   IAuthHeadersStorage,
-  RouterDeprecatedApiDetails,
+  IRouter,
+  KibanaRequestState,
+  KibanaRouteOptions,
+  OnPostAuthHandler,
+  OnPreAuthHandler,
+  OnPreResponseHandler,
+  OnPreRoutingHandler,
+  RouteConfigOptions,
   RouteMethod,
+  RouterDeprecatedApiDetails,
+  RouterRoute,
+  SessionStorageCookieOptions,
   VersionedRouterRoute,
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
@@ -47,6 +47,7 @@ import { identity, isNil, isObject, omitBy } from 'lodash';
 import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import type { Env } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
+import { type Attributes, metrics, ValueType } from '@opentelemetry/api';
 import type { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -58,7 +59,7 @@ import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
-import { StaticAssets, type InternalStaticAssets } from './static_assets';
+import { type InternalStaticAssets, StaticAssets } from './static_assets';
 
 /**
  * Adds ELU timings for the executed function to the current's context transaction
@@ -561,6 +562,7 @@ export class HttpServer {
       executionContext?.setRequestId(requestId);
 
       const app: KibanaRequestState = request.app as KibanaRequestState;
+      app.startTime = performance.now();
       app.requestId = requestId;
       app.requestUuid = uuidv4();
       app.measureElu = stop;
@@ -576,6 +578,97 @@ export class HttpServer {
       (request.app as KibanaRequestState).span?.end();
       (request.app as KibanaRequestState).span = null;
 
+      return responseToolkit.continue;
+    });
+
+    this.instrumentMetrics();
+  }
+
+  private instrumentMetrics() {
+    const meter = metrics.getMeter('kibana.http.server');
+
+    // https://opentelemetry.io/docs/specs/semconv/http/http-metrics/
+    const requestTotalServed = meter.createCounter('http.server.request.served', {
+      description: 'Number of HTTP server requests handled.',
+      unit: '1',
+      valueType: ValueType.INT,
+    });
+    const activeRequestsCounter = meter.createUpDownCounter('http.server.request.active', {
+      description: 'Number of concurrent HTTP server requests.',
+      unit: '1',
+      valueType: ValueType.INT,
+    });
+    const requestDuration = meter.createHistogram('http.server.request.duration', {
+      description: 'Duration of HTTP server requests.',
+      unit: 's',
+      valueType: ValueType.DOUBLE,
+    });
+    const requestTotalDisconnects = meter.createCounter('http.server.request.aborted', {
+      description: 'Number of HTTP server requests that errored or were aborted unexpectedly.',
+      unit: '1',
+      valueType: ValueType.INT,
+    });
+    meter
+      .createObservableUpDownCounter('http.server.connections.usage', {
+        description: 'Number of active HTTP server connections.',
+        unit: '1',
+        valueType: ValueType.INT,
+      })
+      .addCallback((result) => {
+        this.server!.listener.getConnections((err, count) => {
+          if (!err) {
+            result.observe(count);
+          }
+        });
+      });
+
+    function getBaseAttributes(request: Request): Attributes {
+      // https://opentelemetry.io/docs/specs/semconv/registry/attributes/http/
+      return {
+        'http.request.method': request.method.toUpperCase(),
+        'http.route': request.route.path,
+      };
+    }
+
+    // Using onPreAuth instead of onRequest because we want the request.route.path
+    this.server!.ext('onPreAuth', (request, responseToolkit) => {
+      const attributes = getBaseAttributes(request);
+
+      requestTotalServed.add(1, attributes);
+      activeRequestsCounter.add(1, attributes);
+
+      // We need to handle 'disconnect' and 'onPostResponse' events separately because onPostResponse is not called when disconnect happens.
+      // And we cannot use request.events.once('finish') here because it doesn't have the request.response info.
+      request.events.once('disconnect', () => {
+        const startTime = (request.app as KibanaRequestState).startTime;
+        const stopTime = performance.now();
+        requestTotalDisconnects.add(1, attributes);
+        activeRequestsCounter.add(-1, attributes);
+        requestDuration.record(stopTime - startTime, {
+          ...attributes,
+          'error.type': 'aborted',
+        });
+      });
+
+      return responseToolkit.continue;
+    });
+
+    this.server!.ext('onPostResponse', (request, responseToolkit) => {
+      const startTime = (request.app as KibanaRequestState).startTime;
+      const stopTime = performance.now();
+
+      const attributes = getBaseAttributes(request);
+
+      activeRequestsCounter.add(-1, attributes);
+
+      const statusCode: number = isBoom(request.response)
+        ? request.response.output.statusCode
+        : request.response.statusCode;
+
+      requestDuration.record(stopTime - startTime, {
+        ...attributes,
+        'http.response.status_code': statusCode,
+      });
       return responseToolkit.continue;
     });
   }

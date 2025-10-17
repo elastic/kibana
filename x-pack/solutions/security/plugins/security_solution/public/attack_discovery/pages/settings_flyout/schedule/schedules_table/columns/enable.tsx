@@ -17,6 +17,7 @@ import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
 
 import * as i18n from './translations';
 import type { TableColumn } from './constants';
+import { WithMissingPrivileges } from '../../missing_privileges';
 
 interface EnableSwitchProps {
   enabled: boolean;
@@ -57,14 +58,18 @@ const EnableSwitch = ({
         {showLoader ? (
           <EuiLoadingSpinner size="m" data-test-subj="scheduleSwitchLoader" />
         ) : (
-          <EuiSwitch
-            data-test-subj="scheduleSwitch"
-            showLabel={false}
-            label=""
-            disabled={isDisabled}
-            checked={enabled}
-            onChange={onScheduleStateChange}
-          />
+          <WithMissingPrivileges>
+            {(canUpdateSchedule) => (
+              <EuiSwitch
+                data-test-subj="scheduleSwitch"
+                showLabel={false}
+                label=""
+                disabled={isDisabled || !canUpdateSchedule}
+                checked={enabled}
+                onChange={onScheduleStateChange}
+              />
+            )}
+          </WithMissingPrivileges>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

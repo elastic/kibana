@@ -180,7 +180,7 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.ruleRegistry.write.cache.enabled=false',
       '--monitoring_collection.opentelemetry.metrics.prometheus.enabled=true',
       // SAML configuration
-      ...(isRunOnCI ? [] : ['--mock_idp_plugin.enabled=true']),
+      ...(isRunOnCI ? [] : ['--mockIdpPlugin.enabled=true']),
       // This ensures that we register the Security SAML API endpoints.
       // In the real world the SAML config is injected by control plane.
       `--plugin-path=${SAML_IDP_PLUGIN_PATH}`,

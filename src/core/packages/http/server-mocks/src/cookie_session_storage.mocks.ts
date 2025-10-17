@@ -8,12 +8,14 @@
  */
 
 import type { SessionStorageFactory, SessionStorage } from '@kbn/core-http-server';
+import { lazyObject } from '@kbn/lazy-object';
 
-const createSessionStorageMock = <T>(): jest.Mocked<SessionStorage<T>> => ({
-  get: jest.fn().mockResolvedValue({}),
-  set: jest.fn(),
-  clear: jest.fn(),
-});
+const createSessionStorageMock = <T>(): jest.Mocked<SessionStorage<T>> =>
+  lazyObject({
+    get: jest.fn().mockResolvedValue({}),
+    set: jest.fn(),
+    clear: jest.fn(),
+  });
 
 type ReturnMocked<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => infer U
@@ -24,10 +26,9 @@ type ReturnMocked<T> = {
 type DeepMocked<T> = jest.Mocked<ReturnMocked<T>>;
 
 const creatSessionStorageFactoryMock = <T extends object>() => {
-  const mocked: DeepMocked<SessionStorageFactory<T>> = {
-    asScoped: jest.fn(),
-  };
-  mocked.asScoped.mockImplementation(createSessionStorageMock);
+  const mocked: DeepMocked<SessionStorageFactory<T>> = lazyObject({
+    asScoped: jest.fn().mockImplementation(createSessionStorageMock),
+  });
   return mocked;
 };
 

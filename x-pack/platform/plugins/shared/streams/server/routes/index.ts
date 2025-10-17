@@ -19,10 +19,11 @@ import { contentRoutes } from './content/route';
 import { internalDashboardRoutes } from './internal/dashboards/route';
 import { internalCrudRoutes } from './internal/streams/crud/route';
 import { internalManagementRoutes } from './internal/streams/management/route';
-import { systemRoutes as internalSystemsRoutes } from './internal/streams/systems/route';
+import { featureRoutes as internalFeaturesRoutes } from './internal/streams/features/route';
 import { significantEventsRoutes } from './streams/significant_events/route';
 import { queryRoutes } from './queries/route';
 import { ruleRoutes } from './rules/route';
+import { failureStoreRoutes } from './internal/streams/failure_store/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -33,7 +34,8 @@ export const streamsRouteRepository = {
   ...internalSchemaRoutes,
   ...internalLifecycleRoutes,
   ...internalProcessingRoutes,
-  ...internalSystemsRoutes,
+  ...failureStoreRoutes,
+  ...internalFeaturesRoutes,
   // public APIs
   ...dashboardRoutes,
   ...crudRoutes,

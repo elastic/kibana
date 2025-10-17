@@ -98,6 +98,9 @@ export const useConversationScrollActions = ({
         () => checkScrollPosition(scrollContainer, setShowScrollButton),
         SCROLL_POSITION_CHECK_INTERVAL
       );
+    } else {
+      // when the content stops streaming, check the scroll position
+      checkScrollPosition(scrollContainer, setShowScrollButton);
     }
 
     return () => {

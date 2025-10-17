@@ -77,7 +77,10 @@
     "@kbn/datemath",
     "@kbn/elastic-assistant-common",
     "@kbn/response-ops-recurring-schedule-form",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/core-elasticsearch-server-utils",
+    "@kbn/es-types",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*"

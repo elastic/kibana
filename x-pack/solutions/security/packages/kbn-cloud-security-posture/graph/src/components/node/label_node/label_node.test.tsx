@@ -18,6 +18,7 @@ import {
   TEST_SUBJ_EXPAND_BTN,
   TEST_SUBJ_HANDLE,
   TEST_SUBJ_HOVER_OUTLINE,
+  TEST_SUBJ_LABEL_TEXT,
   TEST_SUBJ_TOOLTIP,
 } from './label_node';
 
@@ -106,6 +107,42 @@ describe('LabelNode', () => {
     });
   });
 
+  test('renders ips when present', () => {
+    const props = {
+      ...baseProps,
+      data: {
+        ...baseProps.data,
+        ips: ['127.0.0.1'],
+      },
+    };
+    render(
+      <ReactFlow>
+        <LabelNode {...props} />
+      </ReactFlow>
+    );
+
+    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_FLAGS_BADGE_ID)).not.toBeInTheDocument();
+  });
+
+  test('renders country flags when present', () => {
+    const props = {
+      ...baseProps,
+      data: {
+        ...baseProps.data,
+        countryCodes: ['us'],
+      },
+    };
+    render(
+      <ReactFlow>
+        <LabelNode {...props} />
+      </ReactFlow>
+    );
+
+    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_FLAGS_BADGE_ID)).toBeInTheDocument();
+  });
+
   test('renders ips and country flags when present', () => {
     const props = {
       ...baseProps,
@@ -121,8 +158,69 @@ describe('LabelNode', () => {
       </ReactFlow>
     );
 
-    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(GRAPH_FLAGS_BADGE_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_IPS_TEXT_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_FLAGS_BADGE_ID)).toBeInTheDocument();
+  });
+
+  describe('Tooltip', () => {
+    test('shows tooltip when text is truncated', async () => {
+      const props = {
+        ...baseProps,
+        data: {
+          ...baseProps.data,
+          label: 'This label is too long so it will be truncated for sure oh yeah',
+        },
+      };
+
+      render(
+        <ReactFlow>
+          <LabelNode {...props} />
+        </ReactFlow>
+      );
+
+      await userEvent.hover(screen.getByTestId(TEST_SUBJ_LABEL_TEXT));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).toBeInTheDocument();
+      });
+    });
+
+    test('tooltip shows full text content', async () => {
+      const longText = 'This is a very long label that exceeds twenty-seven characters';
+      const props = {
+        ...baseProps,
+        data: {
+          ...baseProps.data,
+          label: longText,
+        },
+      };
+      render(
+        <ReactFlow>
+          <LabelNode {...props} />
+        </ReactFlow>
+      );
+
+      await userEvent.hover(screen.getByTestId(TEST_SUBJ_LABEL_TEXT));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).toBeInTheDocument();
+        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).toHaveTextContent(longText);
+      });
+    });
+
+    test('does not show tooltip otherwise', async () => {
+      render(
+        <ReactFlow>
+          <LabelNode {...baseProps} />
+        </ReactFlow>
+      );
+
+      await userEvent.hover(screen.getByTestId(TEST_SUBJ_LABEL_TEXT));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).not.toBeInTheDocument();
+      });
+    });
   });
 
   describe('Shape colors', () => {
@@ -151,88 +249,6 @@ describe('LabelNode', () => {
         backgroundColor: mockEuiTheme.colors.backgroundBasePrimary,
         borderColor: mockEuiTheme.colors.borderStrongPrimary,
         textColor: mockEuiTheme.colors.textPrimary,
-      });
-    });
-  });
-
-  describe('Tooltip', () => {
-    test('shows tooltip when text is truncated', async () => {
-      const props = {
-        ...baseProps,
-        data: {
-          ...baseProps.data,
-          label: 'This label is too long so it will be truncated for sure oh yeah',
-        },
-      };
-
-      render(
-        <ReactFlow>
-          <LabelNode {...props} />
-        </ReactFlow>
-      );
-
-      await userEvent.hover(screen.getByTestId(GRAPH_LABEL_NODE_ID));
-
-      await waitFor(() => {
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).toBeInTheDocument();
-      });
-    });
-
-    test('shows tooltip when number of events is over limit', async () => {
-      const props = {
-        ...baseProps,
-        data: {
-          ...baseProps.data,
-          eventsCount: 3,
-        },
-      };
-
-      render(
-        <ReactFlow>
-          <LabelNode {...props} />
-        </ReactFlow>
-      );
-
-      await userEvent.hover(screen.getByTestId(GRAPH_LABEL_NODE_ID));
-
-      await waitFor(() => {
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).toBeInTheDocument();
-      });
-    });
-
-    test('shows tooltip when number of alerts is over limit', async () => {
-      const props = {
-        ...baseProps,
-        data: {
-          ...baseProps.data,
-          alertsCount: 3,
-        },
-      };
-
-      render(
-        <ReactFlow>
-          <LabelNode {...props} />
-        </ReactFlow>
-      );
-
-      await userEvent.hover(screen.getByTestId(GRAPH_LABEL_NODE_ID));
-
-      await waitFor(() => {
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).toBeInTheDocument();
-      });
-    });
-
-    test('does not show tooltip otherwise', async () => {
-      render(
-        <ReactFlow>
-          <LabelNode {...baseProps} />
-        </ReactFlow>
-      );
-
-      await userEvent.hover(screen.getByTestId(GRAPH_LABEL_NODE_ID));
-
-      await waitFor(() => {
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).not.toBeInTheDocument();
       });
     });
   });

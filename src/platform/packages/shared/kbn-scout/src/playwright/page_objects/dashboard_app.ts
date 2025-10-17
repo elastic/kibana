@@ -42,6 +42,7 @@ export class DashboardApp {
   }
 
   async addPanelFromLibrary(...names: string[]) {
+    await this.page.testSubj.click('dashboardAddTopNavButton');
     await this.page.testSubj.click('dashboardAddFromLibraryButton');
     for (let i = 0; i < names.length; i++) {
       // clear search input after the first panel is added

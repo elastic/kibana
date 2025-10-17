@@ -12,12 +12,13 @@ import React from 'react';
 
 interface FormattedValueProps {
   value: string;
+  truncate?: boolean;
 }
 
-export function FormattedValue({ value }: FormattedValueProps) {
+export function FormattedValue({ value, truncate }: FormattedValueProps) {
   return (
     <EuiText
-      className="eui-textTruncate"
+      className={truncate ? 'eui-textTruncate' : 'eui-textBreakWord'}
       data-test-subj="ContentFrameworkTableFormattedValue"
       size="xs"
       // Value returned from formatFieldValue is always sanitized

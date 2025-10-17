@@ -18,6 +18,8 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type { ControlPanelsState } from '@kbn/controls-plugin/public';
 import { cloneDeep } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
@@ -73,6 +75,14 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
    * The current breakdown field
    */
   breakdownField?: string;
+  /**
+   * The ES|QL variables to use for the chart
+   */
+  esqlVariables?: ESQLControlVariable[];
+  /**
+   * The controls state to use for the chart
+   */
+  controlsState?: ControlPanelsState<ESQLControlState>;
   /**
    * The external custom Lens vis
    */
@@ -172,8 +182,17 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     setLensVisService(new LensVisService({ services, lensSuggestionsApi: apiHelper.suggestions }));
   });
 
-  const { services, dataView, columns, isChartLoading, timeRange, table, externalVisContext } =
-    props;
+  const {
+    services,
+    dataView,
+    columns,
+    isChartLoading,
+    timeRange,
+    table,
+    externalVisContext,
+    esqlVariables,
+    controlsState,
+  } = props;
 
   const columnsMap = useMemo(() => {
     return columns?.reduce<Record<string, DatatableColumn>>((acc, column) => {
@@ -246,6 +265,8 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
       ? {
           ...props,
           ...stateProps,
+          esqlVariables,
+          controlsState,
           input$,
           chart,
           isChartAvailable,
@@ -253,7 +274,17 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
           lensVisService,
         }
       : undefined;
-  }, [chart, input$, isChartAvailable, lensVisService, props, requestParams, stateProps]);
+  }, [
+    chart,
+    input$,
+    isChartAvailable,
+    lensVisService,
+    props,
+    requestParams,
+    stateProps,
+    esqlVariables,
+    controlsState,
+  ]);
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
     () => ({
       chart,

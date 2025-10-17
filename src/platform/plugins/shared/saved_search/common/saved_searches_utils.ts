@@ -48,6 +48,7 @@ export const fromSavedSearchAttributes = <
     sampleSize: attributes.sampleSize,
     breakdownField: attributes.breakdownField,
     visContext: attributes.visContext,
+    controlGroupJson: attributes.controlGroupJson,
     density: attributes.density,
     tabs,
     managed,

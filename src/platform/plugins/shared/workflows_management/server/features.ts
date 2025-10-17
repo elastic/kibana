@@ -8,9 +8,8 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { WorkflowsManagementPluginServerDependenciesSetup } from './types';
+import type { WorkflowsServerPluginSetupDeps } from './types';
 
 /**
  * The order of appearance in the feature privilege page
@@ -18,7 +17,7 @@ import type { WorkflowsManagementPluginServerDependenciesSetup } from './types';
  */
 const FEATURE_ORDER = 3000;
 
-export const registerFeatures = (plugins: WorkflowsManagementPluginServerDependenciesSetup) => {
+export const registerFeatures = (plugins: WorkflowsServerPluginSetupDeps) => {
   plugins.features?.registerKibanaFeature({
     app: [],
     category: DEFAULT_APP_CATEGORIES.kibana,
@@ -50,7 +49,6 @@ export const registerFeatures = (plugins: WorkflowsManagementPluginServerDepende
         ui: ['read'],
       },
     },
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     subFeatures: [
       {
         name: i18n.translate(

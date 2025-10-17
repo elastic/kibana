@@ -14,7 +14,6 @@ import { useEffect, useState } from 'react';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMountParameters } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -38,12 +37,13 @@ import {
 } from './components/single_tab_view';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../constants';
 import { ChartPortalsRenderer } from './components/chart';
 import { useStateManagers } from './state_management/hooks/use_state_managers';
 import { useUrl } from './hooks/use_url';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
+import { useUnsavedChanges } from './state_management/hooks/use_unsaved_changes';
+import { DiscoverTopNavMenuProvider } from './components/top_nav/discover_topnav_menu';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -76,45 +76,13 @@ export const DiscoverMainRoute = ({
         ...withNotifyOnErrors(services.core.notifications.toasts),
       })
   );
-  const { internalState, runtimeStateManager } = useStateManagers({
+  const { internalState, runtimeStateManager, searchSessionManager } = useStateManagers({
     services,
     urlStateStorage,
     customizationContext,
   });
 
-  useEffect(() => {
-    onAppLeave?.((actions) => {
-      const tabs = runtimeStateManager.tabs.byId;
-      const hasAnyUnsavedTab = Object.values(tabs).some((tab) => {
-        const stateContainer = tab.stateContainer$.getValue();
-        if (!stateContainer) {
-          return false;
-        }
-
-        const isSaved = !!stateContainer.savedSearchState.getId();
-        const hasChanged = stateContainer.savedSearchState.getHasChanged$().getValue();
-
-        return isSaved && hasChanged;
-      });
-
-      if (!hasAnyUnsavedTab) return actions.default();
-
-      return actions.confirm(
-        i18n.translate('discover.confirmModal.confirmTextDescription', {
-          defaultMessage:
-            "You'll lose unsaved changes if you open another Discover session before returning to this one.",
-        }),
-        i18n.translate('discover.confirmModal.title', {
-          defaultMessage: 'Unsaved changes',
-        }),
-        () => {},
-        i18n.translate('discover.confirmModal.confirmText', {
-          defaultMessage: 'Leave without saving',
-        }),
-        'danger'
-      );
-    });
-  }, [onAppLeave, runtimeStateManager]);
+  useUnsavedChanges({ internalState, runtimeStateManager, onAppLeave });
 
   return (
     <InternalStateProvider store={internalState}>
@@ -124,6 +92,7 @@ export const DiscoverMainRoute = ({
         urlStateStorage={urlStateStorage}
         internalState={internalState}
         runtimeStateManager={runtimeStateManager}
+        searchSessionManager={searchSessionManager}
       />
     </InternalStateProvider>
   );
@@ -132,11 +101,11 @@ export const DiscoverMainRoute = ({
 const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const { customizationContext, runtimeStateManager } = props;
   const services = useDiscoverServices();
-  const { core, dataViews, chrome } = services;
+  const { core, dataViews, chrome, data, discoverFeatureFlags } = services;
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
-  const tabsEnabled = core.featureFlags.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, false);
+  const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
 
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
@@ -210,6 +179,8 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   }, [currentDiscoverSessionId, initializeDiscoverSession]);
 
   useUnmount(() => {
+    data.search.session.clear();
+
     for (const tabId of Object.keys(runtimeStateManager.tabs.byId)) {
       dispatch(internalStateActions.disconnectTab({ tabId }));
     }
@@ -280,7 +251,13 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   return (
     <rootProfileState.AppWrapper>
       <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
-        {tabsEnabled ? <TabsView {...props} /> : <SingleTabView {...props} />}
+        <DiscoverTopNavMenuProvider>
+          {tabsEnabled && customizationContext.displayMode !== 'embedded' ? (
+            <TabsView {...props} />
+          ) : (
+            <SingleTabView {...props} />
+          )}
+        </DiscoverTopNavMenuProvider>
       </ChartPortalsRenderer>
     </rootProfileState.AppWrapper>
   );

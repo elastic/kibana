@@ -185,6 +185,7 @@
     "observables.value",
     "owner",
     "settings",
+    "settings.extractObservables",
     "settings.syncAlerts",
     "severity",
     "status",
@@ -192,6 +193,7 @@
     "title",
     "total_alerts",
     "total_comments",
+    "total_events",
     "updated_at",
     "updated_by",
     "updated_by.email",
@@ -207,6 +209,7 @@
     "created_at",
     "created_by",
     "created_by.username",
+    "eventId",
     "externalReferenceAttachmentTypeId",
     "owner",
     "persistableStateAttachmentTypeId",
@@ -618,11 +621,6 @@
     "version",
     "wsState"
   ],
-  "guided-onboarding-guide-state": [
-    "guideId",
-    "isActive"
-  ],
-  "guided-onboarding-plugin-state": [],
   "index-pattern": [
     "name",
     "title",
@@ -773,6 +771,7 @@
     "vars"
   ],
   "ingest_manager_settings": [
+    "action_secret_storage_requirements_met",
     "delete_unenrolled_agents",
     "delete_unenrolled_agents.enabled",
     "delete_unenrolled_agents.is_preconfigured",
@@ -819,6 +818,7 @@
     "title"
   ],
   "maintenance-window": [
+    "createdBy",
     "enabled",
     "events",
     "expirationDate",
@@ -866,13 +866,6 @@
     "progress",
     "state",
     "type"
-  ],
-  "onechat_workflow": [
-    "access_control",
-    "access_control.public",
-    "categories",
-    "user_id",
-    "workflow_id"
   ],
   "osquery-manager-usage-metric": [
     "count",
@@ -931,9 +924,7 @@
   "privilege-monitoring-status": [
     "status"
   ],
-  "privmon-api-key": [
-    "apiKey"
-  ],
+  "privmon-api-key": [],
   "product-doc-install-status": [
     "index_name",
     "inference_id",
@@ -950,6 +941,7 @@
   "risk-engine-configuration": [
     "alertSampleSizePerShard",
     "dataViewId",
+    "enableResetToZero",
     "enabled",
     "excludeAlertStatuses",
     "filter",
@@ -1270,38 +1262,6 @@
     "kibanaSavedObjectMeta",
     "title",
     "version"
-  ],
-  "workchat_agent": [
-    "access_control",
-    "access_control.public",
-    "agent_id",
-    "agent_name",
-    "configuration",
-    "description",
-    "last_updated",
-    "user_id",
-    "user_name"
-  ],
-  "workchat_conversation": [
-    "access_control",
-    "access_control.public",
-    "agent_id",
-    "conversation_id",
-    "events",
-    "last_updated",
-    "title",
-    "user_id",
-    "user_name"
-  ],
-  "workchat_integration": [
-    "configuration",
-    "created_at",
-    "created_by",
-    "description",
-    "integration_id",
-    "name",
-    "type",
-    "updated_at"
   ],
   "workplace_search_telemetry": []
 }

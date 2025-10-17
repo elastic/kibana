@@ -34,7 +34,7 @@ export type SOSecret =
     };
 
 // this is used in the top level secret_refs array on package and agent policies
-export interface PolicySecretReference {
+export interface SecretReference {
   id: string;
 }
 

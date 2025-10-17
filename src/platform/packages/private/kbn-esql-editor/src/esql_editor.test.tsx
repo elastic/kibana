@@ -20,6 +20,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ESQLEditor } from './esql_editor';
 import type { ESQLEditorProps } from './types';
+import { screen } from '@testing-library/react';
 
 const mockValidate = jest.fn().mockResolvedValue({ errors: [], warnings: [] });
 jest.mock('@kbn/monaco', () => ({
@@ -274,6 +275,33 @@ describe('ESQLEditor', () => {
         queryByTestId('ESQLEditor-footerPopoverButton-error')?.click();
       });
       expect(queryByTestId('ESQLEditor-footerPopover-dataErrorsSwitch')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should render warning if the warning and mergeExternalMessages props are set', async () => {
+    const user = userEvent.setup();
+
+    mockValidate.mockResolvedValue({
+      errors: [],
+      warnings: [],
+    });
+
+    renderWithI18n(
+      renderESQLEditorComponent({
+        ...props,
+        warning: 'Client warning example',
+        mergeExternalMessages: true,
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('1 warning')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByText('1 warning'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Client warning example')).toBeInTheDocument();
     });
   });
 });

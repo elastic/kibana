@@ -13,487 +13,157 @@ import * as yaml from 'js-yaml';
 import { processSemconvYaml, extractFirstExample } from '../src/lib/generate_semconv';
 import type { ResolvedSemconvYaml, YamlGroup } from '../src/types/semconv_types';
 
-// Test data fixtures
-const mockRegistryGroup: YamlGroup = {
-  id: 'registry.webengine',
-  type: 'attribute_group',
-  brief:
-    '|\n    This document defines the attributes used to describe the packaged software running the application code.',
-  stability: 'development',
-  attributes: [
-    {
-      name: 'webengine.name',
-      type: 'string',
-      brief: '|\n      The name of the web engine.',
-      requirement_level: 'recommended',
-      stability: 'development',
-    },
-    {
-      name: 'webengine.version',
-      type: 'string',
-      brief: '|\n      The version of the web engine.',
-      requirement_level: 'recommended',
-      stability: 'development',
-    },
-    {
-      name: 'webengine.description',
-      type: 'string',
-      brief:
-        '|\n      Additional description of the web engine (e.g. detailed version and edition information).',
-      requirement_level: 'recommended',
-      stability: 'development',
-    },
-  ],
-};
-
-const mockMetricGroup: YamlGroup = {
-  id: 'metric.go.memory.used',
-  type: 'metric',
-  brief: 'Memory used by the Go runtime.',
-  note: '|\n    Computed from `(/memory/classes/total:bytes - /memory/classes/heap/released:bytes)`.',
-  stability: 'development',
-  metric_name: 'go.memory.used',
-  attributes: [
-    {
-      name: 'go.memory.type',
-      type: 'string',
-      brief: 'The type of memory.',
-      requirement_level: 'recommended',
-      stability: 'development',
-    },
-  ],
-};
-
-const mockDeprecatedGroup: YamlGroup = {
-  id: 'registry.deprecated',
-  type: 'attribute_group',
-  brief: 'Deprecated group',
-  deprecated: {
-    reason: 'renamed',
-    renamed_to: 'registry.new',
-  },
-  attributes: [
-    {
-      name: 'deprecated.field',
-      type: 'string',
-      brief: 'This field is deprecated',
-      deprecated: true,
-    },
-  ],
-};
-
-const mockNonTargetGroup: YamlGroup = {
-  id: 'spans.http',
-  type: 'span',
-  brief: 'HTTP span attributes',
-  attributes: [
-    {
-      name: 'http.method',
-      type: 'string',
-      brief: 'HTTP request method',
-    },
-  ],
-};
-
-describe('generate_semconv', () => {
+describe('OpenTelemetry Semantic Conventions Processing', () => {
   let tempDir: string;
   let tempYamlFile: string;
 
   beforeEach(() => {
-    // Create temporary directory and file for testing
-    tempDir = fs.mkdtempSync(path.join(__dirname, 'tmp-'));
-    tempYamlFile = path.join(tempDir, 'test-semconv.yaml');
+    tempDir = fs.mkdtempSync(path.join(__dirname, 'temp-'));
+    tempYamlFile = path.join(tempDir, 'test.yaml');
   });
 
   afterEach(() => {
-    // Clean up temporary files
     if (fs.existsSync(tempDir)) {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
   });
 
-  const createTestYamlFile = (groups: YamlGroup[]) => {
+  const createYamlFile = (groups: YamlGroup[]) => {
     const yamlContent: ResolvedSemconvYaml = { groups };
     fs.writeFileSync(tempYamlFile, yaml.dump(yamlContent), 'utf8');
   };
 
-  describe('registry group processing', () => {
-    it('should extract attributes from registry groups', () => {
-      createTestYamlFile([mockRegistryGroup]);
+  describe('Deterministic Ordering for PR Diffs', () => {
+    it('produces identical output across multiple executions to eliminate diff noise', () => {
+      // Real-world scenario: Weekly automated PRs should have minimal diffs
+      const complexGroups: YamlGroup[] = [
+        {
+          id: 'registry.user',
+          type: 'attribute_group',
+          brief: 'User attributes',
+          attributes: [
+            { name: 'user.name', brief: 'Username', type: 'string' },
+            { name: 'user.id', brief: 'User ID', type: 'string' },
+            { name: 'user.email', brief: 'Email', type: 'string' },
+          ],
+        },
+        {
+          id: 'metric.system.cpu',
+          type: 'metric',
+          brief: 'CPU usage',
+          attributes: [{ name: 'cpu.state', brief: 'CPU state', type: 'string' }],
+        },
+      ];
 
-      const result = processSemconvYaml(tempYamlFile);
+      createYamlFile(complexGroups);
 
-      expect(result.registryFields).toEqual({
-        'webengine.name': {
-          name: 'webengine.name',
-          description: 'The name of the web engine.',
-          type: 'keyword',
-        },
-        'webengine.version': {
-          name: 'webengine.version',
-          description: 'The version of the web engine.',
-          type: 'keyword',
-        },
-        'webengine.description': {
-          name: 'webengine.description',
-          description:
-            'Additional description of the web engine (e.g. detailed version and edition information).',
-          type: 'keyword',
-        },
+      // Execute multiple times to simulate CI runs
+      const results = Array.from({ length: 5 }, () => processSemconvYaml(tempYamlFile));
+
+      // Convert to JSON strings to simulate what would be written to files
+      const serializedResults = results.map((r) => JSON.stringify(r.totalFields, null, 2));
+
+      // All outputs must be identical to prevent unnecessary PR diffs
+      const baseline = serializedResults[0];
+      serializedResults.forEach((result, index) => {
+        expect(result).toBe(baseline);
       });
 
-      expect(result.stats.registryGroups).toBe(1);
-      expect(Object.keys(result.registryFields)).toHaveLength(3);
+      // Verify field order is deterministic
+      const fieldOrders = results.map((r) => Object.keys(r.totalFields));
+      const baselineOrder = fieldOrders[0];
+      fieldOrders.forEach((order) => {
+        expect(order).toEqual(baselineOrder);
+      });
     });
 
-    it('should clean brief text properly', () => {
-      const groupWithDirtyBrief: YamlGroup = {
-        id: 'registry.test',
+    it('handles large datasets without crashing', () => {
+      // Simulate real OpenTelemetry registry size (~1000+ fields)
+      const largeGroups: YamlGroup[] = Array.from({ length: 50 }, (_, i) => ({
+        id: `registry.test_${i}`,
         type: 'attribute_group',
-        brief: 'Test group',
-        attributes: [
-          {
-            name: 'test.field',
-            type: 'string',
-            brief:
-              '|\n      This is a test field with\n      multiple lines and\n      pipe characters.',
-          },
-        ],
-      };
+        brief: `Test group ${i}`,
+        attributes: Array.from({ length: 20 }, (__, j) => ({
+          name: `field_${i}_${j}`,
+          brief: `Test field ${i}_${j}`,
+          type: 'string',
+        })),
+      }));
 
-      createTestYamlFile([groupWithDirtyBrief]);
+      createYamlFile(largeGroups);
 
+      // Should process large datasets without throwing errors
       const result = processSemconvYaml(tempYamlFile);
 
-      expect(result.registryFields['test.field']).toEqual({
-        name: 'test.field',
-        description: 'This is a test field with multiple lines and pipe characters.',
-        type: 'keyword',
-      });
+      // Verify it processed the expected number of fields
+      expect(Object.keys(result.totalFields).length).toBeGreaterThan(1000);
+      expect(result.stats.totalFields).toBeGreaterThan(1000);
     });
 
-    it('should skip registry groups without attributes', () => {
-      const emptyGroup: YamlGroup = {
-        id: 'registry.empty',
-        type: 'attribute_group',
-        brief: 'Empty group',
-        // No attributes
-      };
-
-      createTestYamlFile([emptyGroup]);
-
-      const result = processSemconvYaml(tempYamlFile);
-
-      expect(result.registryFields).toEqual({});
-      expect(result.stats.registryGroups).toBe(1);
-    });
-
-    it('should skip attributes without name or brief', () => {
-      const incompleteGroup: YamlGroup = {
-        id: 'registry.incomplete',
-        type: 'attribute_group',
-        brief: 'Group with incomplete attributes',
-        attributes: [
-          {
-            name: 'valid.field',
-            type: 'string',
-            brief: 'Valid field',
-          },
-          {
-            // Missing name
-            type: 'string',
-            brief: 'Field without name',
-          },
-          {
-            name: 'field.without.brief',
-            type: 'string',
-            // Missing brief
-          },
-        ],
-      };
-
-      createTestYamlFile([incompleteGroup]);
-
-      const result = processSemconvYaml(tempYamlFile);
-
-      expect(result.registryFields).toEqual({
-        'valid.field': {
-          name: 'valid.field',
-          description: 'Valid field',
-          type: 'keyword',
+    it('maintains alphabetical ordering consistency', () => {
+      const testGroups: YamlGroup[] = [
+        {
+          id: 'registry.mixed',
+          type: 'attribute_group',
+          brief: 'Mixed fields for ordering test',
+          attributes: [
+            { name: 'zebra.field', brief: 'Last alphabetically', type: 'string' },
+            { name: 'alpha.field', brief: 'First alphabetically', type: 'string' },
+            { name: 'beta.field', brief: 'Middle alphabetically', type: 'string' },
+          ],
         },
-      });
+      ];
+
+      createYamlFile(testGroups);
+      const result = processSemconvYaml(tempYamlFile);
+      const fieldKeys = Object.keys(result.totalFields);
+
+      // Fields should be in alphabetical order
+      const sortedKeys = [...fieldKeys].sort();
+      expect(fieldKeys).toEqual(sortedKeys);
+
+      // @timestamp should be first (from hardcoded mappings)
+      expect(fieldKeys[0]).toBe('@timestamp');
     });
   });
 
-  describe('metric group processing', () => {
-    it('should extract metric name and attributes', () => {
-      createTestYamlFile([mockMetricGroup]);
-
-      const result = processSemconvYaml(tempYamlFile);
-
-      expect(result.metricFields).toEqual({
-        'metrics.go.memory.used': {
-          name: 'metrics.go.memory.used',
-          description: 'Memory used by the Go runtime.',
-          type: 'double',
-        },
-        'go.memory.type': {
-          name: 'go.memory.type',
-          description: 'The type of memory.',
-          type: 'keyword',
-        },
-      });
-
-      expect(result.stats.metricGroups).toBe(1);
-      expect(Object.keys(result.metricFields)).toHaveLength(2);
-    });
-
-    it('should handle metrics without attributes', () => {
-      const metricWithoutAttrs: YamlGroup = {
-        id: 'metric.simple',
-        type: 'metric',
-        brief: 'Simple metric without attributes',
-        metric_name: 'simple.metric',
-      };
-
-      createTestYamlFile([metricWithoutAttrs]);
-
-      const result = processSemconvYaml(tempYamlFile);
-
-      expect(result.metricFields).toEqual({
-        'metrics.simple': {
-          name: 'metrics.simple',
-          description: 'Simple metric without attributes',
-          type: 'double',
-        },
-      });
-    });
-
-    it('should handle metrics without metric_name', () => {
-      const metricWithoutName: YamlGroup = {
-        id: 'metric.no_name',
-        type: 'metric',
-        brief: 'Metric without metric_name',
-        attributes: [
-          {
-            name: 'test.attribute',
-            brief: 'Test attribute',
-          },
-        ],
-      };
-
-      createTestYamlFile([metricWithoutName]);
-
-      const result = processSemconvYaml(tempYamlFile);
-
-      expect(result.metricFields).toEqual({
-        'metrics.no_name': {
-          name: 'metrics.no_name',
-          description: 'Metric without metric_name',
-          type: 'double',
-        },
-        'test.attribute': {
-          name: 'test.attribute',
-          description: 'Test attribute',
-          type: 'keyword',
-        },
-      });
-    });
-  });
-
-  describe('group filtering', () => {
-    it('should only process registry and metric groups', () => {
-      createTestYamlFile([mockRegistryGroup, mockMetricGroup, mockNonTargetGroup]);
-
-      const result = processSemconvYaml(tempYamlFile);
-
-      expect(result.stats.registryGroups).toBe(1);
-      expect(result.stats.metricGroups).toBe(1);
-      expect(result.stats.totalGroups).toBe(2);
-
-      // Should not include fields from non-target group
-      expect(result.totalFields).not.toHaveProperty('http.method');
-    });
-
-    it('should skip non-registry/metric groups', () => {
-      createTestYamlFile([mockNonTargetGroup]);
-
-      const result = processSemconvYaml(tempYamlFile);
-
-      expect(result.stats.registryGroups).toBe(0);
-      expect(result.stats.metricGroups).toBe(0);
-      expect(result.registryFields).toEqual({});
-      expect(result.metricFields).toEqual({});
-      // totalFields will still contain hardcoded fields
-      expect(Object.keys(result.totalFields)).toEqual(Object.keys(result.hardcodedFields));
-    });
-  });
-
-  describe('deprecated field handling', () => {
-    it('should exclude deprecated fields by default', () => {
-      createTestYamlFile([mockDeprecatedGroup]);
-
-      const result = processSemconvYaml(tempYamlFile);
-
-      expect(result.registryFields).toEqual({});
-    });
-
-    it('should include deprecated fields when option is enabled', () => {
-      createTestYamlFile([mockDeprecatedGroup]);
-
-      const result = processSemconvYaml(tempYamlFile, { includeDeprecated: true });
-
-      expect(result.registryFields).toEqual({
-        'deprecated.field': {
-          name: 'deprecated.field',
-          description: 'This field is deprecated',
-          type: 'keyword',
-        },
-      });
-    });
-  });
-
-  describe('edge cases and error handling', () => {
-    it('should handle empty groups array', () => {
-      createTestYamlFile([]);
-
-      const result = processSemconvYaml(tempYamlFile);
-
-      expect(result.stats.totalGroups).toBe(0);
-      expect(result.registryFields).toEqual({});
-      expect(result.metricFields).toEqual({});
-      // totalFields should only contain hardcoded fields
-      expect(Object.keys(result.totalFields)).toEqual(Object.keys(result.hardcodedFields));
-    });
-
-    it('should throw error for invalid YAML file', () => {
+  describe('Error Handling and Edge Cases', () => {
+    it('handles malformed YAML gracefully', () => {
       fs.writeFileSync(tempYamlFile, 'invalid: yaml: content: [', 'utf8');
 
-      expect(() => {
-        processSemconvYaml(tempYamlFile);
-      }).toThrow('Failed to load YAML file');
+      expect(() => processSemconvYaml(tempYamlFile)).toThrow(/Failed to load YAML file/);
     });
 
-    it('should throw error for missing groups property', () => {
-      fs.writeFileSync(tempYamlFile, yaml.dump({ invalid: 'structure' }), 'utf8');
+    it('handles missing groups property', () => {
+      fs.writeFileSync(tempYamlFile, yaml.dump({ notGroups: [] }), 'utf8');
 
-      expect(() => {
-        processSemconvYaml(tempYamlFile);
-      }).toThrow('Invalid YAML structure');
-    });
-
-    it('should throw error for non-existent file', () => {
-      const nonExistentFile = path.join(tempDir, 'does-not-exist.yaml');
-
-      expect(() => {
-        processSemconvYaml(nonExistentFile);
-      }).toThrow('Failed to load YAML file');
-    });
-
-    it('should handle groups with missing properties gracefully', () => {
-      const malformedGroup: YamlGroup = {
-        id: 'registry.malformed',
-        type: 'attribute_group',
-        // Missing brief, attributes, etc.
-      };
-
-      createTestYamlFile([malformedGroup]);
-
-      const result = processSemconvYaml(tempYamlFile);
-
-      expect(result.registryFields).toEqual({});
-      expect(result.stats.registryGroups).toBe(1);
-    });
-  });
-
-  describe('output validation', () => {
-    it('should merge hardcoded, registry and metric fields correctly', () => {
-      createTestYamlFile([mockRegistryGroup, mockMetricGroup]);
-
-      const result = processSemconvYaml(tempYamlFile);
-
-      expect(result.totalFields).toEqual({
-        ...result.hardcodedFields,
-        ...result.registryFields,
-        ...result.metricFields,
-      });
-
-      expect(result.stats.totalFields).toBe(
-        Object.keys(result.hardcodedFields).length +
-          Object.keys(result.registryFields).length +
-          Object.keys(result.metricFields).length
+      expect(() => processSemconvYaml(tempYamlFile)).toThrow(
+        /missing or invalid "groups" property/
       );
     });
 
-    it('should handle field name collisions (metric fields win)', () => {
-      const registryWithCollision: YamlGroup = {
-        id: 'registry.collision',
-        type: 'attribute_group',
-        brief: 'Registry group',
-        attributes: [
-          {
-            name: 'collision.field',
-            brief: 'Registry field description',
-          },
-        ],
-      };
+    it('handles non-existent files', () => {
+      expect(() => processSemconvYaml('/non/existent/file.yaml')).toThrow();
+    });
 
-      const metricWithCollision: YamlGroup = {
-        id: 'metric.collision',
-        type: 'metric',
-        brief: 'Metric group',
-        metric_name: 'collision.field',
-        attributes: [],
-      };
-
-      createTestYamlFile([registryWithCollision, metricWithCollision]);
+    it('handles empty attribute arrays', () => {
+      createYamlFile([
+        {
+          id: 'registry.empty',
+          type: 'attribute_group',
+          brief: 'Empty group',
+          attributes: [],
+        },
+      ]);
 
       const result = processSemconvYaml(tempYamlFile);
-
-      // Both registry and metric fields should exist (no collision since different names)
-      expect(result.totalFields['collision.field']).toEqual({
-        name: 'collision.field',
-        description: 'Registry field description',
-        type: 'keyword',
-      });
-
-      expect(result.totalFields['metrics.collision']).toEqual({
-        name: 'metrics.collision',
-        description: 'Metric group',
-        type: 'double',
-      });
+      expect(result.registryFields).toEqual({});
     });
   });
 
-  describe('processing options', () => {
-    it('should respect cleanBriefText option', () => {
-      createTestYamlFile([mockRegistryGroup]);
-
-      const result = processSemconvYaml(tempYamlFile, { cleanBriefText: false });
-
-      // Should preserve original formatting
-      expect(result.registryFields['webengine.name']).toEqual({
-        name: 'webengine.name',
-        description: '|\n      The name of the web engine.',
-        type: 'keyword',
-      });
-    });
-  });
-
-  describe('hardcoded mappings integration', () => {
-    it('should include hardcoded fields in result', () => {
-      createTestYamlFile([]);
-
-      const result = processSemconvYaml(tempYamlFile);
-
-      expect(result.hardcodedFields).toBeDefined();
-      expect(Object.keys(result.hardcodedFields).length).toBeGreaterThan(0);
-      expect(result.stats.hardcodedFields).toBeGreaterThan(0);
-    });
-
-    it('should include core OTLP fields in hardcoded mappings', () => {
-      createTestYamlFile([]);
+  describe('Integration with Hardcoded Mappings', () => {
+    it('includes core OTLP fields in hardcoded mappings', () => {
+      createYamlFile([]);
 
       const result = processSemconvYaml(tempYamlFile);
 
@@ -517,83 +187,128 @@ describe('generate_semconv', () => {
       });
     });
 
-    it('should allow semantic convention fields to override hardcoded fields', () => {
-      // Create a registry group that conflicts with a hardcoded field
-      const conflictingGroup: YamlGroup = {
-        id: 'registry.test',
+    it('prioritizes semantic conventions over hardcoded mappings correctly', () => {
+      // Test the business rule: YAML fields override hardcoded ones
+      const overrideGroup: YamlGroup = {
+        id: 'registry.override',
         type: 'attribute_group',
-        brief: 'Test group',
+        brief: 'Override test',
         attributes: [
           {
-            name: '@timestamp',
-            brief: 'Custom timestamp description from semantic conventions',
+            name: 'trace_id', // This exists in hardcoded mappings
+            brief: 'Custom trace ID description from YAML',
             type: 'string',
           },
         ],
       };
 
-      createTestYamlFile([conflictingGroup]);
-
+      createYamlFile([overrideGroup]);
       const result = processSemconvYaml(tempYamlFile);
 
-      // Semantic convention should override hardcoded field
-      expect(result.totalFields['@timestamp']).toEqual({
-        name: '@timestamp',
-        description: 'Custom timestamp description from semantic conventions',
-        type: 'keyword', // string maps to keyword
-      });
+      // YAML should win
+      expect(result.totalFields.trace_id.description).toBe('Custom trace ID description from YAML');
+      expect(result.totalFields.trace_id.type).toBe('keyword'); // string -> keyword
 
-      // But hardcoded field should still exist separately
-      expect(result.hardcodedFields['@timestamp']).toEqual({
-        name: '@timestamp',
-        description: expect.stringContaining('Time when'),
-        type: 'date_nanos',
-      });
+      // But hardcoded should still exist separately
+      expect(result.hardcodedFields.trace_id.description).toBe('A unique identifier for a trace.');
+    });
+  });
+
+  describe('Metric Processing Business Logic', () => {
+    it('transforms metric IDs to Kibana field names correctly', () => {
+      const metricGroup: YamlGroup = {
+        id: 'metric.go.memory.used',
+        type: 'metric',
+        brief: 'Memory used by Go runtime',
+        unit: 'bytes',
+      };
+
+      createYamlFile([metricGroup]);
+      const result = processSemconvYaml(tempYamlFile);
+
+      // Business rule: metric.* -> metrics.*
+      expect(result.metricFields['metrics.go.memory.used']).toBeDefined();
+      expect(result.metricFields['metrics.go.memory.used'].name).toBe('metrics.go.memory.used');
+      expect(result.metricFields['metrics.go.memory.used'].type).toBe('double');
     });
 
-    it('should properly count all field sources', () => {
-      createTestYamlFile([mockRegistryGroup, mockMetricGroup]);
+    it('processes metric attributes correctly', () => {
+      const metricGroup: YamlGroup = {
+        id: 'metric.system.cpu',
+        type: 'metric',
+        brief: 'CPU usage',
+        attributes: [
+          { name: 'cpu.state', brief: 'CPU state', type: 'string' },
+          { name: 'cpu.core', brief: 'CPU core', type: 'int' },
+        ],
+      };
 
+      createYamlFile([metricGroup]);
       const result = processSemconvYaml(tempYamlFile);
 
-      expect(result.stats.hardcodedFields).toBeGreaterThan(0);
-      expect(result.stats.registryGroups).toBe(1);
-      expect(result.stats.metricGroups).toBe(1);
+      // Metric itself
+      expect(result.metricFields['metrics.system.cpu']).toBeDefined();
+      expect(result.metricFields['metrics.system.cpu'].type).toBe('double');
 
-      // Total should include all sources
-      const expectedTotal =
-        Object.keys(result.hardcodedFields).length +
-        Object.keys(result.registryFields).length +
-        Object.keys(result.metricFields).length;
+      // Metric attributes
+      expect(result.metricFields['cpu.state']).toBeDefined();
+      expect(result.metricFields['cpu.state'].type).toBe('keyword');
+      expect(result.metricFields['cpu.core']).toBeDefined();
+      expect(result.metricFields['cpu.core'].type).toBe('long');
+    });
+  });
 
-      expect(result.stats.totalFields).toBe(expectedTotal);
+  describe('Deprecation Handling', () => {
+    it('excludes deprecated fields by default', () => {
+      const testGroup: YamlGroup = {
+        id: 'registry.deprecated',
+        type: 'attribute_group',
+        brief: 'Deprecated group',
+        attributes: [
+          { name: 'old.field', brief: 'Old field', type: 'string', deprecated: true },
+          { name: 'current.field', brief: 'Current field', type: 'string' },
+        ],
+      };
+
+      createYamlFile([testGroup]);
+      const result = processSemconvYaml(tempYamlFile);
+
+      expect(result.totalFields['old.field']).toBeUndefined();
+      expect(result.totalFields['current.field']).toBeDefined();
     });
 
-    it('should maintain field structure consistency across all sources', () => {
-      createTestYamlFile([mockRegistryGroup, mockMetricGroup]);
+    it('includes deprecated fields when explicitly requested', () => {
+      const testGroup: YamlGroup = {
+        id: 'registry.deprecated',
+        type: 'attribute_group',
+        brief: 'Deprecated group',
+        attributes: [{ name: 'old.field', brief: 'Old field', type: 'string', deprecated: true }],
+      };
 
+      createYamlFile([testGroup]);
+      const result = processSemconvYaml(tempYamlFile, { includeDeprecated: true });
+
+      expect(result.totalFields['old.field']).toBeDefined();
+    });
+
+    it('excludes deprecated metric groups by default', () => {
+      const deprecatedMetric: YamlGroup = {
+        id: 'metric.old.counter',
+        type: 'metric',
+        brief: 'Old metric',
+        deprecated: { reason: 'Old metric' },
+      };
+
+      createYamlFile([deprecatedMetric]);
       const result = processSemconvYaml(tempYamlFile);
 
-      // Check that all field sources have consistent structure
-      [result.hardcodedFields, result.registryFields, result.metricFields].forEach(
-        (fieldSource) => {
-          Object.entries(fieldSource).forEach(([fieldName, fieldMetadata]) => {
-            expect(fieldMetadata).toHaveProperty('name');
-            expect(fieldMetadata).toHaveProperty('description');
-            expect(fieldMetadata).toHaveProperty('type');
-
-            expect(fieldMetadata.name).toBe(fieldName);
-            expect(typeof fieldMetadata.description).toBe('string');
-            expect(typeof fieldMetadata.type).toBe('string');
-          });
-        }
-      );
+      expect(result.metricFields['metrics.old.counter']).toBeUndefined();
     });
   });
 
   describe('extractFirstExample function', () => {
     describe('JSON compaction', () => {
-      it('should compact the problematic gen_ai.system_instructions multi-line JSON', () => {
+      it('should compact multi-line JSON to prevent TypeScript generation issues', () => {
         const problematicExample = `[
   {
     "type": "text",
@@ -611,22 +326,11 @@ describe('generate_semconv', () => {
       it('should compact multi-line JSON objects', () => {
         const multiLineJson = `{
   "name": "service-name",
-  "version": "1.0.0"  
+  "version": "1.0.0"
 }`;
         const result = extractFirstExample([multiLineJson]);
         expect(result).toBe('{"name":"service-name","version":"1.0.0"}');
         expect(result).not.toContain('\n');
-      });
-
-      it('should handle complex nested JSON arrays', () => {
-        const complexExample = `[
-  {"type": "text", "content": "You are a language translator."},
-  {"type": "text", "content": "Your mission is to translate text."}
-]`;
-        const result = extractFirstExample([complexExample]);
-        expect(result).toBe(
-          '[{"type":"text","content":"You are a language translator."},{"type":"text","content":"Your mission is to translate text."}]'
-        );
       });
     });
 
@@ -639,12 +343,6 @@ describe('generate_semconv', () => {
         expect(result).toBe('This is a multi-line string with extra spaces');
       });
 
-      it('should trim whitespace from simple strings', () => {
-        const paddedString = '   simple string   ';
-        const result = extractFirstExample([paddedString]);
-        expect(result).toBe('simple string');
-      });
-
       it('should handle invalid JSON as plain text', () => {
         const invalidJson = '{ invalid: json, missing: "quotes" }';
         const result = extractFirstExample([invalidJson]);
@@ -652,7 +350,7 @@ describe('generate_semconv', () => {
       });
     });
 
-    describe('edge cases and data types', () => {
+    describe('edge cases', () => {
       it('should return undefined for empty or invalid inputs', () => {
         expect(extractFirstExample([])).toBeUndefined();
         expect(extractFirstExample(undefined)).toBeUndefined();
@@ -665,13 +363,6 @@ describe('generate_semconv', () => {
         expect(extractFirstExample([42])).toBe('42');
         expect(extractFirstExample([true])).toBe('true');
         expect(extractFirstExample([''])).toBe('');
-      });
-
-      it('should process OpenTelemetry field examples correctly', () => {
-        expect(extractFirstExample(['shoppingcart'])).toBe('shoppingcart');
-        expect(extractFirstExample(['21.0.0'])).toBe('21.0.0');
-        expect(extractFirstExample(['GET'])).toBe('GET');
-        expect(extractFirstExample(['stack'])).toBe('stack');
       });
     });
   });

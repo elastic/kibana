@@ -34,7 +34,6 @@ export const getCasesMapMock = () =>
 
 export const openAddToExistingCaseModalMock = jest.fn();
 export const openAddToNewCaseFlyoutMock = jest.fn();
-export const openRemoveAlertFromCaseModalMock = jest.fn();
 
 const uiMock: jest.MockedObject<CasesService['ui']> = {
   getCasesContext: jest
@@ -49,15 +48,13 @@ const hooksMock: jest.MockedObject<CasesService['hooks']> = {
   useCasesAddToExistingCaseModal: jest.fn().mockImplementation(() => ({
     open: openAddToExistingCaseModalMock,
   })),
-  useRemoveAlertFromCaseModal: jest.fn().mockImplementation(() => ({
-    open: openRemoveAlertFromCaseModalMock,
-  })),
 };
 
 const helpersMock: jest.MockedObject<CasesService['helpers']> = {
   canUseCases: jest.fn(),
   groupAlertsByRule: jest.fn(),
   getRuleIdFromEvent: jest.fn(),
+  getObservablesFromEcs: jest.fn(),
 };
 
 export const createCasesServiceMock = (): jest.MaybeMockedDeep<CasesService> => ({

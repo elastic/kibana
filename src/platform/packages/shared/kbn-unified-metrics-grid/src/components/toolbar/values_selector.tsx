@@ -20,9 +20,14 @@ import {
 } from '@elastic/eui';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { FIELD_VALUE_SEPARATOR } from '../../common/utils';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
 import { useDimensionsQuery } from '../../hooks';
 import { ClearAllSection } from './clear_all_section';
+import {
+  MAX_VALUES_SELECTIONS,
+  METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
+} from '../../common/constants';
 
 interface ValuesFilterProps {
   selectedDimensions: string[];
@@ -56,6 +61,7 @@ export const ValuesSelector = ({
   const options: SelectableEntry[] = useMemo(() => {
     const groupedValues = new Map<string, string[]>();
     const selectedSet = new Set(selectedValues);
+    const isAtMaxLimit = selectedValues.length >= MAX_VALUES_SELECTIONS;
 
     values.forEach(({ value, field }) => {
       const arr = groupedValues.get(field) ?? [];
@@ -67,10 +73,14 @@ export const ValuesSelector = ({
       { label: field, isGroupLabel: true, value: field },
       ...fieldValues.map<SelectableEntry>((value) => {
         const key = `${field}${FIELD_VALUE_SEPARATOR}${value}`;
+        const isSelected = selectedSet.has(key);
+        const isDisabledByLimit = !isSelected && isAtMaxLimit;
+
         return {
           value,
           label: value,
-          checked: selectedSet.has(key) ? 'on' : undefined,
+          checked: isSelected ? 'on' : undefined,
+          disabled: isDisabledByLimit,
           key,
         };
       }),
@@ -83,7 +93,9 @@ export const ValuesSelector = ({
         ?.filter((option) => !option.isGroupLabel && option.key)
         .map((option) => option.key!);
 
-      onChange(newSelectedValues ?? []);
+      // Enforce the maximum limit
+      const limitedSelection = (newSelectedValues ?? []).slice(0, MAX_VALUES_SELECTIONS);
+      onChange(limitedSelection);
     },
     [onChange]
   );
@@ -123,17 +135,22 @@ export const ValuesSelector = ({
   }, [isLoading, selectedValues.length]);
 
   const popoverContentBelowSearch = useMemo(() => {
+    const isAtMaxLimit = selectedValues.length >= MAX_VALUES_SELECTIONS;
+    const statusMessage = isAtMaxLimit
+      ? i18n.translate('metricsExperience.valuesSelector.maxLimitStatusMessage', {
+          defaultMessage: 'Maximum of {maxValues} values selected ({count}/{maxValues})',
+          values: { count: selectedValues.length, maxValues: MAX_VALUES_SELECTIONS },
+        })
+      : i18n.translate('metricsExperience.valuesSelector.selectedStatusMessage', {
+          defaultMessage: '{count, plural, one {# value selected} other {# values selected}}',
+          values: { count: selectedValues.length },
+        });
+
     return (
       <ClearAllSection
         selectedOptionsLength={selectedValues.length}
         onClearAllAction={onClear}
-        selectedOptionsMessage={i18n.translate(
-          'metricsExperience.valuesSelector.selectedStatusMessage',
-          {
-            defaultMessage: '{count, plural, one {# value selected} other {# values selected}}',
-            values: { count: selectedValues.length },
-          }
-        )}
+        selectedOptionsMessage={statusMessage}
       />
     );
   }, [selectedValues.length, onClear]);
@@ -158,15 +175,11 @@ export const ValuesSelector = ({
 
   return (
     <ToolbarSelector
-      data-test-subj="metricsExperienceValuesSelector"
+      data-test-subj={METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ}
       data-selected-value={selectedDimensions}
       searchable
       buttonLabel={buttonLabel}
-      optionMatcher={({ option, normalizedSearchValue }) => {
-        return 'name' in option
-          ? String(option.name ?? '').includes(normalizedSearchValue)
-          : option.label.includes(normalizedSearchValue);
-      }}
+      optionMatcher={comboBoxFieldOptionMatcher}
       options={options}
       singleSelection={false}
       hasArrow={!isLoading}

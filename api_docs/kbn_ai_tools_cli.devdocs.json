@@ -19,7 +19,7 @@
         "label": "loadHuggingFaceDatasets",
         "description": [],
         "signature": [
-          "({\n  esClient,\n  logger,\n  accessToken,\n  datasets = PREDEFINED_HUGGING_FACE_DATASETS,\n  limit = 1000,\n  clear = false,\n}: { esClient: ",
+          "({\n  esClient,\n  logger,\n  accessToken,\n  datasets = PREDEFINED_HUGGING_FACE_DATASETS,\n  limit,\n  clear = false,\n}: { esClient: ",
           "ElasticsearchClient",
           "; logger: ",
           {
@@ -48,7 +48,7 @@
             "id": "def-server.loadHuggingFaceDatasets.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  esClient,\n  logger,\n  accessToken,\n  datasets = PREDEFINED_HUGGING_FACE_DATASETS,\n  limit = 1000,\n  clear = false,\n}",
+            "label": "{\n  esClient,\n  logger,\n  accessToken,\n  datasets = PREDEFINED_HUGGING_FACE_DATASETS,\n  limit,\n  clear = false,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/load_hugging_face_datasets.ts",
             "deprecated": false,
@@ -1233,7 +1233,7 @@
             "signature": [
               "{ timeout?: ",
               "Duration",
-              " | undefined; dynamic?: ",
+              " | undefined; body?: string | ({ [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; expand_wildcards?: undefined; ignore_unavailable?: undefined; master_timeout?: undefined; timeout?: undefined; write_index_only?: undefined; date_detection?: undefined; dynamic?: undefined; dynamic_date_formats?: undefined; dynamic_templates?: undefined; _field_names?: undefined; _meta?: undefined; numeric_detection?: undefined; properties?: undefined; _routing?: undefined; _source?: undefined; runtime?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; expand_wildcards?: undefined; ignore_unavailable?: undefined; master_timeout?: undefined; timeout?: undefined; write_index_only?: undefined; date_detection?: undefined; dynamic?: undefined; dynamic_date_formats?: undefined; dynamic_templates?: undefined; _field_names?: undefined; _meta?: undefined; numeric_detection?: undefined; properties?: undefined; _routing?: undefined; _source?: undefined; runtime?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; dynamic?: ",
               "MappingDynamicMapping",
               " | undefined; runtime?: ",
               "MappingRuntimeFields",
@@ -1243,7 +1243,7 @@
               "ExpandWildcards",
               " | undefined; ignore_unavailable?: boolean | undefined; _source?: ",
               "MappingSourceField",
-              " | undefined; body?: string | ({ [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; expand_wildcards?: undefined; ignore_unavailable?: undefined; master_timeout?: undefined; timeout?: undefined; write_index_only?: undefined; date_detection?: undefined; dynamic?: undefined; dynamic_date_formats?: undefined; dynamic_templates?: undefined; _field_names?: undefined; _meta?: undefined; numeric_detection?: undefined; properties?: undefined; _routing?: undefined; _source?: undefined; runtime?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; expand_wildcards?: undefined; ignore_unavailable?: undefined; master_timeout?: undefined; timeout?: undefined; write_index_only?: undefined; date_detection?: undefined; dynamic?: undefined; dynamic_date_formats?: undefined; dynamic_templates?: undefined; _field_names?: undefined; _meta?: undefined; numeric_detection?: undefined; properties?: undefined; _routing?: undefined; _source?: undefined; runtime?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; _routing?: ",
+              " | undefined; _routing?: ",
               "MappingRoutingField",
               " | undefined; _field_names?: ",
               "MappingFieldNamesField",

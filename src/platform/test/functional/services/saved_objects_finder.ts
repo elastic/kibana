@@ -66,7 +66,7 @@ export class SavedObjectsFinderService extends FtrService {
     return { button, name };
   }
 
-  private async waitForListLoading() {
+  public async waitForListLoading() {
     await this.testSubjects.waitForDeleted('savedObjectFinderLoadingIndicator');
   }
 }
