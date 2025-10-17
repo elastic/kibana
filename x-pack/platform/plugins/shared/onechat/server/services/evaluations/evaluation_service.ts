@@ -79,48 +79,48 @@ export class EvaluationServiceImpl implements EvaluationService {
       }),
     };
 
-    const results: ConversationRoundEvaluation[] = [];
+    const results = await Promise.all(
+      conversation.rounds.map(async (round) => {
+        const scores = await Promise.all(
+          evaluatorConfigs.map(async (config) => {
+            const evaluator = evaluators[config.evaluatorId];
 
-    for (const round of conversation.rounds) {
-      const scores = await Promise.all(
-        evaluatorConfigs.map(async (config) => {
-          const evaluator = evaluators[config.evaluatorId];
+            if (evaluator) {
+              try {
+                const result = await evaluator({
+                  conversation,
+                  currentRound: round,
+                  customInstructions: config.customInstructions ?? '',
+                });
 
-          if (evaluator) {
-            try {
-              const result = await evaluator({
-                conversation,
-                currentRound: round,
-                customInstructions: config.customInstructions ?? '',
-              });
-
+                return {
+                  evaluatorId: config.evaluatorIdOverride || config.evaluatorId,
+                  score: result.score,
+                  ...(result.analysis && { analysis: result.analysis }),
+                };
+              } catch (error) {
+                this.logger.error(
+                  `Error running evaluator ${config.evaluatorId} for round ${round.id}: ${
+                    error instanceof Error ? error.message : String(error)
+                  }`
+                );
+                throw error;
+              }
+            } else {
               return {
                 evaluatorId: config.evaluatorIdOverride || config.evaluatorId,
-                score: result.score,
-                ...(result.analysis && { analysis: result.analysis }),
+                score: Math.random(),
               };
-            } catch (error) {
-              this.logger.error(
-                `Error running evaluator ${config.evaluatorId} for round ${round.id}: ${
-                  error instanceof Error ? error.message : String(error)
-                }`
-              );
-              throw error;
             }
-          } else {
-            return {
-              evaluatorId: config.evaluatorIdOverride || config.evaluatorId,
-              score: Math.random(),
-            };
-          }
-        })
-      );
+          })
+        );
 
-      results.push({
-        roundId: round.id,
-        scores,
-      });
-    }
+        return {
+          roundId: round.id,
+          scores,
+        };
+      })
+    );
 
     return results;
   }
