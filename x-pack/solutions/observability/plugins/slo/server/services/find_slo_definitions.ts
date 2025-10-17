@@ -26,9 +26,19 @@ export class FindSLODefinitions {
 
     const result = await this.repository.search(params.search ?? '', toPagination(params), {
       includeOutdatedOnly: params.includeOutdatedOnly === true,
+      enabled: this.parseEnabledFilter(params.enabledFilter),
+      sortField: params.sortField,
+      sortOrder: params.sortOrder,
       tags: requestTags,
     });
     return findSloDefinitionsResponseSchema.encode(result);
+  }
+  private parseEnabledFilter(enabledFilter: string | undefined): boolean | undefined {
+    if (enabledFilter === 'true') {
+      return true;
+    } else if (enabledFilter === 'false') {
+      return false;
+    }
   }
 }
 

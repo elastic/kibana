@@ -31,6 +31,9 @@ export interface SLORepository {
     pagination: Pagination,
     options?: {
       includeOutdatedOnly: boolean;
+      enabled?: boolean;
+      sortField?: string;
+      sortOrder?: 'asc' | 'desc';
       tags: string[];
     }
   ): Promise<Paginated<SLODefinition>>;
@@ -122,14 +125,21 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     search: string,
     pagination: Pagination,
     options: {
-      includeOutdatedOnly?: boolean;
+      includeOutdatedOnly: boolean;
+      enabled?: boolean;
       tags: string[];
-    } = { tags: [] }
+      sortField?: string;
+      sortOrder?: 'asc' | 'desc';
+    }
   ): Promise<Paginated<SLODefinition>> {
-    const { includeOutdatedOnly, tags } = options;
+    const { includeOutdatedOnly, tags, sortField, sortOrder } = options;
     const filter = [];
     if (tags.length > 0) {
       filter.push(`slo.attributes.tags: (${tags.join(' OR ')})`);
+    }
+
+    if (options.enabled !== undefined) {
+      filter.push(`slo.attributes.enabled: ${options.enabled}`);
     }
 
     if (!!includeOutdatedOnly) {
@@ -143,8 +153,8 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       search,
       searchFields: ['name'],
       ...(filter.length && { filter: filter.join(' AND ') }),
-      sortField: 'id',
-      sortOrder: 'asc',
+      sortField: sortField ?? 'id',
+      sortOrder: sortOrder ?? 'asc',
     });
 
     return {
