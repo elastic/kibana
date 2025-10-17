@@ -65,6 +65,7 @@ import {
   type DashboardChildren,
   type DashboardLayout,
   type DashboardLayoutPanel,
+  type DashboardPinnableControl,
 } from './types';
 
 export function initializeLayoutManager(
@@ -371,7 +372,7 @@ export function initializeLayoutManager(
     trackPanel.setHighlightPanelId(uuidOfDuplicate);
   };
 
-  const pinPanel = (uuid: string, controlToPin: DashboardLayoutPanel) => {
+  const pinPanel = (uuid: string, controlToPin: DashboardPinnableControl) => {
     // add control panel to the end of the pinned controls
     const newControls = { ...layout$.getValue().controls };
 
@@ -413,7 +414,7 @@ export function initializeLayoutManager(
         }
 
         // If we hit this, the panel was removed before the embeddable finished loading.
-        if (layout$.value.panels[uuid] === undefined) {
+        if (!Object.hasOwn(panels, uuid) && !Object.hasOwn(controls, uuid)) {
           subscription.unsubscribe();
           resolve(undefined);
         }
@@ -538,7 +539,6 @@ export function initializeLayoutManager(
           : {};
         const panelToPin = {
           type: panelPackage.panelType,
-          grid: { x: 0, y: 0, w: 1, h: 1 },
           ...displaySettings,
         };
         pinPanel(newPanelUuid, panelToPin);

@@ -19,12 +19,16 @@ export interface DashboardChildren {
 export interface DashboardLayoutPanel {
   grid: DashboardPanel['grid'] & { sectionId?: string };
   type: DashboardPanel['type'];
-  width?: ControlWidth;
-  grow?: boolean;
 }
 
 export const isDashboardLayoutPanel = (panel: unknown): panel is DashboardLayoutPanel =>
   Boolean((panel as DashboardLayoutPanel).type) && Boolean((panel as DashboardLayoutPanel).grid);
+
+export interface DashboardPinnableControl {
+  type: DashboardPanel['type'];
+  grow?: boolean;
+  width?: ControlWidth;
+}
 
 export interface DashboardLayout {
   panels: {
