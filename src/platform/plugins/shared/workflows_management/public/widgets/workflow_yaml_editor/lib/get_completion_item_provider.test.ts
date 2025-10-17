@@ -11,9 +11,14 @@ import { monaco } from '@kbn/monaco';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { getCompletionItemProvider, parseLineForCompletion } from './get_completion_item_provider';
-import { z } from '@kbn/zod';
+import { z, ZodType } from '@kbn/zod';
 import { performComputation } from './store/utils/computation';
 import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
+
+const schema1 = z.string().describe('rrule');
+const schema2 = z.string().describe('timezone');
+const schema3 = z.string().describe('other');
+const unionSchema = z.union([schema1, schema2, schema3]).describe('union');
 
 // Mock Monaco editor model
 const createMockModel = (value: string, cursorOffset: number) => {
@@ -86,7 +91,7 @@ describe('getCompletionItemProvider', () => {
       }),
     },
   ];
-  let yamlContent: string;
+  let yamlContent;
   let focusedStepId: string | undefined;
 
   const workflowSchema = generateYamlSchemaFromConnectors(mockConnectors, true);
