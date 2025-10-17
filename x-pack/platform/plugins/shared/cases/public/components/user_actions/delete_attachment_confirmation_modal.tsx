@@ -5,20 +5,41 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { EuiConfirmModalProps } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import type { EuiConfirmModalProps, EuiFocusTrapProps } from '@elastic/eui';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { CANCEL_BUTTON } from './property_actions/translations';
 
-type Pros = Pick<EuiConfirmModalProps, 'title' | 'confirmButtonText' | 'onConfirm' | 'onCancel'>;
+type Props = Pick<
+  EuiConfirmModalProps,
+  'title' | 'confirmButtonText' | 'onConfirm' | 'onCancel'
+> & {
+  /**
+   * The ref of the button to focus when the modal is closed
+   */
+  focusButtonRef?: React.Ref<HTMLAnchorElement>;
+};
 
-const DeleteAttachmentConfirmationModalComponent: React.FC<Pros> = ({
+const DeleteAttachmentConfirmationModalComponent: React.FC<Props> = ({
   title,
   confirmButtonText,
   onConfirm,
   onCancel,
+  focusButtonRef,
 }) => {
   const modalTitleId = useGeneratedHtmlId();
+  const focusTrapProps: Pick<EuiFocusTrapProps, 'returnFocus'> = useMemo(
+    () => ({
+      returnFocus() {
+        if (focusButtonRef && 'current' in focusButtonRef && focusButtonRef.current) {
+          focusButtonRef.current.focus();
+          return false;
+        }
+        return true;
+      },
+    }),
+    [focusButtonRef]
+  );
 
   return (
     <EuiConfirmModal
@@ -34,6 +55,7 @@ const DeleteAttachmentConfirmationModalComponent: React.FC<Pros> = ({
       defaultFocusedButton="confirm"
       data-test-subj="property-actions-confirm-modal"
       aria-labelledby={modalTitleId}
+      focusTrapProps={focusTrapProps}
     />
   );
 };
