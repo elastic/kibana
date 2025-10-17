@@ -253,6 +253,8 @@ export default function ({ getService }: FtrProviderContext) {
         'global_artifact_management_all',
         'trusted_applications_all',
         'trusted_applications_read',
+        'trusted_devices_all',
+        'trusted_devices_read',
         'host_isolation_exceptions_all',
         'host_isolation_exceptions_read',
         'blocklist_all',

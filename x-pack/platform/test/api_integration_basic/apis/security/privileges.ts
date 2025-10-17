@@ -380,6 +380,8 @@ export default function ({ getService }: FtrProviderContext) {
               'file_operations_all',
               'execute_operations_all',
               'scan_operations_all',
+              'trusted_devices_all',
+              'trusted_devices_read',
               'workflow_insights_all',
               'workflow_insights_read',
             ],
