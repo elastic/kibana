@@ -101,24 +101,22 @@ For the Elastic Observability 9.2.0 release information, refer to [Elastic Obser
 For the Elastic Security 9.2.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Machine Learning**:
-* Set the default retention period for the Logs anomaly detection configurations to 120 days [#231080]({{kib-pull}}231080).
-* Redesigns file upload UX [#232923]({{kib-pull}}232923).
-* Adds an `AI` section into `Stack Management` [#227289]({{kib-pull}}227289).
+* Sets the default retention period for the logs anomaly detection configurations to 120 days [#231080]({{kib-pull}}231080).
+* Redesigns the file upload UX and adds the ability to upload multiple files and existing indices [#232923]({{kib-pull}}232923).
+* Adds an `AI` section to `Stack Management` for AI feature settings  [#227289]({{kib-pull}}227289).
 * AI Connector/Inference endpoints creation UI: Adds icon for Contextual AI [#236951]({{kib-pull}}236951).
 * Inference endpoints UI: Adds tech preview for rerank preconfig endpoint [#235222]({{kib-pull}}235222).
 * Adds a default placeholder icon for future AI connectors [#235166]({{kib-pull}}235166).
 * Inference endpoints UI: Adds tech preview for e5 preconfig endpoint [#234811]({{kib-pull}}234811).
-* Choose which AI Assistant to show in the Elastic Header & Move the `AI Assistant visibility` setting to `GenAI Settings` page [#233727]({{kib-pull}}233727).
-* Data Frame Analytics: Improves layout for custom URLs list [#232575]({{kib-pull}}232575).
+* Allows you to choose which AI Assistant to show on non-solution pages and moves  the **AI Assistant visibility** setting to new **GenAI Settings** management page [#233727]({{kib-pull}}233727).
+* Improves the layout for custom URLs list in the data frame analytics form [#232575]({{kib-pull}}232575).
 * AI Connector/Inference endpoints creation UI: Adds icon for AI21 labs and Llama Stack [#232098]({{kib-pull}}232098).
-* Adds new update_all endpoint for product docs management [#231884]({{kib-pull}}231884).
-* Anomaly Detection: Improves layout for custom URLs list [#231751]({{kib-pull}}231751).
-* Adds index searchable check to file upload [#231614]({{kib-pull}}231614).
+* Ensures ELSER and E5 product docs are appropriately updated [#231884]({{kib-pull}}231884).
+* Improves layout for custom URLs when creating a {{ml}} job [#231751]({{kib-pull}}231751).
+* Adds a check to validate whether your newly uploaded index is searchable [#231614]({{kib-pull}}231614).
 * Displays document count chart for ES|QL categorize queries [#231459]({{kib-pull}}231459).
 * UX enhancements for editing fields in the AI Connector flyout [#231037]({{kib-pull}}231037).
 * AI Connector: Adds ability to filter providers by solution type [#228116]({{kib-pull}}228116).
-* Updates threads_per_allocation values in VCU ranges for Serverless [#227940]({{kib-pull}}227940).
-* Inference endpoints UI serverless: Enables adaptive allocations and allow user to set max allocations [#222726]({{kib-pull}}222726).
 
 **Kibana platform and management**:
 * Data views managed by Elastic are now clearly identified in the UI. You can no longer edit them and instead have to duplicate them to apply any changes while preserving the original data view [#223451]({{kib-pull}}223451).
@@ -137,8 +135,8 @@ For the Elastic Security 9.2.0 release information, refer to [Elastic Security S
 ### Fixes [kibana-9.2.0-fixes]
 
 **Alerting**:
-* Fetch the tracked alerts without depending on the task state [#235253]({{kib-pull}}235253).
-* Fixes loading saved query's query in the rule definition [#229964]({{kib-pull}}229964).
+* Fetches the tracked alerts without depending on the task state [#235253]({{kib-pull}}235253).
+* Fixes a bug that prevented the query field from properly loading in the rule request if you used a saved query [#229964]({{kib-pull}}229964).
 
 **Dashboards and Visualizations**:
 * Null buckets and empty string values are now rendered in the UI as `(missing value)` and `(empty)` respectively. This is now aligned across charts and tables, including Discover and Lens charts [#233369]({{kib-pull}}233369).
@@ -165,9 +163,9 @@ For the Elastic Observability 9.2.0 release information, refer to [Elastic Obser
 For the Elastic Security 9.2.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Machine Learning**:
-* Adds unique accessible labels for Show top field values buttons [#237972]({{kib-pull}}237972).
+* Adds unique accessible labels for the **Show top field values** buttons on the **Log Rate Analysis** page [#237972]({{kib-pull}}237972).
 * Single Metric Viewer: fixes partition field settings errors in the dashboard panel [#237046]({{kib-pull}}237046).
-* Alerting: Escape URL-like string from being displayed as links [#226849]({{kib-pull}}226849).
+* Escapes URL-like string from being displayed as links in email clients [#226849]({{kib-pull}}226849).
 
 **Search**:
 * Fixes an accessibility issue where resetting changes or removing all terms in the Synonyms panel was not announced by screen readers. VoiceOver users on Safari will now hear updates when terms are reset [#237877]({{kib-pull}}237877).
