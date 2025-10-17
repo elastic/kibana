@@ -339,7 +339,7 @@ async function writeSummary(results: JestConfigResult[], log: ToolingLog, totalM
           if (slowTests.length > 0) {
             slowTestCount = slowTests.length.toString();
             // Get top 5 slowest tests for this config
-            topSlowTests = slowTests.sort((a, b) => b.duration - a.duration).slice(0, 5);
+            topSlowTests = slowTests.sort((a, b) => b.duration - a.duration);
           }
         }
       } catch (error) {
