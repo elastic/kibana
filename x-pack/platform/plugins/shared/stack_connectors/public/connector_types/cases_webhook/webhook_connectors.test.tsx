@@ -295,7 +295,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       expect(await screen.findByTestId('horizontalStep2-current')).toBeInTheDocument();
     });
 
-    it('includes dynamic __internal__.headers fields in step1 validation', async () => {
+    it('form submit works with valid headers', async () => {
       const customActionConnector = {
         ...actionConnector,
         secrets: {
@@ -308,6 +308,11 @@ describe('CasesWebhookActionConnectorFields renders', () => {
               key: 'configKey',
               value: 'configValue',
               type: 'config',
+            },
+            {
+              key: 'secretKey',
+              value: 'secretValue',
+              type: 'secret',
             },
           ],
         },
