@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { NotificationsStart } from '@kbn/core/public';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import type { ConfirmationConfig } from '../../common/functions/types';
 import type { ConversationCreateEvent, ConversationUpdateEvent } from '../../common';
 import {
   MessageRole,
@@ -21,7 +22,6 @@ import {
 import type { ObservabilityAIAssistantChatService, ObservabilityAIAssistantService } from '..';
 import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';
-import { ConfirmationConfig } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
 export enum ChatState {
   Ready = 'ready',
   Loading = 'loading',
@@ -138,49 +138,6 @@ function useChatWithoutContext({
     },
     [notifications.toasts]
   );
-  const confirmPendingFunction = useCallback(() => {
-    if (!pendingConfirmation) return;
-  
-    // Send as a function response message (with name field) containing only confirmation
-    // Server will look up the original function call arguments from conversation history
-    const confirmationMessage: Message = {
-      '@timestamp': new Date().toISOString(),
-      message: {
-        role: MessageRole.User,
-        name: pendingConfirmation.functionName,
-        content: JSON.stringify({
-          confirmed: true,
-        }),
-      },
-    };
-    
-    setPendingConfirmation(null);
-    
-    // Resume conversation with confirmation
-    next([...messages, confirmationMessage]);
-  }, [pendingConfirmation, messages]);
-  
-  const rejectPendingFunction = useCallback(() => {
-    if (!pendingConfirmation) return;
-  
-    // Send as a function response message (with name field) containing only rejection
-    // Server will handle the cancellation
-    const rejectionMessage: Message = {
-      '@timestamp': new Date().toISOString(),
-      message: {
-        role: MessageRole.User,
-        name: pendingConfirmation.functionName,
-        content: JSON.stringify({
-          confirmed: false,
-        }),
-      },
-    };
-  
-    setPendingConfirmation(null);
-    
-    // Resume conversation with rejection
-    next([...messages, rejectionMessage]);
-  }, [pendingConfirmation, messages]); 
 
   const next = useCallback(
     async (nextMessages: Message[], onError?: (error: any) => void) => {
@@ -321,6 +278,46 @@ function useChatWithoutContext({
       scopes,
     ]
   );
+
+  const confirmPendingFunction = useCallback(() => {
+    if (!pendingConfirmation) return;
+
+    const confirmationMessage: Message = {
+      '@timestamp': new Date().toISOString(),
+      message: {
+        role: MessageRole.User,
+        name: pendingConfirmation.functionName,
+        content: JSON.stringify({
+          confirmed: true,
+        }),
+      },
+    };
+
+    setPendingConfirmation(null);
+
+    // Resume conversation with confirmation
+    next([...messages, confirmationMessage]);
+  }, [pendingConfirmation, messages, next]);
+
+  const rejectPendingFunction = useCallback(() => {
+    if (!pendingConfirmation) return;
+
+    const rejectionMessage: Message = {
+      '@timestamp': new Date().toISOString(),
+      message: {
+        role: MessageRole.User,
+        name: pendingConfirmation.functionName,
+        content: JSON.stringify({
+          confirmed: false,
+        }),
+      },
+    };
+
+    setPendingConfirmation(null);
+
+    // Resume conversation with rejection
+    next([...messages, rejectionMessage]);
+  }, [pendingConfirmation, messages, next]);
 
   useEffect(() => {
     return () => {
