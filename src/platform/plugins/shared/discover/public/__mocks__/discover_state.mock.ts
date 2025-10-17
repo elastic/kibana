@@ -231,6 +231,12 @@ export function getDiscoverInternalStateMock({
   return toolkit;
 }
 
+/**
+ * @deprecated
+ * This util was from before we implemented Discover tabs,
+ * and is not well suited for tabs-first state tests.
+ * Prefer {@link getDiscoverInternalStateMock} for new tests.
+ */
 export function getDiscoverStateMock({
   isTimeBased = true,
   savedSearch,
