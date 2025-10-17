@@ -8,7 +8,7 @@
  */
 
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import type { CoreSetup, CoreStart } from '@kbn/core/server';
+import type { CoreStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame } from '@kbn/workflows';
@@ -52,7 +52,6 @@ export class StepExecutionRuntimeFactory {
       workflowLogger: IWorkflowEventLogger;
       esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
       fakeRequest?: KibanaRequest;
-      coreSetup?: CoreSetup; // For using Kibana's internal HTTP client
       coreStart?: CoreStart;
       cloudSetup?: CloudSetup; // For using Cloud services
     }
