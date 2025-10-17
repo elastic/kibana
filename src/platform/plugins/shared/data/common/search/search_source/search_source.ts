@@ -692,7 +692,8 @@ export class SearchSource {
           const dummyFilter = this.createProjectRoutingDummyFilter(val);
           if (dummyFilter) {
             // Add to filters array in the root
-            const existingFilters = typeof data.filters === 'function' ? data.filters() : data.filters || [];
+            const existingFilters =
+              typeof data.filters === 'function' ? data.filters() : data.filters || [];
             addToRoot('filters', existingFilters.concat(dummyFilter));
           }
         }
@@ -739,7 +740,9 @@ export class SearchSource {
    * @param config - The project routing configuration
    * @returns A filter that serves as a placeholder
    */
-  private createProjectRoutingDummyFilter(config: NonNullable<SearchSourceFields['projectRouting']>): Filter | null {
+  private createProjectRoutingDummyFilter(
+    config: NonNullable<SearchSourceFields['projectRouting']>
+  ): Filter | null {
     switch (config.type) {
       case 'origin':
         // For origin: no-op filter (doesn't affect results)
@@ -789,7 +792,9 @@ export class SearchSource {
    * @param config - The project routing configuration
    * @returns The Elasticsearch-compatible project_routing parameter value
    */
-  private serializeProjectRouting(config: NonNullable<SearchSourceFields['projectRouting']>): string {
+  private serializeProjectRouting(
+    config: NonNullable<SearchSourceFields['projectRouting']>
+  ): string {
     switch (config.type) {
       case 'origin':
         return '_alias:_origin';

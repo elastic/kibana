@@ -111,7 +111,7 @@ export const handleRequest = ({
 
     requestSearchSource.setField('projectRouting', projectRouting);
 
-    console.log('!!!!!JJJJ', requestSearchSource, 'P',projectRouting);
+    console.log('!!!!!JJJJ', requestSearchSource, 'P', projectRouting);
 
     return { allTimeFields, forceNow, requestSearchSource };
   }).pipe(

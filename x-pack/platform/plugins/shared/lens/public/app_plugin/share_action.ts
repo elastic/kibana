@@ -19,7 +19,12 @@ import { getEditPath } from '../../common/constants';
 export interface ShareableConfiguration
   extends Pick<
     LensAppState,
-    'activeDatasourceId' | 'datasourceStates' | 'visualization' | 'filters' | 'query' | 'projectRouting'
+    | 'activeDatasourceId'
+    | 'datasourceStates'
+    | 'visualization'
+    | 'filters'
+    | 'query'
+    | 'projectRouting'
   > {
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;

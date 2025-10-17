@@ -28,7 +28,7 @@ interface LensShareableState {
    */
   query?: Query | AggregateQuery;
 
-  //TODO: should this be shareable?
+  // TODO: should this be shareable?
   projectRouting?: ProjectRouting;
 
   /**
@@ -184,7 +184,8 @@ export class LensAppLocatorDefinition implements LocatorDefinition<LensAppLocato
   public readonly id = LENS_APP_LOCATOR;
 
   public readonly getLocation = async (params: LensAppLocatorParams) => {
-    const { filters, query, savedObjectId, resolvedDateRange, searchSessionId, projectRouting } = params;
+    const { filters, query, savedObjectId, resolvedDateRange, searchSessionId, projectRouting } =
+      params;
     const appState = getStateFromParams(params);
     const queryState: GlobalQueryStateFromUrl = {};
     const { isFilterPinned } = await import('@kbn/es-query');

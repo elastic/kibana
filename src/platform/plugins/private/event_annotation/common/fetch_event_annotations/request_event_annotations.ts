@@ -129,7 +129,7 @@ export const requestEventAnnotations = (
           timeFields,
           filters: ignoreGlobalFilters ? undefined : input?.filters,
           query: ignoreGlobalFilters ? undefined : (input?.query as any),
-          // TODO: should this consider ignoreGLobalFilters? 
+          // TODO: should this consider ignoreGLobalFilters?
           projectRouting: ignoreGlobalFilters ? undefined : input?.projectRouting,
           timeRange: input?.timeRange,
           abortSignal,
