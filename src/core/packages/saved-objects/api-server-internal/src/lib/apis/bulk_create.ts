@@ -131,7 +131,7 @@ export const performBulkCreate = async <T>(
     }
 
     const accessMode =
-      object.accessControl?.accessMode ?? options.accessControl?.accessMode ?? 'default'; // options.accessControl?.accessMode;
+      object.accessControl?.accessMode ?? options.accessControl?.accessMode ?? 'default';
 
     const accessControlToWrite = setAccessControl({
       typeSupportsAccessControl,
