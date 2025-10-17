@@ -110,7 +110,7 @@ export class ConfigRunner {
 
       this.proc?.finally(() => {
         if (!isResolved) {
-          this.options.log.info(`Process prematurely closed`);
+          this.options.log.info(`Process prematurely closed, exitCode ${this.proc!.exitCode}`);
         }
         complete();
       });
