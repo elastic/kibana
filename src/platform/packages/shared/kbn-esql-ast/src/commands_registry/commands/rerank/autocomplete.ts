@@ -196,7 +196,7 @@ async function handleOnExpression({
   insideFunction,
 }: {
   query: string;
-  command: ESQLCommand;
+  command: ESQLAstAllCommands;
   cursorPosition: number;
   callbacks: ICommandCallbacks;
   context: ICommandContext | undefined;

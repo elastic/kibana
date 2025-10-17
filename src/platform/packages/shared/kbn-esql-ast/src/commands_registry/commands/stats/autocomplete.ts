@@ -328,7 +328,7 @@ async function getExpressionSuggestions({
   openSuggestions,
 }: {
   query: string;
-  command: ESQLCommand;
+  command: ESQLAstAllCommands;
   cursorPosition: number;
   expressionRoot: ESQLSingleAstItem | undefined;
   lastArg?: ESQLAstItem;
@@ -459,7 +459,7 @@ function buildCustomFilteringContext(
 
 /** Finds the function at cursor position that should handle suggestions. */
 function findFunctionForSuggestions(
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   cursorPosition: number
 ): ESQLFunction | null {
   const { node } = findAstPosition([command], cursorPosition);

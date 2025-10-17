@@ -13,7 +13,7 @@ import type {
   ICommandContext,
   Location,
 } from '../../../../commands_registry/types';
-import type { ESQLAstAllCommands, ESQLCommand, ESQLSingleAstItem } from '../../../../types';
+import type { ESQLAstAllCommands, ESQLSingleAstItem } from '../../../../types';
 import type {
   FunctionDefinition,
   FunctionDefinitionTypes,
@@ -42,7 +42,7 @@ export interface ExpressionContext {
   expressionRoot?: ESQLSingleAstItem;
   position?: ExpressionPosition;
   location: Location;
-  command: ESQLCommand;
+  command: ESQLAstAllCommands;
   context?: ICommandContext;
   callbacks?: ICommandCallbacks;
   options: ExpressionContextOptions;
