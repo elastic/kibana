@@ -6,16 +6,7 @@
  */
 
 import React from 'react';
-import {
-  useEuiTheme,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiToolTip,
-} from '@elastic/eui';
+import { useEuiTheme, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiBadge } from '@elastic/eui';
 import type { Condition, FilterCondition } from '@kbn/streamlang';
 import {
   getFilterOperator,
@@ -29,10 +20,15 @@ import {
   operatorToHumanReadableNameMap,
 } from '@kbn/streamlang';
 import { css } from '@emotion/css';
-import { i18n } from '@kbn/i18n';
 import { ConditionEditor } from './condition_editor';
 
-export const ConditionPanel = ({ condition }: { condition: Condition }) => {
+export const ConditionPanel = ({
+  condition,
+  keywordWrapper,
+}: {
+  condition: Condition;
+  keywordWrapper?: (children: React.ReactNode) => React.ReactNode;
+}) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiPanel
@@ -42,7 +38,12 @@ export const ConditionPanel = ({ condition }: { condition: Condition }) => {
         border-radius: ${euiTheme.size.s};
       `}
     >
-      <ConditionDisplay condition={condition} showKeyword={true} keyword="WHERE" />
+      <ConditionDisplay
+        condition={condition}
+        showKeyword={true}
+        keyword="WHERE"
+        keywordWrapper={keywordWrapper}
+      />
     </EuiPanel>
   );
 };
@@ -67,41 +68,18 @@ interface ConditionDisplayProps {
   condition: Condition;
   showKeyword?: boolean;
   keyword?: string;
-  onTitleClick?: () => void;
+  keywordWrapper?: (children: React.ReactNode) => React.ReactNode;
 }
 
 export const ConditionDisplay = ({
   condition,
   showKeyword = false,
   keyword = 'WHERE',
-  onTitleClick = () => {},
+  keywordWrapper = (children: React.ReactNode) => children,
 }: ConditionDisplayProps) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
-      {showKeyword && (
-        <EuiToolTip
-          position="top"
-          content={
-            <p>
-              {i18n.translate('xpack.streams.actionBlockListItem.tooltip.editConditionLabel', {
-                defaultMessage: 'Edit condition',
-              })}
-            </p>
-          }
-        >
-          <EuiButtonEmpty
-            onClick={onTitleClick}
-            color="text"
-            size="xs"
-            aria-label={i18n.translate('xpack.streams.conditionDisplay.editConditionLabel', {
-              defaultMessage: 'Edit condition',
-            })}
-            data-test-subj="streamsAppConditionTitleEditButton"
-          >
-            <OperatorText operator={keyword} bold />
-          </EuiButtonEmpty>
-        </EuiToolTip>
-      )}
+      {showKeyword && keywordWrapper(<OperatorText operator={keyword} bold />)}
       <RecursiveConditionDisplay condition={condition} />
     </EuiFlexGroup>
   );
