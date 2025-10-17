@@ -9,7 +9,6 @@
 
 import type {
   CoreSetup,
-  CoreStart,
   Logger,
   Plugin,
   PluginInitializerContext,
