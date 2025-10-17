@@ -8,10 +8,11 @@
  */
 
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import type { CoreStart } from '@kbn/core/server';
+import type { CoreSetup, CoreStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame } from '@kbn/workflows';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { buildStepExecutionId } from '../utils';
 import { StepExecutionRuntime } from './step_execution_runtime';
 import type { WorkflowExecutionState } from './workflow_execution_state';
@@ -51,7 +52,9 @@ export class StepExecutionRuntimeFactory {
       workflowLogger: IWorkflowEventLogger;
       esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
       fakeRequest?: KibanaRequest;
-      coreStart?: CoreStart; // For using Kibana's internal HTTP client
+      coreSetup?: CoreSetup; // For using Kibana's internal HTTP client
+      coreStart?: CoreStart;
+      cloudSetup?: CloudSetup; // For using Cloud services
     }
   ) {}
 
@@ -80,6 +83,7 @@ export class StepExecutionRuntimeFactory {
       esClient: this.params.esClient,
       fakeRequest: this.params.fakeRequest,
       coreStart: this.params.coreStart,
+      cloudSetup: this.params.cloudSetup,
     });
     return new StepExecutionRuntime({
       stepExecutionId,

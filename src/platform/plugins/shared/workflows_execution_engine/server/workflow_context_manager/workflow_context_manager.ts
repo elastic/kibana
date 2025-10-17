@@ -11,6 +11,7 @@ import type { StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest, CoreStart } from '@kbn/core/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { RunStepResult } from '../step/node_implementation';
 import { buildStepExecutionId } from '../utils';
@@ -26,6 +27,7 @@ export interface ContextManagerInit {
   esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
   fakeRequest?: KibanaRequest;
   coreStart?: CoreStart; // For using Kibana's internal HTTP client
+  cloudSetup?: CloudSetup;
 }
 
 export class WorkflowContextManager {
@@ -34,6 +36,7 @@ export class WorkflowContextManager {
   private esClient: ElasticsearchClient;
   private fakeRequest?: KibanaRequest;
   private coreStart?: CoreStart;
+  private cloudSetup?: CloudSetup;
 
   private stackFrames: StackFrame[];
   public readonly node: GraphNodeUnion;
@@ -48,6 +51,7 @@ export class WorkflowContextManager {
     this.esClient = init.esClient;
     this.fakeRequest = init.fakeRequest;
     this.coreStart = init.coreStart;
+    this.cloudSetup = init.cloudSetup;
     this.node = init.node;
     this.stackFrames = init.stackFrames;
   }
@@ -126,6 +130,13 @@ export class WorkflowContextManager {
    */
   public getCoreStart(): CoreStart | undefined {
     return this.coreStart;
+  }
+
+  /**
+   * Get CloudSetup for accessing Cloud services
+   */
+  public getCloudSetup(): CloudSetup | undefined {
+    return this.cloudSetup;
   }
 
   private buildWorkflowContext(): WorkflowContext {
