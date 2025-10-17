@@ -266,9 +266,11 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     const response = await this.request(params, connectorUsageCollector);
     // keeping the response the same as claude 2 for our APIs
     // adding the usage object for better token tracking
+    const thinking = parseThinking(response.data.content);
+
     return {
       completion: parseContent(response.data.content),
-      thinking: parseThinking(response.data.content),
+      ...(thinking ? { thinking } : {}),
       stop_reason: response.data.stop_reason,
       usage: response.data.usage,
     };

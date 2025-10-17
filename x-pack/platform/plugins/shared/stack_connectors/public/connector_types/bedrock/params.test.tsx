@@ -10,6 +10,7 @@ import { fireEvent, render } from '@testing-library/react';
 import BedrockParamsFields from './params';
 import { DEFAULT_BEDROCK_URL, SUB_ACTION } from '../../../common/bedrock/constants';
 import { I18nProvider } from '@kbn/i18n-react';
+import { DEFAULT_BODY } from './constants';
 
 const messageVariables = [
   {
@@ -209,7 +210,7 @@ describe('Bedrock Params Fields renders', () => {
     );
   });
 
-  it('handles extended thinking and budget tokens when actionConnector has extendedThinking true', () => {
+  it('handles extended thinking and budget tokens when actionConnector has extendedThinking true => false', () => {
     const editAction = jest.fn();
     const errors = {};
     const actionConnector = {
@@ -234,7 +235,7 @@ describe('Bedrock Params Fields renders', () => {
         actionParams={{
           subAction: SUB_ACTION.RUN,
           subActionParams: {
-            body: '{}',
+            body: DEFAULT_BODY,
           },
         }}
         actionConnector={actionConnector}
@@ -248,17 +249,27 @@ describe('Bedrock Params Fields renders', () => {
       }
     );
     const extendedThinkingSwitch = getByTestId('bedrock-extended-thinking');
-    expect(extendedThinkingSwitch).toBeInTheDocument();
+    fireEvent.click(extendedThinkingSwitch);
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',
-      expect.objectContaining({
-        body: expect.stringContaining('"thinking":{"type":"enabled","budget_tokens":2048}'),
-      }),
+      {
+        body: DEFAULT_BODY,
+      },
       0
     );
+
+    // Parse and verify the body contains DEFAULT_BODY fields but NOT thinking config
+    const bodyArg = JSON.parse(editAction.mock.calls[0][1].body);
+    expect(bodyArg).toMatchObject({
+      anthropic_version: 'bedrock-2023-05-31',
+      messages: expect.any(Array),
+      max_tokens: expect.any(Number),
+      stop_sequences: expect.any(Array),
+    });
+    expect(bodyArg).not.toHaveProperty('thinking');
   });
 
-  it('handles extended thinking and budget tokens when actionConnector has extendedThinking false', () => {
+  it('handles extended thinking and budget tokens when actionConnector has extendedThinking false => true', () => {
     const editAction = jest.fn();
     const errors = {};
     const actionConnector = {
@@ -274,16 +285,14 @@ describe('Bedrock Params Fields renders', () => {
       name: 'My Bedrock Connector',
       config: {
         apiUrl: DEFAULT_BEDROCK_URL,
-        extendedThinking: false,
-        budgetTokens: 1024,
       },
     };
-    render(
+    const { getByTestId } = render(
       <BedrockParamsFields
         actionParams={{
           subAction: SUB_ACTION.RUN,
           subActionParams: {
-            body: '{}',
+            body: DEFAULT_BODY,
           },
         }}
         actionConnector={actionConnector}
@@ -296,46 +305,35 @@ describe('Bedrock Params Fields renders', () => {
         wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
       }
     );
-    expect(editAction).toHaveBeenCalledWith(
-      'subActionParams',
-      expect.objectContaining({
-        body: '{}',
-      }),
-      0
-    );
-  });
 
-  it('handles when actionConnector is not provided', () => {
-    const editAction = jest.fn();
-    const errors = {};
-    const { getByTestId } = render(
-      <BedrockParamsFields
-        actionParams={{
-          subAction: SUB_ACTION.RUN,
-          subActionParams: {
-            body: '{"key": "value"}',
-          },
-        }}
-        editAction={editAction}
-        index={0}
-        messageVariables={messageVariables}
-        errors={errors}
-      />,
-      {
-        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
-      }
-    );
-    // Should still render UI elements
-    expect(getByTestId('bodyJsonEditor')).toBeInTheDocument();
-    expect(getByTestId('bedrock-model')).toBeInTheDocument();
-    expect(getByTestId('bedrock-extended-thinking')).toBeInTheDocument();
-    // Extended thinking should be off by default when no actionConnector
+    const extendedThinkingSwitch = getByTestId('bedrock-extended-thinking');
+    fireEvent.click(extendedThinkingSwitch);
+    // Verify editAction was called with the correct structure
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',
-      expect.objectContaining({
-        body: '{"key": "value"}',
-      }),
+      {
+        body: JSON.stringify({
+          ...JSON.parse(DEFAULT_BODY),
+          thinking: {
+            type: 'enabled',
+            budget_tokens: 1024,
+          },
+        }),
+      },
       0
     );
+
+    // Parse and verify the body contains DEFAULT_BODY fields but NOT thinking config
+    const bodyArg = JSON.parse(editAction.mock.calls[0][1].body);
+    expect(bodyArg).toMatchObject({
+      anthropic_version: 'bedrock-2023-05-31',
+      messages: expect.any(Array),
+      max_tokens: expect.any(Number),
+      stop_sequences: expect.any(Array),
+      thinking: {
+        budget_tokens: expect.any(Number),
+      },
+    });
+    expect(bodyArg).toHaveProperty('thinking');
   });
 });

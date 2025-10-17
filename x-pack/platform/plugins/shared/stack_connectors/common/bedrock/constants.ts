@@ -28,12 +28,14 @@ export enum SUB_ACTION {
 
 export const DEFAULT_TIMEOUT_MS = 200000;
 export const DEFAULT_TOKEN_LIMIT = 8191;
-export const DEFAULT_BEDROCK_MODEL = 'us.anthropic.claude-3-7-sonnet-20250219-v1:0';
+export const DEFAULT_BEDROCK_MODEL = 'us.anthropic.claude-sonnet-4-5-20250929-v1:0';
 
 export const DEFAULT_BEDROCK_URL = `https://bedrock-runtime.us-east-1.amazonaws.com` as const;
 
 // Extended thinking supported models
 export const EXTENDED_THINKING_SUPPORTED_MODELS = [
+  'anthropic.claude-sonnet-4-5-20250929-v1:0',
+  'anthropic.claude-haiku-4-5-20251001-v1:0',
   'anthropic.claude-opus-4-20250514-v1:0',
   'anthropic.claude-sonnet-4-20250514-v1:0',
   'anthropic.claude-3-7-sonnet-20250219-v1:0',

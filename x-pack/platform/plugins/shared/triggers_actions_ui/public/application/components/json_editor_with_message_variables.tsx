@@ -108,6 +108,10 @@ export const JsonEditorWithMessageVariables = forwardRef<JsonEditorWithMessageVa
     }, [inputTargetValue]);
 
     const onSelectMessageVariable = (variable: ActionVariable) => {
+      if (readOnly) {
+        return;
+      }
+
       const editor = editorRef.current;
       if (!editor) {
         setShowErrorMessage(true);
@@ -218,7 +222,7 @@ export const JsonEditorWithMessageVariables = forwardRef<JsonEditorWithMessageVa
             value={xJson}
             width="100%"
             height="200px"
-            data-test-subj={`${paramsProperty}JsonEditor`}
+            data-test-subj={`${paramsProperty}JsonEditor${readOnly ? 'ReadOnly' : ''}`}
             aria-label={ariaLabel}
             {...euiCodeEditorProps}
             editorDidMount={onEditorMount}

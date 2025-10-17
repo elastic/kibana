@@ -136,7 +136,7 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
         });
       } else {
         // Clear budget tokens when disabling extended thinking
-        const { thinking, ...bodyWithoutThinking } = JSON.parse(body as string);
+        const { thinking, ...bodyWithoutThinking } = JSON.parse(body || (DEFAULT_BODY as string));
         handleBodyChange(bodyWithoutThinking);
       }
       setExtendedThinking(checked);
