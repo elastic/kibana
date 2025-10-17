@@ -8,7 +8,7 @@
 import { isEqual, noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, ProjectRouting, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useStore } from 'react-redux';
 import type { TopNavMenuData, TopNavMenuProps } from '@kbn/navigation-plugin/public';
@@ -352,6 +352,7 @@ export const LensTopNavMenu = ({
     visualization,
     filters,
     dataViews,
+    projectRouting,
   } = useLensSelector((state) => state.lens);
 
   const dispatch = useLensDispatch();
@@ -950,8 +951,6 @@ export const LensTopNavMenu = ({
     Required<TopNavMenuProps<AggregateQuery>>['onSavedQueryUpdated']
   >(
     (newSavedQuery) => {
-      // TODO: on change project routing picker behavior
-
       // If the user tries to load the same saved query that is already loaded,
       // we will receive the same object reference which was previously frozen
       // by Redux Toolkit. `filterManager.setFilters` will then try to modify
@@ -966,6 +965,20 @@ export const LensTopNavMenu = ({
       }); // Shallow query for reference issues
     },
     [data.query.filterManager, dispatchSetState]
+  );
+
+  const onProjectRoutingChangeWrapped = useCallback(
+    (newProjectRouting: ProjectRouting) => {
+      if (!isEqual(newProjectRouting, projectRouting)) {
+        dispatchSetState({ projectRouting: newProjectRouting });
+        // Start a new search session when project routing changes
+        dispatchSetState({
+          searchSessionId: data.search.session.start(),
+          resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+        });
+      }
+    },
+    [projectRouting, dispatchSetState, data.search.session, data.query.timefilter.timefilter]
   );
 
   const onClearSavedQueryWrapped = useCallback(() => {
@@ -1177,6 +1190,8 @@ export const LensTopNavMenu = ({
       onClearSavedQuery={onClearSavedQueryWrapped}
       indexPatterns={indexPatterns}
       query={query}
+      projectRouting={projectRouting}
+      onProjectRoutingChange={onProjectRoutingChangeWrapped}
       dateRangeFrom={from}
       dateRangeTo={to}
       indicateNoData={indicateNoData}
