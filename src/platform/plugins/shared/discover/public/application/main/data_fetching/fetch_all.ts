@@ -169,8 +169,7 @@ export function fetchAll(
         /**
          * Determine the appropriate fetch status
          *
-         * The partial state for ES|QL mode is necessary to prevent frequent state changes
-         * that cause the data table to re-render too often.
+         * The partial state for ES|QL mode is necessary to limit data table renders.
          * Depending on the type of query new columns can be added to AppState to ensure the data table
          * shows the updated columns. The partial state was introduced to prevent
          * too frequent state changes that cause the table to re-render too often, which can cause
