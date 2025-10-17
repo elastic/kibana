@@ -7,4 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from '@kbn/data-views-plugin/public/mocks';
+export { suggestForExpression } from './suggestion_engine';
+export { getPosition as getExpressionPosition, type ExpressionPosition } from './position';
+export { buildExpressionFunctionParameterContext } from './utils';
