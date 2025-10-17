@@ -8,8 +8,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { Streams } from '@kbn/streams-schema';
+import { I18nProvider } from '@kbn/i18n-react';
 import { StorageSizeCard } from './storage_size_card';
 import type { DataStreamStats } from '../../hooks/use_data_stream_stats';
+
+const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('StorageSizeCard', () => {
   const createMockDefinition = (
@@ -35,9 +38,9 @@ describe('StorageSizeCard', () => {
         totalDocs: 500,
       });
 
-      render(<StorageSizeCard definition={definition} stats={stats} />);
+      renderWithI18n(<StorageSizeCard definition={definition} stats={stats} />);
 
-      expect(screen.getByText(/Storage size/i)).toBeInTheDocument();
+      expect(screen.getByTestId('storageSize-title')).toBeInTheDocument();
       expect(screen.getByTestId('storageSize-metric')).toHaveTextContent(/2\.0\s?MB/);
       expect(screen.getByTestId('storageSize-metric-subtitle')).toHaveTextContent('500 documents');
     });
@@ -46,7 +49,7 @@ describe('StorageSizeCard', () => {
       const stats = createMockStats();
       const error = new Error('Failed to fetch stats');
 
-      render(<StorageSizeCard definition={definition} stats={stats} statsError={error} />);
+      renderWithI18n(<StorageSizeCard definition={definition} stats={stats} statsError={error} />);
 
       expect(screen.getByTestId('storageSize-metric')).toHaveTextContent('-');
     });
@@ -57,7 +60,7 @@ describe('StorageSizeCard', () => {
         totalDocs: 0,
       });
 
-      render(<StorageSizeCard definition={definition} stats={stats} />);
+      renderWithI18n(<StorageSizeCard definition={definition} stats={stats} />);
       expect(screen.getByTestId('storageSize-metric')).toHaveTextContent('-');
       expect(screen.getByTestId('storageSize-metric-subtitle')).toHaveTextContent('- documents');
     });
@@ -68,18 +71,17 @@ describe('StorageSizeCard', () => {
       const definition = createMockDefinition({ monitor: false });
       const stats = createMockStats();
 
-      render(<StorageSizeCard definition={definition} stats={stats} />);
+      renderWithI18n(<StorageSizeCard definition={definition} stats={stats} />);
 
-      const warningButtons = screen.getAllByRole('button', {
-        name: /don't have sufficient privileges/i,
-      });
-      expect(warningButtons.length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByTestId('storageSize-metric')).toBeInTheDocument();
+      // Should show warning icons when lacking privileges
+      expect(screen.getByTestId('streamsInsufficientPrivileges-storageSize')).toBeInTheDocument();
     });
     it('falls back to dash for document count when totalDocs missing', () => {
       const definition = createMockDefinition();
       const stats = createMockStats({ totalDocs: undefined as any });
 
-      render(<StorageSizeCard definition={definition} stats={stats} />);
+      renderWithI18n(<StorageSizeCard definition={definition} stats={stats} />);
 
       expect(screen.getByTestId('storageSize-metric')).toHaveTextContent(/1\.0\s?MB/);
       expect(screen.getByTestId('storageSize-metric-subtitle')).toHaveTextContent('- documents');

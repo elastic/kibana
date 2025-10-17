@@ -10,39 +10,64 @@ import { render, screen } from '@testing-library/react';
 import type { Streams } from '@kbn/streams-schema';
 import { I18nProvider } from '@kbn/i18n-react';
 import { IngestionCard } from './ingestion_card';
-import type { DataStreamStats } from '../../hooks/use_data_stream_stats';
+import type { EnhancedDataStreamStats } from '../../hooks/use_data_stream_stats';
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('IngestionCard', () => {
   const createMockDefinition = (
-    privileges: any = { monitor: true }
+    privileges: { monitor: boolean } = { monitor: true }
   ): Streams.ingest.all.GetResponse =>
     ({
-      privileges,
+      stream: {
+        name: 'test-stream',
+        description: 'test-stream',
+        ingest: {
+          lifecycle: { dsl: {} },
+          processing: { steps: [] },
+          settings: {},
+          wired: { fields: {}, routing: [] },
+        },
+      },
+      privileges: {
+        manage: true,
+        monitor: privileges.monitor,
+        lifecycle: true,
+        simulate: true,
+        text_structure: true,
+        read_failure_store: true,
+        manage_failure_store: true,
+      },
+      dashboards: [],
+      rules: [],
+      queries: [],
     } as any);
 
-  const createMockStats = (overrides: Partial<DataStreamStats> = {}): DataStreamStats => ({
+  const createMockStats = (
+    overrides: Partial<EnhancedDataStreamStats> = {}
+  ): EnhancedDataStreamStats => ({
+    // Base DataStreamStats properties
     name: 'test-stream',
     userPrivileges: {
       canMonitor: true,
       canReadFailureStore: true,
       canManageFailureStore: true,
     },
-    size: '1MB',
-    sizeBytes: 1000000,
     totalDocs: 1000,
+    sizeBytes: 1000000,
+    // creationDate in DataStreamStats appears to be a timestamp number; use epoch ms
+    creationDate: 1672531200000,
+    // CalculatedStats properties
     bytesPerDoc: 1000,
-    bytesPerDay: 50000, // 50KB per day
+    bytesPerDay: 50000,
+    size: '1.0 MB',
     ...overrides,
   });
 
   describe('Core behavior with monitor privileges', () => {
     it('renders daily and monthly ingestion averages', () => {
       const definition = createMockDefinition();
-      const stats = createMockStats({
-        bytesPerDay: 1048576, // 1MB per day
-      });
+      const stats = createMockStats({ bytesPerDay: 1048576 }); // 1MB per day
 
       renderWithI18n(<IngestionCard definition={definition} stats={stats} />);
 
@@ -70,9 +95,7 @@ describe('IngestionCard', () => {
 
     it('formats large ingestion rates (GB scale)', () => {
       const definition = createMockDefinition();
-      const stats = createMockStats({
-        bytesPerDay: 1073741824, // 1GB per day
-      });
+      const stats = createMockStats({ bytesPerDay: 1073741824 }); // 1GB per day
 
       renderWithI18n(<IngestionCard definition={definition} stats={stats} />);
 
@@ -101,20 +124,20 @@ describe('IngestionCard', () => {
 
       renderWithI18n(<IngestionCard definition={definition} stats={stats} />);
 
-      // Check for warning icon buttons (streamsInsufficientPrivileges prefix)
-      const warningButtons = screen.getAllByRole('button', {
-        name: /don't have sufficient privileges/i,
-      });
-      expect(warningButtons.length).toBeGreaterThanOrEqual(1);
+      // Should show warning icons when lacking privileges
+      expect(
+        screen.getByTestId('streamsInsufficientPrivileges-ingestionDaily')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId('streamsInsufficientPrivileges-ingestionMonthly')
+      ).toBeInTheDocument();
     });
   });
 
   describe('Monthly calculation', () => {
     it('calculates monthly average (daily * ~30)', () => {
       const definition = createMockDefinition();
-      const stats = createMockStats({
-        bytesPerDay: 2097152, // 2MB per day
-      });
+      const stats = createMockStats({ bytesPerDay: 2097152 }); // 2MB per day
 
       renderWithI18n(<IngestionCard definition={definition} stats={stats} />);
 
@@ -124,9 +147,7 @@ describe('IngestionCard', () => {
 
     it('formats very small daily rates (KB)', () => {
       const definition = createMockDefinition();
-      const stats = createMockStats({
-        bytesPerDay: 1024, // 1KB per day
-      });
+      const stats = createMockStats({ bytesPerDay: 1024 }); // 1KB per day
 
       renderWithI18n(<IngestionCard definition={definition} stats={stats} />);
 
@@ -142,11 +163,13 @@ describe('IngestionCard', () => {
 
       renderWithI18n(<IngestionCard definition={definition} stats={stats} />);
 
-      // Should not show warning icons when privileges are undefined (defaults to true)
-      const warningButtons = screen.queryAllByRole('button', {
-        name: /don't have sufficient privileges/i,
-      });
-      expect(warningButtons.length).toBe(0);
+      // There should be no warning icon when user has privileges
+      expect(
+        screen.queryByTestId('streamsInsufficientPrivileges-ingestionDaily')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('streamsInsufficientPrivileges-ingestionMonthly')
+      ).not.toBeInTheDocument();
     });
   });
 });

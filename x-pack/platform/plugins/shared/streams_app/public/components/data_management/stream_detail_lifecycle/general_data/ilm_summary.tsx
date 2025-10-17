@@ -88,7 +88,9 @@ export function IlmSummary({
               </h5>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{loading && <EuiLoadingSpinner size="s" />}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {loading && <EuiLoadingSpinner size="s" data-test-subj="ilmSummary-loading" />}
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
 

@@ -55,7 +55,7 @@ describe('IlmSummary', () => {
       render(<IlmSummary definition={definition} />);
 
       expect(screen.getByTestId('ilmSummary-title')).toBeInTheDocument();
-      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+      expect(screen.getByTestId('ilmSummary-loading')).toBeInTheDocument();
     });
   });
 
