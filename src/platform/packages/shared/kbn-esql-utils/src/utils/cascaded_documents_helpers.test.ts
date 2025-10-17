@@ -174,7 +174,8 @@ describe('cascaded documents helpers utils', () => {
             nodePathMap,
           });
 
-          expect(cascadeQuery.esql).toMatchInlineSnapshot(
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toMatchInlineSnapshot(
             `"FROM kibana_sample_data_logs | WHERE clientip == \\"192.168.1.1\\""`
           );
         });
@@ -220,7 +221,8 @@ describe('cascaded documents helpers utils', () => {
             nodePathMap,
           });
 
-          expect(cascadeQuery.esql).toMatchInlineSnapshot(
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toMatchInlineSnapshot(
             `"FROM kibana_sample_data_logs | WHERE \`url.keyword\` == \\"https://www.elastic.co/downloads/beats/metricbeat\\""`
           );
         });
@@ -247,7 +249,8 @@ describe('cascaded documents helpers utils', () => {
             nodePathMap,
           });
 
-          expect(cascadeQuery.esql).toMatchInlineSnapshot(
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toMatchInlineSnapshot(
             `"FROM kibana_sample_data_logs | WHERE MATCH(message, \\"some random pattern\\", {\\"auto_generate_synonyms_phrase_query\\": FALSE, \\"fuzziness\\": 0, \\"operator\\": \\"AND\\"})"`
           );
         });
@@ -274,7 +277,8 @@ describe('cascaded documents helpers utils', () => {
             nodePathMap,
           });
 
-          expect(cascadeQuery.esql).toMatchInlineSnapshot(
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toMatchInlineSnapshot(
             `"FROM kibana_sample_data_logs | WHERE MATCH(message, \\"some random pattern\\", {\\"auto_generate_synonyms_phrase_query\\": FALSE, \\"fuzziness\\": 0, \\"operator\\": \\"AND\\"})"`
           );
         });

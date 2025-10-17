@@ -55,13 +55,17 @@ export interface ESQLStatsQueryMeta {
 }
 
 function getStatsCommandToOperateOn(esqlQuery: EsqlQuery): StatsCommandSummary | null {
-  let summarizedStatsCommand: StatsCommandSummary | null = null;
+  if (esqlQuery.errors.length) {
+    return null;
+  }
 
   const statsCommands = Array.from(mutate.commands.stats.list(esqlQuery.ast));
 
   if (statsCommands.length === 0) {
-    return summarizedStatsCommand;
+    return null;
   }
+
+  let summarizedStatsCommand: StatsCommandSummary | null = null;
 
   // accounting for the possibility of multiple stats commands in the query,
   // we always want to operate on the last stats command that has valid grouping options
@@ -221,18 +225,17 @@ export const constructCascadeQuery = ({
   nodeType,
   nodePath,
   nodePathMap,
-}: // @ts-expect-error -- temporary stop gap to fix deployment
-CascadeQueryArgs): AggregateQuery => {
+}: CascadeQueryArgs): AggregateQuery | undefined => {
   const EditorESQLQuery = EsqlQuery.fromSrc(query.esql);
+
+  if (EditorESQLQuery.errors.length) {
+    throw new Error('Query is malformed');
+  }
 
   const dataSourceCommand = mutate.generic.commands.find(
     EditorESQLQuery.ast,
-    (cmd) => cmd.name === 'from'
-  ) as ESQLCommand<'from'> | undefined;
-
-  const queryRuntimeFields = Array.from(mutate.commands.stats.summarize(EditorESQLQuery)).map(
-    (command) => command.newFields
-  );
+    (cmd) => cmd.name === 'from' || cmd.name === 'ts'
+  ) as ESQLCommand<'from' | 'ts'> | undefined;
 
   if (!dataSourceCommand) {
     throw new Error('Query does not have a data source');
@@ -243,6 +246,10 @@ CascadeQueryArgs): AggregateQuery => {
   if (!summarizedStatsCommand) {
     throw new Error('Query does not have a valid stats command with grouping options');
   }
+
+  const queryRuntimeFields = Array.from(mutate.commands.stats.summarize(EditorESQLQuery)).map(
+    (command) => command.newFields
+  );
 
   if (nodeType === 'leaf') {
     const pathSegment = nodePath[nodePath.length - 1];
@@ -293,13 +300,13 @@ CascadeQueryArgs): AggregateQuery => {
  * helps us with fetching leaf node data for stats operation in the data cascade experience.
  */
 function handleStatsByColumnLeafOperation(
-  dataSourceCommand: ESQLCommand<'from'>,
+  dataSourceCommand: ESQLCommand<'from' | 'ts'>,
   columnInterpolationRecord: Record<string, string>
-) {
+): AggregateQuery {
   // create new query which we will modify to contain the valid query for the cascade experience
   const cascadeOperationQuery = EsqlQuery.fromSrc('');
 
-  // append data source to to new query
+  // set data source for the new query
   mutate.generic.commands.append(cascadeOperationQuery.ast, dataSourceCommand);
 
   const newCommands = Object.entries(columnInterpolationRecord).map(([key, value]) => {
@@ -329,14 +336,14 @@ function handleStatsByColumnLeafOperation(
  * Handles the stats command for a leaf operation that contains a categorize function by modifying the query and adding necessary commands.
  */
 function handleStatsByCategorizeLeafOperation(
-  dataSourceCommand: ESQLCommand<'from'>,
+  dataSourceCommand: ESQLCommand<'from' | 'ts'>,
   categorizeCommand: StatsFieldSummary,
   nodePathMap: Record<string, string>
-) {
+): AggregateQuery {
   // create new query which we will modify to contain the valid query for the cascade experience
   const cascadeOperationQuery = EsqlQuery.fromSrc('');
 
-  // append data source to to new query
+  // set data source for the new query
   mutate.generic.commands.append(cascadeOperationQuery.ast, dataSourceCommand);
 
   // build a where command with match expressions for the selected categorize function
