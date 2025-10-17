@@ -122,5 +122,11 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
       margin-right: -4px;
       line-height: 25px; // 21px + 4px for padding
     }
+
+    .monaco-scrollable-element > .scrollbar > .slider {
+      width: calc(${euiTheme.size.s} * 0.75) !important;
+      border-radius: ${euiTheme.border.radius.medium} !important;
+      margin-right: 2px;
+    }
   `;
 };
