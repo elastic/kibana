@@ -193,7 +193,7 @@ export const NotificationsList: FC = () => {
         render: (value: string) => {
           return <EuiBadge color={'hollow'}>{value}</EuiBadge>;
         },
-        width: '20%',
+        width: '14%',
       },
       {
         field: 'job_id',
@@ -203,7 +203,7 @@ export const NotificationsList: FC = () => {
         sortable: true,
         truncateText: true,
         'data-test-subj': 'mlNotificationEntity',
-        width: '16%',
+        width: '22%',
       },
       {
         field: 'message',
