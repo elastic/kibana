@@ -580,7 +580,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         useSpaceAwareness &&
         agentPolicy &&
         agentPolicy.space_ids &&
-        agentPolicy.space_ids.length > 1
+        (agentPolicy.space_ids.length > 1 || agentPolicy.space_ids.includes(ALL_SPACES_ID))
       ) {
         await updatePackagePolicySpaces({
           packagePolicyId: newSo.id,
@@ -799,7 +799,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           continue;
         }
         const agentPolicy = agentPoliciesIndexById[newSo.attributes.policy_ids[0]];
-        if (agentPolicy && agentPolicy.space_ids && agentPolicy.space_ids.length > 1) {
+        if (
+          agentPolicy &&
+          agentPolicy.space_ids &&
+          (agentPolicy.space_ids.length > 1 || agentPolicy.space_ids.includes(ALL_SPACES_ID))
+        ) {
           await updatePackagePolicySpaces({
             packagePolicyId: newSo.id,
             currentSpaceId: soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
