@@ -5725,6 +5725,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cps@link:src/platform/plugins/shared/cps":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cross-cluster-replication-plugin@link:x-pack/platform/plugins/private/cross_cluster_replication":
   version "0.0.0"
   uid ""
@@ -27033,11 +27037,6 @@ p-timeout@^3.2.0:
   dependencies:
     p-finally "^1.0.0"
 
-p-timeout@^6.1.4:
-  version "6.1.4"
-  resolved "https://registry.yarnpkg.com/p-timeout/-/p-timeout-6.1.4.tgz#418e1f4dd833fa96a2e3f532547dd2abdb08dbc2"
-  integrity sha512-MyIV3ZA/PmyBN/ud8vV9XzwTrNtR4jFrObymZYnZqMmW0zA8Z17vnT0rBgFE/TlohB+YCHqXMgZzb3Csp49vqg==
-
 p-try@^2.0.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/p-try/-/p-try-2.2.0.tgz#cb2868540e313d61de58fafbe35ce9004d5540e6"
@@ -30092,15 +30091,15 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.35.0:
-  version "4.35.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.35.0.tgz#2f769b8e0ca62817e275656a1eda5e6ea1ec4f66"
-  integrity sha512-Baaeiuyu7BIIsSYf0SI7Mi55gsNmdI00KM0Hcofw1RnAY+0QEVpdh5yAxueDxgTZS8vcbGZFU0NJ6Qc1riIrLg==
+selenium-webdriver@^4.36.0:
+  version "4.36.0"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.36.0.tgz#71d12429d61ca56dc09e5f1895af422bc4986e9f"
+  integrity sha512-rZGqjXiqNVL6QNqKNEk5DPaIMPbvApcmAS9QsXyt5wT3sfTSHGCh4AX/YKeDTOwei1BOZDlPOKBd82WCosUt9w==
   dependencies:
     "@bazel/runfiles" "^6.3.1"
     jszip "^3.10.1"
-    tmp "^0.2.3"
-    ws "^8.18.2"
+    tmp "^0.2.5"
+    ws "^8.18.3"
 
 self-signed-cert@^1.0.1:
   version "1.0.1"
@@ -32069,7 +32068,7 @@ tmp@^0.0.33:
   dependencies:
     os-tmpdir "~1.0.2"
 
-tmp@^0.2.3, tmp@~0.2.3:
+tmp@^0.2.5, tmp@~0.2.3:
   version "0.2.5"
   resolved "https://registry.yarnpkg.com/tmp/-/tmp-0.2.5.tgz#b06bcd23f0f3c8357b426891726d16015abfd8f8"
   integrity sha512-voyz6MApa1rQGUxT3E+BK7/ROe8itEx7vD8/HEvt4xwXucvQ5G5oeEiHkmHZJuBO21RpOf+YYm9MOivj709jow==
@@ -34207,7 +34206,7 @@ ws@^7.0.0, ws@^7.2.0, ws@^7.3.1, ws@^7.4.2:
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.10.tgz#58b5c20dc281633f6c19113f39b349bd8bd558d9"
   integrity sha512-+dbF1tHwZpXcbOJdVOkzLDxZP1ailvSxM6ZweXTegylPny803bFhA+vqBYw4s31NSAk4S2Qz+AKXK9a4wkdjcQ==
 
-ws@^8.18.0, ws@^8.18.2, ws@^8.18.3, ws@^8.2.3, ws@^8.9.0:
+ws@^8.18.0, ws@^8.18.3, ws@^8.2.3, ws@^8.9.0:
   version "8.18.3"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.18.3.tgz#b56b88abffde62791c639170400c93dcb0c95472"
   integrity sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg==

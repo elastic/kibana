@@ -33,7 +33,10 @@ import {
 } from './settings_handler';
 
 export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
-  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
+  const experimentalFeatures = parseExperimentalConfigValue(
+    config.enableExperimental || [],
+    config.experimentalFeatures || {}
+  );
   if (experimentalFeatures.useSpaceAwareness) {
     router.versioned
       // @ts-ignore https://github.com/elastic/kibana/issues/203170
