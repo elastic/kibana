@@ -338,14 +338,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         const oldDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-${TEST_SPACE}`;
 
         // Create old v1 data view in test space
-        createDataView(
+        const body = await createDataView(
           supertest,
           oldDataViewId,
           'Old Misconfiguration Data View v1',
           'security_solution-*.misconfiguration_latest'
-        ).then((body) => {
-          expect(body.data_view.id).to.eql(oldDataViewId);
-        });
+        );
+        expect(body.data_view.id).to.eql(oldDataViewId);
 
         // Install CSP package - this triggers plugin initialization which runs the migration
         await installCspPackage();
@@ -368,14 +367,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         const legacyDataViewId = CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS[0];
 
         // Create legacy data view (no space suffix, uses wildcard namespace)
-        createDataView(
+        const body = await createDataView(
           supertest,
           legacyDataViewId,
           'Old Legacy Misconfiguration Data View',
           'logs-cloud_security_posture.findings_latest-*'
-        ).then((body) => {
-          expect(body.data_view.id).to.eql(legacyDataViewId);
-        });
+        );
+        expect(body.data_view.id).to.eql(legacyDataViewId);
 
         // Install CSP package - this triggers plugin initialization which runs the migration
         await installCspPackage();
@@ -397,26 +395,24 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         // Create a random unrelated data view that should not be deleted
         const unrelatedDataViewId = 'test-unrelated-dataview-id';
 
-        createDataView(
+        const unrelatedBody = await createDataView(
           supertest,
           unrelatedDataViewId,
           'Test Unrelated Data View',
           'test-unrelated-dataview-id'
-        ).then((body) => {
-          expect(body.data_view.id).to.eql(unrelatedDataViewId);
-        });
+        );
+        expect(unrelatedBody.data_view.id).to.eql(unrelatedDataViewId);
 
         // Create old CSP data view to trigger migration
         const oldDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-${TEST_SPACE}`;
 
-        createDataView(
+        const oldBody = await createDataView(
           supertest,
           oldDataViewId,
           'Old Misconfiguration Data View v1',
           'security_solution-*.misconfiguration_latest'
-        ).then((body) => {
-          expect(body.data_view.id).to.eql(oldDataViewId);
-        });
+        );
+        expect(oldBody.data_view.id).to.eql(oldDataViewId);
 
         // Install CSP package - this triggers plugin initialization which runs the migration
         await installCspPackage();
@@ -455,14 +451,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         const oldDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-${TEST_SPACE}`;
 
         // Create old v1 vulnerabilities data view in test space
-        createDataView(
+        const body = await createDataView(
           supertest,
           oldDataViewId,
           'Old Vulnerabilities Data View v1',
           'security_solution-*.vulnerability_latest,logs-cloud_security_posture.vulnerabilities_latest-default'
-        ).then((body) => {
-          expect(body.data_view.id).to.eql(oldDataViewId);
-        });
+        );
+        expect(body.data_view.id).to.eql(oldDataViewId);
 
         // Install CSP package - this triggers plugin initialization which runs the migration
         await installCspPackage();
@@ -485,14 +480,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         const legacyDataViewId = CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS[0];
 
         // Create legacy vulnerabilities data view (no space suffix, uses wildcard namespace)
-        createDataView(
+        const body = await createDataView(
           supertest,
           legacyDataViewId,
           'Old Legacy Vulnerabilities Data View',
           'logs-cloud_security_posture.vulnerabilities-*'
-        ).then((body) => {
-          expect(body.data_view.id).to.eql(legacyDataViewId);
-        });
+        );
+        expect(body.data_view.id).to.eql(legacyDataViewId);
 
         // Install CSP package - this triggers plugin initialization which runs the migration
         await installCspPackage();
