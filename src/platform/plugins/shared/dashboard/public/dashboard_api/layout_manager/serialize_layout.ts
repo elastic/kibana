@@ -9,7 +9,6 @@
 
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 
-import { omit } from 'lodash';
 import { type DashboardState, prefixReferencesFromPanel } from '../../../common';
 import type { DashboardChildState, DashboardLayout } from './types';
 import type { DashboardSection } from '../../../server';
@@ -52,7 +51,7 @@ export function serializeLayout(
         .map(([id, control]) => {
           return {
             id,
-            ...omit(control, 'order'),
+            ...control,
             ...(childState[id].rawState as ControlsGroupState['controls'][number]),
           };
         }),
