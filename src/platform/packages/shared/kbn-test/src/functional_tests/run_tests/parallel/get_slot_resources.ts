@@ -35,6 +35,7 @@ export interface SlotResources {
   warming: {
     cpu: number;
     memory: number;
+    exclusive: boolean;
   };
   idle: {
     cpu: number;
@@ -43,6 +44,7 @@ export interface SlotResources {
   running: {
     cpu: number;
     memory: number;
+    exclusive: boolean;
   };
 }
 
@@ -106,15 +108,17 @@ export function getSlotResources(capabilities: ServerCapabilities): SlotResource
   return {
     idle: {
       cpu: numNodes * 0.5,
-      memory: esMemory,
+      memory: esMemory + kibanaMemory,
     },
     warming: {
       cpu: numNodes,
       memory: esMemory,
+      exclusive: !isServerless,
     },
     running: {
       cpu: hasBrowser ? 2 : 1,
       memory: esMemory + kibanaMemory + containerMemory + browserMemory,
+      exclusive: hasBrowser,
     },
   };
 }

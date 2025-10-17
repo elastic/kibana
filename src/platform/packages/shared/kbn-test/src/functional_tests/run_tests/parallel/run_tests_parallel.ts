@@ -31,6 +31,10 @@ import { ConfigRunner } from './config_runner';
 import { ResourcePool, Phase } from './resource_pool';
 import type { Slot } from './resource_pool';
 import { prepareChrome } from './prepare_chrome';
+import { readConfig } from './read_config';
+import { getAvailableMemory } from './get_available_memory';
+import { getSlotResources } from './get_slot_resources';
+import type { SlotResources } from './get_slot_resources';
 
 function booleanFromEnv(varName: string, defaultValue: boolean = false): boolean {
   const envValue = process.env[varName];
@@ -42,25 +46,6 @@ function msToDuration(duration: number) {
   const timeSec = Math.floor(duration / 1000);
   const display = timeSec > 60 ? `${Math.floor(timeSec / 60)}m ${timeSec % 60}s` : `${timeSec}s`;
   return display;
-}
-
-function getAvailableMemory(): number {
-  if (process.platform === 'linux') {
-    try {
-      const memInfo = Fs.readFileSync('/proc/meminfo', 'utf8');
-      const match = memInfo.match(/^MemAvailable:\s+(\d+)\s+kB$/m);
-      if (match) {
-        const kb = Number(match[1]);
-        if (Number.isFinite(kb)) {
-          return Math.max(0, Math.floor(kb / 1024));
-        }
-      }
-    } catch (err) {
-      // fall through to fallback
-    }
-  }
-
-  return Math.round(os.freemem() / 1024 / 1024);
 }
 
 interface RunnerState {
@@ -167,6 +152,7 @@ export async function runTestsParallel(
   const portConfigs = Object.fromEntries(portConfigEntries);
 
   const runners: ConfigRunner[] = [];
+  const runnerResources = new Map<ConfigRunner, SlotResources>();
 
   const failedConfigs: string[] = [];
   const results: string[] = [];
@@ -179,6 +165,10 @@ export async function runTestsParallel(
 
     const configExecutionKey = `${config}_executed`;
     const isConfigExecution = runBuildkiteMetaGet(configExecutionKey, 'false');
+
+    const configObj = await readConfig(log, require.resolve(Path.join(REPO_ROOT, config)), {});
+
+    const slotResources = getSlotResources(configObj.getAll());
 
     if (isConfigExecution === 'true') {
       results.push(`- ${config}\n    duration: 0s\n    result: already-tested`);
@@ -204,43 +194,19 @@ export async function runTestsParallel(
     });
 
     runners.push(runner);
+    runnerResources.set(runner, slotResources);
   }
 
-  const MAX_CPUS = Math.max(1, os.cpus().length - 1);
-  const AVAILABLE_MEM = getAvailableMemory();
   const MIN_MB_AVAILABLE = 2048;
-  const MIN_MB_PER_WARMING_SLOT = 4096;
-  const MIN_MB_PER_IDLE_SLOT = 3072;
-  const MIN_MB_PER_RUNNING_SLOT = 4096;
-  const WARMING_MIN_CPU = 2;
-  const IDLE_MIN_CPU = 0.5;
-  const RUNNING_MIN_CPU = 1;
+  const totalCpuCapacity = Math.max(1, os.cpus().length - 1);
+  const initialAvailableMemory = getAvailableMemory();
 
-  log.info(`Available resources: ${MAX_CPUS} cpus, ${AVAILABLE_MEM}mb`);
-
-  const availableMemory = Math.max(AVAILABLE_MEM - MIN_MB_AVAILABLE, MIN_MB_PER_RUNNING_SLOT);
-
-  const maxWarmingByCpu = Math.max(1, Math.floor(MAX_CPUS / WARMING_MIN_CPU));
-  const maxWarmingByMemory = Math.max(1, Math.floor(availableMemory / MIN_MB_PER_WARMING_SLOT));
-  const maxWarming = Math.max(1, Math.min(maxWarmingByCpu, maxWarmingByMemory));
-
-  const maxStartedByCpu = Math.max(1, Math.floor(MAX_CPUS / IDLE_MIN_CPU));
-  const maxStartedByMemory = Math.max(1, Math.floor(availableMemory / MIN_MB_PER_IDLE_SLOT));
-  const maxStarted = Math.max(maxWarming, Math.min(maxStartedByCpu, maxStartedByMemory));
-
-  const maxRunningByCpu = Math.max(1, Math.floor(MAX_CPUS / RUNNING_MIN_CPU));
-  const maxRunningByMemory = Math.max(1, Math.floor(availableMemory / MIN_MB_PER_RUNNING_SLOT));
-  const maxRunning = Math.max(1, Math.min(maxRunningByCpu, maxRunningByMemory));
-
-  log.info(
-    `Resource limits -> started: ${maxStarted}, warming: ${maxWarming}, running: ${maxRunning}`
-  );
+  log.info(`Available resources: ${totalCpuCapacity} cpus, ${initialAvailableMemory}mb free`);
 
   const pool = new ResourcePool({
     log,
-    maxStarted,
-    maxWarming,
-    maxRunning,
+    totalCpu: totalCpuCapacity,
+    minMbAvailable: MIN_MB_AVAILABLE,
   });
 
   let statsTimer: NodeJS.Timeout | undefined;
@@ -351,8 +317,17 @@ export async function runTestsParallel(
     logStats();
   }
 
-  const promises = runners.map(async (runner) => {
-    const slot = pool.acquire();
+  const promises = runners.map(async (runner, runnerIndex) => {
+    const slotResources = runnerResources.get(runner);
+    if (!slotResources) {
+      throw new Error(`Missing slot resources for ${runner.getConfigPath()}`);
+    }
+
+    const slot = pool.acquire({
+      label: runner.getConfigPath(),
+      priority: runnerIndex === 0 ? -1 : runnerIndex,
+      resources: slotResources,
+    });
     const path = runner.getConfigPath();
     const state: RunnerState = {
       slot,
