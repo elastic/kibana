@@ -116,12 +116,12 @@ export function getSlotResources(capabilities: ServerCapabilities): SlotResource
     warming: {
       cpu: numNodes,
       memory: esMemory,
-      exclusive: false,
+      exclusive: true,
     },
     running: {
       cpu: hasBrowser ? 2 : 1,
       memory: esMemory + kibanaMemory + containerMemory + browserMemory,
-      exclusive: hasBrowser,
+      exclusive: false,
     },
   };
 }
