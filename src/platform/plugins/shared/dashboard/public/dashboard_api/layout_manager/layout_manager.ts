@@ -65,6 +65,7 @@ import {
   type DashboardLayout,
   type DashboardLayoutPanel,
 } from './types';
+import { StickyControlLayoutState } from '@kbn/controls-schemas';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,

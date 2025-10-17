@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { BehaviorSubject, debounceTime, first, map, merge } from 'rxjs';
+import { BehaviorSubject, debounceTime, first, map, merge, pairwise } from 'rxjs';
 
 import { EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -65,6 +65,19 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
         syncTimesliceWithTimeRangePercentage
       );
 
+      function getTimesliceSyncedWithTimeRangePercentage(
+        startPercentage: number,
+        endPercentage: number
+      ): [number, number] {
+        const { stepSize, timeRange, timeRangeBounds } = timeRangeMeta$.value;
+        const from = timeRangeBounds[FROM_INDEX] + startPercentage * timeRange;
+        const to = timeRangeBounds[FROM_INDEX] + endPercentage * timeRange;
+        return [
+          roundDownToNextStepSizeFactor(from, stepSize),
+          roundUpToNextStepSizeFactor(to, stepSize),
+        ];
+      }
+
       function syncTimesliceWithTimeRangePercentage(
         startPercentage: number | undefined,
         endPercentage: number | undefined
@@ -76,32 +89,25 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
           return;
         }
 
-        const { stepSize, timeRange, timeRangeBounds } = timeRangeMeta$.value;
-        if (
-          apiPublishesSettings(parentApi) &&
-          !parentApi.settings.autoApplyFilters$.value &&
-          timeslice$.value
-        ) {
-          // If filters are not auto-applied, only sync the timeslice if it's out of bounds of the new time range
-          // This prevents the timeslice from changing slightly to a value the user didn't intend when using
-          // relative time ranges
-          const [prevFrom, prevTo] = timeslice$.value;
-          const [boundsFrom, boundsTo] = timeRangeBounds;
-          if (prevFrom >= boundsFrom && prevTo <= boundsTo) return;
-        }
+        const { timeRange, timeRangeBounds } = timeRangeMeta$.value;
 
         const from = timeRangeBounds[FROM_INDEX] + startPercentage * timeRange;
         const to = timeRangeBounds[FROM_INDEX] + endPercentage * timeRange;
-        timeslice$.next([
-          roundDownToNextStepSizeFactor(from, stepSize),
-          roundUpToNextStepSizeFactor(to, stepSize),
-        ]);
+        timeslice$.next(getTimesliceSyncedWithTimeRangePercentage(startPercentage, endPercentage));
         setSelectedRange(to - from);
       }
 
       function setTimeslice(timeslice?: Timeslice) {
         timeRangePercentage.setTimeRangePercentage(timeslice, timeRangeMeta$.value);
-        timeslice$.next(timeslice);
+        const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
+          timeRangePercentage.getLatestState();
+
+        timeslice$.next(
+          getTimesliceSyncedWithTimeRangePercentage(
+            timesliceStartAsPercentageOfTimeRange!,
+            timesliceEndAsPercentageOfTimeRange!
+          )
+        );
       }
 
       function setIsAnchored(isAnchored: boolean | undefined) {
@@ -283,14 +289,26 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
         },
       });
 
-      const timeRangeMetaSubscription = timeRangeMeta$.subscribe((timeRangeMeta) => {
-        const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
-          timeRangePercentage.getLatestState();
-        syncTimesliceWithTimeRangePercentage(
-          timesliceStartAsPercentageOfTimeRange,
-          timesliceEndAsPercentageOfTimeRange
-        );
-      });
+      const timeRangeMetaSubscription = timeRangeMeta$
+        .pipe(pairwise())
+        .subscribe(([{ timeRange: prevTimeRangeLength }, { timeRange: nextTimeRangeLength }]) => {
+          // If auto apply filters is disabled, only sync the timeslice if the timerange length has changed.
+          // This prevents the timeslice from getting shifted forward immediately after applying the filters
+          // when using a relative time range, thus triggering another dirty state that needs to be applied
+          if (
+            apiPublishesSettings(parentApi) &&
+            !parentApi.settings.autoApplyFilters$.value &&
+            nextTimeRangeLength === prevTimeRangeLength
+          )
+            return;
+
+          const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
+            timeRangePercentage.getLatestState();
+          syncTimesliceWithTimeRangePercentage(
+            timesliceStartAsPercentageOfTimeRange,
+            timesliceEndAsPercentageOfTimeRange
+          );
+        });
 
       return {
         api,
