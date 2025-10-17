@@ -215,10 +215,9 @@ export function ValueControlForm({
     controlFlyoutType,
     onValuesQuerySubmit,
     queryString,
-    selectedValues,
+    selectedValues?.length,
     valuesRetrieval,
     variableName,
-    valuesQuery,
   ]);
 
   useEffect(() => {
