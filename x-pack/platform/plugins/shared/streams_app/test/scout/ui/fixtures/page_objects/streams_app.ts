@@ -398,6 +398,11 @@ export class StreamsApp {
     await processorEditButton.click();
   }
 
+  async clickDuplicateProcessor(pos: number) {
+    const processorDuplicateButton = await this.getProcessorDuplicateButton(pos);
+    await processorDuplicateButton.click();
+  }
+
   async clickEditCondition(pos: number) {
     const conditionEditButton = await this.getConditionEditButton(pos);
     await conditionEditButton.click();
@@ -421,6 +426,13 @@ export class StreamsApp {
     const targetProcessor = processors[pos];
     await targetProcessor.getByRole('button', { name: 'Step context menu' }).first().click();
     return this.page.getByTestId('stepContextMenuEditItem');
+  }
+
+  async getProcessorDuplicateButton(pos: number) {
+    const processors = await this.getProcessorsListItems();
+    const targetProcessor = processors[pos];
+    await targetProcessor.getByRole('button', { name: 'Step context menu' }).first().click();
+    return this.page.getByTestId('stepContextMenuDuplicateItem');
   }
 
   async getConditionEditButton(pos: number) {

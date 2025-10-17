@@ -7,4 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from '@kbn/data-views-plugin/public';
+import type { PluginInitializerContext } from '@kbn/core/server';
+
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { CPSServerPlugin } = await import('./plugin');
+  return new CPSServerPlugin(initContext);
+};

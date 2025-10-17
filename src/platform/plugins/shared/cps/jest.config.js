@@ -7,4 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from '@kbn/data-views-plugin/server/mocks';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/shared/cps'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/cps',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/plugins/shared/cps/{common,public,server}/**/*.{js,ts,tsx}',
+  ],
+  setupFiles: ['jest-canvas-mock'],
+};
