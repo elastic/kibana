@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAst, ESQLCommand, ESQLMessage, ErrorTypes } from '@kbn/esql-ast';
+import type { ESQLCommand, ESQLMessage, ErrorTypes } from '@kbn/esql-ast';
 import { EsqlQuery, esqlCommandRegistry, walk } from '@kbn/esql-ast';
 import type {
   ESQLFieldWithMetadata,
@@ -106,8 +106,9 @@ async function validateAst(
 
   const parsingResult = EsqlQuery.fromSrc(queryString);
 
-  const headerCommands = parsingResult.ast.header ? [parsingResult.ast.header] : [];
-  const rootCommands = [...parsingResult.ast.commands, ...headerCommands].flat();
+  const headerCommands = parsingResult.ast.header ?? [];
+
+  const rootCommands = parsingResult.ast.commands;
 
   const [sources, availablePolicies, joinIndices] = await Promise.all([
     // retrieve the list of available sources
@@ -135,6 +136,23 @@ async function validateAst(
 
   const license = await callbacks?.getLicense?.();
   const hasMinimumLicenseRequired = license?.hasAtLeast;
+
+  // Validate the header commands
+  for (const command of headerCommands) {
+    const references: ReferenceMaps = {
+      sources,
+      columns: new Map(), // no columns available in header
+      policies: availablePolicies,
+      query: queryString,
+      joinIndices: joinIndices?.indices || [],
+    };
+
+    const commandMessages = validateCommand(command, references, rootCommands, {
+      ...callbacks,
+      hasMinimumLicenseRequired,
+    });
+    messages.push(...commandMessages);
+  }
 
   /**
    * Even though we are validating single commands, we work with subqueries.
@@ -187,9 +205,9 @@ async function validateAst(
 }
 
 function validateCommand(
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   references: ReferenceMaps,
-  rootCommands: ESQLAstAllCommands[],
+  rootCommands: ESQLCommand[],
   callbacks?: ICommandCallbacks
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
@@ -231,9 +249,7 @@ function validateCommand(
   };
 
   if (commandDefinition.methods.validate) {
-    messages.push(
-      ...commandDefinition.methods.validate(command, rootCommands as ESQLAst, context, callbacks) // //HD don't cast
-    );
+    messages.push(...commandDefinition.methods.validate(command, rootCommands, context, callbacks));
   }
 
   // no need to check for mandatory options passed

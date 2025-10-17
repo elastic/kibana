@@ -44,7 +44,7 @@ export const getEnrichCommands = (commands: ESQLAstAllCommands[]): ESQLCommand[]
  * Returns a list of subqueries to validate
  * @param rootCommands
  */
-export function getSubqueriesToValidate(rootCommands: ESQLAstAllCommands[]) {
+export function getSubqueriesToValidate(rootCommands: ESQLCommand[]) {
   const subsequences = [];
   const expandedCommands = expandEvals(rootCommands);
   for (let i = 0; i < expandedCommands.length; i++) {

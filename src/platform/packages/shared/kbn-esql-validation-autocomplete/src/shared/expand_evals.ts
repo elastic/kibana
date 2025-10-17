@@ -9,7 +9,6 @@
 
 import type { ESQLCommand } from '@kbn/esql-ast';
 import { Builder } from '@kbn/esql-ast';
-import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 
 /**
  * Expands EVAL commands into separate single-expression EVAL commands.
@@ -21,7 +20,7 @@ import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
  * @param commands The list of commands to expand.
  * @returns The expanded list of commands.
  */
-export function expandEvals(commands: ESQLAstAllCommands[]): ESQLCommand[] {
+export function expandEvals(commands: ESQLCommand[]): ESQLCommand[] {
   const expanded: ESQLCommand[] = [];
   for (const command of commands) {
     if (command.name.toLowerCase() === 'eval') {
