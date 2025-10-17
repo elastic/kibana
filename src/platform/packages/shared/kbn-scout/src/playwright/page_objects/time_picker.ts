@@ -9,9 +9,16 @@
 
 import type { ScoutPage } from '..';
 
+export enum DateUnitSelector {
+  Seconds = 's',
+  Minutes = 'm',
+  Hours = 'h',
+}
+
 export class TimePicker {
   public readonly defaultStartTime = 'Sep 19, 2015 @ 06:31:44.000';
   public readonly defaultEndTime = 'Sep 23, 2015 @ 18:31:44.000';
+  public readonly endTimeNoResults = 'Sep 19, 2015 @ 20:45:00.000';
 
   constructor(private readonly page: ScoutPage) {}
 
@@ -41,6 +48,10 @@ export class TimePicker {
 
   async setDefaultAbsoluteRange() {
     await this.setAbsoluteRange(this.defaultStartTime, this.defaultEndTime);
+  }
+
+  async setTimeRangeWithoutResults() {
+    await this.setAbsoluteRange(this.defaultStartTime, this.endTimeNoResults);
   }
 
   async setAbsoluteRange(fromTime: string, toTime: string) {
@@ -91,7 +102,10 @@ export class TimePicker {
     return { start, end };
   }
 
-  async startAutoRefresh(intervalS: number = 5) {
+  async startAutoRefresh(
+    interval: number = 5,
+    dateUnit: DateUnitSelector = DateUnitSelector.Seconds
+  ) {
     await this.page.testSubj.click('superDatePickerToggleQuickMenuButton');
 
     // Check if refresh is already running
@@ -105,7 +119,9 @@ export class TimePicker {
     // Set interval
     const intervalInput = this.page.testSubj.locator('superDatePickerRefreshIntervalInput');
     await intervalInput.clear();
-    await intervalInput.fill(intervalS.toString());
+    await intervalInput.fill(interval.toString());
+    const timeUnit = this.page.testSubj.locator('superDatePickerRefreshIntervalUnitsSelect');
+    await timeUnit.selectOption({ value: dateUnit });
     await intervalInput.press('Enter');
 
     await this.page.testSubj.click('superDatePickerToggleQuickMenuButton');
