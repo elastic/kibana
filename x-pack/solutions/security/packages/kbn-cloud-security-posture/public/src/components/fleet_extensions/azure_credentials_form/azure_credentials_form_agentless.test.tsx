@@ -256,7 +256,7 @@ describe('AzureCredentialsFormAgentless', () => {
       expect(screen.getByTestId('azure-input-var-fields')).toBeInTheDocument();
       expect(screen.getByTestId('azure-selected-credentials-guide')).toBeInTheDocument();
       expect(screen.queryByTestId('azure-credentials-type-selector')).not.toBeInTheDocument();
-      expect(screen.getByTestId('azureLaunchCloudConnectorArmTemplate')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('azureLaunchCloudConnectorArmTemplate')).not.toBeInTheDocument();
 
       expect(screen.getByTestId('doc-link')).toHaveTextContent(
         '/app/cloud-security-posture/overview/azure'

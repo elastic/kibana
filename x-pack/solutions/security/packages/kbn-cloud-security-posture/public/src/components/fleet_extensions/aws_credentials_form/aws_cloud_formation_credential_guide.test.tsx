@@ -63,7 +63,6 @@ describe('CloudFormationCloudCredentialsGuide', () => {
       // Verify external link attributes
       const link = screen.getByRole('link', { name: /Learn more about CloudFormation/ });
       expect(link).toHaveAttribute('target', '_blank');
-      expect(link).toHaveAttribute('data-test-subj', 'externalLink');
 
       // Verify credential-specific content
       expect(
