@@ -35,7 +35,7 @@ export async function extractMappingsFromPlugins(
     msg$.pipe(
       Rx.map((result) => {
         log.debug('message received from worker', result);
-        proc.kill('SIGILL');
+        proc.kill('SIGKILL');
         return result.mappings;
       }),
       Rx.defaultIfEmpty(undefined)
