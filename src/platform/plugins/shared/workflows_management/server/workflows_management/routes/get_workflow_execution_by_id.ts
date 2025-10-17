@@ -1,0 +1,61 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { schema } from '@kbn/config-schema';
+import type { RouteDependencies } from './types';
+
+export function registerGetWorkflowExecutionByIdRoute({
+  router,
+  api,
+  logger,
+  spaces,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workflowExecutions/{workflowExecutionId}',
+      options: {
+        tags: ['api', 'workflows'],
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: ['read', 'workflow_execution_read'],
+            },
+          ],
+        },
+      },
+      validate: {
+        params: schema.object({
+          workflowExecutionId: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { workflowExecutionId } = request.params;
+        const spaceId = spaces.getSpaceId(request);
+        const workflowExecution = await api.getWorkflowExecution(workflowExecutionId, spaceId);
+        if (!workflowExecution) {
+          return response.notFound();
+        }
+        return response.ok({
+          body: workflowExecution,
+        });
+      } catch (error) {
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
+}
