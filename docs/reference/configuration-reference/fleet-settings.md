@@ -336,8 +336,8 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
 `xpack.fleet.enableManagedLogsAndMetricsDataviews` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Set to `true` (default), to enable the automatic creation of global `logs-*` and `metrics-*` data views.
 
-`xpack.fleet.autoUpgrades.taskInterval`  ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Configure the interval of automatic upgrade task for Fleet-managed Elastic Agents. Defaults to `30m`.
+`xpack.fleet.autoUpgrades.taskInterval`  ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.1`
+:   Configure the interval of the automatic upgrade task for {{fleet}}-managed {{agents}}. Defaults to `30m`.
 
-`xpack.fleet.autoUpgrades.retryDelays`  ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Configure the retry delays of automatic upgrade task for Fleet-managed Elastic Agents. Defaults to `['30m', '1h', '2h', '4h', '8h', '16h', '24h']`.
+`xpack.fleet.autoUpgrades.retryDelays`  ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.1`
+:   Configure the retry delays of the automatic upgrade task for {{fleet}}-managed {{agents}}. The array's length indicates the maximum number of retries. Defaults to `['30m', '1h', '2h', '4h', '8h', '16h', '24h']`.
