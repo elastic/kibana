@@ -28,13 +28,13 @@ export const getSideNavVersion = (featureFlags: FeatureFlagsStart): LayoutProjec
     );
   }
 
-  return featureFlag;
+  return 'v2';
 };
 
 export const getLayoutVersion = (featureFlags: FeatureFlagsStart): LayoutFeatureFlag => {
   const featureFlag = featureFlags.getStringValue<LayoutFeatureFlag>(
     LAYOUT_FEATURE_FLAG_KEY,
-    'legacy-fixed'
+    'workspace'
   );
   if (featureFlag !== 'legacy-fixed' && featureFlag !== 'grid' && featureFlag !== 'workspace') {
     throw new Error(
@@ -42,7 +42,7 @@ export const getLayoutVersion = (featureFlags: FeatureFlagsStart): LayoutFeature
     );
   }
 
-  return featureFlag;
+  return 'workspace';
 };
 
 export const getLayoutDebugFlag = (featureFlags: FeatureFlagsStart): boolean => {
