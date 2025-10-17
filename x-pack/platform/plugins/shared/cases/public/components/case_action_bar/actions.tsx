@@ -29,6 +29,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
   const { permissions } = useCasesContext();
   const { showSuccessToast } = useCasesToast();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const buttonRef = React.useRef<HTMLAnchorElement>(null);
 
   const openModal = useCallback(() => {
     setIsModalVisible(true);
@@ -88,12 +89,17 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
 
   return (
     <EuiFlexItem grow={false} data-test-subj="case-view-actions">
-      <PropertyActions propertyActions={propertyActions} customDataTestSubj={'case'} />
+      <PropertyActions
+        propertyActions={propertyActions}
+        customDataTestSubj={'case'}
+        buttonRef={buttonRef}
+      />
       {isModalVisible ? (
         <ConfirmDeleteCaseModal
           totalCasesToBeDeleted={1}
           onCancel={closeModal}
           onConfirm={onConfirmDeletion}
+          focusButtonRef={buttonRef}
         />
       ) : null}
     </EuiFlexItem>
