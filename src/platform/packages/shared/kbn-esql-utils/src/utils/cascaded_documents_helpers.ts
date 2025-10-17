@@ -38,6 +38,11 @@ export interface AppliedStatsFunction {
   aggregation: string;
 }
 
+export interface ESQLStatsQueryMeta {
+  groupByFields: Array<{ field: string; type: string }>;
+  appliedFunctions: AppliedStatsFunction[];
+}
+
 // list of stats functions we support for grouping in the cascade experience
 const SUPPORTED_STATS_COMMAND_OPTION_FUNCTIONS = ['categorize' as const];
 
@@ -48,11 +53,6 @@ const isSupportedStatsFunction = (fnName: string): fnName is SupportedStatsFunct
 
 // helper for removing backticks from field names of function names
 const removeBackticks = (str: string) => str.replace(/`/g, '');
-
-export interface ESQLStatsQueryMeta {
-  groupByFields: Array<{ field: string; type: string }>;
-  appliedFunctions: AppliedStatsFunction[];
-}
 
 function getStatsCommandToOperateOn(esqlQuery: EsqlQuery): StatsCommandSummary | null {
   if (esqlQuery.errors.length) {
@@ -78,6 +78,15 @@ function getStatsCommandToOperateOn(esqlQuery: EsqlQuery): StatsCommandSummary |
   }
 
   return summarizedStatsCommand;
+}
+
+function getESQLQueryDataSourceCommand(
+  esqlQuery: EsqlQuery
+): ESQLCommand<'from' | 'ts'> | undefined {
+  return mutate.generic.commands.find(
+    esqlQuery.ast,
+    (cmd) => cmd.name === 'from' || cmd.name === 'ts'
+  ) as ESQLCommand<'from' | 'ts'> | undefined;
 }
 
 /**
@@ -232,10 +241,7 @@ export const constructCascadeQuery = ({
     throw new Error('Query is malformed');
   }
 
-  const dataSourceCommand = mutate.generic.commands.find(
-    EditorESQLQuery.ast,
-    (cmd) => cmd.name === 'from' || cmd.name === 'ts'
-  ) as ESQLCommand<'from' | 'ts'> | undefined;
+  const dataSourceCommand = getESQLQueryDataSourceCommand(EditorESQLQuery);
 
   if (!dataSourceCommand) {
     throw new Error('Query does not have a data source');
@@ -390,10 +396,7 @@ function handleStatsByCategorizeLeafOperation(
 export function mutateQueryStatsGrouping(query: AggregateQuery, pick: string[]): AggregateQuery {
   const EditorESQLQuery = EsqlQuery.fromSrc(query.esql);
 
-  const dataSourceCommand = mutate.generic.commands.find(
-    EditorESQLQuery.ast,
-    (cmd) => cmd.name === 'from'
-  ) as ESQLCommand<'from'> | undefined;
+  const dataSourceCommand = getESQLQueryDataSourceCommand(EditorESQLQuery);
 
   if (!dataSourceCommand) {
     throw new Error('Query does not have a data source');
