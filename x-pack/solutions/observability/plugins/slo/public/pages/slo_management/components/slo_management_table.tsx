@@ -17,13 +17,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
+  EuiIconTip,
   EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SLODefinitionResponse } from '@kbn/slo-schema';
+import type { SLODefinitionWithHealthResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { sloPaths } from '../../../../common';
@@ -56,18 +57,19 @@ export function SloManagementTable() {
     name: search,
     tags,
     includeOutdatedOnly,
+    getHealth: true,
   });
   const { tasks } = useBulkOperation();
 
-  const [selectedItems, setSelectedItems] = useState<SLODefinitionResponse[]>([]);
+  const [selectedItems, setSelectedItems] = useState<SLODefinitionWithHealthResponse[]>([]);
 
-  const onSelectionChange = (items: SLODefinitionResponse[]) => {
+  const onSelectionChange = (items: SLODefinitionWithHealthResponse[]) => {
     setSelectedItems(items);
   };
 
-  const selection: EuiTableSelectionType<SLODefinitionResponse> = {
+  const selection: EuiTableSelectionType<SLODefinitionWithHealthResponse> = {
     selected: selectedItems,
-    selectable: (item: SLODefinitionResponse) => {
+    selectable: (item: SLODefinitionWithHealthResponse) => {
       return !tasks.find(
         (task) => task.status === 'in-progress' && task.items.some((i) => i.id === item.id)
       );
@@ -75,7 +77,39 @@ export function SloManagementTable() {
     onSelectionChange,
   };
 
-  const actions: Array<DefaultItemAction<SLODefinitionResponse>> = [
+  const getSLOState = (slo: SLODefinitionWithHealthResponse) => {
+    const stoppedSLO =
+      !slo.enabled &&
+      slo.health?.rollup.transformState === 'stopped' &&
+      slo.health?.summary.transformState === 'stopped';
+
+    const healthyByOperation =
+      slo.health?.rollup.status === 'healthy' && slo.health?.summary.status === 'healthy';
+
+    const healthyByStatus =
+      slo.enabled &&
+      slo.health?.rollup.transformState === 'started' &&
+      slo.health?.summary.transformState === 'started';
+
+    if (stoppedSLO) {
+      return {
+        label: 'Disabled',
+        color: 'subdued',
+      };
+    } else if (healthyByOperation && healthyByStatus) {
+      return {
+        label: 'Enabled',
+        color: 'success',
+      };
+    } else {
+      return {
+        label: 'Unhealthy',
+        color: 'danger',
+      };
+    }
+  };
+
+  const actions: Array<DefaultItemAction<SLODefinitionWithHealthResponse>> = [
     {
       type: 'icon',
       icon: 'pencil',
@@ -87,7 +121,7 @@ export function SloManagementTable() {
       }),
       'data-test-subj': 'sloActionsEdit',
       enabled: () => !!permissions?.hasAllWriteRequested,
-      onClick: (slo: SLODefinitionResponse) => {
+      onClick: (slo: SLODefinitionWithHealthResponse) => {
         navigateToUrl(http.basePath.prepend(paths.sloEdit(slo.id)));
       },
     },
@@ -102,12 +136,13 @@ export function SloManagementTable() {
       }),
       enabled: () => !!permissions?.hasAllWriteRequested,
       'data-test-subj': 'sloActionsClone',
-      onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'clone' }),
+      onClick: (slo: SLODefinitionWithHealthResponse) =>
+        triggerAction({ item: slo, type: 'clone' }),
     },
     {
       type: 'icon',
-      icon: (slo: SLODefinitionResponse) => (slo.enabled ? 'stop' : 'play'),
-      name: (slo: SLODefinitionResponse) =>
+      icon: (slo: SLODefinitionWithHealthResponse) => (slo.enabled ? 'stop' : 'play'),
+      name: (slo: SLODefinitionWithHealthResponse) =>
         slo.enabled
           ? i18n.translate('xpack.slo.item.actions.disable', {
               defaultMessage: 'Disable',
@@ -115,7 +150,7 @@ export function SloManagementTable() {
           : i18n.translate('xpack.slo.item.actions.enable', {
               defaultMessage: 'Enable',
             }),
-      description: (slo: SLODefinitionResponse) =>
+      description: (slo: SLODefinitionWithHealthResponse) =>
         slo.enabled
           ? i18n.translate('xpack.slo.item.actions.disable', {
               defaultMessage: 'Disable',
@@ -125,7 +160,7 @@ export function SloManagementTable() {
             }),
       'data-test-subj': 'sloActionsManage',
       enabled: () => !!permissions?.hasAllWriteRequested,
-      onClick: (slo: SLODefinitionResponse) => {
+      onClick: (slo: SLODefinitionWithHealthResponse) => {
         const isEnabled = slo.enabled;
         triggerAction({ item: slo, type: isEnabled ? 'disable' : 'enable' });
       },
@@ -141,7 +176,8 @@ export function SloManagementTable() {
       }),
       'data-test-subj': 'sloActionsDelete',
       enabled: () => !!permissions?.hasAllWriteRequested,
-      onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'delete' }),
+      onClick: (slo: SLODefinitionWithHealthResponse) =>
+        triggerAction({ item: slo, type: 'delete' }),
     },
     {
       type: 'icon',
@@ -154,7 +190,8 @@ export function SloManagementTable() {
       }),
       'data-test-subj': 'sloActionsPurge',
       enabled: () => !!permissions?.hasAllWriteRequested,
-      onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'purge' }),
+      onClick: (slo: SLODefinitionWithHealthResponse) =>
+        triggerAction({ item: slo, type: 'purge' }),
     },
     {
       type: 'icon',
@@ -167,17 +204,18 @@ export function SloManagementTable() {
       }),
       'data-test-subj': 'sloActionsReset',
       enabled: () => !!permissions?.hasAllWriteRequested,
-      onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'reset' }),
+      onClick: (slo: SLODefinitionWithHealthResponse) =>
+        triggerAction({ item: slo, type: 'reset' }),
     },
   ];
 
-  const columns: Array<EuiBasicTableColumn<SLODefinitionResponse>> = [
+  const columns: Array<EuiBasicTableColumn<SLODefinitionWithHealthResponse>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.slo.sloManagementTable.columns.nameLabel', {
         defaultMessage: 'Name',
       }),
-      render: (_, slo: SLODefinitionResponse) => {
+      render: (_, slo: SLODefinitionWithHealthResponse) => {
         return (
           <EuiLink
             data-test-subj="sloDetailsLink"
@@ -195,7 +233,7 @@ export function SloManagementTable() {
       name: i18n.translate('xpack.slo.sloManagementTable.columns.versionLabel', {
         defaultMessage: 'Version',
       }),
-      render: (value: SLODefinitionResponse['version']) => {
+      render: (value: SLODefinitionWithHealthResponse['version']) => {
         return value < SLO_MODEL_VERSION ? (
           <EuiText size="s">
             {i18n.translate('xpack.slo.sloManagementTable.version.outdated', {
@@ -216,7 +254,7 @@ export function SloManagementTable() {
       name: i18n.translate('xpack.slo.sloManagementTable.columns.tagsLabel', {
         defaultMessage: 'Tags',
       }),
-      render: (value: SLODefinitionResponse['tags']) => {
+      render: (value: SLODefinitionWithHealthResponse['tags']) => {
         return (
           <EuiFlexGroup gutterSize="xs" wrap responsive>
             {value.map((tag) => (
@@ -229,14 +267,35 @@ export function SloManagementTable() {
       },
     },
     {
-      field: 'State',
+      field: 'state',
       width: '20%',
-      name: i18n.translate('xpack.slo.sloManagementTable.columns.state', {
-        defaultMessage: 'State',
-      }),
-      render: (_: SLODefinitionResponse['enabled'], item: SLODefinitionResponse) => {
-        const color = item.enabled ? 'success' : 'danger';
-        const label = item.enabled ? 'Running' : 'Paused';
+      name: (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.slo.sloManagementTable.columns.state', {
+              defaultMessage: 'State',
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiIconTip
+              position="top"
+              content={
+                <>
+                  {i18n.translate('xpack.slo.sloManagementTable.columns.stateTooltipEnabled', {
+                    defaultMessage:
+                      'An SLO is unhealthy when its transforms are not operating as expected.',
+                  })}
+                </>
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      render: (_, item: SLODefinitionWithHealthResponse) => {
+        /*
+        SLO state is considered healthy only if both rollup and summary transforms are healthy, and the SLO is enabled.
+        */
+        const { color, label } = getSLOState(item);
         return <EuiHealth color={color}>{label}</EuiHealth>;
       },
     },
@@ -247,7 +306,7 @@ export function SloManagementTable() {
     },
   ];
 
-  const onTableChange = ({ page: newPage }: Criteria<SLODefinitionResponse>) => {
+  const onTableChange = ({ page: newPage }: Criteria<SLODefinitionWithHealthResponse>) => {
     if (newPage) {
       const { index, size } = newPage;
       const newState = {
@@ -287,7 +346,7 @@ export function SloManagementTable() {
       )}
 
       <EuiSpacer size="s" />
-      <EuiBasicTable<SLODefinitionResponse>
+      <EuiBasicTable<SLODefinitionWithHealthResponse>
         tableCaption={TABLE_CAPTION}
         error={
           isError
