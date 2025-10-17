@@ -145,7 +145,7 @@ const DOCKER_REGISTRY = 'docker.elastic.co';
 
 const CONTAINER_NAME_PREFIX = 'es-';
 
-const DEFAULT_MEM = `-Xms1024m -Xmx1024m`;
+const DEFAULT_MEM = `-Xms1536m -Xmx1536m`;
 const MORE_MEM = `-Xms1536m -Xmx1536m`;
 
 function getEsContainerName(idx: number, processSpecificPrefix: string | undefined) {
