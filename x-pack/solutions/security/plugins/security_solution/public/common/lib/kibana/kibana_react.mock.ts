@@ -222,6 +222,10 @@ export const createStartServicesMock = (
         actions: {
           show: true,
         },
+        fleet: {
+          crud: true,
+          read: true,
+        },
       },
     },
     security,

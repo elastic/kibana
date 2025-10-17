@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { REVIEW_RULE_INSTALLATION_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
@@ -21,7 +22,7 @@ export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter
       path: REVIEW_RULE_INSTALLATION_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_READ],
         },
       },
       options: {

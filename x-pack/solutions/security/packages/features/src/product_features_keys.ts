@@ -12,11 +12,8 @@ export enum ProductFeatureSecurityKey {
   /** Enables Configurations page for AI SOC */
   configurations = 'configurations',
 
-  /** Elastic endpoint detections, includes alerts, rules, investigations */
+  /** Elastic endpoint detections, includes CSP rules which remain provisionally within siem */
   detections = 'detections',
-
-  /** Enables external detections for AI SOC, includes alerts_summary, basic_rules*/
-  externalDetections = 'external_detections',
   /**
    * Enables Investigation guide in Timeline
    */
@@ -109,11 +106,6 @@ export enum ProductFeatureSecurityKey {
 
   /** Enables Endpoint Workflow Insights */
   securityWorkflowInsights = 'security_workflow_insights',
-
-  /**
-   * Enables customization of prebuilt Elastic rules
-   */
-  prebuiltRuleCustomization = 'prebuilt_rule_customization',
 }
 
 export enum ProductFeatureCasesKey {
@@ -157,6 +149,19 @@ export enum ProductFeatureSiemMigrationsKey {
   siemMigrations = 'siem_migrations',
 }
 
+export enum ProductFeatureRulesKey {
+  /** Elastic endpoint detections, includes alerts, rules, investigations */
+  detections = 'detections',
+
+  /** Enables external detections for AI SOC, includes alerts_summary, basic_rules*/
+  externalDetections = 'external_detections',
+
+  /**
+   * Enables customization of prebuilt Elastic rules
+   */
+  prebuiltRuleCustomization = 'prebuilt_rule_customization',
+}
+
 // Merges the two enums.
 export const ProductFeatureKey = {
   ...ProductFeatureSecurityKey,
@@ -166,6 +171,7 @@ export const ProductFeatureKey = {
   ...ProductFeatureSiemMigrationsKey,
   ...ProductFeatureTimelineKey,
   ...ProductFeatureNotesKey,
+  ...ProductFeatureRulesKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
 export type ProductFeatureKeyType =
@@ -175,7 +181,8 @@ export type ProductFeatureKeyType =
   | ProductFeatureAttackDiscoveryKey
   | ProductFeatureSiemMigrationsKey
   | ProductFeatureTimelineKey
-  | ProductFeatureNotesKey;
+  | ProductFeatureNotesKey
+  | ProductFeatureRulesKey;
 
 export const ALL_PRODUCT_FEATURE_KEYS = Object.freeze(Object.values(ProductFeatureKey));
 

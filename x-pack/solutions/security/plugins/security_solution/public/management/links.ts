@@ -8,6 +8,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
+import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import { checkArtifactHasData } from './services/exceptions_list/check_artifact_has_data';
 import {
   calculateEndpointAuthz,
@@ -100,7 +101,7 @@ export const links: LinkItem = {
   skipUrlState: true,
   hideTimeline: true,
   globalNavPosition: 12,
-  capabilities: [`${SECURITY_FEATURE_ID}.show`],
+  capabilities: [SECURITY_UI_SHOW_PRIVILEGE],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {
       defaultMessage: 'Manage',

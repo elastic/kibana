@@ -8,6 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ENDPOINT_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { CreateEndpointListResponse } from '@kbn/securitysolution-endpoint-exceptions-common/api';
+import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
 
@@ -30,7 +31,7 @@ export const createEndpointListRoute = (router: ListsPluginRouter): void => {
       path: ENDPOINT_LIST_URL,
       security: {
         authz: {
-          requiredPrivileges: ['lists-all'],
+          requiredPrivileges: [LISTS_API_ALL],
         },
       },
     })

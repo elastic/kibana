@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { INITIALIZE_SECURITY_SOLUTION } from '@kbn/security-solution-features/constants';
 import { BOOTSTRAP_PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
@@ -22,7 +23,7 @@ export const bootstrapPrebuiltRulesRoute = (
       path: BOOTSTRAP_PREBUILT_RULES_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [INITIALIZE_SECURITY_SOLUTION],
         },
       },
       options: {

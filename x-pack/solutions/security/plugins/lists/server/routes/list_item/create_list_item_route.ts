@@ -12,6 +12,7 @@ import {
   CreateListItemRequestBody,
   CreateListItemResponse,
 } from '@kbn/securitysolution-lists-common/api';
+import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../../types';
 import { buildSiemResponse } from '../utils';
@@ -24,7 +25,7 @@ export const createListItemRoute = (router: ListsPluginRouter): void => {
       path: LIST_ITEM_URL,
       security: {
         authz: {
-          requiredPrivileges: ['lists-all'],
+          requiredPrivileges: [LISTS_API_ALL],
         },
       },
     })

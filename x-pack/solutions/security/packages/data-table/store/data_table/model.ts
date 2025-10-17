@@ -21,7 +21,7 @@ export interface DataTableModelSettings {
   /** When true, shows checkboxes enabling selection. Selected events store in selectedEventIds **/
   showCheckboxes: boolean;
   /**  Specifies which column the data table is sorted on, and the direction (ascending / descending) */
-  sort: SortColumnTable[];
+  sort: SortColumnTable[]; // TODO this was made optional in the initial commit; why?
   title: string;
   unit?: (n: number) => string | React.ReactNode;
 }

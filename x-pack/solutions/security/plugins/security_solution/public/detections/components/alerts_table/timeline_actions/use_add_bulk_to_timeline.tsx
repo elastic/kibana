@@ -119,7 +119,7 @@ export const useAddBulkToTimelineAction = ({
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
 
   const timelineQuerySortField = useMemo(() => {
-    return sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
+    return sort?.map(({ columnId, columnType, esTypes, sortDirection }) => ({
       field: columnId,
       direction: sortDirection as Direction,
       esTypes: esTypes ?? [],

@@ -25,8 +25,6 @@ import {
   EuiSuperDatePicker,
   EuiTextColor,
 } from '@elastic/eui';
-import { useUserData } from '../../../../detections/components/user_info';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { TableHeaderTooltipCell } from '../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -40,6 +38,7 @@ import { useFindGapsForRule } from '../../api/hooks/use_find_gaps_for_rule';
 import { FillGap } from './fill_gap';
 import { FillRuleGapsButton } from './fill_rule_gaps_button';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const DatePickerEuiFlexItem = styled(EuiFlexItem)`
   max-width: 582px;
@@ -176,14 +175,13 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     start: 'now-24h',
     end: 'now',
   });
-  const [{ canUserCRUD }] = useUserData();
   const { timelines } = useKibana().services;
-  const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
+  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
   const [refreshInterval, setRefreshInterval] = useState(1000);
   const [isPaused, setIsPaused] = useState(true);
   const [selectedStatuses, setSelectedStatuses] = useState<GapStatus[]>([]);
   const isBulkFillRuleGapsEnabled = useIsExperimentalFeatureEnabled('bulkFillRuleGapsEnabled');
-  const isFillRuleGapsButtonEnabled = hasCRUDPermissions && isBulkFillRuleGapsEnabled;
+  const isFillRuleGapsButtonEnabled = canEditRules && isBulkFillRuleGapsEnabled;
   const [sort, setSort] = useState<{ field: keyof Gap; direction: 'desc' | 'asc' }>({
     field: '@timestamp',
     direction: 'desc',
@@ -215,7 +213,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     totalItemCount: Math.min(totalItemCount, MaxItemCount),
   };
 
-  const columns = getGapsTableColumns(hasCRUDPermissions, ruleId, enabled);
+  const columns = getGapsTableColumns(canEditRules, ruleId, enabled);
 
   const onRefreshCallback = () => {
     refetch();

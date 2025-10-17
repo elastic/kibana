@@ -97,8 +97,8 @@ describe('Capabilities', { tags: '@serverless' }, () => {
       },
     },
     {
-      name: 'User with siem v4 role',
-      loginAs: 'siemV4',
+      name: 'User with siem v5 role',
+      loginAs: 'siemV5',
       setup: () => {
         cy.task('createServerlessCustomRole', {
           roleDescriptor: {
@@ -107,16 +107,16 @@ describe('Capabilities', { tags: '@serverless' }, () => {
             },
             kibana: [
               {
-                feature: { siemV4: ['all'], fleet: ['all'] },
+                feature: { siemV5: ['all'], securitySolutionRulesV1: ['all'], fleet: ['all'] },
                 spaces: ['*'],
               },
             ],
           },
-          roleName: 'siemV4',
+          roleName: 'siemV5',
         });
       },
       teardown: () => {
-        cy.task('deleteServerlessCustomRole', 'siemV4');
+        cy.task('deleteServerlessCustomRole', 'siemV5');
       },
     },
   ];

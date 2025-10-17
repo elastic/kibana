@@ -11,7 +11,7 @@ import type {
   KibanaRequest,
   KibanaResponseFactory,
 } from '@kbn/core/server';
-import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { ProductFeatureRulesKey } from '@kbn/security-solution-features/keys';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { installSecurityAiPromptsPackage } from '../../logic/integrations/install_ai_prompts';
 import type {
@@ -47,7 +47,7 @@ export const bootstrapPrebuiltRulesHandler = async (
 
     const productFeatureService = securityContext.getProductFeatureService();
     const isExternalDetectionsEnabled = productFeatureService.isEnabled(
-      ProductFeatureSecurityKey.externalDetections
+      ProductFeatureRulesKey.externalDetections
     );
 
     const packageResults: PackageInstallStatus[] = [];
