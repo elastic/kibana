@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 // TODO: refactor this file to be more composable, easier to read and test
-/* eslint-disable no-continue */
 
 import moment from 'moment-timezone';
 import type { Document, Node, Pair, Scalar } from 'yaml';
