@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { timeRangeSchema } from './src/time_range';
-export { querySchema } from './src/query';
-export { filterSchema } from './src/filter';
-export { projectRoutingSchema } from './src/project_routing';
+import { schema } from '@kbn/config-schema';
 
-export type {
-  TimeRange,
-  AbsoluteTimeRange,
-  RelativeTimeRange,
-  Filter,
-  FilterMeta,
-  AggregateQuery,
-  Query,
-} from './src/types';
+export const projectRoutingSchema = schema.oneOf([
+  schema.object({
+    type: schema.literal('origin'),
+  }),
+  schema.object({
+    type: schema.literal('all'),
+  }),
+  schema.object({
+    type: schema.literal('custom'),
+    projects: schema.arrayOf(schema.string()),
+  }),
+]);

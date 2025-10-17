@@ -9,6 +9,7 @@ import type {
   AggregateQuery,
   ExecutionContextSearch,
   Filter,
+  ProjectRouting,
   Query,
   TimeRange,
 } from '@kbn/es-query';
@@ -239,6 +240,7 @@ export type LensApiCallbacks = Simplify<ViewInDiscoverCallbacks & IntegrationCal
 
 export interface LensUnifiedSearchContext {
   filters?: Filter[];
+  projectRouting?: ProjectRouting;
   query?: Query | AggregateQuery;
   timeRange?: TimeRange;
   timeslice?: [number, number];

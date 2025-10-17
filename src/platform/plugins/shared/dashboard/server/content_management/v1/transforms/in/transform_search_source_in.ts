@@ -8,14 +8,20 @@
  */
 
 import { extractReferences } from '@kbn/data-plugin/common';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { DashboardAttributes } from '../../types';
 import { logger } from '../../../../kibana_services';
 
 export function transformSearchSourceIn(
   filters?: DashboardAttributes['filters'],
-  query?: DashboardAttributes['query']
+  query?: DashboardAttributes['query'],
+  projectRouting?: ProjectRouting
 ) {
-  if (!filters && !query) {
+  // Exclude default 'origin' projectRouting to keep saved objects clean
+  const shouldIncludeProjectRouting =
+    projectRouting && projectRouting.type !== 'origin' ? projectRouting : undefined;
+
+  if (!filters && !query && !shouldIncludeProjectRouting) {
     return { searchSourceJSON: '{}', references: [] };
   }
 
@@ -25,6 +31,7 @@ export function transformSearchSourceIn(
     const [extractedState, references] = extractReferences({
       filter: filters,
       query,
+      projectRouting: shouldIncludeProjectRouting,
     });
     return { searchSourceJSON: JSON.stringify(extractedState), references };
   } catch (error) {

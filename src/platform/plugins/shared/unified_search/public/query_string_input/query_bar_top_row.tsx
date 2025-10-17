@@ -283,6 +283,7 @@ export const QueryBarTopRow = React.memo(
   function QueryBarTopRow<QT extends Query | AggregateQuery = Query>(
     props: QueryBarTopRowProps<QT>
   ) {
+    console.log('ptops', props)
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const [isSendingToBackground, setIsSendingToBackground] = useState(false);

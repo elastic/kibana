@@ -84,6 +84,7 @@ export const selectSavedObjectFormat = createSelector(
     selectDatasourceStates,
     selectQuery,
     selectFilters,
+    selectProjectRouting,
     selectActiveDatasourceId,
     selectAdHocDataViews,
     selectInjectedDependencies as SelectInjectedDependenciesFunction<{
