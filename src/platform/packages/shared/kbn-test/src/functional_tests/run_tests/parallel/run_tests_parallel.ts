@@ -175,8 +175,10 @@ export async function runTestsParallel(
       continue;
     }
 
+    const id = uniqueId();
+
     const runner = new ConfigRunner({
-      index: uniqueId(),
+      index: id,
       log,
       ports,
       path: config,
@@ -185,6 +187,7 @@ export async function runTestsParallel(
         args: [
           `scripts/functional_tests`,
           `--config=${config}`,
+          `--base-path=${Path.join(REPO_ROOT, '.es', id)}`,
           ...extraArgsList.flat().map((arg) => {
             return String(arg);
           }),
@@ -221,7 +224,7 @@ export async function runTestsParallel(
       const usage = process.resourceUsage();
       const memory = process.memoryUsage();
       const loadAvg = os.loadavg();
-      const freeMemMb = os.freemem() / (1024 * 1024);
+      const freeMemMb = getAvailableMemory();
       const totalMemMb = os.totalmem() / (1024 * 1024);
 
       const userDelta = previousResourceUsage
@@ -333,6 +336,7 @@ export async function runTestsParallel(
       slot,
       startedAt: Date.now(),
     };
+
     runnerStates.set(path, state);
     let released = false;
 
