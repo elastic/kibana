@@ -227,6 +227,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       let inferenceToModelIdMap = state.inferenceToModelIdMap;
       setIsUpdatingMappings(true);
       try {
+        await ml?.mlApi?.savedObjects.syncSavedObjects();
         if (isSemanticTextEnabled && hasMLPermissions && hasSemanticText && !forceSaveMappings) {
           inferenceToModelIdMap = await fetchInferenceToModelIdMap();
         }
