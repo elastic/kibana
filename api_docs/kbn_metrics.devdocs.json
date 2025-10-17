@@ -9,18 +9,10 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/metrics",
-        "id": "def-common.PrometheusExporter",
+        "id": "def-server.PrometheusExporter",
         "type": "Class",
         "tags": [
           "privateRemarks"
@@ -32,9 +24,9 @@
         "signature": [
           {
             "pluginId": "@kbn/metrics",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnMetricsPluginApi",
-            "section": "def-common.PrometheusExporter",
+            "section": "def-server.PrometheusExporter",
             "text": "PrometheusExporter"
           },
           " extends ",
@@ -46,7 +38,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/metrics",
-            "id": "def-common.PrometheusExporter.instance",
+            "id": "def-server.PrometheusExporter.instance",
             "type": "Object",
             "tags": [
               "private"
@@ -58,9 +50,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/metrics",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnMetricsPluginApi",
-                "section": "def-common.PrometheusExporter",
+                "section": "def-server.PrometheusExporter",
                 "text": "PrometheusExporter"
               },
               " | undefined"
@@ -71,7 +63,7 @@
           },
           {
             "parentPluginId": "@kbn/metrics",
-            "id": "def-common.PrometheusExporter.get",
+            "id": "def-server.PrometheusExporter.get",
             "type": "Function",
             "tags": [],
             "label": "get",
@@ -82,9 +74,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/metrics",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnMetricsPluginApi",
-                "section": "def-common.PrometheusExporter",
+                "section": "def-server.PrometheusExporter",
                 "text": "PrometheusExporter"
               }
             ],
@@ -96,7 +88,7 @@
           },
           {
             "parentPluginId": "@kbn/metrics",
-            "id": "def-common.PrometheusExporter.destroy",
+            "id": "def-server.PrometheusExporter.destroy",
             "type": "Function",
             "tags": [
               "privateRemarks"
@@ -116,7 +108,7 @@
           },
           {
             "parentPluginId": "@kbn/metrics",
-            "id": "def-common.PrometheusExporter.selectAggregationTemporality",
+            "id": "def-server.PrometheusExporter.selectAggregationTemporality",
             "type": "Function",
             "tags": [],
             "label": "selectAggregationTemporality",
@@ -135,7 +127,7 @@
           },
           {
             "parentPluginId": "@kbn/metrics",
-            "id": "def-common.PrometheusExporter.onForceFlush",
+            "id": "def-server.PrometheusExporter.onForceFlush",
             "type": "Function",
             "tags": [
               "protected"
@@ -155,7 +147,7 @@
           },
           {
             "parentPluginId": "@kbn/metrics",
-            "id": "def-common.PrometheusExporter.onShutdown",
+            "id": "def-server.PrometheusExporter.onShutdown",
             "type": "Function",
             "tags": [
               "protected"
@@ -175,7 +167,7 @@
           },
           {
             "parentPluginId": "@kbn/metrics",
-            "id": "def-common.PrometheusExporter.exportMetrics",
+            "id": "def-server.PrometheusExporter.exportMetrics",
             "type": "Function",
             "tags": [],
             "label": "exportMetrics",
@@ -195,7 +187,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/metrics",
-                "id": "def-common.PrometheusExporter.exportMetrics.$1",
+                "id": "def-server.PrometheusExporter.exportMetrics.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "res",
@@ -220,7 +212,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/metrics",
-        "id": "def-common.initMetrics",
+        "id": "def-server.initMetrics",
         "type": "Function",
         "tags": [],
         "label": "initMetrics",
@@ -231,9 +223,9 @@
           "(initMetricsOptions: ",
           {
             "pluginId": "@kbn/metrics",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnMetricsPluginApi",
-            "section": "def-common.InitMetricsOptions",
+            "section": "def-server.InitMetricsOptions",
             "text": "InitMetricsOptions"
           },
           ") => void"
@@ -244,7 +236,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/metrics",
-            "id": "def-common.initMetrics.$1",
+            "id": "def-server.initMetrics.$1",
             "type": "Object",
             "tags": [],
             "label": "initMetricsOptions",
@@ -254,9 +246,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/metrics",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnMetricsPluginApi",
-                "section": "def-common.InitMetricsOptions",
+                "section": "def-server.InitMetricsOptions",
                 "text": "InitMetricsOptions"
               }
             ],
@@ -273,7 +265,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/metrics",
-        "id": "def-common.InitMetricsOptions",
+        "id": "def-server.InitMetricsOptions",
         "type": "Interface",
         "tags": [],
         "label": "InitMetricsOptions",
@@ -286,7 +278,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/metrics",
-            "id": "def-common.InitMetricsOptions.resource",
+            "id": "def-server.InitMetricsOptions.resource",
             "type": "Object",
             "tags": [],
             "label": "resource",
@@ -302,7 +294,7 @@
           },
           {
             "parentPluginId": "@kbn/metrics",
-            "id": "def-common.InitMetricsOptions.metricsConfig",
+            "id": "def-server.InitMetricsOptions.metricsConfig",
             "type": "Object",
             "tags": [],
             "label": "metricsConfig",
@@ -324,7 +316,7 @@
           },
           {
             "parentPluginId": "@kbn/metrics",
-            "id": "def-common.InitMetricsOptions.monitoringCollectionConfig",
+            "id": "def-server.InitMetricsOptions.monitoringCollectionConfig",
             "type": "Object",
             "tags": [],
             "label": "monitoringCollectionConfig",
@@ -342,6 +334,14 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []
