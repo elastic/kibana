@@ -492,7 +492,6 @@ describe('<TemplateCreate />', () => {
             indexPatterns: ['logs-*-*'],
             allowAutoCreate: 'NO_OVERWRITE',
             indexMode: 'logsdb',
-            dataStream: {},
             _kbnMeta: {
               type: 'default',
               hasDatastream: false,
