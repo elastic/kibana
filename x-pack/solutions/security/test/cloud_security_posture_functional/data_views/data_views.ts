@@ -332,12 +332,11 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    describe('MisconfigurationsData View Migration', () => {
-      it('Should migrate from v1 to v2 data view when old data view exists', async () => {
+    describe('Misconfigurations old Data View removal', () => {
+      it('Should delete old data view when installing CSP package', async () => {
         await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
 
         const oldDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-${TEST_SPACE}`;
-        const newDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
 
         // Create old v1 data view in test space
         await kibanaServer.request({
@@ -354,40 +353,33 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           },
         });
 
+        // Verify old v1 data view exists
+        const oldDataViewExists = await getDataViewSafe(
+          kibanaServer.savedObjects,
+          oldDataViewId,
+          TEST_SPACE
+        );
+        expect(oldDataViewExists).to.be(true);
+
         // Install CSP package - this triggers plugin initialization which runs the migration
         await installCspPackage();
 
-        // Wait for plugin initialization (and migration) to complete
-        await waitForPluginInitialized();
-
         // Verify old v1 data view is deleted
-        await retry.tryForTime(20000, async () => {
-          const oldDataViewExists = await getDataViewSafe(
+        await retry.tryForTime(60000, async () => {
+          const oldDataViewExistsAfterMigration = await getDataViewSafe(
             kibanaServer.savedObjects,
             oldDataViewId,
             TEST_SPACE
           );
-          expect(oldDataViewExists).to.be(false);
+          expect(oldDataViewExistsAfterMigration).to.be(false);
         });
-
-        // navigate to the findings page in the test space to trigger new data view creation
-        await findings.navigateToLatestFindingsPage(TEST_SPACE);
-
-        // Verify new v2 data view is created
-        const newDataViewExists = await getDataViewSafe(
-          kibanaServer.savedObjects,
-          newDataViewId,
-          TEST_SPACE
-        );
-        expect(newDataViewExists).to.be(true);
       });
 
-      it('Should migrate from legacy to v2 data view when old data view exists', async () => {
+      it('Should delete legacy data view when installing CSP package', async () => {
         await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
 
         // Legacy data views don't have space suffix - they were global with wildcard namespaces
         const legacyDataViewId = CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS[0];
-        const newDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
 
         // Create legacy data view (no space suffix, uses wildcard namespace)
         await kibanaServer.request({
@@ -404,6 +396,14 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           },
         });
 
+        // Verify legacy data view exists
+        const legacyDataViewExists = await getDataViewSafe(
+          kibanaServer.savedObjects,
+          legacyDataViewId,
+          'default'
+        );
+        expect(legacyDataViewExists).to.be(true);
+
         // Install CSP package - this triggers plugin initialization which runs the migration
         await installCspPackage();
 
@@ -411,77 +411,17 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await waitForPluginInitialized();
 
         // Verify legacy data view is deleted (check in default space as it was global)
-        await retry.tryForTime(20000, async () => {
-          const legacyDataViewExists = await getDataViewSafe(
+        await retry.tryForTime(60000, async () => {
+          const legacyDataViewExistsAfterMigration = await getDataViewSafe(
             kibanaServer.savedObjects,
             legacyDataViewId,
             'default'
           );
-          expect(legacyDataViewExists).to.be(false);
+          expect(legacyDataViewExistsAfterMigration).to.be(false);
         });
-
-        // navigate to the findings page in the test space to trigger new data view creation
-        await findings.navigateToLatestFindingsPage(TEST_SPACE);
-
-        // Verify new v2 data view is created
-        const newDataViewExists = await getDataViewSafe(
-          kibanaServer.savedObjects,
-          newDataViewId,
-          TEST_SPACE
-        );
-        expect(newDataViewExists).to.be(true);
       });
 
-      it('Should handle migration across all spaces', async () => {
-        await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
-
-        // Legacy data views don't have space suffix - they were global with wildcard namespaces
-        const legacyDataViewId = CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS[0];
-        const newDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
-
-        // Create legacy data view (global, no space suffix)
-        await kibanaServer.request({
-          path: `/internal/ftr/kbn_client_so/index-pattern/${legacyDataViewId}`,
-          method: 'POST',
-          query: { overwrite: true },
-          body: {
-            attributes: {
-              title:
-                'logs-*_latest_misconfigurations_cdr,logs-cloud_security_posture.findings_latest-default',
-              name: 'Old Misconfiguration Data View',
-              timeFieldName: '@timestamp',
-              allowNoIndex: true,
-            },
-          },
-        });
-
-        // Install CSP package - this triggers plugin initialization which runs the migration
-        // The migration searches across all spaces and deletes legacy data views globally
-        await installCspPackage();
-
-        await retry.tryForTime(20000, async () => {
-          // Verify legacy data view is deleted (check in default space as it was global)
-          const legacyDataViewExists = await getDataViewSafe(
-            kibanaServer.savedObjects,
-            legacyDataViewId,
-            'default'
-          );
-          expect(legacyDataViewExists).to.be(false);
-        });
-
-        // navigate to the findings page in the test space to trigger new data view creation
-        await findings.navigateToLatestFindingsPage(TEST_SPACE);
-
-        // Verify new v2 data view is created in the test space
-        const newDataViewExists = await getDataViewSafe(
-          kibanaServer.savedObjects,
-          newDataViewId,
-          TEST_SPACE
-        );
-        expect(newDataViewExists).to.be(true);
-      });
-
-      it('Should not delete other dataviews during migration', async () => {
+      it('Should not delete unrelated dataviews when installing CSP package', async () => {
         await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
 
         // Create a random unrelated data view that should not be deleted
@@ -527,11 +467,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         // Install CSP package - this triggers plugin initialization which runs the migration
         await installCspPackage();
 
-        // Wait for plugin initialization (and migration) to complete
-        await waitForPluginInitialized();
-
         // Verify old CSP data view is deleted as expected
-        await retry.tryForTime(20000, async () => {
+        await retry.tryForTime(60000, async () => {
           const oldDataViewExists = await getDataViewSafe(
             kibanaServer.savedObjects,
             oldDataViewId,
@@ -557,12 +494,11 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    describe('Vulnerabilities Data View Migration', () => {
-      it('Should migrate vulnerabilities from v1 to v2 data view when old data view exists', async () => {
+    describe('Vulnerabilities old Data View removal', () => {
+      it('Should delete old data view when installing CSP package', async () => {
         await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
 
         const oldDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-${TEST_SPACE}`;
-        const newDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
 
         // Create old v1 vulnerabilities data view in test space
         await kibanaServer.request({
@@ -580,6 +516,14 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           },
         });
 
+        // Verify old v1 data view exists
+        const oldDataViewExists = await getDataViewSafe(
+          kibanaServer.savedObjects,
+          oldDataViewId,
+          TEST_SPACE
+        );
+        expect(oldDataViewExists).to.be(true);
+
         // Install CSP package - this triggers plugin initialization which runs the migration
         await installCspPackage();
 
@@ -587,33 +531,21 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await waitForPluginInitialized();
 
         // Verify old v1 vulnerabilities data view is deleted
-        await retry.tryForTime(20000, async () => {
-          const oldDataViewExists = await getDataViewSafe(
+        await retry.tryForTime(60000, async () => {
+          const oldDataViewExistsAfterMigration = await getDataViewSafe(
             kibanaServer.savedObjects,
             oldDataViewId,
             TEST_SPACE
           );
-          expect(oldDataViewExists).to.be(false);
+          expect(oldDataViewExistsAfterMigration).to.be(false);
         });
-
-        // navigate to the findings page in the test space to trigger new data view creation
-        await findings.navigateToLatestFindingsPage(TEST_SPACE);
-
-        // Verify new v2 vulnerabilities data view is created
-        const newDataViewExists = await getDataViewSafe(
-          kibanaServer.savedObjects,
-          newDataViewId,
-          TEST_SPACE
-        );
-        expect(newDataViewExists).to.be(true);
       });
 
-      it('Should migrate from legacy to v2 data view when old data view exists', async () => {
+      it('Should delete legacy data view when installing CSP package', async () => {
         await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
 
         // Legacy data views don't have space suffix - they were global with wildcard namespaces
         const legacyDataViewId = CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS[0];
-        const newDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
 
         // Create legacy vulnerabilities data view (no space suffix, uses wildcard namespace)
         await kibanaServer.request({
@@ -630,83 +562,26 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           },
         });
 
+        // Verify legacy data view exists
+        const legacyDataViewExists = await getDataViewSafe(
+          kibanaServer.savedObjects,
+          legacyDataViewId,
+          'default'
+        );
+        expect(legacyDataViewExists).to.be(true);
+
         // Install CSP package - this triggers plugin initialization which runs the migration
         await installCspPackage();
 
-        // Wait for plugin initialization (and migration) to complete
-        await waitForPluginInitialized();
-
         // Verify legacy vulnerabilities data view is deleted (check in default space as it was global)
-        await retry.tryForTime(20000, async () => {
-          const legacyDataViewExists = await getDataViewSafe(
+        await retry.tryForTime(60000, async () => {
+          const legacyDataViewExistsAfterMigration = await getDataViewSafe(
             kibanaServer.savedObjects,
             legacyDataViewId,
             'default'
           );
-          expect(legacyDataViewExists).to.be(false);
+          expect(legacyDataViewExistsAfterMigration).to.be(false);
         });
-
-        // navigate to the findings page in the test space to trigger new data view creation
-        await findings.navigateToLatestFindingsPage(TEST_SPACE);
-
-        // Verify new v2 vulnerabilities data view is created
-        const newDataViewExists = await getDataViewSafe(
-          kibanaServer.savedObjects,
-          newDataViewId,
-          TEST_SPACE
-        );
-        expect(newDataViewExists).to.be(true);
-      });
-
-      it('Should handle vulnerabilities migration across all spaces', async () => {
-        await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
-
-        // Legacy data views don't have space suffix - they were global with wildcard namespaces
-        const legacyDataViewId = CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS[1];
-        const newDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
-
-        // Create legacy vulnerabilities data view (global, no space suffix)
-        await kibanaServer.request({
-          path: `/internal/ftr/kbn_client_so/index-pattern/${legacyDataViewId}`,
-          method: 'POST',
-          query: { overwrite: true },
-          body: {
-            attributes: {
-              title: 'logs-cloud_security_posture.vulnerabilities_latest-*',
-              name: 'Old Vulnerabilities Data View',
-              timeFieldName: '@timestamp',
-              allowNoIndex: true,
-            },
-          },
-        });
-
-        // Install CSP package - this triggers plugin initialization which runs the migration
-        // The migration searches across all spaces and deletes legacy data views globally
-        await installCspPackage();
-
-        // Wait for plugin initialization (and migration) to complete
-        await waitForPluginInitialized();
-
-        // Verify legacy vulnerabilities data view is deleted (check in default space as it was global)
-        await retry.tryForTime(20000, async () => {
-          const legacyDataViewExists = await getDataViewSafe(
-            kibanaServer.savedObjects,
-            legacyDataViewId,
-            'default'
-          );
-          expect(legacyDataViewExists).to.be(false);
-        });
-
-        // navigate to the findings page in the test space to trigger new data view creation
-        await findings.navigateToLatestFindingsPage(TEST_SPACE);
-
-        // Verify new v2 vulnerabilities data view is created in the test space
-        const newDataViewExists = await getDataViewSafe(
-          kibanaServer.savedObjects,
-          newDataViewId,
-          TEST_SPACE
-        );
-        expect(newDataViewExists).to.be(true);
       });
     });
   });

@@ -118,12 +118,12 @@ export const installDataView = async (
   }
 };
 
-export const migrateCdrDataViewsForAllSpaces = async (
+export const deleteOldAndLegacyCdrDataViewsForAllSpaces = async (
   soClient: ISavedObjectsRepository,
   logger: Logger
 ) => {
   try {
-    logger.info('Starting CDR data views migration across all spaces');
+    logger.info('Starting deletion of old and legacy CDR data views across all spaces');
 
     // Get all data views matching old prefixes
     const oldMisconfigurationsPrefixes = CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS;
@@ -143,7 +143,7 @@ export const migrateCdrDataViewsForAllSpaces = async (
 
     if (allDataViewsResult.total > 1000) {
       logger.warn(
-        `Total data views (${allDataViewsResult.total}) exceeds page limit (1000). Some old data views may not be migrated.`
+        `Total data views (${allDataViewsResult.total}) exceeds page limit (1000). Some old data views may not be deleted.`
       );
     }
 
@@ -169,36 +169,36 @@ export const migrateCdrDataViewsForAllSpaces = async (
     for (const dataView of legacyMisconfigurationsDataViews) {
       const namespace = dataView.namespaces?.[0] || DEFAULT_SPACE_ID;
       logger.info(
-        `Found legacy misconfigurations data view: ${dataView.id} in namespace: ${dataView.namespaces}, migrating...`
+        `Found legacy misconfigurations data view: ${dataView.id} in namespace: ${dataView.namespaces}, deleting...`
       );
       await deleteDataViewSafe(soClient, dataView.id, namespace, logger);
     }
 
     // Delete legacy vulnerabilities data views
     for (const dataView of legacyVulnerabilitiesDataViews) {
-      logger.info(`Found legacy vulnerabilities data view: ${dataView.id}, migrating...`);
+      logger.info(`Found legacy vulnerabilities data view: ${dataView.id}, deleting...`);
       const namespace = dataView.namespaces?.[0] || DEFAULT_SPACE_ID;
       await deleteDataViewSafe(soClient, dataView.id, namespace, logger);
     }
 
     // Delete old misconfigurations data views
     for (const dataView of oldMisconfigurationsDataViews) {
-      logger.info(`Found old misconfigurations data view: ${dataView.id}, migrating...`);
+      logger.info(`Found old misconfigurations data view: ${dataView.id}, deleting...`);
       const namespace = dataView.namespaces?.[0] || DEFAULT_SPACE_ID;
       await deleteDataViewSafe(soClient, dataView.id, namespace, logger);
     }
 
     // Delete old vulnerabilities data views
     for (const dataView of oldVulnerabilitiesDataViews) {
-      logger.info(`Found old vulnerabilities data view: ${dataView.id}, migrating...`);
+      logger.info(`Found old vulnerabilities data view: ${dataView.id}, deleting...`);
       const namespace = dataView.namespaces?.[0] || DEFAULT_SPACE_ID;
       await deleteDataViewSafe(soClient, dataView.id, namespace, logger);
     }
 
-    logger.info('CDR data views migration completed successfully');
+    logger.info('Deletion of old and legacy CDR data views completed successfully');
   } catch (error) {
-    logger.error('Failed to migrate CDR data views', error);
-    // Don't throw - migration failure shouldn't block initialization
+    logger.error('Failed to delete old and legacy CDR data views', error);
+    // Don't throw - deletion failure shouldn't block plugin initialization
   }
 };
 

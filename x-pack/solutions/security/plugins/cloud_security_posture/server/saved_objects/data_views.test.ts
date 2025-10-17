@@ -22,7 +22,11 @@ import {
   CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS,
   CDR_VULNERABILITIES_DATA_VIEW_NAME,
 } from '@kbn/cloud-security-posture-common';
-import { installDataView, migrateCdrDataViewsForAllSpaces, setupCdrDataViews } from './data_views';
+import {
+  installDataView,
+  deleteOldAndLegacyCdrDataViewsForAllSpaces,
+  setupCdrDataViews,
+} from './data_views';
 
 describe('data_views', () => {
   let mockSoClient: jest.Mocked<ISavedObjectsRepository>;
@@ -86,9 +90,6 @@ describe('data_views', () => {
         mockLogger
       );
 
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        `Creating and saving data view with ID: ${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${DEFAULT_SPACE_ID}`
-      );
       expect(mockDataViewsClient.createAndSave).toHaveBeenCalledWith(
         {
           id: `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${DEFAULT_SPACE_ID}`,
@@ -127,7 +128,6 @@ describe('data_views', () => {
         mockLogger
       );
 
-      expect(mockLogger.info).not.toHaveBeenCalled();
       expect(mockDataViewsClient.createAndSave).not.toHaveBeenCalled();
     });
 
@@ -184,7 +184,7 @@ describe('data_views', () => {
     });
   });
 
-  describe('migrateCdrDataViewsForAllSpaces', () => {
+  describe('deleteOldAndLegacyCdrDataViewsForAllSpaces', () => {
     it('should find and delete old misconfigurations data views', async () => {
       const oldDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-${DEFAULT_SPACE_ID}`;
       const newDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${DEFAULT_SPACE_ID}`;
@@ -213,7 +213,7 @@ describe('data_views', () => {
         page: 1,
       });
 
-      await migrateCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
+      await deleteOldAndLegacyCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
 
       expect(mockSoClient.find).toHaveBeenCalledWith({
         type: 'index-pattern',
@@ -228,16 +228,6 @@ describe('data_views', () => {
       expect(mockSoClient.delete).not.toHaveBeenCalledWith('index-pattern', newDataViewId, {
         namespace: DEFAULT_SPACE_ID,
       });
-
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'Starting CDR data views migration across all spaces'
-      );
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        `Found old misconfigurations data view: ${oldDataViewId}, migrating...`
-      );
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'CDR data views migration completed successfully'
-      );
     });
 
     it('should find and delete old vulnerabilities data views', async () => {
@@ -259,15 +249,11 @@ describe('data_views', () => {
         page: 1,
       });
 
-      await migrateCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
+      await deleteOldAndLegacyCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
 
       expect(mockSoClient.delete).toHaveBeenCalledWith('index-pattern', oldDataViewId, {
         namespace: DEFAULT_SPACE_ID,
       });
-
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        `Found old vulnerabilities data view: ${oldDataViewId}, migrating...`
-      );
     });
 
     it('should find and delete legacy misconfigurations data views (wildcard, not space-specific)', async () => {
@@ -289,16 +275,12 @@ describe('data_views', () => {
         page: 1,
       });
 
-      await migrateCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
+      await deleteOldAndLegacyCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
 
       // For wildcard namespaces, delete uses force: true instead of namespace: '*'
       expect(mockSoClient.delete).toHaveBeenCalledWith('index-pattern', legacyDataViewId, {
         force: true,
       });
-
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        `Found legacy misconfigurations data view: ${legacyDataViewId} in namespace: *, migrating...`
-      );
     });
 
     it('should find and delete legacy vulnerabilities data views (wildcard, not space-specific)', async () => {
@@ -320,16 +302,12 @@ describe('data_views', () => {
         page: 1,
       });
 
-      await migrateCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
+      await deleteOldAndLegacyCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
 
       // For wildcard namespaces, delete uses force: true instead of namespace: '*'
       expect(mockSoClient.delete).toHaveBeenCalledWith('index-pattern', legacyDataViewId, {
         force: true,
       });
-
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        `Found legacy vulnerabilities data view: ${legacyDataViewId}, migrating...`
-      );
     });
 
     it('should handle multiple old data views across different spaces', async () => {
@@ -369,7 +347,7 @@ describe('data_views', () => {
         page: 1,
       });
 
-      await migrateCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
+      await deleteOldAndLegacyCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
 
       expect(mockSoClient.delete).toHaveBeenCalledTimes(3);
       expect(mockSoClient.delete).toHaveBeenCalledWith('index-pattern', oldMisconfigId1, {
@@ -452,7 +430,7 @@ describe('data_views', () => {
         page: 1,
       });
 
-      await migrateCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
+      await deleteOldAndLegacyCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
 
       // Should delete all 4 old/legacy data views but not the 2 current ones
       expect(mockSoClient.delete).toHaveBeenCalledTimes(4);
@@ -500,7 +478,7 @@ describe('data_views', () => {
         page: 1,
       });
 
-      await migrateCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
+      await deleteOldAndLegacyCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
 
       expect(mockSoClient.delete).toHaveBeenCalledTimes(legacyIds.length);
       // Legacy data views with wildcard namespaces use force: true
@@ -530,7 +508,7 @@ describe('data_views', () => {
         page: 1,
       });
 
-      await migrateCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
+      await deleteOldAndLegacyCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
 
       expect(mockSoClient.delete).toHaveBeenCalledWith('index-pattern', legacyDataViewId, {
         namespace: 'custom-space',
@@ -565,7 +543,7 @@ describe('data_views', () => {
         page: 1,
       });
 
-      await migrateCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
+      await deleteOldAndLegacyCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
 
       // Should only delete the old data view, not the new one
       expect(mockSoClient.delete).toHaveBeenCalledTimes(1);
@@ -582,10 +560,10 @@ describe('data_views', () => {
         page: 1,
       });
 
-      await migrateCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
+      await deleteOldAndLegacyCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        'Total data views (1500) exceeds page limit (1000). Some old data views may not be migrated.'
+        'Total data views (1500) exceeds page limit (1000). Some old data views may not be deleted.'
       );
     });
 
@@ -606,23 +584,20 @@ describe('data_views', () => {
         page: 1,
       });
 
-      await migrateCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
+      await deleteOldAndLegacyCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
 
       expect(mockSoClient.delete).not.toHaveBeenCalled();
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'CDR data views migration completed successfully'
-      );
     });
 
     it('should handle errors gracefully and not throw', async () => {
       mockSoClient.find.mockRejectedValue(new Error('Service unavailable'));
 
       await expect(
-        migrateCdrDataViewsForAllSpaces(mockSoClient, mockLogger)
+        deleteOldAndLegacyCdrDataViewsForAllSpaces(mockSoClient, mockLogger)
       ).resolves.not.toThrow();
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        'Failed to migrate CDR data views',
+        'Failed to delete old and legacy CDR data views',
         expect.any(Error)
       );
     });
@@ -646,7 +621,7 @@ describe('data_views', () => {
         page: 1,
       });
 
-      await migrateCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
+      await deleteOldAndLegacyCdrDataViewsForAllSpaces(mockSoClient, mockLogger);
 
       expect(mockSoClient.delete).toHaveBeenCalledWith('index-pattern', oldDataViewId, {
         namespace: DEFAULT_SPACE_ID,

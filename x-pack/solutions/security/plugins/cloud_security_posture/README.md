@@ -8,7 +8,12 @@ Cloud Posture automates the identification and remediation of risks across cloud
 
 Read [Kibana Contributing Guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) for more details
 
-### Data View Versioning
+### DataView Migration Logic
+
+The data view migration is split into two parts:
+
+1. Deletion of old and legacy data views during the plugin initialization (only runs once when the CSP package is installed or when Kibana is started)
+2. Creation of new data views when the user navigates to the CSP page (the check runs every time the user navigates to the CSP page to see if the data views need to be created)
 
 When making changes to CSP data views, follow these guidelines:
 
@@ -41,17 +46,11 @@ Create a new data view version when:
      'security_solution_cdr_latest_misconfigurations_v3'; // Updated to v3
    ```
 
-2. **Migration Logic** in `server/saved_objects/data_views.ts`:
-
-   - The `migrateCdrDataViewsForAllSpaces()` function automatically handles all versions in the arrays
-   - Migration runs during plugin initialization when the CSP package is installed
-   - Both legacy (global) and versioned (space-specific) data views are supported
-
-3. **Add Tests** in `test/cloud_security_posture_functional/data_views/data_views.ts`:
-   - Test migration from v1 to current version (with space suffix)
-   - Test migration from legacy to current version (global to space-specific)
-   - Test migration across all spaces
-   - Test fresh installations with navigation-triggered data view creation
+2. **Update Tests** in `test/cloud_security_posture_functional/data_views/data_views.ts`:
+   - Test deletion from v1 to current version (with space suffix)
+   - Test deletion from legacy to current version (global to space-specific)
+   - Test deletion of old and legacy data views during plugin initialization
+   - Test creation of new data views when the user navigates to the CSP page
 
 #### Example: Moving from v2 to v3
 
