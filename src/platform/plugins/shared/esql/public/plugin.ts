@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -25,6 +25,7 @@ import { registerIndexEditorActions, registerIndexEditorAnalyticsEvents } from '
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import type { BuildFlavor } from '@kbn/config';
 import {
   ESQL_CONTROL_TRIGGER,
   esqlControlTrigger,
@@ -62,9 +63,12 @@ export interface EsqlPluginStart {
     taskType: InferenceTaskType
   ) => Promise<InferenceEndpointsAutocompleteResult>;
   variablesService: EsqlVariablesService;
+  buildFlavor: BuildFlavor;
 }
 
 export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
+  constructor(private readonly initContext: PluginInitializerContext) {}
+
   public setup(core: CoreSetup, { uiActions }: EsqlPluginSetupDependencies) {
     uiActions.registerTrigger(updateESQLQueryTrigger);
     uiActions.registerTrigger(esqlControlTrigger);
@@ -89,6 +93,8 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       share,
     }: EsqlPluginStartDependencies
   ): EsqlPluginStart {
+    const buildFlavor = this.initContext.env.packageInfo.buildFlavor;
+
     const storage = new Storage(localStorage);
 
     // Register triggers
@@ -187,6 +193,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
     );
 
     const start = {
+      buildFlavor,
       getJoinIndicesAutocomplete,
       getTimeseriesIndicesAutocomplete,
       getEditorExtensionsAutocomplete: cachedGetEditorExtensionsAutocomplete,

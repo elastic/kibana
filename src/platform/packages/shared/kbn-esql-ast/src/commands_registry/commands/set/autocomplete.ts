@@ -41,7 +41,7 @@ export async function autocomplete(
     if (hasSettingLeftSide) {
       return [{ ...assignCompletionItem, detail: '' }];
     } else {
-      return getSettingsCompletionItems();
+      return getSettingsCompletionItems(callbacks?.buildFlavor);
     }
   }
 

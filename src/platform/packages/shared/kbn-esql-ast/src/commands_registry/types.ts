@@ -15,6 +15,7 @@ import type {
 } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import type { BuildFlavor } from '@kbn/config';
 import type { ESQLLocation } from '../types';
 import type { FieldType, SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
@@ -142,6 +143,7 @@ export interface ICommandCallbacks {
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
   getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
+  buildFlavor?: BuildFlavor;
 }
 
 export interface ICommandContext {

@@ -137,7 +137,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
-  const { dataViews, application, core, fieldsMetadata, uiSettings, uiActions, data } =
+  const { dataViews, application, core, fieldsMetadata, uiSettings, uiActions, data, esql } =
     kibana.services;
 
   const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
@@ -598,6 +598,7 @@ const ESQLEditorInternal = function ESQLEditor({
       },
       getActiveProduct: () => core.pricing.getActiveProduct(),
       canCreateLookupIndex,
+      buildFlavor: kibana.services?.esql?.buildFlavor,
     };
     return callbacks;
   }, [
