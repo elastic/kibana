@@ -18,7 +18,6 @@ import type {
   CanAddNewSection,
   CanExpandPanels,
   CanPinPanel,
-  CanAddPinnedPanel,
   HasLastSavedChildState,
   HasSerializedChildState,
   PassThroughContext,
