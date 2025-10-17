@@ -1007,8 +1007,12 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
       : {}),
   });
 
+  const now = Date.now();
+
   const readyPromise = waitUntilClusterReady({ client, expectedStatus: 'green', log }).then(
     async () => {
+      console.log(Math.round((Date.now() - now) / 1000) + 'ms');
+
       if (!options.ssl || !options.kibanaUrl) {
         return;
       }
