@@ -3,7 +3,18 @@
 This guide provides prompts to help you migrate existing FTR tests to the [Scout](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-scout) framework.
 
 > [!WARNING]
-> These prompts are experimental. Please carefully review all AI-generated code for mistakes before merging.
+> These prompts are experimental. Please carefully review all AI-generated code for mistakes before merging. We also highly encourage to make sure the tests you're migrating should be functional tests. If they
+
+## ⚠️ Before migrating a test
+
+First, it's **crucial** to determine if your FTR test should be migrated to a Scout functional test at all. Functional UI tests should focus on **user interactions** and **component rendering**, not on validating the underlying data from APIs. Migrating tests that are essentially data validation checks will lead to a slow and brittle test suite.
+
+### Example: testing a table
+
+Let's suppose you have an FTR test that validates a data table.
+
+- **Avoid** testing the specific contents of the cells. A test asserting that the table has exactly 15 rows and the value in row 3, column 2 is 'Complete' is a data validation test, not a UI functional test. Write an API test instead.
+- **Do** test that the table component renders and is interactive. A good functional test would assert that the table is visible, contains column headers, and displays at least one row of data. This confirms the UI is functioning correctly without being tightly coupled to the data itself.
 
 ## Recommended tools
 
