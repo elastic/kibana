@@ -29,7 +29,7 @@ describe('regex_evaluator', () => {
   });
 
   describe('createRegexEvaluator', () => {
-    it('returns 1 when regex matches response message', async () => {
+    it('returns 1.0 when regex matches response message', async () => {
       const evaluator = createRegexEvaluator();
       const context: EvaluatorContext = {
         conversation: createMockConversation(),
@@ -38,11 +38,11 @@ describe('regex_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result.score).toBe(1);
+      expect(result.score).toBe(1.0);
       expect(result.analysis).toBeUndefined();
     });
 
-    it('returns 0 when regex does not match response message', async () => {
+    it('returns 0.0 when regex does not match response message', async () => {
       const evaluator = createRegexEvaluator();
       const context: EvaluatorContext = {
         conversation: createMockConversation(),
@@ -51,7 +51,7 @@ describe('regex_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result.score).toBe(0);
+      expect(result.score).toBe(0.0);
     });
 
     it('handles case-sensitive patterns correctly', async () => {
@@ -63,14 +63,14 @@ describe('regex_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result.score).toBe(0);
+      expect(result.score).toBe(0.0);
 
       const contextInsensitive: EvaluatorContext = {
         ...context,
         customInstructions: 'world|World',
       };
       const resultInsensitive = await evaluator(contextInsensitive);
-      expect(resultInsensitive.score).toBe(1);
+      expect(resultInsensitive.score).toBe(1.0);
     });
 
     it('handles complex regex patterns with lookaheads', async () => {
@@ -82,7 +82,7 @@ describe('regex_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result.score).toBe(1);
+      expect(result.score).toBe(1.0);
     });
 
     it('handles regex patterns with groups', async () => {
@@ -94,7 +94,7 @@ describe('regex_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result.score).toBe(1);
+      expect(result.score).toBe(1.0);
     });
 
     it('handles regex patterns with special characters', async () => {
@@ -106,7 +106,7 @@ describe('regex_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result.score).toBe(1);
+      expect(result.score).toBe(1.0);
     });
 
     it('throws error when customInstructions is not a string', async () => {
@@ -142,7 +142,7 @@ describe('regex_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result.score).toBe(0);
+      expect(result.score).toBe(0.0);
     });
 
     it('handles empty regex pattern', async () => {
@@ -154,7 +154,7 @@ describe('regex_evaluator', () => {
       };
 
       const result = await evaluator(context);
-      expect(result.score).toBe(1);
+      expect(result.score).toBe(1.0);
     });
   });
 });

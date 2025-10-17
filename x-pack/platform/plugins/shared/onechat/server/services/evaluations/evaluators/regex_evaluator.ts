@@ -31,6 +31,6 @@ export const createRegexEvaluator = (): EvaluatorFunction => {
     const responseMessage = currentRound.response.message;
     const match = regex.test(responseMessage);
 
-    return { score: match ? 1 : 0 };
+    return { score: match ? 1.0 : 0.0 };
   };
 };
