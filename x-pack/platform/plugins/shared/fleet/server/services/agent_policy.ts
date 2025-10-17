@@ -1620,15 +1620,22 @@ class AgentPolicyService {
   public async deployPolicy(
     soClient: SavedObjectsClientContract,
     agentPolicyId: string,
-    agentPolicy?: AgentPolicy | null
+    agentPolicy?: AgentPolicy | null,
+    options?: { throwOnAgentlessError?: boolean }
   ) {
-    await this.deployPolicies(soClient, [agentPolicyId], agentPolicy ? [agentPolicy] : undefined);
+    await this.deployPolicies(
+      soClient,
+      [agentPolicyId],
+      agentPolicy ? [agentPolicy] : undefined,
+      options
+    );
   }
 
   public async deployPolicies(
     soClient: SavedObjectsClientContract,
     agentPolicyIds: string[],
-    agentPolicies?: AgentPolicy[]
+    agentPolicies?: AgentPolicy[],
+    options?: { throwOnAgentlessError?: boolean }
   ) {
     const logger = this.getLogger('deployPolicies');
     logger.debug(
@@ -1766,6 +1773,9 @@ class AgentPolicyService {
           `[Agentless API] Error deploying agentless deployment for single agent policy id ${agentPolicy.id}`,
           { error }
         );
+        if (options?.throwOnAgentlessError) {
+          throw error;
+        }
       }
     }
 
