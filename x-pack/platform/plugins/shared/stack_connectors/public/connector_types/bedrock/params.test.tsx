@@ -23,7 +23,7 @@ const messageVariables = [
 
 describe('Bedrock Params Fields renders', () => {
   test('all params fields are rendered', () => {
-    const actionConnector = {
+    const actionConnector = createMockActionConnector({
       secrets: {
         accessKey: 'accessKey',
         secret: 'secret',
@@ -37,7 +37,7 @@ describe('Bedrock Params Fields renders', () => {
       config: {
         apiUrl: DEFAULT_BEDROCK_URL,
       },
-    };
+    });
     const { getByTestId } = render(
       <BedrockParamsFields
         actionParams={{
@@ -212,7 +212,7 @@ describe('Bedrock Params Fields renders', () => {
   it('handles extended thinking and budget tokens when actionConnector has extendedThinking true => false', () => {
     const editAction = jest.fn();
     const errors = {};
-    const actionConnector = {
+    const actionConnector = createMockActionConnector({
       secrets: {
         accessKey: 'accessKey',
         secret: 'secret',
@@ -228,7 +228,7 @@ describe('Bedrock Params Fields renders', () => {
         extendedThinking: true,
         budgetTokens: 2048,
       },
-    };
+    });
     const { getByTestId } = render(
       <BedrockParamsFields
         actionParams={{
@@ -271,7 +271,7 @@ describe('Bedrock Params Fields renders', () => {
   it('handles extended thinking and budget tokens when actionConnector has extendedThinking false => true', () => {
     const editAction = jest.fn();
     const errors = {};
-    const actionConnector = {
+    const actionConnector = createMockActionConnector({
       secrets: {
         accessKey: 'accessKey',
         secret: 'secret',
@@ -285,7 +285,7 @@ describe('Bedrock Params Fields renders', () => {
       config: {
         apiUrl: DEFAULT_BEDROCK_URL,
       },
-    };
+    });
     const { getByTestId } = render(
       <BedrockParamsFields
         actionParams={{
