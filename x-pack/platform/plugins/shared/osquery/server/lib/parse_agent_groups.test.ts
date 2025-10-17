@@ -109,10 +109,7 @@ describe('parseAgentSelection', () => {
 
     mockPackagePolicyService = {
       list: jest.fn().mockResolvedValue({
-        items: [
-          { policy_ids: ['policy-1', 'policy-2'] },
-          { policy_ids: ['policy-3'] },
-        ],
+        items: [{ policy_ids: ['policy-1', 'policy-2'] }, { policy_ids: ['policy-3'] }],
         total: 2,
       }),
     };
