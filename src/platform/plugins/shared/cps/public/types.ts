@@ -6,9 +6,9 @@
  */
 
 export interface CPSPluginSetup {
-    enabled?: boolean;
+    cpsEnabled?: boolean;
 }
 
 export interface CPSConfigType {
-    enabled: boolean;
+    cpsEnabled: boolean;
 }

@@ -6,5 +6,5 @@
  */
 
 export interface CPSServerSetup {
-    getEnabled(): Promise<boolean>;
+    getCpsEnabled(): Promise<boolean>;
 }
