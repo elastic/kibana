@@ -99,15 +99,19 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
 
       function setTimeslice(timeslice?: Timeslice) {
         timeRangePercentage.setTimeRangePercentage(timeslice, timeRangeMeta$.value);
-        const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
-          timeRangePercentage.getLatestState();
+        if (timeslice) {
+          const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
+            timeRangePercentage.getLatestState();
 
-        timeslice$.next(
-          getTimesliceSyncedWithTimeRangePercentage(
-            timesliceStartAsPercentageOfTimeRange!,
-            timesliceEndAsPercentageOfTimeRange!
-          )
-        );
+          timeslice$.next(
+            getTimesliceSyncedWithTimeRangePercentage(
+              timesliceStartAsPercentageOfTimeRange!,
+              timesliceEndAsPercentageOfTimeRange!
+            )
+          );
+        } else {
+          timeslice$.next(undefined);
+        }
       }
 
       function setIsAnchored(isAnchored: boolean | undefined) {
