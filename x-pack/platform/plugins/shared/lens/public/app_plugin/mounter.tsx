@@ -218,17 +218,19 @@ export async function mountApp(
     if (stateTransfer && props?.state) {
       const { state: rawState, isCopied } = props;
       const { references } = extract(rawState as unknown as EmbeddableStateWithType);
-      stateTransfer.navigateToWithEmbeddablePackage<LensSerializedState>(mergedOriginatingApp, {
+      stateTransfer.navigateToWithEmbeddablePackages<LensSerializedState>(mergedOriginatingApp, {
         path: embeddableEditorIncomingState?.originatingPath,
-        state: {
-          embeddableId: isCopied ? undefined : embeddableId,
-          type: LENS_EMBEDDABLE_TYPE,
-          serializedState: {
-            references,
-            rawState,
+        state: [
+          {
+            embeddableId: isCopied ? undefined : embeddableId,
+            type: LENS_EMBEDDABLE_TYPE,
+            serializedState: {
+              references,
+              rawState,
+            },
+            searchSessionId: data.search.session.getSessionId(),
           },
-          searchSessionId: data.search.session.getSessionId(),
-        },
+        ],
       });
     } else {
       coreStart.application.navigateToApp(mergedOriginatingApp, {
