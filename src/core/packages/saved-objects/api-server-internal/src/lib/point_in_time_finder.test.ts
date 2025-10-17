@@ -9,8 +9,8 @@
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type {
-  SavedObjectsFindResult,
   SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsPointInTimeFinderMock } from '../mocks';
 
@@ -352,6 +352,7 @@ describe('createPointInTimeFinder()', () => {
         sortField: 'updated_at',
         sortOrder: 'desc',
         type: ['visualization'],
+        perPage: 1000,
       }),
       internalOptions
     );
@@ -517,32 +518,35 @@ describe('createPointInTimeFinder()', () => {
       expect(repository.closePointInTime).toHaveBeenCalledTimes(2);
     });
 
-    test('defaults perPage to 1000 when passed as undefined', async () => {
+    test('applies defaults as expected', async () => {
       repository.openPointInTimeForType.mockResolvedValueOnce({
-        id: 'pit-id-123',
+        id: 'abc123',
       });
       repository.find.mockResolvedValueOnce({
-        total: 0,
-        saved_objects: [],
-        pit_id: 'pit-id-123',
-        per_page: 1000,
+        total: 2,
+        saved_objects: mockHits,
+        pit_id: 'abc123',
+        per_page: 2,
         page: 0,
       });
 
       const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
         type: ['visualization'],
-        perPage: undefined,
+        search: 'foo*',
       };
 
       const finder = new PointInTimeFinder(findOptions, {
         logger,
         client: repository,
       });
-
       await finder.find().next();
 
       expect(repository.find).toHaveBeenCalledWith(
         expect.objectContaining({
+          pit: expect.objectContaining({ id: 'abc123', keepAlive: '2m' }),
+          sortField: 'updated_at',
+          sortOrder: 'desc',
+          type: ['visualization'],
           perPage: 1000,
         }),
         undefined
