@@ -896,11 +896,14 @@ export class AIAssistantService {
     });
 
     const defaultAnonymizationFields = getDefaultAnonymizationFields(spaceId);
-    // ElasticSearch query to returns all default anonymization fields
+    // ElasticSearch query to returns all default anonymization fields that exist in the environment
     const defaultAnonymizationFieldsQuery = {
       terms: { field: defaultAnonymizationFields.map((field) => field.field) },
     };
 
+    // It only contains default anonymization fields that are stored in the environment.
+    // It does not contain fields created by the user that are not present in defaultAnonymizationFields array.
+    // If a user created a field with the same name as a default anonymization field, it will be returned in the response.
     const existingAnonymizationFieldsResponse = await (
       await dataClient?.getReader()
     ).search<ESSearchRequest, AnonymizationFieldResponse>({
@@ -909,19 +912,17 @@ export class AIAssistantService {
       query: defaultAnonymizationFieldsQuery,
     });
 
+    // Verify if the stored default anonymization fields in the environment count is equal to DefaultAnonymizationFields array length.
     if (
       existingAnonymizationFieldsResponse.hits.total.value !== defaultAnonymizationFields.length
     ) {
-      const existingAnonymizationFields = existingAnonymizationFieldsResponse.hits.hits.map(
-        (doc) => doc._source
+      const existingAnonymizationFields = new Set(
+        existingAnonymizationFieldsResponse.hits.hits.map((doc) => doc._source.field)
       );
 
-      const existingAnonymizationFieldsMap = new Map(
-        existingAnonymizationFields.map((doc) => [doc.field, doc])
-      );
-
+      // Only create fields that are not present in the environment, we don't want to update any fields that the users might have already created with the same name.
       const documentsToCreate = defaultAnonymizationFields.filter(
-        (field) => !existingAnonymizationFieldsMap.has(field.field)
+        (field) => !existingAnonymizationFields.has(field.field)
       );
 
       const writer = await dataClient?.getWriter();
