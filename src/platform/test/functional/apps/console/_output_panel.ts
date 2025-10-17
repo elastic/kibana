@@ -48,6 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await sendRequest('GET /_search?pretty');
 
       await PageObjects.console.focusOutputEditor();
+      await PageObjects.console.selectAllOutputText();
       await PageObjects.console.clickCopyOutput();
 
       const resultToast = await toasts.getElementByIndex(1);
