@@ -11,34 +11,34 @@ import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/act
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 
-export interface WorkflowsPluginSetup {
+export interface WorkflowsServerPluginSetup {
   management: WorkflowsManagementApi;
 }
 
-export type WorkflowsPluginStart = Record<string, never>;
+export type WorkflowsServerPluginStart = Record<string, never>;
 
-export interface WorkflowsExecutionEnginePluginStartDeps {
-  taskManager: TaskManagerStartContract;
-  workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
-  actions: ActionsPluginStartContract;
-  security?: SecurityPluginStart;
-  spaces?: SpacesPluginStart;
-}
-
-export interface WorkflowsManagementPluginServerDependenciesSetup {
+export interface WorkflowsServerPluginSetupDeps {
   features?: FeaturesPluginSetup;
   taskManager?: TaskManagerSetupContract;
   actions?: ActionsPluginSetupContract;
   alerting?: AlertingServerSetup;
+  spaces?: SpacesPluginStart;
+}
+
+export interface WorkflowsServerPluginStartDeps {
+  taskManager: TaskManagerStartContract;
+  workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
+  actions: ActionsPluginStartContract;
+  security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
 }
