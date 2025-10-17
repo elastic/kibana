@@ -70,7 +70,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const cycleLimit = 10;
-  const graphRecursionLimit = cycleLimit * 2 + 5;
+  const graphRecursionLimit = cycleLimit * 2 + 8; // 2 steps per cycle + 3 additional steps + some extra buffer
 
   const initialMessages = conversationToLangchainMessages({
     nextInput,
