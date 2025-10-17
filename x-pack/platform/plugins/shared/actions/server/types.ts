@@ -108,6 +108,11 @@ export interface InMemoryConnector<
 
 export type FindActionResult = ConnectorWithExtraFindData;
 
+export type ParamConstraintsApplicatorType<Config extends Record<string, unknown>, Params> = (
+  config: Config,
+  params: Params
+) => Promise<Params>;
+
 // signature of the action type executor function
 export type ExecutorType<
   Config extends Record<string, unknown>,
@@ -222,6 +227,7 @@ export interface ActionType<
   preSaveHook?: (params: PreSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
   postSaveHook?: (params: PostSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
   postDeleteHook?: (params: PostDeleteConnectorHookParams<Config, Secrets>) => Promise<void>;
+  applyParamConstraints?: ParamConstraintsApplicatorType<Config, Params>;
 }
 
 export interface RawAction extends Record<string, unknown> {

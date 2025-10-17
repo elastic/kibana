@@ -87,6 +87,15 @@ stack: ga 9.2
 stack: ga 9.1
 ```
 
+`xpack.actions.email.maximum_body_length`
+:    The maximum length of an email body.  Values longer than this length will
+be truncated.  The default is 1MB, the maximum is 10MB.
+
+### Version 9.3+ [ec_version_9_3]
+```{applies_to}
+stack: ga 9.3
+```
+
 `xpack.actions.email.services.enabled`
 :   An array of strings indicating all email services that are enabled. Available options are `elastic-cloud`, `google-mail`, `microsoft-outlook`, `amazon-ses`, `microsoft-exchange`, and `other`. If the array is empty, no email services are enabled. The default value is `["*"]`, which enables all email services.
 
