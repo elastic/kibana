@@ -3042,6 +3042,10 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 /.github/workflows/oblt-github-commands   @elastic/observablt-robots @elastic/kibana-operations
 /.github/workflows/undeploy-my-kibana.yml @elastic/observablt-robots @elastic/kibana-operations
 
+# Moon related configs
+.moon         @elastic/kibana-operations
+/**/moon.yml  @elastic/kibana-operations
+
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
