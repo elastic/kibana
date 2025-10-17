@@ -19,6 +19,7 @@ import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { DeleteListRequestQuery, DeleteListResponse } from '@kbn/securitysolution-lists-common/api';
+import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../../types';
 import type { ExceptionListClient } from '../../services/exception_lists/exception_list_client';
@@ -33,7 +34,7 @@ export const deleteListRoute = (router: ListsPluginRouter): void => {
       path: LIST_URL,
       security: {
         authz: {
-          requiredPrivileges: ['lists-all'],
+          requiredPrivileges: [LISTS_API_ALL],
         },
       },
     })

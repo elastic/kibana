@@ -108,7 +108,6 @@ import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import {
   canEditRuleWithActions,
   explainLackOfPermission,
-  hasUserCRUDPermission,
   isBoolean,
 } from '../../../../common/utils/privileges';
 
@@ -155,6 +154,7 @@ import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -258,13 +258,13 @@ export const RuleDetailsPage = connector(
         isSignalIndexExists,
         isAuthenticated,
         hasEncryptionKey,
-        canUserCRUD,
         hasIndexRead,
         signalIndexName,
         hasIndexWrite,
         hasIndexMaintenance,
       },
     ] = useUserData();
+    const canEditRules = useUserPrivileges().rulesPrivileges.edit;
     const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
       useListsConfig();
 
@@ -680,7 +680,7 @@ export const RuleDetailsPage = connector(
                             rule,
                             hasMlPermissions,
                             hasActionsPrivileges,
-                            canUserCRUD
+                            canEditRules
                           )}
                         >
                           <EuiFlexGroup>
@@ -690,7 +690,7 @@ export const RuleDetailsPage = connector(
                                 !rule ||
                                 !isExistingRule ||
                                 !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-                                !hasUserCRUDPermission(canUserCRUD) ||
+                                !canEditRules ||
                                 (isMlRule(rule?.type) && !hasMlPermissions)
                               }
                               enabled={isRuleEnabled}
@@ -710,23 +710,21 @@ export const RuleDetailsPage = connector(
                               ruleId={ruleId}
                               disabled={
                                 !isExistingRule ||
-                                !hasUserCRUDPermission(canUserCRUD) ||
+                                !canEditRules ||
                                 (isMlRule(rule?.type) && !hasMlPermissions)
                               }
                               disabledReason={explainLackOfPermission(
                                 rule,
                                 hasMlPermissions,
                                 hasActionsPrivileges,
-                                canUserCRUD
+                                canEditRules
                               )}
                             />
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <RuleActionsOverflow
                               rule={rule}
-                              userHasPermissions={
-                                isExistingRule && hasUserCRUDPermission(canUserCRUD)
-                              }
+                              userHasPermissions={isExistingRule && canEditRules}
                               canDuplicateRuleWithActions={canEditRuleWithActions(
                                 rule,
                                 hasActionsPrivileges

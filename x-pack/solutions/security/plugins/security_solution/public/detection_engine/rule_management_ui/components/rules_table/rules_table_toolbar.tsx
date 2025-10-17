@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { NewChat } from '@kbn/elastic-assistant';
-import { useUserData } from '../../../../detections/components/user_info';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
@@ -17,6 +16,7 @@ import { getPromptContextFromDetectionRules } from '../../../../assistant/helper
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import * as i18nAssistant from '../../../common/translations';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export enum AllRulesTabs {
   management = 'management',
@@ -28,14 +28,14 @@ export const RulesTableToolbar = React.memo(() => {
   const { data: ruleManagementFilters } = useRuleManagementFilters();
   const { data: prebuiltRulesStatus } = usePrebuiltRulesStatus();
 
-  const [{ loading, canUserCRUD }] = useUserData();
+  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
 
   const installedTotal =
     (ruleManagementFilters?.rules_summary.custom_count ?? 0) +
     (ruleManagementFilters?.rules_summary.prebuilt_installed_count ?? 0);
   const updateTotal = prebuiltRulesStatus?.stats.num_prebuilt_rules_to_upgrade ?? 0;
 
-  const shouldDisplayRuleUpdatesTab = !loading && canUserCRUD && updateTotal > 0;
+  const shouldDisplayRuleUpdatesTab = canEditRules && updateTotal > 0;
 
   const ruleTabs = useMemo(
     () => ({

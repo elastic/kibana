@@ -6,13 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SIEM_MIGRATIONS_FEATURE_ID } from '@kbn/security-solution-features/constants';
 import {
-  SecurityPageName,
+  RULES_UI_READ_PRIVILEGE,
+  SIEM_MIGRATIONS_FEATURE_ID,
+} from '@kbn/security-solution-features/constants';
+import {
   SECURITY_FEATURE_ID,
-  SIEM_MIGRATIONS_RULES_PATH,
   SIEM_MIGRATIONS_DASHBOARDS_PATH,
   SIEM_MIGRATIONS_LANDING_PATH,
+  SIEM_MIGRATIONS_RULES_PATH,
+  SecurityPageName,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 import { IconDashboards } from '../common/icons/dashboards';
@@ -67,7 +70,7 @@ export const links: LinkItem = {
     defaultMessage: 'Migrations',
   }),
   path: SIEM_MIGRATIONS_LANDING_PATH,
-  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
+  capabilities: [[RULES_UI_READ_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.migrations', {
       defaultMessage: 'Migrations',
