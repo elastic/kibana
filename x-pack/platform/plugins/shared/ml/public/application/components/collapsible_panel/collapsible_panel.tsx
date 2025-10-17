@@ -75,7 +75,7 @@ export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
                   }}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem css={{ minWidth: '67px' }} grow={false}>
                 <EuiTitle size="xxs">
                   <h2>{header}</h2>
                 </EuiTitle>
