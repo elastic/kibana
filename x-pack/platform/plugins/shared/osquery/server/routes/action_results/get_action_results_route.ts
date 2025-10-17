@@ -93,7 +93,6 @@ export const getActionResultsRoute = (
               {
                 actionId: request.params.actionId,
                 factoryQueryType: OsqueryQueries.actionDetails,
-                componentTemplateExists: osqueryContext.service?.isComponentTemplateExists,
                 spaceId:
                   (await context.core).savedObjects.client.getCurrentNamespace() || 'default',
               },
