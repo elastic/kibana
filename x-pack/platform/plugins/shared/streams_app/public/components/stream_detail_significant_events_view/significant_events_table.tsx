@@ -49,7 +49,7 @@ export function SignificantEventsTable({
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
   const [selectedFeature, setSelectedFeature] = useState<Feature>();
-  const { featuresByName } = useStreamFeatures(definition);
+  const { featuresByName, refreshFeatures } = useStreamFeatures(definition);
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
     {
@@ -73,7 +73,7 @@ export function SignificantEventsTable({
     {
       field: 'query',
       name: i18n.translate('xpack.streams.significantEventsTable.feature', {
-        defaultMessage: 'Feauture',
+        defaultMessage: 'Feature',
       }),
       render: (query: StreamQuery) => {
         return (
@@ -223,6 +223,7 @@ export function SignificantEventsTable({
           closeFlyout={() => {
             setSelectedFeature(undefined);
           }}
+          refreshFeatures={refreshFeatures}
         />
       )}
       {isDeleteModalVisible && selectedDeleteItem && (
