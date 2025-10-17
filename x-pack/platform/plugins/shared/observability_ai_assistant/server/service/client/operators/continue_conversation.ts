@@ -41,6 +41,7 @@ import {
   MessageRole,
   StreamingChatResponseEventType,
 } from '../../../../common';
+import { isConfirmationMessage } from '../../../../common/utils/is_confirmation_message';
 import type { MessageOrChatEvent } from '../../../../common/conversation_complete';
 import { createFunctionLimitExceededError } from '../../../../common/conversation_complete';
 import type { Instruction } from '../../../../common/types';
@@ -252,20 +253,8 @@ export function continueConversation({
 
   const isUserMessage = lastMessage?.role === MessageRole.User;
 
-  // Filter out confirmation messages
-  const messagesWithoutConfirmation = initialMessages.filter((msg) => {
-    if (msg.message.role === MessageRole.User && msg.message.name) {
-      try {
-        const content = JSON.parse(msg.message.content || '{}');
-        if (content.confirmed !== undefined) {
-          return false; 
-        }
-      } catch (e) {
-        // Not JSON, keep the message
-      }
-    }
-    return true;
-  });
+  // Filter out confirmation messages before sending to LLM
+  const messagesWithoutConfirmation = initialMessages.filter((msg) => !isConfirmationMessage(msg));
 
   return executeNextStep().pipe(handleEvents());
 
@@ -278,13 +267,13 @@ export function continueConversation({
           // Find the original function_call in the conversation history
           // Use slice() to avoid mutating messagesWithoutConfirmation
           const functionCallMessage = messagesWithoutConfirmation
-          .slice()
-          .reverse()
-          .find(
-            (msg) =>
-              msg.message.role === MessageRole.Assistant &&
-              msg.message.function_call?.name === lastMessage.name
-          );
+            .slice()
+            .reverse()
+            .find(
+              (msg) =>
+                msg.message.role === MessageRole.Assistant &&
+                msg.message.function_call?.name === lastMessage.name
+            );
 
           if (!functionCallMessage?.message.function_call) {
             return of(

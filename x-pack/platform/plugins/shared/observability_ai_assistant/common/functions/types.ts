@@ -32,7 +32,7 @@ export interface ConfirmationConfig {
 }
 
 export interface ConditionalConfirmationConfig extends ConfirmationConfig {
-  method: string;  // 'DELETE' | 'POST' | 'PUT' etc.
+  method: string; // 'DELETE' | 'POST' | 'PUT' etc.
 }
 export type FunctionResponse =
   | {

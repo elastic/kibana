@@ -36,6 +36,7 @@ import {
   aiAssistantSimulatedFunctionCalling,
   getElasticManagedLlmConnector,
   InferenceModelState,
+  isConfirmationMessage,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { findLastIndex } from 'lodash';
@@ -208,20 +209,8 @@ export function ChatBody({
       conversation.loading
   );
 
-  // Filter out confirmation messages
-  const displayMessages = messages.filter((msg) => {
-    if (msg.message.role === MessageRole.User && msg.message.name) {
-      try {
-        const content = JSON.parse(msg.message.content || '{}');
-        if (content.confirmed !== undefined) {
-          return false;
-        }
-      } catch (e) {
-        // Not JSON, show the message
-      }
-    }
-    return true;
-  });
+  // Filter out confirmation messages before displaying
+  const displayMessages = messages.filter((msg) => !isConfirmationMessage(msg));
 
   let title = conversation.value?.conversation.title || initialTitle;
   if (!title) {
@@ -655,7 +644,9 @@ export function ChatBody({
                 className={promptEditorContainerClassName}
               >
                 <PromptEditor
-                  disabled={!connectors.selectedConnector || !hasCorrectLicense || !!pendingConfirmation}
+                  disabled={
+                    !connectors.selectedConnector || !hasCorrectLicense || !!pendingConfirmation
+                  }
                   hidden={connectors.loading || connectors.connectors?.length === 0}
                   loading={isLoading}
                   onChangeHeight={handleChangeHeight}

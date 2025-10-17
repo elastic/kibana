@@ -38,6 +38,7 @@ import type {
 import { ToolChoiceType } from '@kbn/inference-common';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { CONTEXT_FUNCTION_NAME } from '../../../common';
+import { isConfirmationMessage } from '../../../common/utils/is_confirmation_message';
 import { resourceNames } from '..';
 import type {
   ChatCompletionChunkEvent,
@@ -369,20 +370,9 @@ export class ObservabilityAIAssistantClient {
                   addAnonymizationData(initialMessages.concat(addedMessages)),
                   switchMap((deanonymizedMessages) => {
                     // Filter out confirmation messages before persisting
-                    // These are transient control messages that shouldn't be stored
-                    const messagesToPersist = deanonymizedMessages.filter((msg) => {
-                      if (msg.message.role === 'user' && msg.message.name) {
-                        try {
-                          const content = JSON.parse(msg.message.content || '{}');
-                          if (content.confirmed !== undefined) {
-                            return false; // Exclude confirmation messages
-                          }
-                        } catch (e) {
-                          // Not JSON, keep the message
-                        }
-                      }
-                      return true;
-                    });
+                    const messagesToPersist = deanonymizedMessages.filter(
+                      (msg) => !isConfirmationMessage(msg)
+                    );
 
                     const lastMessage = last(messagesToPersist);
 

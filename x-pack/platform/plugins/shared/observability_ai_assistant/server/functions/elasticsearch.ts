@@ -23,20 +23,20 @@ export function registerElasticsearchFunction({
           method: 'DELETE',
           message: 'This will permanently delete data from Elasticsearch',
           type: 'destructive',
-          confirmButtonText: 'Delete'
+          confirmButtonText: 'Delete',
         },
         {
           method: 'PUT',
           message: 'This will modify data in Elasticsearch',
           type: 'warning',
-          confirmButtonText: 'Update'
+          confirmButtonText: 'Update',
         },
         {
           method: 'POST',
           message: 'This will create or update data in Elasticsearch',
           type: 'warning',
-          confirmButtonText: 'Continue'
-        }
+          confirmButtonText: 'Continue',
+        },
       ],
       parameters: {
         type: 'object',
@@ -59,7 +59,6 @@ export function registerElasticsearchFunction({
       },
     },
     async ({ arguments: { method, path, body } }) => {
-
       const esClient = (await resources.context.core).elasticsearch.client;
       const response = await esClient.asCurrentUser.transport.request({
         method,
