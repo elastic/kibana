@@ -9,7 +9,7 @@
 
 import React, { useCallback, useMemo, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
-import { EuiFlexGrid, EuiFlexItem, useEuiTheme, useIsWithinMinBreakpoint } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
@@ -18,8 +18,6 @@ import { css } from '@emotion/react';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { CoreStart } from '@kbn/core/public';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ChartSize } from './chart';
 import { Chart } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
@@ -28,7 +26,7 @@ import { useGridNavigation } from '../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../context/fields_metadata';
 import { createESQLQuery } from '../common/utils';
 import { useChartLayers } from './chart/hooks/use_chart_layers';
-import { useFlyoutA11y } from './flyout/hooks/use_flyout_a11y';
+import type { MetricsContext } from '../types';
 
 export type MetricsGridProps = Pick<
   ChartSectionProps,
@@ -65,15 +63,7 @@ export const MetricsGrid = ({
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-  const kibana = useKibana<CoreStart>();
-  const { euiTheme } = useEuiTheme();
-  const isXlScreen = useIsWithinMinBreakpoint('xl');
-  const { a11yProps } = useFlyoutA11y({ isXlScreen });
-  const defaultWidth = euiTheme.base * 34;
-  const [flyoutWidth, setFlyoutWidth] = useLocalStorage(
-    'metricsExperience:flyoutWidth',
-    defaultWidth
-  );
+  const kibana = useKibana<MetricsContext>();
 
   const chartSize = useMemo(() => (columns === 2 || columns === 4 ? 's' : 'm'), [columns]);
 
@@ -105,8 +95,6 @@ export const MetricsGrid = ({
   const handleViewDetails = (esqlQuery: string, metric: MetricField, chartId: string) => {
     const chartIndex = rows.findIndex((row) => row.key === chartId);
     const { rowIndex, colIndex } = getRowColFromIndex(chartIndex);
-    const minWidth = euiTheme.base * 24;
-    const maxWidth = euiTheme.breakpoint.xl;
     const chartElement = chartRefs.current.get(chartId);
 
     const flyoutSession = kibana.services.core.overlays.openFlyout(
@@ -124,10 +112,7 @@ export const MetricsGrid = ({
             });
           }}
         />,
-        {
-          theme: kibana.services.theme,
-          i18n: kibana.services.i18n,
-        }
+        kibana.services.core
       ),
       {
         'data-test-subj': 'metricsExperienceFlyout',
@@ -136,15 +121,8 @@ export const MetricsGrid = ({
           { defaultMessage: 'Metric Insights Flyout' }
         ),
         ownFocus: true,
-        size: flyoutWidth,
-        onResize: (width: number) => {
-          setFlyoutWidth(width);
-        },
-        minWidth,
-        maxWidth,
         type: 'push',
         isResizable: true,
-        paddingSize: 'm',
         onClose: () => {
           flyoutSession.close();
           requestAnimationFrame(() => {
@@ -154,10 +132,6 @@ export const MetricsGrid = ({
             }
           });
         },
-        css: {
-          maxWidth: `${isXlScreen ? `calc(100vw - ${defaultWidth}px)` : '90vw'} !important`,
-        },
-        ...a11yProps,
       }
     );
 

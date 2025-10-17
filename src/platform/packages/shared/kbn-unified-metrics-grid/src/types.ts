@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CoreStart } from '@kbn/core/public';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
 
 export interface MetricsExperienceService {
   client: MetricsExperienceClient;
+}
+
+export interface MetricsContext {
+  core: CoreStart;
 }
