@@ -42,10 +42,13 @@ export interface PollEsNodesVersionOptions {
   internalClient: ElasticsearchClient;
   log: Logger;
   kibanaVersion: string;
-  ignoreVersionMismatch: boolean; // can only be true in dev mode
-  healthCheckInterval: number; // 2500ms
-  healthCheckStartupInterval?: number; // 500ms
-  healthCheckRetry: number; // 3
+  /** @default false */
+  ignoreVersionMismatch: boolean;
+  /** @default 2500ms */
+  healthCheckInterval: number;
+  healthCheckStartupInterval?: number;
+  /** @default 3 */
+  healthCheckRetry: number;
 }
 
 /** @public */
@@ -188,12 +191,9 @@ export const pollEsNodesVersion = ({
     tap((ms) => (currentInterval = ms))
   );
 
-  const tick$ = checkInterval$.pipe(
-    switchMap((checkInterval) => interval(checkInterval).pipe(startWith(0))),
-    shareReplay({ refCount: true })
-  );
-
-  return tick$.pipe(
+  return checkInterval$.pipe(
+    switchMap((checkInterval) => interval(checkInterval)),
+    startWith(0),
     exhaustMap(() => {
       return from(
         internalClient.nodes.info(
