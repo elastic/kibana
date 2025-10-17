@@ -7,12 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
-import { type UseEuiTheme } from '@elastic/eui';
+import { css, keyframes } from '@emotion/react';
+import { type UseEuiTheme, euiCanAnimate } from '@elastic/eui';
 
 export const overflowYAuto = css({ overflowY: 'auto' });
 
 export const relativePosition = css({ position: 'relative' });
+
+const slideIn = keyframes({
+  '0%': {
+    display: 'none',
+    transform: 'translateY(-100%)',
+  },
+  '50%': {
+    display: 'initial',
+  },
+  '100%': {
+    transform: 'translateY(0)',
+  },
+});
 
 export const dataCascadeImplStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
   container: css({
@@ -35,6 +48,9 @@ export const dataCascadeImplStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
     left: 0,
     right: 0,
     zIndex: euiTheme.levels.header,
+    [euiCanAnimate]: {
+      animation: `${slideIn} ${euiTheme.animation.slow} ${euiTheme.animation.resistance}`,
+    },
   }),
   cascadeTreeGridWrapper: css({
     background: euiTheme.colors.backgroundBaseSubdued,
