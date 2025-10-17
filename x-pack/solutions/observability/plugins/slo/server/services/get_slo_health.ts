@@ -19,10 +19,9 @@ import {
   getSLOSummaryTransformId,
   getSLOTransformId,
 } from '../../common/constants';
-import { SLODefinition } from '../domain/models';
-import { HealthStatus, State } from '../domain/models/health';
-import { SLORepository } from './slo_repository';
-import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
+import type { HealthStatus, State } from '../domain/models/health';
+import type { SLORepository } from './slo_repository';
+import type { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 
 const LAG_THRESHOLD_MINUTES = 10;
 const STALE_THRESHOLD_MINUTES = 2 * 24 * 60;
@@ -47,21 +46,24 @@ export class GetSLOHealth {
         sloName: sloById[item.sloId].name,
       }));
 
-    const transformStatsById = await this.getTransformStats(sloList);
     const summaryDocsById = await this.getSummaryDocsById(filteredList);
 
-    const results = filteredList.map((item) => {
-      const health = computeHealth(transformStatsById, item);
-      const state = computeState(summaryDocsById, item);
+    const results = await Promise.all(
+      filteredList.map(async (item) => {
+        const transformStatsById = await this.getTransformStatsForSLO(item);
+        const health = computeHealth(transformStatsById, item);
+        const state = computeState(summaryDocsById, item);
 
-      return {
-        sloId: item.sloId,
-        sloRevision: item.sloRevision,
-        sloName: item.sloName,
-        state,
-        health,
-      };
-    });
+        return {
+          sloId: item.sloId,
+          sloName: item.sloName,
+          sloInstanceId: item.sloInstanceId,
+          sloRevision: item.sloRevision,
+          state,
+          health,
+        };
+      })
+    );
 
     /*
      * Map results based on SLO ids since transforms represent all instances
@@ -101,25 +103,36 @@ export class GetSLOHealth {
     return summaryDocsById;
   }
 
-  private async getTransformStats(
-    sloList: SLODefinition[]
-  ): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
-    const transformStats =
+  private async getTransformStatsForSLO(item: {
+    sloId: string;
+    sloRevision: number;
+  }): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
+    const rollupTransformStats =
       await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
         {
-          transform_id: sloList
-            .map((slo: SLODefinition) => [
-              getSLOTransformId(slo.id, slo.revision),
-              getSLOSummaryTransformId(slo.id, slo.revision),
-            ])
-            .flat(),
+          transform_id: getSLOTransformId(item.sloId, item.sloRevision),
           allow_no_match: true,
-          size: sloList.length * 2,
+          size: 1,
         },
         { ignore: [404] }
       );
 
-    return keyBy(transformStats.transforms, (transform) => transform.id);
+    const summaryTransformStats =
+      await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
+        {
+          transform_id: getSLOSummaryTransformId(item.sloId, item.sloRevision),
+          allow_no_match: true,
+          size: 1,
+        },
+        { ignore: [404] }
+      );
+
+    const allTransforms = [
+      ...(rollupTransformStats.transforms || []),
+      ...(summaryTransformStats.transforms || []),
+    ];
+
+    return keyBy(allTransforms, (transform) => transform.id);
   }
 }
 
@@ -164,7 +177,10 @@ function computeState(
 function getTransformHealth(
   transformStat?: TransformGetTransformStatsTransformStats
 ): HealthStatus {
-  return transformStat?.health?.status?.toLowerCase() === 'green' ? 'healthy' : 'unhealthy';
+  if (!transformStat) {
+    return 'missing';
+  }
+  return transformStat.health?.status?.toLowerCase() === 'green' ? 'healthy' : 'unhealthy';
 }
 
 function computeHealth(

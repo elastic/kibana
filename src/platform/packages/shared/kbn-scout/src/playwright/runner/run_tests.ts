@@ -165,19 +165,20 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
   await withProcRunner(log, async (procs) => {
     const exitCode = await hasTestsInPlaywrightConfig(log, pwBinPath, pwCmdArgs, pwConfigPath);
+    const pwEnv = {
+      SCOUT_LOG_LEVEL: logsLevel,
+      SCOUT_TARGET_TYPE: options.testTarget,
+      SCOUT_TARGET_MODE: options.mode,
+    };
 
     if (exitCode !== 0) {
       process.exit(exitCode);
     }
 
     if (pwProject === 'local') {
-      await runLocalServersAndTests(procs, log, options, pwBinPath, pwCmdArgs, {
-        SCOUT_LOG_LEVEL: logsLevel,
-      });
+      await runLocalServersAndTests(procs, log, options, pwBinPath, pwCmdArgs, pwEnv);
     } else {
-      await runPlaywrightTest(procs, pwBinPath, pwCmdArgs, {
-        SCOUT_LOG_LEVEL: logsLevel,
-      });
+      await runPlaywrightTest(procs, pwBinPath, pwCmdArgs, pwEnv);
     }
 
     reportTime(runStartTime, 'ready', {
