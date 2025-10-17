@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('Data streams', function () {
+  describe.only('Data streams', function () {
     // see details: https://github.com/elastic/kibana/issues/187372
     this.tags(['failsOnMKI']);
     before(async () => {
@@ -85,6 +85,9 @@ export default function ({ getService }: FtrProviderContext) {
           hidden: false,
           failureStoreEnabled: false,
           indexMode: 'standard',
+          failureStoreRetention: {
+            defaultRetentionPeriod: '30d',
+          },
         });
       });
 
@@ -129,7 +132,9 @@ export default function ({ getService }: FtrProviderContext) {
           meteringStorageSizeBytes: 0,
           failureStoreEnabled: false,
           indexMode: 'standard',
-          failureStoreRetention: { defaultRetentionPeriod: '30d' },
+          failureStoreRetention: {
+            defaultRetentionPeriod: '30d',
+          },
         });
       });
 
