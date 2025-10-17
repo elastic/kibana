@@ -61,6 +61,7 @@ export function getMergedSearchContext(
     : undefined;
 
   const customTimeRange = customTimeRange$.getValue();
+
   const timeRangeToRender = customTimeRange ?? timesliceTimeRange ?? timeRange;
   const context = {
     esqlVariables,

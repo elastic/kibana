@@ -178,7 +178,6 @@ export function initializeFetch({
         }
       }),
       switchMap(async ([fetchContext, savedSearch, dataViews, esqlVariables]) => {
-        console.log({ fetchContext });
         const dataView = dataViews?.length ? dataViews[0] : undefined;
         setBlockingError(undefined);
         if (!dataView || !savedSearch.searchSource) {
