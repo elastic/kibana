@@ -45,6 +45,7 @@ const createMockDefinition = (
       simulate: true,
       text_structure: true,
       read_failure_store: true,
+      view_index_metadata: true,
       manage_failure_store: canManageFailureStore,
     },
   };

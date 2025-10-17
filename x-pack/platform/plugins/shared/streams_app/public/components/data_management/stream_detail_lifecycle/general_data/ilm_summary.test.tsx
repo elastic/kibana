@@ -12,17 +12,12 @@ import { IlmSummary } from './ilm_summary';
 
 jest.mock('../../../../hooks/use_streams_app_fetch');
 jest.mock('../../../../hooks/use_kibana');
-jest.mock('../hooks/use_ilm_phases_color_and_description');
 
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useIlmPhasesColorAndDescription } from '../hooks/use_ilm_phases_color_and_description';
 
 const mockUseStreamsAppFetch = useStreamsAppFetch as jest.MockedFunction<typeof useStreamsAppFetch>;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseIlmPhasesColorAndDescription = useIlmPhasesColorAndDescription as jest.MockedFunction<
-  typeof useIlmPhasesColorAndDescription
->;
 
 describe('IlmSummary', () => {
   const createMockDefinition = (): Streams.ingest.all.GetResponse =>
@@ -31,14 +26,6 @@ describe('IlmSummary', () => {
         name: 'logs-test',
       },
     } as any);
-
-  const mockIlmPhases = {
-    hot: { color: '#FF6B6B', description: () => ['Hot tier'] },
-    warm: { color: '#4ECDC4', description: () => ['Warm tier'] },
-    cold: { color: '#45B7D1', description: () => ['Cold tier'] },
-    frozen: { color: '#96CEB4', description: () => ['Frozen tier'] },
-    delete: { color: '#FFEAA7', description: () => ['Delete phase'] },
-  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -54,10 +41,6 @@ describe('IlmSummary', () => {
         },
       },
     } as any);
-
-    mockUseIlmPhasesColorAndDescription.mockReturnValue({
-      ilmPhases: mockIlmPhases,
-    });
   });
 
   describe('Loading State', () => {
