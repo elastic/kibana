@@ -8,37 +8,74 @@
  */
 
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
-import { getDiscoverStateMock } from '../../../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { getTabStateMock } from '../__mocks__/internal_state.mocks';
-import { internalStateActions } from '..';
+import { fromTabStateToSavedObjectTab, selectTabRuntimeState } from '..';
 import { selectHasUnsavedChanges } from './unsaved_changes';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
+
+const setup = async () => {
+  const services = createDiscoverServicesMock();
+  const { internalState, runtimeStateManager, initializeTabs, initializeSingleTab, addNewTab } =
+    getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewWithTimefieldMock],
+    });
+  const persistedTab = fromTabStateToSavedObjectTab({
+    tab: getTabStateMock({
+      id: 'persisted-tab',
+      initialInternalState: {
+        serializedSearchSource: { index: dataViewWithTimefieldMock.id },
+      },
+    }),
+    timeRestore: false,
+    services,
+  });
+  const persistedDiscoverSession = createDiscoverSessionMock({
+    id: 'test-id',
+    tabs: [persistedTab],
+  });
+
+  await initializeTabs({ persistedDiscoverSession });
+  await initializeSingleTab({ tabId: persistedTab.id });
+
+  return { internalState, runtimeStateManager, services, addNewTab };
+};
 
 describe('selectHasUnsavedChanges', () => {
-  it('returns false when there is no persisted discover session', () => {
+  it('returns false when there is no persisted discover session', async () => {
     const services = createDiscoverServicesMock();
-    const stateContainer = getDiscoverStateMock({ services, savedSearch: false });
+    const { internalState, runtimeStateManager, initializeTabs, addNewTab } =
+      getDiscoverInternalStateMock({
+        services,
+      });
 
-    const result = selectHasUnsavedChanges(stateContainer.internalState.getState(), {
-      runtimeStateManager: stateContainer.runtimeStateManager,
+    await initializeTabs();
+    await addNewTab({ tab: getTabStateMock({ id: 'new-tab' }) });
+
+    const result = selectHasUnsavedChanges(internalState.getState(), {
+      runtimeStateManager,
       services,
     });
 
     expect(result).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
   });
 
-  it('detects unsaved changes when the active saved search diverges from the persisted tab', () => {
-    const services = createDiscoverServicesMock();
-    const stateContainer = getDiscoverStateMock({ services });
-    const currentTabId = stateContainer.getCurrentTab().id;
-    const currentSavedSearch = stateContainer.savedSearchState.getState();
+  it('detects unsaved changes when the active saved search diverges from the persisted tab', async () => {
+    const { internalState, runtimeStateManager, services } = await setup();
+    const currentTabId = internalState.getState().tabs.unsafeCurrentId;
+    const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
+    const currentTabStateContainer = currentTabRuntimeState.stateContainer$.getValue()!;
+    const currentTabSavedSearch = currentTabStateContainer.savedSearchState.getState();
 
-    stateContainer.savedSearchState.assignNextSavedSearch({
-      ...currentSavedSearch,
-      columns: [...(currentSavedSearch.columns ?? []), 'newColumn'],
+    currentTabStateContainer.savedSearchState.assignNextSavedSearch({
+      ...currentTabSavedSearch,
+      columns: [...(currentTabSavedSearch.columns ?? []), 'newColumn'],
     });
 
-    const result = selectHasUnsavedChanges(stateContainer.internalState.getState(), {
-      runtimeStateManager: stateContainer.runtimeStateManager,
+    const result = selectHasUnsavedChanges(internalState.getState(), {
+      runtimeStateManager,
       services,
     });
 
@@ -47,24 +84,39 @@ describe('selectHasUnsavedChanges', () => {
   });
 
   it('marks newly opened tabs as having unsaved changes', async () => {
-    const services = createDiscoverServicesMock();
-    const stateContainer = getDiscoverStateMock({ services });
-    const existingTab = stateContainer.getCurrentTab();
-    const newTab = getTabStateMock({ id: 'new-tab' });
+    const { internalState, runtimeStateManager, services, addNewTab } = await setup();
 
-    await stateContainer.internalState.dispatch(
-      internalStateActions.updateTabs({
-        items: [existingTab, newTab],
-        selectedItem: newTab,
-      })
-    );
+    await addNewTab({ tab: getTabStateMock({ id: 'new-tab' }) });
 
-    const result = selectHasUnsavedChanges(stateContainer.internalState.getState(), {
-      runtimeStateManager: stateContainer.runtimeStateManager,
+    const result = selectHasUnsavedChanges(internalState.getState(), {
+      runtimeStateManager,
       services,
     });
 
     expect(result.hasUnsavedChanges).toBe(true);
     expect(result.unsavedTabIds).toContain('new-tab');
+  });
+
+  it('detects unsaved changes for existing tabs and new tabs at the same time', async () => {
+    const { internalState, runtimeStateManager, services, addNewTab } = await setup();
+    const currentTabId = internalState.getState().tabs.unsafeCurrentId;
+    const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
+    const currentTabStateContainer = currentTabRuntimeState.stateContainer$.getValue()!;
+    const currentTabSavedSearch = currentTabStateContainer.savedSearchState.getState();
+
+    currentTabStateContainer.savedSearchState.assignNextSavedSearch({
+      ...currentTabSavedSearch,
+      columns: [...(currentTabSavedSearch.columns ?? []), 'newColumn'],
+    });
+
+    await addNewTab({ tab: getTabStateMock({ id: 'new-tab' }) });
+
+    const result = selectHasUnsavedChanges(internalState.getState(), {
+      runtimeStateManager,
+      services,
+    });
+
+    expect(result.hasUnsavedChanges).toBe(true);
+    expect(result.unsavedTabIds).toEqual([currentTabId, 'new-tab']);
   });
 });
