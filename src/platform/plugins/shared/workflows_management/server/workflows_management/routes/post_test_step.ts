@@ -8,21 +8,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from '../../../common/lib/errors';
 import type { RouteDependencies } from './types';
+import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
+import { ADMIN_SECURITY } from './route_security';
+import { handleRouteError } from './route_error_handlers';
 
 export function registerPostTestStepRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.post(
     {
       path: '/api/workflows/testStep',
-      options: {
-        tags: ['api', 'workflows'],
-      },
-      security: {
-        authz: {
-          requiredPrivileges: ['all'],
-        },
-      },
+      options: WORKFLOW_ROUTE_OPTIONS,
+      security: ADMIN_SECURITY,
       validate: {
         body: schema.object({
           stepId: schema.string(),
@@ -49,19 +45,7 @@ export function registerPostTestStepRoute({ router, api, logger, spaces }: Route
           },
         });
       } catch (error) {
-        if (error instanceof InvalidYamlSyntaxError || error instanceof InvalidYamlSchemaError) {
-          return response.badRequest({
-            body: {
-              message: `Invalid workflow yaml: ${error.message}`,
-            },
-          });
-        }
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Internal server error: ${error}`,
-          },
-        });
+        return handleRouteError(response, error);
       }
     }
   );

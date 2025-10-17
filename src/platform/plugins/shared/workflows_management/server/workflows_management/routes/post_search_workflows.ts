@@ -10,6 +10,9 @@
 import { SearchWorkflowCommandSchema } from '@kbn/workflows';
 import type { GetWorkflowsParams } from '../workflows_management_api';
 import type { RouteDependencies } from './types';
+import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
+import { WORKFLOW_READ_SECURITY } from './route_security';
+import { handleRouteError } from './route_error_handlers';
 
 export function registerPostSearchWorkflowsRoute({
   router,
@@ -20,18 +23,8 @@ export function registerPostSearchWorkflowsRoute({
   router.post(
     {
       path: '/api/workflows/search',
-      options: {
-        tags: ['api', 'workflows'],
-      },
-      security: {
-        authz: {
-          requiredPrivileges: [
-            {
-              anyRequired: ['read', 'workflow_read'],
-            },
-          ],
-        },
-      },
+      options: WORKFLOW_ROUTE_OPTIONS,
+      security: WORKFLOW_READ_SECURITY,
       validate: {
         body: SearchWorkflowCommandSchema,
       },
@@ -55,12 +48,7 @@ export function registerPostSearchWorkflowsRoute({
           ),
         });
       } catch (error) {
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Internal server error: ${error}`,
-          },
-        });
+        return handleRouteError(response, error);
       }
     }
   );

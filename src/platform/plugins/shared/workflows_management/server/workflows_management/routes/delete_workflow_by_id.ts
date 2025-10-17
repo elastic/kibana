@@ -9,6 +9,9 @@
 
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
+import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
+import { WORKFLOW_DELETE_SECURITY } from './route_security';
+import { handleRouteError } from './route_error_handlers';
 
 export function registerDeleteWorkflowByIdRoute({
   router,
@@ -19,19 +22,8 @@ export function registerDeleteWorkflowByIdRoute({
   router.delete(
     {
       path: '/api/workflows/{id}',
-
-      options: {
-        tags: ['api', 'workflows'],
-      },
-      security: {
-        authz: {
-          requiredPrivileges: [
-            {
-              anyRequired: ['all', 'workflow_delete'],
-            },
-          ],
-        },
-      },
+      options: WORKFLOW_ROUTE_OPTIONS,
+      security: WORKFLOW_DELETE_SECURITY,
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -45,12 +37,7 @@ export function registerDeleteWorkflowByIdRoute({
         await api.deleteWorkflows([id], spaceId, request);
         return response.ok();
       } catch (error) {
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Internal server error: ${error}`,
-          },
-        });
+        return handleRouteError(response, error);
       }
     }
   );

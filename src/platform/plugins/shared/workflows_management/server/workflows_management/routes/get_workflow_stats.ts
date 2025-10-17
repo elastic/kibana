@@ -8,23 +8,16 @@
  */
 
 import type { RouteDependencies } from './types';
+import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
+import { WORKFLOW_READ_SECURITY } from './route_security';
+import { handleRouteError } from './route_error_handlers';
 
 export function registerGetWorkflowStatsRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.get(
     {
       path: '/api/workflows/stats',
-      options: {
-        tags: ['api', 'workflows'],
-      },
-      security: {
-        authz: {
-          requiredPrivileges: [
-            {
-              anyRequired: ['read', 'workflow_read'],
-            },
-          ],
-        },
-      },
+      options: WORKFLOW_ROUTE_OPTIONS,
+      security: WORKFLOW_READ_SECURITY,
       validate: false,
     },
     async (context, request, response) => {
@@ -34,12 +27,7 @@ export function registerGetWorkflowStatsRoute({ router, api, logger, spaces }: R
 
         return response.ok({ body: stats || {} });
       } catch (error) {
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Internal server error: ${error}`,
-          },
-        });
+        return handleRouteError(response, error);
       }
     }
   );

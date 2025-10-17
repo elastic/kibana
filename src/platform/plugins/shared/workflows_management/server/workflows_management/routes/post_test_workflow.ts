@@ -8,25 +8,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  InvalidYamlSchemaError,
-  InvalidYamlSyntaxError,
-  isWorkflowValidationError,
-} from '../../../common/lib/errors';
 import type { RouteDependencies } from './types';
+import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
+import { ADMIN_SECURITY } from './route_security';
+import { handleRouteError } from './route_error_handlers';
 
 export function registerPostTestWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.post(
     {
       path: '/api/workflows/test',
-      options: {
-        tags: ['api', 'workflows'],
-      },
-      security: {
-        authz: {
-          requiredPrivileges: ['all'],
-        },
-      },
+      options: WORKFLOW_ROUTE_OPTIONS,
+      security: ADMIN_SECURITY,
       validate: {
         body: schema.object({
           inputs: schema.recordOf(schema.string(), schema.any()),
@@ -51,24 +43,7 @@ export function registerPostTestWorkflowRoute({ router, api, logger, spaces }: R
           },
         });
       } catch (error) {
-        if (error instanceof InvalidYamlSyntaxError || error instanceof InvalidYamlSchemaError) {
-          return response.badRequest({
-            body: {
-              message: `Invalid workflow yaml: ${error.message}`,
-            },
-          });
-        }
-        if (isWorkflowValidationError(error)) {
-          return response.badRequest({
-            body: error.toJSON(),
-          });
-        }
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Internal server error: ${error}`,
-          },
-        });
+        return handleRouteError(response, error);
       }
     }
   );

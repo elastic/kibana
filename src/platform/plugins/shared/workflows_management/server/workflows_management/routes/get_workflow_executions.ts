@@ -13,6 +13,9 @@ import { ExecutionStatusValues, ExecutionTypeValues } from '@kbn/workflows';
 import type { SearchWorkflowExecutionsParams } from '../workflows_management_service';
 import { parseExecutionStatuses, MAX_PAGE_SIZE } from './types';
 import type { RouteDependencies } from './types';
+import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
+import { WORKFLOW_EXECUTION_READ_SECURITY } from './route_security';
+import { handleRouteError } from './route_error_handlers';
 
 export function registerGetWorkflowExecutionsRoute({
   router,
@@ -23,18 +26,8 @@ export function registerGetWorkflowExecutionsRoute({
   router.get(
     {
       path: '/api/workflowExecutions',
-      options: {
-        tags: ['api', 'workflows'],
-      },
-      security: {
-        authz: {
-          requiredPrivileges: [
-            {
-              anyRequired: ['read', 'workflow_execution_read'],
-            },
-          ],
-        },
-      },
+      options: WORKFLOW_ROUTE_OPTIONS,
+      security: WORKFLOW_EXECUTION_READ_SECURITY,
       validate: {
         // todo use shared params schema based on SearchWorkflowExecutionsParams type
         query: schema.object({
@@ -97,12 +90,7 @@ export function registerGetWorkflowExecutionsRoute({
           body: await api.getWorkflowExecutions(params, spaceId),
         });
       } catch (error) {
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Internal server error: ${error}`,
-          },
-        });
+        return handleRouteError(response, error);
       }
     }
   );

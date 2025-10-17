@@ -9,6 +9,9 @@
 
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
+import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
+import { ADMIN_SECURITY } from './route_security';
+import { handleRouteError } from './route_error_handlers';
 
 export function registerGetWorkflowJsonSchemaRoute({
   router,
@@ -19,14 +22,8 @@ export function registerGetWorkflowJsonSchemaRoute({
   router.get(
     {
       path: '/api/workflows/workflow-json-schema',
-      options: {
-        tags: ['api', 'workflows'],
-      },
-      security: {
-        authz: {
-          requiredPrivileges: ['all'],
-        },
-      },
+      options: WORKFLOW_ROUTE_OPTIONS,
+      security: ADMIN_SECURITY,
       validate: {
         query: schema.object({
           loose: schema.boolean(),
@@ -42,12 +39,7 @@ export function registerGetWorkflowJsonSchemaRoute({
           body: jsonSchema,
         });
       } catch (error) {
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Internal server error: ${error}`,
-          },
-        });
+        return handleRouteError(response, error);
       }
     }
   );

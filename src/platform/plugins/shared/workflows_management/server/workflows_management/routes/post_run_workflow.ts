@@ -10,23 +10,16 @@
 import { schema } from '@kbn/config-schema';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { RouteDependencies } from './types';
+import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
+import { WORKFLOW_EXECUTE_SECURITY } from './route_security';
+import { handleRouteError } from './route_error_handlers';
 
 export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.post(
     {
       path: '/api/workflows/{id}/run',
-      options: {
-        tags: ['api', 'workflows'],
-      },
-      security: {
-        authz: {
-          requiredPrivileges: [
-            {
-              anyRequired: ['all', 'workflow_execute', 'workflow_execution_create'],
-            },
-          ],
-        },
-      },
+      options: WORKFLOW_ROUTE_OPTIONS,
+      security: WORKFLOW_EXECUTE_SECURITY,
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -86,12 +79,7 @@ export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: Ro
           },
         });
       } catch (error) {
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Internal server error: ${error}`,
-          },
-        });
+        return handleRouteError(response, error);
       }
     }
   );

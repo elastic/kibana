@@ -9,16 +9,14 @@
 
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
+import { ADMIN_SECURITY } from './route_security';
+import { handleRouteError } from './route_error_handlers';
 
 export function registerGetStepExecutionRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.get(
     {
       path: '/api/workflowExecutions/{executionId}/steps/{id}',
-      security: {
-        authz: {
-          requiredPrivileges: ['all'],
-        },
-      },
+      security: ADMIN_SECURITY,
       validate: {
         params: schema.object({
           executionId: schema.string(),
@@ -40,12 +38,7 @@ export function registerGetStepExecutionRoute({ router, api, logger, spaces }: R
           body: stepExecution,
         });
       } catch (error) {
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Internal server error: ${error}`,
-          },
-        });
+        return handleRouteError(response, error);
       }
     }
   );

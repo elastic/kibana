@@ -9,7 +9,9 @@
 
 import { CreateWorkflowCommandSchema } from '@kbn/workflows';
 import type { RouteDependencies } from './types';
-import { isWorkflowValidationError } from '../../../common/lib/errors';
+import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
+import { WORKFLOW_CREATE_SECURITY } from './route_security';
+import { handleRouteError } from './route_error_handlers';
 
 export function registerPostCreateWorkflowRoute({
   router,
@@ -20,18 +22,8 @@ export function registerPostCreateWorkflowRoute({
   router.post(
     {
       path: '/api/workflows',
-      options: {
-        tags: ['api', 'workflows'],
-      },
-      security: {
-        authz: {
-          requiredPrivileges: [
-            {
-              anyRequired: ['all', 'workflow_create'],
-            },
-          ],
-        },
-      },
+      options: WORKFLOW_ROUTE_OPTIONS,
+      security: WORKFLOW_CREATE_SECURITY,
       validate: {
         body: CreateWorkflowCommandSchema,
       },
@@ -42,17 +34,7 @@ export function registerPostCreateWorkflowRoute({
         const createdWorkflow = await api.createWorkflow(request.body, spaceId, request);
         return response.ok({ body: createdWorkflow });
       } catch (error) {
-        if (isWorkflowValidationError(error)) {
-          return response.badRequest({
-            body: error.toJSON(),
-          });
-        }
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Internal server error: ${error}`,
-          },
-        });
+        return handleRouteError(response, error);
       }
     }
   );

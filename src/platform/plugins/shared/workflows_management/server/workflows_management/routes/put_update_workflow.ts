@@ -9,25 +9,17 @@
 
 import { schema } from '@kbn/config-schema';
 import { UpdateWorkflowCommandSchema } from '@kbn/workflows';
-import { isWorkflowValidationError } from '../../../common/lib/errors';
 import type { RouteDependencies } from './types';
+import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
+import { WORKFLOW_UPDATE_SECURITY } from './route_security';
+import { handleRouteError } from './route_error_handlers';
 
 export function registerPutUpdateWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.put(
     {
       path: '/api/workflows/{id}',
-      options: {
-        tags: ['api', 'workflows'],
-      },
-      security: {
-        authz: {
-          requiredPrivileges: [
-            {
-              anyRequired: ['all', 'workflow_update'],
-            },
-          ],
-        },
-      },
+      options: WORKFLOW_ROUTE_OPTIONS,
+      security: WORKFLOW_UPDATE_SECURITY,
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -47,17 +39,7 @@ export function registerPutUpdateWorkflowRoute({ router, api, logger, spaces }: 
           body: updated,
         });
       } catch (error) {
-        if (isWorkflowValidationError(error)) {
-          return response.badRequest({
-            body: error.toJSON(),
-          });
-        }
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Internal server error: ${error}`,
-          },
-        });
+        return handleRouteError(response, error);
       }
     }
   );

@@ -8,8 +8,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 import type { RouteDependencies } from './types';
+import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
+import { WORKFLOW_EXECUTION_CANCEL_SECURITY } from './route_security';
+import { handleRouteError } from './route_error_handlers';
 
 export function registerPostCancelWorkflowExecutionRoute({
   router,
@@ -20,18 +22,8 @@ export function registerPostCancelWorkflowExecutionRoute({
   router.post(
     {
       path: '/api/workflowExecutions/{workflowExecutionId}/cancel',
-      options: {
-        tags: ['api', 'workflows'],
-      },
-      security: {
-        authz: {
-          requiredPrivileges: [
-            {
-              anyRequired: ['read', 'workflow_execution_cancel'],
-            },
-          ],
-        },
-      },
+      options: WORKFLOW_ROUTE_OPTIONS,
+      security: WORKFLOW_EXECUTION_CANCEL_SECURITY,
       validate: {
         params: schema.object({
           workflowExecutionId: schema.string(),
@@ -46,16 +38,7 @@ export function registerPostCancelWorkflowExecutionRoute({
         await api.cancelWorkflowExecution(workflowExecutionId, spaceId);
         return response.ok();
       } catch (error) {
-        if (error instanceof WorkflowExecutionNotFoundError) {
-          return response.notFound();
-        }
-
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Internal server error: ${error}`,
-          },
-        });
+        return handleRouteError(response, error, { checkNotFound: true });
       }
     }
   );

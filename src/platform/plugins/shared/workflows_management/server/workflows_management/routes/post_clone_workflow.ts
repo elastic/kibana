@@ -9,23 +9,16 @@
 
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
+import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
+import { WORKFLOW_CREATE_SECURITY } from './route_security';
+import { handleRouteError } from './route_error_handlers';
 
 export function registerPostCloneWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
   router.post(
     {
       path: '/api/workflows/{id}/clone',
-      options: {
-        tags: ['api', 'workflows'],
-      },
-      security: {
-        authz: {
-          requiredPrivileges: [
-            {
-              anyRequired: ['all', 'workflow_create'],
-            },
-          ],
-        },
-      },
+      options: WORKFLOW_ROUTE_OPTIONS,
+      security: WORKFLOW_CREATE_SECURITY,
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -43,12 +36,7 @@ export function registerPostCloneWorkflowRoute({ router, api, logger, spaces }: 
         const createdWorkflow = await api.cloneWorkflow(workflow, spaceId, request);
         return response.ok({ body: createdWorkflow });
       } catch (error) {
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Internal server error: ${error}`,
-          },
-        });
+        return handleRouteError(response, error);
       }
     }
   );
