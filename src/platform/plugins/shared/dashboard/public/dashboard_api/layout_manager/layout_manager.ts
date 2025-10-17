@@ -43,6 +43,7 @@ import {
 import { asyncForEach } from '@kbn/std';
 
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
+import type { StickyControlLayoutState } from '@kbn/controls-schemas';
 import type { DashboardState } from '../../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/content_management';
 import type { DashboardPanel } from '../../../server';
@@ -65,7 +66,6 @@ import {
   type DashboardLayout,
   type DashboardLayoutPanel,
 } from './types';
-import { StickyControlLayoutState } from '@kbn/controls-schemas';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
