@@ -28,6 +28,12 @@ export const TEST_ES_PORT = Number(parsedEsUrlParts?.port || process.env.TEST_ES
 
 export const TEST_ES_TRANSPORT_PORT = Number(process.env.TEST_ES_TRANSPORT_PORT || 9300);
 
+export const TEST_ES_02_PORT = TEST_ES_PORT + 2;
+export const TEST_ES_02_TRANSPORT_PORT = TEST_ES_02_PORT + 100;
+
+export const TEST_ES_03_PORT = TEST_ES_PORT + 3;
+export const TEST_ES_03_TRANSPORT_PORT = TEST_ES_03_PORT + 100;
+
 export const TEST_FLEET_HOST = 'localhost';
 export const TEST_FLEET_PORT = Number(process.env.TEST_FLEET_PORT ?? 8220);
 

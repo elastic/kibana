@@ -298,10 +298,24 @@ export const getServerlessNodeArgs = async (
 ): Promise<Array<{ name: string; params: string[]; esArgs?: [string, string][] }>> => {
   primaryPort = Number(primaryPort || DEFAULT_PORT);
 
+  const fromEnv = async (key: string, fallback: number) => {
+    const value = process.env[key];
+    if (value === undefined) {
+      return await getPort({ port: fallback });
+    }
+    return Number(value);
+  };
+
   const ports: [number[], number[], number[]] = [
-    [await getPort({ port: primaryPort + 1 })],
-    [await getPort({ port: primaryPort + 2 }), await getPort({ port: primaryPort + 102 })],
-    [await getPort({ port: primaryPort + 3 }), await getPort({ port: primaryPort + 103 })],
+    [await fromEnv('TEST_ES_TRANSPORT_PORT', primaryPort + 1)],
+    [
+      await fromEnv('TEST_ES_02_PORT', primaryPort + 2),
+      await fromEnv('TEST_ES_02_TRANSPORT_PORT', primaryPort + 102),
+    ],
+    [
+      await fromEnv('TEST_ES_03_PORT', primaryPort + 3),
+      await fromEnv('TEST_ES_03_TRANSPORT_PORT', primaryPort + 103),
+    ],
   ];
 
   const names = [

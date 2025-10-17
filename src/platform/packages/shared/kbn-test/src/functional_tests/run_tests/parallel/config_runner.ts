@@ -23,8 +23,8 @@ interface ConfigRunnerOptions {
   };
   ports: {
     agentless: number;
-    es: number;
-    esTransport: number;
+    es: number[] | readonly number[];
+    esTransport: number[] | readonly number[];
     packageRegistry: number;
     kibana: number;
     fleet: number;
@@ -65,8 +65,12 @@ export class ConfigRunner {
     this.proc = execa(this.options.command.exec, args, {
       env: {
         TEST_KIBANA_PORT: this.options.ports.kibana.toString(),
-        TEST_ES_PORT: this.options.ports.es.toString(),
-        TEST_ES_TRANSPORT_PORT: this.options.ports.esTransport.toString(),
+        TEST_ES_PORT: this.options.ports.es[0].toString(),
+        TEST_ES_TRANSPORT_PORT: this.options.ports.esTransport[0].toString(),
+        TEST_ES_02_PORT: this.options.ports.es[1].toString(),
+        TEST_ES_02_TRANSPORT_PORT: this.options.ports.esTransport[1].toString(),
+        TEST_ES_03_PORT: this.options.ports.es[2].toString(),
+        TEST_ES_03_TRANSPORT_PORT: this.options.ports.esTransport[2].toString(),
         TEST_AGENTLESS_PORT: this.options.ports.agentless.toString(),
         TEST_FLEET_PORT: this.options.ports.fleet.toString(),
         FLEET_PACKAGE_REGISTRY_PORT: this.options.ports.packageRegistry.toString(),

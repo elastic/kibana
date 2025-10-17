@@ -151,8 +151,12 @@ export async function runTestsParallel(
         {
           agentless: await getPort({ port: DEFAULT_PORTS.agentless }),
           fleet: await getPort({ port: DEFAULT_PORTS.fleet }),
-          es: await getPort({ port: DEFAULT_PORTS.es }),
-          esTransport: await getPort({ port: DEFAULT_PORTS.esTransport }),
+          es: [await getPort({ port: DEFAULT_PORTS.es }), await getPort(), await getPort()],
+          esTransport: [
+            await getPort({ port: DEFAULT_PORTS.esTransport }),
+            await getPort(),
+            await getPort(),
+          ],
           kibana: await getPort({ port: DEFAULT_PORTS.kibana }),
           packageRegistry: await getPort({ port: DEFAULT_PORTS.packageRegistry }),
         },
