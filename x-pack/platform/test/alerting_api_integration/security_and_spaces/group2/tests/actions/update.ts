@@ -90,6 +90,7 @@ export default function updateConnectorTests({ getService }: FtrProviderContext)
                 connector_type_id: 'test.index-record',
                 is_missing_secrets: false,
                 name: 'My Connector updated',
+                is_connector_type_deprecated: false,
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
                 },

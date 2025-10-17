@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { ConnectorContract } from '@kbn/workflows';
+import type { ConnectorContractUnion } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { getCompletionItemProvider, parseLineForCompletion } from './get_completion_item_provider';
 import { z } from '@kbn/zod';
@@ -73,7 +73,7 @@ async function getSuggestions(
 }
 
 describe('getCompletionItemProvider', () => {
-  const mockConnectors: ConnectorContract[] = [
+  const mockConnectors: ConnectorContractUnion[] = [
     {
       type: 'console.log',
       paramsSchema: z.object({

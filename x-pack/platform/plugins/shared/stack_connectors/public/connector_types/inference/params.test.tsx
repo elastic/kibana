@@ -10,6 +10,7 @@ import { fireEvent, render } from '@testing-library/react';
 import ParamsFields from './params';
 import { SUB_ACTION } from '../../../common/inference/constants';
 import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 const mockedIsInferenceEndpointExists = isInferenceEndpointExists as jest.Mock;
 
@@ -26,18 +27,14 @@ describe('Inference Params Fields renders', () => {
           subAction: SUB_ACTION.UNIFIED_COMPLETION,
           subActionParams: { body: { messages: [{ role: 'user', content: 'What is Elastic?' }] } },
         }}
-        actionConnector={{
+        actionConnector={createMockActionConnector({
           actionTypeId: '.inference',
           config: {
             taskType: 'chat_completion',
           },
           id: 'test',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-          secrets: {},
           name: 'AI Connector',
-        }}
+        })}
         errors={{ body: [] }}
         editAction={() => {}}
         index={0}
@@ -59,15 +56,12 @@ describe('Inference Params Fields renders', () => {
       };
       const editAction = jest.fn();
       const errors = {};
-      const actionConnector = {
+      const actionConnector = createMockActionConnector({
         secrets: {
           providerSecrets: { apiKey: 'apiKey' },
         },
         id: 'test',
         actionTypeId: '.inference',
-        isPreconfigured: false,
-        isSystemAction: false as const,
-        isDeprecated: false,
         name: 'My OpenAI Connector',
         config: {
           provider,
@@ -76,7 +70,7 @@ describe('Inference Params Fields renders', () => {
           },
           taskType: 'completion',
         },
-      };
+      });
       render(
         <ParamsFields
           actionParams={actionParams}
@@ -121,18 +115,14 @@ describe('Inference Params Fields renders', () => {
         editAction={editAction}
         index={0}
         errors={errors}
-        actionConnector={{
+        actionConnector={createMockActionConnector({
           actionTypeId: '.inference',
           config: {
             taskType: 'completion',
           },
           id: 'test',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-          secrets: {},
           name: 'AI Connector',
-        }}
+        })}
       />
     );
     expect(editAction).toHaveBeenCalledTimes(1);
@@ -154,18 +144,14 @@ describe('Inference Params Fields renders', () => {
         editAction={editAction}
         index={0}
         errors={errors}
-        actionConnector={{
+        actionConnector={createMockActionConnector({
           actionTypeId: '.inference',
           config: {
             taskType: 'rerank',
           },
           id: 'test',
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
-          secrets: {},
           name: 'AI Connector',
-        }}
+        })}
       />
     );
     const jsonEditor = getByTestId('inputJsonEditor');

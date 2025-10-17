@@ -10,18 +10,29 @@ import type {
   ObltTestFixtures,
   ObltWorkerFixtures,
   KibanaUrl,
+  BrowserAuthFixture,
 } from '@kbn/scout-oblt';
 import { test as base, createLazyPageObject } from '@kbn/scout-oblt';
 import { ServiceMapPage } from './page_objects/service_map';
 import { ServiceInventoryPage } from './page_objects/service_inventory';
+import { StorageExplorerPage } from './page_objects/storage_explorer';
 import { ServiceGroupsPage } from './page_objects/service_groups';
+import { APM_ROLES } from './constants';
+
+export interface ApmBrowserAuthFixture extends BrowserAuthFixture {
+  loginAsApmAllPrivilegesWithoutWriteSettings: () => Promise<void>;
+  loginAsApmReadPrivilegesWithWriteSettings: () => Promise<void>;
+  loginAsApmMonitor: () => Promise<void>;
+}
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
     serviceMapPage: ServiceMapPage;
     serviceInventoryPage: ServiceInventoryPage;
+    storageExplorerPage: StorageExplorerPage;
     serviceGroupsPage: ServiceGroupsPage;
   };
+  browserAuth: ApmBrowserAuthFixture;
 }
 
 export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
@@ -41,10 +52,28 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
       ...pageObjects,
       serviceMapPage: createLazyPageObject(ServiceMapPage, page, kbnUrl),
       serviceInventoryPage: createLazyPageObject(ServiceInventoryPage, page, kbnUrl),
+      storageExplorerPage: createLazyPageObject(StorageExplorerPage, page, kbnUrl),
       serviceGroupsPage: createLazyPageObject(ServiceGroupsPage, page, kbnUrl),
     };
 
     await use(extendedPageObjects);
+  },
+  browserAuth: async (
+    { browserAuth }: { browserAuth: BrowserAuthFixture },
+    use: (browserAuth: ApmBrowserAuthFixture) => Promise<void>
+  ) => {
+    const loginAsApmAllPrivilegesWithoutWriteSettings = async () =>
+      browserAuth.loginWithCustomRole(APM_ROLES.apmAllPrivilegesWithoutWriteSettings);
+    const loginAsApmReadPrivilegesWithWriteSettings = async () =>
+      browserAuth.loginWithCustomRole(APM_ROLES.apmReadPrivilegesWithWriteSettings);
+    const loginAsApmMonitor = async () => browserAuth.loginWithCustomRole(APM_ROLES.apmMonitor);
+
+    await use({
+      ...browserAuth,
+      loginAsApmAllPrivilegesWithoutWriteSettings,
+      loginAsApmReadPrivilegesWithWriteSettings,
+      loginAsApmMonitor,
+    });
   },
 });
 

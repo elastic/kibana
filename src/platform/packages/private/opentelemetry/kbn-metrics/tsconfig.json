@@ -17,5 +17,6 @@
     "@kbn/metrics-config",
     "@kbn/std",
     "@kbn/core-http-server",
+    "@kbn/cleanup-before-exit",
   ]
 }

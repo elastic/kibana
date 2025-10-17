@@ -8,7 +8,7 @@
  */
 
 import type { QueryOperator } from '@kbn/esql-composer';
-import { drop, evaluate, stats, timeseries, where, rename } from '@kbn/esql-composer';
+import { drop, evaluate, stats, timeseries, where } from '@kbn/esql-composer';
 import { type MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { DIMENSION_TYPES } from '../../constants';
@@ -90,7 +90,7 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
     ),
     ...((dimensions ?? []).length > 0
       ? dimensions.length === 1
-        ? [rename(`??dim as ${DIMENSIONS_COLUMN}`, { dim: dimensions[0] })]
+        ? []
         : [
             evaluate(
               `${DIMENSIONS_COLUMN} = CONCAT(${dimensions

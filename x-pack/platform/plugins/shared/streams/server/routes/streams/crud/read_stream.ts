@@ -74,22 +74,27 @@ export async function readStream({
     };
   }
 
+  const privileges = await streamsClient.getPrivileges(name);
+
   // These queries are only relavant for IngestStreams
-  const [ancestors, dataStream, privileges, dataStreamSettings] = await Promise.all([
+  const [ancestors, dataStream, dataStreamSettings] = await Promise.all([
     streamsClient.getAncestors(name),
-    streamsClient.getDataStream(name).catch((e) => {
-      if (isNotFoundError(e)) {
-        return null;
-      }
-      throw e;
-    }),
-    streamsClient.getPrivileges(name),
-    scopedClusterClient.asCurrentUser.indices.getDataStreamSettings({ name }).catch((e) => {
-      if (isNotFoundError(e)) {
-        return null;
-      }
-      throw e;
-    }),
+    privileges.view_index_metadata
+      ? streamsClient.getDataStream(name).catch((e) => {
+          if (isNotFoundError(e)) {
+            return null;
+          }
+          throw e;
+        })
+      : Promise.resolve(null),
+    privileges.view_index_metadata
+      ? scopedClusterClient.asCurrentUser.indices.getDataStreamSettings({ name }).catch((e) => {
+          if (isNotFoundError(e)) {
+            return null;
+          }
+          throw e;
+        })
+      : Promise.resolve(null),
   ]);
 
   if (Streams.ClassicStream.Definition.is(streamDefinition)) {

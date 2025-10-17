@@ -10,10 +10,13 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
-import type { Condition } from '@kbn/streamlang';
+import { conditionSchema, type Condition } from '@kbn/streamlang';
+import { DeepStrict } from '@kbn/zod-helpers';
 import { clusterLogs } from '../../src/cluster_logs/cluster_logs';
 import { SuggestStreamPartitionsPrompt } from './prompt';
 import { schema } from './schema';
+
+const strictConditionSchema = DeepStrict(conditionSchema);
 
 export async function partitionStream({
   definition,
@@ -105,7 +108,8 @@ export async function partitionStream({
         };
       }) ?? [];
 
-  return proposedPartitions.filter(({ condition }) => {
-    return !isEqual(condition, { always: {} });
-  });
+  return proposedPartitions.filter(
+    ({ condition }) =>
+      strictConditionSchema.safeParse(condition).success && !isEqual(condition, { always: {} })
+  );
 }

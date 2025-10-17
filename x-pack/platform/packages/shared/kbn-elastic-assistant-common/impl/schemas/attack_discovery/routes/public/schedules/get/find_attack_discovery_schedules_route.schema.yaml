@@ -16,10 +16,9 @@ paths:
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]
       operationId: FindAttackDiscoverySchedules
+      x-state: Technical Preview; added in 9.2.0
       summary: Finds Attack discovery schedules that match the search criteria
-      description: Finds Attack discovery schedules that match the search criteria. Supports pagination and sorting by various fields.
-      tags:
-        - Attack discovery API
+      description: Finds Attack discovery schedules that match the search criteria. Supports pagination and sorting by various fields. `Technical preview`
       parameters:
         - name: page
           description: Page number to return (used for pagination). Defaults to 1.

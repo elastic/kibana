@@ -230,6 +230,11 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         id: 'search_project_nav_footer',
         children: [
           {
+            id: 'getting_started',
+            icon: 'launch',
+            link: 'searchGettingStarted',
+          },
+          {
             id: 'dev_tools',
             title: i18n.translate('xpack.serverlessSearch.nav.developerTools', {
               defaultMessage: 'Developer Tools',

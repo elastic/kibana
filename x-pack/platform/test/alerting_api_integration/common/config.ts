@@ -88,6 +88,7 @@ const enabledActionTypes = [
   'test.system-action-kibana-privileges',
   'test.system-action-connector-adapter',
   'test.connector-with-hooks',
+  'test.deprecated',
 ];
 
 export const getPreConfiguredActions = (

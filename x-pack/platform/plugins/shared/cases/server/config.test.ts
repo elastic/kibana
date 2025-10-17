@@ -110,7 +110,7 @@ describe('config validation', () => {
             ],
           },
           "incrementalId": Object {
-            "enabled": false,
+            "enabled": true,
             "taskIntervalMinutes": 10,
             "taskStartDelayMinutes": 10,
           },

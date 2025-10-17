@@ -253,6 +253,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
 
       if (isV1) {
@@ -270,7 +271,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       }
 
       if (isV2) {
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Machine Learning' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Data management' });
         await solutionNavigation.sidenav.expectLinkExists({ text: 'Admin and Settings' });
@@ -289,6 +289,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           'home',
           'discover',
           'dashboards',
+          'agent_builder',
           'build',
           'elasticsearchIndexManagement',
           'searchPlayground',

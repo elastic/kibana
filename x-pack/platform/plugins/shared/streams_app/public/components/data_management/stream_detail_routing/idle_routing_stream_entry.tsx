@@ -22,6 +22,7 @@ import type { DraggableProvided } from '@hello-pangea/dnd';
 import { i18n } from '@kbn/i18n';
 import { isDescendantOf, isRoutingEnabled } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
+import { css as cssReact } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { ConditionPanel } from '../shared';
@@ -53,16 +54,14 @@ export function IdleRoutingStreamEntry({
   isEditingEnabled,
   onEditIconClick,
   routingRule,
-  totalRoutingRules,
-  isEditMode,
+  canReorder,
 }: {
   availableStreams: string[];
   draggableProvided: DraggableProvided;
   isEditingEnabled: boolean;
   onEditIconClick: (id: string) => void;
   routingRule: RoutingDefinitionWithUIAttributes;
-  totalRoutingRules: number;
-  isEditMode: boolean;
+  canReorder: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
   const router = useStreamsAppRouter();
@@ -97,7 +96,7 @@ export function IdleRoutingStreamEntry({
           alignItems="center"
           responsive={false}
         >
-          {totalRoutingRules > 1 && !isEditMode && (
+          {canReorder && (
             <EuiFlexItem grow={false}>
               <EuiPanel
                 className="streamsDragHandle"
@@ -114,17 +113,27 @@ export function IdleRoutingStreamEntry({
               </EuiPanel>
             </EuiFlexItem>
           )}
+
           <EuiLink
             href={router.link('/{key}/management/{tab}', {
               path: { key: routingRule.destination, tab: 'partitioning' },
             })}
             data-test-subj="streamsAppRoutingStreamEntryButton"
+            css={cssReact`
+              min-width: 0;
+            `}
           >
-            <EuiText size="m">
-              <h6>{routingRule.destination}</h6>
+            <EuiText
+              size="xs"
+              component="p"
+              className="eui-textTruncate"
+              css={cssReact`
+                font-weight: ${euiTheme.font.weight.bold};
+              `}
+            >
+              {routingRule.destination}
             </EuiText>
           </EuiLink>
-
           <EuiFlexGroup
             justifyContent="flexEnd"
             gutterSize="xs"

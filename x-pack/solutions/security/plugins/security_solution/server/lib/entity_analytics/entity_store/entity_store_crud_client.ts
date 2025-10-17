@@ -9,6 +9,11 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getFlattenedObject } from '@kbn/std';
 import { EntityStoreCapability } from '@kbn/entities-schema';
+import type {
+  BulkOperationContainer,
+  BulkUpdateAction,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { EntityContainer } from '../../../../common/api/entity_analytics/entity_store/entities/upsert_entities_bulk.gen';
 import type { EntityType as APIEntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type {
@@ -60,6 +65,46 @@ export class EntityStoreCrudClient {
     this.namespace = namespace;
     this.logger = logger;
     this.dataClient = dataClient;
+  }
+
+  public async upsertEntitiesBulk(entities: EntityContainer[], force = false) {
+    const docs: Record<EntityType, (BulkOperationContainer | BulkUpdateAction)[]> = {
+      [EntityType.user]: [],
+      [EntityType.host]: [],
+      [EntityType.service]: [],
+      [EntityType.generic]: [],
+    };
+
+    for (const { type, record } of entities) {
+      if (docs[type].length === 0) {
+        // if no operations in type yet, verify if it's all enabled
+        await this.assertEngineIsRunning(type);
+        await this.assertCRUDApiIsEnabled(type);
+      }
+
+      const normalizedDocToECS = normalizeToECS(record);
+      const flatProps = getFlattenedObject(normalizedDocToECS);
+      const entityTypeDescription = engineDescriptionRegistry[type];
+      const fieldDescriptions = getFieldDescriptions(flatProps, entityTypeDescription);
+
+      if (!force) {
+        assertOnlyNonForcedAttributesInReq(fieldDescriptions);
+      }
+
+      docs[type].push({ create: {} }, buildDocumentToUpdate(type, normalizedDocToECS));
+    }
+
+    const reqs = Object.entries(docs)
+      .filter(([_, ops]) => ops.length > 0)
+      .map(([type, ops]) => {
+        this.logger.info(`Bulk updating entities (amount: ${ops.length / 2}, type: ${type})`);
+        return this.esClient.bulk({
+          index: getEntityUpdatesDataStreamName(type as EntityType, this.namespace),
+          operations: ops,
+        });
+      });
+
+    await Promise.all(reqs);
   }
 
   public async upsertEntity(type: APIEntityType, doc: Entity, force = false) {

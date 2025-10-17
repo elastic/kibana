@@ -14,7 +14,6 @@
       "data",
       "datasetQuality",
       "dataViews",
-      "discover",
       "discoverShared",
       "fieldFormats",
       "fieldsMetadata",
@@ -31,6 +30,7 @@
     ],
     "optionalPlugins": ["observabilityAIAssistant", "cloud", "spaces"],
     "requiredBundles": [
+      "discover",
       "kibanaReact",
       "kibanaUtils",
       "observabilityAIAssistant",

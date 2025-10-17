@@ -48,7 +48,7 @@ export function mergeControlGroupStates(
 
     mergedControlGroupState = {
       ...mergedControlGroupState,
-      controls: [...mergedControlGroupState.controls, ...uniqueControls],
+      controls: [...uniqueControls, ...mergedControlGroupState.controls],
     };
   } else if (!mergedControlGroupState && incomingControlGroupState) {
     mergedControlGroupState = incomingControlGroupState as ControlsGroupState;

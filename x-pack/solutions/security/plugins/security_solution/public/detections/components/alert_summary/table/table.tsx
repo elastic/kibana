@@ -106,7 +106,7 @@ export const EuiDataGridStyleWrapper = styled.div`
 
 export interface AdditionalTableContext {
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   packages: PackageListItem[];
 }
@@ -121,7 +121,7 @@ export interface TableProps {
    */
   groupingFilters: Filter[];
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   packages: PackageListItem[];
 }

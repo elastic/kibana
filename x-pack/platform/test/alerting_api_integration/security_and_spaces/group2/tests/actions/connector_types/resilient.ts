@@ -92,6 +92,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             apiUrl: resilientSimulatorURL,
             orgId: mockResilient.config.orgId,
           },
+          is_connector_type_deprecated: false,
         });
 
         const { body: fetchedAction } = await supertest
@@ -110,6 +111,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             apiUrl: resilientSimulatorURL,
             orgId: mockResilient.config.orgId,
           },
+          is_connector_type_deprecated: false,
         });
       });
 
