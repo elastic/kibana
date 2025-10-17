@@ -288,8 +288,9 @@ export class BackfillClient {
         for (let i = 0; i < backfillSOs.length; i += 10) {
           const chunk = backfillSOs.slice(i, i + 10);
           await Promise.all(
-            chunk.map((backfill) =>
-              updateGaps({
+            chunk.map((backfill) => {
+              const ruleGaps = gaps?.filter((gap) => gap.ruleId === backfill.rule.id);
+              return updateGaps({
                 backfillSchedule: backfill.schedule,
                 ruleId: backfill.rule.id,
                 start: new Date(backfill.start),
@@ -300,9 +301,9 @@ export class BackfillClient {
                 logger: this.logger,
                 backfillClient: this,
                 actionsClient,
-                gaps,
-              })
-            )
+                gaps: ruleGaps,
+              });
+            })
           );
         }
       } catch {

@@ -81,6 +81,11 @@ export const configSchema = schema.object({
   maintenanceWindow: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  gapAutoFillScheduler: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    maxBackfills: schema.number({ defaultValue: 1000 }),
+    gapFillRange: schema.string({ defaultValue: 'now-7d' }),
+  }),
   disabledRuleTypes: schema.maybe(
     schema.arrayOf(schema.string({ minLength: 1 }), { defaultValue: [] })
   ),

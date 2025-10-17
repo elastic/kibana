@@ -56,6 +56,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
+import type { RulesClient } from './rules_client';
 import {
   RulesSettingsClientFactory,
   RulesSettingsService,
@@ -74,7 +75,6 @@ import type {
   RuleType,
   RuleTypeParams,
   RuleTypeState,
-  RulesClientApi,
 } from './types';
 import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
@@ -82,6 +82,7 @@ import {
   setupSavedObjects,
   RULE_SAVED_OBJECT_TYPE,
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
+  GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
 } from './saved_objects';
 import {
   initializeApiKeyInvalidator,
@@ -117,6 +118,7 @@ import { createGetAlertIndicesAliasFn, spaceIdToNamespace } from './lib';
 import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { AlertDeletionClient } from './alert_deletion';
+import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_fill_scheduler_task';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -131,6 +133,7 @@ export const EVENT_LOG_ACTIONS = {
   untrackedInstance: 'untracked-instance',
   gap: 'gap',
   deleteAlerts: 'delete-alerts',
+  gapAutoFillSchedule: 'gap-auto-fill-schedule',
 };
 export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
@@ -176,7 +179,7 @@ export interface AlertingServerStart {
   getAllTypes: RuleTypeRegistry['getAllTypes'];
   getType: RuleTypeRegistry['get'];
   getAlertIndicesAlias: GetAlertIndicesAlias;
-  getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
+  getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClient>;
   getAlertingAuthorizationWithRequest(
     request: KibanaRequest
   ): Promise<PublicMethodsOf<AlertingAuthorization>>;
@@ -241,6 +244,7 @@ export class AlertingPlugin {
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
+  private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClient>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -401,7 +405,8 @@ export class AlertingPlugin {
       this.ruleTypeRegistry,
       this.logger,
       plugins.actions.isPreconfiguredConnector,
-      getSearchSourceMigrations
+      getSearchSourceMigrations,
+      { enableGapAutoFillScheduler: this?.config?.gapAutoFillScheduler?.enabled ?? false }
     );
 
     initializeApiKeyInvalidator(
@@ -438,6 +443,15 @@ export class AlertingPlugin {
       registerClusterCollector({
         monitoringCollection: plugins.monitoringCollection,
         core,
+      });
+    }
+
+    if (this?.config?.gapAutoFillScheduler?.enabled ?? false) {
+      registerGapAutoFillSchedulerTask({
+        taskManager: plugins.taskManager,
+        logger: this.logger,
+        getRulesClientWithRequest: (request) => this?.getRulesClientWithRequest?.(request),
+        eventLogger: this.eventLogger!,
       });
     }
 
@@ -598,7 +612,11 @@ export class AlertingPlugin {
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
-      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, AD_HOC_RUN_SAVED_OBJECT_TYPE],
+      includedHiddenTypes: [
+        RULE_SAVED_OBJECT_TYPE,
+        AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      ],
     });
 
     alertingAuthorizationClientFactory.initialize({
@@ -622,6 +640,7 @@ export class AlertingPlugin {
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository([
         RULE_SAVED_OBJECT_TYPE,
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
       ]),
       encryptedSavedObjectsClient,
       spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
@@ -665,6 +684,8 @@ export class AlertingPlugin {
       }
       return rulesClientFactory!.create(request, core.savedObjects);
     };
+
+    this.getRulesClientWithRequest = getRulesClientWithRequest;
 
     const getAlertingAuthorizationWithRequest = async (request: KibanaRequest) => {
       return alertingAuthorizationClientFactory!.create(request);

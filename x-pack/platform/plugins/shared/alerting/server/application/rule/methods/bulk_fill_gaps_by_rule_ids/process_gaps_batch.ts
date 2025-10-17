@@ -10,79 +10,148 @@ import type { Gap } from '../../../../lib/rule_gaps/gap';
 import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { logProcessedAsAuditEvent } from './utils';
 import type { RulesClientContext } from '../../../../rules_client';
-import { backfillInitiator } from '../../../../../common/constants';
+import type { BackfillInitiator } from '../../../../../common/constants';
 
 interface ProcessGapsBatchParams {
-  rule: { id: string; name: string };
   range: BulkFillGapsByRuleIdsParams['range'];
   gapsBatch: Gap[];
   maxGapsCountToProcess?: number;
+  initiator: BackfillInitiator;
 }
 
 interface ProcessGapsBatchResult {
   processedGapsCount: number;
+  hasErrors: boolean;
+  results: Array<{
+    ruleId: string;
+    processedGaps: number;
+    status: 'success' | 'error';
+    error?: string;
+  }>;
 }
 
 export const processGapsBatch = async (
   context: RulesClientContext,
-  { rule, range, gapsBatch, maxGapsCountToProcess }: ProcessGapsBatchParams
+  { range, gapsBatch, maxGapsCountToProcess, initiator }: ProcessGapsBatchParams
 ): Promise<ProcessGapsBatchResult> => {
   const { start, end } = range;
-  let processedGapsCount = 0;
-  let gapsClampedIntervals = gapsBatch
-    .map((gap) => ({
-      gap,
-      clampedIntervals: clampIntervals(gap.unfilledIntervals, {
-        gte: new Date(start),
-        lte: new Date(end),
-      }),
-    }))
-    .filter(({ clampedIntervals }) => clampedIntervals.length > 0);
 
-  if (maxGapsCountToProcess && maxGapsCountToProcess < gapsClampedIntervals.length) {
-    gapsClampedIntervals = gapsClampedIntervals.slice(
-      0,
-      Math.min(maxGapsCountToProcess, gapsClampedIntervals.length)
-    );
+  // Group gaps by rule ID
+  const gapsByRuleId = new Map<string, Gap[]>();
+  for (const gap of gapsBatch) {
+    const ruleId = gap.ruleId;
+    if (!ruleId) {
+      continue; // Skip gaps without ruleId
+    }
+    if (!gapsByRuleId.has(ruleId)) {
+      gapsByRuleId.set(ruleId, []);
+    }
+    gapsByRuleId.get(ruleId)!.push(gap);
   }
 
-  processedGapsCount += gapsClampedIntervals.length;
+  const schedulingPayloads: Array<{
+    ruleId: string;
+    ranges: Array<{ start: string; end: string }>;
+    initiator: BackfillInitiator;
+  }> = [];
 
-  const gapsInBackfillScheduling = gapsClampedIntervals.map(({ gap }) => gap);
+  let totalProcessedGapsCount = 0;
+  const gapsForScheduling: Gap[] = [];
+  const results: Array<{
+    ruleId: string;
+    processedGaps: number;
+    status: 'success' | 'error';
+    error?: string;
+  }> = [];
+  const processedGapsByRuleId = new Map<string, number>();
 
-  const gapRanges = gapsClampedIntervals.flatMap(({ clampedIntervals }) =>
-    clampedIntervals.map(({ gte, lte }) => ({
-      start: gte.toISOString(),
-      end: lte.toISOString(),
-    }))
-  );
+  // Prepare all scheduling payloads from all rules
+  for (const [ruleId, ruleBatch] of gapsByRuleId) {
+    let ruleGapsClampedIntervals = ruleBatch
+      .map((gap) => ({
+        gap,
+        clampedIntervals: clampIntervals(gap.unfilledIntervals, {
+          gte: new Date(start),
+          lte: new Date(end),
+        }),
+      }))
+      .filter(({ clampedIntervals }) => clampedIntervals.length > 0);
+
+    if (
+      maxGapsCountToProcess &&
+      totalProcessedGapsCount + ruleGapsClampedIntervals.length > maxGapsCountToProcess
+    ) {
+      const remainingSlots = maxGapsCountToProcess - totalProcessedGapsCount;
+      ruleGapsClampedIntervals = ruleGapsClampedIntervals.slice(0, remainingSlots);
+    }
+
+    if (ruleGapsClampedIntervals.length === 0) {
+      continue;
+    }
+
+    const ruleProcessedCount = ruleGapsClampedIntervals.length;
+    totalProcessedGapsCount += ruleProcessedCount;
+    processedGapsByRuleId.set(ruleId, ruleProcessedCount);
+    gapsForScheduling.push(...ruleGapsClampedIntervals.map(({ gap }) => gap));
+
+    const gapRanges = ruleGapsClampedIntervals.flatMap(({ clampedIntervals }) =>
+      clampedIntervals.map(({ gte, lte }) => ({
+        start: gte.toISOString(),
+        end: lte.toISOString(),
+      }))
+    );
+
+    schedulingPayloads.push({
+      ruleId,
+      ranges: gapRanges,
+      initiator,
+    });
+
+    // Stop if we've reached the max gaps count limit
+    if (maxGapsCountToProcess && totalProcessedGapsCount >= maxGapsCountToProcess) {
+      break;
+    }
+  }
 
   // Rules might have gaps within the range that don't yield any schedulingPayload
   // This can happen when they have gaps that are in an "in progress" state.
-  // They are returned still returned by the function that is querying gaps
-  if (gapRanges.length === 0) {
+  if (schedulingPayloads.length === 0) {
     return {
       processedGapsCount: 0,
+      results: [],
+      hasErrors: false,
     };
   }
 
-  const schedulingPayload = {
-    ruleId: rule.id,
-    ranges: gapRanges,
-    initiator: backfillInitiator.USER,
-  };
+  // Schedule all backfills in a single bulk operation
+  const scheduleResults = await scheduleBackfill(context, schedulingPayloads, gapsForScheduling);
+  let hasErrors = false;
+  for (let i = 0; i < scheduleResults.length; i++) {
+    const result = scheduleResults[i];
+    const ruleId = schedulingPayloads[i].ruleId;
+    const processedGaps = processedGapsByRuleId.get(ruleId) || 0;
 
-  const results = await scheduleBackfill(context, [schedulingPayload], gapsInBackfillScheduling);
-  if (results.length !== 1) {
-    throw new Error(`Unexpected scheduling result count ${results.length}`);
-  } else if ('error' in results[0]) {
-    const backfillError = results[0].error;
-    throw new Error(backfillError.message);
-  } else {
-    logProcessedAsAuditEvent(context, rule);
+    if ('error' in result) {
+      hasErrors = true;
+      results.push({
+        ruleId,
+        processedGaps,
+        status: 'error',
+        error: result.error?.message || 'Unknown error',
+      });
+    } else {
+      logProcessedAsAuditEvent(context, { id: ruleId, name: ruleId });
+      results.push({
+        ruleId,
+        processedGaps,
+        status: 'success',
+      });
+    }
   }
 
   return {
-    processedGapsCount,
+    processedGapsCount: totalProcessedGapsCount,
+    results,
+    hasErrors,
   };
 };

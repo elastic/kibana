@@ -87,6 +87,7 @@ describe('fillGapByIdRoute', () => {
           created_at: '2024-01-30T00:00:00.000Z',
           duration: '12h',
           enabled: true,
+          initiator: 'user',
           rule: {
             name: 'my rule name',
             tags: ['foo'],

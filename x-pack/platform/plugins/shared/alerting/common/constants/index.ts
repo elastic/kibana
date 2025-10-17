@@ -17,3 +17,4 @@ export { gapStatus } from './gap_status';
 export type { GapStatus } from './gap_status';
 export { alertDeleteCategoryIds } from './alert_delete';
 export { backfillInitiator } from './backfill';
+export type { BackfillInitiator } from './backfill';
