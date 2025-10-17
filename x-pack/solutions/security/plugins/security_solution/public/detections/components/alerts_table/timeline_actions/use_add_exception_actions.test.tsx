@@ -104,8 +104,8 @@ describe('useAlertExceptionActions', () => {
   });
 
   it('should disable adding rule exceptions when user has no index write privilege', () => {
-    mockUseUserData.mockReturnValue([{ hasIndexWrite: false }])
-    mockUseUserPrivileges.mockReturnValue({ rulesPrivileges: { edit: true } });;
+    mockUseUserData.mockReturnValue([{ hasIndexWrite: false }]);
+    mockUseUserPrivileges.mockReturnValue({ rulesPrivileges: { edit: true } });
     mockUseEndpointExceptionsCapability.mockReturnValue(true);
 
     const { result } = renderHook(
@@ -136,8 +136,8 @@ describe('useAlertExceptionActions', () => {
   });
 
   it('should not return menu items when user has neither index write and it is not an endpoint alert', () => {
-    mockUseUserData.mockReturnValue([{ hasIndexWrite: false }])
-    mockUseUserPrivileges.mockReturnValue({ rulesPrivileges: { edit: true } });;
+    mockUseUserData.mockReturnValue([{ hasIndexWrite: false }]);
+    mockUseUserPrivileges.mockReturnValue({ rulesPrivileges: { edit: true } });
     mockUseEndpointExceptionsCapability.mockReturnValue(true);
 
     const { result } = renderHook(
