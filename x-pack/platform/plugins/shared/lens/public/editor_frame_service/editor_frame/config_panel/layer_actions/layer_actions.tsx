@@ -119,7 +119,7 @@ const InContextMenuActions = (props: LayerActionsProps) => {
           <EuiButtonIcon
             display="empty"
             color="text"
-            size="xs"
+            size="s"
             iconType="boxesVertical"
             aria-label={i18n.translate('xpack.lens.layer.actions.contextMenuAriaLabel', {
               defaultMessage: `Layer actions`,
