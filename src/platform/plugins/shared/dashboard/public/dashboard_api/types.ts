@@ -55,6 +55,7 @@ import type {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
+import type { DashboardLayout } from './layout_manager';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -162,6 +163,8 @@ export type DashboardApi = CanExpandPanels &
     publishedTimeslice$: PublishingSubject<TimeSlice | undefined>;
     unpublishedTimeslice$: PublishingSubject<TimeSlice | undefined>;
     publishTimeslice: () => void;
+
+    layout$: BehaviorSubject<DashboardLayout>;
 
     registerChildApi: (api: DefaultEmbeddableApi) => void;
   };
