@@ -45,6 +45,7 @@ import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
+  SavedObjectsRawDocSource,
   SavedObjectsSearchOptions,
   SavedObjectsSearchResponse,
 } from '@kbn/core-saved-objects-api-server';
@@ -106,9 +107,9 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   }
 
   /** {@inheritDoc SavedObjectsClientContract.search} */
-  async search<A = unknown>(
+  async search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
     options: SavedObjectsSearchOptions
-  ): Promise<SavedObjectsSearchResponse<A>> {
+  ): Promise<SavedObjectsSearchResponse<T, A>> {
     return await this._repository.search(options);
   }
 

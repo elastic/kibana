@@ -51,6 +51,7 @@ import type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
   SavedObjectsFindInternalOptions,
+  SavedObjectsRawDocSource,
   SavedObjectsSearchOptions,
   SavedObjectsSearchResponse,
   ISavedObjectsRepository,
@@ -336,9 +337,9 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   /**
    * {@inheritDoc ISavedObjectsRepository.search}
    */
-  async search<A = unknown>(
+  async search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
     options: SavedObjectsSearchOptions
-  ): Promise<SavedObjectsSearchResponse<A>> {
+  ): Promise<SavedObjectsSearchResponse<T, A>> {
     return performSearch({ options }, this.apiExecutionContext);
   }
 

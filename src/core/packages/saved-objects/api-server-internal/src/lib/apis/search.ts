@@ -16,9 +16,9 @@ import {
   type GetFindRedactTypeMapParams,
   SavedObjectsErrorHelpers,
   type SavedObjectsRawDoc,
-  type SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import type {
+  SavedObjectsRawDocSource,
   SavedObjectsSearchOptions,
   SavedObjectsSearchResponse,
 } from '@kbn/core-saved-objects-api-server';
@@ -29,7 +29,10 @@ export interface PerformSearchParams {
   options: SavedObjectsSearchOptions;
 }
 
-function createEmptySearchResponse<A = unknown>(): SavedObjectsSearchResponse<A> {
+function createEmptySearchResponse<
+  T extends SavedObjectsRawDocSource,
+  A = unknown
+>(): SavedObjectsSearchResponse<T, A> {
   return {
     hits: { hits: [] },
     took: 0,
@@ -38,10 +41,10 @@ function createEmptySearchResponse<A = unknown>(): SavedObjectsSearchResponse<A>
   };
 }
 
-export async function performSearch<A = unknown>(
+export async function performSearch<T extends SavedObjectsRawDocSource, A = unknown>(
   { options }: PerformSearchParams,
   { registry, helpers, serializer, allowedTypes, client, extensions = {} }: ApiExecutionContext
-): Promise<SavedObjectsSearchResponse<A>> {
+): Promise<SavedObjectsSearchResponse<T, A>> {
   const {
     common: commonHelper,
     encryption: encryptionHelper,
@@ -114,7 +117,7 @@ export async function performSearch<A = unknown>(
     }
   );
 
-  const result = await client.search<SavedObjectsRawDocSource, A>(
+  const result = await client.search<T, A>(
     {
       ...esOptions,
       // If `pit` is provided, we drop the `index`, otherwise ES returns 400.
@@ -156,9 +159,7 @@ export async function performSearch<A = unknown>(
   // Migrations and encryption don't work on raw documents. To process them we have
   // to serialize raw documents to saved objects and then deserialize them back to
   // raw documents again.
-  const processHit = async (
-    hit: estypes.SearchHit<SavedObjectsRawDocSource>
-  ): Promise<estypes.SearchHit<SavedObjectsRawDocSource>> => {
+  const processHit = async (hit: estypes.SearchHit<T>): Promise<estypes.SearchHit<T>> => {
     if (!serializer.isRawSavedObject(hit as SavedObjectsRawDoc)) {
       return hit;
     }
@@ -177,7 +178,7 @@ export async function performSearch<A = unknown>(
       return {
         ...hit,
         ...serializer.savedObjectToRaw(decrypted),
-      };
+      } as estypes.SearchHit<T>;
     }
 
     const migratedSavedObject = await migrationHelper.migrateAndDecryptStorageDocument({
@@ -188,10 +189,10 @@ export async function performSearch<A = unknown>(
     return {
       ...hit,
       ...serializer.savedObjectToRaw(migratedSavedObject),
-    };
+    } as estypes.SearchHit<T>;
   };
 
-  const processedHits: estypes.SearchHit<SavedObjectsRawDocSource>[] = [];
+  const processedHits: estypes.SearchHit<T>[] = [];
   for (const hit of result.body.hits.hits) {
     processedHits.push(await processHit(hit));
   }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObject } from '..';
+import type { SavedObject, SavedObjectsRawDocSource } from '..';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
@@ -188,7 +188,9 @@ export interface SavedObjectsClientContract {
    * @param options {@link SavedObjectsSearchOptions} - options for the search operation
    * @returns the {@link SavedObjectsSearchResponse}
    */
-  search<A = unknown>(options: SavedObjectsSearchOptions): Promise<SavedObjectsSearchResponse<A>>;
+  search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
+    options: SavedObjectsSearchOptions
+  ): Promise<SavedObjectsSearchResponse<T, A>>;
 
   /**
    * Returns an array of objects by id

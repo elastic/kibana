@@ -26,7 +26,7 @@ export interface SavedObjectsSearchOptions extends Omit<estypes.SearchRequest, '
 /**
  * Response from the saved objects raw search operation.
  */
-export type SavedObjectsSearchResponse<Aggregations = unknown> = estypes.SearchResponse<
-  SavedObjectsRawDocSource,
-  Aggregations
->;
+export type SavedObjectsSearchResponse<
+  Document extends SavedObjectsRawDocSource = SavedObjectsRawDocSource,
+  Aggregations = unknown
+> = estypes.SearchResponse<Document, Aggregations>;

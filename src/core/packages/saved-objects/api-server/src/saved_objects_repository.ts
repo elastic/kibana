@@ -8,6 +8,7 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsRawDocSource } from '..';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
@@ -185,7 +186,9 @@ export interface ISavedObjectsRepository {
    * @param options {@link SavedObjectsSearchOptions} - options for the search operation
    * @returns the {@link SavedObjectsSearchResponse}
    */
-  search<A = unknown>(options: SavedObjectsSearchOptions): Promise<SavedObjectsSearchResponse<A>>;
+  search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
+    options: SavedObjectsSearchOptions
+  ): Promise<SavedObjectsSearchResponse<T, A>>;
 
   /**
    * Returns an array of objects by id
