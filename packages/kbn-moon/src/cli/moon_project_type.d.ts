@@ -15,7 +15,7 @@ export type MoonProjectConfig = DeepPartial<{
   type: string;
   language: string;
   owners: {
-    defaultOwner: string[];
+    defaultOwner: string;
   };
   toolchain:
     | string

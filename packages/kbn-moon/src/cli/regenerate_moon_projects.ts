@@ -16,6 +16,7 @@ import merge from 'lodash/merge';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { run } from '@kbn/dev-cli-runner';
 import type { Package } from '@kbn/repo-packages';
+import type { PackageManifestBaseFields } from '@kbn/repo-packages/modern/types';
 import { getPackages } from '@kbn/repo-packages';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -140,19 +141,20 @@ const getGeneratedPreambleForProject = (projectId: string) =>
 function buildBaseProjectConfig(
   projectConfigTemplate: string,
   pkg: Package,
-  kibanaJsonc: object & { owner: string | string[]; type: string; devOnly?: boolean }
+  kibanaJsonc: PackageManifestBaseFields
 ): MoonProjectConfig {
   const projectConfig: MoonProjectConfig = yaml.load(projectConfigTemplate) as any;
+  const mainOwner = Array.isArray(kibanaJsonc.owner) ? kibanaJsonc.owner[0] : kibanaJsonc.owner;
   projectConfig.id = pkg.name;
   projectConfig.type = MOON_CONST.PROJECT_TYPE_UNKNOWN; // we currently don't make use of this
-  projectConfig.owners = { defaultOwner: ([] as string[]).concat(kibanaJsonc.owner) };
+  projectConfig.owners = { defaultOwner: mainOwner };
   projectConfig.toolchain = { default: MOON_CONST.DEFAULT_TOOLCHAIN };
 
   projectConfig.project = {
     name: pkg.name,
     description: `Moon project for ${pkg.name}`,
     channel: '',
-    owner: kibanaJsonc.owner,
+    owner: mainOwner,
     metadata: {
       // Not a Moon config field; included for convenience
       sourceRoot: pkg.normalizedRepoRelativeDir,
@@ -160,9 +162,12 @@ function buildBaseProjectConfig(
   };
 
   projectConfig.tags = [
-    pkg.getGroup(),
-    kibanaJsonc.type,
-    kibanaJsonc.devOnly ? MOON_CONST.TAG_DEV : MOON_CONST.TAG_PROD,
+    ...new Set([
+      kibanaJsonc.type,
+      kibanaJsonc.group,
+      kibanaJsonc.visibility,
+      kibanaJsonc.devOnly ? MOON_CONST.TAG_DEV : MOON_CONST.TAG_PROD,
+    ]),
   ];
 
   return projectConfig;
