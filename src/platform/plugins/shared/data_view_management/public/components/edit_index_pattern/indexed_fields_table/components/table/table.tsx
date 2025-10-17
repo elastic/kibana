@@ -237,7 +237,7 @@ const getItems = (conflictDescriptions: IndexedFieldItem['conflictDescriptions']
 export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string) => (
   <span data-test-subj={`field-name-${field.name}`}>
     <EuiFlexGroup gutterSize="s" alignItems="center">
-      <FieldIcon type={getFieldIconType(field, (f) => f?.kbnType)} />
+      <FieldIcon type={getFieldIconType(field, (f) => f?.kbnType)} scripted={field?.scripted} />
       {field.name}
       {field.info && field.info.length ? (
         <EuiIconTip
