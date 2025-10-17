@@ -46,11 +46,15 @@ describe('IngestionCard', () => {
 
       renderWithI18n(<IngestionCard definition={definition} stats={stats} />);
 
-      expect(screen.getByText(/Ingestion averages/)).toBeInTheDocument();
-      expect(screen.getByText(/1(\.0)?\s?MB/)).toBeInTheDocument(); // Daily average
-      expect(screen.getByText(/3[01](\.\d)?\s?MB/)).toBeInTheDocument(); // Monthly average (1MB * 30/31)
-      expect(screen.getByText('Daily average')).toBeInTheDocument();
-      expect(screen.getByText('Monthly average')).toBeInTheDocument();
+      expect(screen.getByTestId('ingestionCard-title')).toBeInTheDocument();
+      expect(screen.getByTestId('ingestion-daily-metric')).toHaveTextContent(/1(\.0)?\s?MB/);
+      expect(screen.getByTestId('ingestion-monthly-metric')).toHaveTextContent(/3[01](\.\d)?\s?MB/);
+      expect(screen.getByTestId('ingestion-daily-metric-subtitle')).toHaveTextContent(
+        'Daily average'
+      );
+      expect(screen.getByTestId('ingestion-monthly-metric-subtitle')).toHaveTextContent(
+        'Monthly average'
+      );
     });
 
     it('renders dash placeholders when daily bytes is zero', () => {
@@ -72,8 +76,8 @@ describe('IngestionCard', () => {
 
       renderWithI18n(<IngestionCard definition={definition} stats={stats} />);
 
-      expect(screen.getByText(/1(\.0)?\s?GB/)).toBeInTheDocument(); // Daily average
-      expect(screen.getByText(/3[12](\.\d)?\s?GB/)).toBeInTheDocument(); // Monthly average (1GB * 31/32)
+      expect(screen.getByTestId('ingestion-daily-metric')).toHaveTextContent(/1(\.0)?\s?GB/);
+      expect(screen.getByTestId('ingestion-monthly-metric')).toHaveTextContent(/3[12](\.\d)?\s?GB/);
     });
 
     it('renders dashes when stats are absent or error present', () => {
@@ -114,8 +118,8 @@ describe('IngestionCard', () => {
 
       renderWithI18n(<IngestionCard definition={definition} stats={stats} />);
 
-      expect(screen.getByText(/2(\.0)?\s?MB/)).toBeInTheDocument(); // Daily average
-      expect(screen.getByText(/6[12](\.\d)?\s?MB/)).toBeInTheDocument(); // Monthly average (2MB * 31/32)
+      expect(screen.getByTestId('ingestion-daily-metric')).toHaveTextContent(/2(\.0)?\s?MB/);
+      expect(screen.getByTestId('ingestion-monthly-metric')).toHaveTextContent(/6[12](\.\d)?\s?MB/);
     });
 
     it('formats very small daily rates (KB)', () => {
@@ -126,8 +130,8 @@ describe('IngestionCard', () => {
 
       renderWithI18n(<IngestionCard definition={definition} stats={stats} />);
 
-      expect(screen.getByText(/1(\.0)?\s?KB/)).toBeInTheDocument(); // Daily average
-      expect(screen.getByText(/3[01](\.\d)?\s?KB/)).toBeInTheDocument(); // Monthly average (1KB * 30/31)
+      expect(screen.getByTestId('ingestion-daily-metric')).toHaveTextContent(/1(\.0)?\s?KB/);
+      expect(screen.getByTestId('ingestion-monthly-metric')).toHaveTextContent(/3[01](\.\d)?\s?KB/);
     });
   });
 

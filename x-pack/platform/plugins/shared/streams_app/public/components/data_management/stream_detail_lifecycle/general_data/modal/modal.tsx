@@ -116,7 +116,7 @@ export function EditLifecycleModal({
   return (
     <EuiModal onClose={closeModal} aria-labelledby={modalTitleId} css={{ width: '600px' }}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>
+        <EuiModalHeaderTitle id={modalTitleId} data-test-subj="editLifecycleModalTitle">
           {i18n.translate('xpack.streams.streamDetailLifecycle.editRetention', {
             defaultMessage: 'Edit data retention',
           })}
@@ -128,7 +128,7 @@ export function EditLifecycleModal({
           {(!isWired || !isRoot(definition.stream.name)) && (
             <EuiFlexItem>
               <EuiText>
-                <h5>
+                <h5 data-test-subj="inheritRetentionHeading">
                   {isWired
                     ? i18n.translate(
                         'xpack.streams.streamDetailLifecycle.wiredInheritSwitchLabel',
@@ -182,7 +182,7 @@ export function EditLifecycleModal({
 
           <EuiFlexItem>
             <EuiText>
-              <h5>
+              <h5 data-test-subj="customRetentionHeading">
                 {i18n.translate('xpack.streams.streamDetailLifecycle.dataRetention', {
                   defaultMessage: 'Custom retention',
                 })}
@@ -212,6 +212,7 @@ export function EditLifecycleModal({
               buttonSize="m"
               isDisabled={isInheritToggleOn}
               isFullWidth
+              data-test-subj="dataRetentionButtonGroup"
             />
             <EuiSpacer size="s" />
 

@@ -63,9 +63,11 @@ describe('RetentionCard', () => {
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
-      expect(screen.getByText('Retention')).toBeInTheDocument();
-      expect(screen.getByText('my-ilm-policy')).toBeInTheDocument();
-      expect(screen.getByText(/ILM policy/)).toBeInTheDocument();
+      expect(screen.getByTestId('retentionCard-title')).toBeInTheDocument();
+      expect(screen.getByTestId('streamsAppLifecycleBadgeIlmPolicyNameLink')).toHaveTextContent(
+        'my-ilm-policy'
+      );
+      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent('ILM policy');
     });
 
     it('shows inherit label for wired child inheriting', () => {
@@ -102,7 +104,9 @@ describe('RetentionCard', () => {
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
-      expect(screen.getByText(/Inherit from parent/)).toBeInTheDocument();
+      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent(
+        'Inherit from parent'
+      );
     });
     it('shows override label for non-inheriting wired child', () => {
       // Non-inheriting wired stream: ingest.lifecycle is not inherit, effective lifecycle still ILM
@@ -136,7 +140,7 @@ describe('RetentionCard', () => {
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
-      expect(screen.getByText(/Override parent/)).toBeInTheDocument();
+      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent('Override parent');
     });
   });
 
@@ -150,9 +154,9 @@ describe('RetentionCard', () => {
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
-      expect(screen.getByText('Retention')).toBeInTheDocument();
-      expect(screen.getByText('30 days')).toBeInTheDocument();
-      expect(screen.getByText(/Custom period/)).toBeInTheDocument();
+      expect(screen.getByTestId('retentionCard-title')).toBeInTheDocument();
+      expect(screen.getByTestId('retention-metric')).toHaveTextContent('30 days');
+      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent('Custom period');
     });
 
     it('renders indefinite symbol when no data_retention', () => {
@@ -162,8 +166,8 @@ describe('RetentionCard', () => {
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
-      expect(screen.getByText('∞')).toBeInTheDocument();
-      expect(screen.getByText(/Indefinite/)).toBeInTheDocument();
+      expect(screen.getByTestId('retention-metric')).toHaveTextContent('∞');
+      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent('Indefinite');
     });
 
     it('shows inherit label for classic streams inheriting', () => {
@@ -175,7 +179,9 @@ describe('RetentionCard', () => {
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
-      expect(screen.getByText(/Inherit from index template/)).toBeInTheDocument();
+      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent(
+        'Inherit from index template'
+      );
     });
 
     it('shows override label for non-inheriting classic streams', () => {
@@ -187,7 +193,9 @@ describe('RetentionCard', () => {
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
-      expect(screen.getByText(/Override index template/)).toBeInTheDocument();
+      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent(
+        'Override index template'
+      );
     });
   });
 
@@ -199,8 +207,8 @@ describe('RetentionCard', () => {
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
-      expect(screen.getByText('∞')).toBeInTheDocument();
-      expect(screen.getByText(/Disabled/)).toBeInTheDocument();
+      expect(screen.getByTestId('retention-metric')).toHaveTextContent('∞');
+      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent('Disabled');
     });
   });
 
@@ -212,7 +220,7 @@ describe('RetentionCard', () => {
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
-      expect(screen.getByText('—')).toBeInTheDocument();
+      expect(screen.getByTestId('retention-metric')).toHaveTextContent('—');
     });
   });
 
@@ -262,8 +270,9 @@ describe('RetentionCard', () => {
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
-      expect(screen.queryByText('Inherit from parent')).not.toBeInTheDocument();
-      expect(screen.queryByText('Override parent')).not.toBeInTheDocument();
+      const subtitle = screen.getByTestId('retention-metric-subtitle');
+      expect(subtitle).not.toHaveTextContent('Inherit from parent');
+      expect(subtitle).not.toHaveTextContent('Override parent');
     });
   });
 });

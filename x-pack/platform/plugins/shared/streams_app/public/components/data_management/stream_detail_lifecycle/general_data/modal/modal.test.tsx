@@ -32,15 +32,40 @@ describe('EditLifecycleModal', () => {
     const definition = {
       stream: {
         name: streamName,
+        description: '',
         ingest: {
           lifecycle: ingestLifecycle,
+          processing: { steps: [] },
+          settings: {},
+          wired: { fields: {}, routing: [] },
         },
       },
       effective_lifecycle: effectiveLifecycle,
-    } as any;
+      effective_settings: {},
+      inherited_fields: {},
+      dashboards: [],
+      rules: [],
+      queries: [],
+      privileges: {
+        manage: true,
+        monitor: true,
+        lifecycle: false,
+        simulate: true,
+        text_structure: true,
+        read_failure_store: true,
+        manage_failure_store: true,
+      },
+    };
 
     if (isWired) {
-      definition.__type = 'WiredStream';
+      definition.privileges.lifecycle = true;
+      // Wired effective lifecycle must include a `from` field to satisfy schema
+      if ((effectiveLifecycle.dsl || effectiveLifecycle.ilm) && !effectiveLifecycle.from) {
+        (definition as any).effective_lifecycle = {
+          ...effectiveLifecycle,
+          from: streamName,
+        };
+      }
     }
 
     return definition;
@@ -70,7 +95,7 @@ describe('EditLifecycleModal', () => {
 
       render(<EditLifecycleModal {...defaultProps} definition={definition} />);
 
-      expect(screen.getByText('Edit data retention')).toBeInTheDocument();
+      expect(screen.getByTestId('editLifecycleModalTitle')).toBeInTheDocument();
       expect(screen.getByTestId('streamsAppModalFooterCancelButton')).toBeInTheDocument();
       expect(screen.getByTestId('streamsAppModalFooterButton')).toBeInTheDocument();
     });
@@ -99,12 +124,12 @@ describe('EditLifecycleModal', () => {
       render(<EditLifecycleModal {...defaultProps} definition={definition} />);
 
       // Current implementation uses classic label even for wired streams in this test context
-      expect(screen.getByText('Inherit from index template')).toBeInTheDocument();
+      expect(screen.getByTestId('inheritRetentionHeading')).toBeInTheDocument();
       expect(screen.getByTestId('inheritDataRetentionSwitch')).toBeInTheDocument();
       // Description uses index template variant for classic label in code path
       expect(
         screen.getByText(
-          /Use the stream’s index template retention configuration|Use the stream's index template retention configuration/
+          /Use the parent stream’s retention configuration|Use the parent stream's retention configuration/
         )
       ).toBeInTheDocument();
     });
@@ -119,7 +144,7 @@ describe('EditLifecycleModal', () => {
 
       render(<EditLifecycleModal {...defaultProps} definition={definition} />);
 
-      expect(screen.getByText('Inherit from index template')).toBeInTheDocument();
+      expect(screen.getByTestId('inheritRetentionHeading')).toBeInTheDocument();
       expect(screen.getByTestId('inheritDataRetentionSwitch')).toBeInTheDocument();
     });
 
@@ -133,7 +158,7 @@ describe('EditLifecycleModal', () => {
 
       render(<EditLifecycleModal {...defaultProps} definition={definition} />);
 
-      expect(screen.queryByText('Inherit retention')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('inheritRetentionHeading')).not.toBeInTheDocument();
     });
   });
 
@@ -143,10 +168,9 @@ describe('EditLifecycleModal', () => {
 
       render(<EditLifecycleModal {...defaultProps} definition={definition} />);
 
+      expect(screen.getByTestId('dataRetentionButtonGroup')).toBeInTheDocument();
+      // Button labels are rendered inside the button group; keep role assertion for accessibility
       expect(screen.getByRole('group', { name: 'Data retention' })).toBeInTheDocument();
-      expect(screen.getByText('Indefinite')).toBeInTheDocument();
-      expect(screen.getByText('Custom period')).toBeInTheDocument();
-      expect(screen.getByText('ILM policy')).toBeInTheDocument();
     });
 
     it('should handle indefinite retention selection', async () => {
@@ -154,7 +178,7 @@ describe('EditLifecycleModal', () => {
 
       render(<EditLifecycleModal {...defaultProps} definition={definition} />);
 
-      const indefiniteButton = screen.getByText('Indefinite');
+      const indefiniteButton = screen.getByRole('button', { name: 'Indefinite' });
       await userEvent.click(indefiniteButton);
 
       // Save button should be enabled
@@ -168,7 +192,7 @@ describe('EditLifecycleModal', () => {
       // Disable inheritance first to enable buttons
       const inheritSwitch = screen.getByTestId('inheritDataRetentionSwitch');
       await userEvent.click(inheritSwitch);
-      const customButton = screen.getByText('Custom period');
+      const customButton = screen.getByRole('button', { name: 'Custom period' });
       await userEvent.click(customButton);
       // DSL field renders with input for custom period
       expect(screen.getByTestId('streamsAppDslModalDaysField')).toBeInTheDocument();
@@ -179,7 +203,7 @@ describe('EditLifecycleModal', () => {
       render(<EditLifecycleModal {...defaultProps} definition={definition} />);
       const inheritSwitch = screen.getByTestId('inheritDataRetentionSwitch');
       await userEvent.click(inheritSwitch);
-      const ilmButton = screen.getByText('ILM policy');
+      const ilmButton = screen.getByRole('button', { name: 'ILM policy' });
       await userEvent.click(ilmButton);
       // ILM field should be loading policies
       const saveButton = screen.getByTestId('streamsAppModalFooterButton');
@@ -218,7 +242,7 @@ describe('EditLifecycleModal', () => {
       render(<EditLifecycleModal {...defaultProps} definition={definition} />);
 
       // Select indefinite
-      const indefiniteButton = screen.getByText('Indefinite');
+      const indefiniteButton = screen.getByRole('button', { name: 'Indefinite' });
       await userEvent.click(indefiniteButton);
 
       // Click save

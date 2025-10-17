@@ -9,7 +9,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { Streams } from '@kbn/streams-schema';
 import { IlmSummary } from './ilm_summary';
-import type { DataStreamStats } from '../hooks/use_data_stream_stats';
 
 jest.mock('../../../../hooks/use_streams_app_fetch');
 jest.mock('../../../../hooks/use_kibana');
@@ -33,19 +32,12 @@ describe('IlmSummary', () => {
       },
     } as any);
 
-  const createMockStats = (): DataStreamStats => ({
-    sizeBytes: 1000000,
-    totalDocs: 1000,
-    bytesPerDoc: 1000,
-    bytesPerDay: 50000,
-  });
-
   const mockIlmPhases = {
-    hot: { color: '#FF6B6B', description: 'Hot tier' },
-    warm: { color: '#4ECDC4', description: 'Warm tier' },
-    cold: { color: '#45B7D1', description: 'Cold tier' },
-    frozen: { color: '#96CEB4', description: 'Frozen tier' },
-    delete: { color: '#FFEAA7', description: 'Delete phase' },
+    hot: { color: '#FF6B6B', description: () => ['Hot tier'] },
+    warm: { color: '#4ECDC4', description: () => ['Warm tier'] },
+    cold: { color: '#45B7D1', description: () => ['Cold tier'] },
+    frozen: { color: '#96CEB4', description: () => ['Frozen tier'] },
+    delete: { color: '#FFEAA7', description: () => ['Delete phase'] },
   };
 
   beforeEach(() => {
@@ -79,7 +71,7 @@ describe('IlmSummary', () => {
       const definition = createMockDefinition();
       render(<IlmSummary definition={definition} />);
 
-      expect(screen.getByText('ILM policy data tiers')).toBeInTheDocument();
+      expect(screen.getByTestId('ilmSummary-title')).toBeInTheDocument();
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
     });
   });
@@ -95,8 +87,8 @@ describe('IlmSummary', () => {
       const definition = createMockDefinition();
       render(<IlmSummary definition={definition} />);
 
-      expect(screen.getByText('ILM policy data tiers')).toBeInTheDocument();
-      expect(screen.queryByText('Hot')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ilmSummary-title')).toBeInTheDocument();
+      expect(screen.queryByTestId('ilmPhase-hot-name')).not.toBeInTheDocument();
     });
   });
 
@@ -117,9 +109,9 @@ describe('IlmSummary', () => {
       const definition = createMockDefinition();
       render(<IlmSummary definition={definition} />);
 
-      expect(screen.getByText('ILM policy data tiers')).toBeInTheDocument();
-      expect(screen.getByText('Hot')).toBeInTheDocument();
-      expect(screen.getByText('Warm')).toBeInTheDocument();
+      expect(screen.getByTestId('ilmSummary-title')).toBeInTheDocument();
+      expect(screen.getByTestId('ilmPhase-hot-name')).toBeInTheDocument();
+      expect(screen.getByTestId('ilmPhase-warm-name')).toBeInTheDocument();
     });
 
     it('should display storage sizes', () => {
@@ -138,8 +130,8 @@ describe('IlmSummary', () => {
       const definition = createMockDefinition();
       render(<IlmSummary definition={definition} />);
 
-      expect(screen.getByText(/1\.0\s?MB/)).toBeInTheDocument();
-      expect(screen.getByText(/500\.0\s?KB/)).toBeInTheDocument();
+      expect(screen.getByTestId('ilmPhase-hot-size')).toHaveTextContent(/1\.0\s?MB/);
+      expect(screen.getByTestId('ilmPhase-warm-size')).toHaveTextContent(/500\.0\s?KB/);
     });
   });
 
@@ -154,8 +146,8 @@ describe('IlmSummary', () => {
       const definition = createMockDefinition();
       render(<IlmSummary definition={definition} />);
 
-      expect(screen.getByText('ILM policy data tiers')).toBeInTheDocument();
-      expect(screen.queryByText('Hot')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ilmSummary-title')).toBeInTheDocument();
+      expect(screen.queryByTestId('ilmPhase-hot-name')).not.toBeInTheDocument();
     });
   });
 });
