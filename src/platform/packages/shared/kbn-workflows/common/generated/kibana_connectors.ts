@@ -11,13 +11,11 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Kibana connector definitions generated from the Kibana OpenAPI specification.
- * Generated at: 2025-10-16T16:03:01.100Z
+ * Generated at: 2025-10-17T16:48:37.483Z
  * Source: Kibana OpenAPI spec (498 APIs)
  * 
  * To regenerate: npm run generate:kibana-connectors
  */
-
-// @ts-nocheck
 
 import { z } from '@kbn/zod';
 import type { InternalConnectorContract } from '../../types/v1';
