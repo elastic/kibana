@@ -275,6 +275,7 @@ export function UnifiedDocViewerFlyout({
         minWidth={minWidth}
         maxWidth={maxWidth}
         onResize={setFlyoutWidth}
+        session="never" // do not allow the flyout to be a child implicitly
         css={{
           maxWidth: `${isXlScreen ? `calc(100vw - ${DEFAULT_WIDTH}px)` : '90vw'} !important`,
         }}
