@@ -23,7 +23,7 @@ export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) 
   const { controls } = controlGroupInput;
   let references: Reference[] = [];
   const updatedControls = Object.fromEntries(
-    controls.map((controlState) => {
+    controls.map((controlState, index) => {
       const { id = uuidv4(), type } = controlState;
       const transforms = embeddableService.getTransforms(type);
 
@@ -52,6 +52,7 @@ export function transformControlGroupIn(controlGroupInput?: ControlsGroupState) 
       return [
         id,
         {
+          order: index,
           type,
           width,
           grow,
