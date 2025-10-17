@@ -44,16 +44,16 @@ export const initializeTimesliceManager = (
   ).subscribe((newTimeslice) => {
     // Guard against children that publish an empty timeslice
     const [from, to] = newTimeslice ?? [];
-    if (typeof from !== 'number' || typeof to !== 'number') {
-      unpublishedTimeslice$.next(undefined);
-      timeslice$.next(undefined);
-    } else unpublishedTimeslice$.next(newTimeslice);
+    if (typeof from !== 'number' || typeof to !== 'number') unpublishedTimeslice$.next(undefined);
+    else unpublishedTimeslice$.next(newTimeslice);
   });
 
   const autoPublishTimesliceSubscription = unpublishedTimeslice$
     .pipe(
       combineLatestWith(settingsManager.api.settings.autoApplyFilters$),
-      filter(([_, autoApplyFilters]) => autoApplyFilters)
+      filter(
+        ([unpublishedTimeslice, autoApplyFilters]) => !unpublishedTimeslice || autoApplyFilters
+      )
     )
     .subscribe(() => {
       publishTimeslice();
