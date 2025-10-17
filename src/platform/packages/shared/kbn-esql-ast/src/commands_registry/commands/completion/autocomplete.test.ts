@@ -170,21 +170,11 @@ describe('COMPLETION Autocomplete', () => {
   });
 
   describe('expressions in prompt', () => {
-    it('supports string functions in prompt position', async () => {
+    it('supports string functions and enforces type compatibility', async () => {
       await completionExpectSuggestions(
         'FROM a | COMPLETION ',
         {
-          contains: ['CONCAT($0) '],
-        },
-        mockCallbacks
-      );
-    });
-
-    it('enforces type compatibility for prompt', async () => {
-      await completionExpectSuggestions(
-        'FROM a | COMPLETION ',
-        {
-          contains: ['textField ', 'keywordField '],
+          contains: ['CONCAT($0) ', 'textField ', 'keywordField '],
           notContains: ['doubleField '],
         },
         mockCallbacks
