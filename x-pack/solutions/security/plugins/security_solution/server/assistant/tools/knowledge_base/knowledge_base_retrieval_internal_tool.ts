@@ -13,8 +13,7 @@ import { ToolType } from '@kbn/onechat-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
-import { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
-import { Document } from 'langchain/document';
+import { getDataClientsProvider, initializeDataClients } from '../data_clients_provider';
 
 const knowledgeBaseRetrievalToolSchema = z.object({
   query: z.string().describe(`Summary of items/things to search for in the knowledge base`),
@@ -85,137 +84,91 @@ export const knowledgeBaseRetrievalInternalTool = (
     },
     handler: async ({ query }, context) => {
       try {
-        console.log(`[KB_RETRIEVAL_TOOL] Starting handler for query: ${query}`);
-
-        // Get access to start services
-        const [, pluginsStart] = await getStartServices();
-        console.log(`[KB_RETRIEVAL_TOOL] Got start services`);
-
-        // Get space ID from request
-        const spaceId =
-          pluginsStart.spaces?.spacesService?.getSpaceId(context.request) || 'default';
-        console.log(`[KB_RETRIEVAL_TOOL] Got space ID: ${spaceId}`);
-
-        // Get current user
-        const currentUser = await pluginsStart.security.authc.getCurrentUser(context.request);
-        console.log(`[KB_RETRIEVAL_TOOL] Got current user: ${currentUser?.username || 'unknown'}`);
-
-        // Try to access the KB data client through the context (similar to agent_builder_execute.ts)
+        // Access the assistant context directly from the tool context
+        // This is the same pattern used in agent_builder_execute.ts
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const assistantContext = (context as any).elasticAssistant;
-        console.log(
-          `[KB_RETRIEVAL_TOOL] Got assistant context: ${assistantContext ? 'SUCCESS' : 'NULL'}`
-        );
 
         let kbDataClient = null;
         if (
           assistantContext &&
           typeof assistantContext.getAIAssistantKnowledgeBaseDataClient === 'function'
         ) {
-          try {
-            kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient();
-            console.log(
-              `[KB_RETRIEVAL_TOOL] Got KB data client from context: ${
-                kbDataClient ? 'SUCCESS' : 'NULL'
-              }`
-            );
-          } catch (error) {
-            console.log(
-              `[KB_RETRIEVAL_TOOL] Failed to get KB data client from context: ${error.message}`
-            );
+          kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient();
+        }
+
+        // Fallback: use data clients provider if assistant context is not available
+        if (!kbDataClient) {
+          const dataClientsProvider = getDataClientsProvider(getStartServices);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await initializeDataClients(context as any);
+          kbDataClient = dataClientsProvider.getKnowledgeBaseDataClient();
+
+          // Check if data clients provider is initialized
+          if (!dataClientsProvider.isInitialized()) {
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: {
+                    message:
+                      'The "AI Assistant knowledge base" needs to be installed. Navigate to the Knowledge Base page in the AI Assistant Settings to install it.',
+                    query,
+                  },
+                },
+              ],
+            };
           }
         }
 
-        // Fallback: create the knowledge base data client manually if context method doesn't work
-        if (!kbDataClient) {
-          console.log(`[KB_RETRIEVAL_TOOL] Creating KB data client manually as fallback`);
-          kbDataClient = new AIAssistantKnowledgeBaseDataClient({
-            logger: context.logger.get('knowledgeBase'),
-            currentUser,
-            elasticsearchClientPromise: Promise.resolve(context.esClient.asInternalUser),
-            indexPatternsResourceName: '.kibana-elastic-ai-assistant-knowledge-base',
-            ingestPipelineResourceName:
-              '.kibana-elastic-ai-assistant-ingest-pipeline-knowledge-base',
-            getElserId: async () => 'elser',
-            getIsKBSetupInProgress: () => false,
-            getProductDocumentationStatus: () =>
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              Promise.resolve({ status: 'not_installed' as const } as any),
-            kibanaVersion: pluginsStart.elasticAssistant.kibanaVersion,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ml: {} as any,
-            elserInferenceId: undefined,
-            setIsKBSetupInProgress: () => {},
-            spaceId,
-            manageGlobalKnowledgeBaseAIAssistant: false,
-            getTrainedModelsProvider: () => {
-              // Return a mock provider since we don't have access to ml plugin in this context
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              return {} as any;
-            },
+        if (kbDataClient) {
+          // Get knowledge base document entries
+          const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
+            kbResource: 'user',
+            query,
           });
-        }
-        console.log(
-          `[KB_RETRIEVAL_TOOL] Created KB data client: ${kbDataClient ? 'SUCCESS' : 'NULL'}`
-        );
 
-        // Skip availability check since manually created client doesn't have proper ML config
-        // Go straight to trying to query the KB content - if KB is installed, this should work
-        console.log(`[KB_RETRIEVAL_TOOL] Skipping availability check, trying direct KB query`);
-
-        // Get knowledge base document entries for general knowledge base content
-        console.log(`[KB_RETRIEVAL_TOOL] Querying KB for content with query: ${query}`);
-        const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
-          query,
-        });
-        console.log(`[KB_RETRIEVAL_TOOL] Found ${docs.length} documents`);
-
-        if (docs.length === 0) {
-          console.log(`[KB_RETRIEVAL_TOOL] No documents found - returning no content message`);
-          return {
-            results: [
-              {
-                type: ToolResultType.other,
-                data: {
-                  message:
-                    'No relevant information found in your knowledge base for this query. You may need to add more content to your knowledge base.',
-                  query,
+          if (docs && docs.length > 0) {
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: {
+                    content: docs.map((doc: any) => doc.pageContent).join('\n\n'),
+                    query,
+                  },
                 },
-              },
-            ],
-          };
+              ],
+            };
+          } else {
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: {
+                    message: 'No knowledge base entries found for your query.',
+                    query,
+                  },
+                },
+              ],
+            };
+          }
         }
 
-        // Convert documents to the format expected by the tool
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const citedDocs = docs.map((doc: any) => {
-          return new Document({
-            id: doc.id,
-            pageContent: doc.pageContent,
-            metadata: doc.metadata,
-          });
-        });
-
-        // Limit content size (similar to original tool)
-        const result = JSON.stringify(citedDocs).substring(0, 20000);
-        console.log(
-          `[KB_RETRIEVAL_TOOL] Returning ${citedDocs.length} documents with content length: ${result.length}`
-        );
-
+        // If we can't get the KB data client, return error
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
-                content: result,
-                documents: citedDocs,
+                message:
+                  'The "AI Assistant knowledge base" needs to be installed. Navigate to the Knowledge Base page in the AI Assistant Settings to install it.',
+                query,
               },
             },
           ],
         };
       } catch (error) {
-        console.error(`[KB_RETRIEVAL_TOOL] Error in handler: ${error.message}`);
-        console.error(`[KB_RETRIEVAL_TOOL] Error stack: ${error.stack}`);
         return {
           results: [
             {
