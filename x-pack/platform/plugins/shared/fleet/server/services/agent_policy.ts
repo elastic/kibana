@@ -453,10 +453,8 @@ class AgentPolicyService {
       const { fleetServerId } = agentlessAgentService.getDefaultSettings();
       agentPolicy.fleet_server_host_id = fleetServerId;
     }
-    const nameCheckSoClient = agentPolicy.space_ids
-      ? appContextService.getInternalUserSOClientWithoutSpaceExtension()
-      : soClient;
-    await this.requireUniqueName(nameCheckSoClient, agentPolicy);
+
+    await this.requireUniqueName(soClient, agentPolicy);
     await validatePolicyNamespaceForSpace({
       spaceId: soClient.getCurrentNamespace(),
       namespace: agentPolicy.namespace,
@@ -624,7 +622,7 @@ class AgentPolicyService {
 
   public async requireUniqueName(
     soClient: SavedObjectsClientContract,
-    givenPolicy: {
+    policy: {
       id?: string;
       name: string;
       space_ids?: string[];
@@ -632,34 +630,38 @@ class AgentPolicyService {
     }
   ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
+    const _soClient =
+      (policy.space_ids ?? []).length > 1
+        ? appContextService.getInternalUserSOClientWithoutSpaceExtension()
+        : soClient;
 
-    const results = await soClient
+    const results = await _soClient
       .find<AgentPolicySOAttributes>({
         type: savedObjectType,
         searchFields: ['name'],
-        search: escapeSearchQueryPhrase(givenPolicy.name),
-        namespaces: givenPolicy.space_ids,
+        search: escapeSearchQueryPhrase(policy.name),
+        namespaces: policy.space_ids,
       })
       .catch(
         catchAndSetErrorStackTrace.withMessage(
-          `Failed to find agent policies with name [${givenPolicy.name}]`
+          `Failed to find agent policies with name [${policy.name}]`
         )
       );
 
     const idsWithName = results.total ? results.saved_objects.map(({ id }) => id) : [];
-    const othersWithName = idsWithName.filter((id) => id !== givenPolicy.id);
+    const othersWithName = idsWithName.filter((id) => id !== policy.id);
     if (othersWithName.length) {
-      if (!givenPolicy?.supports_agentless) {
+      if (!policy?.supports_agentless) {
         const isSinglePolicy = othersWithName.length === 1;
         const existClause = isSinglePolicy
           ? `Agent Policy '${othersWithName[0]}' already exists`
           : `Agent Policies '${othersWithName.join(',')}' already exist`;
 
-        throw new AgentPolicyNameExistsError(`${existClause} with name '${givenPolicy.name}'`);
+        throw new AgentPolicyNameExistsError(`${existClause} with name '${policy.name}'`);
       } else {
-        const integrationName = givenPolicy.name.split(' ').pop();
+        const integrationName = policy.name.split(' ').pop();
         throw new AgentlessPolicyExistsRequestError(
-          `${givenPolicy.name} already exist. Please rename the integration name ${integrationName}.`
+          `${policy.name} already exist. Please rename the integration name ${integrationName}.`
         );
       }
     }
@@ -973,8 +975,7 @@ class AgentPolicyService {
     }
 
     if (agentPolicy.name && agentPolicy.name !== existingAgentPolicy.name) {
-      const allSpacesSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
-      await this.requireUniqueName(allSpacesSoClient, {
+      await this.requireUniqueName(soClient, {
         id,
         name: agentPolicy.name,
         space_ids: agentPolicy?.space_ids ?? existingAgentPolicy.space_ids,

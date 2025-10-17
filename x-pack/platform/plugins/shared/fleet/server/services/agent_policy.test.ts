@@ -2277,6 +2277,10 @@ describe('Agent policy', () => {
   });
 
   describe('requireUniqueName', () => {
+    const getAllSpacesSoClientSpy = jest.spyOn(
+      appContextService,
+      'getInternalUserSOClientWithoutSpaceExtension'
+    );
     beforeAll(() => {
       jest.spyOn(agentPolicyService, 'requireUniqueName').mockRestore();
     });
@@ -2366,6 +2370,55 @@ describe('Agent policy', () => {
         searchFields: ['name'],
         search: `\"${testAgentPolicy.name}\"`,
         namespaces: testAgentPolicy.space_ids,
+      });
+    });
+
+    it('should query across spaces if multiple space ids are provided', async () => {
+      const otherAgentPolicy = {
+        ...testAgentPolicy,
+        id: 'other-agent-policy',
+      };
+
+      const multiSpacesTestAgentPolicy = {
+        ...testAgentPolicy,
+        space_ids: ['default', 'outerspace'],
+      };
+
+      const allSpacesSoClient = createSavedObjectClientMock();
+      getAllSpacesSoClientSpy.mockReturnValue(allSpacesSoClient);
+      const soClient = createSavedObjectClientMock();
+
+      soClient.find.mockResolvedValue({
+        total: 0,
+        saved_objects: [],
+        page: 1,
+        per_page: 10,
+      });
+
+      allSpacesSoClient.find.mockResolvedValue({
+        total: 1,
+        saved_objects: [
+          {
+            id: otherAgentPolicy.id,
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            attributes: { name: multiSpacesTestAgentPolicy.name },
+            references: [],
+            score: 1,
+          },
+        ],
+        page: 1,
+        per_page: 10,
+      });
+
+      await expect(
+        agentPolicyService.requireUniqueName(soClient, multiSpacesTestAgentPolicy)
+      ).rejects.toThrow();
+
+      expect(allSpacesSoClient.find).toHaveBeenCalledWith({
+        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        searchFields: ['name'],
+        search: `\"${multiSpacesTestAgentPolicy.name}\"`,
+        namespaces: multiSpacesTestAgentPolicy.space_ids,
       });
     });
   });
