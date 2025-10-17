@@ -90,4 +90,45 @@ describe('useGetEndpointActionList hook', () => {
       })
     );
   });
+
+  it('should return an empty list if the API returns a 404', async () => {
+    // @ts-ignore
+    apiMocks.responseProvider.actionList.mockRejectedValueOnce({
+      body: {
+        statusCode: 404,
+        message: 'Not Found',
+      },
+    });
+
+    const result = await renderReactQueryHook(() =>
+      useGetEndpointActionList({
+        agentIds: ['123'],
+        statuses: ['pending'],
+        page: 1,
+      })
+    );
+
+    expect(result.data).toEqual({ data: [], page: 1, pageSize: 10, total: 0 });
+  });
+
+  it('should return an empty list if the API returns an index not found exception', async () => {
+    // @ts-ignore
+    apiMocks.responseProvider.actionList.mockRejectedValue({
+      body: {
+        statusCode: 500,
+        message: 'index_not_found_exception',
+      },
+    });
+
+    const result = await renderReactQueryHook(() =>
+      useGetEndpointActionList({
+        agentIds: ['123'],
+        statuses: ['pending'],
+        page: 1,
+        pageSize: 20,
+      })
+    );
+
+    expect(result.data).toEqual({ data: [], page: 1, pageSize: 20, total: 0 });
+  });
 });
