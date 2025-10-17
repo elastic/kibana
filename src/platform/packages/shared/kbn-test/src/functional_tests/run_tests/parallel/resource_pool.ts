@@ -9,6 +9,11 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 
+import { getAvailableMemory } from './get_available_memory';
+import type { SlotResources } from './get_slot_resources';
+
+const EPSILON = 0.000001;
+
 export enum Phase {
   BeforeStart = 'before_start',
   Warming = 'warming',
@@ -17,42 +22,79 @@ export enum Phase {
   Done = 'done',
 }
 
+interface PhaseResourceUsage {
+  cpu: number;
+  memory: number;
+  exclusive?: boolean;
+}
+
+interface AcquireOptions {
+  label: string;
+  priority?: number;
+  resources: SlotResources;
+}
+
+interface SlotMetadata {
+  label: string;
+  priority: number;
+  resources: SlotResources;
+  sequence: number;
+  phase: Phase;
+}
+
+interface QueueItem {
+  slot: Slot;
+  resolve: () => void;
+}
+
 export class ResourcePool {
   private readonly log: ToolingLog;
-  private readonly maxStarted: number;
-  private readonly maxWarming: number;
-  private readonly maxRunning: number;
+  private readonly totalCpuBudget: number;
+  private readonly minMbAvailable: number;
 
-  private startedInUse = 0;
-  private warmingInUse = 0;
-  private runningInUse = 0;
-
-  private warmingQueue: QueueItem[] = [];
-  private runningQueue: QueueItem[] = [];
   private readonly slotStates = new WeakMap<Slot, Phase>();
+  private readonly slotMetadata = new WeakMap<Slot, SlotMetadata>();
+  private readonly warmingQueue: QueueItem[] = [];
+  private readonly runningQueue: QueueItem[] = [];
+
+  private usedCpu = 0;
+  private usedMemory = 0;
+  private warmingExclusiveCount = 0;
+  private runningExclusiveCount = 0;
+  private memoryCapacity = 0;
+  private sequenceCounter = 0;
 
   constructor({
     log,
-    maxStarted,
-    maxWarming,
-    maxRunning,
+    totalCpu,
+    minMbAvailable,
   }: {
     log: ToolingLog;
-    maxStarted: number;
-    maxWarming: number;
-    maxRunning: number;
+    totalCpu: number;
+    minMbAvailable: number;
   }) {
     this.log = log;
-    this.maxStarted = maxStarted;
-    this.maxWarming = maxWarming;
-    this.maxRunning = maxRunning;
+    this.totalCpuBudget = Math.max(1, totalCpu);
+    this.minMbAvailable = Math.max(0, minMbAvailable);
+    this.recalculateCapacity();
   }
 
-  acquire(): Slot {
-    const slot: Partial<Slot> = {};
+  acquire(options: AcquireOptions): Slot {
+    const { label, priority = 0, resources } = options;
 
+    const slot: Partial<Slot> = {};
     const typedSlot = slot as Slot;
+
+    const metadata: SlotMetadata = {
+      label,
+      priority,
+      resources,
+      sequence: this.sequenceCounter++,
+      phase: Phase.BeforeStart,
+    };
+
     this.slotStates.set(typedSlot, Phase.BeforeStart);
+    this.slotMetadata.set(typedSlot, metadata);
 
     slot.waitForWarming = async () => {
       await this.waitForWarming(typedSlot);
@@ -73,72 +115,19 @@ export class ResourcePool {
 
   private logStats(label: string) {
     this.log.debug(
-      `[resource-pool:${label}] started=${this.startedInUse}/${this.maxStarted}, warming=${this.warmingInUse}/${this.maxWarming}, running=${this.runningInUse}/${this.maxRunning}, waitingWarming=${this.warmingQueue.length}, waitingRunning=${this.runningQueue.length}`
+      `[resource-pool:${label}] cpu=${this.usedCpu}/${this.totalCpuBudget}, memory=${this.usedMemory}/${this.memoryCapacity}, warmingExclusive=${this.warmingExclusiveCount}, runningExclusive=${this.runningExclusiveCount}, waitingWarming=${this.warmingQueue.length}, waitingRunning=${this.runningQueue.length}`
     );
   }
 
-  private canStartAndWarm() {
-    return this.startedInUse < this.maxStarted && this.warmingInUse < this.maxWarming;
-  }
-
-  private canRun() {
-    return this.runningInUse < this.maxRunning;
-  }
-
-  private tryGrantWarming() {
-    let granted = false;
-
-    while (this.warmingQueue.length > 0 && this.canStartAndWarm()) {
-      const item = this.warmingQueue.shift();
-      if (!item) break;
-      const { slot, resolve } = item;
-      if (this.getPhase(slot) !== Phase.BeforeStart) {
-        continue;
-      }
-      this.startedInUse += 1;
-      this.warmingInUse += 1;
-      this.setPhase(slot, Phase.Warming);
-      granted = true;
-      resolve();
-    }
-
-    if (granted) {
-      this.logStats('warming-granted');
-    }
-  }
-
-  private tryGrantRunning() {
-    let granted = false;
-
-    while (this.runningQueue.length > 0 && this.canRun()) {
-      const item = this.runningQueue.shift();
-      if (!item) break;
-      const { slot, resolve } = item;
-      if (this.getPhase(slot) !== Phase.IdleBeforeRun) {
-        continue;
-      }
-      this.runningInUse += 1;
-      this.setPhase(slot, Phase.Running);
-      granted = true;
-      resolve();
-    }
-
-    if (granted) {
-      this.logStats('running-granted');
-    }
-  }
-
-  async waitForWarming(slot: Slot) {
+  private async waitForWarming(slot: Slot) {
     const phase = this.getPhase(slot);
 
     if (phase !== Phase.BeforeStart) {
       throw new Error(`Cannot warm slot in phase [${phase}]`);
     }
 
-    if (this.canStartAndWarm()) {
-      this.startedInUse += 1;
-      this.warmingInUse += 1;
-      this.setPhase(slot, Phase.Warming);
+    if (this.canAllocatePhase(slot, Phase.Warming)) {
+      this.applyPhaseChange(slot, Phase.Warming);
       this.logStats('warming-acquired');
       return;
     }
@@ -146,24 +135,23 @@ export class ResourcePool {
     await new Promise<void>((resolve) => {
       this.warmingQueue.push({ slot, resolve });
       this.logStats('warming-wait');
+      this.allocate();
     });
   }
 
-  async waitForRunning(slot: Slot) {
+  private async waitForRunning(slot: Slot) {
     const phase = this.getPhase(slot);
 
     if (phase === Phase.Warming) {
-      this.warmingInUse -= 1;
-      this.setPhase(slot, Phase.IdleBeforeRun);
+      this.applyPhaseChange(slot, Phase.IdleBeforeRun);
       this.logStats('warming-finished');
-      this.tryGrantWarming();
+      this.allocate();
     } else if (phase !== Phase.IdleBeforeRun) {
       throw new Error(`Cannot run slot in phase [${phase}]`);
     }
 
-    if (this.canRun()) {
-      this.runningInUse += 1;
-      this.setPhase(slot, Phase.Running);
+    if (this.canAllocatePhase(slot, Phase.Running)) {
+      this.applyPhaseChange(slot, Phase.Running);
       this.logStats('running-acquired');
       return;
     }
@@ -171,34 +159,295 @@ export class ResourcePool {
     await new Promise<void>((resolve) => {
       this.runningQueue.push({ slot, resolve });
       this.logStats('running-wait');
+      this.allocate();
     });
   }
 
-  release(slot: Slot) {
+  private release(slot: Slot) {
+    const metadata = this.getMetadata(slot);
     const phase = this.getPhase(slot);
 
     if (phase === Phase.BeforeStart) {
-      this.warmingQueue = this.warmingQueue.filter((item) => item.slot !== slot);
-      this.runningQueue = this.runningQueue.filter((item) => item.slot !== slot);
-    }
-
-    if (phase === Phase.Warming) {
-      this.warmingInUse = Math.max(0, this.warmingInUse - 1);
-      this.startedInUse = Math.max(0, this.startedInUse - 1);
+      this.removeFromQueues(slot);
+      this.logStats('release-before-start');
+    } else if (phase === Phase.Warming) {
+      this.removeResources(metadata.resources.warming, Phase.Warming);
       this.logStats('release-warming');
     } else if (phase === Phase.IdleBeforeRun) {
-      this.startedInUse = Math.max(0, this.startedInUse - 1);
+      this.removeResources(metadata.resources.idle, Phase.IdleBeforeRun);
       this.logStats('release-idle');
     } else if (phase === Phase.Running) {
-      this.runningInUse = Math.max(0, this.runningInUse - 1);
-      this.startedInUse = Math.max(0, this.startedInUse - 1);
+      this.removeResources(metadata.resources.running, Phase.Running);
       this.logStats('release-running');
     }
 
+    metadata.phase = Phase.Done;
     this.setPhase(slot, Phase.Done);
+    this.removeFromQueues(slot);
+    this.recalculateCapacity();
+    this.allocate();
+  }
 
-    this.tryGrantRunning();
-    this.tryGrantWarming();
+  private allocate() {
+    let madeProgress = false;
+
+    do {
+      madeProgress = false;
+      this.recalculateCapacity();
+
+      if (this.tryGrantRunning()) {
+        madeProgress = true;
+      }
+
+      if (this.tryGrantWarming()) {
+        madeProgress = true;
+      }
+    } while (madeProgress);
+  }
+
+  private tryGrantWarming(): boolean {
+    let granted = false;
+
+    while (true) {
+      const next = this.pickNextCandidate(this.warmingQueue, Phase.Warming);
+      if (!next) {
+        break;
+      }
+
+      const { slot, resolve } = next;
+      this.applyPhaseChange(slot, Phase.Warming);
+      this.logStats('warming-granted');
+      granted = true;
+      resolve();
+    }
+
+    return granted;
+  }
+
+  private tryGrantRunning(): boolean {
+    let granted = false;
+
+    while (true) {
+      const next = this.pickNextCandidate(this.runningQueue, Phase.Running);
+      if (!next) {
+        break;
+      }
+
+      const { slot, resolve } = next;
+      this.applyPhaseChange(slot, Phase.Running);
+      this.logStats('running-granted');
+      granted = true;
+      resolve();
+    }
+
+    return granted;
+  }
+
+  private pickNextCandidate(queue: QueueItem[], phase: Phase): QueueItem | undefined {
+    let selectedIndex = -1;
+    let selectedMetadata: SlotMetadata | undefined;
+
+    const expectedPhase = phase === Phase.Warming ? Phase.BeforeStart : Phase.IdleBeforeRun;
+
+    for (let index = 0; index < queue.length; index += 1) {
+      const entry = queue[index];
+      const metadata = this.slotMetadata.get(entry.slot);
+      const currentPhase = this.getPhase(entry.slot);
+
+      if (!metadata || metadata.phase === Phase.Done || currentPhase !== expectedPhase) {
+        queue.splice(index, 1);
+        index -= 1;
+        continue;
+      }
+
+      if (!this.canAllocatePhase(entry.slot, phase)) {
+        continue;
+      }
+
+      if (!selectedMetadata) {
+        selectedIndex = index;
+        selectedMetadata = metadata;
+        continue;
+      }
+
+      if (this.isBetterCandidate(metadata, selectedMetadata, phase)) {
+        selectedIndex = index;
+        selectedMetadata = metadata;
+      }
+    }
+
+    if (selectedIndex === -1) {
+      return undefined;
+    }
+
+    return queue.splice(selectedIndex, 1)[0];
+  }
+
+  private isBetterCandidate(
+    candidate: SlotMetadata,
+    incumbent: SlotMetadata,
+    phase: Phase
+  ): boolean {
+    if (candidate.priority !== incumbent.priority) {
+      return candidate.priority < incumbent.priority;
+    }
+
+    const candidateResources = this.getPhaseResource(candidate, phase);
+    const incumbentResources = this.getPhaseResource(incumbent, phase);
+
+    if (candidateResources.memory !== incumbentResources.memory) {
+      return candidateResources.memory > incumbentResources.memory;
+    }
+
+    if (candidateResources.cpu !== incumbentResources.cpu) {
+      return candidateResources.cpu > incumbentResources.cpu;
+    }
+
+    return candidate.sequence < incumbent.sequence;
+  }
+
+  private getPhaseResource(metadata: SlotMetadata, phase: Phase): PhaseResourceUsage {
+    if (phase === Phase.Warming) {
+      return metadata.resources.warming;
+    }
+
+    if (phase === Phase.Running) {
+      return metadata.resources.running;
+    }
+
+    return {
+      cpu: metadata.resources.idle.cpu,
+      memory: metadata.resources.idle.memory,
+    };
+  }
+
+  private canAllocatePhase(slot: Slot, phase: Phase): boolean {
+    const metadata = this.slotMetadata.get(slot);
+    if (!metadata) {
+      return false;
+    }
+
+    if (phase === Phase.Warming) {
+      const resources = metadata.resources.warming;
+
+      if (resources.exclusive && this.warmingExclusiveCount > 0) {
+        return false;
+      }
+
+      const cpuAfter = this.usedCpu + resources.cpu;
+      if (cpuAfter - this.totalCpuBudget > EPSILON) {
+        return false;
+      }
+
+      const memoryAfter = this.usedMemory + resources.memory;
+      if (memoryAfter - this.memoryCapacity > EPSILON) {
+        return false;
+      }
+
+      return true;
+    }
+
+    if (phase === Phase.Running) {
+      const runningResources = metadata.resources.running;
+      const idleResources = metadata.resources.idle;
+
+      if (runningResources.exclusive && this.runningExclusiveCount > 0) {
+        return false;
+      }
+
+      const cpuAfter = this.usedCpu - idleResources.cpu + runningResources.cpu;
+      if (cpuAfter - this.totalCpuBudget > EPSILON) {
+        return false;
+      }
+      if (cpuAfter < -EPSILON) {
+        return false;
+      }
+
+      const memoryAfter = this.usedMemory - idleResources.memory + runningResources.memory;
+      if (memoryAfter - this.memoryCapacity > EPSILON) {
+        return false;
+      }
+      if (memoryAfter < -EPSILON) {
+        return false;
+      }
+
+      return true;
+    }
+
+    return false;
+  }
+
+  private applyPhaseChange(slot: Slot, phase: Phase) {
+    const metadata = this.getMetadata(slot);
+    const previousPhase = metadata.phase;
+
+    if (previousPhase === phase) {
+      return;
+    }
+
+    if (previousPhase === Phase.Warming) {
+      this.removeResources(metadata.resources.warming, Phase.Warming);
+    } else if (previousPhase === Phase.IdleBeforeRun) {
+      this.removeResources(metadata.resources.idle, Phase.IdleBeforeRun);
+    } else if (previousPhase === Phase.Running) {
+      this.removeResources(metadata.resources.running, Phase.Running);
+    }
+
+    if (phase === Phase.Warming) {
+      this.addResources(metadata.resources.warming, Phase.Warming);
+    } else if (phase === Phase.IdleBeforeRun) {
+      this.addResources(metadata.resources.idle, Phase.IdleBeforeRun);
+    } else if (phase === Phase.Running) {
+      this.addResources(metadata.resources.running, Phase.Running);
+    }
+
+    metadata.phase = phase;
+    this.setPhase(slot, phase);
+    this.recalculateCapacity();
+  }
+
+  private addResources(resources: PhaseResourceUsage, phase: Phase) {
+    this.usedCpu = this.roundToPrecision(this.usedCpu + resources.cpu);
+    this.usedMemory = this.roundToPrecision(this.usedMemory + resources.memory);
+
+    if (phase === Phase.Warming && resources.exclusive) {
+      this.warmingExclusiveCount += 1;
+    }
+
+    if (phase === Phase.Running && resources.exclusive) {
+      this.runningExclusiveCount += 1;
+    }
+  }
+
+  private removeResources(resources: PhaseResourceUsage, phase: Phase) {
+    this.usedCpu = this.roundToPrecision(Math.max(0, this.usedCpu - resources.cpu));
+    this.usedMemory = this.roundToPrecision(Math.max(0, this.usedMemory - resources.memory));
+
+    if (phase === Phase.Warming && resources.exclusive) {
+      this.warmingExclusiveCount = Math.max(0, this.warmingExclusiveCount - 1);
+    }
+
+    if (phase === Phase.Running && resources.exclusive) {
+      this.runningExclusiveCount = Math.max(0, this.runningExclusiveCount - 1);
+    }
+  }
+
+  private removeFromQueues(slot: Slot) {
+    this.warmingQueue.splice(
+      0,
+      this.warmingQueue.length,
+      ...this.warmingQueue.filter((entry) => entry.slot !== slot)
+    );
+    this.runningQueue.splice(
+      0,
+      this.runningQueue.length,
+      ...this.runningQueue.filter((entry) => entry.slot !== slot)
+    );
+  }
+
+  private recalculateCapacity() {
+    const freeMemory = Math.max(getAvailableMemory() - this.minMbAvailable, 0);
+    this.memoryCapacity = this.usedMemory + freeMemory;
   }
 
   private getPhase(slot: Slot) {
@@ -207,14 +456,22 @@ export class ResourcePool {
 
   private setPhase(slot: Slot, phase: Phase) {
     const previous = this.getPhase(slot);
-    this.log.debug(`[resource-pool:slot] ${previous} -> ${phase}`);
+    const label = this.slotMetadata.get(slot)?.label ?? 'unknown';
+    this.log.debug(`[resource-pool:slot] ${label} ${previous} -> ${phase}`);
     this.slotStates.set(slot, phase);
   }
-}
 
-interface QueueItem {
-  slot: Slot;
-  resolve: () => void;
+  private getMetadata(slot: Slot): SlotMetadata {
+    const metadata = this.slotMetadata.get(slot);
+    if (!metadata) {
+      throw new Error('Unknown slot');
+    }
+    return metadata;
+  }
+
+  private roundToPrecision(value: number): number {
+    return Math.round(value * 1_000_000) / 1_000_000;
+  }
 }
 
 export interface Slot {
