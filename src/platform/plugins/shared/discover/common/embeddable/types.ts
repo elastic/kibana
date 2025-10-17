@@ -35,7 +35,7 @@ type SearchEmbeddableBaseState = SerializedTitles &
   };
 
 export type SearchEmbeddableByValueSerializedState = SearchEmbeddableBaseState & {
-  attributes: Omit<SavedSearchByValueAttributes, 'references'>;
+  attributes: SavedSearchByValueAttributes;
 };
 
 export type SearchEmbeddableByReferenceSerializedState = SearchEmbeddableBaseState & {

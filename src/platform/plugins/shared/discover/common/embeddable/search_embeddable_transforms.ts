@@ -9,14 +9,14 @@
 
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
 import type { EmbeddableTransforms } from '@kbn/embeddable-plugin/common';
-import type { SearchEmbeddableSerializedState } from './types';
+import type { SearchEmbeddableSerializedState, StoredSearchEmbeddableState } from './types';
 import { getTransformIn } from './get_transform_in';
 import { getTransformOut } from './get_transform_out';
 
 export function getSearchEmbeddableTransforms(
   transformEnhancementsIn: EnhancementsRegistry['transformIn'],
   transformEnhancementsOut: EnhancementsRegistry['transformOut']
-): EmbeddableTransforms<SearchEmbeddableSerializedState> {
+): EmbeddableTransforms<StoredSearchEmbeddableState, SearchEmbeddableSerializedState> {
   return {
     transformIn: getTransformIn(transformEnhancementsIn),
     transformOut: getTransformOut(transformEnhancementsOut),

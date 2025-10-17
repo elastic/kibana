@@ -10,11 +10,21 @@
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
-import type { SearchEmbeddableSerializedState, StoredSearchEmbeddableState } from './types';
-import { isByRefState, isByValueState } from './helpers';
+import type {
+  SearchEmbeddableByReferenceSerializedState,
+  SearchEmbeddableSerializedState,
+  StoredSearchEmbeddableByReferenceState,
+  StoredSearchEmbeddableState,
+} from './types';
 import { extract } from './search_inject_extract';
 
 export const SAVED_SEARCH_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
+
+function isByRefState(
+  state: SearchEmbeddableSerializedState
+): state is SearchEmbeddableByReferenceSerializedState {
+  return 'savedObjectId' in state;
+}
 
 export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['transformIn']) {
   function transformIn(state: SearchEmbeddableSerializedState): {
@@ -31,7 +41,7 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
         state: {
           ...rest,
           ...(enhancementsState ? { enhancements: enhancementsState } : {}),
-        },
+        } as StoredSearchEmbeddableByReferenceState,
         references: [
           {
             name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME,
@@ -43,31 +53,23 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
       };
     }
 
-    if (isByValueState(state)) {
-      const { state: extractedState, references } = extract({
-        type: 'search',
-        attributes: state.attributes,
-      });
+    // by value
+    const { state: extractedState, references } = extract({
+      type: 'search',
+      attributes: state.attributes,
+    });
 
-      return {
-        state: {
-          ...state,
-          attributes: {
-            ...state.attributes,
-            ...extractedState,
-            // discover session stores references as part of attributes
-            references,
-          },
-        },
-        references: [...references, ...enhancementsReferences],
-      };
-    }
     return {
       state: {
         ...state,
-        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+        attributes: {
+          ...state.attributes,
+          ...extractedState.attributes,
+          // discover session stores references as part of attributes
+          references,
+        },
       },
-      references: enhancementsReferences,
+      references: [...references, ...enhancementsReferences],
     };
   }
   return transformIn;

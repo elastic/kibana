@@ -10,50 +10,53 @@
 import { extractTabs, SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { SearchEmbeddableSerializedState } from './types';
+import type {
+  SearchEmbeddableByReferenceSerializedState,
+  SearchEmbeddableByValueSerializedState,
+  StoredSearchEmbeddableByValueState,
+  StoredSearchEmbeddableState,
+} from './types';
 import { inject } from './search_inject_extract';
 import { SAVED_SEARCH_SAVED_OBJECT_REF_NAME } from './get_transform_in';
-import { isByValueState } from './helpers';
+
+function isStoredSearchEmbeddableByValueState(
+  state: StoredSearchEmbeddableState
+): state is StoredSearchEmbeddableByValueState {
+  return (
+    typeof (state as StoredSearchEmbeddableByValueState).attributes === 'object' &&
+    (state as StoredSearchEmbeddableByValueState).attributes !== null
+  );
+}
 
 export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['transformOut']) {
-  function transformOut(
-    state: SearchEmbeddableSerializedState,
-    references?: SavedObjectReference[]
-  ) {
+  function transformOut(state: StoredSearchEmbeddableState, references?: SavedObjectReference[]) {
     const enhancementsState = state.enhancements
       ? transformEnhancementsOut(state.enhancements, references ?? [])
       : undefined;
 
     const enhancements = enhancementsState ? { enhancements: enhancementsState } : {};
 
-    const savedObjectRef = (references ?? []).find(
-      (ref) => SavedSearchType === ref.type && ref.name === SAVED_SEARCH_SAVED_OBJECT_REF_NAME
-    );
-    if (savedObjectRef) {
-      return {
-        ...state,
-        ...enhancements,
-        savedObjectId: savedObjectRef.id,
-      };
-    }
-
-    if (isByValueState(state)) {
+    if (isStoredSearchEmbeddableByValueState(state)) {
       const tabsState = {
         ...state,
-        attributes: extractTabs(state.attributes),
+        attributes: extractTabs((state as StoredSearchEmbeddableByValueState).attributes),
       };
       const { attributes } = inject({ type: 'search', ...tabsState }, references ?? []);
       return {
-        ...tabsState,
+        ...state,
+        attributes,
         ...enhancements,
-        ...attributes,
-      };
+      } as SearchEmbeddableByValueSerializedState;
     }
 
+    const savedObjectRef = (references ?? []).find(
+      (ref) => SavedSearchType === ref.type && ref.name === SAVED_SEARCH_SAVED_OBJECT_REF_NAME
+    );
     return {
       ...state,
       ...enhancements,
-    };
+      ...(savedObjectRef?.id ? { savedObjectId: savedObjectRef.id } : {}),
+    } as SearchEmbeddableByReferenceSerializedState;
   }
   return transformOut;
 }
