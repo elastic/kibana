@@ -2530,7 +2530,7 @@ describe('Output Service', () => {
     });
 
     it('should call audit logger', async () => {
-      getMockedSoClient();
+      const soClient = getMockedSoClient();
       await outputService.delete('existing-es-output');
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
@@ -2539,6 +2539,7 @@ describe('Output Service', () => {
         id: outputIdToUuid('existing-es-output'),
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });
+      expect(soClient.delete).toBeCalled();
     });
   });
 
