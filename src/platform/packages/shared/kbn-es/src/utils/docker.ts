@@ -995,8 +995,12 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
       : {}),
   });
 
+  const now = Date.now();
+
   const readyPromise = waitUntilClusterReady({ client, expectedStatus: 'green', log }).then(
     async () => {
+      console.log(Math.round((Date.now() - now) / 1000) + 'ms');
+
       if (!options.ssl || !options.kibanaUrl) {
         return;
       }
@@ -1063,8 +1067,7 @@ export function teardownServerlessClusterSync(log: ToolingLog, options: Serverle
   if (runningNodes.length) {
     log.info({ stdout, command });
     log.info('Killing running serverless ES nodes.');
-
-    // execa.commandSync(`docker kill ${runningNodes.join(' ')}`);
+    execa.commandSync(`docker kill ${runningNodes.join(' ')}`);
   }
 }
 
