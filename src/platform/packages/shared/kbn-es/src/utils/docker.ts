@@ -36,6 +36,7 @@ import {
 } from '@kbn/mock-idp-utils';
 
 import getPort from 'get-port';
+import { range, without } from 'lodash';
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
@@ -144,6 +145,9 @@ const DOCKER_REGISTRY = 'docker.elastic.co';
 
 const CONTAINER_NAME_PREFIX = 'es-';
 
+const DEFAULT_MEM = `-Xms1024m -Xmx1024m`;
+const MORE_MEM = `-Xms1536m -Xmx1536m`;
+
 function getEsContainerName(idx: number, processSpecificPrefix: string | undefined) {
   return `${CONTAINER_NAME_PREFIX}${processSpecificPrefix || 'default'}-${idx
     .toString()
@@ -199,11 +203,11 @@ const DEFAULT_DOCKER_ESARGS: Array<[string, string]> = [
 // Temporary workaround for https://github.com/elastic/elasticsearch/issues/118583
 if (process.arch === 'arm64') {
   DEFAULT_DOCKER_ESARGS.push(
-    ['ES_JAVA_OPTS', '-Xms1024m -Xmx1024m -XX:UseSVE=0'],
+    ['ES_JAVA_OPTS', `${DEFAULT_MEM} -XX:UseSVE=0`],
     ['CLI_JAVA_OPTS', '-XX:UseSVE=0']
   );
 } else {
-  DEFAULT_DOCKER_ESARGS.push(['ES_JAVA_OPTS', '-Xms1024m -Xmx1024m']);
+  DEFAULT_DOCKER_ESARGS.push(['ES_JAVA_OPTS', DEFAULT_MEM]);
 }
 
 export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
@@ -260,11 +264,11 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 // Temporary workaround for https://github.com/elastic/elasticsearch/issues/118583
 if (process.arch === 'arm64') {
   DEFAULT_SERVERLESS_ESARGS.push(
-    ['ES_JAVA_OPTS', '-Xms1g -Xmx1g -XX:UseSVE=0'],
+    ['ES_JAVA_OPTS', `${DEFAULT_MEM} -XX:UseSVE=0`],
     ['CLI_JAVA_OPTS', '-XX:UseSVE=0']
   );
 } else {
-  DEFAULT_SERVERLESS_ESARGS.push(['ES_JAVA_OPTS', '-Xms1g -Xmx1g']);
+  DEFAULT_SERVERLESS_ESARGS.push(['ES_JAVA_OPTS', DEFAULT_MEM]);
 }
 
 const DEFAULT_SSL_ESARGS: Array<[string, string]> = [
@@ -294,7 +298,8 @@ const DOCKER_SSL_ESARGS: Array<[string, string]> = [
 
 export const getServerlessNodeArgs = async (
   primaryPort: number | undefined,
-  namePrefix: string | undefined
+  namePrefix: string | undefined,
+  count: 1 | 2 | 3 = 2
 ): Promise<Array<{ name: string; params: string[]; esArgs?: [string, string][] }>> => {
   primaryPort = Number(primaryPort || DEFAULT_PORT);
 
@@ -318,63 +323,43 @@ export const getServerlessNodeArgs = async (
     ],
   ];
 
-  const names = [
-    getEsContainerName(1, namePrefix),
-    getEsContainerName(2, namePrefix),
-    getEsContainerName(3, namePrefix),
-  ];
+  const allNames = range(count).map((_, index) => {
+    return getEsContainerName(index + 1, namePrefix);
+  });
 
-  return [
-    {
-      name: names[0],
+  const allRoles = ['master', 'remote_cluster_client', 'ingest', 'index', 'search'];
+
+  return allNames.map((name, idx) => {
+    const nodeRoles =
+      idx === 0
+        ? count === 1
+          ? allRoles
+          : without(allRoles, 'search')
+        : idx === 1
+        ? count === 2
+          ? without(allRoles, 'master', 'index')
+          : without(allRoles, 'ingest', 'index')
+        : without(allRoles, 'ingest', 'index', 'search').concat('ml', 'transform');
+
+    return {
+      name,
       params: [
-        ...ports[0].flatMap((port) => {
+        ...ports[idx].flatMap((port) => {
           return ['-p', `127.0.0.1:${port}:${port}`];
         }),
+        ...(allNames.length > 1
+          ? ['--env', `discovery.seed_hosts=${allNames.filter((_, i) => idx !== i).join(',')}`]
+          : []),
         '--env',
-        `discovery.seed_hosts=${names[1]},${names[2]}`,
-
-        '--env',
-        'node.roles=["master","remote_cluster_client","ingest","index"]',
+        `node.roles=${JSON.stringify(nodeRoles)}`,
       ],
       esArgs: [
         ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
         ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
-        ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
+        ...(count === 1 ? [['ES_JAVA_OPTS', MORE_MEM] as [string, string]] : []),
       ],
-    },
-    {
-      name: names[1],
-      params: [
-        ...ports[1].flatMap((port) => {
-          return ['-p', `127.0.0.1:${port}:${port}`];
-        }),
-        '--env',
-        `discovery.seed_hosts=${names[0]},${names[2]}`,
-
-        '--env',
-        'node.roles=["master","remote_cluster_client","search"]',
-      ],
-      esArgs: [
-        ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
-        ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
-      ],
-    },
-    {
-      name: names[2],
-      params: [
-        ...ports[2].flatMap((port) => {
-          return ['-p', `127.0.0.1:${port}:${port}`];
-        }),
-
-        '--env',
-        `discovery.seed_hosts=${names[0]},${names[1]}`,
-
-        '--env',
-        'node.roles=["master","remote_cluster_client","ml","transform"]',
-      ],
-    },
-  ];
+    };
+  });
 };
 
 /**

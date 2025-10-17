@@ -327,6 +327,10 @@ export async function runTestsParallel(
     logStats();
   }
 
+  Object.keys(require.cache).forEach((key) => {
+    delete require.cache[key];
+  });
+
   const promises = runners.map(async (runner, runnerIndex) => {
     const slotResources = runnerResources.get(runner);
     if (!slotResources) {
