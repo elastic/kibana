@@ -18,7 +18,7 @@ import type { TimeRangeMeta } from './get_time_range_meta';
 import { getTimeRangeMeta, getTimezone } from './get_time_range_meta';
 import { getMomentTimezone } from './time_utils';
 
-export function initTimeRangeSubscription(api: unknown) {
+export function initTimeRangeSubscription(parentApi: unknown) {
   const timeRange$ = apiPublishesTimeRange(api)
     ? api.timeRange$
     : new BehaviorSubject<TimeRange | undefined>(undefined);
