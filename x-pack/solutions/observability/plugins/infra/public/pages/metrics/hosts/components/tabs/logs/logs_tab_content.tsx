@@ -24,7 +24,7 @@ export const LogsTabContent = () => {
     },
   } = useKibanaContextForPlugin();
 
-  const { parsedDateRange } = useUnifiedSearchContext();
+  const { parsedDateRange, searchCriteria } = useUnifiedSearchContext();
   const timeRange = useMemo(
     () => ({ start: parsedDateRange.from, end: parsedDateRange.to }),
     [parsedDateRange.from, parsedDateRange.to]
@@ -34,13 +34,41 @@ export const LogsTabContent = () => {
 
   const [filterQuery] = useLogsSearchUrlState();
 
-  // User search filters - these should be highlighted
-  const documentLogFilters = useMemo(
+  // Top search bar filters - these should be highlighted
+  // These would be passed to Elasticsearch as well to filter by the logs component,
+  // but I don't care because the data is already filtered at that point
+  const topSearchFilters = useMemo(() => {
+    const hasQuery = searchCriteria.query && searchCriteria.query.query;
+    const hasFilters = searchCriteria.filters && searchCriteria.filters.length > 0;
+    const hasPanelFilters = searchCriteria.panelFilters && searchCriteria.panelFilters.length > 0;
+
+    if (!hasQuery && !hasFilters && !hasPanelFilters) {
+      return [];
+    }
+
+    return [
+      buildEsQuery(
+        undefined,
+        searchCriteria.query,
+        [...(searchCriteria.filters || []), ...(searchCriteria.panelFilters || [])],
+        getEsQueryConfig(uiSettings)
+      ),
+    ];
+  }, [searchCriteria.query, searchCriteria.filters, searchCriteria.panelFilters, uiSettings]);
+
+  // Logs search bar filters - these should be highlighted
+  const logsSearchFilters = useMemo(
     () =>
       filterQuery && filterQuery.query
         ? [buildEsQuery(undefined, filterQuery, [], getEsQueryConfig(uiSettings))]
         : [],
     [filterQuery, uiSettings]
+  );
+
+  // Combine all user search filters (from both search bars)
+  const documentLogFilters = useMemo(
+    () => [...topSearchFilters, ...logsSearchFilters],
+    [topSearchFilters, logsSearchFilters]
   );
 
   // Host name context filters - these should NOT be highlighted
