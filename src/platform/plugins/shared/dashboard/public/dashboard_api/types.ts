@@ -47,11 +47,7 @@ import type {
 import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { type TracksOverlays } from '@kbn/presentation-util';
-import type {
-  ControlsGroupState,
-  TimeSlice,
-  StickyControlLayoutState,
-} from '@kbn/controls-schemas';
+import type { ControlsGroupState, TimeSlice } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 import type { DashboardLocatorParams, DashboardSettings, DashboardState } from '../../common';
@@ -99,7 +95,6 @@ export interface DashboardCreationOptions {
 
 export type DashboardApi = CanExpandPanels &
   CanPinPanel &
-  CanAddPinnedPanel &
   CanAddNewSection &
   HasAppContext &
   HasExecutionContext &
@@ -168,12 +163,6 @@ export type DashboardApi = CanExpandPanels &
     publishedTimeslice$: PublishingSubject<TimeSlice | undefined>;
     unpublishedTimeslice$: PublishingSubject<TimeSlice | undefined>;
     publishTimeslice: () => void;
-
-    layout$: PublishingSubject<{
-      controls: {
-        [id: string]: StickyControlLayoutState;
-      };
-    }>;
 
     registerChildApi: (api: DefaultEmbeddableApi) => void;
   };

@@ -34,6 +34,9 @@ export interface CanPinPanel {
   pinPanel: (panelId: string) => void;
   unpinPanel: (panelId: string) => void;
   panelIsPinned: (panelId: string) => boolean;
+  addPinnedPanel: <StateType extends object, ApiType extends unknown = unknown>(
+    panel: PanelPackage<StateType>
+  ) => Promise<ApiType | undefined>;
 }
 
 export const apiCanPinPanel = (api: unknown): api is CanPinPanel => {
@@ -42,14 +45,3 @@ export const apiCanPinPanel = (api: unknown): api is CanPinPanel => {
     typeof (api as CanPinPanel)?.unpinPanel === 'function'
   );
 };
-
-export type CanAddPinnedPanel = CanAddNewPanel &
-  CanPinPanel & {
-    addPinnedPanel: <StateType extends object, ApiType extends unknown = unknown>(
-      panel: PanelPackage<StateType>
-    ) => Promise<ApiType | undefined>;
-  };
-export const apiCanAddPinnedPanel = (api: unknown): api is CanAddPinnedPanel =>
-  apiCanAddNewPanel(api) &&
-  apiCanPinPanel(api) &&
-  typeof (api as CanAddPinnedPanel)?.addPinnedPanel === 'function';

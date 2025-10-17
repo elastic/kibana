@@ -43,14 +43,16 @@ export const createTimeSliderAction = (): ActionDefinition<EmbeddableApiContext>
   id: ACTION_CREATE_TIME_SLIDER,
   order: 0,
   getIconType: () => 'controlsHorizontal',
-  couldBecomeCompatible: ({ embeddable }) => apiCanAddPinnedPanel(embeddable),
+  couldBecomeCompatible: ({ embeddable }) =>
+    apiCanAddNewPanel(embeddable) && apiCanPinPanel(embeddable),
   getCompatibilityChangesSubject: ({ embeddable }) =>
     apiPublishesControlsLayout(embeddable)
       ? embeddable.layout$.pipe(map(() => undefined))
       : undefined,
   isCompatible: async ({ embeddable }) => compatibilityCheck(embeddable),
   execute: async ({ embeddable }) => {
-    if (!apiCanAddPinnedPanel(embeddable)) throw new IncompatibleActionError();
+    if (!apiCanAddNewPanel(embeddable) && apiCanPinPanel(embeddable))
+      throw new IncompatibleActionError();
     await embeddable.addPinnedPanel({
       panelType: TIME_SLIDER_CONTROL,
       serializedState: {
