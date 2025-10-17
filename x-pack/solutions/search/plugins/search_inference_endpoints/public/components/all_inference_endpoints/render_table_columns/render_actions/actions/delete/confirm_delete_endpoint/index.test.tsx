@@ -80,14 +80,24 @@ describe('ConfirmDeleteEndpointModal', () => {
   });
 
   it('calls onCancel when the cancel button is clicked', () => {
+    mockUseScanUsage.mockReturnValue({ data: mockUsageData });
     render(<Wrapper />);
+
+    act(() => {
+      jest.runAllTimers();
+    });
 
     fireEvent.click(screen.getByText('Cancel'));
     expect(mockOnCancel).toHaveBeenCalled();
   });
 
   it('useScanUsage gets called with correct params', () => {
+    mockUseScanUsage.mockReturnValue({ data: mockUsageData });
     render(<Wrapper />);
+
+    act(() => {
+      jest.runAllTimers();
+    });
 
     expect(mockUseScanUsage).toHaveBeenCalledWith({
       type: 'text_embedding',
@@ -96,18 +106,23 @@ describe('ConfirmDeleteEndpointModal', () => {
   });
 
   describe('endpoint with usage', () => {
+    beforeEach(() => {
+      mockUseScanUsage.mockReturnValue({ data: mockUsageData });
+    });
     it('disables delete endpoint button', () => {
       render(<Wrapper />);
+      act(() => {
+        jest.runAllTimers();
+      });
       expect(screen.getByTestId('confirmModalConfirmButton')).toBeDisabled();
-    });
-
-    it('renders warning message', () => {
-      render(<Wrapper />);
       expect(screen.getByText('Potential Failures')).toBeInTheDocument();
     });
 
     it('selecting checkbox enables Delete Endpoint button', () => {
       render(<Wrapper />);
+      act(() => {
+        jest.runAllTimers();
+      });
       fireEvent.click(screen.getByTestId('warningCheckbox'));
 
       expect(screen.getByTestId('confirmModalConfirmButton')).toBeEnabled();
@@ -116,20 +131,16 @@ describe('ConfirmDeleteEndpointModal', () => {
 
   describe('endpoint without usage', () => {
     beforeEach(() => {
-      mockUseScanUsage.mockReturnValue({
-        data: {
-          indexes: [],
-          pipelines: [],
-        },
-      });
+      mockUseScanUsage.mockReturnValue({ data: mockEmptyData });
 
       render(<Wrapper />);
-    });
-    it('renders no usage message', () => {
-      expect(screen.getByText('No Usage Found')).toBeInTheDocument();
-    });
 
-    it('enables delete endpoint button', () => {
+      act(() => {
+        jest.runAllTimers();
+      });
+    });
+    it('renders no usage message and enables delete button', () => {
+      expect(screen.getByText('No Usage Found')).toBeInTheDocument();
       expect(screen.getByTestId('confirmModalConfirmButton')).toBeEnabled();
     });
 
