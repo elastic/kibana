@@ -130,6 +130,20 @@ export function getDiscoverInternalStateMock({
     return originalSearchSourceCreate(fields);
   });
 
+  const assertTabsAreInitialized = <T extends (...params: Parameters<T>) => ReturnType<T>>(
+    fn: T
+  ): T => {
+    return ((...params: Parameters<T>) => {
+      const state = internalState.getState();
+
+      if (!Boolean(state.tabs.unsafeCurrentId)) {
+        throw new Error('Tabs have not been initialized yet');
+      }
+
+      return fn(...params);
+    }) as T;
+  };
+
   const toolkit = {
     internalState,
     runtimeStateManager,
@@ -152,7 +166,7 @@ export function getDiscoverInternalStateMock({
         })
       );
     },
-    initializeSingleTab: async ({ tabId }: { tabId: string }) => {
+    initializeSingleTab: assertTabsAreInitialized(async ({ tabId }: { tabId: string }) => {
       await toolkit.switchToTab({ tabId });
 
       const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
@@ -186,8 +200,8 @@ export function getDiscoverInternalStateMock({
           },
         })
       );
-    },
-    addNewTab: async ({ tab }: { tab: TabState }) => {
+    }),
+    addNewTab: assertTabsAreInitialized(async ({ tab }: { tab: TabState }) => {
       const currentState = internalState.getState();
 
       await internalState.dispatch(
@@ -196,8 +210,8 @@ export function getDiscoverInternalStateMock({
           selectedItem: tab,
         })
       );
-    },
-    switchToTab: async ({ tabId }: { tabId: string }) => {
+    }),
+    switchToTab: assertTabsAreInitialized(async ({ tabId }: { tabId: string }) => {
       const currentState = internalState.getState();
       const tab = selectTab(currentState, tabId);
 
@@ -211,7 +225,7 @@ export function getDiscoverInternalStateMock({
           selectedItem: tab,
         })
       );
-    },
+    }),
   };
 
   return toolkit;
