@@ -8,210 +8,215 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DiscoverStateContainer } from '../../discover_state';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
-import { getDiscoverStateMock } from '../../../../../__mocks__/discover_state.mock';
-import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { internalStateActions } from '..';
+import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
+import { internalStateActions, selectTab, selectTabRuntimeState } from '..';
+import type { InternalStateStore } from '../internal_state';
 import { internalStateSlice } from '../internal_state';
 import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import { getTabStateMock } from '../__mocks__/internal_state.mocks';
-import { getTabRuntimeStateMock } from '../__mocks__/runtime_state.mocks';
 import * as tabsActions from './tabs';
-import type { TabState } from '../types';
-import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
-import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import type { DiscoverServices } from '../../../../../build_services';
+import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
+import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
+import type { DiscoverAppState } from '../../discover_app_state_container';
 
-interface SetupOptions {
-  additionalPersistedTabs?: DiscoverSessionTab[];
-  savedSearch?: SavedSearch | false;
-}
-
-const servicesMock = createDiscoverServicesMock();
-
-const createPersistedTab = () =>
+const createPersistedTab = ({
+  tabId,
+  initialAppState,
+  dataView,
+  services,
+}: {
+  tabId: string;
+  initialAppState?: DiscoverAppState;
+  dataView: DataView;
+  services: DiscoverServices;
+}) =>
   fromTabStateToSavedObjectTab({
     tab: getTabStateMock({
-      id: 'secondary-tab',
-      label: 'Secondary tab',
+      id: tabId,
+      label: tabId,
       initialInternalState: {
-        serializedSearchSource: { index: dataViewMock.id },
+        serializedSearchSource: { index: dataView.id },
       },
+      ...(initialAppState ? { initialAppState } : {}),
     }),
     timeRestore: false,
-    services: servicesMock,
+    services,
   });
 
-const ensureRuntimeState = (state: DiscoverStateContainer, tabId: string) => {
-  const existingTab = state.runtimeStateManager.tabs.byId[tabId];
-
-  if (existingTab) {
-    existingTab.stateContainer$.next(state);
-    existingTab.currentDataView$.next(dataViewMockWithTimeField);
-    return;
-  }
-
-  state.runtimeStateManager.tabs.byId[tabId] = getTabRuntimeStateMock({
-    stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(state),
-    currentDataView$: new BehaviorSubject<DataView | undefined>(dataViewMockWithTimeField),
-  });
-};
-
-const markUnsavedTab = (state: DiscoverStateContainer, tabId: string) =>
-  state.internalState.dispatch(
+const markUnsavedTabs = (internalState: InternalStateStore, tabIds: string[]) =>
+  internalState.dispatch(
     internalStateSlice.actions.setUnsavedChanges({
       hasUnsavedChanges: true,
-      unsavedTabIds: [tabId],
+      unsavedTabIds: tabIds,
     })
   );
 
-const mockUpdateTabs = () => {
-  let updateTabsArgs: Parameters<typeof tabsActions.updateTabs>[0] | undefined;
-  jest.spyOn(tabsActions, 'updateTabs').mockImplementation((params) => {
-    updateTabsArgs = params;
-    return async () => undefined;
+const setup = async () => {
+  const services = createDiscoverServicesMock();
+  const { internalState, runtimeStateManager, initializeTabs, initializeSingleTab, switchToTab } =
+    getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewWithTimefieldMock, dataViewWithNoTimefieldMock],
+    });
+  const persistedTab1 = createPersistedTab({
+    tabId: 'tab-1',
+    initialAppState: { columns: ['tab-1-column'] },
+    dataView: dataViewWithTimefieldMock,
+    services,
+  });
+  const persistedTab2 = createPersistedTab({
+    tabId: 'tab-2',
+    initialAppState: { columns: ['tab-2-column'] },
+    dataView: dataViewWithNoTimefieldMock,
+    services,
+  });
+  const persistedTab3 = createPersistedTab({
+    tabId: 'tab-3',
+    dataView: dataViewWithTimefieldMock,
+    services,
+  });
+  const persistedDiscoverSession = createDiscoverSessionMock({
+    id: 'test-id',
+    tabs: [persistedTab1, persistedTab2, persistedTab3],
   });
 
-  return () => updateTabsArgs!;
-};
+  await initializeTabs({ persistedDiscoverSession });
+  await initializeSingleTab({ tabId: persistedTab1.id });
+  await initializeSingleTab({ tabId: persistedTab2.id });
+  await switchToTab({ tabId: persistedTab1.id });
 
-const mockSearchSourceCreation = (services: ReturnType<typeof createDiscoverServicesMock>) => {
-  const searchSource = createSearchSourceMock({ index: dataViewMockWithTimeField });
-  jest
-    .spyOn(services.data.search.searchSource, 'create')
-    .mockImplementation(async () => searchSource);
-
-  return searchSource;
-};
-
-const setup = ({ additionalPersistedTabs, savedSearch }: SetupOptions = {}) => {
-  const state = getDiscoverStateMock({
-    additionalPersistedTabs,
-    savedSearch,
-    services: servicesMock,
-  });
-
-  return { services: servicesMock, state };
+  return {
+    internalState,
+    runtimeStateManager,
+    services,
+    persistedTab1,
+    persistedTab2,
+    persistedTab3,
+    persistedDiscoverSession,
+  };
 };
 
 describe('resetDiscoverSession', () => {
-  afterEach(() => {
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
-  });
-
   it('should do nothing when there is no persisted session', async () => {
-    const { state } = setup({ savedSearch: false });
+    const { internalState, initializeTabs } = getDiscoverInternalStateMock();
     const updateTabsSpy = jest.spyOn(tabsActions, 'updateTabs');
 
-    expect(state.internalState.getState().persistedDiscoverSession).toBeUndefined();
+    await initializeTabs();
 
-    await state.internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap();
+    expect(internalState.getState().persistedDiscoverSession).toBeUndefined();
+
+    await internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap();
 
     expect(updateTabsSpy).not.toHaveBeenCalled();
   });
 
   it('should reset persisted tabs and mark unsaved tabs for refetch', async () => {
-    const { services, state } = setup({
-      additionalPersistedTabs: [createPersistedTab()],
-    });
+    const {
+      internalState,
+      runtimeStateManager,
+      services,
+      persistedTab1,
+      persistedTab2,
+      persistedTab3,
+      persistedDiscoverSession,
+    } = await setup();
 
-    const searchSource = mockSearchSourceCreation(services);
+    jest.mocked(services.data.search.searchSource.create).mockClear();
 
-    const getUpdateTabsArgs = mockUpdateTabs();
+    const tab1RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab1.id);
+    const tab1StateContainer = tab1RuntimeState.stateContainer$.getValue()!;
+    const tab1SavedSearchSetSpy = jest.spyOn(tab1StateContainer.savedSearchState, 'set');
+    const tab1UndoSavedSearchChangesSpy = jest.spyOn(
+      tab1StateContainer.actions,
+      'undoSavedSearchChanges'
+    );
+    const tab1ResetInitialStateSpy = jest.spyOn(tab1StateContainer.appState, 'resetInitialState');
+
+    const tab2RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab2.id);
+    const tab2StateContainer = tab2RuntimeState.stateContainer$.getValue()!;
+    const tab2SavedSearchSetSpy = jest.spyOn(tab2StateContainer.savedSearchState, 'set');
+    const tab2UndoSavedSearchChangesSpy = jest.spyOn(
+      tab2StateContainer.actions,
+      'undoSavedSearchChanges'
+    );
+    const tab2ResetInitialStateSpy = jest.spyOn(tab2StateContainer.appState, 'resetInitialState');
+
+    const tab3RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab3.id);
+
+    expect(tab3RuntimeState.stateContainer$.getValue()).toBeUndefined();
 
     const resetOnSavedSearchChangeSpy = jest.spyOn(
       internalStateSlice.actions,
       'resetOnSavedSearchChange'
     );
-    const savedSearchSetSpy = jest.spyOn(state.savedSearchState, 'set');
-    const undoSavedSearchChangesSpy = jest.spyOn(state.actions, 'undoSavedSearchChanges');
-    const resetInitialStateSpy = jest.spyOn(state.appState, 'resetInitialState');
 
-    const currentTabId = state.internalState.getState().tabs.unsafeCurrentId;
-    const secondaryTabId = state.internalState
-      .getState()
-      .tabs.allIds.find((id) => id !== currentTabId)!;
+    markUnsavedTabs(internalState, [persistedTab2.id, persistedTab3.id]);
 
-    ensureRuntimeState(state, currentTabId);
-    ensureRuntimeState(state, secondaryTabId);
+    await internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap();
 
-    markUnsavedTab(state, secondaryTabId);
+    expect(internalState.getState().persistedDiscoverSession).toBe(persistedDiscoverSession);
+    expect(internalState.getState().tabs.unsafeCurrentId).toBe(persistedTab1.id);
 
-    await state.internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap();
-
-    expect(resetOnSavedSearchChangeSpy).toHaveBeenCalledWith({ tabId: currentTabId });
-    expect(resetOnSavedSearchChangeSpy).toHaveBeenCalledWith({ tabId: secondaryTabId });
     expect(services.data.search.searchSource.create).toHaveBeenCalledTimes(2);
-    expect(savedSearchSetSpy).toHaveBeenCalledWith(expect.objectContaining({ searchSource }));
-    expect(undoSavedSearchChangesSpy).toHaveBeenCalled();
-    expect(resetInitialStateSpy).toHaveBeenCalled();
+    expect(resetOnSavedSearchChangeSpy).toHaveBeenCalledWith({ tabId: persistedTab1.id });
+    expect(resetOnSavedSearchChangeSpy).toHaveBeenCalledWith({ tabId: persistedTab2.id });
+    expect(resetOnSavedSearchChangeSpy).toHaveBeenCalledWith({ tabId: persistedTab3.id });
 
-    const { items, selectedItem, updatedDiscoverSession } = getUpdateTabsArgs();
-    expect(updatedDiscoverSession).toBeUndefined();
-
-    const currentTab = items.find((tab) => tab.id === currentTabId)! as TabState;
-    const secondaryTab = items.find((tab) => tab.id === secondaryTabId)! as TabState;
-    expect(currentTab.forceFetchOnSelect).toBe(false);
-    expect(secondaryTab.forceFetchOnSelect).toBe(true);
-    expect(selectedItem?.id).toBe(currentTabId);
-
-    expect(state.runtimeStateManager.tabs.byId[currentTabId].currentDataView$.getValue()).toBe(
-      dataViewMockWithTimeField
+    expect(tab1SavedSearchSetSpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({ columns: persistedTab1.columns })
     );
-    expect(state.runtimeStateManager.tabs.byId[secondaryTabId].currentDataView$.getValue()).toBe(
-      dataViewMockWithTimeField
+    expect(tab1UndoSavedSearchChangesSpy).toHaveBeenCalled();
+    expect(tab1ResetInitialStateSpy).toHaveBeenCalled();
+
+    expect(tab2SavedSearchSetSpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({ columns: persistedTab2.columns })
     );
+    expect(tab2UndoSavedSearchChangesSpy).toHaveBeenCalled();
+    expect(tab2ResetInitialStateSpy).toHaveBeenCalled();
+
+    expect(tab3RuntimeState.stateContainer$.getValue()).toBeUndefined();
+
+    const tab1 = selectTab(internalState.getState(), persistedTab1.id);
+    const tab2 = selectTab(internalState.getState(), persistedTab2.id);
+    const tab3 = selectTab(internalState.getState(), persistedTab3.id);
+
+    expect(tab1.forceFetchOnSelect).toBe(false);
+    expect(tab2.forceFetchOnSelect).toBe(true);
+    expect(tab3.forceFetchOnSelect).toBe(true);
+
+    expect(tab1RuntimeState.currentDataView$.getValue()).toBe(dataViewWithTimefieldMock);
+    expect(tab2RuntimeState.currentDataView$.getValue()).toBe(dataViewWithNoTimefieldMock);
+    expect(tab3RuntimeState.currentDataView$.getValue()).toBeUndefined();
   });
 
   it('should use provided discover session and next selected tab', async () => {
-    const { services, state } = setup({
-      additionalPersistedTabs: [createPersistedTab()],
-    });
+    const { internalState, persistedTab2, persistedDiscoverSession } = await setup();
 
-    mockSearchSourceCreation(services);
+    markUnsavedTabs(internalState, [persistedTab2.id]);
 
-    const getUpdateTabsArgs = mockUpdateTabs();
-
-    const currentTabId = state.internalState.getState().tabs.unsafeCurrentId;
-    const secondaryTabId = state.internalState
-      .getState()
-      .tabs.allIds.find((id) => id !== currentTabId)!;
-
-    ensureRuntimeState(state, currentTabId);
-    ensureRuntimeState(state, secondaryTabId);
-
-    markUnsavedTab(state, secondaryTabId);
-
-    const persistedDiscoverSession = state.internalState.getState().persistedDiscoverSession!;
     const updatedDiscoverSession = {
       ...persistedDiscoverSession,
       title: 'Updated title',
       tabs: cloneDeep(persistedDiscoverSession.tabs),
     };
 
-    await state.internalState
+    await internalState
       .dispatch(
         internalStateActions.resetDiscoverSession({
           updatedDiscoverSession,
-          nextSelectedTabId: secondaryTabId,
+          nextSelectedTabId: persistedTab2.id,
         })
       )
       .unwrap();
 
-    const {
-      items,
-      selectedItem,
-      updatedDiscoverSession: passedDiscoverSession,
-    } = getUpdateTabsArgs();
+    expect(internalState.getState().persistedDiscoverSession).toBe(updatedDiscoverSession);
+    expect(internalState.getState().tabs.unsafeCurrentId).toBe(persistedTab2.id);
 
-    expect(passedDiscoverSession).toBe(updatedDiscoverSession);
-    expect(selectedItem?.id).toBe(secondaryTabId);
-
-    const refetchedTab = items.find((tab) => tab.id === secondaryTabId)! as TabState;
+    const refetchedTab = selectTab(internalState.getState(), persistedTab2.id);
     expect(refetchedTab.forceFetchOnSelect).toBe(false);
   });
 });
