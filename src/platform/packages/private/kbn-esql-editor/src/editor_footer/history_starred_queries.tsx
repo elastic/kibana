@@ -339,7 +339,7 @@ export function QueryList({
         },
       },
     ];
-  }, [onUpdateAndSubmit]);
+  }, [onUpdateAndSubmit, starredQueriesService]);
 
   const isOnReducedSpaceLayout = containerWidth < 560;
   const columns = useMemo(() => {
