@@ -51,7 +51,7 @@ const {
 } = require('@tanstack/official-react-query');
 
 class QueryClient extends OfficialQueryClient {
-  constructor(config) {
+  constructor(config = {}) {
     super({
       ...config,
       defaultOptions: {
