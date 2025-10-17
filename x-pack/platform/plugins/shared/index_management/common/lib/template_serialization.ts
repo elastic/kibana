@@ -20,6 +20,7 @@ import {
   LOGSDB_INDEX_MODE,
 } from '../constants';
 import type { DataStreamOptions } from '../types/data_streams';
+import { buildTemplateSettings } from './utils';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
@@ -41,18 +42,18 @@ export function serializeTemplate(
     deprecated,
   } = templateDeserialized;
 
+  // Build settings object, properly handling index mode
+  const settings = buildTemplateSettings(template, indexMode);
+
+  // Separate settings from other template properties so we can rebuild template cleanly
+  const { settings: _templateSettings, ...otherTemplateProperties } = template || {};
+
   return {
     version,
     priority,
     template: {
-      ...template,
-      settings: {
-        ...template?.settings,
-        index: {
-          ...template?.settings?.index,
-          mode: indexMode,
-        },
-      },
+      ...otherTemplateProperties,
+      ...(settings && { settings }),
       // If the existing template contains data stream options, we need to persist them.
       // Otherwise, they will be lost when the template is updated.
       ...(dataStreamOptions && { data_stream_options: dataStreamOptions }),
