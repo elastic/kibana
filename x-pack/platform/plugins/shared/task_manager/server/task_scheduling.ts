@@ -26,6 +26,7 @@ import type { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
 import type { ErrorOutput } from './lib/bulk_operation_buffer';
+import { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 
 const VERSION_CONFLICT_STATUS = 409;
 const BULK_ACTION_SIZE = 100;
@@ -223,22 +224,10 @@ export class TaskScheduling {
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
       filter: (task) => task.status === TaskStatus.Idle && !_.isEqual(task.schedule, schedule),
       map: (task) => {
-        const { rrule, interval } = schedule || {};
-        let nextRunAt: number | undefined;
-
-        if (interval) {
-          nextRunAt = task.scheduledAt.getTime() + parseIntervalAsMillisecond(interval);
-        } else if (rrule) {
-          const _rrule = new RRule({
-            ...rrule,
-            dtstart: task.scheduledAt,
-          });
-
-          // adding 1ms for the slim chance that scheduled.At === now
-          nextRunAt = _rrule.after(new Date(Date.now() + 1))?.getTime();
-        }
-
-        const newRunAtInMs = Math.max(Date.now(), nextRunAt!);
+        const newRunAtInMs = calculateNextRunAtFromSchedule({
+          schedule,
+          startDate: task.scheduledAt,
+        });
 
         return { ...task, schedule, runAt: new Date(newRunAtInMs) };
       },
