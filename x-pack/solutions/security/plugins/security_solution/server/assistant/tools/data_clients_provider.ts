@@ -6,8 +6,8 @@
  */
 
 import type { StartServicesAccessor } from '@kbn/core/server';
-import type { SecuritySolutionPluginStartDependencies } from '../../plugin_contract';
 import { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
+import type { SecuritySolutionPluginStartDependencies } from '../../plugin_contract';
 
 /**
  * Global data clients provider that can be accessed by other tools
