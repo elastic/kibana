@@ -146,6 +146,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     measureElement,
     virtualizedRowComputedTranslateValue,
     scrollToVirtualizedIndex,
+    scrollOffset: virtualizerScrollOffset,
   } = virtualizerInstance.current;
 
   useRegisterCascadeAccessibilityHelpers<G>({
@@ -192,11 +193,14 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                 }}
               >
                 <>
-                  {activeStickyIndex !== null && enableStickyGroupHeader && (
-                    <div css={styles.cascadeTreeGridHeaderStickyRenderSlot}>
-                      <div ref={activeStickyRenderSlotRef} />
-                    </div>
-                  )}
+                  {activeStickyIndex !== null &&
+                    enableStickyGroupHeader &&
+                    (virtualizerScrollOffset ?? 0) >
+                      (virtualizedRowComputedTranslateValue.get(0) ?? 0) && (
+                      <div css={styles.cascadeTreeGridHeaderStickyRenderSlot}>
+                        <div ref={activeStickyRenderSlotRef} />
+                      </div>
+                    )}
                 </>
                 <div css={styles.cascadeTreeGridWrapper} style={{ height: getTotalSize() }}>
                   <div {...treeGridContainerARIAAttributes} css={relativePosition}>
