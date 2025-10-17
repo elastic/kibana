@@ -86,7 +86,6 @@ export const MappingsDatastreamRolloverModal: React.FunctionComponent<Props> = (
       {error && (
         <>
           <EuiCallOut
-            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.idxMgmt.componentTemplateMappingsRollover.saveError"

@@ -152,7 +152,6 @@ export const SetupTechnologySelector = ({
     <>
       <EuiSpacer size="s" />
       <EuiCallOut
-        announceOnMount
         color="warning"
         iconType="alert"
         size="s"
