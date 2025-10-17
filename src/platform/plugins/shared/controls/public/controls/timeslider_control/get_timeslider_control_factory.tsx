@@ -99,14 +99,13 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
 
       function setTimeslice(timeslice?: Timeslice) {
         timeRangePercentage.setTimeRangePercentage(timeslice, timeRangeMeta$.value);
-        if (timeslice) {
-          const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
-            timeRangePercentage.getLatestState();
-
+        const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
+          timeRangePercentage.getLatestState();
+        if (timesliceStartAsPercentageOfTimeRange && timesliceEndAsPercentageOfTimeRange) {
           timeslice$.next(
             getTimesliceSyncedWithTimeRangePercentage(
-              timesliceStartAsPercentageOfTimeRange!,
-              timesliceEndAsPercentageOfTimeRange!
+              timesliceStartAsPercentageOfTimeRange,
+              timesliceEndAsPercentageOfTimeRange
             )
           );
         } else {
