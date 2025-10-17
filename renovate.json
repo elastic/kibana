@@ -2683,12 +2683,8 @@
     {
       "groupName": "kibana-presentation misc canvas dependencies",
       "matchDepNames": [
-        "expose-loader",
-        "html-loader",
         "object-path-immutable",
-        "postcss-prefix-selector",
-        "safe-squel",
-        "string-replace-loader"
+        "safe-squel"
       ],
       "reviewers": [
         "team:kibana-presentation"

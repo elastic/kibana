@@ -9,6 +9,7 @@ import type { Subscription } from 'rxjs';
 import type { Logger, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import pRetry from 'p-retry';
 
 import type { AgentPolicySOAttributes } from '../types';
 import type { LicenseService } from '../../common/services/license';
@@ -26,7 +27,22 @@ export class PolicyWatcher {
   constructor(private logger: Logger) {}
 
   public start(licenseService: LicenseService) {
-    this.subscription = licenseService.getLicenseInformation$()?.subscribe(this.watch.bind(this));
+    this.subscription = licenseService
+      .getLicenseInformation$()
+      ?.subscribe(async (license: ILicense) => {
+        await pRetry(this.watch.bind(this, license), {
+          retries: 3,
+          minTimeout: 1000,
+          maxTimeout: 5000,
+          onFailedAttempt: (error) => {
+            this.logger.warn(
+              `Failed to process agent policy license compliance (attempt ${error.attemptNumber}/${
+                error.retriesLeft + error.attemptNumber
+              }): ${error.message}`
+            );
+          },
+        });
+      });
   }
 
   public stop() {
@@ -102,23 +118,25 @@ export class PolicyWatcher {
       log.info(`All agent policies are compliant, nothing to do!`);
     } else if (updatedPoliciesSuccess.length && failedPolicies.length) {
       const totalPolicies = updatedPoliciesSuccess.length + failedPolicies.length;
-      log.error(
-        `Done - ${
-          failedPolicies.length
-        } out of ${totalPolicies} were unsuccessful. Errors encountered:\n${failedPolicies
-          .map((e) => `Policy [${e.id}] failed to update due to error: ${e.error.message}`)
-          .join('\n')}`
-      );
+      const message = `Done - ${
+        failedPolicies.length
+      } out of ${totalPolicies} were unsuccessful. Errors encountered:\n${failedPolicies
+        .map((e) => `Policy [${e.id}] failed to update due to error: ${e.error.message}`)
+        .join('\n')}`;
+      log.error(message);
+      throw new Error(message);
     } else if (updatedPoliciesSuccess.length) {
       log.info(
         `Done - ${updatedPoliciesSuccess.length} out of ${updatedPoliciesSuccess.length} were successful. No errors encountered.`
       );
     } else {
-      log.error(
-        `Done - all ${failedPolicies.length} failed to update. Errors encountered:\n${failedPolicies
-          .map((e) => `Policy [${e.id}] failed to update due to error: ${e.error.message}`)
-          .join('\n')}`
-      );
+      const message = `Done - all ${
+        failedPolicies.length
+      } failed to update. Errors encountered:\n${failedPolicies
+        .map((e) => `Policy [${e.id}] failed to update due to error: ${e.error.message}`)
+        .join('\n')}`;
+      log.error(message);
+      throw new Error(message);
     }
   }
 }

@@ -442,7 +442,7 @@ describe('Agent policy', () => {
         updated_by: 'system',
         schema_version: '1.1.1',
         is_protected: false,
-        fleet_server_host_id: 'fleet-default-fleet-server-host',
+        fleet_server_host_id: 'internal-agentless-fleet-server',
       });
     });
 
