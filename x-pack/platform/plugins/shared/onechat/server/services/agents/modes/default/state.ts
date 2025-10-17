@@ -25,6 +25,7 @@ export const StateAnnotation = Annotation.Root({
     default: () => 0,
   }),
   nextMessage: Annotation<AIMessage>(),
+  maxCycleReached: Annotation<boolean>(),
   handoverNote: Annotation<string>(),
   // outputs
   addedMessages: Annotation<BaseMessage[]>({

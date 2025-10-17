@@ -77,16 +77,14 @@ export const createAgentGraph = ({
 
   const prepareToAnswer = async (state: StateType) => {
     const maxCycleReached = state.currentCycle > state.cycleLimit;
-    let handoverNote: string;
-    if (maxCycleReached) {
-      handoverNote = `Researcher agent has reached the maximum number of cycles (${state.cycleLimit}) and was forced to stop.
-        It may not have found all the information it needed to answer the user question.`;
-    } else {
+    let handoverNote: string | undefined;
+    if (!maxCycleReached) {
       const handoverMessage = state.nextMessage;
       handoverNote = extractTextContent(handoverMessage);
     }
     return {
       handoverNote,
+      maxCycleReached,
     };
   };
 
@@ -101,6 +99,7 @@ export const createAgentGraph = ({
         customInstructions: configuration.answer.instructions,
         capabilities,
         handoverNote: state.handoverNote,
+        searchInterrupted: state.maxCycleReached,
         discussion: [...state.initialMessages, ...state.addedMessages],
       })
     );
