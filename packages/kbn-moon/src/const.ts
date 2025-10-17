@@ -19,7 +19,6 @@ export const MOON_CONFIG_KEY_ORDER = [
   'tasks',
 ];
 
-export const ESLINT_IGNORE_NAME = '.eslintignore';
 export const KIBANA_JSONC_FILENAME = 'kibana.jsonc';
 export const MOON_CONST = {
   MOON_CONFIG_FILE_NAME: 'moon.yml',

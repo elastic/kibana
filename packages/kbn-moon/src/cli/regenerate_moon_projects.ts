@@ -20,12 +20,7 @@ import type { PackageManifestBaseFields } from '@kbn/repo-packages/modern/types'
 import { getPackages } from '@kbn/repo-packages';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-import {
-  ESLINT_IGNORE_NAME,
-  KIBANA_JSONC_FILENAME,
-  MOON_CONFIG_KEY_ORDER,
-  MOON_CONST,
-} from '../const';
+import { KIBANA_JSONC_FILENAME, MOON_CONFIG_KEY_ORDER, MOON_CONST } from '../const';
 import type { MoonProjectConfig } from './moon_project_type';
 import {
   filterPackages,
@@ -72,7 +67,6 @@ export function regenerateMoonProjects() {
     const includeDependencies = !!flags.dependencies;
 
     const template = readFile(path.resolve(__dirname, MOON_CONST.TEMPLATE_FILE_NAME));
-    const eslintIgnore = readFile(path.resolve(REPO_ROOT, ESLINT_IGNORE_NAME));
 
     const projectResults: Record<ProjectCreationResult, string[]> = {
       create: [],
@@ -101,8 +95,6 @@ export function regenerateMoonProjects() {
       });
 
       applyJestTaskConfig(projectConfig);
-
-      applyLintTaskConfig(projectConfig, eslintIgnore);
 
       applyDevOverrides(projectConfig, pathInPackage(MOON_CONST.EXTENSION_FILE_NAME));
 
@@ -248,40 +240,6 @@ function applyJestTaskConfig(projectConfig: MoonProjectConfig) {
       args: ['--config', `$projectRoot/${jestConfigName}`],
       inputs: ['@group(src)'],
     };
-  }
-}
-
-function applyLintTaskConfig(projectConfig: MoonProjectConfig, eslintIgnore: string) {
-  if (!projectConfig.project?.metadata?.sourceRoot) {
-    logger.warning('Skipping lint task config - no sourceRoot found in project metadata');
-    return;
-  }
-  const sourceRoot = projectConfig.project?.metadata?.sourceRoot!;
-
-  if (eslintIgnore.split('\n').includes('/' + sourceRoot)) {
-    logger.info(
-      `Skipping lint task for project ${projectConfig.id}. It's explicitly ignored in .eslintignore`
-    );
-    if (projectConfig.tasks) {
-      delete projectConfig.tasks[MOON_CONST.TASK_NAME_LINT];
-    }
-    return;
-  }
-
-  const eslintConfigName = resolveFirstExisting(
-    projectConfig.project.metadata.sourceRoot,
-    MOON_CONST.ESLINT_CONFIG_FILES
-  );
-
-  if (eslintConfigName) {
-    projectConfig.tasks = projectConfig.tasks || {};
-    projectConfig.tasks[MOON_CONST.TASK_NAME_LINT] = {
-      // options: {
-      //   eslintConfig: `{projectRoot}/${eslintConfigName}`,
-      // },
-    };
-  } else {
-    // go with the default, which is {workspaceRoot}/.eslintrc.js
   }
 }
 
