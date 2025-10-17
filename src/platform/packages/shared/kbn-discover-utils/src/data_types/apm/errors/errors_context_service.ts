@@ -7,39 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/public';
 
-export interface ApmErrorsContextService {
+export interface ErrorsContextService {
   getErrorsIndexPattern(): string | undefined;
 }
 
-interface ApmErrorsContextServiceDeps {
-  apmSourcesAccess?: ApmSourceAccessPluginStart;
-}
-
-export const createApmErrorsContextService = async ({
-  apmSourcesAccess,
-}: ApmErrorsContextServiceDeps): Promise<ApmErrorsContextService> => {
-  if (!apmSourcesAccess) {
-    return defaultApmErrorsContextService;
+export const createErrorsContextService = ({
+  indices,
+}: {
+  indices: APMIndices | null;
+}): ErrorsContextService => {
+  if (!indices) {
+    return defaultErrorsContextService;
   }
 
-  try {
-    const indices = await apmSourcesAccess.getApmIndices();
-
-    if (!indices) {
-      return defaultApmErrorsContextService;
-    }
-
-    const { error } = indices;
-    return getApmErrorsContextService(error);
-  } catch (error) {
-    return defaultApmErrorsContextService;
-  }
+  const { error } = indices;
+  return getErrorsContextService(error);
 };
 
-export const getApmErrorsContextService = (error?: string) => ({
+export const getErrorsContextService = (error?: string) => ({
   getErrorsIndexPattern: () => error,
 });
 
-const defaultApmErrorsContextService = getApmErrorsContextService(undefined);
+const defaultErrorsContextService = getErrorsContextService(undefined);
