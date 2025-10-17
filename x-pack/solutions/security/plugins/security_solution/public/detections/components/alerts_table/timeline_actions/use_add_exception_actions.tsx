@@ -35,8 +35,7 @@ export const useAlertExceptionActions = ({
     onAddExceptionTypeClick(ExceptionListTypeEnum.ENDPOINT);
   }, [onAddExceptionTypeClick]);
 
-  const disabledAddEndpointException =
-    !canEditRules || !canWriteEndpointExceptions || !isEndpointAlert; // TODO: verify canEditRules is needed here
+  const disabledAddEndpointException = !canWriteEndpointExceptions || !isEndpointAlert;
   const disabledAddException = !canEditRules || !hasIndexWrite;
 
   const exceptionActionItems: AlertTableContextMenuItem[] = useMemo(
