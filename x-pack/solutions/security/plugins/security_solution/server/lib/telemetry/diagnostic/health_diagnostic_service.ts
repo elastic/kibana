@@ -128,7 +128,17 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
             bufferCount(telemetryConfiguration.health_diagnostic_config.query.bufferSize),
 
             // apply filterlist
-            mergeMap((result) => from(applyFilterlist(result, query.filterlist, this.salt)))
+            mergeMap((result) =>
+              from(
+                applyFilterlist(
+                  result,
+                  query.filterlist,
+                  this.salt,
+                  query,
+                  telemetryConfiguration.encryption_public_keys
+                )
+              )
+            )
           )
           .subscribe({
             next: (data) => {
