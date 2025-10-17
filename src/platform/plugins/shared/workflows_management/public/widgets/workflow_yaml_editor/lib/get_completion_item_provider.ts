@@ -6,34 +6,29 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+// TODO: refactor this file to be more composable, easier to read and test
+/* eslint-disable no-continue */
 
-import type { Scalar, Document, Pair, Node } from 'yaml';
-import { YAMLParseError, isPair, isScalar, parseDocument, visit } from 'yaml';
-import { monaco } from '@kbn/monaco';
-import { z } from '@kbn/zod';
-import type { BuiltInStepType, TriggerType, ConnectorTypeInfo } from '@kbn/workflows';
 import moment from 'moment-timezone';
+import type { Document, Node, Pair, Scalar } from 'yaml';
+import { isMap, isPair, isScalar, parseDocument, visit, YAMLParseError } from 'yaml';
+import { monaco } from '@kbn/monaco';
+import type { BuiltInStepType, ConnectorTypeInfo, TriggerType } from '@kbn/workflows';
 import {
-  ForEachStepSchema,
-  IfStepSchema,
-  ParallelStepSchema,
-  MergeStepSchema,
-  HttpStepSchema,
-  WaitStepSchema,
   AlertRuleTriggerSchema,
-  ScheduledTriggerSchema,
+  ForEachStepSchema,
+  HttpStepSchema,
+  IfStepSchema,
   ManualTriggerSchema,
+  MergeStepSchema,
+  ParallelStepSchema,
+  ScheduledTriggerSchema,
+  WaitStepSchema,
 } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
-import { getDetailedTypeDescription, getSchemaAtPath, parsePath } from '../../../../common/lib/zod';
-import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
-import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
-import {
-  VARIABLE_REGEX_GLOBAL,
-  PROPERTY_PATH_REGEX,
-  UNFINISHED_VARIABLE_REGEX_GLOBAL,
-} from '../../../../common/lib/regex';
+import { z } from '@kbn/zod';
+import { getCachedAllConnectors } from './connectors_cache';
+import { generateBuiltInStepSnippet } from './snippets/generate_builtin_step_snippet';
 import {
   connectorTypeRequiresConnectorId,
   generateConnectorSnippet,
@@ -43,12 +38,19 @@ import {
   getEnhancedTypeInfo,
   getExistingParametersInWithBlock,
 } from './snippets/generate_connector_snippet';
-import { generateBuiltInStepSnippet } from './snippets/generate_builtin_step_snippet';
 import {
-  generateTriggerSnippet,
   generateRRuleTriggerSnippet,
+  generateTriggerSnippet,
 } from './snippets/generate_trigger_snippet';
-import { getCachedAllConnectors } from './connectors_cache';
+import {
+  PROPERTY_PATH_REGEX,
+  UNFINISHED_VARIABLE_REGEX_GLOBAL,
+  VARIABLE_REGEX_GLOBAL,
+} from '../../../../common/lib/regex';
+import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
+import { getDetailedTypeDescription, getSchemaAtPath, parsePath } from '../../../../common/lib/zod';
+import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
+import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 
 // Cache for built-in step types extracted from schema
 let builtInStepTypesCache: Array<{
@@ -179,7 +181,7 @@ function getBuiltInTriggerTypesFromSchema(): Array<{
 /**
  * Detect if the current cursor position is inside a triggers block
  */
-function isInTriggersContext(path: any[]): boolean {
+function isInTriggersContext(path: (string | number)[]): boolean {
   // Check if the path includes 'triggers' at any level
   // Examples: ['triggers'], ['triggers', 0], ['triggers', 0, 'with'], etc.
   return path.length > 0 && path[0] === 'triggers';
@@ -207,7 +209,7 @@ function isInScheduledTriggerWithBlock(yamlDocument: Document, absolutePosition:
 
       // Find the 'with' property node within this trigger
       const withPair = node.items.find(
-        (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'with'
+        (item) => isPair(item) && isScalar(item.key) && item.key.value === 'with'
       ) as Pair<Scalar, Node> | undefined;
 
       if (withPair?.value?.range) {
@@ -237,12 +239,12 @@ function isInScheduledTriggerWithBlock(yamlDocument: Document, absolutePosition:
  * Check if there's already an existing schedule configuration (rrule or every) in the with block
  */
 function hasExistingScheduleConfiguration(withNode: Node): boolean {
-  if (!withNode) {
+  if (!withNode || !isMap(withNode)) {
     return false;
   }
 
   // Check for existing 'rrule' or 'every' properties
-  const items = (withNode as any).items || [];
+  const items = withNode.items || [];
 
   for (const item of items) {
     if (isPair(item) && isScalar(item.key)) {
@@ -338,10 +340,6 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
  * Get appropriate Monaco completion kind for different connector types
  */
 function getConnectorCompletionKind(connectorType: string): monaco.languages.CompletionItemKind {
-  // Map specific connector types to appropriate icons
-  if (connectorType === 'slack') {
-    return monaco.languages.CompletionItemKind.Event; // Will use custom Slack logo
-  }
   if (connectorType.startsWith('elasticsearch')) {
     return monaco.languages.CompletionItemKind.Struct; // Will use custom Elasticsearch logo
   }
@@ -351,9 +349,6 @@ function getConnectorCompletionKind(connectorType: string): monaco.languages.Com
   if (connectorType === 'console') {
     return monaco.languages.CompletionItemKind.Variable; // Will use custom Console icon
   }
-  if (connectorType === 'http') {
-    return monaco.languages.CompletionItemKind.Reference; // Will use custom HTTP icon
-  }
   return monaco.languages.CompletionItemKind.Function;
 }
 
@@ -361,15 +356,15 @@ function getConnectorCompletionKind(connectorType: string): monaco.languages.Com
  * Get the specific connector's parameter schema for autocomplete
  */
 // Cache for connector schemas to avoid repeated processing
-const connectorSchemaCache = new Map<string, Record<string, any> | null>();
+const connectorSchemaCache = new Map<string, Record<string, z.ZodType> | null>();
 
 // Cache for connector type suggestions to avoid recalculating on every keystroke
 const connectorTypeSuggestionsCache = new Map<string, monaco.languages.CompletionItem[]>();
 
 function getConnectorParamsSchema(
   connectorType: string,
-  dynamicConnectorTypes?: Record<string, any>
-): Record<string, any> | null {
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+): Record<string, z.ZodType> | null {
   // Check cache first
   if (connectorSchemaCache.has(connectorType)) {
     return connectorSchemaCache.get(connectorType)!;
@@ -377,7 +372,7 @@ function getConnectorParamsSchema(
 
   try {
     const allConnectors = getCachedAllConnectors(dynamicConnectorTypes);
-    const connector = allConnectors.find((c: any) => c.type === connectorType);
+    const connector = allConnectors.find((c) => c.type === connectorType);
 
     if (!connector || !connector.paramsSchema) {
       // No paramsSchema found for connector
@@ -389,7 +384,7 @@ function getConnectorParamsSchema(
     let actualSchema = connector.paramsSchema;
     if (typeof connector.paramsSchema === 'function') {
       try {
-        actualSchema = (connector.paramsSchema as any)();
+        actualSchema = (connector.paramsSchema as Function)();
       } catch (error) {
         // If function execution fails, cache null and return
         connectorSchemaCache.set(connectorType, null);
@@ -409,10 +404,10 @@ function getConnectorParamsSchema(
     if (actualSchema instanceof z.ZodUnion) {
       // For union schemas, extract common properties from all options
       const unionOptions = actualSchema._def.options;
-      const commonProperties: Record<string, any> = {};
+      const commonProperties: Record<string, z.ZodType> = {};
 
       // Helper function to extract properties from any schema type
-      const extractPropertiesFromSchema = (schema: any): Record<string, any> => {
+      const extractPropertiesFromSchema = (schema: z.ZodType): Record<string, z.ZodType> => {
         if (schema instanceof z.ZodObject) {
           return schema.shape;
         } else if (schema instanceof z.ZodIntersection) {
@@ -431,7 +426,7 @@ function getConnectorParamsSchema(
         // Check each property in the first option
         for (const [key, schema] of Object.entries(firstOptionProps)) {
           // Check if this property exists in ALL other options
-          const existsInAll = unionOptions.every((option: any) => {
+          const existsInAll = unionOptions.every((option: z.ZodType) => {
             const optionProps = extractPropertiesFromSchema(option);
             return optionProps[key];
           });
@@ -452,7 +447,7 @@ function getConnectorParamsSchema(
     // Handle ZodIntersection schemas (from complex union handling)
     if (actualSchema instanceof z.ZodIntersection) {
       // Helper function to extract properties from any schema type (reuse from above)
-      const extractPropertiesFromSchema = (schema: any): Record<string, any> => {
+      const extractPropertiesFromSchema = (schema: z.ZodType): Record<string, z.ZodType> => {
         if (schema instanceof z.ZodObject) {
           return schema.shape;
         } else if (schema instanceof z.ZodIntersection) {
@@ -477,10 +472,10 @@ function getConnectorParamsSchema(
     if (actualSchema instanceof z.ZodDiscriminatedUnion) {
       // For discriminated unions, extract common properties from all options
       const unionOptions = Array.from(actualSchema._def.options.values());
-      const commonProperties: Record<string, any> = {};
+      const commonProperties: Record<string, z.ZodType> = {};
 
       // Helper function to extract properties from any schema type (reuse from above)
-      const extractPropertiesFromSchema = (schema: any): Record<string, any> => {
+      const extractPropertiesFromSchema = (schema: z.ZodType): Record<string, z.ZodType> => {
         if (schema instanceof z.ZodObject) {
           return schema.shape;
         } else if (schema instanceof z.ZodIntersection) {
@@ -493,13 +488,13 @@ function getConnectorParamsSchema(
       };
 
       if (unionOptions.length > 0) {
-        const firstOptionProps = extractPropertiesFromSchema(unionOptions[0]);
+        const firstOptionProps = extractPropertiesFromSchema(unionOptions[0] as z.ZodType);
 
         // Check each property in the first option
         for (const [key, schema] of Object.entries(firstOptionProps)) {
           // Check if this property exists in ALL other options
-          const existsInAll = unionOptions.every((option: any) => {
-            const optionProps = extractPropertiesFromSchema(option);
+          const existsInAll = unionOptions.every((option) => {
+            const optionProps = extractPropertiesFromSchema(option as z.ZodType);
             return optionProps[key];
           });
 
@@ -567,7 +562,7 @@ function getConnectorTypeSuggestions(
     };
 
     // Find display name for this connector type - only for dynamic connectors
-    const connector = allConnectors.find((c: any) => c.type === connectorType);
+    const connector = allConnectors.find((c) => c.type === connectorType);
 
     // Only use display names for dynamic connectors (not elasticsearch.* or kibana.*)
     const isDynamicConnector =
@@ -601,10 +596,9 @@ function getConnectorTypeSuggestions(
     const namespacePrefix = `${namespace}.`;
 
     const apis = allConnectors
-      .filter((c: any) => c.type.startsWith(namespacePrefix))
-      .map((c: any) => c.type)
-      .filter((api: string) => api.toLowerCase().includes(typePrefix.toLowerCase()));
-    //      .slice(0, 50); // Limit for performance
+      .filter((c) => c.type.startsWith(namespacePrefix))
+      .map((c) => c.type)
+      .filter((api) => api.toLowerCase().includes(typePrefix.toLowerCase()));
 
     apis.forEach((api) => {
       suggestions.push(createSnippetSuggestion(api));
@@ -640,8 +634,8 @@ function getConnectorTypeSuggestions(
 
     // Then add matching connectors
     const matchingConnectors = allConnectors
-      .map((c: any) => c.type)
-      .filter((connectorType: string) => {
+      .map((c) => c.type)
+      .filter((connectorType) => {
         const lowerType = connectorType.toLowerCase();
         const lowerPrefix = typePrefix.toLowerCase();
 
@@ -847,7 +841,7 @@ export function getSuggestion(
     kind: monaco.languages.CompletionItemKind.Field,
     range,
     insertText,
-    detail: `${type}` + (description ? `: ${description}` : ''),
+    detail: `${type}${description ? `: ${description}` : ''}`,
     insertTextRules,
     additionalTextEdits: removeDot
       ? [
@@ -868,7 +862,7 @@ export function getSuggestion(
 
 export function getCompletionItemProvider(
   workflowYamlSchema: z.ZodSchema,
-  dynamicConnectorTypes?: Record<string, any>
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
 ): monaco.languages.CompletionItemProvider {
   return {
     triggerCharacters: ['@', '.', ' '],
@@ -1483,13 +1477,8 @@ export function getCompletionItemProvider(
                   );
                   if (stepPath.length >= 2 && stepPath[0] === 'steps') {
                     try {
-                      const stepNode = yamlDocument.getIn(stepPath, true) as any;
-                      if (
-                        stepNode &&
-                        stepNode.has &&
-                        typeof stepNode.has === 'function' &&
-                        !stepNode.has('connector-id')
-                      ) {
+                      const stepNode = yamlDocument.getIn(stepPath, true);
+                      if (stepNode && isMap(stepNode) && !stepNode.has('connector-id')) {
                         return { connectorType: stepConnectorType, stepNode };
                       }
                     } catch (error) {
