@@ -71,12 +71,12 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
     const fakeRequestDocsToolCall = createFakeTooCall(commands, functions);
 
     const hasToolBlock = hasTools
-    ? `**IMPORTANT**: If there is a tool suitable for answering the user's question, use that tool,
+      ? `**IMPORTANT**: If there is a tool suitable for answering the user's question, use that tool,
 preferably with a natural language reply included. DO NOT attempt to call any other tools
 that are not explicitly listed as available. Only use the following available tools: ${availableTools.join(
-        ', '
-      )}`
-    : '**IMPORTANT**: There are no tools available to use. Do not attempt to call any tools.';
+          ', '
+        )}`
+      : '**IMPORTANT**: There are no tools available to use. Do not attempt to call any tools.';
 
     return merge(
       of<
