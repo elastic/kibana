@@ -27,6 +27,7 @@ interface RunElasticsearchOptions {
   onEarlyExit?: (msg: string) => void;
   logsDir?: string;
   name?: string;
+  basePath?: string;
 }
 
 interface CcsConfig {
@@ -94,7 +95,7 @@ export async function cleanupElasticsearch(
 export async function runElasticsearch(
   options: RunElasticsearchOptions
 ): Promise<() => Promise<void>> {
-  const { log, logsDir, name } = options;
+  const { log, logsDir, name, basePath } = options;
   const config = getEsConfig(options);
 
   if (!config.ccsConfig) {
@@ -103,6 +104,7 @@ export async function runElasticsearch(
       name: name ?? 'ftr',
       logsDir,
       config,
+      basePath,
     });
     return async () => {
       await cleanupElasticsearch(node, config.serverless, logsDir, log);
@@ -119,6 +121,7 @@ export async function runElasticsearch(
       port: parseInt(new URL(config.ccsConfig.remoteClusterUrl).port, 10),
       transportPort: remotePort,
     },
+    basePath,
   });
 
   const localNode = await startEsNode({
@@ -129,6 +132,7 @@ export async function runElasticsearch(
       ...config,
       esArgs: [...config.esArgs, `cluster.remote.ftr-remote.seeds=localhost:${remotePort}`],
     },
+    basePath,
   });
 
   return async () => {
@@ -144,12 +148,14 @@ async function startEsNode({
   config,
   onEarlyExit,
   logsDir,
+  basePath,
 }: {
   log: ToolingLog;
   name: string;
   config: EsConfig & { transportPort?: number };
   onEarlyExit?: (msg: string) => void;
   logsDir?: string;
+  basePath?: string;
 }) {
   const cluster = createTestEsCluster({
     clusterName: `cluster-${name}`,
@@ -163,7 +169,7 @@ async function startEsNode({
     ssl: config.ssl,
     log,
     writeLogsToPath: logsDir ? resolve(logsDir, `es-cluster-${name}.log`) : undefined,
-    basePath: resolve(REPO_ROOT, '.es'),
+    basePath: basePath || resolve(REPO_ROOT, '.es'),
     nodes: [
       {
         name,
