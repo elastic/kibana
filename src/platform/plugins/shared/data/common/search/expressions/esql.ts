@@ -173,6 +173,8 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
       },
       { abortSignal, inspectorAdapters, getKibanaRequest, getSearchSessionId }
     ) {
+      performance.mark('requester_fn');
+
       return defer(() =>
         getStartDependencies(() => {
           const request = getKibanaRequest?.();

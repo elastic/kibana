@@ -129,23 +129,21 @@ export function loadEmbeddableData(
       'embeddable_requested',
       'expression_sent_to_engine'
     );
-    performance.measure(
-      'time_until_esaggs_fn_invoked',
-      'expression_sent_to_engine',
-      'esaggs_expression_fn'
-    );
-    performance.measure(
-      'time_until_esaggs_requests_data',
-      'esaggs_expression_fn',
-      'search_initiated'
-    );
+    performance.measure('time_to_requester_fn', 'expression_sent_to_engine', 'requester_fn');
+    performance.measure('time_until_data_request', 'requester_fn', 'search_initiated');
     performance.measure('time_to_data', 'search_initiated', 'search_response_received');
     performance.measure('time_to_charts_lib', 'search_response_received', 'charts_lib_invoked');
     performance.measure('time_in_charts_lib', 'charts_lib_invoked', 'render_complete');
+
+    performance.measure('total', 'navigate_to_dashboard', 'render_complete');
+
     // log them
-    const measures = performance
-      .getEntriesByType('measure')
-      .sort((a, b) => a.startTime - b.startTime);
+    const measures = performance.getEntriesByType('measure').sort((a, b) => {
+      // Keep "total" measure at the end
+      if (a.name === 'total') return 1;
+      if (b.name === 'total') return -1;
+      return a.startTime - b.startTime;
+    });
     const totalTime = measures.reduce((sum, m) => sum + m.duration, 0);
 
     const maxNameLength = Math.max(...measures.map((m) => m.name.length)) + 5;
