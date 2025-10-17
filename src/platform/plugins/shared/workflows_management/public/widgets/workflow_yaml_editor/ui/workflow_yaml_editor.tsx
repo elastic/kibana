@@ -18,6 +18,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type YAML from 'yaml';
 import { useDispatch, useSelector } from 'react-redux';
+import type { z } from '@kbn/zod';
 import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
 import { addDynamicConnectorsToCache } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
@@ -67,7 +68,6 @@ import { useWorkflowEditorStyles } from '../styles/use_workflow_editor_styles';
 import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
 import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_styles';
 import { useCompletionProvider } from './hooks/use_completion_provider';
-import { z } from 'zod';
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
