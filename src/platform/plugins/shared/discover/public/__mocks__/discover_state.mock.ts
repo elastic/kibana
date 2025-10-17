@@ -113,6 +113,7 @@ export function getDiscoverInternalStateMock({
 
   return {
     internalState,
+    runtimeStateManager,
     initializeTabs: async ({
       persistedDiscoverSession,
     }: { persistedDiscoverSession?: DiscoverSession } = {}) => {
@@ -121,6 +122,10 @@ export function getDiscoverInternalStateMock({
           .spyOn(services.savedSearch, 'getDiscoverSession')
           .mockResolvedValueOnce(persistedDiscoverSession);
       }
+
+      internalState.dispatch(
+        internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
+      );
 
       await internalState.dispatch(
         internalStateActions.initializeTabs({
