@@ -63,11 +63,13 @@ export const controlsGroupSchema = schema.object({
           stickyControlSchema,
         ])
         .extendsDeep({ unknowns: 'allow' }),
-      schema.allOf([
-        schema.object({ type: schema.literal(TIME_SLIDER_CONTROL) }),
-        timeSliderControlSchema,
-        stickyControlSchema,
-      ]),
+      schema
+        .allOf([
+          schema.object({ type: schema.literal(TIME_SLIDER_CONTROL) }),
+          timeSliderControlSchema,
+          stickyControlSchema,
+        ])
+        .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `useGlobalFilters`
     ]),
     {
       defaultValue: [],
