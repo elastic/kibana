@@ -8,7 +8,6 @@
  */
 
 import type { PublishingSubject } from '@kbn/presentation-publishing/publishing_subject';
-import { apiCanAddNewPanel, type CanAddNewPanel } from './can_add_new_panel';
 import type { PanelPackage } from './presentation_container';
 
 export interface CanDuplicatePanels {

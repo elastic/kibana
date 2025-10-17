@@ -184,16 +184,11 @@ export function initializeLayoutManager(
       }
     );
 
-    // Store width and grow settings, if present, so they can be preserved if this panel is pinned
-    const stickyPanelDisplaySettings = serializedState
-      ? pick(serializedState?.rawState, 'grow', 'width')
-      : {};
-
     return {
       ...layout$.value,
       panels: {
         ...otherPanels,
-        [uuid]: { grid: newPanelPlacement, type, ...stickyPanelDisplaySettings },
+        [uuid]: { grid: newPanelPlacement, type },
       },
     };
   };
