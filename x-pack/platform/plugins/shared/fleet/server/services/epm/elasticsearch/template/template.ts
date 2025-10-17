@@ -601,6 +601,12 @@ function _generateMappings(
               type: 'aggregate_metric_double',
             };
             break;
+          case 'flattened':
+            fieldProps.type = type;
+            if (field.ignore_above) {
+              fieldProps.ignore_above = field.ignore_above;
+            }
+            break;
           default:
             fieldProps.type = type;
         }

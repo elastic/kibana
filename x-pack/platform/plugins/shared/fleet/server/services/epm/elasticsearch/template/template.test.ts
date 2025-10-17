@@ -1799,11 +1799,32 @@ describe('EPM template', () => {
   type: object
   object_type: constant_keyword
 `;
-    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
-    expect(() => {
+      const fields: Field[] = load(textWithRuntimeFieldsLiteralYml);
+      expect(() => {
+        const processedFields = processFields(fields);
+        generateMappings(processedFields);
+      }).toThrow();
+    });
+
+    it('tests processing flattened field with ignore_above 1024', () => {
+      const flattenedFieldYml = `
+- name: flattenedField
+  type: flattened
+  ignore_above: 1024
+`;
+      const flattenedFieldMapping = {
+        properties: {
+          flattenedField: {
+            type: 'flattened',
+            ignore_above: 1024,
+          },
+        },
+      };
+      const fields: Field[] = load(flattenedFieldYml);
       const processedFields = processFields(fields);
-      generateMappings(processedFields);
-    }).toThrow();
+      const mappings = generateMappings(processedFields);
+      expect(mappings).toEqual(flattenedFieldMapping);
+    });
   });
 
   it('tests priority and index pattern for data stream without dataset_is_prefix', () => {
