@@ -13,6 +13,7 @@ const Path = require('path');
 const { readPackageJson } = require('./parse_package_json');
 const { PLUGIN_CATEGORY } = require('./plugin_category_info');
 const { readPackageManifest } = require('./parse_package_manifest');
+const { KIBANA_SOLUTIONS } = require('@kbn/projects-solutions-groups');
 
 /**
  * Normalize a path for operating systems which use backslashes
@@ -236,8 +237,7 @@ class Package {
       // this conditional branch is the only one that applies in production
       group = this.manifest.group ?? 'common';
       // if the group is 'private-only', enforce it
-      //  BOOKMARK - List of Kibana solutions - FIXME we could use KIBANA_SOLUTIONS array here once we modernize this / get rid of Bazel
-      visibility = ['search', 'security', 'observability', 'workplace_ai'].includes(group)
+      visibility = KIBANA_SOLUTIONS.find((solution) => solution === group)
         ? 'private'
         : this.manifest.visibility ?? 'shared';
     }
