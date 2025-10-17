@@ -76,7 +76,7 @@ export class DashboardPlugin
 
   public setup(core: CoreSetup<StartDeps, DashboardPluginStart>, plugins: SetupDeps) {
     this.logger.debug('dashboard: Setup');
-    
+
     core.savedObjects.registerType(
       createDashboardSavedObjectType({
         migrationDeps: {

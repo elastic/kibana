@@ -8,10 +8,11 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { registerRoutes } from './routes';
-import { Observable, firstValueFrom } from 'rxjs';
-import { CPSConfig } from './config';
-import { CPSServerSetup } from './types';
+import type { CPSConfig } from './config';
+import type { CPSServerSetup } from './types';
 
 export class CPSServerPlugin implements Plugin<CPSServerSetup> {
   private readonly initContext: PluginInitializerContext;
@@ -37,7 +38,7 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup> {
       getCpsEnabled: async () => {
         const config = await firstValueFrom(config$);
         return config.cpsEnabled;
-      }
+      },
     };
   }
 
@@ -48,7 +49,7 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup> {
   public stop() {}
 
   private async setCpsFeatureFlagAsync(core: CoreSetup) {
-    const config = await firstValueFrom(this.config$)
+    const config = await firstValueFrom(this.config$);
     core.elasticsearch.setCpsFeatureFlag(config.cpsEnabled);
   }
 }
