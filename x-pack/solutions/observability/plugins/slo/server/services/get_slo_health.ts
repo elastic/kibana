@@ -51,7 +51,6 @@ export class GetSLOHealth {
         const transformStatsById = await this.getTransformStatsForSLO(item);
         const health = computeHealth(transformStatsById, item);
         const state = computeState(summaryDocsById, item);
-
         return {
           sloId: item.sloId,
           sloName: item.sloName,
