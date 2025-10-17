@@ -15,7 +15,7 @@ import type {
 import { InferenceTaskEventType, isInferenceError } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import type { ChatCompleteRequestBody } from '../../common/http_apis';
-import { InferenceServerStart, InferenceStartDependencies } from '../types';
+import type { InferenceServerStart, InferenceStartDependencies } from '../types';
 import { chatCompleteBodySchema } from './schemas';
 import { getRequestAbortedSignal } from './get_request_aborted_signal';
 

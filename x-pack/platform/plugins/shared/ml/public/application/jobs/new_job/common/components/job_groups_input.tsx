@@ -62,15 +62,18 @@ export const JobGroupsInput: FC<JobGroupsInputProps> = memo(
       onChangeCallback([...selectedOptions, newGroup]);
     }
 
+    const jobGroupSelectLabel = i18n.translate(
+      'xpack.ml.newJob.wizard.jobDetailsStep.jobGroupSelect.placeholder',
+      {
+        defaultMessage: 'Select or create groups',
+      }
+    );
+
     return (
       <Description validation={validation} titleId={titleId}>
         <EuiComboBox
-          placeholder={i18n.translate(
-            'xpack.ml.newJob.wizard.jobDetailsStep.jobGroupSelect.placeholder',
-            {
-              defaultMessage: 'Select or create groups',
-            }
-          )}
+          placeholder={jobGroupSelectLabel}
+          aria-label={jobGroupSelectLabel}
           options={options}
           selectedOptions={selectedOptions}
           onChange={onChangeCallback}

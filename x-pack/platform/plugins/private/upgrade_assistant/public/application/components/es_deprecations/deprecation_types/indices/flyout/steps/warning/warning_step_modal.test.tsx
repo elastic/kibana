@@ -8,12 +8,9 @@
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import {
-  EnrichedDeprecationInfo,
-  IndexWarning,
-  IndexWarningType,
-  ReindexStatus,
-} from '../../../../../../../../../common/types';
+import type { EnrichedDeprecationInfo } from '../../../../../../../../../common/types';
+import type { IndexWarning, IndexWarningType } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { WarningModalStep } from './warning_step_modal';
 

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewsService } from '../../../../common/data_views';
-import { RuntimeField } from '../../../../common/types';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import type { DataViewsService } from '../../../../common/data_views';
+import type { RuntimeField } from '../../../../common/types';
 import { ErrorIndexPatternFieldNotFound } from '../../../error';
 import { handleErrors } from '../util/handle_errors';
 import { runtimeFieldSchemaUpdate } from '../../../schemas';
@@ -19,12 +19,12 @@ import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../../types';
+import type { SERVICE_KEY_TYPE } from '../../../constants';
 import {
   SPECIFIC_RUNTIME_FIELD_PATH,
   SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
-  SERVICE_KEY_TYPE,
   INITIAL_REST_VERSION,
   UPDATE_RUNTIME_FIELD_DESCRIPTION,
 } from '../../../constants';

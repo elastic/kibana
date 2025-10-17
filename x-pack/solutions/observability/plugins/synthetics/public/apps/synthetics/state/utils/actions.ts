@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { createAction, PayloadAction } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createAction } from '@reduxjs/toolkit';
 import type { IHttpSerializedFetchError } from './http_error';
 
 export function createAsyncAction<

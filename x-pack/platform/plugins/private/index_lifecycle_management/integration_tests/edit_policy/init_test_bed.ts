@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { registerTestBed, TestBedConfig } from '@kbn/test-jest-helpers';
+import type { HttpSetup } from '@kbn/core/public';
+import type { TestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 
 import { WithAppDependencies } from '../helpers';
 import { EditPolicy } from '../../public/application/sections/edit_policy';
-import { AppServicesContext } from '../../public/types';
+import type { AppServicesContext } from '../../public/types';
 import { POLICY_NAME } from './constants';
 
 const getTestBedConfig = (testBedConfig?: Partial<TestBedConfig>): TestBedConfig => {

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-import { SnapshotRestore, SnapshotRestoreShardEs } from '../../../common/types';
+import type { SnapshotRestore, SnapshotRestoreShardEs } from '../../../common/types';
 import { serializeRestoreSettings } from '../../../common/lib';
 import { deserializeRestoreShard } from '../../lib';
-import { RouteDependencies } from '../../types';
+import type { RouteDependencies } from '../../types';
 import { addBasePath } from '../helpers';
 import { restoreSettingsSchema } from './validate_schemas';
 
@@ -38,6 +39,7 @@ export function registerRestoreRoutes({
         const snapshotRestores: SnapshotRestore[] = [];
         const recoveryByIndexName = await clusterClient.asCurrentUser.indices.recovery({
           human: true,
+          expand_wildcards: 'all',
         });
 
         // Filter to snapshot-recovered shards only

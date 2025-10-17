@@ -47,8 +47,8 @@ export const SearchSessionName: React.FC<SearchSessionNameProps> = ({ name, edit
         autoFocus={true}
         iconType={'pencil'}
         color={'text'}
-        aria-label={i18n.translate('data.searchSessionName.editAriaLabelText', {
-          defaultMessage: 'Edit search session name',
+        aria-label={i18n.translate('data.searchSessionName.backgroundSearchEditAriaLabelText', {
+          defaultMessage: 'Edit background search name',
         })}
         data-test-subj={'searchSessionNameEdit'}
         onClick={() => setIsEditing(true)}
@@ -58,15 +58,15 @@ export const SearchSessionName: React.FC<SearchSessionNameProps> = ({ name, edit
     <EuiFieldText
       autoFocus={true}
       compressed={true}
-      placeholder={i18n.translate('data.searchSessionName.placeholderText', {
-        defaultMessage: 'Enter a name for the search session',
+      placeholder={i18n.translate('data.searchSessionName.backgroundSearchPlaceholderText', {
+        defaultMessage: 'Enter a name for the background search',
       })}
       value={newName}
       onChange={(e) => {
         setNewName(e.target.value);
       }}
-      aria-label={i18n.translate('data.searchSessionName.ariaLabelText', {
-        defaultMessage: 'Search session name',
+      aria-label={i18n.translate('data.searchSessionName.backgroundSearchAriaLabelText', {
+        defaultMessage: 'Background search name',
       })}
       data-test-subj={'searchSessionNameInput'}
       append={

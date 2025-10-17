@@ -15,7 +15,7 @@ import {
   VULNERABILITIES_INDEX_NAME,
   LATEST_VULNERABILITIES_INDEX_TEMPLATE_NAME,
 } from '../../common/constants';
-import { LatestIndexConfig } from './types';
+import type { LatestIndexConfig } from './types';
 
 export const latestIndexConfigs: LatestIndexConfig = {
   findings: {

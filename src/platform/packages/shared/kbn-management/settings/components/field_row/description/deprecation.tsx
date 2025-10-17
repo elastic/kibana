@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
+import type { FieldDefinition, SettingType } from '@kbn/management-settings-types';
 import { useServices } from '../services';
 
 export const DATA_TEST_SUBJ_DEPRECATION_PREFIX = 'description-block-deprecation';

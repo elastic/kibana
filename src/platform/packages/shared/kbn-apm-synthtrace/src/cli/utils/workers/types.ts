@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RunOptions } from '../parse_run_cli_flags';
+import type { RunOptions } from '../parse_run_cli_flags';
 
 export interface BaseWorkerData {
   bucketFrom: Date;

@@ -6,7 +6,7 @@
  */
 
 import React, { useContext, useMemo } from 'react';
-import { EuiFormRow, EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -84,16 +84,20 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
                 id="xpack.transform.agg.popoverForm.filerAggLabel"
                 defaultMessage="Filter query"
               />
-              <EuiToolTip
+              <EuiIconTip
                 content={
                   <FormattedMessage
                     id="xpack.transform.agg.popoverForm.filerQueryAdvancedSuggestionTooltip"
                     defaultMessage="To add other filter query aggregations, edit the JSON config."
                   />
                 }
-              >
-                <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
-              </EuiToolTip>
+                type="question"
+                size="s"
+                color="subdued"
+                iconProps={{
+                  className: 'eui-alignTop',
+                }}
+              />
             </>
           }
         >

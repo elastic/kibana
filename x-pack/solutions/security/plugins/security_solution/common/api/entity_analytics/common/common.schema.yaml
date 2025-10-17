@@ -203,8 +203,7 @@ components:
           format: double
           description: The contribution of Category 1 to the overall risk score (`calculated_score`). Category 1 contains Detection Engine Alerts.
         category_1_count:
-          type: number
-          format: integer
+          type: integer
           description: The number of risk input documents that contributed to the Category 1 score (`category_1_score`).
         inputs:
           type: array
@@ -215,8 +214,7 @@ components:
           type: number
           format: double
         category_2_count:
-          type: number
-          format: integer
+          type: integer
         notes:
           type: array
           items:

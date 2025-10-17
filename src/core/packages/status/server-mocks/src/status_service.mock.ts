@@ -9,9 +9,11 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ServiceStatusLevels, ServiceStatus } from '@kbn/core-status-common';
+import type { ServiceStatus } from '@kbn/core-status-common';
+import { ServiceStatusLevels } from '@kbn/core-status-common';
 import type { StatusService, InternalStatusServiceSetup } from '@kbn/core-status-server-internal';
 import type { StatusServiceSetup, CoreStatus } from '@kbn/core-status-server';
+import { lazyObject } from '@kbn/lazy-object';
 
 const available: ServiceStatus = {
   level: ServiceStatusLevels.available,
@@ -23,30 +25,30 @@ const availableCoreStatus: CoreStatus = {
 };
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<StatusServiceSetup> = {
+  const setupContract: jest.Mocked<StatusServiceSetup> = lazyObject({
     core$: new BehaviorSubject(availableCoreStatus),
     overall$: new BehaviorSubject(available),
     set: jest.fn(),
     dependencies$: new BehaviorSubject({}),
     derivedStatus$: new BehaviorSubject(available),
     isStatusPageAnonymous: jest.fn().mockReturnValue(false),
-  };
+  });
 
   return setupContract;
 };
 
 const createInternalSetupContractMock = () => {
-  const setupContract: jest.Mocked<InternalStatusServiceSetup> = {
+  const setupContract: jest.Mocked<InternalStatusServiceSetup> = lazyObject({
     core$: new BehaviorSubject(availableCoreStatus),
     coreOverall$: new BehaviorSubject(available),
     overall$: new BehaviorSubject(available),
     isStatusPageAnonymous: jest.fn().mockReturnValue(false),
-    plugins: {
+    plugins: lazyObject({
       set: jest.fn(),
       getDependenciesStatus$: jest.fn(),
       getDerivedStatus$: jest.fn(),
-    },
-  };
+    }),
+  });
 
   return setupContract;
 };
@@ -54,12 +56,12 @@ const createInternalSetupContractMock = () => {
 type StatusServiceContract = PublicMethodsOf<StatusService>;
 
 const createMock = () => {
-  const mocked: jest.Mocked<StatusServiceContract> = {
+  const mocked: jest.Mocked<StatusServiceContract> = lazyObject({
     preboot: jest.fn(),
     setup: jest.fn().mockReturnValue(createInternalSetupContractMock()),
     start: jest.fn(),
     stop: jest.fn(),
-  };
+  });
   return mocked;
 };
 

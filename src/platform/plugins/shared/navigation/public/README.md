@@ -36,15 +36,6 @@ The `TopNavMenu` component provides a standardized way to render navigation cont
 - Extension points for plugins to contribute additional items
 - Consistent styling and behavior across Kibana
 
-### SideNavComponent
-
-The `SideNavComponent` is a lazily-loaded wrapper that renders the side navigation panel in Kibana. This component:
-
-- Is implemented as a React.lazy component for code splitting and performance optimization
-- Integrates with the `ProjectNavigationService` to determine active navigation items
-- Supports collapsible navigation sections
-- Renders navigation trees with proper highlighting of active items
-
 ## Integration with Core Services
 
 This plugin works closely with Kibana's core navigation services:
@@ -109,7 +100,7 @@ Example from Enterprise Search plugin:
 public start(core: CoreStart, plugins: PluginsStart) {
   // Initialize any dynamic navigation items if needed
   private readonly sideNavDynamicItems$ = new BehaviorSubject<DynamicSideNavItems>({});
-  
+
   // Import your navigation tree definition
   import('./navigation_tree').then(({ getNavigationTreeDefinition }) => {
     // Register your solution's navigation with the navigation plugin

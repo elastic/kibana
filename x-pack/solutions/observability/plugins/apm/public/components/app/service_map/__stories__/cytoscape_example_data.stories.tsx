@@ -103,7 +103,7 @@ export const GenerateMap: StoryFn<{}> = () => {
 };
 
 const assertJSON: (json?: any) => asserts json is ServiceMapResponse = (json) => {
-  if (!!json && !('elements' in json || 'spans' in json)) {
+  if (!!json && !('spans' in json)) {
     throw new Error('invalid json');
   }
 };
@@ -118,22 +118,20 @@ const MapFromJSONTemplate = () => {
   const updateRenderedElements = useCallback(() => {
     try {
       assertJSON(json);
-      if ('elements' in json) {
-        setElements(json.elements ?? []);
-      } else {
-        const paths = getPaths({ spans: json.spans ?? [] });
-        const nodes = getServiceMapNodes({
-          anomalies: json.anomalies ?? {
-            mlJobIds: [],
-            serviceAnomalies: [],
-          },
-          connections: paths.connections,
-          servicesData: json.servicesData ?? [],
-          exitSpanDestinations: paths.exitSpanDestinations,
-        });
 
-        setElements(nodes.elements);
-      }
+      const paths = getPaths({ spans: json.spans ?? [] });
+      const nodes = getServiceMapNodes({
+        anomalies: json.anomalies ?? {
+          mlJobIds: [],
+          serviceAnomalies: [],
+        },
+        connections: paths.connections,
+        servicesData: json.servicesData ?? [],
+        exitSpanDestinations: paths.exitSpanDestinations,
+      });
+
+      setElements(nodes.elements);
+
       setUniqueKeyCounter((key) => key + 1);
       setError(undefined);
     } catch (e) {

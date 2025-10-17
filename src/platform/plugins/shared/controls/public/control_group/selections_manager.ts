@@ -7,17 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, first } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
-import {
-  apiPublishesFilters,
-  apiPublishesTimeslice,
-  PublishesFilters,
-  PublishesTimeslice,
-} from '@kbn/presentation-publishing';
-import { ControlGroupApi } from './types';
+import type { PublishesFilters, PublishesTimeslice } from '@kbn/presentation-publishing';
+import { apiPublishesFilters, apiPublishesTimeslice } from '@kbn/presentation-publishing';
+import type { ControlGroupApi } from './types';
 
 export function initSelectionsManager(
   controlGroupApi: Pick<ControlGroupApi, 'autoApplySelections$' | 'children$' | 'untilInitialized'>
@@ -27,6 +24,15 @@ export function initSelectionsManager(
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
   const unpublishedTimeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
   const hasUnappliedSelections$ = new BehaviorSubject(false);
+
+  const filtersPublished = new BehaviorSubject<boolean>(false);
+  const untilFiltersPublished = () =>
+    new Promise<void>((resolve) => {
+      filtersPublished.pipe(first((isComplete) => isComplete)).subscribe(() => {
+        resolve();
+        filtersPublished.complete();
+      });
+    });
 
   const subscriptions: Subscription[] = [];
   controlGroupApi.untilInitialized().then(() => {
@@ -96,6 +102,7 @@ export function initSelectionsManager(
         }
       })
     );
+    filtersPublished.next(true);
   });
 
   function applySelections() {
@@ -111,6 +118,7 @@ export function initSelectionsManager(
     api: {
       filters$,
       timeslice$,
+      untilFiltersPublished,
     },
     applySelections,
     cleanup: () => {

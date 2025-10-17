@@ -161,7 +161,7 @@ describe('EsqlDashboardPanel', () => {
   });
 
   it('render invalid fields when the query is invalid', () => {
-    const invalidQuery = left(['invalidField1', 'invalidField2']);
+    const invalidQuery = left({ invalidFields: ['invalidField1', 'invalidField2'] });
 
     render(
       <EsqlDashboardPanel

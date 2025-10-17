@@ -28,12 +28,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         useCookieHeader: true,
       });
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/infra/8.0.0/metrics_hosts_processes'
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/metrics_hosts_processes'
       );
     });
     after(async () => {
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/infra/8.0.0/metrics_hosts_processes'
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/metrics_hosts_processes'
       );
       await supertestWithAdminScope.destroy();
     });
@@ -50,6 +50,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             to: 1680027660000,
             command:
               '/System/Library/CoreServices/NotificationCenter.app/Contents/MacOS/NotificationCenter',
+            schema: 'ecs',
           })
         )
         .expect(200);

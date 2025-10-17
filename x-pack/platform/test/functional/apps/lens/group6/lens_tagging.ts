@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
@@ -29,7 +29,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('lens tagging', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await dashboard.navigateToApp();
       await dashboard.preserveCrossAppState();
       await dashboard.clickNewDashboard();

@@ -12,7 +12,8 @@ import { EuiPanel } from '@elastic/eui';
 import { useLLMsModels } from '../../hooks/use_llms_models';
 import { IncludeCitationsField } from './include_citations_field';
 import { InstructionsField } from './instructions_field';
-import { PlaygroundForm, PlaygroundFormFields } from '../../types';
+import type { PlaygroundForm } from '../../types';
+import { PlaygroundFormFields } from '../../types';
 import { SummarizationModel } from './summarization_model';
 
 export const SummarizationPanel: React.FC = () => {

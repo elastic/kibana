@@ -9,8 +9,8 @@ import { toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { from, map } from 'rxjs';
 import { v4 } from 'uuid';
-import { Readable } from 'stream';
-import { AssistantScope } from '@kbn/ai-assistant-common';
+import type { Readable } from 'stream';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { flushBuffer } from '../../service/util/flush_buffer';
@@ -19,7 +19,7 @@ import { observableIntoStream } from '../../service/util/observable_into_stream'
 import { withAssistantSpan } from '../../service/util/with_assistant_span';
 import { recallAndScore } from '../../functions/context/utils/recall_and_score';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { Instruction } from '../../../common/types';
+import type { Instruction } from '../../../common/types';
 import {
   assistantScopeType,
   functionRt,
@@ -27,7 +27,7 @@ import {
   publicMessageRt,
   screenContextRt,
 } from '../runtime_types';
-import { ObservabilityAIAssistantRouteHandlerResources } from '../types';
+import type { ObservabilityAIAssistantRouteHandlerResources } from '../types';
 
 const chatCompleteBaseRt = (apiType: 'public' | 'internal') =>
   t.type({
@@ -191,8 +191,18 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
       resources
     );
 
-    const { connectorId, screenDescription, messages } = resources.params.body;
+    const { request, plugins } = resources;
 
+    const actionsClient = await (
+      await plugins.actions.start()
+    ).getActionsClientWithRequest(request);
+
+    const { connectorId, screenDescription, messages, scopes } = resources.params.body;
+
+    const connector = await actionsClient.get({
+      id: connectorId,
+      throwIfSystemAction: true,
+    });
     const response$ = from(
       recallAndScore({
         analytics: (await resources.plugins.core.start()).analytics,
@@ -209,6 +219,8 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
         messages,
         recall: client.recall,
         signal,
+        connector,
+        scopes,
       })
     ).pipe(
       map(({ llmScores, suggestions, relevantDocuments }) => {

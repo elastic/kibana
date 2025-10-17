@@ -47,8 +47,8 @@ import {
   convertECSMappingToArray,
   convertECSMappingToObject,
 } from '../../../common/utils/converters';
-import ECSSchema from '../../common/schemas/ecs/v9.0.0.json';
-import osquerySchema from '../../common/schemas/osquery/v5.15.0.json';
+import ECSSchema from '../../common/schemas/ecs/v9.1.0.json';
+import osquerySchema from '../../common/schemas/osquery/v5.18.1.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';
@@ -781,7 +781,6 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
 
     const oneLineQuery = removeMultilines(query);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let ast: Record<string, any> | undefined;
 
     try {
@@ -848,7 +847,6 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
               data?.map,
               (mapValue: {
                 type: string;
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 source: { type: string; variant: string; name: any | string; alias: any };
               }) => {
                 if (mapValue?.type === 'join') {

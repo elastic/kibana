@@ -6,8 +6,8 @@
  */
 
 import { stringHash } from '@kbn/ml-string-hash';
-import { AlertStatus } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function AssetDetailsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');

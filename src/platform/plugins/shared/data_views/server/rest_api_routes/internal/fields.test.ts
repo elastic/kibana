@@ -9,7 +9,7 @@
 import { createHandler } from './fields';
 import { IndexPatternsFetcher } from '../../fetcher';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import { RequestHandlerContext } from '@kbn/core/server';
+import type { RequestHandlerContext } from '@kbn/core/server';
 
 jest.mock('../../fetcher');
 

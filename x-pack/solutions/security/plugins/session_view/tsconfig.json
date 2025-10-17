@@ -39,6 +39,7 @@
     "@kbn/usage-collection-plugin",
     "@kbn/analytics",
     "@kbn/securitysolution-rules",
+    "@kbn/es-types",
   ],
   "exclude": [
     "target/**/*",

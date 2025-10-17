@@ -11,21 +11,24 @@ import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
 import type { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
-const createContractMock = (): jest.Mocked<ExecutionContextSetup> => ({
-  context$: new BehaviorSubject({}),
-  clear: jest.fn(),
-  set: jest.fn(),
-  get: jest.fn(),
-  getAsLabels: jest.fn(),
-  withGlobalContext: jest.fn(),
-});
+const createContractMock = (): jest.Mocked<ExecutionContextSetup> =>
+  lazyObject({
+    context$: new BehaviorSubject({}),
+    clear: jest.fn(),
+    set: jest.fn(),
+    get: jest.fn(),
+    getAsLabels: jest.fn(),
+    withGlobalContext: jest.fn(),
+  });
 
-const createMock = (): jest.Mocked<PublicMethodsOf<ExecutionContextService>> => ({
-  setup: jest.fn().mockReturnValue(createContractMock()),
-  start: jest.fn().mockReturnValue(createContractMock()),
-  stop: jest.fn(),
-});
+const createMock = (): jest.Mocked<PublicMethodsOf<ExecutionContextService>> =>
+  lazyObject({
+    setup: jest.fn().mockReturnValue(createContractMock()),
+    start: jest.fn().mockReturnValue(createContractMock()),
+    stop: jest.fn(),
+  });
 
 export const executionContextServiceMock = {
   create: createMock,

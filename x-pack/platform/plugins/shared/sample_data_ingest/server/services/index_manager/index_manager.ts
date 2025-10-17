@@ -93,4 +93,19 @@ export class IndexManager {
       this.log.warn(`Failed to delete index [${indexName}]: ${error.message}`);
     }
   }
+
+  async hasIndex({
+    indexName,
+    esClient,
+  }: {
+    indexName: string;
+    esClient: ElasticsearchClient;
+  }): Promise<boolean> {
+    try {
+      return await esClient.indices.exists({ index: indexName });
+    } catch (error) {
+      this.log.warn(`Failed to check if index exists [${indexName}]: ${error.message}`);
+      return false;
+    }
+  }
 }

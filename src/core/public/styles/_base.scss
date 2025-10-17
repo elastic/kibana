@@ -1,6 +1,3 @@
-// Charts themes available app-wide
-@import '@elastic/charts/dist/theme';
-
 // We apply brute force focus states to anything not coming from Eui
 // which has focus states designed at the component level.
 // You can also use "kbn-resetFocusState" to not apply the default focus

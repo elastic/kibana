@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmFields } from '../apm/apm_fields';
+import type { ApmFields } from '../apm/apm_fields';
 
 export type AgentConfigFields = Pick<
   ApmFields,

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 
 import { AssistantHeader } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
@@ -14,20 +14,24 @@ import { alertConvo, welcomeConvo } from '../../mock/conversation';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { mockConnectors } from '../../mock/connectors';
 import { CLOSE } from './translations';
+import { ConversationSharedState } from '@kbn/elastic-assistant-common';
 
 const onConversationSelected = jest.fn();
 const mockConversations = {
-  [alertConvo.title]: alertConvo,
-  [welcomeConvo.title]: welcomeConvo,
+  [alertConvo.title]: { ...alertConvo, isConversationOwner: true },
+  [welcomeConvo.title]: { ...welcomeConvo, isConversationOwner: true },
 };
 const testProps = {
+  conversationSharedState: ConversationSharedState.PRIVATE,
   conversationsLoaded: true,
+  currentUser: { name: 'elastic' },
   selectedConversation: welcomeConvo,
   title: 'Test Title',
   docLinks: {
     ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
     DOC_LINK_VERSION: 'master',
   },
+  isConversationOwner: true,
   isLoading: false,
   isDisabled: false,
   isSettingsModalVisible: false,
@@ -35,6 +39,7 @@ const testProps = {
   onToggleShowAnonymizedValues: jest.fn(),
   setIsSettingsModalVisible: jest.fn(),
   onConversationCreate: jest.fn(),
+  onConversationDeleted: jest.fn(),
   onChatCleared: jest.fn(),
   showAnonymizedValues: false,
   conversations: mockConversations,
@@ -47,6 +52,7 @@ const testProps = {
   contentReferencesVisible: true,
   setContentReferencesVisible: jest.fn(),
   setPaginationObserver: jest.fn(),
+  setCurrentConversation: jest.fn(),
 };
 
 jest.mock('../../connectorland/use_load_connectors', () => ({
@@ -101,5 +107,27 @@ describe('AssistantHeader', () => {
     });
 
     expect(screen.getByRole('button', { name: CLOSE })).toBeInTheDocument();
+  });
+
+  it('renders share badge when sharing is enabled', () => {
+    render(<AssistantHeader {...testProps} />, {
+      wrapper: TestProviders,
+    });
+    expect(screen.getByTestId('shareBadgeButton')).not.toBeDisabled();
+    expect(screen.getByTestId('connector-selector')).not.toBeDisabled();
+    expect(
+      within(screen.getByTestId('conversationTitle')).getByTestId('euiInlineReadModeButton')
+    ).not.toBeDisabled();
+  });
+
+  it('disables share badge when isConversationOwner=false', () => {
+    render(<AssistantHeader {...testProps} isConversationOwner={false} />, {
+      wrapper: TestProviders,
+    });
+    expect(screen.getByTestId('shareBadgeButton')).toBeDisabled();
+    expect(screen.getByTestId('connector-selector')).toBeDisabled();
+    expect(
+      within(screen.getByTestId('conversationTitle')).getByTestId('euiInlineReadModeButton')
+    ).toBeDisabled();
   });
 });

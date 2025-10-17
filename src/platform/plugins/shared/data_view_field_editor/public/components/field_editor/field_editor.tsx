@@ -12,18 +12,16 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
+import type { FormHook, RuntimeType, RuntimePrimitiveTypes } from '../../shared_imports';
 import {
   Form,
   useForm,
   useFormData,
   useFormIsModified,
-  FormHook,
   UseField,
   TextField,
-  RuntimeType,
-  RuntimePrimitiveTypes,
 } from '../../shared_imports';
-import { Field } from '../../types';
+import type { Field } from '../../types';
 import { useFieldEditorContext } from '../field_editor_context';
 import { useFieldPreviewContext } from '../preview';
 
@@ -33,7 +31,7 @@ import { getNameFieldConfig, getFieldPreviewChanges } from './lib';
 import { TypeField } from './form_fields';
 import { FieldDetail } from './field_detail';
 import { CompositeEditor } from './composite_editor';
-import { TypeSelection } from './types';
+import type { TypeSelection } from './types';
 import { ChangeType } from '../preview/types';
 
 export interface FieldEditorFormState {
@@ -64,6 +62,8 @@ export interface Props {
   onChange?: (state: FieldEditorFormState) => void;
   /** Handler to receive update on the form "isModified" state */
   onFormModifiedChange?: (isModified: boolean) => void;
+  /** If disabled, the field editor will not be editable */
+  isDisabled?: boolean;
 }
 
 const changeWarning = i18n.translate('indexPatternFieldEditor.editor.form.changeWarning', {
@@ -113,7 +113,7 @@ const formSerializer = (field: FieldFormInternal): Field => {
   };
 };
 
-const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) => {
+const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, isDisabled }: Props) => {
   const { fieldTypeToProcess, fieldName$, subfields$, dataView } = useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
@@ -262,7 +262,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
             data-test-subj="nameField"
             componentProps={{
               euiFieldProps: {
-                disabled: fieldTypeToProcess === 'concrete',
+                disabled: fieldTypeToProcess === 'concrete' || isDisabled,
                 'aria-label': i18n.translate('indexPatternFieldEditor.editor.form.nameAriaLabel', {
                   defaultMessage: 'Name field',
                 }),
@@ -274,7 +274,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
         {/* Type */}
         <EuiFlexItem>
           <TypeField
-            isDisabled={fieldTypeToProcess === 'concrete'}
+            isDisabled={fieldTypeToProcess === 'concrete' || isDisabled}
             includeComposite={true}
             path="type"
           />
@@ -306,9 +306,9 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
         </>
       )}
       {updatedType && updatedType[0].value !== 'composite' ? (
-        <FieldDetail />
+        <FieldDetail isDisabled={isDisabled} />
       ) : (
-        <CompositeEditor onReset={resetTypes} />
+        <CompositeEditor onReset={resetTypes} isDisabled={isDisabled} />
       )}
     </Form>
   );

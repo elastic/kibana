@@ -6,16 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { EuiAccordion, EuiHorizontalRule, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
-import { DataTableRecord } from '@kbn/discover-utils';
+import { useGeneratedHtmlId } from '@elastic/eui';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React, { forwardRef } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { StacktraceContent } from './sub_components/stacktrace/stacktrace_content';
-import {
-  ScrollableSectionWrapper,
-  ScrollableSectionWrapperApi,
-} from './scrollable_section_wrapper';
+import type { ScrollableSectionWrapperApi } from './scrollable_section_wrapper';
+import { ScrollableSectionWrapper } from './scrollable_section_wrapper';
+import { ContentFrameworkSection } from '../..';
 
 const stacktraceAccordionTitle = i18n.translate(
   'unifiedDocViewer.docView.logsOverview.accordion.title.stacktrace',
@@ -39,21 +38,15 @@ export const LogsOverviewStacktraceSection = forwardRef<
     <ScrollableSectionWrapper ref={ref}>
       {({ forceState, onToggle }) => (
         <>
-          <EuiAccordion
+          <ContentFrameworkSection
             id={accordionId}
-            buttonContent={
-              <EuiTitle size="xs">
-                <p>{stacktraceAccordionTitle}</p>
-              </EuiTitle>
-            }
-            paddingSize="m"
+            title={stacktraceAccordionTitle}
             forceState={forceState}
             onToggle={onToggle}
             data-test-subj="unifiedDocViewLogsOverviewStacktraceAccordion"
           >
             <StacktraceContent hit={hit} dataView={dataView} />
-          </EuiAccordion>
-          <EuiHorizontalRule margin="xs" />
+          </ContentFrameworkSection>
         </>
       )}
     </ScrollableSectionWrapper>

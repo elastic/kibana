@@ -6,7 +6,7 @@
  */
 
 import type { SlmRetention } from '@elastic/elasticsearch/lib/api/types';
-import { SnapshotConfig, SnapshotConfigEs, SnapshotRetention } from './snapshot';
+import type { SnapshotConfig, SnapshotConfigEs, SnapshotRetention } from './snapshot';
 export interface SlmPolicyPayload {
   name: string;
   snapshotName: string;

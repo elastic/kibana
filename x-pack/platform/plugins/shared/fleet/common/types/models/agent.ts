@@ -13,6 +13,8 @@ import type {
   AgentStatuses,
 } from '../../constants';
 
+import type { SecretReference, SOSecret } from './secret';
+
 export type AgentType =
   | typeof AGENT_TYPE_EPHEMERAL
   | typeof AGENT_TYPE_PERMANENT
@@ -42,7 +44,8 @@ export type AgentActionType =
   | 'REQUEST_DIAGNOSTICS'
   | 'POLICY_CHANGE'
   | 'INPUT_ACTION'
-  | 'MIGRATE';
+  | 'MIGRATE'
+  | 'PRIVILEGE_LEVEL_CHANGE';
 
 export type AgentUpgradeStateType =
   | 'UPG_REQUESTED'
@@ -75,6 +78,12 @@ export interface NewAgentAction {
   total?: number;
   is_automatic?: boolean;
   policyId?: string;
+  secrets?: {
+    user_info?: {
+      password?: SOSecret;
+    };
+    enrollment_token?: SOSecret;
+  };
 }
 
 export interface AgentAction extends NewAgentAction {
@@ -148,6 +157,7 @@ export interface Agent extends AgentBase {
   packages: string[];
   sort?: any[];
   metrics?: AgentMetrics;
+  last_known_status?: AgentStatus;
 }
 
 export interface CurrentUpgrade {
@@ -371,6 +381,11 @@ export interface FleetServerAgent {
    * Namespaces
    */
   namespaces?: string[];
+
+  /**
+   * The last known agent status
+   */
+  last_known_status?: AgentStatus;
 }
 
 /**
@@ -445,6 +460,7 @@ export interface FleetServerAgentAction {
 
   /**
    * The opaque payload.
+   * Secret properties contain a secret reference instead of a value.
    */
   data?: {
     [k: string]: unknown;
@@ -467,6 +483,11 @@ export interface FleetServerAgentAction {
 
   // the id of the policy associated with the action
   policyId?: string;
+
+  /**
+   * List of secret references associated with the action.
+   */
+  secret_references?: SecretReference[];
 
   [k: string]: unknown;
 }

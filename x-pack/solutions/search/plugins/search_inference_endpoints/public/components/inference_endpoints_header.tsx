@@ -8,6 +8,7 @@
 import { EuiPageTemplate, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import React from 'react';
 import * as i18n from '../../common/translations';
+import { PLUGIN_TITLE } from '../../common/constants';
 import { docLinks } from '../../common/doc_links';
 import { useTrainedModelPageUrl } from '../hooks/use_trained_model_page_url';
 
@@ -22,7 +23,7 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
   return (
     <EuiPageTemplate.Header
       data-test-subj="allInferenceEndpointsPage"
-      pageTitle={i18n.INFERENCE_ENDPOINT_LABEL}
+      pageTitle={PLUGIN_TITLE}
       description={i18n.MANAGE_INFERENCE_ENDPOINTS_LABEL}
       bottomBorder={true}
       rightSideItems={[
@@ -36,6 +37,7 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
           {i18n.ADD_ENDPOINT_LABEL}
         </EuiButton>,
         <EuiButtonEmpty
+          aria-label={i18n.API_DOCUMENTATION_LINK}
           iconType="popout"
           iconSide="right"
           iconSize="s"
@@ -47,6 +49,7 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
           {i18n.API_DOCUMENTATION_LINK}
         </EuiButtonEmpty>,
         <EuiButtonEmpty
+          aria-label={i18n.VIEW_YOUR_MODELS_LINK}
           href={trainedModelPageUrl}
           iconType="popout"
           iconSide="right"
@@ -56,6 +59,18 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
           data-test-subj="view-your-models"
         >
           {i18n.VIEW_YOUR_MODELS_LINK}
+        </EuiButtonEmpty>,
+        <EuiButtonEmpty
+          aria-label={i18n.EIS_DOCUMENTATION_LINK}
+          href={docLinks.elasticInferenceService}
+          iconType="popout"
+          iconSide="right"
+          iconSize="s"
+          flush="both"
+          target="_blank"
+          data-test-subj="eis-documentation"
+        >
+          {i18n.EIS_DOCUMENTATION_LINK}
         </EuiButtonEmpty>,
       ]}
     />

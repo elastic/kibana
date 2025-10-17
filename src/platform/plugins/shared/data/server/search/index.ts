@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './types';
+export type * from './types';
 export * from './strategies/es_search';
 export * from './strategies/ese_search';
 export * from './strategies/eql_search';

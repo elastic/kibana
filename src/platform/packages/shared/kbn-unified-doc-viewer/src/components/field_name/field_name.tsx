@@ -13,7 +13,8 @@ import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
 import { getFieldTypeName } from '@kbn/field-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FieldIcon, FieldIconProps } from '@kbn/react-field';
+import type { FieldIconProps } from '@kbn/react-field';
+import { FieldIcon } from '@kbn/react-field';
 import React from 'react';
 
 interface Props {
@@ -89,6 +90,7 @@ export function FieldName({
               )}
             >
               <EuiBadge
+                tabIndex={0}
                 title=""
                 className="kbnDocViewer__fieldName_multiFieldBadge"
                 color="default"

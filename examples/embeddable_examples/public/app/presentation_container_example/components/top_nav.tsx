@@ -10,7 +10,7 @@
 import React, { useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { EuiBadge, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { PublishesUnsavedChanges } from '@kbn/presentation-publishing';
+import type { PublishesUnsavedChanges } from '@kbn/presentation-publishing';
 
 interface Props {
   onSave: () => Promise<void>;

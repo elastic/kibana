@@ -35,6 +35,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const loggerMock = getLoggerMock(log);
 
   describe('Knowledge base: POST /internal/observability_ai_assistant/kb/setup', function () {
+    // fails/flaky on MKI, see https://github.com/elastic/kibana/issues/232600
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await restoreIndexAssets(getService);
     });

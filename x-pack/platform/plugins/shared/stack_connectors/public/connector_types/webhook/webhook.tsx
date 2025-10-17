@@ -11,7 +11,7 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { WebhookActionParams, WebhookConfig, WebhookSecrets } from '../types';
+import type { WebhookActionParams, WebhookConfig, WebhookSecrets } from '../types';
 
 export function getConnectorType(): ConnectorTypeModel<
   WebhookConfig,

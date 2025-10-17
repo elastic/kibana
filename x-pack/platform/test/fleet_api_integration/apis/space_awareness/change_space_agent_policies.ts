@@ -7,15 +7,19 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidV4 } from 'uuid';
-import { Client } from '@elastic/elasticsearch';
-import { CreateAgentPolicyResponse, GetOnePackagePolicyResponse } from '@kbn/fleet-plugin/common';
-import { FleetServerAgentAction } from '@kbn/fleet-plugin/common/types';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { Client } from '@elastic/elasticsearch';
+import type {
+  CreateAgentPolicyResponse,
+  GetOnePackagePolicyResponse,
+} from '@kbn/fleet-plugin/common';
+import type { FleetServerAgentAction } from '@kbn/fleet-plugin/common/types';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
 import {
   cleanFleetIndices,
   createFleetAgent,
+  createTestSpace,
   expectToRejectWithError,
   expectToRejectWithNotFound,
   getFleetAgentDoc,
@@ -110,7 +114,7 @@ export default function (providerContext: FtrProviderContext) {
         inputs: {},
       });
       defaultPackagePolicy1 = packagePolicyRes;
-      await spaces.createTestSpace(TEST_SPACE_1);
+      await createTestSpace(providerContext, TEST_SPACE_1);
     });
 
     after(async () => {
@@ -286,7 +290,7 @@ export default function (providerContext: FtrProviderContext) {
               description: 'tata',
               space_ids: ['default', TEST_SPACE_1],
             }),
-          /400 Bad Request Not enough permissions to create policies in space test1/
+          /400 "Bad Request" Not enough permissions to create policies in space test1/
         );
       });
 
@@ -311,7 +315,7 @@ export default function (providerContext: FtrProviderContext) {
               description: 'tata',
               space_ids: ['default'],
             }),
-          /400 Bad Request Not enough permissions to remove policies from space test1/
+          /400 "Bad Request" Not enough permissions to remove policies from space test1/
         );
       });
     });

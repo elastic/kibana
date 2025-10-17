@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('Reporting API Integration Tests with Security disabled', function () {
@@ -17,5 +17,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./csv/job_apis_csv'));
     loadTestFile(require.resolve('./schedule'));
+    loadTestFile(require.resolve('./roll_datastream'));
   });
 }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FilterFn } from 'elastic-apm-node';
+import type { FilterFn } from 'elastic-apm-node';
 import { isPlainObject, has } from 'lodash';
 
 export const piiFilter: FilterFn = (payload) => {

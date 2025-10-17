@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { Demo, dashboardFactory, urlFactory } from './test_data';
-import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
+import type { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
 
 const dashboard = dashboardFactory as unknown as ActionFactory<
   SerializableRecord,

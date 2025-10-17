@@ -15,7 +15,8 @@ import {
 } from '@kbn/product-doc-common';
 import { getArtifactMappings } from '../artifact/mappings';
 import { getArtifactManifest } from '../artifact/manifest';
-import { DEFAULT_ELSER, SemanticTextMapping } from './create_index';
+import type { SemanticTextMapping } from './create_index';
+import { DEFAULT_ELSER } from './create_index';
 
 export const createArtifact = async ({
   productName,

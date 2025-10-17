@@ -8,10 +8,10 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { EsIndexFilesMetadataClient } from '../..';
-import { FileMetadata } from '@kbn/shared-ux-file-types';
+import type { FileMetadata } from '@kbn/shared-ux-file-types';
 import type { estypes } from '@elastic/elasticsearch';
 
 describe('EsIndexFilesMetadataClient', () => {

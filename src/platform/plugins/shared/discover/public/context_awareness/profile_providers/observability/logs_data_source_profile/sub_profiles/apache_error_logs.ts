@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { APACHE_ERROR_LOGS_PROFILE } from '@kbn/discover-utils';
 import type { LogsDataSourceProfileProvider } from '../profile';
 import { extendProfileProvider } from '../../../extend_profile_provider';
-import { createGetDefaultAppState } from '../accessors';
+import { createGetDefaultAppState, createRecommendedFields } from '../accessors';
 import { CLIENT_IP_COLUMN, LOG_LEVEL_COLUMN, MESSAGE_COLUMN } from '../consts';
 import { createResolve } from './create_resolve';
 
@@ -22,6 +23,9 @@ export const createApacheErrorLogsDataSourceProfileProvider = (
       getDefaultAppState: createGetDefaultAppState({
         defaultColumns: [LOG_LEVEL_COLUMN, CLIENT_IP_COLUMN, MESSAGE_COLUMN],
       }),
+      getRecommendedFields: createRecommendedFields({
+        defaultFields: APACHE_ERROR_LOGS_PROFILE.recommendedFields,
+      }),
     },
-    resolve: createResolve('logs-apache.error'),
+    resolve: createResolve(APACHE_ERROR_LOGS_PROFILE.pattern),
   });

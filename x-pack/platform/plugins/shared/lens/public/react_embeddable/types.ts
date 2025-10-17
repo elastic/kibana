@@ -63,8 +63,8 @@ import type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common'
 import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
 import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { CanAddNewPanel } from '@kbn/presentation-containers';
+import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import type { CanAddNewPanel } from '@kbn/presentation-containers';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
 import type { LensInspector } from '../lens_inspector_service';
@@ -204,6 +204,7 @@ export interface IntegrationCallbacks extends LensApiProps {
   updateAttributes: (newAttributes: LensRuntimeState['attributes']) => void;
   updateSavedObjectId: (newSavedObjectId: LensRuntimeState['savedObjectId']) => void;
   updateOverrides: (newOverrides: LensOverrides['overrides']) => void;
+  updateAbortController: (abortController?: AbortController) => void;
   getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<Action[]>;
 }
 
@@ -265,6 +266,7 @@ export interface LensSharedProps {
   noPadding?: boolean;
   viewMode?: ViewMode;
   forceDSL?: boolean;
+  esqlVariables?: ESQLControlVariable[];
 }
 
 interface LensRequestHandlersProps {
@@ -345,7 +347,7 @@ type ComponentProps = LensComponentProps & LensPublicCallbacks;
 type ComponentSerializedProps = TypedLensSerializedState;
 
 type LensRendererPrivateProps = ComponentSerializedProps & ComponentProps;
-export type LensRendererProps = Simplify<LensRendererPrivateProps>;
+export type LensRendererProps = LensRendererPrivateProps;
 
 /**
  * The LensRuntimeState is the state stored for a dashboard panel

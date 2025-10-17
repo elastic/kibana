@@ -18,6 +18,7 @@ test.beforeEach(async ({ page }) => {
 test('Auto-detect logs and metrics', async ({ page, onboardingHomePage, autoDetectFlowPage }) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
+  const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
   const fileName = 'code_snippet_logs_auto_detect.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
 
@@ -57,5 +58,16 @@ test('Auto-detect logs and metrics', async ({ page, onboardingHomePage, autoDete
    */
   const hostDetailsPage = new HostDetailsPage(await page.waitForEvent('popup'));
 
-  await hostDetailsPage.assertCpuPercentageNotEmpty();
+  if (!isLogsEssentialsMode) {
+    await hostDetailsPage.assertCpuPercentageNotEmpty();
+  } else {
+    await autoDetectFlowPage.assertReceivedDataIndicator();
+
+    await page.goto(`${process.env.KIBANA_BASE_URL}/app/discover`);
+
+    const { DiscoverValidationPage } = await import('./pom/pages/discover_validation.page');
+    const discoverValidation = new DiscoverValidationPage(page);
+    await discoverValidation.waitForDiscoverToLoad();
+    await discoverValidation.assertHasAnyLogData();
+  }
 });

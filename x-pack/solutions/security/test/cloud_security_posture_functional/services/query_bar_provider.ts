@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrService } from '@kbn/test-suites-xpack/functional/ftr_provider_context';
+import { FtrService } from '@kbn/test-suites-xpack-platform/functional/ftr_provider_context';
 
 export class QueryBarProvider extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');

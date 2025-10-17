@@ -41,7 +41,8 @@
     "@kbn/core-plugins-server",
     "@kbn/delete-managed-asset-callout",
     "@kbn/shared-ux-utility",
-    "@kbn/ingest-pipelines-shared"
+    "@kbn/ingest-pipelines-shared",
+    "@kbn/licensing-types"
   ],
   "exclude": [
     "target/**/*",

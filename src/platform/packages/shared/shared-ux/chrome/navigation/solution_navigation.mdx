@@ -71,11 +71,6 @@ const navigationTree: NavigationTreeDefinition = {
       breadcrumbStatus: 'hidden', // this node of the navigation tree does not need to appear in the breadcrumbs, since the home logo icon navigates to the same link
       children: [
         {
-          id: 'search_getting_started',
-          title: 'Getting started',
-          link: 'serverlessElasticsearch', // All **internal** links must be deepLinks (core's `app.deepLinks`), learn more in #deep-links section
-        },
-        {
           id: 'explore',
           title: 'Explore', // A nested group with its children
           children: [
@@ -509,7 +504,7 @@ const solutionNavigation = getPageObject('solutionNavigation');
 
 The page object exposes helpers for using links in the sidenav and breadcrumbs, as well as using page-level components such as global search, recent items, the Elastic logo icon. There are also utilities to check that no page reload happened during the navigation.
 
-Find the full list of helpers in [the source](https://github.com/elastic/kibana/blob/621401ed6a435d4c9beaa03ac1f61ace9716217a/x-pack/test_serverless/functional/page_objects/svl_common_navigation.ts#L44-L206). The most notable are:
+Find the full list of helpers in [the source](https://github.com/elastic/kibana/blob/621401ed6a435d4c9beaa03ac1f61ace9716217a/x-pack/platform/test/serverless/functional/page_objects/svl_common_navigation.ts#L44-L206). The most notable are:
 
 - `solutionNavigation.expectExists()` checks that solution navigation is displayed and not the classic one
 - `solutionNavigation.sideNav.expectLinkExists({ deepLinkId: 'discover'})` checks that the link is visible. Can check by deepLinkId, text or navId
@@ -520,15 +515,12 @@ Find the full list of helpers in [the source](https://github.com/elastic/kibana/
 
 For each serverless project there is a navigation test suite that does a shared navigation smoke check and can be used as an example of using the shared navigation page object.
 
-- x-pack/test_serverless/functional/test_suites/
-  - search/navigation
-  - observability/navigation
-  - security/navigation
+- x-pack/solutions/observability/test/serverless/functional/test_suites/navigation.ts
+- x-pack/solutions/search/test/serverless/functional/test_suites/navigation.ts
+- x-pack/solutions/security/test/serverless/functional/test_suites/ftr/navigation.ts
 
 Similarily for stateful you will find smoe tests with setup examples in the following directories:
 
-- x-pack/test/functional_solution_sidenav/tests
-  - observability_sidenav.ts
-  - search_sidenav.ts
-  - security_sidenav.ts
-
+- x-pack/solutions/observability/test/functional_solution_sidenav/tests
+- x-pack/solutions/search/test/functional_solution_sidenav/tests
+- x-pack/solutions/security/test/functional_solution_sidenav/tests

@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import { isEqual } from 'lodash';
 
 import { Status } from '../../../../../common/types/api';
-import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
+import type { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
 
-import { Actions } from '../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
 import { IndexNameLogic } from '../../components/search_index/index_name_logic';
 
-import {
-  FetchIndexApiParams,
-  FetchIndexApiLogic,
-  FetchIndexApiResponse,
-} from './fetch_index_api_logic';
+import type { FetchIndexApiParams, FetchIndexApiResponse } from './fetch_index_api_logic';
+import { FetchIndexApiLogic } from './fetch_index_api_logic';
 
 const FETCH_INDEX_POLLING_DURATION = 5000; // 5 seconds
 const FETCH_INDEX_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds
@@ -117,7 +115,6 @@ export const CachedFetchIndexApiLogic = kea<
       null,
       {
         apiReset: () => null,
-        // @ts-expect-error upgrade typescript v5.1.6
         apiSuccess: (currentState, newIndexData) => {
           return isEqual(currentState, newIndexData) ? currentState : newIndexData;
         },
@@ -127,7 +124,6 @@ export const CachedFetchIndexApiLogic = kea<
       null,
       {
         clearPollTimeout: () => null,
-        // @ts-expect-error upgrade typescript v5.1.6
         setTimeoutId: (_, { id }) => id,
       },
     ],

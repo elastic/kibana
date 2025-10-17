@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectAttributes } from '@kbn/core/server';
-import { RouteInitializerDeps } from '..';
+import type { SavedObjectAttributes } from '@kbn/core/server';
+import type { RouteInitializerDeps } from '..';
 import { CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../../common/lib/constants';
 
 export function initializeHasWorkpadsRoute(deps: RouteInitializerDeps) {

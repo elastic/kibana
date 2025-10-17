@@ -68,17 +68,26 @@ export const FIELD_STATUS_MAP = {
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorInheritedStatusLabel', {
       defaultMessage: 'Inherited',
     }),
+    tooltip: i18n.translate('xpack.streams.streamDetailSchemaEditorInheritedStatusTooltip', {
+      defaultMessage: 'The mapping for this field is inherited from the parent stream.',
+    }),
   },
   mapped: {
     color: 'success',
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorMappedStatusLabel', {
       defaultMessage: 'Mapped',
     }),
+    tooltip: i18n.translate('xpack.streams.streamDetailSchemaEditorMappedStatusTooltip', {
+      defaultMessage: 'This field is mapped as part of this stream.',
+    }),
   },
   unmapped: {
     color: 'default',
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorUnmappedStatusLabel', {
-      defaultMessage: 'Unmapped',
+      defaultMessage: 'Unmanaged',
+    }),
+    tooltip: i18n.translate('xpack.streams.streamDetailSchemaEditorUnmappedStatusTooltip', {
+      defaultMessage: 'The mapping for this field is not managed by this stream or a parent.',
     }),
   },
 };
@@ -111,8 +120,21 @@ export const TABLE_COLUMNS = {
       defaultMessage: 'Status',
     }),
   },
+  source: {
+    display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTablesourceHeader', {
+      defaultMessage: 'Source',
+    }),
+  },
 } as const;
 
 export type TableColumnName = keyof typeof TABLE_COLUMNS;
+
+export const DEFAULT_TABLE_COLUMN_NAMES: TableColumnName[] = [
+  'name',
+  'type',
+  'format',
+  'parent',
+  'status',
+];
 
 export const SUPPORTED_TABLE_COLUMN_NAMES = Object.keys(TABLE_COLUMNS) as TableColumnName[];

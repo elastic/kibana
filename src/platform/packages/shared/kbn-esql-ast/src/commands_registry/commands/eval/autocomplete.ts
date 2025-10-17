@@ -17,12 +17,8 @@ import {
   getExpressionPosition,
 } from '../../../definitions/utils/autocomplete/helpers';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
-import {
-  type ISuggestionItem,
-  type ICommandContext,
-  Location,
-  ICommandCallbacks,
-} from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { type ISuggestionItem, type ICommandContext, Location } from '../../types';
 import { isColumn, isAssignment } from '../../../ast/is';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import { isMarkerNode } from '../../../definitions/utils/ast';
@@ -60,6 +56,7 @@ export async function autocomplete(
     location: Location.EVAL,
     context,
     hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+    activeProduct: context?.activeProduct,
   });
 
   const positionInExpression = getExpressionPosition(query, expressionRoot);
@@ -81,10 +78,7 @@ export async function autocomplete(
 
   if (
     // don't suggest finishing characters if incomplete expression
-    isExpressionComplete(
-      getExpressionType(expressionRoot, context?.fields, context?.userDefinedColumns),
-      innerText
-    ) &&
+    isExpressionComplete(getExpressionType(expressionRoot, context?.columns), innerText) &&
     // don't suggest finishing characters if the expression is a column
     // because "EVAL columnName" is a useless expression
     expressionRoot &&

@@ -12,7 +12,7 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
-import { JiraConfig, JiraSecrets, JiraActionParams } from './types';
+import type { JiraConfig, JiraSecrets, JiraActionParams } from './types';
 import { validateJSON } from '../lib/validate_json';
 
 export const JIRA_DESC = i18n.translate('xpack.stackConnectors.components.jira.selectMessageText', {
@@ -32,7 +32,7 @@ export function getConnectorType(): ConnectorTypeModel<JiraConfig, JiraSecrets, 
     iconClass: lazy(() => import('./logo')),
     selectMessage: JIRA_DESC,
     actionTypeTitle: JIRA_TITLE,
-    actionConnectorFields: lazy(() => import('./jira_connectors')),
+    actionConnectorFields: lazy(() => import('./jira_connector_params')),
     validateParams: async (
       actionParams: JiraActionParams
     ): Promise<GenericValidationResult<unknown>> => {

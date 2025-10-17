@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import { CoreSetup, PluginInitializerContext, Plugin, Logger, CoreStart } from '@kbn/core/server';
-import {
+import type {
+  CoreSetup,
+  PluginInitializerContext,
+  Plugin,
+  Logger,
+  CoreStart,
+} from '@kbn/core/server';
+import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
-import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { ReportingServerPluginSetup } from '@kbn/reporting-server';
+import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { ReportingServerPluginSetup } from '@kbn/reporting-server';
 import { getCanvasFeature } from './feature';
 import { initRoutes } from './routes';
 import { registerCanvasUsageCollector } from './collectors';
@@ -24,7 +30,8 @@ import { customElementType, workpadTypeFactory, workpadTemplateType } from './sa
 import type { CanvasSavedObjectTypeMigrationsDeps } from './saved_objects/migrations';
 import { initializeTemplates } from './templates';
 import { getUISettings } from './ui_settings';
-import { CanvasRouteHandlerContext, createWorkpadRouteContext } from './workpad_route_context';
+import type { CanvasRouteHandlerContext } from './workpad_route_context';
+import { createWorkpadRouteContext } from './workpad_route_context';
 
 interface PluginsSetup {
   expressions: ExpressionsServerSetup;

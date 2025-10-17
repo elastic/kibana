@@ -10,7 +10,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { filter } from 'rxjs';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiButton, EuiLoadingSpinner } from '@elastic/eui';

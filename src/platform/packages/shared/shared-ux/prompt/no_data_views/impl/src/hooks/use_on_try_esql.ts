@@ -10,7 +10,7 @@
 import { useEffect, useState } from 'react';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
 
-import { NavigateToAppFn, LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
+import type { NavigateToAppFn, LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
 
 export interface UseOnTryEsqlParams {
   locatorClient?: LocatorClient;

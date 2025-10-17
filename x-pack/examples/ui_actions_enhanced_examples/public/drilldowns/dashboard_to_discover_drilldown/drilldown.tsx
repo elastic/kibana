@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import type { UiActionsEnhancedDrilldownDefinition as Drilldown } from '@kbn/ui-actions-enhanced-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
-import { StartDependencies as Start } from '../../plugin';
+import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
+import type { StartDependencies as Start } from '../../plugin';
 import type { ActionApi, ActionContext, Config, CollectConfigProps } from './types';
 import { CollectConfigContainer } from './collect_config_container';
 import { SAMPLE_DASHBOARD_TO_DISCOVER_DRILLDOWN } from './constants';

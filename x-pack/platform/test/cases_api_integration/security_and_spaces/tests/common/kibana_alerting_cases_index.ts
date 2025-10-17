@@ -31,11 +31,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('Kibana index: Alerting & Cases', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/8.8.0');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/migrations/8.8.0');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/8.8.0');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/cases/migrations/8.8.0');
       await deleteAllCaseItems(es);
     });
 
@@ -60,13 +60,14 @@ export default ({ getService }: FtrProviderContext): void => {
         duration: null,
         external_service: null,
         owner: 'cases',
-        settings: { syncAlerts: false },
+        settings: { syncAlerts: false, extractObservables: false },
         severity: 0,
         status: 0,
         tags: ['new index', 'test'],
         title: 'cases in the new index',
         total_alerts: -1,
         total_comments: -1,
+        total_events: 0,
         updated_at: '2023-04-19T08:14:18.693Z',
         updated_by: {
           email: null,

@@ -8,10 +8,10 @@
  */
 
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { createMockVisData } from '../mocks';
 import { generateFormatters, getAvailableFormatter, getFormatter } from './formatters';
-import { BucketColumns } from '../../common/types';
+import type { BucketColumns } from '../../common/types';
 
 describe('generateFormatters', () => {
   const visData = createMockVisData();

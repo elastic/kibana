@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RefreshInterval } from '@kbn/data-plugin/public';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
 import { pick } from 'lodash';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardAttributes } from '../../server';
@@ -17,7 +18,7 @@ import type { DashboardAttributes } from '../../server';
 import type { DashboardState } from '../../common';
 import { LATEST_VERSION } from '../../common/content_management';
 import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
-import { DashboardApi } from './types';
+import type { DashboardApi } from './types';
 import { generateNewPanelIds } from './generate_new_panel_ids';
 
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
@@ -75,7 +76,6 @@ export const getSerializedState = ({
     //
   }
 
-  const searchSource = { filters, query };
   const options = {
     useMargins,
     syncColors,
@@ -87,9 +87,8 @@ export const getSerializedState = ({
   /**
    * Parse global time filter settings
    */
-  const { from, to } = timefilter.getTime();
-  const timeFrom = timeRestore ? convertTimeToUTCString(from) : undefined;
-  const timeTo = timeRestore ? convertTimeToUTCString(to) : undefined;
+  const timeRange = timeRestore ? pick(timefilter.getTime(), ['from', 'to']) : undefined;
+
   const refreshInterval = timeRestore
     ? (pick(timefilter.getRefreshInterval(), [
         'display',
@@ -102,15 +101,15 @@ export const getSerializedState = ({
   const attributes: DashboardAttributes = {
     version: LATEST_VERSION,
     controlGroupInput: controlGroupInput as DashboardAttributes['controlGroupInput'],
-    kibanaSavedObjectMeta: { searchSource },
     description: description ?? '',
+    ...(filters ? { filters } : {}),
+    ...(query ? { query } : {}),
     refreshInterval,
+    timeRange,
     timeRestore,
     options,
     panels,
-    timeFrom,
     title,
-    timeTo,
   };
 
   // TODO Provide tags as an array of tag names in the attribute. In that case, tag references

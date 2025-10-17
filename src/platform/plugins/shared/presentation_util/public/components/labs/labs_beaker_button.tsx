@@ -8,9 +8,11 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiButton, EuiIcon, EuiNotificationBadge, EuiButtonProps } from '@elastic/eui';
+import type { EuiButtonProps } from '@elastic/eui';
+import { EuiButton, EuiIcon, EuiNotificationBadge } from '@elastic/eui';
 
-import { LabsFlyout, Props as FlyoutProps } from './labs_flyout';
+import type { Props as FlyoutProps } from './labs_flyout';
+import { LabsFlyout } from './labs_flyout';
 import { getPresentationLabsService } from '../../services/presentation_labs_service';
 
 export type Props = EuiButtonProps & Pick<FlyoutProps, 'solutions'>;

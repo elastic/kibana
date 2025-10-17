@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-const TIMESTAMP_FIELD = '@timestamp';
-import { isArray } from 'lodash';
+import { castArray, isArray } from 'lodash';
+import { existsQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import type { MetricsAPIRequest } from '../../../../common/http_api';
 import type { ESSearchClient } from '../../../lib/metrics/types';
 
@@ -24,22 +24,9 @@ export const queryTotalGroupings = async (
     return Promise.resolve(0);
   }
 
-  let filters: Array<Record<string, any>> = [
-    {
-      range: {
-        [TIMESTAMP_FIELD]: {
-          gte: options.timerange.from,
-          lte: options.timerange.to,
-          format: 'epoch_millis',
-        },
-      },
-    },
-    ...options.groupBy.map((field) => ({ exists: { field } })),
-  ];
-
-  if (options.filters) {
-    filters = [...filters, ...options.filters];
-  }
+  const groupByFilter = options.groupBy
+    .filter((field): field is string => !!field)
+    .flatMap((field) => existsQuery(field));
 
   const params = {
     allow_no_indices: true,
@@ -49,7 +36,11 @@ export const queryTotalGroupings = async (
       size: 0,
       query: {
         bool: {
-          filter: filters,
+          filter: [
+            ...castArray(options.filters),
+            ...rangeQuery(options.timerange.from, options.timerange.to),
+            ...groupByFilter,
+          ],
         },
       },
       aggs: {

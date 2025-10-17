@@ -7,7 +7,7 @@
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { StaticStyleProperty } from './static_style_property';
-import { LabelStaticOptions } from '../../../../../common/descriptor_types';
+import type { LabelStaticOptions } from '../../../../../common/descriptor_types';
 
 export class StaticTextProperty extends StaticStyleProperty<LabelStaticOptions> {
   isComplete() {

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
   ELSER_ON_ML_NODE_INFERENCE_ID,
   E5_SMALL_INFERENCE_ID,

@@ -8,14 +8,16 @@
  */
 
 import joi from 'joi';
-import { isConfigSchema, Type } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
+import { isConfigSchema } from '@kbn/config-schema';
 import { get } from 'lodash';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { KnownParameters } from '../../type';
 import { isReferenceObject } from '../common';
 import { parse } from './parse';
 
-import { createCtx, IContext } from './post_process_mutations';
+import type { IContext } from './post_process_mutations';
+import { createCtx } from './post_process_mutations';
 
 const isObjectType = (schema: joi.Schema | joi.Description): boolean => {
   return schema.type === 'object';

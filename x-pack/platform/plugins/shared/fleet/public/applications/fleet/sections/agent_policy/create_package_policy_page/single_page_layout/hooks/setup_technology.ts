@@ -19,20 +19,18 @@ import { SetupTechnology } from '../../../../../types';
 import { useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
 import {
-  AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
-  AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
-  AGENTLESS_GLOBAL_TAG_NAME_TEAM,
   AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
   AGENTLESS_AGENT_POLICY_MONITORING,
-  SERVERLESS_DEFAULT_OUTPUT_ID,
-  DEFAULT_OUTPUT_ID,
-  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
-  DEFAULT_FLEET_SERVER_HOST_ID,
+  ECH_AGENTLESS_OUTPUT_ID,
+  SERVERLESS_AGENTLESS_OUTPUT_ID,
+  ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+  SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID,
 } from '../../../../../../../../common/constants';
 import {
   isAgentlessIntegration as isAgentlessIntegrationFn,
   getAgentlessAgentPolicyNameFromPackagePolicyName,
   isOnlyAgentlessIntegration,
+  getAgentlessGlobalDataTags,
 } from '../../../../../../../../common/services/agentless_policy_helper';
 
 export const useAgentless = () => {
@@ -109,9 +107,17 @@ export function useSetupTechnology({
   const [currentAgentPolicy, setCurrentAgentPolicy] = useState(newAgentPolicy);
 
   const allowedSetupTechnologies = useMemo(() => {
-    return isOnlyAgentlessIntegration(packageInfo, integrationToEnable)
-      ? [SetupTechnology.AGENTLESS]
-      : [SetupTechnology.AGENTLESS, SetupTechnology.AGENT_BASED];
+    const setupTechnologies = [];
+
+    if (isAgentlessIntegrationFn(packageInfo, integrationToEnable)) {
+      setupTechnologies.push(SetupTechnology.AGENTLESS);
+    }
+
+    if (!isOnlyAgentlessIntegration(packageInfo, integrationToEnable)) {
+      setupTechnologies.push(SetupTechnology.AGENT_BASED);
+    }
+
+    return setupTechnologies;
   }, [integrationToEnable, packageInfo]);
   const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
     SetupTechnology.AGENT_BASED
@@ -147,9 +153,9 @@ export function useSetupTechnology({
   useEffect(() => {
     const fetchOutputId = async () => {
       const outputId = isServerless
-        ? SERVERLESS_DEFAULT_OUTPUT_ID
+        ? SERVERLESS_AGENTLESS_OUTPUT_ID
         : isCloud
-        ? DEFAULT_OUTPUT_ID
+        ? ECH_AGENTLESS_OUTPUT_ID
         : undefined;
       if (outputId) {
         const outputData = await sendGetOneOutput(outputId);
@@ -160,9 +166,9 @@ export function useSetupTechnology({
     };
     const fetchFleetServerHostId = async () => {
       const hostId = isServerless
-        ? SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+        ? SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID
         : isCloud
-        ? DEFAULT_FLEET_SERVER_HOST_ID
+        ? ECH_AGENTLESS_FLEET_SERVER_HOST_ID
         : undefined;
 
       if (hostId) {
@@ -208,13 +214,18 @@ export function useSetupTechnology({
         inactivity_timeout: AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
         supports_agentless: true,
         monitoring_enabled: AGENTLESS_AGENT_POLICY_MONITORING,
-        ...(agentlessPolicyOutputId ? { data_output_id: agentlessPolicyOutputId } : {}),
+        ...(agentlessPolicyOutputId
+          ? {
+              data_output_id: agentlessPolicyOutputId,
+              monitoring_output_id: agentlessPolicyOutputId,
+            }
+          : {}),
         ...(agentlessPolicyFleetServerHostId
           ? { fleet_server_host_id: agentlessPolicyFleetServerHostId }
           : {}),
       }),
       name: agentlessPolicyName,
-      global_data_tags: getGlobaDataTags(packageInfo),
+      global_data_tags: getAgentlessGlobalDataTags(packageInfo),
     };
 
     const agentlessPolicy = getAgentlessPolicy(packageInfo);
@@ -288,44 +299,6 @@ export const isAgentlessSetupDefault = (
   }
 
   return false;
-};
-
-const getGlobaDataTags = (packageInfo?: PackageInfo) => {
-  if (
-    !packageInfo?.policy_templates &&
-    !packageInfo?.policy_templates?.some((policy) => policy.deployment_modes)
-  ) {
-    return undefined;
-  }
-  const agentlessPolicyTemplate = packageInfo.policy_templates.find(
-    (policy) => policy.deployment_modes
-  );
-
-  // assumes that all the policy templates agentless deployments modes indentify have the same organization, division and team
-  const agentlessInfo = agentlessPolicyTemplate?.deployment_modes?.agentless;
-  if (
-    agentlessInfo === undefined ||
-    !agentlessInfo.organization ||
-    !agentlessInfo.division ||
-    !agentlessInfo.team
-  ) {
-    return undefined;
-  }
-
-  return [
-    {
-      name: AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
-      value: agentlessInfo.organization,
-    },
-    {
-      name: AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
-      value: agentlessInfo.division,
-    },
-    {
-      name: AGENTLESS_GLOBAL_TAG_NAME_TEAM,
-      value: agentlessInfo.team,
-    },
-  ];
 };
 
 const getAgentlessPolicy = (packageInfo?: PackageInfo) => {

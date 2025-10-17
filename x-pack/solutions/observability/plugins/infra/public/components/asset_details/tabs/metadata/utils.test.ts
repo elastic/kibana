@@ -72,7 +72,7 @@ describe('#getAllFields', () => {
         },
       ],
     };
-    expect(getAllFields(result)).toHaveLength(0);
+    expect(getAllFields(result, 'ecs')).toHaveLength(0);
   });
 
   it('should return empty array if no field value is provided', async () => {
@@ -92,7 +92,86 @@ describe('#getAllFields', () => {
         },
       },
     };
-    expect(getAllFields(result)).toHaveLength(0);
+    expect(getAllFields(result, 'ecs')).toHaveLength(0);
+  });
+
+  it('should map semconv metadata properly', () => {
+    const result: InfraMetadata = {
+      id: 'host1',
+      name: 'host1',
+      hasSystemIntegration: true,
+      features: [
+        {
+          name: 'system.core',
+          source: 'metrics',
+        },
+      ],
+      info: {
+        host: {
+          name: 'test-host',
+        },
+        resource: {
+          attributes: {
+            host: {
+              name: 'test-host',
+              ip: ['10.10.10.10', '10.10.10.11'],
+              mac: ['01-33-22-33-71-83', '1E-15-33-68-F8-5B', '1E-8B-55-5B-7F-AA'],
+            },
+            os: {
+              name: 'Ubuntu',
+              version: '18.04',
+            },
+            cloud: {
+              provider: 'gcp',
+              resource_id: '1111111111111111111',
+            },
+          },
+        },
+      },
+    };
+
+    expect(getAllFields(result, 'semconv')).toStrictEqual([
+      { name: 'host.name', value: 'test-host' },
+      { name: 'resource.attributes.os.name', value: 'Ubuntu' },
+      { name: 'resource.attributes.os.version', value: '18.04' },
+      { name: 'resource.attributes.host.name', value: 'test-host' },
+      { name: 'resource.attributes.host.ip', value: ['10.10.10.10', '10.10.10.11'] },
+      {
+        name: 'resource.attributes.host.mac',
+        value: ['01-33-22-33-71-83', '1E-15-33-68-F8-5B', '1E-8B-55-5B-7F-AA'],
+      },
+      { name: 'resource.attributes.cloud.provider', value: 'gcp' },
+      { name: 'resource.attributes.cloud.resource_id', value: '1111111111111111111' },
+    ]);
+  });
+
+  it('should map semconv string ip and mac metadata properly', () => {
+    const result: InfraMetadata = {
+      id: 'host1',
+      name: 'host1',
+      hasSystemIntegration: true,
+      features: [
+        {
+          name: 'system.core',
+          source: 'metrics',
+        },
+      ],
+      info: {
+        resource: {
+          attributes: {
+            host: {
+              ip: '10.10.10.10',
+              mac: '01-33-22-33-71-83',
+            },
+          },
+        },
+      },
+    };
+
+    expect(getAllFields(result, 'semconv')).toStrictEqual([
+      { name: 'resource.attributes.host.ip', value: '10.10.10.10' },
+      { name: 'resource.attributes.host.mac', value: '01-33-22-33-71-83' },
+    ]);
   });
 
   it('should map metadata with nested properties', async () => {
@@ -114,7 +193,7 @@ describe('#getAllFields', () => {
         },
       },
     };
-    expect(getAllFields(result)).toStrictEqual([{ name: 'host.os.name', value: 'Ubuntu' }]);
+    expect(getAllFields(result, 'ecs')).toStrictEqual([{ name: 'host.os.name', value: 'Ubuntu' }]);
   });
 
   it('should map metadata with nested properties with container data removing >3th level nesting', async () => {
@@ -147,7 +226,7 @@ describe('#getAllFields', () => {
         },
       },
     } as InfraMetadata;
-    expect(getAllFields(result)).toStrictEqual([
+    expect(getAllFields(result, 'ecs')).toStrictEqual([
       {
         name: 'container.id',
         value: '33d16f043d5f8a7dcc2f9a2164920d0d7ca4c13a9f737bff3dbedb507d954b8e',
@@ -164,7 +243,7 @@ describe('#getAllFields', () => {
     ]);
   });
 
-  it('should map metadata with partial host, agent, could data', async () => {
+  it('should map metadata with partial host, agent, cloud data', async () => {
     const result: InfraMetadata = {
       id: 'host1',
       name: 'host1',
@@ -194,7 +273,7 @@ describe('#getAllFields', () => {
         },
       },
     };
-    expect(getAllFields(result)).toStrictEqual([
+    expect(getAllFields(result, 'ecs')).toStrictEqual([
       {
         name: 'host.name',
         value: 'host2',
@@ -233,7 +312,7 @@ describe('#getAllFields', () => {
         host,
       },
     };
-    expect(getAllFields(result)).toStrictEqual([
+    expect(getAllFields(result, 'ecs')).toStrictEqual([
       { name: 'host.architecture', value: 'x86_64' },
       { name: 'host.containerized', value: 'false' },
       { name: 'host.hostname', value: 'host1' },
@@ -286,7 +365,7 @@ describe('#getAllFields', () => {
       },
     };
 
-    expect(getAllFields(result)).toStrictEqual([
+    expect(getAllFields(result, 'ecs')).toStrictEqual([
       { name: 'host.architecture', value: 'x86_64' },
       { name: 'host.containerized', value: 'false' },
       { name: 'host.hostname', value: 'host1' },
@@ -371,7 +450,7 @@ describe('#getAllFields', () => {
       },
     };
 
-    expect(getAllFields(result)).toStrictEqual([
+    expect(getAllFields(result, 'ecs')).toStrictEqual([
       { name: 'host.architecture', value: 'x86_64' },
       { name: 'host.containerized', value: 'false' },
       { name: 'host.hostname', value: 'host1' },

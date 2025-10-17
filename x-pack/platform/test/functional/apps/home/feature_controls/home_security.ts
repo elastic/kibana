@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -17,9 +17,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('security', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kbnServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/home/feature_controls/security/security.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/home/feature_controls/security/security.json'
       );
 
       // ensure we're logged out so we can login as the appropriate users
@@ -32,7 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.security.forceLogout();
 
       await kbnServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
     });
 
     describe('global all privileges', () => {

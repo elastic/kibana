@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function CommonScreenshotsProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');

@@ -6,11 +6,13 @@
  */
 import Boom from '@hapi/boom';
 import { RelatedDashboardsClient } from './related_dashboards_client';
-import { Logger } from '@kbn/core/server';
-import { IContentClient } from '@kbn/content-management-plugin/server/types';
-import { InvestigateAlertsClient } from './investigate_alerts_client';
-import { AlertData } from './alert_data';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IContentClient } from '@kbn/content-management-plugin/server/types';
+import type { InvestigateAlertsClient } from './investigate_alerts_client';
+import type { AlertData } from './alert_data';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { ReferencedPanelManager } from './referenced_panel_manager';
 
 describe('RelatedDashboardsClient', () => {
   let logger: jest.Mocked<Logger>;
@@ -18,6 +20,7 @@ describe('RelatedDashboardsClient', () => {
   let alertsClient: jest.Mocked<InvestigateAlertsClient>;
   let alertId: string;
   let client: RelatedDashboardsClient;
+  let soClientMock: jest.Mocked<SavedObjectsClientContract>;
   const baseMockAlert = {
     getAllRelevantFields: jest.fn().mockReturnValue(['field1', 'field2']),
     getRuleQueryIndex: jest.fn().mockReturnValue('index1'),
@@ -60,7 +63,15 @@ describe('RelatedDashboardsClient', () => {
 
     alertId = 'test-alert-id';
 
-    client = new RelatedDashboardsClient(logger, dashboardClient, alertsClient, alertId);
+    soClientMock = savedObjectsClientMock.create();
+
+    client = new RelatedDashboardsClient(
+      logger,
+      dashboardClient,
+      alertsClient,
+      alertId,
+      new ReferencedPanelManager(logger, soClientMock)
+    );
 
     jest.clearAllMocks();
   });
@@ -114,7 +125,7 @@ describe('RelatedDashboardsClient', () => {
                 panels: [
                   {
                     type: 'lens',
-                    panelConfig: {
+                    config: {
                       attributes: {
                         references: [
                           { name: 'indexpattern', id: 'index1' },
@@ -141,7 +152,7 @@ describe('RelatedDashboardsClient', () => {
                 panels: [
                   {
                     type: 'lens',
-                    panelConfig: {
+                    config: {
                       attributes: {
                         references: [
                           { name: 'indexpattern', id: 'index1' },
@@ -172,84 +183,12 @@ describe('RelatedDashboardsClient', () => {
         {
           id: 'dashboard1',
           matchedBy: { index: ['index1'] },
-          relevantPanelCount: 1,
-          relevantPanels: [
-            {
-              matchedBy: { index: ['index1'] },
-              panel: {
-                panelConfig: {
-                  attributes: {
-                    references: [
-                      { id: 'index1', name: 'indexpattern' },
-                      { id: 'index2', name: 'irrelevant' },
-                    ],
-                    state: {
-                      datasourceStates: {
-                        formBased: { layers: [{ columns: [{ sourceField: 'field2' }] }] },
-                      },
-                    },
-                    type: 'lens',
-                  },
-                },
-                panelIndex: expect.any(String),
-                title: undefined,
-                type: 'lens',
-              },
-            },
-          ],
           score: 0.5,
           title: 'Dashboard 1',
         },
         {
           id: 'dashboard2',
           matchedBy: { fields: ['field1'], index: ['index1'] },
-          relevantPanelCount: 2,
-          relevantPanels: [
-            {
-              matchedBy: { index: ['index1'] },
-              panel: {
-                panelConfig: {
-                  attributes: {
-                    references: [
-                      { id: 'index1', name: 'indexpattern' },
-                      { id: 'index2', name: 'irrelevant' },
-                    ],
-                    state: {
-                      datasourceStates: {
-                        formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] },
-                      },
-                    },
-                    type: 'lens',
-                  },
-                },
-                panelIndex: expect.any(String),
-                title: undefined,
-                type: 'lens',
-              },
-            },
-            {
-              matchedBy: { fields: ['field1'] },
-              panel: {
-                panelConfig: {
-                  attributes: {
-                    references: [
-                      { id: 'index1', name: 'indexpattern' },
-                      { id: 'index2', name: 'irrelevant' },
-                    ],
-                    state: {
-                      datasourceStates: {
-                        formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] },
-                      },
-                    },
-                    type: 'lens',
-                  },
-                },
-                panelIndex: expect.any(String),
-                title: undefined,
-                type: 'lens',
-              },
-            },
-          ],
           score: 0.5,
           title: 'Dashboard 2',
         },
@@ -275,7 +214,7 @@ describe('RelatedDashboardsClient', () => {
               panels: [
                 {
                   type: 'lens',
-                  panelConfig: {
+                  config: {
                     attributes: {
                       references: [
                         { name: 'indexpattern', id: 'index1' },
@@ -325,8 +264,8 @@ describe('RelatedDashboardsClient', () => {
                 panels: [
                   {
                     type: 'lens',
-                    panelIndex: '123',
-                    panelConfig: {
+                    uid: '123',
+                    config: {
                       attributes: {
                         references: [{ name: 'indexpattern', id: 'index1' }], // matches by index which is handled by getDashboardsByIndex
                         state: {
@@ -355,28 +294,6 @@ describe('RelatedDashboardsClient', () => {
         {
           id: 'dashboard1',
           matchedBy: { fields: ['field1'], index: ['index1'] },
-          relevantPanelCount: 1,
-          relevantPanels: [
-            {
-              matchedBy: { index: ['index1'], fields: ['field1'] },
-              panel: {
-                panelConfig: {
-                  attributes: {
-                    references: [{ id: 'index1', name: 'indexpattern' }],
-                    state: {
-                      datasourceStates: {
-                        formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] },
-                      },
-                    },
-                    type: 'lens',
-                  },
-                },
-                panelIndex: '123',
-                title: undefined,
-                type: 'lens',
-              },
-            },
-          ],
           score: 0.5,
           title: 'Dashboard 1',
         },
@@ -417,6 +334,88 @@ describe('RelatedDashboardsClient', () => {
       expect(dashboardClient.search).toHaveBeenCalledWith({ limit: 2, cursor: '1' });
       expect(client.dashboardsById.size).toBe(2);
     });
+
+    it('should fetch referenced panels when fetching dashboards', async () => {
+      const PANEL_SO_ID = 'panelSOId';
+      const PANEL_TYPE = 'lens';
+      const PANEL_UID = 'panelUid';
+      const PANEL_SO_ATTRIBUTES = { title: 'Panel 1' };
+      dashboardClient.search.mockResolvedValue({
+        contentTypeId: 'dashboard',
+        result: {
+          hits: [
+            {
+              id: 'dashboard1',
+              attributes: {
+                title: 'Dashboard 1',
+                panels: [{ config: {}, uid: PANEL_UID, type: PANEL_TYPE }],
+              },
+              references: [{ name: PANEL_UID, type: PANEL_TYPE, id: PANEL_SO_ID }],
+            },
+          ],
+          pagination: { total: 1 },
+        },
+      });
+
+      soClientMock.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          { attributes: PANEL_SO_ATTRIBUTES, type: PANEL_TYPE, id: PANEL_SO_ID, references: [] },
+        ],
+      });
+
+      // @ts-ignore next-line
+      await client.fetchDashboards({ page: 1 });
+      expect(soClientMock.bulkGet).toHaveBeenCalledWith([{ id: PANEL_SO_ID, type: PANEL_TYPE }]);
+      // @ts-ignore next-line
+      expect(client.referencedPanelManager.getByUid(PANEL_UID)).toStrictEqual({
+        ...PANEL_SO_ATTRIBUTES,
+        references: [],
+      });
+    });
+
+    it('should not refetch a referenced panel if it was fetched before', async () => {
+      const PANEL_SO_ID = 'panelSOId';
+      const PANEL_TYPE = 'lens';
+      const PANEL_UID = 'panelUid';
+      const OTHER_PANEL_UID = 'otherPanelUid';
+      const PANEL_SO_ATTRIBUTES = { title: 'Panel 1' };
+      dashboardClient.search.mockResolvedValue({
+        contentTypeId: 'dashboard',
+        result: {
+          hits: [
+            {
+              id: 'dashboard1',
+              attributes: {
+                title: 'Dashboard 1',
+                panels: [
+                  { config: {}, uid: PANEL_UID, type: PANEL_TYPE },
+                  { config: {}, uid: OTHER_PANEL_UID, type: PANEL_TYPE },
+                ],
+              },
+              references: [
+                { name: PANEL_UID, type: PANEL_TYPE, id: PANEL_SO_ID },
+                { name: OTHER_PANEL_UID, type: PANEL_TYPE, id: PANEL_SO_ID },
+              ],
+            },
+          ],
+          pagination: { total: 1 },
+        },
+      });
+
+      soClientMock.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          { attributes: PANEL_SO_ATTRIBUTES, type: PANEL_TYPE, id: PANEL_SO_ID, references: [] },
+        ],
+      });
+
+      // @ts-ignore next-line
+      await client.fetchDashboards({ page: 1 });
+      expect(soClientMock.bulkGet).toHaveBeenCalledTimes(1);
+      // @ts-ignore next-line
+      expect(client.referencedPanelManager.panelUidToId.get(OTHER_PANEL_UID)).toBe(PANEL_SO_ID);
+      // @ts-ignore next-line
+      expect(client.referencedPanelManager.panelUidToId.get(PANEL_UID)).toBe(PANEL_SO_ID);
+    });
   });
 
   describe('getDashboardsByIndex', () => {
@@ -428,7 +427,7 @@ describe('RelatedDashboardsClient', () => {
           panels: [
             {
               type: 'lens',
-              panelConfig: {
+              config: {
                 attributes: {
                   type: 'lens',
                   references: [
@@ -463,7 +462,7 @@ describe('RelatedDashboardsClient', () => {
           panels: [
             {
               type: 'lens',
-              panelConfig: {
+              config: {
                 attributes: null, // Lens attributes are not available
               },
             },
@@ -474,6 +473,40 @@ describe('RelatedDashboardsClient', () => {
       // @ts-ignore next-line
       const result = client.getDashboardsByIndex('index1');
       expect(result.dashboards).toEqual([]);
+    });
+
+    it('should get attributes from referencedPanelManager when config.attributes is missing', () => {
+      const PANEL_UID = '123';
+      const INDEX_ID = 'index1';
+
+      // dashboard panel without attributes
+      client.dashboardsById.set('dashboardWithMissingAttributes', {
+        id: 'dashboardWithMissingAttributes',
+        attributes: {
+          title: 'Dashboard missing attributes',
+          panels: [
+            {
+              type: 'lens',
+              uid: PANEL_UID,
+              config: {},
+            },
+          ],
+        },
+      } as any);
+
+      // populate fallback map with references for the panelUid
+      // @ts-ignore private field access for testing only
+      client.referencedPanelManager.panelUidToId.set(PANEL_UID, INDEX_ID);
+      // @ts-ignore private field access for testing only
+      client.referencedPanelManager.panelsById.set(INDEX_ID, {
+        references: [{ name: 'indexpattern', id: INDEX_ID, type: 'type' }],
+      });
+
+      // @ts-ignore private method access for testing only
+      const { dashboards } = client.getDashboardsByIndex(INDEX_ID);
+
+      expect(dashboards).toHaveLength(1);
+      expect(dashboards[0]).toMatchObject({ id: 'dashboardWithMissingAttributes' });
     });
   });
 
@@ -486,7 +519,7 @@ describe('RelatedDashboardsClient', () => {
           panels: [
             {
               type: 'lens',
-              panelConfig: {
+              config: {
                 attributes: null, // Lens attributes are not available
               },
             },
@@ -498,20 +531,51 @@ describe('RelatedDashboardsClient', () => {
       const result = client.getDashboardsByField(['field1']);
       expect(result.dashboards).toEqual([]);
     });
-  });
 
-  describe('dedupePanels', () => {
-    it('should deduplicate panels by panelIndex', () => {
-      const panels = [
-        { panel: { panelIndex: '1' }, matchedBy: { index: ['index1'] } },
-        { panel: { panelIndex: '1' }, matchedBy: { fields: ['field1'] } },
-      ];
+    it('should get attributes from referencedPanelManager when config.attributes is missing', () => {
+      const PANEL_UID = '456';
+      const FIELD_NAME = 'field1';
 
-      // @ts-ignore next-line
-      const result = client.dedupePanels(panels as any);
+      client.dashboardsById.set('dashboardMissingState', {
+        id: 'dashboardMissingState',
+        attributes: {
+          title: 'Dashboard missing state',
+          panels: [
+            {
+              type: 'lens',
+              uid: PANEL_UID,
+              config: {},
+            },
+          ],
+        },
+      } as any);
 
-      expect(result).toHaveLength(1);
-      expect(result[0].matchedBy).toEqual({ index: ['index1'], fields: ['field1'] });
+      // @ts-ignore private field access for testing only
+      client.referencedPanelManager.panelUidToId.set(PANEL_UID, 'id');
+      // @ts-ignore private field access for testing only
+      client.referencedPanelManager.panelsById.set('id', {
+        state: {
+          datasourceStates: {
+            formBased: {
+              layers: {
+                layer1: {
+                  columns: {
+                    col1: {
+                      sourceField: FIELD_NAME,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        } as any,
+      });
+
+      // @ts-ignore private method access for testing only
+      const { dashboards } = client.getDashboardsByField([FIELD_NAME]);
+
+      expect(dashboards).toHaveLength(1);
+      expect(dashboards[0]).toMatchObject({ id: 'dashboardMissingState' });
     });
   });
 
@@ -728,8 +792,8 @@ describe('RelatedDashboardsClient', () => {
                 panels: [
                   {
                     type: 'lens',
-                    panelIndex: '123',
-                    panelConfig: {
+                    uid: '123',
+                    config: {
                       attributes: {
                         references: [{ name: 'indexpattern', id: 'index1' }], // matches by index which is handled by getDashboardsByIndex
                         state: {
@@ -751,8 +815,8 @@ describe('RelatedDashboardsClient', () => {
                 panels: [
                   {
                     type: 'lens',
-                    panelIndex: '123',
-                    panelConfig: {
+                    uid: '123',
+                    config: {
                       attributes: {
                         references: [{ name: 'indexpattern', id: 'index1' }],
                         state: {
@@ -789,28 +853,6 @@ describe('RelatedDashboardsClient', () => {
         {
           id: 'dashboard1',
           matchedBy: { fields: ['field1'], index: ['index1'] },
-          relevantPanelCount: 1,
-          relevantPanels: [
-            {
-              matchedBy: { index: ['index1'], fields: ['field1'] },
-              panel: {
-                panelConfig: {
-                  attributes: {
-                    references: [{ id: 'index1', name: 'indexpattern' }],
-                    state: {
-                      datasourceStates: {
-                        formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] },
-                      },
-                    },
-                    type: 'lens',
-                  },
-                },
-                panelIndex: '123',
-                title: undefined,
-                type: 'lens',
-              },
-            },
-          ],
           score: 0.5,
           title: 'Dashboard 1',
         },

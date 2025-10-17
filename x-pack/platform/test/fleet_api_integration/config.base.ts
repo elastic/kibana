@@ -7,9 +7,9 @@
 
 import path from 'path';
 
+import type { FtrConfigProviderContext } from '@kbn/test';
 import {
   fleetPackageRegistryDockerImage,
-  FtrConfigProviderContext,
   defineDockerServersConfig,
   getKibanaCliLoggers,
 } from '@kbn/test';
@@ -88,10 +88,10 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(['endpointRbacEnabled'])}`,
         `--xpack.fleet.enableExperimental=${JSON.stringify([
           'enableAutomaticAgentUpgrades',
-          'enableAgentMigrations',
           'enablePackageRollback',
+          'enableAgentStatusAlerting',
+          'enableAgentPrivilegeLevelChange',
         ])}`,
-        `--xpack.cloud.id='123456789'`,
         `--xpack.fleet.agentless.enabled=true`,
         `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api`,
         `--xpack.fleet.agentless.api.tls.certificate=${KBN_CERT_PATH}`,

@@ -8,7 +8,7 @@
 import { useSelector } from 'react-redux';
 import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { selectDynamicSettings } from '../../../state/selectors';
-import { Ping } from '../../../../../common/runtime_types';
+import type { Ping } from '../../../../../common/runtime_types';
 
 export const useStdErrorLogs = ({
   monitorId,

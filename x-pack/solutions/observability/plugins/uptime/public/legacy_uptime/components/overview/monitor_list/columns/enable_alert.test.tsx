@@ -14,7 +14,7 @@ import { makePing } from '../../../../../../common/runtime_types/ping';
 import { render } from '../../../../lib/helper/rtl_helpers';
 import { DISABLE_STATUS_ALERT, ENABLE_STATUS_ALERT } from './translations';
 import { mockState } from '../../../../lib/__mocks__/uptime_store.mock';
-import { AlertsResult } from '../../../../state/actions/types';
+import type { AlertsResult } from '../../../../state/actions/types';
 
 describe('EnableAlertComponent', () => {
   it('it displays define connectors when there is none', () => {

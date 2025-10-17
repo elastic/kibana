@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
-import { Datatable } from '@kbn/expressions-plugin/public';
-import { UiActionsActionDefinition, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Filter, AggregateQuery } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { UiActionsActionDefinition, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '../triggers';
 
 export type ValueClickActionContext = ValueClickContext;

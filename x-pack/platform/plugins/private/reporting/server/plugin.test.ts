@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  DEFAULT_APP_CATEGORIES,
-  Logger,
-  type PackageInfo,
-} from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, type PackageInfo } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
@@ -23,16 +18,18 @@ import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 import type { ReportingCore, ReportingInternalStart } from './core';
 import { ReportingPlugin } from './plugin';
 import { createMockPluginSetup, createMockPluginStart } from './test_helpers';
-import type { ReportingSetupDeps } from './types';
+import type { ReportingSetupDeps, ReportingStartDeps } from './types';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
+import { PLUGIN_ID } from '@kbn/reporting-server';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
 describe('Reporting Plugin', () => {
   let configSchema: any;
   let initContext: any;
-  let coreSetup: CoreSetup;
+  let coreSetup: CoreSetup<ReportingStartDeps, unknown>;
   let coreStart: CoreStart;
   let pluginSetup: ReportingSetupDeps;
   let pluginStart: ReportingInternalStart;
@@ -45,7 +42,7 @@ describe('Reporting Plugin', () => {
 
     configSchema = createMockConfigSchema();
     initContext = coreMock.createPluginInitializerContext(configSchema);
-    coreSetup = coreMock.createSetup(configSchema);
+    coreSetup = coreMock.createSetup();
     coreStart = coreMock.createStart();
     featuresSetup = featuresPluginMock.createSetup();
     pluginSetup = createMockPluginSetup({
@@ -68,6 +65,27 @@ describe('Reporting Plugin', () => {
     expect(plugin.start(coreStart, pluginStart)).not.toHaveProperty('then');
   });
 
+  it('registers usage counter and collector when usage collection is defined', () => {
+    const usageCollectionSetup = createUsageCollectionSetupMock();
+    plugin.setup(coreSetup, { ...pluginSetup, usageCollection: usageCollectionSetup });
+
+    expect(usageCollectionSetup.createUsageCounter).toHaveBeenCalledWith(PLUGIN_ID);
+    expect(usageCollectionSetup.registerCollector).toHaveBeenCalled();
+  });
+
+  it('registers telemetry task when usage collection is defined', async () => {
+    const usageCollectionSetup = createUsageCollectionSetupMock();
+    plugin.setup(coreSetup, { ...pluginSetup, usageCollection: usageCollectionSetup });
+
+    expect(pluginSetup.taskManager.registerTaskDefinitions).toHaveBeenCalledWith({
+      reporting_telemetry: expect.objectContaining({
+        createTaskRunner: expect.any(Function),
+        timeout: '5m',
+        title: 'Reporting snapshot telemetry fetch task',
+      }),
+    });
+  });
+
   it('registers an advanced setting for PDF logos', async () => {
     plugin.setup(coreSetup, pluginSetup);
     expect(coreSetup.uiSettings.register).toHaveBeenCalled();
@@ -87,6 +105,25 @@ describe('Reporting Plugin', () => {
         management: {
           importableAndExportable: false,
         },
+      })
+    );
+  });
+
+  it('schedules telemetry task on plugin start', async () => {
+    // wait for the setup phase background work
+    plugin.setup(coreSetup, pluginSetup);
+    await new Promise(setImmediate);
+
+    // wait for the startup phase background work
+    plugin.start(coreStart, pluginStart);
+    await new Promise(setImmediate);
+
+    expect(pluginStart.taskManager.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'Reporting-reporting_telemetry',
+        params: {},
+        schedule: { interval: '1d' },
+        taskType: 'reporting_telemetry',
       })
     );
   });
@@ -185,13 +222,12 @@ describe('Reporting Plugin', () => {
   describe('features registration', () => {
     it('registers Kibana manage scheduled reporting feature in traditional build flavour', async () => {
       plugin.setup(coreSetup, pluginSetup);
-      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledTimes(1);
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledTimes(2); // manage scheduled reports + shell feature for self-managed
       expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
         id: 'manageReporting',
         name: 'Manage Scheduled Reports',
         description: 'View and manage scheduled reports for all users in this space.',
         category: DEFAULT_APP_CATEGORIES.management,
-        scope: ['spaces', 'security'],
         app: [],
         privileges: {
           all: {
@@ -212,12 +248,11 @@ describe('Reporting Plugin', () => {
       plugin = new ReportingPlugin(serverlessInitContext);
 
       plugin.setup(coreSetup, pluginSetup);
-      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledTimes(2);
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledTimes(2); // manage scheduled reports + shell feature for serverless
       expect(featuresSetup.registerKibanaFeature).toHaveBeenNthCalledWith(1, {
         id: 'reporting',
         name: 'Reporting',
         category: DEFAULT_APP_CATEGORIES.management,
-        scope: ['spaces', 'security'],
         app: [],
         privileges: {
           all: { savedObject: { all: [], read: [] }, ui: [] },
@@ -229,7 +264,6 @@ describe('Reporting Plugin', () => {
         name: 'Manage Scheduled Reports',
         description: 'View and manage scheduled reports for all users in this space.',
         category: DEFAULT_APP_CATEGORIES.management,
-        scope: ['spaces', 'security'],
         app: [],
         privileges: {
           all: {

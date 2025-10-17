@@ -6,12 +6,14 @@
  */
 
 import { z } from '@kbn/zod';
-import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
+import { platformCoreTools, ToolType } from '@kbn/onechat-common';
+import { indexExplorer, generateEsql } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { generateEsql, GenerateEsqlResponse } from '@kbn/onechat-genai-utils';
+import type { ToolHandlerResult } from '@kbn/onechat-server/tools';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const nlToEsqlToolSchema = z.object({
-  query: z.string().describe('The query to generate an ES|QL query from.'),
+  query: z.string().describe('A natural language query to generate an ES|QL query from.'),
   index: z
     .string()
     .optional()
@@ -24,27 +26,73 @@ const nlToEsqlToolSchema = z.object({
     .describe('(optional) Additional context that could be useful to generate the ES|QL query'),
 });
 
-export const generateEsqlTool = (): BuiltinToolDefinition<
-  typeof nlToEsqlToolSchema,
-  GenerateEsqlResponse
-> => {
+export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
   return {
-    id: builtinToolIds.generateEsql,
+    id: platformCoreTools.generateEsql,
+    type: ToolType.builtin,
     description: 'Generate an ES|QL query from a natural language query.',
     schema: nlToEsqlToolSchema,
-    handler: async ({ query, index, context }, { esClient, modelProvider }) => {
+    handler: async (
+      { query: nlQuery, index, context },
+      { esClient, modelProvider, logger, events }
+    ) => {
       const model = await modelProvider.getDefaultModel();
-      const result = await generateEsql({
-        query,
-        context,
-        index,
+
+      let selectedTarget = index;
+      if (!selectedTarget) {
+        const {
+          resources: [selectedResource],
+        } = await indexExplorer({
+          nlQuery,
+          esClient: esClient.asCurrentUser,
+          limit: 1,
+          model,
+        });
+        selectedTarget = selectedResource.name;
+      }
+
+      const esqlResponse = await generateEsql({
+        nlQuery,
+        index: selectedTarget,
+        additionalContext: context,
         model,
         esClient: esClient.asCurrentUser,
+        logger,
+        events,
       });
+
+      const toolResults: ToolHandlerResult[] = [];
+
+      if (esqlResponse.error) {
+        toolResults.push({
+          type: ToolResultType.error,
+          data: {
+            message: esqlResponse.error,
+          },
+        });
+      } else {
+        if (esqlResponse.query) {
+          toolResults.push({
+            type: ToolResultType.query,
+            data: {
+              esql: esqlResponse.query,
+            },
+          });
+        }
+        if (esqlResponse.answer) {
+          toolResults.push({
+            type: ToolResultType.other,
+            data: {
+              answer: esqlResponse.answer,
+            },
+          });
+        }
+      }
+
       return {
-        result,
+        results: toolResults,
       };
     },
-    tags: [builtinTags.retrieval],
+    tags: [],
   };
 };

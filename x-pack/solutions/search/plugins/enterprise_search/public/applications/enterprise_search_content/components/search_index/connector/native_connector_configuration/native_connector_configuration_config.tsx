@@ -14,12 +14,8 @@ import { EuiSpacer, EuiLink, EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elas
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  Connector,
-  ConnectorConfigurationComponent,
-  ConnectorDefinition,
-  ConnectorStatus,
-} from '@kbn/search-connectors';
+import type { Connector, ConnectorDefinition, ConnectorStatus } from '@kbn/search-connectors';
+import { ConnectorConfigurationComponent } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../../../common/types/api';
 
@@ -90,6 +86,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
         <>
           <EuiSpacer size="l" />
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout',
               { defaultMessage: 'Configuration warning' }

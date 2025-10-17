@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const dashboardTitle = 'map_to_ml';
   const dashboardArchive =
-    'x-pack/test/functional/fixtures/kbn_archiver/ml/map_to_ml_dashboard.json';
+    'x-pack/platform/test/functional/fixtures/kbn_archives/ml/map_to_ml_dashboard.json';
 
   async function dashboardPreparation(selectedPanelTitle: string) {
     await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
 
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
       await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
       await kibanaServer.importExport.load(dashboardArchive);
       await browser.setWindowSize(1920, 1080);

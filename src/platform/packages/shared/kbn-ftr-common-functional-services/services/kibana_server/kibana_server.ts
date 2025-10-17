@@ -10,7 +10,7 @@
 import Url from 'url';
 import { KbnClient } from '@kbn/test';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function KibanaServerProvider({ getService }: FtrProviderContext): KbnClient {
   const log = getService('log');

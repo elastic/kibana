@@ -11,6 +11,7 @@ import { validateDurationSchema, parseDuration } from './lib';
 import { DEFAULT_CACHE_INTERVAL_MS } from './rules_settings';
 
 export const DEFAULT_MAX_ALERTS = 1000;
+
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 const ruleTypeSchema = schema.object({
   id: schema.string(),

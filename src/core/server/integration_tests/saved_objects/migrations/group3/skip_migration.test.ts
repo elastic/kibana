@@ -16,7 +16,7 @@ import {
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { Root } from '@kbn/core-root-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 
 const logFilePath = Path.join(__dirname, 'cleanup.log');
 const asyncUnlink = Util.promisify(Fs.unlink);

@@ -119,6 +119,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           connector_type_id: '.cases-webhook',
           is_missing_secrets: false,
           config: simulatorConfig,
+          is_connector_type_deprecated: false,
         });
 
         const { body: fetchedAction } = await supertest
@@ -134,6 +135,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           connector_type_id: '.cases-webhook',
           is_missing_secrets: false,
           config: simulatorConfig,
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -165,6 +167,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           connector_type_id: '.cases-webhook',
           is_missing_secrets: false,
           config: newConfig,
+          is_connector_type_deprecated: false,
         });
 
         const { body: fetchedAction } = await supertest
@@ -180,6 +183,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           connector_type_id: '.cases-webhook',
           is_missing_secrets: false,
           config: newConfig,
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -475,6 +479,48 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               url: `${casesWebhookSimulatorURL}/browse/CK-1`,
             },
           });
+        });
+
+        it('should send both config and secret headers in a cases wehook action', async () => {
+          const customSimulatorUrl = `${casesWebhookSimulatorURL}/rest/api/2/issue`;
+          const { body: createdAction } = await supertest
+            .post('/api/actions/connector')
+            .set('kbn-xsrf', 'true')
+            .send({
+              name: 'Custom headers test',
+              connector_type_id: '.cases-webhook',
+              config: {
+                ...simulatorConfig,
+                createIncidentUrl: customSimulatorUrl,
+                headers: {
+                  config: 'configValue',
+                },
+              },
+              secrets: {
+                ...secrets,
+                secretHeaders: {
+                  secret: 'secretValue',
+                },
+              },
+            })
+            .expect(200);
+
+          const actionId = createdAction.id;
+          const { body: result } = await supertest
+            .post(`/api/actions/connector/${actionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockCasesWebhook.params,
+                subActionParams: {
+                  incident: mockCasesWebhook.params.subActionParams.incident,
+                  comments: [],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(result.status).to.eql('ok');
         });
       });
 
@@ -865,6 +911,98 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
             proxyServer.close();
           }
         });
+      });
+    });
+
+    describe('CasesWebhook - getWebhookSecretHeadersKeyRoute', () => {
+      let proxyServer: httpProxy | undefined;
+      it('returns only secret headers keys for the webhook connector', async () => {
+        const customSimulatorUrl = `${casesWebhookSimulatorURL}/rest/api/2/issue`;
+        const { body: webhookAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'true')
+          .send({
+            name: 'Custom headers test',
+            connector_type_id: '.cases-webhook',
+            config: {
+              ...simulatorConfig,
+              createIncidentUrl: customSimulatorUrl,
+            },
+            secrets: {
+              ...secrets,
+              secretHeaders: {
+                secretKey1: 'secretValue1',
+                secretKey2: 'secretValue2',
+                secretKey3: 'secretValue3',
+              },
+            },
+          })
+          .expect(200);
+
+        const actionId = webhookAction.id;
+
+        const { body: result } = await supertest
+          .get(`/internal/stack_connectors/${actionId}/secret_headers`)
+          .set('kbn-xsrf', 'test')
+          .expect(200);
+        expect(result).to.eql(['secretKey1', 'secretKey2', 'secretKey3']);
+      });
+
+      it('returns empty array if no secret headers provided', async () => {
+        const { body: webhookAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A casesWebhook action',
+            connector_type_id: '.cases-webhook',
+            config: simulatorConfig,
+            secrets,
+          })
+          .expect(200);
+
+        const actionId = webhookAction.id;
+
+        const { body: result } = await supertest
+          .get(`/internal/stack_connectors/${actionId}/secret_headers`)
+          .set('kbn-xsrf', 'test')
+          .expect(200);
+
+        expect(result).to.eql([]);
+      });
+
+      it('rejects non-webhook connector types', async () => {
+        const { body: emailAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'test')
+          .send({
+            name: 'An email action',
+            connector_type_id: '.email',
+            config: {
+              service: '__json',
+              from: 'bob@example.com',
+              hasAuth: true,
+            },
+            secrets: {
+              user: 'bob',
+              password: 'supersecret',
+            },
+          })
+          .expect(200);
+
+        const actionId = emailAction.id;
+
+        const { body: result } = await supertest
+          .get(`/internal/stack_connectors/${actionId}/secret_headers`)
+          .set('kbn-xsrf', 'test')
+          .expect(400);
+
+        expect(result.message).to.match(/Connector must be a webhook or cases webhook/);
+      });
+
+      after(() => {
+        if (proxyServer) {
+          proxyServer.close();
+        }
       });
     });
   });

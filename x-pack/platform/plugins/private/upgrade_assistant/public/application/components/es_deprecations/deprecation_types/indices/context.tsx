@@ -7,10 +7,13 @@
 
 import React, { createContext, useContext } from 'react';
 
-import { ApiService } from '../../../../lib/api';
-import { useReindex, ReindexState } from './use_reindex';
-import { UpdateIndexState, useUpdateIndex } from './use_update_index';
-import { EnrichedDeprecationInfo, IndexAction } from '../../../../../../common/types';
+import type { Version } from '@kbn/upgrade-assistant-pkg-common';
+import type { ApiService } from '../../../../lib/api';
+import type { ReindexState } from './use_reindex';
+import { useReindex } from './use_reindex';
+import type { UpdateIndexState } from './use_update_index';
+import { useUpdateIndex } from './use_update_index';
+import type { EnrichedDeprecationInfo, IndexAction } from '../../../../../../common/types';
 
 export interface IndexStateContext {
   deprecation: EnrichedDeprecationInfo;
@@ -35,12 +38,14 @@ interface Props {
   api: ApiService;
   children: React.ReactNode;
   deprecation: EnrichedDeprecationInfo;
+  version: Version;
 }
 
 export const IndexStatusProvider: React.FunctionComponent<Props> = ({
   api,
   deprecation,
   children,
+  version,
 }) => {
   const indexName = deprecation.index!;
   const indexAction = deprecation.correctiveAction as IndexAction;
@@ -50,6 +55,7 @@ export const IndexStatusProvider: React.FunctionComponent<Props> = ({
     isInDataStream: Boolean(indexAction?.metadata.isInDataStream),
     isFrozen: Boolean(indexAction?.metadata.isFrozenIndex),
     isClosedIndex: Boolean(indexAction?.metadata.isClosedIndex),
+    kibanaVersion: version,
   });
 
   const { updateIndexState, updateIndex } = useUpdateIndex({

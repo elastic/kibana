@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export const farequoteKQLFiltersSearchTestData = {
   suiteTitle: 'KQL saved search and filters',
@@ -23,7 +23,7 @@ const dataViewCreationTestData = {
   isSavedSearch: true,
   dateTimeField: '@timestamp',
   chartClickCoordinates: [0, 0] as [number, number],
-  comparisonChartClickCoordinates: [2, 2] as [number, number],
+  comparisonChartClickCoordinates: [0, 0] as [number, number],
   totalDocCount: '86,274',
 };
 
@@ -87,10 +87,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('data drift', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
       await ml.testResources.createDataViewIfNeeded('ft_ihp_outlier');
 
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteFilterAndKueryIfNeeded();
 
@@ -98,8 +98,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.securityUI.loginAsMlPowerUser();
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/ihp_outlier');
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await Promise.all([
         ml.testResources.deleteDataViewByTitle('ft_fare*'),
         ml.testResources.deleteDataViewByTitle('ft_fare*,ft_fareq*'),

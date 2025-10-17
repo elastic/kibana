@@ -1,28 +1,3 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders matching snapshot 1`] = `
-<I18nProvider>
-  <EuiProvider>
-    <p
-      data-test-subj="errorToastMessage"
-    >
-      This is the toast message
-    </p>
-    <div
-      className="eui-textRight"
-    >
-      <EuiButton
-        color="danger"
-        data-test-subj="errorToastBtn"
-        onClick={[Function]}
-        size="s"
-      >
-        <MemoizedFormattedMessage
-          defaultMessage="See the full error"
-          id="core.toasts.errorToast.seeFullError"
-        />
-      </EuiButton>
-    </div>
-  </EuiProvider>
-</I18nProvider>
-`;
+exports[`renders matching snapshot 1`] = `"<p data-test-subj=\\"errorToastMessage\\">This is the toast message</p><div class=\\"eui-textRight\\"><button type=\\"button\\" class=\\"euiButton css-uhxbyc-euiButtonDisplay-s-defaultMinWidth-base-danger\\" data-test-subj=\\"errorToastBtn\\"><span class=\\"css-1lhgt31-euiButtonDisplayContent\\">See the full error</span></button></div>"`;

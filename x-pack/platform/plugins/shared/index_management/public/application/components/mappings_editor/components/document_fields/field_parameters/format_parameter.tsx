@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EditFieldFormRow } from '../fields/edit_field';
 import { UseField } from '../../../shared_imports';
 import { ALL_DATE_FORMAT_OPTIONS } from '../../../constants';
-import { ComboBoxOption } from '../../../types';
+import type { ComboBoxOption } from '../../../types';
 import { getFieldConfig } from '../../../lib';
 import { documentationService } from '../../../../../services/documentation';
 

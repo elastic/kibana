@@ -8,10 +8,10 @@
 import React from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { MostRecentError } from './most_recent_error';
 import { MonitorStatusList } from './monitor_status_list';
-import { MonitorDetails, MonitorSummary } from '../../../../../../common/runtime_types';
+import type { MonitorDetails, MonitorSummary } from '../../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover/actions_popover_container';
 import { EnabledAlerts } from './enabled_alerts';
 import { MonitorUrl } from './monitor_url';

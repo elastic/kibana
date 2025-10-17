@@ -14,8 +14,10 @@ import {
   additionalSourcesSuggestions,
 } from '../../../definitions/utils/sources';
 import { metadataSuggestion, getMetadataSuggestions } from '../../options/metadata';
+import { getRecommendedQueriesSuggestions } from '../../options/recommended_queries';
 import { withinQuotes } from '../../../definitions/utils/autocomplete/helpers';
-import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { getOverlapRange, isRestartingExpression } from '../../../definitions/utils/shared';
 
 export async function autocomplete(
@@ -58,6 +60,11 @@ export async function autocomplete(
     suggestions.push(metadataSuggestion);
     suggestions.push(commaCompleteItem);
     suggestions.push(pipeCompleteItem);
+    suggestions.push(
+      ...(await getRecommendedQueriesSuggestions(
+        context?.editorExtensions ?? { recommendedFields: [], recommendedQueries: [] }
+      ))
+    );
   }
   // TS something MET/
   else if (indexes.length > 0 && /^TS\s+\S+\s+/i.test(innerText) && metadataOverlap) {
@@ -68,11 +75,14 @@ export async function autocomplete(
   // TS something, /
   else if (indexes.length) {
     const sources = context?.sources ?? [];
+    const recommendedQuerySuggestions = await getRecommendedQueriesSuggestions(
+      context?.editorExtensions ?? { recommendedFields: [], recommendedQueries: [] }
+    );
     const additionalSuggestions = await additionalSourcesSuggestions(
       innerText,
       sources,
       indexes.map(({ name }) => name),
-      []
+      recommendedQuerySuggestions
     );
     addSuggestionsBasedOnQuote(additionalSuggestions);
   }

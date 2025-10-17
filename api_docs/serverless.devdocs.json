@@ -130,7 +130,7 @@
           "label": "initNavigation",
           "description": [],
           "signature": [
-            "(id: \"security\" | \"oblt\" | \"es\" | \"chat\", navigationTree$: ",
+            "(id: \"security\" | \"chat\" | \"oblt\" | \"es\", navigationTree$: ",
             "Observable",
             "<",
             "NavigationTreeDefinition",
@@ -150,7 +150,7 @@
               "label": "id",
               "description": [],
               "signature": [
-                "\"security\" | \"oblt\" | \"es\" | \"chat\""
+                "\"security\" | \"chat\" | \"oblt\" | \"es\""
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,
@@ -203,43 +203,6 @@
                   "trackAdoption": false
                 }
               ]
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "serverless",
-          "id": "def-public.ServerlessPluginStart.setSideNavComponentDeprecated",
-          "type": "Function",
-          "tags": [
-            "deprecated"
-          ],
-          "label": "setSideNavComponentDeprecated",
-          "description": [],
-          "signature": [
-            "(navigation: ",
-            "SideNavComponent",
-            ") => void"
-          ],
-          "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
-          "deprecated": true,
-          "trackAdoption": false,
-          "references": [],
-          "children": [
-            {
-              "parentPluginId": "serverless",
-              "id": "def-public.ServerlessPluginStart.setSideNavComponentDeprecated.$1",
-              "type": "CompoundType",
-              "tags": [],
-              "label": "navigation",
-              "description": [],
-              "signature": [
-                "SideNavComponent"
-              ],
-              "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
             }
           ],
           "returnComment": []

@@ -111,6 +111,7 @@ kibana_vars=(
     migrations.retryAttempts
     migrations.scrollDuration
     migrations.skip
+    migrations.useCumulativeLogger
     monitoring.cluster_alerts.email_notifications.email_address
     monitoring.kibana.collection.enabled
     monitoring.kibana.collection.interval
@@ -199,11 +200,19 @@ kibana_vars=(
     telemetry.optIn
     telemetry.sendUsageTo
     telemetry.sendUsageFrom
+    telemetry.metrics.enabled
+    telemetry.metrics.interval
+    telemetry.metrics.exporters # Allow specifying the array here or..
+    telemetry.metrics.exporters.grpc.url # ... or a single exporter by specifying these 2.
+    telemetry.metrics.exporters.grpc.headers
+    telemetry.metrics.exporters.grpc.exportIntervalMillis
+    telemetry.metrics.exporters.grpc.temporalityPreference
     tilemap.options.attribution
     tilemap.options.maxZoom
     tilemap.options.minZoom
     tilemap.options.subdomains
     tilemap.url
+    usageCollection.maxCollectorConcurrency
     vega.enableExternalUrls
     vis_type_vega.enableExternalUrls
     xpack.actions.allowedHosts
@@ -412,6 +421,7 @@ kibana_vars=(
     xpack.securitySolution.packagerTaskInterval
     xpack.securitySolution.prebuiltRulesPackageVersion
     xpack.spaces.maxSpaces
+    xpack.spaces.defaultSolution
     xpack.task_manager.capacity
     xpack.task_manager.claim_strategy
     xpack.task_manager.auto_calculate_default_ech_capacity

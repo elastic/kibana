@@ -8,11 +8,12 @@
  */
 
 import React from 'react';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { ImportSummary, ImportSummaryProps } from './import_summary';
-import { FailedImport } from '../../../lib';
+import type { ImportSummaryProps } from './import_summary';
+import { ImportSummary } from './import_summary';
+import type { FailedImport } from '../../../lib';
 
 describe('ImportSummary', () => {
   let basePath: ReturnType<typeof httpServiceMock.createBasePath>;

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { read, Task } from '../lib';
+import type { Task } from '../lib';
+import { read } from '../lib';
 
 export const AssertNoUUID: Task = {
   description: 'Verify that no UUID file is baked into the build',

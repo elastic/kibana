@@ -13,7 +13,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
+import type { AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { useKibanaServices } from '../../hooks/use_kibana';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CharName } from 'cli-table3';
+import type { CharName } from 'cli-table3';
 
 type Borders = Record<string, Partial<Record<CharName, string>>>;
 

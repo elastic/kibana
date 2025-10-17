@@ -8,9 +8,21 @@
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
-import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
-import { DATASTREAM_DATASET, EVENT_MODULE, METRICSET_MODULE } from '../../../common/constants';
+import {
+  existsQuery,
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+  termsQuery,
+} from '@kbn/observability-plugin/server';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import {
+  DATASTREAM_DATASET,
+  EVENT_MODULE,
+  findInventoryFields,
+  findInventoryModel,
+  METRICSET_MODULE,
+} from '@kbn/metrics-data-access-plugin/common';
 import {
   getHasDataQueryParamsRT,
   getHasDataResponseRT,
@@ -29,7 +41,6 @@ import {
 import type { InfraSource } from '../../lib/sources';
 import type { InfraPluginRequestHandlerContext } from '../../types';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
-import { integrationNameByEntityType } from '../../lib/sources/constants';
 
 const defaultStatus = {
   metricIndicesExist: false,
@@ -209,7 +220,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     },
     async (context, request, response) => {
       try {
-        const { entityType: integration } = request.query;
+        const { source } = request.query;
 
         const infraMetricsClient = await getInfraMetricsClient({
           request,
@@ -217,7 +228,12 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           context,
         });
 
-        const source = integration ? integrationNameByEntityType[integration] : undefined;
+        const hostInventoryModel = findInventoryModel('host');
+        const hostIntegration =
+          typeof hostInventoryModel?.requiredIntegration !== 'object' ||
+          !('otel' in hostInventoryModel?.requiredIntegration)
+            ? undefined
+            : hostInventoryModel.requiredIntegration;
 
         const hasDataResponse = await infraMetricsClient.search({
           track_total_hits: true,
@@ -225,13 +241,25 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           size: 0,
           query: {
             bool: {
-              should: source
-                ? [
-                    ...termQuery(EVENT_MODULE, source.beats),
-                    ...termQuery(METRICSET_MODULE, source.beats),
-                    ...termQuery(DATASTREAM_DATASET, source.otel),
-                  ]
-                : [],
+              should:
+                source === 'all'
+                  ? [
+                      ...existsQuery(hostInventoryModel.fields.id),
+                      ...existsQuery(findInventoryFields('container').id),
+                      ...existsQuery(findInventoryFields('pod').id),
+                      ...existsQuery(findInventoryFields('awsEC2').id),
+                      ...existsQuery(findInventoryFields('awsS3').id),
+                      ...existsQuery(findInventoryFields('awsRDS').id),
+                      ...existsQuery(findInventoryFields('awsSQS').id),
+                    ]
+                  : source === 'host' && hostIntegration
+                  ? [
+                      ...termQuery(EVENT_MODULE, hostIntegration.beats),
+                      ...termQuery(METRICSET_MODULE, hostIntegration.beats),
+                      ...termQuery(DATASTREAM_DATASET, hostIntegration.otel),
+                    ]
+                  : [],
+              minimum_should_match: 1,
             },
           },
         });
@@ -269,13 +297,25 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     },
     async (context, request, response) => {
       try {
-        const { from, to, dataSource, kuery } = request.query;
+        const { from, to, dataSource, kuery, filters, isInventoryView } = request.query;
         const infraMetricsClient = await getInfraMetricsClient({
           request,
           libs,
           context,
         });
-        const source = integrationNameByEntityType[dataSource];
+
+        const inventoryModel = findInventoryModel(dataSource);
+        if (
+          typeof inventoryModel.requiredIntegration !== 'object' ||
+          !('otel' in inventoryModel.requiredIntegration)
+        ) {
+          return response.ok({
+            body: getTimeRangeMetadataResponseRT.encode({
+              schemas: ['ecs'],
+              preferredSchema: 'ecs',
+            }),
+          });
+        }
 
         const [ecsResponse, otelResponse] = (
           await infraMetricsClient.msearch([
@@ -286,11 +326,16 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
               query: {
                 bool: {
                   should: [
-                    ...termsQuery(EVENT_MODULE, source.beats),
-                    ...termsQuery(METRICSET_MODULE, source.beats),
+                    ...termsQuery(EVENT_MODULE, inventoryModel.requiredIntegration.beats),
+                    ...termsQuery(METRICSET_MODULE, inventoryModel.requiredIntegration.beats),
+                    ...(!isInventoryView ? termsQuery(DATASTREAM_DATASET, 'apm*') : []),
                   ],
                   minimum_should_match: 1,
-                  filter: [...rangeQuery(from, to), ...kqlQuery(kuery)],
+                  filter: [
+                    ...rangeQuery(from, to),
+                    ...kqlQuery(kuery),
+                    ...(filters ? [filters] : []),
+                  ],
                 },
               },
             },
@@ -301,9 +346,10 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
               query: {
                 bool: {
                   filter: [
-                    ...termQuery(DATASTREAM_DATASET, source.otel),
+                    ...termQuery(DATASTREAM_DATASET, inventoryModel.requiredIntegration.otel),
                     ...rangeQuery(from, to),
                     ...kqlQuery(kuery),
+                    ...(filters ? [filters] : []),
                   ],
                 },
               },
@@ -313,16 +359,21 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         const hasEcsData = ecsResponse.hits.total.value !== 0;
         const hasOtelData = otelResponse.hits.total.value !== 0;
 
+        const allSchemas: DataSchemaFormat[] = ['ecs', 'semconv'];
+        const availableSchemas = allSchemas.filter(
+          (key) => (key === 'ecs' && hasEcsData) || (key === 'semconv' && hasOtelData)
+        );
+        const preferredSchema =
+          availableSchemas.length > 0
+            ? availableSchemas.includes('semconv')
+              ? 'semconv'
+              : availableSchemas[0]
+            : null;
+
         return response.ok({
           body: getTimeRangeMetadataResponseRT.encode({
-            schemas: (
-              [DataSchemaFormat.ECS, DataSchemaFormat.SEMCONV] as DataSchemaFormat[]
-            ).filter((key) => {
-              return (
-                (key === DataSchemaFormat.ECS && hasEcsData) ||
-                (key === DataSchemaFormat.SEMCONV && hasOtelData)
-              );
-            }),
+            schemas: availableSchemas,
+            preferredSchema,
           }),
         });
       } catch (err) {

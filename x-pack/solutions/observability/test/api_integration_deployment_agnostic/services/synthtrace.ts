@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UrlObject } from 'url';
+import type { UrlObject } from 'url';
 import { format } from 'url';
 import { LogLevel, createLogger, SynthtraceClientsManager } from '@kbn/apm-synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
@@ -30,6 +30,13 @@ export function SynthtraceProvider({ getService }: DeploymentAgnosticFtrProvider
       });
 
       return logsEsClient;
+    },
+    createSyntheticsEsClient() {
+      const { syntheticsEsClient } = clientManager.getClients({
+        clients: ['syntheticsEsClient'],
+      });
+
+      return syntheticsEsClient;
     },
     async createApmSynthtraceEsClient() {
       const { apmEsClient } = clientManager.getClients({

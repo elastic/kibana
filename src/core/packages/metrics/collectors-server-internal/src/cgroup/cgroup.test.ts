@@ -26,7 +26,7 @@ jest.mock('./v2', () => {
 import mockFs from 'mock-fs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { OsCgroupMetricsCollector } from '.';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { gatherV1CgroupMetrics } from './v1';
 import { gatherV2CgroupMetrics } from './v2';
 

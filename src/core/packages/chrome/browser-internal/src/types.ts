@@ -10,7 +10,6 @@
 import type {
   ChromeStart,
   ChromeBreadcrumb,
-  SideNavComponent,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
   AppDeepLinkId,
@@ -20,6 +19,7 @@ import type {
   SolutionNavigationDefinitions,
   SolutionId,
 } from '@kbn/core-chrome-browser';
+import type { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 import type { Observable } from 'rxjs';
 
 /** @internal */
@@ -141,7 +141,8 @@ export interface InternalChromeStart extends ChromeStart {
       ChildrenId extends string = Id
     >(
       id: SolutionId,
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
+      config?: { dataTestSubj?: string }
     ): void;
 
     getNavigationTreeUi$: () => Observable<NavigationTreeDefinitionUI>;
@@ -150,16 +151,6 @@ export interface InternalChromeStart extends ChromeStart {
      * Returns an observable of the active nodes in the project navigation.
      */
     getActiveNavigationNodes$(): Observable<ChromeProjectNavigationNode[][]>;
-
-    /**
-     * Set custom project sidenav component to be used instead of the default project sidenav.
-     * @param component A getter function returning a CustomNavigationComponent.
-     *
-     * @remarks This component will receive Chrome navigation state as props (not yet implemented)
-     *
-     * Use {@link ServerlessPluginStart.setSideNavComponent} to set custom project navigation.
-     */
-    setSideNavComponent(component: SideNavComponent | null): void;
 
     /** Get an Observable of the current project breadcrumbs */
     getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
@@ -192,5 +183,10 @@ export interface InternalChromeStart extends ChromeStart {
      * will be replaced with the legacy Kibana navigation.
      */
     changeActiveSolutionNavigation(id: SolutionId | null): void;
+
+    /**
+     * Used to manage the navigation tour state and start/stop the tour.
+     */
+    navigationTourManager: NavigationTourManager;
   };
 }

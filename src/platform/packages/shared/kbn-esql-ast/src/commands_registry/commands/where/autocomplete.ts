@@ -10,12 +10,8 @@ import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
 import { pipeCompleteItem } from '../../complete_items';
 import { suggestForExpression } from '../../../definitions/utils/autocomplete/helpers';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
-import {
-  type ISuggestionItem,
-  type ICommandContext,
-  Location,
-  ICommandCallbacks,
-} from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { type ISuggestionItem, type ICommandContext, Location } from '../../types';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 
 export async function autocomplete(
@@ -38,6 +34,7 @@ export async function autocomplete(
     preferredExpressionType: 'boolean',
     context,
     hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+    activeProduct: context?.activeProduct,
   });
 
   const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
@@ -52,11 +49,7 @@ export async function autocomplete(
 
   // Is this a complete boolean expression?
   // If so, we can call it done and suggest a pipe
-  const expressionType = getExpressionType(
-    expressionRoot,
-    context?.fields,
-    context?.userDefinedColumns
-  );
+  const expressionType = getExpressionType(expressionRoot, context?.columns);
   if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
     suggestions.push(pipeCompleteItem);
   }

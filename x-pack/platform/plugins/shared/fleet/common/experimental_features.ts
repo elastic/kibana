@@ -15,9 +15,11 @@ const _allowedExperimentalValues = {
   enableSSLSecrets: false,
   installedIntegrationsTabularUI: true,
   enabledUpgradeAgentlessDeploymentsTask: true,
-  enableAgentMigrations: false,
   enablePackageRollback: false,
-  enableAutoInstallContentPackages: false,
+  enableAutoInstallContentPackages: true,
+  enableOtelIntegrations: true,
+  enableAgentStatusAlerting: true,
+  enableAgentPrivilegeLevelChange: false,
 };
 
 /**

@@ -19,7 +19,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
 import { getComparatorScript } from '../../../../common';
-import type { OnlyEsQueryRuleParams } from '../types';
+import type { OnlyEsQueryRuleParams, EsQuerySourceFields } from '../types';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
 import { getParsedQuery, checkForShardFailures } from '../util';
 
@@ -38,6 +38,7 @@ export interface FetchEsQueryOpts {
   alertLimit?: number;
   dateStart: string;
   dateEnd: string;
+  sourceFields: EsQuerySourceFields;
 }
 
 /**
@@ -53,6 +54,7 @@ export async function fetchEsQuery({
   alertLimit,
   dateStart,
   dateEnd,
+  sourceFields,
 }: FetchEsQueryOpts) {
   const { scopedClusterClient, logger, ruleResultService, share } = services;
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
@@ -116,7 +118,6 @@ export async function fetchEsQuery({
       aggField: params.aggField,
       termField: params.termField,
       termSize: params.termSize,
-      sourceFieldsParams: params.sourceFields,
       condition: {
         resultLimit: alertLimit,
         conditionScript: getComparatorScript(
@@ -157,7 +158,8 @@ export async function fetchEsQuery({
       isGroupAgg,
       esResult: searchResult,
       resultLimit: alertLimit,
-      sourceFieldsParams: params.sourceFields,
+      sourceFieldsParams: sourceFields,
+      generateSourceFieldsFromHits: true,
       termField: params.termField,
     }),
     link,

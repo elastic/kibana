@@ -19,8 +19,9 @@ import {
 import styled from 'styled-components';
 import { css } from '@emotion/react';
 import { useConversationsUpdater } from './use_settings_updater/use_conversations_updater';
-import { AIConnector } from '../../connectorland/connector_selector';
-import { Conversation, useLoadConnectors } from '../../..';
+import type { AIConnector } from '../../connectorland/connector_selector';
+import type { Conversation } from '../../..';
+import { useLoadConnectors } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { TEST_IDS } from '../constants';
@@ -68,6 +69,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       selectedSettingsTab,
       setSelectedSettingsTab,
       toasts,
+      settings,
     } = useAssistantContext();
 
     useEffect(() => {
@@ -80,6 +82,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
 
     const { data: connectors } = useLoadConnectors({
       http,
+      settings,
     });
     const {
       conversationsSettingsBulkActions,

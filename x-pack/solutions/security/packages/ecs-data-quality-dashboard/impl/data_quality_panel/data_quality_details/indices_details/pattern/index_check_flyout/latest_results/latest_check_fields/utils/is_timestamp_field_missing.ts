@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsBasedFieldMetadata } from '../../../../../../../types';
+import type { EcsBasedFieldMetadata } from '../../../../../../../types';
 
 /**
  * Checks if the timestamp field is missing

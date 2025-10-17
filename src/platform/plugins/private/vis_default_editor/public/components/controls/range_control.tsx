@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { AggParamEditorProps } from '../agg_param_props';
+import type { AggParamEditorProps } from '../agg_param_props';
 import { RangesParamEditor } from './ranges';
 
 export const RangesControl = (props: AggParamEditorProps<any>) => (

@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { serializeAutoFollowPattern } from '../../../common/services/auto_follow_pattern_serialization';
@@ -36,12 +37,13 @@ export class AutoFollowPatternRequestFlyout extends PureComponent {
     const endpoint = `PUT /_ccr/auto_follow/${name ? name : '<autoFollowPatternName>'}`;
     const payload = JSON.stringify(serializeAutoFollowPattern(autoFollowPattern), null, 2);
     const request = `${endpoint}\n${payload}`;
+    const modalTitleId = htmlIdGenerator()('autoFollowPatternRequestFlyoutTitle');
 
     return (
-      <EuiFlyout maxWidth={480} onClose={close}>
+      <EuiFlyout maxWidth={480} onClose={close} aria-labelledby={modalTitleId}>
         <EuiFlyoutHeader>
           <EuiTitle>
-            <h2>
+            <h2 id={modalTitleId}>
               {name ? (
                 <FormattedMessage
                   id="xpack.crossClusterReplication.autoFollowPatternForm.requestFlyout.namedTitle"

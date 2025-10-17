@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const testADJobs: Array<{ job: Job; datafeed: Datafeed }> = [
   {
@@ -256,16 +256,18 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await ml.api.cleanMlIndices();
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
 
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/bm_classification'
+      );
       await ml.testResources.createDataViewIfNeeded('ft_bank_marketing', '@timestamp');
 
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
       await ml.testResources.createDataViewIfNeeded('ft_ihp_outlier', '@timestamp');
 
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/egs_regression');
       await ml.testResources.createDataViewIfNeeded('ft_egs_regression', '@timestamp');
 
       await ml.testResources.setKibanaTimeZoneToUTC();

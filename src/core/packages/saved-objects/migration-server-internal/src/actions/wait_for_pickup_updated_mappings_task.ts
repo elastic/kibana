@@ -10,13 +10,13 @@
 import * as TaskEither from 'fp-ts/TaskEither';
 import * as Option from 'fp-ts/Option';
 import { flow } from 'fp-ts/function';
-import {
-  waitForTask,
+import type {
   WaitForTaskCompletionTimeout,
   TaskCompletedWithRetriableError,
 } from './wait_for_task';
+import { waitForTask } from './wait_for_task';
 
-import { RetryableEsClientError } from './catch_retryable_es_client_errors';
+import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
 
 export const waitForPickupUpdatedMappingsTask = flow(
   waitForTask,
@@ -37,18 +37,21 @@ export const waitForPickupUpdatedMappingsTask = flow(
             JSON.stringify(res.failures.value)
         );
       } else if (Option.isSome(res.error)) {
-        if (res.error.value.type === 'search_phase_execution_exception') {
+        const error = res.error.value;
+        if (
+          error.type === 'search_phase_execution_exception' &&
+          error.caused_by?.reason?.includes('Search rejected due to missing shards')
+        ) {
           // This error is normally fixed in the next try, so let's retry
           // the update mappings task instead of throwing
           return TaskEither.left({
             type: 'task_completed_with_retriable_error' as const,
-            message: `The task being waited on encountered a ${res.error.value.type} error`,
+            message: `The task being waited on encountered a ${error.type} error`,
           });
         }
 
         throw new Error(
-          'pickupUpdatedMappings task failed with the following error:\n' +
-            JSON.stringify(res.error.value)
+          'pickupUpdatedMappings task failed with the following error:\n' + JSON.stringify(error)
         );
       } else {
         return TaskEither.right('pickup_updated_mappings_succeeded' as const);

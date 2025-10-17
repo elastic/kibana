@@ -33,7 +33,7 @@ export const createMockConfigSchema = (
       scroll: { size: 500, duration: '30s' },
       ...overrides.csv,
     },
-    capture: { maxAttempts: 1 },
+    capture: { maxAttempts: 1, ...overrides.capture },
     export_types: {
       pdf: { enabled: true },
       png: { enabled: true },

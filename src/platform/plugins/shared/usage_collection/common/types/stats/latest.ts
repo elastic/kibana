@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * as OpsMetricsCopy from './core_metrics';
-export * from './v1';
+export type * as OpsMetricsCopy from './core_metrics';
+export type * from './v1';

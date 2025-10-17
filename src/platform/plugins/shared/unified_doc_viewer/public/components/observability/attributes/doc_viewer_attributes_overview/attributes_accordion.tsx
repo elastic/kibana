@@ -8,12 +8,12 @@
  */
 import React from 'react';
 import { EuiAccordion, EuiText, EuiNotificationBadge, EuiIconTip, useEuiTheme } from '@elastic/eui';
-import { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AttributesTable } from './attributes_table';
 import { AttributesEmptyPrompt } from './attributes_empty_prompt';
-import { AttributeField } from './attributes_overview';
+import type { AttributeField } from './attributes_overview';
 
 interface AttributesAccordionProps {
   id: string;

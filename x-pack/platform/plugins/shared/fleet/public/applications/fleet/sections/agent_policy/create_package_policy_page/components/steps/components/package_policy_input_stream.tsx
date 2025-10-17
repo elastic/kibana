@@ -406,6 +406,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                                   },
                                 });
                               }}
+                              name="dataStreamType"
                             />
                           </EuiFormRow>
                         </EuiFlexItem>

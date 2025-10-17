@@ -11,7 +11,7 @@ import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { ValueFormatConfig } from '../operations/definitions/column_types';
+import type { ValueFormatConfig } from '../../../../common/types';
 import { generateId } from '../../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 import type {

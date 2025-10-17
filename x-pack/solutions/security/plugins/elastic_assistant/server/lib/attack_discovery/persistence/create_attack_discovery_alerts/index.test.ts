@@ -108,4 +108,19 @@ describe('createAttackDiscoveryAlerts', () => {
       expect.stringContaining('Error getting created Attack discovery alerts')
     );
   });
+
+  it('returns an empty array if bulk response is undefined', async () => {
+    bulkMock.mockResolvedValue({ body: undefined });
+    (ruleDataClientMock.getWriter as jest.Mock).mockResolvedValue({ bulk: bulkMock });
+
+    const result = await createAttackDiscoveryAlerts({
+      adhocAttackDiscoveryDataClient: ruleDataClientMock,
+      authenticatedUser: mockAuthenticatedUser,
+      createAttackDiscoveryAlertsParams: mockCreateAttackDiscoveryAlertsParams,
+      logger: mockLogger,
+      spaceId,
+    });
+
+    expect(result).toEqual([]);
+  });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
@@ -72,11 +72,15 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         before(async () => {
-          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
-          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
-          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
+          await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
           await esArchiver.loadIfNeeded(
-            'x-pack/test/functional/es_archives/ml/module_sample_ecommerce'
+            'x-pack/platform/test/fixtures/es_archives/ml/egs_regression'
+          );
+          await esArchiver.loadIfNeeded(
+            'x-pack/platform/test/fixtures/es_archives/ml/bm_classification'
+          );
+          await esArchiver.loadIfNeeded(
+            'x-pack/platform/test/fixtures/es_archives/ml/module_sample_ecommerce'
           );
           await ml.testResources.createDataViewIfNeeded(ihpIndexName);
           await ml.testResources.createDataViewIfNeeded(egsIndexName);
@@ -97,10 +101,12 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testResources.deleteDataViewByTitle(egsIndexName);
           await ml.testResources.deleteDataViewByTitle(bmIndexName);
           await ml.testResources.deleteDataViewByTitle(ecIndexName);
-          await esArchiver.unload('x-pack/test/functional/es_archives/ml/ihp_outlier');
-          await esArchiver.unload('x-pack/test/functional/es_archives/ml/egs_regression');
-          await esArchiver.unload('x-pack/test/functional/es_archives/ml/bm_classification');
-          await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_sample_ecommerce');
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/egs_regression');
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/bm_classification');
+          await esArchiver.unload(
+            'x-pack/platform/test/fixtures/es_archives/ml/module_sample_ecommerce'
+          );
           await ml.testResources.resetKibanaTimeZone();
         });
 
@@ -301,11 +307,6 @@ export default function ({ getService }: FtrProviderContext) {
             'should select a file and load visualizer result page'
           );
           await ml.dataVisualizerFileBased.selectFile(uploadFilePath);
-          await a11y.testAppSnapshot();
-        });
-
-        it('file data visualizer import data page', async () => {
-          await ml.dataVisualizerFileBased.navigateToFileImport();
           await a11y.testAppSnapshot();
         });
       });

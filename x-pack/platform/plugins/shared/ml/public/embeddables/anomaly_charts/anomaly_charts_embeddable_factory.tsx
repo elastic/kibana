@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
 import { Subscription, map, merge } from 'rxjs';
@@ -37,6 +38,7 @@ import {
 import { LazyAnomalyChartsContainer } from './lazy_anomaly_charts_container';
 import { getAnomalyChartsServiceDependencies } from './get_anomaly_charts_services_dependencies';
 import { buildDataViewPublishingApi } from '../common/build_data_view_publishing_api';
+import { EmbeddableAnomalyChartsUserInput } from './anomaly_charts_setup_flyout';
 
 export const getAnomalyChartsReactEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
@@ -107,26 +109,28 @@ export const getAnomalyChartsReactEmbeddableFactory = (
             defaultMessage: 'anomaly charts',
           }),
         onEdit: async () => {
-          try {
-            const { resolveEmbeddableAnomalyChartsUserInput } = await import(
-              './anomaly_charts_setup_flyout'
-            );
-            const result = await resolveEmbeddableAnomalyChartsUserInput(
-              coreStartServices,
-              pluginsStartServices,
-              parentApi,
-              uuid,
-              {
-                ...titleManager.getLatestState(),
-                ...chartsManager.getLatestState(),
-              }
-            );
-            chartsManager.api.updateUserInput(result);
-          } catch (e) {
-            // eslint-disable-next-line no-console
-            console.error(e);
-            return Promise.reject();
-          }
+          openLazyFlyout({
+            core: coreStartServices,
+            parentApi,
+            flyoutProps: {
+              'data-test-subj': 'mlAnomalyChartsEmbeddableInitializer',
+              focusedPanelId: uuid,
+            },
+            loadContent: async ({ closeFlyout }) => {
+              return (
+                <EmbeddableAnomalyChartsUserInput
+                  coreStart={coreStartServices}
+                  pluginStart={pluginsStartServices}
+                  onConfirm={(result) => {
+                    chartsManager.api.updateUserInput(result);
+                    closeFlyout();
+                  }}
+                  onCancel={closeFlyout}
+                  input={{ ...titleManager.getLatestState(), ...chartsManager.getLatestState() }}
+                />
+              );
+            },
+          });
         },
         ...titleManager.api,
         ...timeRangeManager.api,

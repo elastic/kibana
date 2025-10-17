@@ -13,7 +13,7 @@ import { makePing } from '../../../../../../common/runtime_types';
 import { render } from '../../../../lib/helper/rtl_helpers';
 import { ExpandRowColumn } from './expand_row';
 
-import { Ping } from '../../../../../../common/runtime_types/ping';
+import type { Ping } from '../../../../../../common/runtime_types/ping';
 
 describe('ExpandRowColumn', () => {
   const defaultPing = makePing({

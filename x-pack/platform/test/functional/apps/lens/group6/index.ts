@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EsArchiver } from '@kbn/es-archiver';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { EsArchiver } from '@kbn/es-archiver';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) => {
   const browser = getService('browser');
@@ -18,21 +18,21 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   let remoteEsArchiver;
 
   describe('lens app - group 6', () => {
-    const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
+    const esArchive = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
     const localFixtures = {
-      lensBasic: 'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json',
+      lensBasic: 'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json',
       lensLegendStatistics:
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/legend_statistics.json',
-      lensDefault: 'x-pack/test/functional/fixtures/kbn_archiver/lens/default',
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/legend_statistics.json',
+      lensDefault: 'x-pack/platform/test/functional/fixtures/kbn_archives/lens/default',
     };
 
     const remoteFixtures = {
-      lensBasic: 'x-pack/test/functional/fixtures/kbn_archiver/lens/ccs/lens_basic.json',
+      lensBasic: 'x-pack/platform/test/functional/fixtures/kbn_archives/lens/ccs/lens_basic.json',
       lensLegendStatistics:
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/legend_statistics.json',
-      lensDefault: 'x-pack/test/functional/fixtures/kbn_archiver/lens/ccs/default',
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/legend_statistics.json',
+      lensDefault: 'x-pack/platform/test/functional/fixtures/kbn_archives/lens/ccs/default',
     };
     let esNode: EsArchiver;
     let fixtureDirs: {

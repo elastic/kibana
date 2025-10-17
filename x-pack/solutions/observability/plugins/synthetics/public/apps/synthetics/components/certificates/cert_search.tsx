@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useState } from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
 import styled from 'styled-components';
 import useDebounce from 'react-use/lib/useDebounce';

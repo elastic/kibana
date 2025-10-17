@@ -26,15 +26,16 @@ describe('Endpoint Authz service', () => {
   let fleetAuthz: FleetAuthz;
   let userRoles: string[];
 
-  const responseConsolePrivileges = CONSOLE_RESPONSE_ACTION_COMMANDS.slice().reduce<
-    ResponseConsoleRbacControls[]
-  >((acc, e) => {
-    const item = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL[e];
-    if (!acc.includes(item)) {
-      acc.push(item);
-    }
-    return acc;
-  }, []);
+  const responseConsolePrivileges = CONSOLE_RESPONSE_ACTION_COMMANDS.slice()
+    .filter((cmd) => cmd !== 'cancel') // Exclude cancel as it uses dynamic permission checking
+    .reduce<ResponseConsoleRbacControls[]>((acc, e) => {
+      const item =
+        RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL[e as Exclude<typeof e, 'cancel'>];
+      if (!acc.includes(item)) {
+        acc.push(item);
+      }
+      return acc;
+    }, []);
 
   beforeEach(() => {
     licenseService = createLicenseServiceMock();
@@ -169,6 +170,8 @@ describe('Endpoint Authz service', () => {
       ['canWriteFileOperations', 'writeFileOperations'],
       ['canWriteTrustedApplications', 'writeTrustedApplications'],
       ['canReadTrustedApplications', 'readTrustedApplications'],
+      ['canWriteTrustedDevices', 'writeTrustedDevices'],
+      ['canReadTrustedDevices', 'readTrustedDevices'],
       ['canWriteHostIsolationExceptions', 'writeHostIsolationExceptions'],
       ['canAccessHostIsolationExceptions', 'accessHostIsolationExceptions'],
       ['canReadHostIsolationExceptions', 'readHostIsolationExceptions'],
@@ -211,6 +214,8 @@ describe('Endpoint Authz service', () => {
       ['canWriteFileOperations', ['writeFileOperations']],
       ['canWriteTrustedApplications', ['writeTrustedApplications']],
       ['canReadTrustedApplications', ['readTrustedApplications']],
+      ['canWriteTrustedDevices', ['writeTrustedDevices']],
+      ['canReadTrustedDevices', ['readTrustedDevices']],
       ['canWriteHostIsolationExceptions', ['writeHostIsolationExceptions']],
       ['canAccessHostIsolationExceptions', ['accessHostIsolationExceptions']],
       ['canReadHostIsolationExceptions', ['readHostIsolationExceptions']],
@@ -224,6 +229,7 @@ describe('Endpoint Authz service', () => {
       ['canManageGlobalArtifacts', ['writeGlobalArtifacts']],
       // all dependent privileges are false and so it should be false
       ['canAccessResponseConsole', responseConsolePrivileges],
+      ['canCancelAction', responseConsolePrivileges],
     ])('%s should be false if `packagePrivilege.%s` is `false`', (auth, privileges) => {
       privileges.forEach((privilege) => {
         fleetAuthz.packagePrivileges!.endpoint.actions[privilege].executePackageAction = false;
@@ -264,6 +270,8 @@ describe('Endpoint Authz service', () => {
       ['canWriteFileOperations', ['writeFileOperations']],
       ['canWriteTrustedApplications', ['writeTrustedApplications']],
       ['canReadTrustedApplications', ['readTrustedApplications']],
+      ['canWriteTrustedDevices', ['writeTrustedDevices']],
+      ['canReadTrustedDevices', ['readTrustedDevices']],
       ['canWriteHostIsolationExceptions', ['writeHostIsolationExceptions']],
       ['canAccessHostIsolationExceptions', ['accessHostIsolationExceptions']],
       ['canReadHostIsolationExceptions', ['readHostIsolationExceptions']],
@@ -276,6 +284,7 @@ describe('Endpoint Authz service', () => {
       ['canManageGlobalArtifacts', ['writeGlobalArtifacts']],
       // all dependent privileges are false and so it should be false
       ['canAccessResponseConsole', responseConsolePrivileges],
+      ['canCancelAction', responseConsolePrivileges],
     ])(
       '%s should be false if `packagePrivilege.%s` is `false` and user roles is undefined',
       (auth, privileges) => {
@@ -356,13 +365,16 @@ describe('Endpoint Authz service', () => {
         canSuspendProcess: false,
         canGetRunningProcesses: false,
         canAccessResponseConsole: false,
+        canCancelAction: false,
         canWriteExecuteOperations: false,
         canWriteScanOperations: false,
         canWriteFileOperations: false,
         canManageGlobalArtifacts: false,
         canWriteTrustedApplications: false,
-        canWriteWorkflowInsights: false,
         canReadTrustedApplications: false,
+        canWriteTrustedDevices: false,
+        canReadTrustedDevices: false,
+        canWriteWorkflowInsights: false,
         canReadWorkflowInsights: false,
         canWriteHostIsolationExceptions: false,
         canAccessHostIsolationExceptions: false,

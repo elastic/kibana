@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpFetchQuery, HttpSetup } from '@kbn/core/public';
+import type { HttpFetchQuery, HttpSetup } from '@kbn/core/public';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { type ScheduledReportApiJSON } from '@kbn/reporting-common/types';
 

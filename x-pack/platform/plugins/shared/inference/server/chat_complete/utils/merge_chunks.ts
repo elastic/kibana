@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChatCompletionChunkEvent, UnvalidatedToolCall } from '@kbn/inference-common';
+import type { ChatCompletionChunkEvent, UnvalidatedToolCall } from '@kbn/inference-common';
 
 interface UnvalidatedMessage {
   content: string;

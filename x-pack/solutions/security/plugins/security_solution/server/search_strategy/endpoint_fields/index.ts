@@ -53,6 +53,7 @@ export const requestEndpointFieldsSearch = async (
   beatFields: BeatFields,
   indexPatterns: DataViewsServerPluginStart
 ): Promise<IndexFieldsStrategyResponse> => {
+  const isTAAdvancedModeFeatureFlagEnabled = context.experimentalFeatures.trustedAppsAdvancedMode;
   let parsedRequest = parseRequest(request);
 
   if (
@@ -84,12 +85,14 @@ export const requestEndpointFieldsSearch = async (
     }
   }
 
-  const { canWriteEventFilters, canReadEndpointList } = await context.getEndpointAuthz(
-    deps.request
-  );
+  const { canWriteEventFilters, canReadEndpointList, canWriteTrustedApplications } =
+    await context.getEndpointAuthz(deps.request);
 
   if (
     (!canWriteEventFilters && parsedRequest.indices[0] === eventsIndexPattern) ||
+    (isTAAdvancedModeFeatureFlagEnabled &&
+      !canWriteTrustedApplications &&
+      parsedRequest.indices[0] === eventsIndexPattern) ||
     (!canReadEndpointList && parsedRequest.indices[0] === METADATA_UNITED_INDEX)
   ) {
     throw new EndpointAuthorizationError();

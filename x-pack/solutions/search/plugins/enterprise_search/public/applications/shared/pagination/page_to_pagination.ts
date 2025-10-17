@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Page } from '../../../../common/types/pagination';
+import type { Page } from '../../../../common/types/pagination';
 
 export function pageToPagination(page: Page) {
   // Prevent divide-by-zero-error

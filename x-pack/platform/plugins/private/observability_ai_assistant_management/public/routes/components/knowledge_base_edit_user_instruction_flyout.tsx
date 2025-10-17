@@ -127,6 +127,7 @@ export function KnowledgeBaseEditUserInstructionFlyout({ onClose }: { onClose: (
               data-test-subj="knowledgeBaseEditManualEntryFlyoutSaveButton"
               fill
               isLoading={isSaving}
+              disabled={newEntryText.trim().length === 0 && !newEntryId}
               onClick={handleSubmit}
             >
               {i18n.translate(

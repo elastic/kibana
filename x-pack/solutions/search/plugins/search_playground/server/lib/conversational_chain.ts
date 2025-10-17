@@ -5,26 +5,27 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { Document } from '@langchain/core/documents';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { Document } from '@langchain/core/documents';
 import {
   ChatPromptTemplate,
   PromptTemplate,
   SystemMessagePromptTemplate,
 } from '@langchain/core/prompts';
-import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
+import type { Runnable } from '@langchain/core/runnables';
+import { RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { createDataStream, LangChainAdapter } from 'ai';
 import type { DataStreamWriter } from 'ai';
 import type { DataStreamString } from '@ai-sdk/ui-utils';
-import { BaseLanguageModel } from '@langchain/core/language_models/base';
-import { BaseMessage } from '@langchain/core/messages';
+import type { BaseLanguageModel } from '@langchain/core/language_models/base';
+import type { BaseMessage } from '@langchain/core/messages';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
-import { ChatMessage, ElasticsearchRetrieverContentField } from '../types';
+import type { ChatMessage, ElasticsearchRetrieverContentField } from '../types';
 import { ElasticsearchRetriever } from './elasticsearch_retriever';
 import { renderTemplate } from '../utils/render_template';
 
-import { AssistClient } from '../utils/assist';
+import type { AssistClient } from '../utils/assist';
 import { getCitations } from '../utils/get_citations';
 import { getTokenEstimate, getTokenEstimateFromMessages } from './token_tracking';
 import { ContextLimitError } from './errors';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('@kbn/react-kibana-mount', () => {
@@ -17,7 +17,7 @@ jest.mock('@kbn/react-kibana-mount', () => {
   };
 });
 
-import { StartPlugins, PluginStart } from './types';
+import type { StartPlugins, PluginStart } from './types';
 import { RuntimeFieldEditorFlyoutContent } from './components';
 import { RuntimeFieldsPlugin } from './plugin';
 

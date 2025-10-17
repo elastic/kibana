@@ -31,6 +31,7 @@ import {
   AttachmentType,
   AttachmentRt,
   AttachmentsRt,
+  EventAttachmentPayloadRt,
 } from '../../domain/attachment/v1';
 
 /**
@@ -72,6 +73,7 @@ const BasicAttachmentRequestRt = rt.union([
   ActionsAttachmentPayloadRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
   PersistableStateAttachmentPayloadRt,
+  EventAttachmentPayloadRt,
 ]);
 
 export const AttachmentRequestRt = rt.union([
@@ -80,6 +82,7 @@ export const AttachmentRequestRt = rt.union([
     type: rt.literal(AttachmentType.user),
     owner: rt.string,
   }),
+  EventAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
   rt.strict({
     type: rt.literal(AttachmentType.actions),

@@ -7,19 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ApmFields,
-  InfraDocument,
-  Instance,
-  LogDocument,
-  apm,
-  generateShortId,
-  infra,
-  log,
-} from '@kbn/apm-synthtrace-client';
-import { Scenario } from '../cli/scenario';
+/**
+ * Generates a comprehensive set of correlated logs, APM traces, and host metrics.
+ */
+
+import type { ApmFields, InfraDocument, Instance, LogDocument } from '@kbn/apm-synthtrace-client';
+import { apm, generateShortId, infra, log } from '@kbn/apm-synthtrace-client';
+import type { Scenario } from '../cli/scenario';
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
-import { Logger } from '../lib/utils/create_logger';
+import type { Logger } from '../lib/utils/create_logger';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 import { MORE_THAN_1024_CHARS } from './helpers/logs_mock_data';

@@ -267,7 +267,7 @@
         "label": "LazySavedObjectSaveModalDashboard",
         "description": [],
         "signature": [
-          "React.LazyExoticComponent<(props: ",
+          "React.LazyExoticComponent<(<T = void>(props: ",
           {
             "pluginId": "presentationUtil",
             "scope": "public",
@@ -275,7 +275,7 @@
             "section": "def-public.SaveModalDashboardProps",
             "text": "SaveModalDashboardProps"
           },
-          ") => React.JSX.Element>"
+          "<T>) => React.JSX.Element)>"
         ],
         "path": "src/platform/plugins/shared/presentation_util/public/components/index.tsx",
         "deprecated": false,
@@ -285,6 +285,56 @@
           {
             "parentPluginId": "presentationUtil",
             "id": "def-public.LazySavedObjectSaveModalDashboard.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationUtil",
+        "id": "def-public.LazySavedObjectSaveModalDashboardWithSaveResult",
+        "type": "Function",
+        "tags": [],
+        "label": "LazySavedObjectSaveModalDashboardWithSaveResult",
+        "description": [
+          "\nUsed with `showSaveModal` to pass `SaveResult` back from `onSave`"
+        ],
+        "signature": [
+          "React.LazyExoticComponent<(props: ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.SaveModalDashboardProps",
+            "text": "SaveModalDashboardProps"
+          },
+          "<",
+          {
+            "pluginId": "savedObjects",
+            "scope": "public",
+            "docId": "kibSavedObjectsPluginApi",
+            "section": "def-public.SaveResult",
+            "text": "SaveResult"
+          },
+          ">) => React.JSX.Element>"
+        ],
+        "path": "src/platform/plugins/shared/presentation_util/public/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.LazySavedObjectSaveModalDashboardWithSaveResult.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -790,6 +840,16 @@
         "tags": [],
         "label": "SaveModalDashboardProps",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.SaveModalDashboardProps",
+            "text": "SaveModalDashboardProps"
+          },
+          "<T>"
+        ],
         "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -862,7 +922,7 @@
                 "section": "def-public.OnSaveProps",
                 "text": "OnSaveProps"
               },
-              " & { dashboardId: string | null; addToLibrary: boolean; }) => void"
+              " & { dashboardId: string | null; addToLibrary: boolean; }) => Promise<T>"
             ],
             "path": "src/platform/plugins/shared/presentation_util/public/components/types.ts",
             "deprecated": false,

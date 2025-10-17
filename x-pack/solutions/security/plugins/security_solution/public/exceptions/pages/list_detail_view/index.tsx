@@ -19,7 +19,7 @@ import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { ReferenceErrorModal } from '../../../common/components/reference_error_modal';
 import type { Rule } from '../../../detection_engine/rule_management/logic/types';
-import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
+import { MissingPrivilegesCallOut } from '../../../common/components/missing_privileges';
 import { NotFoundPage } from '../../../app/404';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { LinkToRuleDetails, ListWithSearch, ManageRules } from '../../components';

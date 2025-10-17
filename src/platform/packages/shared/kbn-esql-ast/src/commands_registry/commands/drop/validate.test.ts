@@ -21,24 +21,22 @@ describe('DROP Validation', () => {
 
   test('validates the most basic query', () => {
     // make sure that @timestamp field is not present
-    const newUserDefinedColumns = new Map(mockContext.userDefinedColumns);
-    newUserDefinedColumns.set('MIN(doubleField * 10)', [
-      {
-        name: 'MIN(doubleField * 10)',
-        type: 'double',
-        location: { min: 0, max: 10 },
-      },
-    ]);
-    newUserDefinedColumns.set('COUNT(*)', [
-      {
-        name: 'COUNT(*)',
-        type: 'integer',
-        location: { min: 0, max: 10 },
-      },
-    ]);
+    const newColumns = new Map(mockContext.columns);
+    newColumns.set('MIN(doubleField * 10)', {
+      name: 'MIN(doubleField * 10)',
+      type: 'double',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
+    newColumns.set('COUNT(*)', {
+      name: 'COUNT(*)',
+      type: 'integer',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
     const context = {
       ...mockContext,
-      userDefinedColumns: newUserDefinedColumns,
+      columns: newColumns,
     };
     dropExpectErrors('from index | drop textField, doubleField, dateField', []);
     dropExpectErrors('from index | drop `any#Char$Field`', []);
@@ -61,22 +59,18 @@ describe('DROP Validation', () => {
     );
   });
   test('raises error on unknown field', () => {
-    dropExpectErrors('from index | drop s*, d*', ['Unknown column [s*]']);
-    dropExpectErrors('from index | drop m*', ['Unknown column [m*]']);
-    dropExpectErrors('from index | drop *m', ['Unknown column [*m]']);
-    dropExpectErrors('from index | drop d*m', ['Unknown column [d*m]']);
-  });
-  test('raises errors on removing all fields', () => {
-    dropExpectErrors('from index | drop *', ['Removing all fields is not allowed [*]']);
-    dropExpectErrors('from index | drop textField, *', ['Removing all fields is not allowed [*]']);
+    dropExpectErrors('from index | drop s*, d*', ['Unknown column "s*"']);
+    dropExpectErrors('from index | drop m*', ['Unknown column "m*"']);
+    dropExpectErrors('from index | drop *m', ['Unknown column "*m"']);
+    dropExpectErrors('from index | drop d*m', ['Unknown column "d*m"']);
   });
 
   test('raises warning on removing time fields', () => {
     dropExpectErrors('from index | drop @timestamp', [
-      'Drop [@timestamp] will remove all time filters to the search results',
+      'Dropping "@timestamp" prevents the time range from being applied.',
     ]);
     dropExpectErrors('from index | drop textField, @timestamp', [
-      'Drop [@timestamp] will remove all time filters to the search results',
+      'Dropping "@timestamp" prevents the time range from being applied.',
     ]);
   });
 });

@@ -8,10 +8,10 @@
  */
 
 import React, { lazy } from 'react';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { DatatableColumn } from '@kbn/expressions-plugin/common/expression_types/specs';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common/expression_types/specs';
 
 const DataViewComponent = lazy(() => import('./data_view'));
 

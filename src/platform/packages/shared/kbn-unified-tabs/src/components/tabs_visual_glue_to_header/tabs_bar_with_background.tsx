@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { HTMLAttributes, useEffect } from 'react';
+import type { HTMLAttributes } from 'react';
+import React, { useEffect } from 'react';
 import { css } from '@emotion/react';
 import { css as cssString } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';

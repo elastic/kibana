@@ -13,7 +13,7 @@ import { action } from '@storybook/addon-actions';
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { categorizeFields } from '@kbn/management-settings-utilities';
-import { UnsavedFieldChanges, OnFieldChangeFn } from '@kbn/management-settings-types';
+import type { UnsavedFieldChanges, OnFieldChangeFn } from '@kbn/management-settings-types';
 
 export interface Params {
   isFiltered: boolean;

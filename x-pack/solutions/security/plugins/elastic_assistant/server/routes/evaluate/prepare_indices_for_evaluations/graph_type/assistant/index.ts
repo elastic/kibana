@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { Logger } from '@kbn/logging';
-import { IndexRequest, IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
+import type { IndexRequest, IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { PrepareIndicesForEvaluations } from '../../prepare_indices_for_evalutations';
 import { indicesCreateRequests } from './indices_create_requests';
 import { indexRequests } from './index_requests';

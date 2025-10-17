@@ -8,8 +8,7 @@
  */
 
 import type { IRouter } from '@kbn/core-http-server';
-import apm from 'elastic-apm-node';
-import { EluMetrics } from '@kbn/core-metrics-server';
+import type { EluMetrics } from '@kbn/core-metrics-server';
 
 interface ELUHistoryResponse {
   /**
@@ -25,11 +24,6 @@ interface ELUHistoryResponse {
  * Intended for exposing metrics over HTTP that we do not want to include in the /api/stats endpoint, yet.
  */
 export function registerEluHistoryRoute(router: IRouter, elu: () => EluMetrics) {
-  // Report the same metrics to APM
-  apm.registerMetric('elu.history.short', () => elu().short);
-  apm.registerMetric('elu.history.medium', () => elu().medium);
-  apm.registerMetric('elu.history.long', () => elu().long);
-
   router.versioned
     .get({
       access: 'internal',

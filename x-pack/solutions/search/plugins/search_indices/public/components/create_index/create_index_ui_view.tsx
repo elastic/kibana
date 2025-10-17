@@ -10,7 +10,7 @@ import React, { useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { UserStartPrivilegesResponse } from '../../../common';
 import { AnalyticsEvents } from '../../analytics/constants';
-import { CreateIndexFormState } from '../../types';
+import type { CreateIndexFormState } from '../../types';
 import { CreateIndexForm } from '../shared/create_index_form';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { isValidIndexName } from '../../utils/indices';

@@ -26,7 +26,7 @@ import {
   INDEX_MAPPING_TYPE_ACTUAL,
   SAME_FAMILY_BADGE_LABEL,
 } from '../../../../../../../../translations';
-import { EnrichedFieldMetadata } from '../../../../../../../../types';
+import type { EnrichedFieldMetadata } from '../../../../../../../../types';
 import { EMPTY_PLACEHOLDER } from '../../../../../../../../constants';
 import { ECS_DESCRIPTION } from '../../../../translations';
 

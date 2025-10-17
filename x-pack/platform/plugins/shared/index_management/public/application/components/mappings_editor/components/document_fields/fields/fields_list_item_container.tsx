@@ -8,7 +8,7 @@
 import React, { useMemo, useCallback, useRef } from 'react';
 
 import { useDispatch } from '../../../mappings_state_context';
-import { NormalizedField, State } from '../../../types';
+import type { NormalizedField, State } from '../../../types';
 import { FieldsListItem } from './fields_list_item';
 
 interface Props {

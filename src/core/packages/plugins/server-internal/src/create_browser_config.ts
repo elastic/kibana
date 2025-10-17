@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExposedToBrowserDescriptor, PluginConfigDescriptor } from '@kbn/core-plugins-server';
+import type { ExposedToBrowserDescriptor, PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
 export const createBrowserConfig = <T = unknown>(
   config: T,

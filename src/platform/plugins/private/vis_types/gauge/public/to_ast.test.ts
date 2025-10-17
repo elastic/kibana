@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TimefilterContract } from '@kbn/data-plugin/public';
-import { Vis } from '@kbn/visualizations-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
 import { toExpressionAst } from './to_ast';
-import { GaugeVisParams } from './types';
+import type { GaugeVisParams } from './types';
 
 describe('gauge vis toExpressionAst function', () => {
   let vis: Vis<GaugeVisParams>;

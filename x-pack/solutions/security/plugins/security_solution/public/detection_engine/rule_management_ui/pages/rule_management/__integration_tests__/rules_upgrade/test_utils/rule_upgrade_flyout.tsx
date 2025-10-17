@@ -33,6 +33,7 @@ import { RuleUpgradeTestProviders } from './rule_upgrade_test_providers';
 // Mocks necessary to render Rule Upgrade Flyout
 jest.mock('../../../../../../../detections/components/user_info');
 jest.mock('../../../../../../../detections/containers/detection_engine/lists/use_lists_config');
+jest.mock('../../../../../components/rules_table/feature_tour/rules_feature_tour');
 /** **********************************************/
 
 /**

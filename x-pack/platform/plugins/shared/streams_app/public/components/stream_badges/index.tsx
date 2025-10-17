@@ -7,9 +7,10 @@
 
 import { EuiBadge, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IlmLocatorParams, ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
+import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
+import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
+import type { IngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import {
-  IngestStreamEffectiveLifecycle,
   isIlmLifecycle,
   isErrorLifecycle,
   isDslLifecycle,
@@ -17,9 +18,12 @@ import {
   getIndexPatternsForStream,
 } from '@kbn/streams-schema';
 import React from 'react';
-import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
+
+import { truncateText } from '../../util/truncate_text';
 
 const DataRetentionTooltip: React.FC<{ children: React.ReactElement }> = ({ children }) => (
   <EuiToolTip
@@ -28,7 +32,7 @@ const DataRetentionTooltip: React.FC<{ children: React.ReactElement }> = ({ chil
       defaultMessage: 'Data Retention',
     })}
     content={i18n.translate('xpack.streams.badges.lifecycle.description', {
-      defaultMessage: 'You can edit retention settings from the stream’s management view',
+      defaultMessage: 'The data retention period or policy for this stream.',
     })}
     anchorProps={{
       css: css`
@@ -49,7 +53,7 @@ export function ClassicStreamBadge() {
       })}
       content={i18n.translate('xpack.streams.badges.classic.description', {
         defaultMessage:
-          'Classic streams are based on existing data streams and may not support all Streams features like custom re-routing',
+          "Classic streams are based on existing data streams and don't support all Streams features like partitioning.",
       })}
       anchorProps={{
         css: css`
@@ -57,7 +61,13 @@ export function ClassicStreamBadge() {
         `,
       }}
     >
-      <EuiBadge color="hollow">
+      <EuiBadge
+        color="hollow"
+        iconType="streamsClassic"
+        iconSide="left"
+        tabIndex={0}
+        data-test-subj="classicStreamBadge"
+      >
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel', {
           defaultMessage: 'Classic',
         })}
@@ -66,7 +76,28 @@ export function ClassicStreamBadge() {
   );
 }
 
-export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffectiveLifecycle }) {
+export function WiredStreamBadge() {
+  return (
+    <EuiBadge
+      color="hollow"
+      iconType="streamsWired"
+      iconSide="left"
+      data-test-subj="wiredStreamBadge"
+    >
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.managedBadgeLabel', {
+        defaultMessage: 'Wired',
+      })}
+    </EuiBadge>
+  );
+}
+
+export function LifecycleBadge({
+  lifecycle,
+  dataTestSubj,
+}: {
+  lifecycle: IngestStreamEffectiveLifecycle;
+  dataTestSubj?: string;
+}) {
   const {
     dependencies: {
       start: { share },
@@ -78,26 +109,27 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
 
   if (isIlmLifecycle(lifecycle)) {
     badge = (
-      <EuiBadge color="hollow">
+      <EuiBadge color="hollow" iconType="clockCounter" iconSide="left" tabIndex={0}>
         <EuiLink
-          data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
+          data-test-subj={dataTestSubj}
           color="text"
           target="_blank"
           href={ilmLocator?.getRedirectUrl({
             page: 'policy_edit',
             policyName: lifecycle.ilm.policy,
           })}
+          title={lifecycle.ilm.policy}
         >
           {i18n.translate('xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel', {
             defaultMessage: 'ILM Policy: {name}',
-            values: { name: lifecycle.ilm.policy },
+            values: { name: truncateText(lifecycle.ilm.policy, 25) },
           })}
         </EuiLink>
       </EuiBadge>
     );
   } else if (isErrorLifecycle(lifecycle)) {
     badge = (
-      <EuiBadge color="hollow">
+      <EuiBadge color="hollow" tabIndex={0} data-test-subj={dataTestSubj}>
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.errorBadgeLabel', {
           defaultMessage: 'Error: {message}',
           values: { message: lifecycle.error.message },
@@ -106,16 +138,22 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
     );
   } else if (isDslLifecycle(lifecycle)) {
     badge = (
-      <EuiBadge color="hollow">
-        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslBadgeLabel', {
-          defaultMessage: 'Retention: {retention}',
-          values: { retention: lifecycle.dsl.data_retention || '∞' },
-        })}
+      <EuiBadge
+        color="hollow"
+        iconType="clockCounter"
+        iconSide="left"
+        tabIndex={0}
+        data-test-subj={dataTestSubj}
+      >
+        {lifecycle.dsl.data_retention ??
+          i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslIndefiniteBadgeLabel', {
+            defaultMessage: 'Indefinite',
+          })}
       </EuiBadge>
     );
   } else {
     badge = (
-      <EuiBadge color="hollow">
+      <EuiBadge color="hollow" tabIndex={0} data-test-subj={dataTestSubj}>
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.disabledLifecycleBadgeLabel', {
           defaultMessage: 'Retention: Disabled',
         })}
@@ -158,7 +196,7 @@ export function DiscoverBadgeButton({
 
   return (
     <EuiButtonIcon
-      data-test-subj="streamsDetailOpenInDiscoverBadgeButton"
+      data-test-subj={`streamsDiscoverActionButton-${definition.stream.name}`}
       href={discoverLink}
       iconType="discoverApp"
       size="xs"

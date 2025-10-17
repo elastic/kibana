@@ -6,7 +6,7 @@
  */
 
 import { MetricsCatalog } from './metrics_catalog';
-import { DataSchemaFormat, type MetricConfigMap } from './types';
+import { type MetricConfigMap } from './types';
 
 describe('MetricsCatalog', () => {
   const aggregationsPerSchema = {
@@ -71,21 +71,21 @@ describe('MetricsCatalog', () => {
   describe('Schema variation', () => {
     describe('ecs', () => {
       it('should resolve formulas', () => {
-        const catalog = new MetricsCatalog(formulasPerSchema, DataSchemaFormat.ECS);
+        const catalog = new MetricsCatalog(formulasPerSchema, 'ecs');
 
         expect(catalog.get('cpu')).toEqual({ value: 'avg(field.ecs)' });
         expect(catalog.get('memory')).toEqual({ value: 'avg(field.ecs)' });
       });
 
       it('should resolve aggregations', () => {
-        const catalog = new MetricsCatalog(aggregationsPerSchema, DataSchemaFormat.ECS);
+        const catalog = new MetricsCatalog(aggregationsPerSchema, 'ecs');
 
         expect(catalog.get('cpu')).toEqual({ cpuAgg: { avg: { field: 'field.ecs' } } });
         expect(catalog.get('memory')).toEqual({ memoryAgg: { avg: 'field.ecs' } });
       });
 
       it('should get all formulas', () => {
-        const catalog = new MetricsCatalog(formulasPerSchema, DataSchemaFormat.ECS);
+        const catalog = new MetricsCatalog(formulasPerSchema, 'ecs');
         const allMetrics = catalog.getAll();
 
         expect(allMetrics).toEqual({
@@ -95,7 +95,7 @@ describe('MetricsCatalog', () => {
       });
 
       it('should get all aggregations', () => {
-        const catalog = new MetricsCatalog(aggregationsPerSchema, DataSchemaFormat.ECS);
+        const catalog = new MetricsCatalog(aggregationsPerSchema, 'ecs');
         const allMetrics = catalog.getAll();
 
         expect(allMetrics).toEqual({
@@ -107,14 +107,14 @@ describe('MetricsCatalog', () => {
 
     describe('semconv', () => {
       it('should resolve formulas', () => {
-        const catalog = new MetricsCatalog(formulasPerSchema, DataSchemaFormat.SEMCONV);
+        const catalog = new MetricsCatalog(formulasPerSchema, 'semconv');
 
         expect(catalog.get('cpu')).toEqual({ value: 'avg(field.semconv)' });
         expect(catalog.get('memory')).toEqual({ value: 'avg(field.semconv)' });
       });
 
       it('should resolve aggregations', () => {
-        const catalog = new MetricsCatalog(aggregationsPerSchema, DataSchemaFormat.SEMCONV);
+        const catalog = new MetricsCatalog(aggregationsPerSchema, 'semconv');
 
         expect(catalog.get('cpu')).toEqual({
           cpuAgg: {
@@ -151,7 +151,7 @@ describe('MetricsCatalog', () => {
       });
 
       it('should get all formulas', () => {
-        const catalog = new MetricsCatalog(formulasPerSchema, DataSchemaFormat.SEMCONV);
+        const catalog = new MetricsCatalog(formulasPerSchema, 'semconv');
         const allMetrics = catalog.getAll();
 
         expect(allMetrics).toEqual({
@@ -161,7 +161,7 @@ describe('MetricsCatalog', () => {
       });
 
       it('should get all aggregations', () => {
-        const catalog = new MetricsCatalog(aggregationsPerSchema, DataSchemaFormat.SEMCONV);
+        const catalog = new MetricsCatalog(aggregationsPerSchema, 'semconv');
         const allMetrics = catalog.getAll();
 
         expect(allMetrics).toEqual({

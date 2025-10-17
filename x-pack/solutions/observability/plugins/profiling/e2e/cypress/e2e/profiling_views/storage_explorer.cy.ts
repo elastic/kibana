@@ -19,7 +19,7 @@ describe('Storage explorer page', () => {
       rangeFrom: '2023-08-08T18:00:00.000Z',
       rangeTo: '2023-08-08T20:00:00.000Z',
     });
-    cy.contains('Storage Explorer');
+    cy.contains('Storage explorer');
     cy.wait('@summary');
     cy.contains(
       "We've identified 2 distinct probabilistic profiling values. Make sure to update them."
@@ -34,7 +34,7 @@ describe('Storage explorer page', () => {
       rangeFrom: '2023-08-08T18:00:00.000Z',
       rangeTo: '2023-08-08T20:00:00.000Z',
     });
-    cy.contains('Storage Explorer');
+    cy.contains('Storage explorer');
     cy.wait('@summary');
     cy.contains(
       "We've identified 2 distinct probabilistic profiling values. Make sure to update them."
@@ -47,7 +47,7 @@ describe('Storage explorer page', () => {
         'hostDetails'
       );
       cy.visitKibana('/app/profiling/storage-explorer', { rangeFrom, rangeTo });
-      cy.contains('Storage Explorer');
+      cy.contains('Storage explorer');
       cy.wait('@hostDetails');
       const firstRowSelector = 'table > tbody .euiTableRowCell';
       cy.get(firstRowSelector).eq(0).get('.euiTableCellContent__text').contains('3145700');
@@ -102,7 +102,7 @@ describe('Storage explorer page', () => {
     });
     it('displays correct values per index', () => {
       cy.visitKibana('/app/profiling/storage-explorer', { rangeFrom, rangeTo });
-      cy.contains('Storage Explorer');
+      cy.contains('Storage explorer');
       cy.get('[data-test-subj="storageExplorer_dataBreakdownTab"]').click();
       cy.contains('Indices breakdown');
       cy.wait('@indicesDetails');

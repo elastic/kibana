@@ -22,8 +22,7 @@ jest.mock('../../../common/components/user_privileges');
 
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
-// FLAKY: https://github.com/elastic/kibana/issues/208987
-describe.skip('Running Processes Action Results component', () => {
+describe('Running Processes Action Results component', () => {
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -71,10 +70,13 @@ describe.skip('Running Processes Action Results component', () => {
     action.agentType = 'sentinel_one';
     render();
 
-    await waitFor(() => {
-      expect(renderResult.getByTestId('test-download'));
-    });
-  });
+    await waitFor(
+      () => {
+        expect(renderResult.getByTestId('test-download')).toBeTruthy();
+      },
+      { timeout: 5000 }
+    );
+  }, 10000);
 
   it('should display nothing if agent type does not support processes', () => {
     action.agentType = 'crowdstrike';

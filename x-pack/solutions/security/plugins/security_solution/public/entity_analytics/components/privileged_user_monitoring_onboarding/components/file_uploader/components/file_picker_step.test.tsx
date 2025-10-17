@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { PrivilegedUserMonitoringFilePickerStep } from './file_picker_step';
-import { TestProviders } from '@kbn/timelines-plugin/public/mock';
+import { TestProviders } from '../../../../../../common/mock';
 
 describe('PrivilegedUserMonitoringFilePickerStep', () => {
   const mockOnFileChange = jest.fn();

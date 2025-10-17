@@ -8,10 +8,11 @@
  */
 
 import semver from 'semver';
-import { PassThrough, pipeline, Readable } from 'stream';
+import type { Readable } from 'stream';
+import { PassThrough, pipeline } from 'stream';
 import { getDedotTransform } from '../../../shared/get_dedot_transform';
 import { getSerializeTransform } from '../../../shared/get_serialize_transform';
-import { Logger } from '../../../utils/create_logger';
+import type { Logger } from '../../../utils/create_logger';
 import { fork } from '../../../utils/stream_utils';
 import { deleteSummaryFieldTransform } from '../../../utils/transform_helpers';
 import { createBreakdownMetricsAggregator } from '../../aggregators/create_breakdown_metrics_aggregator';

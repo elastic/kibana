@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Connector } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
 import { useQuery } from '@tanstack/react-query';
 import { useKibanaServices } from '../use_kibana';
 

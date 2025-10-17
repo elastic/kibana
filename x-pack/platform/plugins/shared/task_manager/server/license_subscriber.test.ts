@@ -8,7 +8,7 @@
 import { LicenseSubscriber } from './license_subscriber';
 import { Subject } from 'rxjs';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import type { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 
 describe('LicenseSubscriber', () => {
   afterEach(() => {

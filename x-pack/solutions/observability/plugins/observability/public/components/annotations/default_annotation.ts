@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import {
   defaultAnnotationColor,
   defaultAnnotationLabel,
   defaultAnnotationRangeColor,
   defaultRangeAnnotationLabel,
 } from '@kbn/event-annotation-common';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { CreateAnnotationForm } from './components/create_annotation';
 
 export function getDefaultAnnotation({

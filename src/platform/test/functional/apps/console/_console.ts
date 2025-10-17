@@ -10,7 +10,7 @@
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import { DEFAULT_INPUT_VALUE } from '@kbn/console-plugin/common/constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');

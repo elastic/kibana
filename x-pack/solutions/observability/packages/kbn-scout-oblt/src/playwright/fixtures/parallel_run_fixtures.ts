@@ -9,7 +9,7 @@ import { spaceTest as spaceBase } from '@kbn/scout';
 import type { ApiServicesFixture, KbnClient } from '@kbn/scout';
 import { extendPageObjects } from '../page_objects';
 
-import {
+import type {
   ObltApiServicesFixture,
   ObltParallelTestFixtures,
   ObltParallelWorkerFixtures,

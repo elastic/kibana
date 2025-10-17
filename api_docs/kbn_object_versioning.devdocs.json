@@ -385,7 +385,7 @@
             "label": "down",
             "description": [],
             "signature": [
-              "<I = DownIn, O = DownOut>(obj: DownIn, version?: number | \"latest\" | undefined, options?: { validate?: boolean | undefined; } | undefined) => ",
+              "<I = DownIn, O = DownOut>(obj: I, version?: number | \"latest\" | undefined, options?: { validate?: boolean | undefined; } | undefined) => ",
               {
                 "pluginId": "@kbn/object-versioning",
                 "scope": "server",
@@ -407,7 +407,7 @@
                 "label": "obj",
                 "description": [],
                 "signature": [
-                  "DownIn"
+                  "I"
                 ],
                 "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
                 "deprecated": false,

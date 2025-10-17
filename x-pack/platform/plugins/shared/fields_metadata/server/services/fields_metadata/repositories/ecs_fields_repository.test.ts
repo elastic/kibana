@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { EcsFlat as ecsFields } from '@elastic/ecs';
-import { EcsFieldsRepository, EcsFieldsRepositoryDeps } from './ecs_fields_repository';
+import type { EcsFieldsRepositoryDeps } from './ecs_fields_repository';
+import { EcsFieldsRepository } from './ecs_fields_repository';
 
 describe('EcsFieldsRepository class', () => {
   it('should validate the EcsFlat map', async () => {

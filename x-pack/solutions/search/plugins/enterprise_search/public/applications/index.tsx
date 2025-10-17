@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
 import { getContext, resetContext } from 'kea';
-import { Store } from 'redux';
+import type { Store } from 'redux';
 
 import { of } from 'rxjs';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
 
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
@@ -25,8 +26,8 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { Router } from '@kbn/shared-ux-router';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
-import { ClientConfigType, InitialAppData } from '../../common/types';
-import { PluginsStart, ClientData, ESConfig, UpdateSideNavDefinitionFn } from '../plugin';
+import type { ClientConfigType, InitialAppData } from '../../common/types';
+import type { PluginsStart, ClientData, ESConfig, UpdateSideNavDefinitionFn } from '../plugin';
 
 import { mountFlashMessagesLogic } from './shared/flash_messages';
 import { mountHttpLogic } from './shared/http';

@@ -25,7 +25,7 @@ export const LinkToNodeDetails = ({ entityId, entityName, entityType }: LinkToNo
   const { getAssetDetailUrl } = useAssetDetailsRedirect();
 
   // don't propagate the autoRefresh to the details page
-  const { dateRange, autoRefresh: _, ...assetDetails } = state ?? {};
+  const { dateRange, autoRefresh: _, preferredSchema, ...assetDetails } = state ?? {};
 
   const assetDetailMenuItemLinkProps = getAssetDetailUrl({
     entityType,
@@ -36,6 +36,7 @@ export const LinkToNodeDetails = ({ entityId, entityName, entityType }: LinkToNo
       from: parse(dateRange?.from ?? '')?.valueOf(),
       to: parse(dateRange?.to ?? '')?.valueOf(),
     },
+    preferredSchema: preferredSchema ?? 'semconv',
   });
 
   return (

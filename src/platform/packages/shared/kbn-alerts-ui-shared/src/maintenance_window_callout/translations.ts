@@ -12,12 +12,18 @@ import { i18n } from '@kbn/i18n';
 export const MAINTENANCE_WINDOW_RUNNING_DESCRIPTION = i18n.translate(
   'alertsUIShared.maintenanceWindowCallout.maintenanceWindowActiveDescription',
   {
-    defaultMessage: 'Rule notifications are stopped while maintenance windows are running.',
+    defaultMessage: 'Some rule notifications may be stopped while maintenance windows are running.',
   }
 );
 export const MAINTENANCE_WINDOW_NO_CATEGORY_TITLE = i18n.translate(
   'alertsUIShared.maintenanceWindowCallout.maintenanceWindowActiveNoCategories',
   {
     defaultMessage: 'One or more maintenance windows are running',
+  }
+);
+export const MAINTENANCE_WINDOW_PAGE_LINK_TEXT = i18n.translate(
+  'alertsUIShared.maintenanceWindowCallout.maintenanceWindowPageLinkText',
+  {
+    defaultMessage: 'Go to Maintenance Windows',
   }
 );

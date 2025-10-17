@@ -9,17 +9,14 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { observabilityFeatureId, observabilityPaths } from '@kbn/observability-plugin/common';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import {
-  AlertsClientError,
-  DEFAULT_AAD_CONFIG,
-  GetViewInAppRelativeUrlFnOpts,
-} from '@kbn/alerting-plugin/server';
-import { LegacyUptimeRuleTypeFactory } from './types';
+import type { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import type { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import { AlertsClientError, DEFAULT_AAD_CONFIG } from '@kbn/alerting-plugin/server';
+import type { LegacyUptimeRuleTypeFactory } from './types';
 import { updateState } from './common';
 import { CLIENT_ALERT_TYPES, TLS_LEGACY } from '../../../../common/constants/uptime_alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { Cert, CertResult } from '../../../../common/runtime_types';
+import type { Cert, CertResult } from '../../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
 
 import { savedObjectsAdapter } from '../saved_objects/saved_objects';
@@ -55,7 +52,7 @@ const mapCertsToSummaryString = (
     .reduce((prev, cur) => (prev === '' ? cur : prev.concat(`; ${cur}`)), '');
 
 const getValidAfter = ({ not_after: date }: Cert) => {
-  if (!date) return 'Error, missing `certificate_not_valid_after` date.';
+  if (!date) return 'Error, missing `not_after` date.';
   const relativeDate = moment().diff(date, 'days');
   return relativeDate >= 0
     ? tlsTranslations.validAfterExpiredString(date, relativeDate)
@@ -63,7 +60,7 @@ const getValidAfter = ({ not_after: date }: Cert) => {
 };
 
 const getValidBefore = ({ not_before: date }: Cert): string => {
-  if (!date) return 'Error, missing `certificate_not_valid_before` date.';
+  if (!date) return 'Error, missing `not_before` date.';
   const relativeDate = moment().diff(date, 'days');
   return relativeDate >= 0
     ? tlsTranslations.validBeforeExpiredString(date, relativeDate)

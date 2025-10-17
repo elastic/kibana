@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { pick, orderBy } from 'lodash';
-import { GetSLOResponse } from '@kbn/slo-schema';
+import type { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useEffect, useState, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import moment from 'moment';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
@@ -17,15 +17,15 @@ import {
 import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_END, ALERT_RULE_PARAMETERS, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useFetchDataViews } from '@kbn/observability-plugin/public';
 import { colorTransformer } from '@kbn/observability-shared-plugin/common';
-import { KQLCustomIndicator, DurationUnit } from '@kbn/slo-schema';
+import type { KQLCustomIndicator, DurationUnit } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
 import type { WindowSchema } from '../../../../../typings';
-import { TimeRange } from '../../../../slo/error_rate_chart/use_lens_definition';
-import { BurnRateAlert, BurnRateRule } from '../../../types';
+import type { TimeRange } from '../../../../slo/error_rate_chart/use_lens_definition';
+import type { BurnRateAlert, BurnRateRule } from '../../../types';
 import { getActionGroupFromReason } from '../../../utils/alert';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { getESQueryForLogRateAnalysis } from './helpers/log_rate_analysis_query';

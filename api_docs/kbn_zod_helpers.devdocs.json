@@ -97,6 +97,54 @@
       },
       {
         "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.createIsNarrowSchema",
+        "type": "Function",
+        "tags": [],
+        "label": "createIsNarrowSchema",
+        "description": [],
+        "signature": [
+          "(_base: TBaseSchema, narrow: TNarrowSchema) => <TValue extends Zod.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, Zod.input<TNarrowSchema>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.createIsNarrowSchema.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "_base",
+            "description": [],
+            "signature": [
+              "TBaseSchema"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.createIsNarrowSchema.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "narrow",
+            "description": [],
+            "signature": [
+              "TNarrowSchema"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
         "id": "def-common.DeepStrict",
         "type": "Function",
         "tags": [],
@@ -277,6 +325,54 @@
       },
       {
         "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.isoToEpoch",
+        "type": "Function",
+        "tags": [],
+        "label": "isoToEpoch",
+        "description": [],
+        "signature": [
+          "(input: string, ctx: Zod.RefinementCtx) => number"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod-helpers/src/iso_to_epoch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.isoToEpoch.$1",
+            "type": "string",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/iso_to_epoch.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.isoToEpoch.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "ctx",
+            "description": [],
+            "signature": [
+              "Zod.RefinementCtx"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/iso_to_epoch.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
         "id": "def-common.isPassThroughAny",
         "type": "Function",
         "tags": [],
@@ -300,6 +396,54 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/pass_through_any.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.isSchema",
+        "type": "Function",
+        "tags": [],
+        "label": "isSchema",
+        "description": [],
+        "signature": [
+          "(schema: TSchema, value: unknown) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.isSchema.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "TSchema"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.isSchema.$2",
+            "type": "Unknown",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

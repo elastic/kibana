@@ -7,7 +7,7 @@
 
 import { getIndexDetailsLink, getIndexListUri, navigateToIndexDetailsPage } from './routing';
 import { applicationServiceMock, httpServiceMock } from '@kbn/core/public/mocks';
-import { ExtensionsService } from '../../services/extensions_service';
+import type { ExtensionsService } from '../../services/extensions_service';
 import { IndexDetailsSection } from '../../../common/constants';
 
 describe('routing', () => {

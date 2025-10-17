@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { errors } from '@elastic/elasticsearch';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 
 export async function createKnowledgeBaseIndex({
   esClient,

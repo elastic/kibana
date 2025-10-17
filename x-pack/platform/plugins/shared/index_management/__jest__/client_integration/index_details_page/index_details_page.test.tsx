@@ -6,13 +6,16 @@
  */
 
 import { setupEnvironment } from '../helpers';
-import { IndexDetailsPageTestBed, setup } from './index_details_page.helpers';
+import type { IndexDetailsPageTestBed } from './index_details_page.helpers';
+import { setup } from './index_details_page.helpers';
 import { act } from 'react-dom/test-utils';
 
 import React from 'react';
 
-import { IndexDetailsSection, IndexDetailsTab, IndexDetailsTabId } from '../../../common/constants';
-import { API_BASE_PATH, Index, INTERNAL_API_BASE_PATH } from '../../../common';
+import type { IndexDetailsTab, IndexDetailsTabId } from '../../../common/constants';
+import { IndexDetailsSection } from '../../../common/constants';
+import type { Index } from '../../../common';
+import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
 
 import {
   breadcrumbService,
@@ -54,6 +57,15 @@ const requestOptions = {
   body: undefined,
   query: undefined,
   version: undefined,
+};
+const mockIndexMappingResponse: any = {
+  ...testIndexMappings.mappings,
+  properties: {
+    ...testIndexMappings.mappings.properties,
+    name: {
+      type: 'text',
+    },
+  },
 };
 describe('<IndexDetailsPage />', () => {
   let testBed: IndexDetailsPageTestBed;
@@ -533,23 +545,12 @@ describe('<IndexDetailsPage />', () => {
   });
 
   describe('Semantic Text Banner', () => {
-    const mockIndexMappingResponseWithoutSemanticText: any = {
-      ...testIndexMappings.mappings,
-      properties: {
-        ...testIndexMappings.mappings.properties,
-        name: {
-          type: 'text',
-        },
-      },
-    };
+    const mockIndexMappingResponseWithoutSemanticText: any = mockIndexMappingResponse;
 
     const mockIndexMappingResponseWithSemanticText: any = {
-      ...testIndexMappings.mappings,
+      ...mockIndexMappingResponse,
       properties: {
-        ...testIndexMappings.mappings.properties,
-        name: {
-          type: 'text',
-        },
+        ...mockIndexMappingResponse.properties,
         sem_text: {
           type: 'semantic_text',
           inference_id: '.elser-2-elasticsearch',
@@ -614,6 +615,7 @@ describe('<IndexDetailsPage />', () => {
       expect(testBed.exists('indexDetailsMappingsToggleViewButton')).toBe(true);
       expect(testBed.exists('indexDetailsMappingsFieldSearch')).toBe(true);
       expect(testBed.exists('indexDetailsMappingsFilter')).toBe(true);
+      expect(testBed.actions.mappings.isEmptyPromptVisible()).toBe(false);
     });
 
     it('displays the mappings in the table view', async () => {
@@ -645,16 +647,45 @@ describe('<IndexDetailsPage />', () => {
       // the url from the mocked docs mock
       expect(docsLinkHref).toContain('mapping');
     });
-    describe('Filter field by filter Type', () => {
-      const mockIndexMappingResponse: any = {
-        ...testIndexMappings.mappings,
-        properties: {
-          ...testIndexMappings.mappings.properties,
-          name: {
-            type: 'text',
+    describe('No saved mapping fields', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+          mappings: {
+            properties: {},
           },
-        },
-      };
+        });
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+        testBed.component.update();
+        await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      });
+      it('displays empty mappings prompt', async () => {
+        expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
+        expect(testBed.actions.mappings.isEmptyPromptVisible()).toBe(true);
+      });
+      it('hides filter, search and toggle while adding fields', async () => {
+        await testBed.actions.mappings.clickAddFieldButton();
+        expect(testBed.exists('indexDetailsMappingsFieldSearch')).toBe(false);
+        expect(testBed.exists('indexDetailsMappingsToggleViewButton')).toBe(false);
+        expect(testBed.exists('indexDetailsMappingsFilter')).toBe(false);
+        expect(testBed.exists('indexDetailsMappingsSaveMappings')).toBe(true);
+      });
+      it('does not display empty prompt after adding a field', async () => {
+        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+          mappings: mockIndexMappingResponse,
+        });
+        expect(testBed.actions.mappings.isEmptyPromptVisible()).toBe(true);
+        await testBed.actions.mappings.clickAddFieldButton();
+        expect(testBed.actions.mappings.isEmptyPromptVisible()).toBe(false);
+        await testBed.actions.mappings.addNewMappingFieldNameAndType([
+          { name: 'name', type: 'text' },
+        ]);
+        await testBed.actions.mappings.clickSaveMappingsButton();
+        expect(testBed.actions.mappings.isEmptyPromptVisible()).toBe(false);
+      });
+    });
+    describe('Filter field by filter Type', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
           mappings: mockIndexMappingResponse,
@@ -715,15 +746,6 @@ describe('<IndexDetailsPage />', () => {
       });
     });
     describe('Add a new field ', () => {
-      const mockIndexMappingResponse: any = {
-        ...testIndexMappings.mappings,
-        properties: {
-          ...testIndexMappings.mappings.properties,
-          name: {
-            type: 'text',
-          },
-        },
-      };
       beforeEach(async () => {
         await act(async () => {
           testBed = await setup({ httpSetup });
@@ -986,28 +1008,6 @@ describe('<IndexDetailsPage />', () => {
         await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
         expect(testBed.actions.mappings.isErrorDisplayed()).toBe(true);
       });
-    });
-
-    it('renders the content set via the extensions service', async () => {
-      const mappingsContent = 'test mappings extension';
-      await act(async () => {
-        testBed = await setup({
-          httpSetup,
-          dependencies: {
-            services: {
-              extensionsService: {
-                _indexMappingsContent: {
-                  renderContent: () => mappingsContent,
-                },
-              },
-            },
-          },
-        });
-      });
-      testBed.component.update();
-      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
-      const content = testBed.actions.getActiveTabContent();
-      expect(content).toContain(mappingsContent);
     });
   });
 

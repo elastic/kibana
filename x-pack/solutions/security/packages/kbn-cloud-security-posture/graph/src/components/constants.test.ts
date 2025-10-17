@@ -7,7 +7,6 @@
 
 import {
   GRID_SIZE,
-  STACK_NODE_MIN_HEIGHT,
   NODE_WIDTH,
   NODE_HEIGHT,
   NODE_LABEL_WIDTH,
@@ -15,10 +14,6 @@ import {
 } from './constants';
 
 describe('constants', () => {
-  it('should set STACK_NODE_MIN_HEIGHT a multiplication of 2*GRID_SIZE', () => {
-    expect(STACK_NODE_MIN_HEIGHT % (2 * GRID_SIZE)).toBe(0);
-  });
-
   it('should set NODE_WIDTH a multiplication of 2*GRID_SIZE', () => {
     expect(NODE_WIDTH % (2 * GRID_SIZE)).toBe(0);
   });

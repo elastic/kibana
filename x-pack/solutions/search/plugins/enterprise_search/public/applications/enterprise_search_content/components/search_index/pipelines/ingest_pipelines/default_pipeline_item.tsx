@@ -18,9 +18,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { IngestPipelineParams } from '@kbn/search-connectors';
+import type { IngestPipelineParams } from '@kbn/search-connectors';
 
-import { ElasticsearchIndexWithIngestion } from '../../../../../../../common/types/indices';
+import type { ElasticsearchIndexWithIngestion } from '../../../../../../../common/types/indices';
 
 import { isApiIndex } from '../../../../utils/indices';
 import { CurlRequest } from '../../components/curl_request/curl_request';

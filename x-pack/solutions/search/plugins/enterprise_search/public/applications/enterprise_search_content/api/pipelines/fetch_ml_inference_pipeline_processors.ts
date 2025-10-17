@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferencePipeline } from '../../../../../common/types/pipelines';
+import type { InferencePipeline } from '../../../../../common/types/pipelines';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 

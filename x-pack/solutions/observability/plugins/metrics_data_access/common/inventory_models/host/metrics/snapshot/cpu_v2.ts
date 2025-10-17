@@ -19,7 +19,7 @@ export const cpuV2: SchemaBasedAggregations = {
     cpu_idle: {
       terms: {
         field: 'state',
-        include: ['idle'],
+        include: ['idle', 'wait'],
       },
       aggs: {
         avg: {

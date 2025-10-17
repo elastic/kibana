@@ -9,8 +9,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { extractAuthzDescription } from './extract_authz_description';
-import { InternalRouterRoute } from './type';
-import { RouteSecurity } from '@kbn/core-http-server';
+import type { InternalRouterRoute } from './type';
+import type { RouteSecurity } from '@kbn/core-http-server';
 
 describe('extractAuthzDescription', () => {
   it('should return empty if route does not require privileges', () => {

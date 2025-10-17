@@ -10,7 +10,7 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { first, skip } from 'rxjs';
 import { dataViewsService } from '../../services/kibana_services';
-import { ControlGroupApi } from '../../control_group/types';
+import type { ControlGroupApi } from '../../control_group/types';
 import { initializeDataControlManager } from './data_control_manager';
 
 describe('initializeDataControlManager', () => {

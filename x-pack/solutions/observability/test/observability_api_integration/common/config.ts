@@ -6,10 +6,12 @@
  */
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { Config, FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
-import { format, UrlObject } from 'url';
+import type { Config, FtrConfigProviderContext } from '@kbn/test';
+import { kbnTestConfig } from '@kbn/test';
+import type { UrlObject } from 'url';
+import { format } from 'url';
 import supertest from 'supertest';
-import { FtrProviderContext } from './ftr_provider_context';
+import type { FtrProviderContext } from './ftr_provider_context';
 import { createObsApiClient } from './obs_api_supertest';
 
 interface Settings {

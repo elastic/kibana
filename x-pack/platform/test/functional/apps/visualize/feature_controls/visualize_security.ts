@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -26,15 +26,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
-  // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
+  // more tests are in x-pack/platform/test/functional/apps/saved_query_management/feature_controls/security.ts
 
   describe('visualize feature controls security', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/visualize/default'
       );
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       // ensure we're logged out so we can login as the appropriate users
       await security.forceLogout();
     });
@@ -84,7 +86,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows visualize navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Visualize Library');
+        expect(navLinks).to.contain('Visualize library');
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {
@@ -207,7 +209,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows visualize navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Visualize Library']);
+        expect(navLinks).to.eql(['Visualize library']);
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {
@@ -311,7 +313,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows visualize navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Visualize Library']);
+        expect(navLinks).to.eql(['Visualize library']);
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {

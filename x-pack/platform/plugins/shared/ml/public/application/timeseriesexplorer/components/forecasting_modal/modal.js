@@ -20,6 +20,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { MessageCallOut } from '../../../components/message_call_out';
@@ -31,6 +32,8 @@ import { RunControls } from './run_controls';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export function Modal(props) {
+  const modalTitleId = useGeneratedHtmlId();
+
   const [mlNodesAvailable, setMlNodesAvailable] = useState(false);
   const {
     services: {
@@ -50,9 +53,14 @@ export function Modal(props) {
   );
 
   return (
-    <EuiModal onClose={props.close} maxWidth={860} data-test-subj="mlModalForecast">
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      onClose={props.close}
+      maxWidth={860}
+      data-test-subj="mlModalForecast"
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.ml.timeSeriesExplorer.forecastingModal.forecastingTitle"
             defaultMessage="Forecasting"

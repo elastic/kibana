@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach } from '../../helpers';
 
 const TOTAL_ALERTS_CELL_COUNT = 440;
@@ -84,7 +84,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     let customThresholdRuleId: string;
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
       const setup = async () => {
         await observability.alerts.common.setKibanaTimeZoneToUTC();
         await observability.alerts.common.navigateToTimeWithData();
@@ -104,7 +106,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
@@ -114,12 +118,16 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     describe('Alerts table', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/simple_logs'
+        );
         await observability.alerts.common.navigateToTimeWithData();
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/simple_logs'
+        );
       });
 
       it('Renders the table', async () => {

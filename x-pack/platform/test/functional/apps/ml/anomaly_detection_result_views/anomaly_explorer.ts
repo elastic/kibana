@@ -8,6 +8,8 @@
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-plugin/public';
 import { stringHash } from '@kbn/ml-string-hash';
+import { SWIMLANE_TYPE } from '@kbn/ml-plugin/server/embeddable/schemas';
+import type { AnomalySwimlaneEmbeddableStateViewBy } from '@kbn/ml-plugin/public/embeddables/anomaly_swimlane/types';
 import { USER } from '../../../services/ml/security_common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -97,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('anomaly explorer', function () {
     this.tags(['ml']);
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createMLTestDashboardIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -480,17 +482,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 tag: 'ml_swim_lane_case',
               });
 
-              const expectedAttachment = {
-                swimlaneType: 'viewBy',
+              const attachmentData: Omit<AnomalySwimlaneEmbeddableStateViewBy, 'id'> = {
+                swimlaneType: SWIMLANE_TYPE.VIEW_BY,
                 viewBy: 'airline',
                 jobIds: [testData.jobConfig.job_id],
                 timeRange: {
                   from: '2016-02-07T00:00:00.000Z',
                   to: '2016-02-11T23:59:54.000Z',
                 },
-              } as AnomalySwimLaneEmbeddableState;
+              };
 
-              expectedAttachment.id = stringHash(JSON.stringify(expectedAttachment)).toString();
+              const expectedAttachment: AnomalySwimLaneEmbeddableState = {
+                ...attachmentData,
+                id: stringHash(JSON.stringify(attachmentData)).toString(),
+              };
 
               await ml.cases.assertCaseWithAnomalySwimLaneAttachment(
                 {

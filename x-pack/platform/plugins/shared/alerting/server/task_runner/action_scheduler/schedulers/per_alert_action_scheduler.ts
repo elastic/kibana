@@ -394,7 +394,7 @@ export class PerAlertActionScheduler<
     const alertMaintenanceWindowIds = alert.getMaintenanceWindowIds();
     if (alertMaintenanceWindowIds.length !== 0) {
       this.context.logger.debug(
-        `no scheduling of summary actions "${action.id}" for rule "${
+        `no scheduling of actions "${action.id}" for alert "${alert.getId()}" from rule "${
           this.context.rule.id
         }": has active maintenance windows ${alertMaintenanceWindowIds.join(', ')}.`
       );

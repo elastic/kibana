@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AggregationsMultiBucketBase } from '@elastic/elasticsearch/lib/api/types';
-import { CspStatusCode } from '@kbn/cloud-security-posture-common';
+import type { AggregationsMultiBucketBase } from '@elastic/elasticsearch/lib/api/types';
+import type { CspStatusCode } from '@kbn/cloud-security-posture-common';
 
 export type CloudSecurityUsageCollectorType =
   | 'Indices'
@@ -16,7 +16,8 @@ export type CloudSecurityUsageCollectorType =
   | 'Installation'
   | 'Alerts'
   | 'Cloud Accounts'
-  | 'Muted Rules';
+  | 'Muted Rules'
+  | 'CSPM Cloud Connector Usage';
 
 export type CloudProviderKey = 'cis_eks' | 'cis_gke' | 'cis_k8s' | 'cis_ake';
 export type CloudbeatConfigKeyType =
@@ -34,6 +35,7 @@ export interface CspmUsage {
   alerts_stats: CloudSecurityAlertsStats[];
   cloud_account_stats: CloudSecurityAccountsStats[];
   muted_rules_stats: MutedRulesStats[];
+  cspm_cloud_connector_usage_stats: CloudSecurityCSPMCloudConnectorUsageStats[];
 }
 
 export interface PackageSetupStatus {
@@ -146,6 +148,8 @@ export interface CloudSecurityInstallationStats {
   is_agentless: boolean;
   account_type?: 'single-account' | 'organization-account';
   setup_access_option: SetupAccessOption;
+  supports_cloud_connector: boolean;
+  cloud_connector_id: string | null;
 }
 
 export interface CloudSecurityAlertsStats {
@@ -226,4 +230,14 @@ export interface MutedRulesStats {
   benchmark_version: string;
   posture_type: string;
   rule_number: string;
+}
+
+export interface CloudSecurityCSPMCloudConnectorUsageStats {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  hasCredentials: boolean;
+  cloud_provider: string;
+  packagePolicyIds: string[];
+  packagePolicyCount: number;
 }

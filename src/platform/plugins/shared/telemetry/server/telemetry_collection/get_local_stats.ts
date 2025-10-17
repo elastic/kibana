@@ -8,15 +8,17 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
+import type {
   StatsGetter,
   StatsCollectionContext,
 } from '@kbn/telemetry-collection-manager-plugin/server';
 import { getClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
-import { getKibana, handleKibanaStats, KibanaUsageStats } from './get_kibana';
+import type { KibanaUsageStats } from './get_kibana';
+import { getKibana, handleKibanaStats } from './get_kibana';
 import { getNodesUsage } from './get_nodes_usage';
-import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get_data_telemetry';
+import type { DataTelemetryPayload } from './get_data_telemetry';
+import { getDataTelemetry, DATA_TELEMETRY_ID } from './get_data_telemetry';
 
 /**
  * Handle the separate local calls by combining them into a single object response that looks like the

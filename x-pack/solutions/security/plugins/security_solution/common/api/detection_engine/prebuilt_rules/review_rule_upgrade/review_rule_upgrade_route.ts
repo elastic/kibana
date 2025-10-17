@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { SortOrder, type RuleObjectId, type RuleSignatureId, type RuleTagArray } from '../../model';
-import type { PartialRuleDiff } from '../model';
+import type { PartialThreeWayRuleDiff } from '../model';
 import type { RuleResponse, RuleVersion } from '../../model/rule_schema';
 import { FindRulesSortField } from '../../rule_management';
 import { ReviewPrebuiltRuleUpgradeFilter } from '../common/review_prebuilt_rules_upgrade_filter';
@@ -87,7 +87,7 @@ export interface RuleUpgradeInfoForReview {
   version: RuleVersion;
   current_rule: RuleResponse;
   target_rule: RuleResponse;
-  diff: PartialRuleDiff;
+  diff: PartialThreeWayRuleDiff;
   revision: number;
   has_base_version: boolean;
 }

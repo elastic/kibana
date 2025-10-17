@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common']);
-  const searchSessions = getService('searchSessions');
 
   describe('Discover', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.common.navigateToApp('discover');
     });
 
-    beforeEach(async () => {
-      await searchSessions.markTourDone();
-    });
-
+    loadTestFile(require.resolve('./classic'));
+    loadTestFile(require.resolve('./esql'));
     loadTestFile(require.resolve('./async_search'));
     loadTestFile(require.resolve('./sessions_in_space'));
+    loadTestFile(require.resolve('./tabs'));
   });
 }

@@ -11,11 +11,11 @@ import * as redux from 'react-redux';
 import { MONITOR_ROUTE } from '../../../../../../common/constants';
 import { mockState } from '../../../utils/testing/__mocks__/synthetics_store.mock';
 import { WrappedHelper } from '../../../utils/testing';
-import { SyntheticsAppState } from '../../../state/root_reducer';
+import type { SyntheticsAppState } from '../../../state/root_reducer';
+import type { MonitorFilterState } from '../../../state';
 import {
   selectEncryptedSyntheticsSavedMonitors,
   updateManagementPageStateAction,
-  MonitorFilterState,
 } from '../../../state';
 
 import { useMonitorList } from './use_monitor_list';

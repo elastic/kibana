@@ -24,6 +24,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import moment from 'moment';
 import { KnowledgeBaseEntryRole } from '@kbn/observability-ai-assistant-plugin/public';
@@ -74,11 +75,13 @@ export function KnowledgeBaseEditManualEntryFlyout({
     onClose();
   };
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder data-test-subj="knowledgeBaseManualEntryFlyout">
         <EuiTitle>
-          <h2>
+          <h2 id={flyoutTitleId}>
             {!entry
               ? i18n.translate(
                   'xpack.observabilityAiAssistantManagement.knowledgeBaseNewEntryFlyout.h2.newEntryLabel',

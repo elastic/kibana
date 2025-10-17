@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { LegacyRequest } from '../../types';
+import type { LegacyRequest } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { createApmQuery } from './create_apm_query';
 import { apmAggFilterPath, apmUuidsAgg, apmAggResponseHandler } from './_apm_stats';

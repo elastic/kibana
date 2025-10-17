@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { searchSessionsManagement } = getPageObjects(['searchSessionsManagement']);
@@ -17,12 +17,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Search sessions Accessibility', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/data/search_sessions');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/data/search_sessions');
       await searchSessionsManagement.goTo();
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/data/search_sessions');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/data/search_sessions');
     });
 
     it('Search sessions management page populated with search sessions meets a11y requirements', async () => {

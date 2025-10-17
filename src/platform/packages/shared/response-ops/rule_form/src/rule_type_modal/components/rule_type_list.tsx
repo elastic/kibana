@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { omit } from 'lodash';
 import { PRODUCER_DISPLAY_NAMES } from '../../common/i18n';
-import { RuleTypeWithDescription, RuleTypeCountsByProducer } from '../types';
+import type { RuleTypeWithDescription, RuleTypeCountsByProducer } from '../types';
 
 interface RuleTypeListProps {
   ruleTypes: RuleTypeWithDescription[];

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { calculateAuto } from '@kbn/calculate-auto';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
-import {
-  ALL_VALUE,
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
+import type {
   APMTransactionErrorRateIndicator,
   GetPreviewDataParams,
   GetPreviewDataResponse,
@@ -21,10 +20,11 @@ import {
   SyntheticsAvailabilityIndicator,
   TimesliceMetricIndicator,
 } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
 import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
-import { APMTransactionDurationIndicator, Groupings } from '../domain/models';
+import type { APMTransactionDurationIndicator, Groupings } from '../domain/models';
 import { computeSLIForPreview } from '../domain/services';
 import { typedSearch } from '../utils/queries';
 import {

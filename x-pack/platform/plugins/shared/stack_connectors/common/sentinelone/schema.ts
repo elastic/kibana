@@ -189,6 +189,26 @@ export const SentinelOneGetRemoteScriptsParamsSchema = schema.object({
   osTypes: schema.nullable(schema.string()),
   // possible values (multiples comma delimiter): `action` or `artifactCollection` or `dataCollection`
   scriptType: schema.nullable(schema.string()),
+  // Cursor position returned by the last request. Use to iterate over more than 1000 items. Example: "YWdlbnRfaWQ6NTgwMjkzODE=".
+  cursor: schema.nullable(schema.string()),
+  // List of group IDs to filter by. Example: "225494730938493804,225494730938493915".
+  groupIds: schema.nullable(schema.string()),
+  // A list of script IDs. Example: "225494730938493804,225494730938493915".
+  ids: schema.nullable(schema.string()),
+  // Is the script runnable in Advanced Response Scripts
+  isAvailableForArs: schema.nullable(schema.boolean()),
+  // Limit number of returned items (1-1000). Example: "10".
+  limit: schema.nullable(schema.number({ max: 1000, min: 1, defaultValue: 10 })),
+  // List of Site IDs to filter by. Example: "225494730938493804,225494730938493915".
+  siteIds: schema.nullable(schema.string()),
+  // Skip first number of items (0-1000). To iterate over more than 1000 items, use "cursor". Example: "150".
+  skip: schema.nullable(schema.number()),
+  // If true, total number of items will not be calculated, which speeds up execution time.
+  skipCount: schema.nullable(schema.boolean()),
+  // The column to sort the results by. Example: "id".
+  sortBy: schema.nullable(schema.string()),
+  // Sort direction. Example: "asc" or "desc"
+  sortOrder: schema.nullable(schema.string()),
 });
 
 export const SentinelOneFetchAgentFilesParamsSchema = schema.object({

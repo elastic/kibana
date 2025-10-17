@@ -18,8 +18,8 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-import { SlmPolicyPayload } from '../../../../../../common/types';
-import { StepProps } from '..';
+import type { SlmPolicyPayload } from '../../../../../../common/types';
+import type { StepProps } from '..';
 
 import {
   IndicesAndDataStreamsField,
@@ -132,7 +132,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
   );
 
   return (
-    <div className="snapshotRestore__policyForm__stepSettings">
+    <div>
       {/* Step title and doc link */}
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>

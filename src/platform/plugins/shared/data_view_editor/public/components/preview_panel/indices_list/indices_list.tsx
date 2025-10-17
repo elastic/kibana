@@ -25,10 +25,12 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { Pager } from '@elastic/eui';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { INDEX_PATTERN_TYPE, MatchedItem, Tag } from '@kbn/data-views-plugin/public';
+import type { MatchedItem, Tag } from '@kbn/data-views-plugin/public';
+import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { RollupDeprecationTooltip } from '@kbn/rollup';
 
 export interface IndicesListProps {
@@ -130,7 +132,14 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
     const paginationControls =
       pageCount > 1 ? (
         <EuiFlexItem grow={false}>
-          <EuiPagination pageCount={pageCount} activePage={page} onPageClick={this.onChangePage} />
+          <EuiPagination
+            pageCount={pageCount}
+            activePage={page}
+            onPageClick={this.onChangePage}
+            aria-label={i18n.translate('indexPatternEditor.pagination.ariaLabel', {
+              defaultMessage: 'Indices list pagination',
+            })}
+          />
         </EuiFlexItem>
       ) : null;
 

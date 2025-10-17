@@ -12,7 +12,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { ENROLLMENT_API_KEYS_INDEX } from '@kbn/fleet-plugin/common/constants';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -84,14 +84,14 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/fleet/agents');
       await fleetAndAgents.setup();
     });
     after(async () => {
       // Wait before agent status is updated
       await new Promise((resolve) => setTimeout(resolve, AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS));
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/agents');
     });
 
     describe('In default space', () => {

@@ -13,10 +13,11 @@ import Fsp from 'fs/promises';
 import dedent from 'dedent';
 
 import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
-import { SomeDevLog } from '@kbn/some-dev-log';
+import type { SomeDevLog } from '@kbn/some-dev-log';
 import { getPackages } from '@kbn/repo-packages';
 
-import { YarnLock, stringifyLockFile } from './yarn_lock';
+import type { YarnLock } from './yarn_lock';
+import { stringifyLockFile } from './yarn_lock';
 import { findProductionDependencies } from './find_production_dependencies';
 
 /**

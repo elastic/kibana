@@ -7,16 +7,14 @@
 
 import expect from '@kbn/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/analytics/schemas/chat_feedback';
+import type { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/analytics/schemas/chat_feedback';
 import { pick } from 'lodash';
 import { parse as parseCookie } from 'tough-cookie';
 import { kbnTestConfig } from '@kbn/test';
 import { systemMessageSorted } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/conversation';
-import {
-  createLlmProxy,
-  LlmProxy,
-} from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { LlmProxy } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
+import { createLlmProxy } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { editor } from '../../common/users/users';
 import { deleteConnectors } from '../../common/connectors';
@@ -235,7 +233,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   messages.map((msg) => msg.message);
 
                 expect(systemMessage).to.contain(
-                  'You are a helpful assistant for Elastic Observability. Your goal is '
+                  '# System Prompt: Elastic Observability Assistant\n\n<RoleAndGoal>\n\nYou are a specialized, helpful assistant for Elastic Observability users.'
                 );
 
                 expect(systemMessageSorted(systemMessage!)).to.eql(

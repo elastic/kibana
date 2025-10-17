@@ -9,15 +9,15 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { CoreStart } from '@kbn/core/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 
-import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
+import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { CONTENT_ID } from '../../common';
-import { LinksStartDependencies } from '../plugin';
+import type { LinksStartDependencies } from '../plugin';
 
 export let coreServices: CoreStart;
 export let dashboardServices: DashboardStart;

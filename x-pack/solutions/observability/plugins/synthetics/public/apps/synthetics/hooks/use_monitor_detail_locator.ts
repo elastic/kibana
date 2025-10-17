@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { TimeRange } from '@kbn/es-query';
+import { type TimeRange } from '@kbn/es-query';
 import { getMonitorSpaceToAppend } from './use_edit_monitor_locator';
 import { useKibanaSpace } from '../../../hooks/use_kibana_space';
-import { ClientPluginsStart } from '../../../plugin';
+import type { ClientPluginsStart } from '../../../plugin';
 
 export interface MonitorDetailLocatorParams {
   configId: string;
@@ -19,6 +20,7 @@ export interface MonitorDetailLocatorParams {
   timeRange?: TimeRange;
   spaces?: string[];
   tabId?: string;
+  useAbsoluteDate?: boolean;
 }
 
 export function useMonitorDetailLocator({
@@ -27,26 +29,44 @@ export function useMonitorDetailLocator({
   spaces,
   timeRange,
   tabId,
+  useAbsoluteDate = false,
 }: MonitorDetailLocatorParams) {
   const { space } = useKibanaSpace();
   const [monitorUrl, setMonitorUrl] = useState<string | undefined>(undefined);
-  const locator = useKibana<ClientPluginsStart>().services?.share?.url.locators.get(
-    syntheticsMonitorDetailLocatorID
-  );
+  const locators = useKibana<ClientPluginsStart>().services?.share?.url.locators;
+  const locator = useMemo(() => {
+    return locators?.get(syntheticsMonitorDetailLocatorID);
+  }, [locators]);
 
   useEffect(() => {
-    async function generateUrl() {
-      const url = locator?.getRedirectUrl({
-        configId,
-        locationId,
-        timeRange,
-        tabId,
-        ...getMonitorSpaceToAppend(space, spaces),
-      });
-      setMonitorUrl(url);
-    }
-    generateUrl();
-  }, [locator, configId, locationId, spaces, space?.id, space, timeRange, tabId]);
+    const url = locator?.getRedirectUrl({
+      configId,
+      locationId,
+      timeRange: useAbsoluteDate ? convertToAbsoluteTimeRange(timeRange) : timeRange,
+      tabId,
+      ...getMonitorSpaceToAppend(space, spaces),
+    });
+    setMonitorUrl(url);
+  }, [locator, configId, locationId, spaces, space, timeRange, tabId, useAbsoluteDate]);
 
   return monitorUrl;
 }
+
+export const convertToAbsoluteTimeRange = (timeRange?: TimeRange): TimeRange | undefined => {
+  if (!timeRange) {
+    return;
+  }
+
+  const absRange = getAbsoluteTimeRange(
+    {
+      from: timeRange.from,
+      to: timeRange.to,
+    },
+    { forceNow: new Date() }
+  );
+
+  return {
+    from: absRange.from,
+    to: absRange.to,
+  };
+};

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -15,6 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const retry = getService('retry');
   const security = getService('security');
+  const es = getService('es');
 
   describe('Home page', function () {
     before(async () => {
@@ -65,6 +66,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.indexManagement.setCreateIndexMode('Lookup');
         await pageObjects.indexManagement.clickCreateIndexSaveButton();
         await pageObjects.indexManagement.expectIndexToExist(testIndexName);
+      });
+
+      after(async () => {
+        try {
+          await es.indices.delete({ index: testIndexName });
+        } catch (e) {
+          log.debug(`Index cleanup failed for ${testIndexName}: ${e.message}`);
+        }
       });
     });
 
@@ -123,7 +132,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('Enrich policies', () => {
       it('renders the enrich policies tab', async () => {
-        // Navigate to the component templates tab
+        // Navigate to the enrich policies tab
         await pageObjects.indexManagement.changeTabs('enrich_policiesTab');
 
         await pageObjects.header.waitUntilLoadingHasFinished();

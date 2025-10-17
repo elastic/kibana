@@ -16,7 +16,7 @@ import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
 import { waitForActiveRule } from './helpers/wait_for_active_rule';
 import { createApmRule } from './helpers/alerting_api_helper';
 import { cleanupRuleAndAlertState } from './helpers/cleanup_rule_and_alert_state';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

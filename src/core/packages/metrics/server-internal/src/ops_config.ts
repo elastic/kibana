@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import type { Duration } from 'moment';
 
 /** @internal */

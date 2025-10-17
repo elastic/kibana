@@ -108,6 +108,7 @@ export class EncryptedSavedObjectsPlugin
       service,
       savedObjects: core.savedObjects,
       getStartServices: core.getStartServices,
+      logger: this.logger,
     });
 
     // Expose the key rotation route for both stateful and serverless environments

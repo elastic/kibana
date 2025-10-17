@@ -8,8 +8,8 @@
 import { evaluate } from '@kbn/tinymath';
 import { groupBy, zipObject, omit, uniqBy } from 'lodash';
 import moment from 'moment';
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import {
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type {
   Datatable,
   DatatableRow,
   PointSeries,

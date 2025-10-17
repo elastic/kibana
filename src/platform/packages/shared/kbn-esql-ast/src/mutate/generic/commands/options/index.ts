@@ -8,9 +8,9 @@
  */
 
 import { Builder } from '../../../../builder';
-import { ESQLAstQueryExpression, ESQLCommand, ESQLCommandOption } from '../../../../types';
+import type { ESQLAstQueryExpression, ESQLCommand, ESQLCommandOption } from '../../../../types';
 import { Visitor } from '../../../../visitor';
-import { Predicate } from '../../../types';
+import type { Predicate } from '../../../types';
 import * as commands from '..';
 
 /**

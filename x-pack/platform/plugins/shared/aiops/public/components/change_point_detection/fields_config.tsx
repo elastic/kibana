@@ -479,8 +479,8 @@ const FieldPanel: FC<FieldPanelProps> = ({
     timeRange,
   ]);
 
-  const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId, newTitle, newDescription }) => {
+  const onSaveCallback = useCallback<SaveModalDashboardProps['onSave']>(
+    async ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
 
       const embeddableInput: Partial<ChangePointEmbeddableState> = {
@@ -506,8 +506,8 @@ const FieldPanel: FC<FieldPanelProps> = ({
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },
@@ -748,6 +748,7 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
       {cardinalityExceeded ? (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.aiops.changePointDetection.cardinalityWarningTitle', {
               defaultMessage: 'Analysis has been limited',
             })}

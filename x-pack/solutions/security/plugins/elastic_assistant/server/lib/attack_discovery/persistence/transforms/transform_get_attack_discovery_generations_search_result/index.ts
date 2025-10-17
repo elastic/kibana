@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
-import { GetAttackDiscoveryGenerationsResponse } from '@kbn/elastic-assistant-common';
+import type { GetAttackDiscoveryGenerationsResponse } from '@kbn/elastic-assistant-common';
 
 import { GetAttackDiscoveryGenerationsSearchResult } from '../../get_attack_discovery_generations_search_result';
 import { getGenerationStatusOrThrow } from './get_generation_status_or_throw';

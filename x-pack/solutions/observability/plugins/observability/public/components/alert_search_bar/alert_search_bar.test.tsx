@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, waitFor } from '@testing-library/react';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
@@ -15,7 +15,7 @@ import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { ObservabilityAlertSearchBar } from './alert_search_bar';
-import { ObservabilityAlertSearchBarProps, Services } from './types';
+import type { ObservabilityAlertSearchBarProps, Services } from './types';
 
 const getAlertsSearchBarMock = jest.fn();
 const ALERT_SEARCH_BAR_DATA_TEST_SUBJ = 'alerts-search-bar';

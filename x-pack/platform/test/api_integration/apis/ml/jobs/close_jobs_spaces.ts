@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { JOB_STATE } from '@kbn/ml-plugin/common/constants/states';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 import { USER } from '../../../services/ml/security_common';
 

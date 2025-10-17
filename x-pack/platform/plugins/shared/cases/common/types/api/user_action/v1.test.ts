@@ -8,6 +8,7 @@
 import { AttachmentType } from '../../domain/attachment/v1';
 import { UserActionTypes } from '../../domain/user_action/action/v1';
 import {
+  type CaseUserActionStatsResponse,
   CaseUserActionStatsResponseRt,
   CaseUserActionStatsRt,
   UserActionFindRequestRt,
@@ -115,10 +116,13 @@ describe('User actions APIs', () => {
 
   describe('User actions stats API', () => {
     describe('CaseUserActionStatsResponseRt', () => {
-      const defaultRequest = {
+      const defaultRequest: CaseUserActionStatsResponse = {
         total: 15,
+        total_deletions: 0,
         total_comments: 10,
+        total_comment_deletions: 0,
         total_other_actions: 5,
+        total_other_action_deletions: 0,
       };
 
       it('has expected attributes in request', () => {
@@ -141,10 +145,13 @@ describe('User actions APIs', () => {
     });
 
     describe('CaseUserActionStatsRt', () => {
-      const defaultRequest = {
+      const defaultRequest: CaseUserActionStatsResponse = {
         total: 100,
+        total_deletions: 0,
         total_comments: 60,
+        total_comment_deletions: 0,
         total_other_actions: 40,
+        total_other_action_deletions: 0,
       };
 
       it('has expected attributes in request', () => {

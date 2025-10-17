@@ -26,10 +26,10 @@ describe('JOIN Validation', () => {
 
       test('raises error, when index is not suitable for JOIN command', () => {
         joinExpectErrors('FROM index | LEFT JOIN index ON stringField', [
-          '[index] index is not a valid JOIN index. Please use a "lookup" mode index JOIN commands.',
+          '"index" is not a valid JOIN index. Please use a "lookup" mode index.',
         ]);
         joinExpectErrors('FROM index | LEFT JOIN non_existing_index_123 ON stringField', [
-          '[non_existing_index_123] index is not a valid JOIN index. Please use a "lookup" mode index JOIN commands.',
+          '"non_existing_index_123" is not a valid JOIN index. Please use a "lookup" mode index.',
         ]);
       });
 

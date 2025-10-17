@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import * as http from 'http';
+import type * as http from 'http';
 import expect from '@kbn/expect';
 import { type Agent, FLEET_ELASTIC_AGENT_PACKAGE, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupMockServer } from './helpers/mock_agentless_api';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
       mockApiServer = await mockAgentlessApiService.listen(8089); // Start the agentless api mock server on port 8089
       // Ensure fleet default outputs are setup
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/fleet/agents');
       const getPkRes = await supertest
         .get(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}`)
         .set('kbn-xsrf', 'xxxx')
@@ -44,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
     after(async () => {
       mockApiServer.close();
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/agents');
       await supertest
         .delete(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}/${elasticAgentpkgVersion}`)
         .set('kbn-xsrf', 'xxxx');
@@ -384,8 +384,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('advanced search params', () => {
       afterEach(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/agents');
+        await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/fleet/agents');
       });
 
       it('should return correct results with searchAfter parameter', async () => {

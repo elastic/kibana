@@ -30,6 +30,7 @@ components:
       enum:
         - incompatible_antivirus
         - noisy_process_tree
+        - policy_response_failure
 
     DefendInsight:
       type: object
@@ -45,6 +46,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DefendInsightEvent'
+        remediation:
+          description: The suggested remediation for the insight
+          type: object
+          additionalProperties: true
 
     DefendInsights:
       type: array

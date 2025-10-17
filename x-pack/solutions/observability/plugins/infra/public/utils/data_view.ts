@@ -26,7 +26,7 @@ interface DataViewAttributes {
   name?: string;
 }
 
-export const resolveDataView = ({
+export const resolveDataView = async ({
   dataViewId,
   dataViewsService,
 }: {
@@ -34,7 +34,7 @@ export const resolveDataView = ({
   dataViewsService: DataViewsContract;
 }) => {
   try {
-    return resolvePersistedDataView({ dataViewsService, dataViewId });
+    return await resolvePersistedDataView({ dataViewsService, dataViewId });
   } catch {
     return resolveAdHocDataView({
       dataViewsService,

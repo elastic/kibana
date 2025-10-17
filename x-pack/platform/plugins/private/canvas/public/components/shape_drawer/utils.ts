@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SvgConfig } from './types';
+import type { SvgConfig } from './types';
 
 export const getDefaultShapeData = (): SvgConfig => ({
   viewBox: {

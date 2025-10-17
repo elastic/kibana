@@ -1,0 +1,15 @@
+title: Artifacts
+description: Links to related assets for the SLO
+type: object
+properties:
+  dashboards:
+    description: Array of dashboard references
+    type: array
+    items:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          description: Dashboard saved-object id
+          type: string

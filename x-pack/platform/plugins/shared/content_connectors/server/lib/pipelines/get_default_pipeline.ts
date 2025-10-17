@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
-import { CURRENT_CONNECTORS_INDEX, IngestPipelineParams } from '@kbn/search-connectors';
+import type { IngestPipelineParams } from '@kbn/search-connectors';
+import { CURRENT_CONNECTORS_INDEX } from '@kbn/search-connectors';
 
 import { DEFAULT_PIPELINE_VALUES } from '../../../common/constants';
 
-import { DefaultConnectorsPipelineMeta } from '../../../common/constants';
+import type { DefaultConnectorsPipelineMeta } from '../../../common/constants';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
 export const getDefaultPipeline = async (

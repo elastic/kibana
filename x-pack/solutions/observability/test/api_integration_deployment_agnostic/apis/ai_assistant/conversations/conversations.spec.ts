@@ -7,10 +7,8 @@
 
 import expect from '@kbn/expect';
 import { merge, omit } from 'lodash';
-import {
-  type ConversationUpdateRequest,
-  Conversation,
-} from '@kbn/observability-ai-assistant-plugin/common/types';
+import type { Conversation } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { type ConversationUpdateRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { SupertestReturnType } from '../../../services/observability_ai_assistant_api';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { clearConversations, conversationCreate, createConversation } from '../utils/conversation';

@@ -55,7 +55,7 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
-import { SavedObjectsRepository } from '../lib/repository';
+import type { SavedObjectsRepository } from '../lib/repository';
 
 export const DEFAULT_SPACE = 'default';
 

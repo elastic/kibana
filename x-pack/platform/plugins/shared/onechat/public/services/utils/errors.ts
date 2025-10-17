@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { MonoTypeOperatorFunction, catchError, throwError } from 'rxjs';
+import type { MonoTypeOperatorFunction } from 'rxjs';
+import { catchError, throwError } from 'rxjs';
 import { isSSEError } from '@kbn/sse-utils';
-import { createOnechatError, OnechatErrorCode } from '@kbn/onechat-common';
+import type { OnechatErrorCode } from '@kbn/onechat-common';
+import { createOnechatError } from '@kbn/onechat-common';
 
 /**
  * Convert SSE errors to Onechat errors and rethrow them.

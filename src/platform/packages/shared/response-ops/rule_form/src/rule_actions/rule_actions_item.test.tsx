@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { RuleType } from '@kbn/alerting-types';
+import type { RuleType } from '@kbn/alerting-types';
 import type { ActionTypeModel, RuleTypeModel } from '@kbn/alerts-ui-shared';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import {
@@ -21,8 +21,8 @@ import {
 import { RuleActionsItem } from './rule_actions_item';
 import userEvent from '@testing-library/user-event';
 
-import { RuleActionsSettingsProps } from './rule_actions_settings';
-import { RuleActionsMessageProps } from './rule_actions_message';
+import type { RuleActionsSettingsProps } from './rule_actions_settings';
+import type { RuleActionsMessageProps } from './rule_actions_message';
 
 jest.mock('../hooks', () => ({
   useRuleFormState: jest.fn(),

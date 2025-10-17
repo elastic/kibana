@@ -9,13 +9,14 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
-import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
+import type { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<FatalErrorsSetup> = {
+  const setupContract: jest.Mocked<FatalErrorsSetup> = lazyObject({
     add: jest.fn<never, any>(),
     catch: jest.fn(),
-  };
+  });
 
   return setupContract;
 };
@@ -23,13 +24,11 @@ const createStartContractMock = createSetupContractMock;
 
 type FatalErrorsServiceContract = PublicMethodsOf<FatalErrorsService>;
 const createMock = () => {
-  const mocked: jest.Mocked<FatalErrorsServiceContract> = {
-    setup: jest.fn(),
-    start: jest.fn(),
-  };
+  const mocked: jest.Mocked<FatalErrorsServiceContract> = lazyObject({
+    setup: jest.fn().mockReturnValue(createSetupContractMock()),
+    start: jest.fn().mockReturnValue(createStartContractMock()),
+  });
 
-  mocked.setup.mockReturnValue(createSetupContractMock());
-  mocked.start.mockReturnValue(createStartContractMock());
   return mocked;
 };
 

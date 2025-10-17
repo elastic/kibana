@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { CustomLink } from '@kbn/apm-plugin/common/custom_link/custom_link_types';
-import { ApmApiClientKey, UserApiClient } from '../../../common/config';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { ApmApiError } from '../../../common/apm_api_supertest';
+import type { CustomLink } from '@kbn/apm-plugin/common/custom_link/custom_link_types';
+import type { ApmApiClientKey, UserApiClient } from '../../../common/config';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { ApmApiError } from '../../../common/apm_api_supertest';
 
 export default function customLinksTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { CommentsService, CommentServiceActions } from './comments_service';
-import { ClientMessage } from '@kbn/elastic-assistant';
-import { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { CommentServiceActions } from './comments_service';
+import { CommentsService } from './comments_service';
+import type { ClientMessage } from '@kbn/elastic-assistant';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 describe('CommentsService', () => {
   it('start returns correct object', () => {

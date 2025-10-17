@@ -40,7 +40,7 @@ describe('Service inventory - header filters', () => {
   describe('Filtering by kuerybar', () => {
     it('filters by service.name with special characters', () => {
       cy.visitKibana(serviceOverviewHref);
-      cy.contains('Services');
+      cy.contains('Service inventory');
       cy.contains('opbeans-node');
       cy.contains('service 1');
       cy.getByTestSubj('apmUnifiedSearchBar')

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
@@ -22,10 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       await log.debug('Navigating to the index templates tab');
       await security.testUser.setRoles(['index_management_user']);
-      await pageObjects.common.navigateToApp('indexManagement');
-      // Navigate to the templates tab
-      await pageObjects.indexManagement.changeTabs('templatesTab');
-      await pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.indexManagement.navigateToIndexManagementTab('templates');
     });
 
     afterEach(async () => {
@@ -112,9 +109,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           // Close Flyout to return to templates tab
           await testSubjects.click('closeDetailsButton');
         } else {
-          // Comeback to templates tab
-          await pageObjects.common.navigateToApp('indexManagement');
-          await pageObjects.indexManagement.changeTabs('templatesTab');
+          await pageObjects.indexManagement.navigateToIndexManagementTab('templates');
         }
       });
 
@@ -243,11 +238,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             },
           },
         });
-
-        // Navigate to the index management
-        await pageObjects.common.navigateToApp('indexManagement');
-        // Navigate to the templates tab
-        await pageObjects.indexManagement.changeTabs('templatesTab');
+        await pageObjects.indexManagement.navigateToIndexManagementTab('templates');
       });
 
       after(async () => {

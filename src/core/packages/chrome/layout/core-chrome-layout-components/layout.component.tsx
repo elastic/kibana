@@ -13,10 +13,10 @@ import { LayoutBanner } from './banner';
 import { LayoutNavigation } from './navigation';
 import { LayoutFooter } from './footer';
 import { LayoutHeader } from './header';
-import { LayoutSidebar, LayoutSidebarPanel } from './sidebar';
+import { LayoutSidebar } from './sidebar';
 
 import { useLayoutStyles } from './layout.styles';
-import { ChromeLayoutSlots, Slot } from './layout.types';
+import type { ChromeLayoutSlots, Slot } from './layout.types';
 import { useLayoutState } from './layout_state_context';
 
 export interface ChromeLayoutComponentProps extends ChromeLayoutSlots {
@@ -53,11 +53,6 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
     <LayoutSidebar>{renderSlot(props.sidebar)}</LayoutSidebar>
   ) : null;
 
-  const sidebarPanel =
-    layoutState.hasSidebar && layoutState.hasSidebarPanel ? (
-      <LayoutSidebarPanel>{renderSlot(props.sidebarPanel)}</LayoutSidebarPanel>
-    ) : null;
-
   const header = layoutState.hasHeader ? (
     <LayoutHeader>{renderSlot(props.header)}</LayoutHeader>
   ) : null;
@@ -83,7 +78,6 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
       {application}
       {footer}
       {sidebar}
-      {sidebarPanel}
     </div>
   );
 };

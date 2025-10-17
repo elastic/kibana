@@ -14,7 +14,7 @@ import {
   DateNanosFormat,
   formatWithNanos,
 } from '../../../common/converters/date_nanos_shared';
-import { TextContextTypeConvert } from '../../../common/types';
+import type { TextContextTypeConvert } from '../../../common/types';
 
 class DateNanosFormatServer extends DateNanosFormat {
   textConvert: TextContextTypeConvert = (val: string | number, options) => {

@@ -22,7 +22,8 @@ import { ElasticsearchQueryViewer } from './query_viewer';
 import { ElasticsearchQueryOutput } from './query_output';
 import { QuerySidePanel } from './query_side_panel';
 import { useElasticsearchQuery } from '../../hooks/use_elasticsearch_query';
-import { PlaygroundForm, PlaygroundFormFields, PlaygroundPageMode } from '../../types';
+import type { PlaygroundForm } from '../../types';
+import { PlaygroundFormFields, PlaygroundPageMode } from '../../types';
 import {
   FullHeight,
   QueryViewContainer,

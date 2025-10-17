@@ -9,17 +9,17 @@
 
 import React, { useMemo } from 'react';
 import { SourceDocument, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type { ShouldShowFieldInTableHandler, DataTableRecord } from '@kbn/discover-utils';
 import {
-  ShouldShowFieldInTableHandler,
   getLogDocumentOverview,
   getMessageFieldWithFallbacks,
   getLogLevelCoalescedValue,
   getLogLevelColor,
   LOG_LEVEL_REGEX,
-  DataTableRecord,
 } from '@kbn/discover-utils';
 import { MESSAGE_FIELD } from '@kbn/discover-utils';
-import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { makeHighContrastColor, useEuiTheme } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { formatJsonDocumentForContent } from './utils';
 
@@ -77,9 +77,14 @@ const getHighlightedMessage = (
     const bgColor = getLogLevelColor(coalesced, euiTheme);
     if (!bgColor) return match;
 
-    const color = isDarkTheme ? euiTheme.colors.plainDark : euiTheme.colors.plainLight;
+    // Use EUI's makeHighContrastColor utility to calculate appropriate text color
+    // This function automatically determines the best contrasting color based on WCAG standards
+    const textColor = makeHighContrastColor(
+      isDarkTheme ? euiTheme.colors.ghost : euiTheme.colors.ink, // preferred foreground color
+      4.5 // WCAG AA contrast ratio (default in EUI)
+    )(bgColor);
 
-    return `<span style="color:${color};background-color:${bgColor};border-radius:2px;padding:0 2px;">${match}</span>`;
+    return `<span style="color:${textColor};background-color:${bgColor};border-radius:2px;padding:0 2px;">${match}</span>`;
   });
 };
 

@@ -18,7 +18,7 @@ import {
   getAlertSummarySearchEsMock,
   getCreateAlertSummarySchemaMock,
 } from '../../__mocks__/alert_summary.mock';
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/src/authentication/authenticated_user.mock';
 
 const mockEsSearchResponse = getAlertSummarySearchEsMock();

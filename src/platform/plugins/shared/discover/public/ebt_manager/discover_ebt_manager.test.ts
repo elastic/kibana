@@ -14,6 +14,7 @@ import { registerDiscoverEBTManagerAnalytics } from './discover_ebt_manager_regi
 import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { NON_ECS_FIELD } from './scoped_discover_ebt_manager';
 
 jest.mock('@kbn/ebt-tools', () => ({
   ...jest.requireActual('@kbn/ebt-tools'),
@@ -86,7 +87,8 @@ describe('DiscoverEBTManager', () => {
           fieldName: {
             type: 'keyword',
             _meta: {
-              description: "Field name if it's a part of ECS schema",
+              description:
+                "Field name if it is part of ECS schema. For non ECS compliant fields, there's a <non-ecs> placeholder",
               optional: true,
             },
           },
@@ -95,6 +97,29 @@ describe('DiscoverEBTManager', () => {
             _meta: {
               description: "Operation type when a filter is added i.e. '+', '-', '_exists_'",
               optional: true,
+            },
+          },
+        },
+      });
+
+      expect(coreSetupMock.analytics.registerEventType).toHaveBeenCalledWith({
+        eventType: 'discover_query_fields_usage',
+        schema: {
+          eventName: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'The name of the event that is tracked in the metrics i.e. kqlQuery, esqlQuery',
+            },
+          },
+          fieldNames: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description:
+                  "List of field names if they are part of ECS schema. For non ECS compliant fields, there's a <non-ecs> placeholder",
+              },
             },
           },
         },
@@ -287,7 +312,8 @@ describe('DiscoverEBTManager', () => {
       });
 
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenLastCalledWith('discover_field_usage', {
-        eventName: 'dataTableSelection', // non-ECS fields would not be included in properties
+        eventName: 'dataTableSelection',
+        fieldName: NON_ECS_FIELD, // non-ECS fields would be tracked with a "<non-ecs>" label
       });
     });
 
@@ -316,7 +342,8 @@ describe('DiscoverEBTManager', () => {
       });
 
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenLastCalledWith('discover_field_usage', {
-        eventName: 'dataTableRemoval', // non-ECS fields would not be included in properties
+        eventName: 'dataTableRemoval',
+        fieldName: NON_ECS_FIELD, // non-ECS fields would be tracked with a "<non-ecs>" label
       });
     });
 
@@ -348,7 +375,8 @@ describe('DiscoverEBTManager', () => {
       });
 
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenLastCalledWith('discover_field_usage', {
-        eventName: 'filterAddition', // non-ECS fields would not be included in properties
+        eventName: 'filterAddition',
+        fieldName: NON_ECS_FIELD, // non-ECS fields would be tracked with a "<non-ecs>" label
         filterOperation: '_exists_',
       });
     });
@@ -562,6 +590,278 @@ describe('DiscoverEBTManager', () => {
         },
         ['profile1', 'profile2'],
       ]);
+    });
+  });
+
+  describe('trackSubmittingQuery', () => {
+    it('should track ES|QL query field usage', async () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      const esqlQuery = {
+        esql: 'FROM logs-synth-default | WHERE test == "test value"',
+      };
+
+      await scopedManager.trackSubmittingQuery({
+        query: esqlQuery,
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+        'discover_query_fields_usage',
+        {
+          eventName: 'esqlQuery',
+          fieldNames: ['test'],
+        }
+      );
+    });
+
+    it('should track KQL query field usage', async () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      const kqlQuery = {
+        query: 'test: "test value"',
+        language: 'kuery',
+      };
+
+      await scopedManager.trackSubmittingQuery({
+        query: kqlQuery,
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+        'discover_query_fields_usage',
+        {
+          eventName: 'kqlQuery',
+          fieldNames: ['test'],
+        }
+      );
+    });
+
+    it('should track free text search for KQL queries without field names', async () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      const freeTextQuery = {
+        query: 'error occurred',
+        language: 'kuery',
+      };
+
+      await scopedManager.trackSubmittingQuery({
+        query: freeTextQuery,
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+        'discover_query_fields_usage',
+        {
+          eventName: 'kqlQuery',
+          fieldNames: ['__FREE_TEXT__'],
+        }
+      );
+    });
+
+    it('should track both free text and field names for KQL queries', async () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      const freeTextQuery = {
+        query: 'test: "test value" and error occurred',
+        language: 'kuery',
+      };
+
+      await scopedManager.trackSubmittingQuery({
+        query: freeTextQuery,
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+        'discover_query_fields_usage',
+        {
+          eventName: 'kqlQuery',
+          fieldNames: ['test', '__FREE_TEXT__'],
+        }
+      );
+    });
+
+    it('should not track when query is undefined', async () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      await scopedManager.trackSubmittingQuery({
+        query: undefined,
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).not.toHaveBeenCalled();
+    });
+
+    it('should not track empty ES|QL queries', async () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      const emptyEsqlQuery = {
+        esql: '',
+      };
+
+      await scopedManager.trackSubmittingQuery({
+        query: emptyEsqlQuery,
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).not.toHaveBeenCalled();
+    });
+
+    it('should not track empty string queries', async () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      const emptyQuery = {
+        query: '',
+        language: 'kuery' as const,
+      };
+
+      await scopedManager.trackSubmittingQuery({
+        query: emptyQuery,
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).not.toHaveBeenCalled();
+    });
+
+    it('should track non-ECS compliant fields with <non-ecs> placeholder instead of a field name', async () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      const kqlQuery = {
+        query: 'test: "test value" AND test2: "test2 value"',
+        language: 'kuery',
+      };
+
+      await scopedManager.trackSubmittingQuery({
+        query: kqlQuery,
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+        'discover_query_fields_usage',
+        {
+          eventName: 'kqlQuery',
+          fieldNames: ['test', NON_ECS_FIELD],
+        }
+      );
+
+      const esqlQuery = {
+        esql: 'FROM logs-synth-default | WHERE test2 == "test2 value"',
+      };
+
+      await scopedManager.trackSubmittingQuery({
+        query: esqlQuery,
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+        'discover_query_fields_usage',
+        {
+          eventName: 'esqlQuery',
+          fieldNames: [NON_ECS_FIELD],
+        }
+      );
+    });
+
+    it('should deduplicate fields used more than once', async () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      const esqlQuery = {
+        esql: 'FROM logs-synth-default | WHERE test == "test value" AND test !== "another test value"',
+      };
+
+      await scopedManager.trackSubmittingQuery({
+        query: esqlQuery,
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+        'discover_query_fields_usage',
+        {
+          eventName: 'esqlQuery',
+          fieldNames: ['test'],
+        }
+      );
+    });
+
+    it('should extract KQL queries embedded in ES|QL query', async () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      const esqlQuery = {
+        esql: 'FROM logs-synth-default | WHERE KQL("""test:"test-value" """)',
+      };
+
+      await scopedManager.trackSubmittingQuery({
+        query: esqlQuery,
+        fieldsMetadata,
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
+        'discover_query_fields_usage',
+        {
+          eventName: 'esqlQuery',
+          fieldNames: ['test'],
+        }
+      );
     });
   });
 

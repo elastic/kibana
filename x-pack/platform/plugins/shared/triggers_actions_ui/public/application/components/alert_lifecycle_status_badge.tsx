@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertLifecycleStatusBadge, AlertLifecycleStatusBadgeProps } from '@kbn/alerts-ui-shared';
+import type { AlertLifecycleStatusBadgeProps } from '@kbn/alerts-ui-shared';
+import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 
 export { AlertLifecycleStatusBadge };
 export type { AlertLifecycleStatusBadgeProps };

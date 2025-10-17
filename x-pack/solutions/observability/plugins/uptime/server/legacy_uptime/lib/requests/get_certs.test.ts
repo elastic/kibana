@@ -205,6 +205,14 @@ describe('getCerts', () => {
                   },
                   Object {
                     "range": Object {
+                      "@timestamp": Object {
+                        "gte": "now-7d",
+                        "lte": "now",
+                      },
+                    },
+                  },
+                  Object {
+                    "range": Object {
                       "monitor.timespan": Object {
                         "gte": 10000,
                         "lte": 10000,
@@ -217,7 +225,7 @@ describe('getCerts', () => {
                       "should": Array [
                         Object {
                           "range": Object {
-                            "tls.certificate_not_valid_after": Object {
+                            "tls.server.x509.not_after": Object {
                               "lte": 10000,
                             },
                           },

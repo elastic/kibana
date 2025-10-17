@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { BehaviorSubject, skip, Subject } from 'rxjs';
 import { fetch$ } from './fetch';
 
@@ -127,6 +127,58 @@ describe('onFetchContextChanged', () => {
         from: 'now-15m',
         to: 'now',
       });
+      subscription.unsubscribe();
+    });
+  });
+
+  describe('with isFetchPaused$', () => {
+    test('should skip emits while fetch is paused', async () => {
+      const isFetchPaused$ = new BehaviorSubject<boolean>(true);
+      const api = {
+        parentApi,
+        isFetchPaused$,
+      };
+      const subscription = fetch$(api).subscribe(onFetchMock);
+
+      parentApi.filters$.next([]);
+      parentApi.query$.next({ language: 'kquery', query: 'hello' });
+      parentApi.reload$.next();
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(onFetchMock).not.toHaveBeenCalled();
+
+      subscription.unsubscribe();
+    });
+
+    test('should emit most recent context when fetch becomes un-paused', async () => {
+      const isFetchPaused$ = new BehaviorSubject<boolean>(true);
+      const api = {
+        parentApi,
+        isFetchPaused$,
+      };
+      const subscription = fetch$(api).subscribe(onFetchMock);
+
+      parentApi.filters$.next([]);
+      parentApi.query$.next({ language: 'kquery', query: '' });
+      parentApi.reload$.next();
+
+      isFetchPaused$.next(false);
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(onFetchMock).toHaveBeenCalledTimes(1);
+      const fetchContext = onFetchMock.mock.calls[0][0];
+      expect(fetchContext).toEqual({
+        filters: [],
+        isReload: true,
+        query: {
+          language: 'kquery',
+          query: '',
+        },
+        searchSessionId: undefined,
+        timeRange: undefined,
+        timeslice: undefined,
+      });
+
       subscription.unsubscribe();
     });
   });

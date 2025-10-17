@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import type { EuiDataGridColumn, EuiDataGridProps } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 import type { IFieldSubType } from '@kbn/es-query';
-import type { ComponentType } from 'react';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { TimelineNonEcsData, BrowserFields } from '@kbn/timelines-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
-import { OnRowSelected } from '../../../components/data_table/types';
-import type { SortColumnTable } from '../data_table';
-import { SetEventsDeleted, SetEventsLoading } from '..';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
@@ -48,52 +41,3 @@ export type ColumnHeaderOptions = Pick<
   subType?: IFieldSubType;
   type?: string;
 };
-
-export interface HeaderActionProps {
-  width: number;
-  browserFields: BrowserFields;
-  columnHeaders: ColumnHeaderOptions[];
-  fieldBrowserOptions?: FieldBrowserOptions;
-  isEventViewer?: boolean;
-  isSelectAllChecked: boolean;
-  onSelectAll: ({ isSelected }: { isSelected: boolean }) => void;
-  showEventsSelect: boolean;
-  showSelectAllCheckbox: boolean;
-  sort: SortColumnTable[];
-  tabType: string;
-  timelineId: string;
-}
-
-export type HeaderCellRender = ComponentType | ComponentType<HeaderActionProps>;
-
-export type RowCellRender = EuiDataGridProps['renderCellValue'];
-
-export interface ActionProps {
-  action?: RowCellRender;
-  ariaRowindex: number;
-  checked: boolean;
-  columnId: string;
-  columnValues: string;
-  data: TimelineNonEcsData[];
-  disabled?: boolean;
-  ecsData: Ecs;
-  eventId: string;
-  eventIdToNoteIds?: Readonly<Record<string, string[]>>;
-  index: number;
-  isEventPinned?: boolean;
-  isEventViewer?: boolean;
-  loadingEventIds: Readonly<string[]>;
-  onEventDetailsPanelOpened: () => void;
-  onRowSelected: OnRowSelected;
-  onRuleChange?: () => void;
-  refetch?: () => void;
-  rowIndex: number;
-  setEventsDeleted: SetEventsDeleted;
-  setEventsLoading: SetEventsLoading;
-  showCheckboxes: boolean;
-  showNotes?: boolean;
-  tabType?: string;
-  timelineId: string;
-  toggleShowNotes?: () => void;
-  width?: number;
-}

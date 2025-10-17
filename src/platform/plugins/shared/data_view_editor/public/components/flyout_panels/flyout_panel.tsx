@@ -7,16 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  CSSProperties,
-  useState,
-  useLayoutEffect,
-  useCallback,
-  createContext,
-  useContext,
-} from 'react';
+import type { CSSProperties } from 'react';
+import React, { useState, useLayoutEffect, useCallback, createContext, useContext } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexItem, type UseEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, euiMaxBreakpoint, type UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import { useFlyoutPanelsContext } from './flyout_panels';
@@ -123,10 +117,14 @@ export const useFlyoutPanelContext = (): Context => {
 };
 
 const componentStyles = {
-  flyoutColumn: css({
-    height: '100%',
-    overflow: 'hidden',
-  }),
+  flyoutColumn: (themeContext: UseEuiTheme) =>
+    css({
+      height: '100%',
+      overflow: 'hidden',
+      [euiMaxBreakpoint(themeContext, 'm')]: {
+        height: 'auto',
+      },
+    }),
   flyoutPanel: ({ euiTheme }: UseEuiTheme) =>
     css({
       height: '100%',

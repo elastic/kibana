@@ -8,7 +8,8 @@
  */
 
 import { left } from 'fp-ts/Either';
-import { ImportQuerySchema, importQuerySchema } from '.';
+import type { ImportQuerySchema } from '.';
+import { importQuerySchema } from '.';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('importQuerySchema', () => {

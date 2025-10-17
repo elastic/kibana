@@ -16,12 +16,12 @@ import type {
   SlackApiActionParams,
   OpsgenieActionParams,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
-import { RuleAction as RuleActionOrig } from '@kbn/alerting-plugin/common';
+import type { RuleAction as RuleActionOrig } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 
 import { OpsgenieSubActions } from '@kbn/stack-connectors-plugin/common';
-import { ActionConnector, ActionTypeId } from './types';
-import { DefaultEmail } from '../runtime_types';
+import type { ActionConnector, ActionTypeId } from './types';
+import type { DefaultEmail } from '../runtime_types';
 
 export const SLACK_WEBHOOK_ACTION_ID: ActionTypeId = '.slack';
 export const SLACK_WEBAPI_ACTION_ID: ActionTypeId = '.slack_api';

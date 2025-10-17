@@ -84,7 +84,7 @@ export function TipsAndResources() {
     },
     {
       label: i18n.translate('xpack.apm.storageExplorer.resources.serviceInventory', {
-        defaultMessage: 'Service Inventory',
+        defaultMessage: 'Service inventory',
       }),
       href: router.link('/services', {
         query: {

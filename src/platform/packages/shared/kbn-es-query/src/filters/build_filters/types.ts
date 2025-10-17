@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExistsFilter } from './exists_filter';
-import { PhrasesFilter, PhrasesFilterMeta } from './phrases_filter';
-import { PhraseFilter, PhraseFilterMeta, PhraseFilterMetaParams } from './phrase_filter';
-import { RangeFilter, RangeFilterMeta, RangeFilterParams } from './range_filter';
-import { MatchAllFilter, MatchAllFilterMeta } from './match_all_filter';
+import type { ExistsFilter } from './exists_filter';
+import type { PhrasesFilter, PhrasesFilterMeta } from './phrases_filter';
+import type { PhraseFilter, PhraseFilterMeta, PhraseFilterMetaParams } from './phrase_filter';
+import type { RangeFilter, RangeFilterMeta, RangeFilterParams } from './range_filter';
+import type { MatchAllFilter, MatchAllFilterMeta } from './match_all_filter';
 
 /**
  * A common type for filters supported by this package

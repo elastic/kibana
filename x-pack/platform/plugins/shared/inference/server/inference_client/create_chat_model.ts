@@ -9,11 +9,11 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { InferenceChatModel, type InferenceChatModelParams } from '@kbn/inference-langchain';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { AnonymizationRule } from '@kbn/inference-common';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { AnonymizationRule } from '@kbn/inference-common';
 import { getConnectorById } from '../util/get_connector_by_id';
 import { createClient } from './create_client';
-import { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
+import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 
 export interface CreateChatModelOptions {
   request: KibanaRequest;
@@ -44,9 +44,7 @@ export const createChatModel = async ({
     esClient,
     logger,
   });
-  const actionsClient = await actions.getActionsClientWithRequest(request);
-  const connector = await getConnectorById({ connectorId, actionsClient });
-
+  const connector = await getConnectorById({ connectorId, actions, request });
   return new InferenceChatModel({
     ...chatModelOptions,
     chatComplete: client.chatComplete,

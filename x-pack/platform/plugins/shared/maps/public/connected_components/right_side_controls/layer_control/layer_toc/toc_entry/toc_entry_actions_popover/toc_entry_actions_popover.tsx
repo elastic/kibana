@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import { EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ILayer } from '../../../../../../classes/layers/layer';
+import type { ILayer } from '../../../../../../classes/layers/layer';
 import { TOCEntryButton } from '../toc_entry_button';
 import {
   EDIT_FEATURES_LABEL,

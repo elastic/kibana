@@ -44,6 +44,7 @@ const makeRequest = async ({
   url,
   newCase,
   path,
+  apiKey,
   username,
   password,
   ssl,
@@ -51,6 +52,7 @@ const makeRequest = async ({
   url: string;
   newCase: CasePostRequest;
   path: string;
+  apiKey?: string;
   username: string;
   password: string;
   ssl: boolean;
@@ -81,16 +83,29 @@ const makeRequest = async ({
       url: updatedUrl,
     };
   }
-  const kbnClient = new KbnClient({ ...kbnClientOptions });
+  const kbnClient = new KbnClient({
+    ...kbnClientOptions,
+  });
+
+  let headers: Record<string, string> = {};
+  if (apiKey) {
+    headers = {
+      Authorization: `ApiKey ${apiKey}`,
+    };
+  }
 
   return kbnClient
     .request({
       method: 'POST',
       path,
+      headers,
       body: newCase,
     })
     .then(({ data }) => data)
-    .catch(toolingLogger.error.bind(toolingLogger, `Error creating case: ${newCase.title}`));
+    .catch((error) => {
+      toolingLogger.error(`Error creating case: ${newCase.title}`);
+      toolingLogger.error(error);
+    });
 };
 
 const createCase = (counter: number, owner: string, reqId: string): CasePostRequest => ({
@@ -108,6 +123,7 @@ const createCase = (counter: number, owner: string, reqId: string): CasePostRequ
   },
   settings: {
     syncAlerts: false,
+    extractObservables: false,
   },
   owner: owner ?? 'cases',
   customFields: [],
@@ -123,11 +139,13 @@ const generateCases = async ({
   space,
   username,
   password,
+  apiKey,
   kibana,
   ssl,
 }: {
   cases: CasePostRequest[];
   space: string;
+  apiKey: string;
   username: string;
   password: string;
   kibana: string;
@@ -138,12 +156,19 @@ const generateCases = async ({
       `Creating ${cases.length} cases in ${space ? `space: ${space}` : 'default space'}`
     );
     const path = `${space ? `/s/${space}` : ''}/api/cases`;
+    const concurrency = 100;
     await pMap(
       cases,
-      (newCase) => {
-        return makeRequest({ url: kibana, path, newCase, username, password, ssl });
+      (newCase, index) => {
+        if (index % concurrency === 0) {
+          const caseCount = cases.length;
+          console.info(
+            `CREATING CASES ${index + 1} to ${Math.min(index + concurrency, caseCount)}`
+          );
+        }
+        return makeRequest({ url: kibana, path, newCase, username, password, apiKey, ssl });
       },
-      { concurrency: 100 }
+      { concurrency }
     );
   } catch (error) {
     toolingLogger.error(error);
@@ -177,6 +202,12 @@ const main = async () => {
         type: 'number',
         default: 10,
       },
+      apiKey: {
+        alias: 'apiKey',
+        describe: 'API key to pass as an authorization header. Necessary for serverless',
+        type: 'string',
+        default: '',
+      },
       owners: {
         alias: 'o',
         describe:
@@ -198,7 +229,7 @@ const main = async () => {
       },
     }).argv;
 
-    const { username, password, kibana, count, owners, space, ssl } = argv;
+    const { apiKey, username, password, kibana, count, owners, space, ssl } = argv;
     const numCasesToCreate = Number(count);
     const potentialOwners = new Set(['securitySolution', 'observability', 'cases']);
     const invalidOwnerProvided = owners.some((owner) => !potentialOwners.has(owner));
@@ -218,7 +249,7 @@ const main = async () => {
         return createCase(index + 1, owner, idForThisRequest);
       });
 
-    await generateCases({ cases, space, username, password, kibana, ssl });
+    await generateCases({ cases, space, username, password, kibana, apiKey, ssl });
   } catch (error) {
     console.log(error);
   }

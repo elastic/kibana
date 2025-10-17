@@ -372,7 +372,12 @@ describe('Authenticator', () => {
     let mockSessVal: SessionValue;
 
     beforeEach(() => {
-      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
+      mockOptions = getMockOptions({
+        providers: {
+          basic: { basic1: { order: 0 } },
+          oidc: { oidc1: { order: 1, realm: 'oidc' } },
+        },
+      });
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
@@ -399,6 +404,13 @@ describe('Authenticator', () => {
       ).rejects.toThrowError(
         'Login attempt should be an object with non-empty "provider.type" or "provider.name" property.'
       );
+
+      await expect(
+        authenticator.login(httpServerMock.createKibanaRequest(), {
+          provider: { type: 'oidc' },
+          value: undefined,
+        } as any)
+      ).rejects.toThrowError('Login "attempt.value" should not be empty.');
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
 

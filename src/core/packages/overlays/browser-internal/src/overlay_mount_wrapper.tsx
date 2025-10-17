@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { MountWrapper, MountWrapperComponentProps } from '@kbn/core-mount-utils-browser-internal';
+import type { MountWrapperComponentProps } from '@kbn/core-mount-utils-browser-internal';
+import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 
 export function OverlayMountWrapper(props: MountWrapperComponentProps) {
   // NOTE: The kbnOverlayMountWrapper className is used for allowing consumers to add additional styles

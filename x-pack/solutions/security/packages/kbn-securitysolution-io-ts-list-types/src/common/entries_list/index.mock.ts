@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntryList } from '.';
+import type { EntryList } from '.';
 import { FIELD, LIST, LIST_ID, OPERATOR, TYPE } from '../../constants/index.mock';
 
 export const getEntryListMock = (): EntryList => ({

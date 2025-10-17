@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 
-import { ManagementAppLocatorParams } from '@kbn/management-plugin/common/locator';
+import type { ManagementAppLocatorParams } from '@kbn/management-plugin/common/locator';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
-import { Dependencies } from './types';
+import type { Dependencies } from './types';
 import { ELASTICSEARCH_FEATURE, KIBANA_FEATURE } from './features';
 import {
   DatasetQualityDetailsLocatorDefinition,

@@ -9,7 +9,7 @@ import { Subject } from 'rxjs';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { LicensedEmailService } from './licensed_email_service';
-import type { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 import type { EmailService, HTMLEmail, PlainTextEmail, AttachmentEmail } from './types';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

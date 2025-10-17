@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-import { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
-import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchParams } from '@kbn/es-types';
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import {
@@ -23,7 +23,7 @@ import { pollSearch } from '../../../../common';
 import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
-import { SearchConfigSchema } from '../../../config';
+import type { SearchConfigSchema } from '../../../config';
 
 // `drop_null_columns` is going to change the response
 // now we get `all_columns` and `columns`
@@ -218,7 +218,11 @@ export const esqlAsyncSearchStrategyProvider = (
       logger.debug(`extend ${id} by ${keepAlive}`);
       try {
         await esClient.asCurrentUser.transport.request(
-          { method: 'GET', path: `/_query/async/${id}`, body: { id, keep_alive: keepAlive } },
+          {
+            method: 'GET',
+            path: `/_query/async/${id}`,
+            querystring: { id, keep_alive: keepAlive },
+          },
           { ...options.transport, signal: options.abortSignal, meta: true }
         );
       } catch (e) {

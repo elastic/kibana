@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import {
+import type {
   ChatCompleteAPI,
-  ChatCompletionEventType,
-  MessageRole,
   OutputAPI,
   OutputCompositeResponse,
-  OutputEventType,
   OutputOptions,
   ToolSchema,
+} from '@kbn/inference-common';
+import {
+  ChatCompletionEventType,
+  MessageRole,
+  OutputEventType,
   isToolValidationError,
   withoutTokenCountEvents,
 } from '@kbn/inference-common';
@@ -128,7 +130,15 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
                 {
                   role: MessageRole.Assistant as const,
                   content: '',
-                  toolCalls: error.meta.toolCalls!,
+                  toolCalls: error.meta.toolCalls?.map((toolCall) => {
+                    return {
+                      ...toolCall,
+                      function: {
+                        ...toolCall.function,
+                        arguments: JSON.parse(toolCall.function.arguments),
+                      },
+                    };
+                  }),
                 },
                 ...(error.meta.toolCalls?.map((toolCall) => {
                   return {

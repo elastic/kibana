@@ -17,8 +17,9 @@ import {
   EuiSpacer,
   EuiBadge,
 } from '@elastic/eui';
-import { IBasePath } from '@kbn/core-http-browser';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { Content } from './content';
 import { TutorialsCategory } from '../../../../common/constants';
 

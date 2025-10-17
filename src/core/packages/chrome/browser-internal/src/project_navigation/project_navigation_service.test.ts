@@ -11,6 +11,7 @@ import { createMemoryHistory } from 'history';
 import { firstValueFrom, lastValueFrom, take, BehaviorSubject, of, type Observable } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type {
   ChromeNavLinks,
@@ -88,6 +89,7 @@ const setup = ({
     http: httpServiceMock.createStartContract(),
     chromeBreadcrumbs$,
     logger,
+    featureFlags: coreFeatureFlagsMock.createStart(),
   });
 
   return { projectNavigation, history, chromeBreadcrumbs$, navLinksService, application };
@@ -899,7 +901,6 @@ describe('solution navigations', () => {
     icon: 'logoSolution2',
     homePage: 'app2',
     navigationTree$: of({ body: [{ type: 'navItem', link: 'app2' }] }),
-    sideNavComponent: () => null,
   };
 
   const solution3: SolutionNavigationDefinition<any> = {
@@ -985,10 +986,7 @@ describe('solution navigations', () => {
         projectNavigation.getActiveSolutionNavDefinition$().pipe(take(1))
       );
       expect(activeSolution).not.toBeNull();
-      // sideNavComponentGetter should not be exposed to consumers
-      expect('sideNavComponent' in activeSolution!).toBe(false);
-      const { sideNavComponent, ...rest } = solution2;
-      expect(activeSolution).toEqual(rest);
+      expect(activeSolution).toEqual(solution2);
     }
 
     projectNavigation.changeActiveSolutionNavigation('es'); // Set **after** the navs are registered

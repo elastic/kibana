@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  BehaviorSubject,
-  Observable,
-  combineLatest,
-  debounceTime,
-  map,
-  skipWhile,
-  switchMap,
-} from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, skipWhile, switchMap } from 'rxjs';
 
 import type { Filter, TimeRange } from '@kbn/es-query';
 import {
@@ -24,7 +17,7 @@ import {
   apiPublishesTimeslice,
 } from '@kbn/presentation-publishing';
 
-import type { ControlGroupChainingSystem } from '../../../common';
+import type { ControlsChainingSystem } from '@kbn/controls-schemas';
 
 export interface ChainingContext {
   chainingFilters?: Filter[] | undefined;
@@ -33,7 +26,7 @@ export interface ChainingContext {
 
 export function chaining$(
   uuid: string,
-  chainingSystem$: PublishingSubject<ControlGroupChainingSystem>,
+  chainingSystem$: PublishingSubject<ControlsChainingSystem>,
   controlsInOrder$: PublishingSubject<Array<{ id: string; type: string }>>,
   children$: PublishingSubject<{ [key: string]: unknown }>
 ) {

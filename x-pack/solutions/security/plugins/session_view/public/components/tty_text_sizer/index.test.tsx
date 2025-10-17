@@ -6,9 +6,11 @@
  */
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import type { AppContextTestRender } from '../../test';
+import { createAppRootMockRenderer } from '../../test';
 import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
-import { TTYTextSizer, TTYTextSizerDeps } from '.';
+import type { TTYTextSizerDeps } from '.';
+import { TTYTextSizer } from '.';
 
 describe('TTYTextSizer component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

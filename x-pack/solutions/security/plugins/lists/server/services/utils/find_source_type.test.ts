@@ -8,7 +8,7 @@
 import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getSearchEsListItemMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';
-import { SearchEsListItemSchema } from '../../schemas/elastic_response';
+import type { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 import { findSourceType } from './find_source_type';
 

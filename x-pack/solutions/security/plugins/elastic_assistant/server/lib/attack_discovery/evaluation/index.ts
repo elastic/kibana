@@ -7,19 +7,19 @@
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/core/server';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/core/server';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { asyncForEach } from '@kbn/std';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { CombinedPrompts } from '../graphs/default_attack_discovery_graph/prompts';
+import type { CombinedPrompts } from '../graphs/default_attack_discovery_graph/prompts';
 import { DEFAULT_EVAL_ANONYMIZATION_FIELDS } from './constants';
-import { AttackDiscoveryGraphMetadata } from '../../langchain/graphs';
-import { DefaultAttackDiscoveryGraph } from '../graphs/default_attack_discovery_graph';
+import type { AttackDiscoveryGraphMetadata } from '../../langchain/graphs';
+import type { DefaultAttackDiscoveryGraph } from '../graphs/default_attack_discovery_graph';
 import { getLlmType } from '../../../routes/utils';
 import { runEvaluations } from './run_evaluations';
 import { createOrUpdateEvaluationResults, EvaluationStatus } from '../../../routes/evaluate/utils';

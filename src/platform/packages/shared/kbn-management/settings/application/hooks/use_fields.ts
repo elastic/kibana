@@ -9,9 +9,9 @@
 
 import { Ast, Query } from '@elastic/eui';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
-import { FieldDefinition } from '@kbn/management-settings-types';
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
-import { Clause } from '@elastic/eui/src/components/search_bar/query/ast';
+import type { FieldDefinition } from '@kbn/management-settings-types';
+import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { Clause } from '@elastic/eui/src/components/search_bar/query/ast';
 import { useServices } from '../services';
 import { CATEGORY_FIELD } from '../query_input';
 import { useSettings } from './use_settings';

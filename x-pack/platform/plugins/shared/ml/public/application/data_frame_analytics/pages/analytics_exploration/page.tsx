@@ -28,6 +28,7 @@ import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_p
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { JobInfoFlyoutsProvider } from '../../../jobs/components/job_details_flyout/job_details_flyout_context';
 import { AnalyticsDetailFlyout } from './components/analytics_detail_flyout';
+import { PageTitle } from '../../../components/page_title';
 
 export const Page: FC<{
   jobId: string;
@@ -145,23 +146,24 @@ export const Page: FC<{
             setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
           />
         ) : null}
-        {jobIdToUse !== undefined && (
-          <MlPageHeader>
-            <FormattedMessage
-              id="xpack.ml.dataframe.analyticsExploration.titleWithId"
-              defaultMessage="Explore results for job ID {id}"
-              values={{ id: jobIdToUse }}
-            />
-          </MlPageHeader>
-        )}
-        {jobIdToUse === undefined && (
-          <MlPageHeader>
-            <FormattedMessage
-              id="xpack.ml.dataframe.analyticsExploration.title"
-              defaultMessage="Explore results"
-            />
-          </MlPageHeader>
-        )}
+        <MlPageHeader>
+          <PageTitle
+            title={
+              jobIdToUse !== undefined ? (
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analyticsExploration.titleWithId"
+                  defaultMessage="Explore results for job ID {id}"
+                  values={{ id: jobIdToUse }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analyticsExploration.title"
+                  defaultMessage="Explore results"
+                />
+              )
+            }
+          />
+        </MlPageHeader>
 
         <SavedObjectsWarning onCloseFlyout={refresh} />
 

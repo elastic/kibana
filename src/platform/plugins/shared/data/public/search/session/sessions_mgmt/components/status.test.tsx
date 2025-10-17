@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiTextProps, EuiToolTipProps } from '@elastic/eui';
+import type { EuiTextProps, EuiToolTipProps } from '@elastic/eui';
 import { mount } from 'enzyme';
 import React from 'react';
 import { SearchSessionStatus } from '../../../../../common';
-import { UISession } from '../types';
+import type { UISession } from '../types';
 import { LocaleWrapper } from '../__mocks__';
 import { getStatusText, StatusIndicator } from './status';
 

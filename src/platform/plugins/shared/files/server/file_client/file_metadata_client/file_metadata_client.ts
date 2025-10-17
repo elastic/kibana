@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ES_FIXED_SIZE_INDEX_BLOB_STORE } from '../../../common/constants';
+import type { ES_FIXED_SIZE_INDEX_BLOB_STORE } from '../../../common/constants';
 import type { FileMetadata, FilesMetrics, Pagination } from '../../../common/types';
 import type { FindFileArgs } from '../../file_service/file_action_types';
 

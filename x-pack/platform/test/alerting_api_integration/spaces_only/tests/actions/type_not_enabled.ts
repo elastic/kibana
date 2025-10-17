@@ -17,8 +17,8 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
 
   describe('connectorType not enabled', () => {
     // loads connector PREWRITTEN_CONNECTOR_ID with connectorType DISABLED_CONNECTOR_TYPE
-    before(() => esArchiver.load('x-pack/test/functional/es_archives/actions'));
-    after(() => esArchiver.unload('x-pack/test/functional/es_archives/actions'));
+    before(() => esArchiver.load('x-pack/platform/test/fixtures/es_archives/actions'));
+    after(() => esArchiver.unload('x-pack/platform/test/fixtures/es_archives/actions'));
 
     it('should handle create connector with disabled connector type request appropriately', async () => {
       const response = await supertest.post(`/api/actions/connector`).set('kbn-xsrf', 'foo').send({
@@ -65,6 +65,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         is_system_action: false,
         is_missing_secrets: false,
         name: 'an action created before test.not-enabled was disabled',
+        is_connector_type_deprecated: false,
       });
     });
 
@@ -95,6 +96,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         is_missing_secrets: false,
         is_system_action: false,
         name: 'an action created before test.not-enabled was disabled',
+        is_connector_type_deprecated: false,
       });
     });
 

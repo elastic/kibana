@@ -6,10 +6,10 @@
  */
 
 import { getSampleProbability } from '@kbn/ml-random-sampler-utils';
-import { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { lastValueFrom } from 'rxjs';
 import { fromPromise } from 'xstate5';
-import { LogCategorizationParams } from './types';
+import type { LogCategorizationParams } from './types';
 import { createCategorizationQuery } from './queries';
 
 export const countDocuments = ({ search }: { search: ISearchGeneric }) =>
