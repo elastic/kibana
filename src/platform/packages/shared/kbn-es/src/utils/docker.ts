@@ -135,6 +135,7 @@ interface ServerlessEsNodeArgs {
   name: string;
   masterNodes: string[];
   params: string[];
+  namePrefix: string | undefined;
 }
 
 export const DEFAULT_PORT = 9200;
@@ -155,7 +156,7 @@ const getDockerBaseCmd = (options: DockerOptions) => [
   '-t',
 
   '--net',
-  getNetworkName(options),
+  getNetworkName(options.namePrefix),
   '--name',
   `${getEsContainerName(1, options.namePrefix)}`,
 
@@ -163,10 +164,7 @@ const getDockerBaseCmd = (options: DockerOptions) => [
   `127.0.0.1:${options.port}:${options.port}`,
 ];
 
-const getSharedServerlessParams = (
-  masterNodes: string[],
-  options: DockerOptions | ServerlessOptions
-) => [
+const getSharedServerlessParams = (masterNodes: string[], namePrefix: string | undefined) => [
   'run',
 
   '--detach',
@@ -176,7 +174,7 @@ const getSharedServerlessParams = (
   '--tty',
 
   '--net',
-  getNetworkName(options),
+  getNetworkName(namePrefix),
 
   '--env',
   'path.repo=/objectstore',
@@ -441,24 +439,21 @@ export async function verifyDockerInstalled(log: ToolingLog) {
   log.indent(4, () => log.info(stdout));
 }
 
-function getNetworkName(options: DockerOptions | ServerlessOptions) {
-  if (!options.namePrefix) {
+function getNetworkName(namePrefix: string | undefined) {
+  if (!namePrefix) {
     return 'elastic';
   }
-  return `elastic-${options.namePrefix}`;
+  return `elastic-${namePrefix}`;
 }
 
 /**
  * Setup elastic Docker network if needed
  */
-export async function maybeCreateDockerNetwork(
-  log: ToolingLog,
-  options: DockerOptions | ServerlessOptions
-) {
+export async function maybeCreateDockerNetwork(log: ToolingLog, namePrefix: string | undefined) {
   log.info(chalk.bold('Checking status of elastic Docker network.'));
   log.indent(4);
 
-  const networkName = getNetworkName(options);
+  const networkName = getNetworkName(namePrefix);
   const process = await execa('docker', ['network', 'create', networkName]).catch(({ message }) => {
     if (message.includes(`network with name ${networkName} already exists`)) {
       log.info('Using existing network.');
@@ -612,7 +607,7 @@ async function setupDocker({
   await verifyDockerInstalled(log);
   await detectRunningNodes(log, options);
   await cleanUpDanglingContainers(log, options);
-  await maybeCreateDockerNetwork(log, options);
+  await maybeCreateDockerNetwork(log, options.namePrefix);
   await maybePullDockerImage(log, image);
   await printESImageInfo(log, image);
 }
@@ -903,9 +898,9 @@ function getServerlessImage({ image, tag }: ImageOptions) {
  */
 export async function runServerlessEsNode(
   log: ToolingLog,
-  { params, name, image, masterNodes }: ServerlessEsNodeArgs
+  { params, name, image, masterNodes, namePrefix }: ServerlessEsNodeArgs
 ) {
-  const dockerCmd = getSharedServerlessParams(masterNodes).concat(
+  const dockerCmd = getSharedServerlessParams(masterNodes, namePrefix).concat(
     params,
     ['--name', name, '--env', `node.name=${name}`],
     image
@@ -963,6 +958,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
           i === 0 ? portCmd : [],
           volumeCmd
         ),
+        namePrefix: options.namePrefix,
       });
       return node.name;
     })

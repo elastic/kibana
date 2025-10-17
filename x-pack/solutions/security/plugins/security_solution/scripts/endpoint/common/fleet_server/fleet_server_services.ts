@@ -307,7 +307,7 @@ const startFleetServerWithDocker = async ({
       }
 
       // Create the `elastic` network to use with all containers
-      await maybeCreateDockerNetwork(log);
+      await maybeCreateDockerNetwork(log, undefined);
       try {
         const dockerArgs = isServerless
           ? await getFleetServerStandAloneDockerArgs({
