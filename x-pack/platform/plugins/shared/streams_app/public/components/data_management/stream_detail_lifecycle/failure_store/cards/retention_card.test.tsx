@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import type { Streams } from '@kbn/streams-schema';
 import { RetentionCard } from './retention_card';
 
 // Mock discover link hook with a simpler implementation
@@ -16,28 +17,48 @@ jest.mock('../../hooks/use_failure_store_redirect_link', () => ({
   useFailureStoreRedirectLink: () => ({ href: '/app/discover#/?_a=test' }),
 }));
 
-// Mock Streams schema to control wired stream detection
-const mockWiredIs = jest.fn(() => false);
-jest.mock('@kbn/streams-schema', () => {
-  const actual = jest.requireActual('@kbn/streams-schema');
-  return {
-    ...actual,
-    Streams: {
-      ...actual.Streams,
-      WiredStream: {
-        ...actual.Streams.WiredStream,
-        GetResponse: {
-          is: () => mockWiredIs(),
-        },
+const createMockDefinition = (
+  canManageFailureStore: boolean = true,
+  isWired: boolean = false
+): Streams.ingest.all.GetResponse => {
+  const definition = {
+    stream: {
+      name: 'logs-test',
+      description: '',
+      ingest: {
+        lifecycle: { inherit: {} },
+        processing: { steps: [] },
+        settings: {},
+        wired: { fields: {}, routing: [] },
       },
     },
+    effective_lifecycle: { dsl: { data_retention: '30d' } } as any,
+    effective_settings: {},
+    inherited_fields: {},
+    dashboards: [],
+    rules: [],
+    queries: [],
+    privileges: {
+      manage: true,
+      monitor: true,
+      lifecycle: true,
+      simulate: true,
+      text_structure: true,
+      read_failure_store: true,
+      manage_failure_store: canManageFailureStore,
+    },
   };
-});
 
-const makeDefinition = (canManage = true) =>
-  ({
-    privileges: { manage_failure_store: canManage },
-  } as any);
+  if (isWired) {
+    // Wired effective lifecycle must include a `from` field to satisfy schema
+    definition.effective_lifecycle = {
+      ...definition.effective_lifecycle,
+      from: 'test-stream',
+    };
+  }
+
+  return definition;
+};
 
 const customFailureStore: FailureStore = {
   retentionPeriod: {
@@ -58,12 +79,15 @@ const renderI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nPr
 describe('RetentionCard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockWiredIs.mockReturnValue(false);
   });
 
   it('returns null when failureStore missing', () => {
     const { container } = renderI18n(
-      <RetentionCard openModal={jest.fn()} definition={makeDefinition()} failureStore={undefined} />
+      <RetentionCard
+        openModal={jest.fn()}
+        definition={createMockDefinition()}
+        failureStore={undefined}
+      />
     );
     expect(container.firstChild).toBeNull();
   });
@@ -72,7 +96,7 @@ describe('RetentionCard', () => {
     const { container } = renderI18n(
       <RetentionCard
         openModal={jest.fn()}
-        definition={makeDefinition()}
+        definition={createMockDefinition()}
         failureStore={{ enabled: true, retentionPeriod: {} }}
       />
     );
@@ -83,7 +107,7 @@ describe('RetentionCard', () => {
     renderI18n(
       <RetentionCard
         openModal={jest.fn()}
-        definition={makeDefinition(true)}
+        definition={createMockDefinition(true)}
         failureStore={customFailureStore}
       />
     );
@@ -98,7 +122,7 @@ describe('RetentionCard', () => {
     renderI18n(
       <RetentionCard
         openModal={jest.fn()}
-        definition={makeDefinition(true)}
+        definition={createMockDefinition(true)}
         failureStore={defaultFailureStore}
       />
     );
@@ -114,7 +138,7 @@ describe('RetentionCard', () => {
     renderI18n(
       <RetentionCard
         openModal={openModal}
-        definition={makeDefinition(true)}
+        definition={createMockDefinition(true)}
         failureStore={defaultFailureStore}
       />
     );
@@ -127,7 +151,7 @@ describe('RetentionCard', () => {
     renderI18n(
       <RetentionCard
         openModal={jest.fn()}
-        definition={makeDefinition(false)}
+        definition={createMockDefinition(false)}
         failureStore={defaultFailureStore}
       />
     );
@@ -136,11 +160,10 @@ describe('RetentionCard', () => {
   });
 
   it('omits edit action when stream is wired even if privileged', () => {
-    mockWiredIs.mockReturnValue(true);
     renderI18n(
       <RetentionCard
         openModal={jest.fn()}
-        definition={makeDefinition(true)}
+        definition={createMockDefinition(true, true)}
         failureStore={defaultFailureStore}
       />
     );

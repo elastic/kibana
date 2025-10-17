@@ -49,7 +49,7 @@ describe('EditLifecycleModal', () => {
       privileges: {
         manage: true,
         monitor: true,
-        lifecycle: false,
+        lifecycle: true,
         simulate: true,
         text_structure: true,
         read_failure_store: true,
@@ -58,7 +58,6 @@ describe('EditLifecycleModal', () => {
     };
 
     if (isWired) {
-      definition.privileges.lifecycle = true;
       // Wired effective lifecycle must include a `from` field to satisfy schema
       if ((effectiveLifecycle.dsl || effectiveLifecycle.ilm) && !effectiveLifecycle.from) {
         (definition as any).effective_lifecycle = {
