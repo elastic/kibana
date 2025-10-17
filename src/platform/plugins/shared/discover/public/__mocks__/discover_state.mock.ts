@@ -18,6 +18,7 @@ import {
   createRuntimeStateManager,
   fromSavedSearchToSavedObjectTab,
   selectAllTabs,
+  selectTab,
   selectTabRuntimeState,
 } from '../application/main/state_management/redux';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
@@ -35,6 +36,8 @@ import { DEFAULT_TAB_STATE } from '../application/main/state_management/redux';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { DiscoverSearchSessionManager } from '../application/main/state_management/discover_search_session';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
+import { omit } from 'lodash';
 
 interface CreateInternalStateStoreMockOptions {
   runtimeStateManager?: RuntimeStateManager;
@@ -111,7 +114,23 @@ export function getDiscoverInternalStateMock({
     return Promise.resolve(dataView);
   });
 
-  return {
+  const originalSearchSourceCreate = services.data.search.searchSource.create;
+
+  services.data.search.searchSource.create = jest.fn((fields) => {
+    if (typeof fields?.index === 'string') {
+      const dataView = persistedDataViews?.find((dv) => dv.id === fields.index);
+
+      if (dataView) {
+        return Promise.resolve(
+          createSearchSourceMock({ ...omit(fields, 'parent'), index: dataView })
+        );
+      }
+    }
+
+    return originalSearchSourceCreate(fields);
+  });
+
+  const toolkit = {
     internalState,
     runtimeStateManager,
     initializeTabs: async ({
@@ -133,17 +152,15 @@ export function getDiscoverInternalStateMock({
         })
       );
     },
-    addTab: async ({ tab }: { tab: TabState }) => {
-      const currentState = internalState.getState();
-
-      await internalState.dispatch(
-        internalStateActions.updateTabs({
-          items: [...selectAllTabs(currentState), tab],
-          selectedItem: tab,
-        })
-      );
-    },
     initializeSingleTab: async ({ tabId }: { tabId: string }) => {
+      await toolkit.switchToTab({ tabId });
+
+      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+
+      if (tabRuntimeState.stateContainer$.getValue()) {
+        throw new Error(`Tab with ID "${tabId}" has already been initialized`);
+      }
+
       const stateContainer = getDiscoverStateContainer({
         tabId: internalState.getState().tabs.unsafeCurrentId,
         services,
@@ -170,7 +187,34 @@ export function getDiscoverInternalStateMock({
         })
       );
     },
+    addNewTab: async ({ tab }: { tab: TabState }) => {
+      const currentState = internalState.getState();
+
+      await internalState.dispatch(
+        internalStateActions.updateTabs({
+          items: [...selectAllTabs(currentState), tab],
+          selectedItem: tab,
+        })
+      );
+    },
+    switchToTab: async ({ tabId }: { tabId: string }) => {
+      const currentState = internalState.getState();
+      const tab = selectTab(currentState, tabId);
+
+      if (!tab) {
+        throw new Error(`Tab with ID "${tabId}" not found in state`);
+      }
+
+      await internalState.dispatch(
+        internalStateActions.updateTabs({
+          items: [...selectAllTabs(currentState)],
+          selectedItem: tab,
+        })
+      );
+    },
   };
+
+  return toolkit;
 }
 
 export function getDiscoverStateMock({
