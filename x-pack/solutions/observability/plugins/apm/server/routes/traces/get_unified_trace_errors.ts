@@ -6,7 +6,6 @@
  */
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { existsQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   EXCEPTION_MESSAGE,
@@ -22,6 +21,7 @@ import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getApmTraceError } from './get_trace_items';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import type { TimestampUs } from '../../../typings/es_schemas/raw/fields/timestamp_us';
+import { getFieldValue } from '../../utils/get_field_value';
 
 export interface UnifiedTraceErrors {
   apmErrors: Awaited<ReturnType<typeof getApmTraceError>>;
@@ -65,17 +65,6 @@ export const optionalFields = asMutableArray([
   TIMESTAMP_US,
 ] as const);
 
-interface OtelError {
-  span: {
-    id: string;
-  };
-  exception?: {
-    type: string;
-    message: string;
-  };
-  timestamp?: TimestampUs;
-}
-
 async function getUnprocessedOtelErrors({
   logsClient,
   traceId,
@@ -111,19 +100,18 @@ async function getUnprocessedOtelErrors({
 
   return response.hits.hits
     .map((hit) => {
-      const event = unflattenKnownApmEventFields(hit.fields, requiredFields) as
-        | OtelError
-        | undefined;
+      const event = hit.fields;
+
       if (!event) return null;
 
       return {
         id: hit._id,
-        spanId: event.span?.id,
-        timestamp: event?.timestamp,
+        spanId: getFieldValue(SPAN_ID, event),
+        timestamp: getFieldValue(TIMESTAMP_US, event),
         error: {
           exception: {
-            type: event.exception?.type,
-            message: event.exception?.message,
+            type: getFieldValue(EXCEPTION_TYPE, event),
+            message: getFieldValue(EXCEPTION_MESSAGE, event),
           },
         },
       };
