@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiConfirmModal, type EuiFocusTrapProps, useGeneratedHtmlId } from '@elastic/eui';
+import React from 'react';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import * as i18n from './translations';
+import { useFocusButtonTrap } from '../use_focus_button';
 
 interface ConfirmDeleteCaseModalProps {
   totalCasesToBeDeleted: number;
@@ -23,18 +24,7 @@ const ConfirmDeleteCaseModalComp: React.FC<ConfirmDeleteCaseModalProps> = ({
   focusButtonRef,
 }) => {
   const titleId = useGeneratedHtmlId();
-  const focusTrapProps: Pick<EuiFocusTrapProps, 'returnFocus'> = useMemo(
-    () => ({
-      returnFocus() {
-        if (focusButtonRef && 'current' in focusButtonRef && focusButtonRef.current) {
-          focusButtonRef.current.focus();
-          return false;
-        }
-        return true;
-      },
-    }),
-    [focusButtonRef]
-  );
+  const focusTrapProps = useFocusButtonTrap(focusButtonRef);
 
   return (
     <EuiConfirmModal

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -16,7 +16,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  type EuiFocusTrapProps,
   euiFullHeight,
   EuiText,
   EuiTitle,
@@ -26,6 +25,7 @@ import type { CasesUI } from '../../../../common';
 import { EditAssigneesSelectable } from './edit_assignees_selectable';
 import * as i18n from './translations';
 import type { ItemsSelectionState } from '../types';
+import { useFocusButtonTrap } from '../../use_focus_button';
 
 interface Props {
   selectedCases: CasesUI;
@@ -57,19 +57,7 @@ const EditAssigneesFlyoutComponent: React.FC<Props> = ({
     () => onSaveAssignees(assigneesSelection),
     [onSaveAssignees, assigneesSelection]
   );
-
-  const focusTrapProps: Pick<EuiFocusTrapProps, 'returnFocus'> = useMemo(
-    () => ({
-      returnFocus() {
-        if (focusButtonRef && 'current' in focusButtonRef && focusButtonRef.current) {
-          focusButtonRef.current.focus();
-          return false;
-        }
-        return true;
-      },
-    }),
-    [focusButtonRef]
-  );
+  const focusTrapProps = useFocusButtonTrap(focusButtonRef);
 
   const headerSubtitle =
     selectedCases.length > 1 ? i18n.SELECTED_CASES(selectedCases.length) : selectedCases[0].title;
