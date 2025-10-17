@@ -50,6 +50,7 @@ import {
   getNormalizedInputs,
   isRootPrivilegesRequired,
   checkIntegrationFipsLooseCompatibility,
+  varsReducer,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -82,6 +83,7 @@ import type {
   CloudConnectorVars,
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
+  PackagePolicyConfigRecord,
 } from '../../common/types';
 import {
   FleetError,
@@ -3552,9 +3554,11 @@ export function updatePackageInputs(
       originalInput.policy_template = update.policy_template;
     }
 
-    if (update.vars) {
+    if (update.vars || originalInput.vars) {
       const indexOfInput = inputs.indexOf(originalInput);
-      inputs[indexOfInput] = deepMergeVars(originalInput, update, true) as NewPackagePolicyInput;
+      const mergedVars = deepMergeVars(originalInput, update, true) as NewPackagePolicyInput;
+      const filteredVars = removeStaleVars<NewPackagePolicyInput>(mergedVars, update);
+      inputs[indexOfInput] = filteredVars;
       originalInput = inputs[indexOfInput];
     }
 
@@ -3587,16 +3591,14 @@ export function updatePackageInputs(
           originalStream.enabled = stream.enabled;
         }
 
-        if (stream.vars) {
+        if (stream.vars || originalStream.vars) {
           // streams wont match for input pkgs
           const indexOfStream = isInputPkgUpdate
             ? 0
             : originalInput.streams.indexOf(originalStream);
-          originalInput.streams[indexOfStream] = deepMergeVars(
-            originalStream,
-            stream as InputsOverride,
-            true
-          );
+          const mergedVars = deepMergeVars(originalStream, stream as InputsOverride, true);
+          const filteredVars = removeStaleVars(mergedVars, stream);
+          originalInput.streams[indexOfStream] = filteredVars;
           originalStream = originalInput.streams[indexOfStream];
         }
       }
@@ -3611,9 +3613,12 @@ export function updatePackageInputs(
     });
   }
 
+  const vars = getUpdatedGlobalVars(packageInfo, basePackagePolicy);
+
   const resultingPackagePolicy: NewPackagePolicy = {
     ...basePackagePolicy,
     inputs,
+    vars,
   };
 
   const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, load);
@@ -3869,6 +3874,9 @@ export function sendUpdatePackagePolicyTelemetryEvent(
 }
 
 function deepMergeVars(original: any, override: any, keepOriginalValue = false): any {
+  if (!override.vars) {
+    return original;
+  }
   if (!original.vars) {
     original.vars = { ...override.vars };
   }
@@ -3895,6 +3903,51 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
   }
 
   return result;
+}
+
+function getUpdatedGlobalVars(packageInfo: PackageInfo, packagePolicy: NewPackagePolicy) {
+  if (!packageInfo.vars) {
+    return undefined;
+  }
+
+  const packageInfoVars = packageInfo.vars.reduce(varsReducer, {});
+  const result = deepMergeVars(packagePolicy, { vars: packageInfoVars }, true);
+  return removeStaleVars(result, { vars: packageInfoVars }).vars;
+}
+
+interface SupportsVars {
+  vars?: PackagePolicyConfigRecord;
+}
+
+function removeStaleVars<T extends SupportsVars>(
+  currentWithVars: T,
+  expectedVars: SupportsVars
+): T {
+  if (!currentWithVars.vars) {
+    return currentWithVars;
+  }
+
+  if (!expectedVars.vars) {
+    return {
+      ...currentWithVars,
+      vars: {},
+    };
+  }
+
+  const filteredVars = Object.entries(currentWithVars.vars).reduce<PackagePolicyConfigRecord>(
+    (acc, [key, val]) => {
+      if (key in expectedVars.vars!) {
+        acc[key] = val;
+      }
+      return acc;
+    },
+    {}
+  );
+
+  return {
+    ...currentWithVars,
+    vars: filteredVars,
+  };
 }
 
 async function requireUniqueName(
