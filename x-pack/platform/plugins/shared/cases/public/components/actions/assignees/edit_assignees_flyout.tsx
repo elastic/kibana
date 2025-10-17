@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -16,6 +16,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  type EuiFocusTrapProps,
   euiFullHeight,
   EuiText,
   EuiTitle,
@@ -30,6 +31,7 @@ interface Props {
   selectedCases: CasesUI;
   onClose: () => void;
   onSaveAssignees: (args: ItemsSelectionState) => void;
+  focusButtonRef?: React.Ref<HTMLButtonElement>;
 }
 
 const FlyoutBodyCss = css`
@@ -44,6 +46,7 @@ const EditAssigneesFlyoutComponent: React.FC<Props> = ({
   selectedCases,
   onClose,
   onSaveAssignees,
+  focusButtonRef,
 }) => {
   const [assigneesSelection, setAssigneesSelection] = useState<ItemsSelectionState>({
     selectedItems: [],
@@ -53,6 +56,19 @@ const EditAssigneesFlyoutComponent: React.FC<Props> = ({
   const onSave = useCallback(
     () => onSaveAssignees(assigneesSelection),
     [onSaveAssignees, assigneesSelection]
+  );
+
+  const focusTrapProps: Pick<EuiFocusTrapProps, 'returnFocus'> = useMemo(
+    () => ({
+      returnFocus() {
+        if (focusButtonRef && 'current' in focusButtonRef && focusButtonRef.current) {
+          focusButtonRef.current.focus();
+          return false;
+        }
+        return true;
+      },
+    }),
+    [focusButtonRef]
   );
 
   const headerSubtitle =
@@ -66,6 +82,7 @@ const EditAssigneesFlyoutComponent: React.FC<Props> = ({
       data-test-subj="cases-edit-assignees-flyout"
       size="s"
       paddingSize="m"
+      focusTrapProps={focusTrapProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">

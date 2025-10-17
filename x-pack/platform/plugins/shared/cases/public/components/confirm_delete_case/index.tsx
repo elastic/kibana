@@ -13,7 +13,7 @@ interface ConfirmDeleteCaseModalProps {
   totalCasesToBeDeleted: number;
   onCancel: () => void;
   onConfirm: () => void;
-  focusButtonRef?: React.Ref<HTMLAnchorElement>;
+  focusButtonRef?: React.Ref<HTMLAnchorElement | HTMLButtonElement>;
 }
 
 const ConfirmDeleteCaseModalComp: React.FC<ConfirmDeleteCaseModalProps> = ({

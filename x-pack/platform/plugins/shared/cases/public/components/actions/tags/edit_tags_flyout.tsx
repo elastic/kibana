@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -16,6 +16,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  type EuiFocusTrapProps,
   euiFullHeight,
   EuiLoadingSpinner,
   EuiText,
@@ -32,6 +33,7 @@ interface Props {
   selectedCases: CasesUI;
   onClose: () => void;
   onSaveTags: (args: ItemsSelectionState) => void;
+  focusButtonRef?: React.Ref<HTMLButtonElement>;
 }
 
 const FlyoutBodyCss = css`
@@ -42,7 +44,12 @@ const FlyoutBodyCss = css`
   }
 `;
 
-const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSaveTags }) => {
+const EditTagsFlyoutComponent: React.FC<Props> = ({
+  selectedCases,
+  onClose,
+  onSaveTags,
+  focusButtonRef,
+}) => {
   const { data: tags, isLoading } = useGetTags();
 
   const [tagsSelection, setTagsSelection] = useState<ItemsSelectionState>({
@@ -51,6 +58,19 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSa
   });
 
   const onSave = useCallback(() => onSaveTags(tagsSelection), [onSaveTags, tagsSelection]);
+
+  const focusTrapProps: Pick<EuiFocusTrapProps, 'returnFocus'> = useMemo(
+    () => ({
+      returnFocus() {
+        if (focusButtonRef && 'current' in focusButtonRef && focusButtonRef.current) {
+          focusButtonRef.current.focus();
+          return false;
+        }
+        return true;
+      },
+    }),
+    [focusButtonRef]
+  );
 
   const headerSubtitle =
     selectedCases.length > 1 ? i18n.SELECTED_CASES(selectedCases.length) : selectedCases[0].title;
@@ -63,6 +83,7 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSa
       data-test-subj="cases-edit-tags-flyout"
       size="s"
       paddingSize="m"
+      focusTrapProps={focusTrapProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
