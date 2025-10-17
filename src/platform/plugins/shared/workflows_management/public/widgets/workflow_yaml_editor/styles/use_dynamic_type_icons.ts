@@ -9,8 +9,8 @@
 
 import { useEffect } from 'react';
 import type { ConnectorTypeInfoMinimal } from '@kbn/workflows';
-import { getStepIconBase64 } from '../../../shared/ui/step_icons/get_step_icon_base64';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/use_available_connectors';
+import { getStepIconBase64 } from '../../../shared/ui/step_icons/get_step_icon_base64';
 
 const predefinedStepTypes = [
   {
@@ -127,12 +127,14 @@ async function injectDynamicConnectorIcons(connectorTypes: ConnectorTypeInfoMini
           selector = '.codicon-symbol-struct:before';
         } else if (connectorType === 'kibana') {
           selector = '.codicon-symbol-module:before';
+        } else if (connectorType === 'console') {
+          selector = '.codicon-symbol-variable:before';
         }
         cssToInject += `
           /* Target by aria-label content */
           ${selector} {
             background-image: url("data:image/svg+xml;base64,${iconBase64}") !important;
-            background-size: 16px 16px !important;
+            background-size: 12px 12px !important;
             background-repeat: no-repeat !important;
             background-position: center !important;
             content: " " !important;
