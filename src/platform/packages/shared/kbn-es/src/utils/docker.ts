@@ -931,13 +931,19 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
 
   const nodes = await getServerlessNodeArgs(options.port, options.namePrefix);
 
+  const masterNodes = nodes
+    .filter((node) =>
+      node.esArgs?.filter(([arg, val]) => val.includes('node.roles') && val.includes('master'))
+    )
+    .map((node) => node.name);
+
   // This is where nodes are started
   const nodeNames = await Promise.all(
     nodes.map(async (node, i) => {
       await runServerlessEsNode(log, {
         ...node,
         image,
-        masterNodes: nodes.map((n) => n.name),
+        masterNodes,
         params: node.params.concat(
           resolveEsArgs(DEFAULT_SERVERLESS_ESARGS.concat(node.esArgs ?? []), options),
           i === 0 ? portCmd : [],
@@ -994,6 +1000,8 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
       if (!options.ssl || !options.kibanaUrl) {
         return;
       }
+
+      log.debug(`Ensuring SAML Role mapping`);
 
       await ensureSAMLRoleMapping(client);
 

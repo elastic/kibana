@@ -188,6 +188,7 @@ export async function runTestsParallel(
           `scripts/functional_tests`,
           `--config=${config}`,
           `--base-path=${Path.join(REPO_ROOT, '.es', id)}`,
+          '--debug',
           ...extraArgsList.flat().map((arg) => {
             return String(arg);
           }),
@@ -312,12 +313,12 @@ export async function runTestsParallel(
         log.info(`Configs:\n${configLines.map((line) => `  ${line}`).join('\n')}`);
       }
 
-      log.info(
-        execSync(
-          (process.platform === 'linux' ? `top -b -n 1 -o %MEM` : `top -l 1 -o mem`) +
-            ` | head -30 `
-        ).toString('utf-8')
-      );
+      // log.info(
+      //   execSync(
+      //     (process.platform === 'linux' ? `top -b -n 1 -o %MEM` : `top -l 1 -o mem`) +
+      //       ` | head -30 `
+      //   ).toString('utf-8')
+      // );
     }
 
     statsTimer = setInterval(logStats, 10_000);
@@ -411,7 +412,10 @@ export async function runTestsParallel(
         runBuildkiteMetaSet(`config_${runner.getConfigPath()}`, 'true');
       } else {
         failedConfigs.push(runner.getConfigPath());
-        process.exit(1);
+        log.error(`Exiting because of failed config: ${runner.getConfigPath()}`);
+        setTimeout(() => {
+          process.exit(1);
+        }, 50).unref();
       }
     } finally {
       if (!released) {
