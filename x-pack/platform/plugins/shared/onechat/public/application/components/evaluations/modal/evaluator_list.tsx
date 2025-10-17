@@ -109,10 +109,6 @@ export const EvaluatorList: React.FC<EvaluatorListProps> = ({
                 <EuiText size="xs" color="subdued">
                   {evaluator.description}
                 </EuiText>
-                <EuiSpacer size="xs" />
-                <EuiText size="xs" color="accent">
-                  Type: {evaluator.type}
-                </EuiText>
               </div>
             </div>
           </div>

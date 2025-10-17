@@ -109,7 +109,7 @@ export const EvaluatorSelectionModal: React.FC<EvaluatorSelectionModalProps> = (
       <EuiModalBody>
         <>
           <EuiFlexGroup gutterSize="l">
-            <EuiFlexItem grow={1}>
+            <EuiFlexItem grow={2}>
               <EvaluatorList
                 evaluators={availableEvaluators || []}
                 selectedEvaluators={selectedEvaluators}
