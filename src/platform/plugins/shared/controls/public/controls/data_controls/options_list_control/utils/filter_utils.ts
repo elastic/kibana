@@ -42,6 +42,6 @@ export const buildFilter = (
     newFilter.meta.controlledBy = controlId;
     if (filterState.sectionId) newFilter.meta.group = filterState.sectionId;
   }
-  // console.log({ newFilter });
+
   return newFilter;
 };

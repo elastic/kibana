@@ -281,13 +281,7 @@ export function loadEmbeddableData(
 
   const subscriptions: Subscription[] = [
     // on search context change, reload
-    fetch$(api)
-      .pipe(
-        tap((filters) => {
-          console.log({ filtersFromFetch: filters });
-        })
-      )
-      .subscribe((fetchContext) => reload('searchContext' as ReloadReason, fetchContext)),
+    fetch$(api).subscribe((fetchContext) => reload('searchContext' as ReloadReason, fetchContext)),
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
     // In case of changes to the dashboard ES|QL controls, re-map them
     internalApi.esqlVariables$.subscribe((newVariables: ESQLControlVariable[]) => {

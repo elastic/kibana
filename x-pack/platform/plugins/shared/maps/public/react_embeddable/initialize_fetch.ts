@@ -38,7 +38,6 @@ export function initializeFetch({
 }) {
   let prevIsRestore: boolean | undefined;
   const fetchSubscription = fetch$(api).subscribe((fetchContext: FetchContext) => {
-    console.log({ fetchContext });
     // New search session id causes all layers from elasticsearch to refetch data.
     // Dashboard provides a new search session id anytime filters change.
     // Thus, filtering embeddable container by map extent causes a new search session id any time the map is moved.

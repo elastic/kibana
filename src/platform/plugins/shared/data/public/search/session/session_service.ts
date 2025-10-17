@@ -482,6 +482,7 @@ export class SessionService {
    */
   public start() {
     if (!this.currentApp) throw new Error('this.currentApp is missing');
+
     this.storeSessionSnapshot();
 
     this.state.transitions.start({ appName: this.currentApp });

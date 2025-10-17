@@ -80,6 +80,7 @@ export function startDashboardSearchSessionIntegration(
       }
       return searchSessionIdFromURL ?? dataService.search.session.start();
     })();
+
     if (updatedSearchSessionId && updatedSearchSessionId !== currentSearchSessionId) {
       setSearchSessionId(updatedSearchSessionId);
     }

@@ -112,7 +112,7 @@ function getBatchedObservables(api: unknown): Array<Observable<unknown>> {
       )
     );
   }
-  // observables.push(api.parentApi?.getPanelSection$(api.uuid));
+  observables.push(api.parentApi?.getPanelSection$(api.uuid));
 
   return observables;
 }
@@ -128,7 +128,6 @@ function getImmediateObservables(api: unknown): Array<Observable<unknown>> {
   if (apiHasParentApi(api) && apiPublishesReload(api.parentApi)) {
     observables.push(api.parentApi.reload$.pipe(filter(() => !hasSearchSession(api))));
   }
-  // const sectionId$: Observable<string | undefined> = api.parentApi?.getPanelSection$(api.uuid);
   observables.push(api.parentApi?.getPanelSection$(api.uuid));
   return observables;
 }
@@ -177,10 +176,6 @@ export function fetch$(api: unknown): Observable<FetchContext> {
   );
 
   return fetchContext$.pipe(
-    // tap((reloadTimeFetchContext) => {
-    //   if (api.uuid !== '68f74abf-99d0-4cef-b982-52b07de82444')
-    //     console.log({ reloadTimeFetchContext });
-    // }),
     combineLatestWith(isFetchPaused$),
     filter(([, isFetchPaused]) => !isFetchPaused),
     map(([fetchContext]) => fetchContext),
@@ -194,10 +189,7 @@ export function fetch$(api: unknown): Observable<FetchContext> {
       timeRange: reloadTimeFetchContext.timeRange,
       timeslice: reloadTimeFetchContext.timeslice,
       searchSessionId: reloadTimeFetchContext.searchSessionId,
-    })),
-    tap((context) => {
-      if (api.uuid === '6664ab4d-b360-4a00-9a9f-849cd752f9d5') console.log({ context });
-    })
+    }))
   );
 }
 

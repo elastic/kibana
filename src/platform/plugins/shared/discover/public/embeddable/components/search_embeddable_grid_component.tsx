@@ -102,6 +102,8 @@ export function SearchEmbeddableGridComponent({
     esqlVariables$ ?? emptyEsqlVariables$
   );
 
+  console.log({ loading });
+
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
   // `fetchContext.query` and `fetchContext.filters` are Dashboard's query and filters
   const savedSearchQuery = apiQuery;
