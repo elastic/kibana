@@ -15,6 +15,15 @@ import type { AgentsServiceStart } from '../../agents';
 import type { ToolsServiceStart } from '../../tools';
 import { createOptimizerEvaluator } from './optimizer_evaluator';
 
+jest.mock('@kbn/evals', () => ({
+  LlmOptimizerEvaluationPrompt: {
+    name: 'mock-optimizer-prompt',
+    description: 'Mock optimizer evaluation prompt',
+    schema: { type: 'object', properties: {} },
+  },
+  calculateOptimizerScore: jest.fn((analysis: any) => analysis.satisfaction_score / 10),
+}));
+
 describe('OptimizerEvaluator', () => {
   let logger: MockedLogger;
   let mockInferenceClient: jest.Mocked<BoundInferenceClient>;

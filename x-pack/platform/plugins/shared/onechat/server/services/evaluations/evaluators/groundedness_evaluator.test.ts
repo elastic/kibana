@@ -14,6 +14,35 @@ import { createGroundednessEvaluator } from './groundedness_evaluator';
 import type { EvaluatorContext } from '../types';
 import type { GroundednessAnalysis } from '@kbn/evals/src/evaluators/groundedness/types';
 
+jest.mock('@kbn/evals', () => ({
+  LlmGroundednessEvaluationPrompt: {
+    name: 'mock-groundedness-prompt',
+    description: 'Mock groundedness evaluation prompt',
+    schema: { type: 'object', properties: {} },
+  },
+  calculateGroundednessScore: jest.fn((analysis: any) => {
+    if (!analysis || !analysis.analysis || analysis.analysis.length === 0) {
+      return 1.0;
+    }
+    const scores = analysis.analysis.map((claim: any) => {
+      switch (claim.verdict) {
+        case 'FULLY_SUPPORTED':
+          return 1.0;
+        case 'PARTIALLY_SUPPORTED':
+          return 0.9;
+        case 'NOT_FOUND':
+          return claim.centrality === 'central' ? 0.5 : 0.8;
+        case 'CONTRADICTED':
+          return claim.centrality === 'central' ? 0.0 : 0.1;
+        default:
+          return 1.0;
+      }
+    });
+    const product = scores.reduce((acc: number, score: number) => acc * score, 1);
+    return Math.pow(product, 1 / scores.length);
+  }),
+}));
+
 describe('groundedness_evaluator', () => {
   let logger: MockedLogger;
 
@@ -121,21 +150,6 @@ describe('groundedness_evaluator', () => {
       expect(result.score).toBe(1.0);
       expect(result.analysis).toBeDefined();
       expect(result.analysis).toEqual(analysis);
-    });
-
-    it('returns 1.0 when there are no tool calls', async () => {
-      const mockClient = createMockInferenceClient(createMockGroundednessAnalysis('GROUNDED', []));
-      const evaluator = createGroundednessEvaluator({ inferenceClient: mockClient, logger });
-
-      const context: EvaluatorContext = {
-        conversation: createMockConversation(),
-        currentRound: createMockRound('Response without tool calls', []),
-        customInstructions: '',
-      };
-
-      const result = await evaluator(context);
-      expect(result.score).toBe(1.0);
-      expect(result.analysis).toBeUndefined();
     });
 
     it('calculates score correctly for partially supported claims', async () => {

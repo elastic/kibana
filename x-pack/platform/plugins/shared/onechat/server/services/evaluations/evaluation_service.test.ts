@@ -20,6 +20,41 @@ import { EvaluationServiceImpl } from './evaluation_service';
 import type { AgentsServiceStart } from '../agents';
 import type { ToolsServiceStart } from '../tools';
 
+jest.mock('@kbn/evals', () => ({
+  LlmGroundednessEvaluationPrompt: {
+    name: 'mock-groundedness-prompt',
+    description: 'Mock groundedness evaluation prompt',
+    schema: { type: 'object', properties: {} },
+  },
+  LlmOptimizerEvaluationPrompt: {
+    name: 'mock-optimizer-prompt',
+    description: 'Mock optimizer evaluation prompt',
+    schema: { type: 'object', properties: {} },
+  },
+  calculateGroundednessScore: jest.fn((analysis: any) => {
+    if (!analysis || !analysis.analysis || analysis.analysis.length === 0) {
+      return 1.0;
+    }
+    const scores = analysis.analysis.map((claim: any) => {
+      switch (claim.verdict) {
+        case 'FULLY_SUPPORTED':
+          return 1.0;
+        case 'PARTIALLY_SUPPORTED':
+          return 0.9;
+        case 'NOT_FOUND':
+          return claim.centrality === 'central' ? 0.5 : 0.8;
+        case 'CONTRADICTED':
+          return claim.centrality === 'central' ? 0.0 : 0.1;
+        default:
+          return 1.0;
+      }
+    });
+    const product = scores.reduce((acc: number, score: number) => acc * score, 1);
+    return Math.pow(product, 1 / scores.length);
+  }),
+  calculateOptimizerScore: jest.fn((analysis: any) => analysis.satisfaction_score / 10),
+}));
+
 describe('EvaluationService', () => {
   let logger: MockedLogger;
   let service: EvaluationService;
@@ -173,12 +208,12 @@ describe('EvaluationService', () => {
       expect(results[0].scores[0].score).toBe(1);
     });
 
-    it('calls criteria evaluator for EvaluatorId.Relevance', async () => {
+    it('calls criteria evaluator for EvaluatorId.Criteria', async () => {
       const conversation = createMockConversation([createMockRound('round-1', 'Hello world')]);
 
       const evaluatorConfigs: EvaluatorConfig[] = [
         {
-          evaluatorId: EvaluatorId.Relevance,
+          evaluatorId: EvaluatorId.Criteria,
           customInstructions: 'test',
         },
       ];
