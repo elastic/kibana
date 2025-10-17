@@ -25,6 +25,7 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup> {
   }
 
   public setup(core: CoreSetup) {
+    this.setCpsFeatureFlagAsync(core);
     const { initContext, config$ } = this;
 
     // Register route only for serverless
@@ -45,4 +46,9 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup> {
   }
 
   public stop() {}
+
+  private async setCpsFeatureFlagAsync(core: CoreSetup) {
+    const config = await firstValueFrom(this.config$)
+    core.elasticsearch.setCpsFeatureFlag(config.enabled);
+  }
 }
