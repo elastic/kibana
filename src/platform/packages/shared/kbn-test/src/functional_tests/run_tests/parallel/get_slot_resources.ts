@@ -13,7 +13,6 @@ export interface ServerCapabilities {
   testConfigCategory: ScoutTestRunConfigCategory;
   servers: {
     elasticsearch: {
-      from: 'serverless' | 'snapshot';
       ccs?: unknown;
     };
   };
@@ -26,6 +25,7 @@ export interface ServerCapabilities {
     type: 'chrome' | 'firefox' | 'msedge';
   };
   esTestCluster: {
+    from: 'serverless' | 'snapshot';
     esJavaOpts?: string;
   };
   kbnTestServer: {
@@ -81,15 +81,16 @@ function getMemFromJavaOpts(javaOpts: string): number | undefined {
 }
 
 export function getSlotResources(capabilities: ServerCapabilities): SlotResources {
-  const isServerless = capabilities.servers.elasticsearch.from === 'serverless';
+  const isServerless = capabilities.esTestCluster.from === 'serverless';
   const hasCcs = !!capabilities.servers.elasticsearch.ccs;
 
-  const numNodes = isServerless ? 3 : hasCcs ? 2 : 1;
+  const numNodes = isServerless || hasCcs ? 2 : 1;
 
-  const esMemory =
-    (capabilities.esTestCluster.esJavaOpts &&
-      getMemFromJavaOpts(capabilities.esTestCluster.esJavaOpts)) ||
-    1.5 * 1024;
+  const esMemoryPerNode = capabilities.esTestCluster.esJavaOpts
+    ? getMemFromJavaOpts(capabilities.esTestCluster.esJavaOpts)
+    : undefined;
+
+  const esMemory = numNodes * (esMemoryPerNode ?? 1.5 * 1024);
 
   const numContainers = Object.entries(capabilities.dockerServers ?? {}).filter(
     ([name, config]) => config.enabled
