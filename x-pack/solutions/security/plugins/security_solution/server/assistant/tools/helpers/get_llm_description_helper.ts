@@ -49,7 +49,7 @@ export const getLlmDescriptionHelper = async ({
   savedObjectsClient,
 }: GetLlmDescriptionParams): Promise<string> => {
   try {
-    if (!context) {
+    if (!context || !savedObjectsClient) {
       return description;
     }
 
@@ -58,24 +58,6 @@ export const getLlmDescriptionHelper = async ({
 
     // Get the actions client from the context
     const actionsClient = await actions.getActionsClientWithRequest(context.request);
-
-    // Use the injected savedObjectsClient or fallback to workaround
-    let clientToUse = savedObjectsClient;
-
-    if (!clientToUse) {
-      // Fallback workaround for tools that don't have injected savedObjectsClient
-      clientToUse =
-        (
-          context.request as unknown as { getSavedObjectsClient?: () => SavedObjectsClientContract }
-        ).getSavedObjectsClient?.() ||
-        (context.request as unknown as { savedObjects?: { client: SavedObjectsClientContract } })
-          .savedObjects?.client;
-    }
-
-    if (!clientToUse) {
-      // Fall back to default description if we can't access saved objects client
-      return description;
-    }
 
     // Try to get the model-aware prompt
     // We need to determine the model type from the request context
@@ -95,7 +77,7 @@ export const getLlmDescriptionHelper = async ({
       promptId,
       promptGroupId,
       provider: modelType,
-      savedObjectsClient: clientToUse as unknown as SavedObjectsClientContract,
+      savedObjectsClient,
     });
 
     return prompt;
