@@ -932,6 +932,12 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     )
     .map((node) => node.name);
 
+  const masterNodes = nodes
+    .filter((node) =>
+      node.esArgs?.filter(([arg, val]) => val.includes('node.roles') && val.includes('master'))
+    )
+    .map((node) => node.name);
+
   // This is where nodes are started
   const nodeNames = await Promise.all(
     nodes.map(async (node, i) => {
