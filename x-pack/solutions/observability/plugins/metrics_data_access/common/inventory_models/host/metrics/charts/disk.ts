@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { LegendValue } from '@elastic/charts';
 import type { LensConfigWithId } from '../../../types';
 import type { HostFormulas } from '../formulas';
 import {
@@ -70,7 +71,7 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
           type: 'topValues',
           field:
             formulas.schema === 'ecs' ? 'system.filesystem.mount_point' : 'attributes.mountpoint',
-          size: 5,
+          size: 15,
         },
         yAxis: [
           {
@@ -86,7 +87,15 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
       },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    ...DEFAULT_XY_LEGEND,
+    legend: {
+      ...DEFAULT_XY_LEGEND.legend,
+      legendStats: [
+        LegendValue.Average,
+        LegendValue.Min,
+        LegendValue.Max,
+        LegendValue.LastNonNullValue,
+      ],
+    },
     ...DEFAULT_XY_YBOUNDS,
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
