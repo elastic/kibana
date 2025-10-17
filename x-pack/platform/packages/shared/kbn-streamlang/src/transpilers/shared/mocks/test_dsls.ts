@@ -23,13 +23,11 @@ export const comprehensiveTestDSL: StreamlangDSL = {
     {
       action: 'convert',
       from: 'http.status_code',
-      to: 'http.status_code_str',
-      ignore_missing: true,
+      type: 'string',
       where: {
         field: 'http.error',
         eq: 404,
       },
-      type: 'string',
     } as ConvertProcessor,
     // Rename a field
     {

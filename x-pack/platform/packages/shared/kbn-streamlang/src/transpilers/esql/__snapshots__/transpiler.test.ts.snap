@@ -21,16 +21,19 @@ Object {
 `;
 
 exports[`transpile - Streamlang DSL to ES|QL) should transpile a variety of processor steps and where blocks 1`] = `
-"  | WHERE NOT(\`attributes.old_name\` IS NULL)
+"  | WHERE NOT(\`http.status_code\` IS NULL)
+  //N.B. We are evaluating a new field when the user does not specify a target field to preserve type conversion logic.
+  | EVAL \`http.status_code__to_string\` = CASE(\`http.error\` == 404, TO_STRING(\`http.status_code\`), NULL)
+  | WHERE NOT(\`attributes.old_name\` IS NULL)
   | WHERE \`attributes.new_name\` IS NULL
   | EVAL \`attributes.new_name\` = \`attributes.old_name\`
   | DROP \`attributes.old_name\`
   | EVAL \`attributes.status\` = \\"active\\"
   | WHERE NOT(\`body.message\` IS NULL)
-  | GROK \`body.message\` \\"%{IP:attributes.client_ip} - %{WORD:attributes.method}\\"
+  | GROK \`body.message\`\\"%{IP:attributes.client_ip} - %{WORD:attributes.method}\\"
   | EVAL \`attributes.parsed_time\` = DATE_FORMAT(\\"yyyy-MM-dd\\", COALESCE(DATE_PARSE(\\"yyyy-MM-dd'T'HH:mm:ss.SSSZ\\", TO_STRING(\`attributes.timestamp\`)), DATE_PARSE(\\"yyyy-MM-dd HH:mm:ss\\", TO_STRING(\`attributes.timestamp\`))))
   | WHERE NOT(\`body.log\` IS NULL)
-  | DISSECT \`body.log\` \\"%{attributes.client} %{attributes.method} %{attributes.path}\\"
+  | DISSECT \`body.log\`\\"%{attributes.client} %{attributes.method} %{attributes.path}\\"
   | EVAL \`attributes.tags\` = CASE(\`attributes.tags\` IS NULL, [\\"new_tag\\"], MV_APPEND(\`attributes.tags\`, [\\"new_tag\\"]))
   | EVAL \`attributes.flag\` = CASE(\`attributes.status\` == \\"active\\", \\"yes\\", \`attributes.flag\`)
   | EVAL \`attributes.prod_flag\` = CASE(\`attributes.env\` == \\"prod\\", \\"prod-env\\", \`attributes.prod_flag\`)

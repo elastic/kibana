@@ -6,7 +6,7 @@
  */
 
 import type { ESQLAstCommand } from '@kbn/esql-ast';
-import { BasicPrettyPrinter, Builder } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, Builder, WrappingPrettyPrinter } from '@kbn/esql-ast';
 import { conditionToESQLAst } from './condition_to_esql';
 
 import type { ESQLTranspilationOptions } from '.';
@@ -78,7 +78,12 @@ export function convertStreamlangDSLToESQLCommands(
     .flat();
 
   const query = Builder.expression.query(esqlAstCommands);
-  return BasicPrettyPrinter.multiline(query, { pipeTab: transpilationOptions.pipeTab });
+
+  return WrappingPrettyPrinter.print(query, {
+    wrap: 1000,
+    multiline: true,
+    pipeTab: transpilationOptions.pipeTab,
+  });
 }
 
 /**

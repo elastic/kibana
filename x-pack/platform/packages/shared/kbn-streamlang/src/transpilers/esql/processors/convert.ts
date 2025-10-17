@@ -53,10 +53,10 @@ export function convertConvertProcessorToESQL(processor: ConvertProcessor): ESQL
     where,
   } = processor;
   const fromColumn = Builder.expression.column(from);
-  // If the target field is not specified, replace the source field
-  const toColumn = Builder.expression.column(to ?? from);
 
   const commands: ESQLAstCommand[] = [];
+  const typeConversionFunction = resolveTypeConversionFunctionForESQL(type);
+  const convertAssignment = Builder.expression.func.call(typeConversionFunction, [fromColumn]);
 
   // Add missing field filter if needed (ignore_missing = false)
   const missingFieldFilter = buildIgnoreMissingFilter(from, ignore_missing);
@@ -64,22 +64,146 @@ export function convertConvertProcessorToESQL(processor: ConvertProcessor): ESQL
     commands.push(missingFieldFilter);
   }
 
-  const typeConversionFunction = resolveTypeConversionFunctionForESQL(type);
+  /**
+   * 1. Best case: No where condition, just convert the field.
+   *
+   *  @example
+   *     ```typescript
+   *     const streamlangDSL: StreamlangDSL = {
+   *        steps: [
+   *          {
+   *            action: 'convert',
+   *            from: 'http.status_code',
+   *            to: 'http.status_code_str',
+   *            type: 'string',
+   *          },
+   *        ],
+   *      };
+   *    ```
+   * Generates (conceptually):
+   *    ```txt
+   *      // | WHERE NOT(http.status_code IS NULL)  // Only if ignore_missing = false
+   *      | EVAL http.status_code_str = TO_STRING(http.status_code)
+   *    ```
+   */
+  if (!where) {
+    const evalCommand = Builder.command({
+      name: 'eval',
+      args: [
+        Builder.expression.func.binary('=', [
+          Builder.expression.column(to ?? from), // Either the target field or override the source field
+          convertAssignment,
+        ]),
+      ],
+    });
 
-  let convertAssignment = Builder.expression.func.call(typeConversionFunction, [fromColumn]);
-
-  if (where) {
-    convertAssignment = Builder.expression.func.call('CASE', [
-      buildWhereCondition(from, ignore_missing, where, conditionToESQLAst),
-      convertAssignment,
-      to ? Builder.expression.literal.nil() : fromColumn,
-    ]);
+    commands.push(evalCommand);
+    return commands;
   }
+
+  /**
+   * 2. If the target field is specified and there is a where condition, use a CASE expression to conditionally set the target field to the converted value, else set it to NULL.
+   *
+   *  @example
+   *     ```typescript
+   *     const streamlangDSL: StreamlangDSL = {
+   *        steps: [
+   *          {
+   *            action: 'convert',
+   *            from: 'http.status_code',
+   *            type: 'string',
+   *            to: 'http.status_code_str',
+   *            where: {
+   *              field: 'http.error',
+   *              exists: true,
+   *            },
+   *          },
+   *        ],
+   *      };
+   *    ```
+   * Generates (conceptually):
+   *    ```txt
+   *      // | WHERE NOT(http.status_code IS NULL)  // Only if ignore_missing = false
+   *      | EVAL http.status_code_str = CASE(NOT(`http.error` IS NULL), TO_STRING(http.status_code), NULL)
+   *    ```
+   */
+  if (to) {
+    const evalCommand = Builder.command({
+      name: 'eval',
+      args: [
+        Builder.expression.func.binary('=', [
+          Builder.expression.column(to),
+          Builder.expression.func.call('CASE', [
+            buildWhereCondition(from, ignore_missing, where, conditionToESQLAst),
+            convertAssignment,
+            Builder.expression.literal.nil(),
+          ]),
+        ]),
+      ],
+    });
+    commands.push(evalCommand);
+    return commands;
+  }
+
+  /**
+   * 3. If the target field is not specified and there is a where condition:
+   *    - use a CASE expression to evaluate the where condition: if true, gives the converted value, else gives NULL.
+   *    - set the evaluated value to a target field named `${from}__to_${type}`.
+   *
+   * THIS IS THE ONLY CASE WHERE WE NEED TO EVALUATE A NEW FIELD WHEN THE USER DOES NOT SPECIFY A TARGET FIELD.
+   * IT IS BECAUSE WE, IN CASE THE CONDITION IS FALSE, WE CANNOT OVERRIDE THE SOURCE FIELD WITH SOMETHING LIKE:
+   * ```txt
+   * EVAL `http.status_code` = CASE(`http.error` == 404, TO_STRING(`http.status_code`), `http.status_code`)
+   * ```
+   * BECAUSE IT WOULD RESULT IN A CASE EXPRESSION EVALUATING TWO DIFFERENT TYPES, WHICH IS NOT ALLOWED.
+   * SO WE EVALUATE THE CONDITION AND SET THE VALUE TO A NEW FIELD, ADDING A COMMENT TO INDICATE THAT WE ARE DOING THIS WHEN THE USER DOES NOT SPECIFY A TARGET FIELD.
+   *
+   *  @example
+   *     ```typescript
+   *     const streamlangDSL: StreamlangDSL = {
+   *        steps: [
+   *          {
+   *            action: 'convert',
+   *            from: 'http.status_code',
+   *            type: 'string',
+   *            where: {
+   *              field: 'http.error',
+   *              exists: true,
+   *            },
+   *          },
+   *        ],
+   *      };
+   *    ```
+   * Generates (conceptually):
+   *    ```txt
+   *      // | WHERE NOT(http.status_code IS NULL)  // Only if ignore_missing = false
+   *      // N.B. We are evaluating a new field when the user does not specify a target field to preserve type conversion logic.
+   *      | EVAL http.status_code__to_string = CASE(NOT(`http.error` IS NULL), TO_STRING(http.status_code), NULL)
+   *    ```
+   */
 
   const evalCommand = Builder.command({
     name: 'eval',
-    args: [Builder.expression.func.binary('=', [toColumn, convertAssignment])],
+    args: [
+      Builder.expression.func.binary('=', [
+        Builder.expression.column(`${from}__to_${type}`),
+        Builder.expression.func.call('CASE', [
+          buildWhereCondition(from, ignore_missing, where, conditionToESQLAst),
+          convertAssignment,
+          Builder.expression.literal.nil(),
+        ]),
+      ]),
+    ],
   });
+
+  evalCommand.formatting = {
+    top: [
+      Builder.comment(
+        'single-line',
+        'N.B. We are evaluating a new field when the user does not specify a target field to preserve type conversion logic.'
+      ),
+    ],
+  };
 
   commands.push(evalCommand);
 
