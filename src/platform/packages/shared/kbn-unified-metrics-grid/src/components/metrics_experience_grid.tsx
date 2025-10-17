@@ -7,18 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import { useFetch } from '@kbn/unified-histogram';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { EuiResizeObserverProps } from '@elastic/eui';
 import {
   EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiResizeObserver,
   EuiText,
   euiScrollBarStyles,
   useEuiTheme,
@@ -58,7 +56,6 @@ export const MetricsExperienceGrid = ({
 
   const { currentPage, dimensions, valueFilters, onPageChange, searchTerm } = useMetricsGridState();
   const { updateTimeRange } = requestParams;
-  const [metricsGridWidth, setMetricsGridWidth] = React.useState(0);
 
   const input$ = useMemo(
     () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
@@ -88,27 +85,10 @@ export const MetricsExperienceGrid = ({
     searchTerm,
   }) ?? {};
 
-  const maxColumns = useMemo(() => {
-    switch (true) {
-      case metricsGridWidth >= euiTheme.breakpoint.xl:
-        return 4;
-      case metricsGridWidth >= euiTheme.breakpoint.l:
-        return 3;
-      case metricsGridWidth >= euiTheme.breakpoint.s:
-        return 2;
-      default:
-        return 1;
-    }
-  }, [metricsGridWidth, euiTheme]);
-
-  const columns = useMemo<EuiFlexGridProps['columns']>(
-    () => Math.min(filteredFieldsCount, maxColumns) as EuiFlexGridProps['columns'],
-    [filteredFieldsCount, maxColumns]
+  const columns = useMemo<NonNullable<EuiFlexGridProps['columns']>>(
+    () => Math.min(filteredFieldsCount, 4) as NonNullable<EuiFlexGridProps['columns']>,
+    [filteredFieldsCount]
   );
-
-  const handleResize: EuiResizeObserverProps['onResize'] = useCallback(({ width }) => {
-    setMetricsGridWidth(width);
-  }, []);
 
   const filters = useValueFilters(valueFilters);
 
@@ -182,26 +162,20 @@ export const MetricsExperienceGrid = ({
         </EuiFlexItem>
         <EuiFlexItem grow>
           {isDiscoverLoading && <MetricsGridLoadingProgress />}
-          <EuiResizeObserver onResize={handleResize}>
-            {(resizeRef) => (
-              <div ref={resizeRef}>
-                <MetricsGrid
-                  pivotOn="metric"
-                  columns={columns}
-                  dimensions={dimensions}
-                  filters={filters}
-                  services={services}
-                  fields={currentPageFields}
-                  searchSessionId={searchSessionId}
-                  onBrushEnd={onBrushEnd}
-                  onFilter={onFilter}
-                  discoverFetch$={discoverFetch$}
-                  requestParams={requestParams}
-                  abortController={abortController}
-                />
-              </div>
-            )}
-          </EuiResizeObserver>
+          <MetricsGrid
+            pivotOn="metric"
+            columns={columns}
+            dimensions={dimensions}
+            filters={filters}
+            services={services}
+            fields={currentPageFields}
+            searchSessionId={searchSessionId}
+            onBrushEnd={onBrushEnd}
+            onFilter={onFilter}
+            discoverFetch$={discoverFetch$}
+            requestParams={requestParams}
+            abortController={abortController}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <Pagination
