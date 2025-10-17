@@ -19,6 +19,7 @@ export const ConfigSchema = schema.object({
   providerConfig: schema.object({}, { unknowns: 'allow', defaultValue: {} }),
   taskTypeConfig: schema.object({}, { unknowns: 'allow', defaultValue: {} }),
   contextWindowLength: schema.maybe(schema.number({})),
+  temperature: schema.maybe(schema.number({})),
 });
 
 export const SecretsSchema = schema.object({
