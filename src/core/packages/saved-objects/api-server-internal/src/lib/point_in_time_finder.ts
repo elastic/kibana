@@ -45,7 +45,7 @@ export class PointInTimeFinder<T = unknown, A = unknown>
 {
   readonly #log: Logger;
   readonly #client: SavedObjectsPointInTimeFinderClient;
-  readonly #findOptions: SavedObjectsFindOptions;
+  readonly #findOptions: SavedObjectsFindOptions & { perPage: number };
   readonly #internalOptions: SavedObjectsFindInternalOptions | undefined;
   #open: boolean = false;
   #pitId?: string;
@@ -57,13 +57,11 @@ export class PointInTimeFinder<T = unknown, A = unknown>
     this.#log = logger.get('point-in-time-finder');
     this.#client = client;
     this.#internalOptions = internalOptions;
-
-    const { perPage, ...otherFindOptions } = findOptions;
     this.#findOptions = {
       // Default to 1000 items per page as a tradeoff between
       // speed and memory consumption.
-      perPage: perPage ?? 1000,
-      ...otherFindOptions,
+      perPage: 1000,
+      ...findOptions,
     };
   }
 
@@ -93,7 +91,7 @@ export class PointInTimeFinder<T = unknown, A = unknown>
       this.#log.debug(`Collected [${lastResultsCount}] saved objects`);
 
       // Close PIT if this was our last page
-      if (this.#pitId && lastResultsCount < this.#findOptions.perPage!) {
+      if (this.#pitId && lastResultsCount < this.#findOptions.perPage) {
         await this.close();
       }
 
@@ -105,7 +103,7 @@ export class PointInTimeFinder<T = unknown, A = unknown>
 
       // We've reached the end when there are fewer hits than our perPage size,
       // or when `close()` has been called.
-    } while (this.#open && lastResultsCount >= this.#findOptions.perPage!);
+    } while (this.#open && lastResultsCount >= this.#findOptions.perPage);
 
     return;
   }
