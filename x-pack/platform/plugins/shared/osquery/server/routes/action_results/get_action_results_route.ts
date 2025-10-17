@@ -9,9 +9,6 @@ import { lastValueFrom } from 'rxjs';
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-
-import { flatten, reverse, uniqBy } from 'lodash/fp';
-import type { estypes } from '@elastic/elasticsearch';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import {
   getActionResultsRequestParamsSchema,
@@ -28,6 +25,8 @@ import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import type {
   ActionResultsRequestOptions,
   ActionResultsStrategyResponse,
+  ActionDetailsRequestOptions,
+  ActionDetailsStrategyResponse,
 } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
@@ -88,9 +87,30 @@ export const getActionResultsRoute = (
 
           const search = await context.search;
 
-          const agentIds = request.query.agentIds
-            ? request.query.agentIds.split(',').map((id) => id.trim())
-            : undefined;
+          // Fetch action details to get agent IDs
+          const { actionDetails } = await lastValueFrom(
+            search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
+              {
+                actionId: request.params.actionId,
+                factoryQueryType: OsqueryQueries.actionDetails,
+                componentTemplateExists: osqueryContext.service?.isComponentTemplateExists,
+                spaceId:
+                  (await context.core).savedObjects.client.getCurrentNamespace() || 'default',
+              },
+              { abortSignal, strategy: 'osquerySearchStrategy' }
+            )
+          );
+
+          // Extract agent IDs from action document
+          let agentIds: string[] = [];
+          if (actionDetails?._source) {
+            // Check if actionId is a child query action_id
+            const queries = actionDetails._source.queries || [];
+            const matchingQuery = queries.find((q: any) => q.action_id === request.params.actionId);
+
+            // Use query-specific agents if found, otherwise use parent action's agents
+            agentIds = matchingQuery?.agents || actionDetails._source.agents || [];
+          }
 
           const res = await lastValueFrom(
             search.search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
@@ -122,27 +142,17 @@ export const getActionResultsRoute = (
           const aggsBuckets =
             res.rawResponse?.aggregations?.aggs.responses_by_action_id?.responses.buckets;
 
-          const previousEdges =
-            agentIds?.map(
-              (agentId) =>
-                ({ fields: { agent_id: [agentId] } } as unknown as estypes.SearchHit<object>)
-            ) ?? [];
-
-          const processedEdges = reverse(
-            uniqBy('fields.agent_id[0]', flatten([res.edges, previousEdges]))
-          );
-
           const aggregations = {
             totalRowCount,
             totalResponded,
             successful: aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0,
             failed: aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0,
-            pending: agentIds?.length ? Math.max(0, agentIds.length - totalResponded) : 0,
+            pending: Math.max(0, agentIds.length - totalResponded),
           };
 
           return response.ok({
             body: {
-              edges: processedEdges,
+              edges: res.edges,
               total: res.total,
               aggregations,
               inspect: res.inspect,
