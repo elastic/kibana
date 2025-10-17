@@ -26,6 +26,28 @@ import {
   workflowInsightsSubFeature,
   trustedDevicesSubFeature,
 } from '../kibana_sub_features';
+import type { SubFeatureReplacements } from '../../types';
+import { SECURITY_FEATURE_ID_V4 } from '../../constants';
+import { addSubFeatureReplacements } from '../../utils';
+
+const replacements: Partial<Record<SecuritySubFeatureId, SubFeatureReplacements>> = {
+  [SecuritySubFeatureId.endpointList]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.workflowInsights]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.endpointExceptions]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.globalArtifactManagement]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.trustedApplications]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.trustedDevices]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.hostIsolationExceptionsBasic]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.blocklist]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.eventFilters]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.policyManagement]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.responseActionsHistory]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.hostIsolation]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.processOperations]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.fileOperations]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.executeAction]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.scanAction]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+};
 
 /**
  * Sub-features that will always be available for Security
@@ -67,6 +89,11 @@ export const getSecurityV3SubFeaturesMap = ({
   const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(
     securitySubFeaturesList.map(([id, originalSubFeature]) => {
       let subFeature = originalSubFeature;
+
+      const featureReplacements = replacements[id];
+      if (featureReplacements) {
+        subFeature = addSubFeatureReplacements(subFeature, featureReplacements);
+      }
 
       // If the feature is space-aware, we need to set false to the requireAllSpaces flag and remove the privilegesTooltip
       if (experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {

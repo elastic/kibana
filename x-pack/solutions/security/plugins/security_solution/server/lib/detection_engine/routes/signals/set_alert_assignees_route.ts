@@ -8,6 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { uniq } from 'lodash/fp';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { ALERTS_API_ALL } from '@kbn/security-solution-features/constants';
 import { SetAlertAssigneesRequestBody } from '../../../../../common/api/detection_engine/alert_assignees';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
@@ -24,7 +25,7 @@ export const setAlertAssigneesRoute = (router: SecuritySolutionPluginRouter) => 
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [ALERTS_API_ALL],
         },
       },
     })

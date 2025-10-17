@@ -9,7 +9,6 @@ import React from 'react';
 
 import { TestProviders } from '../../../common/mock';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
-import { useUserData } from '../../../detections/components/user_info';
 
 import { SharedLists } from '.';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
@@ -17,8 +16,10 @@ import { useAllExceptionLists } from '../../hooks/use_all_exception_lists';
 import { useHistory } from 'react-router-dom';
 import { generateHistoryMock } from '../../../common/utils/route/mocks';
 import { fireEvent, render, waitFor } from '@testing-library/react';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { initialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 
-jest.mock('../../../detections/components/user_info');
+jest.mock('../../../common/components/user_privileges');
 jest.mock('../../../common/utils/route/mocks');
 jest.mock('../../hooks/use_all_exception_lists');
 jest.mock('@kbn/securitysolution-list-hooks');
@@ -86,13 +87,9 @@ describe('SharedLists', () => {
       },
     ]);
 
-    (useUserData as jest.Mock).mockReturnValue([
-      {
-        loading: false,
-        canUserCRUD: false,
-        canUserREAD: false,
-      },
-    ]);
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+    });
   });
 
   it('renders empty view if no lists exist', async () => {
@@ -215,13 +212,10 @@ describe('SharedLists', () => {
   });
 
   it('renders delete option as disabled if user is read only', async () => {
-    (useUserData as jest.Mock).mockReturnValue([
-      {
-        loading: false,
-        canUserCRUD: false,
-        canUserREAD: true,
-      },
-    ]);
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: { read: true, edit: false },
+    });
 
     const wrapper = render(
       <TestProviders>

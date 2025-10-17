@@ -19,19 +19,24 @@ import {
   getCasesV3Feature,
   getSecurityV2Feature,
   getSecurityV3Feature,
+  getSecurityV4Feature,
   getTimelineFeature,
   getNotesFeature,
   getSiemMigrationsFeature,
+  getRulesFeature,
 } from '@kbn/security-solution-features/product_features';
 import { API_ACTION_PREFIX } from '@kbn/security-solution-features/actions';
 import type { ExperimentalFeatures } from '../../../common';
 import { ProductFeatures } from './product_features';
 import { casesProductFeatureParams } from './cases_product_feature_params';
 import {
-  securityDefaultSavedObjects,
+  rulesSavedObjects,
   securityNotesSavedObjects,
   securityTimelineSavedObjects,
   securityV1SavedObjects,
+  securityV2SavedObjects,
+  securityV3SavedObjects,
+  securityV4SavedObjects,
 } from './security_saved_objects';
 import { registerApiAccessControl } from './product_features_api_access_control';
 import type {
@@ -51,8 +56,9 @@ export class ProductFeaturesService {
     const securityFeatureParams = { experimentalFeatures };
     this.productFeaturesRegistry.create('security', [
       getSecurityFeature({ ...securityFeatureParams, savedObjects: securityV1SavedObjects }),
-      getSecurityV2Feature({ ...securityFeatureParams, savedObjects: securityDefaultSavedObjects }),
-      getSecurityV3Feature({ ...securityFeatureParams, savedObjects: securityDefaultSavedObjects }),
+      getSecurityV2Feature({ ...securityFeatureParams, savedObjects: securityV2SavedObjects }),
+      getSecurityV3Feature({ ...securityFeatureParams, savedObjects: securityV3SavedObjects }),
+      getSecurityV4Feature({ ...securityFeatureParams, savedObjects: securityV4SavedObjects }),
     ]);
     this.productFeaturesRegistry.create('cases', [
       getCasesFeature(casesProductFeatureParams),
@@ -68,6 +74,9 @@ export class ProductFeaturesService {
     ]);
     this.productFeaturesRegistry.create('notes', [
       getNotesFeature({ ...securityFeatureParams, savedObjects: securityNotesSavedObjects }),
+    ]);
+    this.productFeaturesRegistry.create('rules', [
+      getRulesFeature({ ...securityFeatureParams, savedObjects: rulesSavedObjects }),
     ]);
     if (!experimentalFeatures.siemMigrationsDisabled) {
       this.productFeaturesRegistry.create('siemMigrations', [getSiemMigrationsFeature()]);

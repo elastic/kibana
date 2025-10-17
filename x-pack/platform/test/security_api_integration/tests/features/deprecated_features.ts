@@ -191,6 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
           "securitySolutionCasesV2",
           "siem",
           "siemV2",
+          "siemV3",
           "visualize",
         ]
       `);

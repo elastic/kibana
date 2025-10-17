@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { RULES_UI_READ_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import {
   ALERT_SUMMARY_PATH,
   ALERTS_PATH,
@@ -16,7 +17,7 @@ import { ALERT_SUMMARY, ALERTS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 
 export const alertsLink: LinkItem = {
-  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.detections`]],
+  capabilities: [[RULES_UI_READ_PRIVILEGE, `${SECURITY_FEATURE_ID}.detections`]],
   globalNavPosition: 3,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.alerts', {
@@ -29,7 +30,7 @@ export const alertsLink: LinkItem = {
 };
 
 export const alertSummaryLink: LinkItem = {
-  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.external_detections`]],
+  capabilities: [[RULES_UI_READ_PRIVILEGE, `${SECURITY_FEATURE_ID}.external_detections`]],
   globalNavPosition: 3,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.alertSummary', {

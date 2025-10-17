@@ -53,7 +53,7 @@ const AIValueComponent = () => {
 
   const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
 
-  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
+  const { hasSiemRead: hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
 
   const { hasRequiredRole, isLoading: isRoleCheckLoading } = useAiValueRoleCheck();

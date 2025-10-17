@@ -6,9 +6,15 @@
  */
 
 export { getCasesFeature, getCasesV2Feature, getCasesV3Feature } from './src/cases';
-export { getSecurityFeature, getSecurityV2Feature, getSecurityV3Feature } from './src/security';
+export {
+  getSecurityFeature,
+  getSecurityV2Feature,
+  getSecurityV3Feature,
+  getSecurityV4Feature,
+} from './src/security';
 export { getAssistantFeature } from './src/assistant';
 export { getAttackDiscoveryFeature } from './src/attack_discovery';
 export { getTimelineFeature } from './src/timeline';
 export { getNotesFeature } from './src/notes';
 export { getSiemMigrationsFeature } from './src/siem_migrations';
+export { getRulesFeature } from './src/rules';

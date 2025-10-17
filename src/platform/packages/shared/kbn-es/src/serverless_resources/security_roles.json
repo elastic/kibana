@@ -32,7 +32,8 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV3": ["read", "read_alerts"],
+          "siemV4": ["read", "read_alerts"],
+          "securitySolutionRulesV1": ["read"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["read"],
@@ -81,7 +82,8 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV3": ["read", "read_alerts"],
+          "siemV4": ["read", "read_alerts"],
+          "securitySolutionRulesV1": ["read"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["read"],
@@ -140,7 +142,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV3": [
+          "siemV4": [
             "all",
             "read_alerts",
             "crud_alerts",
@@ -155,6 +157,7 @@
             "actions_log_management_all",
             "file_operations_all"
           ],
+          "securitySolutionRulesV1": ["all"],
           "securitySolutionCasesV2": ["all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
@@ -217,7 +220,8 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV3": ["all", "read_alerts", "crud_alerts"],
+          "siemV4": ["all", "read_alerts", "crud_alerts"],
+          "securitySolutionRulesV1": ["all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -274,7 +278,8 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV3": ["all", "read_alerts", "crud_alerts"],
+          "siemV4": ["all", "read_alerts", "crud_alerts"],
+          "securitySolutionRulesV1": ["all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -326,12 +331,13 @@
       {
         "feature": {
           "ml": ["all"],
-          "siemV3": ["all", "read_alerts", "crud_alerts"],
+          "siemV4": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
           "securitySolutionTimeline": ["all"],
           "securitySolutionNotes": ["all"],
+          "securitySolutionRulesV1": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"],
           "dev_tools": ["all"]
@@ -385,12 +391,13 @@
       {
         "feature": {
           "ml": ["all"],
-          "siemV3": ["all", "read_alerts", "crud_alerts"],
+          "siemV4": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
           "securitySolutionTimeline": ["all"],
           "securitySolutionNotes": ["all"],
+          "securitySolutionRulesV1": ["all"],
           "actions": ["all"],
           "builtInAlerts": ["all"]
         },

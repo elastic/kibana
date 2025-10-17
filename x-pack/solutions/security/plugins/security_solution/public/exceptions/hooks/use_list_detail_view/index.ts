@@ -29,6 +29,7 @@ import {
 import { checkIfListCannotBeEdited, isAnExceptionListItem } from '../../utils/list.utils';
 import * as i18n from '../../translations';
 import { useInvalidateFetchRuleByIdQuery } from '../../../detection_engine/rule_management/api/hooks/use_fetch_rule_by_id_query';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 interface ReferenceModalState {
   contentText: string;
@@ -53,8 +54,9 @@ export const useListDetailsView = (exceptionListId: string) => {
   const { navigateToApp } = services.application;
 
   const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
+  const { read: canReadRules, edit: canEditRules } = useUserPrivileges().rulesPrivileges;
 
-  const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
+  const [{ loading: userInfoLoading }] = useUserData();
 
   const [isLoading, setIsLoading] = useState<boolean>();
   const [showManageButtonLoader, setShowManageButtonLoader] = useState<boolean>(false);
@@ -405,7 +407,7 @@ export const useListDetailsView = (exceptionListId: string) => {
   return {
     isLoading: isLoading || userInfoLoading,
     invalidListId,
-    isReadOnly: !!(!canUserCRUD && canUserREAD),
+    isReadOnly: !!(!canEditRules && canReadRules),
     list,
     listName: list?.name,
     listDescription: list?.description,
