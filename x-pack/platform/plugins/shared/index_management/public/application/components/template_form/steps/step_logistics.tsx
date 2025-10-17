@@ -275,6 +275,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       getErrors: getFormErrors,
       getFormData,
       setFieldValue,
+      updateFieldValues,
     } = form;
 
     const [
@@ -301,7 +302,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
 
     useEffect(() => {
       if (!setIndexMode) {
-        setFieldValue('indexMode', undefined);
+        setFieldValue('indexMode', null);
       }
     }, [setIndexMode, setFieldValue]);
 
@@ -313,10 +314,12 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
         // Only set index mode if index pattern was changed
         defaultValue.indexPatterns !== indexPatternsField
       ) {
-        setFieldValue('setIndexMode', true);
-        setFieldValue('indexMode', LOGSDB_INDEX_MODE);
+        updateFieldValues({
+          setIndexMode: true,
+          indexMode: LOGSDB_INDEX_MODE,
+        });
       }
-    }, [defaultValue.indexPatterns, indexPatternsField, setFieldValue]);
+    }, [defaultValue.indexPatterns, indexPatternsField, updateFieldValues]);
 
     /**
      * When the consumer call validate() on this step, we submit the form so it enters the "isSubmitted" state
