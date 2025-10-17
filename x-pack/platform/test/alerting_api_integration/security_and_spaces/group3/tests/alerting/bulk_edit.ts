@@ -1137,7 +1137,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         expect(updatedInternalRuleType.tags).to.eql(['internally-managed']);
         expect(updatedNonInternalRuleType.tags).to.eql(['internally-managed', 'tag-A']);
 
-        const res = await alertUtils.deleteInternallyManagedRule(createdRule.id);
+        const res = await alertUtils.deleteInternallyManagedRule(internalRuleType.id);
 
         expect(res.statusCode).to.eql(200);
       });
