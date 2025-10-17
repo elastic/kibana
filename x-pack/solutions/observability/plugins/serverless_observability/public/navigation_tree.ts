@@ -437,6 +437,7 @@ export const createNavigationTree = ({
                   { link: 'management:transform' },
                   { link: 'management:rollup_jobs' },
                   { link: 'management:data_quality' },
+                  { link: 'management:data_usage' },
                 ],
               },
             ],
@@ -473,9 +474,6 @@ export const createNavigationTree = ({
                     cloudLink: 'billingAndSub',
                   },
                   {
-                    cloudLink: 'performance',
-                  },
-                  {
                     cloudLink: 'userAndRoles',
                     title: i18n.translate('xpack.serverlessObservability.navLinks.usersAndRoles', {
                       defaultMessage: 'Members',
@@ -499,23 +497,26 @@ export const createNavigationTree = ({
                   { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
                 ],
               },
-              {
-                id: 'machine_learning',
-                title: i18n.translate(
-                  'xpack.serverlessObservability.nav.projectSettings.machineLearning',
-                  {
-                    defaultMessage: 'Machine Learning',
-                  }
-                ),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  { link: 'management:overview' },
-                  { link: 'management:anomaly_detection' },
-                  { link: 'management:analytics' },
-                  { link: 'management:trained_models' },
-                  { link: 'management:supplied_configurations' },
-                ],
-              },
+              ...filterForFeatureAvailability(
+                {
+                  id: 'machine_learning',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.projectSettings.machineLearning',
+                    {
+                      defaultMessage: 'Machine Learning',
+                    }
+                  ),
+                  breadcrumbStatus: 'hidden',
+                  children: [
+                    { link: 'management:overview' },
+                    { link: 'management:anomaly_detection' },
+                    { link: 'management:analytics' },
+                    { link: 'management:trained_models' },
+                    { link: 'management:supplied_configurations' },
+                  ],
+                },
+                overviewAvailable
+              ),
               ...filterForFeatureAvailability(
                 {
                   title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.ai', {
@@ -534,14 +535,6 @@ export const createNavigationTree = ({
                 },
                 overviewAvailable
               ),
-              {
-                id: 'data',
-                title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.data', {
-                  defaultMessage: 'Data',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [{ link: 'management:data_usage' }],
-              },
               {
                 id: 'content',
                 title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.content', {
