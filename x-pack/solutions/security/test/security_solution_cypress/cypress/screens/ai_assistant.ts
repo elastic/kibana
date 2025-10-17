@@ -7,7 +7,6 @@
 
 export const ADD_NEW_CONNECTOR = '[data-test-subj="addNewConnectorButton"]';
 export const ADD_QUICK_PROMPT = '[data-test-subj="addQuickPrompt"]';
-export const ASSISTANT_SETTINGS_BUTTON = 'button[data-test-subj="settings"]';
 export const AI_ASSISTANT_BUTTON = '[data-test-subj="assistantNavLink"]';
 export const ASSISTANT_CHAT_BODY = '[data-test-subj="assistantChat"]';
 export const CHAT_CONTEXT_MENU = '[data-test-subj="chat-context-menu"]';
@@ -26,7 +25,6 @@ export const CONVERSATION_MULTI_SELECTOR =
   '[data-test-subj="conversationMultiSelector"] [data-test-subj="comboBoxSearchInput"]';
 export const CONVERSATION_SELECT = (c: string) => `[data-test-subj="conversation-select-${c}"]`;
 export const CONVERSATION_TITLE = '[data-test-subj="conversationTitle"]';
-export const CONVERSATION_TITLE_SAVE_BUTTON = '[data-test-subj="euiInlineEditModeSaveButton"]';
 export const CREATE_SYSTEM_PROMPT = '[data-test-subj="addSystemPrompt"]';
 export const EMPTY_CONVO = '[data-test-subj="emptyConvo"]';
 export const FLYOUT_NAV_TOGGLE = '[data-test-subj="aiAssistantFlyoutNavigationToggle"]';

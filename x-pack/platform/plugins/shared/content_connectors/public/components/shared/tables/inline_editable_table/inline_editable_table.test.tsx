@@ -222,6 +222,8 @@ describe('InlineEditableTable', () => {
       isLoading,
       lastItemWarning,
       uneditableItems,
+      prevFocusRef: expect.objectContaining({ current: null }),
+      emptyPropertyAllowed: undefined,
     });
   });
 });

@@ -34,15 +34,14 @@ import { useFieldsMetadataContext } from '../../context/fields_metadata';
 interface MetricInsightsFlyoutProps {
   metric: MetricField;
   esqlQuery?: string;
-  isOpen: boolean;
   onClose: () => void;
+  chartRef: { current: HTMLDivElement | null };
 }
 
 export const MetricInsightsFlyout = ({
   metric,
   esqlQuery,
-
-  isOpen,
+  chartRef,
   onClose,
 }: MetricInsightsFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
@@ -66,8 +65,6 @@ export const MetricInsightsFlyout = ({
     [onClose]
   );
 
-  if (!isOpen) return null;
-
   const minWidth = euiTheme.base * 24;
   const maxWidth = euiTheme.breakpoint.xl;
 
@@ -75,16 +72,24 @@ export const MetricInsightsFlyout = ({
     <EuiPortal>
       <EuiFlyoutResizable
         onClose={onClose}
-        type="push"
+        type="overlay"
         size={flyoutWidth}
         onKeyDown={onKeyDown}
-        pushMinBreakpoint="xl"
         data-test-subj="metricsExperienceFlyout"
         aria-label={i18n.translate(
           'metricsExperience.metricInsightsFlyout.euiFlyoutResizable.metricInsightsFlyoutLabel',
           { defaultMessage: 'Metric Insights Flyout' }
         )}
         ownFocus
+        focusTrapProps={{
+          returnFocus: () => {
+            if (chartRef.current) {
+              chartRef.current.focus();
+              return false;
+            }
+            return true;
+          },
+        }}
         minWidth={minWidth}
         maxWidth={maxWidth}
         onResize={setFlyoutWidth}

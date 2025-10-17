@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTreeView, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PipelineTreeNode } from './types';
 import { createTreeNodesFromPipelines } from './create_tree_nodes';
@@ -63,7 +64,14 @@ export const PipelineStructureTree = React.memo(
           </EuiFlexItem>
         )}
         <EuiFlexItem css={{ marginLeft: isExtension ? euiTheme.size.l : '0' }}>
-          <EuiTreeView items={[treeNode]} showExpansionArrows={true} css={styles} />
+          <EuiTreeView
+            items={[treeNode]}
+            showExpansionArrows={true}
+            css={styles}
+            aria-label={i18n.translate('ingestPipelines.pipelineStructureTree.treeAriaLabel', {
+              defaultMessage: 'Pipeline structure',
+            })}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

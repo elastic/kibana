@@ -20,6 +20,7 @@ import {
   operatorToHumanReadableNameMap,
 } from '@kbn/streamlang';
 import { css } from '@emotion/css';
+import { ConditionEditor } from './condition_editor';
 
 export const ConditionPanel = ({ condition }: { condition: Condition }) => {
   const { euiTheme } = useEuiTheme();
@@ -33,6 +34,22 @@ export const ConditionPanel = ({ condition }: { condition: Condition }) => {
     >
       <ConditionDisplay condition={condition} showKeyword={true} keyword="WHERE" />
     </EuiPanel>
+  );
+};
+
+export const EditableConditionPanel = ({
+  condition,
+  isEditingCondition,
+  setCondition,
+}: {
+  condition: Condition;
+  isEditingCondition: boolean;
+  setCondition: (condition: Condition) => void;
+}) => {
+  return isEditingCondition ? (
+    <ConditionEditor condition={condition} status="enabled" onConditionChange={setCondition} />
+  ) : (
+    <ConditionPanel condition={condition} />
   );
 };
 

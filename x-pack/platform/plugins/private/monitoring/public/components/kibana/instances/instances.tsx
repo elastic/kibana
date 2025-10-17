@@ -376,7 +376,7 @@ function prepareLastSeenTimestamp(lastSeenTimestampRaw: string, dateFormat: stri
   if (shouldShowRelativeTime) {
     return (
       <EuiToolTip position="top" content={formattedTimestamp}>
-        <span>{relativeTime}</span>
+        <span tabIndex={0}>{relativeTime}</span>
       </EuiToolTip>
     );
   }

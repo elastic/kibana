@@ -136,6 +136,7 @@ export function StorageExplorer() {
             defaultMessage: 'Long loading time?',
           })}
           iconType="timeRefresh"
+          data-test-subj="apmStorageExplorerLongLoadingTimeCallout"
         >
           <p>
             <FormattedMessage
