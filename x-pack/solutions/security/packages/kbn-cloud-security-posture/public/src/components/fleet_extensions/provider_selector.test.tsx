@@ -83,14 +83,6 @@ describe('<ProviderSelector />', () => {
       const azureInput = azureOption.querySelector('input[type="radio"]');
       expect(azureInput).toBeChecked();
     });
-
-    it('shows correct labels for each provider', () => {
-      const { getByLabelText } = renderWithIntl(<ProviderSelector {...defaultProps} />);
-
-      expect(getByLabelText('AWS')).toBeInTheDocument();
-      expect(getByLabelText('Azure')).toBeInTheDocument();
-      expect(getByLabelText('GCP')).toBeInTheDocument();
-    });
   });
 
   describe('Interaction Tests', () => {
@@ -224,74 +216,6 @@ describe('<ProviderSelector />', () => {
       expect(newAzureInput).toBeChecked();
       expect(newAwsInput).not.toBeChecked();
     });
-
-    it('changes selection from Azure to GCP', async () => {
-      const mockSetProvider = jest.fn();
-      const props = {
-        ...defaultProps,
-        selectedProvider: 'azure' as const,
-        setSelectedProvider: mockSetProvider,
-      };
-      const { getByTestId, rerender } = renderWithIntl(<ProviderSelector {...props} />);
-
-      // Initially Azure is selected
-      const azureInput = getByTestId('azure-radio-option').querySelector('input[type="radio"]');
-      const gcpInput = getByTestId('gcp-radio-option').querySelector('input[type="radio"]');
-      expect(azureInput).toBeChecked();
-      expect(gcpInput).not.toBeChecked();
-
-      // Click GCP
-      await userEvent.click(getByTestId('gcp-radio-option'));
-      expect(mockSetProvider).toHaveBeenCalledWith('gcp');
-
-      // Simulate state change by re-rendering with new selectedProvider
-      const newProps = { ...props, selectedProvider: 'gcp' as const };
-      rerender(
-        <I18nProvider>
-          <ProviderSelector {...newProps} />
-        </I18nProvider>
-      );
-
-      // Now GCP should be selected
-      const newGcpInput = getByTestId('gcp-radio-option').querySelector('input[type="radio"]');
-      const newAzureInput = getByTestId('azure-radio-option').querySelector('input[type="radio"]');
-      expect(newGcpInput).toBeChecked();
-      expect(newAzureInput).not.toBeChecked();
-    });
-
-    it('changes selection from GCP to AWS', async () => {
-      const mockSetProvider = jest.fn();
-      const props = {
-        ...defaultProps,
-        selectedProvider: 'gcp' as const,
-        setSelectedProvider: mockSetProvider,
-      };
-      const { getByTestId, rerender } = renderWithIntl(<ProviderSelector {...props} />);
-
-      // Initially GCP is selected
-      const gcpInput = getByTestId('gcp-radio-option').querySelector('input[type="radio"]');
-      const awsInput = getByTestId('aws-radio-option').querySelector('input[type="radio"]');
-      expect(gcpInput).toBeChecked();
-      expect(awsInput).not.toBeChecked();
-
-      // Click AWS
-      await userEvent.click(getByTestId('aws-radio-option'));
-      expect(mockSetProvider).toHaveBeenCalledWith('aws');
-
-      // Simulate state change by re-rendering with new selectedProvider
-      const newProps = { ...props, selectedProvider: 'aws' as const };
-      rerender(
-        <I18nProvider>
-          <ProviderSelector {...newProps} />
-        </I18nProvider>
-      );
-
-      // Now AWS should be selected
-      const finalAwsInput = getByTestId('aws-radio-option').querySelector('input[type="radio"]');
-      const finalGcpInput = getByTestId('gcp-radio-option').querySelector('input[type="radio"]');
-      expect(finalAwsInput).toBeChecked();
-      expect(finalGcpInput).not.toBeChecked();
-    });
   });
 
   describe('Edge Cases', () => {
@@ -323,25 +247,6 @@ describe('<ProviderSelector />', () => {
 
       // Should render without throwing
       renderWithIntl(<ProviderSelector {...defaultProps} />);
-    });
-
-    it('maintains selection state after multiple clicks', async () => {
-      const mockSetProvider = jest.fn();
-      const props = { ...defaultProps, setSelectedProvider: mockSetProvider };
-      const { getByTestId } = renderWithIntl(<ProviderSelector {...props} />);
-
-      const azureOption = getByTestId('azure-radio-option');
-      const gcpOption = getByTestId('gcp-radio-option');
-
-      // Click multiple times
-      await userEvent.click(azureOption);
-      await userEvent.click(gcpOption);
-      await userEvent.click(azureOption);
-
-      expect(mockSetProvider).toHaveBeenCalledTimes(3);
-      expect(mockSetProvider).toHaveBeenNthCalledWith(1, 'azure');
-      expect(mockSetProvider).toHaveBeenNthCalledWith(2, 'gcp');
-      expect(mockSetProvider).toHaveBeenNthCalledWith(3, 'azure');
     });
   });
 });

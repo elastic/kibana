@@ -24,7 +24,7 @@ describe('AwsCredentialTypeSelector', () => {
   describe('Manual credentials options', () => {
     const manualOptions = getAwsCredentialsFormManualOptions();
 
-    it('renders all manual options and handles selection changes', () => {
+    it('renders all manual options, displays selected value, and handles selection changes', () => {
       render(
         <AwsCredentialTypeSelector
           type="direct_access_keys"
@@ -39,6 +39,11 @@ describe('AwsCredentialTypeSelector', () => {
       manualOptions.forEach((option) => {
         expect(screen.getByRole('option', { name: option.text })).toBeInTheDocument();
       });
+
+      const select = screen.getByTestId(
+        AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ
+      ) as HTMLSelectElement;
+      expect(select.value).toBe('direct_access_keys');
 
       // Test selection change
       fireEvent.change(screen.getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ), {
@@ -69,10 +74,10 @@ describe('AwsCredentialTypeSelector', () => {
   describe('Agentless credentials options', () => {
     const agentlessOptions = getAwsCredentialsCloudConnectorsFormAgentlessOptions();
 
-    it('renders agentless options including cloud connectors', () => {
+    it('renders agentless options, displays selected value, and handles selection changes', () => {
       render(
         <AwsCredentialTypeSelector
-          type="cloud_connectors"
+          type="direct_access_keys"
           onChange={mockOnChange}
           label="AWS Credential Type"
           options={agentlessOptions}
@@ -85,12 +90,16 @@ describe('AwsCredentialTypeSelector', () => {
         expect(screen.getByRole('option', { name: option.text })).toBeInTheDocument();
       });
 
-      // Verify cloud connectors option is present
-      expect(
-        screen
-          .getAllByRole('option')
-          .some((option) => /cloud connectors/i.test(option.textContent || ''))
-      ).toBe(true);
+      const select = screen.getByTestId(
+        AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ
+      ) as HTMLSelectElement;
+      expect(select.value).toBe('direct_access_keys');
+
+      // Test selection change for agentless options
+      fireEvent.change(screen.getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ), {
+        target: { value: 'cloud_connectors' },
+      });
+      expect(mockOnChange).toHaveBeenCalledWith('cloud_connectors');
     });
   });
 });

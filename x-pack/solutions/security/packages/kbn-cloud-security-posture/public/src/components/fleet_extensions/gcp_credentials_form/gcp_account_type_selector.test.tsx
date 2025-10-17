@@ -28,9 +28,6 @@ jest.mock('../hooks/use_cloud_setup_context', () => ({
 }));
 
 // Mock the utility functions
-const mockUpdatePolicyWithInputs = jest.fn();
-const mockGetGcpInputVarsFields = jest.fn();
-
 jest.mock('../utils', () => ({
   updatePolicyWithInputs: jest.fn(),
   gcpField: {
@@ -40,6 +37,12 @@ jest.mock('../utils', () => ({
   },
   getGcpInputVarsFields: jest.fn(),
 }));
+
+// Get mocked functions from jest modules
+const {
+  updatePolicyWithInputs: mockUpdatePolicyWithInputs,
+  getGcpInputVarsFields: mockGetGcpInputVarsFields,
+} = jest.requireMock('../utils');
 
 const renderWithIntl = (component: React.ReactElement) =>
   render(<I18nProvider>{component}</I18nProvider>);
@@ -105,7 +108,25 @@ describe('GcpAccountTypeSelect', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseCloudSetup.mockReturnValue(defaultCloudSetup);
-    mockUpdatePolicyWithInputs.mockImplementation((policy) => policy);
+    mockUpdatePolicyWithInputs.mockImplementation(
+      (
+        policy: NewPackagePolicy,
+        policyType: string,
+        updates: Record<string, { value?: unknown; type?: string }>
+      ) => ({
+        ...policy,
+        inputs: policy.inputs.map((input) => ({
+          ...input,
+          streams: input.streams.map((stream) => ({
+            ...stream,
+            vars: {
+              ...stream.vars,
+              ...updates,
+            },
+          })),
+        })),
+      })
+    );
     mockGetGcpInputVarsFields.mockReturnValue([
       { id: 'gcp.organization_id', value: 'test-org-id' },
     ]);
@@ -166,11 +187,17 @@ describe('GcpAccountTypeSelect', () => {
 
       renderWithIntl(<GcpAccountTypeSelect {...defaultProps} input={inputWithOrg} />);
 
+      const orgRadio = screen.getByRole('radio', { name: /GCP Organization/ });
+      expect(orgRadio).toBeChecked();
+
       expect(screen.getByText(/Connect Elastic to every GCP Project/)).toBeInTheDocument();
     });
 
     it('shows single account description when single account type is selected', () => {
       renderWithIntl(<GcpAccountTypeSelect {...defaultProps} />);
+
+      const singleRadio = screen.getByRole('radio', { name: /Single Project/ });
+      expect(singleRadio).toBeChecked();
 
       expect(
         screen.getByText(/Deploying to a single project is suitable for an initial POC/)
@@ -189,32 +216,6 @@ describe('GcpAccountTypeSelect', () => {
   });
 
   describe('account type selection', () => {
-    it('renders correct option as selected based on input', () => {
-      renderWithIntl(<GcpAccountTypeSelect {...defaultProps} />);
-
-      const singleRadio = screen.getByRole('radio', { name: /Single Project/ });
-      expect(singleRadio).toBeChecked();
-    });
-
-    it('renders organization as selected when input has organization type', () => {
-      const inputWithOrg = {
-        ...mockInput,
-        streams: [
-          {
-            ...mockInput.streams[0],
-            vars: {
-              'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-            },
-          },
-        ],
-      };
-
-      renderWithIntl(<GcpAccountTypeSelect {...defaultProps} input={inputWithOrg} />);
-
-      const orgRadio = screen.getByRole('radio', { name: /GCP Organization/ });
-      expect(orgRadio).toBeChecked();
-    });
-
     it('allows clicking on account type options', () => {
       renderWithIntl(<GcpAccountTypeSelect {...defaultProps} />);
 
@@ -224,9 +225,27 @@ describe('GcpAccountTypeSelect', () => {
       expect(orgOption).toBeInTheDocument();
       expect(singleOption).toBeInTheDocument();
 
-      // These are clickable elements
+      // The default input has 'single-account', so clicking organization should trigger an update
       fireEvent.click(orgOption);
-      fireEvent.click(singleOption);
+
+      // Verify that updatePolicy was called with organization-account
+      expect(mockUpdatePolicy).toHaveBeenCalledWith({
+        updatedPolicy: expect.objectContaining({
+          inputs: expect.arrayContaining([
+            expect.objectContaining({
+              streams: expect.arrayContaining([
+                expect.objectContaining({
+                  vars: expect.objectContaining({
+                    'gcp.account_type': expect.objectContaining({
+                      value: GCP_ORGANIZATION_ACCOUNT,
+                    }),
+                  }),
+                }),
+              ]),
+            }),
+          ]),
+        }),
+      });
     });
   });
 

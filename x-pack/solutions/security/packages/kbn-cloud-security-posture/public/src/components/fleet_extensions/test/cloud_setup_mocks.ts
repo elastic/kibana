@@ -44,7 +44,7 @@ export const createCloudSetupMock = (
     shortName: 'CSPM',
     templateName: 'cspm',
     config: {} as CloudSetupConfig,
-    showCloudTemplates: false,
+    showCloudTemplates: true,
     defaultProvider: 'aws',
     defaultProviderType: 'aws',
     templateInputOptions: [],

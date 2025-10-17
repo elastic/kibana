@@ -61,6 +61,9 @@ const renderComponent = (props = {}) => {
   );
 };
 
+const ORGANIZATION_TEXT = 'AWS Organization';
+const SINGLE_ACCOUNT_TEXT = 'Single Account';
+
 describe('AwsAccountTypeSelect', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -76,19 +79,19 @@ describe('AwsAccountTypeSelect', () => {
     renderComponent();
 
     // Both radio options should be available
-    expect(screen.getByText('AWS Organization')).toBeInTheDocument();
-    expect(screen.getByText('Single Account')).toBeInTheDocument();
+    expect(screen.getByText(ORGANIZATION_TEXT)).toBeInTheDocument();
+    expect(screen.getByText(SINGLE_ACCOUNT_TEXT)).toBeInTheDocument();
 
     // Single Account should be selected by default
-    const singleRadio = screen.getByLabelText('Single Account');
-    const orgRadio = screen.getByLabelText('AWS Organization');
+    const singleRadio = screen.getByLabelText(SINGLE_ACCOUNT_TEXT);
+    const orgRadio = screen.getByLabelText(ORGANIZATION_TEXT);
     expect(singleRadio).toBeChecked();
     expect(orgRadio).not.toBeChecked();
   });
 
   it('handles user interaction and calls updatePolicy when selection changes', async () => {
     renderComponent();
-    const orgRadio = screen.getByLabelText('AWS Organization');
+    const orgRadio = screen.getByLabelText(ORGANIZATION_TEXT);
 
     await userEvent.click(orgRadio);
     await waitFor(() =>
@@ -126,8 +129,8 @@ describe('AwsAccountTypeSelect', () => {
   it('handles disabled states correctly', () => {
     // Disabled prop affects all radios
     renderComponent({ disabled: true });
-    expect(screen.getByLabelText('Single Account')).toBeDisabled();
-    expect(screen.getByLabelText('AWS Organization')).toBeDisabled();
+    expect(screen.getByLabelText(SINGLE_ACCOUNT_TEXT)).toBeDisabled();
+    expect(screen.getByLabelText(ORGANIZATION_TEXT)).toBeDisabled();
   });
 
   it('disables AWS Organization when not enabled in cloud setup', () => {
@@ -140,7 +143,7 @@ describe('AwsAccountTypeSelect', () => {
 
     renderComponent({ packageInfo: { version: '3.0.0' } });
 
-    const orgRadio = screen.getByLabelText('AWS Organization');
+    const orgRadio = screen.getByLabelText(ORGANIZATION_TEXT);
     expect(orgRadio).toBeDisabled();
     expect(
       screen.getByText(/AWS Organization not supported in current integration version/)

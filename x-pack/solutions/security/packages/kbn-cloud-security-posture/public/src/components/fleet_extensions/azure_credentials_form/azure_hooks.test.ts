@@ -6,7 +6,11 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import type { PackageInfo } from '@kbn/fleet-plugin/common';
+import type {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackageInfo,
+} from '@kbn/fleet-plugin/common';
 import { useAzureCredentialsForm } from './azure_hooks';
 import { AZURE_SETUP_FORMAT, AZURE_CREDENTIALS_TYPE } from '../constants';
 
@@ -98,8 +102,7 @@ describe('Azure Hooks', () => {
         ],
       },
     ],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any;
+  } as unknown as NewPackagePolicy;
 
   const mockInput = mockNewPolicy.inputs[0];
 
@@ -141,7 +144,7 @@ describe('Azure Hooks', () => {
             },
           },
         ],
-      };
+      } as unknown as NewPackagePolicyInput;
 
       const { result } = renderHook(() =>
         useAzureCredentialsForm({
@@ -181,7 +184,7 @@ describe('Azure Hooks', () => {
             },
           },
         ],
-      };
+      } as unknown as NewPackagePolicyInput;
 
       const { result } = renderHook(() =>
         useAzureCredentialsForm({
@@ -216,7 +219,7 @@ describe('Azure Hooks', () => {
       const inputWithoutCredentialsType = {
         ...mockInput,
         streams: [{ vars: {} }],
-      };
+      } as unknown as NewPackagePolicyInput;
 
       const { result } = renderHook(() =>
         useAzureCredentialsForm({
@@ -234,7 +237,7 @@ describe('Azure Hooks', () => {
       const inputWithoutCredentialsType = {
         ...mockInput,
         streams: [{ vars: {} }],
-      };
+      } as unknown as NewPackagePolicyInput;
 
       const { result } = renderHook(() =>
         useAzureCredentialsForm({
@@ -285,7 +288,7 @@ describe('Azure Hooks', () => {
               },
             },
           ],
-        };
+        } as unknown as NewPackagePolicyInput;
 
         const { result } = renderHook(() =>
           useAzureCredentialsForm({
@@ -361,7 +364,7 @@ describe('Azure Hooks', () => {
             },
           },
         ],
-      };
+      } as unknown as NewPackagePolicyInput;
 
       renderHook(() =>
         useAzureCredentialsForm({
@@ -388,7 +391,7 @@ describe('Azure Hooks', () => {
             },
           },
         ],
-      };
+      } as unknown as NewPackagePolicyInput;
 
       renderHook(() =>
         useAzureCredentialsForm({
@@ -437,7 +440,7 @@ describe('Azure Hooks', () => {
         const inputWithEmptyVars = {
           ...mockInput,
           streams: [{ vars: {} }],
-        };
+        } as unknown as NewPackagePolicyInput;
 
         const { result } = renderHook(() =>
           useAzureCredentialsForm({
@@ -459,7 +462,7 @@ describe('Azure Hooks', () => {
               },
             },
           ],
-        };
+        } as unknown as NewPackagePolicyInput;
 
         const { result } = renderHook(() =>
           useAzureCredentialsForm({
@@ -490,7 +493,7 @@ describe('Azure Hooks', () => {
               },
             },
           ],
-        };
+        } as unknown as NewPackagePolicyInput;
 
         renderHook(() =>
           useAzureCredentialsForm({

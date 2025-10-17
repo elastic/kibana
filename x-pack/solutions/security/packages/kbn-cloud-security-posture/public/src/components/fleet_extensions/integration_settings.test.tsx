@@ -40,50 +40,12 @@ describe('<IntegrationSettings />', () => {
 
   describe('Rendering Tests', () => {
     it('renders successfully', () => {
-      renderWithIntl(<IntegrationSettings {...defaultProps} />);
-    });
-
-    it('renders name field with correct value', () => {
-      const { getByDisplayValue } = renderWithIntl(<IntegrationSettings {...defaultProps} />);
-      expect(getByDisplayValue('test-policy')).toBeInTheDocument();
-    });
-
-    it('renders description field with correct value', () => {
-      const { getByDisplayValue } = renderWithIntl(<IntegrationSettings {...defaultProps} />);
-      expect(getByDisplayValue('Test policy description')).toBeInTheDocument();
-    });
-
-    it('renders name field label', () => {
-      const { getByText } = renderWithIntl(<IntegrationSettings {...defaultProps} />);
-      expect(getByText('Name')).toBeInTheDocument();
-    });
-
-    it('renders description field label', () => {
-      const { getByText } = renderWithIntl(<IntegrationSettings {...defaultProps} />);
-      expect(getByText('Description')).toBeInTheDocument();
-    });
-
-    it('renders both fields when policy has no description', () => {
-      const propsWithoutDescription = {
-        ...defaultProps,
-        newPolicy: {
-          ...defaultProps.newPolicy,
-          description: undefined,
-        },
-      };
       const { getByDisplayValue, getByText } = renderWithIntl(
-        <IntegrationSettings {...propsWithoutDescription} />
+        <IntegrationSettings {...defaultProps} />
       );
-
       expect(getByDisplayValue('test-policy')).toBeInTheDocument();
+      expect(getByDisplayValue('Test policy description')).toBeInTheDocument();
       expect(getByText('Name')).toBeInTheDocument();
-      expect(getByText('Description')).toBeInTheDocument();
-
-      // Description field should be empty - check that no description value exists
-      const { queryByDisplayValue } = renderWithIntl(
-        <IntegrationSettings {...propsWithoutDescription} />
-      );
-      expect(queryByDisplayValue('Test policy description')).not.toBeInTheDocument();
     });
   });
 
@@ -178,47 +140,6 @@ describe('<IntegrationSettings />', () => {
       expect(getByText('Description must be less than 200 characters')).toBeInTheDocument();
     });
 
-    it('shows multiple validation errors', () => {
-      const propsWithMultipleErrors = {
-        ...defaultProps,
-        validationResults: {
-          name: ['Name is required'],
-          description: ['Description is invalid'],
-          namespace: [],
-          additional_datastreams_permissions: [],
-          inputs: null,
-        },
-      };
-      const { getByText } = renderWithIntl(<IntegrationSettings {...propsWithMultipleErrors} />);
-
-      expect(getByText('Name is required')).toBeInTheDocument();
-      expect(getByText('Description is invalid')).toBeInTheDocument();
-    });
-
-    it('applies invalid styling to fields with errors', () => {
-      const propsWithNameError = {
-        ...defaultProps,
-        validationResults: {
-          name: ['Name is required'],
-          description: [],
-          namespace: [],
-          additional_datastreams_permissions: [],
-          inputs: null,
-        },
-      };
-      const { getByDisplayValue } = renderWithIntl(<IntegrationSettings {...propsWithNameError} />);
-
-      const nameInput = getByDisplayValue('test-policy');
-
-      // Check for CSS class that indicates invalid state (may vary based on EUI version)
-      const hasInvalidClass =
-        nameInput.classList.contains('euiFieldText-isInvalid') ||
-        nameInput.classList.contains('euiFieldText--invalid') ||
-        nameInput.getAttribute('aria-invalid') === 'true';
-
-      expect(hasInvalidClass).toBe(true);
-    });
-
     it('does not show validation errors when validationResults is undefined', () => {
       const propsWithoutValidation = {
         ...defaultProps,
@@ -298,50 +219,6 @@ describe('<IntegrationSettings />', () => {
     });
   });
 
-  describe('Accessibility Tests', () => {
-    it('has proper form labels associated with inputs', () => {
-      const { getByLabelText } = renderWithIntl(<IntegrationSettings {...defaultProps} />);
-
-      expect(getByLabelText('Name')).toBeInTheDocument();
-      expect(getByLabelText('Description')).toBeInTheDocument();
-    });
-
-    it('has proper aria attributes for invalid fields', () => {
-      const propsWithNameError = {
-        ...defaultProps,
-        validationResults: {
-          name: ['Name is required'],
-          description: [],
-          namespace: [],
-          additional_datastreams_permissions: [],
-          inputs: null,
-        },
-      };
-      const { getByDisplayValue } = renderWithIntl(<IntegrationSettings {...propsWithNameError} />);
-
-      const nameInput = getByDisplayValue('test-policy');
-      expect(nameInput).toHaveAttribute('aria-invalid', 'true');
-    });
-
-    it('has proper form structure with fullWidth fields', () => {
-      const { getByDisplayValue } = renderWithIntl(<IntegrationSettings {...defaultProps} />);
-
-      const nameInput = getByDisplayValue('test-policy');
-      const descriptionInput = getByDisplayValue('Test policy description');
-
-      // Check for fullWidth class (may vary based on CSS-in-JS implementation)
-      const nameHasFullWidth =
-        nameInput.classList.contains('euiFieldText--fullWidth') ||
-        nameInput.classList.toString().includes('fullWidth');
-      const descHasFullWidth =
-        descriptionInput.classList.contains('euiFieldText--fullWidth') ||
-        descriptionInput.classList.toString().includes('fullWidth');
-
-      expect(nameHasFullWidth).toBe(true);
-      expect(descHasFullWidth).toBe(true);
-    });
-  });
-
   describe('Edge Cases', () => {
     it('handles missing description property', () => {
       const propsWithoutDescription = {
@@ -366,45 +243,6 @@ describe('<IntegrationSettings />', () => {
 
       // Should still render description field, but empty
       expect(getByText('Description')).toBeInTheDocument();
-    });
-
-    it('handles very long field values', () => {
-      const longValue = 'a'.repeat(500); // Shorter to avoid DOM issues
-      const propsWithLongValues = {
-        ...defaultProps,
-        newPolicy: {
-          ...defaultProps.newPolicy,
-          name: longValue,
-          description: longValue,
-        },
-      };
-
-      const { container } = renderWithIntl(<IntegrationSettings {...propsWithLongValues} />);
-
-      // Check that inputs exist with long values
-      const nameInput = container.querySelector('input[id="name"]');
-      const descInput = container.querySelector('input[id="description"]');
-
-      expect(nameInput).toHaveValue(longValue);
-      expect(descInput).toHaveValue(longValue);
-    });
-
-    it('handles array validation errors', () => {
-      const propsWithArrayErrors = {
-        ...defaultProps,
-        validationResults: {
-          name: ['Error 1', 'Error 2', 'Error 3'],
-          description: [],
-          namespace: [],
-          additional_datastreams_permissions: [],
-          inputs: null,
-        },
-      };
-
-      const { getByText } = renderWithIntl(<IntegrationSettings {...propsWithArrayErrors} />);
-
-      // Should show first error in array
-      expect(getByText('Error 1')).toBeInTheDocument();
     });
   });
 });

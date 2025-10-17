@@ -58,7 +58,7 @@ describe('AzureCredentialTypeSelector', () => {
       expect(screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
     });
 
-    it('renders select with all provided options', () => {
+    it('renders with all provided options', () => {
       renderWithIntl(
         <AzureCredentialTypeSelector
           type="arm_template"
