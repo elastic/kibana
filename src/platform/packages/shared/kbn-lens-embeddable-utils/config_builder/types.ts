@@ -14,8 +14,8 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { DataViewsCommon } from './config_builder';
 import type { XYLegendValue } from '@kbn/visualizations-plugin/common';
+import type { DataViewsCommon } from './config_builder';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export const DEFAULT_LAYER_ID = 'layer_0';
