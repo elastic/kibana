@@ -1647,7 +1647,7 @@ class AgentPolicyService {
 
     // Use internal ES client so we have permissions to write to .fleet* indices
     const esClient = appContextService.getInternalUserESClient();
-    const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
+    const defaultOutputId = await outputService.getDefaultDataOutputId();
 
     if (!defaultOutputId) {
       logger.debug(`Deployment canceled!! Default output ID is not defined.`);
@@ -2201,15 +2201,12 @@ class AgentPolicyService {
   }
 
   // Get all the outputs per agent policy
-  public async getAllOutputsForPolicy(
-    soClient: SavedObjectsClientContract,
-    agentPolicy: AgentPolicy
-  ) {
+  public async getAllOutputsForPolicy(agentPolicy: AgentPolicy) {
     const logger = this.getLogger('getAllOutputsForPolicy');
 
     const [defaultDataOutputId, defaultMonitoringOutputId] = await Promise.all([
-      outputService.getDefaultDataOutputId(soClient),
-      outputService.getDefaultMonitoringOutputId(soClient),
+      outputService.getDefaultDataOutputId(),
+      outputService.getDefaultMonitoringOutputId(),
     ]);
 
     if (!defaultDataOutputId) {
@@ -2239,7 +2236,7 @@ class AgentPolicyService {
         async (pkgPolicy) => {
           if (pkgPolicy?.output_id) {
             try {
-              const output = await outputService.get(soClient, pkgPolicy.output_id);
+              const output = await outputService.get(pkgPolicy.output_id);
               return { integrationPolicyName: pkgPolicy?.name, id: output.id, name: output.name };
             } catch (error) {
               logger.error(
@@ -2272,14 +2269,11 @@ class AgentPolicyService {
     return outputs;
   }
 
-  public async listAllOutputsForPolicies(
-    soClient: SavedObjectsClientContract,
-    agentPolicies: AgentPolicy[]
-  ) {
+  public async listAllOutputsForPolicies(agentPolicies: AgentPolicy[]) {
     const allOutputs: OutputsForAgentPolicy[] = await pMap(
       agentPolicies,
       async (agentPolicy) => {
-        const output = await this.getAllOutputsForPolicy(soClient, agentPolicy);
+        const output = await this.getAllOutputsForPolicy(agentPolicy);
         return { agentPolicyId: agentPolicy.id, ...output };
       },
       {

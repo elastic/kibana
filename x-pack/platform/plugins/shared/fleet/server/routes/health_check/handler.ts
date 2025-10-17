@@ -19,11 +19,9 @@ export const postHealthCheckHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const abortController = new AbortController();
   const { id } = request.body;
-  const coreContext = await context.core;
-  const soClient = coreContext.savedObjects.client;
 
   try {
-    const fleetServerHost = await fleetServerHostService.get(soClient, id);
+    const fleetServerHost = await fleetServerHostService.get(id);
 
     if (
       !fleetServerHost ||
