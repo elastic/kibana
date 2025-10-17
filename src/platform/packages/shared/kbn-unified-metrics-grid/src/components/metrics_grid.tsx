@@ -7,15 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
-import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, useEuiTheme, useIsWithinMinBreakpoint } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { CoreStart } from '@kbn/core/public';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ChartSize } from './chart';
 import { Chart } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
@@ -24,6 +28,7 @@ import { useGridNavigation } from '../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../context/fields_metadata';
 import { createESQLQuery } from '../common/utils';
 import { useChartLayers } from './chart/hooks/use_chart_layers';
+import { useFlyoutA11y } from './flyout/hooks/use_flyout_a11y';
 
 export type MetricsGridProps = Pick<
   ChartSectionProps,
@@ -60,19 +65,17 @@ export const MetricsGrid = ({
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const kibana = useKibana<CoreStart>();
+  const { euiTheme } = useEuiTheme();
+  const isXlScreen = useIsWithinMinBreakpoint('xl');
+  const { a11yProps } = useFlyoutA11y({ isXlScreen });
+  const defaultWidth = euiTheme.base * 34;
+  const [flyoutWidth, setFlyoutWidth] = useLocalStorage(
+    'metricsExperience:flyoutWidth',
+    defaultWidth
+  );
 
   const chartSize = useMemo(() => (columns === 2 || columns === 4 ? 's' : 'm'), [columns]);
-
-  const [expandedMetric, setExpandedMetric] = useState<
-    | {
-        metric: MetricField;
-        esqlQuery: string;
-        chartId: string;
-        rowIndex: number;
-        colIndex: number;
-      }
-    | undefined
-  >();
 
   const rows = useMemo(() => {
     return pivotOn === 'metric'
@@ -99,56 +102,67 @@ export const MetricsGrid = ({
     }
   }, []);
 
-  const handleViewDetails = useCallback(
-    (esqlQuery: string, metric: MetricField, chartId: string) => {
-      const chartIndex = rows.findIndex((row) => row.key === chartId);
-      const { rowIndex, colIndex } = getRowColFromIndex(chartIndex);
+  const handleViewDetails = (esqlQuery: string, metric: MetricField, chartId: string) => {
+    const chartIndex = rows.findIndex((row) => row.key === chartId);
+    const { rowIndex, colIndex } = getRowColFromIndex(chartIndex);
+    const minWidth = euiTheme.base * 24;
+    const maxWidth = euiTheme.breakpoint.xl;
+    const chartElement = chartRefs.current.get(chartId);
 
-      setExpandedMetric({ metric, esqlQuery, chartId, rowIndex, colIndex });
-      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
-    },
-    [rows, getRowColFromIndex]
-  );
-
-  const handleCloseFlyout = useCallback(() => {
-    if (expandedMetric) {
-      // Use requestAnimationFrame to ensure the flyout is fully closed before focusing
-      requestAnimationFrame(() => {
-        focusCell(expandedMetric.rowIndex, expandedMetric.colIndex);
-      });
-    }
-    setExpandedMetric(undefined);
-  }, [expandedMetric, focusCell]);
-
-  const getChartRefForFocus = useCallback(() => {
-    if (expandedMetric?.chartId) {
-      const chartElement = chartRefs.current.get(expandedMetric.chartId);
-      if (chartElement) {
-        return { current: chartElement };
-      }
-    }
-    return { current: null };
-  }, [expandedMetric?.chartId]);
-
-  // TODO: find a better way to handle conflicts with other flyouts
-  // https://github.com/elastic/kibana/issues/237965
-  useEffect(() => {
-    const handleClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-
-      if (target.closest('[data-test-subj="embeddablePanelAction-openInspector"]')) {
-        if (expandedMetric) {
-          handleCloseFlyout();
+    const flyoutSession = kibana.services.core.overlays.openFlyout(
+      toMountPoint(
+        <MetricInsightsFlyout
+          metric={metric}
+          esqlQuery={esqlQuery}
+          onClose={() => {
+            flyoutSession.close();
+            requestAnimationFrame(() => {
+              if (chartElement) {
+                chartElement.focus();
+                focusCell(rowIndex, colIndex);
+              }
+            });
+          }}
+        />,
+        {
+          theme: kibana.services.theme,
+          i18n: kibana.services.i18n,
         }
+      ),
+      {
+        'data-test-subj': 'metricsExperienceFlyout',
+        'aria-label': i18n.translate(
+          'metricsExperience.metricInsightsFlyout.euiFlyoutResizable.metricInsightsFlyoutLabel',
+          { defaultMessage: 'Metric Insights Flyout' }
+        ),
+        ownFocus: true,
+        size: flyoutWidth,
+        onResize: (width: number) => {
+          setFlyoutWidth(width);
+        },
+        minWidth,
+        maxWidth,
+        type: 'push',
+        isResizable: true,
+        paddingSize: 'm',
+        onClose: () => {
+          flyoutSession.close();
+          requestAnimationFrame(() => {
+            if (chartElement) {
+              chartElement.focus();
+              focusCell(rowIndex, colIndex);
+            }
+          });
+        },
+        css: {
+          maxWidth: `${isXlScreen ? `calc(100vw - ${defaultWidth}px)` : '90vw'} !important`,
+        },
+        ...a11yProps,
       }
-    };
+    );
 
-    document.addEventListener('click', handleClick);
-
-    return () => {
-      document.removeEventListener('click', handleClick);
-    };
-  }, [expandedMetric, handleCloseFlyout]);
+    dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
+  };
 
   const normalizedFields = useMemo(() => (Array.isArray(fields) ? fields : [fields]), [fields]);
 
@@ -197,15 +211,6 @@ export const MetricsGrid = ({
           })}
         </EuiFlexGrid>
       </A11yGridWrapper>
-      {expandedMetric && (
-        <MetricInsightsFlyout
-          chartRef={getChartRefForFocus()}
-          metric={expandedMetric.metric}
-          esqlQuery={expandedMetric.esqlQuery}
-          isOpen
-          onClose={handleCloseFlyout}
-        />
-      )}
     </FieldsMetadataProvider>
   );
 };
