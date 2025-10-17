@@ -9,24 +9,17 @@
 
 import { omit, pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
-import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import {
   type SerializedTimeRange,
   type SerializedTitles,
   type SerializedPanelState,
   findSavedObjectRef,
-  SAVED_OBJECT_REF_NAME,
 } from '@kbn/presentation-publishing';
-import {
-  toSavedSearchAttributes,
-  type SavedSearch,
-  type SavedSearchAttributes,
-} from '@kbn/saved-search-plugin/common';
-import type { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
+import { toSavedSearchAttributes, type SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import { extract, inject } from '../../../common/embeddable/search_inject_extract';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../../common/embeddable/constants';
 import type {
+  SearchEmbeddableByReferenceSerializedState,
   SearchEmbeddableByValueSerializedState,
   SearchEmbeddableSerializedState,
 } from '../../../common/embeddable/types';
@@ -43,7 +36,9 @@ export const deserializeState = async ({
 }): Promise<SearchEmbeddableRuntimeState> => {
   const panelState = pick(serializedState.rawState, EDITABLE_PANEL_KEYS);
   const savedObjectRef = findSavedObjectRef(SEARCH_EMBEDDABLE_TYPE, serializedState.references);
-  const savedObjectId = savedObjectRef ? savedObjectRef.id : serializedState.rawState.savedObjectId;
+  const savedObjectId = savedObjectRef
+    ? savedObjectRef.id
+    : (serializedState.rawState as SearchEmbeddableByReferenceSerializedState).savedObjectId;
   if (savedObjectId) {
     // by reference
     const { get } = discoverServices.savedSearch;
@@ -67,12 +62,11 @@ export const deserializeState = async ({
   } else {
     // by value
     const { byValueToSavedSearch } = discoverServices.savedSearch;
-    const savedSearchUnwrappedResult = inject(
-      serializedState.rawState as unknown as EmbeddableStateWithType,
-      serializedState.references ?? []
-    ) as SavedSearchUnwrapResult;
 
-    const savedSearch = await byValueToSavedSearch(savedSearchUnwrappedResult, true);
+    const savedSearch = await byValueToSavedSearch(
+      serializedState.rawState as SearchEmbeddableByValueSerializedState,
+      true
+    );
     return {
       ...savedSearch,
       ...panelState,
