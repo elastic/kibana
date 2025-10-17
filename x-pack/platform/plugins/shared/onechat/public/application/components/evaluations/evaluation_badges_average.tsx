@@ -16,6 +16,7 @@ interface EvaluatorBadgesGroupProps {
   regexScore?: number;
   criteriaScore?: number;
   optimizerScore?: number;
+  direction?: 'row' | 'column';
 }
 
 const getEvaluatorConfig = (key: string, value: number) => {
@@ -75,6 +76,7 @@ export const EvaluatorBadgesAverage: React.FC<EvaluatorBadgesGroupProps> = ({
   regexScore,
   criteriaScore,
   optimizerScore,
+  direction = 'row',
 }) => {
   // Create array of evaluation data for dynamic rendering
   const evaluations = [
@@ -92,7 +94,7 @@ export const EvaluatorBadgesAverage: React.FC<EvaluatorBadgesGroupProps> = ({
       style={{
         display: 'flex',
         gap: '8px',
-        flexDirection: 'row',
+        flexDirection: direction,
       }}
     >
       {evaluations.map(({ key, value }) => {
