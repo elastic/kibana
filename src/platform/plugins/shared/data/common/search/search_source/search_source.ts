@@ -1182,12 +1182,18 @@ export class SearchSource {
       size: _size, // omit it
       sort,
       index,
+      projectRouting,
       ...searchSourceFields
     } = this.getFields();
 
     let serializedSearchSourceFields: SerializedSearchSourceFields = {
       ...searchSourceFields,
     };
+
+    // Only include projectRouting if it's not the default 'origin' type
+    if (projectRouting && projectRouting.type !== 'origin') {
+      serializedSearchSourceFields.projectRouting = projectRouting;
+    }
     if (index) {
       serializedSearchSourceFields.index = index.isPersisted() ? index.id : index.toMinimalSpec();
     }
