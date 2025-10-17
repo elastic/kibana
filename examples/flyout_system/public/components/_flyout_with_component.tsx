@@ -91,7 +91,7 @@ const FlyoutSessionFromComponents: React.FC<FlyoutSessionFromComponents> = React
       {isFlyoutVisible && (
         <EuiFlyout
           id={`mainFlyout-${title}`}
-          session={true}
+          session="start"
           flyoutMenuProps={{
             title: `${title} - Main`,
           }}
@@ -222,7 +222,7 @@ const NonSessionFlyout: React.FC = () => {
           type={flyoutType}
           size="s"
           side="left"
-          session={false}
+          session="never"
         >
           <EuiFlyoutBody>
             <EuiText>
