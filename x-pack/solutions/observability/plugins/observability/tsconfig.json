@@ -136,7 +136,6 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/deeplinks-management",
     "@kbn/observability-nav-icons",
-    "@kbn/management-settings-ids"
   ],
   "exclude": ["target/**/*"]
 }
