@@ -86,7 +86,7 @@ describe('getCompletionItemProvider', () => {
       }),
     },
   ];
-  let yamlContent;
+  let yamlContent: string;
   let focusedStepId: string | undefined;
 
   const workflowSchema = generateYamlSchemaFromConnectors(mockConnectors, true);

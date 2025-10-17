@@ -25,10 +25,11 @@ const debounceComputation = (
     clearTimeout(computationTimeoutId);
     computationTimeoutId = null;
   }
+  const state = store.getState();
 
   // Debounce the computation
   computationTimeoutId = setTimeout(() => {
-    const computed = performComputation(yamlString);
+    const computed = performComputation(yamlString, state.workflow.schemaLoose);
 
     if (computed) {
       store.dispatch(_setComputedDataInternal(computed));
@@ -51,7 +52,7 @@ export const workflowComputationMiddleware: Middleware =
 
       // Do computation immediately if yaml string is defined and no previous workflow graph exists
       if (yamlString && !state.workflow.computed) {
-        const computed = performComputation(yamlString);
+        const computed = performComputation(yamlString, state.workflow.schemaLoose);
 
         if (computed) {
           store.dispatch(_setComputedDataInternal(computed));
