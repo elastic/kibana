@@ -115,3 +115,25 @@ export interface SavedObject<T = unknown> {
    */
   managed?: boolean;
 }
+
+/**
+ * Saved object document as stored in `_source` of doc in ES index
+ * Similar to SavedObjectDoc and excludes `version`, includes `references`, has `attributes` in [typeMapping]
+ *
+ * @public
+ */
+export interface SavedObjectsRawDocSource {
+  type: string;
+  namespace?: string;
+  namespaces?: string[];
+  migrationVersion?: SavedObjectsMigrationVersion;
+  typeMigrationVersion?: string;
+  updated_at?: string;
+  created_at?: string;
+  created_by?: string;
+  references?: SavedObjectReference[];
+  originId?: string;
+  managed?: boolean;
+
+  [typeMapping: string]: any;
+}

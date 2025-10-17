@@ -72,4 +72,5 @@ export type {
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectReference,
+  SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-common/src/server_types';

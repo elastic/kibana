@@ -8,7 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsRawDocSource } from '../..';
 
 /**
  * Options for the saved objects raw search operation.
