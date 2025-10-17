@@ -11,6 +11,14 @@ applies_to:
 
 The AI Connector uses the [Inference API](docs-content://explore-analyze/elastic-inference/inference-api.md) to connect to third-party Large Language Model (LLM) services to enable AI-powered {{kib}} features such as AI Assistant. It can connect with LLM services including Amazon Bedrock, Azure, Google Gemini, and OpenAI. It can also connect with models you've enabled in Elastic Inference Service (EIS). 
 
+## Requirements
+
+* A working [LLM connector](/solutions/security/ai/set-up-connectors-for-large-language-models-llm.md).
+* {{stack}} users: An [Enterprise](https://www.elastic.co/pricing) subscription.
+* {{serverless-short}} users: a project with the [Security Analytics Complete](/deploy-manage/deploy/elastic-cloud/project-settings.md) feature tier.
+* The **Actions and Connectors : All** [privilege](/deploy-manage/users-roles/cluster-or-deployment-auth/kibana-privileges.md).
+
+
 ## Set up an AI connector
 
 1. Use the [global search field](docs-content://get-started/the-stack.md#kibana-navigation-search) to find the **Connectors** page. 
