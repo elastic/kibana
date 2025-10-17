@@ -23,6 +23,7 @@ mapped_pages:
 | [console](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/README.md) | Console provides the user with tools for storing and executing requests against Elasticsearch. |
 | [contentManagement](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/content_management/README.md) | The content management plugin provides functionality to manage content in Kibana. |
 | [controls](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/controls/README.mdx) | The Controls plugin contains Embeddables which can be used to add user-friendly interactivity to apps. |
+| [cps](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/cps/README.md) | Retrieves project tags from Elasticsearch using the /_project/tags endpoint. |
 | [customIntegrations](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/custom_integrations/README.md) | Register add-data cards |
 | [dashboard](kibana-dashboard-plugin.md) | - Registers the dashboard application. - Adds a dashboard embeddable that can be used in other applications. |
 | [dashboardMarkdown](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/dashboard_markdown/README.md) | This plugin provides a simple Markdown component for embedding editable Markdown content in Kibana dashboards. |
