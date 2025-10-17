@@ -23,34 +23,6 @@ interface ExtendedKibanaRequest {
   };
 }
 
-// Helper function to create user-friendly settings display
-const createUserFriendlySettings = (settings: Record<string, unknown>, toolId: string) => {
-  const userFriendly: Record<string, unknown> = {};
-
-  // Always include alertsIndexPattern if present
-  if (settings.alertsIndexPattern) {
-    userFriendly.alertsIndexPattern = settings.alertsIndexPattern;
-  }
-
-  // Always include size if present
-  if (settings.size) {
-    userFriendly.size = settings.size;
-  }
-
-  // Handle anonymization fields - show only field names being anonymized
-  if (settings.anonymizationFields && Array.isArray(settings.anonymizationFields)) {
-    const anonymizedFields = settings.anonymizationFields
-      .filter((field: Record<string, unknown>) => field.anonymized === true)
-      .map((field: Record<string, unknown>) => field.field);
-
-    if (anonymizedFields.length > 0) {
-      userFriendly.anonymizedFields = anonymizedFields;
-    }
-  }
-
-  return userFriendly;
-};
-
 // Schema to specify which tool settings to retrieve
 const assistantSettingsToolSchema = z.object({
   toolId: z
@@ -65,7 +37,7 @@ export const ASSISTANT_SETTINGS_INTERNAL_TOOL_DESCRIPTION =
   'Call this tool to retrieve current assistant settings for a specific tool. Use this when you need to get configuration parameters for a specific tool before calling it. ' +
   'This tool requires a toolId parameter specifying which tool you need settings for. It provides only the relevant configuration for that specific tool. ' +
   'The tool dynamically fetches the current settings from the request and data client. ' +
-  'WORKFLOW: After calling this tool, use the retrieved settings to call the tool specified in toolId.';
+  'WORKFLOW: After calling this tool, use the retrieved settings from the "settings" field in the response to call the tool specified in toolId with those parameters.';
 
 /**
  * Returns a tool for retrieving assistant settings using the InternalToolDefinition pattern.
@@ -215,17 +187,13 @@ export const assistantSettingsInternalTool = (
             };
         }
 
-        // Create user-friendly settings display
-        const userFriendlySettings = createUserFriendlySettings(toolSpecificSettings, toolId);
-
+        // Return the raw settings data for direct consumption by other tools
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
-                message: `Current settings retrieved successfully. Please confirm these settings before proceeding:`,
-                settings: userFriendlySettings,
-                guidance: `These are the current settings for your analysis. Please confirm if these settings are correct. I will wait for your explicit confirmation before proceeding with your original question using these settings.`,
+                settings: toolSpecificSettings,
               },
             },
           ],

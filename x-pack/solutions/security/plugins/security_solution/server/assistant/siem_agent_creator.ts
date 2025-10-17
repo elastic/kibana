@@ -44,10 +44,11 @@ export const siemAgentCreator = (): BuiltInAgentDefinition => {
 
     4. **Workflow for security tools that require settings**:
        - Get tool-specific settings by calling 'core.security.assistant_settings' with the toolId parameter
-       - For alert_counts: Call assistant_settings with toolId="core.security.alert_counts"
-       - For open_and_acknowledged_alerts: Call assistant_settings with toolId="core.security.open_and_acknowledged_alerts"
-       - For entity_risk_score: Call assistant_settings with toolId="core.security.entity_risk_score"
-       - Use the retrieved settings to execute the tool directly
+       - The assistant_settings tool returns raw settings data in the "settings" field of the response
+       - For alert_counts: Call assistant_settings with toolId="core.security.alert_counts", then call alert_counts with the retrieved alertsIndexPattern from the settings
+       - For open_and_acknowledged_alerts: Call assistant_settings with toolId="core.security.open_and_acknowledged_alerts", then call open_and_acknowledged_alerts with the retrieved settings (alertsIndexPattern, size, anonymizationFields)
+       - For entity_risk_score: Call assistant_settings with toolId="core.security.entity_risk_score", then call entity_risk_score with the retrieved alertsIndexPattern plus the required identifier_type and identifier parameters
+       - Always pass the retrieved settings as parameters to the respective tools
 
     4. **For product documentation tool**:
        - Call 'core.security.product_documentation' directly with the user's query
@@ -56,7 +57,8 @@ export const siemAgentCreator = (): BuiltInAgentDefinition => {
 
     EXAMPLES:
     - "What is Elastic Painless?" → Call product_documentation with query="Elastic Painless scripting language"
-    - "How many open alerts do I have?" → Call assistant_settings(toolId="core.security.alert_counts"), then call alert_counts
+    - "How many open alerts do I have?" → Call assistant_settings(toolId="core.security.alert_counts"), then call alert_counts with alertsIndexPattern from the settings field
+    - "What are the latest alerts?" → Call assistant_settings(toolId="core.security.open_and_acknowledged_alerts"), then call open_and_acknowledged_alerts with alertsIndexPattern, size, and anonymizationFields from the settings field
     - "What is EQL?" → Call product_documentation with query="EQL Event Query Language"
 
     Remember: Always use tools to get accurate, up-to-date information rather than relying on general knowledge.`,

@@ -40,8 +40,34 @@ interface AnonymizationField {
   namespace: string;
 }
 
-// Empty schema for A2A compatibility - all configuration comes from assistant settings tool
-const openAndAcknowledgedAlertsToolSchema = z.object({});
+// Schema for configuration parameters
+const openAndAcknowledgedAlertsToolSchema = z.object({
+  alertsIndexPattern: z
+    .string()
+    .optional()
+    .describe('The index pattern for alerts (e.g., ".alerts-security.alerts-default")'),
+  size: z
+    .number()
+    .min(1)
+    .max(1000)
+    .optional()
+    .describe('Number of alerts to retrieve (default: 100)'),
+  anonymizationFields: z
+    .array(
+      z.object({
+        id: z.string(),
+        field: z.string(),
+        allowed: z.boolean(),
+        anonymized: z.boolean(),
+        timestamp: z.string(),
+        createdAt: z.string(),
+        updatedAt: z.string().optional(),
+        namespace: z.string(),
+      })
+    )
+    .optional()
+    .describe('Anonymization fields configuration'),
+});
 
 // Default anonymization fields
 const DEFAULT_ANONYMIZATION_FIELDS: AnonymizationField[] = [
@@ -83,59 +109,11 @@ const DEFAULT_ANONYMIZATION_FIELDS: AnonymizationField[] = [
   },
 ];
 
-// Helper function to parse assistant settings and extract configuration
-const parseAssistantSettings = (settingsData: unknown) => {
-  const result = {
-    anonymizationFields: DEFAULT_ANONYMIZATION_FIELDS,
-    alertsIndexPattern: '.alerts-security.alerts-default',
-    size: 100,
-  };
-
-  if (
-    settingsData &&
-    typeof settingsData === 'object' &&
-    'settings' in settingsData &&
-    settingsData.settings &&
-    typeof settingsData.settings === 'object'
-  ) {
-    // Get anonymization fields
-    if (
-      'anonymizationFields' in settingsData.settings &&
-      Array.isArray(settingsData.settings.anonymizationFields)
-    ) {
-      result.anonymizationFields = settingsData.settings.anonymizationFields;
-    }
-
-    // Get defaults for this tool
-    if (
-      'defaults' in settingsData.settings &&
-      settingsData.settings.defaults &&
-      typeof settingsData.settings.defaults === 'object' &&
-      'openAndAcknowledgedAlertsInternalTool' in settingsData.settings.defaults
-    ) {
-      const toolDefaults = settingsData.settings.defaults.openAndAcknowledgedAlertsInternalTool;
-      if (toolDefaults && typeof toolDefaults === 'object') {
-        if (
-          'alertsIndexPattern' in toolDefaults &&
-          typeof toolDefaults.alertsIndexPattern === 'string'
-        ) {
-          result.alertsIndexPattern = toolDefaults.alertsIndexPattern;
-        }
-        if ('size' in toolDefaults && typeof toolDefaults.size === 'number') {
-          result.size = toolDefaults.size;
-        }
-      }
-    }
-  }
-
-  return result;
-};
-
 const OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_ID = 'core.security.open_and_acknowledged_alerts';
 export const OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_DESCRIPTION =
   'Call this for knowledge about the latest n open and acknowledged alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts. Do not call this tool for alert count or quantity. The output is an array of the latest n open and acknowledged alerts. ' +
-  'IMPORTANT: This tool requires NO parameters. All configuration (alertsIndexPattern, size, anonymizationFields) is automatically retrieved from the assistant_settings tool. ' +
-  'Always call the assistant_settings tool first to get current configuration before calling this tool.';
+  'IMPORTANT: This tool accepts optional configuration parameters (alertsIndexPattern, size, anonymizationFields). If not provided, sensible defaults will be used. ' +
+  'WORKFLOW: First call the assistant_settings tool with toolId="core.security.open_and_acknowledged_alerts" to get current configuration, then call this tool with the retrieved settings.';
 
 /**
  * Returns a tool for querying open and acknowledged alerts using the InternalToolDefinition pattern.
@@ -160,43 +138,22 @@ export const openAndAcknowledgedAlertsInternalTool = (
       });
     },
     handler: async (params, context) => {
-      // Get configuration from assistant settings tool (with fallback defaults)
-      let settingsData: unknown = null;
-
-      try {
-        const [, pluginsStart] = await getStartServices();
-        const toolRegistry = await pluginsStart.onechat.tools.getRegistry({
-          request: context.request,
-        });
-        const assistantSettingsResult = await toolRegistry.execute({
-          toolId: 'core.security.assistant_settings',
-          toolParams: {},
-        });
-
-        if (assistantSettingsResult.results && assistantSettingsResult.results.length > 0) {
-          settingsData = assistantSettingsResult.results[0].data;
-        }
-      } catch (error) {
-        // Use defaults if assistant settings fails
-      }
-
-      // Always use parseAssistantSettings to get configuration (with fallbacks)
-      const parsed = parseAssistantSettings(settingsData);
+      // Use provided parameters or fall back to defaults
       const {
-        alertsIndexPattern: actualAlertsIndexPattern,
-        size: actualSize,
-        anonymizationFields,
-      } = parsed;
+        alertsIndexPattern = '.alerts-security.alerts-default',
+        size = 100,
+        anonymizationFields = DEFAULT_ANONYMIZATION_FIELDS,
+      } = params;
 
       // Validate size is within range
-      if (sizeIsOutOfRange(actualSize)) {
-        throw new Error(`Size ${actualSize} is out of range`);
+      if (sizeIsOutOfRange(size)) {
+        throw new Error(`Size ${size} is out of range`);
       }
 
       const query = getOpenAndAcknowledgedAlertsQuery({
-        alertsIndexPattern: actualAlertsIndexPattern,
+        alertsIndexPattern,
         anonymizationFields,
-        size: actualSize,
+        size,
       });
 
       const result = await context.esClient.asCurrentUser.search<SearchResponse>(query);

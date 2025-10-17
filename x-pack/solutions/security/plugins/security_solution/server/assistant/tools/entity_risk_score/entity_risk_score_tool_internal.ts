@@ -23,49 +23,21 @@ import { createGetAlertsById } from './get_alert_by_id';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
 
-// Helper function to parse assistant settings and extract configuration
-const parseAssistantSettings = (settingsData: unknown) => {
-  const result = {
-    alertsIndexPattern: '.alerts-security.alerts-default',
-  };
-
-  if (
-    settingsData &&
-    typeof settingsData === 'object' &&
-    'settings' in settingsData &&
-    settingsData.settings &&
-    typeof settingsData.settings === 'object'
-  ) {
-    // Get defaults for this tool
-    if (
-      'defaults' in settingsData.settings &&
-      settingsData.settings.defaults &&
-      typeof settingsData.settings.defaults === 'object' &&
-      'entityRiskScoreToolInternal' in settingsData.settings.defaults
-    ) {
-      const toolDefaults = settingsData.settings.defaults.entityRiskScoreToolInternal;
-      if (toolDefaults && typeof toolDefaults === 'object') {
-        if (
-          'alertsIndexPattern' in toolDefaults &&
-          typeof toolDefaults.alertsIndexPattern === 'string'
-        ) {
-          result.alertsIndexPattern = toolDefaults.alertsIndexPattern;
-        }
-      }
-    }
-  }
-
-  return result;
-};
-
 const entityRiskScoreInternalSchema = z.object({
   identifier_type: IdentifierType,
   identifier: z.string().min(1).describe('The value that identifies the entity.'),
+  alertsIndexPattern: z
+    .string()
+    .optional()
+    .describe('The index pattern for alerts (e.g., ".alerts-security.alerts-default")'),
 });
 
 export const ENTITY_RISK_SCORE_TOOL_INTERNAL_ID = 'core.security.entity_risk_score';
 
-export const ENTITY_RISK_SCORE_TOOL_INTERNAL_DESCRIPTION = `Call this for knowledge about the latest entity risk score and the inputs that contributed to the calculation (sorted by 'kibana.alert.risk_score') in the environment, or when answering questions about how critical or risky an entity is. When informing the risk score value for a entity you must use the normalized field 'calculated_score_norm'.`;
+export const ENTITY_RISK_SCORE_TOOL_INTERNAL_DESCRIPTION =
+  `Call this for knowledge about the latest entity risk score and the inputs that contributed to the calculation (sorted by 'kibana.alert.risk_score') in the environment, or when answering questions about how critical or risky an entity is. When informing the risk score value for a entity you must use the normalized field 'calculated_score_norm'. ` +
+  'IMPORTANT: This tool accepts an optional alertsIndexPattern parameter. If not provided, a sensible default will be used. ' +
+  'WORKFLOW: First call the assistant_settings tool with toolId="core.security.entity_risk_score" to get current configuration, then call this tool with the retrieved settings.';
 
 export const entityRiskScoreToolInternal = (
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>,
@@ -87,7 +59,11 @@ export const entityRiskScoreToolInternal = (
       });
     },
     handler: async (
-      { identifier_type: identifierType, identifier },
+      {
+        identifier_type: identifierType,
+        identifier,
+        alertsIndexPattern = '.alerts-security.alerts-default',
+      },
       { esClient, logger, request, toolProvider }
     ) => {
       logger.debug(
@@ -95,30 +71,6 @@ export const entityRiskScoreToolInternal = (
       );
 
       try {
-        // Get configuration from assistant settings tool (with fallback defaults)
-        let settingsData: unknown = null;
-
-        try {
-          const [, pluginsStart] = await getStartServices();
-          const toolRegistry = await pluginsStart.onechat.tools.getRegistry({
-            request,
-          });
-          const assistantSettingsResult = await toolRegistry.execute({
-            toolId: 'core.security.assistant_settings',
-            toolParams: { toolId: 'core.security.entity_risk_score' },
-          });
-
-          if (assistantSettingsResult.results && assistantSettingsResult.results.length > 0) {
-            settingsData = assistantSettingsResult.results[0].data;
-          }
-        } catch (error) {
-          // Use defaults if assistant settings fails
-        }
-
-        // Parse assistant settings to get configuration (with fallbacks)
-        const parsed = parseAssistantSettings(settingsData);
-        const { alertsIndexPattern } = parsed;
-
         // Get space ID from request context - use default space for now
         const spaceId = 'default';
 

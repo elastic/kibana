@@ -16,14 +16,19 @@ import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
 import { getAlertsCountQuery } from './get_alert_counts_query';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 
-// Empty schema for A2A compatibility - all configuration comes from assistant settings tool
-const alertCountsToolSchema = z.object({});
+// Schema for configuration parameters
+const alertCountsToolSchema = z.object({
+  alertsIndexPattern: z
+    .string()
+    .optional()
+    .describe('The index pattern for alerts (e.g., ".alerts-security.alerts-default")'),
+});
 
 export const ALERT_COUNTS_INTERNAL_TOOL_ID = 'core.security.alert_counts';
 export const ALERT_COUNTS_INTERNAL_TOOL_DESCRIPTION =
   'Call this for the counts of last 24 hours of open and acknowledged alerts in the environment, grouped by their severity and workflow status. The response will be JSON and from it you can summarize the information to answer the question. ' +
-  'IMPORTANT: This tool requires NO parameters. All configuration (alertsIndexPattern) is automatically retrieved from the assistant_settings tool. ' +
-  'Always call the assistant_settings tool first to get current configuration before calling this tool.';
+  'IMPORTANT: This tool accepts an optional alertsIndexPattern parameter. If not provided, a sensible default will be used. ' +
+  'WORKFLOW: First call the assistant_settings tool with toolId="core.security.alert_counts" to get current configuration, then call this tool with the retrieved settings.';
 
 /**
  * Returns a tool for querying alert counts using the InternalToolDefinition pattern.
@@ -40,7 +45,7 @@ export const alertCountsInternalTool = (
     getLlmDescription: async ({ config, description }, context) => {
       return getLlmDescriptionHelper({
         description,
-        context,
+        context: context as unknown as Parameters<typeof getLlmDescriptionHelper>[0]['context'],
         promptId: 'AlertCountsTool',
         promptGroupId: 'builtin-security-tools',
         getStartServices,
@@ -48,44 +53,8 @@ export const alertCountsInternalTool = (
       });
     },
     handler: async (params, context) => {
-      // Get configuration from assistant settings tool (with fallback defaults)
-      let settingsData: unknown = null;
-
-      try {
-        const [, pluginsStart] = await getStartServices();
-        const toolRegistry = await pluginsStart.onechat.tools.getRegistry({
-          request: context.request,
-        });
-        const assistantSettingsResult = await toolRegistry.execute({
-          toolId: 'core.security.assistant_settings',
-          toolParams: { toolId: 'core.security.alert_counts' },
-        });
-
-        if (assistantSettingsResult.results && assistantSettingsResult.results.length > 0) {
-          settingsData = assistantSettingsResult.results[0].data;
-        }
-      } catch (error) {
-        // Use defaults if assistant settings fails
-      }
-
-      // Parse settings with fallback defaults
-      let alertsIndexPattern = '.alerts-security.alerts-default';
-
-      if (
-        settingsData &&
-        typeof settingsData === 'object' &&
-        'settings' in settingsData &&
-        (settingsData as Record<string, unknown>).settings &&
-        typeof (settingsData as Record<string, unknown>).settings === 'object'
-      ) {
-        const settings = (settingsData as Record<string, unknown>).settings as Record<
-          string,
-          unknown
-        >;
-        if ('alertsIndexPattern' in settings) {
-          alertsIndexPattern = settings.alertsIndexPattern as string;
-        }
-      }
+      // Use provided parameters or fall back to defaults
+      const { alertsIndexPattern = '.alerts-security.alerts-default' } = params;
 
       const query = getAlertsCountQuery(alertsIndexPattern);
       const result = await context.esClient.asCurrentUser.search<SearchResponse>(query);
