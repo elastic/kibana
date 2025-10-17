@@ -31,7 +31,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const toasts = getService('toasts');
   const dataGrid = getService('dataGrid');
 
-  describe('discover async search', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/239001
+  describe.skip('discover async search', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/platform/test/functional/fixtures/kbn_archives/discover/default'

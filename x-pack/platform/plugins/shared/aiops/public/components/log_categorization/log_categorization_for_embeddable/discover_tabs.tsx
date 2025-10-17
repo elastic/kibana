@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
-
+import { styles as toolbarStyles } from '@kbn/unified-data-table/src/components/custom_toolbar/render_custom_toolbar';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { OpenInDiscover } from '../category_table/use_open_in_discover';
 import { EmbeddableMenu } from './embeddable_menu';
@@ -62,7 +62,7 @@ export const DiscoverTabs: FC<Props> = ({
   query,
 }) => {
   return (
-    <EuiFlexItem grow={false} className="unifiedDataTableToolbar">
+    <EuiFlexItem grow={false} className="unifiedDataTableToolbar" css={toolbarStyles.toolbar}>
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem grow={false}>{renderViewModeToggle(data?.categories.length)}</EuiFlexItem>
         <EuiFlexItem />
@@ -81,8 +81,11 @@ export const DiscoverTabs: FC<Props> = ({
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <div className="unifiedDataTableToolbarControlGroup" css={{ marginRight: '8px' }}>
-                <div className="unifiedDataTableToolbarControlIconButton">
+              <div className="unifiedDataTableToolbarControlGroup" css={toolbarStyles.controlGroup}>
+                <div
+                  className="unifiedDataTableToolbarControlIconButton"
+                  css={toolbarStyles.controlGroupIconButton}
+                >
                   <EmbeddableMenu
                     randomSampler={randomSampler}
                     reload={() => loadCategories()}
@@ -92,7 +95,10 @@ export const DiscoverTabs: FC<Props> = ({
                   />
                 </div>
                 {selectedField !== null && earliest !== undefined && latest !== undefined ? (
-                  <div className="unifiedDataTableToolbarControlIconButton">
+                  <div
+                    className="unifiedDataTableToolbarControlIconButton"
+                    css={toolbarStyles.controlGroupIconButton}
+                  >
                     <CreateCategorizationJobButton
                       dataView={dataview}
                       field={selectedField}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -33,15 +33,22 @@ export const StreamFeaturesFlyout = ({
   closeFlyout,
   isLoading,
   definition,
+  setFeatures,
 }: {
   isLoading: boolean;
   features: Feature[];
   closeFlyout: () => void;
   definition: Streams.all.Definition;
+  setFeatures: React.Dispatch<React.SetStateAction<Feature[]>>;
 }) => {
-  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
+  const [selectedFeatureNames, setSelectedFeatureNames] = useState<Set<string>>(new Set());
   const { addFeaturesToStream } = useStreamFeaturesApi(definition);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const selectedFeatures = useMemo(
+    () => features.filter((f) => selectedFeatureNames.has(f.name)),
+    [features, selectedFeatureNames]
+  );
 
   return (
     <EuiFlyout
@@ -73,12 +80,13 @@ export const StreamFeaturesFlyout = ({
         {!isLoading ? (
           <StreamFeaturesTable
             features={features}
-            selectedFeatures={selectedFeatures}
-            setSelectedFeatures={setSelectedFeatures}
+            selectedFeatureNames={selectedFeatureNames}
+            setSelectedFeatureNames={setSelectedFeatureNames}
             definition={definition}
+            setFeatures={setFeatures}
           />
         ) : (
-          <LoadingState />
+          <LoadingState closeFlyout={closeFlyout} />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -112,7 +120,7 @@ export const StreamFeaturesFlyout = ({
                 });
               }}
               fill
-              isDisabled={selectedFeatures.length === 0}
+              isDisabled={selectedFeatureNames.size === 0}
             >
               <FormattedMessage
                 id="xpack.streams.streamFeaturesFlyout.addToStreamButton"
@@ -126,7 +134,7 @@ export const StreamFeaturesFlyout = ({
   );
 };
 
-function LoadingState() {
+function LoadingState({ closeFlyout }: { closeFlyout: () => void }) {
   const label = useWaitingForAiMessage();
 
   return (
@@ -135,11 +143,25 @@ function LoadingState() {
       alignItems="center"
       justifyContent="center"
       css={{ height: '100%' }}
+      gutterSize="m"
     >
       <EuiFlexItem grow={false} css={{ textAlign: 'center' }}>
         <EuiLoadingElastic size="xxl" />
         <EuiSpacer size="m" />
         <EuiText>{label}</EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          onClick={closeFlyout}
+          aria-label={i18n.translate('xpack.streams.streamFeaturesFlyout.stopButtonAriaLabel', {
+            defaultMessage: 'Stop feature identification',
+          })}
+        >
+          <FormattedMessage
+            id="xpack.streams.streamFeaturesFlyout.stopButton"
+            defaultMessage="Stop"
+          />
+        </EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
