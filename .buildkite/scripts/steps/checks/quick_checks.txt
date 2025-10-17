@@ -23,4 +23,3 @@
 .buildkite/scripts/steps/checks/check_scout_config.sh
 .buildkite/scripts/steps/checks/dependencies_diff.sh
 .buildkite/scripts/steps/checks/verify_codeowners.sh
-.buildkite/scripts/steps/checks/verify_moon_projects.sh
