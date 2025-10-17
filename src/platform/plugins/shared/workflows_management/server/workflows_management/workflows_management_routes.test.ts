@@ -46,6 +46,13 @@ describe('Workflow Management Routes', () => {
     mockSpaces.getSpaceId = jest.fn().mockReturnValue('default');
   });
 
+  const createMockResponse = () => ({
+    ok: jest.fn().mockReturnThis(),
+    notFound: jest.fn().mockReturnThis(),
+    badRequest: jest.fn().mockReturnThis(),
+    customError: jest.fn().mockReturnThis(),
+  });
+
   describe('/api/workflows/stats', () => {
     describe('GET /api/workflows/stats route definition', () => {
       it('should define the stats route with correct configuration', () => {
@@ -109,17 +116,13 @@ describe('Workflow Management Routes', () => {
 
         workflowsApi.getWorkflowStats = jest.fn().mockResolvedValue(mockStats);
 
-        const mockContext = {};
         const mockRequest = {
           headers: {},
           url: { pathname: '/api/workflows/stats' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
-        await routeHandler(mockContext, mockRequest, mockResponse);
+        await routeHandler({}, mockRequest, mockResponse);
 
         expect(workflowsApi.getWorkflowStats).toHaveBeenCalled();
         expect(workflowsApi.getWorkflowStats).toHaveBeenCalledWith('default');
@@ -137,17 +140,13 @@ describe('Workflow Management Routes', () => {
 
         workflowsApi.getWorkflowStats = jest.fn().mockResolvedValue(mockEmptyStats);
 
-        const mockContext = {};
         const mockRequest = {
           headers: {},
           url: { pathname: '/api/workflows/stats' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
-        await routeHandler(mockContext, mockRequest, mockResponse);
+        await routeHandler({}, mockRequest, mockResponse);
 
         expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockEmptyStats });
       });
@@ -156,17 +155,13 @@ describe('Workflow Management Routes', () => {
         const errorMessage = 'Elasticsearch connection failed';
         workflowsApi.getWorkflowStats = jest.fn().mockRejectedValue(new Error(errorMessage));
 
-        const mockContext = {};
         const mockRequest = {
           headers: {},
           url: { pathname: '/api/workflows/stats' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
-        await routeHandler(mockContext, mockRequest, mockResponse);
+        await routeHandler({}, mockRequest, mockResponse);
 
         expect(mockResponse.customError).toHaveBeenCalledWith({
           statusCode: 500,
@@ -193,10 +188,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/s/custom-space/api/workflows/stats' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -215,10 +207,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/stats' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -303,19 +292,14 @@ describe('Workflow Management Routes', () => {
 
         workflowsApi.getWorkflow = jest.fn().mockResolvedValue(mockWorkflow);
 
-        const mockContext = {};
         const mockRequest = {
           params: { id: 'workflow-123' },
           headers: {},
           url: { pathname: '/api/workflows/workflow-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
-        await routeHandler(mockContext, mockRequest, mockResponse);
+        await routeHandler({}, mockRequest, mockResponse);
 
         expect(workflowsApi.getWorkflow).toHaveBeenCalledWith('workflow-123', 'default');
         expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockWorkflow });
@@ -330,11 +314,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/non-existent-workflow' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -356,11 +336,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -395,11 +371,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/s/custom-space/api/workflows/workflow-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -419,11 +391,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -500,10 +468,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/aggs' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -521,10 +486,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/aggs' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -550,10 +512,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/s/custom-space/api/workflows/aggs' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -573,10 +532,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/aggs' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -685,10 +641,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/connectors' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -714,10 +667,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/connectors' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -739,10 +689,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/connectors' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -786,10 +733,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/s/custom-space/api/workflows/connectors' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -816,10 +760,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/connectors' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -864,10 +805,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/connectors' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -978,10 +916,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/search' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1011,10 +946,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/search' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1064,10 +996,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/s/custom-space/api/workflows/search' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1097,10 +1026,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/search' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1194,11 +1120,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1222,11 +1144,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1264,11 +1182,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/s/custom-space/api/workflows' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1294,11 +1208,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1322,11 +1232,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1414,12 +1320,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1445,12 +1346,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/non-existent-workflow' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1476,12 +1372,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1516,12 +1407,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/s/custom-space/api/workflows/workflow-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1549,12 +1435,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1587,12 +1468,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1626,12 +1502,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1698,10 +1569,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1723,10 +1591,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1748,10 +1613,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/s/custom-space/api/workflows/workflow-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1775,10 +1637,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1801,10 +1660,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/non-existent-workflow' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1826,10 +1682,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1897,10 +1750,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1923,10 +1773,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1946,10 +1793,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -1973,10 +1817,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/s/custom-space/api/workflows' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -2002,10 +1843,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -2029,10 +1867,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -2115,7 +1950,6 @@ describe('Workflow Management Routes', () => {
         workflowsApi.getWorkflow = jest.fn().mockResolvedValue(mockWorkflow);
         workflowsApi.runWorkflow = jest.fn().mockResolvedValue(mockExecutionId);
 
-        const mockContext = {};
         const mockRequest = {
           params: { id: 'workflow-123' },
           body: {
@@ -2127,14 +1961,9 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123/run' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
-        await routeHandler(mockContext, mockRequest, mockResponse);
+        await routeHandler({}, mockRequest, mockResponse);
 
         expect(workflowsApi.getWorkflow).toHaveBeenCalledWith('workflow-123', 'default');
         expect(workflowsApi.runWorkflow).toHaveBeenCalledWith(
@@ -2168,12 +1997,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/non-existent-workflow/run' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -2202,12 +2026,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123/run' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -2243,12 +2062,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123/run' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -2273,12 +2087,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123/run' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -2320,12 +2129,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/s/custom-space/api/workflows/workflow-123/run' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -2374,12 +2178,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123/run' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -2496,11 +2295,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123/clone' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -2522,11 +2317,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/non-existent-workflow/clone' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -2544,11 +2335,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123/clone' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -2595,11 +2382,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/s/custom-space/api/workflows/workflow-123/clone' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -2636,11 +2419,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-123/clone' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -2717,11 +2496,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/test' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -2826,11 +2601,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/test' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -2859,11 +2630,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/s/custom-space/api/workflows/test' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -2893,11 +2660,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/test' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -2969,11 +2732,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/testStep' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3005,11 +2764,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/testStep' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3039,11 +2794,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/s/custom-space/api/workflows/testStep' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3075,11 +2826,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/testStep' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3105,11 +2852,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/testStep' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          badRequest: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3319,10 +3062,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3350,10 +3090,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3399,10 +3136,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/s/custom-space/api/workflowExecutions' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3432,10 +3166,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3469,10 +3200,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3499,10 +3227,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3610,11 +3335,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/execution-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3631,11 +3352,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/non-existent-execution' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3656,11 +3373,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/execution-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3694,11 +3407,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/s/custom-space/api/workflowExecutions/execution-456' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3721,11 +3430,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/execution-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3747,11 +3452,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/execution-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3817,11 +3518,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/execution-123/cancel' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3879,11 +3576,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/execution-123/cancel' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3905,11 +3598,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/s/custom-space/api/workflowExecutions/execution-456/cancel' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3930,11 +3619,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/execution-123/cancel' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -3956,11 +3641,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/execution-123/cancel' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -4079,10 +3760,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/execution-123/logs' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -4113,10 +3791,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/execution-123/logs' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -4146,10 +3821,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/s/custom-space/api/workflowExecutions/execution-456/logs' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -4206,10 +3878,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/execution-123/logs' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -4239,10 +3908,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/execution-123/logs' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -4265,10 +3931,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/execution-123/logs' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -4352,11 +4015,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/execution-123/steps/step-execution-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -4376,11 +4035,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/execution-123/steps/non-existent-step' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -4401,11 +4056,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/execution-123/steps/step-execution-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -4446,11 +4097,7 @@ describe('Workflow Management Routes', () => {
               '/s/custom-space/api/workflowExecutions/execution-456/steps/step-execution-456',
           },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -4473,11 +4120,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/execution-123/steps/step-execution-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -4499,11 +4142,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflowExecutions/execution-123/steps/step-execution-123' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          notFound: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -4606,10 +4245,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-json-schema' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -4631,10 +4267,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-json-schema' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -4680,10 +4313,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/s/custom-space/api/workflows/workflow-json-schema' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -4705,10 +4335,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-json-schema' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
@@ -4730,10 +4357,7 @@ describe('Workflow Management Routes', () => {
           headers: {},
           url: { pathname: '/api/workflows/workflow-json-schema' },
         };
-        const mockResponse = {
-          ok: jest.fn().mockReturnThis(),
-          customError: jest.fn().mockReturnThis(),
-        };
+        const mockResponse = createMockResponse();
 
         await routeHandler(mockContext, mockRequest, mockResponse);
 
