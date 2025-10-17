@@ -18,7 +18,6 @@ export const FILE_UPLOAD_EVENT = {
 
 /**
  * Registers the file upload analytics events.
- * This function is wrapped in `once` to ensure that the events are registered only once.
  */
 export const registerFileUploadAnalyticsEvents = (analytics: AnalyticsServiceSetup) => {
   analytics.registerEventType({
