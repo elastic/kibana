@@ -30,18 +30,22 @@ import React, { useState } from 'react';
 import { sloPaths } from '../../../../common';
 import { SLO_MODEL_VERSION } from '../../../../common/constants';
 import { paths } from '../../../../common/locators/paths';
-import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
+import {
+  type SLODefinitionSortableFields,
+  useFetchSloDefinitions,
+} from '../../../hooks/use_fetch_slo_definitions';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
 import { useActionModal } from '../../../context/action_modal';
 import { useBulkOperation } from '../context/bulk_operation';
-import { useUrlSearchState } from '../hooks/use_url_search_state';
+import { type SearchState, useUrlSearchState } from '../hooks/use_url_search_state';
 import { SloManagementBulkActions } from './slo_management_bulk_actions';
 import { SloManagementSearchBar } from './slo_management_search_bar';
 
 export function SloManagementTable() {
   const { state, onStateChange } = useUrlSearchState();
-  const { search, page, perPage, tags, includeOutdatedOnly } = state;
+  const { search, page, perPage, tags, includeOutdatedOnly, enabledFilter, sortField, sortOrder } =
+    state;
   const {
     services: {
       http,
@@ -58,6 +62,9 @@ export function SloManagementTable() {
     tags,
     includeOutdatedOnly,
     includeHealth: true,
+    enabledFilter,
+    sortField,
+    sortOrder,
   });
   const { tasks } = useBulkOperation();
 
@@ -198,6 +205,7 @@ export function SloManagementTable() {
     {
       field: 'version',
       width: '10%',
+      sortable: true,
       name: i18n.translate('xpack.slo.sloManagementTable.columns.versionLabel', {
         defaultMessage: 'Version',
       }),
@@ -244,6 +252,15 @@ export function SloManagementTable() {
         const color = item.enabled ? 'success' : 'subdued';
         const label = item.enabled ? 'Enabled' : 'Disabled';
 
+        // field: 'enabled',
+        // width: '20%',
+        // name: i18n.translate('xpack.slo.sloManagementTable.columns.state', {
+        //   defaultMessage: 'State',
+        // }),
+        // sortable: true,
+        // render: (_: SLODefinitionResponse['enabled'], item: SLODefinitionResponse) => {
+        //   const color = item.enabled ? 'success' : 'danger';
+        //   const label = item.enabled ? RUNNING_LABEL : PAUSED_LABEL;
         return <EuiHealth color={color}>{label}</EuiHealth>;
       },
     },
@@ -303,13 +320,21 @@ export function SloManagementTable() {
   ];
 
   const onTableChange = ({ page: newPage }: Criteria<SLODefinitionWithHealthResponse>) => {
+    let newState: Partial<SearchState> | undefined;
     if (newPage) {
       const { index, size } = newPage;
-      const newState = {
+      newState = {
         ...state,
         page: index,
         perPage: size,
       };
+    }
+    if (sort) {
+      newState = newState ? { ...newState } : { ...state };
+      newState.sortField = convertToSortableField(sort.field);
+      newState.sortOrder = sort.direction;
+    }
+    if (newState) {
       onStateChange(newState);
     }
   };
@@ -358,12 +383,31 @@ export function SloManagementTable() {
         pagination={pagination}
         onChange={onTableChange}
         loading={isLoading}
+        sorting={{
+          sort: {
+            field: sortField ?? 'name',
+            direction: sortOrder ?? 'asc',
+          },
+        }}
         selection={permissions?.hasAllWriteRequested ? selection : undefined}
       />
     </EuiPanel>
   );
 }
 
+function convertToSortableField(field: string): SLODefinitionSortableFields | undefined {
+  if (field === 'version' || field === 'enabled') {
+    return field;
+  }
+  return undefined;
+}
+
 const TABLE_CAPTION = i18n.translate('xpack.slo.sloManagement.tableCaption', {
   defaultMessage: 'SLO Management',
+});
+const RUNNING_LABEL = i18n.translate('xpack.slo.sloManagement.runningLabel', {
+  defaultMessage: 'Running',
+});
+const PAUSED_LABEL = i18n.translate('xpack.slo.sloManagement.pausedLabel', {
+  defaultMessage: 'Paused',
 });

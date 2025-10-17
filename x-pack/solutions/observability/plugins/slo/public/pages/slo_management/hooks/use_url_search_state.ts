@@ -13,6 +13,7 @@ import deepmerge from 'deepmerge';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { DEFAULT_SLO_PAGE_SIZE } from '../../../../common/constants';
+import { type SLODefinitionSortableFields } from '../../../hooks/use_fetch_slo_definitions';
 
 export const SLO_MANAGEMENT_SEARCH_URL_STORAGE_KEY = 'search';
 export const SLO_MANAGEMENT_SEARCH_SESSION_STORAGE_KEY = 'slo.management_page_search_state';
@@ -23,6 +24,9 @@ export interface SearchState {
   page: number;
   perPage: number;
   includeOutdatedOnly?: boolean;
+  sortField?: SLODefinitionSortableFields;
+  sortOrder?: 'asc' | 'desc';
+  enabledFilter?: string;
 }
 
 export const DEFAULT_STATE: SearchState = {

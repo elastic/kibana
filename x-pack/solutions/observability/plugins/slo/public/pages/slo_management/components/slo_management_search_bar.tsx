@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiText } from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
 import { useFetchSLOSuggestions } from '../../slo_edit/hooks/use_fetch_suggestions';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -50,25 +50,64 @@ export function SloManagementSearchBar({ onRefresh }: Props) {
       }}
       onRefresh={onRefresh}
       renderQueryInputAppend={() => (
-        <>
-          <EuiComboBox
-            compressed
-            aria-label={filterTagsLabel}
-            placeholder={filterTagsLabel}
-            delimiter=","
-            options={suggestions?.tags ? [existOption, ...suggestions?.tags] : []}
-            selectedOptions={selectedOptions}
-            onChange={(newOptions) => {
-              setSelectedOptions(newOptions);
-              onStateChange({
-                ...state,
-                tags: newOptions.map((option) => String(option.value)),
-              });
-            }}
-            isClearable={true}
-            data-test-subj="filter-slos-by-tag"
-          />
-        </>
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem>
+            <EuiComboBox
+              compressed
+              options={enabledOptions}
+              aria-label={i18n.translate('xpack.slo.sloDefinitions.filterByStatus', {
+                defaultMessage: 'Filter by status',
+              })}
+              singleSelection={{ asPlainText: true }}
+              placeholder={i18n.translate('xpack.slo.sloDefinitions.filterByStatus', {
+                defaultMessage: 'Filter by status',
+              })}
+              selectedOptions={
+                state.enabledFilter !== undefined
+                  ? [
+                      {
+                        label: state.enabledFilter === 'true' ? RUNNING_LABEL : PAUSED_LABEL,
+                        value: state.enabledFilter === 'true' ? 'enabled' : 'disabled',
+                      },
+                    ]
+                  : []
+              }
+              onChange={(newOptions) => {
+                if (newOptions.length === 0) {
+                  onStateChange({ ...state, enabledFilter: undefined });
+                } else {
+                  const option = newOptions[0];
+                  onStateChange({
+                    ...state,
+                    enabledFilter: option.value === 'enabled' ? 'true' : 'false',
+                  });
+                }
+              }}
+              isClearable={true}
+              data-test-subj="filter-slos-by-status"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiComboBox
+              compressed
+              aria-label={filterTagsLabel}
+              placeholder={filterTagsLabel}
+              delimiter=","
+              options={suggestions?.tags ? [existOption, ...suggestions?.tags] : []}
+              selectedOptions={selectedOptions}
+              onChange={(newOptions) => {
+                setSelectedOptions(newOptions);
+                onStateChange({
+                  ...state,
+                  tags: newOptions.map((option) => String(option.value)),
+                });
+              }}
+              isClearable={true}
+              data-test-subj="filter-slos-by-tag"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem />
+        </EuiFlexGroup>
       )}
     />
   );
@@ -93,3 +132,21 @@ const existOption = {
   label: '',
   value: '*',
 };
+
+const RUNNING_LABEL = i18n.translate('xpack.slo.sloDefinitions.statusOptions.enabled', {
+  defaultMessage: 'Running',
+});
+const PAUSED_LABEL = i18n.translate('xpack.slo.sloDefinitions.statusOptions.disabled', {
+  defaultMessage: 'Paused',
+});
+
+const enabledOptions = [
+  {
+    label: RUNNING_LABEL,
+    value: 'enabled',
+  },
+  {
+    label: PAUSED_LABEL,
+    value: 'disabled',
+  },
+];

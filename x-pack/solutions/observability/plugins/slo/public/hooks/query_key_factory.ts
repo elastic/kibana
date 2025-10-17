@@ -6,6 +6,7 @@
  */
 
 import type { Indicator, Objective } from '@kbn/slo-schema';
+import { type SLODefinitionSortableFields } from './use_fetch_slo_definitions';
 
 interface SloListFilter {
   kqlQuery: string;
@@ -58,6 +59,9 @@ export const sloKeys = {
     perPage: number;
     includeOutdatedOnly: boolean;
     validTags: string;
+    enabledFilter?: string;
+    sortField?: SLODefinitionSortableFields;
+    sortOrder?: 'asc' | 'desc';
   }) => [...sloKeys.allDefinitions(), params],
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
   health: (list: Array<{ sloId: string; sloInstanceId: string }>) =>
