@@ -10,6 +10,8 @@ export {
   oneChatDefaultAgentId,
   type AgentDefinition,
   type AgentConfiguration,
+  type AgentResearchStepConfiguration,
+  type AgentAnswerStepConfiguration,
 } from './definition';
 export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';
 export {

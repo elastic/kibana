@@ -28,7 +28,8 @@ export class DockerServersService {
       [name: string]: DockerServerSpec;
     },
     private log: ToolingLog,
-    private lifecycle: Lifecycle
+    private lifecycle: Lifecycle,
+    private disabled?: boolean
   ) {
     this.servers = Object.entries(configs).map(([name, config]) => ({
       ...config,
@@ -208,6 +209,10 @@ export class DockerServersService {
   }
 
   private async startServers() {
+    if (this.disabled) {
+      return;
+    }
+
     await Promise.all(
       this.servers.map(async (server) => {
         if (server.enabled) {
