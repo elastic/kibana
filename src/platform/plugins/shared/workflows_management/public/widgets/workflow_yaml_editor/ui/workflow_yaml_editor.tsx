@@ -209,7 +209,7 @@ export const WorkflowYAMLEditor = ({
       {
         fileMatch: ['*'],
         // casting here because zod-to-json-schema returns a more complex type than JSONSchema7 expected by monaco-yaml
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         schema: workflowJsonSchemaStrict as any,
         uri: workflowSchemaUriStrict,
       },
