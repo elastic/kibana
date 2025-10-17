@@ -193,7 +193,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     showAutoRefreshOnly: false,
     filtersForSuggestions: [],
     additionalQueryBarMenuItems: [],
-    showProjectPicker: true,
   };
 
   private services = this.props.kibana.services;
