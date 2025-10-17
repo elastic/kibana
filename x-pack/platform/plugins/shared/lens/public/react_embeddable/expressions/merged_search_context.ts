@@ -65,13 +65,18 @@ export function getMergedSearchContext(
   const customTimeRange = customTimeRange$.getValue();
 
   const timeRangeToRender = customTimeRange ?? timesliceTimeRange ?? timeRange;
+
+  // Use panel's own projectRouting if it exists, otherwise inherit from parent (dashboard)
+  const panelProjectRouting = attributes.state.projectRouting;
+  const effectiveProjectRouting = panelProjectRouting ?? projectRouting;
+
   const context = {
     esqlVariables,
     now: data.nowProvider.get().getTime(),
     timeRange: timeRangeToRender,
     query: [attributes.state.query].filter(nonNullable),
     filters: injectFilterReferences(attributes.state.filters || [], attributes.references),
-    projectRouting,
+    projectRouting: effectiveProjectRouting,
     disableWarningToasts: true,
   };
   // Prepend query and filters from dashboard to the visualization ones
@@ -82,9 +87,6 @@ export function getMergedSearchContext(
   }
   if (filters) {
     context.filters.unshift(...filters.filter(({ meta }) => !meta.disabled));
-  }
-  if (projectRouting) {
-    context.projectRouting = projectRouting;
   }
   return context;
 }
