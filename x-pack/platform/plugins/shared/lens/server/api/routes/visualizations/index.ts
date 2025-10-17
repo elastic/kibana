@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RegisterAPIRoutesArgs } from '../../types';
+import type { RegisterAPIRoutesArgs } from '../../types';
 import { registerLensVisualizationsCreateAPIRoute } from './create';
 import { registerLensVisualizationsGetAPIRoute } from './get';
 import { registerLensVisualizationsUpdateAPIRoute } from './update';

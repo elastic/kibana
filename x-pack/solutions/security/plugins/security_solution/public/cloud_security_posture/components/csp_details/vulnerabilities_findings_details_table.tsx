@@ -17,7 +17,7 @@ import type {
 } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
 import {
   useVulnerabilitiesFindings,
-  VULNERABILITY,
+  VULNERABILITY_FINDING,
 } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
 import type {
   FindingsVulnerabilityPanelExpandableFlyoutPropsPreview,
@@ -54,11 +54,12 @@ type VulnerabilitySortFieldType =
   | 'score'
   | 'vulnerability'
   | 'resource'
-  | VULNERABILITY.SEVERITY
-  | VULNERABILITY.ID
-  | VULNERABILITY.PACKAGE_NAME
-  | VULNERABILITY.TITLE
-  | 'event';
+  | VULNERABILITY_FINDING.SEVERITY
+  | VULNERABILITY_FINDING.ID
+  | VULNERABILITY_FINDING.PACKAGE_NAME
+  | VULNERABILITY_FINDING.TITLE
+  | 'event'
+  | VULNERABILITY_FINDING.PACKAGE_VERSION;
 
 const EMPTY_VALUE = '-';
 
@@ -74,7 +75,9 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     }, []);
 
     const [currentFilter, setCurrentFilter] = useState<string>('');
-    const [sortField, setSortField] = useState<VulnerabilitySortFieldType>(VULNERABILITY.SEVERITY);
+    const [sortField, setSortField] = useState<VulnerabilitySortFieldType>(
+      VULNERABILITY_FINDING.SEVERITY
+    );
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
     const { openPreviewPanel } = useExpandableFlyoutApi();
@@ -235,8 +238,8 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
                 params: {
                   vulnerabilityId: vulnerability?.id,
                   resourceId: finding?.resource?.id,
-                  packageName: vulnerability?.package?.name,
-                  packageVersion: vulnerability?.package?.version,
+                  packageName: finding?.[VULNERABILITY_FINDING.PACKAGE_NAME],
+                  packageVersion: finding?.[VULNERABILITY_FINDING.PACKAGE_VERSION],
                   eventId: finding?.event?.id,
                   scopeId,
                   isPreviewMode: true,
@@ -255,6 +258,12 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
 
               openPreviewPanel(previewPanelProps);
             }}
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.left.insights.vulnerability.table.previewDetailsButtonAriaLabel',
+              {
+                defaultMessage: 'Preview vulnerability details',
+              }
+            )}
           />
         ),
       },
@@ -273,7 +282,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
         sortable: true,
       },
       {
-        field: VULNERABILITY.TITLE,
+        field: VULNERABILITY_FINDING.TITLE,
         render: (title: string) => {
           if (Array.isArray(title)) {
             return <EuiText size="s">{title.join(', ')}</EuiText>;
@@ -289,9 +298,9 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
         sortable: true,
       },
       {
-        field: VULNERABILITY.ID,
+        field: VULNERABILITY_FINDING.ID,
         render: (id: string, finding: VulnerabilitiesFindingDetailFields) =>
-          renderMultiValueCell(VULNERABILITY.ID, finding),
+          renderMultiValueCell(VULNERABILITY_FINDING.ID, finding),
         name: i18n.translate(
           'xpack.securitySolution.flyout.left.insights.vulnerability.table.vulnerabilityIdColumnName',
           { defaultMessage: 'CVE ID' }
@@ -300,7 +309,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
         sortable: true,
       },
       {
-        field: VULNERABILITY.SEVERITY,
+        field: VULNERABILITY_FINDING.SEVERITY,
         render: (severity: string) => (
           <>
             <EuiText size="s">
@@ -316,9 +325,9 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
         sortable: true,
       },
       {
-        field: VULNERABILITY.PACKAGE_NAME,
+        field: VULNERABILITY_FINDING.PACKAGE_NAME,
         render: (packageName: string, finding: VulnerabilitiesFindingDetailFields) =>
-          renderMultiValueCell(VULNERABILITY.PACKAGE_NAME, finding),
+          renderMultiValueCell(VULNERABILITY_FINDING.PACKAGE_NAME, finding),
         name: i18n.translate(
           'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
           { defaultMessage: 'Package' }

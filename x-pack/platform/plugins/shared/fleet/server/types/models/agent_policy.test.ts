@@ -4,9 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AgentlessPolicy, GlobalDataTag } from '../../../common/types';
 
-import { AgentPolicyBaseSchema } from './agent_policy';
+import { set } from '@kbn/safer-lodash-set';
+
+import type { AgentlessPolicy, GlobalDataTag } from '../../../common/types';
+import { getSettings } from '../../services/form_settings';
+
+import { AgentPolicyBaseSchema, FullAgentPolicyResponseSchema } from './agent_policy';
 
 describe('AgentPolicyBaseSchema', () => {
   describe('global_data_tags validations', () => {
@@ -142,5 +146,39 @@ describe('AgentPolicyBaseSchema', () => {
         AgentPolicyBaseSchema.agentless.validate(agentless);
       }).toThrow();
     });
+  });
+});
+
+describe('FullAgentPolicySchema', () => {
+  it('support all advanced settings', () => {
+    expect(() => {
+      const advancedPolicySettings = getSettings('AGENT_POLICY_ADVANCED_SETTINGS');
+
+      const policyData = {
+        id: 'test-id',
+        outputs: {},
+        inputs: [],
+        agent: {
+          monitoring: {
+            enabled: true,
+            metrics: true,
+            logs: true,
+            traces: true,
+          },
+          download: { sourceURI: 'http://test' },
+          features: {},
+        },
+      };
+
+      for (const settings of advancedPolicySettings) {
+        if (settings.example_value) {
+          set(policyData, settings.name, settings.example_value);
+        } else {
+          throw new Error(`No example value provided for ${settings.name}`);
+        }
+      }
+
+      FullAgentPolicyResponseSchema.validate(policyData);
+    }).not.toThrow();
   });
 });

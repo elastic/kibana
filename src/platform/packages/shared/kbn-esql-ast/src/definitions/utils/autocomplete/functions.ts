@@ -6,43 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { LicenseType } from '@kbn/licensing-types';
+
 import { uniq } from 'lodash';
-import { ESQLLicenseType } from '@kbn/esql-types';
-import {
-  allStarConstant,
-  commaCompleteItem,
-  listCompleteItem,
-} from '../../../commands_registry/complete_items';
-import {
-  ESQLFieldWithMetadata,
-  GetColumnsByTypeFn,
-  ICommandContext,
-  ISuggestionItem,
-  getLocationFromCommandOrOptionName,
-  Location,
-  ItemKind,
-  ICommandCallbacks,
-} from '../../../commands_registry/types';
-import {
-  ESQLAstItem,
-  ESQLCommand,
-  ESQLCommandOption,
-  ESQLFunction,
-  ESQLLocation,
-} from '../../../types';
-import { collectUserDefinedColumns, excludeUserDefinedColumnsFromCurrentCommand } from './columns';
-import { filterFunctionSignatures, getFunctionDefinition } from '../functions';
-import {
-  extractTypeFromASTArg,
-  getFieldsOrFunctionsSuggestions,
-  getValidSignaturesAndTypesToSuggestNext,
-} from './helpers';
-import {
-  FunctionDefinitionTypes,
-  FunctionParameter,
-  FunctionParameterType,
-  isNumericType,
-} from '../../types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import { getLocationInfo } from '../../../commands_registry/location';
 import {
   isAssignment,
   isColumn,
@@ -51,18 +19,43 @@ import {
   isLiteral,
   isOptionNode,
 } from '../../../ast/is';
-import { buildValueDefinitions } from '../values';
-import { getCompatibleLiterals, getDateLiterals } from '../literals';
-import { getColumnExists } from '../columns';
-import { getFunctionSuggestions, getAllFunctions } from '../functions';
-import { pushItUpInTheList } from './helpers';
-import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../constants';
-import { comparisonFunctions } from '../../all_operators';
-import { correctQuerySyntax, findAstPosition } from '../ast';
+import {
+  allStarConstant,
+  commaCompleteItem,
+  listCompleteItem,
+} from '../../../commands_registry/complete_items';
+import type {
+  ESQLColumnData,
+  GetColumnsByTypeFn,
+  ICommandCallbacks,
+  ICommandContext,
+  ISuggestionItem,
+  ItemKind,
+} from '../../../commands_registry/types';
 import { parse } from '../../../parser';
+import type { ESQLAstItem, ESQLCommand, ESQLCommandOption, ESQLFunction } from '../../../types';
 import { Walker } from '../../../walker';
-import { getSuggestionsToRightOfOperatorExpression } from '../operators';
+import { comparisonFunctions } from '../../all_operators';
+import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../constants';
+import type { FunctionParameter, FunctionParameterType } from '../../types';
+import { FunctionDefinitionTypes, isNumericType } from '../../types';
+import { correctQuerySyntax, findAstPosition } from '../ast';
+import { getColumnExists } from '../columns';
 import { getExpressionType } from '../expressions';
+import {
+  filterFunctionSignatures,
+  getAllFunctions,
+  getFunctionDefinition,
+  getFunctionSuggestions,
+} from '../functions';
+import { getCompatibleLiterals, getDateLiterals } from '../literals';
+import { getSuggestionsToRightOfOperatorExpression } from '../operators';
+import { buildValueDefinitions } from '../values';
+import {
+  getFieldsOrFunctionsSuggestions,
+  getValidSignaturesAndTypesToSuggestNext,
+  pushItUpInTheList,
+} from './helpers';
 
 function checkContentPerDefinition(fn: ESQLFunction, def: FunctionDefinitionTypes): boolean {
   const fnDef = getFunctionDefinition(fn.name);
@@ -142,7 +135,7 @@ export async function getFunctionArgsSuggestions(
   fullText: string,
   offset: number,
   context?: ICommandContext,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean
 ): Promise<ISuggestionItem[]> {
   const astContext = findAstPosition(commands, offset);
   const node = astContext.node;
@@ -151,14 +144,12 @@ export async function getFunctionArgsSuggestions(
     return [];
   }
   let command = astContext.command;
-  let option = astContext.option;
   if (astContext.command?.name === 'fork') {
-    const { command: forkCommand, option: forkOption } =
+    const { command: forkCommand } =
       astContext.command?.name === 'fork'
         ? getCommandAndOptionWithinFORK(astContext.command as ESQLCommand<'fork'>)
-        : { command: undefined, option: undefined };
+        : { command: undefined };
     command = forkCommand || astContext.command;
-    option = forkOption || astContext.option;
   }
   const functionNode = node as ESQLFunction;
   const fnDefinition = getFunctionDefinition(functionNode.name);
@@ -172,19 +163,11 @@ export async function getFunctionArgsSuggestions(
     signatures: filterFunctionSignatures(fnDefinition.signatures, hasMinimumLicenseRequired),
   };
 
-  const fieldsMap: Map<string, ESQLFieldWithMetadata> = context?.fields || new Map();
-  const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
+  const columnMap: Map<string, ESQLColumnData> = context?.columns || new Map();
 
   const references = {
-    fields: fieldsMap,
-    userDefinedColumns: anyUserDefinedColumns,
+    columns: columnMap,
   };
-  const userDefinedColumnsExcludingCurrentCommandOnes = excludeUserDefinedColumnsFromCurrentCommand(
-    commands,
-    command,
-    fieldsMap,
-    innerText
-  );
 
   const { typesToSuggestNext, hasMoreMandatoryArgs, enrichedArgs, argIndex } =
     getValidSignaturesAndTypesToSuggestNext(
@@ -219,7 +202,7 @@ export async function getFunctionArgsSuggestions(
 
   const suggestedConstants = uniq(
     typesToSuggestNext
-      .map((d) => d.literalSuggestions || d.acceptedValues)
+      .map((d) => d.suggestedValues)
       .filter((d) => d)
       .flat()
   ) as string[];
@@ -237,8 +220,7 @@ export async function getFunctionArgsSuggestions(
     arg &&
     isColumn(arg) &&
     !getColumnExists(arg, {
-      fields: fieldsMap,
-      userDefinedColumns: userDefinedColumnsExcludingCurrentCommandOnes,
+      columns: columnMap,
     });
   if (noArgDefined || isUnknownColumn) {
     // ... | EVAL fn( <suggest>)
@@ -248,7 +230,7 @@ export async function getFunctionArgsSuggestions(
       (cmdArg) => !Array.isArray(cmdArg) && cmdArg.location.max >= node.location.max
     );
     const finalCommandArgIndex =
-      command.name !== 'stats'
+      command.name !== 'stats' && command.name !== 'inline stats'
         ? -1
         : commandArgIndex < 0
         ? Math.max(command.args.length - 1, 0)
@@ -258,17 +240,12 @@ export async function getFunctionArgsSuggestions(
 
     const fnToIgnore = [];
 
-    if (functionNode.subtype === 'variadic-call') {
-      // for now, this getFunctionArgsSuggestions is being used in STATS to suggest for
-      // operators. When that is fixed, we can remove this "is variadic-call" check
-      // and always exclude the grouping functions
-      fnToIgnore.push(
-        ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name)
-      );
-    }
+    fnToIgnore.push(
+      ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name)
+    );
 
     if (
-      command.name !== 'stats' ||
+      (command.name !== 'stats' && command.name !== 'inline stats') ||
       (isOptionNode(finalCommandArg) && finalCommandArg.name === 'by')
     ) {
       // ignore the current function
@@ -332,6 +309,13 @@ export async function getFunctionArgsSuggestions(
 
     // Fields
 
+    // In most cases, just suggest fields that match the parameter types.
+    // But in the case of boolean conditions, we want to suggest fields of any type,
+    // since they may be used in comparisons.
+
+    // and we always add a comma at the end if there are more mandatory args
+    // but this needs to be refined when full expressions begin to be supported
+
     suggestions.push(
       ...pushItUpInTheList(
         await getFieldsByType(
@@ -358,13 +342,12 @@ export async function getFunctionArgsSuggestions(
 
     // Functions
     if (typesToSuggestNext.every((d) => !d.fieldsOnly)) {
-      let location = getLocationFromCommandOrOptionName(option?.name ?? command.name);
-      // If the user is working with timeseries data, we want to suggest
-      // functions that are relevant to the timeseries context.
-      const isTSSourceCommand = commands[0].name === 'ts';
-      if (isTSSourceCommand && isAggFunctionUsedAlready(command, finalCommandArgIndex)) {
-        location = Location.STATS_TIMESERIES;
-      }
+      const location = getLocationInfo(
+        offset,
+        command,
+        commands,
+        isAggFunctionUsedAlready(command, finalCommandArgIndex)
+      ).id;
       suggestions.push(
         ...getFunctionSuggestions(
           {
@@ -376,7 +359,8 @@ export async function getFunctionArgsSuggestions(
                 ) as FunctionParameterType[]),
             ignored: fnToIgnore,
           },
-          hasMinimumLicenseRequired
+          hasMinimumLicenseRequired,
+          context?.activeProduct
         ).map((suggestion) => ({
           ...suggestion,
           text: addCommaIf(shouldAddComma, suggestion.text),
@@ -384,12 +368,11 @@ export async function getFunctionArgsSuggestions(
       );
     }
 
-    // could also be in stats (bucket) but our autocomplete is not great yet
     if (
       (getTypesFromParamDefs(typesToSuggestNext).includes('date') &&
         ['where', 'eval'].includes(command.name) &&
         !FULL_TEXT_SEARCH_FUNCTIONS.includes(fnDefinition.name)) ||
-      (command.name === 'stats' &&
+      (['stats', 'inline stats'].includes(command.name) &&
         typesToSuggestNext.some((t) => t && t.type === 'date' && t.constantOnly === true))
     )
       suggestions.push(
@@ -402,7 +385,7 @@ export async function getFunctionArgsSuggestions(
 
   // for eval and row commands try also to complete numeric literals with time intervals where possible
   if (arg) {
-    if (command.name !== 'stats') {
+    if (command.name !== 'stats' && command.name !== 'inline stats') {
       if (isLiteral(arg) && isNumericType(arg.literalType)) {
         // ... | EVAL fn(2 <suggest>)
         suggestions.push(
@@ -438,9 +421,6 @@ export async function getFunctionArgsSuggestions(
   return suggestions;
 }
 
-const within = (position: number, location: ESQLLocation | undefined) =>
-  Boolean(location && location.min <= position && location.max >= position);
-
 function isOperator(node: ESQLFunction) {
   return getFunctionDefinition(node.name)?.type === FunctionDefinitionTypes.OPERATOR;
 }
@@ -449,9 +429,10 @@ async function getListArgsSuggestions(
   innerText: string,
   commands: ESQLCommand[],
   getFieldsByType: GetColumnsByTypeFn,
-  fieldsMap: Map<string, ESQLFieldWithMetadata>,
+  columnMap: Map<string, ESQLColumnData>,
   offset: number,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
+  activeProduct?: PricingProduct
 ) {
   const suggestions = [];
   const { command, node } = findAstPosition(commands, offset);
@@ -471,19 +452,9 @@ async function getListArgsSuggestions(
       }
     }
 
-    const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
-    // extract the current node from the userDefinedColumns inferred
-    anyUserDefinedColumns.forEach((values, key) => {
-      if (values.some((v) => v.location === node.location)) {
-        anyUserDefinedColumns.delete(key);
-      }
-    });
     const [firstArg] = node.args;
     if (isColumn(firstArg)) {
-      const argType = extractTypeFromASTArg(firstArg, {
-        fields: fieldsMap,
-        userDefinedColumns: anyUserDefinedColumns,
-      });
+      const argType = getExpressionType(firstArg, columnMap);
       if (argType) {
         // do not propose existing columns again
         const otherArgs = isList(list)
@@ -492,15 +463,15 @@ async function getListArgsSuggestions(
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
             [argType as string],
-            getLocationFromCommandOrOptionName(command.name),
+            getLocationInfo(offset, command, commands, false).id,
             getFieldsByType,
             {
               functions: true,
-              fields: true,
-              userDefinedColumns: anyUserDefinedColumns,
+              columns: true,
             },
             { ignoreColumns: [firstArg.name, ...otherArgs.map(({ name }) => name)] },
-            hasMinimumLicenseRequired
+            hasMinimumLicenseRequired,
+            activeProduct
           ))
         );
       }
@@ -513,6 +484,7 @@ function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
   return node.name !== '=' && command.name !== 'enrich';
 }
 
+// TODO: merge this into suggestForExpression
 export const getInsideFunctionsSuggestions = async (
   query: string,
   cursorPosition?: number,
@@ -522,14 +494,6 @@ export const getInsideFunctionsSuggestions = async (
   const innerText = query.substring(0, cursorPosition);
   const correctedQuery = correctQuerySyntax(innerText);
   const { ast } = parse(correctedQuery, { withFormatting: true });
-  let withinStatsWhereClause = false;
-  Walker.walk(ast, {
-    visitFunction: (fn) => {
-      if (fn.name === 'where' && within(cursorPosition ?? 0, fn.location)) {
-        withinStatsWhereClause = true;
-      }
-    },
-  });
   const { node, command, containingFunction } = findAstPosition(ast, cursorPosition ?? 0);
   if (!node) {
     return undefined;
@@ -551,12 +515,12 @@ export const getInsideFunctionsSuggestions = async (
     ) {
       return await getSuggestionsToRightOfOperatorExpression({
         queryText: innerText,
-        location: getLocationFromCommandOrOptionName(command.name),
+        location: getLocationInfo(cursorPosition ?? 0, command, ast, false).id,
         rootOperator: node,
-        getExpressionType: (expression) =>
-          getExpressionType(expression, context?.fields, context?.userDefinedColumns),
+        getExpressionType: (expression) => getExpressionType(expression, context?.columns),
         getColumnsByType: callbacks?.getByType ?? (() => Promise.resolve([])),
         hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+        activeProduct: context?.activeProduct,
       });
     }
     if (['in', 'not in'].includes(node.name)) {
@@ -566,15 +530,13 @@ export const getInsideFunctionsSuggestions = async (
         innerText,
         ast,
         callbacks?.getByType ?? (() => Promise.resolve([])),
-        context?.fields ?? new Map(),
+        context?.columns ?? new Map(),
         cursorPosition ?? 0,
-        callbacks?.hasMinimumLicenseRequired
+        callbacks?.hasMinimumLicenseRequired,
+        context?.activeProduct
       );
     }
-    if (
-      isNotEnrichClauseAssigment(node, command) &&
-      (!isOperator(node) || (command.name === 'stats' && !withinStatsWhereClause))
-    ) {
+    if (isNotEnrichClauseAssigment(node, command) && !isOperator(node)) {
       // command ... fn( <here> )
       return await getFunctionArgsSuggestions(
         innerText,

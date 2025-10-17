@@ -7,50 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
-
 export const PLUGIN_ID = 'workflows';
 export const PLUGIN_NAME = 'Workflows';
 
-export const WORKFLOWS_EXECUTIONS_INDEX = '.kibana-workflow-executions';
-export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.kibana-workflow-step-executions';
-export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.kibana-workflow-execution-logs';
+export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
+export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
+export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.workflows-execution-logs';
 
-// TODO: remove this...
-const connectors = [
-  {
-    type: 'console',
-    params: [
-      {
-        name: 'message',
-        type: 'string' as const,
-      },
-    ],
-  },
-  // TODO: this should be fetched from the action type registry
-  {
-    type: 'slack.sendMessage',
-    params: [
-      {
-        name: 'message',
-        type: 'string' as const,
-      },
-    ],
-  },
-  {
-    type: 'delay',
-    params: [
-      {
-        name: 'delay',
-        type: 'number' as const,
-      },
-    ],
-  },
-];
+// These kibana connectors that are not supported in the workflows management UI
+export const UNSUPPORTED_CONNECTOR_TYPES = ['.index', '.webhook', '.cases-webhook', '.server-log'];
 
-export const WORKFLOW_ZOD_SCHEMA = generateYamlSchemaFromConnectors(connectors);
-export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(connectors, true);
-export {
-  convertToWorkflowGraph,
-  convertToSerializableGraph,
-} from './lib/build_execution_graph/build_execution_graph';
+// Export shared utilities that are needed by both server and client
+// NOTE: buildRequestFromConnector removed from here to avoid main bundle bloat
+// Import directly from './elasticsearch_request_builder' if needed
+
+// DO NOT IMPORT MODULES HERE. Otherwise it will inflate the initial plugin bundle size.

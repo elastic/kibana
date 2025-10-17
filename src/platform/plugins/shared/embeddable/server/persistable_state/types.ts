@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 export type EmbeddableStateWithType = {
   enhancements?: SerializableRecord;

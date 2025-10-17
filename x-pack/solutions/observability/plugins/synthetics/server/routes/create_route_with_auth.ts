@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { HttpResponsePayload, ResponseError } from '@kbn/core-http-server';
-import { ILicense } from '@kbn/licensing-plugin/server';
+import type { HttpResponsePayload, ResponseError } from '@kbn/core-http-server';
+import type { ILicense } from '@kbn/licensing-types';
 import {
   LICENSE_MISSING_ERROR,
   LICENSE_NOT_ACTIVE_ERROR,
   LICENSE_NOT_SUPPORTED_ERROR,
 } from '../../common/constants';
-import {
+import type {
   SupportedMethod,
   SyntheticsRestApiRouteFactory,
   SyntheticsRoute,

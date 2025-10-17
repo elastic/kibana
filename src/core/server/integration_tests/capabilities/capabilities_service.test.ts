@@ -16,7 +16,7 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import type { CapabilitiesSetup } from '@kbn/core-capabilities-server';
 import { CapabilitiesService } from '@kbn/core-capabilities-server-internal';
-import {
+import type {
   HttpService,
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,

@@ -6,10 +6,10 @@
  */
 import expect from '@kbn/expect';
 import { policyFactory } from '@kbn/security-solution-plugin/common/endpoint/models/policy_config';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { sortBy } from 'lodash';
 import { getInstallationInfo } from '@kbn/test-suites-xpack-platform/fleet_api_integration/apis/package_policy/helper';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import {
   skipIfNoDockerRegistry,
   isDockerRegistryEnabledOrSkipped,
@@ -67,7 +67,7 @@ export default function (providerContext: FtrProviderContext) {
     let inputOnlyBasePackagePolicy: NewPackagePolicy;
 
     before(async function () {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
       if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
         return;
@@ -268,7 +268,7 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
@@ -401,6 +401,7 @@ export default function (providerContext: FtrProviderContext) {
               enabled: true,
               streams: [],
               config: {
+                artifact_manifest: { value: {} },
                 policy: {
                   value: policyFactory(),
                 },

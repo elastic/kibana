@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Datatable, DatatableRow } from '../expression_types';
+import type { Datatable, DatatableRow } from '../expression_types';
 
 /**
  * Returns a string identifying the group of a row by a list of columns to group by

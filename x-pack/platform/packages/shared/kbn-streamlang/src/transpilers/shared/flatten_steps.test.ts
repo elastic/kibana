@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StreamlangStep } from '../../../types/streamlang';
+import type { StreamlangStep } from '../../../types/streamlang';
 import { flattenSteps } from './flatten_steps';
 
 describe('flattenSteps', () => {

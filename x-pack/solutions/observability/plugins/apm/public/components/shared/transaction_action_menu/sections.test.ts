@@ -99,26 +99,13 @@ describe('Transaction action menu', () => {
         },
         {
           key: 'serviceMap',
-          title: 'Service Map',
+          title: 'Service map',
           subtitle: 'View service map filtered by this trace.',
           actions: [
             {
               key: 'serviceMap',
               label: 'Show in service map',
               href: 'some-basepath/app/apm/service-map?comparisonEnabled=false&environment=ENVIRONMENT_ALL&kuery=trace.id%20%3A%20%22123%22&rangeFrom=now-24h&rangeTo=now&serviceGroup=',
-              condition: true,
-            },
-          ],
-        },
-      ],
-      [
-        {
-          key: 'kibana',
-          actions: [
-            {
-              key: 'sampleDocument',
-              label: 'View transaction in Discover',
-              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_data_view_id_default,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
           ],
@@ -186,26 +173,13 @@ describe('Transaction action menu', () => {
         },
         {
           key: 'serviceMap',
-          title: 'Service Map',
+          title: 'Service map',
           subtitle: 'View service map filtered by this trace.',
           actions: [
             {
               key: 'serviceMap',
               label: 'Show in service map',
               href: 'some-basepath/app/apm/service-map?comparisonEnabled=false&environment=ENVIRONMENT_ALL&kuery=trace.id%20%3A%20%22123%22&rangeFrom=now-24h&rangeTo=now&serviceGroup=',
-              condition: true,
-            },
-          ],
-        },
-      ],
-      [
-        {
-          key: 'kibana',
-          actions: [
-            {
-              key: 'sampleDocument',
-              label: 'View transaction in Discover',
-              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_data_view_id_default,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
           ],
@@ -273,26 +247,13 @@ describe('Transaction action menu', () => {
         },
         {
           key: 'serviceMap',
-          title: 'Service Map',
+          title: 'Service map',
           subtitle: 'View service map filtered by this trace.',
           actions: [
             {
               key: 'serviceMap',
               label: 'Show in service map',
               href: 'some-basepath/app/apm/service-map?comparisonEnabled=false&environment=ENVIRONMENT_ALL&kuery=trace.id%20%3A%20%22123%22&rangeFrom=now-24h&rangeTo=now&serviceGroup=',
-              condition: true,
-            },
-          ],
-        },
-      ],
-      [
-        {
-          key: 'kibana',
-          actions: [
-            {
-              key: 'sampleDocument',
-              label: 'View transaction in Discover',
-              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_data_view_id_default,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
           ],

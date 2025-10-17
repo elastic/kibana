@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { EuiDelayRender, EuiLoadingSpinner } from '@elastic/eui';
-import { OverlayRef } from '@kbn/core/public';
+import type { OverlayRef } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { ITagAssignmentService, ITagsCache } from '../../services';
-import { StartServices } from '../../types';
+import type { ITagAssignmentService, ITagsCache } from '../../services';
+import type { StartServices } from '../../types';
 
 export interface GetAssignFlyoutOpenerOptions extends StartServices {
   tagCache: ITagsCache;

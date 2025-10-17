@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { TaggingUsageData, ByTypeTaggingUsageData } from './types';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { TaggingUsageData, ByTypeTaggingUsageData } from './types';
 
 const perTypeSchema: MakeSchemaFrom<ByTypeTaggingUsageData> = {
   usedTags: { type: 'integer' },
@@ -26,5 +26,6 @@ export const tagUsageCollectorSchema: MakeSchemaFrom<TaggingUsageData> = {
     'osquery-pack': perTypeSchema,
     'osquery-pack-asset': perTypeSchema,
     'osquery-saved-query': perTypeSchema,
+    alerting_rule_template: perTypeSchema,
   },
 };

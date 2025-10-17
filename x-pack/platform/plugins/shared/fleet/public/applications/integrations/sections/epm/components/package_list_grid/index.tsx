@@ -79,6 +79,7 @@ export interface PackageListGridProps {
   spacer?: boolean;
   // Security Solution sends the id to determine which element to scroll when the user interacting with the package list
   scrollElementId?: string;
+  onlyAgentlessFilter?: boolean;
 }
 
 export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
@@ -98,6 +99,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   setUrlandReplaceHistory,
   setUrlandPushHistory,
   showMissingIntegrationMessage = false,
+  onlyAgentlessFilter = false,
   sortByFeaturedIntegrations = true,
   callout,
   calloutTopSpacerSize = 'l', // Default EUI spacer size
@@ -124,7 +126,12 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
 
   const resetQuery = () => {
     setSearchTerm('');
-    setUrlandReplaceHistory({ searchString: '', categoryId: '', subCategoryId: '' });
+    setUrlandReplaceHistory({
+      searchString: '',
+      categoryId: '',
+      subCategoryId: '',
+      onlyAgentless: onlyAgentlessFilter,
+    });
   };
 
   const onSubCategoryClick = useCallback(
@@ -133,9 +140,10 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
       setUrlandPushHistory({
         categoryId: selectedCategory,
         subCategoryId: subCategory,
+        onlyAgentless: onlyAgentlessFilter,
       });
     },
-    [selectedCategory, setSelectedSubCategory, setUrlandPushHistory]
+    [selectedCategory, setSelectedSubCategory, setUrlandPushHistory, onlyAgentlessFilter]
   );
 
   const filteredPromotedList: IntegrationCardItem[] = useMemo(() => {
@@ -222,11 +230,12 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
               setSelectedSubCategory={setSelectedSubCategory}
               selectedSubCategory={selectedSubCategory}
               setUrlandReplaceHistory={setUrlandReplaceHistory}
+              onlyAgentlessFilter={onlyAgentlessFilter}
             />
           </EuiFlexItem>
         )}
 
-        {availableSubCategories?.length ? <EuiSpacer /> : null}
+        {availableSubCategories?.length ? <EuiSpacer size="m" /> : null}
 
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
@@ -235,7 +244,8 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
             direction="row"
             gutterSize="s"
             style={{
-              maxWidth: 943,
+              maxWidth: '100%',
+              flexWrap: 'wrap',
             }}
           >
             {visibleSubCategories?.map((subCategory) => {
@@ -248,6 +258,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
                     fill={isSelected}
                     aria-label={subCategory?.title}
                     onClick={() => onSubCategoryClick(subCategory.id)}
+                    size="s"
                   >
                     <FormattedMessage
                       id="xpack.fleet.epmList.subcategoriesButton"
@@ -271,7 +282,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
                       onClick={onButtonClick}
                       iconType="boxesHorizontal"
                       aria-label="Show more subcategories"
-                      size="m"
+                      size="s"
                     />
                   }
                   isOpen={isPopoverOpen}

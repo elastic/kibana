@@ -22,9 +22,9 @@ const readline = require('readline');
 
 // Serverless FTRs
 const FTR_SERVERLESS =
-  'x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture';
+  'x-pack/solutions/security/test/serverless/functional/test_suites/ftr/cloud_security_posture';
 const FTR_SERVERLESS_API_INTEGRATION =
-  'x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture';
+  'x-pack/solutions/security/test/serverless/api_integration/test_suites/cloud_security_posture';
 
 // FTRs
 const FTR_API_INTEGRATION =

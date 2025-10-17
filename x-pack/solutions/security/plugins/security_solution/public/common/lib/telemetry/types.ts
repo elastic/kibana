@@ -42,9 +42,14 @@ import type {
 } from './events/preview_rule/types';
 import type { AppEventTypes, AppTelemetryEventsMap } from './events/app/types';
 import type {
-  SiemMigrationsEventTypes,
+  SiemMigrationsRuleEventTypes,
+  SiemMigrationsDashboardEventTypes,
   SiemMigrationsTelemetryEventsMap,
 } from './events/siem_migrations/types';
+import type {
+  RuleUpgradeEventTypes,
+  RuleUpgradeTelemetryEventsMap,
+} from './events/rule_upgrade/types';
 
 export * from './events/app/types';
 export * from './events/alerts_grouping/types';
@@ -84,8 +89,12 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends Al
   ? NotesTelemetryEventsMap[T]
   : T extends AppEventTypes
   ? AppTelemetryEventsMap[T]
-  : T extends SiemMigrationsEventTypes
+  : T extends SiemMigrationsRuleEventTypes
   ? SiemMigrationsTelemetryEventsMap[T]
+  : T extends SiemMigrationsDashboardEventTypes
+  ? SiemMigrationsTelemetryEventsMap[T]
+  : T extends RuleUpgradeEventTypes
+  ? RuleUpgradeTelemetryEventsMap[T]
   : never;
 
 export type TelemetryEventTypes =
@@ -100,4 +109,6 @@ export type TelemetryEventTypes =
   | EventLogEventTypes
   | NotesEventTypes
   | AppEventTypes
-  | SiemMigrationsEventTypes;
+  | SiemMigrationsRuleEventTypes
+  | SiemMigrationsDashboardEventTypes
+  | RuleUpgradeEventTypes;

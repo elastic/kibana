@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition, ExpressionValueRender } from '../../../types';
+import type { ExpressionFunctionDefinition, ExpressionValueRender } from '../../../types';
 import { help as strings, errors } from '../../../i18n/functions/dict/reveal_image';
 
 export enum Origin {

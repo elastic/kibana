@@ -64,6 +64,15 @@ test('can create a complex STATS command', () => {
   );
 });
 
+test('can create a complex INLINE STATS command', () => {
+  const node = cmd`INLINE STATS count_last_hour = SUM(count_last_hour), total_visits = SUM(total_visits), bytes_transform = SUM(bytes_transform), bytes_transform_last_hour = SUM(bytes_transform_last_hour) BY extension.keyword`;
+  const text = BasicPrettyPrinter.command(node);
+
+  expect(text).toBe(
+    'INLINE STATS count_last_hour = SUM(count_last_hour), total_visits = SUM(total_visits), bytes_transform = SUM(bytes_transform), bytes_transform_last_hour = SUM(bytes_transform_last_hour) BY extension.keyword'
+  );
+});
+
 test('can create a FROM source command', () => {
   const node = cmd`FROM index METADATA _id`;
   const text = BasicPrettyPrinter.command(node);

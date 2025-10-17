@@ -19,7 +19,8 @@ export type NavigationID =
   | 'ingest'
   | 'data'
   | 'alerts_and_insights'
-  | 'kibana';
+  | 'kibana'
+  | 'ai';
 
 export type ManagementNodeDefinition = NodeDefinitionWithChildren<DeepLinkId, NavigationID>;
 
@@ -121,9 +122,7 @@ export const defaultNavigation: ManagementNodeDefinition = {
             {
               link: 'management:dataViews',
             },
-            {
-              link: 'management:aiAssistantManagementSelection',
-            },
+
             {
               // Saved objects
               link: 'management:objects',

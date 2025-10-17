@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const archivedBooksIndex = 'x-pack/solutions/search/test/functional_search/fixtures/search-books';
 
@@ -58,6 +58,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Select indices
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
 
+        // Select created openai connector
+        await pageObjects.searchPlayground.PlaygroundChatPage.selectConnector(openaiConnectorName);
         await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveButtonToExist();
         await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveButtonToBeEnabled();
         await pageObjects.searchPlayground.PlaygroundChatPage.savePlayground(testPlaygroundName);

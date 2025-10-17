@@ -6,10 +6,10 @@
  */
 
 import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
-import { IBasePath } from '@kbn/core-http-server';
+import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IBasePath } from '@kbn/core-http-server';
 import { getSLOSummaryPipelineId, SLO_RESOURCES_VERSION } from '../../../common/constants';
-import { SLODefinition } from '../../domain/models';
+import type { SLODefinition } from '../../domain/models';
 
 export const getSummaryPipelineTemplate = (
   slo: SLODefinition,

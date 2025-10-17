@@ -13,8 +13,8 @@ import {
   buildReferences,
   getDatasetIndex,
   addLayerColumn,
-  isFormulaDataset,
   mapToFormula,
+  isDataViewDataset,
 } from './utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
@@ -41,22 +41,22 @@ const dataView = {
   toSpec: () => ({}),
 };
 
-describe('isFormulaDataset', () => {
-  test('isFormulaDataset returns true when dataset is based on index and timefield', () => {
-    const result = isFormulaDataset({
+describe('isDataViewDataset', () => {
+  test('isDataViewDataset returns true when dataset is based on index and timefield', () => {
+    const result = isDataViewDataset({
       index: 'test',
       timeFieldName: 'test',
     });
     expect(result).toEqual(true);
   });
 
-  test('isFormulaDataset returns false when dataset is not based on index and timefield', () => {
-    const result = isFormulaDataset({
+  test('isDataViewDataset returns false when dataset is not based on index and timefield', () => {
+    const result = isDataViewDataset({
       esql: 'test',
     });
     expect(result).toEqual(false);
 
-    const result2 = isFormulaDataset({
+    const result2 = isDataViewDataset({
       type: 'datatable',
       columns: [],
       rows: [],
@@ -196,6 +196,7 @@ describe('buildDatasourceStates', () => {
       () => [],
       {
         get: async () => ({ id: 'test' }),
+        create: async () => ({ id: 'test' }),
       } as any
     );
     expect(results).toMatchInlineSnapshot(`

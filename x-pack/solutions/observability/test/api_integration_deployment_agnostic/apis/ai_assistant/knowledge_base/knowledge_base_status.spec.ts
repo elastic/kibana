@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/common';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   teardownTinyElserModelAndInferenceEndpoint,
@@ -22,6 +22,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('Knowledge base: GET /internal/observability_ai_assistant/kb/status', function () {
+    // fails/flaky on MKI, see https://github.com/elastic/kibana/issues/232600
+    this.tags(['failsOnMKI']);
+
     it('returns correct status before knowledge base is setup', async () => {
       const res = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'GET /internal/observability_ai_assistant/kb/status',
@@ -29,7 +32,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       expect(res.status).to.be(200);
 
-      expect(res.body.kbState).to.be(KnowledgeBaseState.NOT_INSTALLED);
+      expect(res.body.inferenceModelState).to.be(InferenceModelState.NOT_INSTALLED);
       expect(res.body.enabled).to.be(true);
     });
 
@@ -49,7 +52,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(res.status).to.be(200);
 
-        expect(res.body.kbState).to.be(KnowledgeBaseState.READY);
+        expect(res.body.inferenceModelState).to.be(InferenceModelState.READY);
         expect(res.body.enabled).to.be(true);
         expect(res.body.endpoint?.service_settings?.model_id).to.eql(TINY_ELSER_MODEL_ID);
       });
@@ -62,7 +65,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         expect(res.status).to.be(200);
-        expect(res.body.kbState).to.be(KnowledgeBaseState.MODEL_PENDING_DEPLOYMENT);
+        expect(res.body.inferenceModelState).to.be(InferenceModelState.MODEL_PENDING_DEPLOYMENT);
       });
 
       it('returns the correct status after the model is deleted', async () => {
@@ -74,7 +77,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(res.status).to.be(200);
 
-        expect(res.body.kbState).to.be(KnowledgeBaseState.NOT_INSTALLED);
+        expect(res.body.inferenceModelState).to.be(InferenceModelState.NOT_INSTALLED);
         expect(res.body.enabled).to.be(true);
         expect(res.body.errorMessage).to.include.string(
           'No known trained model with model_id [pt_tiny_elser]'
@@ -90,7 +93,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(res.status).to.be(200);
 
-        expect(res.body.kbState).to.be(KnowledgeBaseState.NOT_INSTALLED);
+        expect(res.body.inferenceModelState).to.be(InferenceModelState.NOT_INSTALLED);
         expect(res.body.enabled).to.be(true);
         expect(res.body.errorMessage).to.include.string(
           'Inference endpoint not found [pt_tiny_elser_inference_id]'

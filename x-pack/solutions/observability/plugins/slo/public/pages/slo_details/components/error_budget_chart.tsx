@@ -8,12 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
-import { ChartData } from '../../../typings/slo';
+import type { ChartData } from '../../../typings/slo';
 import { toDuration, toMinutes } from '../../../utils/slo/duration';
-import { TimeBounds } from '../types';
+import type { TimeBounds } from '../types';
 import { WideChart } from './wide_chart';
 
 function formatTime(minutes: number) {

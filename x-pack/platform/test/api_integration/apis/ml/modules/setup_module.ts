@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import { isEmpty, sortBy } from 'lodash';
 
 import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
-import { Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
@@ -23,7 +23,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for sample_data_weblogs with prefix, startDatafeed false and estimateModelMemory false',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_sample_logs',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_sample_logs',
       indexPattern: { name: 'ft_module_sample_logs', timeField: '@timestamp' },
       module: 'sample_data_weblogs',
       user: USER.ML_POWERUSER,
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for sample_data_weblogs with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_sample_logs',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_sample_logs',
       indexPattern: { name: 'ft_module_sample_logs', timeField: '@timestamp' },
       module: 'sample_data_weblogs',
       user: USER.ML_POWERUSER,
@@ -97,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for apache_ecs with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apache',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_apache',
       indexPattern: { name: 'ft_module_apache', timeField: '@timestamp' },
       module: 'apache_ecs',
       user: USER.ML_POWERUSER,
@@ -152,7 +152,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for apm_transaction with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apm_transaction',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_apm_transaction',
       indexPattern: { name: 'ft_module_apm_transaction', timeField: '@timestamp' },
       module: 'apm_transaction',
       user: USER.ML_POWERUSER,
@@ -179,7 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for logs_ui_analysis with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_logs',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_logs',
       indexPattern: { name: 'ft_module_logs', timeField: '@timestamp' },
       module: 'logs_ui_analysis',
       user: USER.ML_POWERUSER,
@@ -206,7 +206,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for logs_ui_categories with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_logs',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_logs',
       indexPattern: { name: 'ft_module_logs', timeField: '@timestamp' },
       module: 'logs_ui_categories',
       user: USER.ML_POWERUSER,
@@ -232,7 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for nginx_ecs with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_nginx',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_nginx',
       indexPattern: { name: 'ft_module_nginx', timeField: '@timestamp' },
       module: 'nginx_ecs',
       user: USER.ML_POWERUSER,
@@ -287,7 +287,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for sample_data_ecommerce with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_sample_ecommerce',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_sample_ecommerce',
       indexPattern: { name: 'ft_module_sample_ecommerce', timeField: 'order_date' },
       module: 'sample_data_ecommerce',
       user: USER.ML_POWERUSER,
@@ -314,7 +314,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for siem_packetbeat with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_packetbeat',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_security_packetbeat',
       indexPattern: { name: 'ft_module_security_packetbeat', timeField: '@timestamp' },
       module: 'security_packetbeat',
       user: USER.ML_POWERUSER,
@@ -361,7 +361,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for uptime_heartbeat with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_heartbeat',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_heartbeat',
       indexPattern: { name: 'ft_module_heartbeat', timeField: '@timestamp' },
       module: 'uptime_heartbeat',
       user: USER.ML_POWERUSER,
@@ -388,7 +388,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for metricbeat_system_ecs with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_metricbeat',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_metricbeat',
       indexPattern: { name: 'ft_module_metricbeat', timeField: '@timestamp' },
       module: 'metricbeat_system_ecs',
       user: USER.ML_POWERUSER,
@@ -425,7 +425,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for metrics_ui_hosts with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_metrics_ui',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_metrics_ui',
       indexPattern: { name: 'ft_module_metrics_ui', timeField: '@timestamp' },
       module: 'metrics_ui_hosts',
       user: USER.ML_POWERUSER,
@@ -462,7 +462,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for metrics_ui_k8s with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_metrics_ui',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_metrics_ui',
       indexPattern: { name: 'ft_module_metrics_ui', timeField: '@timestamp' },
       module: 'metrics_ui_k8s',
       user: USER.ML_POWERUSER,
@@ -499,7 +499,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for siem_cloudtrail with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_cloudtrail',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_security_cloudtrail',
       indexPattern: { name: 'ft_module_security_cloudtrail', timeField: '@timestamp' },
       module: 'security_cloudtrail',
       user: USER.ML_POWERUSER,
@@ -546,7 +546,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for apache_data_stream with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apache_data_stream',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_apache_data_stream',
       indexPattern: { name: 'ft_module_apache_data_stream', timeField: '@timestamp' },
       module: 'apache_data_stream',
       user: USER.ML_POWERUSER,
@@ -593,7 +593,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for nginx_data_stream with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_nginx_data_stream',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_nginx_data_stream',
       indexPattern: { name: 'ft_module_nginx_data_stream', timeField: '@timestamp' },
       module: 'nginx_data_stream',
       user: USER.ML_POWERUSER,
@@ -657,7 +657,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for unauthorized user',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_sample_logs',
+      sourceDataArchive: 'x-pack/platform/test/fixtures/es_archives/ml/module_sample_logs',
       indexPattern: { name: 'ft_module_sample_logs', timeField: '@timestamp' },
       module: 'sample_data_weblogs',
       user: USER.ML_UNAUTHORIZED,

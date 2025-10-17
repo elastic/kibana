@@ -24,7 +24,8 @@ import type {
   IStaticAssets,
 } from '@kbn/core-http-server';
 import { AuthStatus } from '@kbn/core-http-server';
-import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
+import type { RouterMock } from '@kbn/core-http-router-server-mocks';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 
 import { CspConfig, ExternalUrlConfig, config } from '@kbn/core-http-server-internal';
 import type {
@@ -34,6 +35,7 @@ import type {
   InternalHttpServiceStart,
 } from '@kbn/core-http-server-internal';
 import { sessionStorageMock } from './cookie_session_storage.mocks';
+import { lazyObject } from '@kbn/lazy-object';
 
 type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 type InternalStaticAssetsMocked = jest.Mocked<InternalHttpServiceSetup['staticAssets']>;
@@ -75,42 +77,42 @@ export type InternalHttpServiceStartMock = jest.Mocked<InternalHttpServiceStart>
 const createBasePathMock = (
   serverBasePath = '/mock-server-basepath',
   publicBaseUrl = 'http://myhost.com/mock-server-basepath'
-): BasePathMocked => ({
-  serverBasePath,
-  publicBaseUrl,
-  get: jest.fn().mockReturnValue(serverBasePath),
-  set: jest.fn(),
-  prepend: jest.fn(),
-  remove: jest.fn(),
-});
+): BasePathMocked =>
+  lazyObject({
+    serverBasePath,
+    publicBaseUrl,
+    get: jest.fn().mockReturnValue(serverBasePath),
+    set: jest.fn(),
+    prepend: jest.fn(),
+    remove: jest.fn(),
+  });
 
 const createInternalStaticAssetsMock = (
   basePath: BasePathMocked,
   cdnUrl: undefined | string = undefined
-): InternalStaticAssetsMocked => ({
-  isUsingCdn: jest.fn().mockReturnValue(!!cdnUrl),
-  getHrefBase: jest.fn().mockReturnValue(cdnUrl ?? basePath.serverBasePath),
-  getPluginAssetHref: jest.fn().mockReturnValue(cdnUrl ?? basePath.serverBasePath),
-  getPluginServerPath: jest.fn((v, _) => v),
-  prependServerPath: jest.fn((v) => v),
-  prependPublicUrl: jest.fn((v) => v),
-});
+): InternalStaticAssetsMocked =>
+  lazyObject({
+    isUsingCdn: jest.fn().mockReturnValue(!!cdnUrl),
+    getHrefBase: jest.fn().mockReturnValue(cdnUrl ?? basePath.serverBasePath),
+    getPluginAssetHref: jest.fn().mockReturnValue(cdnUrl ?? basePath.serverBasePath),
+    getPluginServerPath: jest.fn((v, _) => v),
+    prependServerPath: jest.fn((v) => v),
+    prependPublicUrl: jest.fn((v) => v),
+  });
 
 const createAuthMock = () => {
-  const mock: AuthMocked = {
-    get: jest.fn(),
-    isAuthenticated: jest.fn(),
-  };
-  mock.get.mockReturnValue({ status: AuthStatus.authenticated, state: {} });
-  mock.isAuthenticated.mockReturnValue(true);
+  const mock: AuthMocked = lazyObject({
+    get: jest.fn().mockReturnValue({ status: AuthStatus.authenticated, state: {} }),
+    isAuthenticated: jest.fn().mockReturnValue(true),
+  });
   return mock;
 };
 
 const createAuthHeaderStorageMock = () => {
-  const mock: jest.Mocked<IAuthHeadersStorage> = {
+  const mock: jest.Mocked<IAuthHeadersStorage> = lazyObject({
     set: jest.fn(),
     get: jest.fn(),
-  };
+  });
   return mock;
 };
 
@@ -120,7 +122,7 @@ interface CreateMockArgs {
 
 const createInternalPrebootContractMock = (args: CreateMockArgs = {}) => {
   const basePath = createBasePathMock();
-  const mock: InternalHttpServicePrebootMock = {
+  const mock: InternalHttpServicePrebootMock = lazyObject({
     registerRoutes: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
     registerStaticDir: jest.fn(),
@@ -131,7 +133,7 @@ const createInternalPrebootContractMock = (args: CreateMockArgs = {}) => {
     externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
     getServerInfo: jest.fn(),
-    server: {
+    server: lazyObject({
       name: 'http-preboot-server-test',
       version: 'kibana',
       route: jest.fn(),
@@ -139,28 +141,28 @@ const createInternalPrebootContractMock = (args: CreateMockArgs = {}) => {
       stop: jest.fn(),
       config: jest.fn().mockReturnValue(configMock.create()),
       // @ts-expect-error somehow it thinks that `Server` isn't a `Construtable`
-    } as unknown as jest.MockedClass<Server>,
-  };
+    }) as unknown as jest.MockedClass<Server>,
+  });
   return mock;
 };
 
 const createPrebootContractMock = () => {
   const internalMock = createInternalPrebootContractMock();
 
-  const mock: HttpServicePrebootMock = {
+  const mock: HttpServicePrebootMock = lazyObject({
     registerRoutes: internalMock.registerRoutes,
     basePath: createBasePathMock(),
     getServerInfo: jest.fn(),
-  };
+  });
 
   return mock;
 };
 
 const createInternalSetupContractMock = () => {
   const basePath = createBasePathMock();
-  const mock: InternalHttpServiceSetupMock = {
+  const mock: InternalHttpServiceSetupMock = lazyObject({
     // we can mock other hapi server methods when we need it
-    server: {
+    server: lazyObject({
       name: 'http-server-test',
       version: 'kibana',
       route: jest.fn(),
@@ -168,8 +170,10 @@ const createInternalSetupContractMock = () => {
       stop: jest.fn(),
       config: jest.fn().mockReturnValue(configMock.create()),
       // @ts-expect-error somehow it thinks that `Server` isn't a `Construtable`
-    } as unknown as jest.MockedClass<Server>,
-    createCookieSessionStorageFactory: jest.fn(),
+    }) as unknown as jest.MockedClass<Server>,
+    createCookieSessionStorageFactory: jest
+      .fn()
+      .mockResolvedValue(sessionStorageMock.createFactory()),
     registerOnPreRouting: jest.fn(),
     registerOnPreAuth: jest.fn(),
     getDeprecatedRoutes: jest.fn(),
@@ -188,19 +192,17 @@ const createInternalSetupContractMock = () => {
     externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
     authRequestHeaders: createAuthHeaderStorageMock(),
-    getServerInfo: jest.fn(),
+    getServerInfo: jest.fn().mockReturnValue({
+      hostname: 'localhost',
+      name: 'kibana',
+      port: 80,
+      protocol: 'http',
+    }),
     registerRouterAfterListening: jest.fn(),
     rateLimiter: config.schema.getSchema().extract('rateLimiter').validate({}).value,
-  };
-  mock.createCookieSessionStorageFactory.mockResolvedValue(sessionStorageMock.createFactory());
-  mock.createRouter.mockImplementation(() => mockRouter.create());
-  mock.authRequestHeaders.get.mockReturnValue({ authorization: 'authorization-header' });
-  mock.getServerInfo.mockReturnValue({
-    hostname: 'localhost',
-    name: 'kibana',
-    port: 80,
-    protocol: 'http',
   });
+
+  mock.authRequestHeaders.get.mockReturnValue({ authorization: 'authorization-header' });
   return mock;
 };
 
@@ -209,7 +211,7 @@ const createSetupContractMock = <
 >() => {
   const internalMock = createInternalSetupContractMock();
 
-  const mock: HttpServiceSetupMock<ContextType> = {
+  const mock: HttpServiceSetupMock<ContextType> = lazyObject({
     createCookieSessionStorageFactory: internalMock.createCookieSessionStorageFactory,
     registerOnPreRouting: internalMock.registerOnPreRouting,
     registerOnPreAuth: jest.fn(),
@@ -222,11 +224,11 @@ const createSetupContractMock = <
     createRouter: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
     getServerInfo: internalMock.getServerInfo,
-    staticAssets: {
+    staticAssets: lazyObject({
       getPluginAssetHref: jest.fn().mockImplementation((assetPath: string) => assetPath),
       prependPublicUrl: jest.fn().mockImplementation((pathname: string) => pathname),
-    },
-  };
+    }),
+  });
 
   mock.createRouter.mockImplementation(() => internalMock.createRouter(''));
 
@@ -251,6 +253,7 @@ const createInternalStartContractMock = () => {
   const basePath = createBasePathMock();
   const mock: InternalHttpServiceStartMock = {
     ...createStartContractMock(),
+    generateOas: jest.fn(),
     staticAssets: createInternalStaticAssetsMock(basePath),
     isListening: jest.fn(),
   };

@@ -13,40 +13,38 @@ jest.mock('../../../../lib/content_stream', () => ({
   getContentStream: jest.fn(),
 }));
 
-import { setupServer, SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
-import {
-  ElasticsearchClientMock,
-  coreMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import type { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
-import { ExportType } from '@kbn/reporting-server';
+import type { ExportType } from '@kbn/reporting-server';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
-import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 
-import { ReportingCore } from '../../../..';
-import { ReportingInternalSetup, ReportingInternalStart } from '../../../../core';
-import { ContentStream, getContentStream } from '../../../../lib';
+import type { ReportingCore } from '../../../..';
+import type { ReportingInternalSetup, ReportingInternalStart } from '../../../../core';
+import type { ContentStream } from '../../../../lib';
+import { getContentStream } from '../../../../lib';
 import { reportingMock } from '../../../../mocks';
 import {
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../../test_helpers';
-import { ReportingRequestHandlerContext, ScheduledReportType } from '../../../../types';
+import type { ReportingRequestHandlerContext, ScheduledReportType } from '../../../../types';
 import { EventTracker } from '../../../../usage';
 import { registerScheduledRoutesInternal } from '../scheduled';
-import {
+import type {
   KibanaRequest,
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 const fakeRawRequest = {
   headers: {

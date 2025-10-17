@@ -6,10 +6,10 @@
  */
 import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
-import { StoredSLODefinition } from '../../domain/models';
+import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
+import type { StoredSLODefinition } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
-import { Usage } from './type';
+import type { Usage } from './type';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 
 export const fetcher = async (context: CollectorFetchContext) => {

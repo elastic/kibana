@@ -10,11 +10,11 @@
 import React from 'react';
 import { partition } from 'lodash';
 import { queryToAst } from '@kbn/data-plugin/common';
-import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type { Reference } from '@kbn/content-management-utils';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { type EventAnnotationServiceType } from '@kbn/event-annotation-components';
 import {
   defaultAnnotationColor,
@@ -312,6 +312,7 @@ export function getEventAnnotationService(
                 function: 'indexPatternLoad',
                 arguments: {
                   id: [indexPatternId],
+                  includeFields: [false],
                 },
               },
             ],

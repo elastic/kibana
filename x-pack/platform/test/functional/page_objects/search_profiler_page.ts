@@ -6,10 +6,9 @@
  */
 
 import { compressToEncodedURIComponent } from 'lz-string';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
-  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
   const editorTestSubjectSelector = 'searchProfilerEditor';
@@ -35,8 +34,7 @@ export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('profileButton');
     },
     async getProfileContent() {
-      const profileTree = await find.byClassName('prfDevTool__main__profiletree');
-      // const profileTree = await find.byClassName('prfDevTool__page');
+      const profileTree = await testSubjects.find('profileTree');
       return profileTree.getVisibleText();
     },
     getUrlWithIndexAndQuery({ indexName, query }: { indexName: string; query: any }) {

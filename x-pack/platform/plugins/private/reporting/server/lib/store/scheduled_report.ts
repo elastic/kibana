@@ -8,10 +8,10 @@
 import moment from 'moment';
 import { JOB_STATUS } from '@kbn/reporting-common';
 
-import { SavedObject } from '@kbn/core/server';
-import { BasePayload } from '@kbn/reporting-common/types';
+import type { SavedObject } from '@kbn/core/server';
+import type { BasePayload } from '@kbn/reporting-common/types';
 import { Report } from './report';
-import { ScheduledReportType } from '../../types';
+import type { ScheduledReportType } from '../../types';
 
 interface ConstructorOpts {
   runAt: Date;

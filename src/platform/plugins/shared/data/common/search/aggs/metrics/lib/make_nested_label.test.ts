@@ -8,7 +8,7 @@
  */
 
 import { makeNestedLabel } from './make_nested_label';
-import { IMetricAggConfig } from '../metric_agg_type';
+import type { IMetricAggConfig } from '../metric_agg_type';
 
 describe('metric agg make_nested_label', () => {
   const generateAggConfig = (metricLabel: string): IMetricAggConfig => {

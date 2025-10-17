@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,7 +17,7 @@ import {
   EuiIconTip,
   EuiSpacer,
 } from '@elastic/eui';
-import { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { first, range, xor } from 'lodash';
@@ -27,8 +27,9 @@ import {
   aggValueToLabel,
   CUSTOM_METRIC_AGGREGATION_OPTIONS,
 } from '../../../helpers/aggregation_options';
-import { createOptionsFromFields, Option } from '../../../helpers/create_options';
-import { CreateSLOForm } from '../../../types';
+import type { Option } from '../../../helpers/create_options';
+import { createOptionsFromFields } from '../../../helpers/create_options';
+import type { CreateSLOForm } from '../../../types';
 import { QueryBuilder } from '../../common/query_builder';
 
 interface MetricIndicatorProps {

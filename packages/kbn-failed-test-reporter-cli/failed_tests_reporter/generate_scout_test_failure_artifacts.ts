@@ -12,8 +12,8 @@ import Path from 'path';
 import globby from 'globby';
 import fs from 'fs';
 import { createHash } from 'crypto';
-import { ToolingLog } from '@kbn/tooling-log';
-import { BuildkiteMetadata } from './buildkite_metadata';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { BuildkiteMetadata } from './buildkite_metadata';
 
 const SCOUT_TEST_FAILURE_DIR_PATTERN = '.scout/reports/scout-playwright-test-failures-*';
 const SUMMARY_REPORT_FILENAME = 'test-failures-summary.json';

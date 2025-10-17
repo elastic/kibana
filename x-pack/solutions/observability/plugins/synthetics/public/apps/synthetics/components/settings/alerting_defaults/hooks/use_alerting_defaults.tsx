@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import React, { useEffect } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ClientPluginsStart } from '../../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../../plugin';
 import { selectDynamicSettings } from '../../../../state/settings/selectors';
 import { fetchActionTypes } from '../../../../state/settings/api';
 import { getConnectorsAction } from '../../../../state/settings/actions';

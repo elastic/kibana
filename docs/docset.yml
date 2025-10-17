@@ -4,6 +4,7 @@ products:
 exclude:
   - settings-gen/readme.md
   - development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.createdefaultinspectoradapters.md
+  - action-type-template.md
 cross_links:
   - apm-agent-nodejs
   - apm-agent-rum-js
@@ -34,7 +35,9 @@ subs:
   fleet-server:   "Fleet Server"
   package-manager:   "Elastic Package Manager"
   stack:   "Elastic Stack"
+  elastic-sec:   "Elastic Security"
   es:   "Elasticsearch"
+  esql:   "ES|QL"
   kib:   "Kibana"
   ls:   "Logstash"
   security-features:   "security features"

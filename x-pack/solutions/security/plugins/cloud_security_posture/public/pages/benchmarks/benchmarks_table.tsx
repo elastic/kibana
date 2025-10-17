@@ -32,10 +32,8 @@ import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
 import { ComplianceScoreBar } from '../../components/compliance_score_bar';
 import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
-import {
-  GetBenchmarkDynamicValues,
-  useBenchmarkDynamicValues,
-} from '../../common/hooks/use_benchmark_dynamic_values';
+import type { GetBenchmarkDynamicValues } from '../../common/hooks/use_benchmark_dynamic_values';
+import { useBenchmarkDynamicValues } from '../../common/hooks/use_benchmark_dynamic_values';
 import { useKibana } from '../../common/hooks/use_kibana';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
@@ -196,6 +194,15 @@ const getBenchmarkTableColumns = (
           onClick={() => {
             navToFindings({ 'rule.benchmark.id': benchmark.id }, [groupByField]);
           }}
+          aria-label={i18n.translate('xpack.csp.benchmarks.benchmarksTable.evaluatedAriaLabel', {
+            defaultMessage:
+              'CIS Benchmark {benchmarkId} version {benchmarkVersion} evaluated with {resourceCountLabel} ',
+            values: {
+              benchmarkId: benchmark.id,
+              benchmarkVersion: benchmark.version || 'N/A',
+              resourceCountLabel,
+            },
+          })}
         >
           {i18n.translate('xpack.csp.benchmarks.benchmarksTable.accountsCountTitle', {
             defaultMessage: '{benchmarkEvaluation} {resourceCountLabel}',

@@ -14,10 +14,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { coreServices } from '../services/kibana_services';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
-import {
-  DashboardListingEmptyPrompt,
-  DashboardListingEmptyPromptProps,
-} from './dashboard_listing_empty_prompt';
+import type { DashboardListingEmptyPromptProps } from './dashboard_listing_empty_prompt';
+import { DashboardListingEmptyPrompt } from './dashboard_listing_empty_prompt';
 
 jest.mock('./confirm_overlays', () => {
   const originalModule = jest.requireActual('./confirm_overlays');

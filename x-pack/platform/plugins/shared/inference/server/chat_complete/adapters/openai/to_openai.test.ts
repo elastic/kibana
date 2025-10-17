@@ -6,6 +6,8 @@
  */
 
 import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
+import type { InferenceConnector, ToolOptions } from '@kbn/inference-common';
+import { OpenAiProviderType } from './types';
 import { messagesToOpenAI, toolChoiceToOpenAI, toolsToOpenAI } from './to_openai';
 
 describe('toolChoiceToOpenAI', () => {
@@ -23,6 +25,46 @@ describe('toolChoiceToOpenAI', () => {
     expect(toolChoiceToOpenAI({ function: 'foo' })).toEqual({
       type: 'function',
       function: { name: 'foo' },
+    });
+  });
+
+  it('returns "required" for Other providers with native tool calling enabled and a single matching tool', () => {
+    const connector = {
+      config: {
+        apiProvider: OpenAiProviderType.Other,
+        enableNativeFunctionCalling: true,
+      },
+    } as unknown as InferenceConnector;
+
+    const tools: NonNullable<ToolOptions['tools']> = {
+      myTool: {
+        description: 'desc',
+        schema: { type: 'object', properties: {} },
+      },
+    };
+
+    // Named tool matches the only tool available => coerced to 'required'
+    expect(toolChoiceToOpenAI({ function: 'myTool' }, { connector, tools })).toEqual('required');
+  });
+
+  it('keeps named-function mapping when native tool calling is disabled, even for Other providers', () => {
+    const connector = {
+      config: {
+        apiProvider: OpenAiProviderType.Other,
+        enableNativeFunctionCalling: false,
+      },
+    } as unknown as InferenceConnector;
+
+    const tools: NonNullable<ToolOptions['tools']> = {
+      myTool: {
+        description: 'desc',
+        schema: { type: 'object', properties: {} },
+      },
+    };
+
+    expect(toolChoiceToOpenAI({ function: 'myTool' }, { connector, tools })).toEqual({
+      type: 'function',
+      function: { name: 'myTool' },
     });
   });
 });

@@ -226,6 +226,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               title={title}
               isExpanded={isExpanded}
               setIsExpanded={setIsExpanded}
+              signalIndexName={signalIndexName}
             />
           )}
         </FullHeightFlexItem>

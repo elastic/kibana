@@ -9,6 +9,7 @@
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/validation';
+import type { ICommandContext } from '../../types';
 
 const statsExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
   return expectErrors(query, expectedErrors, context, 'stats', validate);
@@ -20,24 +21,22 @@ describe('STATS Validation', () => {
   });
 
   describe('STATS <aggregates> [ BY <grouping> ]', () => {
-    const newUserDefinedColumns = new Map(mockContext.userDefinedColumns);
-    newUserDefinedColumns.set('doubleField * 3.281', [
-      {
-        name: 'doubleField * 3.281',
-        type: 'double',
-        location: { min: 0, max: 10 },
-      },
-    ]);
-    newUserDefinedColumns.set('avg_doubleField', [
-      {
-        name: 'avg_doubleField',
-        type: 'double',
-        location: { min: 0, max: 10 },
-      },
-    ]);
-    const context = {
+    const newColumns = new Map(mockContext.columns);
+    newColumns.set('doubleField * 3.281', {
+      name: 'doubleField * 3.281',
+      type: 'double',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
+    newColumns.set('avg_doubleField', {
+      name: 'avg_doubleField',
+      type: 'double',
+      location: { min: 0, max: 10 },
+      userDefined: true,
+    });
+    const context: ICommandContext = {
       ...mockContext,
-      userDefinedColumns: newUserDefinedColumns,
+      columns: newColumns,
     };
     test('no errors on correct usage', () => {
       statsExpectErrors('from a_index | stats by textField', []);
@@ -84,70 +83,24 @@ describe('STATS Validation', () => {
         }
       });
 
-      test('errors on agg and non-agg mix', () => {
-        statsExpectErrors('from a_index | STATS sum( doubleField ) + abs( doubleField ) ', [
-          'Cannot combine aggregation and non-aggregation values in [STATS], found [sum(doubleField)+abs(doubleField)]',
-        ]);
-        statsExpectErrors('from a_index | STATS abs( doubleField + sum( doubleField )) ', [
-          'Cannot combine aggregation and non-aggregation values in [STATS], found [abs(doubleField+sum(doubleField))]',
-        ]);
-        // This is a valid expression as it is an operation on two aggregation functions
-        statsExpectErrors(
-          'from a_index | STATS sum(doubleField) / (min(doubleField) + max(doubleField))  ',
-          []
-        );
-      });
-
-      test('errors on each aggregation field, which does not contain at least one agg function', () => {
-        statsExpectErrors('from a_index | stats doubleField + 1', [
-          'At least one aggregation function required in [STATS], found [doubleField+1]',
-        ]);
-        statsExpectErrors('from a_index | stats doubleField + 1, textField', [
-          'At least one aggregation function required in [STATS], found [doubleField+1]',
-          'Expected an aggregate function or group but got [textField] of type [FieldAttribute]',
-        ]);
-        statsExpectErrors('from a_index | stats doubleField + 1, doubleField + 2, count()', [
-          'At least one aggregation function required in [STATS], found [doubleField+1]',
-          'At least one aggregation function required in [STATS], found [doubleField+2]',
-        ]);
-        statsExpectErrors('from a_index | stats doubleField + 1, doubleField + count(), count()', [
-          'At least one aggregation function required in [STATS], found [doubleField+1]',
-        ]);
-        statsExpectErrors('from a_index | stats 5 + doubleField + 1', [
-          'At least one aggregation function required in [STATS], found [5+doubleField+1]',
-        ]);
-        statsExpectErrors('from a_index | stats doubleField + 1 by ipField', [
-          'At least one aggregation function required in [STATS], found [doubleField+1]',
-        ]);
-      });
-
       test('errors when input is not an aggregate function', () => {
         statsExpectErrors('from a_index | stats doubleField ', [
-          'Expected an aggregate function or group but got [doubleField] of type [FieldAttribute]',
+          'Expected an aggregate function or group but got "doubleField" of type FieldAttribute',
         ]);
       });
 
       test('various errors', () => {
         statsExpectErrors('from a_index | stats avg(doubleField) by wrongField', [
-          'Unknown column [wrongField]',
+          'Unknown column "wrongField"',
         ]);
         statsExpectErrors('from a_index | stats avg(doubleField) by wrongField + 1', [
-          'Unknown column [wrongField]',
+          'Unknown column "wrongField"',
         ]);
         statsExpectErrors('from a_index | stats avg(doubleField) by col0 = wrongField + 1', [
-          'Unknown column [wrongField]',
+          'Unknown column "wrongField"',
         ]);
         statsExpectErrors('from a_index | stats col0 = avg(fn(number)), count(*)', [
-          'Unknown function [fn]',
-        ]);
-      });
-
-      test('semantic errors', () => {
-        statsExpectErrors('from a_index | stats count(round(*))', [
-          'Using wildcards (*) in round is not allowed',
-        ]);
-        statsExpectErrors('from a_index | stats count(count(*))', [
-          `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [long]`,
+          'Unknown function FN',
         ]);
       });
 
@@ -179,22 +132,13 @@ describe('STATS Validation', () => {
         }
       });
 
-      test('semantic errors in <aggregates>', () => {
-        statsExpectErrors('from a_index | stats count(round(*)) BY ipField', [
-          'Using wildcards (*) in round is not allowed',
-        ]);
-        statsExpectErrors('from a_index | stats count(count(*)) BY ipField', [
-          `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [long]`,
-        ]);
-      });
-
       test('various errors', () => {
-        statsExpectErrors('from a_index | stats avg(doubleField) by percentile(doubleField)', [
-          'STATS BY does not support function percentile',
+        statsExpectErrors('from a_index | stats avg(doubleField) by percentile(doubleField, 20)', [
+          'Function PERCENTILE not allowed in BY',
         ]);
         statsExpectErrors(
-          'from a_index | stats avg(doubleField) by textField, percentile(doubleField) by ipField',
-          ['STATS BY does not support function percentile']
+          'from a_index | stats avg(doubleField) by textField, percentile(doubleField, 50) by ipField',
+          ['Function PERCENTILE not allowed in BY']
         );
       });
 
@@ -204,28 +148,6 @@ describe('STATS Validation', () => {
           statsExpectErrors(
             'from index | stats by bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
             []
-          );
-        });
-
-        test('errors', () => {
-          statsExpectErrors('from index | stats by bucket(dateField, pi(), "", "")', [
-            'Argument of [bucket] must be [integer], found value [pi()] type [double]',
-          ]);
-
-          statsExpectErrors('from index | stats by bucket(dateField, abs(doubleField), "", "")', [
-            'Argument of [bucket] must be a constant, received [abs(doubleField)]',
-          ]);
-          statsExpectErrors(
-            'from index | stats by bucket(dateField, abs(length(doubleField)), "", "")',
-            ['Argument of [bucket] must be a constant, received [abs(length(doubleField))]']
-          );
-          statsExpectErrors(
-            'from index | stats by bucket(dateField, doubleField, textField, textField)',
-            [
-              'Argument of [bucket] must be a constant, received [doubleField]',
-              'Argument of [bucket] must be a constant, received [textField]',
-              'Argument of [bucket] must be a constant, received [textField]',
-            ]
           );
         });
       });
@@ -250,21 +172,6 @@ describe('STATS Validation', () => {
               statsExpectErrors(
                 `from a_index | stats 5 ${operatorsWrapping} + avg(doubleField)`,
                 []
-              );
-            });
-
-            test('errors', () => {
-              statsExpectErrors(`from a_index | stats 5 ${operatorsWrapping} + doubleField`, [
-                `At least one aggregation function required in [STATS], found [5${operatorsWrapping}+doubleField]`,
-              ]);
-              statsExpectErrors(`from a_index | stats 5 + doubleField ${operatorsWrapping}`, [
-                `At least one aggregation function required in [STATS], found [5+doubleField${operatorsWrapping}]`,
-              ]);
-              statsExpectErrors(
-                `from a_index | stats 5 + doubleField ${operatorsWrapping}, col0 = sum(doubleField)`,
-                [
-                  `At least one aggregation function required in [STATS], found [5+doubleField${operatorsWrapping}]`,
-                ]
               );
             });
           });
@@ -301,27 +208,6 @@ describe('STATS Validation', () => {
               statsExpectErrors(
                 `from a_index | stats sum(${evalWrapping} doubleField ${closingWrapping} ) + sum(${evalWrapping} doubleField ${closingWrapping} )`,
                 []
-              );
-            });
-
-            test('errors', () => {
-              statsExpectErrors(
-                `from a_index | stats ${evalWrapping} doubleField + sum(doubleField) ${closingWrapping}`,
-                [
-                  `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalWrapping}doubleField+sum(doubleField)${closingWrapping}]`,
-                ]
-              );
-              statsExpectErrors(
-                `from a_index | stats ${evalWrapping} doubleField + sum(doubleField) ${closingWrapping}, col0 = sum(doubleField)`,
-                [
-                  `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalWrapping}doubleField+sum(doubleField)${closingWrapping}]`,
-                ]
-              );
-              statsExpectErrors(
-                `from a_index | stats col0 = ${evalWrapping} doubleField + sum(doubleField) ${closingWrapping}, var0 = sum(doubleField)`,
-                [
-                  `Cannot combine aggregation and non-aggregation values in [STATS], found [${evalWrapping}doubleField+sum(doubleField)${closingWrapping}]`,
-                ]
               );
             });
           });

@@ -15,7 +15,7 @@ import {
   postKibanaOverviewResponsePayloadRT,
 } from '../../../../../common/http_api/kibana';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import { getKibanaDataset } from '../../../../../common/get_index_patterns';
 
 export function kibanaOverviewRoute(server: MonitoringCore) {

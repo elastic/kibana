@@ -7,23 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ProvidedType } from '@kbn/test';
+import type { ProvidedType } from '@kbn/test';
 export { services as commonFunctionalServices } from './services/all';
 
-import { KibanaServerProvider } from './services/kibana_server';
+import type { KibanaServerProvider } from './services/kibana_server';
 export { KibanaServerProvider } from './services/kibana_server';
 export type KibanaServer = ProvidedType<typeof KibanaServerProvider>;
 
 export { RetryService, type TryWithRetriesOptions } from './services/retry';
 
-import { EsArchiverProvider } from './services/es_archiver';
+import type { EsArchiverProvider } from './services/es_archiver';
 export type EsArchiver = ProvidedType<typeof EsArchiverProvider>;
 
-import { EsProvider } from './services/es';
+import type { EsProvider } from './services/es';
 export { EsProvider } from './services/es';
 export type Es = ProvidedType<typeof EsProvider>;
 
-import { SupertestWithoutAuthProvider } from './services/supertest_without_auth';
+import type { SupertestWithoutAuthProvider } from './services/supertest_without_auth';
 export type SupertestWithoutAuthProviderType = ProvidedType<typeof SupertestWithoutAuthProvider>;
 
 export type {
@@ -33,7 +33,7 @@ export type {
   KibanaRoleDescriptors,
 } from './services/saml_auth';
 
-import { SamlAuthProvider } from './services/saml_auth/saml_auth_provider';
+import type { SamlAuthProvider } from './services/saml_auth/saml_auth_provider';
 export type SamlAuthProviderType = ProvidedType<typeof SamlAuthProvider>;
 
 export type { FtrProviderContext } from './services/ftr_provider_context';

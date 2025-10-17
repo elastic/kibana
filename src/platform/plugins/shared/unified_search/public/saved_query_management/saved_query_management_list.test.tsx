@@ -12,10 +12,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock, applicationServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import {
-  SavedQueryManagementListProps,
-  SavedQueryManagementList,
-} from './saved_query_management_list';
+import type { SavedQueryManagementListProps } from './saved_query_management_list';
+import { SavedQueryManagementList } from './saved_query_management_list';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';

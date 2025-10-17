@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useSearchApi } from '@kbn/presentation-publishing';
 import type { SearchApi, SearchSerializedState } from './types';

@@ -1,0 +1,216 @@
+{
+  "id": "@kbn/chart-test-jest-helpers",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/chart-test-jest-helpers",
+        "id": "def-common.cleanCanvasMock",
+        "type": "Function",
+        "tags": [],
+        "label": "cleanCanvasMock",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "src/platform/packages/shared/chart-test-jest-helpers/canvas_mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-test-jest-helpers",
+        "id": "def-common.cleanResizeObserverMock",
+        "type": "Function",
+        "tags": [],
+        "label": "cleanResizeObserverMock",
+        "description": [
+          "\nRestores the original global ResizeObserver after tests.\nCall this after your chart tests to clean up the mock and avoid side effects in other tests."
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "path": "src/platform/packages/shared/chart-test-jest-helpers/resize_observer_mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-test-jest-helpers",
+        "id": "def-common.renderChart",
+        "type": "Function",
+        "tags": [],
+        "label": "renderChart",
+        "description": [
+          "\nRenders a chart component and waits for it to complete rendering.\n"
+        ],
+        "signature": [
+          "(props: P, Component: React.FC<P>, withDebug: boolean) => Promise<{ component: ",
+          "RenderResult",
+          "<typeof ",
+          "node_modules/@testing-library/dom/types/queries",
+          ", HTMLElement, HTMLElement>; debugState?: ",
+          "DebugState",
+          " | undefined; }>"
+        ],
+        "path": "src/platform/packages/shared/chart-test-jest-helpers/render_chart.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-test-jest-helpers",
+            "id": "def-common.renderChart.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "- Chart props including a `renderComplete` callback (usually a Jest mock)."
+            ],
+            "signature": [
+              "P"
+            ],
+            "path": "src/platform/packages/shared/chart-test-jest-helpers/render_chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/chart-test-jest-helpers",
+            "id": "def-common.renderChart.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "Component",
+            "description": [
+              "- The chart React component to render."
+            ],
+            "signature": [
+              "React.FC<P>"
+            ],
+            "path": "src/platform/packages/shared/chart-test-jest-helpers/render_chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/chart-test-jest-helpers",
+            "id": "def-common.renderChart.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "withDebug",
+            "description": [
+              "- If true, enables the Elastic Charts debug flag and returns the chart's debug state."
+            ],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/chart-test-jest-helpers/render_chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An object containing the RTL render result and, if requested, the parsed chart debug state.\n\nUsage:\nawait renderChart(props, MyChartComponent); // returns { component }\nawait renderChart(props, MyChartComponent, true); // returns { component, debugState }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-test-jest-helpers",
+        "id": "def-common.setupCanvasMock",
+        "type": "Function",
+        "tags": [],
+        "label": "setupCanvasMock",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "src/platform/packages/shared/chart-test-jest-helpers/canvas_mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-test-jest-helpers",
+        "id": "def-common.setupResizeObserverMock",
+        "type": "Function",
+        "tags": [],
+        "label": "setupResizeObserverMock",
+        "description": [
+          "\nInstalls the ResizeObserverMock globally, replacing the browser's ResizeObserver.\nCall this before running chart tests to ensure charts receive a resize event and render correctly in RTL."
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "path": "src/platform/packages/shared/chart-test-jest-helpers/resize_observer_mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-test-jest-helpers",
+        "id": "def-common.waitForRenderComplete",
+        "type": "Function",
+        "tags": [],
+        "label": "waitForRenderComplete",
+        "description": [
+          "\nWaits for the chart to complete its initial rendering in tests.\n\nAdvances the Jest timer to trigger a requestAnimationFrame (used by Elastic Charts to detect parent size)\nand waits for the provided `renderComplete` callback to be called.\n"
+        ],
+        "signature": [
+          "(renderComplete: () => void) => Promise<void>"
+        ],
+        "path": "src/platform/packages/shared/chart-test-jest-helpers/render_chart.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-test-jest-helpers",
+            "id": "def-common.waitForRenderComplete.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "renderComplete",
+            "description": [
+              "- Callback function that signals chart rendering is complete (usually a Jest mock)."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/chart-test-jest-helpers/render_chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

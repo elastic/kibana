@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { AlertsClientError, ExecutorType, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import type { ExecutorType, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { i18n } from '@kbn/i18n';
-import { ComparatorFns, TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
+import type { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
+import { ComparatorFns } from '@kbn/response-ops-rule-params/common/utils';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -15,13 +17,13 @@ import {
   ALERT_KEY_JOINER,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { Comparator } from '@kbn/stack-alerts-plugin/common/comparator_types';
-import { LocatorClient } from '@kbn/share-plugin/common/url_service';
+import type { Comparator } from '@kbn/stack-alerts-plugin/common/comparator_types';
+import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import { _IGNORED } from '../../../common/es_fields';
 import { generateContext } from '../context';
 import { getDocsStats } from '../get_docs_stats';
+import type { AdditionalContext } from '../types';
 import {
-  AdditionalContext,
   THRESHOLD_MET_GROUP,
   type DatasetQualityAlert,
   type DatasetQualityAlertContext,

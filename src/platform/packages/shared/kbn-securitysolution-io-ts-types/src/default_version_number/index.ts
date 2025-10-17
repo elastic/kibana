@@ -8,8 +8,9 @@
  */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/Either';
-import { version, Version } from '../version';
+import type { Either } from 'fp-ts/Either';
+import type { Version } from '../version';
+import { version } from '../version';
 
 /**
  * Types the DefaultVersionNumber as:

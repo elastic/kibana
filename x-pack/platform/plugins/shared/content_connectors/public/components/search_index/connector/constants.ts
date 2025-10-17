@@ -7,7 +7,7 @@
 
 import dedent from 'dedent';
 
-import { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
+import type { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
 
 export const getConnectorTemplate = ({
   apiKeyData,

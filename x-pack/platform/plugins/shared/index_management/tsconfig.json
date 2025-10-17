@@ -60,6 +60,9 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/deeplinks-observability",
     "@kbn/streams-app-plugin",
+    "@kbn/licensing-types",
+    "@kbn/reindex-service-plugin",
+    "@kbn/upgrade-assistant-pkg-common",
   ],
   "exclude": ["target/**/*"]
 }

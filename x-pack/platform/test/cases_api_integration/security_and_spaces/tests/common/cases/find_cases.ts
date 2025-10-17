@@ -392,6 +392,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       describe('search and searchField', () => {
+        const searchFields = ['title', 'description', 'incremental_id.text'];
         beforeEach(async () => {
           await createCase(supertest, postCaseReq);
         });
@@ -403,7 +404,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should successfully find a case when using valid searchFields', async () => {
           const cases = await findCases({
             supertest,
-            query: { searchFields: ['title', 'description'], search: 'Issue' },
+            query: { searchFields, search: 'Issue' },
           });
 
           expect(cases.total).to.be(1);
@@ -423,7 +424,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const cases = await findCases({
             supertest,
-            query: { searchFields: ['title', 'description'], search: caseWithId.id },
+            query: { searchFields, search: caseWithId.id },
           });
 
           expect(cases.total).to.be(1);
@@ -436,7 +437,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const cases = await findCases({
             supertest,
-            query: { searchFields: ['title', 'description'], search: uuid },
+            query: { searchFields, search: uuid },
           });
 
           expect(cases.total).to.be(1);
@@ -449,7 +450,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const cases = await findCases({
             supertest,
-            query: { searchFields: ['title', 'description'], search: uuid },
+            query: { searchFields, search: uuid },
           });
 
           expect(cases.total).to.be(1);
@@ -787,13 +788,13 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('range queries', () => {
       before(async () => {
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.2.0/cases_various_dates.json'
         );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.2.0/cases_various_dates.json'
         );
         await deleteAllCaseItems(es);
       });
@@ -1049,14 +1050,14 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('range queries', () => {
         before(async () => {
           await kibanaServer.importExport.load(
-            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json',
+            'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.2.0/cases_various_dates.json',
             { space: 'space1' }
           );
         });
 
         after(async () => {
           await kibanaServer.importExport.unload(
-            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json',
+            'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.2.0/cases_various_dates.json',
             { space: 'space1' }
           );
           await deleteAllCaseItems(es);

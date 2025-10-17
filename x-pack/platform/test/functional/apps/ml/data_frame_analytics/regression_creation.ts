@@ -56,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('regression creation', function () {
     let testDashboardId: string | null = null;
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/egs_regression');
       await ml.testResources.createDataViewIfNeeded('ft_egs_regression');
       await ml.testResources.setKibanaTimeZoneToUTC();
       testDashboardId = await ml.testResources.createMLTestDashboardIfNeeded();
@@ -487,6 +487,20 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsTable.openMapView(testData.jobId);
           await ml.dataFrameAnalyticsMap.assertMapElementsExists();
           await ml.dataFrameAnalyticsMap.assertJobMapTitle(testData.jobId);
+        });
+
+        it('opens job details fly-out in the map view', async () => {
+          await ml.testExecution.logTestStep('should open the job details fly-out');
+          await ml.navigation.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList');
+          await ml.dataFrameAnalyticsTable.openMapView(testData.jobId);
+          await ml.dataFrameAnalyticsMap.assertMapElementsExists();
+          await ml.dataFrameAnalyticsMap.openMlAnalyticsIdSelectionBadge(testData.jobId);
+          await ml.dataFrameAnalyticsMap.assertAnalyticsJobDetailsFlyoutButtonExists(
+            testData.jobId
+          );
+          await ml.dataFrameAnalyticsMap.openAnalyticsJobDetailsFlyout(testData.jobId);
+          await ml.jobDetailsFlyout.assertAnalyticsDetailsFlyoutExists();
+          await ml.jobDetailsFlyout.assertAnalyticsDetailsFlyoutIdExists(testData.jobId);
         });
       });
     }

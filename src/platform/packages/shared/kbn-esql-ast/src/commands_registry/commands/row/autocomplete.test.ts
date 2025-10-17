@@ -12,7 +12,8 @@ import {
   expectSuggestions,
   getFunctionSignaturesByReturnType,
 } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks, Location } from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { Location } from '../../types';
 
 const rowExpectSuggestions = (
   query: string,

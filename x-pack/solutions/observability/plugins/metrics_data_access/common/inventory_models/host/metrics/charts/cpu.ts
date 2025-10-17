@@ -14,120 +14,123 @@ import {
   DEFAULT_XY_LEGEND,
   DEFAULT_XY_YBOUNDS,
 } from '../../../shared/charts/constants';
+import type { FormulasCatalog } from '../../../shared/metrics/types';
 import type { LensConfigWithId } from '../../../types';
-import { formulas } from '../formulas';
+import type { HostFormulas } from '../formulas';
 
-const cpuUsageBreakdown: LensConfigWithId = {
-  id: 'cpuUsageBreakdown',
-  chartType: 'xy',
-  title: CPU_USAGE_LABEL,
-  layers: [
-    {
-      seriesType: 'area',
-      type: 'series',
-      xAxis: '@timestamp',
-      yAxis: [
-        formulas.cpuUsageIowait,
-        formulas.cpuUsageIrq,
-        formulas.cpuUsageNice,
-        formulas.cpuUsageSoftirq,
-        formulas.cpuUsageSteal,
-        formulas.cpuUsageUser,
-        formulas.cpuUsageSystem,
-      ],
+export const init = (formulas: FormulasCatalog<HostFormulas>) => {
+  const cpuUsageBreakdown: LensConfigWithId = {
+    id: 'cpuUsageBreakdown',
+    chartType: 'xy',
+    title: CPU_USAGE_LABEL,
+    layers: [
+      {
+        seriesType: 'area',
+        type: 'series',
+        xAxis: '@timestamp',
+        yAxis: [
+          formulas.get('cpuUsageIowait'),
+          formulas.get('cpuUsageIrq'),
+          formulas.get('cpuUsageNice'),
+          formulas.get('cpuUsageSoftirq'),
+          formulas.get('cpuUsageSteal'),
+          formulas.get('cpuUsageUser'),
+          formulas.get('cpuUsageSystem'),
+        ],
+      },
+    ],
+    ...DEFAULT_XY_FITTING_FUNCTION,
+    ...DEFAULT_XY_LEGEND,
+    ...DEFAULT_XY_YBOUNDS,
+    ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
+  };
+
+  const loadBreakdown: LensConfigWithId = {
+    id: 'loadBreakdown',
+    chartType: 'xy',
+    title: LOAD_LABEL,
+    layers: [
+      {
+        seriesType: 'area',
+        type: 'series',
+        xAxis: '@timestamp',
+        yAxis: [formulas.get('load1m'), formulas.get('load5m'), formulas.get('load15m')],
+      },
+    ],
+    ...DEFAULT_XY_FITTING_FUNCTION,
+    ...DEFAULT_XY_LEGEND,
+    ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
+  };
+
+  const cpuUsageXY: LensConfigWithId = {
+    id: 'cpuUsage',
+    chartType: 'xy',
+    title: formulas.get('cpuUsage').label ?? '',
+    layers: [
+      {
+        seriesType: 'line',
+        type: 'series',
+        xAxis: '@timestamp',
+        yAxis: [formulas.get('cpuUsage')],
+      },
+    ],
+    ...DEFAULT_XY_FITTING_FUNCTION,
+    ...DEFAULT_XY_HIDDEN_LEGEND,
+    ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
+    ...DEFAULT_XY_YBOUNDS,
+  };
+
+  const normalizedLoad1mXY: LensConfigWithId = {
+    id: 'normalizedLoad1m',
+    chartType: 'xy',
+    title: formulas.get('normalizedLoad1m').label ?? '',
+    layers: [
+      {
+        seriesType: 'line',
+        type: 'series',
+        xAxis: '@timestamp',
+        yAxis: [formulas.get('normalizedLoad1m')],
+      },
+      {
+        type: 'reference',
+        yAxis: [
+          {
+            value: '1',
+          },
+        ],
+      },
+    ],
+    ...DEFAULT_XY_FITTING_FUNCTION,
+    ...DEFAULT_XY_HIDDEN_LEGEND,
+    ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
+  };
+
+  const cpuUsageMetric: LensConfigWithId = {
+    id: 'cpuUsage',
+    chartType: 'metric',
+    title: formulas.get('cpuUsage').label ?? '',
+    trendLine: true,
+    ...formulas.get('cpuUsage'),
+  };
+
+  const normalizedLoad1mMetric: LensConfigWithId = {
+    id: 'normalizedLoad1m',
+    chartType: 'metric',
+    title: formulas.get('normalizedLoad1m').label ?? '',
+    trendLine: true,
+    ...formulas.get('normalizedLoad1m'),
+  };
+
+  return {
+    xy: {
+      cpuUsageBreakdown,
+      loadBreakdown,
+      cpuUsage: cpuUsageXY,
+      normalizedLoad1m: normalizedLoad1mXY,
     },
-  ],
-  ...DEFAULT_XY_FITTING_FUNCTION,
-  ...DEFAULT_XY_LEGEND,
-  ...DEFAULT_XY_YBOUNDS,
-  ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
-};
-
-const loadBreakdown: LensConfigWithId = {
-  id: 'loadBreakdown',
-  chartType: 'xy',
-  title: LOAD_LABEL,
-  layers: [
-    {
-      seriesType: 'area',
-      type: 'series',
-      xAxis: '@timestamp',
-      yAxis: [formulas.load1m, formulas.load5m, formulas.load15m],
+    metric: {
+      cpuUsage: cpuUsageMetric,
+      normalizedLoad1m: normalizedLoad1mMetric,
     },
-  ],
-  ...DEFAULT_XY_FITTING_FUNCTION,
-  ...DEFAULT_XY_LEGEND,
-  ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
+  };
 };
-
-const cpuUsageXY: LensConfigWithId = {
-  id: 'cpuUsage',
-  chartType: 'xy',
-  title: formulas.cpuUsage.label ?? '',
-  layers: [
-    {
-      seriesType: 'line',
-      type: 'series',
-      xAxis: '@timestamp',
-      yAxis: [formulas.cpuUsage],
-    },
-  ],
-  ...DEFAULT_XY_FITTING_FUNCTION,
-  ...DEFAULT_XY_HIDDEN_LEGEND,
-  ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
-  ...DEFAULT_XY_YBOUNDS,
-};
-
-const normalizedLoad1mXY: LensConfigWithId = {
-  id: 'normalizedLoad1m',
-  chartType: 'xy',
-  title: formulas.normalizedLoad1m.label ?? '',
-  layers: [
-    {
-      seriesType: 'line',
-      type: 'series',
-      xAxis: '@timestamp',
-      yAxis: [formulas.normalizedLoad1m],
-    },
-    {
-      type: 'reference',
-      yAxis: [
-        {
-          value: '1',
-        },
-      ],
-    },
-  ],
-  ...DEFAULT_XY_FITTING_FUNCTION,
-  ...DEFAULT_XY_HIDDEN_LEGEND,
-  ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
-};
-
-const cpuUsageMetric: LensConfigWithId = {
-  id: 'cpuUsage',
-  chartType: 'metric',
-  title: formulas.cpuUsage.label ?? '',
-  trendLine: true,
-  ...formulas.cpuUsage,
-};
-
-const normalizedLoad1mMetric: LensConfigWithId = {
-  id: 'normalizedLoad1m',
-  chartType: 'metric',
-  title: formulas.normalizedLoad1m.label ?? '',
-  trendLine: true,
-  ...formulas.normalizedLoad1m,
-};
-
-export const cpu = {
-  xy: {
-    cpuUsageBreakdown,
-    loadBreakdown,
-    cpuUsage: cpuUsageXY,
-    normalizedLoad1m: normalizedLoad1mXY,
-  },
-  metric: {
-    cpuUsage: cpuUsageMetric,
-    normalizedLoad1m: normalizedLoad1mMetric,
-  },
-} as const;

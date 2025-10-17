@@ -14,7 +14,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
-import { PresentationUtilPluginStartDeps } from '../types';
+import type { PresentationUtilPluginStartDeps } from '../types';
 
 export let coreServices: CoreStart;
 export let contentManagementService: ContentManagementPublicStart;

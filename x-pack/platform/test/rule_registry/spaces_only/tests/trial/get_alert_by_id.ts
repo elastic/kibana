@@ -54,11 +54,11 @@ export default ({ getService }: FtrProviderContext) => {
       await getSecuritySolutionIndexName(superUser);
       await getAPMIndexName(superUser);
 
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
     });
 
     it('should return a 404 when superuser accesses not-existent alert', async () => {

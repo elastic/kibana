@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { bookSchema, bookSearchOptionsSchema } from './v1';
+import type { TypeOf } from '@kbn/config-schema';
+import type { bookSchema, bookSearchOptionsSchema } from './v1';
 
 export type BookSearchOptions = TypeOf<typeof bookSearchOptionsSchema>;
 

@@ -6,6 +6,7 @@
  */
 
 import DateMath from '@kbn/datemath';
+import type { Query } from '@kbn/es-query';
 import { useCallback, useEffect } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import type {
@@ -80,10 +81,10 @@ export const useMetricsExplorerState = ({ enabled }: { enabled: boolean } = { en
   );
 
   const handleFilterQuerySubmit = useCallback(
-    (query: string) => {
+    (payload: { query?: Query }) => {
       setOptions({
         ...options,
-        filterQuery: query,
+        filterQuery: payload.query?.query as string,
       });
     },
     [options, setOptions]

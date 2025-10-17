@@ -8,7 +8,7 @@
 import { omit } from 'lodash';
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { getTestRunner } from '../../utils/test_runner';
 
 import response from '../../fixtures/beats/overview.json';

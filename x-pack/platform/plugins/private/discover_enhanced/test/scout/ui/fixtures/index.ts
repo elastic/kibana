@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import {
-  test as baseTest,
-  spaceTest as spaceBaseTest,
+import type {
   PageObjects,
-  createLazyPageObject,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
 } from '@kbn/scout';
+import { test as baseTest, spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
 import { DemoPage } from './page_objects';
 
 export interface ExtScoutTestFixtures extends ScoutTestFixtures {

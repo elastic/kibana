@@ -12,13 +12,13 @@ import IndexThresholdRuleTypeExpression, { DEFAULT_VALUES } from './expression';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { IndexThresholdRuleParams } from './types';
+import type { IndexThresholdRuleParams } from './types';
 import { validateExpression } from './validation';
+import type { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   builtInAggregationTypes,
   builtInComparators,
   getTimeUnitLabel,
-  TIME_UNITS,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {

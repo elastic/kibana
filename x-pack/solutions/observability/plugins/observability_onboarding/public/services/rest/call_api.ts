@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart } from '@kbn/core/public';
-import { FetchOptions } from '../../../common/fetch_options';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { FetchOptions } from '../../../common/fetch_options';
 
 function getFetchOptions(fetchOptions: FetchOptions) {
   const { body, ...rest } = fetchOptions;

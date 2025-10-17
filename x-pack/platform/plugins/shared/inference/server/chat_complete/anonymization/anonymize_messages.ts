@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { AnonymizationOutput, AnonymizationRule, Message } from '@kbn/inference-common';
-import { merge } from 'lodash';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { AnonymizationOutput, AnonymizationRule, Message } from '@kbn/inference-common';
 import { anonymizeRecords } from './anonymize_records';
 import { messageFromAnonymizationRecords } from './message_from_anonymization_records';
 import { messageToAnonymizationRecords } from './message_to_anonymization_records';
-import { RegexWorkerService } from './regex_worker_service';
+import type { RegexWorkerService } from './regex_worker_service';
 
 export async function anonymizeMessages({
   system,
@@ -41,7 +40,7 @@ export async function anonymizeMessages({
     ...(system ? [{ system }] : []),
   ];
 
-  const { records, anonymizations } = await anonymizeRecords({
+  const { records: anonymizedRecords, anonymizations } = await anonymizeRecords({
     input: toAnonymize,
     anonymizationRules: rules,
     regexWorker,
@@ -49,12 +48,14 @@ export async function anonymizeMessages({
   });
 
   const anonymizedMessages = messages.map((original, index) => {
-    const map = records[index];
+    const anonymizedRecord = anonymizedRecords[index];
 
-    return merge({}, original, messageFromAnonymizationRecords(map));
+    return messageFromAnonymizationRecords(original, anonymizedRecord);
   });
 
-  const anonymizedSystem = records.find((r) => 'system' in r) as { system?: string } | undefined;
+  const anonymizedSystem = anonymizedRecords.find((r) => 'system' in r) as
+    | { system?: string }
+    | undefined;
 
   return {
     system: anonymizedSystem?.system,

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiLinkProps, EuiText, EuiTextProps } from '@elastic/eui';
+import type { EuiTextProps } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import React from 'react';
-import extendSessionIcon from '../icons/extend_session.svg';
 
-export type { OnActionComplete } from './actions';
-export { PopoverActionsMenu } from './actions';
+export type { OnActionComplete } from './table/actions';
+export { PopoverActionsMenu } from './table/actions';
 
 export const TableText = ({ children, ...props }: EuiTextProps) => {
   return (
@@ -21,17 +21,6 @@ export const TableText = ({ children, ...props }: EuiTextProps) => {
     </EuiText>
   );
 };
-
-export interface IClickActionDescriptor {
-  label: React.ReactNode;
-  iconType: 'trash' | 'cancel' | typeof extendSessionIcon;
-  onClick: () => Promise<void> | void;
-}
-
-export interface IHrefActionDescriptor {
-  label: string;
-  props: EuiLinkProps;
-}
 
 export interface StatusDef {
   textColor?: EuiTextProps['color'];

@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+export interface LogsOverviewFeatureFlags {
+  isPatternsEnabled: boolean;
+}
+
 export interface LogCategory {
   change: LogCategoryChange;
   documentCount: number;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Logger } from '@kbn/logging';
@@ -15,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type { ResponseActionRequestTag } from '../../constants';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
 import { getUnExpiredActionsEsQuery } from '../../utils/fetch_space_ids_with_maybe_pending_actions';
@@ -55,7 +58,6 @@ import {
 } from '../../../../../../common/endpoint/constants';
 import type {
   CommonResponseActionMethodOptions,
-  CustomScriptsResponse,
   GetFileDownloadMethodResponse,
   OmitUnsupportedAttributes,
   ProcessPendingActionsMethodOptions,
@@ -80,9 +82,12 @@ import type {
   ResponseActionScanParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
+  ResponseActionCancelOutputContent,
+  ResponseActionCancelParameters,
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
   WithAllKeys,
+  ResponseActionScriptsApiResponse,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
@@ -96,6 +101,7 @@ import type {
   SuspendProcessRequestBody,
   UnisolationRouteRequestBody,
   UploadActionApiRequestBody,
+  CancelActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { stringify } from '../../../../utils/stringify';
 import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
@@ -159,11 +165,12 @@ export interface ResponseActionsClientUpdateCasesOptions {
 }
 
 export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+  TParameters extends EndpointActionDataParameterTypes = undefined,
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   TMeta extends {} = {}
-> = ResponseActionsRequestBody &
-  Pick<CommonResponseActionMethodOptions, 'ruleName' | 'ruleId' | 'hosts' | 'error'> &
+> = Omit<ResponseActionsRequestBody, 'parameters'> & {
+  parameters?: TParameters;
+} & Pick<CommonResponseActionMethodOptions, 'ruleName' | 'ruleId' | 'hosts' | 'error'> &
   Pick<LogsEndpointAction<TParameters, TOutputContent, TMeta>, 'meta'> & {
     command: ResponseActionsApiCommandNames;
     actionId?: string;
@@ -540,7 +547,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
    * @protected
    */
   protected async validateRequest(
-    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<any, any, any>
   ): Promise<ResponseActionsClientValidateRequestResponse> {
     // Validation for Automated Response actions
     if (this.options.isAutomated) {
@@ -810,7 +817,11 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
    * @protected
    */
   protected buildExternalComment(
-    actionRequestIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+    actionRequestIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      any,
+      any,
+      any
+    >
   ): string {
     const { actionId = uuidv4(), comment, command } = actionRequestIndexOptions;
 
@@ -1037,7 +1048,16 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     throw new ResponseActionsNotSupportedError('runscript');
   }
 
-  public async getCustomScripts(): Promise<CustomScriptsResponse> {
+  public async cancel(
+    actionRequest: OmitUnsupportedAttributes<CancelActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<ResponseActionCancelOutputContent, ResponseActionCancelParameters>> {
+    throw new ResponseActionsNotSupportedError('cancel');
+  }
+
+  public async getCustomScripts(
+    options?: Omit<CustomScriptsRequestQueryParams, 'agentType'>
+  ): Promise<ResponseActionScriptsApiResponse> {
     throw new ResponseActionsNotSupportedError('getCustomScripts');
   }
 

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { createAction, handleActions, Action } from 'redux-actions';
-import {
-  isScreenshotBlockDoc,
+import type { Action } from 'redux-actions';
+import { createAction, handleActions } from 'redux-actions';
+import type {
   ScreenshotBlockDoc,
   ScreenshotBlockCache,
 } from '../../../../common/runtime_types/ping/synthetics';
+import { isScreenshotBlockDoc } from '../../../../common/runtime_types/ping/synthetics';
 
 export interface CacheHitCount {
   hash: string;

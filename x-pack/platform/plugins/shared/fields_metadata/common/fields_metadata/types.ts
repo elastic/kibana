@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { EcsFlat } from '@elastic/ecs';
+import type { EcsFlat } from '@elastic/ecs';
 import * as rt from 'io-ts';
-import { MetadataFields } from '../metadata_fields';
+import type { TSemconvFields, SemconvFieldName } from '@kbn/otel-semantic-conventions';
+import type { MetadataFields } from '../metadata_fields';
 
 export const fieldSourceRT = rt.keyof({
   ecs: null,
   integration: null,
   metadata: null,
+  otel: null,
   unknown: null,
 });
 
@@ -127,6 +129,7 @@ const optionalMetadataPlainRT = rt.partial({
   source: fieldSourceRT,
   type: rt.string,
   documentation_url: rt.string,
+  otel_equivalent: rt.string,
 });
 
 export const partialFieldMetadataPlainRT = rt.intersection([
@@ -151,10 +154,14 @@ export type TMetadataFields = typeof MetadataFields;
 export type MetadataFieldName = keyof TMetadataFields;
 export type TEcsFields = typeof EcsFlat;
 export type EcsFieldName = keyof TEcsFields;
+
+export type TOtelFields = TSemconvFields;
+export type OtelFieldName = SemconvFieldName;
 export type IntegrationFieldName = AnyFieldName;
 
-export type FieldName = MetadataFieldName | EcsFieldName | IntegrationFieldName;
+export type FieldName = MetadataFieldName | EcsFieldName | OtelFieldName | IntegrationFieldName;
 export type FieldMetadataPlain = rt.TypeOf<typeof fieldMetadataPlainRT>;
 export type PartialFieldMetadataPlain = rt.TypeOf<typeof partialFieldMetadataPlainRT>;
 
+export type FieldSource = rt.TypeOf<typeof fieldSourceRT>;
 export type FieldAttribute = rt.TypeOf<typeof fieldAttributeRT>;

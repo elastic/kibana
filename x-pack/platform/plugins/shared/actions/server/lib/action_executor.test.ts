@@ -25,6 +25,7 @@ import {
   asBackgroundTaskExecutionSource,
   asHttpRequestExecutionSource,
   asSavedObjectExecutionSource,
+  isSavedObjectExecutionSource,
 } from './action_execution_source';
 import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
@@ -32,6 +33,7 @@ import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import type { ConnectorRateLimiter } from './connector_rate_limiter';
+import { createMockInMemoryConnector } from '../application/connector/mocks';
 
 const mockRateLimiterLog = jest.fn();
 const mockRateLimiterIsRateLimited = jest.fn().mockReturnValue(false);
@@ -90,7 +92,7 @@ const actionExecutorInitializationParams = {
   eventLogger,
   getActionsAuthorizationWithRequest,
   inMemoryConnectors: [
-    {
+    createMockInMemoryConnector({
       id: 'preconfigured',
       name: 'Preconfigured',
       actionTypeId: 'test',
@@ -101,19 +103,14 @@ const actionExecutorInitializationParams = {
         apiKey: 'abc',
       },
       isPreconfigured: true,
-      isDeprecated: false,
-      isSystemAction: false,
-    },
-    {
+    }),
+    createMockInMemoryConnector({
       actionTypeId: '.cases',
       config: {},
       id: 'system-connector-.cases',
       name: 'System action: .cases',
       secrets: {},
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: true,
-    },
+    }),
   ],
 };
 actionExecutor.initialize(actionExecutorInitializationParams);
@@ -430,6 +427,10 @@ describe('Action Executor', () => {
 
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
           ...execStartDoc,
+          ...(isSavedObjectExecutionSource(executionSource.source) &&
+          executionSource.source.source.type === 'alert'
+            ? { rule: { id: executionSource.source.source.id } }
+            : {}),
           kibana: {
             ...execStartDoc.kibana,
             action: {
@@ -443,6 +444,10 @@ describe('Action Executor', () => {
         });
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
           ...execDoc,
+          ...(isSavedObjectExecutionSource(executionSource.source) &&
+          executionSource.source.source.type === 'alert'
+            ? { rule: { id: executionSource.source.source.id } }
+            : {}),
           kibana: {
             ...execDoc.kibana,
 

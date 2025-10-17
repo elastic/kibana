@@ -8,13 +8,14 @@
  */
 
 import { EuiButton, EuiCallOut, useEuiTheme, EuiText, EuiSpacer } from '@elastic/eui';
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 
 const feedbackUrls: { [id in SolutionId]: string } = {
   es: 'https://ela.st/search-nav-feedback',
-  chat: 'https://ela.st/search-nav-feedback',
+  workplace_ai: 'https://ela.st/search-nav-feedback',
   oblt: 'https://ela.st/o11y-nav-feedback',
   security: 'https://ela.st/security-nav-feedback',
 };

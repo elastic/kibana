@@ -271,6 +271,7 @@ type DetectionAlertSchema = {
           | 'rule_default'
           | 'endpoint'
           | 'endpoint_trusted_apps'
+          | 'endpoint_trusted_devices'
           | 'endpoint_events'
           | 'endpoint_host_isolation_exceptions'
           | 'endpoint_blocklists';

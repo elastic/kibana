@@ -7,14 +7,14 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import {
+import type {
   ApmSynthtraceEsClient,
   InfraSynthtraceEsClient,
   LogsSynthtraceEsClient,
 } from '@kbn/apm-synthtrace';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import {
   DATES,
   HOSTS_LINK_LOCAL_STORAGE_KEY,
@@ -744,15 +744,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('#Page Content with alerts', () => {
         before(async () => {
           return Promise.all([
-            esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
-            esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+            esArchiver.load(
+              'x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts'
+            ),
+            esArchiver.load(
+              'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+            ),
           ]);
         });
 
         after(async () => {
           return Promise.all([
-            esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
-            esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+            esArchiver.unload(
+              'x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts'
+            ),
+            esArchiver.unload(
+              'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+            ),
           ]);
         });
 

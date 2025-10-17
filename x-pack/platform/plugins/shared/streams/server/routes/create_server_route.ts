@@ -6,11 +6,11 @@
  */
 
 import { createServerRouteFactory } from '@kbn/server-route-repository';
-import { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
+import type { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
 import { badRequest, conflict, forbidden, internal, notFound } from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import { get } from 'lodash';
-import { StreamsRouteHandlerResources } from './types';
+import type { StreamsRouteHandlerResources } from './types';
 import { StatusError } from '../lib/streams/errors/status_error';
 import { AggregateStatusError } from '../lib/streams/errors/aggregate_status_error';
 
@@ -34,11 +34,13 @@ export const createServerRoute: CreateServerRouteFactory<
       });
       return handler(options)
         .catch((error) => {
-          if (
-            error instanceof StatusError ||
-            error instanceof AggregateStatusError ||
-            error instanceof errors.ResponseError
-          ) {
+          const isStreamsStateError =
+            error instanceof StatusError || error instanceof AggregateStatusError;
+          if (isStreamsStateError) {
+            telemetry.reportStreamsStateError(error);
+          }
+
+          if (isStreamsStateError || error instanceof errors.ResponseError) {
             switch (error.statusCode) {
               case 400:
                 throw badRequest(error, 'data' in error ? error.data : undefined);

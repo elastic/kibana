@@ -10,7 +10,7 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal, unmountComponentAtNode } from 'react-dom';
 import { AllCellsRenderer } from './all_cells_renderer';
-import { AllCellsProps } from '../types';
+import type { AllCellsProps } from '../types';
 
 export function AllCellsMatchesCounter(props: AllCellsProps) {
   const containerRef = useRef<DocumentFragment | null>(document.createDocumentFragment());

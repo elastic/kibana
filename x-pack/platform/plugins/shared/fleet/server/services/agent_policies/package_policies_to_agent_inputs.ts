@@ -8,6 +8,7 @@ import { merge } from 'lodash';
 import deepMerge from 'deepmerge';
 
 import type { FullAgentPolicyAddFields, GlobalDataTag } from '../../../common/types';
+import { getAgentlessGlobalDataTags } from '../../../common/services/agentless_policy_helper';
 import { isPackageLimited } from '../../../common/services';
 import type {
   PackagePolicy,
@@ -15,14 +16,36 @@ import type {
   FullAgentPolicyInputStream,
   PackageInfo,
   PackagePolicyInput,
+  NewPackagePolicyInput,
 } from '../../types';
 import { DEFAULT_OUTPUT } from '../../constants';
 import { pkgToPkgKey } from '../epm/registry';
-import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '../../../common/constants/epm';
+import {
+  DATASET_VAR_NAME,
+  DATA_STREAM_TYPE_VAR_NAME,
+  GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
+  OTEL_COLLECTOR_INPUT_TYPE,
+} from '../../../common/constants/epm';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
 };
+
+export function getInputId(
+  input: NewPackagePolicyInput,
+  packagePolicyId?: string,
+  packageInfo?: PackageInfo
+): string {
+  // Marks to skip appending input information to package policy ID to make it unique if package is "limited":
+  // this means that only one policy for the package can exist on the agent policy, so its ID is already unique
+  const appendInputId = packageInfo && isPackageLimited(packageInfo) ? false : true;
+
+  return appendInputId
+    ? `${input.type}${input.policy_template ? `-${input.policy_template}` : ''}${
+        packagePolicyId ? `-${packagePolicyId}` : ''
+      }`
+    : packagePolicyId || 'default';
+}
 
 export const storedPackagePolicyToAgentInputs = (
   packagePolicy: PackagePolicy,
@@ -37,24 +60,14 @@ export const storedPackagePolicyToAgentInputs = (
     return fullInputs;
   }
 
-  // Marks to skip appending input information to package policy ID to make it unique if package is "limited":
-  // this means that only one policy for the package can exist on the agent policy, so its ID is already unique
-  const appendInputId = packageInfo && isPackageLimited(packageInfo) ? false : true;
-
   packagePolicy.inputs.forEach((input) => {
     if (!input.enabled) {
       return;
     }
 
-    const inputId = appendInputId
-      ? `${input.type}${input.policy_template ? `-${input.policy_template}-` : '-'}${
-          packagePolicy.id
-        }`
-      : packagePolicy.id;
-
     const fullInput: FullAgentPolicyInput = {
       // @ts-ignore-next-line the following id is actually one level above the one in fullInputStream, but the linter thinks it gets overwritten
-      id: inputId,
+      id: input.id ?? getInputId(input, packagePolicy.id, packageInfo), // Generate input id if not already set
       revision: packagePolicy.revision,
       name: packagePolicy.name,
       type: input.type,
@@ -83,7 +96,9 @@ export const storedPackagePolicyToAgentInputs = (
       fullInput.meta = {
         package: {
           name: packagePolicy.package.name,
-          version: packagePolicy.package.version,
+          version: packagePolicy.package.version ?? packageInfo?.version,
+          ...(input.policy_template ? { policy_template: input.policy_template } : {}),
+          ...(packageInfo?.release ? { release: packageInfo.release } : {}),
         },
       };
     }
@@ -137,6 +152,18 @@ export const getFullInputStreams = (
                   return acc;
                 }, {} as { [k: string]: any }),
               };
+              if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
+                // otelcol inputs are not going to have the data_stream type and dataset in
+                // the compiled stream, get them directly from the user-defined variables.
+                const dsTypeVar = stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value;
+                const datasetVar = stream.vars?.[DATASET_VAR_NAME]?.value;
+                fullStream.data_stream = {
+                  ...fullStream.data_stream,
+                  ...(dsTypeVar ? { type: dsTypeVar } : {}),
+                  ...(datasetVar ? { dataset: datasetVar } : {}),
+                };
+              }
+
               streamsOriginalIdsMap?.set(fullStream.id, streamId);
 
               return fullStream;
@@ -155,11 +182,6 @@ export const storedPackagePoliciesToAgentInputs = async (
 ): Promise<FullAgentPolicyInput[]> => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
-  const addFields =
-    globalDataTags && globalDataTags.length > 0
-      ? globalDataTagsToAddFields(globalDataTags)
-      : undefined;
-
   for (const packagePolicy of packagePolicies) {
     if (!isPolicyEnabled(packagePolicy)) {
       continue;
@@ -168,6 +190,12 @@ export const storedPackagePoliciesToAgentInputs = async (
     const packageInfo = packagePolicy.package
       ? packageInfoCache.get(pkgToPkgKey(packagePolicy.package))
       : undefined;
+
+    const filteredGlobalDataTags = filterGlobalDataTags(globalDataTags, packageInfo);
+    const addFields =
+      filteredGlobalDataTags && filteredGlobalDataTags.length > 0
+        ? globalDataTagsToAddFields(filteredGlobalDataTags)
+        : undefined;
 
     fullInputs.push(
       ...storedPackagePolicyToAgentInputs(
@@ -196,4 +224,25 @@ const globalDataTagsToAddFields = (tags: GlobalDataTag[]): FullAgentPolicyAddFie
       fields,
     },
   };
+};
+
+const filterGlobalDataTags = (
+  globalDataTags: GlobalDataTag[] | undefined,
+  packageInfo: PackageInfo | undefined
+): GlobalDataTag[] | undefined => {
+  if (!globalDataTags) {
+    return globalDataTags;
+  }
+
+  const agentlessGlobalDataTags = getAgentlessGlobalDataTags(packageInfo);
+
+  if (!agentlessGlobalDataTags) {
+    return globalDataTags;
+  }
+
+  return globalDataTags.filter((globalDataTag) => {
+    return !agentlessGlobalDataTags.some(
+      ({ name, value }) => name === globalDataTag.name && value === globalDataTag.value
+    );
+  });
 };

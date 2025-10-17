@@ -135,16 +135,16 @@ export class RuleRegistryPlugin
           RULE_SEARCH_STRATEGY_NAME,
           ruleRegistrySearchStrategy
         );
+
+        core.http.registerRouteHandlerContext<RacRequestHandlerContext, 'rac'>(
+          'rac',
+          this.createRouteHandlerContext()
+        );
       })
       .catch(() => {});
 
     // ALERTS ROUTES
     const router = core.http.createRouter<RacRequestHandlerContext>();
-    core.http.registerRouteHandlerContext<RacRequestHandlerContext, 'rac'>(
-      'rac',
-      this.createRouteHandlerContext()
-    );
-
     defineRoutes(router);
 
     return {
@@ -165,6 +165,9 @@ export class RuleRegistryPlugin
       // NOTE: Alerts share the authorization client with the alerting plugin
       async getAlertingAuthorization(request: KibanaRequest) {
         return plugins.alerting.getAlertingAuthorizationWithRequest(request);
+      },
+      async getEsClientScoped(request: KibanaRequest) {
+        return core.elasticsearch.client.asScoped(request).asCurrentUser;
       },
       securityPluginSetup: security,
       ruleDataService,

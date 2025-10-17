@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { FromSchema } from 'json-schema-to-ts';
-import { CompatibleJSONSchema } from '../../common/functions/types';
+import type { CompatibleJSONSchema } from '../../common/functions/types';
 import type {
   ScreenContextActionDefinition,
   ScreenContextActionRespondFunction,

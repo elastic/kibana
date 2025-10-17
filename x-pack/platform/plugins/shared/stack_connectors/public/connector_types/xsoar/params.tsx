@@ -6,17 +6,17 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   useSubAction,
   useKibana,
-  ActionParamsProps,
   JsonEditorWithMessageVariables,
   TextFieldWithMessageVariables,
   ActionConnectorMode,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFormRow,
-  EuiComboBoxOptionOption,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,7 +25,7 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 import { SUB_ACTION, XSOARSeverity } from '../../../common/xsoar/constants';
-import {
+import type {
   ExecutorParams,
   XSOARRunActionParams,
   XSOARPlaybooksActionResponse,

@@ -6,7 +6,7 @@
  */
 
 import { deserializeTemplate, serializeTemplate } from './template_serialization';
-import { TemplateDeserialized, TemplateSerialized, IndexMode } from '../types';
+import type { TemplateDeserialized, TemplateSerialized, IndexMode } from '../types';
 import { STANDARD_INDEX_MODE, LOGSDB_INDEX_MODE, TIME_SERIES_MODE } from '../constants';
 
 const defaultSerializedTemplate: TemplateSerialized = {

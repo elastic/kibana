@@ -584,15 +584,15 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-common",
-            "id": "def-common.UiSettingsParams.solution",
-            "type": "CompoundType",
+            "id": "def-common.UiSettingsParams.solutionViews",
+            "type": "Array",
             "tags": [],
-            "label": "solution",
+            "label": "solutionViews",
             "description": [
-              "The solution where this setting is applicable.\nThis field is used to determine whether the setting should be displayed in the Advanced settings app.\nIf undefined, the setting must be displayed in all solutions."
+              "A list of solutions where this setting is applicable.\nThis field is used to determine whether the setting should be displayed in the stateful Advanced settings app.\nIf undefined or an empty list, the setting must be displayed in all solutions.\nNote: this does not affect serverless settings, since spaces in serverless don't have solution views."
             ],
             "signature": [
-              "UiSettingsSolution",
+              "UiSettingsSolutions",
               " | undefined"
             ],
             "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
@@ -813,13 +813,13 @@
       },
       {
         "parentPluginId": "@kbn/core-ui-settings-common",
-        "id": "def-common.UiSettingsSolution",
+        "id": "def-common.UiSettingsSolutions",
         "type": "Type",
         "tags": [],
-        "label": "UiSettingsSolution",
+        "label": "UiSettingsSolutions",
         "description": [],
         "signature": [
-          "\"security\" | \"oblt\" | \"es\""
+          "(\"security\" | \"chat\" | \"oblt\" | \"es\" | \"classic\")[]"
         ],
         "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
         "deprecated": false,

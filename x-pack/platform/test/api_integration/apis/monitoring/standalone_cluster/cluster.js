@@ -16,7 +16,7 @@ export default function ({ getService }) {
     // Archive contains non-cgroup data which collides with the in-cgroup services present by default on cloud deployments
     this.tags(['skipCloud']);
 
-    const archive = 'x-pack/test/functional/es_archives/monitoring/standalone_cluster';
+    const archive = 'x-pack/platform/test/fixtures/es_archives/monitoring/standalone_cluster';
     const timeRange = {
       min: '2019-02-04T16:52:11.741Z',
       max: '2019-02-04T17:52:11.741Z',

@@ -80,6 +80,7 @@ export const KpiCharts = () => {
       lastReloadRequestTime={afterLoadedState.reloadRequestTime}
       getSubtitle={afterLoadedState.getSubtitle}
       loading={loading}
+      schema={searchCriteria.preferredSchema}
     />
   );
 };

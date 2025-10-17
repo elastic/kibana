@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 
 export function transformReferencesOut(references: SavedObjectReference[]): SavedObjectReference[] {
   return references.map((ref) => {

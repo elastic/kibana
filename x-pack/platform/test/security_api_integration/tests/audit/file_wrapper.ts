@@ -35,14 +35,18 @@ export class FileWrapper {
     });
   }
   // writing in a file is an async operation. we use this method to make sure logs have been written.
-  async isWritten() {
+  async isWritten(timeoutMs?: number) {
     // attempt at determinism - wait for the size of the file to stop changing.
-    await this.retry.waitForWithTimeout(`file '${this.path}' to be written`, 5000, async () => {
-      const sizeBefore = Fs.statSync(this.path).size;
-      await this.delay(500);
-      const sizeAfter = Fs.statSync(this.path).size;
-      return sizeAfter === sizeBefore;
-    });
+    await this.retry.waitForWithTimeout(
+      `file '${this.path}' to be written`,
+      timeoutMs ?? 5000,
+      async () => {
+        const sizeBefore = Fs.statSync(this.path).size;
+        await this.delay(200);
+        const sizeAfter = Fs.statSync(this.path).size;
+        return sizeAfter === sizeBefore;
+      }
+    );
 
     return Fs.statSync(this.path).size > 0;
   }

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchErrorDetails, isResponseError } from '@kbn/es-errors';
+import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
+import { isResponseError } from '@kbn/es-errors';
 import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../common/types/error_codes';
@@ -88,6 +89,7 @@ export function getErrorMessage(payload?: unknown): string {
   }
   try {
     return JSON.stringify(payload);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     // If all else fails, we return a generic error
     return i18n.translate('xpack.enterpriseSearch.server.errorIdentifyingException', {

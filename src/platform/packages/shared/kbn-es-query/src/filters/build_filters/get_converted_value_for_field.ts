@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewFieldBase } from '../../es_query';
+import type { DataViewFieldBase } from '../../es_query';
 
 /**
  * @internal

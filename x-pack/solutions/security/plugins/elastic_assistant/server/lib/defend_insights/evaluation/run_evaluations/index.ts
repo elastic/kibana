@@ -5,16 +5,17 @@
  * 2.0.
  */
 
+import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { Logger } from '@kbn/logging';
-import { asyncForEach } from '@kbn/std';
-import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
+import type { Logger } from '@kbn/logging';
+import type { DefendInsightType } from '@kbn/elastic-assistant-common';
 import { Client } from 'langsmith';
 import { evaluate } from 'langsmith/evaluation';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { getDefendInsightsCustomEvaluator } from '../helpers/get_custom_evaluator';
+import { asyncForEach } from '@kbn/std';
+
+import type { DefaultDefendInsightsGraph } from '../../graphs/default_defend_insights_graph';
 import { getDefendInsightsGraphInputOverrides } from '../helpers/get_graph_input_overrides';
-import { DefaultDefendInsightsGraph } from '../../graphs/default_defend_insights_graph';
+import { getDefendInsightsCustomEvaluator } from '../helpers/get_custom_evaluator';
 
 /**
  * Runs an evaluation for each graph so they show up separately (resulting in

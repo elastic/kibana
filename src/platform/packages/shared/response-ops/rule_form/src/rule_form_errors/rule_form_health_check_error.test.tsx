@@ -11,7 +11,8 @@ import React from 'react';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { render, screen } from '@testing-library/react';
 import { RuleFormHealthCheckError } from './rule_form_health_check_error';
-import { HealthCheckErrors, healthCheckErrors } from '@kbn/alerts-ui-shared/src/common/apis';
+import type { HealthCheckErrors } from '@kbn/alerts-ui-shared/src/common/apis';
+import { healthCheckErrors } from '@kbn/alerts-ui-shared/src/common/apis';
 import {
   HEALTH_CHECK_ALERTS_ERROR_TEXT,
   HEALTH_CHECK_ENCRYPTION_ERROR_TEXT,

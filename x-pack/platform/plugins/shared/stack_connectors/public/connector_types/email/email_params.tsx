@@ -14,7 +14,7 @@ import {
   TextFieldWithMessageVariables,
   TextAreaWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EmailActionParams } from '../types';
+import type { EmailActionParams } from '../types';
 
 const noop = () => {};
 

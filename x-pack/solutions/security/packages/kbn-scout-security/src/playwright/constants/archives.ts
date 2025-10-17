@@ -6,5 +6,6 @@
  */
 
 export const ES = {
-  AUDITBEAT: 'x-pack/test/security_solution_cypress/es_archives/auditbeat_single',
+  AUDITBEAT:
+    'x-pack/solutions/security/test/security_solution_cypress/es_archives/auditbeat_single',
 };

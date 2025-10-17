@@ -6,9 +6,14 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
-import { useLoadConnectors, Props } from '.';
+import type { Props } from '.';
+import { useLoadConnectors } from '.';
 import { mockConnectors } from '../../mock/connectors';
 import { TestProviders } from '../../mock/test_providers/test_providers';
+import {
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+} from '@kbn/management-settings-ids';
 
 const mockConnectorsAndExtras = [
   ...mockConnectors,
@@ -52,7 +57,19 @@ const http = {
 const toasts = {
   addError: jest.fn(),
 };
-const defaultProps = { http, toasts } as unknown as Props;
+const settings = {
+  client: {
+    get: jest.fn().mockImplementation((settingKey) => {
+      if (settingKey === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) {
+        return undefined;
+      }
+      if (settingKey === GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY) {
+        return false;
+      }
+    }),
+  },
+};
+const defaultProps = { http, toasts, settings } as unknown as Props;
 
 describe('useLoadConnectors', () => {
   beforeEach(() => {

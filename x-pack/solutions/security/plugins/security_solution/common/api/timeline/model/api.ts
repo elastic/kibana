@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { DataProviderType } from './components.gen';
 import {
   BareNote,
   BarePinnedEvent,
   ColumnHeaderResult,
+  type DataProviderType,
   DataProviderTypeEnum,
   DataProviderResult,
   FavoriteTimelineResponse,

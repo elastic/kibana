@@ -59,6 +59,8 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   className: `unifiedDataTable ${className}`,
   role: 'rowgroup',
 }))`
+  height: 100%;
+
   .udtTimeline .euiDataGrid__virtualized {
     ${({ theme }) =>
       `scrollbar-color: ${theme.eui.euiColorMediumShade} ${theme.eui.euiColorLightShade}`};

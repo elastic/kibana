@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { LogEntryCategoriesPageProvider } from './log_entry_categories';
 import { LogEntryRatePageProvider } from './log_entry_rate';
 

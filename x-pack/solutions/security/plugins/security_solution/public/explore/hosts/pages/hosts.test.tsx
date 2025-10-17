@@ -17,6 +17,8 @@ import { useSourcererDataView } from '../../../sourcerer/containers';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { HostsTabs } from './hosts_tabs';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -92,6 +94,7 @@ describe('Hosts - rendering', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
   test('it renders the Setup Instructions text when no index is available', async () => {
     mockUseSourcererDataView.mockReturnValue({
       indicesExist: false,
@@ -109,6 +112,8 @@ describe('Hosts - rendering', () => {
   });
 
   test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
+    jest.mocked(useDataView).mockReturnValue(withIndices(['test']));
+
     mockUseSourcererDataView.mockReturnValue({
       indicesExist: true,
       indexPattern: {},

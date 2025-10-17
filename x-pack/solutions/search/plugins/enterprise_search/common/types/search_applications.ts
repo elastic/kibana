@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
+import type { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 
 export interface EnterpriseSearchApplicationsResponse {
   count: number;

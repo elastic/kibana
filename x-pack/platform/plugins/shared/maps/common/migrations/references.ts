@@ -8,9 +8,9 @@
 // Can not use public Layer classes to extract references since this logic must run in both client and server.
 
 import type { DataViewSpec } from '@kbn/data-plugin/common';
-import { SavedObjectReference } from '@kbn/core/types';
-import type { MapAttributes } from '../content_management';
-import { LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
+import type { SavedObjectReference } from '@kbn/core/types';
+import type { StoredMapAttributes } from '../../server';
+import type { LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
 
 interface IndexPatternReferenceDescriptor {
   indexPatternId?: string;
@@ -21,7 +21,7 @@ export function extractReferences({
   attributes,
   references = [],
 }: {
-  attributes: MapAttributes;
+  attributes: StoredMapAttributes;
   references?: SavedObjectReference[];
 }) {
   if (!attributes.layerListJSON) {
@@ -120,7 +120,7 @@ export function injectReferences({
   attributes,
   references,
 }: {
-  attributes: MapAttributes;
+  attributes: StoredMapAttributes;
   references: SavedObjectReference[];
 }) {
   if (!attributes.layerListJSON) {

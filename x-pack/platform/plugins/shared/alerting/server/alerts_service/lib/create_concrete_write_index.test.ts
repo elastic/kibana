@@ -7,7 +7,10 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
-import { createConcreteWriteIndex, setConcreteWriteIndex } from './create_concrete_write_index';
+import {
+  createConcreteWriteIndex,
+  findOrSetConcreteWriteIndex,
+} from './create_concrete_write_index';
 import { getDataStreamAdapter } from './data_stream_adapter';
 
 const randomDelayMultiplier = 0.01;
@@ -28,19 +31,16 @@ interface EsError extends Error {
 const GetAliasResponse = {
   '.internal.alerts-test.alerts-default-000001': {
     aliases: {
-      alias_1: {
-        is_hidden: true,
-      },
-      alias_2: {
+      '.alerts-test.alerts-default': {
         is_hidden: true,
       },
     },
   },
 };
 
-const GetDataStreamResponse = {
-  data_streams: ['any-content-here-means-already-exists'],
-} as unknown as IndicesGetDataStreamResponse;
+const GetDataStreamResponse: IndicesGetDataStreamResponse = {
+  data_streams: [{ indices: [{ index_name: '.alerts-test-index', index_uuid: 'test-uuid' }] }],
+} as IndicesGetDataStreamResponse;
 
 const SimulateTemplateResponse = {
   template: {
@@ -368,19 +368,8 @@ describe('createConcreteWriteIndex', () => {
           dataStreamAdapter,
         });
 
-        if (!useDataStream) {
-          expect(clusterClient.indices.create).toHaveBeenCalledWith({
-            index: '.internal.alerts-test.alerts-default-000001',
-            aliases: {
-              '.alerts-test.alerts-default': {
-                is_write_index: true,
-              },
-            },
-          });
-        }
-
-        expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(useDataStream ? 1 : 2);
-        expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(useDataStream ? 1 : 2);
+        expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
+        expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
       });
 
       it(`should skip updating underlying settings and mappings of existing concrete indices if they follow an unexpected naming convention`, async () => {
@@ -440,9 +429,7 @@ describe('createConcreteWriteIndex', () => {
           dataStreamAdapter,
         });
 
-        expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(
-          useDataStream ? 3 : 4
-        );
+        expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(3);
       });
 
       it(`should retry getting alias on transient ES errors`, async () => {
@@ -492,7 +479,7 @@ describe('createConcreteWriteIndex', () => {
           dataStreamAdapter,
         });
 
-        expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(useDataStream ? 3 : 4);
+        expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(3);
       });
 
       it(`should log and throw error on settings update if max retries exceeded`, async () => {
@@ -502,7 +489,7 @@ describe('createConcreteWriteIndex', () => {
           async () => SimulateTemplateResponse
         );
         clusterClient.indices.putSettings.mockRejectedValue(new EsErrors.ConnectionError('foo'));
-        await expect(() =>
+        await expect(
           createConcreteWriteIndex({
             logger,
             esClient: clusterClient,
@@ -510,12 +497,10 @@ describe('createConcreteWriteIndex', () => {
             totalFieldsLimit: 2500,
             dataStreamAdapter,
           })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(`"foo"`);
-        expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(useDataStream ? 4 : 7);
+        ).resolves.toBe(undefined);
+        expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(useDataStream ? 8 : 4);
         expect(logger.error).toHaveBeenCalledWith(
-          useDataStream
-            ? `Failed to PUT index.mapping.total_fields.limit settings for .alerts-test.alerts-default: foo`
-            : `Failed to PUT index.mapping.total_fields.limit settings for alias_1: foo`
+          `Failed to PUT index.mapping.total_fields.limit settings for .alerts-test.alerts-default: foo`
         );
       });
 
@@ -527,7 +512,7 @@ describe('createConcreteWriteIndex', () => {
         );
         clusterClient.indices.putSettings.mockRejectedValue(new Error('generic error'));
 
-        await expect(() =>
+        await expect(
           createConcreteWriteIndex({
             logger,
             esClient: clusterClient,
@@ -535,12 +520,10 @@ describe('createConcreteWriteIndex', () => {
             totalFieldsLimit: 2500,
             dataStreamAdapter,
           })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(`"generic error"`);
+        ).resolves.toBe(undefined);
 
         expect(logger.error).toHaveBeenCalledWith(
-          useDataStream
-            ? `Failed to PUT index.mapping.total_fields.limit settings for .alerts-test.alerts-default: generic error`
-            : `Failed to PUT index.mapping.total_fields.limit settings for alias_1: generic error`
+          `Failed to PUT index.mapping.total_fields.limit settings for .alerts-test.alerts-default: generic error`
         );
       });
 
@@ -563,7 +546,7 @@ describe('createConcreteWriteIndex', () => {
           dataStreamAdapter,
         });
 
-        expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(useDataStream ? 3 : 4);
+        expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(3);
       });
 
       it(`should log and throw error on mappings update if max retries exceeded`, async () => {
@@ -573,7 +556,7 @@ describe('createConcreteWriteIndex', () => {
           async () => SimulateTemplateResponse
         );
         clusterClient.indices.putMapping.mockRejectedValue(new EsErrors.ConnectionError('foo'));
-        await expect(() =>
+        await expect(
           createConcreteWriteIndex({
             logger,
             esClient: clusterClient,
@@ -581,12 +564,10 @@ describe('createConcreteWriteIndex', () => {
             totalFieldsLimit: 2500,
             dataStreamAdapter,
           })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(`"foo"`);
-        expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(useDataStream ? 4 : 7);
+        ).resolves.toBe(undefined);
+        expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(useDataStream ? 8 : 4);
         expect(logger.error).toHaveBeenCalledWith(
-          useDataStream
-            ? `Failed to PUT mapping for .alerts-test.alerts-default: foo`
-            : `Failed to PUT mapping for alias_1: foo`
+          `Failed to PUT mapping for .alerts-test.alerts-default: foo`
         );
       });
 
@@ -598,7 +579,7 @@ describe('createConcreteWriteIndex', () => {
         );
         clusterClient.indices.putMapping.mockRejectedValue(new Error('generic error'));
 
-        await expect(() =>
+        await expect(
           createConcreteWriteIndex({
             logger,
             esClient: clusterClient,
@@ -606,12 +587,10 @@ describe('createConcreteWriteIndex', () => {
             totalFieldsLimit: 2500,
             dataStreamAdapter,
           })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(`"generic error"`);
+        ).resolves.toBe(undefined);
 
         expect(logger.error).toHaveBeenCalledWith(
-          useDataStream
-            ? `Failed to PUT mapping for .alerts-test.alerts-default: generic error`
-            : `Failed to PUT mapping for alias_1: generic error`
+          `Failed to PUT mapping for .alerts-test.alerts-default: generic error`
         );
       });
 
@@ -742,7 +721,6 @@ describe('createConcreteWriteIndex', () => {
           );
         } else {
           clusterClient.indices.putMapping
-            .mockResolvedValueOnce({ acknowledged: true })
             .mockRejectedValueOnce(new Error('Limit of total fields [2500] has been exceeded'))
             .mockRejectedValueOnce(new Error('Limit of total fields [2501] has been exceeded'))
             .mockRejectedValueOnce(new Error('Limit of total fields [2503] has been exceeded'))
@@ -756,9 +734,9 @@ describe('createConcreteWriteIndex', () => {
             dataStreamAdapter,
           });
 
-          expect(clusterClient.indices.putSettings).toBeCalledTimes(5);
+          expect(clusterClient.indices.putSettings).toBeCalledTimes(4);
           expect(clusterClient.indices.putIndexTemplate).toBeCalledTimes(3);
-          expect(logger.info).toBeCalledTimes(4);
+          expect(logger.info).toBeCalledTimes(5);
 
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(1, {
             composed_of: ['test-mappings'],
@@ -781,28 +759,28 @@ describe('createConcreteWriteIndex', () => {
             name: 'test-template',
           });
 
-          expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(2, {
+          expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(1, {
             index: '.internal.alerts-test.alerts-default-000001',
             settings: {
               'index.mapping.total_fields.limit': 2500,
               'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
             },
           });
-          expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(3, {
+          expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(2, {
             index: '.internal.alerts-test.alerts-default-000001',
             settings: {
               'index.mapping.total_fields.limit': 2501,
               'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
             },
           });
-          expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(4, {
+          expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(3, {
             index: '.internal.alerts-test.alerts-default-000001',
             settings: {
               'index.mapping.total_fields.limit': 2503,
               'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
             },
           });
-          expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(5, {
+          expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(4, {
             index: '.internal.alerts-test.alerts-default-000001',
             settings: {
               'index.mapping.total_fields.limit': 2506,
@@ -812,16 +790,16 @@ describe('createConcreteWriteIndex', () => {
 
           // The first call to logger.info is in createAliasStream, therefore we start testing from 2nd
           expect(logger.info).toHaveBeenNthCalledWith(
-            2,
-            'total_fields.limit of alias_2 has been increased from 2500 to 2501'
-          );
-          expect(logger.info).toHaveBeenNthCalledWith(
             3,
-            'total_fields.limit of alias_2 has been increased from 2501 to 2503'
+            'total_fields.limit of .alerts-test.alerts-default has been increased from 2500 to 2501'
           );
           expect(logger.info).toHaveBeenNthCalledWith(
             4,
-            'total_fields.limit of alias_2 has been increased from 2503 to 2506'
+            'total_fields.limit of .alerts-test.alerts-default has been increased from 2501 to 2503'
+          );
+          expect(logger.info).toHaveBeenNthCalledWith(
+            5,
+            'total_fields.limit of .alerts-test.alerts-default has been increased from 2503 to 2506'
           );
         }
       });
@@ -871,11 +849,9 @@ describe('createConcreteWriteIndex', () => {
               totalFieldsLimit: 2500,
               dataStreamAdapter,
             })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(
-            '"Limit of total fields [2501] has been exceeded"'
-          );
+          ).resolves.toBe(undefined);
 
-          expect(logger.info).toHaveBeenCalledTimes(100);
+          expect(logger.info).toHaveBeenCalledTimes(200);
         }
       });
 
@@ -902,12 +878,10 @@ describe('createConcreteWriteIndex', () => {
               totalFieldsLimit: 2500,
               dataStreamAdapter,
             })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(
-            '"Limit of total fields [2500] has been exceeded"'
-          );
+          ).resolves.toBe(undefined);
 
           expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
-          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
           expect(logger.info).not.toHaveBeenCalled();
         }
       });
@@ -962,9 +936,7 @@ describe('createConcreteWriteIndex', () => {
               totalFieldsLimit: 2500,
               dataStreamAdapter,
             })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Limit of total fields [2500] has been exceeded"`
-          );
+          ).resolves.toBe(undefined);
 
           expect(logger.info).not.toHaveBeenCalled();
           expect(logger.error).toHaveBeenCalledWith(
@@ -984,12 +956,10 @@ describe('createConcreteWriteIndex', () => {
               totalFieldsLimit: 2500,
               dataStreamAdapter,
             })
-          ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Limit of total fields [2500] has been exceeded"`
-          );
+          ).resolves.toBe(undefined);
 
           expect(logger.error).toHaveBeenCalledWith(
-            'An error occured while increasing total_fields.limit of alias_1 - generic error',
+            'An error occured while increasing total_fields.limit of .alerts-test.alerts-default - generic error',
             error
           );
         }
@@ -1011,20 +981,13 @@ describe('createConcreteWriteIndex', () => {
         expect(logger.error).toHaveBeenCalledWith(
           useDataStream
             ? `Ignored PUT mappings for .alerts-test.alerts-default; error generating simulated mappings: fail`
-            : `Ignored PUT mappings for alias_1; error generating simulated mappings: fail`
+            : `Ignored PUT mappings for .internal.alerts-test.alerts-default-000001; error generating simulated mappings: fail`
         );
 
         if (useDataStream) {
           expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
         } else {
-          expect(clusterClient.indices.create).toHaveBeenCalledWith({
-            index: '.internal.alerts-test.alerts-default-000001',
-            aliases: {
-              '.alerts-test.alerts-default': {
-                is_write_index: true,
-              },
-            },
-          });
+          expect(clusterClient.indices.create).not.toHaveBeenCalled();
         }
       });
 
@@ -1048,20 +1011,13 @@ describe('createConcreteWriteIndex', () => {
         expect(logger.error).toHaveBeenCalledWith(
           useDataStream
             ? `Ignored PUT mappings for .alerts-test.alerts-default; simulated mappings were empty`
-            : `Ignored PUT mappings for alias_1; simulated mappings were empty`
+            : `Ignored PUT mappings for .internal.alerts-test.alerts-default-000001; simulated mappings were empty`
         );
 
         if (useDataStream) {
           expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
         } else {
-          expect(clusterClient.indices.create).toHaveBeenCalledWith({
-            index: '.internal.alerts-test.alerts-default-000001',
-            aliases: {
-              '.alerts-test.alerts-default': {
-                is_write_index: true,
-              },
-            },
-          });
+          expect(clusterClient.indices.create).not.toHaveBeenCalled();
         }
       });
 
@@ -1072,10 +1028,6 @@ describe('createConcreteWriteIndex', () => {
           '.internal.alerts-test.alerts-default-0001': {
             aliases: {
               '.alerts-test.alerts-default': {
-                is_write_index: false,
-                is_hidden: true,
-              },
-              alias_2: {
                 is_write_index: false,
                 is_hidden: true,
               },
@@ -1095,9 +1047,82 @@ describe('createConcreteWriteIndex', () => {
         });
 
         expect(logger.debug).toHaveBeenCalledWith(
-          'Indices matching pattern .internal.alerts-test.alerts-default-* exist but none are set as the write index for alias .alerts-test.alerts-default'
+          'Indices for alias .alerts-test.alerts-default exist but none are set as the write index'
         );
         expect(clusterClient.indices.updateAliases).toHaveBeenCalled();
+      });
+
+      it('should roll over if updating write index mapping fails', async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.putSettings.mockResolvedValue({
+          acknowledged: true,
+        });
+        clusterClient.indices.putMapping.mockRejectedValue(new Error('generic error'));
+
+        await expect(
+          createConcreteWriteIndex({
+            logger,
+            esClient: clusterClient,
+            indexPatterns: IndexPatterns,
+            totalFieldsLimit: 2500,
+            dataStreamAdapter,
+          })
+        ).resolves.toBe(undefined);
+
+        if (useDataStream) {
+          expect(logger.error).toHaveBeenCalledWith(
+            'Failed to update mappings for data stream: .alerts-test.alerts-default, updating write index (.alerts-test-index) mappings instead'
+          );
+          expect(logger.error).toHaveBeenCalledWith(
+            'Failed to update mappings for write index of data stream: .alerts-test.alerts-default, rolling over instead'
+          );
+        } else {
+          expect(logger.error).toHaveBeenCalledWith(
+            'Failed to update mappings for write index of alias: .alerts-test.alerts-default, rolling over instead'
+          );
+        }
+        expect(clusterClient.indices.rollover).toBeCalledTimes(1);
+      });
+
+      it('should throw if rolling over fails', async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.putSettings.mockResolvedValue({
+          acknowledged: true,
+        });
+        clusterClient.indices.putMapping.mockRejectedValue(new Error('generic error'));
+        clusterClient.indices.rollover.mockRejectedValue(new Error('generic rollover error'));
+
+        await expect(
+          createConcreteWriteIndex({
+            logger,
+            esClient: clusterClient,
+            indexPatterns: IndexPatterns,
+            totalFieldsLimit: 2500,
+            dataStreamAdapter,
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`"generic rollover error"`);
+
+        if (useDataStream) {
+          expect(logger.error).toHaveBeenCalledWith(
+            'Failed to update mappings for data stream: .alerts-test.alerts-default, updating write index (.alerts-test-index) mappings instead'
+          );
+          expect(logger.error).toHaveBeenCalledWith(
+            'Failed to update mappings for write index of data stream: .alerts-test.alerts-default, rolling over instead'
+          );
+        } else {
+          expect(logger.error).toHaveBeenCalledWith(
+            'Failed to update mappings for write index of alias: .alerts-test.alerts-default, rolling over instead'
+          );
+        }
+        expect(clusterClient.indices.rollover).toBeCalledTimes(1);
       });
     });
   }
@@ -1109,7 +1134,7 @@ describe('setConcreteWriteIndex', () => {
   });
 
   it(`should call updateAliases to set the concrete write index`, async () => {
-    await setConcreteWriteIndex({
+    await findOrSetConcreteWriteIndex({
       logger,
       esClient: clusterClient,
       concreteIndices: [
@@ -1134,6 +1159,7 @@ describe('setConcreteWriteIndex', () => {
           isWriteIndex: false,
         },
       ],
+      alias: '.alerts-test.alerts-default',
     });
 
     expect(logger.debug).toHaveBeenCalledWith(
@@ -1166,7 +1192,7 @@ describe('setConcreteWriteIndex', () => {
     clusterClient.indices.updateAliases.mockRejectedValueOnce(error);
 
     await expect(() =>
-      setConcreteWriteIndex({
+      findOrSetConcreteWriteIndex({
         logger,
         esClient: clusterClient,
         concreteIndices: [
@@ -1176,6 +1202,7 @@ describe('setConcreteWriteIndex', () => {
             isWriteIndex: false,
           },
         ],
+        alias: '.alerts-test.alerts-default',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to set index: .internal.alerts-test.alerts-default-000001 as the write index for alias: .alerts-test.alerts-default."`

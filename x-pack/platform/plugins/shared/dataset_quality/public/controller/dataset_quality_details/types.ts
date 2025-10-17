@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import {
+import type { Observable } from 'rxjs';
+import type {
   DatasetQualityDetailsControllerStateService,
   QualityIssuesTableConfig,
   WithDefaultControllerState,
@@ -22,6 +22,15 @@ export type DatasetQualityIssuesTableOptions = Partial<
   }
 >;
 
+export type StreamViewType = 'classic' | 'wired';
+/**
+ * The different views that the Dataset Quality Details can be in.
+ * - `classic` view is for classic streams' data quality
+ * - `wired` view is for wired streams' data quality
+ * - `dataQuality` view is for Data Quality app
+ */
+export type DatasetQualityView = StreamViewType | 'dataQuality';
+
 export type DatasetQualityDetailsPublicState = WithDefaultControllerState;
 
 // This type is used by external consumers where it enforces datastream to be
@@ -33,6 +42,8 @@ export type DatasetQualityDetailsPublicStateUpdate = Partial<
     | 'timeRange'
     | 'breakdownField'
     | 'showCurrentQualityIssues'
+    | 'selectedIssueTypes'
+    | 'selectedFields'
     | 'expandedQualityIssue'
     | 'qualityIssuesChart'
   >
@@ -42,6 +53,8 @@ export type DatasetQualityDetailsPublicStateUpdate = Partial<
   qualityIssues?: {
     table?: DatasetQualityIssuesTableOptions;
   };
+} & {
+  view?: DatasetQualityView;
 };
 
 export interface DatasetQualityDetailsController {

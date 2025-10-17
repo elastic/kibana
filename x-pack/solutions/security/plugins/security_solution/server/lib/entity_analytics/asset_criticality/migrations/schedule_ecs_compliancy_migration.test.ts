@@ -40,8 +40,8 @@ const getStartServices = jest.fn().mockResolvedValue([
 ]);
 const mockAbortController = {
   abort: jest.fn(),
-  signal: {},
-};
+  signal: new AbortController().signal,
+} satisfies AbortController;
 
 global.AbortController = jest.fn().mockImplementation(() => mockAbortController);
 
@@ -133,7 +133,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
         getStartServices,
         logger,
         auditLogger,
-      })();
+      })({ abortController: mockAbortController });
 
       await migrationTask.run();
 
@@ -153,7 +153,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
         getStartServices,
         logger,
         auditLogger,
-      })();
+      })({ abortController: mockAbortController });
 
       await migrationTask.run();
 
@@ -168,7 +168,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
         getStartServices,
         logger,
         auditLogger,
-      })();
+      })({ abortController: mockAbortController });
 
       await migrationTask.run();
       await migrationTask.cancel();

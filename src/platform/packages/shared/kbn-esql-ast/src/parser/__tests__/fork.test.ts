@@ -9,7 +9,7 @@
 
 import { parse } from '..';
 import { EsqlQuery } from '../../query';
-import { ESQLAstQueryExpression } from '../../types';
+import type { ESQLAstQueryExpression } from '../../types';
 import { Walker } from '../../walker';
 
 describe('FORK', () => {

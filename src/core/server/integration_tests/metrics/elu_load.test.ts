@@ -11,7 +11,7 @@ import supertest from 'supertest';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
-import { Server } from '@hapi/hapi';
+import type { Server } from '@hapi/hapi';
 import { MetricsService } from '@kbn/core-metrics-server-internal';
 import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/repo-info';

@@ -8,8 +8,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CoreStart } from '@kbn/core/public';
-import { ServiceLocationErrors, ServiceLocations } from '../../../../../../common/runtime_types';
+import type { CoreStart } from '@kbn/core/public';
+import type {
+  ServiceLocationErrors,
+  ServiceLocations,
+} from '../../../../../../common/runtime_types';
 
 export const showSyncErrors = (
   errors: ServiceLocationErrors,

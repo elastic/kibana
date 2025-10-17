@@ -17,8 +17,9 @@ import { PipelineTreeNodeLabel, MorePipelinesLabel } from '../tree_node_labels';
  */
 export const createTreeNodesFromPipelines = (
   treeNode: PipelineTreeNode,
-  selectedPipeline: string,
-  setSelectedPipeline: (pipelineName: string) => void,
+  selectedPipeline: string | undefined,
+  clickTreeNode: (pipelineName: string) => void,
+  clickMorePipelines: (name: string) => void,
   level: number = 1
 ): Node => {
   const currentNode = {
@@ -28,34 +29,39 @@ export const createTreeNodesFromPipelines = (
         pipelineName={treeNode.pipelineName}
         isManaged={treeNode.isManaged}
         isDeprecated={treeNode.isDeprecated}
-        setSelected={() => setSelectedPipeline(treeNode.pipelineName)}
       />
     ),
+    'data-test-subj': `pipelineTreeNode-${treeNode.pipelineName}-moreChildrenPipelines`,
     className:
       (level === 1 ? 'cssTreeNode-root' : 'cssTreeNode-children') +
       (treeNode.pipelineName === selectedPipeline ? '--active' : ''),
-    children: treeNode.children.length ? ([] as Node[]) : undefined,
+    children: treeNode.children.length ? [] : undefined,
     isExpanded: level === 1,
-    // Disable EUI's logic for activating tree node when expanding/collapsing them
-    // We should only activate a tree node when we click on the pipeline name
-    isActive: false,
-  };
+    callback: () => clickTreeNode(treeNode.pipelineName),
+  } as unknown as Node;
 
   if (level === MAX_TREE_LEVEL) {
-    if (treeNode.children) {
+    if (treeNode.children.length > 0) {
       const morePipelinesNode = {
         id: `${treeNode.pipelineName}-moreChildrenPipelines`,
         label: <MorePipelinesLabel count={treeNode.children.length} />,
         'data-test-subj': `pipelineTreeNode-${treeNode.pipelineName}-moreChildrenPipelines`,
         className: 'cssTreeNode-morePipelines',
-      };
+        callback: () => clickMorePipelines(treeNode.pipelineName),
+      } as unknown as Node;
       currentNode.children!.push(morePipelinesNode);
     }
     return currentNode;
   }
   treeNode.children.forEach((node) => {
     currentNode.children!.push(
-      createTreeNodesFromPipelines(node, selectedPipeline, setSelectedPipeline, level + 1)
+      createTreeNodesFromPipelines(
+        node,
+        selectedPipeline,
+        clickTreeNode,
+        clickMorePipelines,
+        level + 1
+      )
     );
   });
   return currentNode;

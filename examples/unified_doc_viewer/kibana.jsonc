@@ -3,6 +3,8 @@
   "id": "@kbn/unified-doc-viewer-examples",
   "owner": "@elastic/kibana-core",
   "description": "Examples showing usage of the unified doc viewer.",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "unifiedDocViewerExamples",
     "server": false,

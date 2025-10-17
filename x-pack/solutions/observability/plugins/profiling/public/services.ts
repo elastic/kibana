@@ -132,7 +132,7 @@ export function getServices(): Services {
       return hasSetup;
     },
     postSetupResources: async ({ http }) => {
-      await http.post(paths.HasSetupESResources, {});
+      await http.post(paths.HasSetupESResources, { body: JSON.stringify({}) });
     },
     setupDataCollectionInstructions: async ({ http }) => {
       const instructions = (await http.get(

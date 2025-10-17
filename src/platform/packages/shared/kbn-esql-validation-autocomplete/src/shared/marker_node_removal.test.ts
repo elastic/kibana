@@ -9,7 +9,8 @@
 
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
 import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
-import { ESQLAstItem, Parser, Walker } from '@kbn/esql-ast';
+import type { ESQLAstItem } from '@kbn/esql-ast';
+import { Parser, Walker } from '@kbn/esql-ast';
 import { getAstContext, isMarkerNode } from './context';
 
 const assertMarkerRemoved = (_query: string) => {
@@ -82,4 +83,6 @@ describe('it should remove marker nodes from the AST', () => {
     // SORT command with comma
     assertMarkerRemoved(`FROM employees | SORT age, `);
   });
+
+  it.todo('removes marker from right-side of assignment'); // e.g. assertMarkerRemoved(`FROM employees | EVAL total = `);
 });

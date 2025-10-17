@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  apiHasParentApi,
-  apiHasUniqueId,
-  PublishingSubject,
-  SerializedPanelState,
-} from '@kbn/presentation-publishing';
-import { BehaviorSubject, combineLatest, isObservable, map, Observable, of, switchMap } from 'rxjs';
-import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
+import type { PublishingSubject, SerializedPanelState } from '@kbn/presentation-publishing';
+import { apiHasParentApi, apiHasUniqueId } from '@kbn/presentation-publishing';
+import type { BehaviorSubject, Observable } from 'rxjs';
+import { combineLatest, isObservable, map, of, switchMap } from 'rxjs';
+import type { CanAddNewPanel } from './can_add_new_panel';
+import { apiCanAddNewPanel } from './can_add_new_panel';
 
 export interface PanelPackage<SerializedStateType extends object = object> {
   panelType: string;

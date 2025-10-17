@@ -11,15 +11,16 @@ import {
   fetchServerSearchableTypesMock,
 } from './search_service.test.mocks';
 
-import { firstValueFrom, Observable, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { duration } from 'moment';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { licenseCheckerMock } from '../../common/license_checker.mock';
-import { GlobalSearchProviderResult, GlobalSearchResult } from '../../common/types';
+import type { GlobalSearchProviderResult, GlobalSearchResult } from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';
-import { GlobalSearchClientConfigType } from '../config';
-import { GlobalSearchResultProvider } from '../types';
+import type { GlobalSearchClientConfigType } from '../config';
+import type { GlobalSearchResultProvider } from '../types';
 import { SearchService } from './search_service';
 
 const getTestScheduler = () =>

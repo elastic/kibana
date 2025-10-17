@@ -48,13 +48,42 @@ export const CONDITIONS_HEADER_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.trustedApps.conditions.header.description',
   {
     defaultMessage:
-      'Select an operating system and add conditions. Availability of conditions may depend on your chosen OS.',
+      'Select either Basic or Advanced mode to add a trusted application. Then, select an operating system and add conditions. Availability of conditions may depend on your chosen operating system.',
+  }
+);
+
+export const USING_ADVANCED_MODE = i18n.translate(
+  'xpack.securitySolution.trustedApps.conditions.header.description.advancedMode',
+  {
+    defaultMessage: 'You are using advanced mode.',
+  }
+);
+
+export const USING_ADVANCED_MODE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.trustedApps.conditions.header.description.advancedMode2',
+  {
+    defaultMessage:
+      'While advanced Trusted Application configuration allows for more complex conditions, use caution. Overly broad conditions can expose your systems to risk.',
   }
 );
 
 export const SELECT_OS_LABEL = i18n.translate('xpack.securitySolution.trustedApps.os.label', {
   defaultMessage: 'Select operating system',
 });
+
+export const PROCESS_DESCENDANTS_TRUSTED_APP = i18n.translate(
+  'xpack.securitySolution.trustedApps.processDescendants.label',
+  {
+    defaultMessage: 'Process Descendants',
+  }
+);
+
+export const TRUSTED_APPLICATIONS = i18n.translate(
+  'xpack.securitySolution.trustedApps.processDescendants.label',
+  {
+    defaultMessage: 'Trusted Applications',
+  }
+);
 
 export const CONDITION_FIELD_TITLE: { [K in ConditionEntryField]: string } = {
   [ConditionEntryField.HASH]: i18n.translate(

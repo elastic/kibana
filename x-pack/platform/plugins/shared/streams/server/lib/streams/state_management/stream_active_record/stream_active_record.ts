@@ -102,6 +102,7 @@ export abstract class StreamActiveRecord<
       startingState
     );
     this._changeStatus = changeStatus;
+
     return cascadingChanges;
   }
 

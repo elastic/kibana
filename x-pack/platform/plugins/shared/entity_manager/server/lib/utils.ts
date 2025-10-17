@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
-import { EntityManagerServerSetup } from '../types';
-import { EntityDiscoveryAPIKey } from './auth/api_key/api_key';
+import type { EntityManagerServerSetup } from '../types';
+import type { EntityDiscoveryAPIKey } from './auth/api_key/api_key';
 import { EntityDiscoveryApiKeyType } from '../saved_objects';
 
 export const getClientsFromAPIKey = ({

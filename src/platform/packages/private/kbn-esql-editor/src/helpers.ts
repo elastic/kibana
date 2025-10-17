@@ -7,26 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
+import { euiShadow } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { ILicense } from '@kbn/licensing-types';
+import { monaco } from '@kbn/monaco';
+import type { MapCache } from 'lodash';
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { UseEuiTheme, euiShadow } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { monaco } from '@kbn/monaco';
-import type { CoreStart } from '@kbn/core/public';
-import type { ILicense } from '@kbn/licensing-plugin/public';
-import { i18n } from '@kbn/i18n';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { MapCache } from 'lodash';
+import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import {
-  EDITOR_MIN_HEIGHT,
   EDITOR_MAX_HEIGHT,
+  EDITOR_MIN_HEIGHT,
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
 } from './esql_editor.styles';
 
 const KEYCODE_ARROW_UP = 38;
 const KEYCODE_ARROW_DOWN = 40;
-
-export type MonacoMessage = monaco.editor.IMarkerData;
 
 interface IntegrationsResponse {
   items: Array<{
@@ -119,6 +119,7 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
           endColumn: startColumn + errorLength - 1,
           endLineNumber: startLineNumber,
           severity: monaco.MarkerSeverity.Warning,
+          code: 'warningFromES',
         };
       });
     }
@@ -132,46 +133,61 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
       endColumn: 10,
       endLineNumber: 1,
       severity: monaco.MarkerSeverity.Warning,
+      code: 'unknown',
     },
   ];
 };
 
 export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
   return errors.map((error) => {
-    if (
-      // Found while testing random commands (as inlinestats)
-      !error.message.includes('esql_illegal_argument_exception') &&
-      error.message.includes('line')
-    ) {
-      const text = error.message.split('line')[1];
-      const [lineNumber, startPosition, errorMessage] = text.split(':');
-      // initialize the length to 10 in case no error word found
-      let errorLength = 10;
-      const [_, wordWithError] = errorMessage.split('[');
-      if (wordWithError) {
-        errorLength = wordWithError.length - 1;
+    try {
+      if (
+        // Found while testing random commands (as inlinestats)
+        !error.message.includes('esql_illegal_argument_exception') &&
+        error.message.includes('line')
+      ) {
+        const text = error.message.split('line')[1];
+        const [lineNumber, startPosition, errorMessage] = text.split(':');
+        // initialize the length to 10 in case no error word found
+        let errorLength = 10;
+        const [_, wordWithError] = errorMessage.split('[');
+        if (wordWithError) {
+          errorLength = wordWithError.length - 1;
+        }
+        return {
+          message: errorMessage,
+          startColumn: Number(startPosition),
+          startLineNumber: Number(lineNumber),
+          endColumn: Number(startPosition) + errorLength + 1,
+          endLineNumber: Number(lineNumber),
+          severity: monaco.MarkerSeverity.Error,
+          code: 'errorFromES',
+        };
+      } else if (error.message.includes('expression was aborted')) {
+        return {
+          message: i18n.translate('esqlEditor.query.aborted', {
+            defaultMessage: 'Request was aborted',
+          }),
+          startColumn: 1,
+          startLineNumber: 1,
+          endColumn: 10,
+          endLineNumber: 1,
+          severity: monaco.MarkerSeverity.Warning,
+          code: 'abortedRequest',
+        };
+      } else {
+        // unknown error message
+        return {
+          message: error.message,
+          startColumn: 1,
+          startLineNumber: 1,
+          endColumn: 10,
+          endLineNumber: 1,
+          severity: monaco.MarkerSeverity.Error,
+          code: 'unknownError',
+        };
       }
-      return {
-        message: errorMessage,
-        startColumn: Number(startPosition),
-        startLineNumber: Number(lineNumber),
-        endColumn: Number(startPosition) + errorLength + 1,
-        endLineNumber: Number(lineNumber),
-        severity: monaco.MarkerSeverity.Error,
-      };
-    } else if (error.message.includes('expression was aborted')) {
-      return {
-        message: i18n.translate('esqlEditor.query.aborted', {
-          defaultMessage: 'Request was aborted',
-        }),
-        startColumn: 1,
-        startLineNumber: 1,
-        endColumn: 10,
-        endLineNumber: 1,
-        severity: monaco.MarkerSeverity.Warning,
-      };
-    } else {
-      // unknown error message
+    } catch (e) {
       return {
         message: error.message,
         startColumn: 1,
@@ -179,6 +195,7 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
         endColumn: 10,
         endLineNumber: 1,
         severity: monaco.MarkerSeverity.Error,
+        code: 'unknownError',
       };
     }
   });
@@ -377,9 +394,8 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
   `;
 };
 
-export const filterDataErrors = (errors: MonacoMessage[]): MonacoMessage[] => {
+export const filterDataErrors = (errors: (MonacoMessage & { code: string })[]): MonacoMessage[] => {
   return errors.filter((error) => {
-    const code = typeof error.code === 'object' ? error.code.value : error.code;
-    return code !== 'unknownIndex' && code !== 'unknownColumn';
+    return !['unknownIndex', 'unknownColumn'].includes(error.code);
   });
 };

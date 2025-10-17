@@ -14,9 +14,9 @@ import {
   makeEmbeddableServices,
 } from '../mocks';
 import { BehaviorSubject } from 'rxjs';
-import { ApplicationStart } from '@kbn/core/public';
-import { LensEmbeddableStartServices } from '../types';
-import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { LensEmbeddableStartServices } from '../types';
+import type { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 
 function createEditApi(
   servicesOverrides: Partial<LensEmbeddableStartServices> = {},

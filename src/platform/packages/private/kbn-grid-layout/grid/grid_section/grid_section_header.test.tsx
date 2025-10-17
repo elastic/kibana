@@ -9,13 +9,16 @@
 import React from 'react';
 
 import { EuiThemeProvider } from '@elastic/eui';
-import { RenderResult, act, render, waitFor } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { getGridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
-import { GridLayoutContext, GridLayoutContextType } from '../use_grid_layout_context';
-import { GridSectionHeader, GridSectionHeaderProps } from './grid_section_header';
-import { CollapsibleSection } from './types';
+import type { GridLayoutContextType } from '../use_grid_layout_context';
+import { GridLayoutContext } from '../use_grid_layout_context';
+import type { GridSectionHeaderProps } from './grid_section_header';
+import { GridSectionHeader } from './grid_section_header';
+import type { CollapsibleSection } from './types';
 
 describe('GridSectionHeader', () => {
   const renderGridSectionHeader = (

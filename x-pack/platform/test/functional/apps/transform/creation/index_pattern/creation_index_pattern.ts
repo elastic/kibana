@@ -8,13 +8,8 @@
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import {
-  GroupByEntry,
-  isLatestTransformTestData,
-  isPivotTransformTestData,
-  LatestTransformTestData,
-  PivotTransformTestData,
-} from '../../helpers';
+import type { GroupByEntry, LatestTransformTestData, PivotTransformTestData } from '../../helpers';
+import { isLatestTransformTestData, isPivotTransformTestData } from '../../helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const canvasElement = getService('canvasElement');
@@ -24,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('creation_index_pattern', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
       await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
       await transform.testResources.setKibanaTimeZoneToUTC();
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { errors } from '@elastic/elasticsearch';
+import type { errors } from '@elastic/elasticsearch';
 import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
 import { getEsCause } from './es_error_parser';
 

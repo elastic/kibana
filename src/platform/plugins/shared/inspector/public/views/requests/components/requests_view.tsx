@@ -12,8 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 
 import { RequestStatus } from '../../../../common/adapters';
-import { Request } from '../../../../common/adapters/request/types';
-import { InspectorViewProps } from '../../../types';
+import type { Request } from '../../../../common/adapters/request/types';
+import type { InspectorViewProps } from '../../../types';
 
 import { RequestSelector } from './request_selector';
 import { RequestDetails } from './request_details';
@@ -174,7 +174,7 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
             >
               <FormattedMessage
                 id="inspector.requests.searchSessionId"
-                defaultMessage="Search session id: {searchSessionId}"
+                defaultMessage="Background search id: {searchSessionId}"
                 values={{ searchSessionId: this.state.request.searchSessionId }}
               />
             </p>

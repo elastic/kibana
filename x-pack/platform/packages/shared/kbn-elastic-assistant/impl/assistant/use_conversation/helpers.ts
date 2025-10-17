@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
-import { Conversation } from '../../assistant_context/types';
-import { AIConnector } from '../../connectorland/connector_selector';
+import type React from 'react';
+import type { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
+import type { Conversation } from '../../assistant_context/types';
+import type { AIConnector } from '../../connectorland/connector_selector';
 import { getGenAiConfig } from '../../connectorland/helpers';
 
 export interface CodeBlockDetails {
@@ -133,7 +133,7 @@ export const getConversationApiConfig = ({
           actionTypeId: connector.actionTypeId,
           provider: connector.apiProvider ?? connectorApiProvider,
           defaultSystemPromptId: defaultSystemPrompt?.id,
-          model: conversation?.apiConfig?.model ?? connectorModel,
+          model: connectorModel ?? conversation?.apiConfig?.model,
         },
       }
     : ({

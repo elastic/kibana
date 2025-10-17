@@ -9,9 +9,9 @@
 
 import moment from 'moment';
 import { clone } from 'lodash';
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { registerRoutes } from './routes';
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../config';
 
 export class AutocompleteService implements Plugin<void> {
   private valueSuggestionsEnabled: boolean = true;

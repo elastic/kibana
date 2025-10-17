@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
+import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -26,7 +26,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useAbortControllerRef } from '../../../../hooks/use_abort_controller_ref';
 import { useIndicesCheckContext } from '../../../../contexts/indices_check_context';
 
-import { MeteringStatsIndex, PatternRollup } from '../../../../types';
+import type { MeteringStatsIndex, PatternRollup } from '../../../../types';
 import { useDataQualityContext } from '../../../../data_quality_context';
 import { IndexResultBadge } from '../index_result_badge';
 import { useCurrentWindowWidth } from './hooks/use_current_window_width';
@@ -37,7 +37,7 @@ import { useHistoricalResultsContext } from '../contexts/historical_results_cont
 import { getFormattedCheckTime } from './utils/get_formatted_check_time';
 import { CHECK_NOW } from '../translations';
 import { HISTORY_TAB_ID, LATEST_CHECK_TAB_ID } from '../constants';
-import { IndexCheckFlyoutTabId } from './types';
+import type { IndexCheckFlyoutTabId } from './types';
 
 export interface Props {
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;

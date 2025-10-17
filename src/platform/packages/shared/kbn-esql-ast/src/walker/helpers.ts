@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   ESQLAstCommand,
   ESQLAstQueryExpression,
   ESQLColumn,
@@ -20,7 +20,6 @@ import {
   ESQLOrderExpression,
   ESQLProperNode,
   ESQLSource,
-  ESQLTimeInterval,
   ESQLUnknownItem,
 } from '../types';
 
@@ -31,7 +30,6 @@ export type NodeMatchKeys =
   | keyof ESQLCommandOption
   | keyof ESQLSource
   | keyof ESQLColumn
-  | keyof ESQLTimeInterval
   | keyof ESQLList
   | keyof ESQLLiteral
   | keyof ESQLIdentifier
@@ -83,4 +81,12 @@ export const templateToPredicate = (
   };
 
   return predicate;
+};
+
+export const replaceProperties = (obj: object, replacement: object) => {
+  for (const key in obj) {
+    if (typeof key === 'string' && Object.prototype.hasOwnProperty.call(obj, key))
+      delete (obj as any)[key];
+  }
+  Object.assign(obj, replacement);
 };

@@ -10,12 +10,13 @@
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { EuiPortal, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiPortal } from '@elastic/eui';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
-import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
+import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { CONTROL_GROUP_EMBEDDABLE_ID } from '../../dashboard_api/control_group_manager';
@@ -24,11 +25,7 @@ import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_inter
 import { DashboardGrid } from '../grid';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 
-export const DashboardViewport = ({
-  dashboardContainerRef,
-}: {
-  dashboardContainerRef?: React.MutableRefObject<HTMLElement | null>;
-}) => {
+export const DashboardViewport = () => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
   const [hasControls, setHasControls] = useState(false);
@@ -57,8 +54,8 @@ export const DashboardViewport = ({
 
   const { panelCount, visiblePanelCount, sectionCount } = useMemo(() => {
     const panels = Object.values(layout.panels);
-    const visiblePanels = panels.filter(({ gridData }) => {
-      return !dashboardInternalApi.isSectionCollapsed(gridData.sectionId);
+    const visiblePanels = panels.filter(({ grid }) => {
+      return !dashboardInternalApi.isSectionCollapsed(grid.sectionId);
     });
     return {
       panelCount: panels.length,
@@ -85,23 +82,18 @@ export const DashboardViewport = ({
     };
   }, [controlGroupApi]);
 
-  // Bug in main where panels are loaded before control filters are ready
-  // Want to migrate to react embeddable controls with same behavior
-  // TODO - do not load panels until control filters are ready
-  /*
-  const [dashboardInitialized, setDashboardInitialized] = useState(false);
+  const [controlsReady, setControlsReady] = useState(false);
   useEffect(() => {
     let ignore = false;
-    dashboard.untilContainerInitialized().then(() => {
+    dashboardInternalApi.untilControlsInitialized().then(() => {
       if (!ignore) {
-        setDashboardInitialized(true);
+        setControlsReady(true);
       }
     });
     return () => {
       ignore = true;
     };
-  }, [dashboard]);
-  */
+  }, [dashboardInternalApi]);
 
   const styles = useMemoCss(dashboardViewportStyles);
 
@@ -119,7 +111,7 @@ export const DashboardViewport = ({
             key={dashboardApi.uuid}
             hidePanelChrome={true}
             panelProps={{ hideLoader: true }}
-            type={CONTROL_GROUP_TYPE}
+            type={CONTROLS_GROUP_TYPE}
             maybeId={CONTROL_GROUP_EMBEDDABLE_ID}
             getParentApi={() => {
               return {
@@ -147,9 +139,9 @@ export const DashboardViewport = ({
       >
         {panelCount === 0 && sectionCount === 0 ? (
           <DashboardEmptyScreen />
-        ) : (
-          <DashboardGrid dashboardContainerRef={dashboardContainerRef} />
-        )}
+        ) : viewMode === 'print' || controlsReady ? (
+          <DashboardGrid />
+        ) : null}
       </div>
     </div>
   );

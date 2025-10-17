@@ -8,6 +8,7 @@
  */
 
 import { AxiosError } from 'axios';
+
 export class KbnClientRequesterError extends Error {
   axiosError?: AxiosError;
   constructor(message: string, error: unknown) {

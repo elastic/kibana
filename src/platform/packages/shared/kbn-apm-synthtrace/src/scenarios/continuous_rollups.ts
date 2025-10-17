@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apm, ApmFields } from '@kbn/apm-synthtrace-client';
+/**
+ * Generates high-cardinality APM data specifically for testing continuous rollups.
+ */
+
+import type { ApmFields } from '@kbn/apm-synthtrace-client';
+import { apm } from '@kbn/apm-synthtrace-client';
 import { merge, range as lodashRange } from 'lodash';
-import { Scenario } from '../cli/scenario';
+import type { Scenario } from '../cli/scenario';
 import { ComponentTemplateName } from '../lib/apm/client/apm_synthtrace_es_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';

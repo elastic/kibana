@@ -10,7 +10,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs';
 import deepFreeze from 'deep-freeze-strict';
-import {
+import type {
   PureTransitionsToTransitions,
   PureTransition,
   ReduxLikeStateContainer,

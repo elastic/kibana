@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { refreshIntervalSchema } from './refresh_interval';
+import type { TypeOf } from '@kbn/config-schema';
+import type { refreshIntervalSchema } from './refresh_interval';
 
 export type RefreshInterval = TypeOf<typeof refreshIntervalSchema>;

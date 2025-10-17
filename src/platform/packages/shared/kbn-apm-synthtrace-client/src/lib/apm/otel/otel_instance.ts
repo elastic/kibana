@@ -8,11 +8,11 @@
  */
 
 import { OtelSpan } from './otel_span';
-import { ApmOtelFields, SpanKind } from './apm_otel_fields';
+import type { ApmOtelFields, SpanKind } from './apm_otel_fields';
 import { ApmOtelError } from './apm_otel_error';
 import { Entity } from '../../entity';
-import { HttpMethod } from '../span';
-import { ApmApplicationMetricFields } from '../apm_fields';
+import type { HttpMethod } from '../span';
+import type { ApmApplicationMetricFields } from '../apm_fields';
 import { OtelMetricset } from './apm_otel_metrics';
 export class OtelInstance extends Entity<ApmOtelFields> {
   span({

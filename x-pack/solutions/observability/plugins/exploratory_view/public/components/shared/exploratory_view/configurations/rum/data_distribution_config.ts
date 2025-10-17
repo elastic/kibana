@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigProps, SeriesConfig } from '../../types';
+import type { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
   REPORT_METRIC_FIELD,

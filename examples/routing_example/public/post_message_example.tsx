@@ -19,7 +19,7 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
-import { Services } from './services';
+import type { Services } from './services';
 
 interface Props {
   postMessage: Services['postMessage'];

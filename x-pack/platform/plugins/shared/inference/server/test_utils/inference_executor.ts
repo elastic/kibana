@@ -6,7 +6,7 @@
  */
 
 import type { InferenceConnector } from '@kbn/inference-common';
-import { InferenceExecutor } from '../chat_complete/utils';
+import type { InferenceExecutor } from '../chat_complete/utils';
 import { createInferenceConnectorMock } from './inference_connector';
 
 export const createInferenceExecutorMock = ({

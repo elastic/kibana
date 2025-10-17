@@ -6,7 +6,7 @@
  */
 
 import { useHistory, useLocation } from 'react-router-dom';
-import { TabId } from '../types';
+import type { TabId } from '../types';
 
 const ALERT_DETAILS_TAB_URL_STORAGE_KEY = 'tabId';
 

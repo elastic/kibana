@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
+import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 
-import { RANGE_SLIDER_CONTROL } from '../../common';
+import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import {
   createRangeSliderExtract,
   createRangeSliderInject,

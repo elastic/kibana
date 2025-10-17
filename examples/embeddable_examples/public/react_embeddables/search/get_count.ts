@@ -8,8 +8,8 @@
  */
 
 import { lastValueFrom } from 'rxjs';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-plugin/common';
 
 export async function getCount(

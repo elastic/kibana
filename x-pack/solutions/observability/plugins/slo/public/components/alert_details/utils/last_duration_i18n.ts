@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { TimeRange } from '../../slo/error_rate_chart/use_lens_definition';
+import type { TimeRange } from '../../slo/error_rate_chart/use_lens_definition';
 
 export function getLastDurationInUnit(timeRange: TimeRange): string {
   const duration = moment.duration(moment(timeRange.to).diff(timeRange.from));

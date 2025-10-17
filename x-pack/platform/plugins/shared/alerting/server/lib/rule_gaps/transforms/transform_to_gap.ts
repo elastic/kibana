@@ -36,6 +36,12 @@ export const transformToGap = (events: Pick<QueryEventsBySavedObjectResult, 'dat
       // Deleted gaps should not be used by Kibana at all because it means that the rule they are associated with has been deleted
       if (!gap || gap.deleted) return null;
 
+      const ruleId = doc.rule?.id;
+
+      if (!ruleId) {
+        return null;
+      }
+
       const range = validateInterval(gap.range);
 
       if (!range || !doc['@timestamp']) return null;
@@ -44,6 +50,7 @@ export const transformToGap = (events: Pick<QueryEventsBySavedObjectResult, 'dat
       const inProgressIntervals = validateIntervals(gap?.in_progress_intervals);
 
       return new Gap({
+        ruleId,
         timestamp: doc['@timestamp'],
         range,
         filledIntervals,

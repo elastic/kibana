@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AggregationType, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import { CustomThresholdExpressionMetric } from '../../../../../common/custom_threshold_rule/types';
-import { MetricExpression } from '../../types';
+import type { AggregationType, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import type { CustomThresholdExpressionMetric } from '../../../../../common/custom_threshold_rule/types';
+import type { MetricExpression } from '../../types';
 
 export type CustomMetrics = MetricExpression['metrics'];
 

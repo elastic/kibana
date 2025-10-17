@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import {
   columnExists as _columnExists,
@@ -15,13 +16,8 @@ import {
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import type { ESQLCommand } from '../../../types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import {
-  ICommandCallbacks,
-  Location,
-  type ICommandContext,
-  type ISuggestionItem,
-} from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { Location, type ICommandContext, type ISuggestionItem } from '../../types';
 import {
   getNullsPrefixRange,
   getSortPos,
@@ -64,9 +60,10 @@ export async function autocomplete(
         getColumnsByType: callbacks?.getByType,
         expressionRoot: undefined,
         location: Location.SORT,
-        context,
-        advanceCursorAfterInitialField: false,
         hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+        activeProduct: context?.activeProduct,
+        context,
+        advanceCursorAfterInitialColumn: false,
       });
     }
 
@@ -81,12 +78,7 @@ export async function autocomplete(
 
       const columnExists = (name: string) => _columnExists(name, context);
 
-      if (
-        isExpressionComplete(
-          getExpressionType(expressionRoot, context?.fields, context?.userDefinedColumns),
-          innerText
-        )
-      ) {
+      if (isExpressionComplete(getExpressionType(expressionRoot, context?.columns), innerText)) {
         suggestions.push(
           ...getSuggestionsAfterCompleteExpression(innerText, expressionRoot, columnExists)
         );
@@ -100,6 +92,7 @@ export async function autocomplete(
           location: Location.SORT,
           context,
           hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+          activeProduct: context?.activeProduct,
         });
         suggestions.push(...expressionSuggestions);
       }
@@ -120,13 +113,14 @@ export async function autocomplete(
         { ...commaCompleteItem, text: ', ' },
         prependSpace(sortModifierSuggestions.NULLS_FIRST),
         prependSpace(sortModifierSuggestions.NULLS_LAST),
-      ].map((suggestion) => ({
-        ...suggestion,
-        filterText: fragment,
-        text: fragment + suggestion.text,
-        rangeToReplace,
-        command: TRIGGER_SUGGESTION_COMMAND,
-      }));
+      ].map((suggestion) =>
+        withAutoSuggest({
+          ...suggestion,
+          filterText: fragment,
+          text: fragment + suggestion.text,
+          rangeToReplace,
+        })
+      );
     }
 
     case 'after_order': {
@@ -135,7 +129,7 @@ export async function autocomplete(
         sortModifierSuggestions.NULLS_FIRST,
         sortModifierSuggestions.NULLS_LAST,
         pipeCompleteItem,
-        { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
+        withAutoSuggest({ ...commaCompleteItem, text: ', ' }),
       ].map((suggestion) => ({
         ...suggestion,
         rangeToReplace: nullsPrefixRange,
@@ -148,20 +142,18 @@ export async function autocomplete(
       return [
         { ...pipeCompleteItem, text: ' | ' },
         { ...commaCompleteItem, text: ', ' },
-      ].map((suggestion) => ({
-        ...suggestion,
-        filterText: fragment,
-        text: fragment + suggestion.text,
-        rangeToReplace,
-        command: TRIGGER_SUGGESTION_COMMAND,
-      }));
+      ].map((suggestion) =>
+        withAutoSuggest({
+          ...suggestion,
+          filterText: fragment,
+          text: fragment + suggestion.text,
+          rangeToReplace,
+        })
+      );
     }
 
     case 'after_nulls': {
-      return [
-        pipeCompleteItem,
-        { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
-      ];
+      return [pipeCompleteItem, withAutoSuggest({ ...commaCompleteItem, text: ', ' })];
     }
 
     default: {

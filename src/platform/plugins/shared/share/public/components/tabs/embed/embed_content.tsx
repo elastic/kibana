@@ -18,17 +18,19 @@ import {
   EuiSwitch,
   type EuiSwitchEvent,
   EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
   copyToClipboard,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { format as formatUrl, parse as parseUrl } from 'url';
-import { AnonymousAccessState } from '../../../../common';
+import type { AnonymousAccessState } from '../../../../common';
 
 import type { IShareContext } from '../../context';
 import type { EmbedShareConfig, EmbedShareUIConfig } from '../../../types';
+import type { DraftModeCalloutProps } from '../../common/draft_mode_callout';
+import { DraftModeCallout } from '../../common/draft_mode_callout';
 
 type EmbedProps = Pick<
   IShareContext,
@@ -48,6 +50,13 @@ interface UrlParams {
     [queryParam: string]: boolean;
   };
 }
+
+const draftModeCalloutMessage = (
+  <FormattedMessage
+    id="share.embed.draftModeCallout.message"
+    defaultMessage="This code might not work properly. Save your changes to ensure it works as expected."
+  />
+);
 
 export const EmbedContent = ({
   shareableUrlForSavedObject,
@@ -72,10 +81,20 @@ export const EmbedContent = ({
   const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
 
   const {
-    draftModeCallOut: DraftModeCallout,
+    draftModeCallOut,
     computeAnonymousCapabilities,
     embedUrlParamExtensions: urlParamExtensions,
   } = objectConfig;
+  // TODO Remove node override logic https://github.com/elastic/kibana/issues/238877
+  const isValidCalloutOverride = React.isValidElement(draftModeCallOut);
+  const draftModeCalloutContent = isValidCalloutOverride
+    ? // Retro-compatible case
+      { node: draftModeCallOut }
+    : typeof draftModeCallOut === 'object'
+    ? // Custom content callout
+      (draftModeCallOut as DraftModeCalloutProps)
+    : // Default content callout
+      {};
 
   useEffect(() => {
     if (computeAnonymousCapabilities && anonymousAccess) {
@@ -274,16 +293,15 @@ export const EmbedContent = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
+          <EuiIconTip
             content={
               <FormattedMessage
                 id="share.embed.publicUrlOptionsSwitch.tooltip"
                 defaultMessage="Enabling public access generates a sharable URL that allows anonymous access without a login prompt."
               />
             }
-          >
-            <EuiIcon type="question" />
-          </EuiToolTip>
+            type="question"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -309,10 +327,10 @@ export const EmbedContent = ({
         <EuiText size="s">{helpText}</EuiText>
         <EuiSpacer />
         {renderUrlParamExtensions()}
-        {isDirty && DraftModeCallout && (
+        {isDirty && draftModeCallOut && (
           <>
             <EuiSpacer size="m" />
-            {DraftModeCallout}
+            <DraftModeCallout message={draftModeCalloutMessage} {...draftModeCalloutContent} />
           </>
         )}
         <EuiSpacer />

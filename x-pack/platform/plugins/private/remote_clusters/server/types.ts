@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
-import { handleEsError } from './shared_imports';
+import type { handleEsError } from './shared_imports';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;

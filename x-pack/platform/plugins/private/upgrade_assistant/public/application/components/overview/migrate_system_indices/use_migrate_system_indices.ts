@@ -12,7 +12,8 @@ import { SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS } from '../../../../../common
 import type { ResponseError } from '../../../../../common/types';
 import { GlobalFlyout } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
-import { SystemIndicesFlyout, SystemIndicesFlyoutProps } from './flyout';
+import type { SystemIndicesFlyoutProps } from './flyout';
+import { SystemIndicesFlyout } from './flyout';
 
 const FLYOUT_ID = 'migrateSystemIndicesFlyout';
 const { useGlobalFlyout } = GlobalFlyout;

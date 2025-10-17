@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createReadStream, Stats } from 'fs';
+import type { Stats } from 'fs';
+import { createReadStream } from 'fs';
 import { createHash } from 'crypto';
 import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs';

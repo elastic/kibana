@@ -36,8 +36,9 @@ import { ColorPicker } from '../color_picker';
 import { YesNo } from '../yes_no';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
-import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
-import { TimeseriesVisParams } from '../../../types';
+import type { PanelConfigProps } from './types';
+import { PANEL_CONFIG_TABS } from './types';
+import type { TimeseriesVisParams } from '../../../types';
 import { TOOLTIP_MODES } from '../../../../common/enums';
 import { panelConfigContainerStyles } from './_panel_config';
 
@@ -151,6 +152,10 @@ export class TimeseriesPanelConfig extends Component<
     const selectedTooltipMode = tooltipModeOptions.find(
       (option) => model.tooltip_mode === option.value
     );
+    const tooltipModeId = htmlId('tooltipMode');
+    const tooltipModeLabelId = `${tooltipModeId}Label`;
+    const legendPositionId = htmlId('legendPos');
+    const legendPositionLabelId = `${legendPositionId}Label`;
 
     let view;
     if (selectedTab === PANEL_CONFIG_TABS.DATA) {
@@ -369,7 +374,7 @@ export class TimeseriesPanelConfig extends Component<
                 <YesNo value={model.show_grid} name="show_grid" onChange={this.props.onChange} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>
+                <EuiFormLabel id={tooltipModeLabelId} htmlFor={tooltipModeId}>
                   <FormattedMessage
                     id="visTypeTimeseries.timeseries.optionsTab.tooltipMode"
                     defaultMessage="Tooltip"
@@ -379,7 +384,8 @@ export class TimeseriesPanelConfig extends Component<
               <EuiFlexItem grow={false}>
                 <EuiComboBox
                   isClearable={false}
-                  id={htmlId('tooltipMode')}
+                  id={tooltipModeId}
+                  aria-labelledby={tooltipModeLabelId}
                   options={tooltipModeOptions}
                   selectedOptions={selectedTooltipMode ? [selectedTooltipMode] : []}
                   onChange={handleSelectChange('tooltip_mode')}
@@ -447,7 +453,7 @@ export class TimeseriesPanelConfig extends Component<
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel htmlFor={htmlId('legendPos')}>
+                <EuiFormLabel id={legendPositionLabelId} htmlFor={legendPositionId}>
                   <FormattedMessage
                     id="visTypeTimeseries.timeseries.optionsTab.legendPositionLabel"
                     defaultMessage="Legend position"
@@ -457,7 +463,8 @@ export class TimeseriesPanelConfig extends Component<
               <EuiFlexItem grow={false}>
                 <EuiComboBox
                   isClearable={false}
-                  id={htmlId('legendPos')}
+                  id={legendPositionId}
+                  aria-labelledby={legendPositionLabelId}
                   options={legendPositionOptions}
                   selectedOptions={selectedLegendPosOption ? [selectedLegendPosOption] : []}
                   onChange={handleSelectChange('legend_position')}

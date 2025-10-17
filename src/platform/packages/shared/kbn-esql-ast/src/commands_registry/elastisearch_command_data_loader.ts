@@ -7,15 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLSignatureLicenseType } from '@kbn/esql-types';
+import type { LicenseType } from '@kbn/licensing-types';
 import type { ICommand } from './registry';
 
 import { commandsMetadata } from '../definitions/generated/commands/commands';
-import { ElasticsearchCommandDefinition } from '../definitions/types';
+import type { ElasticsearchCommandDefinition } from '../definitions/types';
+
+function mapCommandNameToElasticsearchName(commandName: string): string {
+  const nameMapping: Record<string, string> = {
+    'inline stats': 'inline_stats',
+  };
+
+  return nameMapping[commandName] || commandName;
+}
 
 export function mergeCommandWithGeneratedCommandData(command: ICommand): ICommand {
+  const elasticsearchCommandName = mapCommandNameToElasticsearchName(command.name);
   const generatedMetadata = (commandsMetadata as Record<string, ElasticsearchCommandDefinition>)[
-    command.name
+    elasticsearchCommandName
   ];
 
   if (!generatedMetadata || Object.keys(generatedMetadata).length === 0) {
@@ -27,7 +36,7 @@ export function mergeCommandWithGeneratedCommandData(command: ICommand): IComman
     metadata: {
       ...command.metadata,
       ...(generatedMetadata.license && {
-        license: generatedMetadata.license as ESQLSignatureLicenseType,
+        license: generatedMetadata.license as LicenseType,
       }),
       ...(generatedMetadata.observability_tier && {
         observabilityTier: generatedMetadata.observability_tier,

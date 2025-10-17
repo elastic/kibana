@@ -7,7 +7,7 @@
 
 import { Client } from 'langsmith';
 import type { Logger } from '@kbn/core/server';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 
 /**

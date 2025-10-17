@@ -5,45 +5,56 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { coreMock, elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { AttackDiscoveryGenerationConfig } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryGenerationConfig } from '@kbn/elastic-assistant-common';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
-import { generateAttackDiscoveries } from './generate_discoveries';
-import { generateAndUpdateAttackDiscoveries } from './generate_and_update_discoveries';
-import { updateAttackDiscoveries } from './helpers';
-import { handleGraphError } from '../post/helpers/handle_graph_error';
-import { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
 import { mockAnonymizedAlerts } from '../../../lib/attack_discovery/evaluation/__mocks__/mock_anonymized_alerts';
 import { mockAttackDiscoveries } from '../../../lib/attack_discovery/evaluation/__mocks__/mock_attack_discoveries';
+import { generateAttackDiscoveries } from './generate_discoveries';
+import { generateAndUpdateAttackDiscoveries } from './generate_and_update_discoveries';
+import { reportAttackDiscoverySuccessTelemetry } from './report_attack_discovery_success_telemetry';
+import type { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
+import { handleGraphError } from '../public/post/helpers/handle_graph_error';
+import { reportAttackDiscoveryGenerationSuccess } from './telemetry';
 
 jest.mock('./generate_discoveries', () => ({
   ...jest.requireActual('./generate_discoveries'),
   generateAttackDiscoveries: jest.fn(),
 }));
-jest.mock('./helpers', () => ({
-  ...jest.requireActual('./helpers'),
-  updateAttackDiscoveries: jest.fn(),
+jest.mock('./report_attack_discovery_success_telemetry', () => ({
+  ...jest.requireActual('./report_attack_discovery_success_telemetry'),
+  reportAttackDiscoverySuccessTelemetry: jest.fn(),
 }));
-jest.mock('../post/helpers/handle_graph_error', () => ({
-  ...jest.requireActual('../post/helpers/handle_graph_error'),
+jest.mock('../../../lib/attack_discovery/persistence/deduplication', () => ({
+  deduplicateAttackDiscoveries: jest
+    .fn()
+    .mockResolvedValue(
+      jest.requireActual(
+        '../../../lib/attack_discovery/evaluation/__mocks__/mock_attack_discoveries'
+      ).mockAttackDiscoveries
+    ),
+}));
+jest.mock('../public/post/helpers/handle_graph_error', () => ({
+  ...jest.requireActual('../public/post/helpers/handle_graph_error'),
   handleGraphError: jest.fn(),
 }));
+jest.mock('./telemetry', () => {
+  const actual = jest.requireActual('./telemetry');
+  return {
+    ...actual,
+    reportAttackDiscoveryGenerationSuccess: jest.fn(actual.reportAttackDiscoveryGenerationSuccess),
+  };
+});
 
-const findAttackDiscoveryByConnectorId = jest.fn();
-const updateAttackDiscovery = jest.fn();
-const createAttackDiscovery = jest.fn();
-const getAttackDiscovery = jest.fn();
-const findAllAttackDiscoveries = jest.fn();
+const createAttackDiscoveryAlerts = jest.fn();
+const getAdHocAlertsIndexPattern = jest.fn();
 const mockDataClient = {
-  findAttackDiscoveryByConnectorId,
-  updateAttackDiscovery,
-  createAttackDiscovery,
-  getAttackDiscovery,
-  findAllAttackDiscoveries,
+  createAttackDiscoveryAlerts,
+  getAdHocAlertsIndexPattern,
 } as unknown as AttackDiscoveryDataClient;
 
 const mockActionsClient = actionsClientMock.create();
@@ -101,11 +112,13 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         authenticatedUser: mockAuthenticatedUser,
         config: mockConfig,
         dataClient: mockDataClient,
+        enableFieldRendering: true,
         esClient: mockEsClient,
         executionUuid,
         logger: mockLogger,
         savedObjectsClient: mockSavedObjectsClient,
         telemetry: mockTelemetry,
+        withReplacements: false,
       });
 
       expect(generateAttackDiscoveries).toHaveBeenCalledWith({
@@ -117,32 +130,30 @@ describe('generateAndUpdateAttackDiscoveries', () => {
       });
     });
 
-    it('should call `updateAttackDiscoveries`', async () => {
+    it('should call `reportAttackDiscoverySuccessTelemetry` with the expected telemetry', async () => {
       const executionUuid = 'test-1';
       await generateAndUpdateAttackDiscoveries({
         actionsClient: mockActionsClient,
         authenticatedUser: mockAuthenticatedUser,
         config: mockConfig,
         dataClient: mockDataClient,
+        enableFieldRendering: true,
         esClient: mockEsClient,
         executionUuid,
         logger: mockLogger,
         savedObjectsClient: mockSavedObjectsClient,
         telemetry: mockTelemetry,
+        withReplacements: false,
       });
 
-      expect(updateAttackDiscoveries).toHaveBeenCalledWith(
+      expect(reportAttackDiscoverySuccessTelemetry).toHaveBeenCalledWith(
         expect.objectContaining({
           anonymizedAlerts: mockAnonymizedAlerts,
           apiConfig: mockConfig.apiConfig,
           attackDiscoveries: mockAttackDiscoveries,
-          executionUuid,
-          authenticatedUser: mockAuthenticatedUser,
-          dataClient: mockDataClient,
           hasFilter: false,
           end: mockConfig.end,
           latestReplacements: mockConfig.replacements,
-          logger: mockLogger,
           size: mockConfig.size,
           start: mockConfig.start,
           telemetry: mockTelemetry,
@@ -157,11 +168,13 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         authenticatedUser: mockAuthenticatedUser,
         config: mockConfig,
         dataClient: mockDataClient,
+        enableFieldRendering: true,
         esClient: mockEsClient,
         executionUuid,
         logger: mockLogger,
         savedObjectsClient: mockSavedObjectsClient,
         telemetry: mockTelemetry,
+        withReplacements: false,
       });
 
       expect(handleGraphError).not.toBeCalled();
@@ -174,11 +187,13 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         authenticatedUser: mockAuthenticatedUser,
         config: mockConfig,
         dataClient: mockDataClient,
+        enableFieldRendering: true,
         esClient: mockEsClient,
         executionUuid,
         logger: mockLogger,
         savedObjectsClient: mockSavedObjectsClient,
         telemetry: mockTelemetry,
+        withReplacements: false,
       });
 
       expect(results).toEqual({
@@ -187,6 +202,64 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         replacements: mockConfig.replacements,
       });
     });
+
+    it.each([[true], [false]])(
+      'should call createAttackDiscoveryAlerts with withReplacements=%s',
+      async (withReplacementsVal) => {
+        const executionUuid = 'test-1';
+
+        await generateAndUpdateAttackDiscoveries({
+          actionsClient: mockActionsClient,
+          authenticatedUser: mockAuthenticatedUser,
+          config: mockConfig,
+          dataClient: mockDataClient,
+          enableFieldRendering: true,
+          esClient: mockEsClient,
+          executionUuid,
+          logger: mockLogger,
+          savedObjectsClient: mockSavedObjectsClient,
+          telemetry: mockTelemetry,
+          withReplacements: withReplacementsVal,
+        });
+
+        expect(createAttackDiscoveryAlerts).toHaveBeenCalledWith(
+          expect.objectContaining({
+            createAttackDiscoveryAlertsParams: expect.objectContaining({
+              withReplacements: withReplacementsVal,
+            }),
+          })
+        );
+      }
+    );
+
+    it.each([[true], [false]])(
+      'should call createAttackDiscoveryAlerts with enableFieldRendering=%s',
+      async (enableFieldRenderingVal) => {
+        const executionUuid = 'test-2';
+
+        await generateAndUpdateAttackDiscoveries({
+          actionsClient: mockActionsClient,
+          authenticatedUser: mockAuthenticatedUser,
+          config: mockConfig,
+          dataClient: mockDataClient,
+          enableFieldRendering: enableFieldRenderingVal,
+          esClient: mockEsClient,
+          executionUuid,
+          logger: mockLogger,
+          savedObjectsClient: mockSavedObjectsClient,
+          telemetry: mockTelemetry,
+          withReplacements: false,
+        });
+
+        expect(createAttackDiscoveryAlerts).toHaveBeenCalledWith(
+          expect.objectContaining({
+            createAttackDiscoveryAlertsParams: expect.objectContaining({
+              enableFieldRendering: enableFieldRenderingVal,
+            }),
+          })
+        );
+      }
+    );
   });
 
   describe('when `generateAttackDiscoveries` throws an error', () => {
@@ -199,28 +272,26 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         authenticatedUser: mockAuthenticatedUser,
         config: mockConfig,
         dataClient: mockDataClient,
+        enableFieldRendering: true,
         esClient: mockEsClient,
         executionUuid,
         logger: mockLogger,
         savedObjectsClient: mockSavedObjectsClient,
         telemetry: mockTelemetry,
+        withReplacements: false,
       });
 
       expect(handleGraphError).toHaveBeenCalledWith(
         expect.objectContaining({
           apiConfig: mockConfig.apiConfig,
-          executionUuid,
-          authenticatedUser: mockAuthenticatedUser,
-          dataClient: mockDataClient,
           err: testInvokeError,
-          latestReplacements: mockConfig.replacements,
           logger: mockLogger,
           telemetry: mockTelemetry,
         })
       );
     });
 
-    it('should not call `updateAttackDiscoveries`', async () => {
+    it('should not call `reportAttackDiscoverySuccessTelemetry`', async () => {
       (generateAttackDiscoveries as jest.Mock).mockRejectedValue(testInvokeError);
 
       const executionUuid = 'test-1';
@@ -229,14 +300,16 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         authenticatedUser: mockAuthenticatedUser,
         config: mockConfig,
         dataClient: mockDataClient,
+        enableFieldRendering: true,
         esClient: mockEsClient,
         executionUuid,
         logger: mockLogger,
         savedObjectsClient: mockSavedObjectsClient,
         telemetry: mockTelemetry,
+        withReplacements: false,
       });
 
-      expect(updateAttackDiscoveries).not.toBeCalled();
+      expect(reportAttackDiscoverySuccessTelemetry).not.toBeCalled();
     });
 
     it('should return an error', async () => {
@@ -248,90 +321,66 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         authenticatedUser: mockAuthenticatedUser,
         config: mockConfig,
         dataClient: mockDataClient,
+        enableFieldRendering: true,
         esClient: mockEsClient,
         executionUuid,
         logger: mockLogger,
         savedObjectsClient: mockSavedObjectsClient,
         telemetry: mockTelemetry,
+        withReplacements: false,
       });
 
       expect(results).toEqual({ error: testInvokeError });
     });
   });
 
-  describe('when `updateAttackDiscoveries` throws an error', () => {
-    it('should call `generateAttackDiscoveries`', async () => {
-      (updateAttackDiscoveries as jest.Mock).mockRejectedValue(testUpdateError);
+  describe('when `reportAttackDiscoveryGenerationSuccess` throws an error', () => {
+    beforeEach(() => {
+      (reportAttackDiscoveryGenerationSuccess as jest.Mock).mockImplementation(() => {
+        throw testUpdateError;
+      });
+    });
 
+    it('should NOT call `handleGraphError`', async () => {
       const executionUuid = 'test-1';
       await generateAndUpdateAttackDiscoveries({
         actionsClient: mockActionsClient,
         authenticatedUser: mockAuthenticatedUser,
         config: mockConfig,
         dataClient: mockDataClient,
+        enableFieldRendering: true,
         esClient: mockEsClient,
         executionUuid,
         logger: mockLogger,
         savedObjectsClient: mockSavedObjectsClient,
         telemetry: mockTelemetry,
+        withReplacements: false,
       });
 
-      expect(generateAttackDiscoveries).toHaveBeenCalledWith({
-        actionsClient: mockActionsClient,
-        config: mockConfig,
-        logger: mockLogger,
-        savedObjectsClient: mockSavedObjectsClient,
-        esClient: mockEsClient,
-      });
+      expect(handleGraphError).not.toBeCalled();
     });
 
-    it('should call `handleGraphError`', async () => {
-      (updateAttackDiscoveries as jest.Mock).mockRejectedValue(testUpdateError);
-
-      const executionUuid = 'test-1';
-      await generateAndUpdateAttackDiscoveries({
-        actionsClient: mockActionsClient,
-        authenticatedUser: mockAuthenticatedUser,
-        config: mockConfig,
-        dataClient: mockDataClient,
-        esClient: mockEsClient,
-        executionUuid,
-        logger: mockLogger,
-        savedObjectsClient: mockSavedObjectsClient,
-        telemetry: mockTelemetry,
-      });
-
-      expect(handleGraphError).toHaveBeenCalledWith(
-        expect.objectContaining({
-          apiConfig: mockConfig.apiConfig,
-          executionUuid,
-          authenticatedUser: mockAuthenticatedUser,
-          dataClient: mockDataClient,
-          err: testUpdateError,
-          latestReplacements: mockConfig.replacements,
-          logger: mockLogger,
-          telemetry: mockTelemetry,
-        })
-      );
-    });
-
-    it('should return an error', async () => {
-      (updateAttackDiscoveries as jest.Mock).mockRejectedValue(testUpdateError);
-
+    it('should return valid results', async () => {
       const executionUuid = 'test-1';
       const results = await generateAndUpdateAttackDiscoveries({
         actionsClient: mockActionsClient,
         authenticatedUser: mockAuthenticatedUser,
         config: mockConfig,
         dataClient: mockDataClient,
+        enableFieldRendering: true,
         esClient: mockEsClient,
         executionUuid,
         logger: mockLogger,
         savedObjectsClient: mockSavedObjectsClient,
         telemetry: mockTelemetry,
+        withReplacements: false,
       });
 
-      expect(results).toEqual({ error: testUpdateError });
+      expect(results).toEqual({
+        anonymizedAlerts: mockAnonymizedAlerts,
+        attackDiscoveries: mockAttackDiscoveries,
+        replacements: mockConfig.replacements,
+      });
     });
   });
 });

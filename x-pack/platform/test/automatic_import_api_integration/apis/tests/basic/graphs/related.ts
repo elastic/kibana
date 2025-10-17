@@ -6,8 +6,8 @@
  */
 
 import { postRelated } from '../../../../common/lib/api/related';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { User } from '../../../../common/lib/authentication/types';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { User } from '../../../../common/lib/authentication/types';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

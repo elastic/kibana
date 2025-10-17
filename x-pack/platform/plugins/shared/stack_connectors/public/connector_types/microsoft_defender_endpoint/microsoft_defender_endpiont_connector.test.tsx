@@ -9,9 +9,9 @@ import React from 'react';
 import { type RenderResult } from '@testing-library/react';
 import { ConnectorFormTestProvider, createAppMockRenderer } from '../lib/test_utils';
 import MicrosoftDefenderEndpointActionConnectorFields from './microsoft_defender_endpoint_connector';
-import { ActionConnectorFieldsProps } from '@kbn/alerts-ui-shared';
+import type { ActionConnectorFieldsProps } from '@kbn/alerts-ui-shared';
 import { MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '../../../common/microsoft_defender_endpoint/constants';
-import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 
 describe('Microsoft Defender for Endpoint Connector UI', () => {
   let renderProps: ActionConnectorFieldsProps;

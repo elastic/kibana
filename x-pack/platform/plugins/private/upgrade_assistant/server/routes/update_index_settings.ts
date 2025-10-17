@@ -6,11 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH } from '../../common/constants';
-import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 
-export function registerUpdateSettingsRoute({ router }: RouteDependencies) {
+export function registerUpdateSettingsRoute({ router, current }: RouteDependencies) {
   router.post(
     {
       path: `${API_BASE_PATH}/{indexName}/index_settings`,
@@ -29,7 +29,7 @@ export function registerUpdateSettingsRoute({ router }: RouteDependencies) {
         }),
       },
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       try {
         const {
           elasticsearch: { client },

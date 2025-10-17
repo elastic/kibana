@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { ElasticsearchSource } from '../../../common/types/es';
+import type { ElasticsearchSource } from '../../../common/types/es';
 
 /*
  * @param cluster {Object} clusterStats from getClusterStatus

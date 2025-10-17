@@ -9,10 +9,10 @@ import { FeatureRegistry } from '../feature_registry';
 import { defineRoutes } from '.';
 
 import { httpServerMock, httpServiceMock, coreMock } from '@kbn/core/server/mocks';
-import { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { RequestHandler } from '@kbn/core/server';
-import { FeatureKibanaPrivileges, KibanaFeatureConfig, SubFeatureConfig } from '../../common';
+import type { RequestHandler } from '@kbn/core/server';
+import type { FeatureKibanaPrivileges, KibanaFeatureConfig, SubFeatureConfig } from '../../common';
 
 function createContextMock(licenseType: LicenseType = 'platinum') {
   return coreMock.createCustomRequestHandlerContext({

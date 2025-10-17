@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { buildContextMenuForActions } from './build_eui_context_menu_panels';
-import { Action, ActionExecutionContext, createAction } from '../actions';
-import { PresentableGrouping } from '@kbn/ui-actions-browser';
+import type { Action, ActionExecutionContext } from '../actions';
+import { createAction } from '../actions';
+import type { PresentableGrouping } from '@kbn/ui-actions-browser';
 
 const createTestAction = ({
   type,

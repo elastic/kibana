@@ -73,3 +73,17 @@ export async function findPluginCleanPaths(log) {
     return [Path.resolve(pkgDir, 'target'), ...readCleanPatterns(pkgDir)];
   });
 }
+
+/**
+ * Lists sym-link folders created by bazel
+ * @returns { string[] }
+ */
+export function collectBazelPaths() {
+  return [
+    Path.resolve(REPO_ROOT, '.bazelrc.cache'),
+    Path.resolve(REPO_ROOT, 'bazel-out'),
+    Path.resolve(REPO_ROOT, 'bazel-bin'),
+    Path.resolve(REPO_ROOT, 'bazel-testlogs'),
+    Path.resolve(REPO_ROOT, `bazel-${Path.basename(REPO_ROOT)}`), // it's often bazel-kibana, but not strictly
+  ];
+}

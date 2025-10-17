@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { Component, ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React, { Component } from 'react';
 import _ from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { Category } from './category';
-import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
+import type { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
 
 const EMPTY_VALUE = '';
 
@@ -92,7 +93,12 @@ export class BreakedLegend extends Component<Props, State> {
               title={this.props.style.getDisplayStyleName()}
               content={this.state.label}
             >
-              <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
+              <EuiText
+                className="eui-textTruncate"
+                size="xs"
+                style={{ maxWidth: '180px' }}
+                tabIndex={0}
+              >
                 <small>
                   <strong>{this.state.label}</strong>
                 </small>

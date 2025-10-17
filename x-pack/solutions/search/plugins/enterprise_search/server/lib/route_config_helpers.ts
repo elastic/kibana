@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
+import type {
   DestructiveRouteMethod,
   RouteConfig,
   RouteConfigOptions,

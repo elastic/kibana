@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DataViewFieldBase } from '@kbn/es-query';
-import { ReactElement } from 'react';
+import type { DataViewFieldBase } from '@kbn/es-query';
+import type { ReactElement } from 'react';
 import { act, renderHook } from '@testing-library/react';
 
 import { fields } from '../../fields/index.mock';

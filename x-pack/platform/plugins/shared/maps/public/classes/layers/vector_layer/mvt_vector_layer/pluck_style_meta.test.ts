@@ -6,10 +6,10 @@
  */
 
 import { FIELD_ORIGIN } from '../../../../../common/constants';
-import { TileMetaFeature } from '../../../../../common/descriptor_types';
+import type { TileMetaFeature } from '../../../../../common/descriptor_types';
 import { pluckOrdinalStyleMeta } from './pluck_style_meta';
-import { IField } from '../../../fields/field';
-import { DynamicSizeProperty } from '../../../styles/vector/properties/dynamic_size_property';
+import type { IField } from '../../../fields/field';
+import type { DynamicSizeProperty } from '../../../styles/vector/properties/dynamic_size_property';
 
 describe('pluckOrdinalStyleMeta', () => {
   test('should pluck range from metaFeatures', () => {

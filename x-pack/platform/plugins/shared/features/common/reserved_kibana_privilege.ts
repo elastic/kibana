@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FeatureKibanaPrivileges } from '.';
+import type { FeatureKibanaPrivileges } from '.';
 
 export interface ReservedKibanaPrivilege {
   id: string;

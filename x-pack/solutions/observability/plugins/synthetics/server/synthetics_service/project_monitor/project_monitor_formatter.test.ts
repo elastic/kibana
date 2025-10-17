@@ -7,13 +7,8 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { ProjectMonitorFormatter } from './project_monitor_formatter';
-import {
-  ConfigKey,
-  MonitorTypeEnum,
-  Locations,
-  LocationStatus,
-  PrivateLocation,
-} from '../../../common/runtime_types';
+import type { Locations, PrivateLocation } from '../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum, LocationStatus } from '../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { times } from 'lodash';
 import { SyntheticsService } from '../synthetics_service';
@@ -26,7 +21,7 @@ import * as telemetryHooks from '../../routes/telemetry/monitor_upgrade_sender';
 import { formatLocation } from '../../../common/utils/location_formatter';
 import * as locationsUtil from '../get_all_locations';
 import { mockEncryptedSO } from '../utils/mocks';
-import { SyntheticsServerSetup } from '../../types';
+import type { SyntheticsServerSetup } from '../../types';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 
 const testMonitors = [
@@ -123,6 +118,7 @@ describe('ProjectMonitorFormatter', () => {
     coreStart: {
       savedObjects: savedObjectsServiceMock.createStartContract(),
     },
+    fleet: { runWithCache: async (cb: any) => await cb() },
   } as unknown as SyntheticsServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
@@ -258,7 +254,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'packagePolicyService')",
+          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
           payload: payloadData,
           reason: 'Failed to create 2 monitors',
         },
@@ -289,7 +285,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'packagePolicyService')",
+          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
           payload: payloadData,
           reason: 'Failed to create 2 monitors',
         },
@@ -320,7 +316,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'packagePolicyService')",
+          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
           reason: 'Failed to create 2 monitors',
           payload: payloadData,
         },

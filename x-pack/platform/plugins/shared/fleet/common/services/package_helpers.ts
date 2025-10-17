@@ -19,6 +19,10 @@ export function isRootPrivilegesRequired(packageInfo: PackageInfo) {
   );
 }
 
+export function isRootPrivilegeRequired(packagePolicies: PackagePolicy[]) {
+  return packagePolicies.some((policy) => policy.package?.requires_root || false);
+}
+
 export function getRootPrivilegedDataStreams(
   packageInfo: PackageInfo
 ): Array<{ name: string; title: string }> {
@@ -51,4 +55,40 @@ export function hasInstallServersInputs(packagePolicies: PackagePolicy[]): boole
       (input) => INSTALL_SERVERS_INPUTS.includes(input.type) || input.type.startsWith('cloudbeat')
     )
   );
+}
+/**
+ * Return true if a package is fips compatible.
+ * Policy templates that have fips_compatible not defined are considered compatible.
+ * Only `fips_compatible: false` is considered not compatible
+ */
+export function checkIntegrationFipsLooseCompatibility(
+  integrationName: string,
+  packageInfo?: Pick<PackageInfo, 'policy_templates'>
+) {
+  if (!packageInfo?.policy_templates || packageInfo.policy_templates?.length === 0) {
+    return true;
+  }
+  if (
+    packageInfo.policy_templates.find(
+      (p) => p.name === integrationName && p.fips_compatible !== false
+    )
+  ) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Given a package policy list, get the list of integrations that are explicitly marked as not compatible with FIPS
+ *
+ */
+export function getNonFipsIntegrations(
+  packagePolicies: PackagePolicy[]
+): Array<{ name: string; title: string }> {
+  return uniqBy(
+    packagePolicies
+      .map((policy) => policy.package)
+      .filter((pkg) => pkg && pkg.fips_compatible === false),
+    (pkg) => pkg!.name
+  ).map((pkg) => ({ name: pkg!.name, title: pkg!.title }));
 }

@@ -533,3 +533,5 @@ POST /internal/inference/chat_complete
 ```
 
 </details>
+
+For more information on anonymization see [elastic docs](https://www.elastic.co/docs/solutions/observability/observability-ai-assistant#obs-ai-anonymization)

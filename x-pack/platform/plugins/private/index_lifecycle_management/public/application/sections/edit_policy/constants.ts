@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PhaseWithDownsample } from '../../../../common/types';
+import type { PhaseWithDownsample } from '../../../../common/types';
 
 export const isUsingCustomRolloverPath = '_meta.hot.customRollover.enabled';
 

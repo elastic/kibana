@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
 
 export const NoData: FunctionComponent<Record<any, any>>;

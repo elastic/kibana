@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -17,18 +17,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/hybrid_dataview.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/hybrid_dataview.json'
       );
-      await esArchiver.load('x-pack/test/functional/es_archives/hybrid/logstash');
-      await esArchiver.load('x-pack/test/functional/es_archives/hybrid/rollup');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/hybrid/logstash');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/hybrid/rollup');
     });
 
     after(async () => {
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/hybrid_dataview.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/hybrid_dataview.json'
       );
-      await esArchiver.unload('x-pack/test/functional/es_archives/hybrid/logstash');
-      await esArchiver.unload('x-pack/test/functional/es_archives/hybrid/rollup');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/hybrid/logstash');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/hybrid/rollup');
       await kibanaServer.savedObjects.cleanStandardList();
       await common.unsetTime();
     });

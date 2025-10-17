@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
-import { DataStreamDocsStat } from '@kbn/dataset-quality-plugin/common/api_types';
-import { SupertestWithRoleScopeType } from '../../services';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DataStreamDocsStat } from '@kbn/dataset-quality-plugin/common/api_types';
+import type { SupertestWithRoleScopeType } from '../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import { closeDataStream, rolloverDataStream } from './utils';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const esClient = getService('es');
   const roleScopedSupertest = getService('roleScopedSupertest');
   const synthtrace = getService('synthtrace');
   const start = '2023-12-11T18:00:00.000Z';
@@ -202,6 +204,129 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         after(async () => {
           await synthtraceLogsEsClient.clean();
+        });
+      });
+
+      describe('when there are data streams closed', () => {
+        before(async () => {
+          await synthtraceLogsEsClient.index([
+            timerange(start, end)
+              .interval('1m')
+              .rate(1)
+              .generator((timestamp) =>
+                log
+                  .create()
+                  .message('This is a log message')
+                  .timestamp(timestamp)
+                  .dataset('synth.open')
+                  .logLevel(MORE_THAN_1024_CHARS)
+                  .defaults({
+                    'log.file.path': '/my-service.log',
+                  })
+              ),
+            timerange(start, end)
+              .interval('1m')
+              .rate(1)
+              .generator((timestamp) =>
+                log
+                  .create()
+                  .message('This is a log message')
+                  .timestamp(timestamp)
+                  .dataset('synth.closed')
+                  .logLevel(MORE_THAN_1024_CHARS)
+                  .defaults({
+                    'log.file.path': '/my-service.log',
+                  })
+              ),
+          ]);
+
+          await closeDataStream(esClient, 'logs-synth.closed-default');
+        });
+
+        after(async () => {
+          await synthtraceLogsEsClient.clean();
+        });
+
+        it('returns stats correctly', async () => {
+          const stats = await callApiAs(supertestViewerWithCookieCredentials);
+          expect(stats.body.degradedDocs.length).to.be(1);
+
+          const degradedDocsStats = stats.body.degradedDocs.reduce(
+            (acc: Record<string, { count: number }>, curr: DataStreamDocsStat) => ({
+              ...acc,
+              [curr.dataset]: {
+                count: curr.count,
+              },
+            }),
+            {}
+          );
+
+          expect(degradedDocsStats['logs-synth.open-default']).to.eql({
+            count: 1,
+          });
+        });
+
+        describe('when new backing indices are open', () => {
+          before(async () => {
+            await rolloverDataStream(esClient, 'logs-synth.closed-default');
+
+            await synthtraceLogsEsClient.index([
+              timerange(start, end)
+                .interval('1m')
+                .rate(1)
+                .generator((timestamp) =>
+                  log
+                    .create()
+                    .message('This is a log message')
+                    .timestamp(timestamp)
+                    .dataset('synth.open')
+                    .logLevel(MORE_THAN_1024_CHARS)
+                    .defaults({
+                      'log.file.path': '/my-service.log',
+                    })
+                ),
+              timerange(start, end)
+                .interval('1m')
+                .rate(1)
+                .generator((timestamp) =>
+                  log
+                    .create()
+                    .message('This is a log message')
+                    .timestamp(timestamp)
+                    .dataset('synth.closed')
+                    .logLevel(MORE_THAN_1024_CHARS)
+                    .defaults({
+                      'log.file.path': '/my-service.log',
+                    })
+                ),
+            ]);
+          });
+
+          after(async () => {
+            await synthtraceLogsEsClient.clean();
+          });
+
+          it('returns stats correctly when some of the backing indices are closed and others are open', async () => {
+            const stats = await callApiAs(supertestViewerWithCookieCredentials);
+            expect(stats.body.degradedDocs.length).to.be(2);
+
+            const degradedDocsStats = stats.body.degradedDocs.reduce(
+              (acc: Record<string, { count: number }>, curr: DataStreamDocsStat) => ({
+                ...acc,
+                [curr.dataset]: {
+                  count: curr.count,
+                },
+              }),
+              {}
+            );
+
+            expect(degradedDocsStats['logs-synth.open-default']).to.eql({
+              count: 2,
+            });
+            expect(degradedDocsStats['logs-synth.closed-default']).to.eql({
+              count: 1,
+            });
+          });
         });
       });
     });

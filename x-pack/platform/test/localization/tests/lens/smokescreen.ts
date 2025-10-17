@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { NULL_LABEL } from '@kbn/field-formats-common';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getI18nLocaleFromServerArgs } from '../utils';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -144,6 +145,60 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   }
 
+  function getTranslationDe(term: string, field?: string, values: number = 3) {
+    switch (term) {
+      case 'legacyMetric':
+        // xpack.lens.legacyMetric.label
+        return 'Veraltete Metrik';
+      case 'datatable':
+        // xpack.lens.datatable.label
+        return 'Tabelle';
+      case 'bar':
+        // xpack.lens.xyVisualization.barLabel
+        return 'Balkendiagramm';
+      case 'line':
+        // xpack.lens.xyVisualization.lineLabel
+        return 'Liniendiagramm';
+      case 'pie':
+        // xpack.lens.pie.pielabel
+        return 'Kreisdiagramm';
+      case 'treemap':
+        // xpack.lens.pie.treemaplabel
+        return 'Treemap';
+      case 'heatmap':
+        // xpack.lens.heatmap.heatmapLabel
+        return 'Heatmap';
+      case 'Number':
+        return 'Zahl';
+      case 'Percent':
+        return 'Prozent';
+      case 'Linear':
+        return 'Linear';
+      case 'Records':
+        // xpack.lens.indexPattern.records
+        return 'Einträge';
+      case 'records':
+        // xpack.lens.indexPattern.records
+        return 'Einträge';
+      case 'moving_average':
+        // xpack.lens.indexPattern.movingAverage
+        return 'Gleitender Durchschnitt';
+      case 'average':
+        // xpack.dataVisualizer.index.lensChart.averageOfLabel
+        return field ? `Durchschnitt von ${field}` : `Durchschnitt`;
+      case 'max':
+        // xpack.dataVisualizer.index.lensChart.maximumOfLabel
+        return field ? `Maximal ${field}` : 'Maximum';
+      case 'terms':
+        return field ? `Top ${values} values of ${field}` : 'Top values'; // Not translated yet
+      case 'sum':
+        // xpack.maps.aggType.sumLabel
+        return 'Summe';
+      default:
+        return term;
+    }
+  }
+
   function getExpectedI18nTranslator(locale: string): (term: string, field?: string) => string {
     switch (locale) {
       case 'ja-JP':
@@ -152,6 +207,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return getTranslationZh;
       case 'fr-FR':
         return getTranslationFr;
+      case 'de-DE':
+        return getTranslationDe;
       default:
         return (v: string, field?: string) => v;
     }
@@ -605,6 +662,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'cumulative_sum',
         keepOpen: true,
       });
+
       await lens.configureReference({
         field: termTranslator('Records'),
       });
@@ -643,7 +701,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         range(0, 6).map((index) => lens.getDatatableCellText(index, 1))
       );
       expect(values).to.eql([
-        '-',
+        NULL_LABEL,
         '222,420.00',
         '702,050.00',
         '1,879,613.33',

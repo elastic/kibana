@@ -7,13 +7,10 @@
 
 import { SPACES } from '../../common/lib/spaces';
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
-import { TestUser } from '../../common/lib/types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  resolveTestSuiteFactory,
-  TEST_CASES as CASES,
-  ResolveTestDefinition,
-} from '../../common/suites/resolve';
+import type { TestUser } from '../../common/lib/types';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ResolveTestDefinition } from '../../common/suites/resolve';
+import { resolveTestSuiteFactory, TEST_CASES as CASES } from '../../common/suites/resolve';
 
 const {
   SPACE_2: { spaceId: SPACE_2_ID },

@@ -8,7 +8,7 @@
  */
 
 import { createParser } from './parser';
-import { ConsoleParserResult } from './types';
+import type { ConsoleParserResult } from './types';
 
 const parser = createParser();
 describe('console parser', () => {

@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import capitalize from 'lodash/capitalize';
-import { type CoreSetup, type CoreStart, Plugin } from '@kbn/core/public';
-import type { PluginInitializerContext } from '@kbn/core/public';
-import { InterceptsStart } from '@kbn/intercepts-plugin/public';
+import { type CoreSetup, type CoreStart } from '@kbn/core/public';
+import type { PluginInitializerContext, Plugin } from '@kbn/core/public';
+import type { InterceptsStart } from '@kbn/intercepts-plugin/public';
 import { type CloudStart } from '@kbn/cloud-plugin/public';
 
 import { PromptTelemetry } from './telemetry';
-import { TRIGGER_DEF_ID, UPGRADE_TRIGGER_DEF_PREFIX_ID } from '../common/constants';
+import {
+  TRIGGER_DEF_ID,
+  UPGRADE_TRIGGER_DEF_PREFIX_ID,
+  TRIAL_TRIGGER_DEF_ID,
+} from '../common/constants';
 
 interface ProductInterceptPluginStartDeps {
   intercepts: InterceptsStart;
@@ -24,6 +28,7 @@ export class ProductInterceptPublicPlugin implements Plugin {
   private readonly telemetry = new PromptTelemetry();
   private interceptSubscription?: Subscription;
   private upgradeInterceptSubscription?: Subscription;
+  private trialInterceptSubscription?: Subscription;
   private readonly buildVersion: string;
 
   constructor(ctx: PluginInitializerContext) {
@@ -50,8 +55,13 @@ export class ProductInterceptPublicPlugin implements Plugin {
       surveyUrl.searchParams.set('pid', String(cloud.serverless.projectId || null));
       surveyUrl.searchParams.set('solution', String(cloud.serverless.projectType || null));
 
-      [this.upgradeInterceptSubscription, this.interceptSubscription] = [
+      [
+        this.interceptSubscription,
+        this.trialInterceptSubscription,
+        this.upgradeInterceptSubscription,
+      ] = [
         TRIGGER_DEF_ID,
+        `${TRIAL_TRIGGER_DEF_ID}:${this.buildVersion}`,
         `${UPGRADE_TRIGGER_DEF_PREFIX_ID}:${this.buildVersion}`,
       ].map((triggerId) =>
         intercepts
@@ -75,7 +85,10 @@ export class ProductInterceptPublicPlugin implements Plugin {
   }
 
   stop() {
-    this.interceptSubscription?.unsubscribe();
-    this.upgradeInterceptSubscription?.unsubscribe();
+    [
+      this.interceptSubscription,
+      this.trialInterceptSubscription,
+      this.upgradeInterceptSubscription,
+    ].forEach((subscription) => subscription?.unsubscribe());
   }
 }

@@ -8,9 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { AggExpressionType, AggConfigSerialized } from '..';
-import { AggParamsShardDelay, SHARD_DELAY_AGG_NAME } from './shard_delay';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { AggExpressionType, AggConfigSerialized } from '..';
+import type { AggParamsShardDelay } from './shard_delay';
+import { SHARD_DELAY_AGG_NAME } from './shard_delay';
 
 export const aggShardDelayFnName = 'aggShardDelay';
 

@@ -18,6 +18,14 @@ export const THREAT_FIELD = i18n.translate(
   }
 );
 
+export const THREAT_FIELD_LABEL_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.threatMatch.threatFieldLabelHelpDescription',
+  {
+    defaultMessage:
+      'Start by defining the MATCHES conditions, then add more MATCHES/DOES NOT MATCH entries as needed.',
+  }
+);
+
 export const FIELD_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.threatMatch.fieldPlaceholderDescription',
   {
@@ -28,6 +36,13 @@ export const FIELD_PLACEHOLDER = i18n.translate(
 export const MATCHES = i18n.translate('xpack.securitySolution.threatMatch.matchesLabel', {
   defaultMessage: 'MATCHES',
 });
+
+export const DOES_NOT_MATCH = i18n.translate(
+  'xpack.securitySolution.threatMatch.doesNotMatchLabel',
+  {
+    defaultMessage: 'DOES NOT MATCH',
+  }
+);
 
 export const AND = i18n.translate('xpack.securitySolution.threatMatch.andDescription', {
   defaultMessage: 'AND',

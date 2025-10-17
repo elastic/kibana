@@ -13,7 +13,7 @@ import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-int
 import { SavedObjectsExporter } from './saved_objects_exporter';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
 import { EXPORT_ALL_TYPES_TOKEN } from './constants';
 

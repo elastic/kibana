@@ -6,8 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../lib/object_remover';
+
+const ENTER_KEY = '\uE007';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -15,6 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
   const toasts = getService('toasts');
+  const find = getService('find');
   const objectRemover = new ObjectRemover(supertest);
 
   describe('Maintenance window create form', () => {
@@ -90,6 +93,47 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created maintenance window 'Test Maintenance Window'`);
+      });
+    });
+
+    it('should show a callout warning when filters toggle is on and scope query is set', async () => {
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await testSubjects.click('mw-create-button');
+
+      await retry.try(async () => {
+        await testSubjects.existOrFail('createMaintenanceWindowForm');
+      });
+
+      const nameInput = await testSubjects.find('createMaintenanceWindowFormNameInput');
+
+      await nameInput.click();
+      await nameInput.type('New Maintenance Window');
+      const button = await find.byCssSelector(
+        '[data-test-subj*="maintenanceWindowScopedQuerySwitch"] button'
+      );
+
+      // Turn on filters toggle
+      await button.click();
+
+      await retry.try(async () => {
+        await testSubjects.existOrFail('maintenanceWindowScopeQuery');
+      });
+
+      await testSubjects.missingOrFail('maintenanceWindowMultipleSolutionsRemovedWarning');
+
+      const filtersInput = await testSubjects.find('queryInput');
+      await filtersInput.click();
+      await filtersInput.type('_id: "*"');
+      await filtersInput.pressKeys(ENTER_KEY);
+
+      await testSubjects.existOrFail('maintenanceWindowMultipleSolutionsRemovedWarning');
+
+      await (await testSubjects.find('create-submit')).click();
+
+      await retry.try(async () => {
+        const toastTitle = await toasts.getTitleAndDismiss();
+        expect(toastTitle).to.eql(`Created maintenance window 'New Maintenance Window'`);
       });
     });
   });

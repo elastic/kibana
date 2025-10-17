@@ -7,26 +7,28 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import {
-  initializeTitleManager,
-  useBatchedPublishingSubjects,
-  fetch$,
+import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type {
   PublishesWritableTitle,
   PublishesTitle,
   SerializedTitles,
   HasEditCapabilities,
+} from '@kbn/presentation-publishing';
+import {
+  initializeTitleManager,
+  useBatchedPublishingSubjects,
+  fetch$,
   titleComparators,
 } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { BehaviorSubject, Subject, map, merge } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { MonitorFilters } from './types';
+import type { MonitorFilters } from './types';
 import { StatusGridComponent } from './monitors_grid_component';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
-import { ClientPluginsStart } from '../../../plugin';
+import type { ClientPluginsStart } from '../../../plugin';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
-import { OverviewView } from '../../synthetics/state';
+import type { OverviewView } from '../../synthetics/state';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.monitors.displayName', {

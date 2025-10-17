@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedObjectWithMetadata } from '@kbn/saved-objects-management-plugin/common';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import { SupertestWithRoleScopeType } from '../../services';
+import type { SavedObjectWithMetadata } from '@kbn/saved-objects-management-plugin/common';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const kibanaServer = getService('kibanaServer');

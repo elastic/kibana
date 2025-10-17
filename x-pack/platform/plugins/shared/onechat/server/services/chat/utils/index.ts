@@ -10,4 +10,10 @@ export { generateTitle$, generateConversationTitle } from './generate_title';
 export { handleCancellation } from './handle_cancellation';
 export { getChatModel$ } from './get_chat_model';
 export { executeAgent$ } from './execute_agent';
-export { getConversation$, updateConversation$, createConversation$ } from './conversations';
+export {
+  getConversation$,
+  conversationExists$,
+  createPlaceholderConversation$,
+  updateConversation$,
+  createConversation$,
+} from './conversations';

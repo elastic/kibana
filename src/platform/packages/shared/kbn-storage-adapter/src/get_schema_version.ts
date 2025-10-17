@@ -9,7 +9,7 @@
 
 import stringify from 'json-stable-stringify';
 import objectHash from 'object-hash';
-import { IndexStorageSettings } from '..';
+import type { IndexStorageSettings } from '..';
 
 export function getSchemaVersion(storage: IndexStorageSettings): string {
   const version = objectHash(stringify(storage.schema.properties));

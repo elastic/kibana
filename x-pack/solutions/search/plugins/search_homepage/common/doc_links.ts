@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocLinks } from '@kbn/doc-links';
+import type { DocLinks } from '@kbn/doc-links';
 
 class ESDocLinks {
   public kibanaFeedback: string = '';
@@ -18,6 +18,8 @@ class ESDocLinks {
   public ingestDataToSecurity: string = '';
   public cloudSecurityPosture: string = '';
   public installElasticDefend: string = '';
+  public languageClients: string = '';
+
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
@@ -31,6 +33,7 @@ class ESDocLinks {
     this.ingestDataToSecurity = newDocLinks.siem.ingestDataToSecurity;
     this.cloudSecurityPosture = newDocLinks.securitySolution.cloudSecurityPosture;
     this.installElasticDefend = newDocLinks.securitySolution.installElasticDefend;
+    this.languageClients = newDocLinks.clients.guide;
   }
 }
 

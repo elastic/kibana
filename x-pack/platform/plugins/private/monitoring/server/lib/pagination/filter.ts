@@ -22,6 +22,7 @@ export function filter<T>(
 ): T[] {
   return data.filter((item) => {
     for (const field of fields) {
+      // @ts-expect-error upgrade typescript v5.4.5
       if (filterFn(get(item, field, ''), queryText)) {
         return true;
       }

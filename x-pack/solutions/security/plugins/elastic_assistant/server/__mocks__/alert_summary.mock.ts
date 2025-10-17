@@ -6,8 +6,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { EsAlertSummarySchema } from '../ai_assistant_data_clients/alert_summary/types';
-import {
+import type { EsAlertSummarySchema } from '../ai_assistant_data_clients/alert_summary/types';
+import type {
   PerformAlertSummaryBulkActionRequestBody,
   AlertSummaryCreateProps,
   AlertSummaryResponse,

@@ -10,11 +10,28 @@
 import { parseTestFlags } from './flags';
 import { FlagsReader } from '@kbn/dev-cli-runner';
 import * as configValidator from './config_validator';
+import * as testFilesUtils from '../../common/utils';
 
 const validatePlaywrightConfigMock = jest.spyOn(configValidator, 'validatePlaywrightConfig');
 
+// Mock the entire module to avoid spy redefinition issues
+jest.mock('../../common/utils', () => ({
+  ...jest.requireActual('../../common/utils'),
+  validateAndProcessTestFiles: jest.fn(),
+}));
+
+const validateAndProcessTestFilesMock =
+  testFilesUtils.validateAndProcessTestFiles as jest.MockedFunction<
+    typeof testFilesUtils.validateAndProcessTestFiles
+  >;
+
 describe('parseTestFlags', () => {
-  it(`should throw an error without 'config' flag`, async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    validatePlaywrightConfigMock.mockResolvedValue();
+  });
+
+  it(`should throw an error without 'config' or 'testFiles' flag`, async () => {
     const flags = new FlagsReader({
       stateful: true,
       logToFile: false,
@@ -22,7 +39,21 @@ describe('parseTestFlags', () => {
     });
 
     await expect(parseTestFlags(flags)).rejects.toThrow(
-      'Path to playwright config is required: --config <file path>'
+      `Either '--config' or '--testFiles' flag is required`
+    );
+  });
+
+  it(`should throw an error when both 'config' and 'testFiles' are provided`, async () => {
+    const flags = new FlagsReader({
+      config: '/path/to/config',
+      testFiles: 'test.spec.ts',
+      stateful: true,
+      logToFile: false,
+      headed: false,
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      `Cannot use both '--config' or '--testFiles' flags at the same time`
     );
   });
 
@@ -54,7 +85,7 @@ describe('parseTestFlags', () => {
     });
 
     await expect(parseTestFlags(flags)).rejects.toThrow(
-      'invalid --serverless, expected one of "es", "oblt", "security"'
+      'invalid --serverless, expected one of "es", "oblt", "oblt-logs-essentials", "security"'
     );
   });
 
@@ -161,6 +192,162 @@ describe('parseTestFlags', () => {
       esFrom: 'snapshot',
       installDir: undefined,
       logsDir: undefined,
+    });
+  });
+
+  describe('testFiles flag', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      validatePlaywrightConfigMock.mockResolvedValue();
+    });
+
+    it('should use validateAndProcessTestFiles helper and derive config path', async () => {
+      const testFile =
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/tests/test.spec.ts';
+      const derivedConfig =
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/playwright.config.ts';
+
+      validateAndProcessTestFilesMock.mockReturnValue({
+        testFiles: [testFile],
+        configPath: derivedConfig,
+      });
+
+      const flags = new FlagsReader({
+        testFiles: testFile,
+        stateful: true,
+        logToFile: false,
+        headed: false,
+      });
+
+      const result = await parseTestFlags(flags);
+
+      expect(validateAndProcessTestFilesMock).toHaveBeenCalledWith(testFile);
+      expect(result).toEqual({
+        mode: 'stateful',
+        configPath: derivedConfig,
+        testTarget: 'local',
+        headed: false,
+        testFiles: [testFile],
+        esFrom: undefined,
+        installDir: undefined,
+        logsDir: undefined,
+      });
+    });
+
+    it('should handle multiple test files through helper', async () => {
+      const testFiles = [
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/tests/test1.spec.ts',
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/tests/test2.spec.ts',
+      ];
+      const testFilesString = testFiles.join(',');
+      const derivedConfig =
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/playwright.config.ts';
+
+      validateAndProcessTestFilesMock.mockReturnValue({
+        testFiles,
+        configPath: derivedConfig,
+      });
+
+      const flags = new FlagsReader({
+        testFiles: testFilesString,
+        stateful: true,
+        logToFile: false,
+        headed: false,
+      });
+
+      const result = await parseTestFlags(flags);
+
+      expect(validateAndProcessTestFilesMock).toHaveBeenCalledWith(testFilesString);
+      expect(result).toEqual({
+        mode: 'stateful',
+        configPath: derivedConfig,
+        testTarget: 'local',
+        headed: false,
+        testFiles,
+        esFrom: undefined,
+        installDir: undefined,
+        logsDir: undefined,
+      });
+    });
+
+    it('should handle API tests with correct config derivation', async () => {
+      const testFile =
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/api/tests/test.spec.ts';
+      const derivedConfig =
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/api/playwright.config.ts';
+
+      validateAndProcessTestFilesMock.mockReturnValue({
+        testFiles: [testFile],
+        configPath: derivedConfig,
+      });
+
+      const flags = new FlagsReader({
+        testFiles: testFile,
+        stateful: true,
+        logToFile: false,
+        headed: false,
+      });
+
+      const result = await parseTestFlags(flags);
+
+      expect(result.configPath).toBe(derivedConfig);
+      expect(result.testFiles).toEqual([testFile]);
+    });
+
+    it('should handle parallel tests with correct config derivation', async () => {
+      const testFile =
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/parallel_tests/test.spec.ts';
+      const derivedConfig =
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/parallel.playwright.config.ts';
+
+      validateAndProcessTestFilesMock.mockReturnValue({
+        testFiles: [testFile],
+        configPath: derivedConfig,
+      });
+
+      const flags = new FlagsReader({
+        testFiles: testFile,
+        stateful: true,
+        logToFile: false,
+        headed: false,
+      });
+
+      const result = await parseTestFlags(flags);
+
+      expect(result.configPath).toBe(derivedConfig);
+      expect(result.testFiles).toEqual([testFile]);
+    });
+
+    it('should propagate validation errors from helper', async () => {
+      const testFile = 'invalid/path/test.spec.ts';
+      const errorMessage = 'Test file must be from scout directory';
+
+      validateAndProcessTestFilesMock.mockImplementation(() => {
+        throw new Error(errorMessage);
+      });
+
+      const flags = new FlagsReader({
+        testFiles: testFile,
+        stateful: true,
+        logToFile: false,
+        headed: false,
+      });
+
+      await expect(parseTestFlags(flags)).rejects.toThrow(errorMessage);
+    });
+
+    it('should not include testFiles in result when empty', async () => {
+      const flags = new FlagsReader({
+        config: '/path/to/config',
+        stateful: true,
+        logToFile: false,
+        headed: false,
+      });
+
+      const result = await parseTestFlags(flags);
+
+      expect(result).not.toHaveProperty('testFiles');
+      expect(result.configPath).toBe('/path/to/config');
     });
   });
 });

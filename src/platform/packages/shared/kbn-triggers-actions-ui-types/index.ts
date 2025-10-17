@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './rule_types';
+export type * from './rule_types';
 export * from './action_variable_types';
-export * from './action_group_types';
+export type * from './action_group_types';

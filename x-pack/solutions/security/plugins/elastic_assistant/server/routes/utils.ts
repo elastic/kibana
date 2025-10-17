@@ -18,7 +18,7 @@ import {
   ActionsClientChatBedrockConverse,
   ActionsClientChatVertexAI,
 } from '@kbn/langchain/server';
-import { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import {
   OPENAI_CHAT_URL,
   OpenAiProviderType,

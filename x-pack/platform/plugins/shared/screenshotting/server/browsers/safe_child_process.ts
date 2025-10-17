@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { fromEvent, merge, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { fromEvent, merge } from 'rxjs';
 import { take, share, mapTo, delay, tap } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 

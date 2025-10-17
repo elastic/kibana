@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Command } from '@kbn/dev-cli-runner';
+import type { Command } from '@kbn/dev-cli-runner';
 import { initLogsDir } from '@kbn/test';
-import { FlagsReader } from '@kbn/dev-cli-runner';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { FlagsReader } from '@kbn/dev-cli-runner';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { TEST_FLAG_OPTIONS } from '../playwright/runner';
 import { parseTestFlags, runTests } from '../playwright/runner';
 
@@ -39,6 +39,8 @@ export const runTestsCmd: Command<void> = {
     Running tests against local servers:
     node scripts/scout run-tests --stateful --config <playwright_config_path>
     node scripts/scout run-tests --serverless=es --headed --config <playwright_config_path>
+    node scripts/scout run-tests --serverless=es --testFiles <spec_path1,spec_path2>
+    node scripts/scout run-tests --serverless=es --testFiles <spec_directory_path>
 
     Running tests against Cloud deployment / MKI project:
     node scripts/scout run-tests --stateful --testTarget=cloud --config <playwright_config_path>

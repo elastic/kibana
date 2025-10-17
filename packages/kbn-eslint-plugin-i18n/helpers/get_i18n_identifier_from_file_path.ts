@@ -9,7 +9,6 @@
 
 import fs from 'fs';
 import { join, parse, resolve } from 'path';
-import { findKey } from 'lodash';
 
 export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
   const { dir } = parse(fileName);
@@ -43,11 +42,21 @@ export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
 
   if (Object.keys(allPaths).length === 0) return 'could_not_find_i18nrc';
 
-  return (
-    findKey(allPaths, (value) =>
-      Array.isArray(value)
-        ? value.find((el) => el === path)
-        : typeof value === 'string' && value === path
-    ) ?? 'app_not_found_in_i18nrc'
-  );
+  // First try exact matches
+  for (const [k, v] of Object.entries(allPaths)) {
+    if (Array.isArray(v)) {
+      if (v.some((p) => path === p)) return k;
+    } else if (typeof v === 'string' && path === v) {
+      return k;
+    }
+  }
+
+  // Fallback to substring (legacy behavior)
+  for (const [k, v] of Object.entries(allPaths)) {
+    if (Array.isArray(v)) {
+      if (v.some((p) => path.includes(p))) return k;
+    } else if (typeof v === 'string' && path.includes(v)) {
+      return k;
+    }
+  }
 }

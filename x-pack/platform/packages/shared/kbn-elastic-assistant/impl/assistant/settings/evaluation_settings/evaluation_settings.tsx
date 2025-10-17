@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiComboBoxOptionOption, EuiComboBoxSingleSelectionShape } from '@elastic/eui';
 import {
   EuiAccordion,
   euiPaletteComplementary,
@@ -16,8 +17,6 @@ import {
   EuiSpacer,
   EuiComboBox,
   EuiButton,
-  EuiComboBoxOptionOption,
-  EuiComboBoxSingleSelectionShape,
   EuiTextColor,
   EuiFieldText,
   EuiFieldNumber,
@@ -50,8 +49,9 @@ const AS_PLAIN_TEXT: EuiComboBoxSingleSelectionShape = { asPlainText: true };
  * Evaluation Settings -- development-only feature for evaluating models
  */
 export const EvaluationSettings: React.FC = React.memo(() => {
-  const { actionTypeRegistry, http, setTraceOptions, toasts, traceOptions } = useAssistantContext();
-  const { data: connectors } = useLoadConnectors({ http, inferenceEnabled: true });
+  const { actionTypeRegistry, http, setTraceOptions, toasts, traceOptions, settings } =
+    useAssistantContext();
+  const { data: connectors } = useLoadConnectors({ http, inferenceEnabled: true, settings });
   const { mutate: performEvaluation, isLoading: isPerformingEvaluation } = usePerformEvaluation({
     http,
     toasts,

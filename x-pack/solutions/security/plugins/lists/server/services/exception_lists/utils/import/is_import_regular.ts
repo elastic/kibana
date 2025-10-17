@@ -7,7 +7,7 @@
 
 import { has } from 'lodash/fp';
 
-import { ImportExceptionsOk, ImportResponse } from '../../import_exception_list_and_items';
+import type { ImportExceptionsOk, ImportResponse } from '../../import_exception_list_and_items';
 
 /**
  * Helper to determine if response is error response or not

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { SetupPlugins } from '../../plugin';
 import { MINIMUM_ML_LICENSE } from '../../../common/constants';

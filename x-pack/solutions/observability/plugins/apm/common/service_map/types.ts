@@ -57,8 +57,7 @@ export interface ServiceMapRawResponse {
   anomalies: ServiceAnomaliesResponse;
 }
 
-export type ServiceMapResponse =
-  | Pick<ServiceMapTelemetry, 'tracesCount'> & (ServiceMapRawResponse | GroupResourceNodesResponse);
+export type ServiceMapResponse = Pick<ServiceMapTelemetry, 'tracesCount'> & ServiceMapRawResponse;
 
 export interface ServicesResponse {
   [SERVICE_NAME]: string;

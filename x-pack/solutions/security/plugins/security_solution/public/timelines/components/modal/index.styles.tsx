@@ -8,12 +8,12 @@ import React from 'react';
 import { css } from '@emotion/css';
 import { Global } from '@emotion/react';
 import {
-  useEuiTheme,
   euiAnimFadeIn,
-  transparentize,
+  euiAnimSlideInUp,
   euiBackgroundColor,
   euiCanAnimate,
-  euiAnimSlideInUp,
+  transparentize,
+  useEuiTheme,
 } from '@elastic/eui';
 
 export const usePaneStyles = () => {
@@ -23,14 +23,14 @@ export const usePaneStyles = () => {
   return css`
     // euiOverlayMask styles
     position: fixed;
-    top: var(--kbn-application--content-top, 0px);
-    left: var(--kbn-application--content-left, 0px);
-    right: var(--kbn-application--content-right, 0px);
-    bottom: var(--kbn-application--content-bottom, 0px);
+    top: var(--kbn-layout--application-top, 0px);
+    left: var(--kbn-layout--application-left, 0px);
+    right: var(--kbn-layout--application-right, 0px);
+    bottom: var(--kbn-layout--application-bottom, 0px);
     // TODO EUI: add color with transparency
     background: ${transparentize(euiTheme.colors.ink, 0.5)};
     z-index: ${(euiTheme.levels.flyout as number) +
-    1}; // this z-index needs to be between the eventFlyout (set at 1000) and the timelineFlyout (set at 1002)
+    2}; // this z-index needs to be between the documentFlyout (set at 1001) and the timelineFlyout (set at 1003)
 
     ${euiCanAnimate} {
       animation: ${euiAnimFadeIn} ${euiTheme.animation.fast} ease-in;
@@ -43,10 +43,10 @@ export const usePaneStyles = () => {
     .timeline-container {
       min-width: 150px;
       position: fixed;
-      top: var(--kbn-application--content-top, 0px);
-      left: var(--kbn-application--content-left, 0px);
-      right: var(--kbn-application--content-right, 0px);
-      bottom: var(--kbn-application--content-bottom, 0px);
+      top: var(--kbn-layout--application-top, 0px);
+      left: var(--kbn-layout--application-left, 0px);
+      right: var(--kbn-layout--application-right, 0px);
+      bottom: var(--kbn-layout--application-bottom, 0px);
       background: ${euiBackgroundColor(EuiTheme, 'plain')};
       ${euiCanAnimate} {
         animation: ${euiAnimSlideInUp(euiTheme.size.xxl)} ${euiTheme.animation.normal}

@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -25,7 +25,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     const DATA_VIEW_1_NAME = 'test-data-view-name_1';
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+      );
       await observability.alerts.common.createDataView({
         supertest,
         name: DATA_VIEW_1_NAME,
@@ -38,7 +40,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+      );
       // This also deletes the created data views
       await kibanaServer.savedObjects.cleanStandardList();
     });

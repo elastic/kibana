@@ -8,11 +8,12 @@
  */
 
 import _ from 'lodash';
-import { Datatable, isSourceParamsESQL } from '@kbn/expressions-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import { isSourceParamsESQL } from '@kbn/expressions-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import {
   compareFilters,
   COMPARE_ALL_OPTIONS,
-  Filter,
   toggleFilterNegated,
   type AggregateQuery,
 } from '@kbn/es-query';
@@ -21,8 +22,9 @@ import {
   buildSimpleExistFilter,
   buildSimpleNumberRangeFilter,
 } from '@kbn/es-query/src/filters/build_filters';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import { getIndexPatterns, getSearchService } from '../../services';
-import { AggConfigSerialized } from '../../../common/search/aggs';
+import type { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
 
 export interface ValueClickDataContext {
@@ -67,7 +69,7 @@ const getOtherBucketFilterTerms = (
     ...new Set(
       terms.filter((term) => {
         const notOther = String(term) !== '__other__';
-        const notMissing = String(term) !== '__missing__';
+        const notMissing = String(term) !== MISSING_TOKEN;
         return notOther && notMissing;
       })
     ),
@@ -235,14 +237,11 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
       if (table?.columns?.[columnIndex]) {
         const column = table.columns[columnIndex];
         const value: unknown = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
-        if (value == null) {
-          return;
-        }
         const queryWithWhere = appendWhereClauseToESQLQuery(
           queryString,
           column.name,
           value,
-          negate ? '-' : '+',
+          value == null ? 'is_null' : negate ? '-' : '+',
           column.meta?.type
         );
 

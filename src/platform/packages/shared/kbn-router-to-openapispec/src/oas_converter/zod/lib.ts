@@ -12,7 +12,7 @@ import { isPassThroughAny } from '@kbn/zod-helpers';
 import zodToJsonSchema from 'zod-to-json-schema';
 import type { OpenAPIV3 } from 'openapi-types';
 
-import { KnownParameters } from '../../type';
+import type { KnownParameters } from '../../type';
 import { validatePathParameters } from '../common';
 
 // Adapted from from https://github.com/jlalmes/trpc-openapi/blob/aea45441af785518df35c2bc173ae2ea6271e489/src/utils/zod.ts#L1

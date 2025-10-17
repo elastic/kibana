@@ -10,7 +10,7 @@ import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { syntheticsThrottlingEnabled } from '@kbn/observability-plugin/public';
 import { useConnectionProfiles } from './use_connection_profiles';
 import { ThrottlingDisabledCallout } from './throttling_disabled_callout';
-import { ThrottlingConfig } from '../../../../../../../common/runtime_types';
+import type { ThrottlingConfig } from '../../../../../../../common/runtime_types';
 import { ThrottlingFields } from './throttling_fields';
 import { PROFILE_VALUES_ENUM, PROFILE_VALUES, PROFILES_MAP, CUSTOM_LABEL } from '../../constants';
 import { ConnectionProfile } from './connection_profile';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDataGridCellPopoverElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import React from 'react';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import { ErrorBoundary } from './error_boundary';

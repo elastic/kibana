@@ -10,7 +10,8 @@
 import React from 'react';
 import { merge } from 'lodash';
 import { coreMock } from '@kbn/core/public/mocks';
-import { registerTestBed, AsyncTestBedConfig, TestBed } from '@kbn/test-jest-helpers';
+import type { AsyncTestBedConfig, TestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 
 import { AppContextProvider } from '../management_app/management_context';
 import { ManagementLandingPage } from './landing';
@@ -116,6 +117,73 @@ describe('Landing Page', () => {
 
       expect(exists('managementHome')).toBe(false);
       expect(exists('managementHomeSolution')).toBe(true);
+    });
+  });
+
+  describe('AutoOps Promotion Callout', () => {
+    test('Shows AutoOps callout when not in cloud and has enterprise license', async () => {
+      testBed = await setupLandingPage({
+        chromeStyle: 'classic',
+        cardsNavigationConfig: { enabled: false },
+        cloud: { isCloudEnabled: false },
+        hasEnterpriseLicense: true,
+      });
+
+      const { exists } = testBed;
+
+      expect(exists('autoOpsPromotionCallout')).toBe(true);
+    });
+
+    test('Hides AutoOps callout when in cloud environment', async () => {
+      testBed = await setupLandingPage({
+        chromeStyle: 'classic',
+        cardsNavigationConfig: { enabled: false },
+        cloud: { isCloudEnabled: true },
+        hasEnterpriseLicense: true,
+      });
+
+      const { exists } = testBed;
+
+      expect(exists('autoOpsPromotionCallout')).toBe(false);
+    });
+
+    test('Hides AutoOps callout when not having enterprise license', async () => {
+      testBed = await setupLandingPage({
+        chromeStyle: 'classic',
+        cardsNavigationConfig: { enabled: false },
+        cloud: { isCloudEnabled: false },
+        hasEnterpriseLicense: false,
+      });
+
+      const { exists } = testBed;
+
+      expect(exists('autoOpsPromotionCallout')).toBe(false);
+    });
+
+    test('Hides AutoOps callout when in cloud and without enterprise license', async () => {
+      testBed = await setupLandingPage({
+        chromeStyle: 'classic',
+        cardsNavigationConfig: { enabled: false },
+        cloud: { isCloudEnabled: true },
+        hasEnterpriseLicense: false,
+      });
+
+      const { exists } = testBed;
+
+      expect(exists('autoOpsPromotionCallout')).toBe(false);
+    });
+
+    test('Shows AutoOps callout when cloud service is not available but has enterprise license', async () => {
+      testBed = await setupLandingPage({
+        chromeStyle: 'classic',
+        cardsNavigationConfig: { enabled: false },
+        hasEnterpriseLicense: true,
+        // cloud service not provided - defaults to isCloudEnabled: false
+      });
+
+      const { exists } = testBed;
+
+      expect(exists('autoOpsPromotionCallout')).toBe(true);
     });
   });
 });

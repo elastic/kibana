@@ -11,29 +11,27 @@ import React, { useMemo, useCallback, type ComponentType } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutResizable,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
   EuiSpacer,
   EuiPortal,
   EuiPagination,
   keys,
-  EuiButtonEmpty,
   useEuiTheme,
   useIsWithinMinBreakpoint,
-  EuiFlyoutProps,
   isDOMNode,
 } from '@elastic/eui';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { DocViewerProps } from '@kbn/unified-doc-viewer';
+import type { DocViewerProps } from '@kbn/unified-doc-viewer';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
 
@@ -213,7 +211,7 @@ export function UnifiedDocViewerFlyout({
         onRemoveColumn={removeColumn}
         textBasedHits={isEsqlQuery ? hits : undefined}
         docViewsRegistry={docViewsRegistry}
-        decreaseAvailableHeightBy={80} // flyout footer height
+        decreaseAvailableHeightBy={euiTheme.base}
         initialTabId={initialTabId}
       />
     ),
@@ -229,6 +227,7 @@ export function UnifiedDocViewerFlyout({
       isEsqlQuery,
       hits,
       docViewsRegistry,
+      euiTheme.base,
       initialTabId,
     ]
   );
@@ -306,7 +305,7 @@ export function UnifiedDocViewerFlyout({
               <EuiFlexItem data-test-subj={`docViewerFlyoutNavigationPage-${activePage}`}>
                 <EuiPagination
                   aria-label={i18n.translate('unifiedDocViewer.flyout.documentNavigation', {
-                    defaultMessage: 'Document navigation',
+                    defaultMessage: 'Document pagination',
                   })}
                   pageCount={pageCount}
                   activePage={activePage}
@@ -325,18 +324,6 @@ export function UnifiedDocViewerFlyout({
           )}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiButtonEmpty
-            iconType="cross"
-            onClick={onClose}
-            flush="left"
-            data-test-subj="docViewerFlyoutCloseButton"
-          >
-            {i18n.translate('unifiedDocViewer.flyout.closeButtonLabel', {
-              defaultMessage: 'Close',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlyoutFooter>
       </EuiFlyoutResizable>
     </EuiPortal>
   );

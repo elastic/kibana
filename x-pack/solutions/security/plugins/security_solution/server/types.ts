@@ -6,6 +6,7 @@
  */
 
 import type {
+  AnalyticsServiceSetup,
   CoreRequestHandlerContext,
   CustomRequestHandlerContext,
   IRouter,
@@ -39,18 +40,21 @@ import type { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk
 import type { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
 import type { IDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
-import type { SiemRuleMigrationsClient } from './lib/siem_migrations/rules/siem_rule_migrations_service';
 import type { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_data_client';
-import type { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client';
+import type { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/engine/data_client';
 import type { ApiKeyManager as EntityStoreApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
 import type { ApiKeyManager as PrivilegedUsersApiKeyManager } from './lib/entity_analytics/privilege_monitoring/auth/api_key';
 import type { ProductFeaturesService } from './lib/product_features_service';
-import type { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/monitoring_entity_source_data_client';
+import type { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/data_sources/monitoring_entity_source_data_client';
 import type { MlAuthz } from './lib/machine_learning/authz';
+import type { SiemMigrationClients } from './lib/siem_migrations/types';
+import type { EntityStoreCrudClient } from './lib/entity_analytics/entity_store/entity_store_crud_client';
+
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
+  getAnalytics: () => AnalyticsServiceSetup;
   getServerBasePath: () => string;
   getEndpointAuthz: () => Promise<Immutable<EndpointAuthz>>;
   getEndpointService: () => EndpointAppContextService;
@@ -72,11 +76,12 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getRiskScoreDataClient: () => RiskScoreDataClient;
   getAssetCriticalityDataClient: () => AssetCriticalityDataClient;
   getEntityStoreDataClient: () => EntityStoreDataClient;
+  getEntityStoreCrudClient: () => EntityStoreCrudClient;
   getPrivilegeMonitoringDataClient: () => PrivilegeMonitoringDataClient;
   getMonitoringEntitySourceDataClient: () => MonitoringEntitySourceDataClient;
   getPrivilegedUserMonitoringApiKeyManager: () => PrivilegedUsersApiKeyManager;
   getPadPackageInstallationClient: () => PadPackageInstallationClient;
-  getSiemRuleMigrationsClient: () => SiemRuleMigrationsClient;
+  siemMigrations: SiemMigrationClients;
   getInferenceClient: () => InferenceClient;
   getAssetInventoryClient: () => AssetInventoryDataClient;
   getProductFeatureService: () => ProductFeaturesService;

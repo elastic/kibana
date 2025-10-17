@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHealth } from '@elastic/eui';
 
-import { RepositoryVerification } from '../../../common/types';
+import type { RepositoryVerification } from '../../../common/types';
 
 interface Props {
   verificationResults: RepositoryVerification | null;

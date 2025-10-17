@@ -90,7 +90,7 @@ jobs:
           echo "$ISSUE_BODY" | extract_code_blocks
       - name: Report multiple puppeteer_version properties
         if: ${{ steps.extract_version_bump_config.outputs.multiple_puppeteer_version_properties == 'true' }}
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             github.rest.issues.createComment({
@@ -101,7 +101,7 @@ jobs:
             })
       - name: Report missing puppeteer_version properties
         if: ${{ steps.extract_version_bump_config.outputs.result == '' }}
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             github.rest.issues.createComment({

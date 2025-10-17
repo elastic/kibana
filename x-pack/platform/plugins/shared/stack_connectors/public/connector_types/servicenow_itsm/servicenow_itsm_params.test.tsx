@@ -10,13 +10,15 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { act, render, waitFor, screen } from '@testing-library/react';
 import { merge } from 'lodash';
 
-import { ActionConnector, ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useGetChoices } from '../lib/servicenow/use_get_choices';
 import ServiceNowITSMParamsFields from './servicenow_itsm_params';
-import { Choice } from '../lib/servicenow/types';
+import type { Choice } from '../lib/servicenow/types';
 import { ACTION_GROUP_RECOVERED } from '../lib/servicenow/helpers';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('../lib/servicenow/use_get_choices');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -43,16 +45,11 @@ const actionParams = {
   },
 };
 
-const connector: ActionConnector = {
-  secrets: {},
-  config: {},
+const connector: ActionConnector = createMockActionConnector({
   id: 'test',
   actionTypeId: '.test',
   name: 'Test',
-  isPreconfigured: false,
-  isSystemAction: false as const,
-  isDeprecated: false,
-};
+});
 
 const editAction = jest.fn();
 const defaultProps = {

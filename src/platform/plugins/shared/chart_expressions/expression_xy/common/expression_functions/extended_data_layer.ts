@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExtendedDataLayerFn } from '../types';
+import type { ExtendedDataLayerFn } from '../types';
 import { EXTENDED_DATA_LAYER } from '../constants';
 import { strings } from '../i18n';
 import { commonDataLayerArgs } from './common_data_layer_args';

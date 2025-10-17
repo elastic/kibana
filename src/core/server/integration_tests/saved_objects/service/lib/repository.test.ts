@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import {
   createRootWithCorePlugins,
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { Root } from '@kbn/core-root-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 
 const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),

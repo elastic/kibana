@@ -19,8 +19,68 @@ steps:
         - exit_status: '-1'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
-    label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
+  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_customization.sh
+    label: 'Serverless Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests'
+    agents:
+      machineType: n2-standard-4
+      preemptible: true
+    depends_on:
+      - build
+      - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
+    timeout_in_minutes: 60
+    parallelism: 1
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_installation.sh
+    label: 'Serverless Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests'
+    agents:
+      machineType: n2-standard-4
+      preemptible: true
+    depends_on:
+      - build
+      - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
+    timeout_in_minutes: 60
+    parallelism: 1
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_management.sh
+    label: 'Serverless Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests'
+    agents:
+      machineType: n2-standard-4
+      preemptible: true
+    depends_on:
+      - build
+      - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
+    timeout_in_minutes: 60
+    parallelism: 1
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_upgrade.sh
+    label: 'Serverless Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
       preemptible: true
@@ -59,8 +119,8 @@ steps:
         - exit_status: '-1'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules.sh
-    label: 'Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
+  - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_customization.sh
+    label: 'Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
       preemptible: true
@@ -73,7 +133,67 @@ steps:
       - check_types
       - check_oas_snapshot
     timeout_in_minutes: 60
-    parallelism: 2
+    parallelism: 1
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_installation.sh
+    label: 'Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests'
+    agents:
+      machineType: n2-standard-4
+      preemptible: true
+    depends_on:
+      - build
+      - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
+    timeout_in_minutes: 60
+    parallelism: 1
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_management.sh
+    label: 'Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests'
+    agents:
+      machineType: n2-standard-4
+      preemptible: true
+    depends_on:
+      - build
+      - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
+    timeout_in_minutes: 60
+    parallelism: 1
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_upgrade.sh
+    label: 'Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests'
+    agents:
+      machineType: n2-standard-4
+      preemptible: true
+    depends_on:
+      - build
+      - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
+    timeout_in_minutes: 60
+    parallelism: 1
     retry:
       automatic:
         - exit_status: '-1'

@@ -15,8 +15,11 @@ import {
   MOVING_AVERAGE_WINDOW_DEFAULT_VALUE,
 } from '@kbn/lens-formula-docs';
 import { useDebounceWithOptions } from '../../../../../shared_components';
-import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
-import { FormBasedLayer } from '../../../types';
+import type {
+  FormattedIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+} from '../column_types';
+import type { FormBasedLayer } from '../../../types';
 import {
   buildLabelFunction,
   checkForDateHistogram,

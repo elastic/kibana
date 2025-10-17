@@ -30,12 +30,9 @@ import {
   getOwningTeamsForPath,
   findAreaForCodeOwner,
 } from '@kbn/code-owners';
-import {
-  ScoutEventsReport,
-  ScoutFileInfo,
-  ScoutReportEventAction,
-  type ScoutTestRunInfo,
-} from '../../report';
+import { SCOUT_TARGET_TYPE, SCOUT_TARGET_MODE } from '@kbn/scout-info';
+import type { ScoutFileInfo } from '../../report';
+import { ScoutEventsReport, ScoutReportEventAction, type ScoutTestRunInfo } from '../../report';
 import { environmentMetadata } from '../../../datasources';
 import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
 import { generateTestRunId, getTestIDForTitle } from '../../../helpers';
@@ -51,6 +48,16 @@ export class ScoutPlaywrightReporter implements Reporter {
   private baseTestRunInfo: ScoutTestRunInfo;
   private readonly codeOwnersEntries: CodeOwnersEntry[];
 
+  private readonly testStats: {
+    passes: number;
+    failures: number;
+    pending: number;
+  } = {
+    passes: 0,
+    failures: 0,
+    pending: 0,
+  };
+
   constructor(private reporterOptions: ScoutPlaywrightReporterOptions = {}) {
     this.log = new ToolingLog({
       level: 'info',
@@ -62,7 +69,13 @@ export class ScoutPlaywrightReporter implements Reporter {
     this.log.info(`Scout test run ID: ${this.runId}`);
 
     this.report = new ScoutEventsReport(this.log);
-    this.baseTestRunInfo = { id: this.runId };
+    this.baseTestRunInfo = {
+      id: this.runId,
+      target: {
+        type: SCOUT_TARGET_TYPE,
+        mode: SCOUT_TARGET_MODE,
+      },
+    };
     this.codeOwnersEntries = getCodeOwnersEntries();
   }
 
@@ -112,6 +125,7 @@ export class ScoutPlaywrightReporter implements Reporter {
 
     this.baseTestRunInfo = {
       ...this.baseTestRunInfo,
+      fully_parallel: config.fullyParallel,
       config: configInfo,
     };
 
@@ -223,6 +237,26 @@ export class ScoutPlaywrightReporter implements Reporter {
   }
 
   onTestEnd(test: TestCase, result: TestResult) {
+    switch (result.status) {
+      case 'failed':
+        this.testStats.failures++;
+        break;
+      case 'interrupted':
+        this.testStats.failures++;
+        break;
+      case 'timedOut':
+        this.testStats.failures++;
+        break;
+
+      case 'passed':
+        this.testStats.passes++;
+        break;
+
+      case 'skipped':
+        this.testStats.pending++;
+        break;
+    }
+
     this.report.logEvent({
       ...environmentMetadata,
       reporter: {
@@ -265,9 +299,18 @@ export class ScoutPlaywrightReporter implements Reporter {
         ...this.baseTestRunInfo,
         status: result.status,
         duration: result.duration,
+        tests: {
+          failures: this.testStats.failures,
+          passes: this.testStats.passes,
+          pending: this.testStats.pending,
+          total: this.testStats.failures + this.testStats.passes + this.testStats.pending,
+        },
       },
       event: {
         action: ScoutReportEventAction.RUN_END,
+      },
+      process: {
+        uptime: Math.floor(process.uptime() * 1000),
       },
     });
 

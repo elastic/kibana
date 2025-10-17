@@ -7,13 +7,33 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DELETE_CONVERSATION_ARIA_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.sidePanel.deleteConversationAriaLabel',
+export const CONVERSATION_CONTEXT_MENU = i18n.translate(
+  'xpack.elasticAssistant.assistant.sidePanel.contextMenuLabel',
   {
-    defaultMessage: 'Delete conversation',
+    defaultMessage: 'Conversation options',
   }
 );
 
+export const DELETE_CONVERSATION = i18n.translate(
+  'xpack.elasticAssistant.assistant.sidePanel.deleteConversation',
+  {
+    defaultMessage: 'Delete',
+  }
+);
+
+export const SHARED_BY_YOU = i18n.translate(
+  'xpack.elasticAssistant.assistant.sidePanel.sharedByYou',
+  {
+    defaultMessage: 'Shared by you',
+  }
+);
+
+export const SHARED_WITH_YOU = i18n.translate(
+  'xpack.elasticAssistant.assistant.sidePanel.sharedWithYou',
+  {
+    defaultMessage: 'Shared with you',
+  }
+);
 export const NEW_CHAT = i18n.translate(
   'xpack.elasticAssistant.assistant.conversations.sidePanel.newChatButtonLabel',
   {

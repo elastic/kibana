@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
     const to = 'Aug 16, 2017 @ 00:00:00.000';
 
     before(async () => {
-      await setup('x-pack/test/functional/es_archives/monitoring/multicluster', {
+      await setup('x-pack/platform/test/fixtures/es_archives/monitoring/multicluster', {
         from,
         to,
       });

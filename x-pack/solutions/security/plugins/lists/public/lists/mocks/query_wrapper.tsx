@@ -19,8 +19,11 @@ export const createQueryWrapperMock = (): {
       },
     },
     logger: {
+      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       error: () => undefined,
+      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       log: () => undefined,
+      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       warn: () => undefined,
     },
   });

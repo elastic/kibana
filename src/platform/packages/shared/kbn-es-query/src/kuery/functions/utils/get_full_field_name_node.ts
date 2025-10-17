@@ -8,7 +8,7 @@
  */
 
 import { getFields } from './get_fields';
-import { DataViewBase, DataViewFieldBase, KueryNode } from '../../../..';
+import type { DataViewBase, DataViewFieldBase, KueryNode } from '../../../..';
 import { getDataViewFieldSubtypeNested } from '../../../utils';
 import { isNode as isWildcardNode } from '../../node_types/wildcard';
 

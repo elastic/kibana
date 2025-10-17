@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { EntityDefinition } from '@kbn/entities-schema';
-import { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { EntityDefinition } from '@kbn/entities-schema';
+import type { Logger } from '@kbn/logging';
 import { deleteEntityDefinition } from './delete_entity_definition';
 import { deleteIngestPipelines } from './delete_ingest_pipeline';
-
 import { deleteTemplates } from '../manage_index_templates';
-
 import { stopTransforms } from './stop_transforms';
-
 import { deleteTransforms } from './delete_transforms';
 import { EntityClient } from '../entity_client';
-import { EntityManagerServerSetup } from '../../types';
+import type { EntityManagerServerSetup } from '../../types';
 import { deleteEntityDiscoveryAPIKey, readEntityDiscoveryAPIKey } from '../auth';
 import { getClientsFromAPIKey } from '../utils';
 
@@ -66,8 +63,10 @@ export async function uninstallBuiltInEntityDefinitions({
 
 export async function disableManagedEntityDiscovery({
   server,
+  isServerless,
 }: {
   server: EntityManagerServerSetup;
+  isServerless: boolean;
 }) {
   const apiKey = await readEntityDiscoveryAPIKey(server);
   if (!apiKey) {
@@ -75,7 +74,12 @@ export async function disableManagedEntityDiscovery({
   }
 
   const { clusterClient, soClient } = getClientsFromAPIKey({ apiKey, server });
-  const entityClient = new EntityClient({ clusterClient, soClient, logger: server.logger });
+  const entityClient = new EntityClient({
+    clusterClient,
+    soClient,
+    isServerless,
+    logger: server.logger,
+  });
 
   await uninstallBuiltInEntityDefinitions({ entityClient, deleteData: true });
 

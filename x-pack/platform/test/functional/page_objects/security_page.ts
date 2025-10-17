@@ -6,7 +6,11 @@
  */
 
 import { adminTestUser } from '@kbn/test';
-import { AuthenticatedUser, Role, RoleRemoteClusterPrivilege } from '@kbn/security-plugin/common';
+import type {
+  AuthenticatedUser,
+  Role,
+  RoleRemoteClusterPrivilege,
+} from '@kbn/security-plugin/common';
 import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
 import { Key } from 'selenium-webdriver';
 import { FtrService } from '../ftr_provider_context';
@@ -165,7 +169,7 @@ export class SecurityPageObject extends FtrService {
         if (alert && alert.accept) {
           await alert.accept();
         }
-        return await this.find.existsByDisplayedByCssSelector('.login-form');
+        return await this.isLoginFormVisible();
       }
     );
   }
@@ -253,7 +257,9 @@ export class SecurityPageObject extends FtrService {
   async initTests() {
     this.log.debug('SecurityPage:initTests');
     await this.kibanaServer.savedObjects.cleanStandardList();
-    await this.esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+    await this.esArchiver.loadIfNeeded(
+      'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+    );
     await this.browser.setWindowSize(1600, 1000);
   }
 
@@ -301,7 +307,7 @@ export class SecurityPageObject extends FtrService {
     { waitForLoginPage }: { waitForLoginPage: boolean } = { waitForLoginPage: true }
   ) {
     this.log.debug('SecurityPage.forceLogout');
-    if (await this.find.existsByDisplayedByCssSelector('.login-form', 100)) {
+    if (await this.isLoginFormVisible()) {
       this.log.debug('Already on the login page, not forcing anything');
       return;
     }

@@ -17,10 +17,15 @@ import {
   renderWithReduxStore,
 } from '../../../../mocks';
 
-import { DatasourcePublicAPI, SuggestionRequest, DatasourceSuggestion } from '../../../../types';
-import { ChartSwitchProps } from './chart_switch';
+import type {
+  DatasourcePublicAPI,
+  SuggestionRequest,
+  DatasourceSuggestion,
+} from '../../../../types';
+import type { ChartSwitchProps } from './chart_switch';
 import { ChartSwitchPopover } from './chart_switch_popover';
-import { LensAppState, applyChanges } from '../../../../state_management';
+import type { LensAppState } from '../../../../state_management';
+import { applyChanges } from '../../../../state_management';
 import { faker } from '@faker-js/faker';
 
 const mockFrame = (layers: string[]) => ({

@@ -7,30 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './management_app.scss';
-
 import React, { useState, useEffect, useCallback } from 'react';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { BehaviorSubject, Observable } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
-import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
-import { CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import useObservable from 'react-use/lib/useObservable';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { AppContextProvider } from './management_context';
-import {
-  ManagementSection,
-  MANAGEMENT_BREADCRUMB,
-  MANAGEMENT_BREADCRUMB_NO_HREF,
-} from '../../utils';
+import type { ManagementSection } from '../../utils';
+import { MANAGEMENT_BREADCRUMB, MANAGEMENT_BREADCRUMB_NO_HREF } from '../../utils';
 import { ManagementRouter } from './management_router';
 import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
-import { SectionsServiceStart, NavigationCardsSubject, AppDependencies } from '../../types';
+import type { SectionsServiceStart, NavigationCardsSubject, AppDependencies } from '../../types';
 
 interface ManagementAppProps {
   appBasePath: string;
@@ -42,6 +38,8 @@ export interface ManagementAppDependencies {
   sections: SectionsServiceStart;
   kibanaVersion: string;
   coreStart: CoreStart;
+  cloud?: { isCloudEnabled: boolean; baseUrl?: string };
+  hasEnterpriseLicense: boolean;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   isSidebarEnabled$: BehaviorSubject<boolean>;
   cardsNavigationConfig$: BehaviorSubject<NavigationCardsSubject>;
@@ -113,6 +111,8 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
     kibanaVersion: dependencies.kibanaVersion,
     coreStart,
     chromeStyle,
+    cloud: dependencies.cloud,
+    hasEnterpriseLicense: dependencies.hasEnterpriseLicense,
   };
 
   return (

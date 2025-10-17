@@ -214,7 +214,9 @@ const NetworkDetailsComponent: React.FC = () => {
         <>
           <FiltersGlobal>
             <SiemSearchBar
-              sourcererDataView={oldSourcererDataView} // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
+              sourcererDataView={
+                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView
+              }
               id={InputsModelId.global}
             />
           </FiltersGlobal>

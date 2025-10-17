@@ -6,27 +6,31 @@
  */
 
 import type { UnifiedTraceErrors } from './get_unified_trace_errors';
-import { getErrorCountByDocId } from './get_unified_trace_items';
+import { getErrorsByDocId } from './get_unified_trace_items';
 
-describe('getErrorCountByDocId', () => {
-  it('counts errors grouped by doc id from apmErrors and unprocessedOtelErrors', () => {
+describe('getErrorsByDocId', () => {
+  it('groups errors by doc id from apmErrors and unprocessedOtelErrors', () => {
     const unifiedTraceErrors = {
       apmErrors: [
-        { parent: { id: 'a' } },
-        { parent: { id: 'a' } },
-        { parent: { id: 'b' } },
-        { parent: { id: undefined } },
+        { transaction: { id: 'a' }, id: 'error-1' },
+        { transaction: { id: 'a' }, id: 'error-2' },
+        { span: { id: 'b' }, id: 'error-3' },
+        { span: { id: undefined }, id: 'error-4' },
       ],
-      unprocessedOtelErrors: [{ id: 'a' }, { id: 'c' }, { id: undefined }],
-      totalErrors: 5,
+      unprocessedOtelErrors: [
+        { spanId: 'a', id: 'error-5' },
+        { spanId: 'c', id: 'error-6' },
+        { spanId: undefined, id: 'error-7' },
+      ],
+      totalErrors: 7,
     } as UnifiedTraceErrors;
 
-    const result = getErrorCountByDocId(unifiedTraceErrors);
+    const result = getErrorsByDocId(unifiedTraceErrors);
 
     expect(result).toEqual({
-      a: 3,
-      b: 1,
-      c: 1,
+      a: [{ errorDocId: 'error-1' }, { errorDocId: 'error-2' }, { errorDocId: 'error-5' }],
+      b: [{ errorDocId: 'error-3' }],
+      c: [{ errorDocId: 'error-6' }],
     });
   });
 
@@ -37,16 +41,16 @@ describe('getErrorCountByDocId', () => {
       totalErrors: 0,
     } as UnifiedTraceErrors;
 
-    expect(getErrorCountByDocId(unifiedTraceErrors)).toEqual({});
+    expect(getErrorsByDocId(unifiedTraceErrors)).toEqual({});
   });
 
   it('ignores errors with undefined ids', () => {
     const unifiedTraceErrors = {
-      apmErrors: [{ parent: { id: undefined } }],
-      unprocessedOtelErrors: [{ id: undefined }],
+      apmErrors: [{ span: { id: undefined }, id: 'error-1' }],
+      unprocessedOtelErrors: [{ spanId: undefined, id: 'error-2' }],
       totalErrors: 0,
     } as unknown as UnifiedTraceErrors;
 
-    expect(getErrorCountByDocId(unifiedTraceErrors)).toEqual({});
+    expect(getErrorsByDocId(unifiedTraceErrors)).toEqual({});
   });
 });

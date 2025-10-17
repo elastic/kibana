@@ -140,6 +140,8 @@ const ExceptionsViewerComponent = ({
     ...initialState,
   });
 
+  const isReadOnlyOnCurrentList = isEndpointSpecified ? !canWriteEndpointExceptions : isReadOnly;
+
   // Reducer actions
   const setLastUpdated = useCallback(
     (lastUpdate: string | number): void => {
@@ -522,7 +524,7 @@ const ExceptionsViewerComponent = ({
               />
               <EuiSpacer size="m" />
               <ExceptionsViewerSearchBar
-                canAddException={isEndpointSpecified ? !canWriteEndpointExceptions : isReadOnly}
+                isReadOnly={isReadOnlyOnCurrentList}
                 isEndpoint={isEndpointSpecified}
                 isSearching={viewerState === 'searching'}
                 onSearch={handleSearch}
@@ -533,8 +535,8 @@ const ExceptionsViewerComponent = ({
           <EuiSpacer size="l" />
 
           <ExceptionsViewerItems
-            isReadOnly={isEndpointSpecified ? !canWriteEndpointExceptions : isReadOnly}
-            disableActions={isReadOnly || viewerState === 'deleting' || !canWriteEndpointExceptions}
+            isReadOnly={isReadOnlyOnCurrentList}
+            disableActions={isReadOnlyOnCurrentList || viewerState === 'deleting'}
             exceptions={exceptions}
             isEndpoint={isEndpointSpecified}
             ruleReferences={allReferences}

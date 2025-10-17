@@ -8,16 +8,9 @@
  */
 
 import path from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
-import {
-  ApiDeclaration,
-  ScopeApi,
-  TypeKind,
-  Lifecycle,
-  PluginApi,
-  ApiScope,
-  PluginOrPackage,
-} from './types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { ApiDeclaration, ScopeApi, PluginApi, PluginOrPackage } from './types';
+import { TypeKind, Lifecycle, ApiScope } from './types';
 
 function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);

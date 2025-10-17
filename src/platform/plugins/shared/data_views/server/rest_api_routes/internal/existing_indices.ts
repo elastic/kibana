@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IRouter, RequestHandler } from '@kbn/core/server';
+import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { INITIAL_REST_VERSION_INTERNAL as version } from '../../constants';
 import { IndexPatternsFetcher } from '../..';

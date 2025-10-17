@@ -14,12 +14,12 @@ import {
   type RangeSelectDataContext,
 } from './create_filters_from_range_select';
 
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
-import { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { DateFormat } from '@kbn/field-formats-plugin/public';
-import { RangeFilter } from '@kbn/es-query';
+import type { RangeFilter } from '@kbn/es-query';
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;

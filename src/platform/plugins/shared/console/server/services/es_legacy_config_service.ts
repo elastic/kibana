@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom, Observable, Subscription } from 'rxjs';
-import { ElasticsearchConfig } from '@kbn/core/server';
+import type { Observable, Subscription } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
+import type { ElasticsearchConfig } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 export class EsLegacyConfigService {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { VectorStyleDescriptor } from '@kbn/maps-plugin/common';
+import type { LAYER_STYLE_TYPE, VectorStyleDescriptor } from '@kbn/maps-plugin/common';
 import {
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
@@ -29,7 +29,7 @@ export function getLayerStyle(
 ): VectorStyleDescriptor {
   const { lineColor, labelColor, labelOutlineColor } = styleColors;
   return {
-    type: 'VECTOR',
+    type: 'VECTOR' as LAYER_STYLE_TYPE.VECTOR,
     properties: {
       icon: { type: STYLE_TYPE.STATIC, options: { value: 'marker' } },
       fillColor: {

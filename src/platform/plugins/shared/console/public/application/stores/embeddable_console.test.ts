@@ -8,11 +8,8 @@
  */
 
 import { reducer, initialValue } from './embeddable_console';
-import {
-  EmbeddableConsoleView,
-  EmbeddedConsoleAction,
-  EmbeddedConsoleStore,
-} from '../../types/embeddable_console';
+import type { EmbeddedConsoleAction, EmbeddedConsoleStore } from '../../types/embeddable_console';
+import { EmbeddableConsoleView } from '../../types/embeddable_console';
 
 describe('embeddable_console store', () => {
   it('should return initial state when no action matches', () => {

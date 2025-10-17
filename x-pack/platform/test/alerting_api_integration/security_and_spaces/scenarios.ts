@@ -42,7 +42,7 @@ export const Superuser: User = {
   },
 };
 
-const GlobalRead: User = {
+export const GlobalRead: User = {
   username: 'global_read',
   fullName: 'global_read',
   password: 'global_read-password',
@@ -57,6 +57,8 @@ const GlobalRead: User = {
           actionsSimulators: ['read'],
           rulesSettings: ['read', READ_FLAPPING_SETTINGS_SUB_FEATURE_ID],
           maintenanceWindow: ['read'],
+          siem: ['read'],
+          stackAlerts: ['read'],
         },
         spaces: ['*'],
       },
@@ -86,6 +88,8 @@ const Space1All: User = {
           actionsSimulators: ['all'],
           rulesSettings: ['all', ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID],
           maintenanceWindow: ['all'],
+          siem: ['all'],
+          stackAlerts: ['all'],
         },
         spaces: ['space1'],
       },
@@ -244,6 +248,12 @@ const OtherSpace: Space = {
   disabledFeatures: [],
 };
 
+export const DefaultSpace: Space = {
+  id: 'default',
+  name: 'Default Space',
+  disabledFeatures: [],
+};
+
 export const Spaces: Space[] = [Space1, Space2, OtherSpace];
 
 // For all scenarios, we define both an instance in addition
@@ -258,7 +268,7 @@ export interface Scenario {
 interface NoKibanaPrivilegesAtSpace1 extends Scenario {
   id: 'no_kibana_privileges at space1';
 }
-const NoKibanaPrivilegesAtSpace1: NoKibanaPrivilegesAtSpace1 = {
+export const NoKibanaPrivilegesAtSpace1: NoKibanaPrivilegesAtSpace1 = {
   id: 'no_kibana_privileges at space1',
   user: NoKibanaPrivileges,
   space: Space1,
@@ -276,6 +286,7 @@ export const SuperuserAtSpace1: SuperuserAtSpace1 = {
 interface GlobalReadAtSpace1 extends Scenario {
   id: 'global_read at space1';
 }
+
 export const GlobalReadAtSpace1: GlobalReadAtSpace1 = {
   id: 'global_read at space1',
   user: GlobalRead,

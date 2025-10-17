@@ -7,16 +7,19 @@
 
 import rawExpect from 'expect';
 import expect from '@kbn/expect';
-import {
+import type {
   IngestStreamEffectiveLifecycle,
   IngestStreamLifecycle,
   IngestStreamLifecycleDisabled,
+} from '@kbn/streams-schema';
+import {
   Streams,
   isDisabledLifecycle,
   isDslLifecycle,
   isIlmLifecycle,
+  emptyAssets,
 } from '@kbn/streams-schema';
-import { IndicesManagedBy } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesManagedBy } from '@elastic/elasticsearch/lib/api/types';
 import {
   disableStreams,
   enableStreams,
@@ -24,11 +27,9 @@ import {
   getStream,
   getIlmStats,
 } from './helpers/requests';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');
@@ -112,12 +113,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         description: '',
         ingest: {
           lifecycle: { inherit: {} },
-          processing: [],
+          settings: {},
+          processing: { steps: [] },
           wired: { fields: {}, routing: [] },
         },
       },
-      dashboards: [],
-      queries: [],
+      ...emptyAssets,
     };
 
     describe('Wired streams update', () => {
@@ -125,8 +126,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const rootDefinition = await getStream(apiClient, 'logs');
 
         const response = await putStream(apiClient, 'logs', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -158,8 +158,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           apiClient,
           'logs',
           {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -175,8 +174,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('inherits on creation', async () => {
         const rootDefinition = await getStream(apiClient, 'logs');
         await putStream(apiClient, 'logs', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -201,8 +199,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const rootDefinition = await getStream(apiClient, 'logs');
         await putStream(apiClient, 'logs', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -212,15 +209,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
         await putStream(apiClient, 'logs.overrides', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               wired: {
                 fields: {},
-                routing: [{ destination: 'logs.overrides.lifecycle', if: { never: {} } }],
+                routing: [
+                  {
+                    destination: 'logs.overrides.lifecycle',
+                    where: { never: {} },
+                    status: 'disabled',
+                  },
+                ],
               },
               lifecycle: { dsl: { data_retention: '1d' } },
             },
@@ -240,8 +242,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('applies the nearest parent lifecycle when deleted', async () => {
         await putStream(apiClient, 'logs.10d', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -251,8 +252,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
         await putStream(apiClient, 'logs.10d.20d', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -265,15 +265,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         // delete lifecycle of the 20d override
         await putStream(apiClient, 'logs.10d.20d', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               wired: {
                 fields: {},
-                routing: [{ destination: 'logs.10d.20d.inherits', if: { never: {} } }],
+                routing: [
+                  {
+                    destination: 'logs.10d.20d.inherits',
+                    where: { never: {} },
+                    status: 'disabled',
+                  },
+                ],
               },
             },
           },
@@ -287,8 +292,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('handles no retention dsl', async () => {
         await putStream(apiClient, 'logs.no', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -299,8 +303,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         await putStream(apiClient, 'logs.no.retention', {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -322,8 +325,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             apiClient,
             'logs.ilm',
             {
-              dashboards: [],
-              queries: [],
+              ...emptyAssets,
               stream: {
                 description: '',
                 ingest: {
@@ -339,15 +341,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('inherits ilm', async () => {
           await putStream(apiClient, 'logs.ilm.stream', wiredPutBody);
           await putStream(apiClient, 'logs.ilm', {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
                   fields: {},
-                  routing: [{ destination: 'logs.ilm.stream', if: { never: {} } }],
+                  routing: [
+                    { destination: 'logs.ilm.stream', where: { never: {} }, status: 'disabled' },
+                  ],
                 },
                 lifecycle: { ilm: { policy: 'my-policy' } },
               },
@@ -363,8 +366,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('updates when transitioning from ilm to dsl', async () => {
           const name = 'logs.ilm-with-backing-indices';
           await putStream(apiClient, name, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -378,8 +380,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await esClient.indices.rollover({ alias: name });
 
           await putStream(apiClient, name, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -399,8 +400,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('updates when transitioning from dsl to ilm', async () => {
           const name = 'logs.dsl-with-backing-indices';
           await putStream(apiClient, name, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -418,8 +418,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await esClient.indices.rollover({ alias: name });
 
           await putStream(apiClient, name, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -438,18 +437,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    describe('Unwired streams update', () => {
-      const unwiredPutBody: Streams.UnwiredStream.UpsertRequest = {
+    describe('Classic streams update', () => {
+      const classicPutBody: Streams.ClassicStream.UpsertRequest = {
         stream: {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: [],
-            unwired: {},
+            processing: { steps: [] },
+            settings: {},
+            classic: {},
           },
         },
-        dashboards: [],
-        queries: [],
+        ...emptyAssets,
       };
 
       let clean: () => Promise<void>;
@@ -490,22 +489,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       };
 
       it('inherit falls back to template dsl configuration', async () => {
-        const indexName = 'unwired-stream-inherit-dsl';
+        const indexName = 'classic-stream-inherit-dsl';
         await createDataStream(indexName, { dsl: { data_retention: '77d' } });
 
         // initially set to inherit which is a noop
-        await putStream(apiClient, indexName, unwiredPutBody);
+        await putStream(apiClient, indexName, classicPutBody);
         await esClient.indices.rollover({ alias: indexName });
         await expectLifecycle([indexName], { dsl: { data_retention: '77d' } });
 
         // update lifecycle
         await putStream(apiClient, indexName, {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
-              ...unwiredPutBody.stream.ingest,
+              ...classicPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '2d' } },
             },
           },
@@ -513,21 +511,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await expectLifecycle([indexName], { dsl: { data_retention: '2d' } });
 
         // inherit sets the lifecycle back to the template configuration
-        await putStream(apiClient, indexName, unwiredPutBody, 200);
+        await putStream(apiClient, indexName, classicPutBody, 200);
         await expectLifecycle([indexName], { dsl: { data_retention: '77d' } });
       });
 
       it('overrides dsl retention', async () => {
-        const indexName = 'unwired-stream-override-dsl';
+        const indexName = 'classic-stream-override-dsl';
         await createDataStream(indexName, { dsl: { data_retention: '77d' } });
 
         await putStream(apiClient, indexName, {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
-              ...unwiredPutBody.stream.ingest,
+              ...classicPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '11d' } },
             },
           },
@@ -538,15 +535,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       if (isServerless) {
         it('does not support ilm', async () => {
-          const indexName = 'unwired-stream-no-ilm';
+          const indexName = 'classic-stream-no-ilm';
           await createDataStream(indexName, { dsl: { data_retention: '2d' } });
 
           await putStream(
             apiClient,
             indexName,
             {
-              dashboards: [],
-              queries: [],
+              ...emptyAssets,
               stream: {
                 description: '',
                 ingest: {
@@ -560,16 +556,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       } else {
         it('updates from ilm to dsl', async () => {
-          const indexName = 'unwired-stream-ilm-to-dsl';
+          const indexName = 'classic-stream-ilm-to-dsl';
           await createDataStream(indexName, { ilm: { policy: 'my-policy' } });
 
           await putStream(apiClient, indexName, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
-                ...unwiredPutBody.stream.ingest,
+                ...classicPutBody.stream.ingest,
                 lifecycle: { dsl: { data_retention: '1d' } },
               },
             },
@@ -579,16 +574,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('updates from dsl to ilm', async () => {
-          const indexName = 'unwired-stream-dsl-to-ilm';
+          const indexName = 'classic-stream-dsl-to-ilm';
           await createDataStream(indexName, { dsl: { data_retention: '10d' } });
 
           await putStream(apiClient, indexName, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
-                ...unwiredPutBody.stream.ingest,
+                ...classicPutBody.stream.ingest,
                 lifecycle: { ilm: { policy: 'my-policy' } },
               },
             },
@@ -598,23 +592,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('inherit falls back to template dsl or ilm configuration', async () => {
-          const indexName = 'unwired-stream-inherit-dsl-ilm';
+          const indexName = 'classic-stream-inherit-dsl-ilm';
           const templateLifecycle = { ilm: { policy: 'my-policy' } };
           await createDataStream(indexName, templateLifecycle);
 
           // initially set to inherit which is a noop
-          await putStream(apiClient, indexName, unwiredPutBody);
+          await putStream(apiClient, indexName, classicPutBody);
           await esClient.indices.rollover({ alias: indexName });
           await expectLifecycle([indexName], templateLifecycle);
 
           // update lifecycle
           await putStream(apiClient, indexName, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
-                ...unwiredPutBody.stream.ingest,
+                ...classicPutBody.stream.ingest,
                 lifecycle: { dsl: { data_retention: '2d' } },
               },
             },
@@ -622,7 +615,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await expectLifecycle([indexName], { dsl: { data_retention: '2d' } });
 
           // inherit sets the lifecycle back to the template configuration
-          await putStream(apiClient, indexName, unwiredPutBody);
+          await putStream(apiClient, indexName, classicPutBody);
           await expectLifecycle([indexName], templateLifecycle);
 
           // update the template to use a new ilm policy
@@ -642,23 +635,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('inherit falls back to template disabled configuration', async () => {
-          const indexName = 'unwired-stream-inherit-disabled';
+          const indexName = 'classic-stream-inherit-disabled';
           const templateLifecycle = { disabled: {} };
           await createDataStream(indexName, templateLifecycle);
 
           // initially set to inherit which is a noop
-          await putStream(apiClient, indexName, unwiredPutBody);
+          await putStream(apiClient, indexName, classicPutBody);
           await esClient.indices.rollover({ alias: indexName });
           await expectLifecycle([indexName], templateLifecycle);
 
           // update lifecycle to dsl
           await putStream(apiClient, indexName, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
-                ...unwiredPutBody.stream.ingest,
+                ...classicPutBody.stream.ingest,
                 lifecycle: { dsl: { data_retention: '2d' } },
               },
             },
@@ -667,12 +659,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           // update lifecycle to ilm
           await putStream(apiClient, indexName, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
-                ...unwiredPutBody.stream.ingest,
+                ...classicPutBody.stream.ingest,
                 lifecycle: { ilm: { policy: 'my-policy' } },
               },
             },
@@ -680,7 +671,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await expectLifecycle([indexName], { ilm: { policy: 'my-policy' } });
 
           // inherit sets the lifecycle back to the template configuration
-          await putStream(apiClient, indexName, unwiredPutBody);
+          await putStream(apiClient, indexName, classicPutBody);
           await expectLifecycle([indexName], templateLifecycle);
         });
       }
@@ -690,8 +681,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('is not enabled for streams with dsl', async () => {
         const indexName = 'logs.dslnostats';
         await putStream(apiClient, indexName, {
-          dashboards: [],
-          queries: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -711,8 +701,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('returns not found when the policy does not exist', async () => {
           const indexName = 'logs.ilmpolicydontexists';
           await putStream(apiClient, indexName, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -743,8 +732,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           await putStream(apiClient, indexName, {
-            dashboards: [],
-            queries: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {

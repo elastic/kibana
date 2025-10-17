@@ -27,7 +27,7 @@ import {
   JsonEditorWithMessageVariables,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { IndexActionParams } from '../types';
+import type { IndexActionParams } from '../types';
 
 export const IndexParamsFields = ({
   actionParams,
@@ -61,7 +61,7 @@ export const IndexParamsFields = ({
         ? // if non-empty object, stringify it into format that JSON editor expects
           JSON.stringify(docs[0], null, 2)
         : null
-      : undefined;
+      : '';
   };
 
   const [documentToIndex, setDocumentToIndex] = useState<string | undefined | null>(

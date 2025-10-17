@@ -21,7 +21,7 @@ const { readPackageManifest } = require('./parse_package_manifest');
 const normalize = (path) => (Path.sep !== '/' ? path.split('\\').join('/') : path);
 
 /**
- * Representation of a Bazel Package in the Kibana repository
+ * Representation of a Package in the Kibana repository
  * @class
  */
 class Package {
@@ -196,9 +196,7 @@ class Package {
       dir.startsWith('x-pack/platform/test/') ||
       dir.startsWith('x-pack/solutions/search/test/') ||
       dir.startsWith('x-pack/solutions/observability/test/') ||
-      dir.startsWith('x-pack/solutions/security/test/') ||
-      dir.startsWith('x-pack/test/');
-
+      dir.startsWith('x-pack/solutions/security/test/');
     return {
       oss,
       example,
@@ -231,15 +229,15 @@ class Package {
     } else if (dir.startsWith('x-pack/solutions/observability/')) {
       group = 'observability';
       visibility = 'private';
-    } else if (dir.startsWith('x-pack/solutions/chat/')) {
-      group = 'chat';
+    } else if (dir.startsWith('x-pack/solutions/workplace_ai/')) {
+      group = 'workplace_ai';
       visibility = 'private';
     } else {
       // this conditional branch is the only one that applies in production
       group = this.manifest.group ?? 'common';
       // if the group is 'private-only', enforce it
       //  BOOKMARK - List of Kibana solutions - FIXME we could use KIBANA_SOLUTIONS array here once we modernize this / get rid of Bazel
-      visibility = ['search', 'security', 'observability', 'chat'].includes(group)
+      visibility = ['search', 'security', 'observability', 'workplace_ai'].includes(group)
         ? 'private'
         : this.manifest.visibility ?? 'shared';
     }
@@ -248,8 +246,7 @@ class Package {
   }
 
   /**
-   * Custom inspect handler so that logging variables in scripts/generate doesn't
-   * print all the BUILD.bazel files
+   * Custom inspect handler
    */
   [inspect.custom]() {
     return `${this.isPlugin() ? `PluginPackage` : `Package`}<${this.normalizedRepoRelativeDir}>`;

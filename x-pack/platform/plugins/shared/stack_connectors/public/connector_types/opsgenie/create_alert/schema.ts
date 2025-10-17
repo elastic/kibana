@@ -8,7 +8,7 @@
 import type { Either } from 'fp-ts/Either';
 import * as rt from 'io-ts';
 import { isEmpty } from 'lodash';
-import { decodeSchema } from '../schema_utils';
+import { decodeSchema } from '../../lib/schema_utils';
 import * as i18n from './translations';
 
 const MessageNonEmptyString = new rt.Type<string, string, unknown>(

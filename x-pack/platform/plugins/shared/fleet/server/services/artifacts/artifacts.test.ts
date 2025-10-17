@@ -322,7 +322,10 @@ describe('When using the artifacts services', () => {
     it('should return error if one is encountered', async () => {
       esClientMock.bulk.mockResolvedValue({
         errors: true,
-        items: [{ create: { status: 400, error: { reason: 'error' } } as any }],
+        items: [
+          { create: { status: 200 } as any },
+          { create: { status: 400, error: { reason: 'error' } } as any },
+        ],
       } as any);
       const { artifacts, errors: responseErrors } = await bulkCreateArtifacts(esClientMock, [
         newArtifact,

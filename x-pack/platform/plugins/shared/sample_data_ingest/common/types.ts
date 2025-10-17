@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { DocumentationProduct } from '@kbn/product-doc-common';
-
 export type InstallationStatus = 'installed' | 'uninstalled' | 'installing' | 'error';
 
 export interface StatusResponse {
   status: InstallationStatus;
   indexName?: string;
+  dashboardId?: string;
 }
 
 export interface InstallResponse {
   status: InstallationStatus;
   indexName: string;
+  dashboardId?: string;
 }
 
 export enum DatasetSampleType {
-  elasticsearch = DocumentationProduct.elasticsearch,
+  elasticsearch = 'elasticsearch_documentation',
 }

@@ -9,17 +9,17 @@
 
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_CONTROL_CHAINING,
+  DEFAULT_CONTROLS_CHAINING,
   DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_LABEL_POSITION,
+  DEFAULT_CONTROLS_LABEL_POSITION,
   DEFAULT_CONTROL_WIDTH,
   DEFAULT_IGNORE_PARENT_SETTINGS,
-} from '@kbn/controls-plugin/common';
-import {
+} from '@kbn/controls-constants';
+import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '../../../../dashboard_saved_object';
-import { DashboardAttributes } from '../../types';
+import type { DashboardAttributes } from '../../types';
 import { transformDashboardOut } from './transform_dashboard_out';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
 
@@ -57,8 +57,8 @@ describe('transformDashboardOut', () => {
     };
     expect(transformDashboardOut(input)).toEqual<DashboardAttributes>({
       controlGroupInput: {
-        chainingSystem: DEFAULT_CONTROL_CHAINING,
-        labelPosition: DEFAULT_CONTROL_LABEL_POSITION,
+        chainingSystem: DEFAULT_CONTROLS_CHAINING,
+        labelPosition: DEFAULT_CONTROLS_LABEL_POSITION,
         ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
         autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
         controls: [
@@ -73,20 +73,19 @@ describe('transformDashboardOut', () => {
         ],
       },
       description: 'my description',
-      kibanaSavedObjectMeta: {},
       options: {
         ...DEFAULT_DASHBOARD_OPTIONS,
         hidePanelTitles: false,
       },
       panels: [
         {
-          panelConfig: {
+          config: {
             enhancements: {},
             savedObjectId: '1',
             title: 'title1',
           },
-          gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
-          panelIndex: '1',
+          grid: { x: 0, y: 0, w: 10, h: 10 },
+          uid: '1',
           type: 'type1',
           version: '2',
         },
@@ -129,7 +128,24 @@ describe('transformDashboardOut', () => {
       timeTo: 'now',
       title: 'title',
     };
-    expect(transformDashboardOut(input)).toEqual<DashboardAttributes>({
+    const references = [
+      {
+        type: 'tag',
+        id: 'tag1',
+        name: 'tag-ref-tag1',
+      },
+      {
+        type: 'tag',
+        id: 'tag2',
+        name: 'tag-ref-tag2',
+      },
+      {
+        type: 'index-pattern',
+        id: 'index-pattern1',
+        name: 'index-pattern-ref-index-pattern1',
+      },
+    ];
+    expect(transformDashboardOut(input, references)).toEqual<DashboardAttributes>({
       controlGroupInput: {
         chainingSystem: 'NONE',
         labelPosition: 'twoLine',
@@ -154,9 +170,7 @@ describe('transformDashboardOut', () => {
         ],
       },
       description: 'description',
-      kibanaSavedObjectMeta: {
-        searchSource: { query: { query: 'test', language: 'KQL' } },
-      },
+      query: { query: 'test', language: 'KQL' },
       options: {
         hidePanelTitles: true,
         useMargins: false,
@@ -166,19 +180,18 @@ describe('transformDashboardOut', () => {
       },
       panels: [
         {
-          panelConfig: {
+          config: {
             enhancements: {},
             savedObjectId: '1',
             title: 'title1',
           },
-          gridData: {
+          grid: {
             x: 0,
             y: 0,
             w: 10,
             h: 10,
-            i: '1',
           },
-          panelIndex: '1',
+          uid: '1',
           type: 'type1',
           version: '2',
         },
@@ -187,9 +200,12 @@ describe('transformDashboardOut', () => {
         pause: true,
         value: 1000,
       },
-      timeFrom: 'now-15m',
+      tags: ['tag1', 'tag2'],
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
       timeRestore: true,
-      timeTo: 'now',
       title: 'title',
     });
   });

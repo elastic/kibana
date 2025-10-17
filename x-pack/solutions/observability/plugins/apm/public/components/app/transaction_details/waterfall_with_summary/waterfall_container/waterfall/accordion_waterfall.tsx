@@ -200,7 +200,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
 
   return (
     <EuiAccordion
-      data-test-subj="waterfallItem"
+      data-test-subj="accordionWaterfall"
       style={{ position: 'relative' }}
       buttonClassName={`button_${node.item.id}`}
       id={node.item.id}
@@ -303,7 +303,9 @@ function ToggleAccordionButton({
             }}
           >
             <EuiToolTip content={childrenCount} delay="long">
-              <EuiText size="xs">{asBigNumber(childrenCount)}</EuiText>
+              <EuiText size="xs" tabIndex={0}>
+                {asBigNumber(childrenCount)}
+              </EuiText>
             </EuiToolTip>
           </div>
         </EuiFlexItem>

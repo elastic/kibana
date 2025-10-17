@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { omit } from 'lodash';
-import { SupertestWithRoleScopeType } from '../../../services';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { statusRule, tlsRule } from './data';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {

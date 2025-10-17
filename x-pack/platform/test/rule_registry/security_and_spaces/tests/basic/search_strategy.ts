@@ -10,7 +10,6 @@ import { ALERT_RULE_TYPE_ID, ALERT_START } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type { Client } from '@elastic/elasticsearch';
-import { ObjectRemover } from '../../../../alerting_api_integration/common/lib';
 import { getAlwaysFiringInternalRule } from '../../../../alerting_api_integration/common/lib/alert_utils';
 import { getEventLog } from '../../../../alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -45,11 +44,15 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('logs', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
 
       it('should return alerts from log rules', async () => {
@@ -119,14 +122,20 @@ export default ({ getService }: FtrProviderContext) => {
       ];
 
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/8.1.0'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/alerts/8.1.0'
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/8.1.0'
         );
       });
 
@@ -213,11 +222,15 @@ export default ({ getService }: FtrProviderContext) => {
       const apmRuleTypeIds = ['apm.transaction_error_rate', 'apm.error_rate'];
 
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
 
       it('should return alerts from apm rules', async () => {
@@ -705,11 +718,15 @@ export default ({ getService }: FtrProviderContext) => {
       const apmRuleTypeIds = ['apm.transaction_error_rate', 'apm.error_rate'];
 
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
 
       it('should omit alerts when score is less than min score', async () => {
@@ -891,10 +908,14 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('discover', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
 
       it('should return alerts from .es-query rule type with consumer discover with access only to stack rules', async () => {
@@ -994,7 +1015,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('internal rule types', () => {
       const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
-      const objectRemover = new ObjectRemover(supertest);
       const rulePayload = getAlwaysFiringInternalRule();
       let ruleId: string;
 
@@ -1004,18 +1024,17 @@ export default ({ getService }: FtrProviderContext) => {
 
       beforeEach(async () => {
         const { body: createdRule1 } = await supertest
-          .post('/api/alerting/rule')
+          .post('/api/alerts_fixture/rule/internally_managed')
           .set('kbn-xsrf', 'foo')
           .send(rulePayload)
           .expect(200);
 
         ruleId = createdRule1.id;
-        objectRemover.add('default', createdRule1.id, 'rule', 'alerting');
       });
 
       afterEach(async () => {
         await deleteAllAlertsFromIndex(alertAsDataIndex, es);
-        await objectRemover.removeAll();
+        await deleteRuleById(es, ruleId);
       });
 
       it('should not return alerts from internal rule types', async () => {
@@ -1104,5 +1123,12 @@ const deleteAllAlertsFromIndex = async (index: string, es: Client) => {
     },
     conflicts: 'proceed',
     ignore_unavailable: true,
+  });
+};
+
+const deleteRuleById = async (es: Client, id: string) => {
+  await es.delete({
+    id: `alert:${id}`,
+    index: '.kibana_alerting_cases',
   });
 };

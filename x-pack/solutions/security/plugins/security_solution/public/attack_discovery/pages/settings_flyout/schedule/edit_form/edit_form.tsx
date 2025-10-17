@@ -99,7 +99,6 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     onSettingsChanged,
     settings,
     showConnectorSelector: false,
-    stats: null,
   });
 
   const messageVariables = useMemo(() => {

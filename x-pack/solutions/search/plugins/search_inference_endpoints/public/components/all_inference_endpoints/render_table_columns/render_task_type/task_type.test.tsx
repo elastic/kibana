@@ -8,7 +8,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { TaskType } from './task_type';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 describe('TaskType component', () => {
   it.each([

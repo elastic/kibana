@@ -14,7 +14,7 @@ import {
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { find, without } from 'lodash';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { createPackagePolicy, createUser, createCSPRole, deleteRole, deleteUser } from '../helper';
 
 const UNPRIVILEGED_ROLE = 'unprivileged_test_role';
@@ -43,14 +43,16 @@ export default function (providerContext: FtrProviderContext) {
         await createCSPRole(security, UNPRIVILEGED_ROLE);
         await createUser(security, UNPRIVILEGED_USERNAME, UNPRIVILEGED_ROLE);
         await esArchiver.loadIfNeeded(
-          'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
         );
       });
 
       after(async () => {
         await deleteUser(security, UNPRIVILEGED_USERNAME);
         await deleteRole(security, UNPRIVILEGED_ROLE);
-        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
+        );
       });
 
       beforeEach(async () => {
@@ -128,12 +130,14 @@ export default function (providerContext: FtrProviderContext) {
 
       before(async () => {
         await esArchiver.loadIfNeeded(
-          'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
         );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
+        );
       });
 
       it(`Return unprivileged when missing access to findings_latest index`, async () => {

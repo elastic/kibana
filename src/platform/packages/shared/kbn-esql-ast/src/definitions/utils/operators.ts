@@ -6,10 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ESQLLicenseType } from '@kbn/esql-types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { GetColumnsByTypeFn, ISuggestionItem, Location } from '../../commands_registry/types';
 import { listCompleteItem } from '../../commands_registry/complete_items';
+import { withAutoSuggest } from './autocomplete/helpers';
 import { getFieldsOrFunctionsSuggestions } from './autocomplete/helpers';
 import {
   type FunctionFilterPredicates,
@@ -21,19 +22,19 @@ import {
   isParameterType,
   isReturnType,
 } from '../types';
-import { operatorsDefinitions } from '../all_operators';
+import { operatorsDefinitions, logicalOperators } from '../all_operators';
 import {
   filterFunctionDefinitions,
   checkFunctionInvocationComplete,
   getFunctionDefinition,
 } from './functions';
 import { removeFinalUnknownIdentiferArg, getOverlapRange } from './shared';
-import { ESQLAstItem, ESQLFunction } from '../../types';
+import type { ESQLAstItem, ESQLFunction } from '../../types';
 import { getTestFunctions } from './test_functions';
 
 export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
   const hasArgs = fn.signatures.some(({ params }) => params.length > 1);
-  return {
+  const suggestion: ISuggestionItem = {
     label: fn.name.toUpperCase(),
     text: hasArgs ? `${fn.name.toUpperCase()} $0` : fn.name.toUpperCase(),
     asSnippet: hasArgs,
@@ -43,8 +44,8 @@ export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
       value: '',
     },
     sortText: 'D',
-    command: hasArgs ? TRIGGER_SUGGESTION_COMMAND : undefined,
   };
+  return hasArgs ? withAutoSuggest(suggestion) : suggestion;
 }
 
 /**
@@ -55,14 +56,16 @@ export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
  */
 export const getOperatorSuggestions = (
   predicates?: FunctionFilterPredicates & { leftParamType?: FunctionParameterType },
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
+  hasMinimumLicenseRequired?: ((minimumLicenseRequired: LicenseType) => boolean) | undefined,
+  activeProduct?: PricingProduct | undefined
 ): ISuggestionItem[] => {
   const filteredDefinitions = filterFunctionDefinitions(
     getTestFunctions().length
       ? [...operatorsDefinitions, ...getTestFunctions()]
       : operatorsDefinitions,
     predicates,
-    hasMinimumLicenseRequired
+    hasMinimumLicenseRequired,
+    activeProduct
   );
 
   // make sure the operator has at least one signature that matches
@@ -86,6 +89,35 @@ export const getOperatorsSuggestionsAfterNot = (): ISuggestionItem[] => {
     .map(getOperatorSuggestion);
 };
 
+const getNullCheckOperators = () => {
+  return operatorsDefinitions.filter(({ name }) => name === 'is null' || name === 'is not null');
+};
+
+/** Suggest complete "IS [NOT] NULL" operators when the user has started typing "IS ..." */
+export const getNullCheckOperatorSuggestions = (
+  queryText: string,
+  location: Location,
+  leftParamType: FunctionParameterType
+): ISuggestionItem[] => {
+  const candidates = getNullCheckOperators().map(({ name }) => name);
+  const queryLower = queryText.toLowerCase();
+  const queryNormalized = queryLower.replace(/\s+/g, ' ').replace(/\s+$/, ' ');
+  const allowedOperators = candidates.filter((candidate) => {
+    const candidateLower = candidate.toLowerCase();
+    // - "... is " matches candidate "is null" (prefix: "is ")
+    // - "... is n" matches candidate "is not null" (prefix: "is n")
+    return [...candidateLower].some((_, i) =>
+      queryNormalized.endsWith(candidateLower.slice(0, i + 1))
+    );
+  });
+
+  return getOperatorSuggestions({
+    location,
+    leftParamType,
+    allowed: allowedOperators,
+  });
+};
+
 export function isArrayType(type: string): type is ArrayType {
   return type.endsWith('[]');
 }
@@ -98,7 +130,7 @@ function getSupportedTypesForBinaryOperators(
   return fnDef && Array.isArray(fnDef?.signatures)
     ? fnDef.signatures
         .filter(({ params }) => params.find((p) => p.name === 'left' && p.type === previousType))
-        .map(({ params }) => params[1].type)
+        .map(({ params }) => params[1]?.type)
     : [previousType];
 }
 
@@ -118,6 +150,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
   getExpressionType,
   getColumnsByType,
   hasMinimumLicenseRequired,
+  activeProduct,
 }: {
   queryText: string;
   location: Location;
@@ -125,10 +158,12 @@ export async function getSuggestionsToRightOfOperatorExpression({
   preferredExpressionType?: SupportedDataType;
   getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown';
   getColumnsByType: GetColumnsByTypeFn;
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
+  hasMinimumLicenseRequired?: ((minimumLicenseRequired: LicenseType) => boolean) | undefined;
+  activeProduct?: PricingProduct | undefined;
 }) {
   const suggestions = [];
   const isFnComplete = checkFunctionInvocationComplete(operator, getExpressionType);
+
   if (isFnComplete.complete) {
     // i.e. ... | <COMMAND> field > 0 <suggest>
     // i.e. ... | <COMMAND> field + otherN <suggest>
@@ -143,6 +178,14 @@ export async function getSuggestionsToRightOfOperatorExpression({
             ? 'any'
             : operatorReturnType,
         ignored: ['=', ':'],
+        allowed:
+          operatorReturnType === 'boolean'
+            ? [
+                ...logicalOperators
+                  .filter(({ locationsAvailable }) => locationsAvailable.includes(location))
+                  .map(({ name }) => name),
+              ]
+            : undefined,
       })
     );
   } else {
@@ -167,7 +210,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
         suggestions.push(listCompleteItem);
       } else {
         const finalType = leftArgType || 'any';
-        const supportedTypes = getSupportedTypesForBinaryOperators(fnDef, finalType as string);
+        const supportedTypes = getSupportedTypesForBinaryOperators(fnDef, finalType);
 
         // this is a special case with AND/OR
         // <COMMAND> expression AND/OR <suggest>
@@ -177,23 +220,38 @@ export async function getSuggestionsToRightOfOperatorExpression({
           finalType === 'boolean' &&
           getFunctionDefinition(operator.name)?.type === FunctionDefinitionTypes.OPERATOR
             ? ['any']
-            : (supportedTypes as string[]);
+            : supportedTypes;
 
-        // TODO replace with fields callback + function suggestions
-        suggestions.push(
-          ...(await getFieldsOrFunctionsSuggestions(
-            typeToUse,
-            location,
-            getColumnsByType,
-            {
-              functions: true,
-              fields: true,
-              values: Boolean(operator.subtype === 'binary-expression'),
-            },
-            {},
-            hasMinimumLicenseRequired
-          ))
+        const couldBeNullCheck = getNullCheckOperators().some(({ name }) =>
+          name.startsWith(operator.name.toLowerCase())
         );
+
+        if (couldBeNullCheck) {
+          suggestions.push(
+            ...getNullCheckOperatorSuggestions(
+              queryText,
+              location,
+              finalType === 'unknown' || finalType === 'unsupported' ? 'any' : finalType
+            )
+          );
+        } else {
+          // TODO replace with fields callback + function suggestions
+          suggestions.push(
+            ...(await getFieldsOrFunctionsSuggestions(
+              typeToUse,
+              location,
+              getColumnsByType,
+              {
+                functions: true,
+                columns: true,
+                values: Boolean(operator.subtype === 'binary-expression'),
+              },
+              {},
+              hasMinimumLicenseRequired,
+              activeProduct
+            ))
+          );
+        }
       }
     }
 

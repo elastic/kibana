@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { PrivilegedUserMonitoringSampleDashboard } from './sample_dashboard';
 import { TestProviders } from '../../../../../common/mock';
 
@@ -27,23 +27,28 @@ describe('PrivilegedUserMonitoringSampleDashboard', () => {
     expect(screen.getByTestId('esql-dashboard-panel')).toBeInTheDocument();
   });
 
-  it('renders the EuiSelect with stack by options', () => {
+  it('renders the EuiSuperSelect with selected option', () => {
     render(<PrivilegedUserMonitoringSampleDashboard />, { wrapper: TestProviders });
-    expect(screen.getByText('Stack by')).toBeInTheDocument();
-    expect(screen.getAllByRole('option').length).toBeGreaterThan(0);
+    expect(screen.getByText('Privileged user')).toBeInTheDocument();
   });
 
   it('calls setSelectedStackByOption when EuiSelect changes', () => {
     render(<PrivilegedUserMonitoringSampleDashboard />, { wrapper: TestProviders });
-    const select = screen.getByRole<HTMLInputElement>('combobox');
-    const options = screen.getAllByRole('option');
+
+    // Asset the initial state
+    expect(screen.getByDisplayValue('privileged_user')).toBeInTheDocument();
+
+    // Open the select dropdown
+    act(() => {
+      screen.getByText('Privileged user').click(); // click to open the select
+    });
 
     // Simulate changing the select value to the second option
-    const secondOption = options[1];
-    fireEvent.change(select, { target: { value: secondOption.getAttribute('value') } });
+    act(() => {
+      screen.getByRole('option', { name: 'Target user' }).click();
+    });
+
     // The component should re-render with the new stackByField
-    expect(screen.getByRole<HTMLInputElement>('combobox').value).toBe(
-      options[1].getAttribute('value')
-    );
+    expect(screen.getByDisplayValue('target_user')).toBeInTheDocument();
   });
 });

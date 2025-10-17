@@ -7,8 +7,7 @@
 
 import { useMemo } from 'react';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
-import { usePluginConfig } from '../../../../containers/plugin_config_context';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import type {
   InfraTimerangeInput,
@@ -17,32 +16,19 @@ import type {
 import { SnapshotNodeResponseRT } from '../../../../../common/http_api/snapshot_api';
 
 export interface UseSnapshotRequest
-  extends Omit<SnapshotRequest, 'filterQuery' | 'timerange' | 'includeTimeseries'> {
-  filterQuery?: string | null | symbol;
+  extends Omit<SnapshotRequest, 'timerange' | 'includeTimeseries' | 'schema'> {
   currentTime: number;
   includeTimeseries?: boolean;
   timerange?: InfraTimerangeInput;
+
+  schema?: DataSchemaFormat | null;
 }
 
 export function useSnapshot(
-  props: Omit<UseSnapshotRequest, 'schema'>,
+  props: UseSnapshotRequest,
   { sendRequestImmediately = true }: { sendRequestImmediately?: boolean } = {}
 ) {
-  const config = usePluginConfig();
-
-  const payload = useMemo(
-    () =>
-      // TODO: Replace this with the schema selector value
-      JSON.stringify(
-        buildPayload({
-          ...props,
-          schema: config.featureFlags.hostOtelEnabled
-            ? DataSchemaFormat.SEMCONV
-            : DataSchemaFormat.ECS,
-        })
-      ),
-    [props, config.featureFlags.hostOtelEnabled]
-  );
+  const payload = useMemo(() => JSON.stringify(buildPayload(props)), [props]);
 
   const { data, status, error, refetch } = useFetcher(
     async (callApi) => {
@@ -73,7 +59,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     accountId = '',
     currentTime,
     dropPartialBuckets = true,
-    filterQuery = '',
+    kuery,
     groupBy = null,
     includeTimeseries = true,
     metrics,
@@ -88,7 +74,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
   return {
     accountId,
     dropPartialBuckets,
-    filterQuery: filterQuery as string,
+    kuery,
     groupBy,
     includeTimeseries,
     metrics,
@@ -96,7 +82,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     sourceId,
     overrideCompositeSize,
     region,
-    schema,
+    schema: schema ?? 'ecs',
     timerange: timerange ?? {
       interval: '1m',
       to: currentTime,

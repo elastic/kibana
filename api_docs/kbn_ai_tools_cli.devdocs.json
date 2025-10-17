@@ -19,7 +19,7 @@
         "label": "loadHuggingFaceDatasets",
         "description": [],
         "signature": [
-          "({\n  esClient,\n  logger,\n  accessToken,\n  datasets = ALL_HUGGING_FACE_DATASETS,\n  limit = 1000,\n  clear = false,\n}: { esClient: ",
+          "({\n  esClient,\n  logger,\n  accessToken,\n  datasets = PREDEFINED_HUGGING_FACE_DATASETS,\n  limit,\n  clear = false,\n}: { esClient: ",
           "ElasticsearchClient",
           "; logger: ",
           {
@@ -48,7 +48,7 @@
             "id": "def-server.loadHuggingFaceDatasets.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  esClient,\n  logger,\n  accessToken,\n  datasets = ALL_HUGGING_FACE_DATASETS,\n  limit = 1000,\n  clear = false,\n}",
+            "label": "{\n  esClient,\n  logger,\n  accessToken,\n  datasets = PREDEFINED_HUGGING_FACE_DATASETS,\n  limit,\n  clear = false,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/load_hugging_face_datasets.ts",
             "deprecated": false,
@@ -170,7 +170,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -954,6 +954,8 @@
                   "default",
                   "; ssl: ",
                   "default",
+                  "; streams: ",
+                  "default",
                   "; synonyms: ",
                   "default",
                   "; tasks: ",
@@ -1231,7 +1233,7 @@
             "signature": [
               "{ timeout?: ",
               "Duration",
-              " | undefined; dynamic?: ",
+              " | undefined; body?: string | ({ [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; expand_wildcards?: undefined; ignore_unavailable?: undefined; master_timeout?: undefined; timeout?: undefined; write_index_only?: undefined; date_detection?: undefined; dynamic?: undefined; dynamic_date_formats?: undefined; dynamic_templates?: undefined; _field_names?: undefined; _meta?: undefined; numeric_detection?: undefined; properties?: undefined; _routing?: undefined; _source?: undefined; runtime?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; expand_wildcards?: undefined; ignore_unavailable?: undefined; master_timeout?: undefined; timeout?: undefined; write_index_only?: undefined; date_detection?: undefined; dynamic?: undefined; dynamic_date_formats?: undefined; dynamic_templates?: undefined; _field_names?: undefined; _meta?: undefined; numeric_detection?: undefined; properties?: undefined; _routing?: undefined; _source?: undefined; runtime?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; dynamic?: ",
               "MappingDynamicMapping",
               " | undefined; runtime?: ",
               "MappingRuntimeFields",
@@ -1241,7 +1243,7 @@
               "ExpandWildcards",
               " | undefined; ignore_unavailable?: boolean | undefined; _source?: ",
               "MappingSourceField",
-              " | undefined; body?: string | ({ [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; expand_wildcards?: undefined; ignore_unavailable?: undefined; master_timeout?: undefined; timeout?: undefined; write_index_only?: undefined; date_detection?: undefined; dynamic?: undefined; dynamic_date_formats?: undefined; dynamic_templates?: undefined; _field_names?: undefined; _meta?: undefined; numeric_detection?: undefined; properties?: undefined; _routing?: undefined; _source?: undefined; runtime?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; expand_wildcards?: undefined; ignore_unavailable?: undefined; master_timeout?: undefined; timeout?: undefined; write_index_only?: undefined; date_detection?: undefined; dynamic?: undefined; dynamic_date_formats?: undefined; dynamic_templates?: undefined; _field_names?: undefined; _meta?: undefined; numeric_detection?: undefined; properties?: undefined; _routing?: undefined; _source?: undefined; runtime?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; _routing?: ",
+              " | undefined; _routing?: ",
               "MappingRoutingField",
               " | undefined; _field_names?: ",
               "MappingFieldNamesField",
@@ -1299,10 +1301,10 @@
     "misc": [
       {
         "parentPluginId": "@kbn/ai-tools-cli",
-        "id": "def-server.ALL_HUGGING_FACE_DATASETS",
+        "id": "def-server.PREDEFINED_HUGGING_FACE_DATASETS",
         "type": "Array",
         "tags": [],
-        "label": "ALL_HUGGING_FACE_DATASETS",
+        "label": "PREDEFINED_HUGGING_FACE_DATASETS",
         "description": [],
         "signature": [
           {
@@ -1314,7 +1316,7 @@
           },
           "[]"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/config.ts",
+        "path": "x-pack/platform/packages/shared/kbn-ai-tools-cli/src/hf_dataset_loader/datasets/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

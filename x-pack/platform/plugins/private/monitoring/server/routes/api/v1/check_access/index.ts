@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import { checkAccessRoute } from './check_access';
 
 export function registerV1CheckAccessRoutes(server: MonitoringCore) {

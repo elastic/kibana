@@ -12,8 +12,10 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ConnectorsSelection } from './connectors_selection';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ActionType, GenericValidationResult } from '../../../types';
+import type { ActionType, GenericValidationResult } from '../../../types';
 import { EuiFieldText } from '@elastic/eui';
+import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('connectors_selection', () => {
   const core = coreMock.createStart();
@@ -51,31 +53,22 @@ describe('connectors_selection', () => {
   };
 
   const actionTypeIndex: Record<string, ActionType> = {
-    '.pagerduty': {
+    '.pagerduty': createMockConnectorType({
       id: '.pagerduty',
-      enabled: true,
       name: 'Test',
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
-      isSystemActionType: false,
-    },
+    }),
   };
 
   const connectors = [
-    {
+    createMockActionConnector({
       actionTypeId: '.pagerduty',
       config: {
         apiUrl: 'http:\\test',
       },
       id: 'testId',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false as const,
       name: 'test pagerduty',
-      secrets: {},
-    },
+    }),
   ];
 
   const actionType = actionTypeRegistryMock.createMockActionTypeModel({

@@ -16,9 +16,12 @@ import axios from 'axios';
 
 import apm from 'elastic-apm-node';
 
-import { AgentlessAgentCreateOverProvisionedError } from '../../../common/errors';
+import {
+  AgentlessAgentCreateOverProvisionedError,
+  AgentlessAgentCreateFleetUnreachableError,
+} from '../../../common/errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
-import type { AgentPolicy } from '../../types';
+import type { AgentPolicy, FullAgentPolicy } from '../../types';
 import type { AgentlessApiDeploymentResponse, FleetServerHost } from '../../../common/types';
 import {
   AgentlessAgentConfigError,
@@ -30,9 +33,9 @@ import {
   AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
   AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
-  DEFAULT_OUTPUT_ID,
+  ECH_AGENTLESS_OUTPUT_ID,
+  ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
   SERVERLESS_DEFAULT_OUTPUT_ID,
-  DEFAULT_FLEET_SERVER_HOST_ID,
   SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
 } from '../../constants';
 
@@ -67,12 +70,12 @@ class AgentlessAgentService {
     const outputId = isServerless
       ? SERVERLESS_DEFAULT_OUTPUT_ID
       : isCloud
-      ? DEFAULT_OUTPUT_ID
+      ? ECH_AGENTLESS_OUTPUT_ID
       : undefined;
     const fleetServerId = isServerless
       ? SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
       : isCloud
-      ? DEFAULT_FLEET_SERVER_HOST_ID
+      ? ECH_AGENTLESS_FLEET_SERVER_HOST_ID
       : undefined;
 
     return {
@@ -142,7 +145,11 @@ class AgentlessAgentService {
     const tlsConfig = this.createTlsConfig(agentlessConfig);
     const labels = this.getAgentlessTags(agentlessAgentPolicy);
     const secrets = this.getAgentlessSecrets();
-    const policyDetails = await this.getPolicyDetails(soClient, agentlessAgentPolicy);
+    const fullPolicy = await agentPolicyService.getFullAgentPolicy(
+      soClient,
+      agentlessAgentPolicy.id
+    );
+    const policyDetails = await this.getPolicyDetails(soClient, fullPolicy);
 
     const requestConfig: AxiosRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
@@ -155,6 +162,7 @@ class AgentlessAgentService {
         labels,
         secrets,
         policy_details: policyDetails,
+        agent_policy: fullPolicy,
       },
       method: 'POST',
       ...this.getHeaders(tlsConfig, traceId),
@@ -348,13 +356,8 @@ class AgentlessAgentService {
 
   private async getPolicyDetails(
     soClient: SavedObjectsClientContract,
-    agentlessAgentPolicy: AgentPolicy
+    fullPolicy: FullAgentPolicy | null
   ) {
-    const fullPolicy = await agentPolicyService.getFullAgentPolicy(
-      soClient,
-      agentlessAgentPolicy.id
-    );
-
     return {
       output_name: Object.keys(fullPolicy?.outputs || {})?.[0], // Agentless policies only have one output
     };
@@ -591,7 +594,12 @@ class AgentlessAgentService {
           this.withRequestIdMessage(userMessage, traceId),
           limit
         );
+      } else if (responseData?.code === AGENTLESS_API_ERROR_CODES.FLEET_UNREACHABLE) {
+        return new AgentlessAgentCreateFleetUnreachableError(
+          this.withRequestIdMessage(userMessage, traceId)
+        );
       }
+
       return new AgentlessAgentCreateError(this.withRequestIdMessage(userMessage, traceId));
     }
     if (action === 'delete') {

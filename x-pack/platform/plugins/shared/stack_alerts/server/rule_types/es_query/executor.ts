@@ -34,6 +34,7 @@ import type {
   OnlyEsQueryRuleParams,
   OnlySearchSourceRuleParams,
   OnlyEsqlQueryRuleParams,
+  EsQuerySourceFields,
 } from './types';
 import { ActionGroupId, ConditionMetAlertInstanceId } from '../../../common/es_query';
 import { fetchEsQuery } from './lib/fetch_es_query';
@@ -42,7 +43,11 @@ import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import { fetchEsqlQuery } from './lib/fetch_esql_query';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE } from '..';
 
-export async function executor(core: CoreSetup, options: ExecutorOptions<EsQueryRuleParams>) {
+export async function executor(
+  core: CoreSetup,
+  options: ExecutorOptions<EsQueryRuleParams>,
+  sourceFields: EsQuerySourceFields
+) {
   const searchSourceRule = isSearchSourceRule(options.params.searchType);
   const esqlQueryRule = isEsqlQueryRule(options.params.searchType);
   const {
@@ -94,6 +99,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         },
         dateStart,
         dateEnd,
+        sourceFields,
       })
     : esqlQueryRule
     ? await fetchEsqlQuery({
@@ -109,6 +115,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         },
         dateStart,
         dateEnd,
+        sourceFields,
       })
     : await fetchEsQuery({
         ruleId,
@@ -125,6 +132,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         },
         dateStart,
         dateEnd,
+        sourceFields,
       });
 
   const unmetGroupValues: Record<string, number> = {};
@@ -187,9 +195,9 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
         [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
         [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
+        [ALERT_GROUPING]: groupingObject,
         ...ecsGroups,
         ...actionContext.sourceFields,
-        [ALERT_GROUPING]: groupingObject,
       },
     });
     if (!isGroupAgg) {

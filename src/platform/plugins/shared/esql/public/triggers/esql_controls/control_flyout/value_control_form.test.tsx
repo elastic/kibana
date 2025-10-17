@@ -10,10 +10,11 @@
 import React from 'react';
 import { render, within, fireEvent, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { monaco } from '@kbn/monaco';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { monaco } from '@kbn/monaco';
 import { coreMock } from '@kbn/core/server/mocks';
-import { ESQLVariableType, EsqlControlType, ESQLControlState } from '@kbn/esql-types';
+import type { ESQLControlState } from '@kbn/esql-types';
+import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { getESQLResults } from '@kbn/esql-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -287,6 +288,54 @@ describe('ValueControlForm', () => {
             })
           );
         });
+      });
+
+      it('should preserve custom esqlQuery when editing an existing VALUES_FROM_QUERY control', async () => {
+        const customQuery = 'FROM custom-logs* | STATS BY custom_field';
+        const initialState = {
+          grow: false,
+          width: 'medium',
+          title: 'Custom Query Control',
+          availableOptions: [],
+          selectedOptions: [], // Start with empty to trigger the useEffect
+          variableName: 'customVar',
+          variableType: ESQLVariableType.VALUES,
+          esqlQuery: customQuery,
+          controlType: EsqlControlType.VALUES_FROM_QUERY,
+        } as ESQLControlState;
+
+        const getESQLResultsMock = getESQLResults as jest.Mock;
+        getESQLResultsMock.mockClear();
+
+        render(
+          <KibanaContextProvider services={services}>
+            <IntlProvider locale="en">
+              <ESQLControlsFlyout
+                {...defaultProps}
+                initialVariableType={ESQLVariableType.VALUES}
+                queryString="FROM foo | WHERE field =="
+                initialState={initialState}
+              />
+            </IntlProvider>
+          </KibanaContextProvider>
+        );
+
+        await waitFor(() => {
+          // Verify that getESQLResults was called with the custom query
+          expect(getESQLResultsMock).toHaveBeenCalledWith(
+            expect.objectContaining({
+              esqlQuery: customQuery,
+            })
+          );
+        });
+
+        // Custom query is displayed in the query editor
+        const queryEditor = await waitFor(() =>
+          document.querySelector('[data-test-subj*="queryInput"]')
+        );
+        if (queryEditor) {
+          expect(queryEditor.textContent).toContain('custom-logs');
+        }
       });
     });
   });

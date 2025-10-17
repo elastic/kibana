@@ -68,7 +68,12 @@ describe('useDynamicEntityFlyout', () => {
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: GenericEntityPanelKey,
-        params: { entityDocId: '123', scopeId: 'scope1', contextId: 'context1' },
+        params: {
+          entityDocId: '123',
+          scopeId: 'scope1',
+          contextId: 'context1',
+          isEngineMetadataExist: true,
+        },
       },
     });
   });

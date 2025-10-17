@@ -12,10 +12,11 @@ import {
   buildFieldDescriptorForIndex,
   getDefaultQueryFields,
 } from '@kbn/search-queries';
-import { Mappings, SearchCodeSnippetParameters } from '../types';
+import type { Mappings, SearchCodeSnippetParameters } from '../types';
 import { useElasticsearchUrl } from './use_elasticsearch_url';
 import { useKibana } from './use_kibana';
-import { AvailableLanguages, Languages } from '../code_examples';
+import type { AvailableLanguages } from '../code_examples';
+import { Languages } from '../code_examples';
 import { SearchCodeExample } from '../code_examples/search';
 
 const DEFAULT_QUERY_STRING = 'REPLACE WITH YOUR QUERY';

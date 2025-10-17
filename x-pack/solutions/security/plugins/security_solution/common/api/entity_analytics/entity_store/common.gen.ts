@@ -100,12 +100,14 @@ export const EngineComponentResource = z.enum([
   'entity_engine',
   'entity_definition',
   'index',
+  'data_stream',
   'component_template',
   'index_template',
   'ingest_pipeline',
   'enrich_policy',
   'task',
   'transform',
+  'ilm_policy',
 ]);
 export type EngineComponentResourceEnum = typeof EngineComponentResource.enum;
 export const EngineComponentResourceEnum = EngineComponentResource.enum;
@@ -116,7 +118,7 @@ export const EngineComponentStatus = z.object({
   installed: z.boolean(),
   metadata: Metadata.optional(),
   resource: EngineComponentResource,
-  health: z.enum(['green', 'yellow', 'red', 'unknown']).optional(),
+  health: z.enum(['green', 'yellow', 'red', 'unavailable', 'unknown']).optional(),
   errors: z
     .array(
       z.object({

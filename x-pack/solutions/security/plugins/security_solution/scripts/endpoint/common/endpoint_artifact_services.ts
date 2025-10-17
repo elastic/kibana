@@ -7,9 +7,6 @@
 
 import type { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
-  ENDPOINT_LIST_DESCRIPTION,
-  ENDPOINT_LIST_ID,
-  ENDPOINT_LIST_NAME,
   EXCEPTION_LIST_ITEM_URL,
   INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
 } from '@kbn/securitysolution-list-constants';
@@ -20,7 +17,7 @@ import type {
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { memoize } from 'lodash';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '../../../public/management/pages/endpoint_exceptions/constants';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../../../public/management/pages/trusted_apps/constants';
 import { EVENT_FILTER_LIST_DEFINITION } from '../../../public/management/pages/event_filters/constants';
@@ -54,13 +51,7 @@ export const ensureArtifactListExists = memoize(
         break;
 
       case 'endpointExceptions':
-        listDefinition = {
-          name: ENDPOINT_LIST_NAME,
-          namespace_type: 'agnostic',
-          description: ENDPOINT_LIST_DESCRIPTION,
-          list_id: ENDPOINT_LIST_ID,
-          type: ExceptionListTypeEnum.ENDPOINT,
-        };
+        listDefinition = ENDPOINT_EXCEPTIONS_LIST_DEFINITION;
         break;
 
       default:

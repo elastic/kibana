@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IBasePath } from '@kbn/core/server';
+import type { IBasePath } from '@kbn/core/server';
 import { updateState, setRecoveredAlertsContext } from './common';
-import {
+import type {
   AlertOverviewStatus,
   StaleDownConfig,
   SyntheticsCommonState,
 } from '../../common/runtime_types/alert_rules/common';
+import { ALERT_GROUPING } from '@kbn/rule-data-utils';
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const monitorName = 'test-monitor';
@@ -204,7 +205,7 @@ describe('setRecoveredAlertsContext', () => {
       monitorQueryId: 'stale-config',
       status: 'up',
       locationId: '',
-      ping: {
+      latestPing: {
         '@timestamp': new Date().toISOString(),
         state: {
           ends: {
@@ -219,7 +220,7 @@ describe('setRecoveredAlertsContext', () => {
             name: location,
           },
         },
-      } as StaleDownConfig['ping'],
+      } as StaleDownConfig['latestPing'],
       timestamp: new Date().toISOString(),
       checks: {
         downWithinXChecks: 1,
@@ -260,7 +261,7 @@ describe('setRecoveredAlertsContext', () => {
         monitorQueryId: 'stale-config',
         status: 'down',
         locationId: 'location',
-        ping: {
+        latestPing: {
           '@timestamp': new Date().toISOString(),
           state: {
             id: '123456',
@@ -273,7 +274,7 @@ describe('setRecoveredAlertsContext', () => {
               name: location,
             },
           },
-        } as StaleDownConfig['ping'],
+        } as StaleDownConfig['latestPing'],
         timestamp: new Date().toISOString(),
         isDeleted: true,
         checks: {
@@ -350,7 +351,7 @@ describe('setRecoveredAlertsContext', () => {
         monitorQueryId: 'stale-config',
         status: 'down',
         locationId: 'location',
-        ping: {
+        latestPing: {
           '@timestamp': new Date().toISOString(),
           state: {
             id: '123456',
@@ -363,7 +364,7 @@ describe('setRecoveredAlertsContext', () => {
               name: 'us_west',
             },
           },
-        } as StaleDownConfig['ping'],
+        } as StaleDownConfig['latestPing'],
         timestamp: new Date().toISOString(),
         isLocationRemoved: true,
         checks: {
@@ -440,7 +441,7 @@ describe('setRecoveredAlertsContext', () => {
         monitorQueryId: 'stale-config',
         status: 'down',
         locationId: location,
-        ping: {
+        latestPing: {
           state: {
             id: '123456',
           },
@@ -448,7 +449,7 @@ describe('setRecoveredAlertsContext', () => {
           monitor: {
             name: 'test-monitor',
           },
-        } as StaleDownConfig['ping'],
+        } as StaleDownConfig['latestPing'],
         timestamp: new Date().toISOString(),
         isLocationRemoved: true,
         checks: {
@@ -522,6 +523,7 @@ describe('setRecoveredAlertsContext', () => {
             'monitor.type': 'HTTP',
             'error.message': 'test-error-message',
             configId,
+            [ALERT_GROUPING]: { monitor: { id: monitorId }, location: { id: location } },
           },
         },
       ]),
@@ -565,6 +567,7 @@ describe('setRecoveredAlertsContext', () => {
         lastErrorMessage: 'test-error-message',
         monitorType: 'HTTP',
         hostName: 'test-host',
+        grouping: { monitor: { id: monitorId }, location: { id: location } },
       },
     });
   });

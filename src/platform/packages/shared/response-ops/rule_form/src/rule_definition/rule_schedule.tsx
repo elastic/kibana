@@ -22,7 +22,7 @@ import {
   INTERVAL_WARNING_TEXT,
 } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
-import { MinimumScheduleInterval } from '../common';
+import type { MinimumScheduleInterval } from '../common';
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
 const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];

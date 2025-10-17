@@ -7,7 +7,7 @@
 
 // React is needed for JSX in the tests
 import { render } from '@testing-library/react';
-import { RawBucket } from '@kbn/grouping/src';
+import type { RawBucket } from '@kbn/grouping/src';
 import { getGroupPanelTitle } from './get_group_panel_title';
 import type { GroupingAggregation } from './get_group_panel_title';
 

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject, Observable, firstValueFrom, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { Subject, firstValueFrom, of } from 'rxjs';
 import { filter, switchMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { stripVersionQualifier } from '@kbn/std';
@@ -308,6 +309,7 @@ export class SavedObjectsService
       const migrationStartTime = performance.now();
       await migrator.runMigrations();
       migrationDuration = Math.round(performance.now() - migrationStartTime);
+      this.logger.info(`Completed all migrations in ${migrationDuration}ms`);
     }
 
     const createRepository = (

@@ -9,7 +9,7 @@ import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ComponentProps } from '../../route_init';
+import type { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useTable } from '../../hooks/use_table';
 import { ApmTemplate } from './apm_template';

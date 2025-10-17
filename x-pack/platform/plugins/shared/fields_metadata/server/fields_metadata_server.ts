@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldsMetadataBackendLibs } from './lib/shared_types';
+import type { FieldsMetadataBackendLibs } from './lib/shared_types';
 import { initFieldsMetadataRoutes } from './routes/fields_metadata';
 
 export const initFieldsMetadataServer = (libs: FieldsMetadataBackendLibs) => {

@@ -19,7 +19,8 @@ import {
 } from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { coreServices } from '../services/kibana_services';
-import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
+import type { DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
+import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 
 const renderDashboardUnsavedListing = (props: Partial<DashboardUnsavedListingProps> = {}) =>
   render(
