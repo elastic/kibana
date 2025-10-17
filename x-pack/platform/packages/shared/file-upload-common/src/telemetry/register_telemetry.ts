@@ -56,19 +56,12 @@ export const registerFileUploadAnalyticsEvents = (analytics: AnalyticsServiceSet
           description: 'The file extension of the analyzed file.',
         },
       },
-      file_size: {
+      file_size_bytes: {
         type: 'integer',
         _meta: {
           description: 'The bucket in which the file size of the analyzed file falls into.',
         },
       },
-      // file_size_bucket: {
-      //   type: 'keyword',
-      //   _meta: {
-      //     description:
-      //       'The bucket in which the file size of the analyzed file falls into. Possible MB values are: 1-10|11-50|51-100|100-250|251-500|501+',
-      //   },
-      // },
       num_lines_analyzed: {
         type: 'integer',
         _meta: {
@@ -117,6 +110,12 @@ export const registerFileUploadAnalyticsEvents = (analytics: AnalyticsServiceSet
           description: 'Whether overrides were used during analysis.',
         },
       },
+      analysis_time_ms: {
+        type: 'integer',
+        _meta: {
+          description: 'The time taken to analyze the file in milliseconds.',
+        },
+      },
     },
   });
 
@@ -153,6 +152,12 @@ export const registerFileUploadAnalyticsEvents = (analytics: AnalyticsServiceSet
         _meta: {
           description:
             'The number of missing fields that had a mapping clash when uploading the file.',
+        },
+      },
+      file_size_bytes: {
+        type: 'integer',
+        _meta: {
+          description: 'The bucket in which the file size of the analyzed file falls into.',
         },
       },
       documents_success: {
@@ -204,7 +209,7 @@ export const registerFileUploadAnalyticsEvents = (analytics: AnalyticsServiceSet
           description: 'The total number of files in the upload session.',
         },
       },
-      total_size: {
+      total_size_bytes: {
         type: 'integer',
         _meta: {
           description: 'The total size of all files in the upload session in bytes.',

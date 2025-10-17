@@ -840,7 +840,7 @@ export class FileUploadManager {
       this.fileUploadTelemetryService.trackUploadSession({
         upload_session_id: this.uploadSessionId,
         total_files: files.length,
-        total_size: files.reduce((acc, file) => acc + file.getSizeInBytes(), 0),
+        total_size_bytes: files.reduce((acc, file) => acc + file.getSizeInBytes(), 0),
         session_success: success,
         session_time_ms: new Date().getTime() - startTime,
         new_index_created: isExistingIndex === false,

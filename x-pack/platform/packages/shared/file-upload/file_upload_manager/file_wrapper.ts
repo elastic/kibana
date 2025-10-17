@@ -12,6 +12,7 @@ import type {
   FindFileStructureResponse,
   FormattedOverrides,
   ImportFailure,
+  ImportResults,
   IngestPipeline,
   InputOverrides,
 } from '@kbn/file-upload-common';
@@ -132,6 +133,7 @@ export class FileWrapper {
   }
 
   public async analyzeFile(overrides: InputOverrides = {}) {
+    const startTime = new Date().getTime();
     this.setStatus({ analysisStatus: STATUS.STARTED });
     readFile(this.file).then(async ({ data, fileContents }) => {
       // return after file has been read
@@ -157,44 +159,8 @@ export class FileWrapper {
         supportedFormat,
       });
       this.setPipeline(analysisResults.results?.ingest_pipeline);
-      if (analysisResults.results) {
-        // TODO: change this to take in analysisResults and whatever else.
-        // Make it cleaner
-        // make it trackAnalyzeFileSuccess
-        this.fileUploadTelemetryService.trackAnalyzeFile({
-          analysis_success: true,
-          upload_session_id: this.uploadSessionId,
-          file_id: this.fileId,
-          file_type: analysisResults.results.format,
-          file_extension: this.file.name.split('.').pop() ?? 'unknown',
-          file_size: this.file.size ?? 0,
-          num_lines_analyzed: analysisResults.results.num_lines_analyzed,
-          num_messages_analyzed: analysisResults.results.num_messages_analyzed,
-          java_timestamp_formats: analysisResults.results.java_timestamp_formats?.join(',') ?? '',
-          num_fields_found: Object.keys(analysisResults.results.field_stats).length,
-          delimiter: analysisResults.results.delimiter ?? '',
-          preview_success: analysisResults.sampleDocs.length > 0,
-          overrides_used: Object.keys(overrides).length > 0,
-        });
-      } else {
-        // TODO: change this to a failure function
-        // make it trackAnalyzeFileFailure
-        this.fileUploadTelemetryService.trackAnalyzeFile({
-          upload_session_id: this.uploadSessionId,
-          file_id: this.fileId,
-          file_type: 'unknown',
-          file_extension: this.file.name.split('.').pop() ?? 'unknown',
-          file_size: this.file.size ?? 0,
-          num_lines_analyzed: 0,
-          num_messages_analyzed: 0,
-          java_timestamp_formats: '',
-          num_fields_found: 0,
-          delimiter: '',
-          preview_success: false,
-          analysis_success: false,
-          overrides_used: Object.keys(overrides).length > 0,
-        });
-      }
+
+      this.analyzeFileTelemetry(analysisResults, overrides, new Date().getTime() - startTime);
     });
   }
 
@@ -352,25 +318,74 @@ export class FileWrapper {
         failures: resp.failures ?? [],
         importStatus: STATUS.COMPLETED,
       });
-      const failureCount = resp.failures ? resp.failures.length : 0;
-      const fileClash = getFileClashes();
-      // TODO: change this to take in resp and whatever else.
-      // Make it cleaner
-      this.fileUploadTelemetryService.trackUploadFile({
-        upload_session_id: this.uploadSessionId,
-        file_id: this.fileId,
-        mapping_clash_new_fields: fileClash?.newFields?.length ?? 0,
-        mapping_clash_missing_fields: fileClash?.missingFields?.length ?? 0,
-        documents_success: resp.docCount !== undefined ? resp.docCount - failureCount : 0,
-        documents_failed: failureCount,
-        upload_success: resp.success,
-        upload_time_ms: new Date().getTime() - startTime,
-      });
+      this.uploadFileTelemetry(resp, getFileClashes, new Date().getTime() - startTime);
 
       return resp;
     } catch (error) {
       this.setStatus({ importStatus: STATUS.FAILED });
       return;
     }
+  }
+
+  private analyzeFileTelemetry(
+    analysisResults: AnalysisResults | undefined,
+    overrides: InputOverrides,
+    analysisTimeMs: number
+  ) {
+    if (analysisResults?.results) {
+      this.fileUploadTelemetryService.trackAnalyzeFile({
+        analysis_success: true,
+        upload_session_id: this.uploadSessionId,
+        file_id: this.fileId,
+        file_type: analysisResults.results.format,
+        file_extension: this.file.name.split('.').pop() ?? 'unknown',
+        file_size_bytes: this.file.size ?? 0,
+        num_lines_analyzed: analysisResults.results.num_lines_analyzed,
+        num_messages_analyzed: analysisResults.results.num_messages_analyzed,
+        java_timestamp_formats: analysisResults.results.java_timestamp_formats?.join(',') ?? '',
+        num_fields_found: Object.keys(analysisResults.results.field_stats).length,
+        delimiter: analysisResults.results.delimiter ?? '',
+        preview_success: analysisResults.sampleDocs.length > 0,
+        overrides_used: Object.keys(overrides).length > 0,
+        analysis_time_ms: analysisTimeMs,
+      });
+    } else {
+      this.fileUploadTelemetryService.trackAnalyzeFile({
+        upload_session_id: this.uploadSessionId,
+        file_id: this.fileId,
+        file_type: 'unknown',
+        file_extension: this.file.name.split('.').pop() ?? 'unknown',
+        file_size_bytes: this.file.size ?? 0,
+        num_lines_analyzed: 0,
+        num_messages_analyzed: 0,
+        java_timestamp_formats: '',
+        num_fields_found: 0,
+        delimiter: '',
+        preview_success: false,
+        analysis_success: false,
+        overrides_used: Object.keys(overrides).length > 0,
+        analysis_time_ms: analysisTimeMs,
+      });
+    }
+  }
+
+  private uploadFileTelemetry(
+    resp: ImportResults,
+    getFileClashes: () => FileClash | null,
+    uploadTimeMs: number
+  ) {
+    const failureCount = resp.failures ? resp.failures.length : 0;
+    const fileClash = getFileClashes();
+    this.fileUploadTelemetryService.trackUploadFile({
+      upload_session_id: this.uploadSessionId,
+      file_id: this.fileId,
+      file_size_bytes: this.file.size ?? 0,
+      mapping_clash_new_fields: fileClash?.newFields?.length ?? 0,
+      mapping_clash_missing_fields: fileClash?.missingFields?.length ?? 0,
+      documents_success: resp.docCount !== undefined ? resp.docCount - failureCount : 0,
+      documents_failed: failureCount,
+      upload_success: resp.success,
+      upload_time_ms: uploadTimeMs,
+    });
   }
 }

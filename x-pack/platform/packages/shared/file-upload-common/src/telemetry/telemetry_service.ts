@@ -13,7 +13,7 @@ interface FileAnalysisEvent {
   file_id: string;
   file_type: string;
   file_extension: string;
-  file_size: number;
+  file_size_bytes: number;
   num_lines_analyzed: number;
   num_messages_analyzed: number;
   java_timestamp_formats: string;
@@ -22,6 +22,7 @@ interface FileAnalysisEvent {
   preview_success: boolean;
   analysis_success: boolean;
   overrides_used: boolean;
+  analysis_time_ms: number;
   location?: string;
 }
 
@@ -30,6 +31,7 @@ interface FileUploadEvent {
   file_id: string;
   mapping_clash_new_fields: number;
   mapping_clash_missing_fields: number;
+  file_size_bytes: number;
   documents_success: number;
   documents_failed: number;
   upload_success: boolean;
@@ -40,7 +42,7 @@ interface FileUploadEvent {
 interface UploadSessionEvent {
   upload_session_id: string;
   total_files: number;
-  total_size: number;
+  total_size_bytes: number;
   session_success: boolean;
   session_time_ms: number;
   new_index_created: boolean;
@@ -85,22 +87,4 @@ export class FileUploadTelemetryService {
       location: this.location,
     });
   }
-
-  // public getFileSizeBucket(fileSizeInBytes: number): string {
-  //   if (fileSizeInBytes < 1024) {
-  //     return '<1KB';
-  //   } else if (fileSizeInBytes < 10 * 1024) {
-  //     return '1KB-10KB';
-  //   } else if (fileSizeInBytes < 100 * 1024) {
-  //     return '10KB-100KB';
-  //   } else if (fileSizeInBytes < 1024 * 1024) {
-  //     return '100KB-1MB';
-  //   } else if (fileSizeInBytes < 10 * 1024 * 1024) {
-  //     return '1MB-10MB';
-  //   } else if (fileSizeInBytes < 100 * 1024 * 1024) {
-  //     return '10MB-100MB';
-  //   } else {
-  //     return '>100MB';
-  //   }
-  // }
 }
