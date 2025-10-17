@@ -18,7 +18,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const synthtrace = getService('svlLogsSynthtraceClient');
 
-  describe('Onboarding Auto-Detect', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/239362
+  describe.skip('Onboarding Auto-Detect', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsAdmin(); // Onboarding requires admin role
       await PageObjects.common.navigateToUrlWithBrowserHistory(
