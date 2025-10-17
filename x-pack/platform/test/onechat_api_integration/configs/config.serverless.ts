@@ -6,11 +6,11 @@
  */
 
 import { createServerlessTestConfig } from '../../api_integration_deployment_agnostic/default_configs/serverless.config.base';
-import { oneChatServices } from './ftr_provider_context';
+import { oneChatApiServices } from '../../onechat/services/api';
 
 export default createServerlessTestConfig({
   serverlessProject: 'es',
-  services: oneChatServices,
+  services: oneChatApiServices,
   testFiles: [require.resolve('../apis')],
   junit: {
     reportName: 'X-Pack Agent Builder Serverless API Integration Tests',
