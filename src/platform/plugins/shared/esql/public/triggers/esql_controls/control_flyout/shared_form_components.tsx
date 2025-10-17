@@ -40,6 +40,8 @@ import {
   EuiCallOut,
   useEuiTheme,
 } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ServiceDeps } from '../../../kibana_services';
 import { checkVariableExistence } from './helpers';
 
 const controlTypeOptions = [
@@ -345,8 +347,10 @@ export function ControlSelectionType({
   onSelectionTypeChange: (isSingleSelect: boolean) => void;
 }) {
   const theme = useEuiTheme();
-  const link =
-    'https://www.elastic.co/docs/explore-analyze/dashboards/add-controls#add-esql-control';
+  const {
+    services: { docLinks },
+  } = useKibana<ServiceDeps>();
+  const multiValuesGuideLink = docLinks.links.query.queryESQLMultiValueControls;
   return (
     <>
       <EuiSpacer size="m" />
@@ -388,7 +392,7 @@ export function ControlSelectionType({
                 defaultMessage="You must use {mvContainsLink} in your ES|QL query for multi-select controls to work."
                 values={{
                   mvContainsLink: (
-                    <EuiLink href={link} target="_blank">
+                    <EuiLink href={multiValuesGuideLink} target="_blank">
                       MV_CONTAINS
                     </EuiLink>
                   ),

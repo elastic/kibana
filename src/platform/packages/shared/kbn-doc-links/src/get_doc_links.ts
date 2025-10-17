@@ -506,6 +506,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       queryDsl: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/querydsl`,
       queryESQL: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql`,
       queryESQLExamples: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql`,
+      queryESQLMultiValueControls: `${ELASTIC_DOCS}explore-analyze/dashboards/add-controls#add-esql-control`,
     },
     search: {
       sessions: `${ELASTIC_DOCS}explore-analyze/discover/search-sessions`,
