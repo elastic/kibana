@@ -797,6 +797,8 @@ export const VisualizationWrapper = ({
     );
   }
 
+  console.log('searchContext', searchContext)
+
   return (
     <div
       className="lnsExpressionRenderer eui-scrollBar"

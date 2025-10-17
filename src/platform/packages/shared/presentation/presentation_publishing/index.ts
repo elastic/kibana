@@ -48,6 +48,7 @@ export {
   apiPublishesTimeRange,
   apiPublishesTimeslice,
   apiPublishesUnifiedSearch,
+  apiPublishesProjectRouting,
   apiPublishesWritableUnifiedSearch,
   useSearchApi,
   type PublishesFilters,

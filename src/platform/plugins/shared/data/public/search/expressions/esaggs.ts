@@ -68,10 +68,13 @@ export function getFunctionDefinition({
         switchMap(({ aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest }) => {
           const { disableWarningToasts } = getSearchContext();
 
+          console.log('!!!!!ESAGGS', input);
+
           return handleEsaggsRequest({
             abortSignal,
             aggs: aggConfigs,
             filters: args.ignoreGlobalFilters ? undefined : get(input, 'filters', undefined),
+            projectRouting: get(input, 'projectRouting', undefined),
             indexPattern,
             inspectorAdapters,
             query: args.ignoreGlobalFilters ? undefined : (get(input, 'query', undefined) as any),

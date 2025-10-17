@@ -13,7 +13,7 @@ import { defer } from 'rxjs';
 import { map, switchMap } from 'rxjs';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { Filter, TimeRange } from '@kbn/es-query';
+import type { Filter, ProjectRouting, TimeRange } from '@kbn/es-query';
 
 import type { Query } from '../../..';
 import { calculateBounds } from '../../..';
@@ -26,6 +26,7 @@ export interface RequestHandlerParams {
   abortSignal?: AbortSignal;
   aggs: IAggConfigs;
   filters?: Filter[];
+  projectRouting?: ProjectRouting;
   indexPattern?: DataView;
   inspectorAdapters: Adapters;
   query?: Query;
@@ -44,6 +45,7 @@ export const handleRequest = ({
   abortSignal,
   aggs,
   filters,
+  projectRouting,
   indexPattern,
   inspectorAdapters,
   query,
@@ -106,6 +108,10 @@ export const handleRequest = ({
 
     requestSearchSource.setField('filter', filters);
     requestSearchSource.setField('query', query);
+
+    requestSearchSource.setField('projectRouting', projectRouting);
+
+    console.log('!!!!!JJJJ', requestSearchSource, 'P',projectRouting);
 
     return { allTimeFields, forceNow, requestSearchSource };
   }).pipe(

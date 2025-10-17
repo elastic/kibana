@@ -950,6 +950,8 @@ export const LensTopNavMenu = ({
     Required<TopNavMenuProps<AggregateQuery>>['onSavedQueryUpdated']
   >(
     (newSavedQuery) => {
+      // TODO: on change project routing picker behavior
+
       // If the user tries to load the same saved query that is already loaded,
       // we will receive the same object reference which was previously frozen
       // by Redux Toolkit. `filterManager.setFilters` will then try to modify

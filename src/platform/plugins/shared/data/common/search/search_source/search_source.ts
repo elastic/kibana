@@ -680,6 +680,10 @@ export class SearchSource {
         return addToBody(key, sort);
       case 'pit':
         return addToRoot(key, val);
+      case 'projectRouting':
+        // Convert ProjectRouting config to ES parameter format
+        const projectRoutingValue = this.serializeProjectRouting(val);
+        return addToBody('project_routing', projectRoutingValue);
       case 'aggs':
         if ((val as unknown) instanceof AggConfigs) {
           return addToBody('aggs', val.toDsl());
@@ -714,6 +718,31 @@ export class SearchSource {
 
   private getDataView(index?: DataView | string): DataView | undefined {
     return typeof index !== 'string' ? index : undefined;
+  }
+
+  /**
+   * Serializes a ProjectRouting configuration to the Elasticsearch project_routing parameter format.
+   * @param config - The project routing configuration
+   * @returns The Elasticsearch-compatible project_routing parameter value
+   */
+  private serializeProjectRouting(config: SearchSourceFields['projectRouting']): string {
+    // Default to origin if no config provided
+    if (!config) {
+      return '_alias:_origin';
+    }
+
+    switch (config.type) {
+      case 'origin':
+        return '_alias:_origin';
+      case 'all':
+        return '_alias:*';
+      case 'custom':
+        // For custom, join the project IDs
+        // Format: "_alias:project1,project2,project3"
+        return `_alias:${config.projects.join(',')}`;
+      default:
+        return '_alias:_origin';
+    }
   }
 
   private readonly getFieldName = (fld: SearchFieldValue): string =>
@@ -1173,6 +1202,8 @@ export class SearchSource {
     const searchRequest = this.mergeProps();
     const { body, index, query } = searchRequest;
     const dataView = this.getDataView(index);
+
+    console.log('!!!Generating expression AST from search source:', searchRequest);
 
     const filters = (
       typeof searchRequest.filters === 'function' ? searchRequest.filters() : searchRequest.filters

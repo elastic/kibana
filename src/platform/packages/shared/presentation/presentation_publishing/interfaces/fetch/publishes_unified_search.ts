@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import { useEffect, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { PublishingSubject } from '../../publishing_subject';
@@ -33,6 +33,11 @@ export type PublishesWritableTimeRange = PublishesTimeRange & {
 export interface PublishesFilters {
   filters$: PublishingSubject<Filter[] | undefined>;
 }
+
+export interface PublishesFilters {
+  projectRouting$: PublishingSubject<ProjectRouting | undefined>;
+}
+
 
 export type PublishesUnifiedSearch = PublishesTimeRange &
   PublishesFilters & {
@@ -63,6 +68,10 @@ export const apiPublishesFilters = (unknownApi: unknown): unknownApi is Publishe
   return Boolean(unknownApi && (unknownApi as PublishesFilters)?.filters$ !== undefined);
 };
 
+export const apiPublishesProjectRouting = (unknownApi: unknown): unknownApi is PublishesFilters => {
+  return Boolean(unknownApi && (unknownApi as PublishesFilters)?.projectRouting$ !== undefined);
+};
+
 export const apiPublishesUnifiedSearch = (
   unknownApi: null | unknown
 ): unknownApi is PublishesUnifiedSearch => {
@@ -70,7 +79,7 @@ export const apiPublishesUnifiedSearch = (
     unknownApi &&
       apiPublishesTimeRange(unknownApi) &&
       apiPublishesFilters(unknownApi) &&
-      (unknownApi as PublishesUnifiedSearch)?.query$ !== undefined
+      (unknownApi as PublishesUnifiedSearch)?.query$ !== undefined 
   );
 };
 

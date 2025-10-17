@@ -730,6 +730,7 @@ export class Execution<
     if (!fn.allowCache || !this.context.allowCache) {
       return { hash: undefined, value: undefined, valid: false };
     }
+    console.log(this.context.getSearchContext())
     const hash = calculateObjectHash([fn.name, input, args, this.context.getSearchContext()]);
 
     const cached = this.functionCache.get(hash);
