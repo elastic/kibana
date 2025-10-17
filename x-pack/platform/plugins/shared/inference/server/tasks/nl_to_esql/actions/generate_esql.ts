@@ -64,16 +64,18 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   }): Observable<NlToEsqlTaskEvent<TToolOptions>> {
     const functionLimitReached = callCount >= maxCallsAllowed;
     const keywords = [...(commands ?? []), ...(functions ?? [])];
+    const availableTools = Object.keys(tools ?? {});
+    const hasTools = !functionLimitReached && availableTools.length > 0;
     const requestedDocumentation = docBase.getDocumentation(keywords);
     const fakeRequestDocsToolCall = createFakeTooCall(commands, functions);
-
-<<<<<<< HEAD
+    const hasToolBlock = hasTools
+      ? `**IMPORTANT**: If there is a tool suitable for answering the user's question, use that tool,
+preferably with a natural language reply included. DO NOT attempt to call any other tools
+that are not explicitly listed as available. Only use the following available tools: ${availableTools.join(
+          ', '
+        )}`
+      : '**IMPORTANT**: There are no tools available to use. Do not attempt to call any tools.';
     return merge(
-=======
-    const availableTools = Object.keys(tools ?? {});
-
-    const next$ = merge(
->>>>>>> c495727dd32 ([NaturalLanguage2ESQL] Fix tool calling unavailable tools (#237174))
       of<
         OutputCompleteEvent<
           'request_documentation',
@@ -95,7 +97,6 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
         retryConfiguration,
         metadata,
         stream: true,
-<<<<<<< HEAD
         system: `${systemMessage}
 
           # Current task
@@ -104,6 +105,8 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
           suitable for answering the user's question, use that tool, preferably
           with a natural language reply included.
 
+          ${hasToolBlock}
+          
           Format any ES|QL query as follows:
           \`\`\`esql
           <query>
@@ -122,14 +125,6 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
           When converting queries from one language to ES|QL, make sure that the functions are available
           and documented in ES|QL. E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
           ${system ? `## Additional instructions\n\n${system}` : ''}`,
-=======
-        system: generateEsqlPrompt({
-          esqlPrompts: docBase.getPrompts(),
-          additionalSystemInstructions,
-          availableTools,
-          hasTools: !functionLimitReached && Object.keys(tools ?? {}).length > 0,
-        }),
->>>>>>> c495727dd32 ([NaturalLanguage2ESQL] Fix tool calling unavailable tools (#237174))
         messages: [
           ...messages,
           {
