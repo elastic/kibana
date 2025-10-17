@@ -93,11 +93,11 @@ describe('useLensProps', () => {
       useLensProps({
         title: 'Test Chart',
         query: 'FROM metrics-*',
-        seriesType: 'line',
         services: servicesMock as UnifiedHistogramServices,
         getTimeRange,
         discoverFetch$,
         chartRef,
+        chartLayers: mockChartLayers,
       })
     );
 
@@ -120,11 +120,11 @@ describe('useLensProps', () => {
       useLensProps({
         title: 'Test Chart',
         query: 'FROM metrics-*',
-        seriesType: 'line',
         services: servicesMock as UnifiedHistogramServices,
         getTimeRange,
         discoverFetch$,
         chartRef,
+        chartLayers: mockChartLayers,
       })
     );
 
@@ -162,11 +162,11 @@ describe('useLensProps', () => {
       useLensProps({
         title: 'Test Chart',
         query: 'FROM metrics-*',
-        seriesType: 'line',
         services: servicesMock as UnifiedHistogramServices,
         getTimeRange,
         discoverFetch$,
         chartRef,
+        chartLayers: mockChartLayers,
       })
     );
 
@@ -192,11 +192,11 @@ describe('useLensProps', () => {
       useLensProps({
         title: 'Test Chart',
         query: 'FROM metrics-*',
-        seriesType: 'line',
         services: servicesMock as UnifiedHistogramServices,
         getTimeRange,
         discoverFetch$,
         chartRef: { current: null },
+        chartLayers: mockChartLayers,
       })
     );
 
