@@ -6,19 +6,22 @@
  */
 import { consoleTutorials } from '@kbn/search-code-examples';
 import { TryInConsoleButton } from '@kbn/try-in-console';
-import { EuiBadge, EuiCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiImage } from '@elastic/eui';
 import React, { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchGettingStartedSectionHeading } from '../section_heading';
-
+import searchWindowIllustration from '../../assets/search_window_illustration.svg';
+import searchResultsIllustration from '../../assets/search_results_illustration.svg';
+import searchObserveIllustration from '../../assets/search_observe_illustration.svg';
+import commandLineIllustration from '../../assets/command_line.svg';
 interface TutorialMetadata {
   title: string;
   dataTestSubj: string;
   description: string;
   request: string;
-  duration: number;
+  image: string;
   buttonRef: React.RefObject<HTMLButtonElement>;
 }
 
@@ -34,12 +37,12 @@ export const ConsoleTutorialsGroup = () => {
         defaultMessage: 'Learn how to create an index, add documents, and basic search techniques.',
       }),
       request: consoleTutorials.basics,
-      duration: 3,
+      image: searchWindowIllustration,
       buttonRef: useRef<HTMLButtonElement>(null),
     },
     {
       title: i18n.translate('xpack.searchHomepage.consoleTutorials.semanticTitle', {
-        defaultMessage: 'Semantic search',
+        defaultMessage: 'Intro to semantic search',
       }),
       dataTestSubj: 'console_tutorials_semantic_search',
       description: i18n.translate('xpack.searchHomepage.consoleTutorials.semanticDescription', {
@@ -47,12 +50,12 @@ export const ConsoleTutorialsGroup = () => {
           'Learn semantic search techniques to understand intent and deliver more accurate, relevant results.',
       }),
       request: consoleTutorials.semanticSearch,
-      duration: 3,
+      image: searchResultsIllustration,
       buttonRef: useRef<HTMLButtonElement>(null),
     },
     {
       title: i18n.translate('xpack.searchHomepage.consoleTutorials.esqlTitle', {
-        defaultMessage: 'ES|QL',
+        defaultMessage: 'ES|QL fundamentals',
       }),
       dataTestSubj: 'console_tutorials_esql',
       description: i18n.translate('xpack.searchHomepage.consoleTutorials.esqlDescription', {
@@ -60,7 +63,7 @@ export const ConsoleTutorialsGroup = () => {
           "Learn how to use Elastic's piped query language to simplify data investigations.",
       }),
       request: consoleTutorials.esql,
-      duration: 4,
+      image: searchObserveIllustration,
       buttonRef: useRef<HTMLButtonElement>(null),
     },
   ];
@@ -73,7 +76,7 @@ export const ConsoleTutorialsGroup = () => {
             title={i18n.translate('xpack.searchHomepage.consoleTutorials.label', {
               defaultMessage: 'Explore the API',
             })}
-            icon="console"
+            icon={commandLineIllustration}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -94,44 +97,56 @@ export const ConsoleTutorialsGroup = () => {
                 title={tutorial.title}
                 titleSize="xs"
                 textAlign="left"
-                onClick={tutorial.buttonRef.current?.click}
+                onClick={() => {
+                  tutorial.buttonRef.current?.click();
+                }}
               >
                 <EuiFlexGroup
-                  gutterSize="s"
-                  direction="column"
-                  justifyContent="center"
+                  gutterSize="m"
                   alignItems="flexStart"
+                  justifyContent="spaceBetween"
+                  wrap
                 >
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">
-                      <EuiText size="relative" color="subdued">
-                        <FormattedMessage
-                          id="xpack.searchHomepage.consoleTutorials.duration"
-                          defaultMessage="~{duration} min"
-                          values={{ duration: tutorial.duration }}
+                  <EuiFlexItem grow={1}>
+                    <EuiFlexGroup
+                      gutterSize="s"
+                      direction="column"
+                      justifyContent="center"
+                      alignItems="flexStart"
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="relative">{tutorial.description}</EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <TryInConsoleButton
+                          type="button"
+                          iconType={commandLineIllustration}
+                          color="text"
+                          request={tutorial.request}
+                          application={application}
+                          sharePlugin={share}
+                          consolePlugin={consolePlugin}
+                          telemetryId={tutorial.dataTestSubj}
+                          data-test-subj={tutorial.dataTestSubj}
+                          buttonProps={{ buttonRef: tutorial.buttonRef }}
+                          content={
+                            <FormattedMessage
+                              id="xpack.searchHomepage.consoleTutorials.runInConsole"
+                              defaultMessage="Open in Console"
+                            />
+                          }
+                          onClick={(e) => {
+                            // Do not trigger the card click
+                            e.stopPropagation();
+                          }}
                         />
-                      </EuiText>
-                    </EuiBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiText size="relative">{tutorial.description}</EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <TryInConsoleButton
-                      type="button"
-                      color="text"
-                      request={tutorial.request}
-                      application={application}
-                      sharePlugin={share}
-                      consolePlugin={consolePlugin}
-                      telemetryId={tutorial.dataTestSubj}
-                      data-test-subj={tutorial.dataTestSubj}
-                      buttonProps={{ buttonRef: tutorial.buttonRef }}
-                      onClick={(e) => {
-                        // Do not trigger the card click
-                        e.stopPropagation();
-                      }}
-                    />
+                    <div style={{ alignSelf: 'flex-end', minWidth: '66px' }}>
+                      <EuiImage src={tutorial.image} alt="Custom SVG icon" size="original" />
+                    </div>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiCard>
