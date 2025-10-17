@@ -77,6 +77,7 @@ export const knowledgeBaseRetrievalInternalTool = (
     getLlmDescription: async ({ config, description }, context) => {
       return getLlmDescriptionHelper({
         description,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         context: context as any, // Type cast to bypass strict type checking
         promptId: 'KnowledgeBaseRetrievalTool',
         promptGroupId: 'builtin-security-tools',
@@ -135,7 +136,7 @@ export const knowledgeBaseRetrievalInternalTool = (
               {
                 type: ToolResultType.other,
                 data: {
-                  content: docs.map((doc: any) => doc.pageContent).join('\n\n'),
+                  content: docs.map((doc: { pageContent: string }) => doc.pageContent).join('\n\n'),
                   query,
                 },
               },
