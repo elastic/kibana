@@ -55,7 +55,7 @@ export interface ConfigPanelWrapperProps extends LensConfigPanelBaseProps {
   hideLayerHeader?: boolean;
 }
 
-export interface LayerPanelProps extends ConfigPanelWrapperProps {
+export interface LayerPanelProps extends LensConfigPanelBaseProps {
   visualizationState: unknown;
   activeVisualization: Visualization;
   dimensionGroups: VisualizationDimensionGroupConfig[];
