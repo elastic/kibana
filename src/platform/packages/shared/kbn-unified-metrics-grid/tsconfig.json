@@ -19,7 +19,6 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/chart-icons",
-    "@kbn/esql-utils",
     "@kbn/data-plugin",
     "@kbn/lens-embeddable-utils",
     "@kbn/data-views-plugin",
@@ -31,7 +30,6 @@
     "@kbn/data-grid-in-table-search",
     "@kbn/es-query",
     "@kbn/fields-metadata-plugin",
-    "@kbn/esql-utils",
     "@kbn/field-utils"
   ]
 }
