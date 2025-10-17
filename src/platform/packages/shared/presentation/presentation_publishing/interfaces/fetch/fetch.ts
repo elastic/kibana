@@ -72,9 +72,11 @@ function getReloadTimeFetchContext(api: unknown, reloadTimestamp?: number): Relo
 }
 
 function hasSearchSession(api: unknown) {
-  return apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)
-    ? typeof api.parentApi.searchSessionId$.value === 'string'
-    : false;
+  // TODO: Remove this once https://github.com/elastic/kibana/issues/239610 is resolved
+  // return apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)
+  //   ? typeof api.parentApi.searchSessionId$.value === 'string'
+  //   : false;
+  return false;
 }
 
 function hasLocalTimeRange(api: unknown) {
@@ -176,6 +178,9 @@ export function fetch$(api: unknown): Observable<FetchContext> {
   );
 
   return fetchContext$.pipe(
+    tap(() => {
+      console.log('HERE!!!!!!');
+    }),
     combineLatestWith(isFetchPaused$),
     filter(([, isFetchPaused]) => !isFetchPaused),
     map(([fetchContext]) => fetchContext),
