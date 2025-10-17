@@ -224,7 +224,6 @@ describe('Slack API service', () => {
       requestMock.mockImplementation(() => postMessageResponse);
 
       await service.postMessage({
-        channels: ['general', 'privat'],
         channelIds: ['QWEERTYU987', 'POIUYT123'],
         text: 'a message',
       });
@@ -262,6 +261,30 @@ describe('Slack API service', () => {
         method: 'post',
         url: 'https://slack.com/api/chat.postMessage',
         data: { channel: 'QWEERTYU987', text: 'a message' },
+        connectorUsageCollector,
+      });
+    });
+
+    test('should call request with only channelNames argument', async () => {
+      requestMock.mockImplementation(() => postMessageResponse);
+
+      await service.postMessage({
+        channelNames: ['#general'],
+        text: 'a message',
+      });
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock).toHaveBeenNthCalledWith(1, {
+        axios,
+        headers: {
+          Authorization: 'Bearer token',
+          'Content-type': 'application/json; charset=UTF-8',
+        },
+        logger,
+        configurationUtilities,
+        method: 'post',
+        url: 'https://slack.com/api/chat.postMessage',
+        data: { channel: '#general', text: 'a message' },
         connectorUsageCollector,
       });
     });
@@ -311,7 +334,7 @@ describe('Slack API service', () => {
       requestMock.mockImplementation(() => postBlockkitResponse);
 
       await service.postBlockkit({
-        channels: ['general', 'private'],
+        channels: ['#general', '#private'],
         channelIds: ['QWEERTYU987', 'POIUYT123'],
         text: JSON.stringify(testBlock),
       });
@@ -327,7 +350,7 @@ describe('Slack API service', () => {
         configurationUtilities,
         method: 'post',
         url: 'https://slack.com/api/chat.postMessage',
-        data: { channel: 'QWEERTYU987', blocks: testBlock.blocks },
+        data: { channel: '#general', blocks: testBlock.blocks },
         connectorUsageCollector,
       });
     });
@@ -352,6 +375,30 @@ describe('Slack API service', () => {
         method: 'post',
         url: 'https://slack.com/api/chat.postMessage',
         data: { channel: 'QWEERTYU987', blocks: testBlock.blocks },
+        connectorUsageCollector,
+      });
+    });
+
+    test('should call request with only channelNames argument', async () => {
+      requestMock.mockImplementation(() => postBlockkitResponse);
+
+      await service.postBlockkit({
+        channelNames: ['#general'],
+        text: JSON.stringify(testBlock),
+      });
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock).toHaveBeenNthCalledWith(1, {
+        axios,
+        logger,
+        headers: {
+          Authorization: 'Bearer token',
+          'Content-type': 'application/json; charset=UTF-8',
+        },
+        configurationUtilities,
+        method: 'post',
+        url: 'https://slack.com/api/chat.postMessage',
+        data: { channel: '#general', blocks: testBlock.blocks },
         connectorUsageCollector,
       });
     });
@@ -427,7 +474,7 @@ describe('Slack API service', () => {
         configurationUtilities,
         method: 'post',
         url: 'https://slack.com/api/chat.postMessage',
-        data: { channel: 'C024BE91L', text: 'hello' },
+        data: { channel: '#channel-1', text: 'hello' },
         connectorUsageCollector,
       });
     });
@@ -471,7 +518,7 @@ describe('Slack API service', () => {
         configurationUtilities,
         method: 'post',
         url: 'https://slack.com/api/chat.postMessage',
-        data: { channel: 'C024BE91L', blocks: testBlock.blocks },
+        data: { channel: '#channel-1', blocks: testBlock.blocks },
         connectorUsageCollector,
       });
     });

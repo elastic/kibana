@@ -191,31 +191,43 @@ export const createExternalService = (
   const getChannelToUse = ({
     channels,
     channelIds = [],
+    channelNames = [],
   }: {
     channels?: string[];
     channelIds?: string[];
+    channelNames?: string[];
   }): string => {
-    if (
-      channelIds.length > 0 &&
-      allowedChannelIds &&
-      allowedChannelIds.length > 0 &&
-      !channelIds.every((cId) => allowedChannelIds.includes(cId))
-    ) {
-      throw new Error(
-        `One of channel ids "${channelIds.join()}" is not included in the allowed channels list "${allowedChannelIds.join()}"`
-      );
-    }
+    let channelToUse = '';
 
-    // For now, we only allow one channel but we wanted
-    // to have a array in case we need to allow multiple channels
-    // in one actions
-    let channelToUse = channelIds.length > 0 ? channelIds[0] : '';
-    if (channelToUse.length === 0 && channels && channels.length > 0 && channels[0].length > 0) {
-      channelToUse = channels[0];
-    }
+    const mappedChannelNames = channelNames.length ? channelNames : channels ?? [];
 
-    if (channelToUse.length === 0) {
-      throw new Error(`The channel is empty"`);
+    if (mappedChannelNames.length > 0) {
+      if (
+        allowedChannelNames &&
+        allowedChannelNames.length &&
+        !mappedChannelNames.every((name) => allowedChannelNames?.includes(name))
+      ) {
+        throw new Error(
+          `One or more provided channel names are not included in the allowed channels list`
+        );
+      }
+      // For now, we only allow one channel but we wanted
+      // to have a array in case we need to allow multiple channels
+      // in one action
+      channelToUse = mappedChannelNames[0];
+    } else if (channelIds.length > 0) {
+      if (
+        allowedChannelIds &&
+        allowedChannelIds.length > 0 &&
+        !channelIds.every((cId) => allowedChannelIds?.includes(cId))
+      ) {
+        throw new Error(
+          `One of channel ids "${channelIds.join()}" is not included in the allowed channels list "${allowedChannelIds?.join()}"`
+        );
+      }
+      channelToUse = channelIds[0];
+    } else {
+      throw new Error(`The channel is empty`);
     }
 
     return channelToUse;
@@ -230,7 +242,7 @@ export const createExternalService = (
   > => {
     try {
       validateChannelNames(channelNames);
-      const channelToUse = getChannelToUse({ channels, channelIds });
+      const channelToUse = getChannelToUse({ channels, channelIds, channelNames });
 
       const result: AxiosResponse<PostMessageResponse> = await request({
         axios: axiosInstance,
@@ -259,7 +271,7 @@ export const createExternalService = (
   > => {
     try {
       validateChannelNames(channelNames);
-      const channelToUse = getChannelToUse({ channels, channelIds });
+      const channelToUse = getChannelToUse({ channels, channelIds, channelNames });
       const blockJson = JSON.parse(text);
 
       const result: AxiosResponse<PostMessageResponse> = await request({
