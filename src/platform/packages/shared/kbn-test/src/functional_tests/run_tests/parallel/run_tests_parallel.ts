@@ -121,12 +121,12 @@ export async function runTestsParallel(
   }
 
   const DEFAULT_PORTS = {
-    agentless: TEST_AGENTLESS_PORT,
-    fleet: TEST_FLEET_PORT,
-    es: TEST_ES_PORT,
-    esTransport: TEST_ES_TRANSPORT_PORT,
-    kibana: TEST_KIBANA_PORT,
-    packageRegistry: FLEET_PACKAGE_REGISTRY_PORT,
+    agentless: await getPort(), // TEST_AGENTLESS_PORT,
+    fleet: await getPort(), // TEST_FLEET_PORT,
+    es: await getPort(), // TEST_ES_PORT,
+    esTransport: await getPort(), // TEST_ES_TRANSPORT_PORT,
+    kibana: await getPort(), // TEST_KIBANA_PORT,
+    packageRegistry: await getPort(), // FLEET_PACKAGE_REGISTRY_PORT,
   };
 
   const portConfigEntries = await Promise.all(

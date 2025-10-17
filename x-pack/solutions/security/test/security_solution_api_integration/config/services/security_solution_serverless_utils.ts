@@ -52,7 +52,9 @@ export function SecuritySolutionServerlessUtils({
         await invalidateApiKey(credential);
       }
     );
-    await Promise.all(invalidationPromises);
+    await Promise.all(invalidationPromises).catch((error) => {
+      log.error(error);
+    });
   });
 
   const createSuperTest = async (role = 'admin') => {

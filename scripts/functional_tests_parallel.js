@@ -11,5 +11,5 @@ require('../src/setup_node_env');
 require('@kbn/test')
   .runTestsCliParallel()
   .then(function (code) {
-    process.exit(code);
+    process.exit(code ?? 1);
   });

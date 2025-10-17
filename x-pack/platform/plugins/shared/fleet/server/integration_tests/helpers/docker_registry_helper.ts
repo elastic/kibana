@@ -59,7 +59,7 @@ export function useDockerRegistry() {
   });
   const packageRegistryPort = String(FLEET_PACKAGE_REGISTRY_PORT || '8081');
 
-  if (!packageRegistryPort.match(/^[0-9]{4}/)) {
+  if (!packageRegistryPort.match(/^[0-9]{4,5}/)) {
     throw new Error('Invalid FLEET_PACKAGE_REGISTRY_PORT');
   }
 
