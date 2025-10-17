@@ -20,6 +20,7 @@ import {
   type EuiButtonColor,
 } from '@elastic/eui';
 import { Global, css } from '@emotion/react';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
@@ -34,7 +35,6 @@ import {
   type IndicesAutocompleteResult,
 } from '@kbn/esql-types';
 import { fixESQLQueryWithVariables, getRemoteClustersFromESQLQuery } from '@kbn/esql-utils';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
@@ -58,7 +58,6 @@ import {
   esqlEditorStyles,
 } from './esql_editor.styles';
 import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
-import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
   clearCacheWhenOld,
   filterDataErrors,
@@ -138,7 +137,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
-  const { dataViews, expressions, application, core, fieldsMetadata, uiSettings, uiActions, data } =
+  const { dataViews, application, core, fieldsMetadata, uiSettings, uiActions, data } =
     kibana.services;
 
   const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
@@ -440,18 +439,20 @@ const ESQLEditorInternal = function ESQLEditor({
     const fn = memoize(
       (
         ...args: [
-          { esql: string },
-          ExpressionsStart,
-          TimeRange,
-          AbortController?,
-          string?,
-          ESQLControlVariable[]?
+          {
+            esqlQuery: string;
+            search: any;
+            timeRange: TimeRange;
+            signal?: AbortSignal;
+            dropNullColumns?: boolean;
+            variables?: ESQLControlVariable[];
+          }
         ]
       ) => ({
         timestamp: Date.now(),
-        result: fetchFieldsFromESQL(...args),
+        result: getESQLQueryColumns(...args),
       }),
-      ({ esql }) => esql
+      ({ esqlQuery }) => esqlQuery
     );
 
     return { cache: fn.cache, memoizedFieldsFromESQL: fn };
@@ -495,6 +496,8 @@ const ESQLEditorInternal = function ESQLEditor({
     () => ({
       onDecorationHoverShown: (hoverMessage: string) =>
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
+      onSuggestionsWithCustomCommandShown: (commandIds: string[]) =>
+        telemetryService.trackSuggestionsWithCustomCommandShown(commandIds),
     }),
     [telemetryService]
   );
@@ -509,24 +512,20 @@ const ESQLEditorInternal = function ESQLEditor({
       },
       getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
         if (queryToExecute) {
-          // ES|QL with limit 0 returns only the columns and is more performant
-          const esqlQuery = {
-            esql: `${queryToExecute} | limit 0`,
-          };
           // Check if there's a stale entry and clear it
-          clearCacheWhenOld(esqlFieldsCache, esqlQuery.esql);
+          clearCacheWhenOld(esqlFieldsCache, `${queryToExecute} | limit 0`);
           const timeRange = data.query.timefilter.timefilter.getTime();
           try {
-            const table = await memoizedFieldsFromESQL(
-              esqlQuery,
-              expressions,
+            const columns = await memoizedFieldsFromESQL({
+              esqlQuery: queryToExecute,
+              search: data.search.search,
               timeRange,
-              abortController,
-              undefined,
-              variablesService?.esqlVariables
-            ).result;
-            const columns: ESQLFieldWithMetadata[] =
-              table?.columns.map((c) => {
+              signal: abortController.signal,
+              variables: variablesService?.esqlVariables,
+              dropNullColumns: true,
+            }).result;
+            const columnsWithMetadata: ESQLFieldWithMetadata[] =
+              columns.map((c) => {
                 return {
                   name: c.name,
                   type: c.meta.esType as FieldType,
@@ -535,7 +534,7 @@ const ESQLEditorInternal = function ESQLEditor({
                 };
               }) || [];
 
-            return columns;
+            return columnsWithMetadata;
           } catch (e) {
             // no action yet
           }
@@ -611,8 +610,8 @@ const ESQLEditorInternal = function ESQLEditor({
     core,
     esqlFieldsCache,
     data.query.timefilter.timefilter,
+    data.search.search,
     memoizedFieldsFromESQL,
-    expressions,
     abortController,
     variablesService?.esqlVariables,
     variablesService?.areSuggestionsEnabled,
@@ -754,12 +753,18 @@ const ESQLEditorInternal = function ESQLEditor({
     [dataSourcesCache, getJoinIndices, onQueryUpdate, queryValidation]
   );
 
+  // Refresh the fields cache when a new field has been added to the lookup index
+  const onNewFieldsAddedToLookupIndex = useCallback(() => {
+    esqlFieldsCache.clear?.();
+  }, [esqlFieldsCache]);
+
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
     editor1,
     editorModel,
     getJoinIndices,
     query,
-    onLookupIndexCreate
+    onLookupIndexCreate,
+    onNewFieldsAddedToLookupIndex
   );
 
   useDebounceWithOptions(
@@ -790,8 +795,8 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   const suggestionProvider = useMemo(
-    () => ESQLLang.getSuggestionProvider?.(esqlCallbacks),
-    [esqlCallbacks]
+    () => ESQLLang.getSuggestionProvider?.({ ...esqlCallbacks, telemetry: telemetryCallbacks }),
+    [esqlCallbacks, telemetryCallbacks]
   );
 
   const hoverProvider = useMemo(
@@ -823,6 +828,7 @@ const ESQLEditorInternal = function ESQLEditor({
     return () => {
       model.current?.dispose();
       editor1ref.current?.dispose();
+      editorModel.current = undefined;
     };
   }, []);
 

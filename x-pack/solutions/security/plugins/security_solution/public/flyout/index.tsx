@@ -23,9 +23,9 @@ import {
 } from './entity_details/generic_details_left';
 import type { GenericEntityPanelExpandableFlyoutProps } from './entity_details/generic_right';
 import { GenericEntityPanel } from './entity_details/generic_right';
-import type { AIForSOCDetailsProps } from './ai_for_soc/types';
-import { AIForSOCDetailsProvider } from './ai_for_soc/context';
-import { AIForSOCPanel } from './ai_for_soc';
+import type { EaseDetailsProps } from './ease/types';
+import { EaseDetailsProvider } from './ease/context';
+import { EasePanel } from './ease';
 import { SessionViewPanelProvider } from './document_details/session_view/context';
 import type { SessionViewPanelProps } from './document_details/session_view';
 import { SessionViewPanel } from './document_details/session_view';
@@ -65,9 +65,9 @@ import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_det
 import type { AnalyzerPanelExpandableFlyoutProps } from './document_details/analyzer_panels';
 import { AnalyzerPanel } from './document_details/analyzer_panels';
 import {
+  GenericEntityPanelKey,
   HostPanelKey,
   ServicePanelKey,
-  GenericEntityPanelKey,
   UserPanelKey,
 } from './entity_details/shared/constants';
 import type { ServicePanelExpandableFlyoutProps } from './entity_details/service_right';
@@ -79,7 +79,7 @@ import {
   MisconfigurationFindingsPreviewPanelKey,
 } from './csp_details/findings_flyout/constants';
 import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/findings_right';
-import { IOCPanelKey } from './ai_for_soc/constants/panel_keys';
+import { EasePanelKey } from './ease/constants/panel_keys';
 import {
   VulnerabilityFindingsPanelKey,
   VulnerabilityFindingsPreviewPanelKey,
@@ -243,11 +243,11 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
-    key: IOCPanelKey,
+    key: EasePanelKey,
     component: (props) => (
-      <AIForSOCDetailsProvider {...(props as AIForSOCDetailsProps).params}>
-        <AIForSOCPanel />
-      </AIForSOCDetailsProvider>
+      <EaseDetailsProvider {...(props as EaseDetailsProps).params}>
+        <EasePanel />
+      </EaseDetailsProvider>
     ),
   },
   {
@@ -281,11 +281,13 @@ export const TIMELINE_ON_CLOSE_EVENT = `expandable-flyout-on-close-${Flyouts.tim
 
 /**
  * Flyout used for the Security Solution application
- * We keep the default EUI 1000 z-index to ensure it is always rendered behind Timeline (which has a z-index of 1001)
+ * We keep the default EUI 1001 z-index to ensure it is always rendered behind Timeline (which has a z-index of 1002)
  * We propagate the onClose callback to the rest of Security Solution using a window event 'expandable-flyout-on-close-SecuritySolution'
  * This flyout support push/overlay mode. The value is saved in local storage.
  */
 export const SecuritySolutionFlyout = memo(() => {
+  const { euiTheme } = useEuiTheme();
+
   const onClose = useCallback(
     () =>
       window.dispatchEvent(
@@ -300,6 +302,7 @@ export const SecuritySolutionFlyout = memo(() => {
     <ExpandableFlyout
       registeredPanels={expandableFlyoutDocumentsPanels}
       paddingSize="none"
+      customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 1 }}
       onClose={onClose}
     />
   );
@@ -309,7 +312,7 @@ SecuritySolutionFlyout.displayName = 'SecuritySolutionFlyout';
 
 /**
  * Flyout used in Timeline
- * We set the z-index to 1002 to ensure it is always rendered above Timeline (which has a z-index of 1001)
+ * We set the z-index to 1003 to ensure it is always rendered above Timeline (which has a z-index of 1002)
  * We propagate the onClose callback to the rest of Security Solution using a window event 'expandable-flyout-on-close-Timeline'
  * This flyout does not support push mode, because timeline being rendered in a modal (EUiPortal), it's very difficult to dynamically change its width.
  */
@@ -330,7 +333,7 @@ export const TimelineFlyout = memo(() => {
     <ExpandableFlyout
       registeredPanels={expandableFlyoutDocumentsPanels}
       paddingSize="none"
-      customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 2 }}
+      customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 3 }}
       onClose={onClose}
       flyoutCustomProps={{
         pushVsOverlay: {

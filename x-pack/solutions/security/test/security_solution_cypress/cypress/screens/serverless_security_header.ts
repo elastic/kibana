@@ -13,8 +13,6 @@ export const INVESTIGATIONS_PANEL_BTN =
 export const EXPLORE_PANEL_BTN = '[data-test-subj*="nav-item-id-securityGroup:explore"]';
 export const RULES_PANEL_BTN = '[data-test-subj*="nav-item-id-securityGroup:rules"]';
 export const ASSETS_PANEL_BTN = '[data-test-subj*="nav-item-id-securityGroup:assets"]';
-export const MACHINE_LEARNING_BTN =
-  '[data-test-subj*="panelOpener-deepLinkId-id-securityGroup:machineLearning"]';
 
 // main direct links
 export const DISCOVER = '[data-test-subj*="nav-item-deepLinkId-discover"]';
@@ -73,10 +71,6 @@ export const RULES = '[data-test-subj~="panelNavItem-id-rules"]';
 export const EXCEPTIONS = '[data-test-subj~="panelNavItem-id-exceptions"]';
 
 export const ONBOARDING = '[data-test-subj*="nav-item-deepLinkId-securitySolutionUI:get_started"]';
-
-export const getBreadcrumb = (deepLinkId: string) => {
-  return `breadcrumb-deepLinkId-${deepLinkId}`;
-};
 
 // Siem Migrations
 export const TRANSLATED_RULES_PAGE = getDataTestSubjectSelector(

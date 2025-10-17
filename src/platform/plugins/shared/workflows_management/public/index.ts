@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { WorkflowsPlugin } from './plugin';
 
 // This exports static code and TypeScript types,
@@ -15,15 +14,4 @@ import { WorkflowsPlugin } from './plugin';
 export function plugin() {
   return new WorkflowsPlugin();
 }
-export type { WorkflowsPluginSetup, WorkflowsPluginStart } from './types';
-
-// for use in workflows example plugin. TODO: revisit, maybe move to shared package.
-export type { WorkflowExecutionProps } from './features/workflow_execution_detail/ui/workflow_execution_detail';
-
-// Lazy export to avoid bundling the component in the main plugin bundle
-// This creates a dynamic import that will be code-split
-export const WorkflowExecution = React.lazy(() =>
-  import('./features/workflow_execution_detail/ui/workflow_execution.lazy').then((module) => ({
-    default: module.WorkflowExecutionLazy,
-  }))
-);
+export type { WorkflowsPublicPluginSetup, WorkflowsPublicPluginStart } from './types';

@@ -17,6 +17,7 @@ import type {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { XYByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/visualizations/xy/types';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
+import type { TextBasedLayerColumn } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 import {
   addLayerColumn,
@@ -47,6 +48,7 @@ function buildVisualizationState(config: LensXYConfig): XYState {
     legend: {
       isVisible: config.legend?.show ?? true,
       position: config.legend?.position ?? 'left',
+      ...(config.legend?.legendStats ? { legendStats: config.legend.legendStats } : {}),
     },
     hideEndzones: true,
     preferredSeriesType: 'line',
@@ -164,7 +166,7 @@ function getValueColumns(layer: LensSeriesLayer, i: number) {
     ...(layer.breakdown
       ? [getValueColumn(`${ACCESSOR}${i}_breakdown`, layer.breakdown as string)]
       : []),
-    getXValueColumn(layer.xAxis, i),
+    ...getXValueColumn(layer.xAxis, i),
     ...layer.yAxis.map((yAxis, index) => {
       const params = hasFormatParams(yAxis)
         ? {
@@ -184,19 +186,25 @@ function getValueColumns(layer: LensSeriesLayer, i: number) {
   ];
 }
 
-function getXValueColumn(xConfig: LensBreakdownConfig, index: number) {
+function getXValueColumn(
+  xConfig: LensBreakdownConfig | undefined,
+  index: number
+): TextBasedLayerColumn[] {
+  if (!xConfig) {
+    return [];
+  }
   const accessor = `x_${ACCESSOR}${index}`;
   if (typeof xConfig === 'string') {
-    return getValueColumn(accessor, xConfig);
+    return [getValueColumn(accessor, xConfig)];
   }
 
   switch (xConfig.type) {
     case 'dateHistogram':
-      return getValueColumn(accessor, xConfig.field, 'date');
+      return [getValueColumn(accessor, xConfig.field, 'date')];
     case 'intervals':
-      return getValueColumn(accessor, xConfig.field, 'number');
+      return [getValueColumn(accessor, xConfig.field, 'number')];
     case 'topValues':
-      return getValueColumn(accessor, xConfig.field);
+      return [getValueColumn(accessor, xConfig.field)];
     case 'filters':
       throw new Error('Not implemented yet');
   }

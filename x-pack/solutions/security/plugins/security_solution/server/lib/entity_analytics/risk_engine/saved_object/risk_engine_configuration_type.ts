@@ -35,6 +35,9 @@ export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] =
     alertSampleSizePerShard: {
       type: 'integer',
     },
+    enableResetToZero: {
+      type: 'boolean',
+    },
     range: {
       properties: {
         start: {
@@ -84,6 +87,28 @@ const version2: SavedObjectsModelVersion = {
   ],
 };
 
+const version3: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        enableResetToZero: { type: 'boolean' },
+      },
+    },
+    {
+      type: 'data_backfill',
+      backfillFn: (document) => {
+        return {
+          attributes: {
+            ...document.attributes,
+            enableResetToZero: false,
+          },
+        };
+      },
+    },
+  ],
+};
+
 export const riskEngineConfigurationType: SavedObjectsType = {
   name: riskEngineConfigurationTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
@@ -93,5 +118,6 @@ export const riskEngineConfigurationType: SavedObjectsType = {
   modelVersions: {
     1: version1,
     2: version2,
+    3: version3,
   },
 };

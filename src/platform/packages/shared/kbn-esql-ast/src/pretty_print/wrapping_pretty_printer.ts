@@ -129,6 +129,7 @@ export class WrappingPrettyPrinter {
       indent: opts.indent ?? '',
       tab: opts.tab ?? '  ',
       pipeTab: opts.pipeTab ?? '  ',
+      skipHeader: opts.skipHeader ?? false,
       commandTab: opts.commandTab ?? '    ',
       multiline: opts.multiline ?? false,
       wrap: opts.wrap ?? 80,
@@ -497,6 +498,75 @@ export class WrappingPrettyPrinter {
       return { txt };
     })
 
+    .on('visitHeaderCommand', (ctx, inp: Input): Output => {
+      const opts = this.opts;
+      const cmd = opts.lowercaseCommands ? ctx.node.name : ctx.node.name.toUpperCase();
+
+      let args = '';
+
+      for (const arg of ctx.visitArgs(inp)) {
+        args += (args ? ', ' : '') + arg.txt;
+      }
+
+      const argsFormatted = args ? ` ${args}` : '';
+      const formatted = `${cmd}${argsFormatted};`;
+
+      const formatting = ctx.node.formatting;
+      let txt = formatted;
+      let indented = false;
+
+      if (formatting) {
+        if (formatting.left) {
+          const comments = LeafPrinter.commentList(formatting.left);
+          if (comments) {
+            indented = true;
+            txt = `${inp.indent}${comments} ${txt}`;
+          }
+        }
+
+        if (formatting.top) {
+          const top = formatting.top;
+          const length = top.length;
+          for (let i = length - 1; i >= 0; i--) {
+            const decoration = top[i];
+            if (decoration.type === 'comment') {
+              if (!indented) {
+                txt = inp.indent + txt;
+                indented = true;
+              }
+              txt = inp.indent + LeafPrinter.comment(decoration) + '\n' + txt;
+              indented = true;
+            }
+          }
+        }
+
+        if (formatting.right) {
+          const comments = LeafPrinter.commentList(formatting.right);
+          if (comments) {
+            txt = `${txt} ${comments}`;
+          }
+        }
+
+        // For header commands, rightSingleLine comments should appear on the same line
+        // but we need to ensure there's a newline after the comment for the next statement
+        if (formatting.rightSingleLine) {
+          const comment = LeafPrinter.comment(formatting.rightSingleLine);
+          txt = `${txt} ${comment}`;
+        }
+
+        if (formatting.bottom) {
+          for (const decoration of formatting.bottom) {
+            if (decoration.type === 'comment') {
+              indented = true;
+              txt = txt + '\n' + inp.indent + LeafPrinter.comment(decoration);
+            }
+          }
+        }
+      }
+
+      return { txt, indented };
+    })
+
     .on('visitIdentifierExpression', (ctx, inp: Input) => {
       const formatted = LeafPrinter.identifier(ctx.node);
       const { txt, indented } = this.decorateWithComments(inp, ctx.node, formatted);
@@ -756,6 +826,7 @@ export class WrappingPrettyPrinter {
       const remaining = inp?.remaining ?? opts.wrap;
       const commands = ctx.node.commands;
       const commandCount = commands.length;
+      const hasHeaderCommands = !opts.skipHeader && ctx.node.header && ctx.node.header.length > 0;
 
       let multiline = opts.multiline ?? commandCount > 3;
 
@@ -766,7 +837,7 @@ export class WrappingPrettyPrinter {
         }
       }
 
-      if (!multiline) {
+      if (!multiline && !hasHeaderCommands) {
         const oneLine = indent + BasicPrettyPrinter.print(ctx.node, opts);
         if (oneLine.length <= remaining) {
           return { txt: oneLine };
@@ -775,12 +846,68 @@ export class WrappingPrettyPrinter {
         }
       }
 
+      // Special handling for queries with header commands: we want to try
+      // to keep the main query on a single line if possible.
+      if (hasHeaderCommands && !multiline && commandCount < 4) {
+        // Use skipHeader option to format just the main query
+        const mainQueryOneLine = BasicPrettyPrinter.print(ctx.node, {
+          ...opts,
+          skipHeader: true,
+        });
+
+        if (mainQueryOneLine.length <= remaining) {
+          // Main query fits on one line, print headers separately then main query
+          let text = indent;
+          let hasHeaderCommandsOutput = false;
+
+          for (const headerOut of ctx.visitHeaderCommands({
+            indent,
+            remaining: remaining - indent.length,
+          })) {
+            if (hasHeaderCommandsOutput) {
+              text += '\n' + indent;
+            }
+            text += headerOut.txt;
+            hasHeaderCommandsOutput = true;
+          }
+
+          if (hasHeaderCommandsOutput) {
+            text += '\n' + indent;
+          }
+
+          text += mainQueryOneLine;
+          return { txt: text };
+        } else {
+          // Main query doesn't fit, use multiline formatting
+          multiline = true;
+        }
+      }
+
       // Regular top-level query formatting
       let text = indent;
       const pipedCommandIndent = `${indent}${opts.pipeTab ?? '  '}`;
       const cmdSeparator = multiline ? `${pipedCommandIndent}| ` : ' | ';
+
+      // Print header pseudo-commands first (e.g., SET instructions).
+      // Each header command goes on its own line.
+      let hasHeaderCommandsOutput = false;
+
+      if (hasHeaderCommands) {
+        for (const headerOut of ctx.visitHeaderCommands({
+          indent,
+          remaining: remaining - indent.length,
+        })) {
+          if (hasHeaderCommandsOutput) {
+            text += '\n' + indent;
+          }
+          text += headerOut.txt;
+          hasHeaderCommandsOutput = true;
+        }
+      }
+
       let i = 0;
       let prevOut: Output | undefined;
+      let hasCommands = false;
 
       for (const out of ctx.visitCommands({ indent, remaining: remaining - indent.length })) {
         const isFirstCommand = i === 0;
@@ -801,16 +928,21 @@ export class WrappingPrettyPrinter {
           text += topDecorations;
         }
 
-        if (!isFirstCommand) {
+        if (hasCommands) {
+          // Separate main commands with pipe `|`
           if (multiline && !topDecorations) {
             text += '\n';
           }
           text += cmdSeparator;
+        } else if (hasHeaderCommandsOutput) {
+          // Separate header commands from main commands with a newline
+          text += '\n' + indent;
         }
 
         text += out.txt;
         i++;
         prevOut = out;
+        hasCommands = true;
       }
 
       return { txt: text };

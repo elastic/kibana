@@ -140,12 +140,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
           ...reduxSyncComparators,
           ...titleComparators,
           ...timeRangeComparators,
-          attributes:
-            savedMap.getSavedObjectId() !== undefined
-              ? 'skip'
-              : (a, b) => {
-                  return a?.layerListJSON === b?.layerListJSON;
-                },
+          attributes: savedMap.getSavedObjectId() !== undefined ? 'skip' : 'deepEquality',
           mapSettings: 'deepEquality',
           savedObjectId: 'skip',
         };

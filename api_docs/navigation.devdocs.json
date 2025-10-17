@@ -1241,10 +1241,10 @@
           },
           {
             "parentPluginId": "navigation",
-            "id": "def-common.DEFAULT_ROUTES.chat",
+            "id": "def-common.DEFAULT_ROUTES.workplace_ai",
             "type": "string",
             "tags": [],
-            "label": "chat",
+            "label": "workplace_ai",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
             "deprecated": false,

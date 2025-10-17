@@ -5744,6 +5744,78 @@
         }
       }
     },
+    "observability_ai_assistant": {
+      "properties": {
+        "knowledge_base": {
+          "properties": {
+            "users_with_global_entries": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with global knowledge base entries"
+              }
+            },
+            "users_with_global_entries_user_created": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with global knowledge base entries created by user"
+              }
+            },
+            "users_with_global_entries_assistant_created": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with global knowledge base entries created by assistant"
+              }
+            },
+            "users_with_private_entries": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with private knowledge base entries"
+              }
+            },
+            "users_with_private_entries_user_created": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with private knowledge base entries created by user"
+              }
+            },
+            "users_with_private_entries_assistant_created": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with private knowledge base entries created by assistant"
+              }
+            },
+            "users_with_user_instructions": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users who have configured custom user instructions"
+              }
+            }
+          }
+        },
+        "conversations": {
+          "properties": {
+            "users_with_archived_conversations": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with archived conversations"
+              }
+            },
+            "users_with_private_conversations": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with private conversations"
+              }
+            },
+            "users_with_shared_conversations": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with shared conversations"
+              }
+            }
+          }
+        }
+      }
+    },
     "reporting": {
       "properties": {
         "has_errors": {
@@ -6363,64 +6435,172 @@
         "inference_count_by_provider": {
           "properties": {
             "alibabacloud-ai-search": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the AlibabaCloud AI Search provider."
+              }
             },
             "amazonbedrock": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Amazon Bedrock provider."
+              }
             },
             "amazon_sagemaker": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Amazon SageMaker provider."
+              }
             },
             "anthropic": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Anthropic provider."
+              }
             },
             "azureaistudio": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Azure AI Studio provider."
+              }
             },
             "azureopenai": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Azure OpenAI provider."
+              }
             },
             "cohere": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Cohere provider."
+              }
             },
             "deepseek": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the DeepSeek provider."
+              }
             },
             "elastic": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Elastic Inference Service provider."
+              }
             },
             "elasticsearch": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Elasticsearch provider."
+              }
             },
             "googleaistudio": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Google AI Studio provider."
+              }
             },
             "googlevertexai": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Google Vertex AI provider."
+              }
             },
             "hugging_face": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Hugging Face provider."
+              }
             },
             "jinaai": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Jina AI provider."
+              }
             },
             "mistral": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Mistral provider."
+              }
             },
             "openai": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the OpenAI provider."
+              }
             },
             "voyageai": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Voyage AI provider."
+              }
             },
             "watsonxai": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the IBM Watsonx provider."
+              }
             },
             "ai21": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the AI21 labs provider."
+              }
             },
             "llama": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Llama Stack provider."
+              }
+            },
+            "contextualai": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Contextual AI provider."
+              }
+            }
+          }
+        }
+      }
+    },
+    "streams": {
+      "properties": {
+        "classic_streams": {
+          "properties": {
+            "changed_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of classic streams that have been modified from their default configuration. Calculated by presence in .kibana_streams (managed) index and type is \"classic\"."
+              }
+            },
+            "with_processing_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of classic streams with custom processing steps configured. Calculated by counting streams with non-empty ingest.processing.steps arrays."
+              }
+            },
+            "with_fields_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of classic streams with custom field overrides configured. Calculated by counting streams with non-empty ingest.classic.field_overrides objects."
+              }
+            },
+            "with_changed_retention_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of classic streams with changed retention. Calculated by confirming stream lifecycle is not \"inherited\"."
+              }
+            }
+          }
+        },
+        "wired_streams": {
+          "properties": {
+            "count": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of wired streams in the system."
+              }
             }
           }
         }

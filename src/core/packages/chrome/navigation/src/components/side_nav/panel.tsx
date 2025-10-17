@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useRef } from 'react';
+import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiSplitPanel, useEuiOverflowScroll, useEuiTheme } from '@elastic/eui';
+import { EuiSplitPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-import { useRovingIndex } from '../../hooks/use_roving_index';
 import type { MenuItem } from '../../../types';
 import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
+import { getFocusableElements } from '../../utils/get_focusable_elements';
+import { updateTabIndices } from '../../utils/update_tab_indices';
+import { handleRovingIndex } from '../../utils/handle_roving_index';
+import { useScroll } from '../../hooks/use_scroll';
 
 export interface SideNavPanelProps {
   children: ReactNode;
@@ -28,27 +31,21 @@ export interface SideNavPanelProps {
  * Shows only in expanded mode.
  */
 export const SideNavPanel = ({ children, footer, openerNode }: SideNavPanelProps): JSX.Element => {
-  const ref = useRef<HTMLDivElement | null>(null);
-
   const { euiTheme } = useEuiTheme();
-
-  useRovingIndex(ref);
+  const scrollStyles = useScroll();
 
   const wrapperStyles = css`
     // > For instance, only plain or transparent panels can have a border and/or shadow.
     // source: https://eui.elastic.co/docs/components/containers/panel/
-    border-right: ${euiTheme.border.width.thin} ${euiTheme.colors.borderBaseSubdued} solid;
     box-sizing: border-box;
+    border-right: ${euiTheme.border.width.thin} ${euiTheme.colors.borderBaseSubdued} solid;
     display: flex;
     flex-direction: column;
     width: ${SIDE_PANEL_WIDTH}px;
   `;
 
   const navigationPanelStyles = css`
-    ${useEuiOverflowScroll('y')}
-
-    // Account for fixed header when scrolling to elements
-    scroll-padding-top: var(--header-height);
+    ${scrollStyles}
   `;
 
   return (
@@ -71,7 +68,13 @@ export const SideNavPanel = ({ children, footer, openerNode }: SideNavPanelProps
         color="subdued"
         css={navigationPanelStyles}
         data-test-subj="side-navigation-panel-content"
-        panelRef={ref}
+        onKeyDown={handleRovingIndex}
+        panelRef={(ref) => {
+          if (ref) {
+            const elements = getFocusableElements(ref);
+            updateTabIndices(elements);
+          }
+        }}
         paddingSize="none"
       >
         {children}

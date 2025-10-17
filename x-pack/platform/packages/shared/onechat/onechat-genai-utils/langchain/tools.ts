@@ -21,7 +21,7 @@ import type {
   ToolEventHandlerFn,
   ToolProvider,
 } from '@kbn/onechat-server';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { createErrorResult } from '@kbn/onechat-server';
 import type { ToolCall } from './messages';
 
 export type ToolIdMapping = Map<string, string>;
@@ -107,11 +107,11 @@ export const toolToLangchain = async ({
   sendEvent?: AgentEventEmitterFn;
   addReasoningParam?: boolean;
 }): Promise<StructuredTool> => {
-  const description = tool.llmDescription
-    ? tool.llmDescription({ description: tool.description, config: tool.configuration })
+  const description = tool.getLlmDescription
+    ? await tool.getLlmDescription({ description: tool.description, config: tool.configuration })
     : tool.description;
 
-  const schema = await tool.schema();
+  const schema = await tool.getSchema();
 
   return toTool(
     async (rawInput: Record<string, unknown>, config): Promise<[string, RunToolReturn]> => {
@@ -138,12 +138,7 @@ export const toolToLangchain = async ({
         logger.debug(e.stack);
 
         const errorToolReturn: RunToolReturn = {
-          results: [
-            {
-              type: ToolResultType.error,
-              data: { message: e.message },
-            },
-          ],
+          results: [createErrorResult(e.message)],
         };
 
         return [`${e}`, errorToolReturn];

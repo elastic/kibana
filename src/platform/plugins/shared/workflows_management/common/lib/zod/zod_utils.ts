@@ -43,6 +43,9 @@ export function getSchemaAtPath(
       if (current instanceof z.ZodOptional) {
         current = current.unwrap();
       }
+      if (current instanceof z.ZodDefault) {
+        current = current.removeDefault();
+      }
       if (current instanceof z.ZodObject) {
         const shape = current.shape;
         if (!(segment in shape)) {
@@ -79,9 +82,11 @@ export function getSchemaAtPath(
         // This is because we're validating schema paths, not runtime data
         current = current.element;
       } else if (current instanceof z.ZodAny) {
-        return z.any();
+        // pass through any to preserve the description
+        return current;
       } else if (current instanceof z.ZodUnknown) {
-        return z.unknown();
+        // pass through unknown to preserve the description
+        return current;
       } else {
         return null;
       }
@@ -110,27 +115,43 @@ export function isValidSchemaPath(schema: z.ZodType, path: string) {
 /**
  * Infer a zod schema from an object.
  * @param obj - The object to infer the schema from.
+ * @param isConst - If true, the schema will use a literal instead of the inferred type.
  * @returns The inferred zod schema.
  */
-export function inferZodType(obj: any): z.ZodType {
+export function inferZodType(obj: any, { isConst = false }: { isConst?: boolean } = {}): z.ZodType {
   if (obj === null) return z.null();
   if (obj === undefined) return z.undefined();
 
   const type = typeof obj;
 
-  if (type === 'string') return z.string();
-  if (type === 'number') return z.number();
-  if (type === 'boolean') return z.boolean();
+  if (type === 'string') {
+    if (isConst) {
+      return z.literal(obj);
+    }
+    return z.string();
+  }
+  if (type === 'number') {
+    if (isConst) {
+      return z.literal(obj);
+    }
+    return z.number();
+  }
+  if (type === 'boolean') {
+    if (isConst) {
+      return z.literal(obj);
+    }
+    return z.boolean();
+  }
 
   if (Array.isArray(obj)) {
     if (obj.length === 0) return z.array(z.unknown());
-    return z.array(inferZodType(obj[0])).length(obj.length);
+    return z.array(inferZodType(obj[0], { isConst })).length(obj.length);
   }
 
   if (type === 'object') {
     const shape: Record<string, z.ZodSchema> = {};
     for (const [key, value] of Object.entries(obj)) {
-      shape[key] = inferZodType(value);
+      shape[key] = inferZodType(value, { isConst });
     }
     return z.object(shape);
   }
@@ -164,6 +185,8 @@ export function getZodTypeName(schema: z.ZodType) {
       return 'null';
     case 'ZodUnknown':
       return 'unknown';
+    case 'ZodLiteral':
+      return 'literal';
     default:
       return 'unknown';
   }

@@ -44,6 +44,9 @@ const sortOptionsMap: {
   ],
   'original_dashboard.splunk_properties.app': sortOptions.splunkApp,
   updated: sortOptions.updated,
+  translation_result: (direction?: estypes.SortOrder) => [
+    ...sortOptions.translationResult(direction),
+  ],
 };
 
 export const getSortingOptions = (sort?: SiemMigrationSort): estypes.Sort => {

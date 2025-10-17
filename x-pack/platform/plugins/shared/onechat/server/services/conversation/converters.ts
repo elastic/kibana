@@ -11,9 +11,11 @@ import type {
   ConversationRound,
   ConversationRoundStep,
   ConversationWithoutRounds,
+  ToolResult,
   UserIdAndName,
 } from '@kbn/onechat-common';
 import { ConversationRoundStepType } from '@kbn/onechat-common';
+import { getToolResultId } from '@kbn/onechat-server';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
@@ -64,7 +66,12 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
       if (step.type === ConversationRoundStepType.toolCall) {
         return {
           ...step,
-          results: JSON.parse(step.results),
+          results: (JSON.parse(step.results) as ToolResult[]).map((result) => {
+            return {
+              ...result,
+              tool_result_id: result.tool_result_id ?? getToolResultId(),
+            };
+          }),
           progression: step.progression ?? [],
         };
       } else {

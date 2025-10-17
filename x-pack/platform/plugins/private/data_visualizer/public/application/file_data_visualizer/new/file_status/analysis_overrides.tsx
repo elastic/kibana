@@ -17,8 +17,9 @@ import { EditFlyout } from './edit_flyout';
 interface Props {
   fileStatus: FileAnalysis;
   analyzeFileWithOverrides: (overrides: InputOverrides) => void;
+  index: number;
 }
-export const AnalysisOverrides: FC<Props> = ({ fileStatus, analyzeFileWithOverrides }) => {
+export const AnalysisOverrides: FC<Props> = ({ fileStatus, analyzeFileWithOverrides, index }) => {
   const [isEditFlyoutVisible, setIsEditFlyoutVisible] = useState(false);
   const fields = Object.keys(fileStatus.results?.field_stats ?? {});
 
@@ -42,6 +43,7 @@ export const AnalysisOverrides: FC<Props> = ({ fileStatus, analyzeFileWithOverri
           iconType="gear"
           size="xs"
           color="text"
+          data-test-subj={`mlFileUploadOverrideSettingsButton-${index}`}
           aria-label={i18n.translate(
             'xpack.dataVisualizer.file.analysisSummary.overrideSettingsAriaLabel',
             {

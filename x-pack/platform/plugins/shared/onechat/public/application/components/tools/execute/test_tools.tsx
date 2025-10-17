@@ -331,6 +331,7 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
                         iconType="sortRight"
                         isLoading={isExecuting}
                         disabled={!tool || hasErrors}
+                        data-test-subj="agentBuilderToolTestSubmitButton"
                       >
                         {i18nMessages.executeButton}
                       </EuiButton>
@@ -352,6 +353,7 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose,
                   lineNumbers
                   isVirtualized
                   overflowHeight="100%"
+                  data-test-subj="agentBuilderToolTestResponse"
                 >
                   {response}
                 </EuiCodeBlock>

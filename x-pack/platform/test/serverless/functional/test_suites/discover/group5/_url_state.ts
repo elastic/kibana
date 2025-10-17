@@ -30,7 +30,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover URL state', () => {
+  describe('discover URL state', function () {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/237086
+    this.tags(['failsOnMKI']);
+
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load(

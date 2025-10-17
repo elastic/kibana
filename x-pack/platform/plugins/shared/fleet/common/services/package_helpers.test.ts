@@ -15,6 +15,7 @@ import {
   isRootPrivilegesRequired,
   checkIntegrationFipsLooseCompatibility,
   getNonFipsIntegrations,
+  isRootPrivilegeRequired,
 } from './package_helpers';
 
 describe('isRootPrivilegesRequired', () => {
@@ -45,6 +46,35 @@ describe('isRootPrivilegesRequired', () => {
     const res = isRootPrivilegesRequired({
       data_streams: [],
     } as any);
+    expect(res).toBe(false);
+  });
+});
+
+describe('isRootPrivilegeRequired', () => {
+  it('should return true if any package policy requires root', () => {
+    const res = isRootPrivilegeRequired([
+      {
+        package: {
+          requires_root: true,
+        },
+      } as any,
+    ]);
+    expect(res).toBe(true);
+  });
+
+  it('should return false if no package policy requires root', () => {
+    const res = isRootPrivilegeRequired([
+      {
+        package: {
+          requires_root: false,
+        },
+      } as any,
+    ]);
+    expect(res).toBe(false);
+  });
+
+  it('should return false if no package policies', () => {
+    const res = isRootPrivilegeRequired([]);
     expect(res).toBe(false);
   });
 });

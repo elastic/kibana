@@ -52,7 +52,7 @@ echo "Check changes in Saved Objects"
 
 # Obtain an existing snapshot from merge base commit (or one of its ancestors)
 EXISTING_SNAPSHOT_SHA="$(findExistingSnapshotSha "$GITHUB_PR_MERGE_BASE")"
-if [ $? -ne 0 ]; then
+if [[ $? -ne 0 ]]; then
   echo "❌ Could not find an existing snapshot to use as a baseline. Aborting Saved Objects checks" >&2
   exit 1
 fi
@@ -61,19 +61,21 @@ fi
 if [[ "$GITHUB_PR_TARGET_BRANCH" == "main" ]]; then
   # Obtain the current serverless release SHA from serverless-gitops
   GITHUB_SERVERLESS_RELEASE_REV="$(node scripts/get_serverless_release_sha)"
-  if [ $? -ne 0 ]; then
+  if [[ $? -ne 0 ]]; then
     echo "❌ Couldn't determine current serverless release SHA. Aborting Saved Objects checks" >&2
     exit 1
   fi
 
   # Expand to get the full SHA
   GITHUB_SERVERLESS_RELEASE_SHA="$(git rev-parse "$GITHUB_SERVERLESS_RELEASE_REV")"
-  if [ $? -ne 0 || ! "$GITHUB_SERVERLESS_RELEASE_SHA" ]; then
-    echo "❌ Couldn't expand current serverless release SHA. Ensure your branch is up to date with main."  >&2
+  if [[ $? -ne 0 || -z "$GITHUB_SERVERLESS_RELEASE_SHA" ]]; then
+    echo "❌ Couldn't expand current serverless release SHA. Skipping check against Serverless baseline."  >&2
+    node scripts/check_saved_objects --baseline "$EXISTING_SNAPSHOT_SHA"
     exit 1
+  else
+    node scripts/check_saved_objects --baseline "$EXISTING_SNAPSHOT_SHA" --baseline "$GITHUB_SERVERLESS_RELEASE_SHA"
   fi
 
-  node scripts/check_saved_objects --baseline "$EXISTING_SNAPSHOT_SHA" --baseline "$GITHUB_SERVERLESS_RELEASE_SHA"
 else
   node scripts/check_saved_objects --baseline "$EXISTING_SNAPSHOT_SHA"
 fi
