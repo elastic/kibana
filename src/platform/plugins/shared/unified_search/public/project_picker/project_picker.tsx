@@ -29,6 +29,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import type { ProjectRouting } from '@kbn/es-query';
 
 const strings = {
   getProjectPickerButtonAriaLabel: () =>
@@ -205,10 +206,17 @@ const response: { origin: Record<string, Project>; linked_projects: Record<strin
   },
 };
 
-export const ProjectPicker = () => {
-  const [crossProjectSearchScope, setCrossProjectSearchScope] = useState<string>('all');
+export interface ProjectPickerProps {
+  projectRouting?: ProjectRouting;
+  onProjectRoutingChange?: (projectRouting: ProjectRouting) => void;
+}
+
+export const ProjectPicker = ({ projectRouting, onProjectRoutingChange }: ProjectPickerProps) => {
   const [showProjectPickerPopover, setShowProjectPickerPopover] = useState(false);
   const [linkedProjects, setProjects] = useState<Project[]>([]);
+
+  // Derive crossProjectSearchScope from projectRouting prop, defaulting to 'all'
+  const crossProjectSearchScope = projectRouting?.type ?? 'all';
 
   const { euiTheme } = useEuiTheme();
 
@@ -383,8 +391,9 @@ export const ProjectPicker = () => {
             ]}
             onChange={(value: string) => {
               // TODO: add telemetry for project scope change?
-              // TODO: propagate the scope change to search settings
-              setCrossProjectSearchScope(value);
+              const newProjectRouting: ProjectRouting =
+                value === 'origin' ? { type: 'origin' } : { type: 'all' };
+              onProjectRoutingChange?.(newProjectRouting);
             }}
             css={{ margin: '8px' }}
             buttonSize="compressed"
