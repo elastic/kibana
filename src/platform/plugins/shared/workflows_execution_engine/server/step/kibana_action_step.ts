@@ -135,7 +135,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     }
 
     // Fallback to localhost for development
-    return 'https://localhost:5601';
+    return 'http://localhost:5601';
   }
 
   private getAuthHeaders(): Record<string, string> {
