@@ -686,5 +686,10 @@ export interface ESQLSearchParams {
   dropNullColumns?: boolean;
   params?:
     | estypes.ScalarValue[]
-    | Array<Record<string, string | number | Record<string, string | number> | undefined>>;
+    | Array<
+        Record<
+          string,
+          string | number | (string | number)[] | Record<string, string | number> | undefined
+        >
+      >;
 }

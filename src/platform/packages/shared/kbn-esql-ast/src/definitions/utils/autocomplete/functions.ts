@@ -10,6 +10,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 
 import { uniq } from 'lodash';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { getLocationInfo } from '../../../commands_registry/location';
 import {
   isAssignment,
@@ -190,6 +191,10 @@ export async function getFunctionArgsSuggestions(
     // If the type is explicitly a boolean condition
     typesToSuggestNext.some((t) => t && t.type === 'boolean' && t.name === 'condition');
 
+  const canBeMultiValue = typesToSuggestNext.some(
+    (t) => t && (t.supportsMultiValues === true || t.name === 'values')
+  );
+
   const shouldAddComma =
     hasMoreMandatoryArgs &&
     fnDefinition.type !== FunctionDefinitionTypes.OPERATOR &&
@@ -334,6 +339,7 @@ export async function getFunctionArgsSuggestions(
             addComma: shouldAddComma,
             advanceCursor: shouldAdvanceCursor,
             openSuggestions: shouldAdvanceCursor,
+            ...(canBeMultiValue && { variableType: ESQLVariableType.MULTI_VALUES }),
           }
         ),
         true

@@ -20,6 +20,7 @@ export enum ESQLVariableType {
   TIME_LITERAL = 'time_literal',
   FIELDS = 'fields',
   VALUES = 'values',
+  MULTI_VALUES = 'multi_values',
   FUNCTIONS = 'functions',
 }
 

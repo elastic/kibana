@@ -102,7 +102,10 @@ export function ValueControlForm({
   );
   const [label, setLabel] = useState(initialState?.title ?? '');
   const [minimumWidth, setMinimumWidth] = useState(initialState?.width ?? 'medium');
-  const [singleSelect, setSingleSelect] = useState<boolean>(initialState?.singleSelect ?? true);
+  const shouldDefaultToMultiSelect = variableType === ESQLVariableType.MULTI_VALUES;
+  const [singleSelect, setSingleSelect] = useState<boolean>(
+    initialState?.singleSelect ?? !shouldDefaultToMultiSelect
+  );
 
   const [grow, setGrow] = useState(initialState?.grow ?? false);
 
