@@ -24,7 +24,6 @@ export const TIMELINES = '[data-test-subj="solutionSideNavItemLink-timelines"]';
 export const EXPLORE = '[data-test-subj="solutionSideNavItemLink-explore"]';
 export const EXPLORE_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-explore"]';
 
-export const RULES_LANDING = '[data-test-subj="solutionSideNavPanelLink-rules-landing"]';
 export const RULES_PANEL_BTN = '[data-test-subj="solutionSideNavItemButton-rules-landing"]';
 
 export const SETTINGS = '[data-test-subj="solutionSideNavItemLink-administration"]';
@@ -92,7 +91,6 @@ export const KQL_INPUT = (dataTestSubj: string = KQL_INPUT_TEXT_AREA) =>
 export const REFRESH_BUTTON = `${GLOBAL_KQL_WRAPPER} [data-test-subj="querySubmitButton"]`;
 
 export const LOADING_INDICATOR = '[data-test-subj="globalLoadingIndicator"]';
-export const LOADING_INDICATOR_HIDDEN = '[data-test-subj="globalLoadingIndicator-hidden"]';
 
 export const KIBANA_LOADING_ICON = '[data-test-subj="kbnLoadingMessage"]';
 
