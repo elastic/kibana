@@ -181,6 +181,16 @@ exports[`transpile (Streamlang DSL to ingest pipeline) should transpile a variet
 Object {
   "processors": Array [
     Object {
+      "convert": Object {
+        "from": "http.status_code",
+        "type": "string",
+        "where": Object {
+          "eq": 404,
+          "field": "http.error",
+        },
+      },
+    },
+    Object {
       "rename": Object {
         "field": "attributes.old_name",
         "target_field": "attributes.new_name",
