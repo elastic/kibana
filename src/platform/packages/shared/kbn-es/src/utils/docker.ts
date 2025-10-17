@@ -155,8 +155,7 @@ const getDockerBaseCmd = (options: DockerOptions) => [
   '-t',
 
   '--net',
-  options.namePrefix ? `elastic-${options.namePrefix}` : 'elastic',
-
+  getNetworkName(options),
   '--name',
   `${getEsContainerName(1, options.namePrefix)}`,
 
@@ -164,7 +163,10 @@ const getDockerBaseCmd = (options: DockerOptions) => [
   `127.0.0.1:${options.port}:${options.port}`,
 ];
 
-const getSharedServerlessParams = (masterNodes: string[]) => [
+const getSharedServerlessParams = (
+  masterNodes: string[],
+  options: DockerOptions | ServerlessOptions
+) => [
   'run',
 
   '--detach',
@@ -174,7 +176,7 @@ const getSharedServerlessParams = (masterNodes: string[]) => [
   '--tty',
 
   '--net',
-  'elastic',
+  getNetworkName(options),
 
   '--env',
   'path.repo=/objectstore',
@@ -439,6 +441,13 @@ export async function verifyDockerInstalled(log: ToolingLog) {
   log.indent(4, () => log.info(stdout));
 }
 
+function getNetworkName(options: DockerOptions | ServerlessOptions) {
+  if (!options.namePrefix) {
+    return 'elastic';
+  }
+  return `elastic-${options.namePrefix}`;
+}
+
 /**
  * Setup elastic Docker network if needed
  */
@@ -449,7 +458,7 @@ export async function maybeCreateDockerNetwork(
   log.info(chalk.bold('Checking status of elastic Docker network.'));
   log.indent(4);
 
-  const networkName = options.namePrefix ? `elastic-${options.namePrefix}` : `elastic`;
+  const networkName = getNetworkName(options);
   const process = await execa('docker', ['network', 'create', networkName]).catch(({ message }) => {
     if (message.includes(`network with name ${networkName} already exists`)) {
       log.info('Using existing network.');
