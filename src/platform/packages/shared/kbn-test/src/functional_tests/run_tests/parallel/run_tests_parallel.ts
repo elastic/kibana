@@ -385,12 +385,6 @@ export async function runTestsParallel(
         process.stdout.write(runProc.all + '\n');
       }
 
-      if (!runProc.failed) {
-        runBuildkiteMetaSet(`config_${runner.getConfigPath()}`, 'true');
-      } else {
-        failedConfigs.push(runner.getConfigPath());
-      }
-
       if (booleanFromEnv('SCOUT_REPORTER_ENABLED', false)) {
         const scoutProc = await execa('node', [
           'scripts/scout',
@@ -400,6 +394,13 @@ export async function runTestsParallel(
         process.stderr.write(scoutProc.stderr ?? '');
         process.stdout.write(scoutProc.stdout ?? '');
         Fs.rmSync(Path.join(REPO_ROOT, '.scout/reports'), { recursive: true, force: true });
+      }
+
+      if (!runProc.failed) {
+        runBuildkiteMetaSet(`config_${runner.getConfigPath()}`, 'true');
+      } else {
+        failedConfigs.push(runner.getConfigPath());
+        process.exit(1);
       }
     } finally {
       if (!released) {
