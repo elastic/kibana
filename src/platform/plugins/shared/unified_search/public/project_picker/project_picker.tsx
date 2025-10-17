@@ -18,19 +18,15 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiTitle,
-  EuiIcon,
-  EuiBadge,
-  EuiText,
-  EuiIconTip,
   useEuiTheme,
   useEuiOverflowScroll,
-  EuiThemeProvider,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { ProjectListItem } from './project_list_item';
 
-const strings = {
+export const strings = {
   getProjectPickerButtonAriaLabel: () =>
     i18n.translate('unifiedSearch.projectPicker.projectPickerButtonLabel', {
       defaultMessage: 'Cross-project search project picker',
@@ -58,7 +54,7 @@ const strings = {
     }),
 };
 
-interface Project {
+export interface Project {
   _id: string;
   _alias: string;
   _type: string;
@@ -66,27 +62,6 @@ interface Project {
   _region: string;
   [key: string]: string;
 }
-
-const SOLUTION_ICONS: Record<string, string> = {
-  elasticsearch: 'logoElasticsearch',
-  es: 'logoElasticsearch',
-  security: 'logoSecurity',
-  observability: 'logoObservability',
-} as const;
-
-const getSolutionIcon = (solution: string): string => {
-  return SOLUTION_ICONS[solution] || 'empty';
-};
-
-const CSP_LABELS: Record<string, string> = {
-  aws: 'AWS',
-  azure: 'Azure',
-  gcp: 'GCP',
-} as const;
-
-const getCSPLabel = (csp: string): string => {
-  return CSP_LABELS[csp] || csp.toUpperCase();
-};
 
 const response: { origin: Record<string, Project>; linked_projects: Record<string, Project> } = {
   origin: {
@@ -250,66 +225,13 @@ export const ProjectPicker = () => {
 
   const renderProjectsList = () =>
     projects.map((project, index) => {
-      const tags = Object.entries(project)
-        .filter(([key]) => !key.startsWith('_'))
-        .map(([key, value]) => `${key}: ${value}`);
-
       return (
-        <EuiFlexItem
+        <ProjectListItem
           key={project._id}
-          css={{
-            borderTop:
-              index > 0
-                ? `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`
-                : undefined,
-            padding: `${euiTheme.size.s}`,
-          }}
-        >
-          <EuiFlexGroup responsive={false} alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false} gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type={getSolutionIcon(project._type)} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s" color="text">
-                    {project._alias || project._id}
-                  </EuiText>
-                </EuiFlexItem>
-                {project._id === originProject._id ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiIconTip size="m" type="flag" content={strings.getOriginProjectLabel()} />
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s" color="subdued">
-                    {`${getCSPLabel(project._csp)}, ${project._region}`}
-                  </EuiText>
-                </EuiFlexItem>
-                {tags.length ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      title={i18n.translate('unifiedSearch.projectPicker.tagTooltipTitle', {
-                        defaultMessage: 'Custom tags',
-                      })}
-                      content={tags.map((tag) => (
-                        <EuiThemeProvider colorMode="dark">
-                          <EuiBadge css={{ margin: `${euiTheme.size.xs}` }}>{tag}</EuiBadge>
-                        </EuiThemeProvider>
-                      ))}
-                    >
-                      <EuiBadge iconType="tag">{tags.length}</EuiBadge>
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+          project={project}
+          index={index}
+          originProjectId={originProject._id}
+        />
       );
     });
 
