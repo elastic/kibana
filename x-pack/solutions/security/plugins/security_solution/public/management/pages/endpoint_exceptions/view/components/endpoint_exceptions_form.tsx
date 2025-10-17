@@ -35,6 +35,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
+import type { ExceptionEntries } from '../../../../../../common/endpoint/types/exception_list_items';
 import { useFetchIndexPatterns } from '../../../../../detection_engine/rule_exceptions/logic/use_exception_flyout_data';
 import { FormattedError } from '../../../../components/formatted_error';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
@@ -99,14 +100,6 @@ const cleanupEntries = (
   );
 };
 
-// todo: do we need this?
-type EndpointExceptionItemEntries = Array<{
-  field: string;
-  value: string;
-  operator: 'included' | 'excluded';
-  type: Exclude<ExceptionListItemSchema['entries'][number]['type'], 'list'>;
-}>;
-
 export const EndpointExceptionsForm: React.FC<
   ArtifactFormComponentProps & { allowSelectOs?: boolean }
 > = memo(({ allowSelectOs = true, item: exception, onChange, mode, error: submitError }) => {
@@ -147,9 +140,7 @@ export const EndpointExceptionsForm: React.FC<
       !hasNameError &&
       !hasCommentError &&
       !!exception.entries.length &&
-      (exception.entries as EndpointExceptionItemEntries).some(
-        (e) => e.value !== '' || e.value.length
-      )
+      (exception.entries as ExceptionEntries).some((e) => e.value !== '' || e.value.length)
     );
   }, [hasCommentError, hasNameError, exception.entries]);
 
