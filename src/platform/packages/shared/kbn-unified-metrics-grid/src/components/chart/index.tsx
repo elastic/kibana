@@ -17,6 +17,7 @@ import { useBoolean } from '@kbn/react-hooks';
 import { createESQLQuery } from '../../common/utils/esql/create_esql_query';
 import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
+import { useChartLayers } from './hooks/use_chart_layers';
 import { useLensProps } from './hooks/use_lens_props';
 
 const ChartSizes = {
@@ -74,18 +75,17 @@ export const Chart = ({
     });
   }, [metric, dimensions, filters]);
 
+  const chartLayers = useChartLayers({ dimensions, metric, color });
+
   const lensProps = useLensProps({
     title: metric.name,
     query: esqlQuery,
-    unit: metric.unit,
-    seriesType: dimensions.length > 0 ? 'line' : 'area',
-    color,
     services,
     searchSessionId,
     discoverFetch$,
-    abortController,
     getTimeRange,
     chartRef,
+    chartLayers,
   });
 
   const handleViewDetails = useCallback(() => {

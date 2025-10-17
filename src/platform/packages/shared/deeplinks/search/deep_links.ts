@@ -23,6 +23,7 @@ import type {
   ES_SEARCH_SYNONYMS_ID,
   SEARCH_QUERY_RULES_ID,
   SEARCH_INDEX_MANAGEMENT,
+  SEARCH_GETTING_STARTED,
 } from './constants';
 
 export type EnterpriseSearchApp = typeof ENTERPRISE_SEARCH_APP_ID;
@@ -39,6 +40,7 @@ export type SearchHomepage = typeof SEARCH_HOMEPAGE;
 export type SearchStart = typeof SEARCH_INDICES_START;
 export type SearchIndices = typeof SEARCH_INDICES;
 export type SearchIndexManagement = typeof SEARCH_INDEX_MANAGEMENT;
+export type SearchGettingStarted = typeof SEARCH_GETTING_STARTED;
 
 export type ContentLinkId = 'connectors' | 'webCrawlers';
 
@@ -69,4 +71,5 @@ export type DeepLinkId =
   | SearchStart
   | SearchIndices
   | SearchIndexManagement
+  | SearchGettingStarted
   | `${SearchIndices}:${SearchIndicesLinkId}`;

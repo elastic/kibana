@@ -43,6 +43,14 @@ export function SvlSearchNavigationServiceProvider({
         }
       });
     },
+    async navigateToGettingStartedPage() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.common.navigateToApp('searchGettingStarted', {
+          shouldLoginIfPrompted: false,
+        });
+      });
+      await testSubjects.existOrFail('search-getting-started', { timeout: 2000 });
+    },
     async navigateToIndexDetailPage(indexName: string) {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp(`elasticsearch/indices/index_details/${indexName}`, {
