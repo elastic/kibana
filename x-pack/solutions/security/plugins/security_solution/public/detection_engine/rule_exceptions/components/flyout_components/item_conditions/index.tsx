@@ -213,7 +213,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
       {includesRuleWithEQLSequenceStatement && (
         <>
           <EuiCallOut
-            announceOnMount={false}
+            announceOnMount
             data-test-subj="eqlSequenceCallout"
             title={eqlCalloutWarning}
           />

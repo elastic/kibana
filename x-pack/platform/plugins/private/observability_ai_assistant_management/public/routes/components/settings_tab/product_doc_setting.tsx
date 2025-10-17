@@ -317,7 +317,7 @@ export function ProductDocSetting({
 
       {showErrorCallout && (
         <EuiCallOut
-          announceOnMount={false}
+          announceOnMount
           color="warning"
           size="s"
           style={{ width: 528, marginBottom: 16 }}

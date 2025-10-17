@@ -156,7 +156,7 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
           ) : isError ? (
             <div>
               <EuiCallOut
-                announceOnMount={false}
+                announceOnMount
                 title={i18n.translate('xpack.securitySolution.genericDashboard.errorLoadingData', {
                   defaultMessage: 'Error loading data',
                 })}
