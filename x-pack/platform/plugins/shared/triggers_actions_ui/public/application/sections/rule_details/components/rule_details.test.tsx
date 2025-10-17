@@ -30,7 +30,6 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
-import { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from '@kbn/alerting-types/rule_detail_description_type';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient({
@@ -1126,8 +1125,8 @@ describe('rule_details', () => {
     const getDescriptionFields: GetDescriptionFieldsFn = ({ rule }) => {
       return [
         {
-          type: RULE_DETAIL_DESCRIPTION_FIELD_TYPES.INDEX_PATTERN,
-          description: 'Generated Test Description Field',
+          title: 'my title',
+          description: <div>Generated Test Description Field</div>,
         },
       ];
     };
