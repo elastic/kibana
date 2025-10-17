@@ -16,10 +16,11 @@ import {
 } from '../../common/constants';
 
 const CURRENT_VULN_TRANSFORM_VERSION =
-  'cloud_security_posture.vulnerabilities_latest-default-8.15.0';
+  'cloud_security_posture.vulnerabilities_latest-default-9.3.0';
 
 export const DEPRECATED_VULN_TRANSFORM_VERSIONS = [
   'cloud_security_posture.vulnerabilities_latest-default-8.8.0',
+  'cloud_security_posture.vulnerabilities_latest-default-8.15.0',
 ];
 
 export const latestVulnerabilitiesTransform: TransformPutTransformRequest = {
@@ -28,6 +29,15 @@ export const latestVulnerabilitiesTransform: TransformPutTransformRequest = {
     'Defines vulnerabilities transformation to view only the latest vulnerability per resource',
   source: {
     index: VULNERABILITIES_INDEX_PATTERN,
+    query: {
+      bool: {
+        must_not: {
+          exists: {
+            field: 'error.message',
+          },
+        },
+      },
+    },
   },
   dest: {
     index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
