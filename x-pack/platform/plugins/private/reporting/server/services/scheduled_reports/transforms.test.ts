@@ -713,7 +713,7 @@ describe('transformBulkDeleteResponse', () => {
       })
     ).toEqual({
       scheduled_report_ids: ['1', '2'],
-      errors: [{ id: 'test' }],
+      errors: [{ id: 'test', message: 'Test' }],
       total: 3,
     });
   });
