@@ -48,6 +48,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       // Pull initial values
       const initialCounters = await getSavedObjectCounters();
       const initialRouteAccessed = initialCounters.routeAccessed || 0;
+      expect(initialRouteAccessed).to.be(0);
 
       // Send the request
       await supertest.get('/api/usage_collection_test_plugin').set('kbn-xsrf', 'true').expect(200);
