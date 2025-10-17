@@ -682,8 +682,9 @@ export class SearchSource {
         return addToRoot(key, val);
       case 'projectRouting':
         // Convert ProjectRouting config to ES parameter format
-        const projectRoutingValue = this.serializeProjectRouting(val);
-        return addToBody('project_routing', projectRoutingValue);
+        // TODO: Uncomment and use when project routing is supported
+        // const projectRoutingValue = this.serializeProjectRouting(val);
+        // return addToBody('project_routing', projectRoutingValue);
       case 'aggs':
         if ((val as unknown) instanceof AggConfigs) {
           return addToBody('aggs', val.toDsl());
