@@ -231,7 +231,7 @@ export function ValueControlForm({
       singleSelect,
       title: label || variableNameWithoutQuestionmark,
       variableName: variableNameWithoutQuestionmark,
-      variableType,
+      variableType: singleSelect ? variableType : ESQLVariableType.MULTI_VALUES,
       esqlQuery: valuesQuery || queryString,
       controlType: controlFlyoutType,
       grow,

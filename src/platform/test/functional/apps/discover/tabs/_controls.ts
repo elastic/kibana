@@ -68,13 +68,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Check Discover editor has been updated accordingly
       const editorValue = await esql.getEsqlEditorQuery();
-      expect(editorValue).to.contain('FROM logstash-* | WHERE MV_CONTAINS( ?variable');
+      expect(editorValue).to.contain('FROM logstash-* | WHERE MV_CONTAINS( ?values');
 
       await discover.waitUntilTabIsLoaded();
 
       // Update the query
       await esql.typeEsqlEditorQuery(
-        'FROM logstash-* | WHERE MV_CONTAINS( ?variable, geo.dest ) | KEEP geo.dest'
+        'FROM logstash-* | WHERE MV_CONTAINS( ?values, geo.dest ) | KEEP geo.dest'
       );
       await discover.waitUntilTabIsLoaded();
 

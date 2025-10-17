@@ -94,6 +94,8 @@ export const getVariableSuggestion = (variableType: ESQLVariableType) => {
       return 'function';
     case ESQLVariableType.TIME_LITERAL:
       return 'interval';
+    case ESQLVariableType.MULTI_VALUES:
+      return 'values';
     default:
       return 'variable';
   }
