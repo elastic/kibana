@@ -75,8 +75,7 @@ export interface SavedSearchAttributes {
   tabs: DiscoverSessionTabSchema[];
 }
 
-export type SavedSearchByValueAttributes = Omit<SavedSearchAttributes, 'description'> & {
-  description?: string;
+export type SavedSearchByValueAttributes = SavedSearchAttributes & {
   references: Reference[];
 };
 

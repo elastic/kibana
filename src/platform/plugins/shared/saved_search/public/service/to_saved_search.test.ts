@@ -38,6 +38,7 @@ describe('toSavedSearch', () => {
     ];
     const attributes: SavedSearchByValueAttributes = {
       title: 'saved-search-title',
+      description: '',
       sort: [['@timestamp', 'desc']],
       columns: ['message', 'extension'],
       grid: {},
@@ -169,6 +170,7 @@ describe('toSavedSearch', () => {
     ];
     const attributes: SavedSearchByValueAttributes = {
       title: 'saved-search-title',
+      description: '',
       sort: [['@timestamp', 'desc']],
       columns: ['message', 'extension'],
       grid: {},

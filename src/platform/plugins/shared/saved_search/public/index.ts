@@ -16,7 +16,7 @@ export type {
 } from './service/save_discover_session';
 export type { SaveSavedSearchOptions } from './service/save_saved_searches';
 export type { SavedSearchUnwrapMetaInfo, SavedSearchUnwrapResult } from './service/to_saved_search';
-export type { SavedSearch, SavedSearchByValueAttributes } from './service/types';
+export type { SavedSearch } from './service/types';
 export { getSavedSearchFullPathUrl, getSavedSearchUrl } from '../common/saved_searches_url';
 export { VIEW_MODE } from '../common';
 export type { SavedSearchPublicPluginStart } from './plugin';
