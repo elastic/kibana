@@ -13,6 +13,8 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { reduce } from 'rxjs';
 import type { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { AggregateQuery } from '@kbn/es-query';
+import { mutateQueryStatsGrouping } from '@kbn/esql-utils';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchAll, fetchMoreDocuments } from './fetch_all';
@@ -37,6 +39,15 @@ jest.mock('./fetch_documents', () => ({
 jest.mock('./fetch_esql', () => ({
   fetchEsql: jest.fn().mockResolvedValue([]),
 }));
+
+jest.mock('@kbn/esql-utils', () => {
+  const original = jest.requireActual('@kbn/esql-utils');
+  return {
+    ...original,
+    // mock mutateQueryStatsGrouping to return the query as is
+    mutateQueryStatsGrouping: jest.fn((query: AggregateQuery) => query),
+  };
+});
 
 const mockFetchDocuments = fetchDocuments as unknown as jest.MockedFunction<typeof fetchDocuments>;
 const mockfetchEsql = fetchEsql as unknown as jest.MockedFunction<typeof fetchEsql>;
@@ -157,6 +168,35 @@ describe('test fetchAll', () => {
       { fetchStatus: FetchStatus.PARTIAL, result: 2 },
       { fetchStatus: FetchStatus.COMPLETE, result: 42 },
     ]);
+  });
+
+  test('should mutate the query when we have cascade groupings and the cascade layout is selected', async () => {
+    const cascadeLayoutFeatureFlagSpy = jest.spyOn(
+      discoverServiceMock.discoverFeatureFlags,
+      'getCascadeLayoutEnabled'
+    );
+
+    // configure cascade layout feature flag to be true
+    cascadeLayoutFeatureFlagSpy.mockReturnValue(true);
+
+    const editorQuery: AggregateQuery = {
+      esql: 'FROM my_index | STATS count = COUNT(message) BY my_field',
+    };
+
+    // configure state to have an ESQL query with cascade groupings
+    deps.appStateContainer.update({
+      query: editorQuery,
+    });
+
+    searchSource.getField('index')!.isTimeBased = () => false;
+    const hits = [{ _id: '1', _index: 'logs' }];
+    const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    mockFetchDocuments.mockResolvedValue({ records: documents });
+
+    fetchAll(deps);
+    await waitForNextTick();
+
+    expect(mutateQueryStatsGrouping).toHaveBeenCalledWith(editorQuery, ['my_field']);
   });
 
   test('should use charts query to fetch total hit count when chart is visible', async () => {

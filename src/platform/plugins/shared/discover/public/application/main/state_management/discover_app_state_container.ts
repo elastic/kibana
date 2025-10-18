@@ -223,22 +223,31 @@ export const getDiscoverAppStateContainer = ({
         // When updating to an ES|QL query, sync the data source
         value = { ...value, dataSource: createEsqlDataSource() };
 
-        // compute and set cascade groupings when state updates happen
-        internalState.dispatch(
-          injectCurrentTab(internalStateActions.setCascadeUiState)({
-            cascadeUiState: {
-              get availableCascadeGroups() {
-                return getESQLStatsQueryMeta(
+        if (services.discoverFeatureFlags.getCascadeLayoutEnabled()) {
+          const currentTabState = selectTab(internalState.getState(), tabId);
+
+          // compute and set cascade groupings when state updates happen
+          internalState.dispatch(
+            injectCurrentTab(internalStateActions.setCascadeUiState)({
+              cascadeUiState: {
+                availableCascadeGroups: getESQLStatsQueryMeta(
                   (value!.query as AggregateQuery).esql
-                ).groupByFields.map((group) => group.field);
+                ).groupByFields.map((group) => group.field),
+                get selectedCascadeGroups() {
+                  const validSelectionFromCurrentTab =
+                    currentTabState.uiState.cascade?.selectedCascadeGroups.filter((group) =>
+                      this.availableCascadeGroups.includes(group)
+                    );
+
+                  // if no valid selection from previous state, select the first group by default
+                  return validSelectionFromCurrentTab?.length
+                    ? validSelectionFromCurrentTab
+                    : [this.availableCascadeGroups[0]].filter(Boolean);
+                },
               },
-              get selectedCascadeGroups() {
-                // select the first group by default
-                return [this.availableCascadeGroups[0]].filter(Boolean);
-              },
-            },
-          })
-        );
+            })
+          );
+        }
       }
 
       appStateContainer.set(value);

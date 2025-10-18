@@ -28,7 +28,7 @@ export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
   viewModeToggle: React.ReactElement | undefined;
   cascadeConfig?: CascadeDocumentsRestorableState;
-  isCascadeLayoutEnabled: boolean;
+  isCascadeLayoutSelected: boolean;
   onUpdateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
   onCascadeGroupingChange: DiscoverStateContainer['actions']['onCascadeGroupingChange'];
 }
@@ -42,7 +42,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   cascadeConfig,
   onCascadeGroupingChange,
   query,
-  isCascadeLayoutEnabled,
+  isCascadeLayoutSelected,
   viewModeToggle,
   externalAdditionalControls: customExternalAdditionalControls,
   rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
@@ -121,7 +121,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
     );
   }, [cascadeConfig, customExternalAdditionalControls, groupBySelectorRenderer]);
 
-  return isCascadeLayoutEnabled && Boolean(cascadeConfig?.availableCascadeGroups?.length) ? (
+  return isCascadeLayoutSelected && Boolean(cascadeConfig?.availableCascadeGroups?.length) ? (
     <ESQLDataCascade
       {...props}
       dataView={dataView}
