@@ -30,6 +30,7 @@ import { isRootStep, isStepUnderEdit } from '../../../state_management/steps_sta
 import { collectDescendantIds } from '../../../state_management/stream_enrichment_state_machine/utils';
 import { BlockDisableOverlay } from '../block_disable_overlay';
 import { NestedChildrenProcessingSummary } from './nested_children_processing_summary';
+import { useConditionHighlight } from '../../../state_management/condition_highlight_context';
 
 export const WhereBlock = (props: StepConfigurationProps) => {
   const { stepRef, stepUnderEdit, rootLevelMap, stepsProcessingSummaryMap, level } = props;
@@ -39,7 +40,7 @@ export const WhereBlock = (props: StepConfigurationProps) => {
   const freshBlockRef = useRef<HTMLDivElement>(null);
   const isUnderEdit = useSelector(stepRef, (snapshot) => isStepUnderEdit(snapshot));
 
-  const panelColour = getStepPanelColour(level);
+  const { activeConditionId } = useConditionHighlight();
 
   // Invert again
   const nestedSummaryPanelColour = getStepPanelColour(level + 1);
@@ -47,6 +48,28 @@ export const WhereBlock = (props: StepConfigurationProps) => {
   const [isExpanded, toggle] = useToggle(true);
 
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
+  const isConditionHighlighted = activeConditionId === step.customIdentifier;
+  const panelColour = isConditionHighlighted ? undefined : getStepPanelColour(level);
+
+  const basePanelStyles = isUnderEdit
+    ? // eslint-disable-next-line @elastic/eui/no-css-color
+      css`
+        border: 1px solid ${euiTheme.colors.borderStrongPrimary};
+        box-sizing: border-box;
+      `
+    : css`
+        border: ${euiTheme.border.thin};
+        padding: ${euiTheme.size.m};
+        border-radius: ${euiTheme.size.s};
+      `;
+
+  const highlightPanelStyles =
+    isConditionHighlighted && !isUnderEdit
+      ? css`
+          background-color: ${euiTheme.colors.backgroundBasePrimary};
+          border-color: ${euiTheme.colors.borderStrongPrimary};
+        `
+      : undefined;
 
   const childSteps = useStreamEnrichmentSelector((state) =>
     state.context.stepRefs.filter(
@@ -77,19 +100,7 @@ export const WhereBlock = (props: StepConfigurationProps) => {
         data-test-subj="streamsAppConditionBlock"
         hasShadow={false}
         color={isUnderEdit && isRootStepValue ? undefined : panelColour}
-        css={
-          isUnderEdit
-            ? // eslint-disable-next-line @elastic/eui/no-css-color
-              css`
-                border: 1px solid ${euiTheme.colors.borderStrongPrimary};
-                box-sizing: border-box;
-              `
-            : css`
-                border: ${euiTheme.border.thin};
-                padding: ${euiTheme.size.m};
-                border-radius: ${euiTheme.size.s};
-              `
-        }
+        css={[basePanelStyles, highlightPanelStyles]}
       >
         {/* The step under edit isn't part of the same root level hierarchy,
          so we'll cover this item and all children */}
