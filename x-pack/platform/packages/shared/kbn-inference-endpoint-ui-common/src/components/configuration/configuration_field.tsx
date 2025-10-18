@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
@@ -24,8 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash/fp';
-import type { ConfigEntryView } from '../../types/types';
-import { FieldType, type Map } from '../../types/types';
+import { FieldType, type Map, type ConfigEntryView } from '../../types/types';
 import {
   ADD_LABEL,
   DELETE_LABEL,
@@ -212,6 +211,9 @@ export const ConfigInputPassword: React.FC<ConfigInputFieldProps> = ({
     </>
   );
 };
+
+const emptyHeaders: Map = { '': '' };
+
 export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
   configEntry,
   isLoading,
@@ -219,36 +221,32 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
   isEdit = false,
 }) => {
   const { isValid, value, default_value: defaultValue, key, updatable } = configEntry;
-  const [checked, setChecked] = useState<boolean>(isEdit);
-  const [headers, setHeaders] = useState<Map>((value as Map) ?? defaultValue ?? { '': '' });
+  const [showHeaderInputs, setShowHeaderInputs] = useState<boolean>(false);
+  const [headers, setHeaders] = useState<Map>((value as Map) ?? defaultValue ?? emptyHeaders);
 
   const onChange = (e: EuiSwitchEvent) => {
-    setChecked(e.target.checked);
+    setShowHeaderInputs(e.target.checked);
     // clear headers if unchecking
     if (e.target.checked === false) {
-      setHeaders({ '': '' });
+      setHeaders(emptyHeaders);
       validateAndSetConfigValue('');
     }
   };
 
-  const iterableHeaders: [string, string][] = useMemo(
-    () => Object.entries(headers),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify(headers)]
-  );
+  const iterableHeaders: [string, string][] = Object.entries(headers);
 
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={'config-field-map-type'}>
         <EuiFlexItem grow={false}>
           <EuiSwitch
-            data-test-subj={`${key}-switch-${checked ? 'checked' : 'unchecked'}`}
+            data-test-subj={`${key}-switch-${showHeaderInputs ? 'checked' : 'unchecked'}`}
             label={HEADERS_SWITCH_LABEL}
-            checked={checked}
+            checked={showHeaderInputs}
             onChange={(e) => onChange(e)}
           />
         </EuiFlexItem>
-        {checked
+        {showHeaderInputs
           ? iterableHeaders.map((header, index) => (
               <EuiFlexItem key={`${key}-header-${index}`}>
                 <EuiFlexGroup gutterSize="s" alignItems="center">
