@@ -216,6 +216,7 @@
     "@kbn/automatic-import-v2-plugin": "link:x-pack/platform/plugins/shared/automatic_import_v2",
     "@kbn/autoops-promotion-callout": "link:src/platform/packages/shared/kbn-management/autoops_promotion_callout",
     "@kbn/avc-banner": "link:src/platform/packages/shared/kbn-avc-banner",
+    "@kbn/babel-plugin-lazy-require": "link:packages/kbn-babel-plugin-lazy-require",
     "@kbn/background-search": "link:src/platform/packages/shared/kbn-background-search",
     "@kbn/banners-plugin": "link:x-pack/platform/plugins/private/banners",
     "@kbn/calculate-auto": "link:src/platform/packages/shared/kbn-calculate-auto",
