@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import './breadcrumbs.mock';
-import './track_ui_metric.mock';
-import './search_box.mock';
-import './notifications.mock';
+jest.mock('../../../app/services/notifications', () => ({
+  getFatalErrors: () => ({
+    add: jest.fn(),
+  }),
+}));
