@@ -21,6 +21,8 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
+import { previewDocsFilterOptions } from './state_management/simulation_state_machine';
+import { useConditionHighlight } from './state_management/condition_highlight_context';
 
 const createConditionText = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.createConditionButtonText',
@@ -61,7 +63,8 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
   mode,
   nestingDisabled = false,
 }) => {
-  const { addProcessor, addCondition } = useStreamEnrichmentEvents();
+  const { addProcessor, addCondition, changePreviewDocsFilter } = useStreamEnrichmentEvents();
+  const { setActiveConditionId } = useConditionHighlight();
 
   const canAddStep = useStreamEnrichmentSelector(
     (state) => state.can({ type: 'step.addProcessor' }) || state.can({ type: 'step.addCondition' })
@@ -93,6 +96,13 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
       onClick={() => {
         togglePopover(false);
         addProcessor(undefined, { parentId: parentId ?? null });
+
+        if (parentId) {
+          setActiveConditionId(parentId);
+          changePreviewDocsFilter(previewDocsFilterOptions.outcome_filter_condition.id, {
+            conditionId: parentId,
+          });
+        }
       }}
     >
       {createProcessorText}
