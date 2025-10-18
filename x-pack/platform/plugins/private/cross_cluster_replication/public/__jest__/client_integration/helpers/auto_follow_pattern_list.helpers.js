@@ -9,12 +9,12 @@ import { screen, within, act } from '@testing-library/react';
 import { renderWithRouter } from './render';
 import { getTableRows } from './eui_table';
 import { AutoFollowPatternList } from '../../../app/sections/home/auto_follow_pattern_list';
-import { ccrStore } from '../../../app/store';
+import { createCrossClusterReplicationStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
 
 export const setup = (props = {}) => {
   const result = renderWithRouter(AutoFollowPatternList, {
-    store: ccrStore,
+    store: createCrossClusterReplicationStore(),
     onRouter: (router) => {
       routing.reactRouter = {
         ...router,

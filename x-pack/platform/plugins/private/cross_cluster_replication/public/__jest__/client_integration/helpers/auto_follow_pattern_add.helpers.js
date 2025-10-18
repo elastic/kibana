@@ -7,12 +7,12 @@
 
 import { renderWithRouter } from './render';
 import { AutoFollowPatternAdd } from '../../../app/sections/auto_follow_pattern_add';
-import { ccrStore } from '../../../app/store';
+import { createCrossClusterReplicationStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
 
 export const setup = (props = {}) => {
   return renderWithRouter(AutoFollowPatternAdd, {
-    store: ccrStore,
+    store: createCrossClusterReplicationStore(),
     onRouter: (router) => {
       routing.reactRouter = {
         ...router,

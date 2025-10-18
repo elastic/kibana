@@ -24,10 +24,6 @@ describe('<CrossClusterReplicationHome />', () => {
   let user;
 
   beforeAll(() => {
-    ({ httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  beforeAll(() => {
     jest.useFakeTimers();
   });
 
@@ -36,6 +32,8 @@ describe('<CrossClusterReplicationHome />', () => {
   });
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    ({ httpRequestsMockHelpers } = setupEnvironment());
     // Set "default" mock responses by not providing any arguments
     httpRequestsMockHelpers.setLoadFollowerIndicesResponse();
   });

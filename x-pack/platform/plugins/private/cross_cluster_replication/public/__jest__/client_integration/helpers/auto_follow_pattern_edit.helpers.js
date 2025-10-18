@@ -7,13 +7,13 @@
 
 import { renderWithRouter } from './render';
 import { AutoFollowPatternEdit } from '../../../app/sections/auto_follow_pattern_edit';
-import { ccrStore } from '../../../app/store';
+import { createCrossClusterReplicationStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
 import { AUTO_FOLLOW_PATTERN_EDIT_NAME } from './constants';
 
 export const setup = (props = {}) => {
   return renderWithRouter(AutoFollowPatternEdit, {
-    store: ccrStore,
+    store: createCrossClusterReplicationStore(),
     initialEntries: [`/${AUTO_FOLLOW_PATTERN_EDIT_NAME}`],
     routePath: '/:id',
     onRouter: (router) => {

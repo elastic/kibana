@@ -10,17 +10,16 @@ import './mocks';
 import { getFollowerIndexMock } from './fixtures/follower_index';
 import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
 import { getTableCellsValues, getTableRows } from './helpers/eui_table';
-import { resetCcrStore } from './helpers/store';
 
 const { setup } = pageHelpers.followerIndexList;
 
 describe('<FollowerIndicesList />', () => {
   let httpRequestsMockHelpers;
+  let httpSetup;
   let user;
 
   beforeAll(() => {
     jest.useFakeTimers();
-    ({ httpRequestsMockHelpers } = setupEnvironment());
   });
 
   afterAll(() => {
@@ -29,12 +28,16 @@ describe('<FollowerIndicesList />', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    resetCcrStore();
+    ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
     httpRequestsMockHelpers.setLoadFollowerIndicesResponse();
   });
 
   describe('on component mount', () => {
     beforeEach(() => {
+      // Override HTTP mocks to return never-resolving promises
+      // This keeps the component in LOADING state without triggering act warnings
+      httpSetup.get.mockImplementation(() => new Promise(() => {}));
+
       ({ user } = setup());
     });
 

@@ -18,11 +18,19 @@ describe('Edit Auto-follow pattern', () => {
 
   beforeAll(() => {
     jest.useFakeTimers();
-    ({ httpRequestsMockHelpers } = setupEnvironment());
   });
 
   afterAll(() => {
     jest.useRealTimers();
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    ({ httpRequestsMockHelpers } = setupEnvironment());
+    httpRequestsMockHelpers.setGetAutoFollowPatternResponse(
+      AUTO_FOLLOW_PATTERN_EDIT_NAME,
+      AUTO_FOLLOW_PATTERN_EDIT
+    );
   });
 
   describe('on component mount', () => {
@@ -33,10 +41,6 @@ describe('Edit Auto-follow pattern', () => {
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
-      httpRequestsMockHelpers.setGetAutoFollowPatternResponse(
-        AUTO_FOLLOW_PATTERN_EDIT_NAME,
-        AUTO_FOLLOW_PATTERN_EDIT
-      );
       ({ user } = setup());
       // Advance timers to resolve HTTP mocks (required with fake timers)
       await act(async () => {
@@ -77,10 +81,6 @@ describe('Edit Auto-follow pattern', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse([
         { name: 'cluster-2', seeds: ['localhost:123'], isConnected: false },
       ]);
-      httpRequestsMockHelpers.setGetAutoFollowPatternResponse(
-        AUTO_FOLLOW_PATTERN_EDIT_NAME,
-        AUTO_FOLLOW_PATTERN_EDIT
-      );
       ({ user } = setup());
       // Advance timers once to resolve HTTP mocks
       await act(async () => {

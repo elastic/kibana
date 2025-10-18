@@ -9,12 +9,12 @@ import { screen, within } from '@testing-library/react';
 import { renderWithRouter } from './render';
 import { getTableRows } from './eui_table';
 import { FollowerIndicesList } from '../../../app/sections/home/follower_indices_list';
-import { ccrStore } from '../../../app/store';
+import { createCrossClusterReplicationStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
 
 export const setup = (props = {}) => {
   const result = renderWithRouter(FollowerIndicesList, {
-    store: ccrStore,
+    store: createCrossClusterReplicationStore(),
     onRouter: (router) => {
       routing.reactRouter = {
         history: {

@@ -9,7 +9,6 @@ import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-views-plugin/public';
 import { screen, act } from '@testing-library/react';
 import './mocks';
 import { setupEnvironment, pageHelpers } from './helpers';
-import { resetCcrStore } from './helpers/store';
 
 const { setup } = pageHelpers.followerIndexAdd;
 
@@ -20,9 +19,6 @@ describe('Create Follower index', () => {
 
   beforeAll(() => {
     jest.useFakeTimers();
-    const mockEnvironment = setupEnvironment();
-    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
-    httpSetup = mockEnvironment.httpSetup;
   });
 
   afterAll(() => {
@@ -31,12 +27,18 @@ describe('Create Follower index', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    resetCcrStore();
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
     httpRequestsMockHelpers.setLoadRemoteClustersResponse();
   });
 
   describe('on component mount', () => {
     beforeEach(() => {
+      // Override HTTP mocks to return never-resolving promises
+      // This keeps the component in LOADING state without triggering act warnings
+      httpSetup.get.mockImplementation(() => new Promise(() => {}));
+
       ({ user } = setup());
     });
 

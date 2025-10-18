@@ -7,13 +7,13 @@
 
 import { renderWithRouter } from './render';
 import { FollowerIndexEdit } from '../../../app/sections/follower_index_edit';
-import { ccrStore } from '../../../app/store';
+import { createCrossClusterReplicationStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
 import { FOLLOWER_INDEX_EDIT_NAME } from './constants';
 
 export const setup = (props = {}) => {
   return renderWithRouter(FollowerIndexEdit, {
-    store: ccrStore,
+    store: createCrossClusterReplicationStore(),
     initialEntries: [`/${FOLLOWER_INDEX_EDIT_NAME}`],
     routePath: '/:id',
     onRouter: (router) => {

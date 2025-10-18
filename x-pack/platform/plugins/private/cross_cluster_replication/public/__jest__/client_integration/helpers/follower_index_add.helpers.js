@@ -7,12 +7,12 @@
 
 import { renderWithRouter } from './render';
 import { FollowerIndexAdd } from '../../../app/sections/follower_index_add';
-import { ccrStore } from '../../../app/store';
+import { createCrossClusterReplicationStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
 
 export const setup = (props = {}) => {
   return renderWithRouter(FollowerIndexAdd, {
-    store: ccrStore,
+    store: createCrossClusterReplicationStore(),
     onRouter: (router) => {
       routing.reactRouter = {
         ...router,

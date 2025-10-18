@@ -9,18 +9,16 @@ import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-views-plugin/public';
 import { screen, within, act } from '@testing-library/react';
 import './mocks';
 import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
-import { resetCcrStore } from './helpers/store';
 
 const { setup } = pageHelpers.autoFollowPatternAdd;
 
 describe('Create Auto-follow pattern', () => {
   let httpRequestsMockHelpers;
+  let httpSetup;
   let user;
 
   beforeAll(() => {
     jest.useFakeTimers();
-    const mockEnvironment = setupEnvironment();
-    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
   });
 
   afterAll(() => {
@@ -29,12 +27,18 @@ describe('Create Auto-follow pattern', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    resetCcrStore();
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
     httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
   });
 
   describe('on component mount', () => {
     beforeEach(() => {
+      // Override HTTP mocks to return never-resolving promises
+      // This keeps the component in LOADING state without triggering act warnings
+      httpSetup.get.mockImplementation(() => new Promise(() => {}));
+
       ({ user } = setup());
     });
 

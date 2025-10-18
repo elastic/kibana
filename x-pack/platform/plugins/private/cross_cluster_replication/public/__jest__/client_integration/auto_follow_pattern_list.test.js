@@ -15,11 +15,11 @@ const { setup } = pageHelpers.autoFollowPatternList;
 
 describe('<AutoFollowPatternList />', () => {
   let httpRequestsMockHelpers;
+  let httpSetup;
   let user;
 
   beforeAll(() => {
     jest.useFakeTimers();
-    ({ httpRequestsMockHelpers } = setupEnvironment());
   });
 
   afterAll(() => {
@@ -27,6 +27,8 @@ describe('<AutoFollowPatternList />', () => {
   });
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
     // Set "default" mock responses by not providing any arguments
     httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse();
     httpRequestsMockHelpers.setDeleteAutoFollowPatternResponse();
@@ -35,6 +37,10 @@ describe('<AutoFollowPatternList />', () => {
 
   describe('on component mount', () => {
     beforeEach(() => {
+      // Override HTTP mocks to return never-resolving promises
+      // This keeps the component in LOADING state without triggering act warnings
+      httpSetup.get.mockImplementation(() => new Promise(() => {}));
+
       ({ user } = setup());
     });
 

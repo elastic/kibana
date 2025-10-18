@@ -10,7 +10,6 @@ import { API_BASE_PATH } from '../../../common/constants';
 import './mocks';
 import { FOLLOWER_INDEX_EDIT, FOLLOWER_INDEX_EDIT_NAME } from './helpers/constants';
 import { setupEnvironment, pageHelpers } from './helpers';
-import { resetCcrStore } from './helpers/store';
 
 const { setup } = pageHelpers.followerIndexEdit;
 
@@ -29,7 +28,6 @@ describe('Edit follower index', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    resetCcrStore(); // Clear Redux store state to ensure clean test isolation
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;

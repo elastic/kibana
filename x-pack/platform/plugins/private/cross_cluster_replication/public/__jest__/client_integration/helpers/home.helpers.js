@@ -7,12 +7,12 @@
 
 import { renderWithRouter } from './render';
 import { CrossClusterReplicationHome } from '../../../app/sections/home';
-import { ccrStore } from '../../../app/store';
+import { createCrossClusterReplicationStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
 
 export const setup = (props = {}) => {
   return renderWithRouter(CrossClusterReplicationHome, {
-    store: ccrStore,
+    store: createCrossClusterReplicationStore(),
     initialEntries: ['/follower_indices'],
     routePath: '/:section',
     onRouter: (router) => {
