@@ -47,8 +47,8 @@ const createInitialCredentials = (vars: PackagePolicyConfigRecord): CloudConnect
 
   // Default to AWS credentials
   return {
-    roleArn: vars.role_arn || vars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN]?.value,
-    externalId: vars.external_id || vars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID]?.value,
+    roleArn: vars.role_arn?.value || vars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN]?.value,
+    externalId: vars.external_id?.value || vars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID]?.value,
   } as AwsCloudConnectorCredentials;
 };
 
@@ -118,6 +118,12 @@ export const useCloudConnectorSetup = (
 
       // Update existing connection credentials state
       setExistingConnectionCredentials(credentials);
+
+      // Set cloud connector ID if provided
+      if (credentials.cloudConnectorId) {
+        updatedPolicy.cloud_connector_id = credentials.cloudConnectorId;
+      }
+
       updatePolicy({ updatedPolicy });
     },
     [input.streams, newPolicy, updatePolicy]

@@ -17,6 +17,7 @@ import type { CloudConnectorCredentials } from '../types';
 jest.mock('../utils', () => ({
   updateInputVarsWithCredentials: jest.fn(),
   updatePolicyInputs: jest.fn(),
+  isAzureCloudConnectorVars: jest.fn(),
 }));
 
 import { updateInputVarsWithCredentials, updatePolicyInputs } from '../utils';
