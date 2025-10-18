@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/babel-plugin-lazy-require",
+  "owner": "@elastic/kibana-operations",
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": false
+}
