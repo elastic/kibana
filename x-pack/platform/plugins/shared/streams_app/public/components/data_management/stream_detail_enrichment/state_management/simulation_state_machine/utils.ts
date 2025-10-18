@@ -99,6 +99,7 @@ export function getFilterSimulationDocumentsFn(filter: PreviewDocsFilterOption) 
       return (doc: SimulationDocReport) => doc.status === 'skipped';
     case 'outcome_filter_failed':
       return (doc: SimulationDocReport) => doc.status === 'failed';
+    case 'outcome_filter_condition':
     case 'outcome_filter_all':
     default:
       return (_doc: SimulationDocReport) => true;

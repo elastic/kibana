@@ -37,6 +37,7 @@ import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
 import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
+import { ConditionHighlightProvider } from './state_management/condition_highlight_context';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -133,55 +134,57 @@ export function StreamDetailEnrichmentContentImpl() {
   };
 
   return (
-    <EuiSplitPanel.Outer grow hasShadow={false}>
-      <EuiSplitPanel.Inner
-        paddingSize="none"
-        css={css`
-          display: flex;
-          overflow: hidden auto;
-        `}
-      >
-        <EuiResizableContainer>
-          {(EuiResizablePanel, EuiResizableButton) => (
-            <>
-              <EuiResizablePanel
-                initialSize={40}
-                minSize="480px"
-                tabIndex={0}
-                paddingSize="l"
-                css={verticalFlexCss}
-              >
-                <StepsEditor />
-              </EuiResizablePanel>
-              <EuiResizableButton indicator="border" />
-              <EuiResizablePanel
-                initialSize={60}
-                minSize="300px"
-                tabIndex={0}
-                paddingSize="l"
-                css={verticalFlexCss}
-              >
-                <MemoSimulationPlayground />
-              </EuiResizablePanel>
-            </>
-          )}
-        </EuiResizableContainer>
-      </EuiSplitPanel.Inner>
-      {hasChanges && (
-        <ManagementBottomBar
-          onCancel={resetChanges}
-          onConfirm={
-            detectedFields.length > 0 && getChanges(detectedFields, definitionFields).length > 0
-              ? openConfirmationModal
-              : saveChanges
-          }
-          isLoading={isSavingChanges}
-          disabled={!hasChanges}
-          insufficientPrivileges={!canManage}
-          isInvalid={hasDefinitionError}
-        />
-      )}
-    </EuiSplitPanel.Outer>
+    <ConditionHighlightProvider>
+      <EuiSplitPanel.Outer grow hasShadow={false}>
+        <EuiSplitPanel.Inner
+          paddingSize="none"
+          css={css`
+            display: flex;
+            overflow: hidden auto;
+          `}
+        >
+          <EuiResizableContainer>
+            {(EuiResizablePanel, EuiResizableButton) => (
+              <>
+                <EuiResizablePanel
+                  initialSize={40}
+                  minSize="480px"
+                  tabIndex={0}
+                  paddingSize="l"
+                  css={verticalFlexCss}
+                >
+                  <StepsEditor />
+                </EuiResizablePanel>
+                <EuiResizableButton indicator="border" />
+                <EuiResizablePanel
+                  initialSize={60}
+                  minSize="300px"
+                  tabIndex={0}
+                  paddingSize="l"
+                  css={verticalFlexCss}
+                >
+                  <MemoSimulationPlayground />
+                </EuiResizablePanel>
+              </>
+            )}
+          </EuiResizableContainer>
+        </EuiSplitPanel.Inner>
+        {hasChanges && (
+          <ManagementBottomBar
+            onCancel={resetChanges}
+            onConfirm={
+              detectedFields.length > 0 && getChanges(detectedFields, definitionFields).length > 0
+                ? openConfirmationModal
+                : saveChanges
+            }
+            isLoading={isSavingChanges}
+            disabled={!hasChanges}
+            insufficientPrivileges={!canManage}
+            isInvalid={hasDefinitionError}
+          />
+        )}
+      </EuiSplitPanel.Outer>
+    </ConditionHighlightProvider>
   );
 }
 
@@ -223,7 +226,11 @@ const StepsEditor = React.memo(() => {
 
   return (
     <>
-      {hasSteps ? <RootSteps stepRefs={stepRefs} /> : <NoStepsEmptyPrompt />}
+      {hasSteps ? (
+        <RootSteps stepRefs={stepRefs} />
+      ) : (
+        <NoStepsEmptyPrompt />
+      )}
       {(!isEmpty(errors.ignoredFields) ||
         !isEmpty(errors.mappingFailures) ||
         errors.definition_error) && (

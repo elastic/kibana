@@ -41,6 +41,7 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
+import { useConditionHighlight } from './state_management/condition_highlight_context';
 import { isStepUnderEdit } from './state_management/steps_state_machine';
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
 import { DOC_VIEW_DIFF_ID, DocViewerContext } from './doc_viewer_diff';
@@ -117,13 +118,28 @@ const PreviewDocumentsGroupBy = () => {
   const simulationParsedRate = useSimulatorSelector((state) =>
     formatRateToPercentage(state.context.simulation?.documents_metrics.parsed_rate)
   );
+  const { activeConditionId } = useConditionHighlight();
+  const hasActiveCondition = Boolean(activeConditionId);
 
-  const getFilterButtonPropsFor = (filter: PreviewDocsFilterOption) => ({
+  useEffect(() => {
+    if (
+      previewDocsFilter === previewDocsFilterOptions.outcome_filter_condition.id &&
+      !hasActiveCondition
+    ) {
+      changePreviewDocsFilter(previewDocsFilterOptions.outcome_filter_all.id);
+    }
+  }, [changePreviewDocsFilter, hasActiveCondition, previewDocsFilter]);
+
+  const getFilterButtonPropsFor = (
+    filter: PreviewDocsFilterOption,
+    overrides: Partial<React.ComponentProps<typeof EuiFilterButton>> = {}
+  ) => ({
     isToggle: previewDocsFilter === filter,
     isSelected: previewDocsFilter === filter,
     disabled: !hasMetrics,
     hasActiveFilters: previewDocsFilter === filter,
     onClick: () => changePreviewDocsFilter(filter),
+    ...overrides,
   });
 
   return (
@@ -138,6 +154,15 @@ const PreviewDocumentsGroupBy = () => {
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_all.id)}
         >
           {previewDocsFilterOptions.outcome_filter_all.label}
+        </EuiFilterButton>
+        <EuiFilterButton
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_condition.id, {
+            disabled: !hasActiveCondition,
+            hasActiveFilters:
+              previewDocsFilter === previewDocsFilterOptions.outcome_filter_condition.id,
+          })}
+        >
+          {previewDocsFilterOptions.outcome_filter_condition.label}
         </EuiFilterButton>
         <EuiFilterButton
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}

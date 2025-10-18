@@ -43,6 +43,13 @@ export const previewDocsFilterOptions = {
       { defaultMessage: 'Failed' }
     ),
   },
+  outcome_filter_condition: {
+    id: 'outcome_filter_condition',
+    label: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.condition',
+      { defaultMessage: 'Condition' }
+    ),
+  },
 } as const;
 
 export type PreviewDocsFilterOption = keyof typeof previewDocsFilterOptions;

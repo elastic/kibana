@@ -15,6 +15,9 @@ import { StepContextMenu } from '../context_menu';
 import { BlockDisableOverlay } from '../block_disable_overlay';
 import { ConditionDisplay } from '../../../../shared';
 import type { StepConfigurationProps } from '../../steps_list';
+import { useConditionHighlight } from '../../../state_management/condition_highlight_context';
+import { useStreamEnrichmentEvents } from '../../../state_management/stream_enrichment_state_machine';
+import { previewDocsFilterOptions } from '../../../state_management/simulation_state_machine';
 
 export const WhereBlockSummary = ({
   stepRef,
@@ -25,8 +28,22 @@ export const WhereBlockSummary = ({
   isLastStepInLevel,
 }: StepConfigurationProps) => {
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
+  const { activeConditionId, setActiveConditionId } = useConditionHighlight();
+  const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
 
   if (!isWhereBlock(step)) return null;
+
+  const isActive = activeConditionId === step.customIdentifier;
+
+  const handleConditionClick = () => {
+    if (isActive) {
+      setActiveConditionId(null);
+      changePreviewDocsFilter(previewDocsFilterOptions.outcome_filter_all.id);
+    } else {
+      setActiveConditionId(step.customIdentifier);
+      changePreviewDocsFilter(previewDocsFilterOptions.outcome_filter_condition.id);
+    }
+  };
 
   return (
     <EuiFlexGroup
@@ -47,7 +64,13 @@ export const WhereBlockSummary = ({
           overflow: hidden;
         `}
       >
-        <ConditionDisplay condition={step.where} showKeyword={true} keyword="WHERE" />
+        <ConditionDisplay
+          condition={step.where}
+          showKeyword={true}
+          keyword="WHERE"
+          onClick={handleConditionClick}
+          isActive={isActive}
+        />
       </EuiFlexItem>
 
       <EuiFlexItem
