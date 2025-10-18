@@ -89,7 +89,8 @@ const triggerControl = async (
   uiActions: ESQLEditorDeps['uiActions'],
   esqlVariables?: ESQLControlVariable[],
   onSaveControl?: ControlsContext['onSaveControl'],
-  onCancelControl?: ControlsContext['onCancelControl']
+  onCancelControl?: ControlsContext['onCancelControl'],
+  onCloseFlyout?: ControlsContext['onCancelControl']
 ) => {
   await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
     queryString,
@@ -98,6 +99,7 @@ const triggerControl = async (
     esqlVariables,
     onSaveControl,
     onCancelControl,
+    onCloseFlyout,
   });
 };
 
@@ -344,6 +346,7 @@ const ESQLEditorInternal = function ESQLEditor({
       uiActions,
       esqlVariables,
       controlsContext?.onSaveControl,
+      controlsContext?.onCancelControl,
       controlsContext?.onCancelControl
     );
   });
