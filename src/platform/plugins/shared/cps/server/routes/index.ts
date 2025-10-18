@@ -7,4 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from '@kbn/data-views-plugin/public/mocks';
+import type { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import { registerGetProjectTagsRoute } from './get_projects_tags';
+
+export const registerRoutes = (setup: CoreSetup, initContext: PluginInitializerContext) => {
+  const router = setup.http.createRouter();
+
+  registerGetProjectTagsRoute(router, initContext);
+};
