@@ -19,16 +19,16 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsPluginSetup {}
+export interface WorkflowsPublicPluginSetup {}
 
-export interface WorkflowsPluginSetupDependencies {
+export interface WorkflowsPublicPluginSetupDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsPluginStart {}
+export interface WorkflowsPublicPluginStart {}
 
-export interface WorkflowsPluginStartDependencies {
+export interface WorkflowsPublicPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   serverless?: ServerlessPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -38,13 +38,13 @@ export interface WorkflowsPluginStartDependencies {
   spaces: SpacesPluginStart;
 }
 
-export interface WorkflowsPluginStartAdditionalServices {
+export interface WorkflowsPublicPluginStartAdditionalServices {
   storage: Storage;
 }
 
 export type WorkflowsServices = CoreStart &
-  WorkflowsPluginStartDependencies &
-  WorkflowsPluginStartAdditionalServices;
+  WorkflowsPublicPluginStartDependencies &
+  WorkflowsPublicPluginStartAdditionalServices;
 
 export interface WorkflowsSearchParams {
   limit: number;
