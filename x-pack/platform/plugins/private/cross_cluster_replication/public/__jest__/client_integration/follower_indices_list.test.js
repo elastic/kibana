@@ -97,6 +97,7 @@ describe('<FollowerIndicesList />', () => {
 
   describe('when there are follower indices', () => {
     let tableCellsValues;
+    let actions;
 
     const index1 = getFollowerIndexMock({ name: `a${getRandomString()}` });
     const index2 = getFollowerIndexMock({ name: `b${getRandomString()}`, status: 'paused' });
@@ -106,7 +107,7 @@ describe('<FollowerIndicesList />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadFollowerIndicesResponse({ indices: followerIndices });
 
-      ({ user } = setup());
+      ({ user, actions } = setup());
       await act(async () => {
         await jest.runOnlyPendingTimersAsync();
       });
@@ -304,8 +305,7 @@ describe('<FollowerIndicesList />', () => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/142774
-    describe.skip('detail panel', () => {
+    describe('detail panel', () => {
       test('should open a detail panel when clicking on a follower index', async () => {
         expect(screen.queryByTestId('followerIndexDetail')).not.toBeInTheDocument();
 
@@ -317,22 +317,20 @@ describe('<FollowerIndicesList />', () => {
       });
 
       test('should set the title the index that has been selected', async () => {
-        const rows = getTableRows('followerIndexListTable');
-        const nameLink = within(rows[0]).getByText(index1.name);
-        await user.click(nameLink);
+        await actions.clickFollowerIndexAt(0);
 
-        const title = await screen.findByTestId('followerIndexDetail.title');
+        const detailPanel = await screen.findByTestId('followerIndexDetail');
+        const title = within(detailPanel).getByTestId('title');
         expect(title.textContent).toEqual(index1.name);
       });
 
       test('should indicate the correct "status", "remote cluster" and "leader index"', async () => {
-        const rows = getTableRows('followerIndexListTable');
-        const nameLink = within(rows[0]).getByText(index1.name);
-        await user.click(nameLink);
+        await actions.clickFollowerIndexAt(0);
 
-        const status = await screen.findByTestId('followerIndexDetail.status');
-        const remoteCluster = await screen.findByTestId('followerIndexDetail.remoteCluster');
-        const leaderIndex = await screen.findByTestId('followerIndexDetail.leaderIndex');
+        const detailPanel = await screen.findByTestId('followerIndexDetail');
+        const status = within(detailPanel).getByTestId('status');
+        const remoteCluster = within(detailPanel).getByTestId('remoteCluster');
+        const leaderIndex = within(detailPanel).getByTestId('leaderIndex');
 
         expect(status.textContent).toEqual(index1.status);
         expect(remoteCluster.textContent).toEqual(index1.remoteCluster);
@@ -340,15 +338,15 @@ describe('<FollowerIndicesList />', () => {
       });
 
       test('should have a "settings" section', async () => {
-        const rows = getTableRows('followerIndexListTable');
-        const nameLink = within(rows[0]).getByText(index1.name);
-        await user.click(nameLink);
+        await actions.clickFollowerIndexAt(0);
 
-        const settingsSection = await screen.findByTestId('followerIndexDetail.settingsSection');
+        const detailPanel = await screen.findByTestId('followerIndexDetail');
+        const settingsSection = within(detailPanel).getByTestId('settingsSection');
         const heading = within(settingsSection).getByRole('heading', { level: 3 });
         expect(heading.textContent).toEqual('Settings');
 
-        expect(screen.getByTestId('followerIndexDetail.settingsValues')).toBeInTheDocument();
+        const settingsValues = within(detailPanel).queryAllByTestId('settingsValues');
+        expect(settingsValues.length).toBeGreaterThan(0);
       });
 
       test('should set the correct follower index settings values', async () => {
@@ -365,44 +363,39 @@ describe('<FollowerIndicesList />', () => {
           readPollTimeout: 'readPollTimeout',
         };
 
-        const rows = getTableRows('followerIndexListTable');
-        const nameLink = within(rows[0]).getByText(index1.name);
-        await user.click(nameLink);
+        await actions.clickFollowerIndexAt(0);
 
-        await screen.findByTestId('followerIndexDetail.settingsValues');
+        const detailPanel = await screen.findByTestId('followerIndexDetail');
+        // Wait for any settingsValues to appear
+        await within(detailPanel).findByTestId('maxReadReqOpCount');
 
         Object.entries(mapSettingsToFollowerIndexProp).forEach(([setting, prop]) => {
-          const element = screen.getByTestId(`settingsValues.${setting}`);
+          const element = within(detailPanel).getByTestId(setting);
           expect(element.textContent).toEqual(index1[prop].toString());
         });
       });
 
       test('should not have settings values for a "paused" follower index', async () => {
-        const rows = getTableRows('followerIndexListTable');
-        const nameLink = within(rows[1]).getByText(index2.name);
-        await user.click(nameLink);
+        await actions.clickFollowerIndexAt(1);
 
-        await screen.findByTestId('followerIndexDetail.settingsSection');
+        const detailPanel = await screen.findByTestId('followerIndexDetail');
+        await within(detailPanel).findByTestId('settingsSection');
 
-        expect(screen.queryByTestId('followerIndexDetail.settingsValues')).not.toBeInTheDocument();
+        expect(within(detailPanel).queryByTestId('settingsValues')).not.toBeInTheDocument();
 
-        const settingsSection = screen.getByTestId('followerIndexDetail.settingsSection');
+        const settingsSection = within(detailPanel).getByTestId('settingsSection');
         expect(settingsSection.textContent).toContain(
           'paused follower index does not have settings'
         );
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/100951
-      test.skip('should have a section to render the follower index shards stats', async () => {
-        const rows = getTableRows('followerIndexListTable');
-        const nameLink = within(rows[0]).getByText(index1.name);
-        await user.click(nameLink);
+      test('should have a section to render the follower index shards stats', async () => {
+        await actions.clickFollowerIndexAt(0);
 
-        expect(
-          await screen.findByTestId('followerIndexDetail.shardsStatsSection')
-        ).toBeInTheDocument();
+        const detailPanel = await screen.findByTestId('followerIndexDetail');
+        expect(within(detailPanel).getByTestId('shardsStatsSection')).toBeInTheDocument();
 
-        const codeBlocks = screen.queryAllByTestId('shardsStats');
+        const codeBlocks = within(detailPanel).queryAllByTestId('shardsStats');
         expect(codeBlocks.length).toBe(index1.shards.length);
 
         codeBlocks.forEach((codeBlock, i) => {

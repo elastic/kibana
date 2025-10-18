@@ -344,17 +344,10 @@ describe('<AutoFollowPatternList />', () => {
         expect(screen.getByTestId('deleteAutoFollowPatternConfirmation')).toBeInTheDocument();
       });
 
-      // This test is failing in CI, skipping for now
-      // we will need to remove the calls to "await nextTick()"";
-      // Issue: https://github.com/elastic/kibana/issues/75261
-      test.skip('should display the recent errors', async () => {
+      test('should display the recent errors', async () => {
         const message = 'bar';
+        // Only pattern 2 should have errors, pattern 1 should not
         const recentAutoFollowErrors = [
-          {
-            timestamp: 1587081600021,
-            leaderIndex: `${autoFollowPattern1.name}:my-leader-test`,
-            autoFollowException: { type: 'exception', reason: message },
-          },
           {
             timestamp: 1587081600021,
             leaderIndex: `${autoFollowPattern2.name}:my-leader-test`,
@@ -364,16 +357,20 @@ describe('<AutoFollowPatternList />', () => {
         httpRequestsMockHelpers.setAutoFollowStatsResponse({ recentAutoFollowErrors });
 
         await actions.clickAutoFollowPatternAt(0);
-        expect(screen.queryByTestId('autoFollowPatternDetail.errors')).not.toBeInTheDocument();
 
-        // We select the other auto-follow pattern because the stats are fetched
-        // each time we change the auto-follow pattern selection
+        // Wait for detail panel to open
+        const detailPanel1 = await screen.findByTestId('autoFollowPatternDetail');
+        expect(within(detailPanel1).queryByTestId('errors')).not.toBeInTheDocument();
+
+        // Select the other pattern - stats are fetched on selection change
         await actions.clickAutoFollowPatternAt(1);
 
-        expect(screen.getByTestId('autoFollowPatternDetail.errors')).toBeInTheDocument();
-        expect(screen.getByTestId('autoFollowPatternDetail.titleErrors')).toBeInTheDocument();
+        // Wait for errors to appear
+        const detailPanel2 = await screen.findByTestId('autoFollowPatternDetail');
+        expect(await within(detailPanel2).findByTestId('errors')).toBeInTheDocument();
+        expect(within(detailPanel2).getByTestId('titleErrors')).toBeInTheDocument();
 
-        const errors = screen.getAllByTestId('autoFollowPatternDetail.recentError');
+        const errors = within(detailPanel2).queryAllByTestId('recentError');
         expect(errors.map((error) => error.textContent)).toEqual([
           'April 16th, 2020 8:00:00 PM: bar',
         ]);

@@ -30,7 +30,8 @@ export const resetCcrStore = () => {
   ccrStore.dispatch({ type: 'AUTO_FOLLOW_PATTERN_SELECT_EDIT', payload: null });
   ccrStore.dispatch({ type: 'AUTO_FOLLOW_PATTERN_SELECT_DETAIL', payload: null });
 
-  // Clear the byId caches by directly mutating (acceptable in test utilities)
+  // Clear the byId caches to prevent stale data between tests
+  // HTTP mocks will repopulate these after component renders
   ccrStore.getState().followerIndex.byId = {};
   ccrStore.getState().autoFollowPattern.byId = {};
 };
