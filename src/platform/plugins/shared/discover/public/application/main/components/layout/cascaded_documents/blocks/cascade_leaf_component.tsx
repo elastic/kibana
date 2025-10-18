@@ -52,18 +52,26 @@ interface CustomCascadeGridBodyProps
 }
 
 const customCascadeGridBodyStyle = {
-  wrapper: css({
-    width: '100%',
-    position: 'relative',
-    overflowAnchor: 'none',
+  wrapper: css({ overflow: 'hidden', position: 'relative', height: '100%' }),
+  headerRow: css({
+    position: 'sticky',
+    top: 0,
   }),
-  inner: css({
+  virtualizerContainer: css({
+    width: '100%',
+    height: '100%',
+    overflowY: 'auto',
+    position: 'relative',
+    scrollbarWidth: 'thin',
+  }),
+  virtualizerInner: css({
     position: 'absolute',
     top: 0,
     left: 0,
     width: '100%',
     overflowAnchor: 'none',
   }),
+  displayFlex: css({ display: 'flex' }),
 };
 
 /**
@@ -87,13 +95,34 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     () => data.slice(visibleRowData.startRow, visibleRowData.endRow),
     [data, visibleRowData.startRow, visibleRowData.endRow]
   );
+  const customGridBodyScrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   const scrollMargin = useMemo(() => getScrollMargin(), [getScrollMargin]);
 
   // create scroll element reference for custom nested virtualized grid
-  const customCascadeGridScrollRef = useRef<Element | null>(getScrollElement());
+  const virtualizerScrollElementRef = useRef<Element | null>(getScrollElement());
 
-  const scrollElementGetter = useCallback(() => customCascadeGridScrollRef.current, []);
+  const scrollElementGetter = useCallback(() => virtualizerScrollElementRef.current, []);
+
+  useEffect(() => {
+    const defaultScrollElement = getScrollElement();
+
+    if (
+      isFullScreenMode &&
+      customGridBodyScrollContainerRef.current &&
+      !virtualizerScrollElementRef.current?.isSameNode(customGridBodyScrollContainerRef.current)
+    ) {
+      // assign the custom grid body element as scrollable element in full screen mode
+      // customCascadeGridScrollRef.current = $gridBody;
+      virtualizerScrollElementRef.current = customGridBodyScrollContainerRef.current;
+    } else if (
+      !isFullScreenMode &&
+      !virtualizerScrollElementRef.current?.isSameNode(defaultScrollElement)
+    ) {
+      // when exiting full screen mode we ensure the scroll element is reset to the default scroll container
+      virtualizerScrollElementRef.current = defaultScrollElement;
+    }
+  }, [getScrollElement, isFullScreenMode]);
 
   const virtualizer = useVirtualizer({
     count: visibleRows.length,
@@ -105,63 +134,52 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     useAnimationFrameWithResizeObserver: true,
   });
 
-  useEffect(() => {
-    const defaultScrollElement = getScrollElement();
-
-    return setCustomGridBodyProps({
-      ref: ($gridBody) => {
-        if (isFullScreenMode && !customCascadeGridScrollRef.current?.isSameNode($gridBody)) {
-          // assign the custom grid body element as scrollable element in full screen mode
-          customCascadeGridScrollRef.current = $gridBody;
-        } else if (
-          !isFullScreenMode &&
-          !customCascadeGridScrollRef.current?.isSameNode(defaultScrollElement)
-        ) {
-          // when exiting full screen mode we ensure the scroll element is reset to the default scroll container
-          customCascadeGridScrollRef.current = defaultScrollElement;
-        }
-      },
-    });
-  }, [getScrollElement, isFullScreenMode, setCustomGridBodyProps]);
-
   const items = virtualizer.getVirtualItems();
 
   return (
-    <div data-test-subj="dataGridBody" role="rowgroup">
-      <React.Fragment>{headerRow}</React.Fragment>
+    <div
+      data-test-subj="discoverCascadeCustomDataGridBody"
+      role="rowgroup"
+      css={customCascadeGridBodyStyle.wrapper}
+    >
+      <div css={customCascadeGridBodyStyle.headerRow}>{headerRow}</div>
       <div
-        css={customCascadeGridBodyStyle.wrapper}
-        style={{
-          height: virtualizer.getTotalSize(),
-        }}
+        ref={customGridBodyScrollContainerRef}
+        css={customCascadeGridBodyStyle.virtualizerContainer}
       >
         <div
-          css={customCascadeGridBodyStyle.inner}
           style={{
-            transform: `translateY(${items[0]?.start - virtualizer.options.scrollMargin ?? 0}px)`,
+            height: virtualizer.getTotalSize(),
           }}
         >
-          {items.map((virtualRow) => (
-            <div
-              key={virtualRow.key}
-              data-index={virtualRow.index}
-              ref={virtualizer.measureElement}
-              className="euiDataGridRow"
-              css={{ display: 'flex' }}
-            >
-              {visibleColumns.map((column, colIndex) => {
-                return (
-                  <Cell
-                    key={`${virtualRow.index}-${colIndex}`}
-                    colIndex={colIndex}
-                    rowIndex={virtualRow.index}
-                    visibleRowIndex={virtualRow.index}
-                    columnId={column.id}
-                  />
-                );
-              })}
-            </div>
-          ))}
+          <div
+            css={customCascadeGridBodyStyle.virtualizerInner}
+            style={{
+              transform: `translateY(${items[0]?.start - virtualizer.options.scrollMargin ?? 0}px)`,
+            }}
+          >
+            {items.map((virtualRow) => (
+              <div
+                key={virtualRow.key}
+                data-index={virtualRow.index}
+                ref={virtualizer.measureElement}
+                className="euiDataGridRow"
+                css={customCascadeGridBodyStyle.displayFlex}
+              >
+                {visibleColumns.map((column, colIndex) => {
+                  return (
+                    <Cell
+                      key={`${virtualRow.index}-${colIndex}`}
+                      colIndex={colIndex}
+                      rowIndex={virtualRow.index}
+                      visibleRowIndex={virtualRow.index}
+                      columnId={column.id}
+                    />
+                  );
+                })}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
       <React.Fragment>{footerRow}</React.Fragment>
