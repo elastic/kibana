@@ -80,10 +80,10 @@ import type {
   PreconfiguredInputs,
   CloudProvider,
   CloudConnector,
+  CloudConnectorVars,
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
   PackagePolicyConfigRecord,
-  AzureCloudConnectorVars,
 } from '../../common/types';
 import {
   FleetError,
@@ -131,9 +131,6 @@ import {
 import {
   AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME,
   AWS_ROLE_ARN_VAR_NAME,
-  AZURE_TENANT_ID_VAR_NAME,
-  AZURE_CLIENT_ID_VAR_NAME,
-  AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME,
 } from '../../common/constants/cloud_connector';
 
 import { createSoFindIterable } from './utils/create_so_find_iterable';
@@ -279,17 +276,17 @@ const extractPackagePolicyVars = (
   cloudProvider: CloudProvider,
   packagePolicy: NewPackagePolicy,
   logger: Logger
-): AwsCloudConnectorVars | AzureCloudConnectorVars | undefined => {
+): CloudConnectorVars | undefined => {
   logger.get('extract package policy vars');
 
-  const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
-
-  if (!vars) {
-    logger.error('Package policy must contain vars');
-    throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
-  }
-
   if (packagePolicy.supports_cloud_connector && cloudProvider === 'aws') {
+    const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+
+    if (!vars) {
+      logger.error('Package policy must contain vars');
+      throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
+    }
+
     const roleArn: string = vars.role_arn?.value || vars[AWS_ROLE_ARN_VAR_NAME]?.value;
 
     if (roleArn) {
@@ -305,43 +302,6 @@ const extractPackagePolicyVars = (
       };
 
       return awsCloudConnectorVars;
-    }
-  }
-
-  if (packagePolicy.supports_cloud_connector && cloudProvider === 'azure') {
-    // Extract tenant_id - handle both string values and secret references
-    const tenantIdVar = vars.tenant_id || vars[AZURE_TENANT_ID_VAR_NAME];
-    const tenantIdValue = tenantIdVar?.value;
-
-    // Extract client_id - handle both string values and secret references
-    const clientIdVar = vars.client_id || vars[AZURE_CLIENT_ID_VAR_NAME];
-    const clientIdValue = clientIdVar?.value;
-
-    // Extract connector_id - handle both string values and secret references
-    const connectorIdVar = vars[AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME];
-    const connectorIdValue = connectorIdVar?.value;
-
-    if (tenantIdValue && clientIdValue && connectorIdValue) {
-      // Create proper CloudConnectorSecretVar structure for each field
-      const tenantId: CloudConnectorSecretVar = tenantIdVar?.value?.isSecretRef
-        ? (tenantIdVar as CloudConnectorSecretVar)
-        : { type: 'password', value: { isSecretRef: false, id: String(tenantIdValue) } };
-
-      const clientId: CloudConnectorSecretVar = clientIdVar?.value?.isSecretRef
-        ? (clientIdVar as CloudConnectorSecretVar)
-        : { type: 'password', value: { isSecretRef: false, id: String(clientIdValue) } };
-
-      const connectorId: CloudConnectorSecretVar = connectorIdVar?.value?.isSecretRef
-        ? (connectorIdVar as CloudConnectorSecretVar)
-        : { type: 'password', value: { isSecretRef: false, id: String(connectorIdValue) } };
-
-      const azureCloudConnectorVars: AzureCloudConnectorVars = {
-        tenant_id: tenantId,
-        client_id: clientId,
-        azure_credentials_cloud_connector_id: connectorId,
-      };
-
-      return azureCloudConnectorVars;
     }
   }
 };

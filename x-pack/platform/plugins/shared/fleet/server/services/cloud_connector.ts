@@ -9,8 +9,6 @@ import type { Logger } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import type {
-  AwsCloudConnectorVars,
-  AzureCloudConnectorVars,
   CloudConnector,
   CloudConnectorListOptions,
   CloudConnectorSecretReference,
@@ -60,45 +58,6 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     return appContextService.getLogger().get('CloudConnectorService', ...childContextPaths);
   }
 
-  private isAwsCloudConnectorVars(
-    vars: AwsCloudConnectorVars | AzureCloudConnectorVars,
-    cloudProvider: string
-  ): vars is AwsCloudConnectorVars {
-    return cloudProvider === 'aws';
-  }
-
-  private isAzureCloudConnectorVars(
-    vars: AwsCloudConnectorVars | AzureCloudConnectorVars,
-    cloudProvider: string
-  ): vars is AzureCloudConnectorVars {
-    return cloudProvider === 'azure';
-  }
-
-  // Helper method for type-safe variable building
-  private buildCloudConnectorVars(
-    vars: AwsCloudConnectorVars | AzureCloudConnectorVars,
-    cloudProvider: string
-  ): Record<string, any> {
-    if (cloudProvider === 'aws') {
-      return {
-        ...(vars.role_arn?.value && { role_arn: vars.role_arn }),
-        ...(vars.external_id?.value && { external_id: vars.external_id }),
-      };
-    }
-
-    if (cloudProvider === 'azure') {
-      return {
-        ...(vars.tenant_id?.value && { tenant_id: vars.tenant_id }),
-        ...(vars.client_id?.value && { client_id: vars.client_id }),
-        ...(vars.azure_credentials_cloud_connector_id?.value && {
-          azure_credentials_cloud_connector_id: vars.azure_credentials_cloud_connector_id,
-        }),
-      };
-    }
-
-    return {};
-  }
-
   async create(
     soClient: SavedObjectsClientContract,
     cloudConnector: CreateCloudConnectorRequest
@@ -117,41 +76,25 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
           `CloudConnectorService Package policy must contain ${cloudProvider} input vars`
         );
       }
-
-      let name = cloudConnector.name;
-
-      // Type-safe name generation
-      if (this.isAwsCloudConnectorVars(vars, cloudProvider)) {
-        name = vars.role_arn.value;
-      } else if (this.isAzureCloudConnectorVars(vars, cloudProvider)) {
-        const tenantIdValue = vars.tenant_id.value;
-        const clientIdValue = vars.client_id.value;
-        // Handle both string values and CloudConnectorSecretReference objects
-        const tenantIdString =
-          typeof tenantIdValue === 'string'
-            ? tenantIdValue
-            : (tenantIdValue as CloudConnectorSecretReference).id || 'unknown';
-        const clientIdString =
-          typeof clientIdValue === 'string'
-            ? clientIdValue
-            : (clientIdValue as CloudConnectorSecretReference).id || 'unknown';
-        name = `azure-connector-${clientIdString.substring(0, 8)}-${tenantIdString.substring(
-          0,
-          8
-        )}`;
-      }
+      const name =
+        cloudConnector.cloudProvider === 'aws' && vars.role_arn?.value
+          ? vars.role_arn.value
+          : cloudConnector.name;
 
       // Check if space awareness is enabled for namespace handling
       const { isSpaceAwarenessEnabled } = await import('./spaces/helpers');
       const useSpaceAwareness = await isSpaceAwarenessEnabled();
       const namespace = useSpaceAwareness ? '*' : undefined;
 
-      // Create cloud connector saved object with properly typed vars
+      // Create cloud connector saved object
       const cloudConnectorAttributes: CloudConnectorSOAttributes = {
         name,
         namespace,
         cloudProvider,
-        vars: this.buildCloudConnectorVars(vars, cloudProvider),
+        vars: {
+          ...(vars.role_arn?.value && { role_arn: vars.role_arn }),
+          ...(vars.external_id?.value && { external_id: vars.external_id }),
+        },
         packagePolicyCount: 1,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -270,10 +213,10 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       }
 
       if (updates.vars) {
-        updateAttributes.vars = this.buildCloudConnectorVars(
-          updates.vars,
-          existingCloudConnector.attributes.cloudProvider
-        );
+        updateAttributes.vars = {
+          ...(updates.vars.role_arn?.value && { role_arn: updates.vars.role_arn }),
+          ...(updates.vars.external_id?.value && { external_id: updates.vars.external_id }),
+        };
       }
 
       // Update the saved object
@@ -294,7 +237,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       return {
         id: cloudConnectorId,
         ...mergedAttributes,
-      } as CloudConnector;
+      };
     } catch (error) {
       logger.error('Failed to update cloud connector', error.message);
       throw new CloudConnectorCreateError(
@@ -359,7 +302,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     const logger = this.getLogger('validate cloud connector details');
     const vars = cloudConnector.vars;
 
-    if (cloudConnector.cloudProvider === 'aws' && this.isAwsCloudConnectorVars(vars, 'aws')) {
+    if (cloudConnector.cloudProvider === 'aws') {
       const roleArn = vars.role_arn?.value;
 
       if (!roleArn) {
@@ -383,42 +326,6 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       if (!isValidExternalId) {
         logger.error('External ID secret reference must be a valid secret reference');
         throw new CloudConnectorInvalidVarsError('External ID secret reference is not valid');
-      }
-    } else if (
-      cloudConnector.cloudProvider === 'azure' &&
-      this.isAzureCloudConnectorVars(vars, 'azure')
-    ) {
-      const tenantIdValue = vars.tenant_id?.value;
-      const clientIdValue = vars.client_id?.value;
-      const cloudConnectorIdValue = vars.azure_credentials_cloud_connector_id?.value;
-
-      // Handle both string values and CloudConnectorSecretReference objects for validation
-      // because Azure credentials might be provided as plain secret strings (not password type) during creation
-      // but stored as secret references in saved objects
-      const tenantId = typeof tenantIdValue === 'string' ? tenantIdValue : tenantIdValue?.id;
-
-      const clientId = typeof clientIdValue === 'string' ? clientIdValue : clientIdValue?.id;
-
-      const cloudConnectorId =
-        typeof cloudConnectorIdValue === 'string'
-          ? cloudConnectorIdValue
-          : cloudConnectorIdValue?.id;
-
-      if (!tenantId) {
-        logger.error('Package policy must contain tenant_id variable');
-        throw new CloudConnectorInvalidVarsError('Package policy must contain tenant_id variable');
-      }
-
-      if (!clientId) {
-        logger.error('Package policy must contain client_id variable');
-        throw new CloudConnectorInvalidVarsError('Package policy must contain client_id variable');
-      }
-
-      if (!cloudConnectorId) {
-        logger.error('Package policy must contain azure_credentials_cloud_connector_id variable');
-        throw new CloudConnectorInvalidVarsError(
-          'Package policy must contain azure_credentials_cloud_connector_id variable'
-        );
       }
     } else {
       logger.error(`Unsupported cloud provider: ${cloudConnector.cloudProvider}`);

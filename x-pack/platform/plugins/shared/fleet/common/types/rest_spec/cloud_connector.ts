@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import type {
-  CloudConnector,
-  AwsCloudConnectorVars,
-  AzureCloudConnectorVars,
-  CloudProvider,
-} from '../models/cloud_connector';
+import type { CloudConnector, CloudConnectorVars, CloudProvider } from '../models/cloud_connector';
 
 // Request interfaces
 export interface CreateCloudConnectorRequest {
   name: string;
-  vars: AwsCloudConnectorVars | AzureCloudConnectorVars;
+  vars: CloudConnectorVars;
   cloudProvider: CloudProvider;
 }
 
 export interface UpdateCloudConnectorRequest {
   name?: string;
-  vars?: AwsCloudConnectorVars | AzureCloudConnectorVars;
+  vars?: CloudConnectorVars;
   packagePolicyCount?: number;
   cloudProvider?: CloudProvider;
 }
