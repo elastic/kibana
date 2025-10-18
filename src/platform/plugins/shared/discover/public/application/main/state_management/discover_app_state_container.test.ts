@@ -396,4 +396,51 @@ describe('Test discover app state container', () => {
       });
     });
   });
+
+  describe('cascade layout feature flag side effects', () => {
+    const cascadeLayoutFeatureFlagSpy = jest.spyOn(
+      discoverServiceMock.discoverFeatureFlags,
+      'getCascadeLayoutEnabled'
+    );
+
+    afterEach(() => {
+      // revert to default value
+      cascadeLayoutFeatureFlagSpy.mockReturnValue(false);
+      cascadeLayoutFeatureFlagSpy.mockClear();
+    });
+
+    it('should not compute and set cascade groupings when state updates happen and feature flag evaluation is false', () => {
+      cascadeLayoutFeatureFlagSpy.mockReturnValue(false);
+
+      const stateContainer = getStateContainer();
+
+      stateContainer.update({
+        query: { esql: 'FROM my_index | STATS count = Count(message) BY my_field' },
+      });
+
+      expect(cascadeLayoutFeatureFlagSpy).toHaveBeenCalled();
+
+      expect(getCurrentTab().uiState.cascade).toBeUndefined();
+    });
+
+    it('should compute and set cascade groupings when state updates happen and the feature flag evaluation is true', () => {
+      cascadeLayoutFeatureFlagSpy.mockReturnValue(true);
+
+      const stateContainer = getStateContainer();
+
+      stateContainer.update({
+        query: { esql: 'FROM my_index | STATS count = Count(message) BY my_field' },
+      });
+
+      expect(cascadeLayoutFeatureFlagSpy).toHaveBeenCalled();
+
+      const currentTab = getCurrentTab();
+
+      expect(currentTab.uiState.cascade).toBeDefined();
+
+      expect(currentTab.uiState.cascade?.availableCascadeGroups).toEqual(['my_field']);
+
+      expect(currentTab.uiState.cascade?.selectedCascadeGroups).toEqual(['my_field']);
+    });
+  });
 });

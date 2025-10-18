@@ -98,7 +98,7 @@ export function fetchAll(
 
     if (
       isEsqlQuery &&
-      currentTabState.uiState.layout?.supportsCascade !== false &&
+      currentTabState.uiState.layout?.cascadeEnabled !== false &&
       currentTabState.uiState.cascade?.availableCascadeGroups?.length
     ) {
       fetchQuery = mutateQueryStatsGrouping(
