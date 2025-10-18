@@ -316,21 +316,6 @@ describe('GcpCredentialsFormAgentless', () => {
       ],
     };
 
-    const orgFields = [
-      {
-        id: 'gcp.organization_id',
-        label: 'Organization ID',
-        type: 'text' as const,
-        value: 'test-org',
-      },
-      {
-        id: 'gcp.credentials.json',
-        label: 'Credentials JSON',
-        type: 'password' as const,
-        value: '{"type":"service_account"}',
-      },
-    ];
-
     it('generates correct cloud shell URL for organization account', () => {
       mockGetTemplateUrlFromPackageInfo.mockReturnValue(
         'https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/elastic/cloudbeat&cloudshell_workspace=deploy/cloud&shellonly=true&cloudshell_tutorial=deploy/cloud/cloud-shell-gcp.md&env_vars=CLOUD_SHELL_DEPLOYMENT_TYPE=cspm,CLOUD_SHELL_CSPM_ACCOUNT_TYPE=organization-account'
