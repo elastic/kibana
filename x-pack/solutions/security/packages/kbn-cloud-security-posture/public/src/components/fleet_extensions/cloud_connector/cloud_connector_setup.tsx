@@ -24,6 +24,7 @@ import { CloudConnectorTabs, type CloudConnectorTab } from './cloud_connector_ta
 import type { UpdatePolicy } from '../types';
 import { TABS, CLOUD_FORMATION_EXTERNAL_DOC_URL, AWS_PROVIDER } from './constants';
 import { hasValidNewConnectionCredentials, isCloudConnectorReusableEnabled } from './utils';
+import { AZURE_PROVIDER } from '../constants';
 export interface CloudConnectorSetupProps {
   input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
@@ -184,7 +185,22 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           setCredentials={updatePolicyWithNewCredentials}
         />
       )}
-      {reusableFeatureEnabled && (
+      {reusableFeatureEnabled && cloudProvider === AZURE_PROVIDER && (
+        <NewCloudConnectorForm
+          input={input}
+          templateName={templateName}
+          newPolicy={newPolicy}
+          packageInfo={packageInfo}
+          updatePolicy={updatePolicy}
+          isEditPage={isEditPage}
+          hasInvalidRequiredVars={hasInvalidRequiredVars}
+          cloud={cloud}
+          cloudProvider={cloudProvider}
+          credentials={newConnectionCredentials}
+          setCredentials={updatePolicyWithNewCredentials}
+        />
+      )}
+      {reusableFeatureEnabled && cloudProvider === AWS_PROVIDER && (
         <CloudConnectorTabs
           tabs={tabs}
           selectedTabId={selectedTabId}
