@@ -359,6 +359,14 @@ export function createMessage(
 const createError = (messageId: string, location: ESQLLocation, message: string = '') =>
   createMessage('error', message, location, messageId);
 
+export function tagSemanticError(error: ESQLMessage, requiresCallback: string): ESQLMessage {
+  return { ...error, errorType: 'semantic', requiresCallback };
+}
+
+export function tagSyntaxError(error: ESQLMessage): ESQLMessage {
+  return { ...error, errorType: 'syntax' };
+}
+
 export const errors = {
   unexpected: (
     location: ESQLLocation,
@@ -381,15 +389,16 @@ export const errors = {
     }),
 
   unknownFunction: (fn: ESQLFunction): ESQLMessage =>
-    errors.byId('unknownFunction', fn.location, fn),
+    tagSyntaxError(errors.byId('unknownFunction', fn.location, fn)),
 
   unknownColumn: (column: ESQLColumn | ESQLIdentifier): ESQLMessage =>
-    errors.byId('unknownColumn', column.location, {
-      name: column.name,
-    }),
+    tagSemanticError(
+      errors.byId('unknownColumn', column.location, { name: column.name }),
+      'getColumnsFor'
+    ),
 
   tooManyForks: (command: ESQLCommand): ESQLMessage =>
-    errors.byId('tooManyForks', command.location, {}),
+    tagSyntaxError(errors.byId('tooManyForks', command.location, {})),
 
   nestedAggFunction: (fn: ESQLFunction, parentName: string): ESQLMessage =>
     errors.byId('nestedAggFunction', fn.location, {
@@ -407,9 +416,10 @@ export const errors = {
     }),
 
   invalidJoinIndex: (identifier: ESQLSource): ESQLMessage =>
-    errors.byId('invalidJoinIndex', identifier.location, {
-      identifier: identifier.name,
-    }),
+    tagSemanticError(
+      errors.byId('invalidJoinIndex', identifier.location, { identifier: identifier.name }),
+      'getJoinIndices'
+    ),
 
   noMatchingCallSignature: (
     fn: ESQLFunction,
@@ -423,11 +433,14 @@ export const errors = {
         return `${definitionArgTypes}`;
       });
 
-    return errors.byId('noMatchingCallSignature', fn.location, {
-      functionName: fn.name,
-      argTypes: argTypes.join(', '),
-      validSignatures,
-    });
+    return tagSemanticError(
+      errors.byId('noMatchingCallSignature', fn.location, {
+        functionName: fn.name,
+        argTypes: argTypes.join(', '),
+        validSignatures,
+      }),
+      'getColumnsFor'
+    );
   },
 
   licenseRequired: (fn: ESQLFunction, license: string): ESQLMessage =>

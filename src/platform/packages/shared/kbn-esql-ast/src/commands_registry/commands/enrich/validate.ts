@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { isAssignment, isColumn, isOptionNode } from '../../../ast/is';
-import { errors, getMessageFromId } from '../../../definitions/utils/errors';
+import { errors, getMessageFromId, tagSemanticError } from '../../../definitions/utils/errors';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 import type {
   ESQLAst,
@@ -33,11 +33,14 @@ export const validate = (
 
   if (index && !policies.has(index.valueUnquoted)) {
     messages.push(
-      getMessageFromId({
-        messageId: 'unknownPolicy',
-        values: { name: index.valueUnquoted },
-        locations: index.location,
-      })
+      tagSemanticError(
+        getMessageFromId({
+          messageId: 'unknownPolicy',
+          values: { name: index.valueUnquoted },
+          locations: index.location,
+        }),
+        'getPolicies'
+      )
     );
   }
 

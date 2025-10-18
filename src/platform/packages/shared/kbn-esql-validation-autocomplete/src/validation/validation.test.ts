@@ -6,7 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { FieldType, SupportedDataType, FunctionDefinition } from '@kbn/esql-ast';
+import type {
+  FieldType,
+  SupportedDataType,
+  FunctionDefinition,
+  ESQLMessage,
+  EditorError,
+} from '@kbn/esql-ast';
 import { timeUnitsToSuggest, dataTypes, getNoValidCallSignatureError } from '@kbn/esql-ast';
 import { getFunctionSignatures } from '@kbn/esql-ast/src/definitions/utils';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
@@ -833,6 +839,106 @@ describe('validation logic', () => {
           )
         ).toBe(true);
       }
+    });
+  });
+
+  describe('Error Tagging behavior', () => {
+    // Helper to get error text from either ESQLMessage or EditorError
+    const getErrorText = (error: ESQLMessage | EditorError): string => {
+      if ('text' in error) {
+        return (error as ESQLMessage).text;
+      } else {
+        return (error as EditorError).message;
+      }
+    };
+
+    it('should preserve syntax errors regardless of missing callbacks', async () => {
+      const { errors } = await validateQuery('FROM index | WHERE field ==', {});
+
+      // ANTLR parser should still catch basic syntax errors
+      expect(errors.length).toBeGreaterThan(0);
+      const hasSyntaxError = errors.some((e) => {
+        const errorText = getErrorText(e);
+        return (
+          errorText?.includes('mismatched input') ||
+          errorText?.includes('missing') ||
+          errorText?.includes('==')
+        );
+      });
+      expect(hasSyntaxError).toBe(true);
+    });
+
+    it('should filter semantic errors when required callback is missing', async () => {
+      const callbacks = {
+        ...getCallbackMocks(),
+        getColumnsFor: undefined, // Missing this callback
+      };
+
+      const { errors } = await validateQuery('FROM index | WHERE unknownField > 10', {}, callbacks);
+
+      const hasUnknownColumnError = errors.some((e) => e.code === 'unknownColumn');
+      expect(hasUnknownColumnError).toBe(false);
+    });
+
+    it('should show semantic errors when required callback is available', async () => {
+      const callbacks = getCallbackMocks(); // All callbacks available
+
+      const { errors } = await validateQuery('FROM index | WHERE unknownField > 10', {}, callbacks);
+
+      const unknownColumnError = errors.find((e) => e.code === 'unknownColumn');
+      expect(unknownColumnError).toBeDefined();
+      if (unknownColumnError) {
+        const errorText = getErrorText(unknownColumnError);
+        expect(errorText).toContain('unknownField');
+      }
+    });
+
+    it('should handle mixed syntax and semantic errors correctly', async () => {
+      const callbacks = {
+        ...getCallbackMocks(),
+        getSources: undefined, // Missing source callback
+      };
+
+      const { errors } = await validateQuery(
+        'FROM unknown_index | LIMIT abc', // unknown_index (semantic) + invalid limit (syntax)
+        {},
+        callbacks
+      );
+
+      expect(errors.length).toBeGreaterThan(0);
+
+      const hasUnknownIndexError = errors.some((e) => e.code === 'unknownIndex');
+      expect(hasUnknownIndexError).toBe(false);
+    });
+
+    it('should filter errors based on specific callback requirements', async () => {
+      const callbacksNoSources = {
+        ...getCallbackMocks(),
+        getSources: undefined,
+      };
+
+      const { errors: errorsNoSources } = await validateQuery(
+        'FROM unknown_index | ENRICH unknown_policy',
+        {},
+        callbacksNoSources
+      );
+
+      expect(errorsNoSources.some((e) => e.code === 'unknownIndex')).toBe(false);
+      expect(errorsNoSources.some((e) => e.code === 'unknownPolicy')).toBe(true);
+
+      const callbacksNoPolicies = {
+        ...getCallbackMocks(),
+        getPolicies: undefined,
+      };
+
+      const { errors: errorsNoPolicies } = await validateQuery(
+        'FROM unknown_index | ENRICH unknown_policy',
+        {},
+        callbacksNoPolicies
+      );
+
+      expect(errorsNoPolicies.some((e) => e.code === 'unknownIndex')).toBe(true);
+      expect(errorsNoPolicies.some((e) => e.code === 'unknownPolicy')).toBe(false);
     });
   });
 });

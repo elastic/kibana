@@ -22,31 +22,6 @@ import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 import { getSubqueriesToValidate } from './helpers';
 
-const COMMAND_DEPENDENCIES: Readonly<Record<string, ReadonlyArray<keyof ESQLCallbacks>>> = {
-  from: ['getSources'],
-  timeseries: ['getSources'],
-
-  enrich: ['getPolicies', 'getColumnsFor'],
-  join: ['getJoinIndices'],
-
-  where: ['getColumnsFor'],
-  eval: ['getColumnsFor'],
-  stats: ['getColumnsFor'],
-  sort: ['getColumnsFor'],
-  keep: ['getColumnsFor'],
-  drop: ['getColumnsFor'],
-  rename: ['getColumnsFor'],
-  dissect: ['getColumnsFor'],
-  grok: ['getColumnsFor'],
-  mv_expand: ['getColumnsFor'],
-  change_point: ['getColumnsFor'],
-  completion: ['getColumnsFor'],
-  rerank: ['getColumnsFor'],
-  fuse: ['getColumnsFor'],
-  row: ['getColumnsFor'],
-  fork: ['getColumnsFor'],
-};
-
 /**
  * ES|QL validation public API
  * It takes a query string and returns a list of messages (errors and warnings) after validate
@@ -62,10 +37,6 @@ export async function validateQuery(
   return validateAst(queryString, callbacks);
 }
 
-/**
- * Helper to check if a callback is available.
- * This replaces the manual ignoreErrorsMap approach.
- */
 function shouldValidateCallback<K extends keyof ESQLCallbacks>(
   callbacks: ESQLCallbacks | undefined,
   name: K
@@ -210,20 +181,21 @@ function validateCommand(
   };
 
   if (commandDefinition.methods.validate) {
-    const requiredCallbacks =
-      COMMAND_DEPENDENCIES[command.name as keyof typeof COMMAND_DEPENDENCIES];
+    const allErrors = commandDefinition.methods.validate(command, ast, context, callbacks);
 
-    if (requiredCallbacks) {
-      const hasMissingCallback = requiredCallbacks.some(
-        (callbackName) => !shouldValidateCallback(callbacks, callbackName as keyof ESQLCallbacks)
-      );
-
-      if (hasMissingCallback) {
-        return messages;
+    const filteredErrors = allErrors.filter((error) => {
+      if (error.errorType === 'syntax' || !error.errorType) {
+        return true;
       }
-    }
 
-    messages.push(...commandDefinition.methods.validate(command, ast, context, callbacks));
+      if (error.errorType === 'semantic' && error.requiresCallback) {
+        return shouldValidateCallback(callbacks, error.requiresCallback as keyof ESQLCallbacks);
+      }
+
+      return true;
+    });
+
+    messages.push(...filteredErrors);
   }
 
   // no need to check for mandatory options passed

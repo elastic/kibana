@@ -10,7 +10,7 @@
 import type { ESQLMessage, ESQLSource } from '../../../types';
 import type { ICommandContext } from '../../../commands_registry/types';
 import { sourceExists } from '../sources';
-import { getMessageFromId } from '../errors';
+import { getMessageFromId, tagSemanticError } from '../errors';
 
 function hasWildcard(name: string) {
   return /\*/.test(name);
@@ -52,24 +52,28 @@ export function validateSources(sources: ESQLSource[], context?: ICommandContext
 
   unknownIndexNames.forEach((source) => {
     messages.push(
-      getMessageFromId({
-        messageId: 'unknownIndex',
-        values: { name: source.name },
-        locations: source.location,
-      })
-    );
-  });
-
-  if (knownIndexNames.length + unknownIndexNames.length + knownIndexPatterns.length === 0) {
-    // only if there are no known index names, no known index patterns, and no unknown
-    // index names do we worry about creating errors for unknown index patterns
-    unknownIndexPatterns.forEach((source) => {
-      messages.push(
+      tagSemanticError(
         getMessageFromId({
           messageId: 'unknownIndex',
           values: { name: source.name },
           locations: source.location,
-        })
+        }),
+        'getSources'
+      )
+    );
+  });
+
+  if (knownIndexNames.length + unknownIndexNames.length + knownIndexPatterns.length === 0) {
+    unknownIndexPatterns.forEach((source) => {
+      messages.push(
+        tagSemanticError(
+          getMessageFromId({
+            messageId: 'unknownIndex',
+            values: { name: source.name },
+            locations: source.location,
+          }),
+          'getSources'
+        )
       );
     });
   }
