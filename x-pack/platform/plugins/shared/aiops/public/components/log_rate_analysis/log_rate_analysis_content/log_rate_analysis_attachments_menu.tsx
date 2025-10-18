@@ -101,7 +101,7 @@ export const LogRateAnalysisAttachmentsMenu = ({
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', { state, path });
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', { state: [state], path });
     },
     [dataView.id, embeddable, applyTimeRange, timeRange]
   );

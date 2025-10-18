@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import util from 'util';
-import { isEqual, isEqualWith } from 'lodash';
 import { diff } from 'jest-diff';
+import { isEqual, isEqualWith } from 'lodash';
+import util from 'util';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -70,6 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
             searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchQueryRules: ['all', 'read', 'minimal_all', 'minimal_read'],
+            workflowsManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchInferenceEndpoints: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -199,6 +200,19 @@ export default function ({ getService }: FtrProviderContext) {
             searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchQueryRules: ['all', 'read', 'minimal_all', 'minimal_read'],
+            workflowsManagement: [
+              'all',
+              'minimal_all',
+              'minimal_read',
+              'read',
+              'workflow_create',
+              'workflow_delete',
+              'workflow_execute',
+              'workflow_execution_cancel',
+              'workflow_execution_read',
+              'workflow_read',
+              'workflow_update',
+            ],
             searchInferenceEndpoints: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleetv2: [
               'agent_policies_all',
@@ -300,6 +314,8 @@ export default function ({ getService }: FtrProviderContext) {
               'file_operations_all',
               'execute_operations_all',
               'scan_operations_all',
+              'trusted_devices_all',
+              'trusted_devices_read',
               'workflow_insights_all',
               'workflow_insights_read',
             ],
@@ -327,6 +343,8 @@ export default function ({ getService }: FtrProviderContext) {
               'read',
               'trusted_applications_all',
               'trusted_applications_read',
+              'trusted_devices_all',
+              'trusted_devices_read',
               'file_operations_all',
               'execute_operations_all',
               'scan_operations_all',

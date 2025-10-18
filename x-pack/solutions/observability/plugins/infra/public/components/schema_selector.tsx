@@ -159,7 +159,7 @@ export const SchemaSelector = ({
 }: {
   onChange: (selected: DataSchemaFormat) => void;
   schemas: DataSchemaFormat[];
-  value: DataSchemaFormat | null;
+  value: DataSchemaFormat;
   isLoading: boolean;
   isHostsView?: boolean;
 }) => {
@@ -249,7 +249,7 @@ export const SchemaSelector = ({
             data-test-subj="infraSchemaSelect"
             id="infraSchemaSelectorSelect"
             options={displayOptions}
-            compressed={isHostsView}
+            compressed
             valueOfSelected={isInvalid ? 'unknown' : value ?? 'semconv'}
             onChange={onSelect}
             isLoading={isLoading}

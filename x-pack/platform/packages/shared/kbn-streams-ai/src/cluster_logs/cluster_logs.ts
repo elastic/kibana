@@ -169,6 +169,7 @@ export async function clusterLogs({
         hits: response.hits.hits,
         fieldCaps,
         dropUnmapped,
+        valueCardinalityLimit: 100,
       });
 
       return {

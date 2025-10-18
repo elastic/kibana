@@ -110,6 +110,14 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    */
   breakdownField?: string;
   /**
+   * Used to force the chart to be hidden or visible
+   */
+  hideChart?: boolean;
+  /**
+   * Number of rows to sample for Discover grid
+   */
+  sampleSize?: number;
+  /**
    * Used when navigating to particular alert results
    */
   isAlertResults?: boolean;

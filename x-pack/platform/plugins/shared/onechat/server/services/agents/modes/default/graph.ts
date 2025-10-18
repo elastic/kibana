@@ -13,7 +13,11 @@ import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ResolvedAgentCapabilities } from '@kbn/onechat-common';
-import { getActPrompt } from './prompts';
+import type { AgentEventEmitter } from '@kbn/onechat-server';
+import { createReasoningEvent, extractTextContent } from '@kbn/onechat-genai-utils/langchain';
+import { getActPrompt, getAnswerPrompt } from './prompts';
+import { getRandomAnsweringMessage, getRandomThinkingMessage } from './i18n';
+import type { ResolvedConfiguration } from '../types';
 
 const StateAnnotation = Annotation.Root({
   // inputs
@@ -21,6 +25,9 @@ const StateAnnotation = Annotation.Root({
     reducer: messagesStateReducer,
     default: () => [],
   }),
+  // internals
+  nextMessage: Annotation<AIMessage>(),
+  handoverNote: Annotation<string>(),
   // outputs
   addedMessages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
@@ -33,15 +40,17 @@ export type StateType = typeof StateAnnotation.State;
 export const createAgentGraph = ({
   chatModel,
   tools,
-  customInstructions,
+  configuration,
   capabilities,
   logger,
+  events,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
   capabilities: ResolvedAgentCapabilities;
-  customInstructions?: string;
+  configuration: ResolvedConfiguration;
   logger: Logger;
+  events: AgentEventEmitter;
 }) => {
   const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
 
@@ -50,11 +59,56 @@ export const createAgentGraph = ({
   });
 
   const callModel = async (state: StateType) => {
+    if (state.addedMessages.length === 0) {
+      events.emit(createReasoningEvent(getRandomThinkingMessage(), { transient: true }));
+    }
     const response = await model.invoke(
       getActPrompt({
-        customInstructions,
+        customInstructions: configuration.research.instructions,
         capabilities,
         messages: [...state.initialMessages, ...state.addedMessages],
+      })
+    );
+    return {
+      nextMessage: response,
+    };
+  };
+
+  const shouldContinue = async (state: StateType) => {
+    const lastMessage = state.nextMessage;
+    if (lastMessage && lastMessage.tool_calls?.length) {
+      return 'tools';
+    }
+    return 'handoverToAnswer';
+  };
+
+  const toolHandler = async (state: StateType) => {
+    const toolNodeResult = await toolNode.invoke([state.nextMessage], {});
+    return {
+      addedMessages: [state.nextMessage, ...toolNodeResult],
+    };
+  };
+
+  const handoverToAnswer = async (state: StateType) => {
+    const handoverMessage = state.nextMessage;
+    const messageContent = extractTextContent(handoverMessage);
+    return {
+      handoverNote: messageContent,
+    };
+  };
+
+  const answeringModel = chatModel.withConfig({
+    tags: ['onechat-agent', 'answering-step'],
+  });
+
+  const generateAnswer = async (state: StateType) => {
+    events.emit(createReasoningEvent(getRandomAnsweringMessage(), { transient: true }));
+    const response = await answeringModel.invoke(
+      getAnswerPrompt({
+        customInstructions: configuration.answer.instructions,
+        capabilities,
+        handoverNote: state.handoverNote,
+        discussion: [...state.initialMessages, ...state.addedMessages],
       })
     );
     return {
@@ -62,33 +116,20 @@ export const createAgentGraph = ({
     };
   };
 
-  const shouldContinue = async (state: StateType) => {
-    const messages = state.addedMessages;
-    const lastMessage: AIMessage = messages[messages.length - 1];
-    if (lastMessage && lastMessage.tool_calls?.length) {
-      return 'tools';
-    }
-    return '__end__';
-  };
-
-  const toolHandler = async (state: StateType) => {
-    const toolNodeResult = await toolNode.invoke(state.addedMessages);
-
-    return {
-      addedMessages: [...toolNodeResult],
-    };
-  };
-
   // note: the node names are used in the event convertion logic, they should *not* be changed
   const graph = new StateGraph(StateAnnotation)
     .addNode('agent', callModel)
     .addNode('tools', toolHandler)
+    .addNode('handoverToAnswer', handoverToAnswer)
+    .addNode('answer', generateAnswer)
     .addEdge('__start__', 'agent')
     .addEdge('tools', 'agent')
     .addConditionalEdges('agent', shouldContinue, {
       tools: 'tools',
-      __end__: '__end__',
+      handoverToAnswer: 'handoverToAnswer',
     })
+    .addEdge('handoverToAnswer', 'answer')
+    .addEdge('answer', '__end__')
     .compile();
 
   return graph;

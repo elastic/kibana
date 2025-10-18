@@ -116,6 +116,8 @@ const getInstalledPackagePolicies = (
           account_type: getAccountTypeField(packagePolicy),
           is_setup_automatic: isSetupAutomatic,
           setup_access_option: isSetupAutomatic ? null : getSetupAccessOption(packagePolicy),
+          supports_cloud_connector: !!packagePolicy?.supports_cloud_connector,
+          cloud_connector_id: packagePolicy.cloud_connector_id || null,
         };
       })
   );

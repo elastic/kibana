@@ -20,13 +20,14 @@ import type {
   WorkflowExecutionListDto,
   WorkflowListDto,
   WorkflowYaml,
+  ConnectorTypeInfo,
 } from '@kbn/workflows';
-import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import { getJsonSchemaFromYamlSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type { JsonSchema7Type } from 'zod-to-json-schema';
 import { WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE, getWorkflowZodSchemaLoose } from '../../common/schema';
 import type { LogSearchResult } from './lib/workflow_logger';
 import type {
   SearchWorkflowExecutionsParams,
@@ -92,6 +93,15 @@ export interface GetStepLogsParams {
   sortOrder?: 'asc' | 'desc';
   stepExecutionId: string;
 }
+export interface GetAvailableConnectorsParams {
+  spaceId: string;
+  request: KibanaRequest;
+}
+
+export interface GetAvailableConnectorsResponse {
+  connectorsByType: Record<string, ConnectorTypeInfo>;
+  totalConnectors: number;
+}
 
 export class WorkflowsManagementApi {
   constructor(
@@ -121,7 +131,12 @@ export class WorkflowsManagementApi {
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
     // Parse and update the YAML to change the name
-    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+    const zodSchema = await this.workflowsService.getWorkflowZodSchema(
+      { loose: true },
+      spaceId,
+      request
+    );
+    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, zodSchema);
     if (parsedYaml.error) {
       throw parsedYaml.error;
     }
@@ -189,7 +204,12 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<string> {
-    const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
+    const zodSchema = await this.workflowsService.getWorkflowZodSchema(
+      { loose: true },
+      spaceId,
+      request
+    );
+    const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, zodSchema);
 
     if (parsedYaml.error) {
       // TODO: handle error properly
@@ -234,9 +254,13 @@ export class WorkflowsManagementApi {
     workflowYaml: string,
     stepId: string,
     contextOverride: Record<string, any>,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest
   ): Promise<string> {
-    const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
+    const parsedYaml = parseWorkflowYamlToJSON(
+      workflowYaml,
+      await this.workflowsService.getWorkflowZodSchema({ loose: true }, spaceId, request)
+    );
 
     if (parsedYaml.error) {
       throw parsedYaml.error;
@@ -348,5 +372,21 @@ export class WorkflowsManagementApi {
 
   public async getWorkflowAggs(fields: string[] = [], spaceId: string) {
     return await this.workflowsService.getWorkflowAggs(fields, spaceId);
+  }
+
+  public async getAvailableConnectors(
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<GetAvailableConnectorsResponse> {
+    return await this.workflowsService.getAvailableConnectors(spaceId, request);
+  }
+
+  public async getWorkflowJsonSchema(
+    { loose }: { loose: boolean },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<JsonSchema7Type> {
+    const zodSchema = await this.workflowsService.getWorkflowZodSchema({ loose }, spaceId, request);
+    return getJsonSchemaFromYamlSchema(zodSchema);
   }
 }

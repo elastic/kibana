@@ -9,11 +9,25 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
+import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from '../../common';
+import { createIndexWithMappings } from '../../common/create_index';
 
 export class WorkflowExecutionRepository {
   private indexName = WORKFLOWS_EXECUTIONS_INDEX;
+  private indexInitialized = false;
+
   constructor(private esClient: ElasticsearchClient) {}
+
+  private async ensureIndexExists() {
+    if (this.indexInitialized) return; // Only 1 boolean check after first time
+
+    await createIndexWithMappings({
+      esClient: this.esClient,
+      indexName: this.indexName,
+      mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+    });
+    this.indexInitialized = true;
+  }
 
   /**
    * Retrieves a workflow execution by its ID from Elasticsearch.
@@ -26,6 +40,8 @@ export class WorkflowExecutionRepository {
     workflowExecutionId: string,
     spaceId: string
   ): Promise<EsWorkflowExecution | null> {
+    await this.ensureIndexExists();
+
     const response = await this.esClient.search<EsWorkflowExecution>({
       index: this.indexName,
       query: {
@@ -50,6 +66,8 @@ export class WorkflowExecutionRepository {
   public async createWorkflowExecution(
     workflowExecution: Partial<EsWorkflowExecution>
   ): Promise<void> {
+    await this.ensureIndexExists();
+
     if (!workflowExecution.id) {
       throw new Error('Workflow execution ID is required for creation');
     }

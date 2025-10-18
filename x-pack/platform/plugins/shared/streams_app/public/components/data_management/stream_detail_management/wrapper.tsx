@@ -120,6 +120,7 @@ export function Wrapper({
                     defaultMessage: 'Back to Streams',
                   }
                 )}
+                data-test-subj="backToStreamsButton"
               >
                 {i18n.translate('xpack.streams.entityDetailViewWithoutParams.breadcrumb', {
                   defaultMessage: 'Streams',

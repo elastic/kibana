@@ -7,11 +7,16 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
-import { SecurityPageName, SecurityGroupName } from '../constants';
+import { lazy } from 'react';
+import { SecurityGroupName, SecurityPageName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 import { i18nStrings } from '../i18n_strings';
 import { renderIntegrationsLinkCallout } from './integrations_link_callout';
+
+const LazyIconAssets = lazy(() =>
+  import('./v2_icons/assets').then(({ iconAssets }) => ({ default: iconAssets }))
+);
 
 export const createAssetsNavigationTree = (
   core: CoreStart,
@@ -20,7 +25,7 @@ export const createAssetsNavigationTree = (
   }
 ): NodeDefinition => ({
   id: SecurityGroupName.assets,
-  iconV2: 'folderClosed',
+  iconV2: LazyIconAssets,
   title: SecurityLinkGroup[SecurityGroupName.assets].title,
   renderAs: 'panelOpener',
   sideNavVersion,

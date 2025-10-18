@@ -39,6 +39,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
         { defaultMessage: 'Customize' }
       )}
       iconSide="left"
+      size="s"
       iconType="eye"
       onClick={togglePopover}
       data-test-subj="metricsExplorer-customize"

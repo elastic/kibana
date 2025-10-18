@@ -75,9 +75,6 @@ export const registerSiemDashboardMigrationsResourceUpsertRoute = (
                 migration_id: migrationId,
               }));
 
-              // Upsert the resources
-              await dashboardMigrationsClient.data.resources.upsert(resourcesUpsert);
-
               // Create identified resource documents to keep track of them (without content)
               const resourceIdentifier = new DashboardResourceIdentifier('splunk');
               const resourcesToCreate = resourceIdentifier
@@ -86,7 +83,11 @@ export const registerSiemDashboardMigrationsResourceUpsertRoute = (
                   ...resource,
                   migration_id: migrationId,
                 }));
-              await dashboardMigrationsClient.data.resources.create(resourcesToCreate);
+
+              await Promise.all([
+                dashboardMigrationsClient.data.resources.upsert(resourcesUpsert),
+                dashboardMigrationsClient.data.resources.create(resourcesToCreate),
+              ]);
 
               return res.ok({ body: { acknowledged: true } });
             } catch (error) {

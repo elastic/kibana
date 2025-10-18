@@ -79,6 +79,7 @@ export const DetailsPanel: FunctionComponent<Props> = ({ pipeline }) => {
                 size="s"
                 color="subdued"
                 data-test-subj="isDeprecatedBadge"
+                tabIndex={0}
               />
             </EuiToolTip>
           </EuiFlexItem>

@@ -174,10 +174,10 @@ describe('Use cases toast hook', () => {
           { wrapper: TestProviders }
         );
         result.current.showSuccessAttach({
-          theCase: mockCase,
+          theCase: { ...mockCase, settings: { syncAlerts: true } },
           attachments: [alertComment as SupportedCaseAttachment],
         });
-        validateContent('The alert statuses are synched with the case status.');
+        validateContent("Alert statuses were synced with the case's status.");
       });
 
       it('renders empty content when called with an alert attachment and sync off', () => {

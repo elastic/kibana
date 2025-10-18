@@ -12,23 +12,10 @@ import type {
   HasEditCapabilities,
   CanOverrideHoverActions,
   PublishesUnsavedChanges,
-  SerializedTitles,
 } from '@kbn/presentation-publishing';
+import type { MarkdownEmbeddableState } from '../server';
 
-/**
- * The markdown editor's own state. Every embeddable type should separate out its own self-managed state, from state
- * supplied by other common managers.
- */
-export interface MarkdownEditorState {
-  content: string;
-}
-
-/**
- * Markdown serialized state includes all state that the parent should provide to this embeddable.
- */
-export type MarkdownEditorSerializedState = SerializedTitles & MarkdownEditorState;
-
-export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEditorSerializedState> &
+export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEmbeddableState> &
   PublishesUnsavedChanges &
   HasEditCapabilities &
   CanOverrideHoverActions;

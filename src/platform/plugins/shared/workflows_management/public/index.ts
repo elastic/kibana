@@ -14,4 +14,4 @@ import { WorkflowsPlugin } from './plugin';
 export function plugin() {
   return new WorkflowsPlugin();
 }
-export type { WorkflowsPluginSetup, WorkflowsPluginStart } from './types';
+export type { WorkflowsPublicPluginSetup, WorkflowsPublicPluginStart } from './types';

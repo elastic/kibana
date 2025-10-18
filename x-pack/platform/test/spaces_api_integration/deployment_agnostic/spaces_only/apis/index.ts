@@ -10,6 +10,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function spacesOnlyTestSuite({
@@ -17,6 +18,7 @@ export default function spacesOnlyTestSuite({
 }: DeploymentAgnosticFtrProviderContext) {
   describe('spaces api without security', function () {
     this.tags('skipFIPS');
+
     loadTestFile(require.resolve('./copy_to_space'));
     loadTestFile(require.resolve('./resolve_copy_to_space_conflicts'));
     loadTestFile(require.resolve('./create'));

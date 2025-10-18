@@ -315,12 +315,13 @@ export function initRoutes(
             params: schema.object({}),
             state: schema.maybe(schema.object({})),
             id: schema.maybe(schema.string()),
+            schedule: schema.maybe(schema.object({ interval: schema.string() })),
           }),
         }),
       },
     },
     async function (
-      context: RequestHandlerContext,
+      _: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {

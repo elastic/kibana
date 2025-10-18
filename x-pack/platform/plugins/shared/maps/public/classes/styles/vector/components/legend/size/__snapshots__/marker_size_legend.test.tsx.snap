@@ -25,6 +25,7 @@ exports[`Should invert legend 1`] = `
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>
@@ -116,6 +117,7 @@ exports[`Should render legend 1`] = `
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>
@@ -239,6 +241,7 @@ exports[`Should render legend with 2 markers when size difference does not provi
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>
@@ -314,6 +317,7 @@ exports[`Should render legend with 3 markers when size difference does not provi
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>
@@ -405,6 +409,7 @@ exports[`Should render legend with only max marker when size difference does not
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>
@@ -464,6 +469,7 @@ exports[`Should render legend without label cutoff when min size is 1 1`] = `
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>
@@ -539,6 +545,7 @@ exports[`Should render max label with std clamp notification 1`] = `
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>

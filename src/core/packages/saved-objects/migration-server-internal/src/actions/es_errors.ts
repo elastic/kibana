@@ -36,7 +36,8 @@ export const isClusterShardLimitExceeded = (errorCause?: ErrorCause): boolean =>
     hasAllKeywordsInOrder(errorCause?.reason, [
       'this action would add',
       'shards, but this cluster currently has',
-      'maximum normal shards open',
+      'maximum',
+      'shards open',
     ])
   );
 };

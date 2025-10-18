@@ -184,7 +184,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       getOneAgentPolicyHandler
     );
 
-  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
+  const experimentalFeatures = parseExperimentalConfigValue(
+    config.enableExperimental || [],
+    config.experimentalFeatures || {}
+  );
   if (experimentalFeatures.enableAutomaticAgentUpgrades) {
     router.versioned
       .get({

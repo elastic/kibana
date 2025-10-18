@@ -28,6 +28,7 @@ export const EsqlEditorField = React.memo(() => {
       name="esql"
       render={({ field: { onBlur, ...field } }) => (
         <div
+          data-test-subj="agentBuilderEsqlEditor"
           onBlur={() => {
             if (isSubmitted) {
               trigger('esql');

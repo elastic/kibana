@@ -23,12 +23,9 @@ export async function transformPanels(
 
   return await asyncMap(panels, async (panel) => {
     if (isDashboardSection(panel)) {
-      const panelsInSection = await asyncMap(
-        panel.panels as DashboardPanel[],
-        async (panelInSection) => {
-          return await transformPanel(panelInSection, filterReferences(panelInSection.uid));
-        }
-      );
+      const panelsInSection = await asyncMap(panel.panels, async (panelInSection) => {
+        return await transformPanel(panelInSection, filterReferences(panelInSection.uid));
+      });
       return {
         ...panel,
         panels: panelsInSection,
@@ -40,11 +37,11 @@ export async function transformPanels(
 }
 
 async function transformPanel(panel: DashboardPanel, references?: Reference[]) {
-  const transforms = await embeddableService.getTransforms(panel.type);
-  if (!transforms?.transformOut) return panel;
+  const transformOut = await embeddableService.getLegacyURLTransform(panel.type);
+  if (!transformOut) return panel;
 
   try {
-    const transformedPanelConfig = transforms.transformOut(panel.config, references);
+    const transformedPanelConfig = transformOut(panel.config, references);
     return {
       ...panel,
       config: transformedPanelConfig,

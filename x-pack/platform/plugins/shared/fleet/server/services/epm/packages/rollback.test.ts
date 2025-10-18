@@ -9,13 +9,16 @@ import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '..
 import { agentPolicyService, appContextService, packagePolicyService } from '../..';
 import type { PackagePolicyClient } from '../../package_policy_service';
 
+import { sendTelemetryEvents } from '../../upgrade_sender';
+
 import { installPackage } from './install';
 import { rollbackInstallation } from './rollback';
 
 jest.mock('../..', () => ({
   appContextService: {
-    getLogger: jest.fn().mockReturnValue({ info: jest.fn() } as any),
+    getLogger: jest.fn().mockReturnValue({ info: jest.fn(), debug: jest.fn() } as any),
     getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
+    getTelemetryEventsSender: jest.fn(),
   },
   packagePolicyService: {
     getPackagePolicySavedObjects: jest.fn(),
@@ -31,6 +34,8 @@ jest.mock('../..', () => ({
 
 jest.mock('../../audit_logging');
 
+jest.mock('../../upgrade_sender');
+
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
 const agentPolicyServiceMock = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
@@ -39,6 +44,8 @@ const pkgName = 'test-package';
 const oldPkgVersion = '1.0.0';
 const newPkgVersion = '1.5.0';
 const spaceId = 'default';
+
+const sendTelemetryEventsMock = sendTelemetryEvents as jest.Mock;
 
 jest.mock('./install', () => ({
   installPackage: jest.fn(),
@@ -190,7 +197,11 @@ describe('rollbackInstallation', () => {
           {
             id: pkgName,
             type: PACKAGES_SAVED_OBJECT_TYPE,
-            attributes: { install_source: 'registry', previous_version: oldPkgVersion },
+            attributes: {
+              install_source: 'registry',
+              previous_version: oldPkgVersion,
+              version: newPkgVersion,
+            },
           },
         ],
       }),
@@ -245,6 +256,14 @@ describe('rollbackInstallation', () => {
     expect(packagePolicyServiceMock.restoreRollback).toHaveBeenCalled();
     expect(packagePolicyServiceMock.cleanupRollbackSavedObjects).not.toHaveBeenCalled();
     expect(packagePolicyServiceMock.bumpAgentPolicyRevisionAfterRollback).not.toHaveBeenCalled();
+    expect(sendTelemetryEventsMock).toHaveBeenCalledWith(expect.anything(), undefined, {
+      packageName: pkgName,
+      currentVersion: newPkgVersion,
+      newVersion: oldPkgVersion,
+      status: 'failure',
+      eventType: 'package-rollback',
+      errorMessage: 'Failed to rollback package test-package to version 1.0.0: Installation failed',
+    });
   });
 
   it('should rollback package policies and install the package on the previous version', async () => {
@@ -255,7 +274,11 @@ describe('rollbackInstallation', () => {
           {
             id: pkgName,
             type: PACKAGES_SAVED_OBJECT_TYPE,
-            attributes: { install_source: 'registry', previous_version: oldPkgVersion },
+            attributes: {
+              install_source: 'registry',
+              previous_version: oldPkgVersion,
+              version: newPkgVersion,
+            },
           },
         ],
       }),
@@ -306,6 +329,14 @@ describe('rollbackInstallation', () => {
     expect(packagePolicyServiceMock.restoreRollback).not.toHaveBeenCalled();
     expect(packagePolicyServiceMock.cleanupRollbackSavedObjects).toHaveBeenCalled();
     expect(packagePolicyServiceMock.bumpAgentPolicyRevisionAfterRollback).toHaveBeenCalled();
+    expect(sendTelemetryEventsMock).toHaveBeenCalledWith(expect.anything(), undefined, {
+      packageName: pkgName,
+      currentVersion: newPkgVersion,
+      newVersion: oldPkgVersion,
+      status: 'success',
+      eventType: 'package-rollback',
+      errorMessage: undefined,
+    });
   });
 
   it('should throw error on rollback when package policy is managed', async () => {

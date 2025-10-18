@@ -61,7 +61,7 @@ export const TechnicalPreviewText = () => {
 
   return (
     <EuiToolTip content={technicalPreviewTip} title={technicalPreviewLabel}>
-      <span>{technicalPreviewLabel}</span>
+      <span tabIndex={0}>{technicalPreviewLabel}</span>
     </EuiToolTip>
   );
 };

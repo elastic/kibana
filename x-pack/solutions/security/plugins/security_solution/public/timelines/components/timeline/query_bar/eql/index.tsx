@@ -11,7 +11,7 @@ import { EuiOutsideClickDetector } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { css } from '@emotion/css';
 
-import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import type { EqlOptions } from '../../../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
@@ -68,7 +68,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
     selectedPatterns: oldSelectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.timeline);
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);

@@ -70,7 +70,11 @@ export const TableFieldNameCell = memo(({ dataType, field }: TableFieldNameCellP
               delay="long"
               anchorClassName="eui-textBreakAll"
             >
-              <EuiText size="xs" data-test-subj={FLYOUT_TABLE_FIELD_NAME_CELL_TEXT_TEST_ID}>
+              <EuiText
+                tabIndex={0}
+                size="xs"
+                data-test-subj={FLYOUT_TABLE_FIELD_NAME_CELL_TEXT_TEST_ID}
+              >
                 {field}
               </EuiText>
             </EuiToolTip>

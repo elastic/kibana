@@ -31,7 +31,7 @@ export const ViewButton: FC<ViewButtonProps> = ({ item }) => {
   if (disabled) {
     return (
       <EuiToolTip position="top" content={tooltipContent}>
-        <>{viewActionButtonText}</>
+        <span tabIndex={0}>{viewActionButtonText}</span>
       </EuiToolTip>
     );
   }

@@ -98,7 +98,7 @@ export const ResetActionName: FC<ResetActionNameProps> = ({
   if (content) {
     return (
       <EuiToolTip position="top" content={content}>
-        <>{resetActionNameText}</>
+        <span tabIndex={0}>{resetActionNameText}</span>
       </EuiToolTip>
     );
   }

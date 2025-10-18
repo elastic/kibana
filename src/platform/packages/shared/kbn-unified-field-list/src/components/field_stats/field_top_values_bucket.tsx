@@ -118,7 +118,12 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                 })}
                 delay="long"
               >
-                <EuiText size="xs" textAlign="left" color={getPercentageColor(euiTheme, color)}>
+                <EuiText
+                  tabIndex={0}
+                  size="xs"
+                  textAlign="left"
+                  color={getPercentageColor(euiTheme, color)}
+                >
                   {formattedPercentage}
                 </EuiText>
               </EuiToolTip>

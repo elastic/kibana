@@ -377,9 +377,13 @@ export const countEventsForID = ({
 }: {
   comments: SavedObjectsFindResponse<AttachmentAttributes>;
 }): number | undefined => {
-  return comments.saved_objects.filter(
-    (savedObject) => savedObject.attributes.type === AttachmentType.event
-  ).length;
+  return comments.saved_objects.reduce((sum, current) => {
+    if (current.attributes.type === AttachmentType.event) {
+      return sum + [current.attributes.eventId].flat().length;
+    }
+
+    return sum;
+  }, 0);
 };
 
 /**

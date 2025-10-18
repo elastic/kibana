@@ -33,17 +33,6 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
         });
       });
     },
-    async navigateToElasticsearchStartPage(expectRedirect: boolean = false, basePath?: string) {
-      await retry.tryForTime(60 * 1000, async () => {
-        await common.navigateToApp('elasticsearchStart', {
-          basePath,
-          shouldLoginIfPrompted: false,
-        });
-        if (!expectRedirect) {
-          await testSubjects.existOrFail('elasticsearchStartPage', { timeout: 2000 });
-        }
-      });
-    },
     async navigateToIndexDetailPage(indexName: string) {
       await solutionNavigation.sidenav.expectLinkExists({ navId: 'data_management' });
       await solutionNavigation.sidenav.clickLink({

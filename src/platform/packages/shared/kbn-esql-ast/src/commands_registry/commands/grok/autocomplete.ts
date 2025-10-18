@@ -8,32 +8,32 @@
  */
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommand } from '../../../types';
+import type { ESQLAstAllCommands } from '../../../types';
 import { pipeCompleteItem } from '../../complete_items';
 import type { ICommandCallbacks } from '../../types';
-import { type ISuggestionItem, type ICommandContext } from '../../types';
+import type { ISuggestionItem, ICommandContext } from '../../types';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
-import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
+import { Parser } from '../../../parser';
+import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
-  cursorPosition?: number
+  cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
   const commandArgs = command.args.filter((arg) => !Array.isArray(arg) && arg.type !== 'unknown');
 
-  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
-    innerText,
-    cursorPosition,
-    callbacks,
-    context
-  );
-  if (functionsSpecificSuggestions) {
-    return functionsSpecificSuggestions;
+  // If cursor is inside a string literal, don't suggest anything
+  const correctedQuery = correctQuerySyntax(innerText);
+  const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+  const { node } = findAstPosition(root.commands, innerText.length);
+
+  if (node?.type === 'literal' && node.literalType === 'keyword') {
+    return [];
   }
 
   // GROK field /
@@ -57,9 +57,11 @@ export async function autocomplete(
   // GROK /
   const fieldSuggestions = (await callbacks?.getByType?.(ESQL_STRING_TYPES)) || [];
   return fieldSuggestions.map((sug) => {
-    return withAutoSuggest({
+    const withSpace = {
       ...sug,
       text: `${sug.text} `,
-    });
+    };
+
+    return withAutoSuggest(withSpace);
   });
 }

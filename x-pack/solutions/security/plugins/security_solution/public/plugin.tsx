@@ -65,6 +65,7 @@ import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
 import { isSecuritySolutionAccessible } from './helpers_access';
 import { generateAttachmentType } from './threat_intelligence/modules/cases/utils/attachments';
+import { defaultDeepLinks } from './app/links/default_deep_links';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -125,6 +126,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: SOLUTION_NAME,
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
+      deepLinks: defaultDeepLinks,
       updater$: this.appUpdater$,
       visibleIn: ['globalSearch', 'home', 'kibanaOverview'],
       euiIconType: APP_ICON_SOLUTION,

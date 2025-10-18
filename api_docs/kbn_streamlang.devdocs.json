@@ -589,7 +589,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ") => { name: string; type: \"string\" | \"number\"; }[]"
+          ") => { name: string; type: \"string\" | \"number\" | \"boolean\"; }[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/helpers.ts",
         "deprecated": false,

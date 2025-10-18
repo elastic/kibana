@@ -108,7 +108,9 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
 
       const dataViewInstance = await data.dataViews.get(dataViewId);
       // Modifications to the fields do not trigger cache invalidation, but should as `fields` will be stale.
-      data.dataViews.clearInstanceCache(dataViewId);
+      if (dataViewInstance.isPersisted?.()) {
+        data.dataViews.clearInstanceCache(dataViewId);
+      }
 
       closeFieldEditor.current = await dataViewFieldEditor.openEditor({
         ctx: {

@@ -105,7 +105,7 @@ export const RuleCustomizationsFlyout = memo(function RuleCustomizationsFlyout({
       id: 'updates',
       name: (
         <EuiToolTip position="top" content={i18n.RULE_CUSTOMIZATIONS_FLYOUT_UPDATES_TAB_TOOLTIP}>
-          <>{i18n.RULE_CUSTOMIZATIONS_FLYOUT_UPDATES_TAB_TITLE}</>
+          <span tabIndex={0}>{i18n.RULE_CUSTOMIZATIONS_FLYOUT_UPDATES_TAB_TITLE}</span>
         </EuiToolTip>
       ),
       content: (
@@ -127,7 +127,7 @@ export const RuleCustomizationsFlyout = memo(function RuleCustomizationsFlyout({
       id: 'jsonViewUpdates',
       name: (
         <EuiToolTip position="top" content={i18n.RULE_CUSTOMIZATIONS_FLYOUT_JSON_TAB_TOOLTIP}>
-          <>{ruleDetailsI18n.JSON_VIEW_UPDATES_TAB_LABEL}</>
+          <span tabIndex={0}>{ruleDetailsI18n.JSON_VIEW_UPDATES_TAB_LABEL}</span>
         </EuiToolTip>
       ),
       content: (

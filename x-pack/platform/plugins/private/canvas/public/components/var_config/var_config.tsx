@@ -189,7 +189,7 @@ export const VarConfig: FC<Props> = ({
               position="left"
               className="canvasArg__tooltip"
             >
-              <span>{strings.getTitle()}</span>
+              <span tabIndex={0}>{strings.getTitle()}</span>
             </EuiToolTip>
           }
           extraAction={

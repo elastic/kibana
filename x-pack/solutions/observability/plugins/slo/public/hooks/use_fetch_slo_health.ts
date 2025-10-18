@@ -18,29 +18,39 @@ export interface UseFetchSloHealth {
 }
 
 export interface Params {
-  list: SLOWithSummaryResponse[];
+  page?: number;
+  perPage?: number;
+  statusFilter?: 'healthy' | 'unhealthy';
+  list?: SLOWithSummaryResponse[];
 }
 
-export function useFetchSloHealth({ list }: Params): UseFetchSloHealth {
+export function useFetchSloHealth({
+  list,
+  page,
+  perPage,
+  statusFilter = 'unhealthy',
+}: Params): UseFetchSloHealth {
   const { sloClient } = usePluginContext();
-  const payload = list.map((slo) => ({
-    sloId: slo.id,
-    sloInstanceId: slo.instanceId ?? ALL_VALUE,
-  }));
+  const payload = list
+    ? list.map((slo) => ({
+        sloId: slo.id,
+        sloInstanceId: slo.instanceId ?? ALL_VALUE,
+      }))
+    : [];
 
   const { isLoading, isError, data } = useQuery({
     queryKey: sloKeys.health(payload),
     queryFn: async ({ signal }) => {
       try {
         return await sloClient.fetch('POST /internal/observability/slos/_health', {
-          params: { body: { list: payload } },
+          params: { body: { list: payload, page, perPage, statusFilter } },
           signal,
         });
       } catch (error) {
         // ignore error
       }
     },
-    enabled: Boolean(list.length > 0),
+    enabled: true,
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });

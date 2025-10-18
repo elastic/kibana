@@ -132,6 +132,7 @@ export const applicationUsageSchema = {
   r: commonSchema,
 
   // X-Pack
+  agent_builder: commonSchema,
   apm: commonSchema,
   canvas: commonSchema,
   enterpriseSearch: commonSchema,
@@ -141,7 +142,6 @@ export const applicationUsageSchema = {
   searchSynonyms: commonSchema,
   searchQueryRules: commonSchema,
   elasticsearchIndices: commonSchema,
-  elasticsearchStart: commonSchema,
   elasticsearchIndexManagement: commonSchema,
   enterpriseSearchAnalytics: commonSchema,
   enterpriseSearchApplications: commonSchema,

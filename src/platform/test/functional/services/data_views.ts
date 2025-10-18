@@ -152,16 +152,24 @@ export class DataViewsService extends FtrService {
    */
   public async editFromSearchBar({
     newName,
+    newIndexPattern,
     newTimeField,
   }: {
     newName?: string;
+    newIndexPattern?: string;
     newTimeField?: string;
   }) {
     await this.testSubjects.click('*dataView-switch-link');
     await this.testSubjects.click('indexPattern-manage-field');
     await this.testSubjects.existOrFail('indexPatternEditorFlyout');
     if (newName) {
-      await this.testSubjects.setValue('createIndexPatternTitleInput', newName, {
+      await this.testSubjects.setValue('createIndexPatternNameInput', newName, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
+    }
+    if (newIndexPattern) {
+      await this.testSubjects.setValue('createIndexPatternTitleInput', newIndexPattern, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });

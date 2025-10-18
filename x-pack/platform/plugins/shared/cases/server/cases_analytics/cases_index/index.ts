@@ -16,12 +16,9 @@ import {
   CAI_CASES_SOURCE_INDEX,
   getCasesSourceQuery,
   getCAICasesBackfillTaskId,
-  getCAICasesSynchronizationTaskId,
-  CAI_CASES_SYNC_TYPE,
 } from './constants';
 import { CAI_CASES_INDEX_MAPPINGS } from './mappings';
 import { CAI_CASES_INDEX_SCRIPT_ID, CAI_CASES_INDEX_SCRIPT } from './painless_scripts';
-import { scheduleCAISynchronizationTask } from '../tasks/synchronization_task';
 
 export const createCasesAnalyticsIndex = ({
   esClient,
@@ -53,29 +50,3 @@ export const createCasesAnalyticsIndex = ({
     sourceIndex: CAI_CASES_SOURCE_INDEX,
     sourceQuery: getCasesSourceQuery(spaceId, owner),
   });
-
-export const scheduleCasesAnalyticsSyncTask = ({
-  taskManager,
-  logger,
-  spaceId,
-  owner,
-}: {
-  taskManager: TaskManagerStartContract;
-  logger: Logger;
-  spaceId: string;
-  owner: Owner;
-}) => {
-  const taskId = getCAICasesSynchronizationTaskId(spaceId, owner);
-  scheduleCAISynchronizationTask({
-    taskId,
-    sourceIndex: CAI_CASES_SOURCE_INDEX,
-    destIndex: getCasesDestinationIndexName(spaceId, owner),
-    spaceId,
-    owner,
-    syncType: CAI_CASES_SYNC_TYPE,
-    taskManager,
-    logger,
-  }).catch((e) => {
-    logger.error(`Error scheduling ${taskId} task, received ${e.message}`);
-  });
-};

@@ -34,7 +34,6 @@ interface DeleteTestDefinition {
 }
 
 export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const es = getService('es');
   const spacesSupertest = getService('spacesSupertest');
   const retry = getService('retry');
@@ -52,7 +51,6 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         'dashboard',
         'space',
         'index-pattern',
-        'legacy-url-alias',
       ]);
 
       // @ts-expect-error @elastic/elasticsearch doesn't defined `count.buckets`.
@@ -70,7 +68,6 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
       'dashboard',
       'space',
       'index-pattern',
-      'legacy-url-alias',
       // TODO: add assertions for config objects -- these assertions were removed because of flaky behavior in #92358, but we should
       // consider adding them again at some point, especially if we convert config objects to `namespaceType: 'multiple-isolated'` in
       // the future.
@@ -87,86 +84,45 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
     const expectedBuckets = [
       {
         key: 'default',
-        doc_count: 20,
+        doc_count: 18,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
-            {
-              key: 'index-pattern',
-              doc_count: 11,
-            },
-            {
-              key: 'space',
-              doc_count: 3,
-            },
-            {
-              key: 'visualization',
-              doc_count: 3,
-            },
-            {
-              key: 'legacy-url-alias',
-              doc_count: 2,
-            },
-            {
-              key: 'dashboard',
-              doc_count: 1,
-            },
+            { key: 'index-pattern', doc_count: 15 },
+            { key: 'space', doc_count: 3 },
           ],
         },
       },
       {
         key: 'space_1',
-        doc_count: 10,
+        doc_count: 16,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
-            {
-              key: 'index-pattern',
-              doc_count: 6,
-            },
-            {
-              key: 'visualization',
-              doc_count: 3,
-            },
-            {
-              key: 'dashboard',
-              doc_count: 1,
-            },
-          ],
-        },
-      },
-      {
-        key: '*',
-        doc_count: 3,
-        countByType: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: [
-            {
-              key: 'index-pattern',
-              doc_count: 3,
-            },
+            { key: 'index-pattern', doc_count: 12 },
+            { key: 'visualization', doc_count: 3 },
+            { key: 'dashboard', doc_count: 1 },
           ],
         },
       },
       {
         key: 'other_space',
+        doc_count: 4,
+        countByType: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [{ key: 'index-pattern', doc_count: 4 }],
+        },
+      },
+      {
+        key: 'space_3',
         doc_count: 3,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
-          buckets: [
-            {
-              key: 'legacy-url-alias',
-              doc_count: 2,
-            },
-            {
-              key: 'index-pattern',
-              doc_count: 1,
-            },
-          ],
+          buckets: [{ key: 'index-pattern', doc_count: 3 }],
         },
       },
     ];
@@ -186,8 +142,8 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
       _id: string;
       _source?: { namespaces: string[] };
     }>;
-    // Just 21 results, since spaces_2_only, conflict_1a_space_2, conflict_1b_space_2, conflict_1c_space_2, and conflict_2_space_2 got deleted.
-    expect(docs).length(21);
+    // Just 34 results, since spaces_2_only, conflict_1a_space_2, conflict_1b_space_2, conflict_1c_space_2, and conflict_2_space_2 got deleted.
+    expect(docs).length(34);
     docs.forEach((doc: { _id: string; _source?: { namespaces: string[] } }) => {
       const containsSpace2 = doc._source?.namespaces.includes('space_2');
       expect(containsSpace2).to.eql(false);
@@ -229,20 +185,10 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         before(async () => {
           supertest = await spacesSupertest.getSupertestWithRoleScope(user!);
         });
+
         after(async () => {
           await supertest.destroy();
         });
-
-        beforeEach(async () => {
-          await esArchiver.load(
-            'x-pack/platform/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          );
-        });
-        afterEach(() =>
-          esArchiver.unload(
-            'x-pack/platform/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
 
         getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
           it(`should return ${tests.exists.statusCode} ${scenario}`, async () => {

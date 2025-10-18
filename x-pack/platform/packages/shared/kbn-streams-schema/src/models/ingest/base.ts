@@ -22,6 +22,8 @@ interface IngestStreamPrivileges {
   manage: boolean;
   // User can read stats (like size in bytes) about the stream
   monitor: boolean;
+  // User can view general metadata about the stream
+  view_index_metadata: boolean;
   // User can change the retention policy of the stream
   lifecycle: boolean;
   // User can simulate changes to the processing or the mapping of the stream
@@ -37,6 +39,7 @@ interface IngestStreamPrivileges {
 const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object({
   manage: z.boolean(),
   monitor: z.boolean(),
+  view_index_metadata: z.boolean(),
   lifecycle: z.boolean(),
   simulate: z.boolean(),
   text_structure: z.boolean(),

@@ -530,6 +530,7 @@ export function Detail() {
                           prepend={versionLabel}
                           options={versionOptions}
                           value={packageInfo.version}
+                          aria-label={versionLabel}
                           onChange={(event) =>
                             onVersionChange(event.target.value, packageInfo.name)
                           }

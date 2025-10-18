@@ -6,6 +6,7 @@
  */
 
 import { AUTHENTICATION } from '../../../common/lib/authentication';
+import { createSpaces, deleteSpaces } from '../../../common/lib/space_test_utils';
 import { SPACES } from '../../../common/lib/spaces';
 import { resolveCopyToSpaceConflictsSuite } from '../../../common/suites/resolve_copy_to_space_conflicts.agnostic';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
@@ -32,7 +33,17 @@ export default function resolveCopyToSpaceConflictsTestSuite(
     NON_EXISTENT_SPACE_ID,
   } = resolveCopyToSpaceConflictsSuite(context);
 
+  const spacesService = context.getService('spaces');
+  const isServerless = context.getService('config').get('serverless');
+
   describe('resolve copy to spaces conflicts', () => {
+    before(async () => {
+      await createSpaces(spacesService, isServerless);
+    });
+
+    after(async () => {
+      await deleteSpaces(spacesService);
+    });
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,

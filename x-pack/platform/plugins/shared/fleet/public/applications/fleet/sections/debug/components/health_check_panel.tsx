@@ -16,6 +16,7 @@ import {
   EuiHealth,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@tanstack/react-query';
 
@@ -115,6 +116,12 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
           <EuiSuperSelect
             fullWidth
             data-test-subj="fleetDebug.fleetServerHostsSelect"
+            aria-label={i18n.translate(
+              'xpack.fleet.debug.healthCheckPanel.fleetServerHostsSelectAriaLabel',
+              {
+                defaultMessage: 'Fleet Server hosts',
+              }
+            )}
             prepend={
               <EuiText size="relative" color={''}>
                 <FormattedMessage

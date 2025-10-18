@@ -76,7 +76,7 @@ const createRoundFromEvents = ({
   const messages = events.filter(isMessageCompleteEvent).map((event) => event.data);
   const stepEvents = events.filter(isStepEvent);
 
-  const eventToStep = (event: StepEvents): ConversationRoundStep => {
+  const eventToStep = (event: StepEvents): ConversationRoundStep[] => {
     if (isToolCallEvent(event)) {
       const toolCall = event.data;
 
@@ -90,20 +90,28 @@ const createRoundFromEvents = ({
           message: progress.message,
         }));
 
-      return {
-        type: ConversationRoundStepType.toolCall,
-        tool_call_id: toolCall.tool_call_id,
-        tool_id: toolCall.tool_id,
-        progression: toolProgress,
-        params: toolCall.params,
-        results: toolResult?.results ?? [],
-      };
+      return [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: toolCall.tool_call_id,
+          tool_id: toolCall.tool_id,
+          progression: toolProgress,
+          params: toolCall.params,
+          results: toolResult?.results ?? [],
+        },
+      ];
     }
     if (isReasoningEvent(event)) {
-      return {
-        type: ConversationRoundStepType.reasoning,
-        reasoning: event.data.reasoning,
-      };
+      if (event.data.transient !== true) {
+        return [
+          {
+            type: ConversationRoundStepType.reasoning,
+            reasoning: event.data.reasoning,
+          },
+        ];
+      } else {
+        return [];
+      }
     }
     throw new Error(`Unknown event type: ${(event as any).type}`);
   };
@@ -111,7 +119,7 @@ const createRoundFromEvents = ({
   const round: ConversationRound = {
     id: uuidv4(),
     input,
-    steps: stepEvents.map(eventToStep),
+    steps: stepEvents.flatMap(eventToStep),
     trace_id: getCurrentTraceId(),
     response: { message: messages[messages.length - 1].message_content },
   };

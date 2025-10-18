@@ -8,7 +8,7 @@
  */
 
 import { buildRequestFromConnector } from '@kbn/workflows';
-import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { RunStepResult, BaseStep } from './node_implementation';
@@ -23,7 +23,7 @@ export interface ElasticsearchActionStep extends BaseStep {
 export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<ElasticsearchActionStep> {
   constructor(
     step: ElasticsearchActionStep,
-    contextManager: WorkflowContextManager,
+    contextManager: StepExecutionRuntime,
     workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
@@ -32,7 +32,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
 
   public getInput() {
     // Get current context for templating
-    const context = this.contextManager.getContext();
+    const context = this.stepExecutionRuntime.contextManager.getContext();
     // Render inputs from 'with' - support both direct step.with and step.configuration.with
     const stepWith = this.step.with || (this.step as any).configuration?.with || {};
     return this.renderObjectTemplate(stepWith, context);
@@ -78,7 +78,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
       });
 
       // Get ES client (user-scoped if available, fallback otherwise)
-      const esClient = this.contextManager.getEsClientAsUser();
+      const esClient = this.stepExecutionRuntime.contextManager.getEsClientAsUser();
 
       // Generic approach like Dev Console - just forward the request to ES
       const result = await this.executeElasticsearchRequest(esClient, stepType, stepWith);

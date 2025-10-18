@@ -52,7 +52,6 @@ export const FeedbackButton = ({
         onClick={handleOpenSurvey}
         css={css`
           width: 100%;
-          padding: ${euiTheme.size.s};
         `}
         color="text"
         iconType="popout"

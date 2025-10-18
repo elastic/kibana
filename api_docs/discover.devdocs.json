@@ -3010,7 +3010,15 @@
                 "section": "def-public.SavedSearch",
                 "text": "SavedSearch"
               },
-              ">; updateAdHocDataViewId: () => Promise<",
+              ">; updateAdHocDataViewId: (editedDataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ") => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4248,13 +4256,13 @@
           "SerializableSavedSearch",
           ", \"serializedSearchSource\"> & ",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedTitles",
-            "text": "SerializedTitles"
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          " & ",
+          "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -4296,13 +4304,13 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedTitles",
-            "text": "SerializedTitles"
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          " & ",
+          "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -5294,6 +5302,38 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-common.DiscoverAppLocatorParams.hideChart",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideChart",
+            "description": [
+              "\nUsed to force the chart to be hidden or visible"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-common.DiscoverAppLocatorParams.sampleSize",
+            "type": "number",
+            "tags": [],
+            "label": "sampleSize",
+            "description": [
+              "\nNumber of rows to sample for Discover grid"
+            ],
+            "signature": [
+              "number | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,

@@ -10,6 +10,7 @@ import type { DocLinks } from '@kbn/doc-links';
 class AgentBuilderDocLinks {
   public agentBuilder: string = '';
   public getStarted: string = '';
+  public models: string = '';
   public chat: string = '';
   public agentBuilderAgents: string = '';
   public tools: string = '';
@@ -24,6 +25,7 @@ class AgentBuilderDocLinks {
   setDocLinks(newDocLinks: DocLinks) {
     this.agentBuilder = newDocLinks.agentBuilder.agentBuilder;
     this.getStarted = newDocLinks.agentBuilder.getStarted;
+    this.models = newDocLinks.agentBuilder.models;
     this.chat = newDocLinks.agentBuilder.chat;
     this.agentBuilderAgents = newDocLinks.agentBuilder.agentBuilderAgents;
     this.tools = newDocLinks.agentBuilder.tools;

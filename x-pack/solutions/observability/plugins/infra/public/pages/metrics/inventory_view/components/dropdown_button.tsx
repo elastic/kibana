@@ -34,7 +34,7 @@ const ButtonLabel = ({ label, theme }: { label: string; theme?: EuiThemeComputed
   <EuiFlexItem
     grow={false}
     css={{
-      padding: 12,
+      padding: 7,
       background: theme?.colors.backgroundBaseFormsPrepend,
       borderRight: theme?.border.thin,
     }}

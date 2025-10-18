@@ -29,7 +29,6 @@ import type {
 import type { EndpointExecuteActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/execute/execute.gen';
 import type { EndpointFileDownloadRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/file_download/file_download.gen';
 import type { EndpointFileInfoRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/file_info/file_info.gen';
-import type { EndpointGetActionsDetailsRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/details/details.gen';
 import type { EndpointGetActionsListRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/list/list.gen';
 import type { EndpointGetActionsStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/status/status.gen';
 import type { EndpointGetFileActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/get_file/get_file.gen';
@@ -101,10 +100,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .send(props.body as object);
     },
     /**
-      * Download a file from an endpoint. 
-> info
-> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
-> {`file_id`} = {`action_id`}`.`{`agent_id`}
+      * Download a file associated with a response action.
 
       */
     endpointFileDownload(props: EndpointFileDownloadProps, kibanaSpace: string = 'default') {
@@ -120,10 +116,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-      * Get information for the specified file using the file ID.
-> info
-> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
-> {`file_id`} = {`action_id`}`.`{`agent_id`}
+      * Get information for the specified response action file download.
 
       */
     endpointFileInfo(props: EndpointFileInfoProps, kibanaSpace: string = 'default') {
@@ -131,24 +124,6 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .get(
           getRouteUrlForSpace(
             replaceParams('/api/endpoint/action/{action_id}/file/{file_id}', props.params),
-            kibanaSpace
-          )
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-     * Get the details of a response action using the action ID.
-     */
-    endpointGetActionsDetails(
-      props: EndpointGetActionsDetailsProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .get(
-          getRouteUrlForSpace(
-            replaceParams('/api/endpoint/action/{action_id}', props.params),
             kibanaSpace
           )
         )
@@ -384,9 +359,6 @@ export interface EndpointFileDownloadProps {
 }
 export interface EndpointFileInfoProps {
   params: EndpointFileInfoRequestParamsInput;
-}
-export interface EndpointGetActionsDetailsProps {
-  params: EndpointGetActionsDetailsRequestParamsInput;
 }
 export interface EndpointGetActionsListProps {
   query: EndpointGetActionsListRequestQueryInput;

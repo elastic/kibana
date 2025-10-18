@@ -76,7 +76,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
             />
           }
         >
-          <span>{label}</span>
+          <span tabIndex={0}>{label}</span>
         </EuiToolTip>
       ) : (
         label
@@ -141,6 +141,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
               iconSide="right"
               iconOnClick={() => onChange(undefined)}
               iconOnClickAriaLabel={REMOVE_REPORT_METRIC_LABEL}
+              tabIndex={0}
             >
               {seriesConfig?.metricOptions?.find(
                 (option) =>

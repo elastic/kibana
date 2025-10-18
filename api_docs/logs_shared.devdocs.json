@@ -570,7 +570,9 @@
         "signature": [
           "React.ForwardRefExoticComponent<Pick<(",
           "DisambiguateSet",
-          "<EuiButtonEmptyPropsForAnchor, ",
+          "<",
+          "EuiButtonEmptyPropsForAnchor",
+          ", ",
           "EuiButtonEmptyPropsForButton",
           "> & ",
           "CommonEuiButtonEmptyProps",
@@ -578,7 +580,9 @@
           "DisambiguateSet",
           "<",
           "EuiButtonEmptyPropsForButton",
-          ", EuiButtonEmptyPropsForAnchor> & ",
+          ", ",
+          "EuiButtonEmptyPropsForAnchor",
+          "> & ",
           "CommonEuiButtonEmptyProps",
           " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"size\" | \"flush\" | \"href\"> & { testSubject: string; } & React.RefAttributes<{}>>"
         ],

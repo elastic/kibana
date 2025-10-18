@@ -303,7 +303,9 @@ function ToggleAccordionButton({
             }}
           >
             <EuiToolTip content={childrenCount} delay="long">
-              <EuiText size="xs">{asBigNumber(childrenCount)}</EuiText>
+              <EuiText size="xs" tabIndex={0}>
+                {asBigNumber(childrenCount)}
+              </EuiText>
             </EuiToolTip>
           </div>
         </EuiFlexItem>

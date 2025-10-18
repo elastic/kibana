@@ -8,7 +8,7 @@
  */
 import type { IndexAutocompleteItem, ESQLSourceResult } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import type { ESQLCommand, ESQLSource } from '../../types';
+import type { ESQLAstAllCommands, ESQLSource } from '../../types';
 import type { ISuggestionItem } from '../../commands_registry/types';
 import { handleFragment } from './autocomplete/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../../commands_registry/complete_items';
@@ -101,7 +101,10 @@ export function sourceExists(index: string, sources: Set<string>) {
   return allExist;
 }
 
-export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'index' | 'policy') {
+export function getSourcesFromCommands(
+  commands: ESQLAstAllCommands[],
+  sourceType: 'index' | 'policy'
+) {
   const sourceCommand = commands.find(({ name }) => name === 'from' || name === 'ts');
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
   // the marker gets added in queries like "FROM "

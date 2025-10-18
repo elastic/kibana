@@ -11,46 +11,35 @@ import type { CreateToolPayload, UpdateToolPayload } from '../../../../../../com
 import type { ToolFormData } from '../types/tool_form_types';
 
 import { esqlToolFormRegistryEntry } from './tool_types/esql';
-import type { SupportedToolTypeRegistryEntry } from './common';
 import { indexSearchToolRegistryEntry } from './tool_types/index_search';
 import { builtinToolRegistryEntry } from './tool_types/builtin';
 import { workflowToolRegistryEntry } from './tool_types/workflow';
 
-export const TOOLS_FORM_REGISTRY: Record<ToolType, SupportedToolTypeRegistryEntry> = {
+export const TOOLS_FORM_REGISTRY = {
   [ToolType.esql]: esqlToolFormRegistryEntry,
   [ToolType.index_search]: indexSearchToolRegistryEntry,
   [ToolType.workflow]: workflowToolRegistryEntry,
-  // This is only for displaying read-only built-in tools
   [ToolType.builtin]: builtinToolRegistryEntry,
 };
 
-export function getToolTypeConfig(toolType: ToolType) {
-  return TOOLS_FORM_REGISTRY[toolType];
+export function getToolTypeConfig<T extends ToolType>(
+  toolType: T
+): (typeof TOOLS_FORM_REGISTRY)[T] {
+  const config = TOOLS_FORM_REGISTRY[toolType];
+  if (!config) {
+    throw new Error(`Unknown tool type: ${toolType}`);
+  }
+  return config;
 }
 
-export function getCreatePayloadFromData(
-  data: ToolFormData,
-  toolType?: ToolType
-): CreateToolPayload {
-  const type = toolType || data.type;
-  const config = getToolTypeConfig(type);
-
-  if (!config) {
-    throw new Error(`Unknown tool type: ${type}`);
-  }
-  // @ts-expect-error TS2345 - Union type ToolFormData cannot be narrowed to specific resolver type at compile time
-  return config.formDataToCreatePayload(data);
+export function getCreatePayloadFromData<T extends ToolFormData>(data: T): CreateToolPayload {
+  const config = getToolTypeConfig(data.type);
+  return config.formDataToCreatePayload(data as any);
 }
 
-export function getUpdatePayloadFromData(data: ToolFormData): UpdateToolPayload {
-  const { type } = data;
-  const config = getToolTypeConfig(type);
-
-  if (!config) {
-    throw new Error(`Unknown tool type: ${type}`);
-  }
-  // @ts-expect-error TS2345 - Union type ToolFormData cannot be narrowed to specific resolver type at compile time
-  return config.formDataToUpdatePayload(data);
+export function getUpdatePayloadFromData<T extends ToolFormData>(data: T): UpdateToolPayload {
+  const config = getToolTypeConfig(data.type);
+  return config.formDataToUpdatePayload(data as any);
 }
 
 export function getEditableToolTypes(): Array<{ value: ToolType; text: string }> {
@@ -64,10 +53,5 @@ export function getEditableToolTypes(): Array<{ value: ToolType; text: string }>
 
 export function getToolTypeDefaultValues(toolType: ToolType): ToolFormData {
   const config = getToolTypeConfig(toolType);
-
-  if (!config) {
-    throw new Error(`Unknown tool type: ${toolType}`);
-  }
-
   return config.defaultValues;
 }

@@ -105,10 +105,12 @@ export namespace Builder {
   export namespace expression {
     export const query = (
       commands: ESQLAstQueryExpression['commands'] = [],
-      fromParser?: Partial<AstNodeParserFields>
+      fromParser?: Partial<AstNodeParserFields>,
+      header?: ESQLAstHeaderCommand[]
     ): ESQLAstQueryExpression => {
       return {
         ...Builder.parserFields(fromParser),
+        header,
         commands,
         type: 'query',
         name: '',

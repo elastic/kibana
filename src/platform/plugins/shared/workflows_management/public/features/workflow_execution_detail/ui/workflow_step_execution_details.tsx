@@ -35,143 +35,138 @@ interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
   stepExecution?: WorkflowStepExecutionDto;
   isLoading: boolean;
-  setSelectedStepId: (stepId: string | null) => void;
 }
 
-export const WorkflowStepExecutionDetails = ({
-  workflowExecutionId,
-  stepExecution,
-  setSelectedStepId,
-  isLoading,
-}: WorkflowStepExecutionDetailsProps) => {
-  const styles = useMemoCss(componentStyles);
-  const getFormattedDateTime = useGetFormattedDateTime();
+export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDetailsProps>(
+  ({ workflowExecutionId, stepExecution, isLoading }) => {
+    const styles = useMemoCss(componentStyles);
+    const getFormattedDateTime = useGetFormattedDateTime();
 
-  const complicatedFlyoutTitleId = `Step ${stepExecution?.stepId} Execution Details`;
+    const complicatedFlyoutTitleId = `Step ${stepExecution?.stepId} Execution Details`;
 
-  const tabs = useMemo(
-    () => [
-      {
-        id: 'input',
-        name: 'Input',
-      },
-      {
-        id: 'output',
-        name: stepExecution?.error ? 'Error' : 'Output',
-      },
-      {
-        id: 'timeline',
-        name: 'Timeline',
-      },
-    ],
-    [stepExecution]
-  );
+    const tabs = useMemo(
+      () => [
+        {
+          id: 'output',
+          name: stepExecution?.error ? 'Error' : 'Output',
+        },
+        {
+          id: 'input',
+          name: 'Input',
+        },
+        {
+          id: 'timeline',
+          name: 'Timeline',
+        },
+      ],
+      [stepExecution]
+    );
 
-  const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
+    const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
 
-  useEffect(() => {
-    setSelectedStepId(stepExecution?.stepId || null);
-    // reset the tab to the default one on step change
-    setSelectedTabId(tabs[0].id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stepExecution?.stepId, tabs[0].id]);
+    useEffect(() => {
+      // reset the tab to the default one on step change
+      setSelectedTabId(tabs[0].id);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [stepExecution?.stepId, tabs[0].id]);
 
-  if (isLoading || !stepExecution) {
+    if (isLoading || !stepExecution) {
+      return (
+        <EuiPanel hasShadow={false} paddingSize="m">
+          <EuiSkeletonText lines={2} />
+          <EuiSpacer size="l" />
+          <EuiSkeletonText lines={4} />
+        </EuiPanel>
+      );
+    }
+
     return (
-      <EuiPanel hasShadow={false} paddingSize="m">
-        <EuiSkeletonText lines={2} />
-        <EuiSpacer size="l" />
-        <EuiSkeletonText lines={4} />
-      </EuiPanel>
+      <EuiFlexGroup direction="column" gutterSize="s" style={{ height: '100%' }}>
+        <EuiFlexItem grow={false}>
+          <EuiPanel hasShadow={false} paddingSize="m">
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <EuiFlexItem grow={false}>
+                <p>{getFormattedDateTime(new Date(stepExecution.startedAt))}</p>
+                <EuiTitle size="m">
+                  <h2 id={complicatedFlyoutTitleId} css={styles.title}>
+                    {stepExecution.stepId}
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">
+                  {stepExecution && (
+                    <EuiFlexGroup gutterSize="s">
+                      <EuiFlexItem>
+                        <EuiPanel hasBorder={true} paddingSize="s">
+                          <EuiStat
+                            css={styles.stat}
+                            title={
+                              <StatusBadge
+                                textProps={{ css: styles.statusBadge }}
+                                status={stepExecution.status}
+                              />
+                            }
+                            titleSize="xxs"
+                            textAlign="left"
+                            isLoading={isLoading}
+                            description="Status"
+                          />
+                        </EuiPanel>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiPanel hasBorder={true} paddingSize="s">
+                          <EuiStat
+                            css={styles.stat}
+                            title={formatDuration(stepExecution.executionTimeMs ?? 0)}
+                            titleSize="xxs"
+                            textAlign="left"
+                            isLoading={isLoading || stepExecution.executionTimeMs === undefined}
+                            description="Execution time"
+                          />
+                        </EuiPanel>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={true}>
+          <EuiTabs bottomBorder={false} css={styles.tabs}>
+            {tabs.map((tab) => (
+              <EuiTab
+                onClick={() => setSelectedTabId(tab.id)}
+                isSelected={tab.id === selectedTabId}
+                key={tab.id}
+              >
+                {tab.name}
+              </EuiTab>
+            ))}
+          </EuiTabs>
+          <EuiHorizontalRule margin="none" />
+          <EuiPanel hasShadow={false} paddingSize="m">
+            {selectedTabId === 'output' && (
+              <StepExecutionDataView stepExecution={stepExecution} mode="output" />
+            )}
+            {selectedTabId === 'input' && (
+              <StepExecutionDataView stepExecution={stepExecution} mode="input" />
+            )}
+            {selectedTabId === 'timeline' && (
+              <StepExecutionTimelineStateful
+                executionId={workflowExecutionId}
+                stepExecutionId={stepExecution.id}
+              />
+            )}
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
-
-  return (
-    <EuiFlexGroup direction="column" gutterSize="s" style={{ height: '100%' }}>
-      <EuiFlexItem grow={false}>
-        <EuiPanel hasShadow={false} paddingSize="m">
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem grow={false}>
-              <p>{getFormattedDateTime(new Date(stepExecution.startedAt))}</p>
-              <EuiTitle size="m">
-                <h2 id={complicatedFlyoutTitleId} css={styles.title}>
-                  {stepExecution.stepId}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                {stepExecution && (
-                  <EuiFlexGroup gutterSize="s">
-                    <EuiFlexItem>
-                      <EuiPanel hasBorder={true} paddingSize="s">
-                        <EuiStat
-                          css={styles.stat}
-                          title={
-                            <StatusBadge
-                              textProps={{ css: styles.statusBadge }}
-                              status={stepExecution.status}
-                            />
-                          }
-                          titleSize="xxs"
-                          textAlign="left"
-                          isLoading={isLoading}
-                          description="Status"
-                        />
-                      </EuiPanel>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiPanel hasBorder={true} paddingSize="s">
-                        <EuiStat
-                          css={styles.stat}
-                          title={formatDuration(stepExecution.executionTimeMs ?? 0)}
-                          titleSize="xxs"
-                          textAlign="left"
-                          isLoading={isLoading || stepExecution.executionTimeMs === undefined}
-                          description="Execution time"
-                        />
-                      </EuiPanel>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                )}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={true}>
-        <EuiTabs bottomBorder={false} css={styles.tabs}>
-          {tabs.map((tab) => (
-            <EuiTab
-              onClick={() => setSelectedTabId(tab.id)}
-              isSelected={tab.id === selectedTabId}
-              key={tab.id}
-            >
-              {tab.name}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-        <EuiHorizontalRule margin="none" />
-        <EuiPanel hasShadow={false} paddingSize="m">
-          {selectedTabId === 'input' && (
-            <StepExecutionDataView stepExecution={stepExecution} mode="input" />
-          )}
-          {selectedTabId === 'output' && (
-            <StepExecutionDataView stepExecution={stepExecution} mode="output" />
-          )}
-          {selectedTabId === 'timeline' && (
-            <StepExecutionTimelineStateful
-              executionId={workflowExecutionId}
-              stepExecutionId={stepExecution.id}
-            />
-          )}
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+);
 
 const componentStyles = {
   title: ({ euiTheme }: UseEuiTheme) =>

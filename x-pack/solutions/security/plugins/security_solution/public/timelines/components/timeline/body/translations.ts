@@ -26,20 +26,6 @@ export const PINNED_WITH_NOTES = (isAlert: boolean) =>
       'This {isAlert, select, true{alert} other{event}} cannot be unpinned because it has notes in Timeline',
   });
 
-export const SORTED_ASCENDING = i18n.translate(
-  'xpack.securitySolution.timeline.body.sort.sortedAscendingTooltip',
-  {
-    defaultMessage: 'Sorted ascending',
-  }
-);
-
-export const SORTED_DESCENDING = i18n.translate(
-  'xpack.securitySolution.timeline.body.sort.sortedDescendingTooltip',
-  {
-    defaultMessage: 'Sorted descending',
-  }
-);
-
 export const DISABLE_PIN = (isAlert: boolean) =>
   i18n.translate('xpack.securitySolution.timeline.body.pinning.disablePinnnedTooltip', {
     values: { isAlert },

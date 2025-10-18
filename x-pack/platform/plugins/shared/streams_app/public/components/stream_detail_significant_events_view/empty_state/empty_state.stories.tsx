@@ -32,9 +32,9 @@ export const Create: StoryFn<{}> = () => {
       <NoSignificantEventsEmptyState
         onGenerateSuggestionsClick={() => {}}
         onManualEntryClick={() => {}}
-        onSystemsChange={() => {}}
-        selectedSystems={[]}
-        systems={[]}
+        onFeaturesChange={() => {}}
+        selectedFeatures={[]}
+        features={[]}
       />
     </EuiPanel>
   );

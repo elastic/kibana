@@ -195,6 +195,7 @@ exports[`IndicesList should change per page 1`] = `
     >
       <EuiPagination
         activePage={0}
+        aria-label="Indices list pagination"
         onPageClick={[Function]}
         pageCount={2}
       />
@@ -686,6 +687,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
     >
       <EuiPagination
         activePage={0}
+        aria-label="Indices list pagination"
         onPageClick={[Function]}
         pageCount={2}
       />

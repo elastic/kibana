@@ -6,10 +6,10 @@
  */
 
 import { createStatefulTestConfig } from '../../api_integration_deployment_agnostic/default_configs/stateful.config.base';
-import { oneChatServices } from './ftr_provider_context';
+import { oneChatApiServices } from '../../onechat/services/api';
 
 export default createStatefulTestConfig({
-  services: oneChatServices,
+  services: oneChatApiServices,
   testFiles: [require.resolve('../apis')],
   junit: {
     reportName: 'X-Pack Agent Builder Stateful API Integration Tests',

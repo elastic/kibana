@@ -19,5 +19,6 @@
     "@kbn/content-management-plugin",
     "@kbn/content-management-utils",
     "@kbn/core",
+    "@kbn/i18n",
   ]
 }

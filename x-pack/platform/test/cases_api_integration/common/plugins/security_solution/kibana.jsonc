@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/security-solution-fixtures-plugin",
   "owner": "@elastic/kibana-cases",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "securitySolutionFixtures",
     "server": true,

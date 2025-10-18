@@ -9,21 +9,20 @@ import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
+import { ScheduledReportsService } from '../../../services/scheduled_reports/scheduled_reports_service';
 import type { ReportingCore } from '../../..';
 import { authorizedUserPreRouting, getCounters } from '../../common';
 import { handleUnavailable } from '../../common/request_handler';
-import { scheduledQueryFactory } from '../../common/scheduled';
 import {
   DEFAULT_SCHEDULED_REPORT_LIST_SIZE,
   MAX_SCHEDULED_REPORT_LIST_SIZE,
-} from '../../common/scheduled/scheduled_query';
+} from '../../../services/scheduled_reports';
 
 const { SCHEDULED } = INTERNAL_ROUTES;
 
 export function registerScheduledRoutesInternal(reporting: ReportingCore, logger: Logger) {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
-  const scheduledQuery = scheduledQueryFactory(reporting);
 
   const registerInternalGetList = () => {
     // list scheduled jobs in the queue, paginated
@@ -84,7 +83,15 @@ export function registerScheduledRoutesInternal(reporting: ReportingCore, logger
             MAX_SCHEDULED_REPORT_LIST_SIZE,
             parseInt(querySize, 10) || DEFAULT_SCHEDULED_REPORT_LIST_SIZE
           );
-          const results = await scheduledQuery.list(logger, req, res, user, page, size);
+
+          const scheduledReportsService = await ScheduledReportsService.build({
+            logger,
+            reportingCore: reporting,
+            request: req,
+            responseFactory: res,
+          });
+
+          const results = await scheduledReportsService.list({ user, page, size });
 
           counters.usageCounter();
 
@@ -138,7 +145,14 @@ export function registerScheduledRoutesInternal(reporting: ReportingCore, logger
 
           const { ids } = req.body;
 
-          const results = await scheduledQuery.bulkDisable(logger, req, res, ids, user);
+          const scheduledReportsService = await ScheduledReportsService.build({
+            logger,
+            reportingCore: reporting,
+            request: req,
+            responseFactory: res,
+          });
+
+          const results = await scheduledReportsService.bulkDisable({ user, ids });
 
           counters.usageCounter();
 
