@@ -10,7 +10,11 @@ import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/
 import type { PackagePolicyConfigRecord } from '@kbn/fleet-plugin/public/types';
 import type { UpdatePolicy } from '../../types';
 import type { CloudConnectorCredentials, AwsCloudConnectorCredentials } from '../types';
-import { isAzureCloudConnectorVars, updateInputVarsWithCredentials, updatePolicyInputs } from '../utils';
+import {
+  isAzureCloudConnectorVars,
+  updateInputVarsWithCredentials,
+  updatePolicyInputs,
+} from '../utils';
 import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, AZURE_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
 
 export interface UseCloudConnectorSetupReturn {
@@ -29,7 +33,6 @@ export interface UseCloudConnectorSetupReturn {
 
 // Helper function to create initial credentials based on existing vars
 const createInitialCredentials = (vars: PackagePolicyConfigRecord): CloudConnectorCredentials => {
-
   if (isAzureCloudConnectorVars(vars, 'azure')) {
     return {
       tenantId:

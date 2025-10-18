@@ -49,7 +49,7 @@ export type AwsCloudConnectorFieldNames =
   (typeof AWS_CLOUD_CONNECTOR_FIELD_NAMES)[keyof typeof AWS_CLOUD_CONNECTOR_FIELD_NAMES];
 
 export const isAwsCloudConnectorVars = (
-  vars: AwsCloudConnectorVars | AzureCloudConnectorVars,
+  vars: AwsCloudConnectorVars | AzureCloudConnectorVars | PackagePolicyConfigRecord,
   provider: string
 ): vars is AwsCloudConnectorVars => {
   return (

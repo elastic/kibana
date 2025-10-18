@@ -11,7 +11,7 @@ import { useCloudConnectorSetup } from './use_cloud_connector_setup';
 
 import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import type { UpdatePolicy } from '../../types';
-import type { CloudConnectorCredentials } from './use_cloud_connector_setup';
+import type { CloudConnectorCredentials } from '../types';
 
 // Mock utility functions
 jest.mock('../utils', () => ({
