@@ -25,8 +25,6 @@ import { NODE_HEIGHT, NODE_WIDTH, NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from '..
 import type { NodeViewModel } from '../types';
 import { graphSample } from '../mock/graph_sample';
 
-const nextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
-
 describe('Minimap', () => {
   it('should render empty', () => {
     render(
@@ -271,27 +269,27 @@ describe('Minimap integrated with Graph', () => {
       showMinimap: true,
     });
 
-    await nextTick();
+    await waitFor(() => {
+      const minimapEntityNodes = screen.getAllByTestId(GRAPH_MINIMAP_ENTITY_NODE_ID);
+      const minimapLabelNodes = screen.getAllByTestId(GRAPH_MINIMAP_LABEL_NODE_ID);
 
-    const minimapEntityNodes = screen.getAllByTestId(GRAPH_MINIMAP_ENTITY_NODE_ID);
-    const minimapLabelNodes = screen.getAllByTestId(GRAPH_MINIMAP_LABEL_NODE_ID);
+      // Verify Minimap entity nodes have the correct dimensions (but scaled down)
+      expect(
+        minimapEntityNodes.every(
+          (node) =>
+            node.getAttribute('width') === NODE_WIDTH.toString() &&
+            node.getAttribute('height') === NODE_HEIGHT.toString()
+        )
+      ).toBe(true);
 
-    // Verify Minimap entity nodes have the correct dimensions (but scaled down)
-    expect(
-      minimapEntityNodes.every(
-        (node) =>
-          node.getAttribute('width') === NODE_WIDTH.toString() &&
-          node.getAttribute('height') === NODE_HEIGHT.toString()
-      )
-    ).toBe(true);
-
-    // Verify Minimap label nodes have the correct dimensions (but scaled down)
-    expect(
-      minimapLabelNodes.every(
-        (node) =>
-          node.getAttribute('width') === NODE_LABEL_WIDTH.toString() &&
-          node.getAttribute('height') === NODE_LABEL_HEIGHT.toString()
-      )
-    ).toBe(true);
+      // Verify Minimap label nodes have the correct dimensions (but scaled down)
+      expect(
+        minimapLabelNodes.every(
+          (node) =>
+            node.getAttribute('width') === NODE_LABEL_WIDTH.toString() &&
+            node.getAttribute('height') === NODE_LABEL_HEIGHT.toString()
+        )
+      ).toBe(true);
+    });
   });
 });
