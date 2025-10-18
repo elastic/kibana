@@ -207,7 +207,7 @@ export class ElasticsearchService
 
   public async stop() {
     this.log.debug('Stopping elasticsearch service');
-    this.stop$.next(); // unubscribe from polling nodes info
+    this.stop$.next();
     if (this.client) {
       await this.client.close();
     }
