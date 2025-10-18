@@ -19,7 +19,7 @@ export const getSortPos = (query: string) => {
   }
 
   const command: ESQLCommand = synth.cmd(commandText);
-  return _getSortPos(query, command);
+  return _getSortPos(query, command, query.length).position;
 };
 
 test('returns correct position on complete modifier matches', () => {
