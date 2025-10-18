@@ -3162,7 +3162,6 @@
       "matchDepNames": [
         "camelcase-keys",
         "copy-to-clipboard",
-        "css-box-model",
         "i18n-iso-countries",
         "node-diff3",
         "react-diff-view",
