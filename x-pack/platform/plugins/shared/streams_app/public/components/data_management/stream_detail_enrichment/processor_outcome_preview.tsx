@@ -126,7 +126,9 @@ const PreviewDocumentsGroupBy = () => {
       previewDocsFilter === previewDocsFilterOptions.outcome_filter_condition.id &&
       !hasActiveCondition
     ) {
-      changePreviewDocsFilter(previewDocsFilterOptions.outcome_filter_all.id);
+      changePreviewDocsFilter(previewDocsFilterOptions.outcome_filter_all.id, {
+        conditionId: null,
+      });
     }
   }, [changePreviewDocsFilter, hasActiveCondition, previewDocsFilter]);
 
@@ -138,7 +140,13 @@ const PreviewDocumentsGroupBy = () => {
     isSelected: previewDocsFilter === filter,
     disabled: !hasMetrics,
     hasActiveFilters: previewDocsFilter === filter,
-    onClick: () => changePreviewDocsFilter(filter),
+    onClick: () =>
+      changePreviewDocsFilter(filter, {
+        conditionId:
+          filter === previewDocsFilterOptions.outcome_filter_condition.id
+            ? activeConditionId
+            : null,
+      }),
     ...overrides,
   });
 

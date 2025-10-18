@@ -52,8 +52,9 @@ export const simulationMachine = setup({
   },
   actions: {
     notifySimulationRunFailure: getPlaceholderFor(createSimulationRunFailureNotifier),
-    storePreviewDocsFilter: assign((_, params: { filter: PreviewDocsFilterOption }) => ({
+    storePreviewDocsFilter: assign((_, params: { filter: PreviewDocsFilterOption; conditionId?: string | null }) => ({
       previewDocsFilter: params.filter,
+      activePreviewConditionId: params.conditionId ?? null,
     })),
     storeSteps: assign((_, params: StepsEventParams) => ({
       steps: params.steps,
@@ -112,6 +113,7 @@ export const simulationMachine = setup({
       previewColumnsOrder: [],
       simulation: undefined,
       previewDocsFilter: 'outcome_filter_all',
+      activePreviewConditionId: null,
     }),
     resetSteps: assign({ steps: [] }),
     resetSamples: assign({ samples: [] }),
@@ -132,6 +134,7 @@ export const simulationMachine = setup({
     detectedSchemaFields: [],
     detectedSchemaFieldsCache: new Map(),
     previewDocsFilter: 'outcome_filter_all',
+    activePreviewConditionId: null,
     previewDocuments: [],
     explicitlyDisabledPreviewColumns: [],
     explicitlyEnabledPreviewColumns: [],

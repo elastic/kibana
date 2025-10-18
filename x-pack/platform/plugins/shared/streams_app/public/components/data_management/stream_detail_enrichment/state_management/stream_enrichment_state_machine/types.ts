@@ -62,7 +62,11 @@ export type StreamEnrichmentEvent =
   | { type: 'dataSources.add'; dataSource: EnrichmentDataSource }
   | { type: 'dataSources.closeManagement' }
   | { type: 'dataSources.openManagement' }
-  | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
+  | {
+      type: 'simulation.changePreviewDocsFilter';
+      filter: PreviewDocsFilterOption;
+      conditionId?: string | null;
+    }
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
   | { type: 'simulation.fields.unmap'; fieldName: string }
   | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }

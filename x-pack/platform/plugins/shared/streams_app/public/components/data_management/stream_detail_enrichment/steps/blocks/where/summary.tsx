@@ -38,10 +38,14 @@ export const WhereBlockSummary = ({
   const handleConditionClick = () => {
     if (isActive) {
       setActiveConditionId(null);
-      changePreviewDocsFilter(previewDocsFilterOptions.outcome_filter_all.id);
+      changePreviewDocsFilter(previewDocsFilterOptions.outcome_filter_all.id, {
+        conditionId: null,
+      });
     } else {
       setActiveConditionId(step.customIdentifier);
-      changePreviewDocsFilter(previewDocsFilterOptions.outcome_filter_condition.id);
+      changePreviewDocsFilter(previewDocsFilterOptions.outcome_filter_condition.id, {
+        conditionId: step.customIdentifier,
+      });
     }
   };
 

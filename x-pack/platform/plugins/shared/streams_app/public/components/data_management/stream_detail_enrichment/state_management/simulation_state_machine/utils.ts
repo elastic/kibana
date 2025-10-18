@@ -89,7 +89,10 @@ export function getTableColumns({
 
 type SimulationDocReport = Simulation['documents'][number];
 
-export function getFilterSimulationDocumentsFn(filter: PreviewDocsFilterOption) {
+export function getFilterSimulationDocumentsFn(
+  filter: PreviewDocsFilterOption,
+  options: { activeConditionId?: string | null } = {}
+) {
   switch (filter) {
     case 'outcome_filter_parsed':
       return (doc: SimulationDocReport) => doc.status === 'parsed';
@@ -100,6 +103,11 @@ export function getFilterSimulationDocumentsFn(filter: PreviewDocsFilterOption) 
     case 'outcome_filter_failed':
       return (doc: SimulationDocReport) => doc.status === 'failed';
     case 'outcome_filter_condition':
+      return (doc: SimulationDocReport) =>
+        options.activeConditionId
+          ? Array.isArray(doc.matched_conditions) &&
+            doc.matched_conditions.includes(options.activeConditionId)
+          : true;
     case 'outcome_filter_all':
     default:
       return (_doc: SimulationDocReport) => true;

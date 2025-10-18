@@ -79,8 +79,15 @@ export const useStreamEnrichmentEvents = () => {
       viewSimulationDetectedFields: () => {
         service.send({ type: 'simulation.viewDetectedFields' });
       },
-      changePreviewDocsFilter: (filter: PreviewDocsFilterOption) => {
-        service.send({ type: 'simulation.changePreviewDocsFilter', filter });
+      changePreviewDocsFilter: (
+        filter: PreviewDocsFilterOption,
+        options?: { conditionId?: string | null }
+      ) => {
+        service.send({
+          type: 'simulation.changePreviewDocsFilter',
+          filter,
+          conditionId: options?.conditionId ?? null,
+        });
       },
       mapField: (field: SchemaField) => {
         service.send({ type: 'simulation.fields.map', field: field as MappedSchemaField });

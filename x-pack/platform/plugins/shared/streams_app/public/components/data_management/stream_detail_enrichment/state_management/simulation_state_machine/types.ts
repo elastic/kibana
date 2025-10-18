@@ -51,7 +51,11 @@ export type SimulationEvent =
   | { type: 'step.delete'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'step.edit'; steps: StreamlangStepWithUIAttributes[] }
   | { type: 'step.save'; steps: StreamlangStepWithUIAttributes[] }
-  | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
+  | {
+      type: 'simulation.changePreviewDocsFilter';
+      filter: PreviewDocsFilterOption;
+      conditionId?: string | null;
+    }
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
   | { type: 'simulation.fields.unmap'; fieldName: string }
   | { type: 'simulation.reset' }
@@ -63,6 +67,7 @@ export interface SimulationContext {
   detectedSchemaFields: SchemaField[];
   detectedSchemaFieldsCache: Map<string, SchemaField>;
   previewDocsFilter: PreviewDocsFilterOption;
+  activePreviewConditionId: string | null;
   previewDocuments: FlattenRecord[];
   explicitlyEnabledPreviewColumns: string[];
   explicitlyDisabledPreviewColumns: string[];

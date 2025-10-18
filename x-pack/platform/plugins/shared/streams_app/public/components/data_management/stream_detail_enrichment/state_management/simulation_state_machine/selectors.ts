@@ -20,12 +20,16 @@ export const selectPreviewRecords = createSelector(
     (context: Pick<SimulationContext, 'samples'>) => context.samples,
     (context: Pick<SimulationContext, 'previewDocsFilter'>) => context.previewDocsFilter,
     (context: Pick<SimulationContext, 'simulation'>) => context.simulation?.documents,
+    (context: Pick<SimulationContext, 'activePreviewConditionId'>) =>
+      context.activePreviewConditionId,
   ],
-  (samples, previewDocsFilter, documents) => {
+  (samples, previewDocsFilter, documents, activeConditionId) => {
     if (!previewDocsFilter || !documents) {
       return samples.map((sample) => flattenObjectNestedLast(sample.document)) as FlattenRecord[];
     }
-    const filterFn = getFilterSimulationDocumentsFn(previewDocsFilter);
+    const filterFn = getFilterSimulationDocumentsFn(previewDocsFilter, {
+      activeConditionId,
+    });
     return documents.filter(filterFn).map((doc) => doc.value);
   }
 );
@@ -35,12 +39,15 @@ export const selectOriginalPreviewRecords = createSelector(
     (context: SimulationContext) => context.samples,
     (context: SimulationContext) => context.previewDocsFilter,
     (context: SimulationContext) => context.simulation?.documents,
+    (context: SimulationContext) => context.activePreviewConditionId,
   ],
-  (samples, previewDocsFilter, documents) => {
+  (samples, previewDocsFilter, documents, activeConditionId) => {
     if (!previewDocsFilter || !documents) {
       return samples;
     }
-    const filterFn = getFilterSimulationDocumentsFn(previewDocsFilter);
+    const filterFn = getFilterSimulationDocumentsFn(previewDocsFilter, {
+      activeConditionId,
+    });
     // return the samples where the filterFn matches the documents at the same index
     return samples.filter((_, index) => filterFn(documents[index]));
   }

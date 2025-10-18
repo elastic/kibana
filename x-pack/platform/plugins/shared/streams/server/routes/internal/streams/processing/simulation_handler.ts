@@ -37,8 +37,8 @@ import {
   Streams,
 } from '@kbn/streams-schema';
 import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
-import type { StreamlangDSL } from '@kbn/streamlang';
-import { transpileIngestPipeline } from '@kbn/streamlang';
+import type { Condition, StreamlangDSL } from '@kbn/streamlang';
+import { transpileIngestPipeline, conditionToPainless, isWhereBlock } from '@kbn/streamlang';
 import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
@@ -101,6 +101,7 @@ export interface SimulationDocReport {
   errors: SimulationError[];
   status: DocSimulationStatus;
   value: FlattenRecord;
+  matched_conditions: string[];
 }
 
 export interface ProcessorMetrics {
@@ -151,6 +152,77 @@ export type WithNameAndEsType<TObj = {}> = TObj & {
   suggestedType?: string;
 };
 export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKey]-?: TObj[TProp] };
+
+const CONDITION_MATCH_TAG_PREFIX = '__condition_match__';
+
+const isConditionTrackingProcessorId = (tag?: string): tag is string =>
+  typeof tag === 'string' && tag.startsWith(CONDITION_MATCH_TAG_PREFIX);
+
+const combineConditionsAsAnd = (condA?: Condition, condB?: Condition): Condition | undefined => {
+  if (!condA) return condB;
+  if (!condB) return condA;
+  return {
+    and: [condA, condB],
+  };
+};
+
+const collectWhereConditions = (
+  steps: StreamlangDSL['steps'],
+  parentCondition?: Condition
+): Array<{ id: string; condition: Condition }> => {
+  return steps.flatMap((step) => {
+    if (!isWhereBlock(step)) {
+      return [];
+    }
+
+    const conditionWithSteps = step.where;
+    const { steps: nestedSteps, ...rawCondition } = conditionWithSteps;
+    const condition = rawCondition as Condition;
+    const combinedCondition = combineConditionsAsAnd(parentCondition, condition);
+
+    const collected: Array<{ id: string; condition: Condition }> = [];
+
+    if (step.customIdentifier && combinedCondition) {
+      collected.push({ id: step.customIdentifier, condition: combinedCondition });
+    }
+
+    if (Array.isArray(nestedSteps) && nestedSteps.length > 0) {
+      collected.push(...collectWhereConditions(nestedSteps, combinedCondition));
+    }
+
+    return collected;
+  });
+};
+
+const createConditionTrackingProcessors = (
+  processing: StreamlangDSL
+): IngestProcessorContainer[] => {
+  const whereConditions = collectWhereConditions(processing.steps);
+
+  if (isEmpty(whereConditions)) {
+    return [];
+  }
+
+  const initializeMatchesProcessor: IngestProcessorContainer = {
+    set: {
+      field: '_matched_conditions',
+      value: [],
+      tag: `${CONDITION_MATCH_TAG_PREFIX}init`,
+    },
+  };
+
+  const matchProcessors = whereConditions.map<IngestProcessorContainer>(({ id, condition }) => ({
+    append: {
+      field: '_matched_conditions',
+      value: id,
+      allow_duplicates: false,
+      tag: `${CONDITION_MATCH_TAG_PREFIX}${id}`,
+      if: conditionToPainless(condition),
+    },
+  }));
+
+  return [initializeMatchesProcessor, ...matchProcessors];
+};
 
 export const simulateProcessing = async ({
   params,
@@ -239,7 +311,7 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
     traceCustomIdentifiers: true,
   }).processors;
 
-  return transpiledIngestPipelineProcessors.map((processor) => {
+  const simulationProcessors = transpiledIngestPipelineProcessors.map((processor) => {
     const type = Object.keys(processor)[0];
     const processorConfig = (processor as any)[type]; // Safe to use any here due to type structure
 
@@ -262,6 +334,8 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
       },
     };
   });
+
+  return [...createConditionTrackingProcessors(processing), ...simulationProcessors];
 };
 
 const prepareSimulationData = (
@@ -533,7 +607,7 @@ const computePipelineSimulationResult = (
     const ingestDocResult = ingestSimulationResult.docs[id];
     const ingestDocErrors = collectIngestDocumentErrors(ingestDocResult);
 
-    const { errors, status, value } = getLastDoc(
+    const { errors, status, value, matchedConditions } = getLastDoc(
       pipelineDocResult,
       sampleDocs[id]._source,
       ingestDocErrors
@@ -549,13 +623,19 @@ const computePipelineSimulationResult = (
     pipelineDocResult.processor_results.forEach((processor) => {
       const procId = processor.tag;
 
-      if (procId && isSkippedProcessor(processor)) {
+      if (procId && isConditionTrackingProcessorId(procId)) {
+        return;
+      }
+
+      if (procId && isSkippedProcessor(processor) && processorsMap[procId]) {
         processorsMap[procId].skipped_rate++;
       }
     });
 
     diff.detected_fields.forEach(({ processor_id, name }) => {
-      processorsMap[processor_id].detected_fields.push(name);
+      if (processor_id && processorsMap[processor_id]) {
+        processorsMap[processor_id].detected_fields.push(name);
+      }
     });
 
     errors.push(...diff.errors); // Add diffing errors to the document errors list, such as reserved fields
@@ -574,6 +654,7 @@ const computePipelineSimulationResult = (
       errors,
       status,
       value,
+      matched_conditions: matchedConditions,
     };
   });
 
@@ -597,7 +678,7 @@ const initProcessorMetricsMap = (
     const config = processor[type] as Record<string, unknown>;
     const tag = config.tag;
 
-    if (typeof tag === 'string') {
+    if (typeof tag === 'string' && !isConditionTrackingProcessorId(tag)) {
       ids.add(tag);
     }
   }
@@ -677,16 +758,32 @@ const getLastDoc = (
     docResult.processor_results.filter((proc) => !isSkippedProcessor(proc)).at(-1)?.doc?._source ??
     sample;
 
+  const metadataSource = lastDocSource as FlattenRecord & {
+    _errors?: SimulationError[];
+    _matched_conditions?: string[];
+  };
+
+  const sanitizedSource = omit(metadataSource, ['_errors', '_matched_conditions']) as FlattenRecord;
+  const matchedConditions = Array.isArray(metadataSource._matched_conditions)
+    ? metadataSource._matched_conditions
+    : [];
+  const docErrors = Array.isArray(metadataSource._errors) ? metadataSource._errors : [];
+
   if (status === 'parsed') {
     return {
-      value: flattenObjectNestedLast(lastDocSource),
+      value: flattenObjectNestedLast(sanitizedSource),
       errors: [] as SimulationError[],
       status,
+      matchedConditions,
     };
-  } else {
-    const { _errors = [], ...value } = lastDocSource;
-    return { value: flattenObjectNestedLast(value), errors: _errors as SimulationError[], status };
   }
+
+  return {
+    value: flattenObjectNestedLast(sanitizedSource),
+    errors: docErrors,
+    status,
+    matchedConditions,
+  };
 };
 
 /**
@@ -700,14 +797,16 @@ const computeSimulationDocDiff = (
   forbiddenFields: string[]
 ) => {
   // Keep only the successful processors defined from the user, skipping the on_failure processors from the simulation
-  const successfulProcessors = docResult.processor_results.filter(isSuccessfulProcessor);
+  const successfulProcessors = docResult.processor_results
+    .filter(isSuccessfulProcessor)
+    .filter((proc) => !isConditionTrackingProcessorId(proc.tag));
 
   const comparisonDocs = [
     { processor_id: 'base', value: base },
     ...successfulProcessors.map((proc) => {
       return {
         processor_id: proc.tag,
-        value: omit(proc.doc._source, ['_errors']),
+        value: omit(proc.doc._source, ['_errors', '_matched_conditions']),
       };
     }),
   ];
