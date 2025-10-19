@@ -24,6 +24,7 @@ export function runTestsCliParallel() {
 
       const installDir = flagsReader.string('kibana-install-dir');
       const bail = flagsReader.boolean('bail');
+      const grep = flagsReader.string('grep');
 
       const extraArgs: string[] = [];
 
@@ -33,6 +34,10 @@ export function runTestsCliParallel() {
 
       if (bail) {
         extraArgs.push(`--bail`);
+      }
+
+      if (grep) {
+        extraArgs.push(`--grep="${grep}"`);
       }
 
       const exitCode = await runTestsParallel(log, configs, {

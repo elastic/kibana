@@ -177,6 +177,8 @@ export async function runTestsParallel(
 
     const id = uniqueId();
 
+    console.log(extraArgsList);
+
     const runner = new ConfigRunner({
       index: id,
       log,
@@ -189,9 +191,12 @@ export async function runTestsParallel(
           `--config=${config}`,
           `--base-path=${Path.join(REPO_ROOT, '.es', id)}`,
           '--debug',
-          ...extraArgsList.flat().map((arg) => {
-            return String(arg);
-          }),
+          ...extraArgsList
+            .flat()
+            .map((arg) => {
+              return String(arg);
+            })
+            .filter((val) => val !== ''),
         ],
       },
       stdio,

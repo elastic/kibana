@@ -151,12 +151,9 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               config,
               onEarlyExit,
             });
-            sendWarmupDoneSignal();
             if (abortCtrl.signal.aborted) {
               return;
             }
-          } else {
-            sendWarmupDoneSignal();
           }
 
           const kibanaProcName = `${CI_PARALLEL_PROCESS_PREFIX}kibana-ftr`;
@@ -214,6 +211,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
             kibanaProcessNames.push(...remoteKibanaProcesses);
           }
+
+          sendWarmupDoneSignal();
 
           if (abortCtrl.signal.aborted) {
             return;
