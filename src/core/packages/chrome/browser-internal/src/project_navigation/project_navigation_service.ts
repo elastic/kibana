@@ -37,6 +37,7 @@ import {
   from,
   catchError,
   shareReplay,
+  switchMap,
 } from 'rxjs';
 import { type Location, createLocation } from 'history';
 import deepEqual from 'react-fast-compare';
@@ -97,13 +98,13 @@ export class ProjectNavigationService {
   private readonly location$ = new BehaviorSubject<Location>(createLocation('/'));
   private deepLinksMap$: Observable<Record<string, ChromeNavLink>> = of({});
   private cloudLinks$ = new BehaviorSubject<CloudLinks>({});
+  private echDeploymentName$: Observable<string | undefined> = of(undefined);
   private application?: InternalApplicationStart;
   private featureFlags?: FeatureFlagsStart;
   private navLinksService?: ChromeNavLinks;
   private _http?: InternalHttpStart;
   private navigationChangeSubscription?: Subscription;
   private unlistenHistory?: () => void;
-  private deploymentName$: Observable<string | undefined> = of(undefined);
 
   constructor(private isServerless: boolean) {}
 
@@ -126,8 +127,6 @@ export class ProjectNavigationService {
     this.handleActiveNodesChange();
     this.handleSolutionNavDefinitionChange();
 
-    this.initDeploymentName$();
-
     this.deepLinksMap$ = navLinksService.getNavLinks$().pipe(
       map((navLinks) => {
         return navLinks.reduce((acc, navLink) => {
@@ -135,6 +134,14 @@ export class ProjectNavigationService {
           return acc;
         }, {} as Record<string, ChromeNavLink>);
       })
+    );
+
+    this.echDeploymentName$ = this.cloudLinks$.pipe(
+      switchMap((cloudLinks: CloudLinks) => {
+        const shouldFetchDeploymentName = !this.isServerless && cloudLinks.deployments;
+        return shouldFetchDeploymentName ? this.getEchDeploymentName$() : of(undefined);
+      }),
+      shareReplay(1)
     );
 
     return {
@@ -181,7 +188,7 @@ export class ProjectNavigationService {
           chromeBreadcrumbs$,
           this.projectName$,
           this.cloudLinks$,
-          this.deploymentName$,
+          this.echDeploymentName$,
         ]).pipe(
           map(
             ([
@@ -484,29 +491,28 @@ export class ProjectNavigationService {
     return this._http;
   }
 
-  private initDeploymentName$() {
-    if (!this._http || typeof this._http.get !== 'function') {
-      this.deploymentName$ = of(undefined);
-      return;
+  private getEchDeploymentName$() {
+    if (!this._http) {
+      return of(undefined);
     }
 
-    const response = this._http.get<{
-      resourceData: { deployment: { name?: string } | undefined } | undefined;
-    }>('/internal/cloud/solution', { version: '1' });
+    try {
+      const response = this._http.get<{
+        resourceData: { deployment?: { name?: string } };
+      }>('/internal/cloud/solution', { version: '1' });
 
-    if (!response) {
-      this.deploymentName$ = of(undefined);
-      return;
-    }
-
-    this.deploymentName$ = from(response).pipe(
-      map(({ resourceData }) => resourceData?.deployment?.name),
-      catchError((err) => {
-        this.logger?.warn(`Failed to load deployment name: ${err?.message}`);
+      if (!response) {
         return of(undefined);
-      }),
-      shareReplay(1)
-    );
+      }
+
+      return from(response).pipe(
+        map(({ resourceData }) => resourceData?.deployment?.name),
+        catchError(() => of(undefined)),
+        shareReplay(1)
+      );
+    } catch (e) {
+      return of(undefined);
+    }
   }
 
   public stop() {

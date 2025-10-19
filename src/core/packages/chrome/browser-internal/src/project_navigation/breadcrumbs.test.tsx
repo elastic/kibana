@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import type {
   ChromeBreadcrumb,
   ChromeProjectNavigationNode,
   CloudLinks,
 } from '@kbn/core-chrome-browser/src';
 import { buildBreadcrumbs } from './breadcrumbs';
+import { EuiTextTruncate } from '@elastic/eui';
 
 describe('buildBreadcrumbs', () => {
   const mockCloudLinks = {
@@ -122,5 +124,25 @@ describe('buildBreadcrumbs', () => {
       { text: 'Chrome Crumb 1', href: '/chrome1', deepLinkId: '2' },
       { text: 'Chrome Crumb 2', href: '/chrome2' },
     ]);
+  });
+
+  it('uses deploymentName when provided for ECH deployment', () => {
+    const result = buildBreadcrumbs({
+      projectName: undefined,
+      cloudLinks: mockCloudLinks,
+      projectBreadcrumbs: { breadcrumbs: [], params: { absolute: false } },
+      activeNodes: [],
+      chromeBreadcrumbs: [],
+      isServerless: false,
+      deploymentName: 'My Custom Deployment',
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual(
+      expect.objectContaining({
+        'data-test-subj': 'deploymentCrumb',
+        text: <EuiTextTruncate text="My Custom Deployment" width={96} />,
+      })
+    );
   });
 });

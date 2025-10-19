@@ -764,6 +764,168 @@ describe('breadcrumbs', () => {
     breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
     expect(breadcrumbs).toHaveLength(4);
   });
+
+  describe('echDeploymentName$', () => {
+    test('should fetch deployment name when on ECH', async () => {
+      const history = createMemoryHistory({
+        initialEntries: ['/'],
+      });
+      const projectNavigationService = new ProjectNavigationService(false);
+      const chromeBreadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
+      const navLinksService = getNavLinksService(['navItem1']);
+      const application = {
+        ...applicationServiceMock.createInternalStartContract(),
+        history,
+      };
+
+      const getEchDeploymentNameSpy = jest
+        .spyOn(projectNavigationService as any, 'getEchDeploymentName$')
+        .mockReturnValue(of('test-deployment'));
+
+      const projectNavigation = projectNavigationService.start({
+        application,
+        navLinksService,
+        http: httpServiceMock.createStartContract(),
+        chromeBreadcrumbs$,
+        logger,
+        featureFlags: coreFeatureFlagsMock.createStart(),
+      });
+
+      projectNavigation.setCloudUrls({
+        deploymentsUrl: 'https://cloud.elastic.co/deployments',
+        deploymentUrl: 'https://cloud.elastic.co/deployment/',
+      });
+
+      const mockNavigation: NavigationTreeDefinition<any> = {
+        body: [
+          {
+            id: 'root',
+            title: 'Root',
+            type: 'navGroup',
+            children: [
+              {
+                link: 'navItem1',
+                title: 'Nav Item 1',
+              },
+            ],
+          },
+        ],
+      };
+
+      projectNavigation.initNavigation('es', of(mockNavigation));
+
+      projectNavigation.setProjectBreadcrumbs([{ text: 'Test', href: '/test' }]);
+
+      await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
+
+      expect(getEchDeploymentNameSpy).toHaveBeenCalled();
+    });
+
+    test('should not fetch deployment name when on serverless deployment', async () => {
+      const history = createMemoryHistory({
+        initialEntries: ['/'],
+      });
+      const projectNavigationService = new ProjectNavigationService(true);
+      const chromeBreadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
+      const navLinksService = getNavLinksService(['navItem1']);
+      const application = {
+        ...applicationServiceMock.createInternalStartContract(),
+        history,
+      };
+
+      const getEchDeploymentNameSpy = jest
+        .spyOn(projectNavigationService as any, 'getEchDeploymentName$')
+        .mockReturnValue(of('test-deployment'));
+
+      const projectNavigation = projectNavigationService.start({
+        application,
+        navLinksService,
+        http: httpServiceMock.createStartContract(),
+        chromeBreadcrumbs$,
+        logger,
+        featureFlags: coreFeatureFlagsMock.createStart(),
+      });
+
+      projectNavigation.setCloudUrls({
+        deploymentsUrl: 'https://cloud.elastic.co/deployments',
+        deploymentUrl: 'https://cloud.elastic.co/deployment/',
+      });
+
+      const mockNavigation: NavigationTreeDefinition<any> = {
+        body: [
+          {
+            id: 'root',
+            title: 'Root',
+            type: 'navGroup',
+            children: [
+              {
+                link: 'navItem1',
+                title: 'Nav Item 1',
+              },
+            ],
+          },
+        ],
+      };
+
+      projectNavigation.initNavigation('es', of(mockNavigation));
+
+      projectNavigation.setProjectBreadcrumbs([{ text: 'Test', href: '/test' }]);
+
+      await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
+
+      expect(getEchDeploymentNameSpy).not.toHaveBeenCalled();
+    });
+
+    test('should not fetch deployment name on on-prem (cloudLinks.deployments is undefined)', async () => {
+      const history = createMemoryHistory({
+        initialEntries: ['/'],
+      });
+      const projectNavigationService = new ProjectNavigationService(false);
+      const chromeBreadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
+      const navLinksService = getNavLinksService(['navItem1']);
+      const application = {
+        ...applicationServiceMock.createInternalStartContract(),
+        history,
+      };
+
+      const getEchDeploymentNameSpy = jest
+        .spyOn(projectNavigationService as any, 'getEchDeploymentName$')
+        .mockReturnValue(of('test-deployment'));
+
+      const projectNavigation = projectNavigationService.start({
+        application,
+        navLinksService,
+        http: httpServiceMock.createStartContract(),
+        chromeBreadcrumbs$,
+        logger,
+        featureFlags: coreFeatureFlagsMock.createStart(),
+      });
+
+      const mockNavigation: NavigationTreeDefinition<any> = {
+        body: [
+          {
+            id: 'root',
+            title: 'Root',
+            type: 'navGroup',
+            children: [
+              {
+                link: 'navItem1',
+                title: 'Nav Item 1',
+              },
+            ],
+          },
+        ],
+      };
+
+      projectNavigation.initNavigation('es', of(mockNavigation));
+
+      projectNavigation.setProjectBreadcrumbs([{ text: 'Test', href: '/test' }]);
+
+      await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
+
+      expect(getEchDeploymentNameSpy).not.toHaveBeenCalled();
+    });
+  });
 });
 
 describe('getActiveNodes$()', () => {
