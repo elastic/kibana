@@ -23,7 +23,7 @@ import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';
 import type { RunTestsOptions } from './flags';
 import { TEST_FLEET_HOST, TEST_FLEET_PORT } from '../../service_addresses';
-import { CI_PARALLEL_PROCESS_PREFIX } from '../../ci_parallel_process_prefix';
+import { CI_PARALLEL_PROCESS_NUMBER } from '../../ci_parallel_process_prefix';
 
 /**
  * Run servers and tests for each config
@@ -146,7 +146,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
             shutdownEs = await runElasticsearch({
               ...options,
-              name: `${CI_PARALLEL_PROCESS_PREFIX}ftr`,
+              name: [CI_PARALLEL_PROCESS_NUMBER, 'es'].filter(Boolean).join('-'),
               log,
               config,
               onEarlyExit,
@@ -156,7 +156,9 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             }
           }
 
-          const kibanaProcName = `${CI_PARALLEL_PROCESS_PREFIX}kibana-ftr`;
+          const kibanaProcName = [CI_PARALLEL_PROCESS_NUMBER, 'kibana-ftr']
+            .filter(Boolean)
+            .join('-');
 
           const mainKibanaProcesses = await runKibanaServer({
             procs,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_prefix';
+import { CI_PARALLEL_PROCESS_NUMBER } from './ci_parallel_process_prefix';
 import { getUrlParts } from './get_url_parts';
 
 const parsedKbnUrlParts = process.env.TEST_KIBANA_URL
@@ -44,4 +44,4 @@ export const FLEET_PACKAGE_REGISTRY_PORT = process.env.FLEET_PACKAGE_REGISTRY_PO
   ? Number(process.env.FLEET_PACKAGE_REGISTRY_PORT)
   : undefined;
 
-export const ES_SERVERLESS_CONTAINER_NAME_PREFIX = CI_PARALLEL_PROCESS_PREFIX;
+export const ES_SERVERLESS_CONTAINER_NAME_PREFIX = CI_PARALLEL_PROCESS_NUMBER;
