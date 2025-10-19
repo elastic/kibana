@@ -162,7 +162,12 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
           <InferenceServiceFormFields
             http={http}
             toasts={toasts}
-            config={{ isEdit, enforceAdaptiveAllocations, isPreconfigured }}
+            config={{
+              isEdit,
+              enforceAdaptiveAllocations,
+              isPreconfigured,
+              reenterSecretsOnEdit: false,
+            }}
           />
           <EuiSpacer size="m" />
           {isPreconfigured ? null : (
