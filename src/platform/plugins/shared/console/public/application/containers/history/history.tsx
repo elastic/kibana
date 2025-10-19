@@ -8,8 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import type { RowComponentProps } from 'react-window';
-import { List } from 'react-window';
+import { List, type RowComponentProps } from 'react-window';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import {

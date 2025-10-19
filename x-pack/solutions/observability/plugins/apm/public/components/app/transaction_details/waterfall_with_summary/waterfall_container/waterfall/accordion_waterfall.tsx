@@ -127,34 +127,6 @@ interface RowProps extends Omit<WaterfallNodeProps, 'node'> {
   traceList: IWaterfallNodeFlatten[];
   onLoad: (index: number, size: number) => void;
 }
-/*
-const VirtualRow = React.memo(
-  ({
-    index,
-    style,
-    data,
-  }: ListChildComponentProps<
-    Omit<WaterfallNodeProps, 'node'> & {
-      traceList: IWaterfallNodeFlatten[];
-      onLoad: (index: number, size: number) => void;
-    }
-  >) => {
-    const { onLoad, traceList, ...props } = data;
-
-    const ref = React.useRef<HTMLDivElement | null>(null);
-    useEffect(() => {
-      onLoad(index, ref.current?.getBoundingClientRect().height ?? ACCORDION_HEIGHT);
-    }, [index, onLoad]);
-
-    return (
-      <div style={style} ref={ref}>
-        <WaterfallNode {...props} node={traceList[index]} />
-      </div>
-    );
-  },
-  areEqual
-);
-*/
 
 function VirtualRow({ index, style, onLoad, traceList, ...props }: RowComponentProps<RowProps>) {
   const ref = React.useRef<HTMLDivElement | null>(null);

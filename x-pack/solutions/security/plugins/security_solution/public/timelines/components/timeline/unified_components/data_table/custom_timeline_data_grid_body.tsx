@@ -13,7 +13,7 @@ import type { CSSProperties, FC, PropsWithChildren } from 'react';
 import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
 import { css } from '@emotion/react';
-import { List } from 'react-window';
+import { List, type RowComponentProps } from 'react-window';
 import { EuiAutoSizer, useEuiTheme } from '@elastic/eui';
 import type { RowRenderer } from '../../../../../../common/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
@@ -194,7 +194,7 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
       <VirtualizedCustomDataGridContainer $maxWidth={calculatedWidth}>
         <EuiAutoSizer className="autosizer" disableWidth>
           {({ height }) => {
-            const Row = ({ index, style }) => {
+            const Row = ({ index, style }: RowComponentProps) => {
               return (
                 <div
                   role="row"
@@ -225,16 +225,15 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
                    */
                   gridWidth !== 0 && (
                     <>
-                      <List
+                      <List<{}>
                         rowComponent={Row}
+                        style={{ width: gridWidth, height }}
                         className="variable__list"
                         /* available space on the screen */
-                        width={gridWidth}
-                        height={height}
-                        itemCount={visibleRows.length}
-                        itemSize={getRowHeight}
+                        rowCount={visibleRows.length}
+                        rowHeight={getRowHeight}
                         overscanCount={5}
-                        ref={listRef}
+                        listRef={listRef}
                         css={css`
                           scrollbar-width: thin;
                           scroll-padding: 0 0 0 0;

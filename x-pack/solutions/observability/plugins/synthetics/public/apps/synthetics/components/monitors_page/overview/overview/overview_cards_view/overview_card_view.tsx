@@ -76,17 +76,15 @@ export const OverviewCardView = ({
             <EuiAutoSizer>
               {({ width }: EuiAutoSize) => (
                 <InfiniteLoader
-                  /*
-                  isItemLoaded={(idx: number) =>
+                  isRowLoaded={(idx: number) =>
                     listItems[idx].every((m) => !!trendData[m.configId + m.locationId])
                   }
-                    */
                   itemCount={listItems.length}
                   loadMoreRows={(_, stop: number) => setMaxItem(Math.max(maxItem, stop))}
                   minimumBatchSize={MIN_BATCH_SIZE}
                   threshold={LIST_THRESHOLD}
                 >
-                  {({ onRowsRendered, ref }) => {
+                  {({ onRowsRendered }) => {
                     // set min row count to based on width to ensure cards are not too small
                     // min is 1 and max is 5
                     setRowCount(Math.max(1, Math.min(5, Math.floor(width / MIN_CARD_WIDTH))));
