@@ -31,6 +31,7 @@ export class WorkflowTemplatingEngine {
     });
     // register dump filter that converts an object to a JSON string
     this.engine.registerFilter('dump', (value: unknown): string => {
+      throw new Error('dump filter is not supported');
       if (typeof value !== 'object' || value === null) {
         return String(value);
       }
@@ -43,6 +44,13 @@ export class WorkflowTemplatingEngine {
   }
 
   public render(template: string, context: Record<string, any>): string {
-    return this.engine.parseAndRenderSync(template, context);
+    try {
+      return this.engine.parseAndRenderSync(template, context);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      // customer-facing error message without the default line number and column number
+      const customerFacingErrorMessage = errorMessage.replace(/, line:\d+, col:\d+/g, '');
+      throw new Error(customerFacingErrorMessage);
+    }
   }
 }

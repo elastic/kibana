@@ -20,6 +20,10 @@ function getLiquidInstance(): Liquid {
       strictFilters: true,
       strictVariables: false, // Allow undefined variables during validation
     });
+    // register dump filter
+    liquidInstance.registerFilter('dump', (value: unknown): string => {
+      return String(value);
+    });
   }
   return liquidInstance;
 }
