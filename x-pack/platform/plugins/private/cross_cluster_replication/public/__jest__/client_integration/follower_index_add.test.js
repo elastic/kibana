@@ -6,7 +6,7 @@
  */
 
 import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-views-plugin/public';
-import { screen, act } from '@testing-library/react';
+import { fireEvent, screen, act } from '@testing-library/react';
 import './mocks';
 import { setupEnvironment, pageHelpers } from './helpers';
 
@@ -96,27 +96,28 @@ describe('Create Follower index', () => {
     });
 
     describe('leader index', () => {
-      test('should not allow spaces', async () => {
-        const leaderInput = await screen.findByTestId('leaderIndexInput');
-        await user.type(leaderInput, 'with space');
+      test('should not allow spaces', () => {
+        const leaderInput = screen.getByTestId('leaderIndexInput');
+        fireEvent.change(leaderInput, { target: { value: 'with space' } });
+        fireEvent.blur(leaderInput);
 
         const saveButton = screen.getByTestId('submitButton');
-        await user.click(saveButton);
+        fireEvent.click(saveButton);
 
         expect(screen.getByText('Spaces are not allowed in the leader index.')).toBeInTheDocument();
       });
 
-      test('should not allow invalid characters', async () => {
-        const leaderInput = await screen.findByTestId('leaderIndexInput');
+      test('should not allow invalid characters', () => {
+        const leaderInput = screen.getByTestId('leaderIndexInput');
         const saveButton = screen.getByTestId('submitButton');
 
-        await user.click(saveButton); // Make errors visible
+        fireEvent.click(saveButton); // make erros visible
 
         // Test a few representative illegal characters
         const testChars = ILLEGAL_CHARACTERS_VISIBLE.slice(0, 3);
         for (const char of testChars) {
-          await user.clear(leaderInput);
-          await user.type(leaderInput, `with${char}`);
+          fireEvent.change(leaderInput, { target: { value: `with${char}` } });
+          fireEvent.blur(leaderInput);
 
           const errors = screen.queryAllByText(/Remove the character|not allowed/);
           expect(errors.length).toBeGreaterThan(0);
@@ -125,37 +126,39 @@ describe('Create Follower index', () => {
     });
 
     describe('follower index', () => {
-      test('should not allow spaces', async () => {
-        const followerInput = await screen.findByTestId('followerIndexInput');
-        await user.type(followerInput, 'with space');
+      test('should not allow spaces', () => {
+        const followerInput = screen.getByTestId('followerIndexInput');
+        fireEvent.change(followerInput, { target: { value: 'with space' } });
+        fireEvent.blur(followerInput);
 
         const saveButton = screen.getByTestId('submitButton');
-        await user.click(saveButton);
+        fireEvent.click(saveButton);
 
         expect(screen.getByText('Spaces are not allowed in the name.')).toBeInTheDocument();
       });
 
-      test('should not allow a "." (period) as first character', async () => {
-        const followerInput = await screen.findByTestId('followerIndexInput');
-        await user.type(followerInput, '.withDot');
+      test('should not allow a "." (period) as first character', () => {
+        const followerInput = screen.getByTestId('followerIndexInput');
+        fireEvent.change(followerInput, { target: { value: '.withDot' } });
+        fireEvent.blur(followerInput);
 
         const saveButton = screen.getByTestId('submitButton');
-        await user.click(saveButton);
+        fireEvent.click(saveButton);
 
         expect(screen.getByText(`Name can't begin with a period.`)).toBeInTheDocument();
       });
 
-      test('should not allow invalid characters', async () => {
-        const followerInput = await screen.findByTestId('followerIndexInput');
+      test('should not allow invalid characters', () => {
+        const followerInput = screen.getByTestId('followerIndexInput');
         const saveButton = screen.getByTestId('submitButton');
 
-        await user.click(saveButton); // Make errors visible
+        fireEvent.click(saveButton); // make erros visible
 
         // Test a few representative illegal characters
         const testChars = ILLEGAL_CHARACTERS_VISIBLE.slice(0, 3);
         for (const char of testChars) {
-          await user.clear(followerInput);
-          await user.type(followerInput, `with${char}`);
+          fireEvent.change(followerInput, { target: { value: `with${char}` } });
+          fireEvent.blur(followerInput);
 
           const errors = screen.queryAllByText(/Remove the character|not allowed/);
           expect(errors.length).toBeGreaterThan(0);
@@ -166,8 +169,9 @@ describe('Create Follower index', () => {
         test('should make a request to check if the index name is available in ES', async () => {
           httpRequestsMockHelpers.setGetClusterIndicesResponse([]);
 
-          const followerInput = await screen.findByTestId('followerIndexInput');
-          await user.type(followerInput, 'index-name');
+          const followerInput = screen.getByTestId('followerIndexInput');
+          fireEvent.change(followerInput, { target: { value: 'index-name' } });
+          fireEvent.blur(followerInput);
 
           // Wait for debounced validation (500ms)
           await act(async () => {
@@ -184,8 +188,9 @@ describe('Create Follower index', () => {
           const indexName = 'index-name';
           httpRequestsMockHelpers.setGetClusterIndicesResponse([{ name: indexName }]);
 
-          const followerInput = await screen.findByTestId('followerIndexInput');
-          await user.type(followerInput, indexName);
+          const followerInput = screen.getByTestId('followerIndexInput');
+          fireEvent.change(followerInput, { target: { value: indexName } });
+          fireEvent.blur(followerInput);
 
           // Wait for debounced validation
           await act(async () => {
@@ -193,7 +198,7 @@ describe('Create Follower index', () => {
           });
 
           expect(
-            await screen.findByText('An index with the same name already exists.')
+            screen.getByText('An index with the same name already exists.')
           ).toBeInTheDocument();
         });
       });

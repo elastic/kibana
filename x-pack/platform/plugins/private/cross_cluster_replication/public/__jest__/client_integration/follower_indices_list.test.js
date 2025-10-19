@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { screen, within, act } from '@testing-library/react';
+import { fireEvent, screen, within, act } from '@testing-library/react';
 import './mocks';
 import { getFollowerIndexMock } from './fixtures/follower_index';
 import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
@@ -83,7 +83,7 @@ describe('<FollowerIndicesList />', () => {
       expect(initialRows.length).toBe(20); // Default page size
 
       const nextButton = screen.getByLabelText('Next page');
-      await user.click(nextButton);
+      fireEvent.click(nextButton);
 
       const rowsAfterPagination = getTableRows('followerIndexListTable');
       expect(rowsAfterPagination.length).toBe(10); // Remaining items on page 2
@@ -91,7 +91,8 @@ describe('<FollowerIndicesList />', () => {
 
     test('search works', async () => {
       const searchBox = screen.getByTestId('followerIndexSearch');
-      await user.type(searchBox, 'unique');
+      fireEvent.change(searchBox, { target: { value: 'unique' } });
+      fireEvent.blur(searchBox);
 
       const rows = getTableRows('followerIndexListTable');
       expect(rows.length).toBe(1);

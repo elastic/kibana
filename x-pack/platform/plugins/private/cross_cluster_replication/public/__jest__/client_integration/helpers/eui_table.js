@@ -63,8 +63,5 @@ export const getTableRows = (tableTestSubj) => {
     throw new Error(`Table with test subject "${tableTestSubj}" not found`);
   }
 
-  const tbody = table.querySelector('tbody');
-  if (!tbody) return [];
-
-  return Array.from(tbody.querySelectorAll('tr'));
+  return Array.from(table.querySelectorAll('tbody tr'));
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { screen, within, act } from '@testing-library/react';
+import { screen, within, act, fireEvent } from '@testing-library/react';
 import { API_BASE_PATH } from '../../../common/constants';
 import './mocks';
 import { FOLLOWER_INDEX_EDIT, FOLLOWER_INDEX_EDIT_NAME } from './helpers/constants';
@@ -80,6 +80,8 @@ describe('Edit follower index', () => {
       });
     });
 
+    // long test takes a while on CI
+    // Using fireEvent for better performance on CI
     test('is consumed correctly', async () => {
       // Verify GET was called during mount
       const getCalls = httpSetup.get.mock.calls;
@@ -89,17 +91,21 @@ describe('Edit follower index', () => {
       expect(getFollowerCall).toBeDefined();
 
       // Change a form value to enable save
-      const maxRetryDelayInput = await screen.findByTestId('maxRetryDelayInput');
-      await user.clear(maxRetryDelayInput);
-      await user.type(maxRetryDelayInput, '10s');
+      const maxRetryDelayInput = screen.getByTestId('maxRetryDelayInput');
+      fireEvent.change(maxRetryDelayInput, { target: { value: '10s' } });
+      fireEvent.blur(maxRetryDelayInput);
 
       // Click save button
       const saveButton = screen.getByTestId('submitButton');
-      await user.click(saveButton);
+      fireEvent.click(saveButton);
 
       // Confirmation modal should appear, click confirm
       const confirmButton = await screen.findByTestId('confirmModalConfirmButton');
-      await user.click(confirmButton);
+      fireEvent.click(confirmButton);
+
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
 
       // PUT should have been called
       expect(httpSetup.put).toHaveBeenCalledWith(

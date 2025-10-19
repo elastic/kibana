@@ -6,7 +6,7 @@
  */
 
 import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-views-plugin/public';
-import { screen, within, act } from '@testing-library/react';
+import { fireEvent, screen, within, act } from '@testing-library/react';
 import './mocks';
 import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
 
@@ -89,32 +89,35 @@ describe('Create Auto-follow pattern', () => {
         });
       });
 
-      test('should not allow spaces', async () => {
-        const nameInput = await screen.findByTestId('nameInput');
-        await user.type(nameInput, 'with space');
+      test('should not allow spaces', () => {
+        const nameInput = screen.getByTestId('nameInput');
+        fireEvent.change(nameInput, { target: { value: 'with space' } });
+        fireEvent.blur(nameInput);
 
         const saveButton = screen.getByTestId('submitButton');
-        await user.click(saveButton);
+        fireEvent.click(saveButton);
 
         expect(screen.getByText('Spaces are not allowed in the name.')).toBeInTheDocument();
       });
 
-      test('should not allow a "_" (underscore) as first character', async () => {
-        const nameInput = await screen.findByTestId('nameInput');
-        await user.type(nameInput, '_withUnderscore');
+      test('should not allow a "_" (underscore) as first character', () => {
+        const nameInput = screen.getByTestId('nameInput');
+        fireEvent.change(nameInput, { target: { value: '_withUnderscore' } });
+        fireEvent.blur(nameInput);
 
         const saveButton = screen.getByTestId('submitButton');
-        await user.click(saveButton);
+        fireEvent.click(saveButton);
 
         expect(screen.getByText(`Name can't begin with an underscore.`)).toBeInTheDocument();
       });
 
-      test('should not allow a "," (comma)', async () => {
-        const nameInput = await screen.findByTestId('nameInput');
-        await user.type(nameInput, 'with,coma');
+      test('should not allow a "," (comma)', () => {
+        const nameInput = screen.getByTestId('nameInput');
+        fireEvent.change(nameInput, { target: { value: 'with,coma' } });
+        fireEvent.blur(nameInput);
 
         const saveButton = screen.getByTestId('submitButton');
-        await user.click(saveButton);
+        fireEvent.click(saveButton);
 
         expect(screen.getByText(`Commas are not allowed in the name.`)).toBeInTheDocument();
       });
@@ -208,35 +211,39 @@ describe('Create Auto-follow pattern', () => {
         });
       });
 
-      test('should not allow spaces', async () => {
-        const comboboxWrapper = await screen.findByTestId('indexPatternInput');
+      test('should not allow spaces', () => {
+        const comboboxWrapper = screen.getByTestId('indexPatternInput');
         const input =
           comboboxWrapper.querySelector('[role="combobox"]') ||
           comboboxWrapper.querySelector('input');
-        await user.type(input, 'with space{enter}');
+        fireEvent.change(input, { target: { value: 'with space' } });
+        fireEvent.blur(input);
 
         expect(
-          await screen.findByText('Spaces are not allowed in the index pattern.')
+          screen.getByText('Spaces are not allowed in the index pattern.')
         ).toBeInTheDocument();
       });
 
-      test('should not allow invalid characters', async () => {
-        const comboboxWrapper = await screen.findByTestId('indexPatternInput');
-        const input =
-          comboboxWrapper.querySelector('[role="combobox"]') ||
-          comboboxWrapper.querySelector('input');
+      test.each(ILLEGAL_CHARACTERS_VISIBLE)(
+        'should not allow invalid character %s',
+        (illegalChar) => {
+          const comboboxWrapper = screen.getByTestId('indexPatternInput');
+          const input =
+            comboboxWrapper.querySelector('[role="combobox"]') ||
+            comboboxWrapper.querySelector('input');
 
-        // Test a few representative illegal characters
-        const testChars = ILLEGAL_CHARACTERS_VISIBLE.slice(0, 3);
-        for (const char of testChars) {
-          await user.clear(input);
-          await user.type(input, `with${char}space{enter}`);
+          fireEvent.change(input, { target: { value: `legalchar` } });
+          fireEvent.blur(input);
 
-          // Verify some validation error appears (exact message may vary by character)
-          const errorElements = await screen.findAllByText(/Remove the character|not allowed/);
-          expect(errorElements.length).toBeGreaterThan(0);
+          expect(screen.queryByText(/Remove the character/)).not.toBeInTheDocument();
+
+          // Test a few representative illegal characters
+          fireEvent.change(input, { target: { value: `${illegalChar}char` } });
+          fireEvent.blur(input);
+
+          expect(screen.getByText(/Remove the character/m)).toBeInTheDocument();
         }
-      });
+      );
     });
   });
 
@@ -256,32 +263,35 @@ describe('Create Auto-follow pattern', () => {
       const input =
         comboboxWrapper.querySelector('[role="combobox"]') ||
         comboboxWrapper.querySelector('input');
-      await user.type(input, 'kibana-{enter}'); // Press Enter to create the option
+      fireEvent.change(input, { target: { value: 'kibana' } });
+      fireEvent.blur(input);
 
-      expect(await screen.findByTestId('autoFollowPatternIndicesPreview')).toBeInTheDocument();
+      expect(screen.getByTestId('autoFollowPatternIndicesPreview')).toBeInTheDocument();
     });
 
-    test('should display 3 indices example when providing a wildcard(*)', async () => {
+    test('should display 3 indices example when providing a wildcard(*)', () => {
       const comboboxWrapper = screen.getByTestId('indexPatternInput');
       const input =
         comboboxWrapper.querySelector('[role="combobox"]') ||
         comboboxWrapper.querySelector('input');
-      await user.type(input, 'kibana-*{enter}');
+      fireEvent.change(input, { target: { value: 'kibana-*' } });
+      fireEvent.blur(input);
 
-      const preview = await screen.findByTestId('autoFollowPatternIndicesPreview');
+      const preview = screen.getByTestId('autoFollowPatternIndicesPreview');
       const indices = within(preview).queryAllByTestId('indexPreview');
       expect(indices.length).toBe(3);
       expect(indices[0].textContent).toContain('kibana-');
     });
 
-    test('should only display 1 index example when *not* providing a wildcard', async () => {
+    test('should only display 1 index example when *not* providing a wildcard', () => {
       const comboboxWrapper = screen.getByTestId('indexPatternInput');
       const input =
         comboboxWrapper.querySelector('[role="combobox"]') ||
         comboboxWrapper.querySelector('input');
-      await user.type(input, 'kibana{enter}');
+      fireEvent.change(input, { target: { value: 'kibana' } });
+      fireEvent.blur(input);
 
-      const preview = await screen.findByTestId('autoFollowPatternIndicesPreview');
+      const preview = screen.getByTestId('autoFollowPatternIndicesPreview');
       const indices = within(preview).queryAllByTestId('indexPreview');
       expect(indices.length).toBe(1);
       expect(indices[0].textContent).toEqual('kibana');
@@ -295,17 +305,18 @@ describe('Create Auto-follow pattern', () => {
       const input =
         comboboxWrapper.querySelector('[role="combobox"]') ||
         comboboxWrapper.querySelector('input');
-      await user.type(input, 'kibana{enter}');
+      fireEvent.change(input, { target: { value: 'kibana' } });
+      fireEvent.blur(input);
 
       const prefixInput = screen.getByTestId('prefixInput');
-      await user.type(prefixInput, prefix);
+      fireEvent.change(prefixInput, { target: { value: prefix } });
+      fireEvent.blur(prefixInput);
 
       const suffixInput = screen.getByTestId('suffixInput');
-      await user.type(suffixInput, suffix);
+      fireEvent.change(suffixInput, { target: { value: suffix } });
+      fireEvent.blur(suffixInput);
 
-      const preview = await screen.findByTestId('autoFollowPatternIndicesPreview');
-      const indices = within(preview).queryAllByTestId('indexPreview');
-      const textPreview = indices[0].textContent;
+      const { textContent: textPreview } = screen.getByTestId('indexPreview');
 
       expect(textPreview).toContain(prefix);
       expect(textPreview).toContain(suffix);
