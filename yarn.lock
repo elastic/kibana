@@ -17069,7 +17069,7 @@ commander@7, commander@^7.2.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-7.2.0.tgz#a36cb57d0b501ce108e4d20559a150a391d97ab7"
   integrity sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==
 
-commander@^10.0.1:
+commander@^10.0.0, commander@^10.0.1:
   version "10.0.1"
   resolved "https://registry.yarnpkg.com/commander/-/commander-10.0.1.tgz#881ee46b4f77d1c1dccc5823433aa39b022cbe06"
   integrity sha512-y4Mg2tXshplEbSGzx7amzPwKKOCGuoSRP/CjEdwwk0FOGlUbq6lKuoyDZTNZkmxHdJtp54hdfY/JUrdL7Xfdug==
@@ -24466,6 +24466,13 @@ linkify-it@^5.0.0:
   integrity sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ==
   dependencies:
     uc.micro "^2.0.0"
+
+liquidjs@^10.9.2:
+  version "10.22.0"
+  resolved "https://registry.yarnpkg.com/liquidjs/-/liquidjs-10.22.0.tgz#06f2be823d897986fc92f88855caf903c381498c"
+  integrity sha512-SGBYxl7U7vqmmAQdP/PTP3P3q11f99xUjdtxVICqNQqPecl+JIMCsTshDObGzicHaAqWAnPW0o25a9hDaJxOng==
+  dependencies:
+    commander "^10.0.0"
 
 listr2@^3.8.3:
   version "3.10.0"
