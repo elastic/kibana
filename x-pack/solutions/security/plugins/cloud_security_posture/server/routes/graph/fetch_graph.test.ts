@@ -189,6 +189,7 @@ describe('fetchGraph', () => {
     expect(query).toContain('actorEntityType');
     expect(query).toContain('actorEntitySubType');
     expect(query).toContain('actorHostIp');
+    expect(query).toContain('engineMetadata');
 
     expect(query).toContain('EVAL targetDocData = CONCAT');
     expect(query).toContain('target.entity.id');

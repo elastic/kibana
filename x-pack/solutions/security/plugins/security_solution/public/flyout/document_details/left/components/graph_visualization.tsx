@@ -101,6 +101,7 @@ export const GraphVisualization: React.FC = memo(() => {
             scopeId,
             isPreviewMode: true,
             banner: GENERIC_ENTITY_PREVIEW_BANNER,
+            isEngineMetadataExist: Boolean(singleDocumentData.entity?.engineMetadata?.type),
           },
         });
       } else if (docMode === 'grouped-entities' && node.documentsData) {

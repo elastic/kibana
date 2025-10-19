@@ -67,9 +67,7 @@ export default function (providerContext: FtrProviderContext) {
     return req.send(body);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/236975
-  // Failing: See https://github.com/elastic/kibana/issues/236975
-  describe.skip('POST /internal/cloud_security_posture/graph', () => {
+  describe('POST /internal/cloud_security_posture/graph', () => {
     describe('Authorization', () => {
       it('should return 403 for user without read access', async () => {
         await postGraph(
@@ -1009,6 +1007,16 @@ export default function (providerContext: FtrProviderContext) {
             expect(actorNode.icon).to.equal('user');
             expect(actorNode.shape).to.equal('ellipse');
             expect(actorNode.tag).to.equal('Identity');
+            expect(actorNode.documentsData?.[0]).to.eql({
+              id: 'admin@example.com',
+              type: 'entity',
+              entity: {
+                name: 'AdminExample',
+                type: 'Identity',
+                sub_type: 'AWS IAM User',
+                engineMetadata: { type: 'generic' },
+              },
+            });
 
             // Verify other nodes
             response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {

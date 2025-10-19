@@ -18,6 +18,11 @@ import {
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
+// Hardcoded default value for engineMetadata.type field
+// The entity.engineMetadata field is not currently exposed by the enrich policy
+// TODO: Remove hardcoded value once https://github.com/elastic/kibana/issues/232226 is implemented
+const DEFAULT_ENGINE_METADATA_TYPE = 'generic';
+
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
   originEventIds: OriginEventId[];
@@ -195,6 +200,9 @@ ${
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
         ""
       ),
+      ",\\"engineMetadata\\":", "{",
+        "\\"type\\":\\"${DEFAULT_ENGINE_METADATA_TYPE}\\"",
+      "}",
     "}",
   "}")
 | EVAL targetDocData = CONCAT("{",
@@ -209,6 +217,9 @@ ${
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
         ""
       ),
+      ",\\"engineMetadata\\":", "{",
+        "\\"type\\":\\"${DEFAULT_ENGINE_METADATA_TYPE}\\"",
+      "}",
     "}",
   "}")
 `

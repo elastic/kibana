@@ -59,6 +59,11 @@ export const entitySchema = schema.object({
       ip: schema.maybe(schema.string()),
     })
   ),
+  engineMetadata: schema.maybe(
+    schema.object({
+      type: schema.maybe(schema.string()),
+    })
+  ),
 });
 
 export const nodeDocumentDataSchema = schema.object({
