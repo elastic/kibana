@@ -107,6 +107,7 @@ export function TimeComparison() {
       disabled={comparisonEnabled === false}
       options={comparisonOptions}
       value={offset}
+      compressed
       prepend={
         <PrependContainer>
           <EuiCheckbox

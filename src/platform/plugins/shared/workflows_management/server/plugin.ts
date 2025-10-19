@@ -19,23 +19,18 @@ import type {
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
-import {
-  WORKFLOWS_EXECUTION_LOGS_INDEX,
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-} from '../common';
 import type { WorkflowsManagementConfig } from './config';
 
 import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
-  WorkflowsExecutionEnginePluginStartDeps,
-  WorkflowsManagementPluginServerDependenciesSetup,
-  WorkflowsPluginSetup,
-  WorkflowsPluginStart,
+  WorkflowsServerPluginSetupDeps,
+  WorkflowsServerPluginStartDeps,
+  WorkflowsServerPluginSetup,
+  WorkflowsServerPluginStart,
 } from './types';
 import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
-import { defineRoutes } from './workflows_management/workflows_management_routes';
+import { defineRoutes } from './workflows_management/routes';
 import { WorkflowsService } from './workflows_management/workflows_management_service';
 // Import the workflows connector
 import {
@@ -45,7 +40,15 @@ import {
 import { registerFeatures } from './features';
 import { registerUISettings } from './ui_settings';
 
-export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
+export class WorkflowsPlugin
+  implements
+    Plugin<
+      WorkflowsServerPluginSetup,
+      WorkflowsServerPluginStart,
+      WorkflowsServerPluginSetupDeps,
+      WorkflowsServerPluginStartDeps
+    >
+{
   private readonly logger: Logger;
   private readonly config: WorkflowsManagementConfig;
   private workflowsService: WorkflowsService | null = null;
@@ -59,7 +62,10 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     this.config = initializerContext.config.get<WorkflowsManagementConfig>();
   }
 
-  public setup(core: CoreSetup, plugins: WorkflowsManagementPluginServerDependenciesSetup) {
+  public setup(
+    core: CoreSetup<WorkflowsServerPluginStartDeps>,
+    plugins: WorkflowsServerPluginSetupDeps
+  ) {
     this.logger.debug('Workflows Management: Setup');
 
     registerUISettings({ uiSettings: core.uiSettings });
@@ -131,7 +137,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
                 const taskRunner = createWorkflowTaskRunner({
                   logger: plugin.logger,
                   workflowsService: plugin.workflowsService!,
-                  workflowsExecutionEngine: (pluginsStart as any).workflowsExecutionEngine,
+                  workflowsExecutionEngine: pluginsStart.workflowsExecutionEngine,
                   actionsClient: plugin.unsecureActionsClient!,
                 })({ taskInstance, fakeRequest });
 
@@ -161,17 +167,17 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       .then(([coreStart]) => coreStart.elasticsearch.client.asInternalUser);
 
     const getWorkflowExecutionEngine = () =>
-      core
-        .getStartServices()
-        .then(([, pluginsStart]) => (pluginsStart as any).workflowsExecutionEngine);
+      core.getStartServices().then(([, pluginsStart]) => pluginsStart.workflowsExecutionEngine);
+
+    // Create function to get actions client (available after start)
+    const getActionsStart = () =>
+      core.getStartServices().then(([, pluginsStart]) => pluginsStart.actions);
 
     this.workflowsService = new WorkflowsService(
       esClientPromise,
       this.logger,
-      WORKFLOWS_EXECUTIONS_INDEX,
-      WORKFLOWS_STEP_EXECUTIONS_INDEX,
-      WORKFLOWS_EXECUTION_LOGS_INDEX,
-      this.config.logging.console
+      this.config.logging.console,
+      getActionsStart
     );
     this.api = new WorkflowsManagementApi(this.workflowsService, getWorkflowExecutionEngine);
     this.spaces = plugins.spaces?.spacesService;
@@ -184,7 +190,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     };
   }
 
-  public start(core: CoreStart, plugins: WorkflowsExecutionEnginePluginStartDeps) {
+  public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {
     this.logger.info('Workflows Management: Start');
 
     this.unsecureActionsClient = plugins.actions.getUnsecuredActionsClient();

@@ -7,76 +7,73 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { debounce } from 'lodash';
+import React, { useMemo } from 'react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
-import { JSONDataView, type JSONDataViewProps } from '../../../shared/ui/json_data_view';
-import { useKibana } from '../../../hooks/use_kibana';
+import { JSONDataView } from '../../../shared/ui/json_data_view';
 
-export const STORAGE_KEY = 'workflows_management.step_execution_flyout.searchTerm';
-
-const titles = {
-  input: i18n.translate('workflowsManagement.stepExecutionDataView.inputTitle', {
-    defaultMessage: 'Input',
-  }),
+const Titles = {
   output: i18n.translate('workflowsManagement.stepExecutionDataView.outputTitle', {
     defaultMessage: 'Output',
   }),
   error: i18n.translate('workflowsManagement.stepExecutionDataView.errorTitle', {
     defaultMessage: 'Error',
   }),
+  input: i18n.translate('workflowsManagement.stepExecutionDataView.inputTitle', {
+    defaultMessage: 'Input',
+  }),
 };
 
-interface StepExecutionDataViewProps extends Omit<JSONDataViewProps, 'data'> {
+interface StepExecutionDataViewProps {
   stepExecution: WorkflowStepExecutionDto;
   mode: 'input' | 'output';
 }
 
-export const StepExecutionDataView = ({
-  stepExecution,
-  mode,
-  ...props
-}: StepExecutionDataViewProps) => {
-  const { storage } = useKibana().services;
-
-  const searchTermStorage = storage.get(STORAGE_KEY) || '';
-  const [searchTerm, setSearchTerm] = useState(searchTermStorage);
-
-  const setSearchTermStorage = useCallback(
-    (value: string) => {
-      storage.set(STORAGE_KEY, value);
-    },
-    [storage]
-  );
-  const setSearchTermStorageDebounced = useMemo(
-    () => debounce(setSearchTermStorage, 500),
-    [setSearchTermStorage]
-  );
-
-  const handleSearchTermChange = (value: string) => {
-    setSearchTerm(value);
-    setSearchTermStorageDebounced(value);
-  };
-
-  const { data, title } = useMemo(() => {
-    if (mode === 'input') {
-      return { data: stepExecution.input, title: titles.input };
-    } else {
-      if (stepExecution.error) {
-        return { data: { error: stepExecution.error }, title: titles.error };
+export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
+  ({ stepExecution, mode }) => {
+    const { data, title } = useMemo(() => {
+      if (mode === 'input') {
+        return { data: stepExecution.input, title: Titles.input };
+      } else {
+        if (stepExecution.error) {
+          return { data: { error: stepExecution.error }, title: Titles.error };
+        }
+        return { data: stepExecution.output, title: Titles.output };
       }
-      return { data: stepExecution.output, title: titles.output };
-    }
-  }, [mode, stepExecution]);
+    }, [mode, stepExecution]);
 
-  return (
-    <JSONDataView
-      data={data}
-      title={title}
-      searchTerm={searchTerm}
-      onSearchTermChange={handleSearchTermChange}
-      {...props}
-    />
-  );
-};
+    // Convert data to object format if needed
+    const jsonObject = useMemo<Record<string, unknown>>(() => {
+      if (Array.isArray(data)) {
+        return data[0] || {};
+      }
+      // If data is already an object, use it directly
+      if (data && typeof data === 'object') {
+        return data;
+      }
+      if (data != null) {
+        // For primitive values, wrap them in an object
+        return { value: data };
+      }
+      return {};
+    }, [data]);
+
+    const fieldPathActionsPrefix: string | undefined = useMemo(() => {
+      if (mode !== 'output' || stepExecution.error) {
+        return undefined; // Make field path actions available only for output data and not error.
+      }
+      if (Array.isArray(data) && data.length > 0) {
+        return `steps.${stepExecution.stepId}.${mode}[0]`; // jsonObject will be data[0]
+      }
+      return `steps.${stepExecution.stepId}.${mode}`;
+    }, [data, mode, stepExecution.stepId, stepExecution.error]);
+
+    return (
+      <JSONDataView
+        data={jsonObject}
+        title={title}
+        fieldPathActionsPrefix={fieldPathActionsPrefix}
+      />
+    );
+  }
+);
