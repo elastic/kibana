@@ -35,6 +35,7 @@ import {
   type HorizontalAlignment,
 } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
+import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import {
   DataCascade,
   DataCascadeRow,
@@ -45,7 +46,6 @@ import {
   type DataCascadeRowCellProps,
 } from '../components';
 import type { MockGroupData } from '../__fixtures__/types';
-import { getESQLStatsQueryMeta } from './helpers/parse_esql';
 import mdx from './guide.mdx';
 
 /**
@@ -113,7 +113,10 @@ export const CascadeNestedGridImplementation: StoryObj<
 > = {
   name: 'Nested Groups with Default Header',
   render: function DataCascadeWrapper(args) {
-    const { groupByFields } = getESQLStatsQueryMeta(args.query);
+    const groupByFields = useMemo(
+      () => getESQLStatsQueryMeta(args.query).groupByFields.map(({ field }) => field),
+      [args.query]
+    );
 
     const generateGroupFieldRecord = useCallback(
       (nodePath?: string[], nodePathMap?: Record<string, string>) => {
@@ -368,7 +371,10 @@ export const CascadeCustomHeaderImplementation: StoryObj<
 > = {
   name: 'Custom header with one level of grouping',
   render: function DataCascadeWrapper(args) {
-    const { groupByFields } = getESQLStatsQueryMeta(args.query);
+    const groupByFields = useMemo(
+      () => getESQLStatsQueryMeta(args.query).groupByFields.map(({ field }) => field),
+      [args.query]
+    );
 
     const generateGroupFieldRecord = useCallback(
       (nodePath?: string[], nodePathMap?: Record<string, string>) => {
@@ -635,7 +641,11 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
 > = {
   name: 'Custom header with custom row actions',
   render: function DataCascadeWrapper(args) {
-    const { groupByFields } = useMemo(() => getESQLStatsQueryMeta(args.query), [args.query]);
+    const groupByFields = useMemo(
+      () => getESQLStatsQueryMeta(args.query).groupByFields.map(({ field }) => field),
+      [args.query]
+    );
+
     const customerEmailPopoverRef = React.useRef<HTMLElement | null>(null);
     const [alertsCandidates, setAlertsCandidates] = React.useState<string[]>([]);
 
@@ -906,7 +916,10 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
 > = {
   name: 'Custom header with hidden row actions',
   render: function DataCascadeWrapper(args) {
-    const { groupByFields } = useMemo(() => getESQLStatsQueryMeta(args.query), [args.query]);
+    const groupByFields = useMemo(
+      () => getESQLStatsQueryMeta(args.query).groupByFields.map(({ field }) => field),
+      [args.query]
+    );
 
     const generateGroupFieldRecord = useCallback(
       (nodePath?: string[], nodePathMap?: Record<string, string>) => {
@@ -1185,7 +1198,10 @@ export const CascadeCustomHeaderWithRowSelectionActionEnabled: StoryObj<
 > = {
   name: 'Custom header with row selection action enabled',
   render: function DataCascadeWrapper(args) {
-    const { groupByFields } = useMemo(() => getESQLStatsQueryMeta(args.query), [args.query]);
+    const groupByFields = useMemo(
+      () => getESQLStatsQueryMeta(args.query).groupByFields.map(({ field }) => field),
+      [args.query]
+    );
 
     const generateGroupFieldRecord = useCallback(
       (nodePath?: string[], nodePathMap?: Record<string, string>) => {
