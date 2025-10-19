@@ -177,8 +177,6 @@ export async function runTestsParallel(
 
     const id = uniqueId();
 
-    console.log(extraArgsList);
-
     const runner = new ConfigRunner({
       index: id,
       log,

@@ -955,6 +955,24 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     })
   );
 
+  const names = await getEsContainers(options.namePrefix, false);
+  // The serverless cluster has to be started detached, so we attach a logger afterwards for output
+  Promise.all(
+    names.map((name) =>
+      execa('docker', ['logs', '-f', name], {
+        // inherit is required to show Docker output and Java console output for pw, enrollment token, etc
+        stdio: ['ignore', 'inherit', 'inherit'],
+      }).catch(() => {
+        /**
+         * docker logs will throw errors when the nodes are killed through SIGINT
+         * and the entrypoint doesn't exit normally, so we silence the errors.
+         */
+      })
+    )
+  ).catch(() => {
+    //
+  });
+
   log.success(`Serverless ES cluster running.
   Login with username ${chalk.bold.cyan(ELASTIC_SERVERLESS_SUPERUSER)} or ${chalk.bold.cyan(
     SYSTEM_INDICES_SUPERUSER
@@ -1021,24 +1039,6 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
       await waitForSecurityIndex({ client, log });
     }
   }
-
-  const names = await getEsContainers(options.namePrefix, false);
-  // The serverless cluster has to be started detached, so we attach a logger afterwards for output
-  Promise.all(
-    names.map((name) =>
-      execa('docker', ['logs', '-f', name], {
-        // inherit is required to show Docker output and Java console output for pw, enrollment token, etc
-        stdio: ['ignore', 'inherit', 'inherit'],
-      }).catch(() => {
-        /**
-         * docker logs will throw errors when the nodes are killed through SIGINT
-         * and the entrypoint doesn't exit normally, so we silence the errors.
-         */
-      })
-    )
-  ).catch(() => {
-    //
-  });
 
   return nodeNames;
 }
