@@ -370,7 +370,7 @@ export async function runTestsParallel(
       state.warmFinishedAt = startFinishTime;
       state.idleStartedAt = startFinishTime;
 
-      log.debug(`Waiting for running slot for ${runner.getConfigPath()}`);
+      log.info(`Waiting for running slot for ${runner.getConfigPath()}`);
       await slot.waitForRunning();
       log.info(`Running slot acquired for ${runner.getConfigPath()}`);
 
