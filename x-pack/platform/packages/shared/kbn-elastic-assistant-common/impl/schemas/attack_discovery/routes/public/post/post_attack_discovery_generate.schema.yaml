@@ -950,6 +950,7 @@ paths:
               }'
       x-labels: [ess, serverless]
       operationId: PostAttackDiscoveryGenerate
+      x-state: Technical Preview; added in 9.2.0
       summary: Generate attack discoveries from alerts
       description: >-
         Initiates the generation of attack discoveries by analyzing security alerts using AI.
