@@ -19,7 +19,6 @@ export const ConfigSchema = schema.object({
   providerConfig: schema.object({}, { unknowns: 'allow', defaultValue: {} }),
   taskTypeConfig: schema.object({}, { unknowns: 'allow', defaultValue: {} }),
   contextWindowLength: schema.maybe(schema.number({})),
-  headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
 });
 
 export const SecretsSchema = schema.object({
