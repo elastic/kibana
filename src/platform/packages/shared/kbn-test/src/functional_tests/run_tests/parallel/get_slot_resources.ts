@@ -120,7 +120,7 @@ export function getSlotResources(capabilities: ServerCapabilities): SlotResource
       exclusive: true,
     },
     running: {
-      cpu: hasBrowser ? 2 : 1,
+      cpu: hasBrowser ? 2 : 1.5,
       memory: esMemory + kibanaMemory + containerMemory + browserMemory,
       exclusive: false,
     },
