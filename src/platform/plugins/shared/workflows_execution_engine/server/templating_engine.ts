@@ -31,7 +31,6 @@ export class WorkflowTemplatingEngine {
     });
     // register dump filter that converts an object to a JSON string
     this.engine.registerFilter('dump', (value: unknown): string => {
-      throw new Error('dump filter is not supported');
       if (typeof value !== 'object' || value === null) {
         return String(value);
       }
