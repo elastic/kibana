@@ -2410,6 +2410,12 @@
       "@a2a-js/sdk/server": [
         "typings/@a2a-js-sdk/server"
       ],
+      "vega-lite": [
+        "typings/vega/vega_lite"
+      ],
+      "vega-tooltip": [
+        "typings/vega/vega_tooltip"
+      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
