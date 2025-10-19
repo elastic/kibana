@@ -13,6 +13,7 @@ import type { ConnectorAdapter } from '../connector_adapters/types';
 import type { NormalizedSystemAction } from '../rules_client';
 import type { RuleSystemAction } from '../types';
 import { validateAndAuthorizeSystemActions } from './validate_authorize_system_actions';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 describe('validateAndAuthorizeSystemActions', () => {
   const connectorAdapter: ConnectorAdapter = {
@@ -31,16 +32,12 @@ describe('validateAndAuthorizeSystemActions', () => {
     actionsAuthorization = actionsAuthorizationMock.create();
 
     actionsClient.getBulk.mockResolvedValue([
-      {
+      createMockConnector({
         id: 'system_action-id',
         actionTypeId: '.test',
-        config: {},
-        isMissingSecrets: false,
         name: 'system action connector',
-        isPreconfigured: false,
-        isDeprecated: false,
         isSystemAction: true,
-      },
+      }),
     ]);
   });
 
@@ -182,26 +179,18 @@ describe('validateAndAuthorizeSystemActions', () => {
     ];
 
     actionsClient.getBulk.mockResolvedValue([
-      {
+      createMockConnector({
         id: 'system_action-id',
         actionTypeId: '.test',
-        config: {},
-        isMissingSecrets: false,
         name: 'system action connector',
-        isPreconfigured: false,
-        isDeprecated: false,
         isSystemAction: true,
-      },
-      {
+      }),
+      createMockConnector({
         id: 'system_action-id-2',
         actionTypeId: '.test',
-        config: {},
-        isMissingSecrets: false,
         name: 'system action connector 2',
-        isPreconfigured: false,
-        isDeprecated: false,
         isSystemAction: true,
-      },
+      }),
     ]);
 
     registry.register(connectorAdapter);
@@ -245,26 +234,18 @@ describe('validateAndAuthorizeSystemActions', () => {
     ];
 
     actionsClient.getBulk.mockResolvedValue([
-      {
+      createMockConnector({
         id: 'system_action-id',
         actionTypeId: '.test',
-        config: {},
-        isMissingSecrets: false,
         name: 'system action connector',
-        isPreconfigured: false,
-        isDeprecated: false,
         isSystemAction: true,
-      },
-      {
+      }),
+      createMockConnector({
         id: 'system_action-id-2',
         actionTypeId: '.test-2',
-        config: {},
-        isMissingSecrets: false,
         name: 'system action connector 2',
-        isPreconfigured: false,
-        isDeprecated: false,
         isSystemAction: true,
-      },
+      }),
     ]);
 
     registry.register(connectorAdapter);

@@ -21,7 +21,7 @@ import {
 import { isColumn } from '../../../ast/is';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
 import { columnExists, handleFragment } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstFuseCommand, ESQLCommand } from '../../../types';
+import type { ESQLAstAllCommands, ESQLAstFuseCommand } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import {
@@ -68,7 +68,7 @@ function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePositi
 // FUSE <fuse_method> SCORE BY <score_column> GROUP BY <group_column> KEY BY <key_columns> WITH <options>
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number
