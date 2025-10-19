@@ -94,7 +94,7 @@ export const redirectToDashboard = ({
     });
   }
 
-  stateTransfer.navigateToWithMultipleEmbeddablePackage(appId, {
+  stateTransfer.navigateToWithEmbeddablePackages(appId, {
     state: embeddablePackages,
     path:
       getOriginatingPath?.(dashboardId) ??
