@@ -60,6 +60,10 @@ let coreContext: CoreContext;
 let mockClusterClientInstance: ReturnType<typeof elasticsearchClientMock.createCustomClusterClient>;
 let mockConfig$: BehaviorSubject<any>;
 let setupDeps: SetupDeps;
+const nodesInfoResponse = {
+  cluster_name: 'cluster-name',
+  nodes: {},
+};
 
 beforeEach(() => {
   setupDeps = {
@@ -227,16 +231,12 @@ describe('#setup', () => {
 
   it('esNodeVersionCompatibility$ only starts polling when subscribed to', async () => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
-    // mocking successful response becuase error responses would trigger retries and complicate the test
-    mockedClient.nodes.info.mockResolvedValue({
-      nodes: {},
-    } as any);
+    mockedClient.nodes.info.mockResolvedValue(nodesInfoResponse);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
     const setupContract = await elasticsearchService.setup(setupDeps);
 
-    // Polling starts immediately when setup subscribes
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
 
     tick();
@@ -244,15 +244,12 @@ describe('#setup', () => {
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
 
     await firstValueFrom(setupContract.esNodesCompatibility$);
-    // Should reuse the cached value from the first subscription
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
   });
 
   it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async () => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
-    mockedClient.nodes.info.mockResolvedValue({
-      nodes: {},
-    } as any);
+    mockedClient.nodes.info.mockResolvedValue(nodesInfoResponse);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
@@ -526,9 +523,7 @@ describe('#setup', () => {
       expect.assertions(3);
 
       const mockedClient = mockClusterClientInstance.asInternalUser;
-      mockedClient.nodes.info.mockResolvedValue({
-        nodes: {},
-      } as any);
+      mockedClient.nodes.info.mockResolvedValue(nodesInfoResponse);
 
       const setupContract = await elasticsearchService.setup(setupDeps);
 
@@ -536,11 +531,11 @@ describe('#setup', () => {
         setupContract.esNodesCompatibility$.pipe(
           concatMap(async () => {
             expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-            await tick();
+            tick();
             expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
 
             await elasticsearchService.stop();
-            await tick(10);
+            tick(10);
             expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
           })
         )
