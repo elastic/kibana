@@ -73,7 +73,6 @@ export class BedrockSimulator extends Simulator {
 export const bedrockClaude2SuccessResponse = {
   stop_reason: 'max_tokens',
   completion: 'Hello there! How may I assist you today?',
-  thinking: '',
 };
 
 export const bedrockClaude3SuccessResponse = {
