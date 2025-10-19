@@ -30,7 +30,7 @@ export type MetricsGridProps = Pick<
 > & {
   filters?: Array<{ field: string; value: string }>;
   dimensions: string[];
-  columns: EuiFlexGridProps['columns'];
+  columns: NonNullable<EuiFlexGridProps['columns']>;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
 } & (
     | {
@@ -59,6 +59,7 @@ export const MetricsGrid = ({
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const { euiTheme } = useEuiTheme();
 
   const chartSize = useMemo(() => (columns === 2 || columns === 4 ? 's' : 'm'), [columns]);
 
@@ -146,7 +147,21 @@ export const MetricsGrid = ({
         onKeyDown={handleKeyDown}
         data-test-subj="unifiedMetricsExperienceGrid"
       >
-        <EuiFlexGrid columns={columns} gutterSize="s">
+        <EuiFlexGrid
+          gutterSize="s"
+          css={css`
+            grid-template-columns: repeat(${Math.min(columns, 4)}, 1fr);
+            @container (max-width: ${euiTheme.breakpoint.xl}px) {
+              grid-template-columns: repeat(${Math.min(columns, 3)}, 1fr);
+            }
+            @container (max-width: ${euiTheme.breakpoint.l}px) {
+              grid-template-columns: repeat(${Math.min(columns, 2)}, 1fr);
+            }
+            @container (max-width: ${euiTheme.breakpoint.s}px) {
+              grid-template-columns: repeat(${Math.min(columns, 1)}, 1fr);
+            }
+          `}
+        >
           {rows.map(({ key, metric }, index) => {
             return (
               <EuiFlexItem key={index}>
@@ -297,9 +312,10 @@ const A11yGridWrapper = React.forwardRef(
         onKeyDown={onKeyDown}
         data-test-subj="unifiedMetricsExperienceGrid"
         tabIndex={0}
-        style={{
-          outline: 'none',
-        }}
+        css={css`
+          outline: none;
+          container-type: inline-size;
+        `}
       >
         {children}
       </div>
