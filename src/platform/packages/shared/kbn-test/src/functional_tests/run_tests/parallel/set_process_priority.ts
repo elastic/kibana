@@ -8,6 +8,7 @@
  */
 
 import { execFile } from 'child_process';
+import type { ExecFileOptions } from 'child_process';
 import os from 'os';
 import { promisify } from 'util';
 
@@ -61,7 +62,7 @@ export async function setProcessPriority(
     });
   }
 
-  applyPriorityToProcesses(resolvedProcessIds, PRIORITY_CONFIG[priority]);
+  await applyPriorityToProcesses(resolvedProcessIds, PRIORITY_CONFIG[priority]);
   await applyPriorityToDockerContainers(resolvedContainerIds, PRIORITY_CONFIG[priority]);
 }
 
@@ -94,13 +95,16 @@ async function pollForPid(port: number): Promise<number | undefined> {
 // Perform a single lookup for the process that is listening on the port.
 async function resolvePidForPort(port: number): Promise<number | undefined> {
   try {
-    const { stdout } = await execFileAsync(
-      'lsof',
-      ['-nP', `-iTCP:${port}`, '-sTCP:LISTEN', '-Fp'],
-      { encoding: 'utf8' }
-    );
+    const { stdout } = await execFileWithOptionalSudo('lsof', [
+      '-nP',
+      `-iTCP:${port}`,
+      '-sTCP:LISTEN',
+      '-Fp',
+    ]);
 
-    const pidLine = stdout
+    const output = toUtf8String(stdout);
+
+    const pidLine = output
       .split('\n')
       .map((line) => line.trim())
       .find((line) => line.startsWith('p'));
@@ -123,7 +127,11 @@ async function resolveDockerContainers(port: number): Promise<string[]> {
   }
 
   try {
-    const { stdout } = await execFileAsync('docker', ['ps', '--format', '{{.ID}} {{.Ports}}']);
+    const { stdout } = await execFileWithOptionalSudo('docker', [
+      'ps',
+      '--format',
+      '{{.ID}} {{.Ports}}',
+    ]);
     const stdoutText = toUtf8String(stdout);
 
     const parsedEntries = stdoutText
@@ -142,15 +150,40 @@ async function resolveDockerContainers(port: number): Promise<string[]> {
 }
 
 // Apply the configured niceness to every target process without restarting them.
-function applyPriorityToProcesses(processIds: Set<number>, priorityConfig: PriorityConfig): void {
-  for (const processId of processIds) {
-    try {
-      os.setPriority(processId, priorityConfig.nice);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to set process priority';
-      process.stderr.write(`Unable to adjust priority for pid ${processId}: ${message}\n`);
-    }
-  }
+async function applyPriorityToProcesses(
+  processIds: Set<number>,
+  priorityConfig: PriorityConfig
+): Promise<void> {
+  await Promise.all(
+    Array.from(processIds).map(async (processId) => {
+      try {
+        os.setPriority(processId, priorityConfig.nice);
+        return;
+      } catch (error) {
+        if (isPermissionError(error)) {
+          try {
+            await execFileWithOptionalSudo('renice', [
+              '-n',
+              priorityConfig.nice.toString(),
+              '-p',
+              processId.toString(),
+            ]);
+            return;
+          } catch (reniceError) {
+            const reniceMessage =
+              reniceError instanceof Error ? reniceError.message : 'Failed to run renice command';
+            process.stderr.write(
+              `Unable to adjust priority for pid ${processId} using renice: ${reniceMessage}\n`
+            );
+            return;
+          }
+        }
+
+        const message = error instanceof Error ? error.message : 'Failed to set process priority';
+        process.stderr.write(`Unable to adjust priority for pid ${processId}: ${message}\n`);
+      }
+    })
+  );
 }
 
 // Adjust CPU shares for docker containers without forcing a restart.
@@ -169,7 +202,7 @@ async function applyPriorityToDockerContainers(
   await Promise.all(
     Array.from(containerIds).map(async (containerId) => {
       try {
-        await execFileAsync('docker', [
+        await execFileWithOptionalSudo('docker', [
           'update',
           '--cpu-shares',
           priorityConfig.cpuShares.toString(),
@@ -211,4 +244,76 @@ function parseDockerPortsLine(line: string): DockerPortEntry | undefined {
   }
 
   return { containerId, portsInfo };
+}
+
+async function execFileWithOptionalSudo(
+  command: string,
+  args: string[],
+  options: ExecFileOptions = {}
+) {
+  try {
+    return await execFileAsync(command, args, options);
+  } catch (error) {
+    if (!shouldRetryWithSudo(error) || !canUseSudo()) {
+      throw error;
+    }
+
+    return execFileAsync('sudo', [command, ...args], options);
+  }
+}
+
+function canUseSudo(): boolean {
+  if (typeof process.getuid !== 'function') {
+    return false;
+  }
+
+  return process.getuid() !== 0;
+}
+
+function shouldRetryWithSudo(error: unknown): boolean {
+  if (isPermissionError(error)) {
+    return true;
+  }
+
+  if (error && typeof error === 'object') {
+    const stderr = getErrorStream(error, 'stderr');
+    const stdout = getErrorStream(error, 'stdout');
+
+    const hasPermissionMessage =
+      stderr.includes('permission denied') || stdout.includes('permission denied');
+
+    if (hasPermissionMessage) {
+      return canUseSudo();
+    }
+  }
+
+  return false;
+}
+
+function isPermissionError(error: unknown): error is NodeJS.ErrnoException {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const err = error as NodeJS.ErrnoException;
+
+  return err.code === 'EACCES' || err.code === 'EPERM';
+}
+
+function getErrorStream(error: unknown, key: 'stdout' | 'stderr'): string {
+  if (!error || typeof error !== 'object') {
+    return '';
+  }
+
+  const stream = (error as Record<string, unknown>)[key];
+
+  if (typeof stream === 'string') {
+    return stream.toLowerCase();
+  }
+
+  if (Buffer.isBuffer(stream)) {
+    return stream.toString('utf8').toLowerCase();
+  }
+
+  return '';
 }

@@ -1024,7 +1024,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
 
   const names = await getEsContainers(options.namePrefix, false);
   // The serverless cluster has to be started detached, so we attach a logger afterwards for output
-  await Promise.all(
+  Promise.all(
     names.map((name) =>
       execa('docker', ['logs', '-f', name], {
         // inherit is required to show Docker output and Java console output for pw, enrollment token, etc
@@ -1036,7 +1036,9 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
          */
       })
     )
-  );
+  ).catch(() => {
+    //
+  });
 
   return nodeNames;
 }
