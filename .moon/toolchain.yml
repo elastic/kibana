@@ -2,10 +2,8 @@
 $schema: 'https://moonrepo.dev/schemas/toolchain.json'
 
 node:
-  version: 22.17.1
   packageManager: yarn
   yarn:
-    version: 1.22.21
     installArgs:
       - '--non-interactive'
   inferTasksFromScripts: true # Automatically infer tasks from package.json scripts.
