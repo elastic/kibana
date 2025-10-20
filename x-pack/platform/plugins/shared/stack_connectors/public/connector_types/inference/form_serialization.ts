@@ -12,14 +12,11 @@ const MIN_ALLOCATIONS = 0;
 const DEFAULT_NUM_THREADS = 1;
 
 export const formSerializer = (data: ConnectorFormSchema) => {
-  if (
-    data &&
-    (data.config?.providerConfig as InferenceConnectorProviderConfig)?.max_number_of_allocations !==
-      undefined
-  ) {
-    const providerConfig = data.config?.providerConfig as InferenceConnectorProviderConfig;
-    const { max_number_of_allocations: maxAllocations, ...restProviderConfig } =
-      providerConfig || {};
+  const providerConfig = data.config?.providerConfig as
+    | InferenceConnectorProviderConfig
+    | undefined;
+  if (data && providerConfig?.max_number_of_allocations != null) {
+    const { max_number_of_allocations: maxAllocations, ...restProviderConfig } = providerConfig;
 
     return {
       ...data,
@@ -30,7 +27,7 @@ export const formSerializer = (data: ConnectorFormSchema) => {
           adaptive_allocations: {
             enabled: true,
             min_number_of_allocations: MIN_ALLOCATIONS,
-            ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
+            max_number_of_allocations: maxAllocations,
           },
           // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
           num_threads: DEFAULT_NUM_THREADS,
@@ -42,20 +39,17 @@ export const formSerializer = (data: ConnectorFormSchema) => {
 };
 
 export const formDeserializer = (data: ConnectorFormSchema) => {
-  if (
-    data &&
-    (data.config?.providerConfig as InferenceConnectorProviderConfig)?.adaptive_allocations
-      ?.max_number_of_allocations
-  ) {
+  const providerConfig = data.config?.providerConfig as
+    | InferenceConnectorProviderConfig
+    | undefined;
+  if (data && providerConfig?.adaptive_allocations?.max_number_of_allocations != null) {
     return {
       ...data,
       config: {
         ...data.config,
         providerConfig: {
-          ...(data.config.providerConfig as InferenceConnectorProviderConfig),
-          max_number_of_allocations: (
-            data.config.providerConfig as InferenceConnectorProviderConfig
-          ).adaptive_allocations?.max_number_of_allocations,
+          ...providerConfig,
+          max_number_of_allocations: providerConfig.adaptive_allocations.max_number_of_allocations,
           // remove the adaptive_allocations from the data config as form does not expect it
           adaptive_allocations: undefined,
         },
