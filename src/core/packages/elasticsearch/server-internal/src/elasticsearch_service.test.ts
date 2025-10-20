@@ -257,8 +257,6 @@ describe('#setup', () => {
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
 
-    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-
     await firstValueFrom(setupContract.esNodesCompatibility$);
 
     tick();
