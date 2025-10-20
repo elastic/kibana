@@ -103,8 +103,8 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
           timeRangePercentage.getLatestState();
 
         if (
-          typeof timesliceStartAsPercentageOfTimeRange !== 'undefined' &&
-          typeof timesliceEndAsPercentageOfTimeRange !== 'undefined'
+          timesliceStartAsPercentageOfTimeRange !== undefined &&
+          timesliceEndAsPercentageOfTimeRange !== undefined
         ) {
           timeslice$.next(
             getTimesliceSyncedWithTimeRangePercentage(
