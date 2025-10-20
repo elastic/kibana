@@ -13,10 +13,8 @@ const controlGroupReferencePrefix = 'controlGroup_';
 
 export const getPanelIdFromReference = (reference: Reference) => {
   const splits = reference.name.split(':', 1);
-  return splits.length
-    ? splits[0]
-    : undefined;
-}
+  return splits.length ? splits[0] : undefined;
+};
 
 export const getReferencesForPanelId = (id: string, references: Reference[]): Reference[] => {
   const prefix = `${id}:`;
