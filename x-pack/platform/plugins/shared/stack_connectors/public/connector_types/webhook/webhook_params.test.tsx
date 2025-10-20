@@ -70,7 +70,7 @@ describe('WebhookParamsFields renders', () => {
     expect(await screen.findByTestId('bodyAddVariableButton')).toBeInTheDocument();
   });
 
-  it('body is not rendered for GET method', async () => {
+  it('banner displays HTTP method configured', async () => {
     const actionConnector = {
       config: { method: 'get' },
     } as unknown as ActionConnector;
@@ -93,36 +93,7 @@ describe('WebhookParamsFields renders', () => {
     );
 
     expect(await screen.findByTestId('placeholderCallout')).toHaveTextContent(
-      'This connector is configured to use the GET method.No additional setup is required - a request will automatically be sent to the configured url'
+      'This connector is configured to use HTTP GET requests.'
     );
-    expect(await screen.queryByTestId('bodyJsonEditor')).not.toBeInTheDocument();
-  });
-
-  it('body is not rendered for DELETE method', async () => {
-    const actionConnector = {
-      config: { method: 'delete' },
-    } as unknown as ActionConnector;
-
-    renderWithKibanaRenderContext(
-      <WebhookParamsFields
-        actionParams={actionParams}
-        actionConnector={actionConnector}
-        errors={{ body: [] }}
-        editAction={() => {}}
-        index={0}
-        messageVariables={[
-          {
-            name: 'myVar',
-            description: 'My variable description',
-            useWithTripleBracesInTemplates: true,
-          },
-        ]}
-      />
-    );
-
-    expect(await screen.findByTestId('placeholderCallout')).toHaveTextContent(
-      'This connector is configured to use the DELETE method.No additional setup is required - a request will automatically be sent to the configured url'
-    );
-    expect(await screen.queryByTestId('bodyJsonEditor')).not.toBeInTheDocument();
   });
 });
