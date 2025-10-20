@@ -6,6 +6,7 @@
  */
 
 import objectHash from 'object-hash';
+import { v4 as uuid } from 'uuid';
 
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
@@ -37,6 +38,7 @@ export const wrapSuppressedAlerts = ({
   sharedParams: SecuritySharedParams<MachineLearningRuleParams | EqlRuleParams | ThreatRuleParams>;
 }): Array<WrappedAlert<DetectionAlertLatest & SuppressionFieldsLatest>> => {
   const { completeRule, spaceId, primaryTimestamp, secondaryTimestamp } = sharedParams;
+  const searchId = uuid();
   return events.map((event) => {
     const suppressionTerms = getSuppressionTerms({
       alertSuppression: completeRule?.ruleParams?.alertSuppression,
@@ -59,6 +61,7 @@ export const wrapSuppressedAlerts = ({
       applyOverrides: true,
       buildReasonMessage,
       alertUuid: id,
+      searchId,
     });
 
     return {

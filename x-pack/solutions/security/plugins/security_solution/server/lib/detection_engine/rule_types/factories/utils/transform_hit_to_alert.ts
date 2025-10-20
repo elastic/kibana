@@ -22,7 +22,6 @@ import type { DetectionAlertLatest } from '../../../../../../common/api/detectio
 import { traverseAndMutateDoc } from './traverse_and_mutate_doc';
 import { ALERT_THRESHOLD_RESULT } from '../../../../../../common/field_maps/field_names';
 import { robustGet, robustSet } from '../../utils/source_fields_merging/utils/robust_field_access';
-import { _index } from '@kbn/lists-plugin/server/schemas/common/schemas';
 
 const isSourceDoc = (hit: SignalSourceHit): hit is BaseHit<SignalSource> => {
   return hit._source != null && hit._id != null;
@@ -34,6 +33,7 @@ export interface TransformHitToAlertProps {
   applyOverrides: boolean;
   buildReasonMessage: BuildReasonMessage;
   alertUuid: string;
+  searchId: string;
 }
 
 /**
@@ -51,6 +51,7 @@ export const transformHitToAlert = ({
   applyOverrides,
   buildReasonMessage,
   alertUuid,
+  searchId,
 }: TransformHitToAlertProps): DetectionAlertLatest => {
   const mergedDoc = getMergeStrategy(sharedParams.mergeStrategy)({
     doc,
@@ -134,6 +135,7 @@ export const transformHitToAlert = ({
         sort: doc.sort,
         id: doc._id,
         index: doc._index,
+        searchId,
       },
     ];
     return validatedSource as DetectionAlertLatest;
