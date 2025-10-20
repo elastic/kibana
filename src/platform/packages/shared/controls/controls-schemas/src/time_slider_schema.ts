@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ACTION_CLEAR_CONTROL = 'clearControl';
-export const ACTION_CREATE_CONTROL = 'createControl';
-export const ACTION_CREATE_ESQL_CONTROL = 'createESQLControl';
-export const ACTION_CREATE_TIME_SLIDER = 'createTimeSlider';
-export const ACTION_PIN_CONTROL = 'pinControl';
+import { schema } from '@kbn/config-schema';
 
-export const OPTIONS_LIST_ACTION = 'addOptionsList';
-export const RANGE_SLIDER_ACTION = 'addRangeSlider';
+export const timeSliderControlSchema = schema.object({
+  timesliceStartAsPercentageOfTimeRange: schema.maybe(schema.number()),
+  timesliceEndAsPercentageOfTimeRange: schema.maybe(schema.number()),
+});

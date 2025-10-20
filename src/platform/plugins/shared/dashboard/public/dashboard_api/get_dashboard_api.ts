@@ -34,6 +34,7 @@ import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import { initializeESQLVariablesManager } from './esql_variables_manager';
+import { initializeTimesliceManager } from './timeslice_manager';
 
 export function getDashboardApi({
   creationOptions,
@@ -75,6 +76,7 @@ export function getDashboardApi({
   const settingsManager = initializeSettingsManager(initialState);
 
   const esqlVariablesManager = initializeESQLVariablesManager(layoutManager.api.children$);
+  const timesliceManager = initializeTimesliceManager(layoutManager.api.children$, settingsManager);
 
   const unifiedSearchManager = initializeUnifiedSearchManager(
     initialState,
@@ -134,6 +136,7 @@ export function getDashboardApi({
     ...unsavedChangesManager.api,
     ...trackOverlayApi,
     ...esqlVariablesManager.api,
+    ...timesliceManager.api,
     ...initializeTrackContentfulRender(),
     executionContext: {
       type: 'dashboard',
@@ -236,6 +239,8 @@ export function getDashboardApi({
       unifiedSearchManager.cleanup();
       unsavedChangesManager.cleanup();
       layoutManager.cleanup();
+      esqlVariablesManager.cleanup();
+      timesliceManager.cleanup();
     },
   };
 }

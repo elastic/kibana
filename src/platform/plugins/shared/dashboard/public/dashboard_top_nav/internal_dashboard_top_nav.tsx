@@ -97,6 +97,8 @@ export function InternalDashboardTopNav({
     viewMode,
     publishedChildFilters,
     unpublishedChildFilters,
+    publishedTimeslice,
+    unpublishedTimeslice,
   ] = useBatchedPublishingSubjects(
     dashboardApi.dataViews$,
     dashboardApi.fullScreenMode$,
@@ -106,12 +108,17 @@ export function InternalDashboardTopNav({
     dashboardApi.title$,
     dashboardApi.viewMode$,
     dashboardApi.publishedChildFilters$,
-    dashboardApi.unpublishedChildFilters$
+    dashboardApi.unpublishedChildFilters$,
+    dashboardApi.publishedTimeslice$,
+    dashboardApi.unpublishedTimeslice$
   );
 
   const hasUnpublishedFilters = useMemo(() => {
     return !deepEqual(publishedChildFilters ?? [], unpublishedChildFilters ?? []);
   }, [publishedChildFilters, unpublishedChildFilters]);
+  const hasUnpublishedTimeslice = useMemo(() => {
+    return !deepEqual(publishedTimeslice, unpublishedTimeslice);
+  }, [publishedTimeslice, unpublishedTimeslice]);
 
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -393,9 +400,10 @@ export function InternalDashboardTopNav({
             dashboardApi.forceRefresh();
           }
           dashboardApi.publishFilters();
+          dashboardApi.publishTimeslice();
         }}
         onSavedQueryIdChange={setSavedQueryId}
-        hasDirtyState={hasUnpublishedFilters}
+        hasDirtyState={hasUnpublishedFilters || hasUnpublishedTimeslice}
         useBackgroundSearchButton={
           dataService.search.isBackgroundSearchEnabled &&
           getDashboardCapabilities().storeSearchSession

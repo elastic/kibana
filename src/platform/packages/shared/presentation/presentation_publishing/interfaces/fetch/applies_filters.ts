@@ -18,3 +18,11 @@ export interface AppliesFilters {
 export const apiAppliesFilters = (unknownApi: unknown): unknownApi is AppliesFilters => {
   return Boolean(unknownApi && (unknownApi as AppliesFilters)?.appliedFilters$ !== undefined);
 };
+
+export interface AppliesTimeslice {
+  appliedTimeslice$: PublishingSubject<[number, number] | undefined>;
+}
+
+export const apiAppliesTimeslice = (unknownApi: unknown): unknownApi is AppliesTimeslice => {
+  return Boolean(unknownApi && (unknownApi as AppliesTimeslice)?.appliedTimeslice$ !== undefined);
+};

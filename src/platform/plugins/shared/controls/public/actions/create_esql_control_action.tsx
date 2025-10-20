@@ -19,7 +19,7 @@ import { uiActionsService } from '../services/kibana_services';
 
 export const createESQLControlAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ACTION_CREATE_ESQL_CONTROL,
-  order: 0,
+  order: 1,
   getIconType: () => 'controlsHorizontal',
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
   execute: async ({ embeddable }) => {

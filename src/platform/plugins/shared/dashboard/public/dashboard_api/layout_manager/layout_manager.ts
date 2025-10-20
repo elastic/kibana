@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { filter, map as lodashMap, max } from 'lodash';
+import { filter, map as lodashMap, max, pick } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
@@ -41,8 +41,9 @@ import {
   logStateDiff,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
-import type { StickyControlLayoutState } from '@kbn/controls-schemas/src/types';
 
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
+import type { StickyControlLayoutState } from '@kbn/controls-schemas';
 import type { DashboardState } from '../../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/content_management';
 import type { DashboardPanel } from '../../../server';
@@ -59,7 +60,13 @@ import type { initializeTrackPanel } from '../track_panel';
 import { areLayoutsEqual } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
-import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from './types';
+import {
+  isDashboardLayoutPanel,
+  type DashboardChildren,
+  type DashboardLayout,
+  type DashboardLayoutPanel,
+  type DashboardPinnableControl,
+} from './types';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
@@ -178,6 +185,7 @@ export function initializeLayoutManager(
         beside,
       }
     );
+
     return {
       ...layout$.value,
       panels: {
@@ -245,6 +253,15 @@ export function initializeLayoutManager(
     return titles;
   }
 
+  const createPanel = (panelPackage: PanelPackage) => {
+    const { serializedState, maybePanelId } = panelPackage;
+    const uuid = maybePanelId ?? v4();
+
+    if (serializedState) currentChildState[uuid] = serializedState;
+
+    return uuid;
+  };
+
   // --------------------------------------------------------------------------------------
   // API definition
   // --------------------------------------------------------------------------------------
@@ -256,11 +273,9 @@ export function initializeLayoutManager(
     },
     grid?: DashboardPanel['grid']
   ) => {
-    const { panelType: type, serializedState, maybePanelId } = panelPackage;
-    const uuid = maybePanelId ?? v4();
-    usageCollectionService?.reportUiCounter(DASHBOARD_UI_METRIC_ID, METRIC_TYPE.CLICK, type);
-
-    if (serializedState) currentChildState[uuid] = serializedState;
+    const uuid = createPanel(panelPackage);
+    const { serializedState, panelType } = panelPackage;
+    usageCollectionService?.reportUiCounter(DASHBOARD_UI_METRIC_ID, METRIC_TYPE.CLICK, panelType);
 
     layout$.next(await placeNewPanel(uuid, panelPackage, grid, options?.beside));
 
@@ -357,13 +372,37 @@ export function initializeLayoutManager(
     trackPanel.setHighlightPanelId(uuidOfDuplicate);
   };
 
+  const pinPanel = (uuid: string, controlToPin: DashboardPinnableControl) => {
+    // add control panel to the end of the pinned controls
+    const newControls = { ...layout$.getValue().controls };
+
+    newControls[uuid] = {
+      type: controlToPin.type as StickyControlLayoutState['type'],
+      order: Object.keys(newControls).length,
+      width: controlToPin.width ?? DEFAULT_CONTROL_WIDTH,
+      grow: controlToPin.grow ?? DEFAULT_CONTROL_GROW,
+    };
+    const newPanels = { ...layout$.getValue().panels };
+    delete newPanels[uuid];
+
+    // update the layout with the control panel removed and added as a pinned control
+    layout$.next({ ...layout$.getValue(), panels: newPanels, controls: newControls });
+  };
+
   const getChildApi = async (uuid: string): Promise<DefaultEmbeddableApi | undefined> => {
-    const panelLayout = layout$.value.panels[uuid];
+    const { panels, controls } = layout$.value;
+    // Typescript erroneously believes panels[uuid] cannot be undefined, so we need to add these Object.hasOwn
+    // checks to get the type signature of panelLayout to be correct
+    const panelLayout = Object.hasOwn(panels, uuid)
+      ? panels[uuid]
+      : Object.hasOwn(controls, uuid)
+      ? controls[uuid]
+      : undefined;
     if (!panelLayout) throw new PanelNotFoundError();
     if (children$.value[uuid]) return children$.value[uuid];
 
     // if the panel is in a collapsed section and has never been built, then childApi will be undefined
-    if (isSectionCollapsed(panelLayout.grid.sectionId)) {
+    if (isDashboardLayoutPanel(panelLayout) && isSectionCollapsed(panelLayout.grid.sectionId)) {
       return undefined;
     }
 
@@ -375,7 +414,7 @@ export function initializeLayoutManager(
         }
 
         // If we hit this, the panel was removed before the embeddable finished loading.
-        if (layout$.value.panels[uuid] === undefined) {
+        if (!Object.hasOwn(panels, uuid) && !Object.hasOwn(controls, uuid)) {
           subscription.unsubscribe();
           resolve(undefined);
         }
@@ -490,17 +529,20 @@ export function initializeLayoutManager(
         const controlToPin = layout$.getValue().panels[uuid];
         if (!controlToPin) return;
 
-        // add control panel to the end of the pinned controls
-        const newControls = { ...layout$.getValue().controls };
-        newControls[uuid] = {
-          type: controlToPin.type as StickyControlLayoutState['type'],
-          order: Object.keys(newControls).length,
+        pinPanel(uuid, controlToPin);
+      },
+      addPinnedPanel: async (panelPackage: PanelPackage) => {
+        const newPanelUuid = createPanel(panelPackage);
+        const { serializedState } = panelPackage;
+        const displaySettings = serializedState
+          ? pick(serializedState.rawState, 'grow', 'width')
+          : {};
+        const panelToPin = {
+          type: panelPackage.panelType,
+          ...displaySettings,
         };
-        const newPanels = { ...layout$.getValue().panels };
-        delete newPanels[uuid];
-
-        // update the layout with the control panel removed and added as a pinned control
-        layout$.next({ ...layout$.getValue(), panels: newPanels, controls: newControls });
+        pinPanel(newPanelUuid, panelToPin);
+        return await getChildApi(newPanelUuid);
       },
 
       /** Sections */

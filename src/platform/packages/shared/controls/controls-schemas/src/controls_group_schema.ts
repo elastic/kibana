@@ -20,8 +20,9 @@ import {
 } from '@kbn/controls-constants';
 import { optionsListDSLControlSchema } from './options_list_schema';
 import { rangeSliderControlSchema } from './range_slider_schema';
+import { timeSliderControlSchema } from './time_slider_schema';
 
-const controlWidthSchema = schema.oneOf(
+export const controlWidthSchema = schema.oneOf(
   [
     schema.literal(CONTROL_WIDTH_SMALL),
     schema.literal(CONTROL_WIDTH_MEDIUM),
@@ -62,10 +63,13 @@ export const controlsGroupSchema = schema.object({
           stickyControlSchema,
         ])
         .extendsDeep({ unknowns: 'allow' }),
-      schema.allOf([
-        schema.object({ type: schema.literal(TIME_SLIDER_CONTROL) }),
-        stickyControlSchema,
-      ]),
+      schema
+        .allOf([
+          schema.object({ type: schema.literal(TIME_SLIDER_CONTROL) }),
+          timeSliderControlSchema,
+          stickyControlSchema,
+        ])
+        .extendsDeep({ unknowns: 'allow' }), // allows for legacy unknowns such as `useGlobalFilters`
     ]),
     {
       defaultValue: [],

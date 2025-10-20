@@ -42,7 +42,12 @@ export {
   type SerializedTimeRange,
 } from './interfaces/fetch/time_range_manager';
 export { apiPublishesReload, type PublishesReload } from './interfaces/fetch/publishes_reload';
-export { apiAppliesFilters, type AppliesFilters } from './interfaces/fetch/applies_filters';
+export {
+  apiAppliesFilters,
+  type AppliesFilters,
+  apiAppliesTimeslice,
+  type AppliesTimeslice,
+} from './interfaces/fetch/applies_filters';
 export {
   apiPublishesFilters,
   apiPublishesPartialUnifiedSearch,

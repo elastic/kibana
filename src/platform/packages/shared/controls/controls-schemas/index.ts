@@ -10,6 +10,7 @@
 export { controlsGroupSchema } from './src/controls_group_schema';
 
 export type {
+  ControlWidth,
   ControlState,
   ControlsGroupState,
   DataControlState,
@@ -26,4 +27,5 @@ export type {
   TimeSlice,
   HasCustomPrepend,
   LegacyIgnoreParentSettings,
+  StickyControlLayoutState,
 } from './src/types';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StickyControlLayoutState } from '@kbn/controls-schemas/src/types';
+import type { ControlWidth, StickyControlLayoutState } from '@kbn/controls-schemas/src/types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { DashboardPanel, DashboardSection } from '../../../server';
@@ -19,6 +19,15 @@ export interface DashboardChildren {
 export interface DashboardLayoutPanel {
   grid: DashboardPanel['grid'] & { sectionId?: string };
   type: DashboardPanel['type'];
+}
+
+export const isDashboardLayoutPanel = (panel: unknown): panel is DashboardLayoutPanel =>
+  Boolean((panel as DashboardLayoutPanel).type) && Boolean((panel as DashboardLayoutPanel).grid);
+
+export interface DashboardPinnableControl {
+  type: DashboardPanel['type'];
+  grow?: boolean;
+  width?: ControlWidth;
 }
 
 export interface DashboardLayout {

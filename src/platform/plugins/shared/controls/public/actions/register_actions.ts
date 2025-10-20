@@ -15,6 +15,7 @@ import {
   ACTION_CLEAR_CONTROL,
   ACTION_CREATE_CONTROL,
   ACTION_CREATE_ESQL_CONTROL,
+  ACTION_CREATE_TIME_SLIDER,
   ACTION_PIN_CONTROL,
   OPTIONS_LIST_ACTION,
   RANGE_SLIDER_ACTION,
@@ -49,6 +50,12 @@ export function registerActions(uiActions: UiActionsStart) {
     const { createESQLControlAction } = await import('../controls_module');
     return createESQLControlAction();
   });
+
+  uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ACTION_CREATE_TIME_SLIDER, async () => {
+    const { createTimeSliderAction } = await import('../controls_module');
+    return createTimeSliderAction();
+  });
+
   uiActions.addTriggerActionAsync(CONTROL_MENU_TRIGGER, OPTIONS_LIST_ACTION, async () => {
     const { createOptionsListControlAction } = await import('./create_options_list_action');
     return createOptionsListControlAction();
