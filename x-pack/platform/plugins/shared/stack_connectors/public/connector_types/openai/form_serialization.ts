@@ -13,7 +13,6 @@ export const formSerializer = (formData: InternalConnectorForm): ConnectorFormSc
     config: { headers?: Array<{ key: string; value: string }> };
   };
 
-  const secretHeaders = {};
   const configHeaders = (webhookFormData?.config?.headers ?? []).reduce(
     (acc, header) => ({
       ...acc,
@@ -30,7 +29,7 @@ export const formSerializer = (formData: InternalConnectorForm): ConnectorFormSc
     },
     secrets: {
       ...formData.secrets,
-      secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
+      secretHeaders: undefined,
     },
   };
 };
