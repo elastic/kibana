@@ -83,6 +83,20 @@ describe('STATS Validation', () => {
         }
       });
 
+      test('sub-command can reference aggregated field from WHERE clause', () => {
+        statsExpectErrors(
+          'from a_index | stats top10count = sum(doubleField) WHERE textField == "a" | eval result = top10count + 1',
+          []
+        );
+      });
+
+      test('CASE function can reference aggregated field from WHERE clause', () => {
+        statsExpectErrors(
+          'from a_index | stats top10count = sum(doubleField) WHERE textField == "a" | eval result = CASE(textField == "b", top10count, 0)',
+          []
+        );
+      });
+
       test('errors when input is not an aggregate function', () => {
         statsExpectErrors('from a_index | stats doubleField ', [
           'Expected an aggregate function or group but got "doubleField" of type FieldAttribute',
