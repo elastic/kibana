@@ -14,6 +14,7 @@
     "@kbn/ftr-common-functional-services",
     "@kbn/synthetics-plugin",
     "@kbn/observability-synthetics-test-data",
-    "@kbn/ftr-common-functional-ui-services"
+    "@kbn/ftr-common-functional-ui-services",
+    "@kbn/test-services"
   ]
 }

@@ -47,5 +47,6 @@
     "@kbn/code-owners",
     "@kbn/projects-solutions-groups",
     "@kbn/dot-text",
+    "@kbn/test-services",
   ]
 }
