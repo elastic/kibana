@@ -26,6 +26,8 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Global, css } from '@emotion/react';
 import capitalize from 'lodash/capitalize';
+import { useSelector } from 'react-redux';
+import { selectWorkflowDefinition } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { MANUAL_TRIGGERS_DESCRIPTIONS } from '../../../../common/translations';
 import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
@@ -48,17 +50,19 @@ function getDefaultTrigger(definition: WorkflowYaml | null): TriggerType {
 }
 
 export function WorkflowExecuteModal({
-  definition,
   onClose,
   onSubmit,
 }: {
-  definition: WorkflowYaml;
   onClose: () => void;
   onSubmit: (data: Record<string, any>) => void;
 }) {
   const modalTitleId = useGeneratedHtmlId();
+  const definition = useSelector(selectWorkflowDefinition);
   const enabledTriggers = ['alert', 'index', 'manual'];
-  const defaultTrigger = useMemo(() => getDefaultTrigger(definition), [definition]);
+  const defaultTrigger = useMemo(
+    () => (definition ? getDefaultTrigger(definition) : 'alert'),
+    [definition]
+  );
   const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>(defaultTrigger);
 
   const [executionInput, setExecutionInput] = useState<string>('');
@@ -80,10 +84,14 @@ export function WorkflowExecuteModal({
   );
 
   const shouldAutoRun = useMemo(() => {
-    if (definition.triggers?.some((trigger) => trigger.type === 'alert') || definition.inputs) {
-      return false;
+    if (
+      definition &&
+      !definition.triggers?.some((trigger) => trigger.type === 'alert') &&
+      !definition.inputs?.length
+    ) {
+      return true; // Nothing to ask for, auto run the workflow
     }
-    return true;
+    return false;
   }, [definition]);
 
   useEffect(() => {
@@ -93,11 +101,11 @@ export function WorkflowExecuteModal({
       return;
     }
     // Default trigger selection
-    if (definition.triggers?.some((trigger) => trigger.type === 'alert')) {
+    if (definition?.triggers?.some((trigger) => trigger.type === 'alert')) {
       setSelectedTrigger('alert');
       return;
     }
-    if (definition.inputs) {
+    if (definition?.inputs) {
       setSelectedTrigger('manual');
       return;
     }
@@ -189,7 +197,7 @@ export function WorkflowExecuteModal({
           )}
           {selectedTrigger === 'manual' && (
             <WorkflowExecuteManualForm
-              definition={definition}
+              definition={definition ?? null}
               value={executionInput}
               errors={executionInputErrors}
               setErrors={setExecutionInputErrors}
