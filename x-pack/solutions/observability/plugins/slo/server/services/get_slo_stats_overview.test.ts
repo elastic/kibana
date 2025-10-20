@@ -10,7 +10,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { GetSLOStatsOverview } from './get_slo_stats_overview';
+import { ES_PAGESIZE_LIMIT, GetSLOStatsOverview } from './get_slo_stats_overview';
 import { getSloSettings, getSummaryIndices } from './slo_settings';
 import { getElasticsearchQueryOrThrow } from './transform_generators/common';
 import { typedSearch } from '../utils/queries';
@@ -154,7 +154,7 @@ const buildExpectedCompositeQueryPayload = (boolFilters: any, includeInstanceId 
   aggs: {
     sloIds: {
       composite: {
-        size: 5000,
+        size: ES_PAGESIZE_LIMIT,
         sources: [
           {
             sloId: { terms: { field: 'slo.id' } },

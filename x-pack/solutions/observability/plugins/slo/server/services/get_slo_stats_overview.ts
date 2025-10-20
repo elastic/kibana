@@ -23,7 +23,14 @@ import { typedSearch } from '../utils/queries';
 import { getSummaryIndices, getSloSettings } from './slo_settings';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
 
-const ES_PAGESIZE_LIMIT = 5000;
+export const ES_PAGESIZE_LIMIT = 1000;
+
+/*
+    This service retrieves stats from alert and rule indices to display on the SLO landing page. 
+    When filters are applied to SLOs, we want to forward those filters onto the searches performed on alerts and rules so the overview stats actively reflect viewable SLO data.
+    To achieve this, we need to retrieve a list of all SLO ids and instanceIds that may appear across all SLO list pages
+      to use them as filter conditions on the alert and rule stats that we want to count. 
+*/
 
 export class GetSLOStatsOverview {
   constructor(
@@ -44,12 +51,86 @@ export class GetSLOStatsOverview {
     return undefined;
   }
 
+  private processSloQueryBuckets(
+    buckets: Array<{ key: { sloId: string; sloInstanceId: string } }>,
+    instanceId?: string
+  ): Array<{ bucketKey: string; query: QueryDslQueryContainer }> {
+    return buckets.map((bucket) => {
+      return {
+        bucketKey: bucket.key.sloId,
+        query: {
+          bool: {
+            must: [
+              { term: { 'kibana.alert.rule.parameters.sloId': bucket.key.sloId } },
+              ...(instanceId
+                ? [
+                    {
+                      term: {
+                        'kibana.alert.instance.id': bucket.key.sloInstanceId,
+                      },
+                    },
+                  ]
+                : []),
+            ],
+          },
+        },
+      };
+    });
+  }
+
   /*
-    This service retrieves stats from alert and rule indices to display on the SLO landing page. 
-    When filters are applied to SLOs, we want to forward those filters onto the searches performed on alerts and rules so the overview stats actively reflect viewable SLO data.
-    To achieve this, we need to retrieve a list of all SLO ids and instanceIds that may appear across all SLO list pages
-      to use them as filter conditions on the alert and rule stats that we want to count. 
-  */
+     If we know there are no SLOs that match the provided filters, we can skip querying for rules and alerts
+    */
+  private async fetchRulesAndAlerts({
+    querySLOsForIds,
+    sloRuleQueryKeys,
+    ruleFilters,
+    alertFilters,
+  }: {
+    querySLOsForIds: boolean;
+    sloRuleQueryKeys: string[];
+    ruleFilters?: KueryNode;
+    alertFilters?: QueryDslQueryContainer[];
+  }) {
+    return await Promise.all(
+      querySLOsForIds && sloRuleQueryKeys.length === 0
+        ? [
+            {
+              total: 0,
+            },
+            {
+              activeAlertCount: 0,
+              recoveredAlertCount: 0,
+            },
+          ]
+        : [
+            this.rulesClient.find({
+              options: {
+                ruleTypeIds: SLO_RULE_TYPE_IDS,
+                consumers: [
+                  AlertConsumers.SLO,
+                  AlertConsumers.ALERTS,
+                  AlertConsumers.OBSERVABILITY,
+                ],
+                ...(ruleFilters ? { filter: ruleFilters } : {}),
+              },
+            }),
+
+            this.racClient.getAlertSummary({
+              ruleTypeIds: SLO_RULE_TYPE_IDS,
+              consumers: [AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY],
+              gte: moment().subtract(24, 'hours').toISOString(),
+              lte: moment().toISOString(),
+              ...(alertFilters?.length
+                ? {
+                    filter: alertFilters,
+                  }
+                : {}),
+            }),
+          ]
+    );
+  }
+
   public async execute(params: GetSLOStatsOverviewParams): Promise<GetSLOStatsOverviewResponse> {
     const settings = await getSloSettings(this.soClient);
     const { indices } = await getSummaryIndices(this.scopedClusterClient.asInternalUser, settings);
@@ -73,10 +154,8 @@ export class GetSLOStatsOverview {
     const instanceIdIncluded = Object.values(params).find(
       (value) => typeof value === 'string' && value.includes('slo.instanceId')
     );
-    let alertFilters: QueryDslQueryContainer[] = [];
-    let alertFilterTerms: QueryDslQueryContainer[] = [];
+    const alertFilterTerms: QueryDslQueryContainer[] = [];
     let afterKey: AggregationsAggregate | undefined;
-    let ruleFilters: KueryNode | undefined;
 
     try {
       if (querySLOsForIds) {
@@ -123,43 +202,18 @@ export class GetSLOStatsOverview {
               buckets?: Array<{ key: { sloId: string; sloInstanceId: string } }>;
             }
           )?.buckets;
-          if (buckets && buckets.length > 0) {
-            alertFilterTerms = alertFilterTerms.concat(
-              ...buckets.map((bucket) => {
-                sloRuleQueryKeys.push(bucket.key.sloId);
-                return {
-                  bool: {
-                    must: [
-                      { term: { 'kibana.alert.rule.parameters.sloId': bucket.key.sloId } },
-                      ...(instanceIdIncluded
-                        ? [
-                            {
-                              term: {
-                                'kibana.alert.instance.id': bucket.key.sloInstanceId,
-                              },
-                            },
-                          ]
-                        : []),
-                    ],
-                  },
-                };
-              })
+
+          if (buckets) {
+            const processedBuckets = this.processSloQueryBuckets(
+              buckets,
+              instanceIdIncluded as string | undefined
             );
+            for (const { bucketKey, query } of processedBuckets) {
+              alertFilterTerms.push(query);
+              sloRuleQueryKeys.push(bucketKey);
+            }
           }
         } while (afterKey);
-
-        const resultNodes = nodeBuilder.or(
-          sloRuleQueryKeys.map((sloId) => nodeBuilder.is(`alert.attributes.params.sloId`, sloId))
-        );
-
-        ruleFilters = resultNodes;
-        alertFilters = [
-          {
-            bool: {
-              should: [...alertFilterTerms],
-            },
-          },
-        ];
       }
     } catch (error) {
       this.logger.error(`Error querying SLOs for IDs: ${error}`);
@@ -231,46 +285,29 @@ export class GetSLOStatsOverview {
       },
     });
 
-    /*
-     If we know there are no SLOs that match the provided filters, we can skip querying for rules and alerts
-    */
-    const [rules, alerts] = await Promise.all(
-      querySLOsForIds && sloRuleQueryKeys.length === 0
+    const ruleFilters: KueryNode | undefined =
+      sloRuleQueryKeys.length > 0
+        ? nodeBuilder.or(
+            sloRuleQueryKeys.map((sloId) => nodeBuilder.is(`alert.attributes.params.sloId`, sloId))
+          )
+        : undefined;
+    const alertFilters =
+      alertFilterTerms.length > 0
         ? [
             {
-              total: 0,
-            },
-            {
-              activeAlertCount: 0,
-              recoveredAlertCount: 0,
-            },
-          ]
-        : [
-            this.rulesClient.find({
-              options: {
-                ruleTypeIds: SLO_RULE_TYPE_IDS,
-                consumers: [
-                  AlertConsumers.SLO,
-                  AlertConsumers.ALERTS,
-                  AlertConsumers.OBSERVABILITY,
-                ],
-                ...(ruleFilters ? { filter: ruleFilters } : {}),
+              bool: {
+                should: [...alertFilterTerms],
               },
-            }),
-
-            this.racClient.getAlertSummary({
-              ruleTypeIds: SLO_RULE_TYPE_IDS,
-              consumers: [AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY],
-              gte: moment().subtract(24, 'hours').toISOString(),
-              lte: moment().toISOString(),
-              ...(alertFilters?.length
-                ? {
-                    filter: alertFilters,
-                  }
-                : {}),
-            }),
+            },
           ]
-    );
+        : [];
+
+    const [rules, alerts] = await this.fetchRulesAndAlerts({
+      querySLOsForIds,
+      sloRuleQueryKeys,
+      ruleFilters,
+      alertFilters,
+    });
 
     const aggs = response.aggregations;
 
