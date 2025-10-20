@@ -129,9 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('are preserved after opening a dashboard saved with filters', async () => {
-        await dashboard.gotoDashboardLandingPage();
         await dashboard.loadSavedDashboard('with filters');
-        await header.waitUntilLoadingHasFinished();
         await elasticChart.setNewChartUiDebugFlag(true);
         await queryBar.submitQuery();
 
@@ -162,18 +160,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it("navigating to a dashboard with global filter doesn't unpin it if same filter is saved with dashboard", async () => {
         await dashboard.preserveCrossAppState();
-        await dashboard.gotoDashboardLandingPage();
         await dashboard.loadSavedDashboard('with filters');
-        await header.waitUntilLoadingHasFinished();
         expect(await filterBar.isFilterPinned('bytes')).to.be(true);
         await pieChart.expectPieSliceCount(1);
       });
 
       it("pinned filters aren't saved", async () => {
         await filterBar.removeFilter('bytes');
-        await dashboard.gotoDashboardLandingPage();
         await dashboard.loadSavedDashboard('saved with pinned filters');
-        await header.waitUntilLoadingHasFinished();
         expect(await filterBar.getFilterCount()).to.be(0);
         await pieChart.expectPieSliceCount(5);
       });
@@ -199,7 +193,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('bad filters are loaded properly', function () {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
-        await dashboard.gotoDashboardLandingPage();
         await dashboard.loadSavedDashboard('dashboard with bad filters');
       });
 

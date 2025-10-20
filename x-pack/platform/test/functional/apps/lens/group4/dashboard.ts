@@ -364,7 +364,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // re-open the dashboard and check the drilldown is still there
       await dashboard.navigateToApp();
       await dashboard.loadSavedDashboard('dashboardWithDrilldown');
-      await header.waitUntilLoadingHasFinished();
 
       await clickInChart(5, 5); // hardcoded position of the slice, depends heavy on data and charts implementation
       expect(
