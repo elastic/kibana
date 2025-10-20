@@ -1196,10 +1196,9 @@ export default function ({ getService }: FtrProviderContext) {
           freq: 3, // Daily
           interval: 1,
           tzid: 'UTC',
-          byweekday: [1],
+          byweekday: ['MO'],
           byhour: [20],
           byminute: [30],
-          bymonthday: [4],
         },
       };
       const initialTime = Date.now();

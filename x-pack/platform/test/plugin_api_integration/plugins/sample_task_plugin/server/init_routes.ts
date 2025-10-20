@@ -289,7 +289,7 @@ export function initRoutes(
                 tzid: schema.string(),
                 byhour: schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 23 }))),
                 byminute: schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 59 }))),
-                byweekday: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 7 }))),
+                byweekday: schema.maybe(schema.arrayOf(schema.string())),
                 bymonthday: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 31 }))),
               }),
             }),
