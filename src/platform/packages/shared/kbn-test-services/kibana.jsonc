@@ -1,5 +1,5 @@
 {
-  "type": "shared-server",
+  "type": "shared-common",
   "id": "@kbn/test-services",
   "owner": "@elastic/appex-qa",
   "group": "platform",

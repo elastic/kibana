@@ -162,15 +162,21 @@ export class RepoSourceClassifier {
 
     const { pkgId, rel } = pkgInfo;
 
-    if (pkgId === '@kbn/test' || pkgId === '@kbn/test-subj-selector') {
+    if (
+      pkgId === '@kbn/test' ||
+      pkgId === '@kbn/test-subj-selector' ||
+      pkgId === '@kbn/test-services'
+    ) {
       return 'common package';
     }
 
     const pkgIdWords = new Set(pkgId.split(/\W+/));
+
     // treat any package with "mocks" or "storybook" in the ID as a test-specific package
     if (pkgIdWords.has('mocks') || pkgIdWords.has('storybook') || pkgIdWords.has('test')) {
       return 'tests or mocks';
     }
+
     if (Array.from(pkgIdWords).at(-1) === 'cli') {
       return 'tooling';
     }
