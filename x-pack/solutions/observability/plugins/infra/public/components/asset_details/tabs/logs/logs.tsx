@@ -16,6 +16,9 @@ import moment from 'moment';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
 import useAsync from 'react-use/lib/useAsync';
 import { Global, css } from '@emotion/react';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { buildEsQuery, buildCustomFilter, FilterStateStore } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
@@ -41,6 +44,7 @@ export const Logs = () => {
         search: { searchSource },
       },
       share: { url },
+      uiSettings,
     },
   } = useKibanaContextForPlugin();
   const logsLocator = getLogsLocatorFromUrlService(url)!;
@@ -66,17 +70,78 @@ export const Logs = () => {
     [textQuery]
   );
 
-  const filter = useMemo(() => {
-    const query = [
-      `${findInventoryFields(entity.type).id}: "${entity.id}"`,
-      ...(textQueryDebounced !== '' ? [textQueryDebounced] : []),
-    ].join(' and ');
+  // Entity context filter - should NOT be highlighted
+  const entityContextFilter = useMemo(
+    () => [
+      buildEsQuery(
+        undefined,
+        {
+          query: `${findInventoryFields(entity.type).id}: "${entity.id}"`,
+          language: 'kuery',
+        },
+        [],
+        getEsQueryConfig(uiSettings)
+      ),
+    ],
+    [entity.type, entity.id, uiSettings]
+  );
 
-    return {
-      language: 'kuery',
-      query,
-    };
-  }, [entity.type, entity.id, textQueryDebounced]);
+  // User search filter - should be highlighted
+  const userSearchFilter = useMemo(() => {
+    if (!textQueryDebounced || textQueryDebounced.trim() === '') {
+      return [];
+    }
+
+    try {
+      return [
+        buildEsQuery(
+          undefined,
+          { query: textQueryDebounced, language: 'kuery' },
+          [],
+          getEsQueryConfig(uiSettings)
+        ),
+      ];
+    } catch (error) {
+      // Invalid/incomplete query, return empty array to avoid breaking the component
+      return [];
+    }
+  }, [textQueryDebounced, uiSettings]);
+
+  const savedSearchFilters = useMemo<Filter[]>(() => {
+    const filters: Filter[] = [];
+
+    // Add entity context filter (skip highlighting)
+    if (logSources.value && entityContextFilter.length > 0) {
+      filters.push(
+        buildCustomFilter(
+          logSources.value,
+          entityContextFilter[0],
+          false,
+          false,
+          'Entity Context',
+          FilterStateStore.APP_STATE,
+          true
+        )
+      );
+    }
+
+    // Add user search filter (enable highlighting)
+    if (logSources.value && userSearchFilter.length > 0) {
+      filters.push(
+        buildCustomFilter(
+          logSources.value,
+          userSearchFilter[0],
+          false,
+          false,
+          'User Search',
+          FilterStateStore.APP_STATE,
+          false
+        )
+      );
+    }
+
+    return filters;
+  }, [entityContextFilter, userSearchFilter, logSources.value]);
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTextQuery(e.target.value);
@@ -144,7 +209,7 @@ export const Logs = () => {
               dependencies={{ embeddable, searchSource, dataViews }}
               index={logSources.value}
               timeRange={dateRange}
-              query={filter}
+              filters={savedSearchFilters}
               height="68vh"
               displayOptions={{
                 solutionNavIdOverride: 'oblt',
