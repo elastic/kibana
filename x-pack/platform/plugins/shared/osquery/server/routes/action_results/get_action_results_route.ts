@@ -87,28 +87,64 @@ export const getActionResultsRoute = (
 
           const search = await context.search;
 
-          // Fetch action details to get agent IDs
-          const { actionDetails } = await lastValueFrom(
-            search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
-              {
-                actionId: request.params.actionId,
-                factoryQueryType: OsqueryQueries.actionDetails,
-                spaceId:
-                  (await context.core).savedObjects.client.getCurrentNamespace() || 'default',
+          // Parse agentIds from query parameter if provided (for external API consumers)
+          const requestedAgentIds = request.query.agentIds
+            ? request.query.agentIds.split(',').map((id) => id.trim())
+            : undefined;
+
+          if (requestedAgentIds && requestedAgentIds.length > 100) {
+            return response.badRequest({
+              body: {
+                message:
+                  'Too many agent IDs in URL (max 100). Either reduce the list or omit agentIds to query all agents from the action.',
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
-            )
-          );
+            });
+          }
 
-          // Extract agent IDs from action document
-          let agentIds: string[] = [];
-          if (actionDetails?._source) {
-            // Check if actionId is a child query action_id
-            const queries = actionDetails._source.queries || [];
-            const matchingQuery = queries.find((q: any) => q.action_id === request.params.actionId);
+          let agentIds: string[];
+          let agentIdsKuery: string | undefined;
 
-            // Use query-specific agents if found, otherwise use parent action's agents
-            agentIds = matchingQuery?.agents || actionDetails._source.agents || [];
+          if (requestedAgentIds) {
+            // Use provided agentIds for filtering (external API consumers)
+            agentIds = requestedAgentIds;
+
+            // Build kuery to filter results to requested agents
+            agentIdsKuery = requestedAgentIds.map((id) => `agent.id: "${id}"`).join(' OR ');
+          } else {
+            // Fetch action details to get agent IDs (internal UI usage)
+            const { actionDetails } = await lastValueFrom(
+              search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
+                {
+                  actionId: request.params.actionId,
+                  factoryQueryType: OsqueryQueries.actionDetails,
+                  spaceId:
+                    (await context.core).savedObjects.client.getCurrentNamespace() || 'default',
+                },
+                { abortSignal, strategy: 'osquerySearchStrategy' }
+              )
+            );
+
+            // Extract agent IDs from action document
+            if (actionDetails?._source) {
+              // Check if actionId is a child query action_id
+              const queries = actionDetails._source.queries || [];
+              const matchingQuery = queries.find(
+                (q: any) => q.action_id === request.params.actionId
+              );
+
+              // Use query-specific agents if found, otherwise use parent action's agents
+              agentIds = matchingQuery?.agents || actionDetails._source.agents || [];
+            } else {
+              agentIds = [];
+            }
+          }
+
+          // Combine agentIds filtering with user-provided kuery
+          let combinedKuery = request.query.kuery;
+          if (agentIdsKuery) {
+            combinedKuery = combinedKuery
+              ? `(${agentIdsKuery}) AND (${combinedKuery})`
+              : agentIdsKuery;
           }
 
           const res = await lastValueFrom(
@@ -116,7 +152,7 @@ export const getActionResultsRoute = (
               {
                 actionId: request.params.actionId,
                 factoryQueryType: OsqueryQueries.actionResults,
-                kuery: request.query.kuery,
+                kuery: combinedKuery,
                 startDate: request.query.startDate,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,
