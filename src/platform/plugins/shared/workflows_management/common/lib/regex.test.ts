@@ -7,131 +7,241 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { VARIABLE_REGEX_GLOBAL, UNFINISHED_VARIABLE_REGEX_GLOBAL } from './regex';
+import {
+  VARIABLE_REGEX_GLOBAL,
+  UNFINISHED_VARIABLE_REGEX_GLOBAL,
+  ALLOWED_KEY_REGEX,
+  PROPERTY_PATH_REGEX,
+  LIQUID_FILTER_REGEX,
+} from './regex';
 
-describe('Mustache regex patterns', () => {
-  describe('MUSTACHE_REGEX_GLOBAL', () => {
-    beforeEach(() => {
-      // Reset regex state before each test
-      VARIABLE_REGEX_GLOBAL.lastIndex = 0;
-    });
-
-    it('should match basic mustache expressions', () => {
-      const text = 'Hello {{ name }}, welcome!';
-      const matches = [...text.matchAll(VARIABLE_REGEX_GLOBAL)];
-
-      expect(matches).toHaveLength(1);
-      expect(matches[0].groups?.key).toBe('name');
-      expect(matches[0][0]).toBe('{{ name }}');
-    });
-
-    it('should match multiple mustache expressions', () => {
-      const text = '{{ consts.apiUrl }}/users/{{ steps.getUser.output.id }}';
+describe('regex patterns', () => {
+  describe('VARIABLE_REGEX_GLOBAL', () => {
+    it('should match complete mustache expressions', () => {
+      const text = 'Hello {{ user.name }} and {{ item.price }}!';
       const matches = [...text.matchAll(VARIABLE_REGEX_GLOBAL)];
 
       expect(matches).toHaveLength(2);
-      expect(matches[0].groups?.key).toBe('consts.apiUrl');
-      expect(matches[1].groups?.key).toBe('steps.getUser.output.id');
+      expect(matches[0].groups?.key).toBe('user.name');
+      expect(matches[1].groups?.key).toBe('item.price');
     });
 
-    it('should handle whitespace variations', () => {
-      const variations = ['{{name}}', '{{ name }}', '{{  name  }}', '{{ name}}', '{{name }}'];
-
-      variations.forEach((variation) => {
-        VARIABLE_REGEX_GLOBAL.lastIndex = 0;
-        const matches = [...variation.matchAll(VARIABLE_REGEX_GLOBAL)];
-        expect(matches).toHaveLength(1);
-        expect(matches[0].groups?.key).toBe('name');
-      });
-    });
-
-    it('should not match incomplete expressions', () => {
-      const incompleteExpressions = ['{ name }', '{{ name', 'name }}'];
-
-      incompleteExpressions.forEach((expr) => {
-        VARIABLE_REGEX_GLOBAL.lastIndex = 0;
-        const matches = [...expr.matchAll(VARIABLE_REGEX_GLOBAL)];
-        expect(matches).toHaveLength(0);
-      });
-    });
-
-    it('should match incomplete expressions ending with a dot', () => {
-      const incompleteExpressions = ['{{ steps.', '{{consts.templates[0].'];
-      incompleteExpressions.forEach((expr) => {
-        VARIABLE_REGEX_GLOBAL.lastIndex = 0;
-        const matches = [...expr.matchAll(VARIABLE_REGEX_GLOBAL)];
-        expect(matches).toHaveLength(0);
-      });
-    });
-
-    it('should match variables with nunjucks filters with different spacing', () => {
-      const text =
-        '{{ steps.getUser.output.id|toLowerCase }}, {{ steps.getUser.output.id | title }}, {{steps.getUser.output.id | capitalize}}, {{steps.getUser.output.id|replace("foo", "bar")}}';
+    it('should match mustache with whitespace', () => {
+      const text = 'Value: {{  steps.getData.output  }}';
       const matches = [...text.matchAll(VARIABLE_REGEX_GLOBAL)];
 
-      expect(matches).toHaveLength(4);
-      expect(matches[0].groups?.key).toBe('steps.getUser.output.id|toLowerCase');
-      expect(matches[1].groups?.key).toBe('steps.getUser.output.id | title');
-      expect(matches[2].groups?.key).toBe('steps.getUser.output.id | capitalize');
-      expect(matches[3].groups?.key).toBe('steps.getUser.output.id|replace("foo", "bar")');
+      expect(matches).toHaveLength(1);
+      expect(matches[0].groups?.key).toBe('steps.getData.output');
+    });
+
+    it('should not match incomplete mustache', () => {
+      const text = 'Incomplete: {{ user.name';
+      const matches = [...text.matchAll(VARIABLE_REGEX_GLOBAL)];
+
+      expect(matches).toHaveLength(0);
     });
   });
 
-  describe('UNFINISHED_MUSTACHE_REGEX_GLOBAL', () => {
-    beforeEach(() => {
-      UNFINISHED_VARIABLE_REGEX_GLOBAL.lastIndex = 0;
-    });
-
-    it('should match unfinished mustache expressions at end of string', () => {
-      const text = 'message: "{{ consts.api';
+  describe('UNFINISHED_VARIABLE_REGEX_GLOBAL', () => {
+    it('should match unfinished mustache at end of line', () => {
+      const text = 'Message: {{ user.name';
       const matches = [...text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)];
 
       expect(matches).toHaveLength(1);
-      expect(matches[0].groups?.key).toBe('consts.api');
+      expect(matches[0].groups?.key).toBe('user.name');
     });
 
-    it('should match unfinished expressions with trailing dot', () => {
-      const text = 'value: {{ steps.';
+    it('should match unfinished mustache with partial key', () => {
+      const text = 'Value: {{ steps.getData.out';
       const matches = [...text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)];
 
       expect(matches).toHaveLength(1);
-      expect(matches[0].groups?.key).toBe('steps.');
+      expect(matches[0].groups?.key).toBe('steps.getData.out');
     });
 
-    it('should match unfinished expressions with trailing dot in array', () => {
-      const text = '{{ consts.templates[0].';
+    it('should match mustache with just opening braces', () => {
+      const text = 'Start: {{ ';
       const matches = [...text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)];
 
       expect(matches).toHaveLength(1);
-      expect(matches[0].groups?.key).toBe('consts.templates[0].');
+      expect(matches[0].groups?.key).toBe('');
     });
 
-    it('should match unfinished expressions with brackets access in object', () => {
-      const text = "{{ steps.fetchUser['profile";
+    it('should not match complete mustache', () => {
+      const text = 'Complete: {{ user.name }} more';
       const matches = [...text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)];
 
-      expect(matches).toHaveLength(1);
-      expect(matches[0].groups?.key).toBe("steps.fetchUser['profile");
+      expect(matches).toHaveLength(0);
     });
   });
 
-  describe('Edge cases', () => {
-    it('should handle nested object paths', () => {
-      const text = '{{ steps.fetchUser.output.data.profile.name }}';
-      VARIABLE_REGEX_GLOBAL.lastIndex = 0;
-      const matches = [...text.matchAll(VARIABLE_REGEX_GLOBAL)];
+  describe('ALLOWED_KEY_REGEX', () => {
+    it('should match valid property paths', () => {
+      const validPaths = [
+        'user',
+        'user.name',
+        'steps.step1.output',
+        'items[0]',
+        'users["john"]',
+        "data['key']",
+        'user.contacts[0].email',
+        'response.data["user-info"].name',
+      ];
 
-      expect(matches).toHaveLength(1);
-      expect(matches[0].groups?.key).toBe('steps.fetchUser.output.data.profile.name');
+      validPaths.forEach((path) => {
+        expect(ALLOWED_KEY_REGEX.test(path)).toBe(true);
+      });
     });
 
-    it('should handle expressions with numbers', () => {
-      const text = '{{ steps.step1.output.data.0 }}';
-      VARIABLE_REGEX_GLOBAL.lastIndex = 0;
-      const matches = [...text.matchAll(VARIABLE_REGEX_GLOBAL)];
+    it('should match paths with liquid filters', () => {
+      const pathsWithFilters = [
+        'user.name | upcase',
+        'price | round: 2',
+        'items | map: "title" | join: ", "',
+      ];
 
-      expect(matches).toHaveLength(1);
-      expect(matches[0].groups?.key).toBe('steps.step1.output.data.0');
+      pathsWithFilters.forEach((path) => {
+        expect(ALLOWED_KEY_REGEX.test(path)).toBe(true);
+      });
+    });
+
+    it('should not match invalid property paths', () => {
+      const invalidPaths = [
+        '123invalid', // starts with number
+        '.user', // starts with dot
+        'user..name', // double dots
+        'user[abc]', // unquoted string in brackets
+        'user]invalid[', // wrong bracket order
+      ];
+
+      invalidPaths.forEach((path) => {
+        expect(ALLOWED_KEY_REGEX.test(path)).toBe(false);
+      });
+    });
+  });
+
+  describe('PROPERTY_PATH_REGEX', () => {
+    it('should match valid property paths without filters', () => {
+      const validPaths = [
+        'user',
+        'user.name',
+        'steps.step1.output',
+        'items[0]',
+        'users["john"]',
+        "data['key']",
+        'user.contacts[0].email',
+        'response.data["user-info"].name',
+      ];
+
+      validPaths.forEach((path) => {
+        expect(PROPERTY_PATH_REGEX.test(path)).toBe(true);
+      });
+    });
+
+    it('should not match paths with liquid filters', () => {
+      const pathsWithFilters = ['user.name | upcase', 'price | round: 2', 'items | map: "title"'];
+
+      pathsWithFilters.forEach((path) => {
+        expect(PROPERTY_PATH_REGEX.test(path)).toBe(false);
+      });
+    });
+
+    it('should not match invalid property paths', () => {
+      const invalidPaths = [
+        '123invalid', // starts with number
+        '.user', // starts with dot
+        'user..name', // double dots
+        'user[abc]', // unquoted string in brackets
+      ];
+
+      invalidPaths.forEach((path) => {
+        expect(PROPERTY_PATH_REGEX.test(path)).toBe(false);
+      });
+    });
+  });
+
+  describe('LIQUID_FILTER_REGEX', () => {
+    it('should match liquid filter at end of line', () => {
+      const testCases = [
+        { text: '{{ user.name | ', expected: '' },
+        { text: '{{ user.name | up', expected: 'up' },
+        { text: '{{ user.name | upcase', expected: 'upcase' },
+        { text: '  {{ user.firstName | ', expected: '' },
+        { text: '  {{ data.items[0].name | size', expected: 'size' },
+        { text: 'value: {{ price | round', expected: 'round' },
+      ];
+
+      testCases.forEach(({ text, expected }) => {
+        const match = text.match(LIQUID_FILTER_REGEX);
+        expect(match).toBeTruthy();
+        expect(match![1]).toBe(expected);
+      });
+    });
+
+    it('should not match liquid filter not at end of line', () => {
+      const testCases = [
+        '{{ user.name | upcase }} more text',
+        '{{ user.name | upcase }}',
+        'text {{ user.name | }} more',
+        'normal | pipe character',
+      ];
+
+      testCases.forEach((text) => {
+        const match = text.match(LIQUID_FILTER_REGEX);
+        expect(match).toBeNull();
+      });
+    });
+
+    it('should handle whitespace around filter', () => {
+      const testCases = [
+        { text: '{{  user.name  |  ', expected: '' },
+        { text: '{{ user.name |up', expected: 'up' },
+        { text: '{{ user.name | up ', expected: 'up' },
+        { text: '{{user.name|filter', expected: 'filter' },
+      ];
+
+      testCases.forEach(({ text, expected }) => {
+        const match = text.match(LIQUID_FILTER_REGEX);
+        expect(match).toBeTruthy();
+        expect(match![1]).toBe(expected);
+      });
+    });
+
+    it('should not match without mustache braces', () => {
+      const testCases = [
+        'user.name | filter',
+        'text | more text',
+        '{ user.name | filter',
+        'user.name } | filter',
+      ];
+
+      testCases.forEach((text) => {
+        const match = text.match(LIQUID_FILTER_REGEX);
+        expect(match).toBeNull();
+      });
+    });
+
+    it('should match complex variable paths with filters', () => {
+      const testCases = [
+        { text: '{{ steps.fetchUser.output.profile.name | ', expected: '' },
+        { text: '{{ items[0]["user-data"].emails[1] | lower', expected: 'lower' },
+        { text: '{{ response.data["api-key"] | ', expected: '' },
+      ];
+
+      testCases.forEach(({ text, expected }) => {
+        const match = text.match(LIQUID_FILTER_REGEX);
+        expect(match).toBeTruthy();
+        expect(match![1]).toBe(expected);
+      });
+    });
+
+    it('should handle multiple pipes in variable expression', () => {
+      // Should match the last filter being typed
+      const text = '{{ user.name | upcase | append: "!" | ';
+      const match = text.match(LIQUID_FILTER_REGEX);
+
+      expect(match).toBeTruthy();
+      expect(match![1]).toBe('');
     });
   });
 });
