@@ -36,7 +36,7 @@ import {
   prepareConversationMessages,
   prepareSystemPrompt,
 } from './execute_helpers';
-import { agentBuilderExecute } from './agent_builder_execute';
+import { agentBuilderExecute } from '../lib/agent_builder';
 import { isOpenSourceModel } from './utils';
 import type { ConfigSchema } from '../config_schema';
 
