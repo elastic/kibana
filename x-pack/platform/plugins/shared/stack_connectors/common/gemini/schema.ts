@@ -19,6 +19,7 @@ export const ConfigSchema = schema.object({
   gcpRegion: schema.string(),
   gcpProjectID: schema.string(),
   contextWindowLength: schema.maybe(schema.number({})),
+  temperature: schema.maybe(schema.number({})),
 });
 
 export const SecretsSchema = schema.object({

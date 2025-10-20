@@ -18,6 +18,7 @@ export const ConfigSchema = schema.object({
   apiUrl: schema.string(),
   defaultModel: schema.string({ defaultValue: DEFAULT_BEDROCK_MODEL }),
   contextWindowLength: schema.maybe(schema.number({})),
+  temperature: schema.maybe(schema.number({})),
 });
 
 export const SecretsSchema = schema.object({
