@@ -48,10 +48,10 @@ import type {
   anomalySwimlaneEmbeddableCustomInputViewBySchema,
   anomalySwimlaneEmbeddableUserInputSchema,
   anomalySwimlaneInitialInputSchema,
+  singleMetricViewerEmbeddableInputSchema,
 } from '../../server/embeddable/schemas';
 import type {
   MlEntity,
-  SingleMetricViewerEmbeddableCustomInput,
   SingleMetricViewerEmbeddableState,
   SingleMetricViewerEmbeddableUserInput,
 } from './single_metric_viewer/types';
@@ -189,9 +189,9 @@ export interface AnomalyChartsEmbeddableState
     AnomalyChartsEmbeddableOverridableState {}
 
 /** Manual input by the user */
-export type SingleMetricViewerEmbeddableInput = SingleMetricViewerEmbeddableCustomInput & {
-  title?: string;
-};
+export type SingleMetricViewerEmbeddableInput = TypeOf<
+  typeof singleMetricViewerEmbeddableInputSchema
+>;
 
 /**
  * Persisted state for the Single Metric Embeddable.
