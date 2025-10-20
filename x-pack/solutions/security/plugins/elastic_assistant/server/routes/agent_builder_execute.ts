@@ -191,6 +191,173 @@ const processAlertResults = (
   return ` ${citation}`;
 };
 
+// Helper function to process knowledge base retrieval results
+const processKnowledgeBaseRetrievalResults = (
+  result: {
+    data: {
+      content?: string;
+      message?: string;
+      query: string;
+      entries?: Array<{ id: string; name: string }>;
+    };
+  },
+  contentReferencesStore: ContentReferencesStore,
+  logger: Logger,
+  aiResponseMessage: string
+): string => {
+  // Parse the enriched documents from the tool result
+  let enrichedDocs: Array<{
+    id: string;
+    pageContent: string;
+    metadata: { name: string; citation: string };
+  }> = [];
+
+  if (result.data.content) {
+    try {
+      enrichedDocs = JSON.parse(result.data.content);
+    } catch (error) {
+      logger.error(`🔍 [KB_MATCHING] Failed to parse tool result content: ${error.message}`);
+      return '';
+    }
+  }
+
+  if (enrichedDocs.length === 0) {
+    return '';
+  }
+
+  // Pre-register content references for all entries so they can be found by pruneContentReferences
+  if (result.data.entries && result.data.entries.length > 0) {
+    result.data.entries.forEach((entry) => {
+      const placeholderId = `kb-${entry.id}`;
+      contentReferencesStore.add((p) => ({
+        type: 'KnowledgeBaseEntry' as const,
+        id: placeholderId,
+        knowledgeBaseEntryName: entry.name,
+        knowledgeBaseEntryId: entry.id,
+      }));
+    });
+  }
+
+  // Find which documents the AI actually used (conservative matching)
+  const usedDocuments = enrichedDocs.filter((doc) => {
+    // 1. Extract clean content from document (remove citation placeholder)
+    const docContent = doc.pageContent.replace(/\s*\{reference\(.*?\)\}\s*$/, '').trim();
+
+    // 2. Check if AI response contains the document content (exact substring match)
+    if (aiResponseMessage.includes(docContent)) {
+      return true;
+    }
+
+    // 3. For very short content, also check if entry name matches query context
+    // This handles cases like "ice cream" where the AI might say "Your favorite dessert is ice cream"
+    const entryNameWords = doc.metadata.name.toLowerCase().split(/\s+/);
+    const responseWords = aiResponseMessage.toLowerCase().split(/\s+/);
+    if (entryNameWords.every((word) => responseWords.includes(word))) {
+      return true;
+    }
+
+    return false;
+  });
+
+  // Append citations for matched documents
+  const citations = usedDocuments.map((doc) => doc.metadata.citation).join(' ');
+
+  return citations ? ` ${citations}` : '';
+};
+
+// Helper function to process knowledge base write results
+const processKnowledgeBaseWriteResults = (
+  result: { data: { entryId?: string; name: string; query: string } },
+  contentReferencesStore: ContentReferencesStore
+): string => {
+  const { entryId, name } = result.data;
+
+  if (!entryId) {
+    return '';
+  }
+
+  // Create a content reference to the specific knowledge base entry that was created
+  const reference = contentReferencesStore.add((p) => ({
+    type: 'KnowledgeBaseEntry' as const,
+    id: p.id,
+    knowledgeBaseEntryName: name,
+    knowledgeBaseEntryId: entryId,
+  }));
+  const citation = contentReferenceBlock(reference);
+  return ` ${citation}`;
+};
+
+// Helper function to process security labs knowledge results
+const processSecurityLabsKnowledgeResults = (
+  result: {
+    data: {
+      content?: string;
+      message?: string;
+      question: string;
+      citations?: Array<{ id: string; slug: string; title: string }>;
+    };
+  },
+  contentReferencesStore: ContentReferencesStore
+): string => {
+  // Register all citations provided by the tool in the contentReferencesStore
+  // This makes them available for pruneContentReferences to find and format
+  if (result.data.citations && result.data.citations.length > 0) {
+    result.data.citations.forEach((citation) => {
+      contentReferencesStore.add((p) => ({
+        type: 'Href' as const,
+        id: citation.id,
+        href: `https://www.elastic.co/security-labs/${citation.slug}`,
+        title: `Security Labs: ${citation.title}`,
+      }));
+    });
+  }
+
+  // Return empty string - let the AI intelligently place citations based on the content
+  // The tool has already embedded {reference(...)} placeholders in the content
+  // pruneContentReferences will extract and format any citations the AI includes
+  return '';
+};
+
+// Helper function to process integration knowledge results
+const processIntegrationKnowledgeResults = (
+  result: {
+    data: { documents: Array<{ package_name: string; filename: string }>; question: string };
+  },
+  contentReferencesStore: ContentReferencesStore,
+  assistantContext: { getServerBasePath: () => string }
+): string => {
+  // Create references for each integration document
+  const citations = result.data.documents.map((doc) => {
+    const basePath = assistantContext.getServerBasePath();
+    const reference = contentReferencesStore.add((p) => ({
+      type: 'Href' as const,
+      id: p.id,
+      href: `${basePath}/app/integrations/detail/${doc.package_name}`,
+      title: `${doc.package_name} integration (${doc.filename})`,
+    }));
+    return contentReferenceBlock(reference);
+  });
+  return citations.length > 0 ? ` ${citations.join(' ')}` : '';
+};
+
+// Helper function to process entity risk score results
+const processEntityRiskScoreResults = (
+  result: { data: { riskScore: number; entityName: string } },
+  contentReferencesStore: ContentReferencesStore,
+  assistantContext: { getServerBasePath: () => string }
+): string => {
+  // Create a reference to the entity details page
+  const basePath = assistantContext.getServerBasePath();
+  const reference = contentReferencesStore.add((p) => ({
+    type: 'Href' as const,
+    id: p.id,
+    href: `${basePath}/app/security/entity_analytics/hosts/${result.data.entityName}`,
+    title: `Entity Risk Score for ${result.data.entityName}`,
+  }));
+  const citation = contentReferenceBlock(reference);
+  return ` ${citation}`;
+};
+
 // Helper function to check if result is product documentation
 const isProductDocumentationResult = (
   step: { tool_id?: string },
@@ -235,6 +402,95 @@ const isOpenAndAcknowledgedAlertsResult = (
   );
 };
 
+// Helper function to check if result is knowledge base retrieval
+const isKnowledgeBaseRetrievalResult = (
+  step: { tool_id?: string },
+  result: { data?: unknown },
+  logger: Logger
+): boolean => {
+  const isMatch = Boolean(
+    'tool_id' in step &&
+      step.tool_id === 'core.security.knowledge_base_retrieval' &&
+      result.data &&
+      typeof result.data === 'object' &&
+      'query' in result.data &&
+      ('content' in result.data || 'message' in result.data)
+  );
+
+  // Debug logging
+  if ('tool_id' in step && step.tool_id === 'core.security.knowledge_base_retrieval') {
+    logger.debug(
+      `🔍 [KB_RETRIEVAL] Checking knowledge base retrieval result: toolId=${
+        step.tool_id
+      }, hasData=${!!result.data}, dataType=${typeof result.data}, dataKeys=[${
+        result.data && typeof result.data === 'object' ? Object.keys(result.data).join(', ') : ''
+      }], isMatch=${isMatch}`
+    );
+  }
+
+  return isMatch;
+};
+
+// Helper function to check if result is knowledge base write
+const isKnowledgeBaseWriteResult = (
+  step: { tool_id?: string },
+  result: { data?: unknown }
+): boolean => {
+  return Boolean(
+    'tool_id' in step &&
+      step.tool_id === 'core.security.knowledge_base_write' &&
+      result.data &&
+      typeof result.data === 'object' &&
+      'entryId' in result.data &&
+      'name' in result.data &&
+      'query' in result.data
+  );
+};
+
+// Helper function to check if result is security labs knowledge
+const isSecurityLabsKnowledgeResult = (
+  step: { tool_id?: string },
+  result: { data?: unknown }
+): boolean => {
+  return Boolean(
+    'tool_id' in step &&
+      step.tool_id === 'core.security.security_labs_knowledge' &&
+      result.data &&
+      typeof result.data === 'object' &&
+      'content' in result.data &&
+      'question' in result.data
+  );
+};
+
+// Helper function to check if result is integration knowledge
+const isIntegrationKnowledgeResult = (
+  step: { tool_id?: string },
+  result: { data?: unknown }
+): boolean => {
+  return Boolean(
+    'tool_id' in step &&
+      step.tool_id === 'core.security.integration_knowledge' &&
+      result.data &&
+      typeof result.data === 'object' &&
+      'documents' in result.data &&
+      'question' in result.data
+  );
+};
+
+// Helper function to check if result is entity risk score
+const isEntityRiskScoreResult = (
+  step: { tool_id?: string },
+  result: { data?: unknown }
+): boolean => {
+  return Boolean(
+    'tool_id' in step &&
+      step.tool_id === 'core.security.entity_risk_score' &&
+      result.data &&
+      typeof result.data === 'object' &&
+      'riskScore' in result.data
+  );
+};
+
 // Helper function to handle streaming execution
 const executeStreaming = async ({
   onechatServices,
@@ -251,6 +507,7 @@ const executeStreaming = async ({
   startTime,
   logger,
   isEnabledKnowledgeBase,
+  assistantContext,
 }: {
   onechatServices: OnechatPluginStart;
   connectorId: string;
@@ -270,6 +527,7 @@ const executeStreaming = async ({
   startTime: number;
   logger: Logger;
   isEnabledKnowledgeBase: boolean;
+  assistantContext: { getServerBasePath: () => string };
 }): Promise<StreamResponseWithHeaders> => {
   logger.debug(`🚀 [AGENT_BUILDER] Starting streaming agent execution`);
 
@@ -368,7 +626,9 @@ const executeStreaming = async ({
         // Process tool results to add content references
         const processedContent = processToolResults(
           { result: { round: (finalRoundData as RoundCompleteEventData).round } },
-          contentReferencesStore
+          contentReferencesStore,
+          logger,
+          assistantContext
         );
 
         // Use the processed content (which contains reference text) for saving to conversation
@@ -376,7 +636,12 @@ const executeStreaming = async ({
         finalContent = processedContent;
       } else {
         // Fallback to processing the agent result directly if no round data
-        finalContent = processToolResults(agentResult, contentReferencesStore);
+        finalContent = processToolResults(
+          agentResult,
+          contentReferencesStore,
+          logger,
+          assistantContext
+        );
       }
 
       // Collect replacements from tools that stored them in request context
@@ -396,9 +661,16 @@ const executeStreaming = async ({
         model: 'unknown', // TODO: Get this from the response
       });
 
+      // Apply content references pruning if needed
+      let processedFinalContent = finalContent;
+      if (contentReferencesStore) {
+        const { prunedContent } = pruneContentReferences(finalContent, contentReferencesStore);
+        processedFinalContent = prunedContent;
+      }
+
       logger.debug(`🚀 [AGENT_BUILDER] Streaming execution completed`);
 
-      handleStreamEnd(finalContent);
+      handleStreamEnd(processedFinalContent);
     } catch (error) {
       logger.error(`Failed to execute agent: ${error.message}`);
       logger.error(`Agent execution error stack: ${error.stack}`);
@@ -434,6 +706,7 @@ const executeNonStreaming = async ({
   response,
   conversationId,
   isEnabledKnowledgeBase,
+  assistantContext,
 }: {
   onechatServices: OnechatPluginStart;
   connectorId: string;
@@ -455,6 +728,7 @@ const executeNonStreaming = async ({
   response: KibanaResponseFactory;
   conversationId?: string;
   isEnabledKnowledgeBase: boolean;
+  assistantContext: { getServerBasePath: () => string };
 }) => {
   logger.debug(`🚀 [AGENT_BUILDER] Starting non-streaming agent execution`);
 
@@ -475,7 +749,12 @@ const executeNonStreaming = async ({
   );
 
   // Process tool results to add content references
-  const accumulatedContent = processToolResults(agentResult, contentReferencesStore);
+  const accumulatedContent = processToolResults(
+    agentResult,
+    contentReferencesStore,
+    logger,
+    assistantContext
+  );
 
   // Process the final response with content references and anonymization
   let finalResponse = accumulatedContent;
@@ -533,7 +812,10 @@ const executeNonStreaming = async ({
 const processToolResult = (
   step: { type: string; tool_id?: string; results?: Array<{ type: string; data?: unknown }> },
   result: { type: string; data?: unknown },
-  contentReferencesStore: ContentReferencesStore
+  contentReferencesStore: ContentReferencesStore,
+  logger: Logger,
+  aiResponseMessage: string,
+  assistantContext: { getServerBasePath: () => string }
 ): string => {
   // Skip content references for assistant_settings tool
   if ('tool_id' in step && step.tool_id === 'core.security.assistant_settings') {
@@ -561,6 +843,61 @@ const processToolResult = (
     return processAlertResults(result as { data: { alerts: string[] } }, contentReferencesStore);
   }
 
+  if (isKnowledgeBaseRetrievalResult(step, result, logger)) {
+    return processKnowledgeBaseRetrievalResults(
+      result as {
+        data: {
+          content?: string;
+          message?: string;
+          query: string;
+          entries?: Array<{ id: string; name: string }>;
+        };
+      },
+      contentReferencesStore,
+      logger,
+      aiResponseMessage
+    );
+  }
+
+  if (isKnowledgeBaseWriteResult(step, result)) {
+    return processKnowledgeBaseWriteResults(
+      result as { data: { entryId?: string; name: string; query: string } },
+      contentReferencesStore
+    );
+  }
+
+  if (isSecurityLabsKnowledgeResult(step, result)) {
+    return processSecurityLabsKnowledgeResults(
+      result as {
+        data: {
+          content?: string;
+          message?: string;
+          question: string;
+          citations?: Array<{ id: string; slug: string; title: string }>;
+        };
+      },
+      contentReferencesStore
+    );
+  }
+
+  if (isIntegrationKnowledgeResult(step, result)) {
+    return processIntegrationKnowledgeResults(
+      result as {
+        data: { documents: Array<{ package_name: string; filename: string }>; question: string };
+      },
+      contentReferencesStore,
+      assistantContext
+    );
+  }
+
+  if (isEntityRiskScoreResult(step, result)) {
+    return processEntityRiskScoreResults(
+      result as { data: { riskScore: number; entityName: string } },
+      contentReferencesStore,
+      assistantContext
+    );
+  }
+
   // Only create content references for known tools that provide meaningful references
   return '';
 };
@@ -579,9 +916,12 @@ const processToolResults = (
       };
     };
   },
-  contentReferencesStore: ContentReferencesStore
+  contentReferencesStore: ContentReferencesStore,
+  logger: Logger,
+  assistantContext: { getServerBasePath: () => string }
 ): string => {
-  let accumulatedContent = agentResult.result.round.response.message;
+  const aiResponseMessage = agentResult.result.round.response.message;
+  let accumulatedContent = aiResponseMessage;
 
   if (!agentResult.result.round.steps || agentResult.result.round.steps.length === 0) {
     return accumulatedContent;
@@ -591,7 +931,14 @@ const processToolResults = (
     if (step.type === 'tool_call' && 'results' in step && step.results && step.results.length > 0) {
       for (const result of step.results) {
         if (result.type === 'other' && result.data) {
-          accumulatedContent += processToolResult(step, result, contentReferencesStore);
+          accumulatedContent += processToolResult(
+            step,
+            result,
+            contentReferencesStore,
+            logger,
+            aiResponseMessage,
+            assistantContext
+          );
         }
       }
     }
@@ -689,6 +1036,7 @@ export async function agentBuilderExecute({
         startTime,
         logger,
         isEnabledKnowledgeBase,
+        assistantContext,
       });
       return response.ok<StreamResponseWithHeaders['body']>(result);
     } else {
@@ -709,6 +1057,7 @@ export async function agentBuilderExecute({
         response,
         conversationId,
         isEnabledKnowledgeBase,
+        assistantContext,
       });
     }
   } catch (error) {

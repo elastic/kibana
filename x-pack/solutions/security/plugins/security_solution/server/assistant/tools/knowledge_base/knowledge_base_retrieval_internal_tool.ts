@@ -131,13 +131,30 @@ export const knowledgeBaseRetrievalInternalTool = (
         });
 
         if (docs && docs.length > 0) {
+          // Embed citations directly in the page content (like other working tools)
+          // The AI will see the citations as part of the content and naturally include them
+          const enrichedDocs = docs.map(
+            (doc: { id: string; pageContent: string; metadata: { name: string } }) => ({
+              id: doc.id,
+              pageContent: `${doc.pageContent} {reference(kb-${doc.id})}`, // Embed citation in content
+              metadata: {
+                ...doc.metadata,
+                citation: `{reference(kb-${doc.id})}`, // Also add citation to metadata
+              },
+            })
+          );
+
           return {
             results: [
               {
                 type: ToolResultType.other,
                 data: {
-                  content: docs.map((doc: { pageContent: string }) => doc.pageContent).join('\n\n'),
+                  content: JSON.stringify(enrichedDocs), // Return as JSON like original tool
                   query,
+                  entries: docs.map((doc: { id: string; metadata: { name: string } }) => ({
+                    id: doc.id,
+                    name: doc.metadata.name,
+                  })),
                 },
               },
             ],

@@ -13,6 +13,7 @@ import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/rou
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { StartServicesAccessor } from '@kbn/core/server';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
 import { getDataClientsProvider, initializeDataClients } from '../data_clients_provider';
@@ -100,13 +101,66 @@ export const securityLabsKnowledgeInternalTool = (
         });
 
         if (docs && docs.length > 0) {
+          // Process ALL documents (no filtering, just like old LangChain tool)
+          const citedDocs = docs.map(
+            (doc: { id: string; pageContent: string; metadata: Record<string, unknown> }) => {
+              let slug: string | undefined;
+              let title: string | undefined;
+
+              try {
+                const yamlString = doc.pageContent.split('---')[1];
+                if (yamlString) {
+                  const lines = yamlString.trim().split('\n');
+
+                  for (const line of lines) {
+                    if (line.startsWith('slug:')) {
+                      slug = line.split('slug:')[1]?.trim().replace(/['"]/g, '');
+                    } else if (line.startsWith('title:')) {
+                      title = line.split('title:')[1]?.trim().replace(/['"]/g, '');
+                    }
+                  }
+                }
+              } catch (error) {
+                // Use fallback if parsing fails
+              }
+
+              // Use slug and title if available, otherwise use fallback
+              const citationId = slug ? `security-labs-${slug}` : `security-labs-${doc.id}`;
+              const citationTitle = title || 'Elastic Security Labs content';
+
+              return {
+                id: doc.id,
+                // Embed citation at START of content (like old tool)
+                pageContent: `{reference(${citationId})}\n${doc.pageContent}`,
+                metadata: {
+                  ...doc.metadata,
+                  citation: {
+                    id: citationId,
+                    slug: slug || doc.id,
+                    title: citationTitle,
+                  },
+                },
+              };
+            }
+          );
+
+          // Return JSON string with token limit (like old tool)
+          const result = JSON.stringify(citedDocs).substring(0, 20000);
+
+          // Extract citation metadata for agent to register
+          const citations = citedDocs.map(
+            (doc: { metadata: { citation: { id: string; slug: string; title: string } } }) =>
+              doc.metadata.citation
+          );
+
           return {
             results: [
               {
                 type: ToolResultType.other,
                 data: {
-                  content: docs.map((doc: any) => doc.pageContent).join('\n\n'),
+                  content: result,
                   question,
+                  citations,
                 },
               },
             ],
