@@ -41,6 +41,7 @@ interface TextareaInputArgumentProps
   noInputEnteredMessage?: string;
   textareaLabel?: string;
   textareaPlaceholderLabel?: string;
+  helpIconLabel?: string;
   helpContent?: React.ReactNode;
 }
 
@@ -57,6 +58,11 @@ const TEXTAREA_PLACEHOLDER_TEXT = i18n.translate(
 const NO_INPUT_ENTERED_MESSAGE = i18n.translate(
   'xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.noInputEnteredMessage',
   { defaultMessage: 'No input entered' }
+);
+
+const HELP_ICON_LABEL = i18n.translate(
+  'xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.helpIconLabel',
+  { defaultMessage: 'Show instructions' }
 );
 
 /**
@@ -76,16 +82,15 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
     openLabel = OPEN_INPUT,
     noInputEnteredMessage = NO_INPUT_ENTERED_MESSAGE,
     textareaPlaceholderLabel = TEXTAREA_PLACEHOLDER_TEXT,
+    helpIconLabel = HELP_ICON_LABEL,
     width,
     textareaLabel,
-    // FIXME:PT DELETE default value ... dev testing only
-    helpContent = `some help content here\n\nsome other content down here\n`.repeat(100),
+    helpContent,
   }) => {
     const testId = useTestIdGenerator(
       `textareaInputArgument-${command.commandDefinition.name}-${argName}-${argIndex}`
     );
     const { euiTheme } = useEuiTheme();
-
     const [showHelpContent, setShowHelpContent] = useState(false);
 
     const textAreaHtmlId = useMemo(() => {
@@ -207,10 +212,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
                       size="xs"
                       onClick={handleHelpOnClick}
                       isSelected={showHelpContent}
-                      aria-label={i18n.translate(
-                        'xpack.securitySolution.textareaInputArgument.textAreaInputArgument.showHelpContentLabel',
-                        { defaultMessage: 'Show instructions' }
-                      )}
+                      aria-label={helpIconLabel}
                     />
                   </EuiFlexItem>
                 )}
