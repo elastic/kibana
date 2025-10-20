@@ -114,6 +114,15 @@ describe('INLINE STATS Validation', () => {
           []
         );
       });
+
+      test('allows IN operator in WHERE clause', () => {
+        inlinestatsExpectErrors('FROM a_index | INLINE STATS col0 = avg(doubleField) WHERE textField IN ("a", "b")', []);
+        inlinestatsExpectErrors('FROM a_index | INLINE STATS col0 = avg(doubleField) WHERE doubleField IN (doubleField, doubleField)', []);
+      });
+
+      test('allows NOT IN operator in WHERE clause', () => {
+        inlinestatsExpectErrors('FROM a_index | INLINE STATS col0 = avg(doubleField) WHERE textField NOT IN ("a", "b")', []);
+      });
     });
 
     describe('... BY <grouping>', () => {
