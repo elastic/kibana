@@ -7,27 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createHmac } from 'crypto';
 import type { Client } from '@elastic/elasticsearch';
-import { createMockIdpMetadata, createSAMLResponse, ensureSAMLRoleMapping } from './utils';
+import { createHmac } from 'crypto';
+
 import {
+  MOCK_IDP_ATTRIBUTE_EMAIL,
+  MOCK_IDP_ATTRIBUTE_NAME,
+  MOCK_IDP_ATTRIBUTE_PRINCIPAL,
+  MOCK_IDP_ATTRIBUTE_ROLES,
+  MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN,
+  MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN_EXPIRES_AT,
+  MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN,
+  MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN_EXPIRES_AT,
   MOCK_IDP_ENTITY_ID,
   MOCK_IDP_LOGIN_PATH,
   MOCK_IDP_LOGOUT_PATH,
   MOCK_IDP_REALM_NAME,
   MOCK_IDP_ROLE_MAPPING_NAME,
-  MOCK_IDP_ATTRIBUTE_PRINCIPAL,
-  MOCK_IDP_ATTRIBUTE_ROLES,
-  MOCK_IDP_ATTRIBUTE_EMAIL,
-  MOCK_IDP_ATTRIBUTE_NAME,
-  MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN,
-  MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN_EXPIRES_AT,
-  MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN,
-  MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN_EXPIRES_AT,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from './constants';
+import { decodeWithChecksum } from './jwt-codecs/encoder-checksum';
 import { removePrefixEssuDev } from './jwt-codecs/encoder-prefix';
-import { decode } from './jwt-codecs/encoder-checksum';
+import { createMockIdpMetadata, createSAMLResponse, ensureSAMLRoleMapping } from './utils';
 
 describe('mock-idp-utils', () => {
   describe('createMockIdpMetadata', () => {
@@ -92,7 +93,9 @@ describe('mock-idp-utils', () => {
       expect(decoded).toContain('samlp:Response');
       expect(decoded).toContain('saml:Assertion');
       expect(decoded).toContain(`<saml:Issuer>${MOCK_IDP_ENTITY_ID}</saml:Issuer>`);
-      expect(decoded).toContain('samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"');
+      expect(decoded).toContain(
+        'samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"'
+      );
     });
 
     it('should include username in principal attribute', async () => {
@@ -100,7 +103,9 @@ describe('mock-idp-utils', () => {
       const decoded = Buffer.from(samlResponse, 'base64').toString('utf-8');
 
       expect(decoded).toContain(`Name="${MOCK_IDP_ATTRIBUTE_PRINCIPAL}"`);
-      expect(decoded).toContain(`<saml:AttributeValue xsi:type="xs:string">${baseOptions.username}</saml:AttributeValue>`);
+      expect(decoded).toContain(
+        `<saml:AttributeValue xsi:type="xs:string">${baseOptions.username}</saml:AttributeValue>`
+      );
     });
 
     it('should include all roles in roles attribute', async () => {
@@ -109,7 +114,9 @@ describe('mock-idp-utils', () => {
 
       expect(decoded).toContain(`Name="${MOCK_IDP_ATTRIBUTE_ROLES}"`);
       baseOptions.roles.forEach((role) => {
-        expect(decoded).toContain(`<saml:AttributeValue xsi:type="xs:string">${role}</saml:AttributeValue>`);
+        expect(decoded).toContain(
+          `<saml:AttributeValue xsi:type="xs:string">${role}</saml:AttributeValue>`
+        );
       });
     });
 
@@ -202,7 +209,10 @@ describe('mock-idp-utils', () => {
         const decoded = Buffer.from(samlResponse, 'base64').toString('utf-8');
 
         const accessTokenMatch = decoded.match(
-          new RegExp(`${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`, 's')
+          new RegExp(
+            `${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`,
+            's'
+          )
         );
         expect(accessTokenMatch).toBeTruthy();
         const accessToken = accessTokenMatch![1];
@@ -214,13 +224,16 @@ describe('mock-idp-utils', () => {
         const decoded = Buffer.from(samlResponse, 'base64').toString('utf-8');
 
         const accessTokenMatch = decoded.match(
-          new RegExp(`${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`, 's')
+          new RegExp(
+            `${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`,
+            's'
+          )
         );
         const wrappedToken = accessTokenMatch![1];
 
         // Unwrap the token
         const unprefixed = removePrefixEssuDev(wrappedToken);
-        const jwt = decode(unprefixed);
+        const jwt = decodeWithChecksum(unprefixed);
 
         // JWT should have 3 parts: header.payload.signature
         const parts = jwt.split('.');
@@ -256,7 +269,7 @@ describe('mock-idp-utils', () => {
 
         // Unwrap the token
         const unprefixed = removePrefixEssuDev(wrappedToken);
-        const jwt = decode(unprefixed);
+        const jwt = decodeWithChecksum(unprefixed);
 
         const parts = jwt.split('.');
         const headerAndPayload = `${parts[0]}.${parts[1]}`;
@@ -283,14 +296,16 @@ describe('mock-idp-utils', () => {
         const wrappedToken = accessTokenMatch![1];
 
         const unprefixed = removePrefixEssuDev(wrappedToken);
-        const jwt = decode(unprefixed);
+        const jwt = decodeWithChecksum(unprefixed);
         const parts = jwt.split('.');
         const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
 
         expect(payload.ras).toBeDefined();
         expect(payload.ras.project).toHaveLength(1);
         expect(payload.ras.project[0].role_id).toBe('cloud-role-id');
-        expect(payload.ras.project[0].organization_id).toBe(serverlessOptions.serverless.organizationId);
+        expect(payload.ras.project[0].organization_id).toBe(
+          serverlessOptions.serverless.organizationId
+        );
         expect(payload.ras.project[0].project_type).toBe(serverlessOptions.serverless.projectType);
         expect(payload.ras.project[0].application_roles).toEqual(serverlessOptions.roles);
       });
@@ -300,7 +315,10 @@ describe('mock-idp-utils', () => {
         const decoded = Buffer.from(samlResponse, 'base64').toString('utf-8');
 
         const refreshTokenMatch = decoded.match(
-          new RegExp(`${MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`, 's')
+          new RegExp(
+            `${MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`,
+            's'
+          )
         );
         const jwt = refreshTokenMatch![1];
 
@@ -323,7 +341,10 @@ describe('mock-idp-utils', () => {
         const decoded = Buffer.from(samlResponse, 'base64').toString('utf-8');
 
         const expiresAtMatch = decoded.match(
-          new RegExp(`${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN_EXPIRES_AT}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`, 's')
+          new RegExp(
+            `${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN_EXPIRES_AT}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`,
+            's'
+          )
         );
         const expiresAt = new Date(expiresAtMatch![1]).getTime();
 
@@ -398,4 +419,3 @@ describe('mock-idp-utils', () => {
     });
   });
 });
-

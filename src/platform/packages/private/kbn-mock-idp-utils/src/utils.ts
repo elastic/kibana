@@ -30,7 +30,8 @@ import {
   MOCK_IDP_ROLE_MAPPING_NAME,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from './constants';
-import { encode } from './jwt-codecs/encoder-checksum';
+import { seedTestUser } from './cosmos_db_seeder';
+import { encodeWithChecksum } from './jwt-codecs/encoder-checksum';
 import { prefixWithEssuDev } from './jwt-codecs/encoder-prefix';
 
 /**
@@ -108,7 +109,7 @@ export async function createSAMLResponse(options: {
   const notOnOrAfter = new Date(Date.now() + 3600 * 1000).toISOString();
 
   const uiamSessionTokens = options.serverless?.uiamEnabled
-    ? createUiamSessionTokens({
+    ? await createUiamSessionTokens({
         username: options.username,
         organizationId: options.serverless.organizationId,
         projectType: options.serverless.projectType,
@@ -248,22 +249,36 @@ export async function ensureSAMLRoleMapping(client: Client) {
   });
 }
 
-function createUiamSessionTokens({
+async function createUiamSessionTokens({
   username,
   organizationId,
   projectType,
   roles,
-  familyName,
+  fullName,
   email,
 }: {
   username: string;
   organizationId: string;
   projectType: string;
   roles: string[];
-  familyName?: string;
+  fullName?: string;
   email?: string;
 }) {
   const iat = Math.floor(Date.now() / 1000);
+
+  const givenName = fullName ? fullName.split(' ')[0] : 'Test';
+  const familyName = fullName ? fullName.split(' ').slice(1).join(' ') : 'User';
+
+  const { message, response } = await seedTestUser({
+    userId: username,
+    organizationId,
+    roleId: 'cloud-role-id',
+    projectType,
+    applicationRoles: roles,
+    email,
+    firstName: givenName,
+    lastName: familyName,
+  });
 
   const accessTokenBody = Buffer.from(
     JSON.stringify({
@@ -273,6 +288,7 @@ function createUiamSessionTokens({
 
       oid: organizationId,
       sub: username,
+      given_name: givenName,
       family_name: familyName,
       email,
 
@@ -293,7 +309,7 @@ function createUiamSessionTokens({
 
       nbf: iat,
       // 1H
-      exp: iat + 60,
+      exp: iat + 60, // TODO this is set to 60s for easier testing, change back to 3600s (1H) later
       iat,
       jti: randomBytes(16).toString('hex'),
     })
@@ -344,6 +360,6 @@ function signJwt(unsignedJwt: string): string {
 }
 
 function wrapSignedJwt(signedJwt: string): string {
-  const accessTokenEncodedWithChecksum = encode(signedJwt);
+  const accessTokenEncodedWithChecksum = encodeWithChecksum(signedJwt);
   return prefixWithEssuDev(accessTokenEncodedWithChecksum);
 }

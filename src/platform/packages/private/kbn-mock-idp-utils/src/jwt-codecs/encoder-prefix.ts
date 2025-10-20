@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-
 /**
  * Prefixes an encoded string with the ESSU dev identifier.
  *
@@ -25,7 +24,7 @@ export function prefixWithEssuDev(encoded: string): string {
 }
 
 /**
- * Removes the ESSU dev identifier prefix from a string.
+ * Removes the essu_dev_ identifier prefix from a string.
  *
  * @param prefixed - The prefixed string to remove the prefix from
  * @returns The string without the "essu_dev_" prefix

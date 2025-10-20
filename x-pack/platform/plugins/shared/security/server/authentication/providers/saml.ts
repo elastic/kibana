@@ -634,7 +634,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     try {
       if (this.useUiam && this.options.uiam) {
-        this.logger.debug('Refreshing tokens via UIAM service.');
+        this.logger.debug('SAML provider is in UIAM mode, calling UIAM service to refresh tokens.');
 
         const { accessToken, refreshToken } = await this.options.uiam?.refreshSessionTokens(
           state.refreshToken
@@ -642,31 +642,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
         const uiamAuthenticationInfo = await this.options.uiam.authenticate(accessToken);
 
-        this.logger.debug(`Refreshed AccessToken: ${accessToken}`);
-        this.logger.debug(`Refreshed RefreshToken: ${refreshToken}`);
-        this.logger.debug(`Uiam Authentication Info: ${JSON.stringify(uiamAuthenticationInfo)}`);
-
         refreshTokenResult = {
           accessToken,
           refreshToken,
           authenticationInfo: uiamAuthenticationInfo,
         };
-
-        // refreshTokenResult = {
-        //   accessToken,
-        //   refreshToken,
-        //   authenticationInfo: {
-        //     authentication_realm: {
-        //       name: '"cloud-saml-kibana',
-        //       type: 'saml',
-        //     },
-        //     authentication_type: 'token',
-        //     lookup_realm: { name: '"cloud-saml-kibana', type: 'saml' },
-        //     username: '12345',
-        //     roles: ['viewer'],
-        //     enabled: true,
-        //   },
-        // };
       } else {
         refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
       }

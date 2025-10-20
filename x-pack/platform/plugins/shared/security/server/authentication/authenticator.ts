@@ -817,15 +817,10 @@ export class Authenticator {
     const sessionHasBeenAuthenticated =
       !!existingSessionValue && !isExistingSessionAuthenticated && isNewSessionAuthenticated;
 
-    this.logger.debug(`isExistingSessionAuthenticated: ${isExistingSessionAuthenticated}`);
-    this.logger.debug(`isNewSessionAuthenticated: ${isNewSessionAuthenticated}`);
-    this.logger.debug(`new username: ${authenticationResult.user?.username}`);
-    this.logger.debug(`existing username: ${existingSessionValue?.username}`);
-
     const usernameHasChanged =
       isExistingSessionAuthenticated &&
       isNewSessionAuthenticated &&
-      authenticationResult.user!.username.toString() !== existingSessionValue!.username?.toString();
+      authenticationResult.user!.username.toString() !== existingSessionValue!.username?.toString(); // TODO Why is one a number for UIAM?
 
     // There are 3 cases when we SHOULD invalidate existing session and create a new one with
     // regenerated SID/AAD:

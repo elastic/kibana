@@ -11,7 +11,6 @@ import { crc32 } from 'crc';
 
 /**
  * Encodes a string by appending a CRC32 checksum and base64 encoding the result.
- * This is the TypeScript equivalent of the Java encode method.
  *
  * @param toEncode - The string to encode
  * @returns Base64 encoded string with CRC32 checksum appended
@@ -20,7 +19,7 @@ import { crc32 } from 'crc';
  * const encoded = encode("my-string");
  * // Returns a base64 string with the CRC32 checksum appended
  */
-export function encode(toEncode: string): string {
+export function encodeWithChecksum(toEncode: string): string {
   const LONG_BYTES = 8; // Java long is 8 bytes
 
   // Convert string to UTF-8 bytes
@@ -44,7 +43,7 @@ export function encode(toEncode: string): string {
 }
 
 /**
- * Decodes a string that was encoded with the encode() method.
+ * Decodes a string that was encoded with the encodeWithChecksum() method.
  * Verifies the CRC32 checksum and returns the original string.
  *
  * @param encoded - The base64 encoded string with CRC32 checksum
@@ -54,7 +53,7 @@ export function encode(toEncode: string): string {
  * @example
  * const original = decode(encoded);
  */
-export function decode(encoded: string): string {
+export function decodeWithChecksum(encoded: string): string {
   const LONG_BYTES = 8;
 
   // Decode from base64
@@ -80,4 +79,3 @@ export function decode(encoded: string): string {
   // Return original string
   return originalBytes.toString('utf-8');
 }
-

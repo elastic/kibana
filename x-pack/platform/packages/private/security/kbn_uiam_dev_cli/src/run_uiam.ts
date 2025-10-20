@@ -69,7 +69,6 @@ export async function runUiam({ log, signal }: { log: ToolingLog; signal: AbortS
 async function createDockerComposeFile({ env }: { env: typeof ENV_DEFAULTS }) {
   const entrypointScriptPath = path.join(__dirname, '..', 'scripts', 'run_java_with_custom_ca.sh');
   const initScriptPath = path.join(__dirname, '..', 'scripts', 'init_cosmosdb.sh');
-  const seedUserScriptPath = path.join(__dirname, '..', 'scripts', 'seed_test_user.sh');
   const dockerComposeContent = `
 networks:
  default:
@@ -103,22 +102,7 @@ services:
         condition: service_healthy
     volumes:
       - ${initScriptPath}:/init_cosmosdb.sh:ro
-    entrypoint: ["/bin/sh", "-c", "apk add --no-cache curl openssl && /bin/sh /init_cosmosdb.sh https://127.0.0.1:${
-      env.UIAM_COSMOS_DB_GATEWAY_PORT
-    }"]
-    restart: "no"
-
-  uiam-cosmosdb-seed-user:
-    image: alpine:latest
-    network_mode: "service:uiam-cosmosdb-gateway"
-    depends_on:
-      uiam-cosmosdb-init:
-        condition: service_completed_successfully
-    volumes:
-      - ${seedUserScriptPath}:/seed_test_user.sh:ro
-    entrypoint: ["/bin/sh", "-c", "apk add --no-cache curl openssl && /bin/sh /seed_test_user.sh https://127.0.0.1:${
-      env.UIAM_COSMOS_DB_GATEWAY_PORT
-    } || true"]
+    entrypoint: ["/bin/sh", "-c", "apk add --no-cache curl openssl && /bin/sh /init_cosmosdb.sh https://127.0.0.1:${env.UIAM_COSMOS_DB_GATEWAY_PORT}"]
     restart: "no"
 
   uiam:
