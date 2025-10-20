@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { act, renderHook } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import sinon from 'sinon';
 
 import type { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
@@ -17,7 +17,6 @@ import type { UseRequestResponse, UseRequestConfig } from './use_request';
 import { useRequest } from './use_request';
 
 export interface UseRequestHelpers {
-  advanceTime: (ms: number) => Promise<void>;
   completeRequest: () => Promise<void>;
   hookResult: UseRequestResponse;
   getSendRequestSpy: () => sinon.SinonStub;
@@ -28,11 +27,13 @@ export interface UseRequestHelpers {
   setErrorResponse: (overrides?: {}) => void;
   setupErrorWithBodyRequest: (overrides?: {}) => void;
   getErrorWithBodyResponse: () => SendRequestResponse;
-  teardown: () => Promise<void>;
+  teardown: () => Promise<void>; // For real timers
+  teardownFake: () => Promise<void>; // For fake timers
 }
 
-// Each request will take 1s to resolve.
-export const REQUEST_TIME = 1000;
+// Short delay for tests using real timers
+// Using 50ms to provide enough buffer for real timer async operations
+export const REQUEST_TIME = 50;
 
 const successRequest: SendRequestConfig = { method: 'post', path: '/success', body: {} };
 const successResponse = { statusCode: 200, data: { message: 'Success message' } };
@@ -57,24 +58,6 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
     await act(async () => {
       await jest.runAllTimersAsync();
     });
-  };
-
-  const advanceTime = async (ms: number) => {
-    // Split advancement into two separate act() phases so that effects scheduled
-    // by the first phase (e.g. scheduling the next poll) have a chance to run
-    // before we advance the second phase.
-    const first = Math.floor(ms / 2);
-    const second = ms - first;
-    if (first > 0) {
-      await act(async () => {
-        await jest.advanceTimersByTimeAsync(first);
-      });
-    }
-    if (second > 0) {
-      await act(async () => {
-        await jest.advanceTimersByTimeAsync(second);
-      });
-    }
   };
 
   let hookReturn: ReturnType<
@@ -179,7 +162,7 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
     error: errorWithBodyResponse.body,
   });
 
-  const teardown = async () => {
+  const teardownFake = async () => {
     hookReturn?.unmount();
     await jest.runOnlyPendingTimersAsync();
     jest.clearAllTimers();
@@ -187,8 +170,14 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
     sendRequestSpy.resetHistory();
   };
 
+  const teardown = async () => {
+    hookReturn?.unmount();
+    // Wait briefly for any pending real timers to complete
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    sendRequestSpy.resetHistory();
+  };
+
   return {
-    advanceTime,
     completeRequest,
     hookResult,
     getSendRequestSpy: () => sendRequestSpy,
@@ -200,5 +189,6 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
     setupErrorWithBodyRequest,
     getErrorWithBodyResponse,
     teardown,
+    teardownFake,
   };
 };
