@@ -1881,6 +1881,42 @@
     "functions": [
       {
         "parentPluginId": "@kbn/scout",
+        "id": "def-common.apiServicesFixture",
+        "type": "Function",
+        "tags": [],
+        "label": "apiServicesFixture",
+        "description": [
+          "\nThis fixture provides a helper to interact with the Kibana APIs like Alerting, Cases, Fleet, Streams, Spaces, etc."
+        ],
+        "signature": [
+          "TestType",
+          "<",
+          "PlaywrightTestArgs",
+          " & ",
+          "PlaywrightTestOptions",
+          ", ",
+          "PlaywrightWorkerArgs",
+          " & ",
+          "PlaywrightWorkerOptions",
+          " & ",
+          "CoreWorkerFixtures",
+          " & { apiServices: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          },
+          "; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
         "id": "def-common.apiTest",
         "type": "Function",
         "tags": [],
@@ -2572,6 +2608,40 @@
           "; }>"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.synthtraceFixture",
+        "type": "Function",
+        "tags": [],
+        "label": "synthtraceFixture",
+        "description": [],
+        "signature": [
+          "TestType",
+          "<",
+          "PlaywrightTestArgs",
+          " & ",
+          "PlaywrightTestOptions",
+          ", ",
+          "PlaywrightWorkerArgs",
+          " & ",
+          "PlaywrightWorkerOptions",
+          " & ",
+          "CoreWorkerFixtures",
+          " & ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SynthtraceFixture",
+            "text": "SynthtraceFixture"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/synthtrace.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3417,7 +3487,7 @@
             "label": "elasticsearch",
             "description": [],
             "signature": [
-              "{ cluster: string[]; indices: { names: string[]; privileges: string[]; allow_restricted_indices?: boolean | undefined; }[]; }"
+              "{ cluster: string[]; indices?: { names: string[]; privileges: string[]; allow_restricted_indices?: boolean | undefined; }[] | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/common/services/custom_role.ts",
             "deprecated": false,

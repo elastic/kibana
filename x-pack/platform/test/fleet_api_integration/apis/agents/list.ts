@@ -101,6 +101,13 @@ export default function ({ getService }: FtrProviderContext) {
       expect(agent.access_api_key_id).to.eql('api-key-2');
     });
 
+    it('should return a 400 when given an invalid "sortField" value', async () => {
+      await supertest
+        .get(`/api/fleet/agents?sortField=invalid_field`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(400);
+    });
+
     it('should return a 200 when given sort options', async () => {
       const { body: apiResponse } = await supertest
         .get(`/api/fleet/agents?sortField=last_checkin&sortOrder=desc`)
