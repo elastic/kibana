@@ -53,6 +53,7 @@ interface StepAboutRuleProps extends RuleStepProps {
   form: FormHook<AboutStepRule>;
   esqlQuery?: string | undefined;
   ruleSource?: RuleSource;
+  aiAssistedUserQuery?: string;
 }
 
 interface StepAboutRuleReadOnlyProps {
@@ -84,6 +85,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   form,
   esqlQuery,
   ruleSource,
+  aiAssistedUserQuery,
 }) => {
   const { data } = useKibana().services;
 
@@ -156,14 +158,15 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 fullWidth: true,
                 disabled: isLoading,
               },
-              labelAppend: (
+              labelAppend: aiAssistedUserQuery ? (
                 <AiAssistantLabelAppend
                   getFields={getFields}
+                  aiAssistedUserQuery={aiAssistedUserQuery}
                   setFieldValue={form.setFieldValue}
                   fieldName="name"
                   ruleContext={ruleContext}
                 />
-              ),
+              ) : null,
             }}
           />
           <EuiSpacer size="l" />
@@ -177,14 +180,15 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 compressed: true,
                 fullWidth: true,
               },
-              labelAppend: (
+              labelAppend: aiAssistedUserQuery ? (
                 <AiAssistantLabelAppend
                   getFields={getFields}
+                  aiAssistedUserQuery={aiAssistedUserQuery}
                   setFieldValue={form.setFieldValue}
                   fieldName="description"
                   ruleContext={ruleContext}
                 />
-              ),
+              ) : null,
             }}
           />
           <EuiSpacer size="l" />

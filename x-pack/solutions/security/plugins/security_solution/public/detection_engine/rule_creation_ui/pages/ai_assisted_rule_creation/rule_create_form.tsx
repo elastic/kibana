@@ -104,7 +104,10 @@ const MyEuiPanel = EuiPanel;
 //   }
 // `;
 
-const CreateRulePageComponent: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
+const CreateRulePageComponent: React.FC<{ rule: RuleResponse; aiAssistedUserQuery?: string }> = ({
+  rule,
+  aiAssistedUserQuery,
+}) => {
   const [
     {
       loading: userInfoLoading,
@@ -520,6 +523,7 @@ const CreateRulePageComponent: React.FC<{ rule: RuleResponse }> = ({ rule }) => 
             shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
             queryBarTitle={defineStepData.queryBar.title}
             queryBarSavedId={defineStepData.queryBar.saved_id}
+            aiAssistedUserQuery={aiAssistedUserQuery}
           />
           <NextStep
             dataTestSubj="define-continue"
@@ -543,6 +547,7 @@ const CreateRulePageComponent: React.FC<{ rule: RuleResponse }> = ({ rule }) => 
       isQueryBarValid,
       loading,
       memoDefineStepReadOnly,
+      aiAssistedUserQuery,
     ]
   );
   const memoDefineStepExtraAction = useMemo(
@@ -593,6 +598,7 @@ const CreateRulePageComponent: React.FC<{ rule: RuleResponse }> = ({ rule }) => 
             isLoading={isCreateRuleLoading || loading}
             form={aboutStepForm}
             esqlQuery={esqlQueryForAboutStep}
+            aiAssistedUserQuery={aiAssistedUserQuery}
           />
 
           <NextStep
@@ -617,6 +623,7 @@ const CreateRulePageComponent: React.FC<{ rule: RuleResponse }> = ({ rule }) => 
       loading,
       memoAboutStepReadOnly,
       esqlQueryForAboutStep,
+      aiAssistedUserQuery,
     ]
   );
   const memoAboutStepExtraAction = useMemo(

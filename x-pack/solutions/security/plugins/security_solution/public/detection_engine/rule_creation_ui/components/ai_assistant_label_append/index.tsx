@@ -6,10 +6,10 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { NewChat } from '@kbn/elastic-assistant';
+import { NewChat, useAssistantContext } from '@kbn/elastic-assistant';
 
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { css } from '@emotion/react';
@@ -17,7 +17,8 @@ import type { RuleType } from '@kbn/securitysolution-rules';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { DefineStepRule } from '../../../common/types';
-import type { FormHook, ValidationError } from '../../../../shared_imports';
+import type { FormHook } from '../../../../shared_imports';
+import { ALLOWED_FIELDS } from '../../../../assistant/update_field_in_form';
 
 import * as i18n from './translations';
 
@@ -30,23 +31,8 @@ const simpleHoverStyles = css`
   }
 `;
 
-const getRelevantRuleContext = () => {};
-const getLanguageName = (language: string | undefined) => {
-  let modifiedLanguage = language;
-  if (language === 'eql') {
-    modifiedLanguage = 'EQL(Event Query Language)';
-  }
-  if (language === 'esql') {
-    modifiedLanguage = 'ES|QL(The Elasticsearch Query Language)';
-  }
-
-  return modifiedLanguage;
-};
-
-const retrieveErrorMessages = (errors: ValidationError[]): string =>
-  errors
-    .flatMap(({ message, messages }) => [message, ...(Array.isArray(messages) ? messages : [])])
-    .join(', ');
+const suggestedUserPrompt = `Question: \nGuidelines: Any suggested new values of fields should be wrapped in code block. Follow this guideline in every subsequent response. 
+In response, explicitly mention what field was suggested in format [field_name], wrapped in square brackets. Example: Here is a new suggested rule field [description] value: {{suggested value}}\n`;
 
 interface AiAssistantProps {
   getFields: FormHook<DefineStepRule>['getFields'];
@@ -55,8 +41,10 @@ interface AiAssistantProps {
   ruleContext: {
     type: RuleType;
     query?: string;
-    index: string;
+    index: string[];
   };
+  getValue?: () => unknown;
+  aiAssistedUserQuery: string;
 }
 
 const AiAssistantLabelAppendComponent: React.FC<AiAssistantProps> = ({
@@ -64,49 +52,93 @@ const AiAssistantLabelAppendComponent: React.FC<AiAssistantProps> = ({
   setFieldValue,
   fieldName,
   ruleContext,
+  getValue,
+  aiAssistedUserQuery,
 }) => {
+  const promptContextId = `security-solution-ai-assisted-rule-creation-${fieldName}`;
+  const { promptContexts, unRegisterPromptContext, registerPromptContext } = useAssistantContext();
   const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
 
   const getPromptContext = useCallback(async () => {
     const field = getFields()[fieldName];
+    const fieldValue = getValue ? getValue() : field.value;
+
     const paramsToStr = Object.entries(ruleContext).reduce((acc, [key, value]) => {
       if (!value || (typeof value === 'string' && value.trim() === '')) {
         return acc;
       }
-      return `${acc}${key}: ${value}\n`;
+      return `${acc}"${key}": "${value}",\n`;
     }, '');
 
-    return `Value of field ${fieldName} in Detection rule is "${field.value}". \n
-    Additional relevant rule configuration:
-    ${paramsToStr}
+    return `
+Value of field ${fieldName} in Detection rule is "${fieldValue}". \n
+\n
+Additional relevant rule configuration:
+\n
+${paramsToStr}
     `;
-  }, [fieldName, getFields, ruleContext]);
+  }, [fieldName, getFields, ruleContext, getValue]);
 
   const onShowOverlay = useCallback(() => {
     track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.OPEN_ASSISTANT_ON_RULE_QUERY_ERROR);
-  }, []);
+
+    Object.keys(promptContexts).forEach((key) => {
+      if (
+        key.startsWith('security-solution-ai-assisted-rule-creation-') &&
+        key !== promptContextId
+      ) {
+        unRegisterPromptContext(key);
+      }
+    });
+
+    registerPromptContext({
+      id: promptContextId,
+      category: 'detection-rules',
+      description: i18n.ASK_ASSISTANT_DESCRIPTION,
+      getPromptContext,
+      tooltip: i18n.ASK_ASSISTANT_TOOLTIP,
+      suggestedUserPrompt,
+    });
+  }, [
+    getPromptContext,
+    promptContextId,
+    promptContexts,
+    registerPromptContext,
+    unRegisterPromptContext,
+  ]);
 
   const handleOnExportCodeBlock = useCallback(
-    (codeBlock: string) => {
-      const field = getFields()[fieldName];
-
-      console.log;
+    (codeBlock: string, suggestedFieldName: string | null) => {
+      if (suggestedFieldName === null || !ALLOWED_FIELDS.has(suggestedFieldName)) {
+        return;
+      }
       // sometimes AI assistant include redundant backtick symbols in code block
       const newValue = codeBlock.replaceAll('`', '');
+
+      if (suggestedFieldName === 'queryBar') {
+        const queryField = getFields().queryBar;
+        const queryBarValue = queryField.value as DefineStepRule['queryBar'];
+
+        if (queryBarValue.query.query !== codeBlock) {
+          setFieldValue('queryBar', {
+            ...queryBarValue,
+            query: { ...queryBarValue.query, query: codeBlock },
+          });
+        }
+        return;
+      }
+
+      const field = getFields()[suggestedFieldName];
+
       if (field.value !== newValue) {
-        setFieldValue(fieldName, newValue);
+        setFieldValue(suggestedFieldName, newValue);
       }
     },
-    [fieldName, getFields, setFieldValue]
+    [getFields, setFieldValue]
   );
   const chatTitle = useMemo(() => {
-    console.log('fields list', getFields());
-    // const queryField = getFields().queryBar;
-    // const { query } = (queryField.value as DefineStepRule['queryBar']).query;
-    // return `${i18n.DETECTION_RULES_CREATE_FORM_CONVERSATION_ID} - ${query ?? 'query'}`;
-
-    return `Detection Rules Create form - AI Assisted rule creation - ${fieldName}`;
-  }, [fieldName, getFields]);
+    return `Detection Rules Create form - AI Assisted rule creation - ${aiAssistedUserQuery} - [${fieldName}]`;
+  }, [fieldName, aiAssistedUserQuery]);
 
   if (!hasAssistantPrivilege) {
     return null;
@@ -133,15 +165,17 @@ const AiAssistantLabelAppendComponent: React.FC<AiAssistantProps> = ({
           iconType={null}
           onShowOverlay={onShowOverlay}
           isAssistantEnabled={isAssistantEnabled}
-          suggestedUserPrompt={`Question: \nGuidelines: Any suggested new values of fields should be wrapped in code block. Follow this guideline in every subsequent response.\n`}
+          suggestedUserPrompt={suggestedUserPrompt}
           onExportCodeBlock={handleOnExportCodeBlock}
+          promptContextId={promptContextId}
         >
           <AssistantIcon
             size="s"
             css={css`
               vertical-align: inherit;
             `}
-          />
+          />{' '}
+          {i18n.ASK_ASSISTANT_BUTTON}
         </NewChat>
       </EuiToolTip>
     </span>

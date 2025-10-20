@@ -154,7 +154,9 @@ export interface UseAssistantContext {
   basePromptContexts: PromptContextTemplate[];
   unRegisterPromptContext: UnRegisterPromptContext;
   currentAppId: string;
-  codeBlockRef: React.MutableRefObject<(codeBlock: string) => void>;
+  codeBlockRef: React.MutableRefObject<{
+    [key: string]: (codeBlock: string, field: string | null) => void;
+  }>;
   productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
@@ -310,7 +312,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
   /**
    * Setting code block ref that can be used to store callback from parent components
    */
-  const codeBlockRef = useRef(() => {});
+  const codeBlockRef = useRef<{ [key: string]: (codeBlock: string) => void }>({});
 
   // Fetch assistant capabilities
   const { data: assistantFeatures } = useCapabilities({ http, toasts });

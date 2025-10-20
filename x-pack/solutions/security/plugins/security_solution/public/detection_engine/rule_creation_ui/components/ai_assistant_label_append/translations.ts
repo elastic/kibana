@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ASK_ASSISTANT_ERROR_BUTTON = i18n.translate(
+export const ASK_ASSISTANT_BUTTON = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.askAssistant',
   {
     defaultMessage: 'Ask Assistant',

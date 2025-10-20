@@ -43,6 +43,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
   const { settings } = useKibana().services;
 
   const [promptValue, setPromptValue] = useState('');
+  const [submittedPromptValue, setSubmittedPromptValue] = useState('');
   const { aiConnectors, isLoading: isAiConnectorsLoading } = useAIConnectors();
 
   const [selectedConnectorId, setSelectedConnectorId] = useState<string | undefined>();
@@ -61,6 +62,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
   const isValid = promptValue.length > 0 && selectedConnectorId != null;
   const handlePromptSubmit = useCallback(() => {
     if (isValid) {
+      setSubmittedPromptValue(promptValue);
       executeAiAssistedRuleCreation({
         message: promptValue,
         connectorId: selectedConnectorId,
@@ -75,46 +77,45 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
     setPromptValue('');
   }, [handlePromptSubmit, setPromptValue]);
 
-  const mockRule = {
-    query:
-      'FROM packetbeat-8.14.2 METADATA _id,_index,_version\n| EVAL suspicious_score = (bytes_in + bytes_out) + CASE(destination.port >= 1024 AND destination.port NOT IN (80, 443), 5000, 0)\n| SORT suspicious_score DESC\n| KEEP @timestamp, source.ip, source.port, destination.ip, destination.port, bytes_in, _id, bytes_out, suspicious_score\n| LIMIT 10',
-    language: 'esql',
-    type: 'esql',
-    tags: [
-      'Domain: Network',
-      'Use Case: Network Security Monitoring',
-      'Tactic: Command and Control',
-      'Tactic: Exfiltration',
-      'Data Source: Network Traffic',
-      'packetbeat',
-    ],
-    name: 'Top 10 Suspicious Network Connections',
-    description:
-      'Identifies the 10 most suspicious network connections based on data transfer volume and unusual destination ports, highlighting potential anomalies for further investigation.',
-    references: [],
-    severity_mapping: [],
-    risk_score_mapping: [],
-    related_integrations: [],
-    required_fields: [],
-    actions: [],
-    exceptions_list: [],
-    false_positives: [],
-    threat: [],
-    author: [],
-    setup: '',
-    max_signals: 100,
-    interval: '5m',
-    risk_score: 47,
-    severity: 'medium',
-  };
+  // const mockRule = {
+  //   query:
+  //     'FROM packetbeat-8.14.2 METADATA _id,_index,_version\n| EVAL suspicious_score = (bytes_in + bytes_out) + CASE(destination.port >= 1024 AND destination.port NOT IN (80, 443), 5000, 0)\n| SORT suspicious_score DESC\n| KEEP @timestamp, source.ip, source.port, destination.ip, destination.port, bytes_in, _id, bytes_out, suspicious_score\n| LIMIT 10',
+  //   language: 'esql',
+  //   type: 'esql',
+  //   tags: [
+  //     'Domain: Network',
+  //     'Use Case: Network Security Monitoring',
+  //     'Tactic: Command and Control',
+  //     'Tactic: Exfiltration',
+  //     'Data Source: Network Traffic',
+  //     'packetbeat',
+  //   ],
+  //   name: 'Top 10 Suspicious Network Connections',
+  //   description:
+  //     'Identifies the 10 most suspicious network connections based on data transfer volume and unusual destination ports, highlighting potential anomalies for further investigation.',
+  //   references: [],
+  //   severity_mapping: [],
+  //   risk_score_mapping: [],
+  //   related_integrations: [],
+  //   required_fields: [],
+  //   actions: [],
+  //   exceptions_list: [],
+  //   false_positives: [],
+  //   threat: [],
+  //   author: [],
+  //   setup: '',
+  //   max_signals: 100,
+  //   interval: '5m',
+  //   risk_score: 47,
+  //   severity: 'medium',
+  // };
 
-  // mock for easier testing
-  //   return !rule ? (
-  //   <CreateRulePage rule={mockRule} />
+  // // mock for easier testing
+  // return !rule ? (
+  //   <CreateRulePage rule={mockRule} aiAssistedUserQuery="Top ten network events" />
   // ) : (
-
   return rule ? (
-    <CreateRulePage rule={rule} />
+    <CreateRulePage rule={rule} aiAssistedUserQuery={submittedPromptValue} />
   ) : (
     <>
       <SecuritySolutionPageWrapper>
