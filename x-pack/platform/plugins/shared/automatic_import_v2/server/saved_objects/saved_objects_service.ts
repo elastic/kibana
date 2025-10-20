@@ -252,14 +252,15 @@ export class AutomaticImportSavedObjectService {
   /**
    * Update a data stream
    * @param data - The data stream data. Must include an integration_id and data_stream_id.
-   * @param options - The options for the update
+   * @param options - The options for the update. Pass the internal version to the update operation to handle optimistic concurrency control.
    * @returns The updated data stream
    */
   async updateDataStream(
     data: DataStreamAttributes,
     options?: SavedObjectsUpdateOptions<DataStreamAttributes>
   ): Promise<SavedObjectsUpdateResponse<DataStreamAttributes>> {
-    const { integration_id, data_stream_id, job_info, metadata = { sample_count: 0 }, result = {} } = data;
+    const { integration_id, data_stream_id, job_info, metadata = { sample_count: 0 }, result = {}, } = data;
+
 
     if (!integration_id) {
       throw new Error('Integration ID is required');
@@ -268,7 +269,6 @@ export class AutomaticImportSavedObjectService {
     if (!data_stream_id) {
       throw new Error('Data stream ID is required');
     }
-
     try {
       this.logger.debug(`Updating data stream: ${data.data_stream_id}`);
 
@@ -282,6 +282,9 @@ export class AutomaticImportSavedObjectService {
       if (!dataStreamTarget) {
         throw new Error(`Data stream ${data_stream_id} not found`);
       }
+
+      // Use the SO internal version to handle optimistic concurrency control.
+      const internalVersion = options?.version ?? dataStreamTarget.version;
 
       const currentVersion = dataStreamTarget.attributes.metadata?.version || 0;
       const dataStreamData: DataStreamAttributes = {
@@ -301,9 +304,14 @@ export class AutomaticImportSavedObjectService {
         dataStreamData,
         {
           ...options,
+          // pass the internal version to the update operation to handle optimistic concurrency control
+          version: internalVersion,
         }
       );
     } catch (error) {
+      if (SavedObjectsErrorHelpers.isConflictError(error)) {
+        throw new Error(`Data stream ${data_stream_id} has been updated since you last fetched it. Please fetch the latest version and try again.`);
+      }
       this.logger.error(`Failed to update data stream: ${error}`);
       throw error;
     }

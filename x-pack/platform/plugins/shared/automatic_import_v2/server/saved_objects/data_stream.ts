@@ -48,17 +48,16 @@ export const dataStreamSavedObjectType: SavedObjectsType = {
         },
       },
       result: {
-        index: false,
         properties: {
           ingest_pipeline: {
             type: 'text', index: false,
           },
           field_mapping: {
-            type: "flattened"
+            type: "flattened",
+            index: false,
           },
         },
       },
-
     }
   },
   management: {
