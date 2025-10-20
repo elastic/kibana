@@ -12,7 +12,6 @@ import { useCallback, useState } from 'react';
 import type { z } from '@kbn/zod';
 import type YAML from 'yaml';
 import { formatMonacoYamlMarker } from '../../../widgets/workflow_yaml_editor/lib/format_monaco_yaml_marker';
-import type { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { getSeverityString } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { isYamlValidationMarkerOwner, type YamlValidationResult } from '../model/types';
 
@@ -77,7 +76,7 @@ export function useMonacoMarkersChangedInterceptor({
 
         errors.push({
           message: marker.message,
-          severity: getSeverityString(marker.severity as MarkerSeverity),
+          severity: getSeverityString(marker.severity),
           startLineNumber: marker.startLineNumber,
           startColumn: marker.startColumn,
           endLineNumber: marker.endLineNumber,

@@ -16,7 +16,6 @@ import {
   selectYamlLineCounter,
 } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 import type { YamlValidationResult } from '../model/types';
-import { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
@@ -30,9 +29,9 @@ import { validateConnectorIds } from './validate_connector_ids';
 import { useKibana } from '../../../hooks/use_kibana';
 
 const SEVERITY_MAP = {
-  error: MarkerSeverity.Error,
-  warning: MarkerSeverity.Warning,
-  info: MarkerSeverity.Hint,
+  error: monaco.MarkerSeverity.Error,
+  warning: monaco.MarkerSeverity.Warning,
+  info: monaco.MarkerSeverity.Hint,
 };
 
 export interface UseYamlValidationResult {

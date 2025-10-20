@@ -11,22 +11,14 @@ import { monaco } from '@kbn/monaco';
 import type { Node } from 'yaml';
 import type { YamlValidationErrorSeverity } from '../../../features/validate_workflow_yaml/model/types';
 
-// Copied from monaco-editor/esm/vs/editor/editor.api.d.ts because we can't import with turbopack
-export enum MarkerSeverity {
-  Hint = 1,
-  Info = 2,
-  Warning = 4,
-  Error = 8,
-}
-
-export function getSeverityString(severity: MarkerSeverity): YamlValidationErrorSeverity {
+export function getSeverityString(severity: monaco.MarkerSeverity): YamlValidationErrorSeverity {
   switch (severity) {
-    case MarkerSeverity.Error:
+    case monaco.MarkerSeverity.Error:
       return 'error';
-    case MarkerSeverity.Warning:
+    case monaco.MarkerSeverity.Warning:
       return 'warning';
-    case MarkerSeverity.Info:
-    case MarkerSeverity.Hint:
+    case monaco.MarkerSeverity.Info:
+    case monaco.MarkerSeverity.Hint:
     default:
       return 'info';
   }

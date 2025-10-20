@@ -9,6 +9,7 @@
 
 import type { monaco } from '@kbn/monaco';
 import type YAML from 'yaml';
+import type { Scalar, YAMLMap } from 'yaml';
 
 /**
  * Context information for hover providers
@@ -53,9 +54,9 @@ export interface StepContext {
   /** Whether we're inside the 'with' block */
   isInWithBlock: boolean;
   /** YAML node for the entire step */
-  stepNode: any;
+  stepNode: YAMLMap;
   /** YAML node for the type field */
-  typeNode: any;
+  typeNode: Scalar;
 }
 
 /**
@@ -144,8 +145,6 @@ export interface MonacoConnectorHandler {
 export interface ProviderConfig {
   /** Function to get the current YAML document */
   getYamlDocument: () => YAML.Document | null;
-  /** Additional configuration options */
-  options?: Record<string, any>;
 }
 
 /**
