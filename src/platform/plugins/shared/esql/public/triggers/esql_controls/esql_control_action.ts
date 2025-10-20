@@ -37,7 +37,6 @@ interface Context {
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
   parentApi?: unknown;
-  onCloseFlyout?: () => void;
 }
 
 export class CreateESQLControlAction implements Action<Context> {
@@ -74,7 +73,6 @@ export class CreateESQLControlAction implements Action<Context> {
     cursorPosition,
     initialState,
     parentApi,
-    onCloseFlyout,
   }: Context) {
     if (!isActionCompatible(this.core, variableType)) {
       throw new IncompatibleActionError();
@@ -115,8 +113,7 @@ export class CreateESQLControlAction implements Action<Context> {
         isResizable: true,
         maxWidth: 800,
         triggerId: 'dashboard-controls-menu-button',
-        // hideCloseButton: true,
-        ...(onCloseFlyout && { onClose: onCloseFlyout }),
+        ...(queryString && { onClose: onCancelControl }),
       },
     });
   }
