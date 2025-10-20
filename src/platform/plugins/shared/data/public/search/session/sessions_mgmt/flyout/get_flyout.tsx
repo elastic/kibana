@@ -40,7 +40,7 @@ export function openSearchSessionsFlyout({
 }) {
   return (attrs: {
     appId: string;
-    trackingProps: { entryPoint: string };
+    trackingProps: { openedFrom: string };
     onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
   }) => {
     const api = new SearchSessionsMgmtAPI(sessionsClient, config, {
@@ -69,7 +69,7 @@ export function openSearchSessionsFlyout({
               config={config}
               kibanaVersion={kibanaVersion}
               locators={share.url.locators}
-              entryPoint={attrs.trackingProps.entryPoint}
+              trackingProps={{ openedFrom: attrs.trackingProps.openedFrom }}
             />
           </KibanaReactContextProvider>
         ),

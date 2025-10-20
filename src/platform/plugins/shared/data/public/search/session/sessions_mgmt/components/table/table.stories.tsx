@@ -85,7 +85,7 @@ const Component = ({
         kibanaVersion="8.0.0"
         locators={mockShareStart.url.locators}
         searchUsageCollector={mockSearchUsageCollector}
-        from=""
+        trackingProps={{ renderedIn: 'storybook', openedFrom: 'storybook' }}
         searchSessionEBTManager={ebtManager}
         {...props}
       />

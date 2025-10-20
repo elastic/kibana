@@ -105,7 +105,7 @@ interface TrackSearchHandler {
   /**
    * Transition search into "complete" status
    */
-  complete(trackingData: {
+  complete(trackingData?: {
     runtimeMs: number;
     resultsCount: number;
     resultsBytesSize: number;
@@ -390,7 +390,7 @@ export class SessionService {
         // trigger polling once again to save search into a session and extend its keep_alive
         if (this.isStored(state)) {
           const searchSessionSavedObject = state.get().searchSessionSavedObject;
-          if (searchSessionSavedObject) {
+          if (searchSessionSavedObject && trackingData) {
             this.searchSessionEBTManager?.trackBgsCompleted({
               trackingData,
               session: searchSessionSavedObject,
@@ -520,13 +520,7 @@ export class SessionService {
   public async restore(sessionId: string) {
     this.storeSessionSnapshot();
     this.state.transitions.restore(sessionId);
-    const savedObject = await this.refreshSearchSessionSavedObject();
-
-    if (savedObject) {
-      this.searchSessionEBTManager?.trackBgsOpened({
-        session: savedObject,
-      });
-    }
+    await this.refreshSearchSessionSavedObject();
   }
 
   /**

@@ -19,6 +19,7 @@ import {
   BG_SEARCH_OPEN,
   BG_SEARCH_START,
 } from './constants';
+import type { UISession } from '../sessions_mgmt/types';
 
 export type ISearchSessionEBTManager = PublicContract<SearchSessionEBTManager>;
 
@@ -105,10 +106,10 @@ export class SearchSessionEBTManager {
     });
   }
 
-  public trackBgsOpened({ session }: { session: SearchSessionSavedObject }) {
+  public trackBgsOpened({ session }: { session: UISession }) {
     this.reportEvent(BG_SEARCH_OPEN, {
       query_lang: this.getQueryLanguage(
-        session.attributes.restoreState?.query as Query | AggregateQuery | undefined
+        session.restoreState?.query as Query | AggregateQuery | undefined
       ),
       session_id: session.id,
     });

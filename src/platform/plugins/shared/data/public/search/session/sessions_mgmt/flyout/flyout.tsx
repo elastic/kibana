@@ -41,7 +41,7 @@ export const Flyout = ({
   kibanaVersion,
   locators,
   appId,
-  entryPoint,
+  trackingProps,
   onBackgroundSearchOpened,
 }: {
   onClose: () => void;
@@ -53,7 +53,7 @@ export const Flyout = ({
   kibanaVersion: string;
   locators: LocatorsStart;
   appId?: string;
-  entryPoint: string;
+  trackingProps: { openedFrom: string };
   onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
 }) => {
   const flyoutId = useGeneratedHtmlId();
@@ -90,7 +90,7 @@ export const Flyout = ({
           appId={appId}
           onBackgroundSearchOpened={onBackgroundSearchOpened}
           searchSessionEBTManager={ebtManager}
-          from={entryPoint}
+          trackingProps={{ openedFrom: trackingProps.openedFrom, renderedIn: 'flyout' }}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

@@ -60,7 +60,7 @@ const setup = () => {
         locators={mockShareStart.url.locators}
         usageCollector={mockSearchUsageCollector}
         ebtManager={getSearchSessionEBTManagerMock()}
-        entryPoint="test"
+        trackingProps={{ openedFrom: 'test' }}
       />
     </IntlProvider>
   );
