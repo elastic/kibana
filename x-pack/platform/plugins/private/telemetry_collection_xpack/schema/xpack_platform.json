@@ -3563,14 +3563,11 @@
                       "_meta": {
                         "description": "Total number of observables"
                       }
-                    },
-                    "casesWithMaxObservables": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "Number of cases with maximum observables"
-                      }
                     }
                   }
+                },
+                "totalWithMaxObservables": {
+                  "type": "long"
                 },
                 "totalUsers": {
                   "type": "long"
@@ -3755,13 +3752,13 @@
                       "_meta": {
                         "description": "Total number of observables"
                       }
-                    },
-                    "casesWithMaxObservables": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "Number of cases with maximum observables"
-                      }
                     }
+                  }
+                },
+                "totalWithMaxObservables": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of cases with maximum observables"
                   }
                 }
               }
@@ -3919,13 +3916,13 @@
                       "_meta": {
                         "description": "Total number of observables"
                       }
-                    },
-                    "casesWithMaxObservables": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "Number of cases with maximum observables"
-                      }
                     }
+                  }
+                },
+                "totalWithMaxObservables": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of cases with maximum observables"
                   }
                 }
               }
@@ -4083,13 +4080,13 @@
                       "_meta": {
                         "description": "Total number of observables"
                       }
-                    },
-                    "casesWithMaxObservables": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "Number of cases with maximum observables"
-                      }
                     }
+                  }
+                },
+                "totalWithMaxObservables": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of cases with maximum observables"
                   }
                 }
               }
