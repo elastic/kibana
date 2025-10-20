@@ -42,7 +42,7 @@ export async function autocomplete(
     if (hasSettingLeftSide) {
       return [{ ...assignCompletionItem, detail: '' }];
     } else {
-      return getSettingsCompletionItems(callbacks?.buildFlavor);
+      return getSettingsCompletionItems(callbacks?.isServerless);
     }
   }
 
@@ -120,18 +120,6 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
       detail: i18n.translate('kbn-esql-ast.esql.autocomplete.set.projectRouting.allProjectsDoc', {
         defaultMessage: 'Search all projects',
       }),
-      sortText: '1',
-    },
-    {
-      label: '_alias:* AND NOT _alias:_origin',
-      text: '_alias:* AND NOT _alias:_origin',
-      kind: 'Value',
-      detail: i18n.translate(
-        'kbn-esql-ast.esql.autocomplete.set.projectRouting.allOtherProjectsDoc',
-        {
-          defaultMessage: 'Search all projects except the current one',
-        }
-      ),
       sortText: '1',
     },
   ];

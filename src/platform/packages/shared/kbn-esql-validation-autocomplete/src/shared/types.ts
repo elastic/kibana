@@ -19,7 +19,6 @@ import type {
 } from '@kbn/esql-types';
 import type { ILicense } from '@kbn/licensing-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import type { BuildFlavor } from '@kbn/config';
 
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
@@ -65,7 +64,7 @@ export interface ESQLCallbacks {
   getLicense?: () => Promise<Pick<ILicense, 'hasAtLeast'> | undefined>;
   getActiveProduct?: () => PricingProduct | undefined;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
-  buildFlavor?: BuildFlavor;
+  isServerless?: boolean;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

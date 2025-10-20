@@ -25,7 +25,6 @@ import { registerIndexEditorActions, registerIndexEditorAnalyticsEvents } from '
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
-import type { BuildFlavor } from '@kbn/config';
 import {
   ESQL_CONTROL_TRIGGER,
   esqlControlTrigger,
@@ -63,7 +62,7 @@ export interface EsqlPluginStart {
     taskType: InferenceTaskType
   ) => Promise<InferenceEndpointsAutocompleteResult>;
   variablesService: EsqlVariablesService;
-  buildFlavor: BuildFlavor;
+  isServerless: boolean;
 }
 
 export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
@@ -93,7 +92,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       share,
     }: EsqlPluginStartDependencies
   ): EsqlPluginStart {
-    const buildFlavor = this.initContext.env.packageInfo.buildFlavor;
+    const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
 
     const storage = new Storage(localStorage);
 
@@ -193,7 +192,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
     );
 
     const start = {
-      buildFlavor,
+      isServerless,
       getJoinIndicesAutocomplete,
       getTimeseriesIndicesAutocomplete,
       getEditorExtensionsAutocomplete: cachedGetEditorExtensionsAutocomplete,
