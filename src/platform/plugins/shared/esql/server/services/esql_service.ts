@@ -54,6 +54,10 @@ export class EsqlService {
       indices.push({ name: index.name, mode, aliases: index.aliases ?? [] });
     });
 
+    sources.data_streams?.forEach((dataStream) => {
+      indices.push({ name: dataStream.name, mode, aliases: dataStream.aliases ?? [] });
+    });
+
     const crossClusterCommonIndices = remoteClusters
       ? getListOfCCSIndices(remoteClustersArray, indices)
       : indices;

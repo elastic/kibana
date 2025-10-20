@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type { Dimension, MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { DIMENSIONS_COLUMN } from './constants';
 import { createESQLQuery } from './create_esql_query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -63,7 +63,6 @@ TS metrics-*
 TS metrics-*
   | WHERE host.name IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.name
-  | RENAME host.name AS ${DIMENSIONS_COLUMN}
 `.trim()
     );
   });
@@ -160,6 +159,64 @@ TS metrics-*
       `
 TS custom-metrics-*
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+    );
+  });
+
+  it('should handle undefined dimensions without throwing error', () => {
+    const query = createESQLQuery({
+      metric: mockMetric,
+      dimensions: undefined,
+    });
+
+    expect(query).toBe(
+      `
+TS metrics-*
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+    );
+  });
+  it('should handle undefined both dimensions and metrics dimensions without throwing error', () => {
+    const query = createESQLQuery({
+      metric: { ...mockMetric, dimensions: undefined as unknown as Dimension[] },
+      dimensions: undefined,
+    });
+
+    expect(query).toBe(
+      `
+TS metrics-*
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+    );
+  });
+
+  it('should handle undefined dimensions with filters', () => {
+    const query = createESQLQuery({
+      metric: mockMetric,
+      dimensions: undefined,
+      filters: [{ field: 'host.name', value: 'host-1' }],
+    });
+
+    expect(query).toBe(
+      `
+TS metrics-*
+  | WHERE host.name IN ("host-1")
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+    );
+  });
+  it('should handle undefined metrics dimensions with dimensions and filters', () => {
+    const query = createESQLQuery({
+      metric: { ...mockMetric, dimensions: undefined as unknown as Dimension[] },
+      dimensions: ['host.name'],
+      filters: [{ field: 'host.name', value: 'host-1' }],
+    });
+
+    expect(query).toBe(
+      `
+TS metrics-*
+  | WHERE host.name IN ("host-1")
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.name
 `.trim()
     );
   });

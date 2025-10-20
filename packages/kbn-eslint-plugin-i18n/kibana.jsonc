@@ -1,6 +1,11 @@
 {
   "type": "shared-common",
   "id": "@kbn/eslint-plugin-i18n",
-  "owner": ["@elastic/obs-knowledge-team", "@elastic/kibana-operations"],
+  "owner": [
+    "@elastic/obs-knowledge-team",
+    "@elastic/kibana-operations"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "devOnly": true
 }

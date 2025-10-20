@@ -71,7 +71,6 @@ describe('metricsDataSourceProfileProvider', () => {
       'TS metrics-*,',
       'FROM metrics-* | LIMIT 10',
       'FROM metrics-* | SORT @timestamp DESC',
-      'FROM metrics-* | WHERE host.name="foo"',
     ])('when query conatains supported commands %s', async (query) => {
       const result = await provider.resolve(
         createParams({
@@ -151,10 +150,16 @@ describe('metricsDataSourceProfileProvider', () => {
       expect(result).toEqual(RESOLUTION_MISMATCH);
     });
 
-    it('when query contains commands that are not supported', async () => {
+    it.each([
+      'FROM metrics-* | STATS count() BY @timestamp',
+      'FROM metrics-* | WHERE host.name="foo"',
+    ])('when query contains commands that are not supported', async (query) => {
       const result = await provider.resolve(
-        createParams({ query: { esql: 'FROM metrics-* | STATS count() BY @timestamp' } })
+        createParams({
+          query: { esql: query },
+        })
       );
+
       expect(result).toEqual(RESOLUTION_MISMATCH);
     });
   });
