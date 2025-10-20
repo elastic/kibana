@@ -16,6 +16,7 @@
     "@kbn/data-views-plugin",
     "@kbn/search-types",
     "@kbn/utility-types",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/triggers-actions-ui-plugin"
   ]
 }
