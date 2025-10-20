@@ -108,8 +108,6 @@ export async function partitionStream({
         };
       }) ?? [];
 
-  return proposedPartitions.filter(
-    ({ condition }) =>
-      strictConditionSchema.safeParse(condition).success && !isEqual(condition, { always: {} })
-  );
+  //  TODO - don't forget to put this back
+  return proposedPartitions.filter(({ condition }) => !isEqual(condition, { always: {} }));
 }

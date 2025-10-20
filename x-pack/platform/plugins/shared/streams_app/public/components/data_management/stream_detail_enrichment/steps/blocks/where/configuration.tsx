@@ -97,7 +97,8 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
           </EuiForm>
         </FormProvider>
         <EuiSpacer size="m" />
-        <EuiFlexGroup justifyContent="spaceBetween">
+        {/* TODO - this wrapping is awkward */}
+        <EuiFlexGroup justifyContent="spaceBetween" wrap>
           <EuiFlexItem>
             {canDelete && (
               <div>
