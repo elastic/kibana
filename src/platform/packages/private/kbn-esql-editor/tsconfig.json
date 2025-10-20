@@ -38,7 +38,8 @@
     "@kbn/restorable-state",
     "@kbn/licensing-types",
     "@kbn/index-editor",
-    "@kbn/react-hooks"
+    "@kbn/react-hooks",
+    "@kbn/config"
   ],
   "exclude": [
     "target/**/*",

@@ -17,6 +17,7 @@
     "@kbn/core-pricing-common",
     "@kbn/licensing-types",
     "@kbn/i18n",
+    "@kbn/config",
   ],
   "exclude": [
     "target/**/*",
