@@ -12,10 +12,9 @@ import type { ArchiveIterator, ArchiveEntry } from '../../../../../../common/typ
 import { saveKnowledgeBaseContentToIndex } from '../../knowledge_base_index';
 import type { InstallContext } from '../_state_machine_package_install';
 
-import { appContextService } from "../../../../app_context"
+import { appContextService } from '../../../../app_context';
 
 import { stepSaveKnowledgeBase, cleanupKnowledgeBaseStep } from './step_save_knowledge_base';
-
 
 // Mock the app context service
 jest.mock('../../../../app_context', () => ({
@@ -26,7 +25,7 @@ jest.mock('../../../../app_context', () => ({
       info: jest.fn(),
       debug: jest.fn(),
     }),
-    getCloud: jest.fn()
+    getCloud: jest.fn(),
   },
 }));
 
@@ -639,7 +638,7 @@ describe('stepSaveKnowledgeBase', () => {
       const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
       expect(updateEsAssetReferences).not.toHaveBeenCalled();
     });
-  })
+  });
 
   it('should proceed with knowledge base processing when ML node is detected in ECH deployment', async () => {
     (mockedAppContextService.getCloud as any).mockReturnValue({
@@ -684,7 +683,7 @@ describe('stepSaveKnowledgeBase', () => {
     expect(updateEsAssetReferences).toHaveBeenCalled();
   });
 
-  it('should proceed with knowledge base processing for serverless deployments', async() => {
+  it('should proceed with knowledge base processing for serverless deployments', async () => {
     (mockedAppContextService.getCloud as any).mockReturnValue({
       isCloudEnabled: true,
       isServerlessEnabled: true,
