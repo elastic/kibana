@@ -54,10 +54,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
     const { url, method = 'GET', headers = {}, body } = this.step.with;
 
     return {
-      url:
-        typeof url === 'string'
-          ? this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(url)
-          : url,
+      url: this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(url),
       method,
       headers: this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(headers),
       body: this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(body),
