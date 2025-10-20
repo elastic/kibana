@@ -330,7 +330,7 @@ export class ScheduledReportsService {
         unauthorizedSchedules,
         username,
       });
-      this.auditBulkActionStart({
+      this.auditBulkGetAuthorized({
         action: ScheduledReportAuditAction.DELETE,
         authorizedSchedules,
       });
@@ -378,7 +378,7 @@ export class ScheduledReportsService {
     }
   }
 
-  private auditBulkActionStart({
+  private auditBulkGetAuthorized({
     action,
     authorizedSchedules,
   }: {
