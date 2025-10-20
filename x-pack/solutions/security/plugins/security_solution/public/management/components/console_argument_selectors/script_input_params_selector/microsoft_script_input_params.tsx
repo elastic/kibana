@@ -5,10 +5,22 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { TextareaInputArgumentProps } from '../textarea_input_argument';
+import { TextareaInputArgument } from '../textarea_input_argument';
 
 export const MicrosoftScriptInputParams = memo<TextareaInputArgumentProps>((props) => {
-  return <div>{'MicrosoftScriptInputParams placeholder'}</div>;
+  const customizedProps: Pick<
+    TextareaInputArgumentProps,
+    | 'helpContent'
+    | 'openLabel'
+    | 'noInputEnteredMessage'
+    | 'textareaLabel'
+    | 'textareaPlaceholderLabel'
+  > = useMemo(() => {
+    return {};
+  }, []);
+
+  return <TextareaInputArgument {...props} {...customizedProps} />;
 });
 MicrosoftScriptInputParams.displayName = 'MicrosoftScriptInputParams';

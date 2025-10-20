@@ -38,10 +38,6 @@ export const SentinelOneScriptInputParams = memo<
         'xpack.securitySolution.sentineloneScriptInputParams.openInputParamsMessage',
         { defaultMessage: 'Click to enter input parameters for selected script' }
       ),
-      noInputEnteredMessage: i18n.translate(
-        'xpack.securitySolution.sentineloneScriptInputParams.noParamsEntered',
-        { defaultMessage: 'Input parameters empty' }
-      ),
       textareaLabel: i18n.translate(
         'xpack.securitySolution.sentineloneScriptInputParams.inputParamsLabel',
         { defaultMessage: 'Script input parameters' }
