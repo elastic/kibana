@@ -12,6 +12,7 @@ import { getMockCallbacks, mockContext } from '../../../__tests__/context_fixtur
 import { autocomplete } from './autocomplete';
 import { parse } from '../../../parser';
 import type { ESQLCommand } from '../../../types';
+import { settings } from '../../../definitions/generated/settings';
 
 const testSetAutocomplete = async (
   query: string,
