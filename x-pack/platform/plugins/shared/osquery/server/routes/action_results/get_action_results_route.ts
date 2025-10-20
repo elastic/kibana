@@ -95,11 +95,7 @@ export const getActionResultsRoute = (
 
           if (requestedAgentIds && requestedAgentIds.length > 100) {
             return response.badRequest({
-              body: {
-                statusCode: 400,
-                error: 'Bad Request',
-                message: TOO_MANY_AGENT_IDS,
-              },
+              body: TOO_MANY_AGENT_IDS,
             });
           }
 
