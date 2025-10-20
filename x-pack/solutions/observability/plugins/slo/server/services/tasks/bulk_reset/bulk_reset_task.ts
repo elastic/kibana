@@ -8,17 +8,16 @@
 import { type CoreSetup, type Logger, type LoggerFactory } from '@kbn/core/server';
 import type { BulkOperationParams, BulkOperationStatusResponse } from '@kbn/slo-schema';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
-import type { IndicatorTypes } from '../../../domain/models';
 import type { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../../../types';
-import { DeleteSLO } from '../../delete_slo';
+import { ResetSLO } from '../../reset_slo';
 import { KibanaSavedObjectsSLORepository } from '../../slo_repository';
 import { DefaultSummaryTransformGenerator } from '../../summary_transform_generator/summary_transform_generator';
 import { DefaultSummaryTransformManager } from '../../summay_transform_manager';
-import type { TransformGenerator } from '../../transform_generators';
+import { createTransformGenerators } from '../../transform_generators';
 import { DefaultTransformManager } from '../../transform_manager';
-import { runBulkDelete } from './run_bulk_delete';
+import { runBulkReset } from './run_bulk_reset';
 
-export const TYPE = 'slo:bulk-delete-task';
+export const TYPE = 'slo:bulk-reset-task';
 
 interface TaskSetupContract {
   core: CoreSetup<SLOPluginStartDependencies>;
@@ -32,26 +31,29 @@ interface TaskSetupContract {
       start: () => Promise<Required<SLOPluginStartDependencies>[key]>;
     };
   };
+  isServerless: boolean;
 }
 
-export class BulkDeleteTask {
+export class BulkResetTask {
   private logger: Logger;
+  private isServerless: boolean;
 
   constructor(setupContract: TaskSetupContract) {
-    const { core, plugins, logFactory } = setupContract;
+    const { core, plugins, logFactory, isServerless } = setupContract;
     this.logger = logFactory.get(TYPE);
+    this.isServerless = isServerless;
 
     this.logger.debug('Registering task with [10m] timeout');
 
     plugins.taskManager.setup.registerTaskDefinitions({
       [TYPE]: {
-        title: 'SLO bulk delete',
+        title: 'SLO bulk reset',
         timeout: '10m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance, fakeRequest, abortController }: RunContext) => {
           return {
             run: async () => {
-              this.logger.debug(`starting bulk delete operation`);
+              this.logger.debug(`starting bulk reset operation`);
 
               if (!fakeRequest) {
                 this.logger.debug('fakeRequest is not defined');
@@ -71,9 +73,23 @@ export class BulkDeleteTask {
               const scopedSoClient = coreStart.savedObjects.getScopedClient(fakeRequest);
               const rulesClient = await pluginStart.alerting.getRulesClientWithRequest(fakeRequest);
 
+              const [dataViewsService, { id: spaceId }] = await Promise.all([
+                pluginStart.dataViews.dataViewsServiceFactory(
+                  scopedSoClient,
+                  scopedClusterClient.asCurrentUser
+                ),
+                pluginStart.spaces?.spacesService.getActiveSpace(fakeRequest) ?? { id: 'default' },
+              ]);
+
+              const transformGenerators = createTransformGenerators(
+                spaceId,
+                dataViewsService,
+                this.isServerless
+              );
+
               const repository = new KibanaSavedObjectsSLORepository(scopedSoClient, this.logger);
               const transformManager = new DefaultTransformManager(
-                {} as Record<IndicatorTypes, TransformGenerator>,
+                transformGenerators,
                 scopedClusterClient,
                 this.logger,
                 abortController
@@ -85,20 +101,21 @@ export class BulkDeleteTask {
                 abortController
               );
 
-              const deleteSLO = new DeleteSLO(
+              const resetSLO = new ResetSLO(
+                scopedClusterClient,
                 repository,
                 transformManager,
                 summaryTransformManager,
-                scopedClusterClient,
-                rulesClient,
-                abortController
+                this.logger,
+                spaceId,
+                core.http.basePath
               );
 
               try {
                 const params = taskInstance.params as BulkOperationParams;
 
-                const results = await runBulkDelete(params, {
-                  deleteSLO,
+                const results = await runBulkReset(params, {
+                  resetSLO,
                   scopedClusterClient,
                   rulesClient,
                   logger: this.logger,

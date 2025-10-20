@@ -10,10 +10,12 @@ import React, { createContext, useCallback, useContext, useState } from 'react';
 import { sloKeys } from '../../../hooks/query_key_factory';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useKibana } from '../../../hooks/use_kibana';
+import { type TaskOperation, taskUrls } from './operations';
 
 interface BulkOperationTask {
   taskId: string;
-  operation: 'delete';
+  operation: TaskOperation;
+
   status: 'in-progress' | 'completed' | 'failed';
   items: Array<{ id: string; success: boolean; error?: string }>;
   createdAt: Date;
@@ -23,7 +25,8 @@ interface BulkOperationTask {
 
 interface RegisterBulkOperationTask {
   taskId: string;
-  operation: 'delete';
+  operation: TaskOperation;
+  url: string;
   items: Array<{ id: string }>;
 }
 
@@ -70,12 +73,16 @@ export function BulkOperationProvider({ children }: { children: React.ReactNode 
       .map((task) => ({
         queryKey: sloKeys.bulkDeleteStatus(task.taskId),
         queryFn: async () => {
-          const response = await sloClient.fetch(
-            'GET /api/observability/slos/_bulk_delete/{taskId} 2023-10-31',
-            { params: { path: { taskId: task.taskId } } }
-          );
+          const url = taskUrls.get(task.operation);
+          if (!url) {
+            throw new Error(`Unknown operation: ${task.operation}`);
+          }
 
-          if (!response.isDone) {
+          const response = await sloClient.fetch(url, {
+            params: { path: { taskId: task.taskId } },
+          });
+
+          if (!response?.isDone) {
             setTasks((prevTasks) =>
               prevTasks.map((prevTask) => {
                 if (prevTask.taskId === task.taskId) {
@@ -94,7 +101,7 @@ export function BulkOperationProvider({ children }: { children: React.ReactNode 
 
           queryClient.invalidateQueries({ queryKey: sloKeys.allDefinitions(), exact: false });
 
-          if (!!response.error) {
+          if (!!response?.error) {
             setTasks((prevTasks) =>
               prevTasks.map((prevTask) => {
                 if (prevTask.taskId === task.taskId) {
@@ -144,9 +151,9 @@ export function BulkOperationProvider({ children }: { children: React.ReactNode 
 
           toasts.addSuccess({
             title: `Bulk ${task.operation} completed`,
-            text: `Successfully deleted ${response.results?.filter((i) => i.success).length} on ${
-              response.results?.length
-            } SLOs`,
+            text: `Successfully ran ${response.results?.filter((i) => i.success).length} ${
+              task.operation
+            } operations on ${response.results?.length} SLOs`,
           });
 
           return response;

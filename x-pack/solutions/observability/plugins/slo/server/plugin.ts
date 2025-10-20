@@ -47,6 +47,7 @@ import type {
   SLOServerStart,
 } from './types';
 import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
+import { BulkResetTask } from './services/tasks/bulk_reset/bulk_reset_task';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
@@ -244,6 +245,13 @@ export class SLOPlugin
       core,
       plugins: mappedPlugins,
       logFactory: this.initContext.logger,
+    });
+
+    new BulkResetTask({
+      core,
+      plugins: mappedPlugins,
+      logFactory: this.initContext.logger,
+      isServerless: this.isServerless,
     });
 
     return {};

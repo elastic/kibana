@@ -7,7 +7,7 @@
 
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import type { BulkDeleteParams, BulkDeleteResult } from '@kbn/slo-schema';
+import type { BulkOperationParams, BulkOperationResult } from '@kbn/slo-schema';
 import pLimit from 'p-limit';
 import {
   SLI_DESTINATION_INDEX_PATTERN,
@@ -24,9 +24,9 @@ interface Dependencies {
 }
 
 export async function runBulkDelete(
-  params: BulkDeleteParams,
+  params: BulkOperationParams,
   dependencies: Dependencies
-): Promise<BulkDeleteResult[]> {
+): Promise<BulkOperationResult[]> {
   const { scopedClusterClient, rulesClient, deleteSLO, logger, abortController } = dependencies;
 
   logger.debug(`Starting bulk deletion for SLO [${params.list.join(', ')}]`);

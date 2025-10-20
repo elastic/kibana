@@ -15,7 +15,7 @@ import { useBulkOperation } from '../context/bulk_operation';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-export function useBulkDeleteSlo({ onConfirm }: { onConfirm?: () => void } = {}) {
+export function useBulkResetSlo({ onConfirm }: { onConfirm?: () => void } = {}) {
   const {
     notifications: { toasts },
   } = useKibana().services;
@@ -27,9 +27,9 @@ export function useBulkDeleteSlo({ onConfirm }: { onConfirm?: () => void } = {})
     ServerError,
     { items: Array<Pick<SLODefinitionResponse, 'id'>> }
   >(
-    ['bulkDeleteSlo'],
+    ['bulkResetSlo'],
     ({ items }) => {
-      return sloClient.fetch('POST /api/observability/slos/_bulk_delete 2023-10-31', {
+      return sloClient.fetch('POST /api/observability/slos/_bulk_reset 2023-10-31', {
         params: {
           body: {
             list: items.map(({ id }) => id),
@@ -40,8 +40,8 @@ export function useBulkDeleteSlo({ onConfirm }: { onConfirm?: () => void } = {})
     {
       onError: (error, { items }) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
-          title: i18n.translate('xpack.slo.bulkDelete.errorNotification', {
-            defaultMessage: 'Failed to schedule deletion of {count} SLOs',
+          title: i18n.translate('xpack.slo.bulkReset.errorNotification', {
+            defaultMessage: 'Failed to schedule reset of {count} SLOs',
             values: { count: items.length },
           }),
         });
@@ -49,14 +49,14 @@ export function useBulkDeleteSlo({ onConfirm }: { onConfirm?: () => void } = {})
       onSuccess: (response, { items }) => {
         bulkOperation.register({
           taskId: response.taskId,
-          operation: 'delete',
+          operation: 'reset',
           items,
-          url: 'GET /api/observability/slos/_bulk_delete/{taskId} 2023-10-31',
+          url: 'GET /api/observability/slos/_bulk_reset/{taskId} 2023-10-31',
         });
 
         toasts.addSuccess(
-          i18n.translate('xpack.slo.bulkDelete.successNotification', {
-            defaultMessage: 'Bulk delete of {count} SLOs scheduled',
+          i18n.translate('xpack.slo.bulkReset.successNotification', {
+            defaultMessage: 'Bulk reset of {count} SLOs scheduled',
             values: { count: items.length },
           })
         );
