@@ -1570,7 +1570,7 @@ describe('Both modes', () => {
         expect(within(popover).getByRole('button', { name: 'Machine learning' })).toHaveFocus();
       });
 
-      // https://github.com/elastic/kibana/pull/239737
+      // https://github.com/elastic/kibana/issues/239726
       it('does NOT close the popover when onBlur has relatedTarget === null (Safari quirk)', async () => {
         render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
@@ -1596,7 +1596,7 @@ describe('Both modes', () => {
         });
         flushPopoverTimers(); // allow any delayed close to run
 
-        // Your handler skips close when next is unknown -> popover stays open
+        // Blur handler should skip close when nextElement is null -> popover stays open
         expect(screen.getByRole('dialog', { name: 'More' })).toBeInTheDocument();
       });
     });
