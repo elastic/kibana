@@ -13,8 +13,8 @@ import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type {
   RoundInput,
   ConversationRound,
-  ChatEvent,
-  RoundCompleteEvent,
+  ChatAgentEvent,
+  RoundCompleteEventData,
 } from '@kbn/onechat-common';
 import { isMessageChunkEvent, isRoundCompleteEvent, isToolCallEvent } from '@kbn/onechat-common';
 import { streamFactory } from '@kbn/ml-response-stream/server';
@@ -239,7 +239,7 @@ const isOpenAndAcknowledgedAlertsResult = (
 const executeStreaming = async ({
   onechatServices,
   connectorId,
-  conversationId,
+  conversationRounds,
   nextInput,
   request,
   abortSignal,
@@ -252,10 +252,11 @@ const executeStreaming = async ({
   logger,
   response,
   isEnabledKnowledgeBase,
+  conversationId,
 }: {
   onechatServices: OnechatPluginStart;
   connectorId: string;
-  conversationId?: string;
+  conversationRounds: ConversationRound[];
   nextInput: RoundInput;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   abortSignal: AbortSignal;
@@ -272,8 +273,9 @@ const executeStreaming = async ({
   logger: Logger;
   response: KibanaResponseFactory;
   isEnabledKnowledgeBase: boolean;
+  conversationId?: string;
 }): Promise<StreamResponseWithHeaders> => {
-  logger.debug(`🚀 [AGENT_BUILDER] Starting streaming chat execution`);
+  logger.debug(`🚀 [AGENT_BUILDER] Starting streaming agent execution`);
 
   // Initialize stream factory and get response headers
   const {
@@ -307,20 +309,8 @@ const executeStreaming = async ({
   // Set up streaming asynchronously (fire and forget)
   const pushStreamUpdate = async () => {
     try {
-      // Use the chat service for streaming
-      const chatEvents$ = onechatServices.chat.converse({
-        agentId: 'siem-security-analyst',
-        connectorId,
-        conversationId,
-        nextInput,
-        capabilities: {},
-        request,
-        abortSignal,
-        autoCreateConversationWithId: Boolean(conversationId),
-      });
-
       let accumulatedContent = '';
-      let finalRoundData: RoundCompleteEvent['data'] | null = null;
+      let finalRoundData: RoundCompleteEventData | null = null;
       const toolsInvoked: Record<string, number> = {};
 
       // Helper function to map tool names to telemetry format
@@ -340,9 +330,18 @@ const executeStreaming = async ({
         return toolMapping[toolName] || 'CustomTool';
       };
 
-      // Subscribe to chat events and stream them
-      const subscription = chatEvents$.subscribe({
-        next: (event: ChatEvent) => {
+      // Use agents.execute with onEvent callback for fake streaming
+      const agentResult = await onechatServices.agents.execute({
+        request,
+        agentId: 'siem-security-analyst',
+        agentParams: {
+          nextInput,
+          conversation: conversationRounds,
+          capabilities: {},
+        },
+        abortSignal,
+        defaultConnectorId: connectorId,
+        onEvent: (event: ChatAgentEvent) => {
           if (isMessageChunkEvent(event)) {
             // Stream message chunks as they arrive
             const chunk = event.data.text_chunk;
@@ -352,7 +351,7 @@ const executeStreaming = async ({
             }
           } else if (isRoundCompleteEvent(event)) {
             // Store the final round data for processing
-            finalRoundData = event.data;
+            finalRoundData = event.data as RoundCompleteEventData;
           } else if (isToolCallEvent(event)) {
             // Track tool usage for telemetry
             const toolId = event.data.tool_id;
@@ -360,68 +359,64 @@ const executeStreaming = async ({
             toolsInvoked[telemetryToolName] = (toolsInvoked[telemetryToolName] || 0) + 1;
           }
         },
-        error: (error: Error) => {
-          logger.error(`Chat streaming failed: ${error.message}`);
-          logger.error(`Chat streaming error stack: ${error.stack}`);
-          handleStreamEnd(error.message, true);
-        },
-        complete: () => {
-          let finalContent = accumulatedContent;
-
-          // Process final round data for content references and replacements
-          if (finalRoundData) {
-            // Process tool results to add content references
-            const processedContent = processToolResults(
-              { result: { round: finalRoundData.round } },
-              contentReferencesStore
-            );
-
-            // Use the processed content (which contains reference text) for saving to conversation
-            // This allows pruneContentReferences to extract the content references properly
-            finalContent = processedContent;
-          }
-
-          // Collect replacements from tools that stored them in request context
-          const toolReplacements = (request as ExtendedKibanaRequest).__toolReplacements;
-          if (toolReplacements && typeof toolReplacements === 'object') {
-            onNewReplacements(toolReplacements);
-          }
-
-          // Report telemetry
-          const durationMs = Date.now() - startTime;
-          telemetry.reportEvent('invoke_assistant_success', {
-            assistantStreamingEnabled: true,
-            actionTypeId,
-            isEnabledKnowledgeBase,
-            durationMs,
-            toolsInvoked,
-            model: 'unknown', // TODO: Get this from the response
-          });
-
-          // Log detailed execution completion similar to non-streaming
-          if (finalRoundData) {
-            logger.debug(
-              `🚀 [AGENT_BUILDER] Streaming execution completed: ${JSON.stringify(
-                finalRoundData,
-                null,
-                2
-              )}`
-            );
-          } else {
-            logger.debug(`🚀 [AGENT_BUILDER] Streaming execution completed`);
-          }
-
-          handleStreamEnd(finalContent);
-        },
       });
 
-      // Handle abort signal
-      abortSignal?.addEventListener('abort', () => {
-        subscription.unsubscribe();
-        handleStreamEnd('Request aborted', true);
+      logger.debug(
+        `🚀 [AGENT_BUILDER] Agent execution completed: ${JSON.stringify(agentResult, null, 2)}`
+      );
+
+      let finalContent = accumulatedContent;
+
+      // Process final round data for content references and replacements
+      if (finalRoundData) {
+        // Process tool results to add content references
+        const processedContent = processToolResults(
+          { result: { round: (finalRoundData as RoundCompleteEventData).round } },
+          contentReferencesStore
+        );
+
+        // Use the processed content (which contains reference text) for saving to conversation
+        // This allows pruneContentReferences to extract the content references properly
+        finalContent = processedContent;
+      } else {
+        // Fallback to processing the agent result directly if no round data
+        finalContent = processToolResults(agentResult, contentReferencesStore);
+      }
+
+      // Collect replacements from tools that stored them in request context
+      const toolReplacements = (request as ExtendedKibanaRequest).__toolReplacements;
+      if (toolReplacements && typeof toolReplacements === 'object') {
+        onNewReplacements(toolReplacements);
+      }
+
+      // Report telemetry
+      const durationMs = Date.now() - startTime;
+      telemetry.reportEvent('invoke_assistant_success', {
+        assistantStreamingEnabled: true,
+        actionTypeId,
+        isEnabledKnowledgeBase,
+        durationMs,
+        toolsInvoked,
+        model: 'unknown', // TODO: Get this from the response
       });
+
+      // Log detailed execution completion similar to non-streaming
+      if (finalRoundData) {
+        logger.debug(
+          `🚀 [AGENT_BUILDER] Streaming execution completed: ${JSON.stringify(
+            finalRoundData,
+            null,
+            2
+          )}`
+        );
+      } else {
+        logger.debug(`🚀 [AGENT_BUILDER] Streaming execution completed`);
+      }
+
+      handleStreamEnd(finalContent);
     } catch (error) {
-      logger.error(`Failed to set up streaming: ${error.message}`);
+      logger.error(`Failed to execute agent: ${error.message}`);
+      logger.error(`Agent execution error stack: ${error.stack}`);
       handleStreamEnd(error.message, true);
     }
   };
@@ -697,7 +692,7 @@ export async function agentBuilderExecute({
       const result = await executeStreaming({
         onechatServices,
         connectorId,
-        conversationId,
+        conversationRounds,
         nextInput,
         request,
         abortSignal,
@@ -710,6 +705,7 @@ export async function agentBuilderExecute({
         logger,
         response,
         isEnabledKnowledgeBase,
+        conversationId,
       });
       return response.ok<StreamResponseWithHeaders['body']>(result);
     } else {

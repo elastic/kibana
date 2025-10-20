@@ -15,7 +15,6 @@ import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
-import type { ChatService } from './services/chat';
 
 export interface OnechatSetupDependencies {
   cloud?: CloudSetup;
@@ -90,11 +89,5 @@ export interface OnechatPluginStart {
    */
   agents: {
     execute: RunAgentFn;
-  };
-  /**
-   * Chat service, to converse with agents with streaming support.
-   */
-  chat: {
-    converse: ChatService['converse'];
   };
 }

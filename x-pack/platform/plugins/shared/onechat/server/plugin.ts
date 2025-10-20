@@ -105,9 +105,6 @@ export class OnechatPlugin
       agents: {
         execute: agents.execute.bind(agents),
       },
-      chat: {
-        converse: chat.converse.bind(chat),
-      },
     };
   }
 
