@@ -108,6 +108,7 @@ describe('normalizeErrors', () => {
 
       expect(result).toEqual([
         {
+          eventName: 'error',
           error: {
             exception: {
               type: 'OtelError',
@@ -141,6 +142,7 @@ describe('normalizeErrors', () => {
 
       expect(result).toEqual([
         {
+          eventName: 'exception',
           error: {
             exception: {
               type: undefined,
