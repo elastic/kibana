@@ -45,7 +45,6 @@ describe('fetchActionRequestById() utility', () => {
   });
 
   it('should not validate space access to the action when feature is disabled', async () => {
-
     await fetchActionRequestById(endpointServiceMock, 'default', '123');
 
     expect(
@@ -54,8 +53,7 @@ describe('fetchActionRequestById() utility', () => {
   });
 
   describe('and space awareness feature is enabled', () => {
-    beforeEach(() => {
-    });
+    beforeEach(() => {});
 
     it('should validate that action is accessible in active space', async () => {
       (

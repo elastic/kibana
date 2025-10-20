@@ -312,10 +312,7 @@ export class BaseValidator {
   }
 
   protected async validateCanCreateGlobalArtifacts(item: ExceptionItemLikeOptions): Promise<void> {
-    if (
-      !this.isItemByPolicy(item) &&
-      !(await this.endpointAuthzPromise).canManageGlobalArtifacts
-    ) {
+    if (!this.isItemByPolicy(item) && !(await this.endpointAuthzPromise).canManageGlobalArtifacts) {
       throw new EndpointArtifactExceptionValidationError(
         `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
         403
@@ -382,9 +379,7 @@ export class BaseValidator {
   protected async validateCanReadItemInActiveSpace(
     currentSavedItem: ExceptionListItemSchema
   ): Promise<void> {
-    this.logger.debug(
-      () => `Validating if can read single item:\n${stringify(currentSavedItem)}`
-    );
+    this.logger.debug(() => `Validating if can read single item:\n${stringify(currentSavedItem)}`);
 
     // Everyone can read global artifacts and those with global artifact management privilege can do it all
     if (
@@ -439,9 +434,6 @@ export class BaseValidator {
       () => `item can not be read from space [${activeSpaceId}]:\n${stringify(currentSavedItem)}`
     );
 
-    throw new EndpointExceptionsValidationError(
-      `Item not found in space [${activeSpaceId}]`,
-      404
-    );
+    throw new EndpointExceptionsValidationError(`Item not found in space [${activeSpaceId}]`, 404);
   }
 }

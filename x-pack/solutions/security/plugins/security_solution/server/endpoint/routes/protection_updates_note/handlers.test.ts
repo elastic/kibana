@@ -203,8 +203,7 @@ describe('test protection updates note handler', () => {
     });
 
     describe('with space awareness enabled', () => {
-      beforeEach(() => {
-      });
+      beforeEach(() => {});
 
       it('should call ensureInCurrentSpace with integration policy id', async () => {
         const mockEnsureInCurrentSpace = mockEndpointContext.service.getInternalFleetServices()

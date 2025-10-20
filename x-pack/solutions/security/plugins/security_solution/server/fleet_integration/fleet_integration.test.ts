@@ -1530,7 +1530,6 @@ describe('Fleet integrations', () => {
 
     describe('and with space awareness feature enabled', () => {
       beforeEach(() => {
-
         (
           endpointServicesMock.getInternalFleetServices().isEndpointPackageInstalled as jest.Mock
         ).mockResolvedValue(true);

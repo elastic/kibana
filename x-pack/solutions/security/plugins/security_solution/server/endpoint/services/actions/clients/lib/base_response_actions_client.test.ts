@@ -475,7 +475,6 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     it('should include `agent.policy` document field if space awareness is enabled', async () => {
-
       await expect(
         baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
       ).resolves.toEqual(

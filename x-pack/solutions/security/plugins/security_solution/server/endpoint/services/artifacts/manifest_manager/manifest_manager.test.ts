@@ -1735,7 +1735,6 @@ describe('ManifestManager', () => {
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
-
       const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
       manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);

@@ -152,7 +152,7 @@ describe('Agent Status API route handler', () => {
   });
 
   it('should NOT use space ID in creating SO client when feature is disabled', async () => {
-      false;
+    false;
     ((await httpHandlerContextMock.securitySolution).getSpaceId as jest.Mock).mockReturnValue(
       'foo'
     );
@@ -169,7 +169,7 @@ describe('Agent Status API route handler', () => {
   });
 
   it('should use a scoped SO client when spaces awareness feature is enabled', async () => {
-      true;
+    true;
 
     ((await httpHandlerContextMock.securitySolution).getSpaceId as jest.Mock).mockReturnValue(
       'foo'

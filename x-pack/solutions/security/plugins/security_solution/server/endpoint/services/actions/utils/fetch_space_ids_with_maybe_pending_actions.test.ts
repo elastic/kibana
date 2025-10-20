@@ -21,7 +21,6 @@ describe('fetchSpaceIdsWithMaybePendingActions()', () => {
   beforeEach(() => {
     endpointServiceMock = createMockEndpointAppContextService();
 
-
     spaceIdsAggregation = { buckets: [{ key: 'foo' }, { key: 'bar' }] };
 
     applyEsClientSearchMock({

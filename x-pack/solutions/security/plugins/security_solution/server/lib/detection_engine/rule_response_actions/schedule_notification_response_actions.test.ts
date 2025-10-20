@@ -420,8 +420,7 @@ describe('ScheduleNotificationResponseActions', () => {
     });
 
     describe('and when space awareness is enabled', () => {
-      beforeEach(() => {
-      });
+      beforeEach(() => {});
 
       it('should initialize a response action client with the alert space id when space awareness is enabled', async () => {
         const signals = getSignals();

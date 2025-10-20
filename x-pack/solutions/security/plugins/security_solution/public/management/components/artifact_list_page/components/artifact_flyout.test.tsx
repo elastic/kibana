@@ -40,13 +40,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
   beforeEach(() => {
     const renderSetup = getArtifactListPageRenderingSetup();
 
-    ({
-      history,
-      coreStart,
-      mockedApi,
-      FormComponentMock,
-      getLastFormComponentProps,
-    } = renderSetup);
+    ({ history, coreStart, mockedApi, FormComponentMock, getLastFormComponentProps } = renderSetup);
 
     history.push('somepage?show=create');
 

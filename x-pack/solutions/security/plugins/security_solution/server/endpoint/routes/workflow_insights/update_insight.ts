@@ -115,16 +115,16 @@ const updateInsightsRouteHandler = (
       const fleetServices = endpointContext.service.getInternalFleetServices(spaceId);
 
       // We need to make sure the agent IDs, both existing and injected through the request body, are in the current space
-        const existingAgentIds = retrievedInsight?._source?.target?.ids;
-        const newAgentIds = request.body.target?.ids;
+      const existingAgentIds = retrievedInsight?._source?.target?.ids;
+      const newAgentIds = request.body.target?.ids;
 
-        const combinedAgentIds = Array.from(
-          new Set([...(existingAgentIds ?? []), ...(newAgentIds ?? [])])
-        );
+      const combinedAgentIds = Array.from(
+        new Set([...(existingAgentIds ?? []), ...(newAgentIds ?? [])])
+      );
 
-        if (combinedAgentIds.length > 0) {
-          await fleetServices.ensureInCurrentSpace({ agentIds: combinedAgentIds });
-        }
+      if (combinedAgentIds.length > 0) {
+        await fleetServices.ensureInCurrentSpace({ agentIds: combinedAgentIds });
+      }
 
       const body = await securityWorkflowInsightsService.update(
         insightId,

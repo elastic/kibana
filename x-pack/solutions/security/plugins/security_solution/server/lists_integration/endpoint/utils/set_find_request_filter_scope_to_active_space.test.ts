@@ -44,7 +44,6 @@ describe('Artifacts: setFindRequestFilterScopeToActiveSpace()', () => {
       sortField: undefined,
       sortOrder: undefined,
     };
-
   });
 
   it('should nothing if feature flag is disabled', async () => {

@@ -581,7 +581,7 @@ describe('EndpointActionsClient', () => {
 
   describe('and Space Awareness is enabled', () => {
     beforeEach(() => {
-        true;
+      true;
 
       getActionDetailsByIdMock.mockResolvedValue({});
     });

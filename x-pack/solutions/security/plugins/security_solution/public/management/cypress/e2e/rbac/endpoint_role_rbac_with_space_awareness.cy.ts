@@ -36,9 +36,7 @@ describe(
           { product_line: 'endpoint', product_tier: 'complete' },
         ],
         kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'trustedDevices',
-          ])}`,
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['trustedDevices'])}`,
         ],
       },
     },

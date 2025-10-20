@@ -32,7 +32,6 @@ describe('useArtifactRestrictedPolicyAssignments()', () => {
       });
     };
 
-
     item = new ExceptionsListItemGenerator('seed').generateTrustedApp({
       tags: [buildPerPolicyTag('1'), buildPerPolicyTag('2'), buildPerPolicyTag('3')],
     });

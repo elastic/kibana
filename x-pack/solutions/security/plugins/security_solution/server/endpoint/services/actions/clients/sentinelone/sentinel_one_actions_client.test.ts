@@ -2373,7 +2373,7 @@ describe('SentinelOneActionsClient class', () => {
 
   describe('and space awareness is enabled', () => {
     beforeEach(() => {
-        true;
+      true;
 
       getActionDetailsByIdMock.mockResolvedValue({});
 

@@ -91,7 +91,6 @@ describe('Endpoint fields', () => {
     (endpointAppContextService.getEndpointAuthz as jest.Mock).mockResolvedValue(
       getEndpointAuthzInitialStateMock()
     );
-
   });
 
   afterAll(() => {
@@ -142,8 +141,7 @@ describe('Endpoint fields', () => {
     describe('when space awareness feature is enabled', () => {
       beforeEach(() => {
         // @ts-expect-error write to readonly property
-        endpointAppContextService.experimentalFeatures = {
-        };
+        endpointAppContextService.experimentalFeatures = {};
       });
 
       it('should use space-aware index pattern when feature flag is enabled', async () => {
