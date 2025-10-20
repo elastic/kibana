@@ -35,7 +35,7 @@ export const FilterAction = ({ selectedItemsCount, filterSelectedHosts }: Filter
 
   return (
     <div
-      css={css`
+      className={css`
         position: relative;
         height: ${euiTheme.size.m};
       `}
