@@ -36,6 +36,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
   }
 
   public async catchError(): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const retryState = this.stepExecutionRuntime.getCurrentStepState()!;
 
     if (retryState.attempt < this.node.configuration['max-attempts']) {
@@ -73,6 +74,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
   }
 
   private async advanceRetryAttempt(): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const retryState = this.stepExecutionRuntime.getCurrentStepState()!;
     const attempt = retryState.attempt + 1;
     this.workflowLogger.logDebug(`Retrying "${this.node.stepId}" step. (attempt ${attempt}).`);

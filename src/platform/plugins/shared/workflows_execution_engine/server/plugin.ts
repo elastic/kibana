@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
+
 import type { Client } from '@elastic/elasticsearch';
 import { v4 as generateUuid } from 'uuid';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type {
   CoreSetup,
   CoreStart,
+  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -49,7 +53,13 @@ import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manag
 import { WORKFLOWS_EXECUTION_LOGS_INDEX } from '../common';
 
 export class WorkflowsExecutionEnginePlugin
-  implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
+  implements
+    Plugin<
+      WorkflowsExecutionEnginePluginSetup,
+      WorkflowsExecutionEnginePluginStart,
+      WorkflowsExecutionEnginePluginSetupDeps,
+      WorkflowsExecutionEnginePluginStartDeps
+    >
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
@@ -59,7 +69,10 @@ export class WorkflowsExecutionEnginePlugin
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
   }
 
-  public setup(core: CoreSetup, plugins: WorkflowsExecutionEnginePluginSetupDeps) {
+  public setup(
+    core: CoreSetup<WorkflowsExecutionEnginePluginStartDeps, WorkflowsExecutionEnginePluginStart>,
+    plugins: WorkflowsExecutionEnginePluginSetupDeps
+  ) {
     this.logger.debug('workflows-execution-engine: Setup');
 
     const logger = this.logger;
@@ -78,8 +91,7 @@ export class WorkflowsExecutionEnginePlugin
               const { workflowRunId, spaceId } =
                 taskInstance.params as StartWorkflowExecutionParams;
               const [coreStart, pluginsStart] = await core.getStartServices();
-              const { actions, taskManager } =
-                pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
+              const { actions, taskManager } = pluginsStart;
 
               // Get ES client from core services (guaranteed to be available at task execution time)
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
@@ -144,8 +156,7 @@ export class WorkflowsExecutionEnginePlugin
               const { workflowRunId, spaceId } =
                 taskInstance.params as ResumeWorkflowExecutionParams;
               const [coreStart, pluginsStart] = await core.getStartServices();
-              const { actions, taskManager } =
-                pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
+              const { actions, taskManager } = pluginsStart;
 
               // Get ES client from core services (guaranteed to be available at task execution time)
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
@@ -206,7 +217,7 @@ export class WorkflowsExecutionEnginePlugin
     const executeWorkflow = async (
       workflow: WorkflowExecutionEngineModel,
       context: Record<string, any>,
-      request?: any // KibanaRequest for user-scoped execution
+      request?: KibanaRequest
     ) => {
       const workflowCreatedAt = new Date();
 

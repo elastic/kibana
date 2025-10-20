@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type {

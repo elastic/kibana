@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments and fix the issues
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import type { HttpGraphNode } from '@kbn/workflows/graph';
 import type { UrlValidator } from '../../lib/url_validator';
@@ -103,9 +106,9 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
 
   protected async _run(input: any): Promise<RunStepResult> {
     try {
-      return await this.executeHttpRequest(input);
+      return this.executeHttpRequest(input);
     } catch (error) {
-      return await this.handleFailure(input, error);
+      return this.handleFailure(input, error);
     }
   }
 

@@ -39,6 +39,7 @@ export interface WorkflowLogEvent {
     stack_trace?: string;
   };
   tags?: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
@@ -280,6 +281,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     const message = event.message || '';
 
     // Format workflow context metadata
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const meta: Record<string, any> = {
       workflow: {
         name: event.workflow?.name,

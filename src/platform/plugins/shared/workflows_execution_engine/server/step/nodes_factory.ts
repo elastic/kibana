@@ -79,6 +79,7 @@ export class NodesFactory {
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory
   ) {}
 
+  // eslint-disable-next-line complexity
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
     const node = stepExecutionRuntime.node;
     const stepLogger = stepExecutionRuntime.stepLogger;
@@ -90,6 +91,7 @@ export class NodesFactory {
         tags: ['step-factory', 'elasticsearch', 'internal-action'],
       });
       return new ElasticsearchActionStepImpl(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         node as any,
         stepExecutionRuntime,
         this.workflowRuntime,
@@ -103,6 +105,7 @@ export class NodesFactory {
         tags: ['step-factory', 'kibana', 'internal-action'],
       });
       return new KibanaActionStepImpl(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         node as any,
         stepExecutionRuntime,
         this.workflowRuntime,
@@ -210,6 +213,7 @@ export class NodesFactory {
         return new ExitIfNodeImpl(stepExecutionRuntime, this.workflowRuntime);
       case 'wait':
         return new WaitStepImpl(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           node as any,
           stepExecutionRuntime,
           this.workflowRuntime,

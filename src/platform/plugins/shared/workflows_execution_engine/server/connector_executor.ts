@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments and fix the issues
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { validate as validateUuid } from 'uuid';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
@@ -24,7 +27,7 @@ export class ConnectorExecutor {
       throw new Error('Connector type is required');
     }
 
-    return await this.runConnector(connectorName, inputs, spaceId);
+    return this.runConnector(connectorName, inputs, spaceId);
   }
 
   private async runConnector(
@@ -47,7 +50,7 @@ export class ConnectorExecutor {
       connectorId = connector?.id;
     }
 
-    return await this.actionsClient.execute({
+    return this.actionsClient.execute({
       id: connectorId,
       params: connectorParams,
       spaceId,

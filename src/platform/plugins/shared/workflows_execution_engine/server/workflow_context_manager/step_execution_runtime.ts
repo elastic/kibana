@@ -101,10 +101,12 @@ export class StepExecutionRuntime {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public getCurrentStepState(): Record<string, any> | undefined {
     return this.workflowExecutionState.getStepExecution(this.stepExecutionId)?.state;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async setCurrentStepState(state: Record<string, any> | undefined): Promise<void> {
     const stepId = this.node.stepId;
     this.workflowExecutionState.upsertStep({
@@ -114,6 +116,7 @@ export class StepExecutionRuntime {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async startStep(input?: Record<string, any>): Promise<void> {
     const stepId = this.node.stepId;
     const stepStartedAt = new Date();
@@ -130,10 +133,12 @@ export class StepExecutionRuntime {
     } as Partial<EsWorkflowStepExecution>;
 
     this.workflowExecutionState.upsertStep(stepExecution);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.logStepStart(stepId, stepExecution.id!);
     await this.workflowExecutionState.flushStepChanges();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async finishStep(stepOutput?: Record<string, any>): Promise<void> {
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
     const stepExecutionUpdate = {
@@ -175,6 +180,7 @@ export class StepExecutionRuntime {
       error: String(error),
     });
     this.workflowExecutionState.upsertStep(stepExecutionUpdate);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.logStepFail(stepExecutionUpdate.id!, error);
   }
 

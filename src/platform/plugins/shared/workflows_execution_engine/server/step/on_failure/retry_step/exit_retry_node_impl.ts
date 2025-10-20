@@ -24,6 +24,7 @@ export class ExitRetryNodeImpl implements NodeImplementation {
   public async run(): Promise<void> {
     // Exit whole retry step scope
     await this.stepExecutionRuntime.finishStep();
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const retryState = this.stepExecutionRuntime.getCurrentStepState()!;
     this.workflowLogger.logDebug(
       `Exiting retry step ${this.node.stepId} after ${retryState.attempt} attempts.`

@@ -33,6 +33,7 @@ export interface LogSearchResult {
       step_id?: string;
       step_name?: string;
     };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   }>;
 }
@@ -119,6 +120,7 @@ export class WorkflowEventLoggerService {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async searchLogs(query: any): Promise<LogSearchResult> {
     if (!this.initialized) {
       throw new Error('WorkflowEventLoggerService not initialized. Call initialize() first.');
@@ -137,6 +139,7 @@ export class WorkflowEventLoggerService {
           typeof response.hits.total === 'number'
             ? response.hits.total
             : response.hits.total?.value || 0,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         logs: response.hits.hits.map((hit: any) => hit._source),
       };
     } catch (error) {
@@ -183,6 +186,7 @@ export class WorkflowEventLoggerService {
   }
 
   public async getLogsByLevel(level: string, executionId?: string): Promise<LogSearchResult> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mustClauses: any[] = [
       {
         term: {
@@ -226,6 +230,7 @@ export class WorkflowEventLoggerService {
           typeof response.hits.total === 'number'
             ? response.hits.total
             : response.hits.total?.value || 0,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         logs: response.hits.hits.map((hit: any) => hit._source),
       };
     } catch (error) {

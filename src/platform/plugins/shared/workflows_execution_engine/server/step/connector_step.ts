@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments and fix the issues
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
+
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
@@ -104,10 +107,10 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
           error: undefined,
         };
       } else {
-        return await this.handleFailure(withInputs, message);
+        return this.handleFailure(withInputs, message);
       }
     } catch (error) {
-      return await this.handleFailure(withInputs, error);
+      return this.handleFailure(withInputs, error);
     }
   }
 }

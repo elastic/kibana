@@ -31,6 +31,7 @@ export class WorkflowTemplatingEngine {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public render(template: string, context: Record<string, any>): string {
     return this.engine.parseAndRenderSync(template, context);
   }
