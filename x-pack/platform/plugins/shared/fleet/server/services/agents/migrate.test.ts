@@ -506,6 +506,7 @@ describe('Agent migration', () => {
         'agent does not support migration action'
       );
     });
+
     it('should proceed normally when license is sufficient', async () => {
       // Ensure license is valid (default mock)
       mockLicenseService.hasAtLeast.mockReturnValue(true);
