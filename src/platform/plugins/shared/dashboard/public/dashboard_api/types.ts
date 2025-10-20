@@ -51,7 +51,6 @@ import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Subject } from 'rxjs';
 import type { DashboardLocatorParams, DashboardState } from '../../common';
-import type { DashboardLocatorParams, DashboardSettings, DashboardState } from '../../common';
 import type { DashboardAttributes, GridData } from '../../server/content_management';
 import type {
   LoadDashboardReturn,
