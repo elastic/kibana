@@ -12,6 +12,7 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   echo "--- Upload Artifacts"
   buildkite-agent artifact upload '**/.scout/test-artifacts/**/*.png'
   buildkite-agent artifact upload '.scout/reports/scout-playwright-test-failures-*/**/*'
+  buildkite-agent artifact upload '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
   buildkite-agent artifact upload 'target/junit/**/*'
   buildkite-agent artifact upload 'target/kibana-coverage/jest/**/*'
   buildkite-agent artifact upload 'target/kibana-coverage/functional/**/*'
@@ -51,7 +52,7 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
       echo "--- Run Failed Test Reporter"
       node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" \
         'target/junit/**/*.xml' \
-        '.scout/reports/scout-playwright-test-failures-*/**/*.ndjson'
+        '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
     fi
   fi
 

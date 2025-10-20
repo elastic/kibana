@@ -31,8 +31,8 @@ export interface ScoutTestFailureExtended extends TestFailure {
   }>;
 }
 
-// Scout TestFailure interface from kbn-scout-reporting
-interface ScoutTestFailure {
+// Scout Failure Tracking Entry interface
+interface ScoutFailureTrackingEntry {
   id: string;
   suite: string;
   title: string;
@@ -57,6 +57,13 @@ interface ScoutTestFailure {
     path?: string;
     contentType: string;
   }>;
+  timestamp: string;
+  buildkite?: {
+    buildId?: string;
+    jobId?: string;
+    pipeline?: string;
+    branch?: string;
+  };
 }
 
 const isLikelyIrrelevant = (name: string, failure: string) => {
@@ -78,40 +85,40 @@ export async function getScoutFailures(reportPath: string): Promise<ScoutTestFai
     .filter((line) => line.trim() !== '')
     .map((line) => {
       try {
-        return JSON.parse(line) as ScoutTestFailure;
+        return JSON.parse(line) as ScoutFailureTrackingEntry;
       } catch (error) {
-        // Failed to parse Scout failure line;
+        // Failed to parse Scout failure tracking line
         return null;
       }
     })
-    .filter((failure): failure is ScoutTestFailure => failure !== null);
+    .filter((entry): entry is ScoutFailureTrackingEntry => entry !== null);
 
-  for (const scoutFailure of lines) {
-    // Convert Scout TestFailure to compatible TestFailure format
-    const failure = stripAnsi(scoutFailure.error.stack_trace || scoutFailure.error.message || '');
-    const likelyIrrelevant = isLikelyIrrelevant(scoutFailure.title, failure);
+  for (const entry of lines) {
+    // Convert Scout failure tracking entry to compatible TestFailure format
+    const failure = stripAnsi(entry.error.stack_trace || entry.error.message || '');
+    const likelyIrrelevant = isLikelyIrrelevant(entry.title, failure);
 
     const testFailure: ScoutTestFailureExtended = {
       // Map Scout fields to JUnit-compatible fields
-      classname: scoutFailure.suite,
-      name: scoutFailure.title,
+      classname: entry.suite,
+      name: entry.title,
       failure,
       likelyIrrelevant,
-      'system-out': scoutFailure.stdout ? stripAnsi(scoutFailure.stdout) : undefined,
-      owners: scoutFailure.owner.join(', '), // Convert array to string
-      commandLine: scoutFailure.command,
+      'system-out': entry.stdout ? stripAnsi(entry.stdout) : undefined,
+      owners: entry.owner.join(', '), // Convert array to string
+      commandLine: entry.command,
 
       // Scout-specific metadata
-      id: scoutFailure.id,
-      target: scoutFailure.target,
-      location: scoutFailure.location,
-      kibanaModule: scoutFailure.kibanaModule,
-      duration: scoutFailure.duration,
-      attachments: scoutFailure.attachments,
+      id: entry.id,
+      target: entry.target,
+      location: entry.location,
+      kibanaModule: entry.kibanaModule,
+      duration: entry.duration,
+      attachments: entry.attachments,
 
       // Additional fields for compatibility
-      time: String(scoutFailure.duration / 1000), // Convert ms to seconds
-      file: scoutFailure.location,
+      time: String(entry.duration / 1000), // Convert ms to seconds
+      file: entry.location,
     };
 
     failures.push(testFailure);
