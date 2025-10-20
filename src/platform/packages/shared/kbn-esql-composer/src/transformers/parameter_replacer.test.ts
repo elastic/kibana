@@ -69,6 +69,22 @@ describe('ParameterReplacer', () => {
     expect(substituted).toEqual(Builder.expression.literal.string('bar'));
   });
 
+  it('allows replacing falsy values', () => {
+    const params = { baz: 0, qux: false, empty: '' };
+    const replacer = new ParameterReplacer(params);
+
+    const zeroNode = createParamLiteral('named', 'baz');
+    const falseNode = createParamLiteral('named', 'qux');
+    const emptyNode = createParamLiteral('named', 'empty');
+    const zeroSubstituted = replacer.replace(zeroNode);
+    const falseSubstituted = replacer.replace(falseNode);
+    const emptySubstituted = replacer.replace(emptyNode);
+
+    expect(zeroSubstituted).toEqual(Builder.expression.literal.integer(0));
+    expect(falseSubstituted).toEqual(Builder.expression.literal.string('false'));
+    expect(emptySubstituted).toEqual(Builder.expression.literal.string(''));
+  });
+
   it('replaces positional parameters in literals', () => {
     const params = ['positional_value'];
     const replacer = new ParameterReplacer(params);

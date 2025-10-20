@@ -68,9 +68,71 @@ export class StreamsApp {
     await this.gotoStreamManagementTab(streamName, 'advanced');
   }
 
+  async clickGoBackToStreams() {
+    await this.page.getByTestId('backToStreamsButton').click();
+  }
+
+  async clickStreamNameLink(streamName: string) {
+    await this.page.getByTestId(`streamsNameLink-${streamName}`).click();
+  }
+
+  async clickDataQualityTab() {
+    await this.page.getByTestId('dataQualityTab').click();
+  }
+
   // Streams table utility methods
   async expectStreamsTableVisible() {
     await expect(this.page.getByTestId('streamsTable')).toBeVisible();
+  }
+
+  async verifyDatePickerTimeRange(expectedRange: { from: string; to: string }) {
+    await expect(
+      this.page.testSubj.locator('superDatePickerstartDatePopoverButton'),
+      `Date picker 'start date' is incorrect`
+    ).toHaveText(expectedRange.from);
+    await expect(
+      this.page.testSubj.locator('superDatePickerendDatePopoverButton'),
+      `Date picker 'end date' is incorrect`
+    ).toHaveText(expectedRange.to);
+  }
+
+  async verifyDocCount(streamName: string, expectedCount: number) {
+    await expect(this.page.locator(`[data-test-subj="streamsDocCount-${streamName}"]`)).toHaveText(
+      expectedCount.toString()
+    );
+  }
+
+  async verifyDataQuality(streamName: string, expectedQuality: string) {
+    await expect(
+      this.page.locator(`[data-test-subj="dataQualityIndicator-${streamName}"]`)
+    ).toHaveText(expectedQuality);
+  }
+
+  async verifyRetention(streamName: string, expectedIlmPolicy: string) {
+    await expect(
+      this.page.locator(`[data-test-subj="retentionColumn-${streamName}"]`)
+    ).toContainText(expectedIlmPolicy);
+  }
+
+  async verifyDiscoverButtonLink(streamName: string) {
+    const locator = this.page.locator(
+      `[data-test-subj="streamsDiscoverActionButton-${streamName}"]`
+    );
+    await locator.waitFor();
+
+    const href = await locator.getAttribute('href');
+    if (!href) {
+      throw new Error(`Missing href for Discover action button of stream ${streamName}`);
+    }
+
+    // Expect encoded ESQL snippet to appear (basic validation)
+    // 'FROM <streamName>' should appear URL-encoded
+    const expectedFragment = encodeURIComponent(`FROM ${streamName}`);
+    if (!href.includes(expectedFragment)) {
+      throw new Error(
+        `Href for ${streamName} did not contain expected ESQL fragment. href=${href} expectedFragment=${expectedFragment}`
+      );
+    }
   }
 
   async verifyStreamsAreInTable(streamNames: string[]) {
@@ -115,6 +177,21 @@ export class StreamsApp {
         await expandButton.click();
       }
     }
+  }
+
+  // Streams header utility methods
+  async verifyLifecycleBadge(streamName: string, expectedLabel: string) {
+    await expect(
+      this.page.locator(`[data-test-subj="lifecycleBadge-${streamName}"]`)
+    ).toContainText(expectedLabel);
+  }
+
+  async verifyClassicBadge() {
+    await expect(this.page.locator(`[data-test-subj="classicStreamBadge"]`)).toBeVisible();
+  }
+
+  async verifyWiredBadge() {
+    await expect(this.page.locator(`[data-test-subj="wiredStreamBadge"]`)).toBeVisible();
   }
 
   // Routing-specific utility methods
@@ -321,6 +398,11 @@ export class StreamsApp {
     await processorEditButton.click();
   }
 
+  async clickDuplicateProcessor(pos: number) {
+    const processorDuplicateButton = await this.getProcessorDuplicateButton(pos);
+    await processorDuplicateButton.click();
+  }
+
   async clickEditCondition(pos: number) {
     const conditionEditButton = await this.getConditionEditButton(pos);
     await conditionEditButton.click();
@@ -344,6 +426,13 @@ export class StreamsApp {
     const targetProcessor = processors[pos];
     await targetProcessor.getByRole('button', { name: 'Step context menu' }).first().click();
     return this.page.getByTestId('stepContextMenuEditItem');
+  }
+
+  async getProcessorDuplicateButton(pos: number) {
+    const processors = await this.getProcessorsListItems();
+    const targetProcessor = processors[pos];
+    await targetProcessor.getByRole('button', { name: 'Step context menu' }).first().click();
+    return this.page.getByTestId('stepContextMenuDuplicateItem');
   }
 
   async getConditionEditButton(pos: number) {

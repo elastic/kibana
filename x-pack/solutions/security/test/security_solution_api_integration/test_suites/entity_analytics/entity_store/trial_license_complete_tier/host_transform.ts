@@ -17,17 +17,15 @@ import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import { moveIndexToSlowDataTier } from '../../utils/move_index_to_slow_data_tier';
 import { cleanUpEntityStore } from './infra/teardown';
 import { enableEntityStore } from './infra/setup';
-import { TIMEOUT_MS } from './infra/constants';
+import { COMMON_DATASTREAM_NAME, HOST_INDEX_NAME, TIMEOUT_MS } from './infra/constants';
 import type { HostTransformResult, HostTransformResultHost } from './infra/host_transform';
 import {
   buildHostTransformDocument,
   createDocumentsAndTriggerTransform,
 } from './infra/host_transform';
 
-const DATASTREAM_NAME: string = 'logs-elastic_agent.cloudbeat-test';
 const FROZEN_INDEX_NAME: string = 'test-frozen-index';
 const COLD_INDEX_NAME: string = 'test-cold-index';
-const INDEX_NAME: string = '.entities.v1.latest.security_host_default';
 
 const SMALL_HOST_MAPPING: MappingTypeMapping = {
   properties: {
@@ -69,7 +67,7 @@ export default function (providerContext: FtrProviderContext) {
         // Helps avoid "Error initializing entity store: Data view not found 'security-solution-default'"
         await dataView.create('security-solution');
         // Create a test index matching transform's pattern to store test documents
-        await es.indices.createDataStream({ name: DATASTREAM_NAME });
+        await es.indices.createDataStream({ name: COMMON_DATASTREAM_NAME });
         // Create a test index that will be moved to frozen matching transform's pattern to store test documents
         await es.indices.create({ index: FROZEN_INDEX_NAME, mappings: SMALL_HOST_MAPPING });
         // Create a test index that will be moved to cold matching transform's pattern to store test documents
@@ -78,7 +76,7 @@ export default function (providerContext: FtrProviderContext) {
 
       after(async () => {
         const log = providerContext.getService('log');
-        await es.indices.deleteDataStream({ name: DATASTREAM_NAME });
+        await es.indices.deleteDataStream({ name: COMMON_DATASTREAM_NAME });
 
         try {
           await es.indices.deleteAlias({
@@ -141,14 +139,14 @@ export default function (providerContext: FtrProviderContext) {
           { name: hostName, ip: '2.2.2.2' },
         ];
 
-        await createDocumentsAndTriggerTransform(providerContext, testDocs, DATASTREAM_NAME);
+        await createDocumentsAndTriggerTransform(providerContext, testDocs, COMMON_DATASTREAM_NAME);
 
         await retry.waitForWithTimeout(
           'Document to be processed and transformed',
           TIMEOUT_MS,
           async () => {
             const result = await es.search({
-              index: INDEX_NAME,
+              index: HOST_INDEX_NAME,
               query: {
                 term: {
                   'host.name': hostName,
@@ -200,14 +198,14 @@ export default function (providerContext: FtrProviderContext) {
           },
         ];
 
-        await createDocumentsAndTriggerTransform(providerContext, testDocs, DATASTREAM_NAME);
+        await createDocumentsAndTriggerTransform(providerContext, testDocs, COMMON_DATASTREAM_NAME);
 
         await retry.waitForWithTimeout(
           'Document to be processed and transformed',
           TIMEOUT_MS,
           async () => {
             const result = await es.search({
-              index: INDEX_NAME,
+              index: HOST_INDEX_NAME,
               query: {
                 term: {
                   'host.name': hostName,
@@ -252,7 +250,7 @@ export default function (providerContext: FtrProviderContext) {
             { name: `${TEST_DATA_PREFIX}cold-host-0` },
             { name: `${TEST_DATA_PREFIX}cold-host-1` },
           ],
-          [DATASTREAM_NAME]: [
+          [COMMON_DATASTREAM_NAME]: [
             { name: `${TEST_DATA_PREFIX}hot-host-0` },
             { name: `${TEST_DATA_PREFIX}hot-host-1` },
           ],
@@ -292,11 +290,11 @@ export default function (providerContext: FtrProviderContext) {
         ]);
 
         // Start transform
-        await createDocumentsAndTriggerTransform(providerContext, [], DATASTREAM_NAME);
+        await createDocumentsAndTriggerTransform(providerContext, [], COMMON_DATASTREAM_NAME);
 
         await retry.waitForWithTimeout('Fetch only hot node documents', TIMEOUT_MS, async () => {
           const result = await es.search({
-            index: INDEX_NAME,
+            index: HOST_INDEX_NAME,
             query: {
               wildcard: {
                 'host.name': {

@@ -67,6 +67,17 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
               );
               await PageObjects.common.clickConfirmOnModal();
             },
+            rename: async (newName: string) => {
+              log.debug('management ui: rename the session');
+              await actionsCell.click();
+              await find.clickByCssSelector(
+                '[data-test-subj="sessionManagementPopoverAction-rename"]'
+              );
+              await testSubjects.setValue('editNameInput', newName, {
+                clearWithKeyboard: true,
+              });
+              await testSubjects.click('confirmEditName');
+            },
           };
         })
       );

@@ -29,7 +29,7 @@ import {
   mathOperatorsExtraSignatures,
   comparisonOperatorSignatures,
 } from './constants';
-import { extraFunctions, functionEnrichments, excludedFunctions } from './functions';
+import { extraFunctions, excludedFunctions, enrichFunctionParameters } from './functions';
 
 const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
 
@@ -90,11 +90,10 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
     examples: ESFunctionDefinition.examples,
   };
 
-  if (functionEnrichments[ret.name]) {
-    _.merge(ret, functionEnrichments[ret.name]);
-  }
+  // Apply specific parameter enrichments for certain functions' signatures
+  const enrichedDefinition = enrichFunctionParameters(ret as FunctionDefinition);
 
-  return ret as FunctionDefinition;
+  return enrichedDefinition;
 }
 /**
  * Elasticsearch doc exports name as 'lhs' or 'rhs' instead of 'left' or 'right'
