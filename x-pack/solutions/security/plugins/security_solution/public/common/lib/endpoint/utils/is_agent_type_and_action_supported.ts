@@ -26,13 +26,12 @@ export const isAgentTypeAndActionSupported = (
   const isSentinelOneRunScriptEnabled = features.responseActionsSentinelOneRunScriptEnabled;
   const isCrowdstrikeHostIsolationEnabled =
     features.responseActionsCrowdstrikeManualHostIsolationEnabled;
-  const isMicrosoftDefenderEndpointEnabled = features.responseActionsMSDefenderEndpointEnabled;
 
   const isAgentTypeSupported =
     agentType === 'endpoint' ||
     agentType === 'sentinel_one' ||
-    (agentType === 'crowdstrike' && isCrowdstrikeHostIsolationEnabled) ||
-    (agentType === 'microsoft_defender_endpoint' && isMicrosoftDefenderEndpointEnabled);
+    agentType === 'microsoft_defender_endpoint' ||
+    (agentType === 'crowdstrike' && isCrowdstrikeHostIsolationEnabled);
 
   let isActionNameSupported: boolean =
     !actionName || isActionSupportedByAgentType(agentType, actionName, actionType);

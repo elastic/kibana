@@ -436,10 +436,8 @@ function isThirdPartyFeatureDisabled(
   }
 
   if (
-    (agentType === 'crowdstrike' &&
-      !experimentalFeatures.responseActionsCrowdstrikeManualHostIsolationEnabled) ||
-    (agentType === 'microsoft_defender_endpoint' &&
-      !experimentalFeatures.responseActionsMSDefenderEndpointEnabled)
+    agentType === 'crowdstrike' &&
+    !experimentalFeatures.responseActionsCrowdstrikeManualHostIsolationEnabled
   ) {
     return true;
   }

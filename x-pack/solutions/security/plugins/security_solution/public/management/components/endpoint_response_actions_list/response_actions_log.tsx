@@ -67,9 +67,6 @@ export const ResponseActionsLog = memo<
     const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled(
       'responseActionsCrowdstrikeManualHostIsolationEnabled'
     );
-    const isMicrosoftDefenderEnabled = useIsExperimentalFeatureEnabled(
-      'responseActionsMSDefenderEndpointEnabled'
-    );
 
     // Used to decide if display global loader or not (only the fist time tha page loads)
     const [isFirstAttempt, setIsFirstAttempt] = useState(true);
@@ -115,7 +112,6 @@ export const ResponseActionsLog = memo<
       agentIdsFromUrl,
       isFlyout,
       isCrowdstrikeEnabled,
-      isMicrosoftDefenderEnabled,
       statusesFromUrl,
       setQueryParams,
       usersFromUrl,
