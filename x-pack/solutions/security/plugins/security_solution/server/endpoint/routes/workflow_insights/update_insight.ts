@@ -74,8 +74,7 @@ const updateInsightsRouteHandler = (
   return async (context, request, response) => {
     const { insightId } = request.params;
     const { canWriteWorkflowInsights } = await endpointContext.service.getEndpointAuthz(request);
-    const { endpointManagementSpaceAwarenessEnabled, defendInsightsPolicyResponseFailure } =
-      endpointContext.experimentalFeatures;
+    const { defendInsightsPolicyResponseFailure } = endpointContext.experimentalFeatures;
 
     if (request.body.type === 'policy_response_failure' && !defendInsightsPolicyResponseFailure) {
       return response.badRequest({
@@ -111,12 +110,11 @@ const updateInsightsRouteHandler = (
 
       const backingIndex = retrievedInsight._index;
 
-      // If the endpoint management space awareness feature is enabled, we need to ensure that the agent IDs are in the current space
-      if (endpointManagementSpaceAwarenessEnabled) {
-        const spaceId = (await context.securitySolution).getSpaceId();
-        const fleetServices = endpointContext.service.getInternalFleetServices(spaceId);
+      // Ensure that the agent IDs are in the current space
+      const spaceId = (await context.securitySolution).getSpaceId();
+      const fleetServices = endpointContext.service.getInternalFleetServices(spaceId);
 
-        // We need to make sure the agent IDs, both existing and injected through the request body, are in the current space
+      // We need to make sure the agent IDs, both existing and injected through the request body, are in the current space
         const existingAgentIds = retrievedInsight?._source?.target?.ids;
         const newAgentIds = request.body.target?.ids;
 
@@ -127,7 +125,6 @@ const updateInsightsRouteHandler = (
         if (combinedAgentIds.length > 0) {
           await fleetServices.ensureInCurrentSpace({ agentIds: combinedAgentIds });
         }
-      }
 
       const body = await securityWorkflowInsightsService.update(
         insightId,

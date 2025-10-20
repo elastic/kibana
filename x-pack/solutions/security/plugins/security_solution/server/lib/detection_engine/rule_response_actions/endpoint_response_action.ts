@@ -33,20 +33,15 @@ export const endpointResponseAction = async (
   const ruleId = alerts[0].kibana.alert?.rule.uuid;
   const ruleName = alerts[0].kibana.alert?.rule.name;
   const errors: string[] = [];
-  let spaceId = (alerts[0].kibana.space_ids ?? [])[0];
+  const spaceId = (alerts[0].kibana.space_ids ?? [])[0];
 
-  if (endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-    if (!spaceId) {
-      logger.error(
-        new EndpointError(
-          `Unable to identify the space ID from alert data ('kibana.space_ids') for rule [${ruleName}][${ruleId}]`
-        )
-      );
-      return;
-    }
-  } else {
-    // force the space to `default` when space awareness is not enabled
-    spaceId = DEFAULT_SPACE_ID;
+  if (!spaceId) {
+    logger.error(
+      new EndpointError(
+        `Unable to identify the space ID from alert data ('kibana.space_ids') for rule [${ruleName}][${ruleId}]`
+      )
+    );
+    return;
   }
 
   const logMsgPrefix = `Rule [${ruleName}][${ruleId}][${spaceId}]:`;
