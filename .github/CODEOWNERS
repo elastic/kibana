@@ -2486,13 +2486,10 @@ x-pack/solutions/security/plugins/security_solution/public/siem_readiness @elast
 ## Security Solution sub teams - Security Entity Store
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/core-analysis
 x-pack/platform/plugins/shared/entity_manager @elastic/core-analysis
-x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic/core-analysis
 x-pack/platform/test/api_integration/apis/entity_manager @elastic/core-analysis
-x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic/core-analysis
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/core-analysis
 x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store @elastic/core-analysis
 x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/ @elastic/core-analysis
-x-pack/plugins/observability_solution/entities_data_access @elastic/core-analysis
 
 ## Security Solution sub teams - Threat Hunting
 
