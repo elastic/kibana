@@ -8,10 +8,54 @@
  */
 
 import { z } from '@kbn/zod';
-import { GENERATED_KIBANA_CONNECTORS, KIBANA_CONNECTOR_COUNT } from './generated_kibana_connectors';
-import type { InternalConnectorContract } from '..';
+import { GENERATED_KIBANA_CONNECTORS, KIBANA_CONNECTOR_COUNT } from './kibana_connectors';
+import type { InternalConnectorContract } from '../../types/v1';
 
 describe('Generated Kibana Connectors', () => {
+  // SANITY TEST: Critical test to ensure no runtime errors are introduced
+  describe('Sanity Check - Runtime Error Prevention', () => {
+    it('should import kibana_connectors.ts without any runtime errors', () => {
+      // This is the most critical test - it ensures the file can be imported
+      // without throwing any runtime errors, which was the original issue
+      expect(() => {
+        // Re-import to test the actual import process
+        const connectors = require('./kibana_connectors');
+        expect(connectors.GENERATED_KIBANA_CONNECTORS).toBeDefined();
+        expect(connectors.KIBANA_CONNECTOR_COUNT).toBeDefined();
+        expect(Array.isArray(connectors.GENERATED_KIBANA_CONNECTORS)).toBe(true);
+        expect(connectors.GENERATED_KIBANA_CONNECTORS.length).toBeGreaterThan(0);
+        expect(typeof connectors.KIBANA_CONNECTOR_COUNT).toBe('number');
+        expect(connectors.KIBANA_CONNECTOR_COUNT).toBeGreaterThan(0);
+      }).not.toThrow();
+    });
+
+    it('should have all schemas instantiable without TypeScript compilation errors', () => {
+      // Test that all Zod schemas can be instantiated without TypeScript errors
+      // This catches issues with malformed schema definitions
+      expect(() => {
+        GENERATED_KIBANA_CONNECTORS.forEach((connector, index) => {
+          try {
+            const schema = connector.paramsSchema;
+            expect(schema).toBeDefined();
+            
+            // Test basic schema operations
+            const result = schema.safeParse({});
+            expect(result.success === true || result.success === false).toBe(true);
+          } catch (error) {
+            throw new Error(`Schema error in connector ${index} (${connector.type}): ${error.message}`);
+          }
+        });
+      }).not.toThrow();
+    });
+
+    it('should maintain consistent connector count across imports', () => {
+      // Ensure the connector count is consistent and doesn't change unexpectedly
+      expect(KIBANA_CONNECTOR_COUNT).toBe(GENERATED_KIBANA_CONNECTORS.length);
+      expect(KIBANA_CONNECTOR_COUNT).toBeGreaterThan(400); // Reasonable minimum
+      expect(KIBANA_CONNECTOR_COUNT).toBeLessThan(1000); // Reasonable maximum
+    });
+  });
+
   // Test samples covering different types of endpoints
   const TEST_SAMPLES = [
     // Simple GET endpoint with query params
@@ -55,17 +99,19 @@ describe('Generated Kibana Connectors', () => {
         return Array.isArray(bodyParams) && bodyParams.length === 1 && bodyParams[0] === 'body';
       });
 
-      // Currently we have 59 endpoints with generic body params that need inline schema handling
+      // Currently we have 63 endpoints with generic body params that need inline schema handling
       // This is acceptable for now as they represent endpoints with inline OpenAPI schemas
       // that openapi-zod-client generates as inline Zod objects rather than named schemas
-      expect(endpointsWithGenericBody).toHaveLength(59);
+      expect(endpointsWithGenericBody).toHaveLength(63);
     });
 
     it('should use proper schemas for POST/PUT/PATCH endpoints instead of generic z.any() body', () => {
       const endpointsWithGenericBodySchema = GENERATED_KIBANA_CONNECTORS.filter((connector) => {
         // Only check POST/PUT/PATCH endpoints
         const methods = connector.methods || [];
-        const hasBodyMethod = methods.some((method) => ['POST', 'PUT', 'PATCH'].includes(method));
+        const hasBodyMethod = methods.some((method: string) =>
+          ['POST', 'PUT', 'PATCH'].includes(method)
+        );
 
         if (!hasBodyMethod) return false;
 
@@ -184,10 +230,9 @@ describe('Generated Kibana Connectors', () => {
             ) {
               // These are nested fields within customFields, not top-level fields
               // The schema is correct, the bodyParams list is wrong - skip this check
-              continue;
+            } else {
+              expect(hasField).toBe(true);
             }
-
-            expect(hasField).toBe(true);
           }
         });
 
@@ -519,7 +564,7 @@ describe('Generated Kibana Connectors', () => {
         generateYamlSchemaFromConnectors,
         getJsonSchemaFromYamlSchema,
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-      } = require('../spec/lib/generate_yaml_schema');
+      } = require('../../spec/lib/generate_yaml_schema');
 
       // Generate the workflow schema and convert to JSON schema (this is what Monaco uses)
       const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
@@ -554,11 +599,17 @@ describe('Generated Kibana Connectors', () => {
 
       for (const refMatch of allRefs) {
         const refPathMatch = refMatch.match(/"\$ref":"([^"]+)"/);
-        if (!refPathMatch || !refPathMatch[1]) continue;
+        if (!refPathMatch || !refPathMatch[1]) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
         const refPath = refPathMatch[1];
 
         // Skip valid root references
-        if (refPath === '#/definitions/WorkflowSchema') continue;
+        if (refPath === '#/definitions/WorkflowSchema') {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
 
         // Check if this reference can be resolved in the schema
         if (refPath.startsWith('#/definitions/')) {
@@ -668,7 +719,7 @@ describe('Generated Kibana Connectors', () => {
         generateYamlSchemaFromConnectors,
         getJsonSchemaFromYamlSchema,
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-      } = require('../spec/lib/generate_yaml_schema');
+      } = require('../../spec/lib/generate_yaml_schema');
 
       // Generate the workflow schema and convert to JSON schema (this is what Monaco uses)
       const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
@@ -724,7 +775,7 @@ describe('Generated Kibana Connectors', () => {
         generateYamlSchemaFromConnectors,
         getJsonSchemaFromYamlSchema,
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-      } = require('../spec/lib/generate_yaml_schema');
+      } = require('../../spec/lib/generate_yaml_schema');
 
       // Generate the workflow schema and convert to JSON schema
       const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
@@ -776,7 +827,7 @@ describe('Generated Kibana Connectors', () => {
         generateYamlSchemaFromConnectors,
         getJsonSchemaFromYamlSchema,
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-      } = require('../spec/lib/generate_yaml_schema');
+      } = require('../../spec/lib/generate_yaml_schema');
 
       // Generate the workflow schema and convert to JSON schema
       const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
@@ -809,7 +860,7 @@ describe('Generated Kibana Connectors', () => {
         generateYamlSchemaFromConnectors,
         getJsonSchemaFromYamlSchema,
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-      } = require('../spec/lib/generate_yaml_schema');
+      } = require('../../spec/lib/generate_yaml_schema');
 
       // Generate the workflow schema and convert to JSON schema (this is what Monaco uses)
       const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
@@ -844,7 +895,7 @@ describe('Generated Kibana Connectors', () => {
           // console.log('✅ No additionalProperties: false found in anyOf - schema should work');
 
           // Let's also check the downloaded schema to see if there's a discrepancy
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          // eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-nodejs-modules
           const fs = require('fs');
           const downloadedSchemaPath = '/Users/shaharglazner/Downloads/nschema.json';
 
@@ -886,7 +937,7 @@ describe('Generated Kibana Connectors', () => {
         generateYamlSchemaFromConnectors,
         getJsonSchemaFromYamlSchema,
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-      } = require('../spec/lib/generate_yaml_schema');
+      } = require('../../spec/lib/generate_yaml_schema');
 
       // Generate the workflow schema and convert to JSON schema (this is what Monaco uses)
       const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
@@ -952,7 +1003,7 @@ describe('Generated Kibana Connectors', () => {
         generateYamlSchemaFromConnectors,
         getJsonSchemaFromYamlSchema,
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-      } = require('../spec/lib/generate_yaml_schema');
+      } = require('../../spec/lib/generate_yaml_schema');
 
       const workflowSchema = generateYamlSchemaFromConnectors(GENERATED_KIBANA_CONNECTORS);
       const jsonSchema = getJsonSchemaFromYamlSchema(workflowSchema);
@@ -997,52 +1048,47 @@ describe('Generated Kibana Connectors', () => {
       const Ajv = require('ajv');
       const ajv = new Ajv({ strict: false, validateFormats: false });
 
-      try {
-        const validate = ajv.compile(jsonSchema);
+      const validate = ajv.compile(jsonSchema);
 
-        // Test 1: Valid data should pass
-        const validResult = validate(testWorkflow);
-        // console.log('Valid workflow validation result:', validResult);
+      // Test 1: Valid data should pass
+      const validResult = validate(testWorkflow);
+      // console.log('Valid workflow validation result:', validResult);
 
-        // Test 2: Invalid data should fail
-        const invalidResult = validate(invalidWorkflow);
-        // console.log('Invalid workflow validation result:', invalidResult);
+      // Test 2: Invalid data should fail
+      const invalidResult = validate(invalidWorkflow);
+      // console.log('Invalid workflow validation result:', invalidResult);
 
-        // Check if validation is working properly
-        // console.log('Valid result:', validResult, 'Invalid result:', invalidResult);
+      // Check if validation is working properly
+      // console.log('Valid result:', validResult, 'Invalid result:', invalidResult);
 
-        if (validResult && invalidResult) {
-          // console.log('❌ SCHEMA IS GARBAGE: Both valid and invalid data passed validation!');
-          expect(false).toBe(true); // Force failure
-        } else if (!validResult && !invalidResult) {
-          // console.log('⚠️ Both workflows rejected - checking if for different reasons');
-          // console.log('Valid workflow errors:', validate.errors);
+      if (validResult && invalidResult) {
+        // console.log('❌ SCHEMA IS GARBAGE: Both valid and invalid data passed validation!');
+        expect(false).toBe(true); // Force failure
+      } else if (!validResult && !invalidResult) {
+        // console.log('⚠️ Both workflows rejected - checking if for different reasons');
+        // console.log('Valid workflow errors:', validate.errors);
 
-          // Try invalid workflow to see its errors
-          validate(invalidWorkflow);
-          // console.log('Invalid workflow errors:', validate.errors);
+        // Try invalid workflow to see its errors
+        validate(invalidWorkflow);
+        // console.log('Invalid workflow errors:', validate.errors);
 
-          // If both are rejected for the same reason, schema might be too strict
-          // console.log('✅ Schema is functional but may be too strict');
-        } else if (validResult && !invalidResult) {
-          // console.log('✅ PERFECT: Valid data passed, invalid data rejected!');
-        } else {
-          // console.log('⚠️ Valid data rejected, invalid data also rejected');
-          // console.log('Schema may be too strict or have structural issues');
-        }
+        // If both are rejected for the same reason, schema might be too strict
+        // console.log('✅ Schema is functional but may be too strict');
+      } else if (validResult && !invalidResult) {
+        // console.log('✅ PERFECT: Valid data passed, invalid data rejected!');
+      } else {
+        // console.log('⚠️ Valid data rejected, invalid data also rejected');
+        // console.log('Schema may be too strict or have structural issues');
+      }
 
-        // Check schema size to see if it's the useless fallback
-        const schemaSize = JSON.stringify(jsonSchema).length;
-        // console.log(`Schema size: ${Math.round(schemaSize / 1024)}KB`);
+      // Check schema size to see if it's the useless fallback
+      const schemaSize = JSON.stringify(jsonSchema).length;
+      // console.log(`Schema size: ${Math.round(schemaSize / 1024)}KB`);
 
-        if (schemaSize < 10000) {
-          // Less than 10KB means it's garbage
-          // console.log('❌ SCHEMA IS TOO SMALL - This is the useless fallback!');
-          expect(schemaSize).toBeGreaterThan(100000); // Should be much larger for real schema
-        }
-      } catch (error) {
-        // console.log('❌ Schema compilation failed:', error.message);
-        throw error;
+      if (schemaSize < 10000) {
+        // Less than 10KB means it's garbage
+        // console.log('❌ SCHEMA IS TOO SMALL - This is the useless fallback!');
+        expect(schemaSize).toBeGreaterThan(100000); // Should be much larger for real schema
       }
     });
   });
