@@ -100,7 +100,7 @@ For the Elastic Observability 9.2.0 release information, refer to [Elastic Obser
 For the Elastic Security 9.2.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Machine Learning**:
-* Sets the default retention period for the logs anomaly detection configurations to 120 days [#231080]({{kib-pull}}231080).
+* Sets the default retention period for results from the logs anomaly detection configurations to 120 days [#231080]({{kib-pull}}231080).
 * Redesigns the file upload UX and adds the ability to upload multiple files and existing indices [#232923]({{kib-pull}}232923).
 * Adds an `AI` section to `Stack Management` for AI feature settings  [#227289]({{kib-pull}}227289).
 * AI Connector/Inference endpoints creation UI: Adds icon for Contextual AI [#236951]({{kib-pull}}236951).
