@@ -23,7 +23,6 @@ import type {
   RecommendedField,
 } from '@kbn/esql-types';
 import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
-import type { BuildFlavor } from '@kbn/config';
 
 export interface ControlsContext {
   /** The editor supports the creation of controls,
@@ -123,7 +122,7 @@ export interface EsqlPluginStartBase {
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
   getInferenceEndpointsAutocomplete: () => Promise<InferenceEndpointsAutocompleteResult>;
-  buildFlavor: BuildFlavor;
+  isServerless: boolean;
 }
 
 export interface ESQLEditorDeps {

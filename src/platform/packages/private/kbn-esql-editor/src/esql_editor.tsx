@@ -598,7 +598,7 @@ const ESQLEditorInternal = function ESQLEditor({
       },
       getActiveProduct: () => core.pricing.getActiveProduct(),
       canCreateLookupIndex,
-      buildFlavor: kibana.services?.esql?.buildFlavor,
+      isServerless: kibana.services?.esql?.isServerless,
     };
     return callbacks;
   }, [
