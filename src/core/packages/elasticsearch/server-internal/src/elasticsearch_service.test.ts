@@ -50,7 +50,6 @@ const isValidConnectionMock = isValidConnection as jest.Mock;
 
 const TICK = 10;
 const tick = (ticks = 1) => jest.advanceTimersByTime(TICK * ticks);
-const tickAsync = (ticks = 1) => jest.advanceTimersByTimeAsync(TICK * ticks);
 
 const configService = configServiceMock.create();
 
