@@ -79,6 +79,7 @@ interface PersistableUser {
       organization_id: string;
       project_scope: {
         scope: string;
+        project_ids?: string[];
       };
       project_type: string;
       application_roles: string[];

@@ -1843,7 +1843,7 @@ describe('SAMLAuthenticationProvider', () => {
           realm: 'cloud-saml-kibana',
         };
 
-        mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
+        mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValueOnce(
           new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
         );
 
@@ -1852,16 +1852,6 @@ describe('SAMLAuthenticationProvider', () => {
           refreshToken: 'new-refresh-token',
         });
 
-        const mockedUIAMUser = mockAuthenticatedUser({
-          username: 'uiam_user',
-          authentication_realm: { name: 'uiam', type: 'uiam' },
-          lookup_realm: { name: 'uiam', type: 'uiam' },
-          authentication_provider: { type: 'saml', name: 'cloud-saml-kibana' },
-          authentication_type: 'token',
-        });
-
-        mockOptions.uiam?.authenticate.mockResolvedValue(mockedUIAMUser);
-
         mockOptions.uiam?.getUserProfileGrant.mockReturnValue({
           accessToken: 'new-access-token',
           sharedSecret: 'some-secret',
@@ -1869,7 +1859,7 @@ describe('SAMLAuthenticationProvider', () => {
         });
 
         await expect(provider.authenticate(request, state)).resolves.toEqual(
-          AuthenticationResult.succeeded(mockedUIAMUser, {
+          AuthenticationResult.succeeded(mockUser, {
             authHeaders: { authorization: 'Bearer new-access-token' },
             userProfileGrant: {
               accessToken: 'new-access-token',
@@ -1886,7 +1876,6 @@ describe('SAMLAuthenticationProvider', () => {
 
         expect(mockOptions.uiam?.refreshSessionTokens).toHaveBeenCalledTimes(1);
         expect(mockOptions.uiam?.refreshSessionTokens).toHaveBeenCalledWith(state.refreshToken);
-        expect(mockOptions.uiam?.authenticate).toHaveBeenCalledWith('new-access-token');
 
         expect(request.headers).not.toHaveProperty('authorization');
       });

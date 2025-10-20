@@ -114,7 +114,7 @@ export async function createSAMLResponse(options: {
         organizationId: options.serverless.organizationId,
         projectType: options.serverless.projectType,
         roles: options.roles,
-        familyName: options.full_name,
+        fullName: options.full_name,
         email: options.email,
       })
     : undefined;

@@ -14,28 +14,8 @@ import type { Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader } from '..';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
-import type { AuthenticationInfo } from '../elasticsearch';
 import { getDetailedErrorMessage } from '../errors';
 import type { UserProfileGrant } from '../user_profile';
-
-/**
- * Response structure from UIAM _authenticate endpoint
- */
-interface UiamAuthenticateResponse {
-  type: string;
-  user_id: string;
-  email: string;
-  first_name: string | null;
-  last_name: string | null;
-  organization_id: string | null;
-  credentials: {
-    id: string;
-    type: 'api-key' | 'token';
-    creation: string;
-    expiration: string | null;
-    internal: boolean;
-  };
-}
 
 /**
  * The service that integrates with UIAM for user authentication and session management.
@@ -52,12 +32,6 @@ export interface UiamServicePublic {
    * @param accessToken UIAM session access token.
    */
   getUserProfileGrant(accessToken: string): UserProfileGrant;
-
-  /**
-   * Authenticates the user with UIAM and returns authentication information.
-   * @param accessToken UIAM session access token.
-   */
-  authenticate(accessToken: string): Promise<AuthenticationInfo>;
 
   /**
    * Refreshes the UIAM user session and returns new access and refresh session tokens.
@@ -123,54 +97,6 @@ export class UiamService implements UiamServicePublic {
       accessToken,
       sharedSecret: this.#config.sharedSecret,
     };
-  }
-
-  /**
-   * See {@link UiamServicePublic.authenticate}.
-   */
-  async authenticate(accessToken: string): Promise<AuthenticationInfo> {
-    try {
-      this.#logger.debug('Attempting to authenticate user with UIAM.');
-
-      const response: UiamAuthenticateResponse = await UiamService.#parseUiamResponse(
-        await fetch(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
-            Authorization: `Bearer ${accessToken}`,
-          },
-          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
-          dispatcher: this.#dispatcher,
-        })
-      );
-
-      this.#logger.debug('User successfully authenticated with UIAM.');
-
-      // Map UIAM response to AuthenticationInfo
-      return {
-        username: response.user_id.toString(),
-        email: response.email,
-        full_name:
-          response.first_name || response.last_name
-            ? [response.first_name, response.last_name].filter(Boolean).join(' ')
-            : undefined,
-        roles: [],
-        enabled: true,
-        authentication_realm: { name: 'uiam', type: 'uiam' },
-        lookup_realm: { name: 'uiam', type: 'uiam' },
-        authentication_type: response.credentials.type === 'api-key' ? 'api_key' : 'token',
-        metadata: {
-          _reserved: false,
-        },
-      };
-    } catch (err) {
-      this.#logger.error(
-        () => `Failed to authenticate user with UIAM: ${getDetailedErrorMessage(err)}`
-      );
-
-      throw err;
-    }
   }
 
   /**
@@ -267,7 +193,7 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
-   * Parses the UIAM service response as free-form JSON if it’s a successful response, otherwise throws a Boom error based on the error response from the UIAM service.
+   * Parses the UIAM service response as free-form JSON if it's a successful response, otherwise throws a Boom error based on the error response from the UIAM service.
    */
   static async #parseUiamResponse(response: Response) {
     if (response.ok) {

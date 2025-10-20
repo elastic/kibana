@@ -637,12 +637,15 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
           state.refreshToken
         );
 
-        const uiamAuthenticationInfo = await this.options.uiam.authenticate(accessToken);
+        const uiamAuthenticatedUser = await this.getUser(
+          request,
+          this.options.uiam?.getAuthenticationHeaders(accessToken)!
+        );
 
         refreshTokenResult = {
           accessToken,
           refreshToken,
-          authenticationInfo: uiamAuthenticationInfo,
+          authenticationInfo: uiamAuthenticatedUser,
         };
       } else {
         refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);

@@ -193,109 +193,6 @@ describe('UiamService', () => {
     });
   });
 
-  describe('#authenticate', () => {
-    it('properly calls UIAM service to authenticate the user', async () => {
-      fetchSpy.mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          type: 'user',
-          user_id: 'user123',
-          email: 'user@example.com',
-          first_name: 'John',
-          last_name: 'Doe',
-          organization_id: 'org123',
-          credentials: {
-            id: 'cred123',
-            type: 'token',
-            creation: '2025-01-01T00:00:00Z',
-            expiration: null,
-            internal: false,
-          },
-        }),
-      });
-
-      const result = await uiamService.authenticate('some-token');
-
-      expect(result).toEqual({
-        username: 'user123',
-        email: 'user@example.com',
-        full_name: 'John Doe',
-        roles: [],
-        enabled: true,
-        authentication_realm: { name: 'uiam', type: 'uiam' },
-        lookup_realm: { name: 'uiam', type: 'uiam' },
-        authentication_type: 'token',
-        metadata: {
-          _reserved: false,
-        },
-      });
-
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
-      expect(fetchSpy).toHaveBeenCalledWith(
-        'https://uiam.service/uiam/api/v1/authentication/_authenticate',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
-            Authorization: 'Bearer some-token',
-          },
-          dispatcher: AGENT_MOCK,
-        }
-      );
-    });
-
-    it('handles user with no first or last name', async () => {
-      fetchSpy.mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          type: 'user',
-          user_id: 'user123',
-          email: 'user@example.com',
-          first_name: null,
-          last_name: null,
-          organization_id: 'org123',
-          credentials: {
-            id: 'cred123',
-            type: 'token',
-            creation: '2025-01-01T00:00:00Z',
-            expiration: null,
-            internal: false,
-          },
-        }),
-      });
-
-      const result = await uiamService.authenticate('some-token');
-
-      expect(result.full_name).toBeUndefined();
-    });
-
-    it('maps token credential type correctly', async () => {
-      fetchSpy.mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          type: 'user',
-          user_id: 'user123',
-          email: 'user@example.com',
-          first_name: 'John',
-          last_name: 'Doe',
-          organization_id: 'org123',
-          credentials: {
-            id: 'cred123',
-            type: 'token',
-            creation: '2025-01-01T00:00:00Z',
-            expiration: '2025-01-01T01:00:00Z',
-            internal: true,
-          },
-        }),
-      });
-
-      const result = await uiamService.authenticate('some-token');
-
-      expect(result.authentication_type).toBe('token');
-    });
-  });
-
   describe('#refreshSessionTokens', () => {
     it('properly calls UIAM service to refresh the tokens', async () => {
       fetchSpy.mockResolvedValue({
@@ -307,6 +204,30 @@ describe('UiamService', () => {
         accessToken: 'new-token',
         refreshToken: 'new-refresh',
       });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/tokens/_refresh', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+        },
+        body: JSON.stringify({ refresh_token: 'old-refresh' }),
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it('throws error if refresh fails with 400 status code', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 400,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Bad request' } }),
+      });
+
+      await expect(uiamService.refreshSessionTokens('old-refresh')).rejects.toThrowError(
+        'Bad request'
+      );
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/tokens/_refresh', {
@@ -343,30 +264,17 @@ describe('UiamService', () => {
       });
     });
 
-    it('fail if invalidation fails', async () => {
+    it('throws error if invalidation fails with 400 status code', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,
-        status: 401,
+        status: 400,
         headers: new Headers(),
-        json: async () => ({ error: { message: 'Oh no!' } }),
+        json: async () => ({ error: { message: 'Bad request' } }),
       });
 
       await expect(
         uiamService.invalidateSessionTokens('old-token', 'old-refresh')
-      ).rejects.toThrowError('Oh no!');
-    });
-
-    it('throws error if invalidation fails with 500 status code', async () => {
-      fetchSpy.mockResolvedValue({
-        ok: false,
-        status: 500,
-        headers: new Headers(),
-        json: async () => ({ error: { message: 'Oh no!' } }),
-      });
-
-      await expect(
-        uiamService.invalidateSessionTokens('old-token', 'old-refresh')
-      ).rejects.toThrowError('Oh no!');
+      ).rejects.toThrowError('Bad request');
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/tokens/_invalidate', {
