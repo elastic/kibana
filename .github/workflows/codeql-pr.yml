@@ -34,8 +34,6 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
-        packs: |
-          githubsecuritylab/codeql-${{ matrix.language }}-queries
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@f443b600d91635bebf5b0d9ebc620189c0d6fba5 # v4.30.8
       env:
