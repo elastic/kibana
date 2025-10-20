@@ -5,7 +5,7 @@
     "isolatedModules": true
   },
   "include": [
-    "server/**/**/*",
+    "server/**/*",
   ],
   "kbn_references": [
     "@kbn/core",

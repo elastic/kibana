@@ -1,0 +1,38 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/repo-info",
+    "@kbn/dev-cli-runner",
+    "@kbn/repo-packages",
+    "@kbn/tooling-log"
+  ],
+  "references": [
+    {
+      "path": "../../src/platform/packages/private/kbn-repo-packages"
+    },
+    {
+      "path": "../../src/platform/packages/shared/kbn-dev-cli-runner"
+    },
+    {
+      "path": "../../src/platform/packages/shared/kbn-repo-info"
+    },
+    {
+      "path": "../../src/platform/packages/shared/kbn-tooling-log"
+    }
+  ]
+}
