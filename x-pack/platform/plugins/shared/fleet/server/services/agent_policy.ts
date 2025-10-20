@@ -650,20 +650,23 @@ class AgentPolicyService {
 
     const idsWithName = results.total ? results.saved_objects.map(({ id }) => id) : [];
     const othersWithName = idsWithName.filter((id) => id !== policy.id);
-    if (othersWithName.length) {
-      if (!policy?.supports_agentless) {
-        const isSinglePolicy = othersWithName.length === 1;
-        const existClause = isSinglePolicy
-          ? `Agent Policy '${othersWithName[0]}' already exists`
-          : `Agent Policies '${othersWithName.join(',')}' already exist`;
 
-        throw new AgentPolicyNameExistsError(`${existClause} with name '${policy.name}'`);
-      } else {
-        const integrationName = policy.name.split(' ').pop();
-        throw new AgentlessPolicyExistsRequestError(
-          `${policy.name} already exist. Please rename the integration name ${integrationName}.`
-        );
-      }
+    if (othersWithName.length === 0) {
+      return;
+    }
+
+    if (!policy?.supports_agentless) {
+      const isSinglePolicy = othersWithName.length === 1;
+      const existClause = isSinglePolicy
+        ? `Agent Policy '${othersWithName[0]}' already exists`
+        : `Agent Policies '${othersWithName.join(',')}' already exist`;
+
+      throw new AgentPolicyNameExistsError(`${existClause} with name '${policy.name}'`);
+    } else {
+      const integrationName = policy.name.split(' ').pop();
+      throw new AgentlessPolicyExistsRequestError(
+        `${policy.name} already exist. Please rename the integration name ${integrationName}.`
+      );
     }
   }
 

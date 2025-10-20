@@ -185,6 +185,57 @@ export default function (providerContext: FtrProviderContext) {
           /No enough permissions to create policies in space test1/
         );
       });
+
+      it('should correctly increment package policy names when creating agent policy with system package across multiple spaces', async () => {
+        await supertestWithoutAuth
+          .post(`/api/fleet/fleet_server_hosts`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            id: 'test-default-123',
+            name: 'Default',
+            is_default: true,
+            host_urls: ['https://test.fr:8080'],
+          })
+          .expect(200);
+
+        await apiClient.installPackage({ pkgName: 'system', force: true, pkgVersion: '1.54.0' });
+
+        await apiClient.createAgentPolicy('default', {}, { sys_monitoring: true });
+
+        const multiSpacePolicy = await apiClient.createAgentPolicy(
+          TEST_SPACE_1,
+          {
+            space_ids: ['default', TEST_SPACE_1],
+          },
+          { sys_monitoring: true }
+        );
+
+        const fullMultiSpacePolicy = await apiClient.getAgentPolicy(
+          multiSpacePolicy.item.id,
+          'default',
+          { full: true }
+        );
+
+        const systemPackage = fullMultiSpacePolicy.item.package_policies?.find(
+          (packagePolicy) => packagePolicy.package?.name === 'system'
+        );
+        expect(systemPackage?.name).to.eql('system-2');
+      });
+
+      it('should prevent creating agent policy for multiple spaces with same name as policy in non-current namespace', async () => {
+        const testSpaceOnlyPolicy = await apiClient.createAgentPolicy(TEST_SPACE_1);
+
+        // Try to create a multi-space policy (default + test) from default space with same name
+        // This should fail because the name conflicts with policy in test space
+        await expectToRejectWithError(
+          () =>
+            apiClient.createAgentPolicy('default', {
+              name: testSpaceOnlyPolicy.item.name,
+              space_ids: ['default', TEST_SPACE_1],
+            }),
+          /409 "Conflict" Agent Policy\s.* already exists with name\s.*$/i
+        );
+      });
     });
 
     describe('GET /agent_policies_spaces', () => {

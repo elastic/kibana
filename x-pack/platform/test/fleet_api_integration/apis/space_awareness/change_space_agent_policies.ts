@@ -318,6 +318,28 @@ export default function (providerContext: FtrProviderContext) {
           /400 "Bad Request" Not enough permissions to remove policies from space test1/
         );
       });
+
+      it('should prevent updating agent policy to target multiple spaces when name conflicts exist', async () => {
+        const testSpaceOnlyPolicy = await apiClient.createAgentPolicy(TEST_SPACE_1);
+
+        const defaultSpaceOnlyPolicy = await apiClient.createAgentPolicy('default', {
+          name: testSpaceOnlyPolicy.item.name,
+        });
+
+        await expectToRejectWithError(
+          () =>
+            apiClient.putAgentPolicy(
+              defaultSpaceOnlyPolicy.item.id,
+              {
+                name: testSpaceOnlyPolicy.item.name,
+                namespace: 'default',
+                space_ids: ['default', TEST_SPACE_1],
+              },
+              'default'
+            ),
+          /409 "Conflict" Agent Policy\s.* already exists with name\s.*$/i
+        );
+      });
     });
 
     describe('DELETE /agent_policies/{id}', () => {

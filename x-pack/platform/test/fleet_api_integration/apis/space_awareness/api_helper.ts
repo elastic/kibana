@@ -88,10 +88,12 @@ export class SpaceTestApiClient {
   // Agent policies
   async createAgentPolicy(
     spaceId?: string,
-    data: Partial<CreateAgentPolicyRequest['body']> = {}
+    data: Partial<CreateAgentPolicyRequest['body']> = {},
+    opts: CreateAgentPolicyRequest['query'] = {}
   ): Promise<CreateAgentPolicyResponse> {
+    const queryString = opts.sys_monitoring ? `?sys_monitoring=true` : '';
     const res = await this.supertest
-      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies`)
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies${queryString}`)
       .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .send({
@@ -211,9 +213,14 @@ export class SpaceTestApiClient {
 
     expectStatusCode200(res);
   }
-  async getAgentPolicy(policyId: string, spaceId?: string): Promise<GetOneAgentPolicyResponse> {
+  async getAgentPolicy(
+    policyId: string,
+    spaceId?: string,
+    opts: { full: boolean } = { full: false }
+  ): Promise<GetOneAgentPolicyResponse> {
+    const fullSegment = opts.full ? `/full` : '';
     const res = await this.supertest
-      .get(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies/${policyId}`)
+      .get(`${this.getBaseUrl(spaceId)}/api/fleet/agent_policies/${policyId}${fullSegment}`)
       .auth(this.auth.username, this.auth.password);
 
     expectStatusCode200(res);
