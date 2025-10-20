@@ -132,12 +132,10 @@ describe('parseAgentSelection', () => {
 
       // Mock listAgents to return results in chunks (simulating PIT pagination)
       const chunkSize = 9000;
-      let callCount = 0;
-      mockAgentService.listAgents.mockImplementation(() => {
-        const start = callCount * chunkSize;
+      mockAgentService.listAgents.mockImplementation(({ searchAfter }: any) => {
+        const start = searchAfter ? searchAfter[0] + 1 : 0;
         const end = Math.min(start + chunkSize, agentIds.length);
         const chunk = agentIds.slice(start, end);
-        callCount++;
 
         return Promise.resolve({
           agents: chunk.map((id, index) => ({
@@ -163,20 +161,19 @@ describe('parseAgentSelection', () => {
       // Should return all 15,000 agents without hitting max_result_window limit
       expect(result).toHaveLength(15000);
       expect(result).toEqual(agentIds);
-      // Should have used PIT pagination (multiple calls)
-      expect(mockAgentService.listAgents).toHaveBeenCalledTimes(2);
+      // Should have used PIT pagination (3 calls: initial, refetch with PIT, page 2)
+      expect(mockAgentService.listAgents).toHaveBeenCalledTimes(3);
     });
 
     it('should handle 20,000 agents with platform filtering', async () => {
       const agentIds = Array.from({ length: 20000 }, (_, i) => `agent-${i + 1}`);
 
       const chunkSize = 9000;
-      let callCount = 0;
-      mockAgentService.listAgents.mockImplementation(() => {
-        const start = callCount * chunkSize;
+      mockAgentService.listAgents.mockImplementation(({ searchAfter }: any) => {
+        // Determine starting position based on searchAfter
+        const start = searchAfter ? searchAfter[0] + 1 : 0;
         const end = Math.min(start + chunkSize, agentIds.length);
         const chunk = agentIds.slice(start, end);
-        callCount++;
 
         return Promise.resolve({
           agents: chunk.map((id, index) => ({
@@ -209,12 +206,11 @@ describe('parseAgentSelection', () => {
       const agentIds = Array.from({ length: 12000 }, (_, i) => `agent-${i + 1}`);
 
       const chunkSize = 9000;
-      let callCount = 0;
-      mockAgentService.listAgents.mockImplementation(() => {
-        const start = callCount * chunkSize;
+      mockAgentService.listAgents.mockImplementation(({ searchAfter }: any) => {
+        // Determine starting position based on searchAfter
+        const start = searchAfter ? searchAfter[0] + 1 : 0;
         const end = Math.min(start + chunkSize, agentIds.length);
         const chunk = agentIds.slice(start, end);
-        callCount++;
 
         return Promise.resolve({
           agents: chunk.map((id, index) => ({
@@ -247,12 +243,11 @@ describe('parseAgentSelection', () => {
     it('should use PIT when results exceed one page', async () => {
       const agentIds = Array.from({ length: 18000 }, (_, i) => `agent-${i + 1}`);
 
-      let callCount = 0;
-      mockAgentService.listAgents.mockImplementation(() => {
-        const start = callCount * 9000;
+      mockAgentService.listAgents.mockImplementation(({ searchAfter }: any) => {
+        // Determine starting position based on searchAfter
+        const start = searchAfter ? searchAfter[0] + 1 : 0;
         const end = Math.min(start + 9000, agentIds.length);
         const chunk = agentIds.slice(start, end);
-        callCount++;
 
         return Promise.resolve({
           agents: chunk.map((id, index) => ({
@@ -286,12 +281,11 @@ describe('parseAgentSelection', () => {
     it('should use searchAfter for subsequent pages', async () => {
       const agentIds = Array.from({ length: 18000 }, (_, i) => `agent-${i + 1}`);
 
-      let callCount = 0;
       mockAgentService.listAgents.mockImplementation(({ searchAfter }: any) => {
-        const start = callCount * 9000;
+        // Determine starting position based on searchAfter
+        const start = searchAfter ? searchAfter[0] + 1 : 0;
         const end = Math.min(start + 9000, agentIds.length);
         const chunk = agentIds.slice(start, end);
-        callCount++;
 
         return Promise.resolve({
           agents: chunk.map((id, index) => ({
@@ -314,10 +308,10 @@ describe('parseAgentSelection', () => {
         agentSelection
       );
 
-      // Verify searchAfter was used for second page
-      const secondCall = mockAgentService.listAgents.mock.calls[1][0];
-      expect(secondCall.searchAfter).toBeDefined();
-      expect(secondCall.pitId).toBe('mockedPitId');
+      // Verify searchAfter was used for second page (third call overall)
+      const thirdCall = mockAgentService.listAgents.mock.calls[2][0];
+      expect(thirdCall.searchAfter).toBeDefined();
+      expect(thirdCall.pitId).toBe('mockedPitId');
     });
   });
 
