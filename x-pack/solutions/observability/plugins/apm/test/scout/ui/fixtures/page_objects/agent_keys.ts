@@ -26,7 +26,6 @@ export class AgentKeysPage {
 
   async clickCreateButton() {
     const button = this.getCreateButtonLocator();
-    await button.waitFor({ timeout: 5000 });
     await button.click();
   }
 
