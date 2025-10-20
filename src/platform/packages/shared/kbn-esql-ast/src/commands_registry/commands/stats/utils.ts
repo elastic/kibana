@@ -9,8 +9,8 @@
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../../..';
 import type {
+  ESQLAstAllCommands,
   ESQLAstItem,
-  ESQLCommand,
   ESQLFunction,
   ESQLProperNode,
   ESQLSingleAstItem,
@@ -50,7 +50,7 @@ export type CaretPosition =
   | 'grouping_expression_after_assignment'
   | 'after_where';
 
-export const getPosition = (command: ESQLCommand, innerText: string): CaretPosition => {
+export const getPosition = (command: ESQLAstAllCommands, innerText: string): CaretPosition => {
   const lastCommandArg = command.args[command.args.length - 1];
 
   if (isOptionNode(lastCommandArg) && lastCommandArg.name === 'by') {

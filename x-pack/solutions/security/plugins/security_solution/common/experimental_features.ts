@@ -123,16 +123,6 @@ export const allowedExperimentalValues = Object.freeze({
   microsoftDefenderEndpointDataInAnalyzerEnabled: true,
 
   /**
-   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
-   */
-  malwareOnWriteScanOptionAvailable: true,
-
-  /**
-   * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
-   */
-  unifiedManifestEnabled: true,
-
-  /**
    * Enables the new modal for the value list items
    */
   valueListItemsModalEnabled: true,
