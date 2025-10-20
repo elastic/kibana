@@ -77,7 +77,7 @@ class ChatServiceImpl implements ChatService {
     autoCreateConversationWithId = false,
   }: ChatConverseParams): Observable<ChatEvent> {
     return withConverseSpan({ agentId, conversationId }, (span) => {
-      // Step 1: Resolve services (connector, chat model, conversation client)
+      // Step 1: Resolve services scoped services
       return defer(async () => {
         const services = await resolveServices({
           agentId,
@@ -95,7 +95,7 @@ class ChatServiceImpl implements ChatService {
           conversationClient: services.conversationClient,
         });
 
-        // Step 3: Get conversation (resolve it once here)
+        // Step 3: Get existing or placeholder conversation
         const conversation = await getConversation({
           agentId,
           conversationId,
