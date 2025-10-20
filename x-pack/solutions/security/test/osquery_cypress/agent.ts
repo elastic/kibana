@@ -14,9 +14,9 @@ import {
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
 
 import chalk from 'chalk';
+import { ELASTIC_DOCKER_NETWORK_NAME } from '@kbn/test-services';
 import { Manager } from './resource_manager';
 import { generateRandomString, getLatestAvailableAgentVersion } from './utils';
-import { ELASTIC_DOCKER_NETWORK_NAME } from '../../../../../src/platform/packages/shared/kbn-test-services';
 
 export class AgentManager extends Manager {
   private readonly log: ToolingLog;

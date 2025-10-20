@@ -12,12 +12,12 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
 import execa from 'execa';
 import { dump } from 'js-yaml';
+import { ELASTIC_DOCKER_NETWORK_NAME } from '@kbn/test-services';
 import {
   fetchFleetServerUrl,
   getAgentVersionMatchingCurrentStack,
   waitForHostToEnroll,
 } from './fleet_services';
-import { ELASTIC_DOCKER_NETWORK_NAME } from '../../../../../../../../src/platform/packages/shared/kbn-test-services';
 
 interface StartedElasticAgent {
   /** The type of virtualization used to start the agent */
