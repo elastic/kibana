@@ -492,8 +492,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       expect({ extra, missing }).to.eql({ extra: [], missing: [] }, EXPOSED_CONFIG_SETTINGS_ERROR);
     });
 
-    // FLAKY
-    it.skip('renders "core" application', async () => {
+    it('renders "core" application', async () => {
       await navigateTo('/render/core');
 
       const [loadingMessage, userSettings] = await Promise.all([
@@ -508,8 +507,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       expect(await exists('renderingHeader')).to.be(true);
     });
 
-    // FLAKY
-    it.skip('renders "core" application without user settings', async () => {
+    it('renders "core" application without user settings', async () => {
       await navigateTo('/render/core?isAnonymousPage=true');
 
       const [loadingMessage, userSettings] = await Promise.all([
@@ -524,8 +522,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       expect(await exists('renderingHeader')).to.be(true);
     });
 
-    // FLAKY
-    it.skip('navigates between standard application and one with custom appRoute', async () => {
+    it('navigates between standard application and one with custom appRoute', async () => {
       await navigateTo('/');
       await find.waitForElementStale(await findLoadingMessage());
 
@@ -548,8 +545,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       ]);
     });
 
-    // FLAKY
-    it.skip('navigates between applications with custom appRoutes', async () => {
+    it('navigates between applications with custom appRoutes', async () => {
       await navigateTo('/');
       await find.waitForElementStale(await findLoadingMessage());
 
