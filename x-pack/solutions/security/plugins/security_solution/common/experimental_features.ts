@@ -39,12 +39,6 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables the ability to send Response actions to Crowdstrike and persist the results
-   * in ES.
-   */
-  responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-
-  /**
    * `runscript` response actions for SentinelOne hosts.
    *
    * Release: 9.2.0 (earlier for serverless)
@@ -123,16 +117,6 @@ export const allowedExperimentalValues = Object.freeze({
   microsoftDefenderEndpointDataInAnalyzerEnabled: true,
 
   /**
-   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
-   */
-  malwareOnWriteScanOptionAvailable: true,
-
-  /**
-   * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
-   */
-  unifiedManifestEnabled: true,
-
-  /**
    * Enables the new modal for the value list items
    */
   valueListItemsModalEnabled: true,
@@ -146,11 +130,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables scheduling gap fills for rules
    */
   bulkFillRuleGapsEnabled: true,
-
-  /**
-   * Adds a new option to filter descendants of a process for Management / Event Filters
-   */
-  filterProcessDescendantsForEventFiltersEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
@@ -210,11 +189,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   responseActionsMSDefenderEndpointEnabled: true,
 
-  /**
-   * Enables banner for informing users about changes in data collection.
-   */
-  eventCollectionDataReductionBannerEnabled: true,
-
   /** Enables new Data View Picker */
   newDataViewPickerEnabled: true,
 
@@ -233,7 +207,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Trusted Devices artifact management for device control protections.
    * Allows users to manage trusted USB and external devices
    */
-  trustedDevices: false,
+  trustedDevices: true,
 
   /**
    * Enables the ability to import and migration dashboards through automatic migration service
