@@ -66,144 +66,68 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     // Kibana's config in order to use this helper
     apps: {
       ...kibanaFunctionalConfig.get('apps'),
-      lens: {
-        pathname: '/app/lens',
-      },
-      login: {
-        pathname: '/login',
-      },
-      monitoring: {
-        pathname: '/app/monitoring',
-      },
-      logstashPipelines: {
-        pathname: '/app/management/ingest/pipelines',
-      },
-      cases: {
-        pathname: '/app/management/insightsAndAlerting/cases/',
-      },
-      maps: {
-        pathname: '/app/maps',
-      },
-      graph: {
-        pathname: '/app/graph',
-      },
-      grokDebugger: {
-        pathname: '/app/dev_tools',
-        hash: '/grokdebugger',
-      },
-      searchProfiler: {
-        pathname: '/app/dev_tools',
-        hash: '/searchprofiler',
-      },
-      painlessLab: {
-        pathname: '/app/dev_tools',
-        hash: '/painless_lab',
-      },
-      spaceSelector: {
-        pathname: '/',
-      },
-      infraOps: {
-        pathname: '/app/metrics',
-      },
-      infraLogs: {
-        pathname: '/app/logs',
-      },
-      canvas: {
-        pathname: '/app/canvas',
-        hash: '/',
-      },
-      uptime: {
-        pathname: '/app/uptime',
-      },
-      fleet: {
-        pathname: '/app/fleet',
-      },
-      ml: {
-        pathname: '/app/ml',
-      },
-      roleMappings: {
-        pathname: '/app/management/security/role_mappings',
-      },
-      rollupJob: {
-        pathname: '/app/management/data/rollup_jobs',
-      },
-      apiKeys: {
-        pathname: '/app/management/security/api_keys',
-      },
-      licenseManagement: {
-        pathname: '/app/management/stack/license_management',
-      },
-      indexManagement: {
-        pathname: '/app/management/data/index_management',
-      },
-      indexLifecycleManagement: {
-        pathname: '/app/management/data/index_lifecycle_management',
-      },
-      ingestPipelines: {
-        pathname: '/app/management/ingest/ingest_pipelines',
-      },
-      snapshotRestore: {
-        pathname: '/app/management/data/snapshot_restore',
-      },
-      spacesManagement: {
-        pathname: '/app/management/kibana/spaces',
-      },
-      remoteClusters: {
-        pathname: '/app/management/data/remote_clusters',
-      },
-      crossClusterReplication: {
-        pathname: '/app/management/data/cross_cluster_replication',
+      agentBuilder: {
+        pathname: '/app/agent_builder',
       },
       apm: {
         pathname: '/app/apm',
       },
-      watcher: {
-        pathname: '/app/management/insightsAndAlerting/watcher/watches',
-      },
-      transform: {
-        pathname: '/app/management/data/transform',
-      },
-      reporting: {
-        pathname: '/app/management/insightsAndAlerting/reporting',
-      },
-      securitySolution: {
-        pathname: '/app/security',
-      },
-      observability: {
-        pathname: '/app/observability',
-      },
-      observabilityLogsExplorer: {
-        pathname: '/app/observability-logs-explorer',
-      },
-      connectors: {
-        pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors/',
-      },
-      triggersActions: {
-        pathname: '/app/management/insightsAndAlerting/triggersActions',
-      },
-      maintenanceWindows: {
-        pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
-      },
-      obsAIAssistant: {
-        pathname: '/app/observabilityAIAssistant',
-      },
-      aiAssistantManagementSelection: {
-        pathname: '/app/management/ai/aiAssistantManagementSelection',
-      },
-      obsAIAssistantManagement: {
-        pathname: '/app/management/ai/observabilityAiAssistantManagement',
+      cases: {
+        pathname: '/app/management/insightsAndAlerting/cases/',
       },
       enterpriseSearch: {
         pathname: '/app/elasticsearch/overview',
       },
-      elasticsearchIndices: {
-        pathname: '/app/elasticsearch/indices',
+      fleet: {
+        pathname: '/app/fleet',
+      },
+      infraOps: {
+        pathname: '/app/metrics',
+      },
+      ingestPipelines: {
+        pathname: '/app/management/ingest/ingest_pipelines',
+      },
+      lens: {
+        pathname: '/app/lens',
+      },
+      licenseManagement: {
+        pathname: '/app/management/stack/license_management',
+      },
+      maintenanceWindows: {
+        pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
+      },
+      maps: {
+        pathname: '/app/maps',
+      },
+      ml: {
+        pathname: '/app/ml',
+      },
+      monitoring: {
+        pathname: '/app/monitoring',
+      },
+      observability: {
+        pathname: '/app/observability',
+      },
+      observabilityCases: {
+        pathname: '/app/observability/cases',
+      },
+      observabilityLogsExplorer: {
+        pathname: '/app/observability-logs-explorer',
+      },
+      obsAIAssistant: {
+        pathname: '/app/observabilityAIAssistant',
+      },
+      reporting: {
+        pathname: '/app/management/insightsAndAlerting/reporting',
       },
       searchPlayground: {
         pathname: '/app/search_playground',
       },
-      agentBuilder: {
-        pathname: '/app/agent_builder',
+      securitySolution: {
+        pathname: '/app/security',
+      },
+      triggersActions: {
+        pathname: '/app/management/insightsAndAlerting/triggersActions',
       },
     },
 

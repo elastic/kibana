@@ -279,36 +279,41 @@ export class CommonPageObject extends FtrService {
       retryOnFatalError = true,
     } = {}
   ) {
-    let appUrl: string;
+    // Phase 1: Get the app URL
+    // Check if app has custom config (for apps with special routing needs)
+    const hasCustomConfig = this.config.has(['apps', appName]);
+    const appConfig = hasCustomConfig ? this.config.get(['apps', appName]) : null;
 
-    // See https://github.com/elastic/kibana/pull/164376
-    if (appName === 'canvas' && !path) {
-      throw new Error(
-        'This causes flaky test failures. Use Canvas page object goToListingPage instead'
-      );
-    }
+    const pathSuffix = path ? `/${path}` : '';
 
-    if (this.config.has(['apps', appName])) {
-      // Legacy applications
-      const appConfig = this.config.get(['apps', appName]);
-      appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
-        pathname: `${basePath}${appConfig.pathname}${path ? `/${path}` : ''}`,
-        hash: hash || appConfig.hash,
-        search,
-      });
-    } else {
-      appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
-        pathname: `${basePath}/app/${appName}` + (path ? `/${path}` : ''),
-        hash,
-        search,
-      });
-    }
+    const pathname = hasCustomConfig
+      ? `${basePath}${appConfig.pathname}${pathSuffix}`
+      : `${basePath}/app/${appName}${pathSuffix}`;
+
+    const appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
+      pathname,
+      hash: hash || appConfig?.hash || '',
+      search,
+    });
 
     this.log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
-    // Navigate to the app and verify it loaded successfully
+    // Check if we're already on the target URL
+    const currentUrlBeforeNav = await this.browser.getCurrentUrl();
+
+    const normalizedCurrentUrl = decodeURIComponent(currentUrlBeforeNav)
+      .replace(/\/\/\w+:\w+@/, '//')
+      .replace(':80/', '/')
+      .replace(':443/', '/');
+    const normalizedAppUrl = decodeURIComponent(appUrl).replace(':80/', '/').replace(':443/', '/');
+
+    if (normalizedCurrentUrl.startsWith(normalizedAppUrl)) {
+      this.log.debug(`Already on target URL for ${appName}, skipping navigation`);
+      return currentUrlBeforeNav;
+    }
+
+    // Phase 2: Navigate to the app and verify it loaded successfully
     const finalUrl = await this.retry.tryForTime(this.defaultTryTimeout, async () => {
-      // since we're using hash URLs, always reload first to force re-render
       this.log.debug('navigate to: ' + appUrl);
 
       await this.browser.get(appUrl, insertTimestamp);
@@ -322,17 +327,9 @@ export class CommonPageObject extends FtrService {
         await this.sleep(700);
       }
 
-      this.log.debug('returned from get, calling refresh');
-
-      await this.browser.refresh();
-
       let currentUrl = shouldLoginIfPrompted
         ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
         : await this.browser.getCurrentUrl();
-
-      if (currentUrl.includes('app/kibana')) {
-        await this.testSubjects.find('kibanaChrome');
-      }
 
       // If navigating to the `home` app, and we want to skip the Welcome page, but the chrome is still hidden,
       // set the relevant localStorage key to skip the Welcome page and throw an error to try to navigate again.
@@ -349,6 +346,7 @@ export class CommonPageObject extends FtrService {
       }
 
       currentUrl = (await this.browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
+
       const decodedAppUrl = decodeURIComponent(appUrl);
       const decodedCurrentUrl = decodeURIComponent(currentUrl);
 
@@ -369,15 +367,13 @@ export class CommonPageObject extends FtrService {
         throw new Error(msg);
       }
 
-      if (appName === 'discover') {
-        await this.browser.setLocalStorageItem('data.autocompleteFtuePopover', 'true');
-      }
-
       return currentUrl;
     });
 
     // Wait for URL to stabilize (no more redirects)
     let lastUrl = finalUrl;
+
+    // Phase 3: Wait for URL to stabilize (no more redirects)
     await this.retry.tryForTime(this.defaultFindTimeout, async () => {
       await this.sleep(501);
 
