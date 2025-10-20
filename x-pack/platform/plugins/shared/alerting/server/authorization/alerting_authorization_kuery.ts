@@ -100,11 +100,16 @@ export function asFiltersBySpaceId(
 }
 
 export function ensureFieldIsSafeForQuery(field: string, value: string): boolean {
+  const MAX_LENGTH = 1000;
   const invalidChars = '>=<*:()';
   const errors = [];
 
+  if (value.length > MAX_LENGTH) {
+    throw new Error(`Input exceeds maximum allowed length of ${MAX_LENGTH} characters`);
+  }
+
   const containsWhitespace = (str: string): boolean =>
-    str.split('').some((char) => char === ' ' || char === '\t' || char === '\n' || char === '\r');
+    str.split('').some((char) => char.match(/\s/));
 
   if (containsWhitespace(value)) {
     errors.push('whitespace');

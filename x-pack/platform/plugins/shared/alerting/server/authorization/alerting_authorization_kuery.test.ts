@@ -694,6 +694,13 @@ describe('ensureFieldIsSafeForQuery', () => {
     );
   });
 
+  test('throws if field length exceeds MAX_LENGTH', () => {
+    const invalidValue = 'a'.repeat(1001);
+    expect(() => ensureFieldIsSafeForQuery('id', invalidValue)).toThrow(
+      'Input exceeds maximum allowed length of 1000 characters'
+    );
+  });
+
   test('doesnt throws if field is safe as part of a KQL query', () => {
     expect(() => ensureFieldIsSafeForQuery('id', '123-0456-678')).not.toThrow();
   });
