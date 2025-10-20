@@ -14,10 +14,13 @@ import { getBaseTypeIconsStyles } from './get_base_type_icons_styles';
 import { getMonacoWorkflowOverridesStyles } from './get_monaco_workflow_overrides_styles';
 
 export const GlobalWorkflowEditorStyles = () => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
   return (
     <Global
-      styles={[getBaseTypeIconsStyles(euiTheme), getMonacoWorkflowOverridesStyles(euiTheme)]}
+      styles={[
+        getBaseTypeIconsStyles(euiThemeContext),
+        getMonacoWorkflowOverridesStyles(euiThemeContext),
+      ]}
     />
   );
 };
