@@ -1191,6 +1191,58 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should bulk update schedules using every rrule field', async () => {
+      const rruleScheduleExample = {
+        rrule: {
+          freq: 3, // Daily
+          interval: 1,
+          tzid: 'UTC',
+          byweekday: [1],
+          byhour: [20],
+          byminute: [30],
+          bymonthday: [4],
+        },
+      };
+      const initialTime = Date.now();
+      const tasks = await Promise.all([
+        scheduleTask({
+          taskType: 'sampleTask',
+          schedule: { interval: '1h' },
+          params: {},
+        }),
+      ]);
+
+      const taskIds = tasks.map(({ id }) => id);
+
+      await retry.try(async () => {
+        // ensure each task has ran at least once and been rescheduled for future run
+        for (const task of tasks) {
+          const { state } = await currentTask<{ count: number }>(task.id);
+          expect(state.count).to.be(1);
+        }
+
+        // first task to be scheduled in 1h
+        expect(Date.parse((await currentTask(tasks[0].id)).runAt) - initialTime).to.be.greaterThan(
+          moment.duration(1, 'hour').asMilliseconds()
+        );
+      });
+
+      await retry.try(async () => {
+        const updates = await bulkUpdateSchedules(taskIds, rruleScheduleExample);
+
+        expect(updates.tasks.length).to.be(1);
+        expect(updates.errors.length).to.be(0);
+      });
+
+      await retry.try(async () => {
+        const updatedTasks = (await currentTasks()).docs;
+
+        updatedTasks.forEach((task) => {
+          expect(task.schedule).to.eql(rruleScheduleExample);
+        });
+      });
+    });
+
     it('should bulk update schedules for multiple tasks with rrule, using interval', async () => {
       const rruleScheduleExample24h = {
         rrule: {
