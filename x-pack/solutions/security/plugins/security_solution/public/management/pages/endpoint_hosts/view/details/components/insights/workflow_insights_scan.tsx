@@ -40,9 +40,10 @@ export const WorkflowInsightsScanSection = ({
   const CONNECTOR_ID_LOCAL_STORAGE_KEY = 'connectorId';
 
   const spaceId = useSpaceId() ?? 'default';
-  const { http } = useKibana().services;
+  const { http, settings } = useKibana().services;
   const { data: aiConnectors } = useLoadConnectors({
     http,
+    settings,
   });
   const { canWriteWorkflowInsights } = useUserPrivileges().endpointPrivileges;
 

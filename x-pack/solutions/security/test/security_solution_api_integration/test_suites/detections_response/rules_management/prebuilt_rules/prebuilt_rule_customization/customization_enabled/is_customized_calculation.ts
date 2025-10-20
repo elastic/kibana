@@ -21,7 +21,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
 
   const ruleAsset = createRuleAssetSavedObject({
@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
         await installPrebuiltRules(es, supertest);
 
-        const { body: findResult } = await securitySolutionApi
+        const { body: findResult } = await detectionsApi
           .findRules({
             query: {
               per_page: 1,
@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(prebuiltRule).toBeDefined();
         expect(prebuiltRule.rule_source.is_customized).toEqual(false);
 
-        const { body: bulkResult } = await securitySolutionApi
+        const { body: bulkResult } = await detectionsApi
           .performRulesBulkAction({
             query: {},
             body: {
@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
         await installPrebuiltRules(es, supertest);
 
-        const { body: findResult } = await securitySolutionApi
+        const { body: findResult } = await detectionsApi
           .findRules({
             query: {
               per_page: 1,
@@ -93,7 +93,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(prebuiltRule).toBeDefined();
         expect(prebuiltRule.rule_source.is_customized).toEqual(false);
 
-        const { body: bulkResult } = await securitySolutionApi
+        const { body: bulkResult } = await detectionsApi
           .performRulesBulkAction({
             query: {},
             body: {
@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         // Check that the rule has not been customized
-        const { body: findResultAfter } = await securitySolutionApi
+        const { body: findResultAfter } = await detectionsApi
           .findRules({
             query: {
               per_page: 1,
@@ -133,7 +133,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
         await installPrebuiltRules(es, supertest);
 
-        const { body: findResult } = await securitySolutionApi
+        const { body: findResult } = await detectionsApi
           .findRules({
             query: {
               per_page: 1,
@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(prebuiltRule.rule_source.is_customized).toEqual(false);
 
         // Add a tag to the rule
-        const { body: bulkResult } = await securitySolutionApi
+        const { body: bulkResult } = await detectionsApi
           .performRulesBulkAction({
             query: {},
             body: {
@@ -170,7 +170,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         // Remove the added tag
-        const { body: revertResult } = await securitySolutionApi
+        const { body: revertResult } = await detectionsApi
           .performRulesBulkAction({
             query: {},
             body: {

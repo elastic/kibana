@@ -21,6 +21,7 @@ export const useEmbeddableAttributes = ({
   reportType,
   reportConfigMap = {},
   lensFormulaHelper,
+  dslFilters,
 }: ExploratoryEmbeddableComponentProps) => {
   const spaceId = useKibanaSpace();
   const theme = useTheme();
@@ -40,7 +41,8 @@ export const useEmbeddableAttributes = ({
         const lensAttributes = new SingleMetricLensAttributes(
           layerConfigs,
           reportType,
-          lensFormulaHelper!
+          lensFormulaHelper!,
+          dslFilters
         );
         return lensAttributes?.getJSON('lnsLegacyMetric');
       } else if (reportType === ReportTypes.HEATMAP) {
@@ -51,7 +53,12 @@ export const useEmbeddableAttributes = ({
         );
         return lensAttributes?.getJSON('lnsHeatmap');
       } else {
-        const lensAttributes = new LensAttributes(layerConfigs, reportType, lensFormulaHelper);
+        const lensAttributes = new LensAttributes(
+          layerConfigs,
+          reportType,
+          lensFormulaHelper,
+          dslFilters
+        );
         return lensAttributes?.getJSON();
       }
     } catch (error) {
@@ -60,6 +67,7 @@ export const useEmbeddableAttributes = ({
   }, [
     attributes,
     dataViewState,
+    dslFilters,
     lensFormulaHelper,
     reportConfigMap,
     reportType,

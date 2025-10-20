@@ -18,7 +18,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const supertest = getService('supertest');
   const retryService = getService('retry');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   describe('@ess @serverless @skipInServerlessMKI Bootstrap Prebuilt Rules', () => {
     beforeEach(async () => {
@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('installs required Fleet packages required for detection engine to function', async () => {
-      const { body } = await securitySolutionApi.bootstrapPrebuiltRules().expect(200);
+      const { body } = await detectionsApi.bootstrapPrebuiltRules().expect(200);
 
       expect(body).toMatchObject({
         packages: expect.arrayContaining([
@@ -45,9 +45,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('skips packages installation when the package has been already installed', async () => {
       // Install the packages
-      await securitySolutionApi.bootstrapPrebuiltRules().expect(200);
+      await detectionsApi.bootstrapPrebuiltRules().expect(200);
       // Try to install the packages again
-      const { body } = await securitySolutionApi.bootstrapPrebuiltRules().expect(200);
+      const { body } = await detectionsApi.bootstrapPrebuiltRules().expect(200);
 
       expect(body).toMatchObject({
         packages: expect.arrayContaining([

@@ -109,6 +109,7 @@ export const BuildPackages: Task = {
     await buildWebpackBundles({
       quiet: false,
       dist: true,
+      noCache: true,
     });
 
     const transformConfig: TransformConfig = {
@@ -307,8 +308,20 @@ export const BuildPackages: Task = {
   },
 };
 
-export async function buildWebpackBundles({ quiet, dist }: { quiet: boolean; dist: boolean }) {
-  const options = [quiet ? ['--quiet'] : [], dist ? ['--dist'] : []].flat();
+export async function buildWebpackBundles({
+  quiet,
+  dist,
+  noCache,
+}: {
+  quiet: boolean;
+  dist: boolean;
+  noCache?: boolean;
+}) {
+  const options = [
+    quiet ? ['--quiet'] : [],
+    dist ? ['--dist'] : [],
+    noCache ? ['--no-cache'] : [],
+  ].flat();
   const stdio: StdioOption[] = quiet
     ? ['ignore', 'pipe', 'pipe']
     : ['inherit', 'inherit', 'inherit'];

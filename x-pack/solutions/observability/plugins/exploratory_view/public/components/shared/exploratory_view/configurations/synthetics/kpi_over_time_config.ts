@@ -106,7 +106,7 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         label: 'Monitor Errors',
         id: 'monitor_errors',
         columnType: OPERATION_COLUMN,
-        field: 'monitor.check_group',
+        field: 'state.id',
         columnFilters: [
           {
             language: 'kuery',

@@ -106,5 +106,6 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/server-route-repository-utils",
     "@kbn/lock-manager",
+    "@kbn/deeplinks-management",
   ]
 }

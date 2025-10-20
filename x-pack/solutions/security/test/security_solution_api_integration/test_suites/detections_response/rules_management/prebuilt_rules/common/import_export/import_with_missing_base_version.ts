@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   const PREBUILT_RULE_ID = 'prebuilt-rule';
   const CURRENT_PREBUILT_RULE_VERSION = 5;
@@ -150,7 +150,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('imports a prebuilt rule with a missing base version when import payload IS NOT EQUAL to the installed and customized prebuilt rule', async () => {
         await installPrebuiltRules(es, supertest);
-        await securitySolutionApi
+        await detectionsApi
           .patchRule({
             body: {
               rule_id: PREBUILT_RULE_ID,
@@ -231,7 +231,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('imports a prebuilt rule with a missing base version when import payload IS EQUAL to the installed customized prebuilt rule', async () => {
         await installPrebuiltRules(es, supertest);
-        await securitySolutionApi
+        await detectionsApi
           .patchRule({
             body: {
               rule_id: PREBUILT_RULE_ID,

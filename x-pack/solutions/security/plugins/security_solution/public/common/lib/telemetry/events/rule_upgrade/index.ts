@@ -8,7 +8,7 @@
 import type { RuleUpgradeTelemetryEvent } from './types';
 import { RuleUpgradeEventTypes } from './types';
 
-export const flyoutButtonClickEvent: RuleUpgradeTelemetryEvent = {
+export const ruleUpgradeFlyoutButtonClickEvent: RuleUpgradeTelemetryEvent = {
   eventType: RuleUpgradeEventTypes.RuleUpgradeFlyoutButtonClick,
   schema: {
     type: {
@@ -18,27 +18,58 @@ export const flyoutButtonClickEvent: RuleUpgradeTelemetryEvent = {
         optional: false,
       },
     },
-    hasMissingBaseVersion: {
+    hasBaseVersion: {
       type: 'boolean',
       _meta: {
         description: 'Indicates if the rule has a missing base version',
         optional: false,
       },
     },
+    eventVersion: {
+      type: 'integer',
+      _meta: {
+        description: 'Indicates the version of the event',
+        optional: false,
+      },
+    },
   },
 };
 
-export const openFlyoutEvent: RuleUpgradeTelemetryEvent = {
+export const ruleUpgradeSingleButtonClickEvent: RuleUpgradeTelemetryEvent = {
+  eventType: RuleUpgradeEventTypes.RuleUpgradeSingleButtonClick,
+  schema: {
+    hasBaseVersion: {
+      type: 'boolean',
+      _meta: {
+        description: 'Indicates if the rule has base version',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const ruleUpgradeOpenFlyoutEvent: RuleUpgradeTelemetryEvent = {
   eventType: RuleUpgradeEventTypes.RuleUpgradeFlyoutOpen,
   schema: {
-    hasMissingBaseVersion: {
+    hasBaseVersion: {
       type: 'boolean',
       _meta: {
         description: 'Indicates if the rule has a missing base version',
         optional: false,
       },
     },
+    eventVersion: {
+      type: 'integer',
+      _meta: {
+        description: 'Indicates the version of the event',
+        optional: false,
+      },
+    },
   },
 };
 
-export const ruleUpgradeTelemetryEvents = [flyoutButtonClickEvent, openFlyoutEvent];
+export const ruleUpgradeTelemetryEvents = [
+  ruleUpgradeFlyoutButtonClickEvent,
+  ruleUpgradeOpenFlyoutEvent,
+  ruleUpgradeSingleButtonClickEvent,
+];

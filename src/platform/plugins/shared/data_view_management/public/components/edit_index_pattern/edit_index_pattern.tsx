@@ -12,7 +12,6 @@ import { withRouter, RouteComponentProps, useLocation } from 'react-router-dom';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiSpacer,
   EuiBadge,
   EuiCallOut,
@@ -209,17 +208,17 @@ export const EditIndexPattern = withRouter(
     return (
       <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
         {dataView && (
-          <IndexHeader
-            indexPattern={dataView}
-            setDefault={() => dataViewMgmtService.setDefaultDataView()}
-            editIndexPatternClick={editPattern}
-            deleteIndexPatternClick={() =>
-              removeHandler([indexPattern as RemoveDataViewProps], <div>{warning}</div>)
-            }
-            defaultIndex={defaultIndex}
-            canSave={userEditPermission}
-          >
-            <EuiHorizontalRule margin="none" />
+          <>
+            <IndexHeader
+              indexPattern={dataView}
+              setDefault={() => dataViewMgmtService.setDefaultDataView()}
+              editIndexPatternClick={editPattern}
+              deleteIndexPatternClick={() =>
+                removeHandler([indexPattern as RemoveDataViewProps], <div>{warning}</div>)
+              }
+              defaultIndex={defaultIndex}
+              canSave={userEditPermission}
+            />
             <EuiSpacer size="l" />
             <EuiFlexGroup wrap gutterSize="l" alignItems="center">
               {Boolean(indexPattern.title) && (
@@ -291,7 +290,7 @@ export const EditIndexPattern = withRouter(
                 </EuiCallOut>
               </>
             )}
-          </IndexHeader>
+          </>
         )}
         <EuiSpacer size="xl" />
         {dataView && (

@@ -10,6 +10,7 @@ import { FormulaPublicApi, MetricState, OperationType } from '@kbn/lens-plugin/p
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { Query } from '@kbn/es-query';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getColorPalette } from '../synthetics/single_metric_config';
 import { FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
 import { ColumnFilter, MetricOption } from '../../types';
@@ -28,9 +29,10 @@ export class SingleMetricLensAttributes extends LensAttributes {
   constructor(
     layerConfigs: LayerConfig[],
     reportType: string,
-    lensFormulaHelper: FormulaPublicApi
+    lensFormulaHelper: FormulaPublicApi,
+    dslFilters?: QueryDslQueryContainer[]
   ) {
-    super(layerConfigs, reportType, lensFormulaHelper);
+    super(layerConfigs, reportType, lensFormulaHelper, dslFilters);
     this.layers = {};
     this.reportType = reportType;
 
@@ -145,7 +147,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
             ? {
                 id: 'percent',
                 params: {
-                  decimals: 1,
+                  decimals: 3,
                 },
               }
             : undefined,

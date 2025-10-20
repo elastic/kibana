@@ -21,7 +21,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
     error={
       Array [
         "Pipeline ID is required",
-        "Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers",
+        "Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, hyphens, and numbers",
       ]
     }
     isInvalid={true}
@@ -283,7 +283,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
   <EuiForm
     error={
       Array [
-        "Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers",
+        "Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, hyphens, and numbers",
       ]
     }
     isInvalid={true}
@@ -545,7 +545,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
   <EuiForm
     error={
       Array [
-        "Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers",
+        "Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, hyphens, and numbers",
       ]
     }
     isInvalid={true}

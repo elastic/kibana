@@ -11,6 +11,49 @@ import { coreServices } from '../../../services/kibana_services';
 import { extractPanelsState } from './extract_panels_state';
 
 describe('extractPanelsState', () => {
+  describe('8.19', () => {
+    test('should migrate panels in sections', () => {
+      const { panels } = extractPanelsState({
+        panels: [
+          {
+            title: 'Section 1',
+            gridData: {},
+            panels: [
+              {
+                embeddableConfig: {
+                  timeRange: {
+                    from: 'now-7d/d',
+                    to: 'now',
+                  },
+                },
+                gridData: {},
+                type: 'map',
+              },
+            ],
+          },
+        ],
+      });
+      expect(panels).toEqual([
+        {
+          title: 'Section 1',
+          gridData: {},
+          panels: [
+            {
+              panelConfig: {
+                timeRange: {
+                  from: 'now-7d/d',
+                  to: 'now',
+                },
+              },
+              gridData: {},
+              type: 'map',
+            },
+          ],
+        },
+      ]);
+    });
+  });
+
   describe('< 8.19 panels state', () => {
     test('should move id and title to panelConfig', () => {
       const dashboardState = extractPanelsState({
