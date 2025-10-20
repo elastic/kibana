@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
 import type { JsonSchema7Type } from 'zod-to-json-schema';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import { z } from '@kbn/zod';
 import type { ConnectorContractUnion } from '../..';
 import {
   BaseConnectorStepSchema,
@@ -91,6 +91,7 @@ export function generateYamlSchemaFromConnectors(
 }
 
 export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): JsonSchema7Type {
+  // eslint-disable-next-line no-useless-catch
   try {
     // Generate the full schema - this should work and give us the full schema
     const jsonSchema = zodToJsonSchema(yamlSchema, {
@@ -110,6 +111,7 @@ export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): JsonSchema7T
  * Recursively fix additionalProperties in the schema object
  * This ensures all object schemas have additionalProperties: false for strict validation
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function fixAdditionalPropertiesInSchema(obj: any, path: string = '', visited = new Set()): void {
   // Prevent infinite recursion with circular references
   if (typeof obj !== 'object' || obj === null || visited.has(obj)) {
@@ -176,6 +178,7 @@ function fixAdditionalPropertiesInSchema(obj: any, path: string = '', visited = 
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
   const schemaString = JSON.stringify(schema);
   let fixedSchemaString = schemaString;
