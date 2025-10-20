@@ -9,23 +9,24 @@
 
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/repo-info';
-import { run } from '@kbn/dev-cli-runner';
-import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
+import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
+import { run } from '@kbn/dev-cli-runner';
+import { REPO_ROOT } from '@kbn/repo-info';
 import globby from 'globby';
 import normalize from 'normalize-path';
-import { getFailures } from './get_failures';
-import { GithubApi } from './github_api';
-import { updateFailureIssue, createFailureIssue } from './report_failure';
-import { readTestReport, getRootMetadata } from './test_report';
 import { addMessagesToReport } from './add_messages_to_report';
-import { getReportMessageIter } from './report_metadata';
-import { reportFailuresToEs } from './report_failures_to_es';
-import { reportFailuresToFile } from './report_failures_to_file';
 import { getBuildkiteMetadata } from './buildkite_metadata';
 import { ExistingFailedTestIssues } from './existing_failed_test_issues';
 import { generateScoutTestFailureArtifacts } from './generate_scout_test_failure_artifacts';
+import { getFailures } from './get_failures';
+import { getScoutFailures, type ScoutTestFailureExtended } from './get_scout_failures';
+import { GithubApi } from './github_api';
+import { createFailureIssue, updateFailureIssue } from './report_failure';
+import { reportFailuresToEs } from './report_failures_to_es';
+import { reportFailuresToFile } from './report_failures_to_file';
+import { getReportMessageIter } from './report_metadata';
+import { getRootMetadata, readTestReport } from './test_report';
 
 const DEFAULT_PATTERNS = [Path.resolve(REPO_ROOT, 'target/junit/**/*.xml')];
 const DISABLE_MISSING_TEST_REPORT_ERRORS =
@@ -105,10 +106,24 @@ run(
       await generateScoutTestFailureArtifacts({ log, bkMeta });
 
       if (reportPaths.length) {
-        log.info('found', reportPaths.length, 'junit reports', reportPaths);
+        log.info('found', reportPaths.length, 'reports', reportPaths);
+
+        // Separate JUnit and Scout reports
+        const junitReports = reportPaths.filter((p) => p.endsWith('.xml'));
+        const scoutReports = reportPaths.filter((p) => p.endsWith('.ndjson'));
+
+        log.info(
+          'Processing',
+          junitReports.length,
+          'JUnit reports and',
+          scoutReports.length,
+          'Scout reports'
+        );
 
         const existingIssues = new ExistingFailedTestIssues(log);
-        for (const reportPath of reportPaths) {
+
+        // Process FTR JUnit reports
+        for (const reportPath of junitReports) {
           const report = await readTestReport(reportPath);
           const messages = Array.from(getReportMessageIter(report));
           const failures = getFailures(report);
@@ -183,6 +198,69 @@ run(
           });
 
           await reportFailuresToFile(log, failures, bkMeta, getRootMetadata(report));
+        }
+
+        // Process Scout reports
+        for (const reportPath of scoutReports) {
+          log.info('Processing Scout report:', reportPath);
+          const failures: ScoutTestFailureExtended[] = await getScoutFailures(reportPath);
+
+          if (failures.length === 0) {
+            log.info('No Scout failures found in:', reportPath);
+            continue;
+          }
+
+          log.info('Found', failures.length, 'Scout failures in:', reportPath);
+
+          await existingIssues.loadForFailures(failures);
+
+          if (indexInEs) {
+            await reportFailuresToEs(log, failures);
+          }
+
+          for (const failure of failures) {
+            if (failure.likelyIrrelevant) {
+              log.info(
+                `Scout failure is likely irrelevant: ${failure.classname} - ${failure.name}`
+              );
+              continue;
+            }
+
+            const existingIssue = existingIssues.getForFailure(failure);
+            if (existingIssue) {
+              const { newBody, newCount } = await updateFailureIssue(
+                buildUrl,
+                existingIssue,
+                githubApi,
+                branch,
+                pipeline
+              );
+              const url = existingIssue.github.htmlUrl;
+              existingIssue.github.body = newBody;
+              failure.githubIssue = url;
+              failure.failureCount = updateGithub ? newCount : newCount - 1;
+              log.info(`Updated existing Scout issue: ${url} (fail count: ${newCount})`);
+              continue;
+            }
+
+            const newIssue = await createFailureIssue(
+              buildUrl,
+              failure,
+              githubApi,
+              branch,
+              pipeline,
+              prependTitle
+            );
+            existingIssues.addNewlyCreated(failure, newIssue);
+            if (updateGithub) {
+              log.info(`Created new Scout issue: ${newIssue.html_url}`);
+              failure.githubIssue = newIssue.html_url;
+            }
+            failure.failureCount = updateGithub ? 1 : 0;
+          }
+
+          // Generate Scout failure artifacts (similar to JUnit report processing)
+          await reportFailuresToFile(log, failures, bkMeta, {});
         }
       }
     } finally {
