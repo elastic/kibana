@@ -157,7 +157,7 @@ describe('buildSourcesDefinitions with timeseries', () => {
       { name: 'regular_index', isIntegration: false, type: 'Index' },
     ];
 
-    const suggestions = buildSourcesDefinitions(sources);
+    const suggestions = buildSourcesDefinitions(sources, 'FROM ');
 
     // Find the timeseries suggestion
     const timeseriesSuggestion = suggestions.find((s) => s.label === 'my_timeseries_index');
