@@ -526,13 +526,13 @@
               "created_at": {
                 "type": "date",
                 "_meta": {
-                  "description": "Cloud connector created at"
+                  "description": "The creation date of the cloud connector"
                 }
               },
               "updated_at": {
                 "type": "date",
                 "_meta": {
-                  "description": "Cloud connector updated at"
+                  "description": "The last update date of the cloud connector"
                 }
               },
               "hasCredentials": {
@@ -544,7 +544,7 @@
               "cloud_provider": {
                 "type": "keyword",
                 "_meta": {
-                  "description": "Cloud connector cloud provider"
+                  "description": "The cloud provider of the cloud connector"
                 }
               },
               "packagePolicyIds": {

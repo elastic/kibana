@@ -161,10 +161,7 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
         type: 'boolean',
         _meta: { description: 'Whether the package policy supports cloud connector' },
       },
-      cloud_connector_id: {
-        type: 'keyword',
-        _meta: { description: 'Cloud connector ID' },
-      },
+      cloud_connector_id: { type: 'keyword', _meta: { description: 'Cloud connector ID' } },
     },
   },
   alerts_stats: {
@@ -227,17 +224,14 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
   cspm_cloud_connector_usage_stats: {
     type: 'array',
     items: {
-      id: {
-        type: 'keyword',
-        _meta: { description: 'Cloud connector ID' },
-      },
+      id: { type: 'keyword', _meta: { description: 'Cloud connector ID' } },
       created_at: {
         type: 'date',
-        _meta: { description: 'Cloud connector created at' },
+        _meta: { description: 'The creation date of the cloud connector' },
       },
       updated_at: {
         type: 'date',
-        _meta: { description: 'Cloud connector updated at' },
+        _meta: { description: 'The last update date of the cloud connector' },
       },
       hasCredentials: {
         type: 'boolean',
@@ -245,14 +239,11 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       },
       cloud_provider: {
         type: 'keyword',
-        _meta: { description: 'Cloud connector cloud provider' },
+        _meta: { description: 'The cloud provider of the cloud connector' },
       },
       packagePolicyIds: {
         type: 'array',
-        items: {
-          type: 'keyword',
-          _meta: { description: 'Package policy ID' },
-        },
+        items: { type: 'keyword', _meta: { description: 'Package policy ID' } },
       },
       packagePolicyCount: {
         type: 'long',
