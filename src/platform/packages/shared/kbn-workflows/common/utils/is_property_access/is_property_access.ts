@@ -22,11 +22,12 @@ export function isPropertyAccess(str: string): boolean {
   // Pattern explanation:
   // - Start with a valid identifier: [a-zA-Z_$][a-zA-Z0-9_$]*
   // - Followed by zero or more property accessors:
-  //   - Dot notation: \.[a-zA-Z_$][a-zA-Z0-9_$]*
+  //   - Dot notation for identifiers: \.[a-zA-Z_$][a-zA-Z0-9_$]*
+  //   - Dot notation for array indices: \.[0-9]+
   //   - Bracket notation with single quotes: \['[^']*'\]
   //   - Bracket notation with double quotes: \["[^"]*"\]
   const propertyAccessPattern =
-    /^[a-zA-Z_$][a-zA-Z0-9_$]*(?:(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*)|(?:\['[^']*'\])|(?:\["[^"]*"\]))*$/;
+    /^[a-zA-Z_$][a-zA-Z0-9_$]*(?:(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*)|(?:\.[0-9]+)|(?:\['[^']*'\])|(?:\["[^"]*"\]))*$/;
 
   return propertyAccessPattern.test(trimmed);
 }

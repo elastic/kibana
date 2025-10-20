@@ -62,6 +62,12 @@ describe('isPropertyAccess', () => {
       expect(isPropertyAccess("user['']")).toBe(true);
       expect(isPropertyAccess('user[""]')).toBe(true);
     });
+
+    it('should return true for array indices', () => {
+      expect(isPropertyAccess('steps.analysis.output.0.result')).toBe(true);
+      expect(isPropertyAccess(`steps.analysis.output['0'].result`)).toBe(true);
+      expect(isPropertyAccess(`steps.analysis.output["10"].result`)).toBe(true);
+    });
   });
 
   describe('invalid property access patterns', () => {
