@@ -13,7 +13,7 @@ import type * as ast from '../../../types';
 import type { MapParameters } from '../../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { EDITOR_MARKER } from '../../../definitions/constants';
-import type { ESQLCommand, ESQLAstCompletionCommand } from '../../../types';
+import type { ESQLAstCompletionCommand, ESQLAstAllCommands } from '../../../types';
 import { isFunctionExpression } from '../../../ast/is';
 import { within } from '../../../ast/location';
 import {
@@ -56,7 +56,7 @@ export enum CompletionPosition {
 
 function getPosition(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   context?: ICommandContext,
   cursorPosition?: number
 ): CompletionPosition | undefined {
@@ -105,7 +105,7 @@ const promptSnippetText = `"$\{0:${promptText}}"`;
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition: number = query.length
