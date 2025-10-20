@@ -10,10 +10,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, getDefaultSort } from '@kbn/discover-utils';
-import type {
-  SearchEmbeddableSerializedState,
-  SearchEmbeddableApi,
-} from '@kbn/discover-plugin/public';
+import type { SearchEmbeddableApi } from '@kbn/discover-plugin/public';
+import type { SearchEmbeddableSerializedState } from '@kbn/discover-plugin/common';
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { type SavedSearch, toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
