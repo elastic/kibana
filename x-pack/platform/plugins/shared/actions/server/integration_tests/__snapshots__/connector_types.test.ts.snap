@@ -44612,6 +44612,14 @@ Object {
                     "x-oas-optional": true,
                   },
                 ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "limit": 1,
+                    },
+                    "name": "max",
+                  },
+                ],
                 "type": "array",
               },
               "channels": Object {
@@ -44783,6 +44791,14 @@ Object {
                 "metas": Array [
                   Object {
                     "x-oas-optional": true,
+                  },
+                ],
+                "rules": Array [
+                  Object {
+                    "args": Object {
+                      "limit": 1,
+                    },
+                    "name": "max",
                   },
                 ],
                 "type": "array",
