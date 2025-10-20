@@ -396,18 +396,7 @@ const executeStreaming = async ({
         model: 'unknown', // TODO: Get this from the response
       });
 
-      // Log detailed execution completion similar to non-streaming
-      if (finalRoundData) {
-        logger.debug(
-          `🚀 [AGENT_BUILDER] Streaming execution completed: ${JSON.stringify(
-            finalRoundData,
-            null,
-            2
-          )}`
-        );
-      } else {
-        logger.debug(`🚀 [AGENT_BUILDER] Streaming execution completed`);
-      }
+      logger.debug(`🚀 [AGENT_BUILDER] Streaming execution completed`);
 
       handleStreamEnd(finalContent);
     } catch (error) {
