@@ -88,12 +88,14 @@ export function EditLifecycleModal({
         label: i18n.translate('xpack.streams.streamDetailLifecycle.indefinite', {
           defaultMessage: 'Indefinite',
         }),
+        'data-test-subj': 'indefiniteRetentionButton',
       },
       {
         id: 'custom',
         label: i18n.translate('xpack.streams.streamDetailLifecycle.customPeriod', {
           defaultMessage: 'Custom period',
         }),
+        'data-test-subj': 'customRetentionButton',
       },
     ];
 
@@ -103,6 +105,7 @@ export function EditLifecycleModal({
         label: i18n.translate('xpack.streams.streamDetailLifecycle.ilmPolicy', {
           defaultMessage: 'ILM policy',
         }),
+        'data-test-subj': 'ilmRetentionButton',
       });
     }
 

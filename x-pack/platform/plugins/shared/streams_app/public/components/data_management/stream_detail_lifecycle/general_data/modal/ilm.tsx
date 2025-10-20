@@ -136,6 +136,7 @@ export function IlmField({
             data: {
               phases: getPhaseDescription(policy.phases, phaseToIndicatorColors),
             },
+            'data-test-subj': `ilmPolicy-${name}`,
           })
         );
         setPolicies(policyOptions);

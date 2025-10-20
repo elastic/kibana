@@ -122,6 +122,7 @@ export function DslField({ initialValue, isDisabled, setLifecycle, setSaveButton
                     closeUnitMenu();
                     setSelectedUnit(unit);
                   }}
+                  data-test-subj={`streamsAppDslModalUnitOption-${unit.value}`}
                 >
                   {unit.name}
                 </EuiContextMenuItem>

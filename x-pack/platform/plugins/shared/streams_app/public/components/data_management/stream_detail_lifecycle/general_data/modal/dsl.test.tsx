@@ -89,8 +89,8 @@ describe('DslField', () => {
     );
     const unitButton = screen.getByTestId('streamsAppDslModalButton');
     fireEvent.click(unitButton); // open popover
-    // Click Hours option
-    fireEvent.click(screen.getByRole('button', { name: 'Hours' }));
+    const hoursUnitButton = screen.getByTestId('streamsAppDslModalUnitOption-h');
+    fireEvent.click(hoursUnitButton); // Click Hours option
     await waitFor(() => {
       expect(setLifecycle).toHaveBeenCalledWith({ dsl: { data_retention: '30h' } });
     });

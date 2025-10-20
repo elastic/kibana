@@ -94,8 +94,8 @@ describe('IlmField', () => {
     await waitFor(() => expect(getIlmPolicies).toHaveBeenCalled());
     // Policies should be displayed
     await waitFor(() => {
-      expect(screen.getByText('policyA')).toBeInTheDocument();
-      expect(screen.getByText('policyB')).toBeInTheDocument();
+      expect(screen.getByTestId('ilmPolicy-policyA')).toBeInTheDocument();
+      expect(screen.getByTestId('ilmPolicy-policyB')).toBeInTheDocument();
     });
   });
 
@@ -112,6 +112,10 @@ describe('IlmField', () => {
     );
     // In readOnly mode, policyA should be displayed
     await waitFor(() => expect(screen.getByText('policyA')).toBeInTheDocument());
+
+    // It doesn't show dropdown with policies
+    expect(screen.queryByTestId('ilmPolicy-policyA')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ilmPolicy-policyB')).not.toBeInTheDocument();
   });
 
   it('handles getIlmPolicies error', async () => {

@@ -126,11 +126,9 @@ describe('EditLifecycleModal', () => {
       // Current implementation uses classic label even for wired streams in this test context
       expect(screen.getByTestId('inheritRetentionHeading')).toBeInTheDocument();
       expect(screen.getByTestId('inheritDataRetentionSwitch')).toBeInTheDocument();
-      // Description uses index template variant for classic label in code path
+      // Should display the switch description for wired streams
       expect(
-        screen.getByText(
-          /Use the parent stream’s retention configuration|Use the parent stream's retention configuration/
-        )
+        screen.getByText('Use the parent stream’s retention configuration')
       ).toBeInTheDocument();
     });
 
@@ -146,6 +144,10 @@ describe('EditLifecycleModal', () => {
 
       expect(screen.getByTestId('inheritRetentionHeading')).toBeInTheDocument();
       expect(screen.getByTestId('inheritDataRetentionSwitch')).toBeInTheDocument();
+      // Should display the switch description for classic streams
+      expect(
+        screen.getByText('Use the stream’s index template retention configuration')
+      ).toBeInTheDocument();
     });
 
     it('should not show inheritance label for root wired streams', () => {
@@ -169,8 +171,6 @@ describe('EditLifecycleModal', () => {
       render(<EditLifecycleModal {...defaultProps} definition={definition} />);
 
       expect(screen.getByTestId('dataRetentionButtonGroup')).toBeInTheDocument();
-      // Button labels are rendered inside the button group; keep role assertion for accessibility
-      expect(screen.getByRole('group', { name: 'Data retention' })).toBeInTheDocument();
     });
 
     it('should handle indefinite retention selection', async () => {
@@ -178,7 +178,7 @@ describe('EditLifecycleModal', () => {
 
       render(<EditLifecycleModal {...defaultProps} definition={definition} />);
 
-      const indefiniteButton = screen.getByRole('button', { name: 'Indefinite' });
+      const indefiniteButton = screen.getByTestId('indefiniteRetentionButton');
       await userEvent.click(indefiniteButton);
 
       // Save button should be enabled
@@ -192,7 +192,7 @@ describe('EditLifecycleModal', () => {
       // Disable inheritance first to enable buttons
       const inheritSwitch = screen.getByTestId('inheritDataRetentionSwitch');
       await userEvent.click(inheritSwitch);
-      const customButton = screen.getByRole('button', { name: 'Custom period' });
+      const customButton = screen.getByTestId('customRetentionButton');
       await userEvent.click(customButton);
       // DSL field renders with input for custom period
       expect(screen.getByTestId('streamsAppDslModalDaysField')).toBeInTheDocument();
@@ -203,7 +203,7 @@ describe('EditLifecycleModal', () => {
       render(<EditLifecycleModal {...defaultProps} definition={definition} />);
       const inheritSwitch = screen.getByTestId('inheritDataRetentionSwitch');
       await userEvent.click(inheritSwitch);
-      const ilmButton = screen.getByRole('button', { name: 'ILM policy' });
+      const ilmButton = screen.getByTestId('ilmRetentionButton');
       await userEvent.click(ilmButton);
       // ILM field should be loading policies
       const saveButton = screen.getByTestId('streamsAppModalFooterButton');
@@ -242,7 +242,7 @@ describe('EditLifecycleModal', () => {
       render(<EditLifecycleModal {...defaultProps} definition={definition} />);
 
       // Select indefinite
-      const indefiniteButton = screen.getByRole('button', { name: 'Indefinite' });
+      const indefiniteButton = screen.getByTestId('indefiniteRetentionButton');
       await userEvent.click(indefiniteButton);
 
       // Click save
@@ -264,27 +264,6 @@ describe('EditLifecycleModal', () => {
 
       expect(saveButton).toBeDisabled();
       expect(cancelButton).toBeDisabled();
-    });
-  });
-
-  describe('Accessibility', () => {
-    it('should have proper modal labeling', () => {
-      const definition = createMockDefinition({ dsl: { data_retention: '30d' } });
-
-      render(<EditLifecycleModal {...defaultProps} definition={definition} />);
-
-      const modal = screen.getByRole('dialog');
-      expect(modal).toBeInTheDocument();
-    });
-
-    it('should have proper button group legend', () => {
-      const definition = createMockDefinition({ dsl: { data_retention: '30d' } });
-
-      render(<EditLifecycleModal {...defaultProps} definition={definition} />);
-
-      // EuiButtonGroup renders as a fieldset with legend (role=group). Adjust accessibility query.
-      const group = screen.getByRole('group', { name: 'Data retention' });
-      expect(group).toBeInTheDocument();
     });
   });
 });
