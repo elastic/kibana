@@ -8,21 +8,25 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import { DashboardAttributes, DashboardPanel } from '../../types';
+import type { DashboardAttributes, DashboardPanel } from '../../types';
 import { isDashboardSection } from '../../../../../common';
 import { embeddableService } from '../../../../kibana_services';
 import { getPanelIdFromReference } from '../../../../../common/reference_utils';
 
-export function transformReferencesOut(references: SavedObjectReference[], panels: DashboardAttributes['panels']): SavedObjectReference[] {
+export function transformReferencesOut(
+  references: SavedObjectReference[],
+  panels?: DashboardAttributes['panels']
+): SavedObjectReference[] {
   // key: panel uid
   // value: boolean indicating if panel type handles references in transform functions
   const handlesRefsMap: Record<string, boolean> = {};
   function setHandlesRefs(panel: DashboardPanel) {
     if (!panel.uid) return;
     const { transformHandlesReferences } = embeddableService?.getTransforms(panel.type) ?? {};
-    handlesRefsMap[panel.uid] = typeof transformHandlesReferences === 'boolean' ? transformHandlesReferences : false;
+    handlesRefsMap[panel.uid] =
+      typeof transformHandlesReferences === 'boolean' ? transformHandlesReferences : false;
   }
-  panels.forEach((panel) => {
+  (panels ?? []).forEach((panel) => {
     if (isDashboardSection(panel)) {
       panel.panels.forEach((panelInSection) => setHandlesRefs(panelInSection));
     } else {
@@ -37,8 +41,8 @@ export function transformReferencesOut(references: SavedObjectReference[], panel
     .filter((ref) => {
       const panelId = getPanelIdFromReference(ref);
       return panelId && handlesRefsMap[panelId]
-        // drop references for panels that handle references on server
-        ? false
+        ? // drop references for panels that handle references on server
+          false
         : true;
     });
 }
