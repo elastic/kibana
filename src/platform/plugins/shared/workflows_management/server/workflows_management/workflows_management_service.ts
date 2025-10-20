@@ -677,7 +677,7 @@ export class WorkflowsService {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const response = await this.esClient!.search({
+      const response = await this.esClient.search({
         index: WORKFLOWS_EXECUTIONS_INDEX,
         size: 0,
         query: {
@@ -719,6 +719,7 @@ export class WorkflowsService {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const buckets = (response.aggregations as any)?.daily_stats?.buckets || [];
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return buckets.map((bucket: any) => ({
         date: bucket.key_as_string,
         timestamp: bucket.key,
@@ -737,6 +738,7 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const aggs: Record<string, any> = {};
 
     fields.forEach((field) => {
@@ -763,10 +765,12 @@ export class WorkflowsService {
     });
 
     const result: WorkflowAggsDto = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const responseAggs = aggsResponse.aggregations as any;
 
     fields.forEach((field) => {
       if (responseAggs[field]) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         result[field] = responseAggs[field].buckets.map((bucket: any) => ({
           label: bucket.key_as_string,
           key: bucket.key,
@@ -784,7 +788,7 @@ export class WorkflowsService {
     spaceId: string
   ): Promise<WorkflowExecutionDto | null> {
     return getWorkflowExecution({
-      esClient: this.esClient!,
+      esClient: this.esClient,
       logger: this.logger,
       workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
       stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
@@ -831,7 +835,7 @@ export class WorkflowsService {
     const from = (page - 1) * perPage;
 
     return searchWorkflowExecutions({
-      esClient: this.esClient!,
+      esClient: this.esClient,
       logger: this.logger,
       workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
       query: {
@@ -850,7 +854,7 @@ export class WorkflowsService {
     executionId: string,
     spaceId: string
   ): Promise<WorkflowExecutionHistoryModel[]> {
-    const response = await this.esClient!.search<EsWorkflowStepExecution>({
+    const response = await this.esClient.search<EsWorkflowStepExecution>({
       index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       query: {
         bool: {
@@ -868,8 +872,13 @@ export class WorkflowsService {
     });
 
     return response.hits.hits.map((hit) => {
-      const source = hit._source!;
+      if (!hit._source) {
+        throw new Error('Missing _source in search result');
+      }
+      const source = hit._source;
       const startedAt = source.startedAt;
+      // TODO: add these types
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const finishedAt = (source as any).endedAt || (source as any).finishedAt;
 
       // Calculate duration in milliseconds if both timestamps are available
@@ -984,7 +993,7 @@ export class WorkflowsService {
 
   public async getStepExecutions(params: GetStepExecutionParams, spaceId: string) {
     return searchStepExecutions({
-      esClient: this.esClient!,
+      esClient: this.esClient,
       logger: this.logger,
       stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       workflowExecutionId: params.executionId,
@@ -1013,7 +1022,7 @@ export class WorkflowsService {
     spaceId: string
   ): Promise<EsWorkflowStepExecution | null> {
     const { executionId, id } = params;
-    const response = await this.esClient!.search<EsWorkflowStepExecution>({
+    const response = await this.esClient.search<EsWorkflowStepExecution>({
       index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       query: {
         bool: {
