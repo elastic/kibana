@@ -31,7 +31,7 @@ import {
   createConversationServiceMock,
   createEmptyConversation,
 } from '../../test_utils';
-import type { ChatService } from './chat_service';
+import type { ChatService } from './types';
 import { createChatService } from './chat_service';
 import { isConversationIdSetEvent } from '@kbn/onechat-common/chat';
 
