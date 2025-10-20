@@ -359,6 +359,8 @@ export class CommonPageObject extends FtrService {
 
     // Phase 3: Wait for URL to stabilize (no more redirects)
     await this.retry.tryForTime(this.defaultFindTimeout, async () => {
+      await this.sleep(501);
+
       const currentUrl = await this.browser.getCurrentUrl();
 
       this.log.debug('in navigateTo url = ' + currentUrl);
