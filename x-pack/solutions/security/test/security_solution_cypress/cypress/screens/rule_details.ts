@@ -23,19 +23,13 @@ export const INTERVAL_ABBR_VALUE = '[data-test-subj="interval-abbr-value"]';
 
 export const ALERTS_TAB = '[data-test-subj="navigation-alerts"]';
 
-export const ANOMALY_SCORE_DETAILS = 'Anomaly score';
-
 export const CUSTOM_QUERY_DETAILS = 'Custom query';
-
-export const EQL_QUERY_DETAILS = 'EQL query';
 
 export const ESQL_QUERY_DETAILS = 'ES|QL query';
 
 export const SAVED_QUERY_NAME_DETAILS = 'Saved query name';
 
 export const SAVED_QUERY_DETAILS = /^Saved query$/;
-
-export const SAVED_QUERY_FILTERS_DETAILS = 'Saved query filters';
 
 export const DATA_VIEW_DETAILS = 'Data view';
 
@@ -51,8 +45,6 @@ export const EXCEPTIONS_TAB = 'a[data-test-subj="navigation-rule_exceptions"]';
 export const EXCEPTIONS_TAB_EXPIRED_FILTER = '[data-test-subj="expired"]';
 
 export const EXCEPTIONS_TAB_ACTIVE_FILTER = '[data-test-subj="active"]';
-
-export const EXCEPTIONS_ITEM_CONTAINER = '[data-test-subj="exceptionsContainer"]';
 
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
@@ -76,15 +68,7 @@ export const INVESTIGATION_NOTES_MARKDOWN = 'test markdown';
 
 export const INVESTIGATION_NOTES_TOGGLE = '[data-test-subj="stepAboutDetailsToggle-notes"]';
 
-export const MACHINE_LEARNING_JOB_ID = '[data-test-subj="machineLearningJob"]';
-
-export const MACHINE_LEARNING_JOB_STATUS = '[data-test-subj="machineLearningJobStatus"]';
-
 export const MITRE_ATTACK_DETAILS = 'MITRE ATT&CK';
-
-export const NEW_TERMS_FIELDS_DETAILS = 'Fields';
-
-export const NEW_TERMS_HISTORY_WINDOW_DETAILS = 'History Window Size';
 
 export const FIELDS_BROWSER_BTN =
   '[data-test-subj="alertsTableIsLoaded"] [data-test-subj="show-field-browser"]';
@@ -99,8 +83,6 @@ export const RULE_NAME_OVERRIDE_DETAILS = 'Rule name override';
 export const RISK_SCORE_DETAILS = 'Risk score';
 
 export const INDICATOR_PREFIX_OVERRIDE = 'Indicator prefix override';
-
-export const RISK_SCORE_OVERRIDE_DETAILS = 'Risk score override';
 
 export const REFERENCE_URLS_DETAILS = 'Reference URLs';
 
@@ -124,11 +106,7 @@ export const SEVERITY_DETAILS = 'Severity';
 
 export const TAGS_DETAILS = 'Tags';
 
-export const THRESHOLD_DETAILS = 'Threshold';
-
 export const TIMELINE_TEMPLATE_DETAILS = 'Timeline template';
-
-export const TIMESTAMP_OVERRIDE_DETAILS = 'Timestamp override';
 
 export const SUPPRESS_BY_DETAILS = 'Suppress alerts by';
 
@@ -199,8 +177,6 @@ export const RULE_GAPS_STATUS_FILTER = '[data-test-subj="rule-gaps-status-filter
 export const RULE_GAPS_DATE_FILTER_OPTION = `[data-test-subj="rule-gaps-status-filter-item"]`;
 export const RULE_GAPS_FILL_BUTTON =
   '[data-test-subj="rule-gaps-table"] [data-test-subj="rule-gaps-fill-gap-button"]';
-export const RULE_GAPS_FILL_TOOLTIP = '[data-test-subj="rule-gaps-fill-gap-tooltip"]';
-export const RULE_GAPS_PROGRESS_BAR = '[data-test-subj="rule-gaps-progress-bar"]';
 export const RULE_GAPS_DATE_PICKER = '[data-test-subj="rule-gaps-date-picker"]';
 export const RULE_GAPS_DATE_PICKER_APPLY_REFRESH = `${RULE_GAPS_DATE_PICKER} .euiSuperUpdateButton`;
 export const RULE_FILL_ALL_GAPS_BUTTON = '[data-test-subj="fill-rule-gaps-button"]';

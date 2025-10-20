@@ -15,7 +15,7 @@ import { useToolRegistryResolver } from './use_tool_registry_resolver';
 export const useToolForm = (tool?: ToolDefinitionWithSchema, selectedToolType?: ToolType) => {
   const toolType = tool?.type ?? selectedToolType ?? ToolType.esql;
 
-  const dynamicResolver = useToolRegistryResolver(toolType);
+  const dynamicResolver = useToolRegistryResolver();
 
   const form = useForm<ToolFormData>({
     defaultValues: getToolTypeDefaultValues(toolType),
