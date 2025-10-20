@@ -27,11 +27,11 @@ import {
   handleCancellation,
   executeAgent$,
   getConversation,
-  conversationExists,
   updateConversation$,
   createConversation$,
   resolveServices,
   convertErrors,
+  type ConversationOperation,
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import type { ChatService, ChatConverseParams } from './types';
@@ -48,8 +48,6 @@ interface ChatServiceDeps {
 export const createChatService = (options: ChatServiceDeps): ChatService => {
   return new ChatServiceImpl(options);
 };
-
-type ConversationOperation = 'CREATE' | 'UPDATE';
 
 interface ConversationContext {
   operation: ConversationOperation;
@@ -77,7 +75,7 @@ class ChatServiceImpl implements ChatService {
     autoCreateConversationWithId = false,
   }: ChatConverseParams): Observable<ChatEvent> {
     return withConverseSpan({ agentId, conversationId }, (span) => {
-      // Step 1: Resolve scoped services
+      // Resolve scoped services
       return defer(async () => {
         const services = await resolveServices({
           agentId,
@@ -88,22 +86,15 @@ class ChatServiceImpl implements ChatService {
 
         span?.setAttribute('elastic.connector.id', services.selectedConnectorId);
 
-        // Step 2: Determine conversation operation (CREATE or UPDATE)
-        const operation = await determineOperation({
-          conversationId,
-          autoCreateConversationWithId,
-          conversationClient: services.conversationClient,
-        });
-
-        // Step 3: Get existing or placeholder conversation
-        const conversation = await getConversation({
+        // Get conversation and determine operation (CREATE or UPDATE)
+        const { operation, conversation } = await getConversation({
           agentId,
           conversationId,
           autoCreateConversationWithId,
           conversationClient: services.conversationClient,
         });
 
-        // Step 4: Build conversation context
+        // Build conversation context
         const context: ConversationContext = {
           operation,
           conversation,
@@ -115,13 +106,13 @@ class ChatServiceImpl implements ChatService {
         return context;
       }).pipe(
         switchMap((context) => {
-          // Step 5: Emit conversation ID for new conversations
+          // Emit conversation ID for new conversations
           const conversationIdEvent$ =
             context.operation === 'CREATE'
               ? of(createConversationIdSetEvent(context.conversation.id))
               : EMPTY;
 
-          // Step 6: Execute agent
+          // Execute agent
           const agentEvents$ = executeAgent$({
             agentId,
             request,
@@ -133,7 +124,7 @@ class ChatServiceImpl implements ChatService {
             agentService: this.dependencies.agentService,
           });
 
-          // Step 7: Generate title (for CREATE) or use existing title (for UPDATE)
+          // Generate title (for CREATE) or use existing title (for UPDATE)
           const title$ =
             context.operation === 'CREATE'
               ? generateTitle({
@@ -143,8 +134,8 @@ class ChatServiceImpl implements ChatService {
                 })
               : of(context.conversation.title);
 
-          // Step 8: Persist conversation
-          const persistenceEvents$ = createPersistenceEvents({
+          // Persist conversation
+          const persistenceEvents$ = persistConversation({
             agentId,
             operation: context.operation,
             conversation: context.conversation,
@@ -167,37 +158,9 @@ class ChatServiceImpl implements ChatService {
 }
 
 /**
- * Determines whether this is a CREATE or UPDATE operation
- */
-const determineOperation = async ({
-  conversationId,
-  autoCreateConversationWithId,
-  conversationClient,
-}: {
-  conversationId?: string;
-  autoCreateConversationWithId: boolean;
-  conversationClient: ConversationClient;
-}): Promise<ConversationOperation> => {
-  // No conversation ID means we're creating a new one
-  if (!conversationId) {
-    return 'CREATE';
-  }
-
-  // If conversationId specified and autoCreate is false, we're updating an existing conversation
-  if (!autoCreateConversationWithId) {
-    return 'UPDATE';
-  }
-
-  // If conversationId specified and autoCreate is true, we check if the conversation exists
-  const exists = await conversationExists({ conversationId, conversationClient });
-
-  return exists ? 'UPDATE' : 'CREATE';
-};
-
-/**
  * Creates events for conversation persistence (create/update)
  */
-const createPersistenceEvents = ({
+const persistConversation = ({
   agentId,
   operation,
   conversation,

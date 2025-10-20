@@ -90,8 +90,11 @@ export const conversationExists = async ({
   return conversationClient.exists(conversationId);
 };
 
+export type ConversationOperation = 'CREATE' | 'UPDATE';
+
 /**
  * Get a conversation by ID, or create a placeholder for new conversations
+ * Also determines the operation type (CREATE or UPDATE) based on the same logic
  */
 export const getConversation = async ({
   agentId,
@@ -103,24 +106,39 @@ export const getConversation = async ({
   conversationId: string | undefined;
   autoCreateConversationWithId?: boolean;
   conversationClient: ConversationClient;
-}): Promise<Conversation> => {
-  if (conversationId) {
-    if (autoCreateConversationWithId) {
-      const exists = await conversationExists({ conversationId, conversationClient });
-      if (exists) {
-        return conversationClient.get(conversationId);
-      } else {
-        return placeholderConversation({ conversationId, agentId });
-      }
-    } else {
-      return conversationClient.get(conversationId);
-    }
+}): Promise<{ conversation: Conversation; operation: ConversationOperation }> => {
+  // Case 1: No conversation ID - create new with placeholder
+  if (!conversationId) {
+    return {
+      conversation: placeholderConversation({ agentId }),
+      operation: 'CREATE',
+    };
+  }
+
+  // Case 2: Conversation ID specified and autoCreate is false - update existing
+  if (!autoCreateConversationWithId) {
+    return {
+      conversation: await conversationClient.get(conversationId),
+      operation: 'UPDATE',
+    };
+  }
+
+  // Case 3: Conversation ID specified and autoCreate is true - check if exists
+  const exists = await conversationExists({ conversationId, conversationClient });
+  if (exists) {
+    return {
+      conversation: await conversationClient.get(conversationId),
+      operation: 'UPDATE',
+    };
   } else {
-    return placeholderConversation({ agentId });
+    return {
+      conversation: placeholderConversation({ conversationId, agentId }),
+      operation: 'CREATE',
+    };
   }
 };
 
-const placeholderConversation = ({
+export const placeholderConversation = ({
   agentId,
   conversationId,
 }: {
