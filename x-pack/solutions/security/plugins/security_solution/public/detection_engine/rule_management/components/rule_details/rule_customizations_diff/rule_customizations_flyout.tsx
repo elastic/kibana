@@ -95,7 +95,7 @@ export const RuleCustomizationsFlyout = memo(function RuleCustomizationsFlyout({
     const headerCallout = isReverting ? (
       <>
         <EuiCallOut
-          announceOnMount
+          announceOnMount={false}
           title={i18n.REVERTING_RULE_CALLOUT_TITLE}
           color="warning"
           iconType="warning"
