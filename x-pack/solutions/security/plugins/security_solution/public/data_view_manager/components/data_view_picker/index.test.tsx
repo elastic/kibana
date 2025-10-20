@@ -121,7 +121,7 @@ describe('DataViewPicker', () => {
     });
   });
 
-  it('calls useUpdateUrlParam when changing the data view', () => {
+  it('calls useUpdateUrlParam when changing the default scoped data view', () => {
     render(
       <TestProviders>
         <DataViewPicker scope={DataViewManagerScopeName.default} />
@@ -132,6 +132,23 @@ describe('DataViewPicker', () => {
 
     expect(jest.mocked(useUpdateUrlParam(URL_PARAM_KEY.sourcerer))).toHaveBeenCalledWith({
       default: {
+        id: 'new-data-view-id',
+        selectedPatterns: [],
+      },
+    });
+  });
+
+  it('calls useUpdateUrlParam when changing the explore scoped data view', () => {
+    render(
+      <TestProviders>
+        <DataViewPicker scope={DataViewManagerScopeName.explore} />
+      </TestProviders>
+    );
+
+    fireEvent.click(screen.getByTestId('changeDataView'));
+
+    expect(jest.mocked(useUpdateUrlParam(URL_PARAM_KEY.sourcerer))).toHaveBeenCalledWith({
+      explore: {
         id: 'new-data-view-id',
         selectedPatterns: [],
       },
