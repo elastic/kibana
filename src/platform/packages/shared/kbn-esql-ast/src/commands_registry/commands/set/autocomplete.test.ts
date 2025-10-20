@@ -11,6 +11,7 @@ import { mockContext } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { parse } from '../../../parser';
 import type { ESQLCommand } from '../../../types';
+import { settings } from '../../../definitions/generated/settings';
 
 const testSetAutocomplete = async (
   query: string,
@@ -36,21 +37,22 @@ const testSetAutocomplete = async (
 };
 
 describe('SET Autocomplete', () => {
+  const expectedSettingNames = settings.map((setting) => `${setting.name} = `);
   describe('Setting name suggestions', () => {
     it('suggests available settings after SET command', async () => {
-      await testSetAutocomplete('SET ', ['project_routing = ']);
+      await testSetAutocomplete('SET ', expectedSettingNames);
     });
 
     it('suggests available settings with multiple spaces', async () => {
-      await testSetAutocomplete('SET   ', ['project_routing = ']);
+      await testSetAutocomplete('SET   ', expectedSettingNames);
     });
 
     it('suggests available settings with tab characters', async () => {
-      await testSetAutocomplete('SET\t', ['project_routing = ']);
+      await testSetAutocomplete('SET\t', expectedSettingNames);
     });
 
     it('suggests settings for partial setting name', async () => {
-      await testSetAutocomplete('SET project', ['project_routing = ']);
+      await testSetAutocomplete('SET project', expectedSettingNames);
     });
   });
 
