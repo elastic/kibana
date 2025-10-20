@@ -913,6 +913,7 @@ x-pack/platform/packages/shared/kbn-data-forge @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-elastic-assistant @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state @elastic/security-generative-ai
+x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/platform/packages/shared/kbn-evals @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-failure-store-modal @elastic/kibana-management
@@ -1014,6 +1015,7 @@ x-pack/platform/plugins/shared/dataset_quality @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/embeddable_alerts_table @elastic/response-ops
 x-pack/platform/plugins/shared/embeddable_enhanced @elastic/kibana-presentation
 x-pack/platform/plugins/shared/encrypted_saved_objects @elastic/kibana-security
+x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 x-pack/platform/plugins/shared/event_log @elastic/response-ops
 x-pack/platform/plugins/shared/features @elastic/kibana-core
 x-pack/platform/plugins/shared/fields_metadata @elastic/obs-ux-logs-team
@@ -1056,6 +1058,7 @@ x-pack/platform/test/alerting_api_integration/common/plugins/alerts @elastic/res
 x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/packages/helpers @elastic/response-ops
+x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
 x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/kibana-cases
 x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/kibana-cases
 x-pack/platform/test/cases_api_integration/common/plugins/security_solution @elastic/kibana-cases
