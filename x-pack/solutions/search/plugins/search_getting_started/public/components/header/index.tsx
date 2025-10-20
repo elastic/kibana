@@ -29,8 +29,15 @@ export const SearchGettingStartedHeader: React.FC = () => {
     services: { application },
   } = useKibana();
 
+  const skipAndGoHomeLabel = i18n.translate('xpack.search.gettingStarted.page.headerCtaEmpty', {
+    defaultMessage: 'Skip and go to Home',
+  });
+
   return (
-    <EuiFlexGroup gutterSize="m" alignItems="stretch">
+    <EuiFlexGroup gutterSize="m" alignItems="stretch" direction="rowReverse">
+      <EuiFlexItem>
+        <EuiImage size="xl" src={`${assetBasePath}/search_getting_started_header.svg`} alt="" />
+      </EuiFlexItem>
       <EuiFlexItem style={{ alignSelf: 'center' }}>
         <EuiPanel color="transparent" paddingSize="none">
           <SearchGettingStartedSectionHeading title={PLUGIN_NAME} icon="launch" />
@@ -52,29 +59,24 @@ export const SearchGettingStartedHeader: React.FC = () => {
             </p>
           </EuiText>
           <EuiSpacer size="l" />
-          <EuiFlexGroup gutterSize="m" alignItems="stretch">
+          <EuiFlexGroup gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
               <AddDataButton />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                aria-label={skipAndGoHomeLabel}
                 data-test-subj="elasticLLMCostsTourCloseBtn"
                 onClick={() => {
                   application.navigateToUrl('/app/elasticsearch/home');
                 }}
                 color="text"
               >
-                {i18n.translate('xpack.search.gettingStarted.page.headerCtaEmpty', {
-                  defaultMessage: 'Skip and go to Home',
-                })}
+                {skipAndGoHomeLabel}
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiImage size="xl" src={`${assetBasePath}/search_getting_started_header.svg`} alt="" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

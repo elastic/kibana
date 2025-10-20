@@ -14,6 +14,7 @@ import { ConsoleTutorialsGroup } from './tutorials/console_tutorials_group';
 import { SearchGettingStartedConnectCode } from './connect_code';
 import { GettingStartedFooter } from './footer';
 import { SearchGettingStartedHeader } from './header';
+import { ElasticsearchConnectionDetails } from './elasticsearch_connection_details';
 
 export const SearchGettingStartedPage: React.FC = () => {
   const usageTracker = useUsageTracker();
@@ -26,6 +27,9 @@ export const SearchGettingStartedPage: React.FC = () => {
     <SearchGettingStartedPageTemplate>
       <EuiPageTemplate.Section paddingSize="xl" grow={false}>
         <SearchGettingStartedHeader />
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section paddingSize="xl">
+        <ElasticsearchConnectionDetails />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section paddingSize="xl">
         <ConsoleTutorialsGroup />

@@ -70,6 +70,7 @@ export const AddDataButton: React.FC = () => {
       iconType="arrowDown"
       iconSide="right"
       onClick={onButtonClick}
+      data-test-subj="gettingStartedAddDataButton"
     >
       {i18n.translate('xpack.search.gettingStarted.addDataButton.label', {
         defaultMessage: 'Add data',
