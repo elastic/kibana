@@ -77,7 +77,7 @@ class ChatServiceImpl implements ChatService {
     autoCreateConversationWithId = false,
   }: ChatConverseParams): Observable<ChatEvent> {
     return withConverseSpan({ agentId, conversationId }, (span) => {
-      // Step 1: Resolve services scoped services
+      // Step 1: Resolve scoped services
       return defer(async () => {
         const services = await resolveServices({
           agentId,
