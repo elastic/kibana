@@ -182,6 +182,11 @@ export function UnifiedHistogramChart({
         | undefined;
       const response = json?.rawResponse;
 
+      if (response && !Object.keys(response).length) {
+        // it was aborted
+        return;
+      }
+
       if (requestFailed) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
         onChartLoad?.({ adapters: adapters ?? {} });
