@@ -62,8 +62,7 @@ describe('useNavigateToHostDetails', () => {
   it('returns callback that opens details panel when not in preview mode', () => {
     const { result } = renderHook(() => useNavigateToHostDetails(mockProps));
 
-    expect(result.current.isLinkEnabled).toBe(true);
-    result.current.openDetailsPanel({ tab, subTab });
+    result.current({ tab, subTab });
 
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: HostDetailsPanelKey,
@@ -85,8 +84,7 @@ describe('useNavigateToHostDetails', () => {
       useNavigateToHostDetails({ ...mockProps, isPreviewMode: true })
     );
 
-    expect(result.current.isLinkEnabled).toBe(true);
-    result.current.openDetailsPanel({ tab, subTab });
+    result.current({ tab, subTab });
 
     expect(mockOpenFlyout).toHaveBeenCalledWith({
       right: {

@@ -31,8 +31,7 @@ interface UserPanelContentProps {
   scopeId: string;
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
-  isPreviewMode?: boolean;
-  isLinkEnabled: boolean;
+  isPreviewMode: boolean;
 }
 
 export const UserPanelContent = ({
@@ -45,7 +44,6 @@ export const UserPanelContent = ({
   openDetailsPanel,
   onAssetCriticalityChange,
   isPreviewMode,
-  isLinkEnabled,
 }: UserPanelContentProps) => {
   const observedFields = useObservedUserItems(observedUser);
 
@@ -60,7 +58,6 @@ export const UserPanelContent = ({
             queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
-            isLinkEnabled={isLinkEnabled}
             entityType={EntityType.user}
           />
           <EuiHorizontalRule />
@@ -74,7 +71,6 @@ export const UserPanelContent = ({
         value={userName}
         field={EntityIdentifierFields.userName}
         isPreviewMode={isPreviewMode}
-        isLinkEnabled={isLinkEnabled}
         openDetailsPanel={openDetailsPanel}
       />
       <ObservedEntity

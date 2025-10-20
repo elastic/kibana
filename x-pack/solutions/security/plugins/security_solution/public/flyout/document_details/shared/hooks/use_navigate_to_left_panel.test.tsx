@@ -40,9 +40,8 @@ describe('useNavigateToLeftPanel', () => {
       isPreviewMode: false,
     });
     const hookResult = renderHook(() => useNavigateToLeftPanel({ tab: 'tab', subTab: 'subTab' }));
-    expect(hookResult.result.current.isEnabled).toEqual(true);
 
-    hookResult.result.current.navigateToLeftPanel();
+    hookResult.result.current();
 
     expect(mockFlyoutApi.openLeftPanel).toHaveBeenCalledWith({
       id: DocumentDetailsLeftPanelKey,
@@ -67,9 +66,8 @@ describe('useNavigateToLeftPanel', () => {
       isPreviewMode: true,
     });
     const hookResult = renderHook(() => useNavigateToLeftPanel({ tab: 'tab', subTab: 'subTab' }));
-    expect(hookResult.result.current.isEnabled).toEqual(true);
 
-    hookResult.result.current.navigateToLeftPanel();
+    hookResult.result.current();
 
     expect(mockFlyoutApi.openLeftPanel).not.toHaveBeenCalled();
     expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith({

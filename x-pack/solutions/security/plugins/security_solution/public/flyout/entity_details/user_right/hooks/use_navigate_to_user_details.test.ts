@@ -62,11 +62,7 @@ describe('useNavigateToUserDetails', () => {
   it('returns callback that opens details panel when not in preview mode', () => {
     const { result } = renderHook(() => useNavigateToUserDetails(mockProps));
 
-    expect(result.current.isLinkEnabled).toBe(true);
-    result.current.openDetailsPanel({ tab, subTab });
-
-    expect(result.current.isLinkEnabled).toBe(true);
-    result.current.openDetailsPanel({ tab, subTab });
+    result.current({ tab, subTab });
 
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: UserDetailsPanelKey,
@@ -89,8 +85,7 @@ describe('useNavigateToUserDetails', () => {
       useNavigateToUserDetails({ ...mockProps, isPreviewMode: true })
     );
 
-    expect(result.current.isLinkEnabled).toBe(true);
-    result.current.openDetailsPanel({ tab, subTab });
+    result.current({ tab, subTab });
 
     expect(mockOpenFlyout).toHaveBeenCalledWith({
       right: {

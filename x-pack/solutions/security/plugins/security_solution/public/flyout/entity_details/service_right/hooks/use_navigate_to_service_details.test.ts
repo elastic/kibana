@@ -14,7 +14,6 @@ import {
 } from '../../shared/components/left_panel/left_panel_header';
 import { ServiceDetailsPanelKey } from '../../service_details_left';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
-import { ServicePanelKey } from '../../shared/constants';
 
 jest.mock('@kbn/expandable-flyout');
 
@@ -37,11 +36,6 @@ const mockProps = {
   serviceName: 'testService',
   scopeId: 'testScopeId',
   isRiskScoreExist: false,
-  hasMisconfigurationFindings: false,
-  hasNonClosedAlerts: false,
-  contextID: 'testContextID',
-  isPreviewMode: false,
-  email: ['test@test.com'],
 };
 
 const tab = EntityDetailsLeftPanelTab.RISK_INPUTS;
@@ -59,14 +53,10 @@ describe('useNavigateToServiceDetails', () => {
     });
   });
 
-  it('returns callback that opens details panel when not in preview mode', () => {
+  it('returns callback that opens details panel', () => {
     const { result } = renderHook(() => useNavigateToServiceDetails(mockProps));
 
-    expect(result.current.isLinkEnabled).toBe(true);
-    result.current.openDetailsPanel({ tab, subTab });
-
-    expect(result.current.isLinkEnabled).toBe(true);
-    result.current.openDetailsPanel({ tab, subTab });
+    result.current({ tab, subTab });
 
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: ServiceDetailsPanelKey,
@@ -79,37 +69,5 @@ describe('useNavigateToServiceDetails', () => {
         path: { tab, subTab },
       },
     });
-  });
-
-  it('returns callback that opens flyout when in preview mode', () => {
-    const { result } = renderHook(() =>
-      useNavigateToServiceDetails({ ...mockProps, isPreviewMode: true })
-    );
-
-    expect(result.current.isLinkEnabled).toBe(true);
-    result.current.openDetailsPanel({ tab, subTab });
-
-    expect(mockOpenFlyout).toHaveBeenCalledWith({
-      right: {
-        id: ServicePanelKey,
-        params: {
-          contextID: mockProps.contextID,
-          scopeId: mockProps.scopeId,
-          serviceName: mockProps.serviceName,
-        },
-      },
-      left: {
-        id: ServiceDetailsPanelKey,
-        params: {
-          service: {
-            name: mockProps.serviceName,
-          },
-          scopeId: mockProps.scopeId,
-          isRiskScoreExist: mockProps.isRiskScoreExist,
-          path: { tab, subTab },
-        },
-      },
-    });
-    expect(mockOpenLeftPanel).not.toHaveBeenCalled();
   });
 });

@@ -24,24 +24,13 @@ export interface UseNavigateToLeftPanelParams {
   subTab?: string;
 }
 
-export interface UseNavigateToLeftPanelResult {
-  /**
-   * Callback to open analyzer in visualize tab
-   */
-  navigateToLeftPanel: () => void;
-  /**
-   * Whether the button should be disabled
-   */
-  isEnabled: boolean;
-}
-
 /**
  * Hook that returns a callback to navigate to the analyzer in the flyout
  */
 export const useNavigateToLeftPanel = ({
   tab,
   subTab,
-}: UseNavigateToLeftPanelParams): UseNavigateToLeftPanelResult => {
+}: UseNavigateToLeftPanelParams): (() => void) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, isPreviewMode } = useDocumentDetailsContext();
@@ -74,7 +63,7 @@ export const useNavigateToLeftPanel = ({
     [eventId, indexName, scopeId, tab, subTab]
   );
 
-  const navigateToLeftPanel = useCallback(() => {
+  return useCallback(() => {
     if (!isPreviewMode) {
       openLeftPanel(left);
       telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutTabClicked, {
@@ -93,6 +82,4 @@ export const useNavigateToLeftPanel = ({
       });
     }
   }, [openFlyout, openLeftPanel, right, left, scopeId, telemetry, isPreviewMode, tab]);
-
-  return useMemo(() => ({ navigateToLeftPanel, isEnabled: true }), [navigateToLeftPanel]);
 };
