@@ -20,7 +20,7 @@ const PANEL_STYLE = {
   width: '460px',
 };
 
-export const TextPopover: React.FC<TextPopoverProps> = ({ state, setState }) => {
+export const TextPopover: React.FC<TextPopoverProps> = (props) => {
   return (
     <ToolbarPopover
       title={i18n.translate('xpack.lens.shared.titlesAndTextLabel', {
@@ -32,15 +32,21 @@ export const TextPopover: React.FC<TextPopoverProps> = ({ state, setState }) => 
       data-test-subj="lnsTextOptionsPopover"
       panelStyle={PANEL_STYLE}
     >
-      <ValueLabelsSettings
-        label={i18n.translate('xpack.lens.shared.chartBarLabelVisibilityLabel', {
-          defaultMessage: 'Bar values',
-        })}
-        valueLabels={state?.valueLabels ?? 'hide'}
-        onValueLabelChange={(newMode) => {
-          setState({ ...state, valueLabels: newMode });
-        }}
-      />
+      <XyTitlesAndTextSettings {...props} />
     </ToolbarPopover>
   );
 };
+
+export function XyTitlesAndTextSettings({ state, setState }: TextPopoverProps) {
+  return (
+    <ValueLabelsSettings
+      label={i18n.translate('xpack.lens.shared.chartBarLabelVisibilityLabel', {
+        defaultMessage: 'Bar values',
+      })}
+      valueLabels={state?.valueLabels ?? 'hide'}
+      onValueLabelChange={(newMode) => {
+        setState({ ...state, valueLabels: newMode });
+      }}
+    />
+  );
+}
