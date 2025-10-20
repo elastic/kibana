@@ -73,6 +73,20 @@ The dashboard uses a grid layout system with a total width of **48 units**. When
 4. **Validate**: Call `generate_dashboard` to validate all queries - fix any validation errors if they occur
 5. **Commit**: Once `generate_dashboard` succeeds, call `commit_dashboard` to finalize the workflow
 
+{{#guidance}}
+**User Guidance**:
+The user wants the dashboard to be like this: {{{guidance}}}
+{{/guidance}}
+
+{{#previous_dashboard}}
+**Previous Dashboard**:
+This is how the previous dashboard looked like:
+```json
+{{{previous_dashboard}}}
+```
+Use this as a starting point and refine it based on any user guidance provided.
+{{/previous_dashboard}}
+
 The dashboard schema is referenced below as `dashboard_schema`.
 
 `dashboard_schema`:

@@ -74,6 +74,8 @@ export async function suggestStreamDashboard({
   logger,
   maxSteps,
   signal,
+  guidance,
+  previousDashboard,
 }: {
   definition: Streams.ingest.all.Definition;
   features: Feature[];
@@ -82,6 +84,8 @@ export async function suggestStreamDashboard({
   logger: Logger;
   maxSteps?: number | undefined;
   signal: AbortSignal;
+  guidance?: string;
+  previousDashboard?: Dashboard;
 }): Promise<Dashboard | null> {
   try {
     const docBase = await loadEsqlDocBase();
@@ -95,6 +99,8 @@ export async function suggestStreamDashboard({
         stream_as_string: JSON.stringify(definition),
         features_as_string: JSON.stringify(features),
         dashboard_schema: JSON.stringify(schema),
+        guidance,
+        previous_dashboard: previousDashboard ? JSON.stringify(previousDashboard) : undefined,
       },
       maxSteps,
       toolCallbacks: {

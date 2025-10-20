@@ -22,6 +22,8 @@ export interface SuggestDashboardParams {
   };
   body: {
     connector_id: string;
+    guidance?: string;
+    previous_dashboard?: any;
   };
 }
 
@@ -29,6 +31,8 @@ export const suggestDashboardSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.object({
     connector_id: z.string(),
+    guidance: z.string().optional(),
+    previous_dashboard: z.any().optional(),
   }),
 }) satisfies z.Schema<SuggestDashboardParams>;
 
@@ -296,6 +300,8 @@ export const suggestDashboardRoute = createServerRoute({
       logger,
       maxSteps: 20, // Dashboard creation may require more exploration steps than partitioning
       signal: new AbortController().signal,
+      guidance: params.body.guidance,
+      previousDashboard: params.body.previous_dashboard,
     });
 
     // Turn our promise into an Observable ServerSideEvent. The only reason we're streaming the

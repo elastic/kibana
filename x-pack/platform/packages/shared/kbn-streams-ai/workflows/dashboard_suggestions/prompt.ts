@@ -19,6 +19,8 @@ export const SuggestStreamDashboardPrompt = createPrompt({
     stream_as_string: z.string(),
     features_as_string: z.string(),
     dashboard_schema: z.string(),
+    guidance: z.string().optional(),
+    previous_dashboard: z.string().optional(),
   }),
 })
   .version({
