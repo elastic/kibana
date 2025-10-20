@@ -264,18 +264,18 @@ export class WorkflowContextManager {
         stepState: Record<string, any> | undefined;
       }
     | undefined {
-      const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
-      if (!latestStepExecution) {
-        return;
-      }
-
-      return {
-        runStepResult: {
-          input: latestStepExecution?.input,
-          output: latestStepExecution?.output,
-          error: latestStepExecution?.error,
-        },
-        stepState: latestStepExecution.state,
-      };
+    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
+    if (!latestStepExecution) {
+      return;
     }
+
+    return {
+      runStepResult: {
+        input: latestStepExecution?.input,
+        output: latestStepExecution?.output,
+        error: latestStepExecution?.error,
+      },
+      stepState: latestStepExecution.state,
+    };
+  }
 }
