@@ -34,7 +34,7 @@ describe('CPSServerPlugin', () => {
 
   it('should expose getCpsEnabled method in setup', () => {
     const setup = plugin.setup(mockCoreSetup);
-    expect(setup).toHaveProperty('getEnabled');
+    expect(setup).toHaveProperty('getCpsEnabled');
   });
 
   it('should register routes in serverless mode', () => {
