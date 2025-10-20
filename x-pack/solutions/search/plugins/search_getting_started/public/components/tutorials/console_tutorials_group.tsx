@@ -100,6 +100,30 @@ export const ConsoleTutorialsGroup = () => {
                 onClick={() => {
                   tutorial.buttonRef.current?.click();
                 }}
+                footer={
+                  <TryInConsoleButton
+                    type="button"
+                    iconType={commandLineIllustration}
+                    color="text"
+                    request={tutorial.request}
+                    application={application}
+                    sharePlugin={share}
+                    consolePlugin={consolePlugin}
+                    telemetryId={tutorial.dataTestSubj}
+                    data-test-subj={tutorial.dataTestSubj}
+                    buttonProps={{ buttonRef: tutorial.buttonRef }}
+                    content={
+                      <FormattedMessage
+                        id="xpack.searchHomepage.consoleTutorials.runInConsole"
+                        defaultMessage="Open in Console"
+                      />
+                    }
+                    onClick={(e) => {
+                      // Do not trigger the card click
+                      e.stopPropagation();
+                    }}
+                  />
+                }
               >
                 <EuiFlexGroup
                   gutterSize="m"
@@ -116,30 +140,6 @@ export const ConsoleTutorialsGroup = () => {
                     >
                       <EuiFlexItem grow={false}>
                         <EuiText size="relative">{tutorial.description}</EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <TryInConsoleButton
-                          type="button"
-                          iconType={commandLineIllustration}
-                          color="text"
-                          request={tutorial.request}
-                          application={application}
-                          sharePlugin={share}
-                          consolePlugin={consolePlugin}
-                          telemetryId={tutorial.dataTestSubj}
-                          data-test-subj={tutorial.dataTestSubj}
-                          buttonProps={{ buttonRef: tutorial.buttonRef }}
-                          content={
-                            <FormattedMessage
-                              id="xpack.searchHomepage.consoleTutorials.runInConsole"
-                              defaultMessage="Open in Console"
-                            />
-                          }
-                          onClick={(e) => {
-                            // Do not trigger the card click
-                            e.stopPropagation();
-                          }}
-                        />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
