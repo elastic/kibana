@@ -110,6 +110,8 @@ export class EnterForeachNodeImpl implements NodeImplementation {
   }
 
   private getItems(renderedForeachExpression: string): unknown[] {
+    let resolvedValue;
+
     if (isPropertyAccess(renderedForeachExpression)) {
       const result =
         this.stepExecutionRuntime.contextManager.readContextPath(renderedForeachExpression);
@@ -121,37 +123,28 @@ export class EnterForeachNodeImpl implements NodeImplementation {
         );
       }
 
-      if (!Array.isArray(result.value)) {
-        throw new Error(
-          `Foreach expression must evaluate to an array. ` +
-            `Expression "${renderedForeachExpression}" resolved to ${typeof result.value}${
-              result.value === null
-                ? ' (null)'
-                : result.value === undefined
-                ? ' (undefined)'
-                : `: ${JSON.stringify(result.value).substring(0, 100)}${
-                    JSON.stringify(result.value).length > 100 ? '...' : ''
-                  }`
-            }. ` +
-            `Please ensure the expression references an array variable or update the configuration.`
-        );
-      }
-
-      return result.value;
+      resolvedValue = result.value;
+    } else {
+      resolvedValue = this.tryParseJSON(renderedForeachExpression);
     }
 
-    const parsingResult = this.tryParseJSON(renderedForeachExpression);
-
-    if (parsingResult) {
-      if (Array.isArray(parsingResult)) {
-        return parsingResult;
+    if (resolvedValue) {
+      if (Array.isArray(resolvedValue)) {
+        return resolvedValue;
       }
 
       throw new Error(
         `Foreach expression must evaluate to an array. ` +
-          `Got ${typeof parsingResult}: ${JSON.stringify(parsingResult).substring(0, 100)}${
-            JSON.stringify(parsingResult).length > 100 ? '...' : ''
-          }. `
+          `Expression "${renderedForeachExpression}" resolved to ${typeof resolvedValue}${
+            resolvedValue === null
+              ? ' (null)'
+              : resolvedValue === undefined
+              ? ' (undefined)'
+              : `: ${JSON.stringify(resolvedValue).substring(0, 100)}${
+                  JSON.stringify(resolvedValue).length > 100 ? '...' : ''
+                }`
+          }. ` +
+          `Please ensure the expression references an array variable or update the configuration.`
       );
     }
 
