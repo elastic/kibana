@@ -11,6 +11,12 @@ workflow:
         unit: day
     - type: manual
   inputs:
+    - name: days_to_plan
+      type: array
+      items: string
+      required: true
+      minItems: 1
+      default: ["monday", "tuesday"]
   consts:
     - name: jamf-server-url
   steps:

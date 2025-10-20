@@ -361,7 +361,7 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
 };
 
 /* --- Inputs --- */
-export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice']);
+export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
 
 const WorkflowInputBaseSchema = z.object({
   name: z.string(),
@@ -391,11 +391,21 @@ const WorkflowInputChoiceSchema = WorkflowInputBaseSchema.extend({
   options: z.array(z.string()),
 });
 
-export const WorkflowInputSchema = z.discriminatedUnion('type', [
+const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
+  type: z.literal('array'),
+  items: z.enum(['string', 'number', 'boolean']).optional(),
+  minItems: z.number().int().nonnegative().optional(),
+  maxItems: z.number().int().nonnegative().optional(),
+  // validate default later based on items; allow omission
+  default: z.array(z.any()).optional(),
+});
+
+export const WorkflowInputSchema = z.union([
   WorkflowInputStringSchema,
   WorkflowInputNumberSchema,
   WorkflowInputBooleanSchema,
   WorkflowInputChoiceSchema,
+  WorkflowInputArraySchema,
 ]);
 
 /* --- Consts --- */
@@ -507,7 +517,16 @@ export const WorkflowContextSchema = z.object({
   event: EventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
-  inputs: z.record(z.union([z.string(), z.number(), z.boolean()])).optional(),
+  inputs: z
+    .record(
+      z.union([
+        z.string(),
+        z.number(),
+        z.boolean(),
+        z.array(z.union([z.string(), z.number(), z.boolean()])),
+      ])
+    )
+    .optional(),
   consts: z.record(z.string(), z.any()).optional(),
   now: z.date().optional(),
 });

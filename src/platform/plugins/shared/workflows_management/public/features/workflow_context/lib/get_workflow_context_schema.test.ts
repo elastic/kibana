@@ -43,6 +43,9 @@ describe('getWorkflowContextSchema', () => {
         { name: 'test2', type: 'number' },
         { name: 'test3', type: 'boolean' },
         { name: 'test4', type: 'choice', options: ['option1', 'option2'] },
+        { name: 'test5', type: 'array', items: 'string', minItems: 1 },
+        { name: 'test6', type: 'array', items: 'number' },
+        { name: 'test7', type: 'array', items: 'boolean', maxItems: 2 },
       ],
       consts: {},
     });
@@ -54,6 +57,9 @@ describe('getWorkflowContextSchema', () => {
           test2: z.number(),
           test3: z.boolean(),
           test4: z.enum(['option1', 'option2']),
+          test5: z.array(z.string()).min(1),
+          test6: z.array(z.number()),
+          test7: z.array(z.boolean()).max(2),
         }),
         consts: z.object({}),
       })

@@ -42,6 +42,15 @@ const generateField = (input: InputType) => {
     case 'choice':
       field = z.enum(input.options as [string, ...string[]]);
       break;
+    case 'array': {
+      const elemMap = { string: z.string(), number: z.number(), boolean: z.boolean() } as const;
+      const itemType = (input as any).items || 'string';
+      let arr = z.array(elemMap[itemType as keyof typeof elemMap]);
+      if ((input as any).minItems != null) arr = arr.min((input as any).minItems);
+      if ((input as any).maxItems != null) arr = arr.max((input as any).maxItems);
+      field = arr;
+      break;
+    }
     default:
       field = z.any();
       break;

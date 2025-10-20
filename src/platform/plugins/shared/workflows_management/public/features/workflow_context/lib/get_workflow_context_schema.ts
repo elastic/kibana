@@ -42,6 +42,19 @@ export function getWorkflowContextSchema(definition: WorkflowYaml) {
                 valueSchema = z.union(literals);
               }
               break;
+            case 'array': {
+              const elemMap = {
+                string: z.string(),
+                number: z.number(),
+                boolean: z.boolean(),
+              } as const;
+              const itemType = (input as any).items || 'string';
+              let schema = z.array(elemMap[itemType as keyof typeof elemMap]);
+              if ((input as any).minItems != null) schema = schema.min((input as any).minItems);
+              if ((input as any).maxItems != null) schema = schema.max((input as any).maxItems);
+              valueSchema = schema;
+              break;
+            }
             default:
               valueSchema = z.any();
               break;

@@ -32,6 +32,15 @@ const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputS
             ? z.enum(input.options as [string, ...string[]])
             : z.enum(input.options as [string, ...string[]]).optional();
           break;
+        case 'array': {
+          const typeMap = { string: z.string(), number: z.number(), boolean: z.boolean() } as const;
+          const itemType = (input as any).items || 'string';
+          let arr = z.array(typeMap[itemType as keyof typeof typeMap]);
+          if ((input as any).minItems != null) arr = arr.min((input as any).minItems);
+          if ((input as any).maxItems != null) arr = arr.max((input as any).maxItems);
+          acc[input.name] = input.required ? arr : arr.optional();
+          break;
+        }
       }
       return acc;
     }, {} as Record<string, z.ZodType>)
@@ -51,6 +60,16 @@ const defaultWorkflowInputsMappings: Record<string, any> = {
   number: 0,
   boolean: false,
   choice: (input: any) => `Select an option: ${input.options.join(', ')}`,
+  array: (input: any) => {
+    const placeholderByItem: Record<string, any> = {
+      string: 'Enter a string',
+      number: 0,
+      boolean: false,
+    };
+    const itemType = input.items || 'string';
+    const base = placeholderByItem[itemType] ?? 'Enter a value';
+    return [base];
+  },
 };
 
 const getDefaultWorkflowInput = (definition: WorkflowYaml): string => {
