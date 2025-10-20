@@ -176,7 +176,7 @@ test.describe('Onboarding UI Validation', () => {
     }
   );
 
-  test('keyboard functionality', { tag: ['@ess'] }, async ({ page }) => {
+  test('keyboard functionality', { tag: ['@ess', '@svlOblt'] }, async ({ page }) => {
     // this element is not on the page and should throw an error with a useful message
     // await page.keyTo('[data-test-subj="fake-test-subject"]');
 

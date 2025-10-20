@@ -9,6 +9,7 @@
 
 import type { Page } from '@playwright/test';
 import { test as base } from '@playwright/test';
+import { keyToElement } from '../../../../utils';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
 import type { ScoutPage } from '.';
 import type { KibanaUrl, ScoutLogger } from '../../worker';
@@ -33,6 +34,10 @@ export const scoutPageParallelFixture = base.extend<
     // Overriding navigation to specific Kibana apps: url should respect the Kibana Space id
     extendedPage.gotoApp = (appName: string, pathOptions?: PathOptions) =>
       page.goto(kbnUrl.app(appName, { space: scoutSpace.id, pathOptions }));
+    // Method to press a key until an element with the provided selector is in focus.
+    extendedPage.keyTo = async (selector: string, key: string = 'Tab') => {
+      return await keyToElement(page, selector, key);
+    };
 
     log.serviceLoaded(`scoutPage`);
     await use(extendedPage);
