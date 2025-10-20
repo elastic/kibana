@@ -53,96 +53,57 @@ export default async function ({ readConfigFile }) {
     },
 
     apps: {
-      apiKeys: {
-        pathname: '/app/management/security/api_keys',
+      kibana: {
+        pathname: '/app/kibana',
       },
-      console: {
-        pathname: '/app/dev_tools',
-        hash: '/console',
-      },
-      connectors: {
-        pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors/',
-      },
-      context: {
-        pathname: '/app/discover',
-        hash: '/context',
-      },
-      dashboard: {
-        pathname: '/app/dashboards',
-        hash: '/list',
+      status_page: {
+        pathname: '/status',
       },
       discover: {
         pathname: '/app/discover',
         hash: '/',
       },
+      context: {
+        pathname: '/app/discover',
+        hash: '/context',
+      },
+      visualize: {
+        pathname: '/app/visualize',
+        hash: '/',
+      },
+      dashboard: {
+        pathname: '/app/dashboards',
+        hash: '/list',
+      },
+      management: {
+        pathname: '/app/management',
+      },
       filesManagement: {
         pathname: '/app/management/kibana/filesManagement',
       },
-      fleet: {
-        pathname: '/app/fleet',
+      /** @obsolete "management" should be instead of "settings" **/
+      settings: {
+        pathname: '/app/management',
+      },
+      console: {
+        pathname: '/app/dev_tools',
+        hash: '/console',
       },
       home: {
         pathname: '/app/home',
         hash: '/',
       },
-      grokDebugger: {
-        pathname: '/app/dev_tools',
-        hash: '/grokdebugger',
+      observabilityCases: {
+        pathname: '/app/observability/cases',
       },
-      indexLifecycleManagement: {
-        pathname: '/app/management/data/index_lifecycle_management',
-      },
-      indexManagement: {
-        pathname: '/app/management/data/index_management',
+      fleet: {
+        pathname: '/app/fleet',
       },
       integrations: {
         pathname: '/app/integrations',
       },
       kibana_overview: {
         pathname: '/app/kibana_overview',
-      },
-      login: {
-        pathname: '/login',
-      },
-      logstashPipelines: {
-        pathname: '/app/management/ingest/pipelines',
-      },
-      management: {
-        pathname: '/app/management',
-      },
-      painlessLab: {
-        pathname: '/app/dev_tools',
-        hash: '/painless_lab',
-      },
-      remoteClusters: {
-        pathname: '/app/management/data/remote_clusters',
-      },
-      searchProfiler: {
-        pathname: '/app/dev_tools',
-        hash: '/searchprofiler',
-      },
-      /** @obsolete "management" should be instead of "settings" **/
-      settings: {
-        pathname: '/app/management',
-      },
-      snapshotRestore: {
-        pathname: '/app/management/data/snapshot_restore',
-      },
-      spacesManagement: {
-        pathname: '/app/management/kibana/spaces',
-      },
-      spaceSelector: {
-        pathname: '/',
-      },
-      status_page: {
-        pathname: '/status',
-      },
-      transform: {
-        pathname: '/app/management/data/transform',
-      },
-      visualize: {
-        pathname: '/app/visualize',
-        hash: '/',
       },
     },
     junit: {
