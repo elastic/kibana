@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiIconTip } from '@elastic/eui';
 import { PrivilegesWarningIconWrapper } from '../../../../insufficient_privileges/insufficient_privileges';
@@ -15,16 +14,14 @@ import { formatBytes } from '../../helpers/format_bytes';
 import type { EnhancedFailureStoreStats } from '../../hooks/use_data_stream_stats';
 
 export const IngestionCard = ({
-  definition,
+  hasPrivileges,
   stats,
   statsError,
 }: {
-  definition: Streams.ingest.all.GetResponse;
+  hasPrivileges: boolean;
   stats?: EnhancedFailureStoreStats;
   statsError?: Error;
 }) => {
-  const hasPrivileges = definition.privileges?.manage_failure_store;
-
   const title = (
     <FormattedMessage
       id="xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.title"

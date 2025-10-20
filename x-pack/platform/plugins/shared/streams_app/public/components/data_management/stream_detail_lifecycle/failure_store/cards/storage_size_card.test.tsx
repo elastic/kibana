@@ -9,16 +9,11 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { StorageSizeCard } from './storage_size_card';
 
-const makeDefinition = (manage = true) =>
-  ({
-    privileges: { manage_failure_store: manage },
-  } as any);
-
 describe('StorageSizeCard', () => {
   it('renders formatted size and documents when stats + privileges present', () => {
     render(
       <StorageSizeCard
-        definition={makeDefinition(true)}
+        hasPrivileges={true}
         stats={{ size: 2048, count: 321, bytesPerDay: 0, bytesPerDoc: 0 }}
       />
     );
@@ -35,7 +30,7 @@ describe('StorageSizeCard', () => {
   });
 
   it('shows dash for size and docs when stats missing', () => {
-    render(<StorageSizeCard definition={makeDefinition(true)} />);
+    render(<StorageSizeCard hasPrivileges={true} />);
     expect(screen.getByTestId('failureStoreStorageSize-metric')).toBeInTheDocument();
     expect(screen.getByTestId('failureStoreStorageSize-metric')).toHaveTextContent('-');
     expect(screen.getByTestId('failureStoreStorageSize-metric-subtitle')).toHaveTextContent(
@@ -46,7 +41,7 @@ describe('StorageSizeCard', () => {
   it('shows dash when statsError present even if stats exist', () => {
     render(
       <StorageSizeCard
-        definition={makeDefinition(true)}
+        hasPrivileges={true}
         stats={{ size: 4096, count: 10, bytesPerDay: 0, bytesPerDoc: 0 }}
         statsError={new Error('boom')}
       />
@@ -61,17 +56,16 @@ describe('StorageSizeCard', () => {
   it('shows warning icon when lacking privileges', () => {
     render(
       <StorageSizeCard
-        definition={makeDefinition(false)}
+        hasPrivileges={false}
         stats={{ size: 100, count: 5, bytesPerDay: 0, bytesPerDoc: 0 }}
       />
     );
     expect(screen.getByTestId('failureStoreStorageSize-metric')).toBeInTheDocument();
-    // Should show warning icons when lacking privileges
     expect(screen.getByTestId('streamsInsufficientPrivileges-storageSize')).toBeInTheDocument();
   });
 
   it('shows dash if size present but count missing', () => {
-    render(<StorageSizeCard definition={makeDefinition(true)} stats={{ size: 512 } as any} />);
+    render(<StorageSizeCard hasPrivileges={true} stats={{ size: 512 } as any} />);
     expect(screen.getByTestId('failureStoreStorageSize-metric')).toBeInTheDocument();
     expect(screen.getByTestId('failureStoreStorageSize-metric')).toHaveTextContent(/512(\.0)?\s?B/);
     expect(screen.getByTestId('failureStoreStorageSize-metric-subtitle')).toHaveTextContent(

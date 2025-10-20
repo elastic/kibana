@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
 import { EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BaseMetricCard } from '../../common/base_metric_card';
@@ -15,17 +14,18 @@ import { PrivilegesWarningIconWrapper } from '../../../../insufficient_privilege
 import type { EnhancedDataStreamStats } from '../../hooks/use_data_stream_stats';
 
 export const IngestionCard = ({
-  definition,
+  canManageFailureStore,
+  hasMonitorPrivileges,
   stats,
   statsError,
 }: {
-  definition: Streams.ingest.all.GetResponse;
+  canManageFailureStore: boolean;
+  hasMonitorPrivileges: boolean;
   stats?: EnhancedDataStreamStats;
   statsError?: Error;
 }) => {
-  const inaccurateMetric = Boolean(
-    stats?.hasFailureStore && !definition.privileges?.manage_failure_store
-  );
+  // TODO: Check if canManageFailureStore and hasMonitorPrivileges params are needed
+  const inaccurateMetric = Boolean(stats?.hasFailureStore && !canManageFailureStore);
   const title = (
     <FormattedMessage
       id="xpack.streams.streamDetailLifecycle.ingestion.title"
@@ -65,10 +65,7 @@ export const IngestionCard = ({
   const metrics = [
     {
       data: (
-        <PrivilegesWarningIconWrapper
-          hasPrivileges={definition.privileges.monitor}
-          title="ingestionDaily"
-        >
+        <PrivilegesWarningIconWrapper hasPrivileges={hasMonitorPrivileges} title="ingestionDaily">
           {statsError ? '-' : stats?.bytesPerDay ? formatBytes(stats.bytesPerDay || 0) : '-'}
         </PrivilegesWarningIconWrapper>
       ),
@@ -82,10 +79,7 @@ export const IngestionCard = ({
     },
     {
       data: (
-        <PrivilegesWarningIconWrapper
-          hasPrivileges={definition.privileges.monitor}
-          title="ingestionMonthly"
-        >
+        <PrivilegesWarningIconWrapper hasPrivileges={hasMonitorPrivileges} title="ingestionMonthly">
           {statsError ? '-' : stats?.bytesPerDay ? formatBytes((stats.bytesPerDay || 0) * 30) : '-'}
         </PrivilegesWarningIconWrapper>
       ),

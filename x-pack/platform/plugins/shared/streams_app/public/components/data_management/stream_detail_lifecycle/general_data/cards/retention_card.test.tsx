@@ -71,8 +71,7 @@ describe('RetentionCard', () => {
     });
 
     it('shows inherit label for wired child inheriting', () => {
-      // Build a minimal valid wired stream GetResponse so Streams.WiredStream.GetResponse.is(definition) passes
-      const definition: any = {
+      const definition: Streams.WiredStream.GetResponse = {
         stream: {
           name: 'logs-test.child',
           description: '',
@@ -84,7 +83,7 @@ describe('RetentionCard', () => {
           },
         },
         // Effective lifecycle for wired streams must include a `from` field
-        effective_lifecycle: { ilm: { policy: 'my-ilm-policy' }, from: 'logs-test' },
+        effective_lifecycle: { ilm: { policy: 'test-policy' }, from: 'logs-test' },
         effective_settings: {},
         inherited_fields: {},
         dashboards: [],
@@ -93,35 +92,35 @@ describe('RetentionCard', () => {
         privileges: {
           manage: true,
           monitor: true,
-          // lifecycle privilege is the only one the component actually checks, but the schema requires all
           lifecycle: true,
           simulate: true,
           text_structure: true,
           read_failure_store: true,
           manage_failure_store: true,
+          view_index_metadata: true,
         },
       };
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
       expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent(
-        'Inherit from parent'
+        'ILM policy · Inherit from parent'
       );
     });
     it('shows override label for non-inheriting wired child', () => {
       // Non-inheriting wired stream: ingest.lifecycle is not inherit, effective lifecycle still ILM
-      const definition: any = {
+      const definition: Streams.WiredStream.GetResponse = {
         stream: {
           name: 'logs-test.child',
           description: '',
           ingest: {
-            lifecycle: { dsl: { data_retention: '30d' } }, // override -> should show "Override parent"
+            lifecycle: { ilm: { policy: 'test-policy' } }, // override -> should show "Override parent"
             processing: { steps: [] },
             settings: {},
             wired: { fields: {}, routing: [] },
           },
         },
-        effective_lifecycle: { ilm: { policy: 'my-ilm-policy' }, from: 'logs-test' },
+        effective_lifecycle: { ilm: { policy: 'test-policy' }, from: 'logs-test' },
         effective_settings: {},
         inherited_fields: {},
         dashboards: [],
@@ -135,12 +134,15 @@ describe('RetentionCard', () => {
           text_structure: true,
           read_failure_store: true,
           manage_failure_store: true,
+          view_index_metadata: true,
         },
       };
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
-      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent('Override parent');
+      expect(screen.getByTestId('retention-metric-subtitle')).toHaveTextContent(
+        'ILM policy · Override parent'
+      );
     });
   });
 

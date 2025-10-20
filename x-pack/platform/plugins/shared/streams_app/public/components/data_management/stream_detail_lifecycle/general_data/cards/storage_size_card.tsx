@@ -9,33 +9,30 @@ import React from 'react';
 import { EuiIconTip, formatNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Streams } from '@kbn/streams-schema';
 import { BaseMetricCard } from '../../common/base_metric_card';
 import { formatBytes } from '../../helpers/format_bytes';
 import type { DataStreamStats } from '../../hooks/use_data_stream_stats';
 import { PrivilegesWarningIconWrapper } from '../../../../insufficient_privileges/insufficient_privileges';
 
 export const StorageSizeCard = ({
-  definition,
+  hasMonitorPrivilegas,
+  canManageFailureStore,
   stats,
   statsError,
 }: {
-  definition: Streams.ingest.all.GetResponse;
+  hasMonitorPrivilegas: boolean;
+  canManageFailureStore: boolean;
   stats?: DataStreamStats;
   statsError?: Error;
 }) => {
-  const hasPrivileges = definition.privileges?.monitor ?? false;
   const metric = [
     {
       data: (
-        <PrivilegesWarningIconWrapper
-          hasPrivileges={definition.privileges.monitor}
-          title="storageSize"
-        >
+        <PrivilegesWarningIconWrapper hasPrivileges={hasMonitorPrivilegas} title="storageSize">
           {statsError || !stats || !stats.sizeBytes ? '-' : formatBytes(stats.sizeBytes)}
         </PrivilegesWarningIconWrapper>
       ),
-      subtitle: hasPrivileges
+      subtitle: hasMonitorPrivilegas
         ? i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.docs', {
             defaultMessage: '{totalDocs} documents',
             values: {
@@ -47,9 +44,7 @@ export const StorageSizeCard = ({
     },
   ];
 
-  const inaccurateMetric = Boolean(
-    stats?.hasFailureStore && !definition.privileges?.manage_failure_store
-  );
+  const inaccurateMetric = Boolean(stats?.hasFailureStore && !canManageFailureStore);
   const title = (
     <FormattedMessage
       id="xpack.streams.streamDetailLifecycle.storageSize.title"
@@ -62,6 +57,7 @@ export const StorageSizeCard = ({
             content={i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.tooltip', {
               defaultMessage: 'The storage size includes the failure store.',
             })}
+            data-test-subj="inaccurateMetricTooltip"
           />
         ),
       }}
