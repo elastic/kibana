@@ -36,8 +36,8 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup> {
 
     return {
       getCpsEnabled: async () => {
-        const config = await firstValueFrom(config$);
-        return config.cpsEnabled;
+        const { cpsEnabled } = await firstValueFrom(config$);
+        return cpsEnabled;
       },
     };
   }
