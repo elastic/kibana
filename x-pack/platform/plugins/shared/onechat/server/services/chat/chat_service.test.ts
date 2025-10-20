@@ -9,12 +9,12 @@
 import {
   createConversationMock$,
   executeAgentMock$,
-  getConversationMock$,
-  conversationExistsMock$,
+  getConversationMock,
+  conversationExistsMock,
   updateConversationMock$,
-  generateTitleMock$,
+  generateTitleMock,
   getChatModelMock$,
-  resolveSelectedConnectorIdMock,
+  resolveServicesMock,
 } from './chat_service.test.mocks';
 import { ChatEventType } from '@kbn/onechat-common';
 

@@ -16,3 +16,4 @@ export {
   createConversation$,
 } from './conversations';
 export { convertErrors } from './convert_errors';
+export { resolveServices } from './resolve_services';

@@ -30,11 +30,11 @@ import {
   conversationExists,
   updateConversation$,
   createConversation$,
+  resolveServices,
   convertErrors,
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import type { ChatService, ChatConverseParams } from './types';
-import { resolveServices } from './resolve_services';
 
 interface ChatServiceDeps {
   logger: Logger;
