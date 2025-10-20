@@ -123,16 +123,6 @@ export const allowedExperimentalValues = Object.freeze({
   microsoftDefenderEndpointDataInAnalyzerEnabled: true,
 
   /**
-   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
-   */
-  malwareOnWriteScanOptionAvailable: true,
-
-  /**
-   * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
-   */
-  unifiedManifestEnabled: true,
-
-  /**
    * Enables the new modal for the value list items
    */
   valueListItemsModalEnabled: true,
@@ -210,11 +200,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   responseActionsMSDefenderEndpointEnabled: true,
 
-  /**
-   * Enables banner for informing users about changes in data collection.
-   */
-  eventCollectionDataReductionBannerEnabled: true,
-
   /** Enables new Data View Picker */
   newDataViewPickerEnabled: true,
 
@@ -233,7 +218,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Trusted Devices artifact management for device control protections.
    * Allows users to manage trusted USB and external devices
    */
-  trustedDevices: false,
+  trustedDevices: true,
 
   /**
    * Enables the ability to import and migration dashboards through automatic migration service
