@@ -31,8 +31,6 @@ export const ReusableCloudConnectorForm: React.FC<{
         />
       );
     case AZURE_PROVIDER:
-      // TODO: Implement Azure cloud connector forms
-      return null;
     case 'gcp':
       // TODO: Implement GCP cloud connector forms
       return null;

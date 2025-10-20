@@ -496,4 +496,46 @@ describe('CloudConnectorSetup', () => {
       expect(mockNewCloudConnectorForm).toHaveBeenCalled();
     });
   });
+
+  describe('Azure', () => {
+    const AZURE_PROVIDER = 'azure';
+
+    it('should render NewCloudConnectorForm when feature is enabled and provider is azure', () => {
+      mockIsCloudConnectorReusableEnabled.mockReturnValue(true);
+      setupMocks([]);
+
+      renderComponent({ cloudProvider: AZURE_PROVIDER });
+
+      // Azure should render NewCloudConnectorForm even when reusable feature is enabled
+      expect(mockNewCloudConnectorForm).toHaveBeenCalled();
+      expect(mockNewCloudConnectorForm).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cloudProvider: AZURE_PROVIDER,
+          credentials: {},
+          setCredentials: mockUpdatePolicyWithNewCredentials,
+        }),
+        {}
+      );
+    });
+
+    it('should not render tabs when feature is enabled and provider is azure', () => {
+      mockIsCloudConnectorReusableEnabled.mockReturnValue(true);
+      setupMocks([]);
+
+      renderComponent({ cloudProvider: AZURE_PROVIDER });
+
+      // Azure bypasses tabs - CloudConnectorTabs should not be rendered
+      expect(mockCloudConnectorTabs).not.toHaveBeenCalled();
+    });
+
+    it('should not render tabs when feature is disabled and provider is azure', () => {
+      mockIsCloudConnectorReusableEnabled.mockReturnValue(false);
+      setupMocks([]);
+
+      renderComponent({ cloudProvider: AZURE_PROVIDER });
+
+      // CloudConnectorTabs should not be rendered when feature is disabled
+      expect(mockCloudConnectorTabs).not.toHaveBeenCalled();
+    });
+  });
 });

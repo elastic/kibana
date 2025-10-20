@@ -80,7 +80,6 @@ import type {
   PreconfiguredInputs,
   CloudProvider,
   CloudConnector,
-  CloudConnectorVars,
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
   PackagePolicyConfigRecord,
@@ -276,7 +275,7 @@ const extractPackagePolicyVars = (
   cloudProvider: CloudProvider,
   packagePolicy: NewPackagePolicy,
   logger: Logger
-): CloudConnectorVars | undefined => {
+): AwsCloudConnectorVars | undefined => {
   logger.get('extract package policy vars');
 
   if (packagePolicy.supports_cloud_connector && cloudProvider === 'aws') {

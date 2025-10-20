@@ -9,6 +9,10 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
+import {
+  AZURE_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ,
+  AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ,
+} from '@kbn/cloud-security-posture-common';
 import type { CloudConnectorFormProps, CloudSetupForCloudConnector } from '../types';
 import { AzureArmTemplateGuide } from './azure_arm_template_guide';
 import {
@@ -78,7 +82,7 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
     <>
       <EuiAccordion
         id="armTemplateAccordianInstructions"
-        data-test-subj={''}
+        data-test-subj={AZURE_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ}
         buttonContent={<EuiLink>{'Steps to create Managed User Identity in Azure'}</EuiLink>}
         paddingSize="l"
         initialIsOpen={true}
@@ -89,7 +93,7 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
       {armTemplateUrl && (
         <>
           <EuiButton
-            data-test-subj="launchArmTemplateAgentlessButton"
+            data-test-subj={AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ}
             target="_blank"
             iconSide="left"
             iconType="launch"

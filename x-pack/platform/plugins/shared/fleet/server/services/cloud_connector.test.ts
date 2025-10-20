@@ -483,7 +483,14 @@ describe('CloudConnectorService', () => {
       expect(result.name).toEqual('updated-name');
       expect(result.id).toEqual('cloud-connector-123');
       expect(result.vars?.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/OriginalRole');
-      expect(result.vars?.external_id?.value?.id).toEqual('ORIGINALEXTERNALID12');
+
+      const externalIdValue = result.vars?.external_id?.value;
+      expect(externalIdValue).toHaveProperty('id');
+
+      // check is for type checking, the previous expectation would fail guarateeing one would fail
+      if (externalIdValue && typeof externalIdValue === 'object' && 'id' in externalIdValue) {
+        expect(externalIdValue.id).toEqual('ORIGINALEXTERNALID12');
+      }
     });
 
     it('should update cloud connector vars successfully', async () => {
@@ -527,7 +534,14 @@ describe('CloudConnectorService', () => {
       );
 
       expect(result.vars?.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/UpdatedRole');
-      expect(result.vars?.external_id?.value?.id).toEqual('UPDATEDEXTERNALID123');
+
+      const externalIdValue = result.vars?.external_id?.value;
+      expect(externalIdValue).toHaveProperty('id');
+
+      // check is for type checking, the previous expectation would fail guarateeing one would fail
+      if (externalIdValue && typeof externalIdValue === 'object' && 'id' in externalIdValue) {
+        expect(externalIdValue.id).toEqual('UPDATEDEXTERNALID123');
+      }
     });
 
     it('should update both name and vars successfully', async () => {
