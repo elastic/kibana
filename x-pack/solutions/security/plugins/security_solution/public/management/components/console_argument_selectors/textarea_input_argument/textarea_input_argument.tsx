@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
@@ -24,25 +26,40 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/types';
-import type { CommandArgumentValueSelectorProps } from '../../console/types';
+import type { CommandArgumentValueSelectorProps, SupportedArguments } from '../../console/types';
 
 interface TextareaInputArgumentState {
   isPopoverOpen: boolean;
 }
 
-interface TextareaInputArgumentProps
-  extends CommandArgumentValueSelectorProps<
+export interface TextareaInputArgumentProps<
+  /** List of arguments that the command supports and that the console parses by default */
+  TArgs extends SupportedArguments = any,
+  /** The `state` that is stored for Argument Selectors. See the full definition under the ` Command ` type */
+  TSelectorArgsState extends object = any
+> extends CommandArgumentValueSelectorProps<
     string,
     TextareaInputArgumentState,
-    EndpointCommandDefinitionMeta
+    EndpointCommandDefinitionMeta,
+    TArgs,
+    TSelectorArgsState
   > {
   width?: string;
-  openLabel?: string;
-  noInputEnteredMessage?: string;
-  textareaLabel?: string;
-  textareaPlaceholderLabel?: string;
-  helpIconLabel?: string;
+  /**
+   * Any help content to be made avaible in the popup. If defined, a help icon will
+   * be shown that allows user to open and display the help content
+   */
   helpContent?: React.ReactNode;
+  /** Label (`title`) given to the edit icon that is displayed in the console's input area */
+  openLabel?: string;
+  /** Message shown when no input has been entered by the user yet */
+  noInputEnteredMessage?: string;
+  /** Label to display above textarea. Defaults to the console's command Argument name */
+  textareaLabel?: string;
+  /** Placeholder text in the textarea */
+  textareaPlaceholderLabel?: string;
+  /** Help icon `title` and `aria-label` label */
+  helpIconLabel?: string;
 }
 
 const OPEN_INPUT = i18n.translate(
@@ -114,6 +131,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
         .help-container {
           width: 25rem;
           word-break: break-word;
+          white-space: pre-wrap;
           height: var(--height);
         }
       `;
@@ -212,6 +230,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
                       size="xs"
                       onClick={handleHelpOnClick}
                       isSelected={showHelpContent}
+                      title={helpIconLabel}
                       aria-label={helpIconLabel}
                     />
                   </EuiFlexItem>

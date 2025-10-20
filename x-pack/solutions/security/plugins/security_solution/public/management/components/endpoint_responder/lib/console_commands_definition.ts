@@ -62,6 +62,7 @@ import {
   MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS,
 } from '../../../common/translations';
 import { ScanActionResult } from '../command_render_components/scan_action';
+import { SentinelOneScriptInputParams } from '../../console_argument_selectors/script_input_params_selector';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {
@@ -719,6 +720,8 @@ const adjustCommandsForSentinelOne = ({
               { defaultMessage: 'Input arguments for the selected script' }
             ),
             mustHaveValue: 'non-empty-string',
+            SelectorComponent: SentinelOneScriptInputParams,
+            selectorShowTextValue: true,
           },
           ...commandCommentArgument(),
         };
