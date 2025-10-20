@@ -6,9 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstAllCommands } from '../../../types';
+import type { ESQLAstAllCommands, ESQLCommand } from '../../../types';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import { isColumn, isCommand } from '../../../ast/is';
+import { isColumn } from '../../../ast/is';
 import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import {
   getLastNonWhitespaceChar,
@@ -34,9 +34,9 @@ export async function autocomplete(
     return [pipeCompleteItem, commaCompleteItem];
   }
 
-  const alreadyDeclaredFields = command.args
+  const alreadyDeclaredFields = (command as ESQLCommand).args
     .filter(isColumn)
-    .map((arg) => (isCommand(arg) ? arg.name : ''));
+    .map((arg) => arg.name);
   const fieldSuggestions = (await callbacks?.getByType?.('any', alreadyDeclaredFields)) ?? [];
 
   return handleFragment(

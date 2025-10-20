@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mockContext } from '../../../__tests__/context_fixtures';
+import type { MockedICommandCallbacks } from '../../../__tests__/context_fixtures';
+import { getMockCallbacks, mockContext } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { parse } from '../../../parser';
 import type { ESQLCommand } from '../../../types';
@@ -15,7 +16,8 @@ import type { ESQLCommand } from '../../../types';
 const testSetAutocomplete = async (
   query: string,
   expectedSuggestions: string[],
-  cursorPosition?: number
+  cursorPosition?: number,
+  mockCallbacks: MockedICommandCallbacks = getMockCallbacks()
 ) => {
   const { root } = parse(query);
   const setCommand = root.header?.find((cmd) => cmd.name === 'set');
@@ -26,7 +28,7 @@ const testSetAutocomplete = async (
   const suggestions = await autocomplete(
     query,
     setCommand as unknown as ESQLCommand,
-    undefined,
+    mockCallbacks,
     mockContext,
     cursorPosition ?? query.length
   );
@@ -36,21 +38,57 @@ const testSetAutocomplete = async (
 };
 
 describe('SET Autocomplete', () => {
-  describe('Setting name suggestions', () => {
+  describe('Setting name suggestions -- Serverless', () => {
+    const mockCallbacks = { ...getMockCallbacks(), buildFlavor: 'serverless' as const };
+
     it('suggests available settings after SET command', async () => {
-      await testSetAutocomplete('SET ', ['project_routing = ']);
+      await testSetAutocomplete('SET ', ['project_routing = '], undefined, mockCallbacks);
     });
 
     it('suggests available settings with multiple spaces', async () => {
-      await testSetAutocomplete('SET   ', ['project_routing = ']);
+      await testSetAutocomplete('SET   ', ['project_routing = '], undefined, mockCallbacks);
     });
 
     it('suggests available settings with tab characters', async () => {
-      await testSetAutocomplete('SET\t', ['project_routing = ']);
+      await testSetAutocomplete('SET\t', ['project_routing = '], undefined, mockCallbacks);
     });
 
     it('suggests settings for partial setting name', async () => {
-      await testSetAutocomplete('SET project', ['project_routing = ']);
+      await testSetAutocomplete('SET project', ['project_routing = '], undefined, mockCallbacks);
+    });
+
+    it('suggests assignment operator after setting name', async () => {
+      await testSetAutocomplete('SET project_routing ', ['= '], undefined, mockCallbacks);
+    });
+  });
+
+  describe('Setting name suggestions -- Traditional', () => {
+    it('suggests no settings after SET command as there is none available yet', async () => {
+      await testSetAutocomplete('SET ', []);
+    });
+  });
+
+  describe('Setting value suggestions', () => {
+    it('suggests nothing if setting name is unknown', async () => {
+      await testSetAutocomplete('SET unknown_setting = ', []);
+    });
+
+    describe('Project routing setting', () => {
+      it('suggests common project routing values after assignment operator', async () => {
+        await testSetAutocomplete('SET project_routing = ', [
+          '"_alias: *";',
+          '"_alias:* AND NOT _alias:_origin";',
+          '"_alias:_origin";',
+        ]);
+      });
+
+      it('suggests common project routing values for partial input', async () => {
+        await testSetAutocomplete('SET project_routing = "_alias:', [
+          '"_alias: *";',
+          '"_alias:* AND NOT _alias:_origin";',
+          '"_alias:_origin";',
+        ]);
+      });
     });
   });
 
@@ -63,28 +101,12 @@ describe('SET Autocomplete', () => {
       await testSetAutocomplete('SET project_routing = "test"', [';\n']);
     });
 
-    it('suggests semicolon with newline after quoted value', async () => {
-      // Note: Single quotes might not parse as complete binary expression in all cases
-      await testSetAutocomplete("SET project_routing = 'test'", []);
-    });
-
     it('suggests semicolon with newline after boolean value', async () => {
       await testSetAutocomplete('SET project_routing = true', [';\n']);
     });
 
     it('suggests semicolon with newline after numeric value', async () => {
       await testSetAutocomplete('SET project_routing = 123', [';\n']);
-    });
-  });
-
-  // For now we don't suggest anything for settings values
-  describe('Incomplete expressions', () => {
-    it('suggests nothing for incomplete binary expression', async () => {
-      await testSetAutocomplete('SET project_routing = ', []);
-    });
-
-    it('suggests nothing for setting name followed by equals but no value', async () => {
-      await testSetAutocomplete('SET project_routing =', []);
     });
   });
 });

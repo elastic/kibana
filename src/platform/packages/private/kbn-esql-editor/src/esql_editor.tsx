@@ -598,6 +598,7 @@ const ESQLEditorInternal = function ESQLEditor({
       },
       getActiveProduct: () => core.pricing.getActiveProduct(),
       canCreateLookupIndex,
+      buildFlavor: kibana.services?.esql?.buildFlavor,
     };
     return callbacks;
   }, [
@@ -828,6 +829,7 @@ const ESQLEditorInternal = function ESQLEditor({
     return () => {
       model.current?.dispose();
       editor1ref.current?.dispose();
+      editorModel.current = undefined;
     };
   }, []);
 
