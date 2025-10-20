@@ -17,7 +17,7 @@ import { map } from 'rxjs';
 import type { StickyControlLayoutState } from '@kbn/controls-schemas';
 import { ACTION_CREATE_TIME_SLIDER } from './constants';
 
-export interface PublishesControlsLayout {
+interface PublishesControlsLayout {
   layout$: PublishingSubject<{
     controls: {
       [id: string]: StickyControlLayoutState;
