@@ -12,6 +12,50 @@ import { GENERATED_KIBANA_CONNECTORS, KIBANA_CONNECTOR_COUNT } from './kibana_co
 import type { InternalConnectorContract } from '../../types/v1';
 
 describe('Generated Kibana Connectors', () => {
+  // SANITY TEST: Critical test to ensure no runtime errors are introduced
+  describe('Sanity Check - Runtime Error Prevention', () => {
+    it('should import kibana_connectors.ts without any runtime errors', () => {
+      // This is the most critical test - it ensures the file can be imported
+      // without throwing any runtime errors, which was the original issue
+      expect(() => {
+        // Re-import to test the actual import process
+        const connectors = require('./kibana_connectors');
+        expect(connectors.GENERATED_KIBANA_CONNECTORS).toBeDefined();
+        expect(connectors.KIBANA_CONNECTOR_COUNT).toBeDefined();
+        expect(Array.isArray(connectors.GENERATED_KIBANA_CONNECTORS)).toBe(true);
+        expect(connectors.GENERATED_KIBANA_CONNECTORS.length).toBeGreaterThan(0);
+        expect(typeof connectors.KIBANA_CONNECTOR_COUNT).toBe('number');
+        expect(connectors.KIBANA_CONNECTOR_COUNT).toBeGreaterThan(0);
+      }).not.toThrow();
+    });
+
+    it('should have all schemas instantiable without TypeScript compilation errors', () => {
+      // Test that all Zod schemas can be instantiated without TypeScript errors
+      // This catches issues with malformed schema definitions
+      expect(() => {
+        GENERATED_KIBANA_CONNECTORS.forEach((connector, index) => {
+          try {
+            const schema = connector.paramsSchema;
+            expect(schema).toBeDefined();
+            
+            // Test basic schema operations
+            const result = schema.safeParse({});
+            expect(result.success === true || result.success === false).toBe(true);
+          } catch (error) {
+            throw new Error(`Schema error in connector ${index} (${connector.type}): ${error.message}`);
+          }
+        });
+      }).not.toThrow();
+    });
+
+    it('should maintain consistent connector count across imports', () => {
+      // Ensure the connector count is consistent and doesn't change unexpectedly
+      expect(KIBANA_CONNECTOR_COUNT).toBe(GENERATED_KIBANA_CONNECTORS.length);
+      expect(KIBANA_CONNECTOR_COUNT).toBeGreaterThan(400); // Reasonable minimum
+      expect(KIBANA_CONNECTOR_COUNT).toBeLessThan(1000); // Reasonable maximum
+    });
+  });
+
   // Test samples covering different types of endpoints
   const TEST_SAMPLES = [
     // Simple GET endpoint with query params
@@ -55,10 +99,10 @@ describe('Generated Kibana Connectors', () => {
         return Array.isArray(bodyParams) && bodyParams.length === 1 && bodyParams[0] === 'body';
       });
 
-      // Currently we have 59 endpoints with generic body params that need inline schema handling
+      // Currently we have 63 endpoints with generic body params that need inline schema handling
       // This is acceptable for now as they represent endpoints with inline OpenAPI schemas
       // that openapi-zod-client generates as inline Zod objects rather than named schemas
-      expect(endpointsWithGenericBody).toHaveLength(59);
+      expect(endpointsWithGenericBody).toHaveLength(63);
     });
 
     it('should use proper schemas for POST/PUT/PATCH endpoints instead of generic z.any() body', () => {

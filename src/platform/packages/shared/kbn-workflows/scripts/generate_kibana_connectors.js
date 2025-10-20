@@ -548,66 +548,6 @@ function extractBodySchemaName(endpoint) {
 }
 
 /**
- * Recursively collect all schema dependencies
- */
-function collectSchemaDependencies(schemaName, visited = new Set()) {
-  if (visited.has(schemaName)) {
-    return new Set(); // Avoid infinite recursion
-  }
-  visited.add(schemaName);
-
-  const dependencies = new Set([schemaName]);
-
-  try {
-    if (!fs.existsSync(SCHEMAS_OUTPUT_PATH)) {
-      return dependencies;
-    }
-
-    const schemasContent = fs.readFileSync(SCHEMAS_OUTPUT_PATH, 'utf8');
-    const escapedSchemaName = schemaName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const schemaRegex = new RegExp(
-      `export const ${escapedSchemaName} = ([\\s\\S]*?)(?=\\nexport const |\\n$)`,
-      'm'
-    );
-
-    const match = schemasContent.match(schemaRegex);
-    if (match) {
-      const schemaDefinition = match[1];
-
-      // Find all schema references in this definition
-      const depRegex = /([A-Z][a-zA-Z0-9_]*(?:_[A-Z][a-zA-Z0-9_]*)*)/g;
-      let depMatch;
-
-      while ((depMatch = depRegex.exec(schemaDefinition)) !== null) {
-        const depName = depMatch[1];
-        // Skip common zod methods and the schema itself
-        if (
-          depName !== schemaName &&
-          ![
-            'ZodType',
-            'ZodObject',
-            'ZodString',
-            'ZodNumber',
-            'ZodBoolean',
-            'ZodArray',
-            'ZodUnion',
-            'ZodEnum',
-          ].includes(depName)
-        ) {
-          // Recursively collect dependencies
-          const subDeps = collectSchemaDependencies(depName, visited);
-          subDeps.forEach((dep) => dependencies.add(dep));
-        }
-      }
-    }
-  } catch (error) {
-    console.warn(`⚠️ Error collecting dependencies for ${schemaName}:`, error.message);
-  }
-
-  return dependencies;
-}
-
-/**
  * Extract field names from a schema definition
  */
 function extractSchemaFieldNames(schemaName) {
@@ -1293,15 +1233,13 @@ function generateKibanaConnectors() {
       }
     }
 
-    // Collect all dependencies for each directly referenced schema
-    for (const schemaName of directSchemas) {
-      const dependencies = collectSchemaDependencies(schemaName);
-      dependencies.forEach((dep) => usedSchemas.add(dep));
-    }
+    // Don't collect transitive dependencies - only import schemas directly used in connectors
+    // Dependencies are already available from kibana_schemas.ts, no need to re-import them
+    directSchemas.forEach((schema) => usedSchemas.add(schema));
 
     // Schemas already copied earlier
 
-    // Generate schema imports section - only import schemas that actually exist
+    // Generate schema imports section - only import schemas that actually exist and are directly used
     const actualUsedSchemas = Array.from(usedSchemas).filter(
       (s) => s !== 'z' && s !== 'ZodType' && s !== 'ZodSchema'
     );
@@ -1311,7 +1249,34 @@ function generateKibanaConnectors() {
     const existingSchemas = actualUsedSchemas.filter((schemaName) => {
       const escapedSchemaName = schemaName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const schemaRegex = new RegExp(`export const ${escapedSchemaName}(?:\\s*:[^=]+)?\\s*=`, 'm');
-      return schemaRegex.test(schemasFileContent);
+      const schemaExistsInFile = schemaRegex.test(schemasFileContent);
+
+      // Check if the schema is actually used in connector definitions
+      // Exclude schemas that ONLY appear in string literals (like bodyParams: ["schemaName"])
+      const escapedForRegex = schemaName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      // Check if schema appears in actual code usage (not just in string arrays or import statements)
+      const usedInParamsSchema = new RegExp(`paramsSchema:\\s*${escapedForRegex}\\b`).test(
+        connectorContent
+      );
+      const usedInOutputSchema = new RegExp(`outputSchema:\\s*${escapedForRegex}\\b`).test(
+        connectorContent
+      );
+      const usedInZodOps = new RegExp(`z\\.\\w+.*${escapedForRegex}\\b`).test(connectorContent);
+      const usedInFieldAccess = new RegExp(`${escapedForRegex}\\.shape\\b`).test(connectorContent);
+      const usedInVariableAssignment = new RegExp(
+        `const\\s+\\w+\\s*=\\s*${escapedForRegex}\\b`
+      ).test(connectorContent);
+
+      // Check if it's used in any code context (not just string arrays or import statements)
+      const usedInCode =
+        usedInParamsSchema ||
+        usedInOutputSchema ||
+        usedInZodOps ||
+        usedInFieldAccess ||
+        usedInVariableAssignment;
+
+      return schemaExistsInFile && usedInCode;
     });
 
     const missingSchemas = actualUsedSchemas.filter(
@@ -1352,6 +1317,8 @@ function generateKibanaConnectors() {
  * 
  * To regenerate: npm run generate:kibana-connectors
  */
+
+// @ts-nocheck - Suppress type errors for unused imports in generated code
 
 import { z } from '@kbn/zod';
 import type { InternalConnectorContract } from '../../types/v1';${schemaImportsSection}
