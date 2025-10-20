@@ -142,6 +142,7 @@ export class ElasticsearchService
       setCpsFeatureFlag: (enabled) => {
         this.cpsEnabled = enabled;
       },
+      getCpsFeatureFlag: () => this.cpsEnabled,
     };
   }
 
