@@ -34,4 +34,17 @@ EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --co
 
 # Repeatedly evaluate every example by specifying the number of repetitions
 EVALUATION_REPETITIONS=3 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
+
+# Enable scenario-grouped reporting (aggregates datasets by scenario prefix)
+SCENARIO_REPORTING=true EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
 ```
+
+### Evaluation Reporting
+
+The evaluation framework supports two reporting modes:
+
+- **Default (verbose)**: Shows detailed per-dataset statistics. Useful for comparing variations within scenarios (e.g., comparing "alerts: critical" vs "alerts: warning").
+- **Scenario-grouped** (`SCENARIO_REPORTING=true`): Aggregates datasets into scenario-level statistics. Useful for high-level overview across different scenarios (e.g., alerts, esql, apm).
+
+**Dataset Naming Convention**: For scenario-grouped reporting to work properly, datasets should follow the pattern `"scenario: dataset-name"` (e.g., "alerts: critical", "esql: simple queries"). Datasets not following this pattern will be grouped under "Other".
+When creating new test cases, follow the dataset naming format so the new evaluations are reported on correctly.

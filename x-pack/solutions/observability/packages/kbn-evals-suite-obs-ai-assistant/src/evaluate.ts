@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { evaluate as base } from '@kbn/evals';
+import { evaluate as base, createDefaultTerminalReporter } from '@kbn/evals';
 import { KnowledgeBaseClient } from './clients/knowledge_base_client';
 import { ConversationsClient } from './clients/conversations_client';
 import { ObservabilityAIAssistantEvaluationChatClient } from './chat_client';
@@ -68,8 +68,13 @@ export const evaluate = base.extend<
   ],
   reportModelScore: [
     async ({}, use) => {
-      // Override default reporter with scenario summary reporter specific to Obs AI Assistant
-      await use(createScenarioSummaryReporter());
+      const useScenarioReporting = process.env.SCENARIO_REPORTING === 'true';
+
+      if (useScenarioReporting) {
+        await use(createScenarioSummaryReporter());
+      } else {
+        await use(createDefaultTerminalReporter());
+      }
     },
     { scope: 'worker' },
   ],
