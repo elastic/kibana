@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { CopyElasticSearchDevToolsOption } from './copy_elastic_search_devtools_option';
+export { CopyElasticsearchDevToolsOption } from './copy_elasticsearch_devtools_option';
 export { CopyWorkflowStepOption } from './copy_workflow_step_option';

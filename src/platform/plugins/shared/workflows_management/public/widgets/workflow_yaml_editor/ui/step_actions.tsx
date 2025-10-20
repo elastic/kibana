@@ -21,7 +21,7 @@ import { useSelector } from 'react-redux';
 import { css } from '@emotion/react';
 import { RunStepButton } from './run_step_button';
 import { selectFocusedStepInfo } from '../lib/store';
-import { CopyElasticSearchDevToolsOption, CopyWorkflowStepOption } from './step_action_options';
+import { CopyElasticsearchDevToolsOption, CopyWorkflowStepOption } from './step_action_options';
 
 export interface StepActionsProps {
   onStepActionClicked?: (params: { stepId: string; actionType: string }) => void;
@@ -57,7 +57,7 @@ export const StepActions: React.FC<StepActionsProps> = ({ onStepActionClicked })
     return [
       ...[
         ...(focusedStepInfo.stepType.startsWith('elasticsearch.')
-          ? [<CopyElasticSearchDevToolsOption key="copy-as-console" onClick={closePopover} />]
+          ? [<CopyElasticsearchDevToolsOption key="copy-as-console" onClick={closePopover} />]
           : []),
         <CopyWorkflowStepOption key="copy-workflow-step" onClick={closePopover} />,
       ],
