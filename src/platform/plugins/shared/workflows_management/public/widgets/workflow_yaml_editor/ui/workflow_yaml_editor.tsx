@@ -308,44 +308,32 @@ export const WorkflowYAMLEditor = ({
         }, 0);
       }
 
-      // Setup Elasticsearch step providers if we have the required services
-      if (http && notifications) {
-        // Register Elasticsearch connector handler
-        const elasticsearchHandler = new ElasticsearchMonacoConnectorHandler({
-          http,
-          notifications,
-        });
-        registerMonacoConnectorHandler(elasticsearchHandler);
+      // Register Elasticsearch connector handler
+      const elasticsearchHandler = new ElasticsearchMonacoConnectorHandler({
+        http,
+        notifications,
+      });
+      registerMonacoConnectorHandler(elasticsearchHandler);
 
-        // Register Kibana connector handler
-        const kibanaHandler = new KibanaMonacoConnectorHandler({
-          http,
-          notifications,
-          kibanaHost: kibanaHost || window.location.origin,
-        });
-        registerMonacoConnectorHandler(kibanaHandler);
+      // Register Kibana connector handler
+      const kibanaHandler = new KibanaMonacoConnectorHandler({
+        http,
+        notifications,
+        kibanaHost: kibanaHost || window.location.origin,
+      });
+      registerMonacoConnectorHandler(kibanaHandler);
 
-        // Monaco YAML hover is now disabled via configuration (hover: false)
-        // The unified hover provider will handle all hover content including validation errors
+      // Monaco YAML hover is now disabled via configuration (hover: false)
+      // The unified hover provider will handle all hover content including validation errors
 
-        const genericHandler = new GenericMonacoConnectorHandler();
-        registerMonacoConnectorHandler(genericHandler);
+      const genericHandler = new GenericMonacoConnectorHandler();
+      registerMonacoConnectorHandler(genericHandler);
 
-        // Create unified providers
-        const providerConfig = {
-          getYamlDocument: () => yamlDocumentRef.current || null,
-          options: {
-            http,
-            notifications,
-            esHost,
-            kibanaHost: kibanaHost || window.location.origin,
-          },
-        };
-
-        // Register the unified hover provider for API documentation and other content
-        const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
-        disposablesRef.current.push(hoverDisposable);
-      }
+      // Register the unified hover provider for API documentation and other content
+      const hoverDisposable = registerUnifiedHoverProvider({
+        getYamlDocument: () => yamlDocumentRef.current,
+      });
+      disposablesRef.current.push(hoverDisposable);
 
       onMount?.(editor, monaco);
     },

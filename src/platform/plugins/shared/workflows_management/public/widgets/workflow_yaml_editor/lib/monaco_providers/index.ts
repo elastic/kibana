@@ -29,10 +29,6 @@ export {
 } from './provider_registry';
 
 // Unified providers
-export {
-  UnifiedHoverProvider,
-  createUnifiedHoverProvider,
-  registerUnifiedHoverProvider,
-} from './unified_hover_provider';
+export { UnifiedHoverProvider, registerUnifiedHoverProvider } from './unified_hover_provider';
 
 // REMOVED: UnifiedDecorationsProvider - no longer needed in new architecture
