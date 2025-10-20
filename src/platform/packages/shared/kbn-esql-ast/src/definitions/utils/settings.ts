@@ -12,18 +12,21 @@ import type { ISuggestionItem } from '../../commands_registry/types';
 import { settings } from '../generated/settings';
 
 export function getSettingsCompletionItems(isServerless?: boolean): ISuggestionItem[] {
-  return (
-    settings
-      // Filter out serverless-only settings if not in serverless mode, if not flavour is provided don't return serverlessOnly settings.
-      .filter((setting) => (isServerless ? setting.serverlessOnly : !setting.serverlessOnly))
-      .map((setting) =>
-        withAutoSuggest({
-          label: setting.name,
-          text: `${setting.name} = `,
-          kind: 'Reference',
-          detail: setting.description,
-          sortText: '1',
-        })
-      )
-  );
+  return settings
+    .filter((setting) => {
+      // if isServeless is not provided, return all settings.
+      if (isServerless === undefined) {
+        return true;
+      }
+      return isServerless ? setting.serverlessOnly : !setting.serverlessOnly;
+    })
+    .map((setting) =>
+      withAutoSuggest({
+        label: setting.name,
+        text: `${setting.name} = `,
+        kind: 'Reference',
+        detail: setting.description,
+        sortText: '1',
+      })
+    );
 }
