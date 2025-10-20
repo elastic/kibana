@@ -127,7 +127,7 @@ export class WorkflowContextManager {
    */
   public renderValueAccordingToContext<T>(obj: T): T {
     const context = this.getContext();
-    return this.renderValueRecursively(obj, context) as T;
+    return this.templateEngine.render(obj, context);
   }
 
   public readContextPath(propertyPath: string): { pathExists: boolean; value: any } {
@@ -264,47 +264,18 @@ export class WorkflowContextManager {
         stepState: Record<string, any> | undefined;
       }
     | undefined {
-    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
-    if (!latestStepExecution) {
-      return;
-    }
-
-    return {
-      runStepResult: {
-        input: latestStepExecution?.input,
-        output: latestStepExecution?.output,
-        error: latestStepExecution?.error,
-      },
-      stepState: latestStepExecution.state,
-    };
-  }
-
-  private renderValueRecursively(value: unknown, context: StepContext): unknown {
-    // Handle null and undefined
-    if (value === null || value === undefined) {
-      return value;
-    }
-
-    // Handle string values - render them using the template engine
-    if (typeof value === 'string') {
-      return this.templateEngine.render(value, context);
-    }
-
-    // Handle arrays - recursively render each element
-    if (Array.isArray(value)) {
-      return value.map((item) => this.renderValueRecursively(item, context));
-    }
-
-    // Handle objects - recursively render each property
-    if (typeof value === 'object') {
-      const renderedObject: Record<string, any> = {};
-      for (const [key, val] of Object.entries(value)) {
-        renderedObject[key] = this.renderValueRecursively(val, context);
+      const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
+      if (!latestStepExecution) {
+        return;
       }
-      return renderedObject;
-    }
 
-    // Return primitive values as-is (numbers, booleans, etc.)
-    return value;
-  }
+      return {
+        runStepResult: {
+          input: latestStepExecution?.input,
+          output: latestStepExecution?.output,
+          error: latestStepExecution?.error,
+        },
+        stepState: latestStepExecution.state,
+      };
+    }
 }
