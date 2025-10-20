@@ -22,6 +22,7 @@ import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
+import { TOO_MANY_AGENT_IDS } from '../../../common/translations/errors';
 import type {
   ActionResultsRequestOptions,
   ActionResultsStrategyResponse,
@@ -95,8 +96,9 @@ export const getActionResultsRoute = (
           if (requestedAgentIds && requestedAgentIds.length > 100) {
             return response.badRequest({
               body: {
-                message:
-                  'Too many agent IDs in URL (max 100). Either reduce the list or omit agentIds to query all agents from the action.',
+                statusCode: 400,
+                error: 'Bad Request',
+                message: TOO_MANY_AGENT_IDS,
               },
             });
           }
