@@ -598,6 +598,7 @@ const ESQLEditorInternal = function ESQLEditor({
       },
       getActiveProduct: () => core.pricing.getActiveProduct(),
       canCreateLookupIndex,
+      isServerless: Boolean(kibana.services?.esql?.isServerless),
     };
     return callbacks;
   }, [
