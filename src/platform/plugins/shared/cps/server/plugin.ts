@@ -26,7 +26,7 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup> {
   }
 
   public setup(core: CoreSetup) {
-    this.setCpsFeatureFlagAsync(core);
+    void this.setCpsFeatureFlagAsync(core);
     const { initContext, config$ } = this;
 
     // Register route only for serverless
