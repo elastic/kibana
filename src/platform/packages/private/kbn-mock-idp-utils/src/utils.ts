@@ -269,7 +269,7 @@ async function createUiamSessionTokens({
   const givenName = fullName ? fullName.split(' ')[0] : 'Test';
   const familyName = fullName ? fullName.split(' ').slice(1).join(' ') : 'User';
 
-  const { message, response } = await seedTestUser({
+  await seedTestUser({
     userId: username,
     organizationId,
     roleId: 'cloud-role-id',
@@ -309,7 +309,7 @@ async function createUiamSessionTokens({
 
       nbf: iat,
       // 1H
-      exp: iat + 60, // TODO this is set to 60s for easier testing, change back to 3600s (1H) later
+      exp: iat + 3600,
       iat,
       jti: randomBytes(16).toString('hex'),
     })

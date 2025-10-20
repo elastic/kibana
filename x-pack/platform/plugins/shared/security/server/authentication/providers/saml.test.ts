@@ -1833,5 +1833,63 @@ describe('SAMLAuthenticationProvider', () => {
         expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
       });
     });
+
+    describe('refresh token handling', () => {
+      it('succeeds if token from the state is expired, but has been successfully refreshed.', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const state = {
+          accessToken: 'expired-token',
+          refreshToken: 'valid-refresh-token',
+          realm: 'cloud-saml-kibana',
+        };
+
+        mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
+          new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
+        );
+
+        mockOptions.uiam?.refreshSessionTokens.mockResolvedValue({
+          accessToken: 'new-access-token',
+          refreshToken: 'new-refresh-token',
+        });
+
+        const mockedUIAMUser = mockAuthenticatedUser({
+          username: 'uiam_user',
+          authentication_realm: { name: 'uiam', type: 'uiam' },
+          lookup_realm: { name: 'uiam', type: 'uiam' },
+          authentication_provider: { type: 'saml', name: 'cloud-saml-kibana' },
+          authentication_type: 'token',
+        });
+
+        mockOptions.uiam?.authenticate.mockResolvedValue(mockedUIAMUser);
+
+        mockOptions.uiam?.getUserProfileGrant.mockReturnValue({
+          accessToken: 'new-access-token',
+          sharedSecret: 'some-secret',
+          type: 'uiamAccessToken',
+        });
+
+        await expect(provider.authenticate(request, state)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockedUIAMUser, {
+            authHeaders: { authorization: 'Bearer new-access-token' },
+            userProfileGrant: {
+              accessToken: 'new-access-token',
+              sharedSecret: 'some-secret',
+              type: 'uiamAccessToken',
+            },
+            state: {
+              accessToken: 'new-access-token',
+              refreshToken: 'new-refresh-token',
+              realm: 'cloud-saml-kibana',
+            },
+          })
+        );
+
+        expect(mockOptions.uiam?.refreshSessionTokens).toHaveBeenCalledTimes(1);
+        expect(mockOptions.uiam?.refreshSessionTokens).toHaveBeenCalledWith(state.refreshToken);
+        expect(mockOptions.uiam?.authenticate).toHaveBeenCalledWith('new-access-token');
+
+        expect(request.headers).not.toHaveProperty('authorization');
+      });
+    });
   });
 });

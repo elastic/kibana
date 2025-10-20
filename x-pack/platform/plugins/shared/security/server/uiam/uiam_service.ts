@@ -149,7 +149,7 @@ export class UiamService implements UiamServicePublic {
 
       // Map UIAM response to AuthenticationInfo
       return {
-        username: response.user_id,
+        username: response.user_id.toString(),
         email: response.email,
         full_name:
           response.first_name || response.last_name

@@ -820,7 +820,7 @@ export class Authenticator {
     const usernameHasChanged =
       isExistingSessionAuthenticated &&
       isNewSessionAuthenticated &&
-      authenticationResult.user!.username.toString() !== existingSessionValue!.username?.toString(); // TODO Why is one a number for UIAM?
+      authenticationResult.user!.username !== existingSessionValue!.username;
 
     // There are 3 cases when we SHOULD invalidate existing session and create a new one with
     // regenerated SID/AAD:

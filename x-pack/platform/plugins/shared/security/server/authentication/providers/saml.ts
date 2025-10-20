@@ -595,14 +595,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
-    this.logger.debug(`AccessToken via state: ${accessToken}`);
-
     const authHeaders: Record<string, string> | undefined = this.useUiam
       ? this.options.uiam?.getAuthenticationHeaders(accessToken)
       : { authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString() };
 
     try {
-      this.logger.debug('Just about to get User');
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via state.');

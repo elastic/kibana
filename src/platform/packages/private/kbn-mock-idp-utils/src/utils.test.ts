@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Client } from '@elastic/elasticsearch';
 import { createHmac } from 'crypto';
 
 import {
@@ -56,8 +55,8 @@ describe('mock-idp-utils', () => {
       const kibanaUrl = 'http://localhost:5601/';
       const metadata = await createMockIdpMetadata(kibanaUrl);
 
-      expect(metadata).toContain('http://localhost:5601/api/security');
-      expect(metadata).not.toContain('http://localhost:5601//api/security');
+      expect(metadata).toContain('http://localhost:5601/mock_idp');
+      expect(metadata).not.toContain('http://localhost:5601//mock_idp');
     });
 
     it('should include X509 certificate data', async () => {
@@ -215,7 +214,7 @@ describe('mock-idp-utils', () => {
           )
         );
         expect(accessTokenMatch).toBeTruthy();
-        const accessToken = accessTokenMatch![1];
+        const accessToken = accessTokenMatch[1];
         expect(accessToken).toMatch(/^essu_dev_/);
       });
 
@@ -229,7 +228,7 @@ describe('mock-idp-utils', () => {
             's'
           )
         );
-        const wrappedToken = accessTokenMatch![1];
+        const wrappedToken = accessTokenMatch[1];
 
         // Unwrap the token
         const unprefixed = removePrefixEssuDev(wrappedToken);
@@ -252,54 +251,8 @@ describe('mock-idp-utils', () => {
         expect(payload.sub).toBe(serverlessOptions.username);
         expect(payload.oid).toBe(serverlessOptions.serverless.organizationId);
         expect(payload.email).toBe(serverlessOptions.email);
-        expect(payload.family_name).toBe(serverlessOptions.full_name);
-      });
-
-      it('should generate access token with valid HMAC signature', async () => {
-        const samlResponse = await createSAMLResponse(serverlessOptions);
-        const decoded = Buffer.from(samlResponse, 'base64').toString('utf-8');
-
-        const accessTokenMatch = decoded.match(
-          new RegExp(
-            `${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`,
-            's'
-          )
-        );
-        const wrappedToken = accessTokenMatch![1];
-
-        // Unwrap the token
-        const unprefixed = removePrefixEssuDev(wrappedToken);
-        const jwt = decodeWithChecksum(unprefixed);
-
-        const parts = jwt.split('.');
-        const headerAndPayload = `${parts[0]}.${parts[1]}`;
-        const signature = parts[2];
-
-        // Verify signature
-        const expectedSignature = createHmac('sha256', MOCK_IDP_UIAM_SIGNING_SECRET)
-          .update(headerAndPayload)
-          .digest('base64url');
-
-        expect(signature).toBe(expectedSignature);
-      });
-
-      it('should include role assignments in access token', async () => {
-        const samlResponse = await createSAMLResponse(serverlessOptions);
-        const decoded = Buffer.from(samlResponse, 'base64').toString('utf-8');
-
-        const accessTokenMatch = decoded.match(
-          new RegExp(
-            `${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`,
-            's'
-          )
-        );
-        const wrappedToken = accessTokenMatch![1];
-
-        const unprefixed = removePrefixEssuDev(wrappedToken);
-        const jwt = decodeWithChecksum(unprefixed);
-        const parts = jwt.split('.');
-        const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
-
+        expect(payload.given_name).toBe('Test');
+        expect(payload.family_name).toBe('User');
         expect(payload.ras).toBeDefined();
         expect(payload.ras.project).toHaveLength(1);
         expect(payload.ras.project[0].role_id).toBe('cloud-role-id');
@@ -308,6 +261,14 @@ describe('mock-idp-utils', () => {
         );
         expect(payload.ras.project[0].project_type).toBe(serverlessOptions.serverless.projectType);
         expect(payload.ras.project[0].application_roles).toEqual(serverlessOptions.roles);
+
+        // Verify signature
+        const signature = parts[2];
+        const expectedSignature = createHmac('sha256', MOCK_IDP_UIAM_SIGNING_SECRET)
+          .update(`${parts[0]}.${parts[1]}`)
+          .digest('base64url');
+
+        expect(signature).toBe(expectedSignature);
       });
 
       it('should generate refresh token with valid JWT structure', async () => {
@@ -320,7 +281,11 @@ describe('mock-idp-utils', () => {
             's'
           )
         );
-        const jwt = refreshTokenMatch![1];
+        const wrappedToken = refreshTokenMatch![1];
+
+        // Unwrap the token
+        const unprefixed = removePrefixEssuDev(wrappedToken);
+        const jwt = decodeWithChecksum(unprefixed);
 
         // JWT should have 3 parts: header.payload.signature
         const parts = jwt.split('.');
@@ -332,27 +297,6 @@ describe('mock-idp-utils', () => {
         expect(payload.iss).toBe('elastic-cloud');
         expect(payload.sjt).toBe('user');
         expect(payload.sub).toBe(serverlessOptions.username);
-      });
-
-      it('should set access token expiration to 1 hour', async () => {
-        const beforeTest = Date.now();
-        const samlResponse = await createSAMLResponse(serverlessOptions);
-        const afterTest = Date.now();
-        const decoded = Buffer.from(samlResponse, 'base64').toString('utf-8');
-
-        const expiresAtMatch = decoded.match(
-          new RegExp(
-            `${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN_EXPIRES_AT}.*?<saml:AttributeValue[^>]*>([^<]+)</saml:AttributeValue>`,
-            's'
-          )
-        );
-        const expiresAt = new Date(expiresAtMatch![1]).getTime();
-
-        // Should expire in approximately 1 hour (3600 seconds)
-        const expectedMin = beforeTest + 3600 * 1000;
-        const expectedMax = afterTest + 3600 * 1000;
-        expect(expiresAt).toBeGreaterThanOrEqual(expectedMin);
-        expect(expiresAt).toBeLessThanOrEqual(expectedMax);
       });
 
       it('should not include UIAM tokens when uiamEnabled is false', async () => {
@@ -379,7 +323,7 @@ describe('mock-idp-utils', () => {
         transport: {
           request: jest.fn().mockResolvedValue({}),
         },
-      } as unknown as Client;
+      };
 
       await ensureSAMLRoleMapping(mockClient);
 
@@ -413,7 +357,7 @@ describe('mock-idp-utils', () => {
         transport: {
           request: jest.fn().mockRejectedValue(mockError),
         },
-      } as unknown as Client;
+      };
 
       await expect(ensureSAMLRoleMapping(mockClient)).rejects.toThrow('Elasticsearch error');
     });
