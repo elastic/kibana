@@ -27,7 +27,10 @@ import {
   isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
 import { useCreateRule } from '../../../rule_management/logic';
-import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type {
+  RuleCreateProps,
+  RuleResponse,
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 
@@ -54,6 +57,8 @@ import {
   redirectToDetections,
   getActionMessageParams,
   MaxWidthEuiFlexItem,
+  getStepsData,
+  type GetStepsData,
 } from '../../../common/helpers';
 import type { DefineStepRule } from '../../../common/types';
 import { RuleStep } from '../../../common/types';
@@ -110,7 +115,10 @@ const MyEuiPanel = styled(EuiPanel)<{
 
 MyEuiPanel.displayName = 'MyEuiPanel';
 
-const CreateRulePageComponent: React.FC = () => {
+const CreateRulePageComponent: React.FC<{ rule: RuleResponse; aiAssistedUserQuery?: string }> = ({
+  rule,
+  aiAssistedUserQuery,
+}) => {
   const [
     {
       loading: userInfoLoading,
@@ -164,6 +172,14 @@ const CreateRulePageComponent: React.FC = () => {
     [kibanaAbsoluteUrl]
   );
 
+  let stepsData: GetStepsData | undefined;
+
+  if (rule) {
+    stepsData = getStepsData({
+      rule,
+    });
+  }
+
   const {
     defineStepForm,
     defineStepData,
@@ -174,10 +190,10 @@ const CreateRulePageComponent: React.FC = () => {
     actionsStepForm,
     actionsStepData,
   } = useRuleForms({
-    defineStepDefault,
-    aboutStepDefault: stepAboutDefaultValue,
-    scheduleStepDefault: defaultSchedule,
-    actionsStepDefault,
+    defineStepDefault: stepsData?.defineRuleData || defineStepDefault,
+    aboutStepDefault: stepsData?.aboutRuleData || stepAboutDefaultValue,
+    scheduleStepDefault: stepsData?.scheduleRuleData || defaultSchedule,
+    actionsStepDefault: stepsData?.ruleActionsData || actionsStepDefault,
   });
 
   const { modal: confirmSavingWithWarningModal, confirmValidationErrors } =
@@ -538,6 +554,7 @@ const CreateRulePageComponent: React.FC = () => {
             shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
             queryBarTitle={defineStepData.queryBar.title}
             queryBarSavedId={defineStepData.queryBar.saved_id}
+            aiAssistedUserQuery={aiAssistedUserQuery}
           />
           <NextStep
             dataTestSubj="define-continue"
@@ -561,6 +578,7 @@ const CreateRulePageComponent: React.FC = () => {
       isQueryBarValid,
       loading,
       memoDefineStepReadOnly,
+      aiAssistedUserQuery,
     ]
   );
   const memoDefineStepExtraAction = useMemo(
@@ -611,6 +629,7 @@ const CreateRulePageComponent: React.FC = () => {
             isLoading={isCreateRuleLoading || loading}
             form={aboutStepForm}
             esqlQuery={esqlQueryForAboutStep}
+            aiAssistedUserQuery={aiAssistedUserQuery}
           />
 
           <NextStep
@@ -635,6 +654,7 @@ const CreateRulePageComponent: React.FC = () => {
       loading,
       memoAboutStepReadOnly,
       esqlQueryForAboutStep,
+      aiAssistedUserQuery,
     ]
   );
   const memoAboutStepExtraAction = useMemo(
@@ -833,7 +853,7 @@ const CreateRulePageComponent: React.FC = () => {
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
                       <CustomHeaderPageMemo
-                        backOptions={backOptions}
+                        backOptions={aiAssistedUserQuery ? undefined : backOptions}
                         isLoading={isCreateRuleLoading || loading}
                         title={i18n.PAGE_TITLE}
                         isRulePreviewVisible={isRulePreviewVisible}

@@ -79,6 +79,48 @@ export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
             });
           };
 
+          // mock branch for testing
+          if (userQuery.startsWith('_mock')) {
+            const mockRule = {
+              query:
+                'FROM packetbeat-8.14.2 METADATA _id,_index,_version\n| EVAL suspicious_score = (bytes_in + bytes_out) + CASE(destination.port >= 1024 AND destination.port NOT IN (80, 443), 5000, 0)\n| SORT suspicious_score DESC\n| KEEP @timestamp, source.ip, source.port, destination.ip, destination.port, bytes_in, _id, bytes_out, suspicious_score\n| LIMIT 10',
+              language: 'esql',
+              type: 'esql',
+              tags: [
+                'Domain: Network',
+                'Use Case: Network Security Monitoring',
+                'Tactic: Command and Control',
+                'Tactic: Exfiltration',
+                'Data Source: Network Traffic',
+                'packetbeat',
+              ],
+              name: 'Top 10 Suspicious Network Connections',
+              description:
+                'Identifies the 10 most suspicious network connections based on data transfer volume and unusual destination ports, highlighting potential anomalies for further investigation.',
+              references: [],
+              severity_mapping: [],
+              risk_score_mapping: [],
+              related_integrations: [],
+              required_fields: [],
+              actions: [],
+              exceptions_list: [],
+              false_positives: [],
+              threat: [],
+              author: [],
+              setup: '',
+              max_signals: 100,
+              interval: '5m',
+              risk_score: 47,
+              severity: 'medium',
+            };
+
+            return response.ok({
+              body: {
+                rule: mockRule as unknown as AIAssistedCreateRuleResponse['rule'],
+              },
+            });
+          }
+
           // Initial implementation branch
           if (userQuery.startsWith('AAA')) {
             const model = await createLlmInstance();
