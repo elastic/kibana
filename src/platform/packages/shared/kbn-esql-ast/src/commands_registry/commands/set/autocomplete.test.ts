@@ -65,12 +65,12 @@ describe('SET Autocomplete', () => {
     });
   });
 
-  describe('Setting name suggestions -- Traditional', () => {
-    const traditionalSettings = settings
+  describe('Setting name suggestions -- Stateful', () => {
+    const statefulSettings = settings
       .filter((s) => !s.serverlessOnly)
       .map((setting) => `${setting.name} = `);
-    it('suggests no settings after SET command as there is none available yet', async () => {
-      await testSetAutocomplete('SET ', traditionalSettings);
+    it('suggests stateful settings after SET command', async () => {
+      await testSetAutocomplete('SET ', statefulSettings);
     });
   });
 
