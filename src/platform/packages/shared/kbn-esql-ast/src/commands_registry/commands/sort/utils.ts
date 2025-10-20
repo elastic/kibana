@@ -11,11 +11,13 @@ import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers
 import { getFragmentData } from '../../../definitions/utils/autocomplete/helpers';
 import {
   pipeCompleteItem,
-  type ESQLCommand,
   type ESQLSingleAstItem,
   commaCompleteItem,
   isColumn,
+  isFunctionExpression,
 } from '../../../..';
+import type { ESQLAstAllCommands } from '../../../types';
+import { within } from '../../../ast/location';
 import type { ISuggestionItem } from '../../types';
 
 export type SortPosition =
@@ -26,31 +28,46 @@ export type SortPosition =
   | 'nulls_complete'
   | 'after_nulls';
 
-export const getSortPos = (query: string, command: ESQLCommand): SortPosition | undefined => {
+export interface SortPositionContext {
+  insideFunction?: boolean;
+}
+
+export const getSortPos = (
+  query: string,
+  command: ESQLAstAllCommands,
+  cursorPosition: number
+): { position: SortPosition | undefined; context?: SortPositionContext } => {
   const lastArg = command.args[command.args.length - 1];
   if (!lastArg || /,\s+$/.test(query)) {
-    return 'empty_expression';
+    return { position: 'empty_expression' };
   }
 
   if (!Array.isArray(lastArg) && lastArg.type !== 'order') {
-    return 'expression';
+    const insideFunction = isFunctionExpression(lastArg) && within(cursorPosition, lastArg);
+
+    return {
+      position: 'expression',
+      context: { insideFunction },
+    };
   }
 
   if (/(?:asc|desc)$/i.test(query)) {
-    return 'order_complete';
+    return { position: 'order_complete' };
   }
 
   if (/(?:asc|desc)\s+(?:N?U?L?L?S? ?(F?I?R?S?|LA?S?)?)$/i.test(query)) {
-    return 'after_order';
+    return { position: 'after_order' };
   }
 
   if (/(?:nulls\s+first|nulls\s+last)$/i.test(query)) {
-    return 'nulls_complete';
+    return { position: 'nulls_complete' };
   }
 
   if (/(?:nulls\s+first|nulls\s+last)\s+$/i.test(query)) {
-    return 'after_nulls';
+    return { position: 'after_nulls' };
   }
+
+  return { position: undefined };
 };
 
 export const sortModifierSuggestions = {
