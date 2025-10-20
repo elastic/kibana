@@ -8,8 +8,8 @@
  */
 
 import type { AtomicGraphNode, EnterForeachNode, EnterIfNode, WorkflowGraph } from '../../../graph';
-import { extractNunjucksVariables } from '../extract_nunjucks_variables/extract_nunjucks_variables';
 import { extractPropertyPathsFromKql } from '../extract_property_paths_from_kql/extract_property_paths_from_kql';
+import { extractTemplateVariables } from '../extract_template_variables/extract_template_variables';
 
 export function findInputsInGraph(workflowGraph: WorkflowGraph): Record<string, string[]> {
   const inputsInSteps: Record<string, string[]> = {};
@@ -53,7 +53,7 @@ export function findInputsInGraph(workflowGraph: WorkflowGraph): Record<string, 
           return;
         }
 
-        extractNunjucksVariables(input).forEach((variable) => stepInputs.push(variable));
+        extractTemplateVariables(input).forEach((variable) => stepInputs.push(variable));
       });
     }
 
