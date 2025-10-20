@@ -38,9 +38,7 @@ export const useBulkGetUserProfiles = ({ uids }: { uids: Set<string> }) => {
 
   return useQuery<UserProfileWithAvatar[]>(
     ['useBulkGetUserProfiles', ...Array.from(uids)],
-    async () => {
-      return bulkGetUserProfiles({ security, uids });
-    },
+    async () => bulkGetUserProfiles({ security, uids }),
     {
       retry: false,
       staleTime: Infinity,
