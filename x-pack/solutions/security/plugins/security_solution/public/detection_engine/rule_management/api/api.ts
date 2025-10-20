@@ -184,6 +184,7 @@ export const fetchRules = async ({
     showCustomRules: false,
     showElasticRules: false,
     tags: [],
+    allowExpensiveQueries: true,
   },
   sortingOptions = {
     field: 'enabled',

@@ -38,6 +38,7 @@ interface RulesFilterOptions {
   customizationStatus: RuleCustomizationStatus;
   ruleIds: string[];
   includeRuleTypes?: Type[];
+  allowExpensiveQueries?: boolean;
 }
 
 /**
@@ -57,11 +58,12 @@ export function convertRulesFilterToKQL({
   ruleExecutionStatus,
   customizationStatus,
   includeRuleTypes = [],
+  allowExpensiveQueries = true,
 }: Partial<RulesFilterOptions>): string {
   const kql: string[] = [];
 
   if (searchTerm?.length) {
-    kql.push(`(${convertRuleSearchTermToKQL(searchTerm)})`);
+    kql.push(`(${convertRuleSearchTermToKQL(searchTerm, allowExpensiveQueries)})`);
   }
 
   if (showCustomRules && showElasticRules) {
@@ -106,6 +108,7 @@ export function convertRulesFilterToKQL({
 }
 
 const SEARCHABLE_RULE_PARAMS = [
+  RULE_NAME_FIELD,
   RULE_PARAMS_FIELDS.INDEX,
   RULE_PARAMS_FIELDS.TACTIC_ID,
   RULE_PARAMS_FIELDS.TACTIC_NAME,
@@ -119,7 +122,7 @@ const SEARCHABLE_RULE_PARAMS = [
  * Build KQL search terms.
  *
  * Note that RULE_NAME_FIELD is special, for single term searches
- * it includes partial matches, supporting special characters.
+ * we will also attempt to includes partial matches, if wildcards are allowed.
  *
  * Ie - "sql" =KQL=> *sql* --matches-->  sql, Postgreslq, SQLCMD.EXE
  *    - "sql:" =KQL=> *sql\:* --matches-->  sql:x64, but NOT sql_x64
@@ -130,24 +133,25 @@ const SEARCHABLE_RULE_PARAMS = [
  * Ie - "sql" =KQL=> "sql" --matches--> sql server, but NOT mssql or SQLCMD.EXE
  *
  * @param searchTerm search term (ie from the search bar)
+ * @param allowExpensiveQueries use slow queries with wildcards to improve results
  * @returns KQL String
  */
-export function convertRuleSearchTermToKQL(searchTerm: string): string {
-  let ruleNameCondition = '';
-  // Single search term?
-  // Allow partial matches using wildcards.
-  // Use `.keyword` index matches to support special characters.
-  const fullyEscapedSearchTerm = fullyEscapeKQLStringParam(searchTerm);
-  if (fullyEscapedSearchTerm.split(' ').length === 1) {
-    ruleNameCondition = `${RULE_NAME_FIELD}.keyword: *${fullyEscapedSearchTerm}*`;
-  } else {
-    // Multiple search terms? Use exact match with quotations.
-    ruleNameCondition = `${RULE_NAME_FIELD}: ${prepareKQLStringParam(searchTerm)}`;
-  }
-  const remainingConditions = SEARCHABLE_RULE_PARAMS.map(
+export function convertRuleSearchTermToKQL(
+  searchTerm: string,
+  allowExpensiveQueries = true
+): string {
+  const searchableConditions = SEARCHABLE_RULE_PARAMS.map(
     (param) => `${param}: ${prepareKQLStringParam(searchTerm)}`
   );
-  return [ruleNameCondition].concat(remainingConditions).join(' OR ');
+  if (allowExpensiveQueries) {
+    const escapedTerm = fullyEscapeKQLStringParam(searchTerm);
+    const isSingleTerm = escapedTerm.split(' ').length === 1;
+    if (isSingleTerm) {
+      const ruleNameCondition = `${RULE_NAME_FIELD}.keyword: *${escapedTerm}*`;
+      return [ruleNameCondition].concat(searchableConditions).join(' OR ');
+    }
+  }
+  return searchableConditions.join(' OR ');
 }
 
 export function convertRuleTagsToKQL(tags: string[]): string {

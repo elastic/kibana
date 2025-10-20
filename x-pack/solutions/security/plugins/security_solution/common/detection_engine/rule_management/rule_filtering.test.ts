@@ -27,6 +27,7 @@ describe('convertRulesFilterToKQL', () => {
     expect(kql).toBe(
       '(' +
         'alert.attributes.name.keyword: *foo* ' +
+        'OR alert.attributes.name: "foo" ' +
         'OR alert.attributes.params.index: "foo" ' +
         'OR alert.attributes.params.threat.tactic.id: "foo" ' +
         'OR alert.attributes.params.threat.tactic.name: "foo" ' +
@@ -47,6 +48,28 @@ describe('convertRulesFilterToKQL', () => {
     expect(kql).toBe(
       '(' +
         'alert.attributes.name.keyword: *\\"a\\<detection\\\\-rule\\*with\\)a\\<surprise\\:* ' +
+        'OR alert.attributes.name: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.index: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.tactic.id: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.tactic.name: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.technique.id: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.technique.name: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.technique.subtechnique.id: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
+        'OR alert.attributes.params.threat.technique.subtechnique.name: "\\"a<detection\\\\-rule*with)a<surprise:"' +
+        ')'
+    );
+  });
+
+  it('skips expensive queries (allowExpensiveQueries = false) for single term searches', () => {
+    const kql = convertRulesFilterToKQL({
+      ...filterOptions,
+      allowExpensiveQueries: false,
+      filter: '"a<detection\\-rule*with)a<surprise:',
+    });
+
+    expect(kql).toBe(
+      '(' +
+        'alert.attributes.name: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
         'OR alert.attributes.params.index: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
         'OR alert.attributes.params.threat.tactic.id: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
         'OR alert.attributes.params.threat.tactic.name: "\\"a<detection\\\\-rule*with)a<surprise:" ' +
@@ -117,6 +140,7 @@ describe('convertRulesFilterToKQL', () => {
     expect(kql).toBe(
       `(` +
         `alert.attributes.name.keyword: *foo* OR ` +
+        `alert.attributes.name: "foo" OR ` +
         `alert.attributes.params.index: "foo" OR ` +
         `alert.attributes.params.threat.tactic.id: "foo" OR ` +
         `alert.attributes.params.threat.tactic.name: "foo" OR ` +

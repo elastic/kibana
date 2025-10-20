@@ -220,6 +220,7 @@ describe('Detections Rules API', () => {
             filter:
               '(' +
               'alert.attributes.name.keyword: *\\"user\\\\-agent\\*with\\)a\\<surprise\\:* ' +
+              'OR alert.attributes.name: "\\"user\\\\-agent*with)a<surprise:" ' +
               'OR alert.attributes.params.index: "\\"user\\\\-agent*with)a<surprise:" ' +
               'OR alert.attributes.params.threat.tactic.id: "\\"user\\\\-agent*with)a<surprise:" ' +
               'OR alert.attributes.params.threat.tactic.name: "\\"user\\\\-agent*with)a<surprise:" ' +
@@ -493,6 +494,7 @@ describe('Detections Rules API', () => {
             filter:
               '(' +
               'alert.attributes.name.keyword: *ruleName* ' +
+              'OR alert.attributes.name: "ruleName" ' +
               'OR alert.attributes.params.index: "ruleName" ' +
               'OR alert.attributes.params.threat.tactic.id: "ruleName" ' +
               'OR alert.attributes.params.threat.tactic.name: "ruleName" ' +
