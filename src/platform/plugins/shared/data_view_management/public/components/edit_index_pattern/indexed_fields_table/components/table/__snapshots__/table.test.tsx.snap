@@ -80,7 +80,15 @@ exports[`Table render name 1`] = `
 <span
   data-test-subj="field-name-customer"
 >
-  customer
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <WrappedFieldIcon
+      type="string"
+    />
+    customer
+  </EuiFlexGroup>
 </span>
 `;
 
@@ -88,15 +96,20 @@ exports[`Table render name 2`] = `
 <span
   data-test-subj="field-name-customer"
 >
-  customer
-  <span>
-     
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <WrappedFieldIcon
+      type="string"
+    />
+    customer
     <EuiIconTip
       content="This field exists on the data view only."
       title="Runtime field"
       type="indexRuntime"
     />
-  </span>
+  </EuiFlexGroup>
 </span>
 `;
 
@@ -129,7 +142,15 @@ exports[`Table should render normal field name 1`] = `
 <span
   data-test-subj="field-name-Elastic"
 >
-  Elastic
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <WrappedFieldIcon
+      type="string"
+    />
+    Elastic
+  </EuiFlexGroup>
 </span>
 `;
 
@@ -325,15 +346,20 @@ exports[`Table should render timestamp field name 1`] = `
 <span
   data-test-subj="field-name-timestamp"
 >
-  timestamp
-  <span>
-     
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <WrappedFieldIcon
+      type="date"
+    />
+    timestamp
     <EuiIconTip
       aria-label="Primary time field"
       color="primary"
       content="This field represents the time that events occurred."
       type="clock"
     />
-  </span>
+  </EuiFlexGroup>
 </span>
 `;
