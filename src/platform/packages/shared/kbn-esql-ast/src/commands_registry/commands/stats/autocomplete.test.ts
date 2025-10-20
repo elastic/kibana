@@ -483,9 +483,14 @@ describe('STATS Autocomplete', () => {
 
         it('suggests operators after a first operand', async () => {
           await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE keywordField ', [
-            ...getFunctionSignaturesByReturnType(Location.STATS_WHERE, 'any', { operators: true }, [
-              'keyword',
-            ]),
+            'IN $0',
+            'IS NOT NULL',
+            'IS NULL',
+            'LIKE $0',
+            'NOT IN $0',
+            'NOT LIKE $0',
+            'NOT RLIKE $0',
+            'RLIKE $0',
           ]);
         });
 

@@ -84,13 +84,14 @@ describe('WHERE Autocomplete', () => {
       'after a field name (%s)',
       async (query) => {
         await whereExpectSuggestions(query, [
-          ...getFunctionSignaturesByReturnType(
-            Location.WHERE,
-            'boolean',
-            { operators: true },
-            undefined,
-            ['and', 'or', 'not']
-          ),
+          'IN $0',
+          'IS NOT NULL',
+          'IS NULL',
+          'LIKE $0',
+          'NOT IN $0',
+          'NOT LIKE $0',
+          'NOT RLIKE $0',
+          'RLIKE $0',
         ]);
       }
     );
@@ -222,12 +223,18 @@ describe('WHERE Autocomplete', () => {
 
     test('suggests boolean and numeric operators after a numeric function result', async () => {
       await whereExpectSuggestions('from a | where log10(doubleField) ', [
-        ...getFunctionSignaturesByReturnType(Location.WHERE, 'double', { operators: true }, [
+        ...getFunctionSignaturesByReturnType(
+          Location.WHERE,
           'double',
-        ]),
-        ...getFunctionSignaturesByReturnType(Location.WHERE, 'boolean', { operators: true }, [
-          'double',
-        ]),
+          { operators: true, skipAssign: true },
+          ['double']
+        ),
+        ...getFunctionSignaturesByReturnType(
+          Location.WHERE,
+          'boolean',
+          { operators: true, skipAssign: true },
+          ['double']
+        ),
       ]);
     });
 

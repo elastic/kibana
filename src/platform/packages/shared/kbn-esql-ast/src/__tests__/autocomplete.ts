@@ -24,7 +24,7 @@ import { aggFunctionDefinitions } from '../definitions/generated/aggregation_fun
 import { timeSeriesAggFunctionDefinitions } from '../definitions/generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
-import { operatorsDefinitions } from '../definitions/all_operators';
+import { operatorsDefinitions, comparisonFunctions } from '../definitions/all_operators';
 import { parse } from '../parser';
 import type { ESQLAstAllCommands } from '../types';
 import type {
@@ -201,7 +201,20 @@ export function getFunctionSignaturesByReturnType(
     list.push(...scalarFunctionDefinitions);
   }
   if (operators) {
-    list.push(...operatorsDefinitions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
+    const hasStringParams = paramsTypes?.some((type) => type === 'text' || type === 'keyword');
+    const comparisonOperatorNames = comparisonFunctions.map(({ name }) => name);
+
+    list.push(
+      ...operatorsDefinitions.filter(({ name }) => {
+        if (skipAssign && (name === '=' || name === ':')) {
+          return false;
+        }
+        if (hasStringParams && comparisonOperatorNames.includes(name)) {
+          return false;
+        }
+        return true;
+      })
+    );
   }
 
   const deduped = Array.from(new Set(list));

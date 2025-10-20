@@ -339,9 +339,13 @@ describe('RERANK Autocomplete', () => {
       await expectRerankSuggestions(query, {
         contains: [
           addPlaceholder([OPERATOR_SUGGESTIONS.PATTERN[0]])[0],
-          ...addPlaceholder(OPERATOR_SUGGESTIONS.COMPARISON.slice(0, 2)),
+          ...addPlaceholder(OPERATOR_SUGGESTIONS.SET.slice(0, 1)),
+          OPERATOR_SUGGESTIONS.EXISTENCE[0],
         ],
-        notContains: NEXT_ACTIONS_EXPRESSIONS,
+        notContains: [
+          ...NEXT_ACTIONS_EXPRESSIONS,
+          ...addPlaceholder(OPERATOR_SUGGESTIONS.COMPARISON),
+        ],
       });
     });
   });

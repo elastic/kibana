@@ -63,29 +63,17 @@ export function shouldSuggestComma(context: CommaContext): boolean {
 }
 
 function handleAfterComplete(context: CommaContext): boolean {
-  const { typeMatches, isLiteral, hasMoreParams } = context;
+  const { typeMatches, hasMoreParams } = context;
 
-  // Literal complete, no more params: no comma
-  if (isLiteral && typeMatches && !hasMoreParams) {
+  if (!hasMoreParams) {
     return false;
   }
 
-  // Literal complete, has more params: yes comma
-  if (isLiteral && typeMatches && hasMoreParams) {
-    return true;
-  }
-
-  // Type mismatch: no comma (suggest operators to fix type)
-  if (hasMoreParams && !typeMatches) {
+  if (!typeMatches) {
     return false;
   }
 
-  // Type matches and has more params: yes comma
-  if (hasMoreParams && typeMatches) {
-    return true;
-  }
-
-  return false;
+  return true;
 }
 
 function handleEmptyOrEnumExpression(context: CommaContext, isExpressionHeavy: boolean): boolean {

@@ -19,7 +19,10 @@ import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/
 import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
-import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
+import {
+  operatorsDefinitions,
+  comparisonFunctions,
+} from '@kbn/esql-ast/src/definitions/all_operators';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
@@ -168,7 +171,22 @@ export function getFunctionSignaturesByReturnType(
     list.push(...timeSeriesAggFunctionDefinitions);
   }
   if (operators) {
-    list.push(...operatorsDefinitions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
+    const hasStringParams = paramsTypes?.some((type) => type === 'text' || type === 'keyword');
+    const comparisonOperatorNames = comparisonFunctions.map(({ name }) => name);
+
+    list.push(
+      ...operatorsDefinitions.filter(({ name }) => {
+        if (skipAssign && (name === '=' || name === ':')) {
+          return false;
+        }
+
+        if (hasStringParams && comparisonOperatorNames.includes(name)) {
+          return false;
+        }
+
+        return true;
+      })
+    );
   }
 
   const deduped = Array.from(new Set(list));
