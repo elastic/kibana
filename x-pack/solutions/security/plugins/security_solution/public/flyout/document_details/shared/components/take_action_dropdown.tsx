@@ -63,7 +63,7 @@ export interface TakeActionDropdownProps {
   /**
    * The actual raw document object
    */
-  dataAsNestedObject?: Ecs;
+  dataAsNestedObject: Ecs;
   /**
    * Callback called when the popover closes
    */

@@ -28,6 +28,7 @@ import {
   langChainExecute,
 } from '../helpers';
 import type { OnLlmResponse } from '../../lib/langchain/executors/types';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const license = licensingMock.createLicenseMock();
 
@@ -199,20 +200,16 @@ describe('chatCompleteRoute', () => {
       }))
     );
     actionsClient.getBulk.mockResolvedValue([
-      {
+      createMockConnector({
         id: '1',
-        isPreconfigured: false,
-        isSystemAction: false,
-        isDeprecated: false,
         name: 'my name',
         actionTypeId: '.gen-ai',
-        isMissingSecrets: false,
         config: {
           a: true,
           b: true,
           c: true,
         },
-      },
+      }),
     ]);
   });
 

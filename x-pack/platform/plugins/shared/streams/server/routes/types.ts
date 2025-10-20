@@ -20,7 +20,8 @@ import type { QueryClient } from '../lib/streams/assets/query/query_client';
 import type { StreamsClient } from '../lib/streams/client';
 import type { EbtTelemetryClient } from '../lib/telemetry';
 import type { StreamsServer } from '../types';
-import type { SystemClient } from '../lib/streams/system/system_client';
+import type { FeatureClient } from '../lib/streams/feature/feature_client';
+import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipelines/processor_suggestions_service';
 
 type GetScopedClients = ({
   request,
@@ -33,7 +34,7 @@ export interface RouteHandlerScopedClients {
   soClient: SavedObjectsClientContract;
   assetClient: AssetClient;
   streamsClient: StreamsClient;
-  systemClient: SystemClient;
+  featureClient: FeatureClient;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
   queryClient: QueryClient;
@@ -47,6 +48,7 @@ export interface RouteDependencies {
   server: StreamsServer;
   telemetry: EbtTelemetryClient;
   getScopedClients: GetScopedClients;
+  processorSuggestions: ProcessorSuggestionsService;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;

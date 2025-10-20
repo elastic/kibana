@@ -19,6 +19,8 @@ import {
   EuiToken,
   EuiDescriptionList,
   EuiPanel,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
 } from '@elastic/eui';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { buildEsQuery, type Query, type TimeRange } from '@kbn/es-query';
@@ -26,6 +28,7 @@ import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import { take } from 'rxjs';
 import type { SearchHit } from '@kbn/es-types';
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
+import { formatHit } from '@kbn/discover-utils';
 import { useKibana } from '../../../hooks/use_kibana';
 
 interface Document {
@@ -41,6 +44,23 @@ interface WorkflowExecuteEventFormProps {
   errors: string | null;
   setErrors: (errors: string | null) => void;
 }
+
+const flattenObject = (obj: any, prefix = ''): Record<string, any> => {
+  const flattened: Record<string, any> = {};
+
+  for (const [key, val] of Object.entries(obj)) {
+    const fieldName = prefix ? `${prefix}.${key}` : key;
+
+    if (val && typeof val === 'object' && !Array.isArray(val)) {
+      // Recursively flatten nested objects
+      Object.assign(flattened, flattenObject(val, fieldName));
+    } else {
+      flattened[fieldName] = val;
+    }
+  }
+
+  return flattened;
+};
 
 export const WorkflowExecuteIndexForm = ({
   value,
@@ -224,30 +244,48 @@ export const WorkflowExecuteIndexForm = ({
         field: '_source',
         name: 'Document',
         render: (source: any) => {
-          const listItems: Array<{ title: string; description: string }> = [];
-          ['kind', 'agent', 'user', 'message'].forEach((field: string) => {
-            if (source[field] === undefined) {
-              return;
-            }
-            listItems.push({
-              title: field,
-              description: source[field] || '-',
-            });
-          });
+          const flattened = flattenObject(source);
+
+          // Create a mock DataTableRecord-like object for formatHit
+          const mockRecord = {
+            raw: { _source: source },
+            flattened,
+            id: source && source._id ? source._id : undefined,
+            isAnchor: false,
+          };
+
+          // Use formatHit to get properly formatted field pairs
+          const formattedPairs = formatHit(
+            mockRecord,
+            selectedDataView!,
+            () => true, // Show all fields
+            10, // Max entries
+            services.fieldFormats
+          );
+
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiToken iconType="tokenString" />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiDescriptionList type="inline" listItems={listItems} />
+                <EuiDescriptionList type="inline">
+                  {formattedPairs.map(([title, description], index) => (
+                    <React.Fragment key={index}>
+                      <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+                      <EuiDescriptionListDescription
+                        dangerouslySetInnerHTML={{ __html: description || '-' }}
+                      />
+                    </React.Fragment>
+                  ))}
+                </EuiDescriptionList>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
         },
       },
     ],
-    []
+    [selectedDataView, services.fieldFormats]
   );
 
   // Table selection configuration
