@@ -536,54 +536,56 @@ export class SettingsPageObject extends FtrService {
     dataViewName?: string,
     allowHidden?: boolean
   ) {
+    await this.header.waitUntilLoadingHasFinished();
     await this.retry.try(async () => {
-      await this.header.waitUntilLoadingHasFinished();
       await this.clickKibanaIndexPatterns();
-
-      await this.header.waitUntilLoadingHasFinished();
-      const flyOut = await this.testSubjects.exists('createAnyway');
-      if (flyOut) {
-        await this.testSubjects.click('createAnyway');
-      } else {
-        await this.clickAddNewIndexPatternButton();
-      }
-
-      if (allowHidden) {
-        await this.allowHiddenClick();
-      }
-
-      await this.header.waitUntilLoadingHasFinished();
-      if (!isStandardIndexPattern) {
-        await this.selectRollupIndexPatternType();
-      }
-      await this.retry.try(async () => {
-        await this.setIndexPatternField(indexPatternName);
-      });
-
-      if (timefield) {
-        await this.selectTimeFieldOption(timefield);
-      }
-      if (customDataViewId) {
-        await this.addCustomDataViewId(customDataViewId);
-      }
-      if (dataViewName) {
-        await this.setNameField(dataViewName);
-      }
-
-      await this.retry.waitFor(
-        'the index pattern form should have no validation errors',
-        async () => {
-          const form = await this.testSubjects.find('indexPatternEditorForm');
-          const validationError = await form.getAttribute('data-validation-error');
-          if (validationError !== '0') {
-            this.log.debug('Validation error found, retrying');
-          }
-          return validationError === '0';
-        }
-      );
-
-      await (await this.getSaveIndexPatternButton()).click();
     });
+    await this.header.waitUntilLoadingHasFinished();
+
+    const flyOut = await this.testSubjects.exists('createAnyway');
+    if (flyOut) {
+      await this.testSubjects.click('createAnyway');
+    } else {
+      await this.clickAddNewIndexPatternButton();
+    }
+
+    if (allowHidden) {
+      await this.allowHiddenClick();
+    }
+    await this.header.waitUntilLoadingHasFinished();
+
+    if (!isStandardIndexPattern) {
+      await this.selectRollupIndexPatternType();
+    }
+
+    await this.retry.try(async () => {
+      await this.setIndexPatternField(indexPatternName);
+    });
+
+    if (timefield) {
+      await this.selectTimeFieldOption(timefield);
+    }
+    if (customDataViewId) {
+      await this.addCustomDataViewId(customDataViewId);
+    }
+    if (dataViewName) {
+      await this.setNameField(dataViewName);
+    }
+
+    await this.retry.waitFor(
+      'the index pattern form should have no validation errors',
+      async () => {
+        const form = await this.testSubjects.find('indexPatternEditorForm');
+        const validationError = await form.getAttribute('data-validation-error');
+        if (validationError !== '0') {
+          this.log.debug('Validation error found, retrying');
+        }
+        return validationError === '0';
+      }
+    );
+
+    await (await this.getSaveIndexPatternButton()).click();
+
     await this.header.waitUntilLoadingHasFinished();
     await this.retry.try(async () => {
       const currentUrl = await this.browser.getCurrentUrl();
