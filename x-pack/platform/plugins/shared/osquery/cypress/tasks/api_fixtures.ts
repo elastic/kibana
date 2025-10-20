@@ -11,6 +11,7 @@ import type {
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import type { Case } from '@kbn/cases-plugin/common';
+import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test-services';
 import { API_VERSIONS } from '../../common/constants';
 import type { SavedQuerySOFormData } from '../../public/saved_queries/form/use_saved_query_form';
 import type { LiveQueryDetailsItem } from '../../public/actions/use_live_query_details';
@@ -286,7 +287,10 @@ export const loadRule = (includeResponseActions = false) => {
       interval: '1m',
       from: 'now-360s',
       to: 'now',
-      meta: { from: '1m', kibana_siem_app_url: 'http://localhost:5620/app/security' },
+      meta: {
+        from: '1m',
+        kibana_siem_app_url: `http://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}/app/security`,
+      },
       actions: [],
       enabled: true,
       throttle: 'no_actions',

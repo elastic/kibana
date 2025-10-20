@@ -7,6 +7,7 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
+import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test-services';
 
 import Url from 'url';
 
@@ -34,7 +35,7 @@ export default defineCypressConfig({
     runMode: 1,
   },
   e2e: {
-    baseUrl: `https://localhost:5620`,
+    baseUrl: `https://${TEST_KIBANA_HOST}:${TEST_KIBANA_PORT}`,
     supportFile: './support/e2e.ts',
     specPattern: './e2e/**/*.cy.ts',
   },

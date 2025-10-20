@@ -40,6 +40,7 @@ import {
 } from '@kbn/dev-utils';
 import { getServerlessNodeArgs, maybeCreateDockerNetwork, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
+import { SERVICE_NAMESPACE } from '@kbn/test-services';
 import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
 import { captureCallingStack, dump, prefixedOutputLogger } from '../utils';
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
@@ -306,7 +307,7 @@ const startFleetServerWithDocker = async ({
         assert.ok(!!serviceToken, '`serviceToken` is required');
       }
 
-      // Create the `elastic` network to use with all containers
+      // Create the `elastic-${SERVICE_NAMESPACE}` network to use with all containers
       await maybeCreateDockerNetwork(log);
       try {
         const dockerArgs = isServerless
@@ -467,7 +468,7 @@ const getFleetServerManagedDockerArgs = ({
     'no',
 
     '--net',
-    'elastic',
+    `elastic-${SERVICE_NAMESPACE}`,
 
     '--add-host',
     'host.docker.internal:host-gateway',

@@ -22,7 +22,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense } from '@kbn/es';
 import type { ServerlessOptions } from '@kbn/es/src/utils';
 import { getFips } from 'crypto';
-import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
+import { SERVICE_NAMESPACE } from '@kbn/test-services';
 import { esTestConfig } from './es_test_config';
 
 interface TestEsClusterNodesOptions {
@@ -170,7 +170,7 @@ export function createTestEsCluster<
     license = 'basic',
     log,
     writeLogsToPath,
-    basePath = Path.resolve(REPO_ROOT, '.es'),
+    basePath = Path.resolve(REPO_ROOT, '.es', SERVICE_NAMESPACE),
     esVersion = esTestConfig.getVersion(),
     esFrom = esTestConfig.getBuildFrom(),
     esServerlessOptions,
@@ -178,14 +178,14 @@ export function createTestEsCluster<
     nodes = [{ name: 'node-01' }],
     esArgs: customEsArgs = [],
     esJavaOpts,
-    clusterName: customClusterName = 'es-test-cluster',
     ssl,
+    clusterName: customClusterName = `test-cluster`,
     transportPort,
     onEarlyExit,
     files,
   } = options;
 
-  const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
+  const clusterName = `es-${SERVICE_NAMESPACE}-${customClusterName}`;
 
   const defaultEsArgs = [
     `cluster.name=${clusterName}`,
@@ -269,7 +269,6 @@ export function createTestEsCluster<
           ssl,
           kill: true, // likely don't need this but avoids any issues where the ESS cluster wasn't cleaned up
           waitForReady: true,
-          namePrefix: clusterName,
         });
         return;
       } else if (Path.isAbsolute(esFrom)) {

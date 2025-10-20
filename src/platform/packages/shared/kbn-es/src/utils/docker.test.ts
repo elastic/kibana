@@ -870,15 +870,13 @@ describe('stopServerlessCluster()', () => {
 });
 
 describe('teardownServerlessClusterSync()', () => {
-  const defaultOptions = { projectType, basePath: 'foo/bar' };
-
   test('should kill running serverless nodes', () => {
     const nodes = ['es-default-01', 'es-default-02', 'es-default-03'];
     execa.commandSync.mockImplementation(() => ({
       stdout: nodes.join('\n'),
     }));
 
-    teardownServerlessClusterSync(log, defaultOptions);
+    teardownServerlessClusterSync(log);
 
     expect(execa.commandSync.mock.calls).toHaveLength(2);
 
@@ -893,7 +891,7 @@ describe('teardownServerlessClusterSync()', () => {
       stdout: '\n',
     }));
 
-    teardownServerlessClusterSync(log, defaultOptions);
+    teardownServerlessClusterSync(log);
 
     expect(execa.commandSync.mock.calls).toHaveLength(1);
   });

@@ -554,7 +554,7 @@ export class Cluster {
        * Ideally would be async and an event like beforeExit or SIGINT,
        * but those events are not being triggered in FTR child process.
        */
-      process.on('exit', () => teardownServerlessClusterSync(this.log, options));
+      process.on('exit', () => teardownServerlessClusterSync(this.log));
     }
 
     this.serverlessNodes = await runServerlessCluster(this.log, options);

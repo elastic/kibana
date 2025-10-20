@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { TEST_KIBANA_PORT } from '@kbn/test-services';
 import { kibanaTestUser } from './src/kbn/users';
-import { TEST_KIBANA_PORT } from './src/service_addresses';
 import { getUrlParts } from './src/get_url_parts';
 
 export interface UrlParts {

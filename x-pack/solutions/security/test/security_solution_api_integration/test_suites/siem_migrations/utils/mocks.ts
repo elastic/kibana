@@ -14,7 +14,7 @@ import type {
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
 import { generateAssistantComment } from '@kbn/security-solution-plugin/server/lib/siem_migrations/common/task/util/comments';
 import type { StoredSiemMigration } from '@kbn/security-solution-plugin/server/lib/siem_migrations/common/types';
-import { TEST_AGENTLESS_PORT } from '@kbn/test';
+import { TEST_AGENTLESS_PORT } from '@kbn/test-services';
 
 const SIEM_MIGRATIONS_BASE_INDEX_PATTERN = '.kibana-siem-rule-migrations';
 

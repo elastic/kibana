@@ -19,6 +19,15 @@ import {
 } from '@kbn/test';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
+import {
+  FLEET_PACKAGE_REGISTRY_PORT,
+  TEST_ES_HOST,
+  TEST_ES_PORT,
+  TEST_FLEET_HOST,
+  TEST_FLEET_PORT,
+  TEST_KIBANA_HOST,
+  TEST_KIBANA_PORT,
+} from '@kbn/test-services';
 import type { ScoutServerConfig } from '../../types';
 import { SAML_IDP_PLUGIN_PATH, SERVERLESS_IDP_METADATA_PATH, JWKS_PATH } from '../constants';
 
@@ -31,21 +40,21 @@ const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/
  * will spin up a local docker package registry locally for you
  * if this is defined it takes precedence over the `packageRegistryOverride` variable
  */
-const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+const dockerRegistryPort = FLEET_PACKAGE_REGISTRY_PORT;
 
 const servers = {
   elasticsearch: {
     protocol: 'https',
-    hostname: 'localhost',
-    port: 9220,
+    hostname: TEST_ES_HOST,
+    port: TEST_ES_PORT,
     username: 'elastic_serverless',
     password: 'changeme',
     certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)],
   },
   kibana: {
     protocol: 'http',
-    hostname: 'localhost',
-    port: 5620,
+    hostname: TEST_KIBANA_HOST,
+    port: TEST_KIBANA_PORT,
     username: 'elastic_serverless',
     password: 'changeme',
   },
@@ -175,7 +184,7 @@ export const defaultConfig: ScoutServerConfig = {
           id: 'default-fleet-server',
           name: 'Default Fleet Server',
           is_default: true,
-          host_urls: ['https://localhost:8220'],
+          host_urls: [`https://${TEST_FLEET_HOST}:${TEST_FLEET_PORT}`],
         },
       ])}`,
       `--xpack.fleet.outputs=${JSON.stringify([
@@ -185,7 +194,7 @@ export const defaultConfig: ScoutServerConfig = {
           type: 'elasticsearch',
           is_default: true,
           is_default_monitoring: true,
-          hosts: ['https://localhost:9200'],
+          hosts: [`https://${TEST_ES_HOST}:${TEST_ES_PORT}`],
         },
       ])}`,
     ],

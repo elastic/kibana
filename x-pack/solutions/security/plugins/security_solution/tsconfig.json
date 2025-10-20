@@ -266,5 +266,6 @@
     "@kbn/core-analytics-server-mocks",
     "@kbn/object-utils",
     "@kbn/core-ui-settings-common",
+    "@kbn/test-services",
   ]
 }

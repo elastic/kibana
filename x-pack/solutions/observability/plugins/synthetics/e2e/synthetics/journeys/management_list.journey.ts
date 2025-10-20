@@ -6,7 +6,7 @@
  */
 
 import { journey, step, expect, before, after } from '@elastic/synthetics';
-import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test';
+import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test-services';
 import { byTestId } from '../../helpers/utils';
 import {
   addTestMonitor,

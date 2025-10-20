@@ -9,7 +9,7 @@ import type * as http from 'http';
 import expect from '@kbn/expect';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '@kbn/fleet-plugin/server/constants';
-import { TEST_AGENTLESS_PORT, TEST_FLEET_HOST, TEST_FLEET_PORT } from '@kbn/test';
+import { TEST_AGENTLESS_PORT, TEST_FLEET_HOST, TEST_FLEET_PORT } from '@kbn/test-services';
 import { skipIfNoDockerRegistry, generateAgent } from '../../helpers';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupMockServer } from '../agents/helpers/mock_agentless_api';

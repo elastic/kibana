@@ -7,7 +7,7 @@
 import type * as http from 'http';
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { TEST_AGENTLESS_PORT } from '@kbn/test';
+import { TEST_AGENTLESS_PORT } from '@kbn/test-services';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupMockServer } from '../agents/helpers/mock_agentless_api';

@@ -12,7 +12,7 @@ import {
   TEST_ES_TRANSPORT_PORT,
   TEST_KIBANA_HOST,
   TEST_KIBANA_PORT,
-} from '@kbn/test';
+} from '@kbn/test-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 interface IntegrationPackage {

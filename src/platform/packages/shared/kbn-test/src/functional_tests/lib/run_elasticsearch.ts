@@ -15,6 +15,7 @@ import getopts from 'getopts';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
 import { isServerlessProjectType, extractAndArchiveLogs } from '@kbn/es/src/utils';
+import { SERVICE_NAMESPACE } from '@kbn/test-services';
 import type { Config } from '../../functional_test_runner';
 import type { ICluster } from '../../es';
 import { createTestEsCluster, esTestConfig } from '../../es';
@@ -27,6 +28,7 @@ interface RunElasticsearchOptions {
   onEarlyExit?: (msg: string) => void;
   logsDir?: string;
   name?: string;
+  basePath?: string;
 }
 
 interface CcsConfig {
@@ -100,7 +102,7 @@ export async function runElasticsearch(
   if (!config.ccsConfig) {
     const node = await startEsNode({
       log,
-      name: name ?? 'ftr',
+      name: name ?? `${SERVICE_NAMESPACE}-ftr`,
       logsDir,
       config,
     });
@@ -112,7 +114,7 @@ export async function runElasticsearch(
   const remotePort = await getPort();
   const remoteNode = await startEsNode({
     log,
-    name: name ?? 'ftr-remote',
+    name: name ?? `${SERVICE_NAMESPACE}-ftr-remote`,
     logsDir,
     config: {
       ...config,
@@ -123,7 +125,7 @@ export async function runElasticsearch(
 
   const localNode = await startEsNode({
     log,
-    name: name ?? 'ftr-local',
+    name: name ?? `${SERVICE_NAMESPACE}-ftr-local`,
     logsDir,
     config: {
       ...config,
@@ -163,7 +165,7 @@ async function startEsNode({
     ssl: config.ssl,
     log,
     writeLogsToPath: logsDir ? resolve(logsDir, `es-cluster-${name}.log`) : undefined,
-    basePath: resolve(REPO_ROOT, '.es'),
+    basePath: resolve(REPO_ROOT, '.es', SERVICE_NAMESPACE),
     nodes: [
       {
         name,

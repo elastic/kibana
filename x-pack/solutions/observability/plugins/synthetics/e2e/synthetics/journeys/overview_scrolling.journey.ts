@@ -7,7 +7,7 @@
 
 import { before, after, expect, journey, step } from '@elastic/synthetics';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
-import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test';
+import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test-services';
 import {
   addTestMonitor,
   cleanTestMonitors,

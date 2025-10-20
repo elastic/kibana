@@ -15,8 +15,8 @@ import {
   kbnTestConfig,
   kibanaTestSuperuserServerless,
   getDockerFileMountPath,
-  FLEET_PACKAGE_REGISTRY_PORT,
 } from '@kbn/test';
+import { FLEET_PACKAGE_REGISTRY_PORT } from '@kbn/test-services';
 import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import path from 'path';

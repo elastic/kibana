@@ -6,7 +6,8 @@
  */
 
 import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/network_services';
-import { TEST_FLEET_PORT, type FtrConfigProviderContext } from '@kbn/test';
+import { type FtrConfigProviderContext } from '@kbn/test';
+import { TEST_FLEET_PORT } from '@kbn/test-services';
 
 import type { ExperimentalFeatures } from '@kbn/security-solution-plugin/common/experimental_features';
 import { ES_RESOURCES } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/serverless';

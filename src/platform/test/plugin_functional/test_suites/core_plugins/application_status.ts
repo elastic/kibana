@@ -11,7 +11,7 @@ import Url from 'url';
 import expect from '@kbn/expect';
 import type { AppUpdatableFields } from '@kbn/core-application-browser';
 import { AppStatus } from '@kbn/core-application-browser';
-import { TEST_KIBANA_PORT } from '@kbn/test';
+import { TEST_KIBANA_PORT } from '@kbn/test-services';
 import type { PluginFunctionalProviderContext } from '../../services';
 import '@kbn/core-app-status-plugin/public/types';
 

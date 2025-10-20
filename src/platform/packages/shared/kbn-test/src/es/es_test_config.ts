@@ -9,8 +9,8 @@
 
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import Url from 'url';
+import { TEST_ES_PORT, TEST_ES_TRANSPORT_PORT } from '@kbn/test-services';
 import { systemIndicesSuperuser } from '../kbn';
-import { TEST_ES_PORT, TEST_ES_TRANSPORT_PORT } from '../..';
 import { getUrlParts } from '../get_url_parts';
 
 class EsTestConfig {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { TEST_FLEET_PORT, type FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { TEST_FLEET_PORT } from '@kbn/test-services';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 

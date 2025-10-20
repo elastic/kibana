@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TEST_FLEET_HOST, TEST_FLEET_PORT, TEST_ES_HOST, TEST_ES_PORT } from '@kbn/test';
+import { TEST_FLEET_HOST, TEST_FLEET_PORT, TEST_ES_HOST, TEST_ES_PORT } from '@kbn/test-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 const defaultFleetServerHostId = 'default-fleet-server';

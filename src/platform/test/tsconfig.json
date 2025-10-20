@@ -82,5 +82,6 @@
     "@kbn/ai-assistant-management-plugin",
     "@kbn/core-chrome-navigation-tour",
     "@kbn/visualizations-common",
+    "@kbn/test-services",
   ]
 }

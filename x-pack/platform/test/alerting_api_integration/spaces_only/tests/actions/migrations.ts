@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
-import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test';
+import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test-services';
 import { getUrlPrefix } from '../../../common/lib';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 

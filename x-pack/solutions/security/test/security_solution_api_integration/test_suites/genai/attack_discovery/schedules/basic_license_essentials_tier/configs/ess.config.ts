@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { TEST_ES_HOST, TEST_ES_PORT, type FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { TEST_ES_HOST, TEST_ES_PORT } from '@kbn/test-services';
 import { PRECONFIGURED_BEDROCK_ACTION } from '../../../../../../config/shared';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

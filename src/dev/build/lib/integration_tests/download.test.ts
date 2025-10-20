@@ -14,7 +14,7 @@ import { tmpdir } from 'os';
 import { readFileSync } from 'fs';
 
 import del from 'del';
-import { CI_PARALLEL_PROCESS_PREFIX } from '@kbn/test';
+import { CI_PARALLEL_PROCESS_PREFIX } from '@kbn/test-services';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
 

@@ -5,11 +5,8 @@
  * 2.0.
  */
 import type { FtrConfigProviderContext, Config } from '@kbn/test';
-import {
-  fleetPackageRegistryDockerImage,
-  defineDockerServersConfig,
-  FLEET_PACKAGE_REGISTRY_PORT,
-} from '@kbn/test';
+import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
+import { FLEET_PACKAGE_REGISTRY_PORT } from '@kbn/test-services';
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { ServerlessProjectType } from '@kbn/es';

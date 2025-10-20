@@ -15,7 +15,7 @@ import { observeLines } from '@kbn/stdio-dev-helpers';
 import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
 
-import { FLEET_PACKAGE_REGISTRY_PORT } from '@kbn/test';
+import { FLEET_PACKAGE_REGISTRY_PORT } from '@kbn/test-services';
 
 const BEFORE_SETUP_TIMEOUT = 30 * 60 * 1000; // 30 minutes;
 
@@ -59,7 +59,7 @@ export function useDockerRegistry() {
   });
   const packageRegistryPort = String(FLEET_PACKAGE_REGISTRY_PORT || '8081');
 
-  if (!packageRegistryPort.match(/^[0-9]{4}/)) {
+  if (!packageRegistryPort.match(/^[0-9]{4,5}/)) {
     throw new Error('Invalid FLEET_PACKAGE_REGISTRY_PORT');
   }
 

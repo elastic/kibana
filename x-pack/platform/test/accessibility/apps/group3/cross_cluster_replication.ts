@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TEST_ES_TRANSPORT_PORT } from '@kbn/test';
+import { TEST_ES_TRANSPORT_PORT } from '@kbn/test-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

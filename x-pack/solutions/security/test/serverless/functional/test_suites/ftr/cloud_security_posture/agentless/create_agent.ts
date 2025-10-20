@@ -7,7 +7,7 @@
 
 import type * as http from 'http';
 import expect from '@kbn/expect';
-import { TEST_AGENTLESS_PORT } from '@kbn/test';
+import { TEST_AGENTLESS_PORT } from '@kbn/test-services';
 import { setupMockServer } from './mock_agentless_api';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {

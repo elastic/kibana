@@ -10,7 +10,7 @@ import {
   expectDefaultElasticsearchOutput,
   expectDefaultFleetServer,
 } from '@kbn/test-suites-xpack-platform/serverless/api_integration/services/default_fleet_setup';
-import { TEST_FLEET_HOST, TEST_FLEET_PORT } from '@kbn/test';
+import { TEST_FLEET_HOST, TEST_FLEET_PORT } from '@kbn/test-services';
 import type { RoleCredentials } from '../../services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

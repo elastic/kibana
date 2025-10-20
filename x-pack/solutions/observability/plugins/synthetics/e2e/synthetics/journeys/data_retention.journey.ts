@@ -9,7 +9,7 @@ import type { Page } from '@elastic/synthetics';
 import { journey, step, expect } from '@elastic/synthetics';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import { recordVideo } from '@kbn/observability-synthetics-test-data';
-import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test';
+import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test-services';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import { byTestId, assertText } from '../../helpers/utils';
 

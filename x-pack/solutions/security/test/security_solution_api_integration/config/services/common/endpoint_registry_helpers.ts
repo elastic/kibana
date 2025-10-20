@@ -10,8 +10,8 @@ import path from 'path';
 import {
   fleetPackageRegistryDockerImage as ingestDockerImage,
   defineDockerServersConfig,
-  FLEET_PACKAGE_REGISTRY_PORT,
 } from '@kbn/test';
+import { FLEET_PACKAGE_REGISTRY_PORT } from '@kbn/test-services';
 
 export function SecuritySolutionEndpointRegistryHelpers() {
   /**

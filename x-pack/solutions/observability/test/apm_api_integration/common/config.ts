@@ -9,11 +9,11 @@ import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_user
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import {
-  FLEET_PACKAGE_REGISTRY_PORT,
   defineDockerServersConfig,
   fleetPackageRegistryDockerImage,
   kbnTestConfig,
 } from '@kbn/test';
+import { FLEET_PACKAGE_REGISTRY_PORT } from '@kbn/test-services';
 import path from 'path';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import supertest from 'supertest';

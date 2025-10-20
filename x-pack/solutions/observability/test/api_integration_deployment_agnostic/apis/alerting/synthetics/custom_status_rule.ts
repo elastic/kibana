@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import moment from 'moment-timezone';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test';
+import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test-services';
 import { waitForDocumentInIndex } from '../../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
 import type { RoleCredentials, SupertestWithRoleScopeType } from '../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';

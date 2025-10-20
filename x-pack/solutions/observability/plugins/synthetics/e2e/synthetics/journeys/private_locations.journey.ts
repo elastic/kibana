@@ -7,7 +7,7 @@
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { waitForLoadingToFinish } from '@kbn/ux-plugin/e2e/journeys/utils';
-import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test';
+import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test-services';
 import { SyntheticsServices } from './services/synthetics_services';
 import { byTestId } from '../../helpers/utils';
 import { addTestMonitor, cleanPrivateLocations, cleanTestMonitors } from './services/add_monitor';

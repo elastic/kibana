@@ -19,8 +19,8 @@ import {
   kbnTestConfig,
   systemIndicesSuperuser,
   defineDockerServersConfig,
-  FLEET_PACKAGE_REGISTRY_PORT,
 } from '@kbn/test';
+import { FLEET_PACKAGE_REGISTRY_PORT } from '@kbn/test-services';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';

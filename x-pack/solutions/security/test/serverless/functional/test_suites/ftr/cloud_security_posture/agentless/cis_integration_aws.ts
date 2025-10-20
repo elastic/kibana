@@ -11,7 +11,7 @@ import {
   AWS_SINGLE_ACCOUNT_TEST_SUBJ,
   AWS_INPUT_TEST_SUBJECTS,
 } from '@kbn/cloud-security-posture-common';
-import { TEST_AGENTLESS_PORT } from '@kbn/test';
+import { TEST_AGENTLESS_PORT } from '@kbn/test-services';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
 

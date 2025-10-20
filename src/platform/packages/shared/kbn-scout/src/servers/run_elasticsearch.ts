@@ -14,6 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
 import { isServerlessProjectType } from '@kbn/es/src/utils';
 import { createTestEsCluster, esTestConfig, cleanupElasticsearch } from '@kbn/test';
+import { SERVICE_NAMESPACE } from '@kbn/test-services';
 import type { Config } from '../config';
 
 interface RunElasticsearchOptions {
@@ -77,7 +78,7 @@ export async function runElasticsearch(
 
   const node = await startEsNode({
     log,
-    name: name ?? 'scout',
+    name: name ?? `${SERVICE_NAMESPACE}-scout`,
     logsDir,
     config,
   });

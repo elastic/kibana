@@ -8,7 +8,7 @@
 import { journey, step, expect, before } from '@elastic/synthetics';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { recordVideo } from '@kbn/observability-synthetics-test-data';
-import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test';
+import { TEST_KIBANA_HOST, TEST_KIBANA_PORT } from '@kbn/test-services';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
 journey('ProjectAPIKeys', async ({ page, params }) => {

@@ -23,6 +23,7 @@ import {
 } from '@kbn/test/src/functional_test_runner/lib';
 import pRetry from 'p-retry';
 import execa from 'execa';
+import { TEST_ES_PORT, TEST_KIBANA_PORT, TEST_FLEET_PORT } from '@kbn/test-services';
 import { prefixedOutputLogger } from '../endpoint/common/utils';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { parseTestFileConfig, retrieveIntegrations } from '../run_cypress/utils';
@@ -78,13 +79,13 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
       const specArg = argv.spec;
       const specPattern = specArg ?? specConfig;
       const files = retrieveIntegrations(globby.sync(specPattern));
-      const esPorts: number[] = [9200, 9220];
-      const kibanaPorts: number[] = [5601, 5620];
-      const fleetServerPorts: number[] = [8220];
+      const esPorts: number[] = _.uniq([9200, TEST_ES_PORT]);
+      const kibanaPorts: number[] = _.uniq([5601, TEST_KIBANA_PORT]);
+      const fleetServerPorts: number[] = _.uniq([8220, TEST_FLEET_PORT]);
 
       const getEsPort = <T>(): T | number => {
         if (isOpen) {
-          return 9220;
+          return TEST_ES_PORT;
         }
 
         const esPort = parseInt(`92${Math.floor(Math.random() * 89) + 10}`, 10);
@@ -97,7 +98,7 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
 
       const getKibanaPort = <T>(): T | number => {
         if (isOpen) {
-          return 5620;
+          return TEST_KIBANA_PORT;
         }
 
         const kibanaPort = parseInt(`56${Math.floor(Math.random() * 89) + 10}`, 10);
@@ -110,7 +111,7 @@ ${JSON.stringify(playwrightConfigFile, null, 2)}
 
       const getFleetServerPort = <T>(): T | number => {
         if (isOpen) {
-          return 8220;
+          return TEST_FLEET_PORT;
         }
 
         const fleetServerPort = parseInt(`82${Math.floor(Math.random() * 89) + 10}`, 10);

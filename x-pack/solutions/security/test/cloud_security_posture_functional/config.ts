@@ -10,8 +10,8 @@ import {
   getKibanaCliLoggers,
   type FtrConfigProviderContext,
   type GenericFtrProviderContext,
-  TEST_FLEET_PORT,
 } from '@kbn/test';
+import { TEST_FLEET_PORT } from '@kbn/test-services';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import {
   KibanaEBTServerProvider,

@@ -16,8 +16,8 @@ import {
   type FtrConfigProvider,
   defineDockerServersConfig,
   fleetPackageRegistryDockerImage,
-  FLEET_PACKAGE_REGISTRY_PORT,
 } from '@kbn/test';
+import { FLEET_PACKAGE_REGISTRY_PORT } from '@kbn/test-services';
 import path from 'path';
 import { services } from '../services';
 import type { AnyStep } from './journey';

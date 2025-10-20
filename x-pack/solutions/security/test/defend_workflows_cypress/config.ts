@@ -6,7 +6,7 @@
  */
 
 import type { FtrConfigProviderContext } from '@kbn/test';
-import { TEST_FLEET_PORT } from '@kbn/test';
+import { TEST_FLEET_PORT } from '@kbn/test-services';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/network_services';
 import { services } from './services';

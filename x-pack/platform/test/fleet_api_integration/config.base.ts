@@ -12,10 +12,12 @@ import {
   fleetPackageRegistryDockerImage,
   defineDockerServersConfig,
   getKibanaCliLoggers,
+} from '@kbn/test';
+import {
   FLEET_PACKAGE_REGISTRY_PORT,
   TEST_AGENTLESS_PORT,
   TEST_AGENTLESS_HOST,
-} from '@kbn/test';
+} from '@kbn/test-services';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 

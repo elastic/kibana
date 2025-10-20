@@ -7,7 +7,7 @@
 
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
-import { TEST_AGENTLESS_HOST, TEST_AGENTLESS_PORT, TEST_FLEET_PORT } from '@kbn/test';
+import { TEST_AGENTLESS_HOST, TEST_AGENTLESS_PORT, TEST_FLEET_PORT } from '@kbn/test-services';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from './constants';
 import { pageObjects } from './page_objects';
 

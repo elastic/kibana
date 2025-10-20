@@ -8,7 +8,7 @@
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { createTestConfig } from '@kbn/test-suites-xpack-platform/serverless/functional/config.base';
 import { kbnServerArgs as fleetKbnServerArgs } from '@kbn/test-suites-xpack-platform/serverless/api_integration/services/default_fleet_setup';
-import { TEST_AGENTLESS_HOST, TEST_AGENTLESS_PORT } from '@kbn/test';
+import { TEST_AGENTLESS_HOST, TEST_AGENTLESS_PORT } from '@kbn/test-services';
 import { services } from '../services';
 import { pageObjects } from '../page_objects';
 
