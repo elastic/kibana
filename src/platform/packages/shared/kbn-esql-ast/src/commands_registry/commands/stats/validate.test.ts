@@ -123,12 +123,21 @@ describe('STATS Validation', () => {
       });
 
       test('allows IN operator in WHERE clause', () => {
-        statsExpectErrors('FROM a_index | STATS col0 = avg(doubleField) WHERE textField IN ("a", "b")', []);
-        statsExpectErrors('FROM a_index | STATS col0 = avg(doubleField) WHERE doubleField IN (doubleField, doubleField)', []);
+        statsExpectErrors(
+          'FROM a_index | STATS col0 = avg(doubleField) WHERE textField IN ("a", "b")',
+          []
+        );
+        statsExpectErrors(
+          'FROM a_index | STATS col0 = avg(doubleField) WHERE doubleField IN (doubleField, doubleField)',
+          []
+        );
       });
 
       test('allows NOT IN operator in WHERE clause', () => {
-        statsExpectErrors('FROM a_index | STATS col0 = avg(doubleField) WHERE textField NOT IN ("a", "b")', []);
+        statsExpectErrors(
+          'FROM a_index | STATS col0 = avg(doubleField) WHERE textField NOT IN ("a", "b")',
+          []
+        );
       });
     });
 
