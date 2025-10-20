@@ -73,10 +73,11 @@ const getAspectRatioStyles = ({ x, y }: { x: number; y: number }) => {
 export function VisualizationToolbar(props: {
   activeVisualization: Visualization | null;
   framePublicAPI: FramePublicAPI;
+  enableFlyoutToolbar?: boolean;
 }) {
   const dispatchLens = useLensDispatch();
   const visualization = useLensSelector(selectVisualizationState);
-  const { activeVisualization } = props;
+  const { activeVisualization, enableFlyoutToolbar = false } = props;
   const setVisualizationState = useCallback(
     (newState: unknown) => {
       if (!activeVisualization) {
@@ -92,7 +93,15 @@ export function VisualizationToolbar(props: {
     [dispatchLens, activeVisualization]
   );
 
-  const ToolbarComponent = props.activeVisualization?.ToolbarComponent;
+  const { FlyoutToolbarComponent, ToolbarComponent: RegularToolbarComponent } =
+    activeVisualization || {};
+
+  let ToolbarComponent;
+  if (enableFlyoutToolbar) {
+    ToolbarComponent = FlyoutToolbarComponent || RegularToolbarComponent;
+  } else {
+    ToolbarComponent = RegularToolbarComponent;
+  }
 
   return (
     <>
