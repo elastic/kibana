@@ -175,4 +175,11 @@ test.describe('Onboarding UI Validation', () => {
       });
     }
   );
+
+  test('keyboard functionality', { tag: ['@ess'] }, async ({ pageObjects, page }) => {
+    await pageObjects.onboarding.keyToExploreDemoLink();
+    await expect(
+      page.locator('[data-test-subj="observabilityOnboardingFooterExploreDemoLink"]')
+    ).toBeFocused();
+  });
 });

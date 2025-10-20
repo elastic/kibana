@@ -179,4 +179,20 @@ export class OnboardingApp {
     await this.kubernetesUseCaseTile.waitFor({ state: 'visible' });
     await this.cloudUseCaseTile.waitFor({ state: 'visible' });
   }
+
+  async keyToExploreDemoLink() {
+    // this element is not on the page and should throw an error with a useful message
+    // await this.page.testSubj.keyTo('[data-test-subj="fake-test-subject"]');
+
+    // this should have multiple elements matching the selector and throw an error with a useful message
+    // await this.page.testSubj.keyTo('button');
+
+    // this element is not focusable and should result in a tab cycle error
+    // await this.page.testSubj.keyTo('[data-test-subj="obltOnboardingHomeTitle"]');
+
+    // happy path - this element is focusable and should result in focus ending on the provided element
+    await this.page.testSubj.keyTo(
+      '[data-test-subj="observabilityOnboardingFooterExploreDemoLink"]'
+    );
+  }
 }

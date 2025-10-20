@@ -10,6 +10,7 @@
 import type { Page } from '@playwright/test';
 import { test as base } from '@playwright/test';
 import { subj } from '@kbn/test-subj-selector';
+import { keyToElement } from '../../../../utils';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
 import type { KibanaUrl, ScoutLogger } from '../../worker';
 import type { ScoutPage } from '.';
@@ -39,6 +40,7 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
   const extendedMethods: Partial<Record<keyof Page, Function>> & {
     typeWithDelay?: ScoutPage['testSubj']['typeWithDelay'];
     clearInput?: ScoutPage['testSubj']['clearInput'];
+    keyTo?: ScoutPage['testSubj']['keyTo'];
   } = {};
 
   for (const method of methods) {
@@ -65,10 +67,16 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
       await page.waitForTimeout(delay);
     }
   };
+
   // custom method to clear an input field
   extendedMethods.clearInput = async (selector: string) => {
     const testSubjSelector = subj(selector);
     await page.locator(testSubjSelector).fill('');
+  };
+
+  // custom method to press a key until an element with the provided selector is in focus.
+  extendedMethods.keyTo = async (selector: string, key: string = 'Tab') => {
+    return await keyToElement(page, selector, key);
   };
 
   return extendedMethods as ScoutPage['testSubj'];
