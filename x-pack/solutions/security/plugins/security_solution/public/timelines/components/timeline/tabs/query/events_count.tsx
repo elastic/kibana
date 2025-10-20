@@ -38,7 +38,7 @@ import { isActiveTimeline } from '../../../../../helpers';
 import type { TimelineModel } from '../../../../store/model';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { EventsCountBadge } from '../shared/layout';
-import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { DataViewManagerScopeName } from '../../../../../data_view_manager/constants';
 
 /**
@@ -53,7 +53,7 @@ const emptyFieldsList: string[] = [];
 export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string }> = ({
   timelineId,
 }) => {
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const getKqlQueryTimeline = useMemo(() => timelineSelectors.getKqlFilterKuerySelector(), []);
   const getInputsTimeline = useMemo(() => inputsSelectors.getTimelineSelector(), []);
