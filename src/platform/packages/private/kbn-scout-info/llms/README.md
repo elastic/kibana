@@ -71,7 +71,7 @@ Instructions:
 
 If your FTR tests rely on API helpers to prepare the test environment, use this prompt to create or update Scout API helpers.
 
-First you may use the Semantic code search MCP server to find existing API tests:
+First, you may use the Semantic code search MCP server to find existing API tests:
 
 ```
 Use semantic code search to find existing data views API tests.
@@ -80,16 +80,15 @@ Use semantic code search to find existing data views API tests.
 Alternatively, you can search for these files manually. Then, use a similar prompt:
 
 ```
-Can you generate a Scout API helper based on these existing files:
+Can you generate a Scout API helper based on these existing files and folders:
 
-@src/platform/test/api_integration/apis/data_views/data_views_crud/create_data_view/main.ts
-@src/platform/test/api_integration/apis/data_views/data_views_crud/get_data_view/main.ts
-@x-pack/platform/test/serverless/api_integration/test_suites/data_views/data_views_crud/create_data_view/main.ts
-@src/platform/plugins/shared/data_views/public/data_views/data_views_api_client.test.ts
+@src/platform/test/api_integration/apis/data_views/data_views_crud
+@x-pack/platform/test/serverless/api_integration/test_suites/data_views
+@src/platform/plugins/shared/data_views/public/data_views
 
 Guidelines:
 
-- Don't import existing interfaces. Rather, create a separate `types.ts` file which contains all the interfaces and types that the API helper needs.
+- Don't import existing interfaces. Instead, create a separate `types.ts` file which contains all the interfaces and types that the API helper needs.
 - Take inspiration from the existing Scout platform API helpers: `src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis`, and add them there (follow the same structure).
 - Add support for all the available endpoints, and design the API service to be intuitive to use.
 - Register the new API helper in the `index.ts` file.
@@ -99,7 +98,7 @@ Instructions:
 @src/platform/packages/private/kbn-scout-info/llms/scout-api-services.md contains a high-level overview of API services in Scout
 ```
 
-**Checkpoint**: the AI should now have generated or updated a Scout API service that your tests can use.
+**Checkpoint**: the AI should now have generated or updated a Scout API service that your tests can use. For this step, you may need to manually move these files to the correct directory (one of the Scout packages),
 
 ## Step 4: Implement the test logic
 
