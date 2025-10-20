@@ -88,7 +88,10 @@ import {
   packagePolicyService,
 } from '../../services';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
-import { rollbackInstallation } from '../../services/epm/packages/rollback';
+import {
+  isIntegrationRollbackTTLExpired,
+  rollbackInstallation,
+} from '../../services/epm/packages/rollback';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type {
@@ -702,7 +705,9 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       experimental_data_stream_features: attributes.experimental_data_stream_features,
       latest_install_failed_attempts: attributes.latest_install_failed_attempts,
       latest_executed_state: attributes.latest_executed_state,
-      previous_version: attributes.previous_version,
+      previous_version: isIntegrationRollbackTTLExpired(attributes.install_started_at)
+        ? undefined
+        : attributes.previous_version,
       rolled_back: attributes.rolled_back,
     };
 

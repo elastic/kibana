@@ -110,6 +110,7 @@ export interface FleetConfigType {
   integrationsHomeOverride?: string;
   prereleaseEnabledByDefault?: boolean;
   hideDashboards?: boolean;
+  integrationRollbackTTL?: string;
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`
