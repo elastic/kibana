@@ -21,7 +21,6 @@
     // required bundles
     "@kbn/kibana-react-plugin",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/data-plugin",
     "@kbn/license-api-guard-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
@@ -31,6 +30,7 @@
     "@kbn/shared-ux-router",
     "@kbn/react-kibana-context-render",
     "@kbn/licensing-types",
+    "@kbn/data-views-plugin",
   ],
   "exclude": [
     "target/**/*",
