@@ -10,10 +10,10 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { MODEL_TELEMETRY_METADATA } from '../../telemetry';
-import type { ConversationService } from '../conversation';
-import type { AgentsServiceStart } from '../agents';
-import { resolveSelectedConnectorId } from './utils/resolve_selected_connector_id';
+import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
+import type { ConversationService } from '../../conversation';
+import type { AgentsServiceStart } from '../../agents';
+import { resolveSelectedConnectorId } from './resolve_selected_connector_id';
 
 export const resolveServices = async ({
   agentId,
