@@ -34,7 +34,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 **Alerting**:
 * Enables incremental human-readable case IDs [#238555]({{kib-pull}}238555).
 * Create case analytics indexes per solution per space [#234125]({{kib-pull}}234125).
-* Revert incremental id and add multifield [#230278]({{kib-pull}}230278).
 * Shows thumbnail image of attached case file [#226004]({{kib-pull}}226004).
 * Adds a new Jira Service Management connector [#235408]({{kib-pull}}235408).
 * Adds `xpack.actions.email.recipient_allowlist` alert action setting, which lets you specify a list of allowed email recipient patterns (`to`, `cc`, or `bcc`) that can be used with email connectors [#220058]({{kib-pull}}220058).
