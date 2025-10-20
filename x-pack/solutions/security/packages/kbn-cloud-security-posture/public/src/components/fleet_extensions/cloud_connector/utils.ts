@@ -216,22 +216,22 @@ const updatePolicyInputsWithVars = (
   const updatedPolicy: NewPackagePolicy = {
     ...policy,
     inputs: policy.inputs
-      .map((i: NewPackagePolicyInput) => {
-        if (i.enabled && i.streams[0]?.enabled) {
+      .map((input: NewPackagePolicyInput) => {
+        if (input.enabled && input.streams[0]?.enabled) {
           return {
-            ...i,
-            streams: i.streams.map((s: NewPackagePolicyInputStream) => {
-              if (s.enabled) {
+            ...input,
+            streams: input.streams.map((stream: NewPackagePolicyInputStream) => {
+              if (stream.enabled) {
                 return {
-                  ...s,
+                  ...stream,
                   vars: { ...updatedVars }, // Create a shallow copy instead of referencing directly
                 };
               }
-              return { ...s }; // Return a copy of the original stream if not enabled
+              return { ...stream }; // Return a copy of the original stream if not enabled
             }),
           };
         }
-        return { ...i }; // Return a copy of the original input if not enabled
+        return { ...input }; // Return a copy of the original input if not enabled
       })
       .filter(Boolean), // Filter out undefined values
   };
