@@ -210,7 +210,7 @@ export async function loadIndexPatterns({
   );
 
   const end = performance.now();
-  console.log(`Data view transformations took: ${(end - start).toFixed(2)}ms`);
+  // console.log(`Data view transformations took: ${(end - start).toFixed(2)}ms`);
 
   return indexPatternsObject;
 }
