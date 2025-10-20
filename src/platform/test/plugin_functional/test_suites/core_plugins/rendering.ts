@@ -525,8 +525,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     it('navigates between standard application and one with custom appRoute', async () => {
       await navigateTo('/');
       await find.waitForElementStale(await findLoadingMessage());
+      await testSubjects.click('skipWelcomeScreen');
 
-      await navigateToApp('App Status');
+      await navigateToApp('App Status Start Page');
       expect(await exists('appStatusApp')).to.be(true);
       expect(await exists('renderingHeader')).to.be(false);
 
@@ -534,14 +535,14 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       expect(await exists('appStatusApp')).to.be(false);
       expect(await exists('renderingHeader')).to.be(true);
 
-      await navigateToApp('App Status');
+      await navigateToApp('App Status Start Page');
       expect(await exists('appStatusApp')).to.be(true);
       expect(await exists('renderingHeader')).to.be(false);
 
       expect(await getRenderingSession()).to.eql([
-        '/app/app_status',
+        '/app/app_status_start',
         '/render/core',
-        '/app/app_status',
+        '/app/app_status_start',
       ]);
     });
 
