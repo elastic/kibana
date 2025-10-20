@@ -1183,10 +1183,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         updatedTasks.forEach((task) => {
           expect(task.schedule).to.eql(rruleScheduleExample24h);
-          // should be scheduled to run in 24 hours
-          expect(Date.parse(task.runAt) - initialTime).to.be.greaterThan(
-            moment.duration(24, 'hours').asMilliseconds()
-          );
+          expect(
+            Date.parse(task.scheduledAt) + moment.duration(24, 'hours').asMilliseconds()
+          ).to.be(Date.parse(task.runAt));
         });
       });
     });

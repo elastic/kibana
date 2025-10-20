@@ -9,7 +9,7 @@ import pMap from 'p-map';
 import { chunk, flatten, omit } from 'lodash';
 import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
-import _ from 'lodash';
+import { isEqual } from 'lodash';
 import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
 import type {
@@ -221,7 +221,7 @@ export class TaskScheduling {
       taskIds,
       store: this.store,
       getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
-      filter: (task) => task.status === TaskStatus.Idle && !_.isEqual(task.schedule, schedule),
+      filter: (task) => task.status === TaskStatus.Idle && !isEqual(task.schedule, schedule),
       map: (task) => {
         const newRunAtInMs = calculateNextRunAtFromSchedule({
           schedule,
@@ -231,6 +231,10 @@ export class TaskScheduling {
         return { ...task, schedule, runAt: new Date(newRunAtInMs) };
       },
       validate: false,
+      /**
+       * Because the schedule can be converted from Interval to Rrule and vice versa we want to a void a situation
+       * where both are defined by passing mergeAttributes: false here.
+       */
       mergeAttributes: false,
     });
   }

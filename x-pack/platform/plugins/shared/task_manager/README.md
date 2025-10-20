@@ -547,7 +547,7 @@ Use `bulkUpdatesSchedules` to instruct TaskManger to update the schedule interva
 When the interval is updated, new `runAt` will be computed and task will be updated with that value, using the formula
 
 ```
-newRunAt = lastRunAt + newInterval
+newRunAt = scheduledAt + newInterval
 ```
 
 Example:
