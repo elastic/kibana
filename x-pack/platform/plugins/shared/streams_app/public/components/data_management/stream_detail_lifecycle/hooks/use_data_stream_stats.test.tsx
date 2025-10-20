@@ -6,15 +6,14 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
+import { of } from 'rxjs';
+import type { TimeState } from '@kbn/es-query';
 import { useDataStreamStats } from './use_data_stream_stats';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
-import type { TimeState } from '@kbn/es-query';
-import { of } from 'rxjs';
 
 jest.mock('../../../../hooks/use_kibana');
 jest.mock('../../../../hooks/use_timefilter');
-jest.mock('./use_ingestion_rate');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseTimefilter = useTimefilter as jest.MockedFunction<typeof useTimefilter>;
@@ -23,41 +22,45 @@ const mockDataStreamsClient = {
   getDataStreamsStats: jest.fn(),
 };
 
+const mockFailureStoreStats = {
+  config: { enabled: true, retentionPeriod: { custom: '30d' } },
+  stats: { count: 100, size: 50000, creationDate: '2023-01-01T00:00:00Z' },
+};
+
+const mockStreamsRepositoryClient = {
+  fetch: jest.fn(),
+};
+
+const mockDataSearch = {
+  search: jest.fn(),
+};
+
 const mockDefinition = {
   stream: {
     name: 'test-stream',
   },
 } as any;
 
-const mockTimeState: TimeState = {
-  timeRange: {
-    from: '2023-01-01T00:00:00Z',
-    to: '2023-01-08T00:00:00Z',
-    mode: 'absolute',
-  },
-  asAbsoluteTimeRange: {
-    from: '2023-01-01T00:00:00Z',
-    to: '2023-01-08T00:00:00Z',
-    mode: 'absolute',
-  },
-  start: new Date('2023-01-01T00:00:00Z').getTime(),
-  end: new Date('2023-01-08T00:00:00Z').getTime(),
-};
-
-const mockAggregations = {
-  buckets: [
-    { key: 1, doc_count: 50 },
-    { key: 2, doc_count: 75 },
-    { key: 3, doc_count: 25 },
-  ],
-  interval: '1d',
-};
-
 const mockDataStreamStats = {
   totalDocs: 500,
-  sizeBytes: 2500000,
+  sizeBytes: 2550000,
   creationDate: '2023-01-01T00:00:00Z',
 };
+
+const mockTimestate = {
+  start: 1760392800000,
+  end: 1760479200000,
+  timeRange: {
+    from: 'now-1d',
+    to: 'now',
+    mode: 'relative',
+  },
+  asAbsoluteTimeRange: {
+    from: '2025-10-13T22:00:00.000Z',
+    to: '2025-10-14T22:00:00.000Z',
+    mode: 'absolute',
+  },
+} as TimeState;
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -67,47 +70,94 @@ beforeEach(() => {
       dataStreamsClient: Promise.resolve(mockDataStreamsClient),
     },
     core: {
-      notifications: {
-        toasts: {
-          addError: jest.fn(),
-        },
+      notifications: { toasts: { addError: jest.fn() } },
+      uiSettings: {
+        get: jest.fn().mockImplementation((key: string) => {
+          if (key === 'dateFormat') return 'MMM D, YYYY @ HH:mm:ss.SSS';
+          if (key === 'histogram:maxBars') return 1000;
+          if (key === 'histogram:barTarget') return 50;
+          if (key === 'dateFormat:scaled') {
+            return [
+              ['', 'HH:mm:ss.SSS'],
+              ['PT1S', 'HH:mm:ss'],
+              ['PT1M', 'HH:mm'],
+              ['PT1H', 'YYYY-MM-DD HH:mm'],
+              ['P1DT', 'YYYY-MM-DD'],
+              ['P1YT', 'YYYY'],
+            ];
+          }
+
+          throw new Error(`uiSetting [${key}] is not mocked`);
+        }),
+      },
+    },
+    dependencies: {
+      start: {
+        data: { search: mockDataSearch },
+        streams: { streamsRepositoryClient: mockStreamsRepositoryClient },
       },
     },
   } as any);
 
   mockUseTimefilter.mockReturnValue({
-    timeState: mockTimeState,
+    timeState: {},
     timeState$: of({ kind: 'initial' }),
   } as any);
 
   mockDataStreamsClient.getDataStreamsStats.mockResolvedValue({
     dataStreamsStats: [mockDataStreamStats],
   });
+
+  mockStreamsRepositoryClient.fetch.mockResolvedValue(mockFailureStoreStats);
+
+  mockDataSearch.search.mockReturnValue(
+    of({
+      rawResponse: {
+        aggregations: {
+          sampler: { docs_count: { buckets: [{ key: 1, doc_count: 100 }] } },
+          interval: '30m',
+        },
+      },
+    })
+  );
 });
 
 describe('useDataStreamStats', () => {
   describe('successful data fetching', () => {
-    it('should fetch and calculate data stream stats correctly', async () => {
+    it('should fetch data stream stats correctly', async () => {
       const { result } = renderHook(() =>
         useDataStreamStats({
           definition: mockDefinition,
-          timeState: mockTimeState,
-          aggregations: mockAggregations,
+          timeState: mockTimestate,
         })
       );
       await waitFor(() => {
         expect(result.current.stats).toBeDefined();
       });
 
-      // Total doc count from aggregations: 50 + 75 + 25 = 150
-      // Range in days: 7 (Jan 1 to Jan 8)
-      // Per day docs: 150 / 7 ≈ 21.43
-      // Bytes per doc: 2500000 / 500 = 5000
-      // Bytes per day: 5000 * 21.43 ≈ 107143
       expect(result.current.stats).toEqual({
-        ...mockDataStreamStats,
-        bytesPerDoc: 5000,
-        bytesPerDay: 107142.85714285713,
+        ds: {
+          aggregations: { buckets: [{ key: 1, doc_count: 100 }], interval: '30m' },
+          stats: {
+            bytesPerDay: 500000,
+            bytesPerDoc: 5000,
+            creationDate: '2023-01-01T00:00:00Z',
+            size: '2.5 MB',
+            sizeBytes: 2500000, // mockDataStreamStats.sizeBytes - mockFailureStoreStats.stats.size
+            totalDocs: 500,
+          },
+        },
+        fs: {
+          aggregations: { buckets: [{ key: 1, doc_count: 100 }], interval: '30m' },
+          config: { enabled: true, retentionPeriod: { custom: '30d' } },
+          stats: {
+            bytesPerDay: 50000,
+            bytesPerDoc: 500,
+            creationDate: '2023-01-01T00:00:00Z',
+            size: 50000,
+            count: 100,
+          },
+        },
       });
       expect(result.current.isLoading).toBe(false);
       expect(result.current.error).toBeUndefined();
@@ -125,19 +175,91 @@ describe('useDataStreamStats', () => {
         dataStreamsStats: [statsWithZeroDocs],
       });
 
+      mockStreamsRepositoryClient.fetch.mockResolvedValue({
+        ...mockFailureStoreStats,
+        stats: { ...mockFailureStoreStats.stats, count: 0, size: 0 },
+      });
+
+      mockDataSearch.search.mockReturnValue(
+        of({
+          rawResponse: {
+            aggregations: {
+              sampler: { docs_count: { buckets: [] } },
+              interval: '30m',
+            },
+          },
+        })
+      );
+
       const { result } = renderHook(() =>
         useDataStreamStats({
           definition: mockDefinition,
-          timeState: mockTimeState,
-          aggregations: mockAggregations,
+          timeState: mockTimestate,
         })
       );
 
       await waitFor(() => {
         expect(result.current.stats).toBeDefined();
       });
-      expect(result.current.stats?.bytesPerDoc).toBe(0);
-      expect(result.current.stats?.bytesPerDay).toBe(0);
+      expect(result.current.stats).toEqual({
+        ds: {
+          aggregations: { buckets: [], interval: '30m' },
+          stats: {
+            bytesPerDay: 0,
+            bytesPerDoc: 0,
+            creationDate: '2023-01-01T00:00:00Z',
+            size: '1.0 KB',
+            sizeBytes: 1000,
+            totalDocs: 0,
+          },
+        },
+        fs: {
+          aggregations: { buckets: [], interval: '30m' },
+          config: { enabled: true, retentionPeriod: { custom: '30d' } },
+          stats: {
+            bytesPerDay: 0,
+            bytesPerDoc: 0,
+            creationDate: '2023-01-01T00:00:00Z',
+            size: 0,
+            count: 0,
+          },
+        },
+      });
+    });
+
+    it('should handles disabled failure store', async () => {
+      mockStreamsRepositoryClient.fetch.mockResolvedValue({
+        config: { enabled: false, retentionPeriod: { custom: '30d' } },
+      });
+
+      const { result } = renderHook(() =>
+        useDataStreamStats({
+          definition: mockDefinition,
+          timeState: mockTimestate,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.stats).toBeDefined();
+      });
+      expect(result.current.stats).toEqual({
+        ds: {
+          aggregations: { buckets: [{ key: 1, doc_count: 100 }], interval: '30m' },
+          stats: {
+            bytesPerDay: 510000,
+            bytesPerDoc: 5100,
+            creationDate: '2023-01-01T00:00:00Z',
+            size: '2.5 MB',
+            sizeBytes: 2550000,
+            totalDocs: 500,
+          },
+        },
+        fs: {
+          config: { enabled: false, retentionPeriod: { custom: '30d' } },
+          aggregations: undefined,
+          stats: undefined,
+        },
+      });
     });
   });
 
@@ -150,8 +272,7 @@ describe('useDataStreamStats', () => {
       const { result } = renderHook(() =>
         useDataStreamStats({
           definition: mockDefinition,
-          timeState: mockTimeState,
-          aggregations: mockAggregations,
+          timeState: mockTimestate,
         })
       );
 
@@ -161,7 +282,7 @@ describe('useDataStreamStats', () => {
       expect(result.current.stats).toBeUndefined();
     });
 
-    it('should handle missing creation date', async () => {
+    it('should handle missing data stream creation date', async () => {
       const statsWithoutCreationDate = {
         ...mockDataStreamStats,
         creationDate: undefined,
@@ -174,8 +295,7 @@ describe('useDataStreamStats', () => {
       const { result } = renderHook(() =>
         useDataStreamStats({
           definition: mockDefinition,
-          timeState: mockTimeState,
-          aggregations: mockAggregations,
+          timeState: mockTimestate,
         })
       );
 
@@ -192,8 +312,7 @@ describe('useDataStreamStats', () => {
       const { result } = renderHook(() =>
         useDataStreamStats({
           definition: mockDefinition,
-          timeState: mockTimeState,
-          aggregations: mockAggregations,
+          timeState: mockTimestate,
         })
       );
 
@@ -205,17 +324,19 @@ describe('useDataStreamStats', () => {
   });
 
   describe('loading states', () => {
-    it('should return loading state correctly', () => {
+    it('should return loading state correctly', async () => {
       const { result } = renderHook(() =>
         useDataStreamStats({
           definition: mockDefinition,
-          timeState: mockTimeState,
-          aggregations: mockAggregations,
+          timeState: mockTimestate,
         })
       );
 
       expect(result.current.isLoading).toBe(true);
       expect(result.current.stats).toBeUndefined();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
     });
   });
 });
