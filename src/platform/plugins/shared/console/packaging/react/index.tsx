@@ -49,7 +49,7 @@ import { createStorage, createHistory, createSettings, setStorage } from '../../
 import { loadActiveApi } from '../../public/lib/kb';
 
 import { createPackagingParsedRequestsProvider } from './parser';
-import { injectedMetadata, coreContext, trackUiMetric } from './mocked_dependencies';
+import { injectedMetadata, coreContext, trackUiMetric } from './services';
 
 import * as localStorageObjectClient from '../../public/lib/local_storage_object_client';
 import { Main } from '../../public/application/containers';

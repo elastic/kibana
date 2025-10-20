@@ -24,22 +24,22 @@ export interface InjectedMetadataOptions {
 }
 
 /**
- * Creates a mocked InternalInjectedMetadataSetup for standalone packaging.
+ * Creates an InternalInjectedMetadataSetup for standalone packaging.
  * This allows Kibana plugins to run without the full Kibana server context.
  *
- * @param options - Configuration options to customize the mocked metadata
- * @returns A mock InternalInjectedMetadataSetup implementation
+ * @param options - Configuration options to customize the metadata
+ * @returns An InternalInjectedMetadataSetup implementation for standalone use
  *
  * @example
  * ```ts
- * const metadata = createMockedInjectedMetadata({
+ * const metadata = createInjectedMetadata({
  *   kibanaVersion: '8.12.0',
  *   kibanaBuildNumber: 54321,
  *   basePath: '/my-app',
  * });
  * ```
  */
-export function createMockedInjectedMetadata(
+export function createInjectedMetadata(
   options: InjectedMetadataOptions = {}
 ): InternalInjectedMetadataSetup {
   const {

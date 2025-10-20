@@ -17,22 +17,22 @@ export interface TrackUiMetricOptions {
 }
 
 /**
- * Creates a mocked trackUiMetric utility for standalone packaging.
+ * Creates a trackUiMetric utility for standalone packaging.
  * In standalone mode, UI metrics are typically not sent to Kibana's telemetry service.
  * However, you can provide custom handlers to integrate with your own analytics.
  *
  * @param options - Configuration options for metric tracking
- * @returns A mock trackUiMetric implementation
+ * @returns A trackUiMetric implementation for standalone use
  *
  * @example
  * ```ts
- * const trackUiMetric = createMockedTrackUiMetric({
+ * const trackUiMetric = createTrackUiMetric({
  *   onCount: (event) => console.log('Count metric:', event),
  *   onLoad: (event) => console.log('Load metric:', event),
  * });
  * ```
  */
-export function createMockedTrackUiMetric(options: TrackUiMetricOptions = {}) {
+export function createTrackUiMetric(options: TrackUiMetricOptions = {}) {
   const { onCount = () => {}, onLoad = () => {} } = options;
 
   return {

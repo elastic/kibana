@@ -53,22 +53,22 @@ const createLogger = (name?: string, enabled: boolean = true): any => {
 /* eslint-enable no-console */
 
 /**
- * Creates a mocked CoreContext for standalone packaging.
+ * Creates a CoreContext for standalone packaging.
  * This provides logging and environment information for Kibana core services.
  *
  * @param options - Configuration options to customize the core context
- * @returns A mock CoreContext implementation
+ * @returns A CoreContext implementation for standalone use
  *
  * @example
  * ```ts
- * const coreContext = createMockedCoreContext({
+ * const coreContext = createCoreContext({
  *   version: '8.12.0',
  *   mode: 'production',
  *   enableConsoleLogging: false,
  * });
  * ```
  */
-export function createMockedCoreContext(options: CoreContextOptions = {}): CoreContext {
+export function createCoreContext(options: CoreContextOptions = {}): CoreContext {
   const {
     version = '1.0.0',
     branch = 'main',
