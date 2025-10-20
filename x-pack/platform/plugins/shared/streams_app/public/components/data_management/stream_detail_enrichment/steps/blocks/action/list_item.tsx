@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isActionBlock } from '@kbn/streamlang';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { useSelector } from '@xstate5/react';
 import { ProcessorMetricBadges } from './processor_metrics';
@@ -27,6 +27,9 @@ import { ProcessorStatusIndicator } from './processor_status_indicator';
 import { getStepPanelColour } from '../../../utils';
 import { StepContextMenu } from '../context_menu';
 import { BlockDisableOverlay } from '../block_disable_overlay';
+import { useConditionHighlight } from '../../../state_management/condition_highlight_context';
+import { useConditionMatchMetrics } from '../../../state_management/use_condition_metrics';
+import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
 
 export const ActionBlockListItem = ({
   processorMetrics,
@@ -40,6 +43,32 @@ export const ActionBlockListItem = ({
 }: ActionBlockProps) => {
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
   const { euiTheme } = useEuiTheme();
+  const { activeConditionId } = useConditionHighlight();
+
+  const parentIdMap = useStreamEnrichmentSelector((state) => {
+    return new Map(
+      state.context.stepRefs.map((ref) => {
+        const stepContext = ref.getSnapshot().context.step;
+        return [stepContext.customIdentifier, stepContext.parentId];
+      })
+    );
+  });
+
+  const isDescendantOfActiveCondition = useMemo(() => {
+    if (!activeConditionId) {
+      return false;
+    }
+
+    let currentParent = step.parentId;
+    while (currentParent) {
+      if (currentParent === activeConditionId) {
+        return true;
+      }
+      currentParent = parentIdMap.get(currentParent);
+    }
+
+    return false;
+  }, [activeConditionId, parentIdMap, step.parentId]);
 
   const isUnsaved = useSelector(
     stepRef,
@@ -52,6 +81,24 @@ export const ActionBlockListItem = ({
   if (!isActionBlock(step)) return null;
 
   const stepDescription = getStepDescription(step);
+  const activeConditionMetrics = useConditionMatchMetrics(
+    isDescendantOfActiveCondition ? activeConditionId : undefined
+  );
+  const parentConditionMetrics = useConditionMatchMetrics(step.parentId);
+
+  const metricsSource = isDescendantOfActiveCondition
+    ? activeConditionMetrics
+    : parentConditionMetrics;
+
+  const relativeMetrics =
+    processorMetrics && isDescendantOfActiveCondition && metricsSource.matchedCount > 0
+      ? {
+          parsedRate: metricsSource.statusCounts.parsed / metricsSource.matchedCount,
+          partiallyParsedRate:
+            metricsSource.statusCounts.partially_parsed / metricsSource.matchedCount,
+          failedRate: metricsSource.statusCounts.failed / metricsSource.matchedCount,
+        }
+      : undefined;
 
   return (
     <>
@@ -92,7 +139,10 @@ export const ActionBlockListItem = ({
               <EuiFlexGroup alignItems="center" gutterSize="xs">
                 {processorMetrics && (
                   <EuiFlexItem>
-                    <ProcessorMetricBadges {...processorMetrics} />
+                    <ProcessorMetricBadges
+                      {...processorMetrics}
+                      relativeMetrics={relativeMetrics}
+                    />
                   </EuiFlexItem>
                 )}
                 {isUnsaved && (

@@ -28,7 +28,13 @@ import { css } from '@emotion/react';
 import { getPercentageFormatter } from '../../../../../../util/formatters';
 import type { ProcessorMetrics } from '../../../state_management/simulation_state_machine';
 
-type ProcessorMetricBadgesProps = ProcessorMetrics;
+type ProcessorMetricBadgesProps = ProcessorMetrics & {
+  relativeMetrics?: {
+    parsedRate?: number;
+    partiallyParsedRate?: number;
+    failedRate?: number;
+  };
+};
 
 const formatter = getPercentageFormatter();
 
@@ -80,13 +86,20 @@ const ProcessorErrorMessage = ({ message }: { message: string }) => {
 export const ProcessorMetricBadges = ({
   detected_fields,
   failed_rate,
-  skipped_rate,
   parsed_rate,
+  relativeMetrics,
 }: ProcessorMetricBadgesProps) => {
   const detectedFieldsCount = detected_fields.length;
-  const parsedRate = parsed_rate > 0 ? formatter.format(parsed_rate) : null;
-  const skippedRate = skipped_rate > 0 ? formatter.format(skipped_rate) : null;
-  const failedRate = failed_rate > 0 ? formatter.format(failed_rate) : null;
+  const parsedRateValue = relativeMetrics?.parsedRate ?? parsed_rate;
+  const partiallyParsedRateValue = relativeMetrics?.partiallyParsedRate;
+  const failedRateValue = relativeMetrics?.failedRate ?? failed_rate;
+  const parsedRate = parsedRateValue > 0 ? formatter.format(parsedRateValue) : null;
+  const partiallyParsedRate =
+    partiallyParsedRateValue !== undefined && partiallyParsedRateValue > 0
+      ? formatter.format(partiallyParsedRateValue)
+      : null;
+  const failedRate = failedRateValue > 0 ? formatter.format(failedRateValue) : null;
+  const isRelative = Boolean(relativeMetrics);
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -94,11 +107,25 @@ export const ProcessorMetricBadges = ({
         <EuiFlexItem>
           <EuiToolTip
             position="top"
-            content={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.parsedRate', {
-              defaultMessage:
-                '{parsedRate} of the sampled documents were successfully parsed by this processor',
-              values: { parsedRate },
-            })}
+            content={
+              isRelative
+                ? i18n.translate(
+                    'xpack.streams.processorMetricBadges.euiBadge.parsedRate.relative',
+                    {
+                      defaultMessage:
+                        '{parsedRate} of the matched documents were successfully parsed by this processor',
+                      values: { parsedRate },
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.streams.processorMetricBadges.euiBadge.parsedRate',
+                    {
+                      defaultMessage:
+                        '{parsedRate} of the sampled documents were successfully parsed by this processor',
+                      values: { parsedRate },
+                    }
+                  )
+            }
           >
             <EuiTextColor color="success">
               <EuiFlexGroup gutterSize="xs">
@@ -111,15 +138,46 @@ export const ProcessorMetricBadges = ({
           </EuiToolTip>
         </EuiFlexItem>
       )}
+      {partiallyParsedRate && (
+        <EuiFlexItem>
+          <EuiToolTip
+            position="top"
+            content={i18n.translate(
+              'xpack.streams.processorMetricBadges.euiBadge.partiallyParsedRate',
+              {
+                defaultMessage:
+                  '{partiallyParsedRate} of the matched documents were partially parsed by this processor',
+                values: { partiallyParsedRate },
+              }
+            )}
+          >
+            <EuiTextColor color="accent">{partiallyParsedRate}</EuiTextColor>
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
       {failedRate && (
         <EuiFlexItem>
           <EuiToolTip
             position="top"
-            content={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.failedRate', {
-              defaultMessage:
-                '{failedRate} of the sampled documents were not parsed due to an error',
-              values: { failedRate },
-            })}
+            content={
+              isRelative
+                ? i18n.translate(
+                    'xpack.streams.processorMetricBadges.euiBadge.failedRate.relative',
+                    {
+                      defaultMessage:
+                        '{failedRate} of the matched documents were not parsed due to an error',
+                      values: { failedRate },
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.streams.processorMetricBadges.euiBadge.failedRate',
+                    {
+                      defaultMessage:
+                        '{failedRate} of the sampled documents were not parsed due to an error',
+                      values: { failedRate },
+                    }
+                  )
+            }
           >
             <span tabIndex={0}>
               <EuiTextColor color="danger">
@@ -131,20 +189,6 @@ export const ProcessorMetricBadges = ({
                 </EuiFlexGroup>
               </EuiTextColor>
             </span>
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
-      {skippedRate && (
-        <EuiFlexItem>
-          <EuiToolTip
-            position="top"
-            content={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.skippedRate', {
-              defaultMessage:
-                '{skippedRate} of the sampled documents were skipped due to the set condition',
-              values: { skippedRate },
-            })}
-          >
-            <EuiTextColor color="default">{skippedRate}</EuiTextColor>
           </EuiToolTip>
         </EuiFlexItem>
       )}

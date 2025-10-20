@@ -14,7 +14,9 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiLoadingSpinner,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { Sample } from '@kbn/grok-ui';
 import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
@@ -102,6 +104,7 @@ const formatter = getPercentageFormatter();
 const formatRateToPercentage = (rate?: number) => (rate ? formatter.format(rate) : undefined);
 
 const PreviewDocumentsGroupBy = () => {
+  const { euiTheme } = useEuiTheme();
   const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
@@ -118,8 +121,111 @@ const PreviewDocumentsGroupBy = () => {
   const simulationParsedRate = useSimulatorSelector((state) =>
     formatRateToPercentage(state.context.simulation?.documents_metrics.parsed_rate)
   );
+  const simulation = useSimulatorSelector((state) => state.context.simulation);
   const { activeConditionId } = useConditionHighlight();
   const hasActiveCondition = Boolean(activeConditionId);
+  const isConditionSelected =
+    previewDocsFilter === previewDocsFilterOptions.outcome_filter_condition.id;
+  const conditionRelativeRates = useMemo(() => {
+    if (!simulation || !hasActiveCondition || !activeConditionId) {
+      return null;
+    }
+
+    const documents = simulation.documents ?? [];
+    const totalDocuments = documents.length;
+
+    if (totalDocuments === 0) {
+      return null;
+    }
+
+    let matchedDocuments = 0;
+    const mutableStatusCounts: Record<'parsed' | 'partially_parsed' | 'skipped' | 'failed', number> = {
+      parsed: 0,
+      partially_parsed: 0,
+      skipped: 0,
+      failed: 0,
+    };
+
+    for (const doc of documents) {
+      const matches =
+        Array.isArray(doc.matched_conditions) &&
+        doc.matched_conditions.includes(activeConditionId);
+
+      if (!matches) {
+        continue;
+      }
+
+      matchedDocuments += 1;
+
+      if (doc.status in mutableStatusCounts) {
+        mutableStatusCounts[doc.status as keyof typeof mutableStatusCounts] += 1;
+      }
+    }
+
+    if (matchedDocuments === 0) {
+      return {
+        coverageRate: 0,
+        parsedRate: 0,
+        partiallyParsedRate: 0,
+        skippedRate: 0,
+        failedRate: 0,
+      };
+    }
+
+    return {
+      coverageRate: matchedDocuments / totalDocuments,
+      parsedRate: mutableStatusCounts.parsed / matchedDocuments,
+      partiallyParsedRate: mutableStatusCounts.partially_parsed / matchedDocuments,
+      skippedRate: mutableStatusCounts.skipped / matchedDocuments,
+      failedRate: mutableStatusCounts.failed / matchedDocuments,
+    };
+  }, [activeConditionId, hasActiveCondition, simulation]);
+
+  const simulationConditionRate = conditionRelativeRates
+    ? formatRateToPercentage(conditionRelativeRates.coverageRate)
+    : undefined;
+
+  const parsedRateDisplay = conditionRelativeRates
+    ? formatRateToPercentage(conditionRelativeRates.parsedRate)
+    : simulationParsedRate;
+
+  const partiallyParsedRateDisplay = conditionRelativeRates
+    ? formatRateToPercentage(conditionRelativeRates.partiallyParsedRate)
+    : simulationPartiallyParsedRate;
+
+  const skippedRateDisplay = conditionRelativeRates
+    ? formatRateToPercentage(conditionRelativeRates.skippedRate)
+    : simulationSkippedRate;
+
+  const failedRateDisplay = conditionRelativeRates
+    ? formatRateToPercentage(conditionRelativeRates.failedRate)
+    : simulationFailedRate;
+
+  const highlightedFilterButtonStyles = css`
+    background-color: ${euiTheme.colors.backgroundBasePrimary};
+    border-color: ${euiTheme.colors.borderStrongPrimary};
+    color: ${euiTheme.colors.primary};
+
+    &:hover,
+    &:focus {
+      background-color: ${euiTheme.colors.backgroundBasePrimary};
+      color: ${euiTheme.colors.primary};
+    }
+
+    &.euiFilterButton-isSelected,
+    &.euiFilterButton-isSelected:hover,
+    &.euiFilterButton-isSelected:focus {
+      background-color: ${euiTheme.colors.primary};
+      color: ${euiTheme.colors.emptyShade};
+    }
+  `;
+
+  const conditionHighlightedFilterButtonStyles = css`
+    .euiFilterButton__notification {
+      background-color: ${euiTheme.colors.primary};
+      color: ${euiTheme.colors.emptyShade};
+    }
+  `;
 
   useEffect(() => {
     if (
@@ -135,20 +241,24 @@ const PreviewDocumentsGroupBy = () => {
   const getFilterButtonPropsFor = (
     filter: PreviewDocsFilterOption,
     overrides: Partial<React.ComponentProps<typeof EuiFilterButton>> = {}
-  ) => ({
-    isToggle: previewDocsFilter === filter,
-    isSelected: previewDocsFilter === filter,
-    disabled: !hasMetrics,
-    hasActiveFilters: previewDocsFilter === filter,
-    onClick: () =>
-      changePreviewDocsFilter(filter, {
-        conditionId:
-          filter === previewDocsFilterOptions.outcome_filter_condition.id
-            ? activeConditionId
-            : null,
-      }),
-    ...overrides,
-  });
+  ) => {
+    const nextConditionId = hasActiveCondition ? activeConditionId : null;
+
+    return {
+      isToggle: previewDocsFilter === filter,
+      isSelected: previewDocsFilter === filter,
+      disabled: !hasMetrics,
+      hasActiveFilters: previewDocsFilter === filter,
+      onClick: () =>
+        changePreviewDocsFilter(filter, {
+          conditionId:
+            filter === previewDocsFilterOptions.outcome_filter_condition.id
+              ? activeConditionId
+              : nextConditionId,
+        }),
+      ...overrides,
+    };
+  };
 
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
@@ -168,35 +278,47 @@ const PreviewDocumentsGroupBy = () => {
             disabled: !hasActiveCondition,
             hasActiveFilters:
               previewDocsFilter === previewDocsFilterOptions.outcome_filter_condition.id,
+            numActiveFilters: simulationConditionRate,
           })}
+          css={
+            hasActiveCondition
+              ? isConditionSelected
+                ? [highlightedFilterButtonStyles, conditionHighlightedFilterButtonStyles]
+                : highlightedFilterButtonStyles
+              : undefined
+          }
         >
           {previewDocsFilterOptions.outcome_filter_condition.label}
         </EuiFilterButton>
         <EuiFilterButton
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
           badgeColor="success"
-          numActiveFilters={simulationParsedRate}
+          numActiveFilters={parsedRateDisplay}
+          css={hasActiveCondition ? highlightedFilterButtonStyles : undefined}
         >
           {previewDocsFilterOptions.outcome_filter_parsed.label}
         </EuiFilterButton>
         <EuiFilterButton
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_partially_parsed.id)}
           badgeColor="accent"
-          numActiveFilters={simulationPartiallyParsedRate}
+          numActiveFilters={partiallyParsedRateDisplay}
+          css={hasActiveCondition ? highlightedFilterButtonStyles : undefined}
         >
           {previewDocsFilterOptions.outcome_filter_partially_parsed.label}
         </EuiFilterButton>
         <EuiFilterButton
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_skipped.id)}
           badgeColor="accent"
-          numActiveFilters={simulationSkippedRate}
+          numActiveFilters={skippedRateDisplay}
+          css={hasActiveCondition ? highlightedFilterButtonStyles : undefined}
         >
           {previewDocsFilterOptions.outcome_filter_skipped.label}
         </EuiFilterButton>
         <EuiFilterButton
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
           badgeColor="accent"
-          numActiveFilters={simulationFailedRate}
+          numActiveFilters={failedRateDisplay}
+          css={hasActiveCondition ? highlightedFilterButtonStyles : undefined}
         >
           {previewDocsFilterOptions.outcome_filter_failed.label}
         </EuiFilterButton>

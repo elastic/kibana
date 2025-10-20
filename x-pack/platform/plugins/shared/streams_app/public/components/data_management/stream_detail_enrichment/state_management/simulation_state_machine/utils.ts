@@ -93,21 +93,29 @@ export function getFilterSimulationDocumentsFn(
   filter: PreviewDocsFilterOption,
   options: { activeConditionId?: string | null } = {}
 ) {
+  const matchesCondition = (doc: SimulationDocReport) => {
+    if (!options.activeConditionId) {
+      return true;
+    }
+
+    return (
+      Array.isArray(doc.matched_conditions) &&
+      doc.matched_conditions.includes(options.activeConditionId)
+    );
+  };
+
   switch (filter) {
     case 'outcome_filter_parsed':
-      return (doc: SimulationDocReport) => doc.status === 'parsed';
+      return (doc: SimulationDocReport) => doc.status === 'parsed' && matchesCondition(doc);
     case 'outcome_filter_partially_parsed':
-      return (doc: SimulationDocReport) => doc.status === 'partially_parsed';
-    case 'outcome_filter_skipped':
-      return (doc: SimulationDocReport) => doc.status === 'skipped';
-    case 'outcome_filter_failed':
-      return (doc: SimulationDocReport) => doc.status === 'failed';
-    case 'outcome_filter_condition':
       return (doc: SimulationDocReport) =>
-        options.activeConditionId
-          ? Array.isArray(doc.matched_conditions) &&
-            doc.matched_conditions.includes(options.activeConditionId)
-          : true;
+        doc.status === 'partially_parsed' && matchesCondition(doc);
+    case 'outcome_filter_skipped':
+      return (doc: SimulationDocReport) => doc.status === 'skipped' && matchesCondition(doc);
+    case 'outcome_filter_failed':
+      return (doc: SimulationDocReport) => doc.status === 'failed' && matchesCondition(doc);
+    case 'outcome_filter_condition':
+      return (doc: SimulationDocReport) => matchesCondition(doc);
     case 'outcome_filter_all':
     default:
       return (_doc: SimulationDocReport) => true;

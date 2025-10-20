@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import { isWhereBlock } from '@kbn/streamlang';
 import React from 'react';
 import { useSelector } from '@xstate5/react';
@@ -18,6 +18,11 @@ import type { StepConfigurationProps } from '../../steps_list';
 import { useConditionHighlight } from '../../../state_management/condition_highlight_context';
 import { useStreamEnrichmentEvents } from '../../../state_management/stream_enrichment_state_machine';
 import { previewDocsFilterOptions } from '../../../state_management/simulation_state_machine';
+import { getPercentageFormatter } from '../../../../../../util/formatters';
+import { useConditionMatchMetrics } from '../../../state_management/use_condition_metrics';
+import { i18n } from '@kbn/i18n';
+
+const formatter = getPercentageFormatter();
 
 export const WhereBlockSummary = ({
   stepRef,
@@ -34,6 +39,14 @@ export const WhereBlockSummary = ({
   if (!isWhereBlock(step)) return null;
 
   const isActive = activeConditionId === step.customIdentifier;
+  const conditionMatchMetrics = useConditionMatchMetrics(step.customIdentifier);
+
+  const matchRateValue = conditionMatchMetrics.matchRate;
+  const hasMatchRate = conditionMatchMetrics.totalCount > 0 && matchRateValue !== null;
+  const matchRateFormatted =
+    hasMatchRate && matchRateValue !== null ? formatter.format(matchRateValue) : null;
+  const matchRateColor =
+    isActive || (matchRateValue ?? 0) > 0 ? 'primary' : 'subdued';
 
   const handleConditionClick = () => {
     if (isActive) {
@@ -76,6 +89,27 @@ export const WhereBlockSummary = ({
           isActive={isActive}
         />
       </EuiFlexItem>
+
+      {hasMatchRate && matchRateFormatted && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.whereBlock.matchRateTooltip',
+              {
+                defaultMessage:
+                  '{matchRate} of the sampled documents matched this condition ({matchedCount}/{totalCount}).',
+                values: {
+                  matchRate: matchRateFormatted,
+                  matchedCount: conditionMatchMetrics.matchedCount,
+                  totalCount: conditionMatchMetrics.totalCount,
+                },
+              }
+            )}
+          >
+            <EuiTextColor color={matchRateColor}>{matchRateFormatted}</EuiTextColor>
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
 
       <EuiFlexItem
         grow={false}

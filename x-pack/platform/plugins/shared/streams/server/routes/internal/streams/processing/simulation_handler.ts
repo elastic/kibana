@@ -731,17 +731,24 @@ const getDocumentStatus = (
   if (ingestDocErrors.some((error) => error.type === 'field_mapping_failure')) {
     return 'failed';
   }
-  const processorResults = doc.processor_results;
 
-  if (processorResults.every(isSkippedProcessor)) {
+  const processorResults = doc.processor_results;
+  const relevantProcessorResults = processorResults.filter(
+    (processor) =>
+      !('tag' in processor && processor.tag && isConditionTrackingProcessorId(processor.tag))
+  );
+
+  const resultsToEvaluate = relevantProcessorResults.length > 0 ? relevantProcessorResults : processorResults;
+
+  if (resultsToEvaluate.every(isSkippedProcessor)) {
     return 'skipped';
   }
 
-  if (processorResults.every((proc) => isSuccessfulProcessor(proc) || isSkippedProcessor(proc))) {
+  if (resultsToEvaluate.every((proc) => isSuccessfulProcessor(proc) || isSkippedProcessor(proc))) {
     return 'parsed';
   }
 
-  if (processorResults.some(isSuccessfulProcessor)) {
+  if (resultsToEvaluate.some(isSuccessfulProcessor)) {
     return 'partially_parsed';
   }
 
