@@ -26,7 +26,6 @@ export class EnterIfNodeImpl implements NodeImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    await this.stepExecutionRuntime.startStep();
     const successors: any[] = this.workflowGraph.getDirectSuccessors(this.node.id);
 
     if (
@@ -48,8 +47,13 @@ export class EnterIfNodeImpl implements NodeImplementation {
     const elseNode = successors?.find(
       (node) => !Object.hasOwn(node, 'condition')
     ) as EnterConditionBranchNode;
-
-    const evaluatedConditionResult = this.evaluateCondition(thenNode.condition);
+    const renderedCondition =
+      this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(thenNode.condition);
+    const evaluatedConditionResult = this.evaluateCondition(renderedCondition);
+    await this.stepExecutionRuntime.startStep({
+      condition: renderedCondition,
+      conditionResult: evaluatedConditionResult,
+    });
 
     if (evaluatedConditionResult) {
       this.goToThenBranch(thenNode);
