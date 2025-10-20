@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defineRoutes } from './workflows_management_routes';
+import { defineRoutes } from './routes';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockRouter as createMockRouter } from '@kbn/core-http-router-server-mocks';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
