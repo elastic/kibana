@@ -57,7 +57,9 @@ export const promptGroupId = {
     incompatibleAntivirus: 'defendInsights-incompatibleAntivirus',
     policyResponseFailure: 'defendInsights-policyResponseFailure',
   },
+  // TODO remove after 1 week to ensure both versions are available while users upgrade
   aiForSoc: 'aiForSoc',
+  ease: 'ease',
 };
 
 export const promptDictionary = {
@@ -407,6 +409,34 @@ export const localPrompts: Prompt[] = [
   {
     promptId: promptDictionary.costSavingsInsightPart2,
     promptGroupId: promptGroupId.aiForSoc,
+    prompt: {
+      default: costSavingsInsightPart2,
+    },
+  },
+  {
+    promptId: promptDictionary.alertSummary,
+    promptGroupId: promptGroupId.ease,
+    prompt: {
+      default: ALERT_SUMMARY_500,
+    },
+  },
+  {
+    promptId: promptDictionary.alertSummarySystemPrompt,
+    promptGroupId: promptGroupId.ease,
+    prompt: {
+      default: ALERT_SUMMARY_SYSTEM_PROMPT,
+    },
+  },
+  {
+    promptId: promptDictionary.costSavingsInsightPart1,
+    promptGroupId: promptGroupId.ease,
+    prompt: {
+      default: costSavingsInsightPart1,
+    },
+  },
+  {
+    promptId: promptDictionary.costSavingsInsightPart2,
+    promptGroupId: promptGroupId.ease,
     prompt: {
       default: costSavingsInsightPart2,
     },

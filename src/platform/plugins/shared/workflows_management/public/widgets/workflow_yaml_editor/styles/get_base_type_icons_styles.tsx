@@ -11,7 +11,8 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export function getBaseTypeIconsStyles(euiTheme: UseEuiTheme['euiTheme']) {
+export function getBaseTypeIconsStyles(euiThemeContext: UseEuiTheme) {
+  const { euiTheme } = euiThemeContext;
   return css`
     /* Connector type decorations - GitLens style inline icons */
     .type-decoration {
@@ -28,6 +29,7 @@ export function getBaseTypeIconsStyles(euiTheme: UseEuiTheme['euiTheme']) {
       background-color: ${transparentize(euiTheme.colors.primary, 0.06)} !important;
       border-radius: 3px !important;
       padding: 1px 3px !important;
+      // eslint-disable-next-line @elastic/eui/no-css-color -- we need transparent color to avoid overlay text selection
       border: 1px solid ${euiTheme.colors.vis.euiColorVis2} !important;
     }
 
