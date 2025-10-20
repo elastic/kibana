@@ -921,7 +921,7 @@
             "label": "getAlertFields",
             "description": [],
             "signature": [
-              "(ruleTypeIds: string[]) => Promise<Readonly<{} & { fields: Readonly<{ subType?: Readonly<{ nested?: Readonly<{} & { path: string; }> | undefined; multi?: Readonly<{} & { parent: string; }> | undefined; } & {}> | undefined; timeZone?: string[] | undefined; defaultFormatter?: string | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"histogram\" | \"summary\" | \"gauge\" | \"counter\" | \"position\" | undefined; fixedInterval?: string[] | undefined; metadata_field?: boolean | undefined; } & { type: string; name: string; esTypes: string[]; searchable: boolean; aggregatable: boolean; readFromDocValues: boolean; }>[]; }>>"
+              "(ruleTypeIds: string[]) => Promise<Readonly<{} & { fields: Readonly<{ timeZone?: string[] | undefined; subType?: Readonly<{ nested?: Readonly<{} & { path: string; }> | undefined; multi?: Readonly<{} & { parent: string; }> | undefined; } & {}> | undefined; defaultFormatter?: string | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"histogram\" | \"summary\" | \"gauge\" | \"counter\" | \"position\" | undefined; fixedInterval?: string[] | undefined; metadata_field?: boolean | undefined; } & { type: string; name: string; esTypes: string[]; searchable: boolean; aggregatable: boolean; readFromDocValues: boolean; }>[]; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts",
             "deprecated": false,
