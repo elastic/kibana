@@ -9,6 +9,7 @@ import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inf
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
 import { test as base } from '@kbn/scout';
+import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { getPhoenixConfig } from './utils/get_phoenix_config';
 import { KibanaPhoenixClient } from './kibana_phoenix_client/client';
 import type { EvaluationTestOptions } from './config/create_playwright_eval_config';
@@ -25,7 +26,6 @@ import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { EvaluationAnalysisService } from './utils/analysis';
 import { EvaluationScoreRepository } from './utils/score_repository';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
-import { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 
 /**
  * Test type for evaluations. Loads an inference client and a
