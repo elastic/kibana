@@ -122,18 +122,6 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
       }),
       sortText: '1',
     },
-    {
-      label: '_alias:* AND NOT _alias:_origin',
-      text: '_alias:* AND NOT _alias:_origin',
-      kind: 'Value',
-      detail: i18n.translate(
-        'kbn-esql-ast.esql.autocomplete.set.projectRouting.allOtherProjectsDoc',
-        {
-          defaultMessage: 'Search all projects except the current one',
-        }
-      ),
-      sortText: '1',
-    },
   ];
 };
 

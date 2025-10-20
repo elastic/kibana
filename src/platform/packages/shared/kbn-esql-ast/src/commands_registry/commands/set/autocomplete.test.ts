@@ -81,17 +81,12 @@ describe('SET Autocomplete', () => {
 
     describe('Project routing setting', () => {
       it('suggests common project routing values after assignment operator', async () => {
-        await testSetAutocomplete('SET project_routing = ', [
-          '"_alias: *";',
-          '"_alias:* AND NOT _alias:_origin";',
-          '"_alias:_origin";',
-        ]);
+        await testSetAutocomplete('SET project_routing = ', ['"_alias: *";', '"_alias:_origin";']);
       });
 
       it('suggests common project routing values for partial input', async () => {
         await testSetAutocomplete('SET project_routing = "_alias:', [
           '"_alias: *";',
-          '"_alias:* AND NOT _alias:_origin";',
           '"_alias:_origin";',
         ]);
       });
