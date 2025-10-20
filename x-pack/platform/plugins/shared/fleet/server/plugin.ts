@@ -927,9 +927,8 @@ export class FleetPlugin
       },
       getPackageSpecTagId,
       async createOutputClient(request: KibanaRequest) {
-        const soClient = appContextService.getSavedObjects().getScopedClient(request);
         const authz = await getAuthzFromRequest(request);
-        return new OutputClient(soClient, authz);
+        return new OutputClient(authz);
       },
       cloudConnectorService,
       runWithCache,

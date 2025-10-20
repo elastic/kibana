@@ -42,9 +42,19 @@ import {
   generateTriggerSnippet,
 } from './snippets/generate_trigger_snippet';
 import {
+  createLiquidFilterCompletions,
+  createLiquidSyntaxCompletions,
+  createLiquidBlockKeywordCompletions,
+} from './liquid_completions';
+import {
+  LIQUID_FILTER_REGEX,
+  LIQUID_BLOCK_FILTER_REGEX,
+  LIQUID_BLOCK_KEYWORD_REGEX,
+  LIQUID_BLOCK_START_REGEX,
+  LIQUID_BLOCK_END_REGEX,
+  VARIABLE_REGEX_GLOBAL,
   PROPERTY_PATH_REGEX,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
-  VARIABLE_REGEX_GLOBAL,
 } from '../../../../common/lib/regex';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getDetailedTypeDescription, getSchemaAtPath, parsePath } from '../../../../common/lib/zod';
@@ -266,6 +276,10 @@ export interface LineParseResult {
     | 'variable-complete'
     | 'variable-unfinished'
     | 'foreach-variable'
+    | 'liquid-filter'
+    | 'liquid-block-filter'
+    | 'liquid-syntax'
+    | 'liquid-block-keyword'
     | null;
   match: RegExpMatchArray | null;
 }
@@ -279,6 +293,42 @@ function cleanKey(key: string) {
   return key.endsWith('.') ? key.slice(0, -1) : key;
 }
 
+/**
+ * Checks if the current position is inside a liquid block by looking for {%- liquid ... -%} tags
+ *
+ * A position is considered "inside" a liquid block when:
+ * - The cursor is positioned after a `{%- liquid` (or `{% liquid`) opening tag
+ * - AND before the corresponding `-%}` (or `%}`) closing tag
+ *
+ * Examples:
+ * ```
+ * {%- liquid
+ *   assign x = 1  <-- INSIDE (cursor here shows liquid block keywords)
+ *   echo x        <-- INSIDE
+ * -%}
+ * regular text    <-- OUTSIDE (no liquid block keywords)
+ * ```
+ *
+ * Note: This implementation uses simple counting (openings > closings)
+ */
+function isInsideLiquidBlock(fullText: string, position: monaco.Position): boolean {
+  // Get text from start to cursor position
+  const textUpToPosition =
+    fullText.split('\n').slice(0, position.lineNumber).join('\n') +
+    fullText.split('\n')[position.lineNumber - 1].substring(0, position.column - 1);
+
+  // Reset regex lastIndex to ensure fresh matching
+  LIQUID_BLOCK_START_REGEX.lastIndex = 0;
+  LIQUID_BLOCK_END_REGEX.lastIndex = 0;
+
+  // Count opening and closing liquid blocks - simple and effective
+  const openingMatches = Array.from(textUpToPosition.matchAll(LIQUID_BLOCK_START_REGEX));
+  const closingMatches = Array.from(textUpToPosition.matchAll(LIQUID_BLOCK_END_REGEX));
+
+  // If we have more openings than closings, we're inside a liquid block
+  return openingMatches.length > closingMatches.length;
+}
+
 export function parseLineForCompletion(lineUpToCursor: string): LineParseResult {
   // Try @ trigger first (e.g., "@const" or "@steps.step1")
   const atMatch = [...lineUpToCursor.matchAll(/@(?<key>\S+?)?\.?(?=\s|$)/g)].pop();
@@ -289,6 +339,42 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       pathSegments: parsePath(fullKey),
       matchType: 'at',
       match: atMatch,
+    };
+  }
+
+  // Check for Liquid filter completion FIRST (e.g., "{{ variable | fil")
+  const liquidFilterMatch = lineUpToCursor.match(LIQUID_FILTER_REGEX);
+  if (liquidFilterMatch) {
+    const filterPrefix = liquidFilterMatch[1] || '';
+    return {
+      fullKey: filterPrefix,
+      pathSegments: null,
+      matchType: 'liquid-filter',
+      match: liquidFilterMatch,
+    };
+  }
+
+  // Check for Liquid block filter completion (e.g., "assign variable = value | fil")
+  const liquidBlockFilterMatch = lineUpToCursor.match(LIQUID_BLOCK_FILTER_REGEX);
+  if (liquidBlockFilterMatch) {
+    const filterPrefix = liquidBlockFilterMatch[1] || '';
+    return {
+      fullKey: filterPrefix,
+      pathSegments: null,
+      matchType: 'liquid-block-filter',
+      match: liquidBlockFilterMatch,
+    };
+  }
+
+  // Check for Liquid block keyword completion (e.g., "  assign" or "  cas")
+  const liquidBlockKeywordMatch = lineUpToCursor.match(LIQUID_BLOCK_KEYWORD_REGEX);
+  if (liquidBlockKeywordMatch) {
+    const keywordPrefix = liquidBlockKeywordMatch[1] || '';
+    return {
+      fullKey: keywordPrefix,
+      pathSegments: null,
+      matchType: 'liquid-block-keyword',
+      match: liquidBlockKeywordMatch,
     };
   }
 
@@ -323,6 +409,16 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       fullKey,
       pathSegments: parsePath(fullKey),
       matchType: 'foreach-variable',
+      match: null,
+    };
+  }
+
+  // Check for Liquid syntax completion (e.g., "{% ")
+  if (lineUpToCursor.match(/\{\%\s*\w*$/)) {
+    return {
+      fullKey: lastWordBeforeCursor || '',
+      pathSegments: null,
+      matchType: 'liquid-syntax',
       match: null,
     };
   }
@@ -864,7 +960,13 @@ export function getCompletionItemProvider(
   dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
 ): monaco.languages.CompletionItemProvider {
   return {
-    triggerCharacters: ['@', '.', ' '],
+    // Trigger characters for completion:
+    // '@' - variable references
+    // '.' - property access within variables
+    // ' ' - space, used for separating tokens in Liquid syntax
+    // '|' - Liquid filters (e.g., {{ variable | filter }})
+    // '{' - start of Liquid blocks (e.g., {{ ... }})
+    triggerCharacters: ['@', '.', ' ', '|', '{'],
     provideCompletionItems: (model, position, completionContext) => {
       try {
         // Get the latest connector data from cache instead of relying on closure
@@ -1056,6 +1158,60 @@ export function getCompletionItemProvider(
             return {
               suggestions,
               incomplete: true,
+            };
+          }
+        }
+        // SPECIAL CASE: Liquid filter completion
+        if (parseResult.matchType === 'liquid-filter') {
+          const filterPrefix = parseResult.fullKey;
+          const liquidFilterSuggestions = createLiquidFilterCompletions(range, filterPrefix);
+
+          return {
+            suggestions: liquidFilterSuggestions,
+            incomplete: false,
+          };
+        }
+
+        // SPECIAL CASE: Liquid block filter completion (pipe within liquid blocks)
+        if (parseResult.matchType === 'liquid-block-filter') {
+          // Check if we're actually inside a liquid block
+          const isInLiquidBlock = isInsideLiquidBlock(model.getValue(), position);
+
+          if (isInLiquidBlock) {
+            const filterPrefix = parseResult.fullKey;
+            const liquidFilterSuggestions = createLiquidFilterCompletions(range, filterPrefix);
+
+            return {
+              suggestions: liquidFilterSuggestions,
+              incomplete: false,
+            };
+          }
+        }
+
+        // SPECIAL CASE: Liquid syntax completion ({% %})
+        if (parseResult.matchType === 'liquid-syntax') {
+          const syntaxSuggestions = createLiquidSyntaxCompletions(range);
+
+          return {
+            suggestions: syntaxSuggestions,
+            incomplete: false,
+          };
+        }
+
+        // SPECIAL CASE: Liquid block keyword completion (inside {%- liquid ... -%})
+        if (parseResult.matchType === 'liquid-block-keyword') {
+          // Check if we're actually inside a liquid block
+          const isInLiquidBlock = isInsideLiquidBlock(model.getValue(), position);
+
+          if (isInLiquidBlock) {
+            const keywordSuggestions = createLiquidBlockKeywordCompletions(
+              range,
+              parseResult.fullKey
+            );
+
+            return {
+              suggestions: keywordSuggestions,
+              incomplete: false,
             };
           }
         }

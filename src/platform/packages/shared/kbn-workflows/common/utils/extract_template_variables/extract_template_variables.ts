@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function extractNunjucksVariables(template: string): string[] {
+export function extractTemplateVariables(template: string): string[] {
   const variables: string[] = [];
   const seen = new Set<string>();
 
