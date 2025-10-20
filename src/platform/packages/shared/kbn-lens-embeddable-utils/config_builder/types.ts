@@ -14,6 +14,7 @@ import type {
 } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { XYLegendValue } from '@kbn/visualizations-plugin/common';
 import type { DataViewsCommon } from './config_builder';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
@@ -120,6 +121,7 @@ export interface LensYBoundsConfig {
 export interface LensLegendConfig {
   show?: boolean;
   position?: 'top' | 'left' | 'bottom' | 'right';
+  legendStats?: XYLegendValue[];
 }
 
 export interface LensBreakdownDateHistogramConfig {

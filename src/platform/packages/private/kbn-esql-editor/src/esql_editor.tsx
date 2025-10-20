@@ -829,6 +829,7 @@ const ESQLEditorInternal = function ESQLEditor({
     return () => {
       model.current?.dispose();
       editor1ref.current?.dispose();
+      editorModel.current = undefined;
     };
   }, []);
 
