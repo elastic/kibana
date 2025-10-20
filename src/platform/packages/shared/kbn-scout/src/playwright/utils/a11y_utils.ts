@@ -7,16 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator, Page } from '@playwright/test';
-
-async function compareLocators(firstLocator: Locator, secondLocator: Locator): Promise<boolean> {
-  const firstHandle = await firstLocator.elementHandle();
-  const secondHandle = await secondLocator.elementHandle();
-  return firstLocator.page().evaluate((compare) => compare.left.isEqualNode(compare.right), {
-    left: firstHandle,
-    right: secondHandle,
-  });
-}
+import type { Page } from '@playwright/test';
 
 /**
  * Presses a key until the element with the provided selector is in focus.
