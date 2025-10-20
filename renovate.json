@@ -1921,6 +1921,25 @@
       "enabled": true
     },
     {
+      "groupName": "liquidjs",
+      "matchDepNames": [
+        "liquidjs"
+      ],
+      "reviewers": [
+        "team:workflows-eng"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:One Workflow",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "normalize-path",
       "matchDepNames": [
         "normalize-path",
