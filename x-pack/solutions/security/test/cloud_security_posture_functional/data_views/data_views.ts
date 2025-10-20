@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import type SuperTest from 'supertest';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
   CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
   CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS,
@@ -18,8 +17,8 @@ import {
   CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS,
 } from '@kbn/cloud-security-posture-common';
 import type { KbnClientSavedObjects } from '@kbn/test/src/kbn_client/kbn_client_saved_objects';
+import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
 
 const TEST_SPACE = 'space-1';
 
@@ -49,10 +48,12 @@ const createDataView = async (
   supertest: SuperTest.Agent,
   id: string,
   name: string,
-  title: string
+  title: string,
+  space?: string
 ): Promise<{ data_view: { id: string } }> => {
+  const basePath = space ? `/s/${space}` : '';
   const { body } = await supertest
-    .post(`/api/data_views/data_view`)
+    .post(`${basePath}/api/data_views/data_view`)
     .set('kbn-xsrf', 'foo')
     .send({ data_view: { id, title, name, timeFieldName: '@timestamp', allowNoIndex: true } })
     .expect(200);
@@ -71,21 +72,71 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   /**
    * Installs the Cloud Security Posture package, which triggers plugin initialization and migration
    */
-  const installCspPackage = async () => {
-    log.debug(
-      `Installing cloud_security_posture package version ${CLOUD_SECURITY_POSTURE_PACKAGE_VERSION}`
-    );
-    const response = await supertest
-      .post(
-        `/api/fleet/epm/packages/cloud_security_posture/${CLOUD_SECURITY_POSTURE_PACKAGE_VERSION}`
-      )
-      .set('kbn-xsrf', 'xxxx')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-      .send({ force: true })
+  const installCspPackageAndPackagePolicy = async () => {
+    // Create agent policy with unique name
+    const policyName = `Test CSP Policy ${Date.now()}`;
+    const agentPolicyResponse = await supertest
+      .post(`/api/fleet/agent_policies`)
+      .set('kbn-xsrf', 'xx')
+      .send({
+        name: policyName,
+        namespace: 'default',
+        description: 'Test policy for CSP data views',
+        monitoring_enabled: ['logs', 'metrics'],
+      })
       .expect(200);
 
-    log.debug('CSP package installed successfully');
-    return response.body;
+    const agentPolicyId = agentPolicyResponse.body.item.id;
+
+    // Create a package policy for the CSP package
+    const { body: packagePolicyResponse } = await supertest
+      .post(`/api/fleet/package_policies`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({
+        force: true,
+        name: `cloud_security_posture-${agentPolicyId}`,
+        description: '',
+        namespace: 'default',
+        policy_id: agentPolicyId,
+        enabled: true,
+        inputs: [
+          {
+            type: 'cloudbeat/cis_aws',
+            policy_template: 'cspm',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'logs',
+                  dataset: 'cloud_security_posture.findings',
+                },
+              },
+            ],
+          },
+        ],
+        package: {
+          name: 'cloud_security_posture',
+          title: 'Security Posture Management',
+          version: CLOUD_SECURITY_PLUGIN_VERSION,
+        },
+        vars: {
+          deployment: {
+            value: 'aws',
+            type: 'text',
+          },
+          posture: {
+            value: 'cspm',
+            type: 'text',
+          },
+        },
+      })
+      .expect(200);
+
+    return {
+      agentPolicyId,
+      packagePolicyId: packagePolicyResponse.item.id,
+    };
   };
 
   const pageObjects = getPageObjects([
@@ -342,12 +393,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           supertest,
           oldDataViewId,
           'Old Misconfiguration Data View v1',
-          'security_solution-*.misconfiguration_latest'
+          'security_solution-*.misconfiguration_latest',
+          TEST_SPACE
         );
         expect(body.data_view.id).to.eql(oldDataViewId);
 
         // Install CSP package - this triggers plugin initialization which runs the migration
-        await installCspPackage();
+        await installCspPackageAndPackagePolicy();
 
         // Verify old v1 data view is deleted
         await retry.tryForTime(60000, async () => {
@@ -376,7 +428,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         expect(body.data_view.id).to.eql(legacyDataViewId);
 
         // Install CSP package - this triggers plugin initialization which runs the migration
-        await installCspPackage();
+        await installCspPackageAndPackagePolicy();
 
         // Verify legacy data view is deleted (check in default space as it was global)
         await retry.tryForTime(60000, async () => {
@@ -399,7 +451,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           supertest,
           unrelatedDataViewId,
           'Test Unrelated Data View',
-          'test-unrelated-dataview-id'
+          'test-unrelated-dataview-id',
+          TEST_SPACE
         );
         expect(unrelatedBody.data_view.id).to.eql(unrelatedDataViewId);
 
@@ -410,12 +463,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           supertest,
           oldDataViewId,
           'Old Misconfiguration Data View v1',
-          'security_solution-*.misconfiguration_latest'
+          'security_solution-*.misconfiguration_latest',
+          TEST_SPACE
         );
         expect(oldBody.data_view.id).to.eql(oldDataViewId);
 
         // Install CSP package - this triggers plugin initialization which runs the migration
-        await installCspPackage();
+        await installCspPackageAndPackagePolicy();
 
         // Verify old CSP data view is deleted as expected
         await retry.tryForTime(60000, async () => {
@@ -455,12 +509,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           supertest,
           oldDataViewId,
           'Old Vulnerabilities Data View v1',
-          'security_solution-*.vulnerability_latest,logs-cloud_security_posture.vulnerabilities_latest-default'
+          'security_solution-*.vulnerability_latest,logs-cloud_security_posture.vulnerabilities_latest-default',
+          TEST_SPACE
         );
         expect(body.data_view.id).to.eql(oldDataViewId);
 
         // Install CSP package - this triggers plugin initialization which runs the migration
-        await installCspPackage();
+        await installCspPackageAndPackagePolicy();
 
         // Verify old v1 vulnerabilities data view is deleted
         await retry.tryForTime(60000, async () => {
@@ -489,7 +544,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         expect(body.data_view.id).to.eql(legacyDataViewId);
 
         // Install CSP package - this triggers plugin initialization which runs the migration
-        await installCspPackage();
+        await installCspPackageAndPackagePolicy();
 
         // Verify legacy vulnerabilities data view is deleted (check in default space as it was global)
         await retry.tryForTime(60000, async () => {
