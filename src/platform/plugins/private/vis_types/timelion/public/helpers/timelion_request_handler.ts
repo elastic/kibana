@@ -151,11 +151,7 @@ export function getTimelionRequestHandler({
       const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
       const visData = await doSearch(searchSessionOptions);
 
-      searchTracker?.complete({
-        runtimeMs: 0,
-        resultsBytesSize: 0,
-        resultsCount: 0,
-      });
+      searchTracker?.complete();
       return visData;
     } catch (e) {
       searchTracker?.error(e);

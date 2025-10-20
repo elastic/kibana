@@ -78,7 +78,7 @@ const setup = async ({
           locators={mockShareStart.url.locators}
           searchUsageCollector={mockSearchUsageCollector}
           searchSessionEBTManager={getSearchSessionEBTManagerMock()}
-          from="test"
+          trackingProps={{ renderedIn: 'test', openedFrom: 'test' }}
           {...props}
         />
       </LocaleWrapper>

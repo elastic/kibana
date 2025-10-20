@@ -55,7 +55,7 @@ export function SearchSessionsMgmtMain({ documentation, share, ...tableProps }: 
       <SearchSessionsMgmtTable
         data-test-subj="search-sessions-mgmt-table"
         locators={share.url.locators}
-        from="management"
+        trackingProps={{ renderedIn: 'management', openedFrom: 'management' }}
         {...tableProps}
       />
     </>

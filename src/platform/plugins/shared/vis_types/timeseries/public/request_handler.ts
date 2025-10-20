@@ -101,16 +101,7 @@ export const metricsRequestHandler = async ({
             .ok({ time: query.time, json: { rawResponse: query.response } });
         });
 
-        const maxTime = Object.values(visData.trackedEsSearches || {}).reduce(
-          (max, search) => Math.max(max, search.time || 0),
-          0
-        );
-
-        searchTracker?.complete({
-          runtimeMs: maxTime,
-          resultsCount: 0,
-          resultsBytesSize: 0,
-        });
+        searchTracker?.complete();
 
         return visData;
       } catch (e) {

@@ -556,7 +556,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
                   this.services.notifications.toasts.remove(toast);
                   this.services.data.search.showSearchSessionsFlyout({
                     appId: this.services.appName,
-                    trackingProps: { entryPoint: 'toast' },
+                    trackingProps: { openedFrom: 'toast' },
                   });
                 }}
               >

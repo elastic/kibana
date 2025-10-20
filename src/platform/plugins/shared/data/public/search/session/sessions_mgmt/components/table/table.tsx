@@ -50,7 +50,7 @@ interface Props {
     onActionComplete: OnActionComplete;
     onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
   }) => Array<EuiBasicTableColumn<UISession>>;
-  from: string;
+  trackingProps: { openedFrom: string; renderedIn: string };
 }
 
 export type GetColumnsFn = Props['getColumns'];
@@ -68,7 +68,7 @@ export function SearchSessionsMgmtTable({
   getColumns = getDefaultColumns,
   appId,
   onBackgroundSearchOpened,
-  from,
+  trackingProps,
   ...props
 }: Props) {
   const [tableData, setTableData] = useState<UISession[]>([]);
@@ -103,8 +103,8 @@ export function SearchSessionsMgmtTable({
   );
 
   useEffect(() => {
-    searchSessionEBTManager.trackBgsListView({ entryPoint: from });
-  }, [searchSessionEBTManager, from]);
+    searchSessionEBTManager.trackBgsListView({ entryPoint: trackingProps.openedFrom });
+  }, [searchSessionEBTManager, trackingProps.openedFrom]);
 
   // refresh behavior
   const doRefresh = useCallback(async () => {
@@ -166,7 +166,10 @@ export function SearchSessionsMgmtTable({
     onActionComplete,
     kibanaVersion,
     searchUsageCollector,
-    onBackgroundSearchOpened,
+    onBackgroundSearchOpened: (attrs) => {
+      searchSessionEBTManager.trackBgsOpened({ session: attrs.session });
+      onBackgroundSearchOpened?.(attrs);
+    },
   });
 
   const filters = useMemo(() => {

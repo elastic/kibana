@@ -202,7 +202,7 @@ export const useDashboardMenuItems = ({
         run: () =>
           dataService.search.showSearchSessionsFlyout({
             appId: appId!,
-            trackingProps: { entryPoint: 'background search button' },
+            trackingProps: { openedFrom: 'background search button' },
           }),
       } as TopNavMenuData,
 

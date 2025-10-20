@@ -73,7 +73,7 @@ export interface ISearchStart {
    */
   showSearchSessionsFlyout: (attrs: {
     appId: string;
-    trackingProps: { entryPoint: string };
+    trackingProps: { openedFrom: string };
     onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
   }) => void;
   /**
