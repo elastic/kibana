@@ -88,9 +88,7 @@ describe('When displaying Endpoint Response Actions', () => {
   describe('for agent type sentinel_one', () => {
     beforeEach(() => {
       (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
-        responseActionsCrowdstrikeManualHostIsolationEnabled: true,
         responseActionsSentinelOneV1Enabled: true,
-        responseActionsSentinelOneKillProcessEnabled: true,
         responseActionsSentinelOneRunScriptEnabled: true,
       });
 
@@ -149,7 +147,6 @@ describe('When displaying Endpoint Response Actions', () => {
   describe('for agent type crowdstrike', () => {
     beforeEach(() => {
       (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
-        responseActionsCrowdstrikeManualHostIsolationEnabled: true,
         crowdstrikeRunScriptEnabled: true,
       });
       commands = getEndpointConsoleCommands({
