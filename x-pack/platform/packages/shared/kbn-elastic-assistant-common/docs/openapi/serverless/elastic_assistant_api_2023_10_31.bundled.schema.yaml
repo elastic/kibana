@@ -2563,14 +2563,6 @@ components:
           additionalProperties: false
         - $ref: '#/components/schemas/InputTextInterruptValue'
           additionalProperties: false
-    IntervalApiSchedule:
-      type: object
-      properties:
-        interval:
-          description: The schedule interval
-          type: string
-      required:
-        - interval
     KnowledgeBaseEntryBulkActionSkipReason:
       description: Reason why a Knowledge Base Entry was skipped during the bulk action.
       enum:
