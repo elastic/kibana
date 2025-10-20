@@ -134,8 +134,6 @@ export interface ConversationRound {
   response: AssistantResponse;
   /** when tracing is enabled, contains the traceId associated with this round */
   trace_id?: string;
-  /** for router agents, contains the id of the agent that handled this round */
-  handled_by?: string;
 }
 
 export interface Conversation {
