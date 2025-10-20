@@ -18,8 +18,8 @@ export class WorkflowTemplatingEngine {
       strictVariables: false,
     });
 
-    // register json filter that converts JSON string to object
-    this.engine.registerFilter('json', (value: unknown): unknown => {
+    // register json_parse filter that converts JSON string to object
+    this.engine.registerFilter('json_parse', (value: unknown): unknown => {
       if (typeof value !== 'string') {
         return value;
       }
@@ -27,17 +27,6 @@ export class WorkflowTemplatingEngine {
         return JSON.parse(value);
       } catch (error) {
         return value;
-      }
-    });
-    // register dump filter that converts an object to a JSON string
-    this.engine.registerFilter('dump', (value: unknown): string => {
-      if (typeof value !== 'object' || value === null) {
-        return String(value);
-      }
-      try {
-        return JSON.stringify(value, null, 2);
-      } catch (error) {
-        return String(value);
       }
     });
   }
