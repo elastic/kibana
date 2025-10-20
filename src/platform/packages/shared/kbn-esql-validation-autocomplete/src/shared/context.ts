@@ -18,10 +18,10 @@ import {
   type ESQLAstItem,
   type ESQLFunction,
   type ESQLSingleAstItem,
+  within,
 } from '@kbn/esql-ast';
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
 import { pipePrecedesCurrentWord } from '@kbn/esql-ast/src/definitions/utils';
-import { within } from '@kbn/esql-ast/src/definitions/utils/autocomplete/helpers';
 import type {
   ESQLAstExpression,
   ESQLAstAllCommands,
@@ -202,7 +202,7 @@ export function getAstContext(
 
   Walker.visitComments(queryAst, (node) => {
     // if the cursor (offset) is within the range of a comment node
-    if (within(offset, node.location)) {
+    if (within(offset, node)) {
       inComment = true;
       // or if the cursor (offset) is right after a single-line comment (which means there was no newline)
     } else if (

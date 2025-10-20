@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { handleFragment, within } from '../../../definitions/utils/autocomplete/helpers';
+import { handleFragment } from '../../../definitions/utils/autocomplete/helpers';
 import type { ESQLAstAllCommands } from '../../../types';
 import { getSettingsCompletionItems } from '../../../definitions/utils/settings';
 import {
@@ -17,6 +17,7 @@ import {
   isStringLiteral,
   isUnknownNode,
   semiColonCompleteItem,
+  within,
 } from '../../../..';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
@@ -59,7 +60,7 @@ export async function autocomplete(
 
   // SET <setting> = "/  --- Within the value quotes.
   if (isStringLiteral(settingRightSide)) {
-    if (cursorPosition && within(cursorPosition, settingRightSide.location)) {
+    if (cursorPosition && within(cursorPosition, settingRightSide)) {
       const isFragmentComplete = () => {
         return settingRightSide.valueUnquoted.length > 0 && innerText.endsWith('"');
       };

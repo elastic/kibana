@@ -1040,6 +1040,10 @@ describe('autocomplete', () => {
     });
   });
 
+  describe('IN operator with lists', () => {
+    testSuggestions('FROM a | WHERE integerField IN (doubleField /', [{ text: ', ' }]);
+  });
+
   describe('Replacement ranges are attached when needed', () => {
     testSuggestions('FROM a | WHERE doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 35 } },
