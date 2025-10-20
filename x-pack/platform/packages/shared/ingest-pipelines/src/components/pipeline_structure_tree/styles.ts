@@ -8,12 +8,11 @@
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 
-export const getStyles = (euiTheme: EuiThemeComputed, isExtension: boolean) => css`
+export const getStyles = (euiTheme: EuiThemeComputed) => css`
   [class*='cssTreeNode-'] {
     background-color: ${euiTheme.colors.backgroundBasePlain};
     padding: ${euiTheme.size.base} ${euiTheme.size.m};
     border: ${euiTheme.border.thin};
-    width: 400px;
     margin: ${euiTheme.size.base} 0;
   }
 
@@ -21,8 +20,9 @@ export const getStyles = (euiTheme: EuiThemeComputed, isExtension: boolean) => c
     background-color: ${euiTheme.colors.backgroundTransparentPrimary};
   }
 
-  [class*='cssTreeNode-children'] {
-    margin-left: ${isExtension ? euiTheme.size.xl : euiTheme.size.l};
+  [class*='cssTreeNode-level'] {
+    margin-left: ${euiTheme.size.xl};
+    width: calc(100% - ${euiTheme.size.xl});
   }
 
   // We want to disable EUI's logic for activating nodes but EuiTreeViewItems's
@@ -38,7 +38,8 @@ export const getStyles = (euiTheme: EuiThemeComputed, isExtension: boolean) => c
   }
 
   .cssTreeNode-morePipelines {
-    margin-left: ${euiTheme.size.base};
+    margin-left: ${euiTheme.size.xl};
+    width: calc(100% - ${euiTheme.size.xl});
     background-color: ${euiTheme.colors.backgroundLightPrimary};
     color: ${euiTheme.colors.textPrimary} !important;
     border: none;

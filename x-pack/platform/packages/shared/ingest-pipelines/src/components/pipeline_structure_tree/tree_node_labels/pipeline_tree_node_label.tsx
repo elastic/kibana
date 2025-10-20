@@ -6,7 +6,7 @@
  */
 
 import type { EuiFlexItemProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -14,12 +14,14 @@ interface PipelineTreeNodeLabelProps {
   pipelineName: string;
   isManaged: boolean;
   isDeprecated: boolean;
+  onClick: () => void;
 }
 
 export const PipelineTreeNodeLabel = ({
   pipelineName,
   isManaged,
   isDeprecated,
+  onClick,
 }: PipelineTreeNodeLabelProps) => {
   return (
     <EuiFlexGroup
@@ -34,7 +36,14 @@ export const PipelineTreeNodeLabel = ({
         grow={(10 - Number(isDeprecated) - Number(isManaged)) as EuiFlexItemProps['grow']}
         css={{ textAlign: 'left' }}
       >
-        {pipelineName}
+        <EuiLink
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            onClick();
+          }}
+        >
+          {pipelineName}
+        </EuiLink>
       </EuiFlexItem>
       {isManaged && (
         <EuiFlexItem grow={1} data-test-subj={`pipelineTreeNode-${pipelineName}-managedIcon`}>

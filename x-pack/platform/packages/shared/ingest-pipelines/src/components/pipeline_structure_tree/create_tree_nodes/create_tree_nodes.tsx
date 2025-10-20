@@ -29,15 +29,15 @@ export const createTreeNodesFromPipelines = (
         pipelineName={treeNode.pipelineName}
         isManaged={treeNode.isManaged}
         isDeprecated={treeNode.isDeprecated}
+        onClick={() => clickTreeNode(treeNode.pipelineName)}
       />
     ),
     'data-test-subj': `pipelineTreeNode-${treeNode.pipelineName}-moreChildrenPipelines`,
     className:
-      (level === 1 ? 'cssTreeNode-root' : 'cssTreeNode-children') +
+      (level === 1 ? 'cssTreeNode-root' : `cssTreeNode-level-${level}`) +
       (treeNode.pipelineName === selectedPipeline ? '--active' : ''),
     children: treeNode.children.length ? [] : undefined,
     isExpanded: level === 1,
-    callback: () => clickTreeNode(treeNode.pipelineName),
   } as unknown as Node;
 
   if (level === MAX_TREE_LEVEL) {

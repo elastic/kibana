@@ -42,7 +42,7 @@ export const PipelineStructureTree = React.memo(
     goBack,
   }: PipelineStructureTreeProps) => {
     const { euiTheme } = useEuiTheme();
-    const styles = getStyles(euiTheme, isExtension);
+    const styles = getStyles(euiTheme);
 
     const treeNode = createTreeNodesFromPipelines(
       pipelineTree,
@@ -63,7 +63,7 @@ export const PipelineStructureTree = React.memo(
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}
-        <EuiFlexItem css={{ marginLeft: isExtension ? euiTheme.size.l : '0' }}>
+        <EuiFlexItem grow={false} style={{ width: '450px' }}>
           <EuiTreeView
             items={[treeNode]}
             showExpansionArrows={true}
