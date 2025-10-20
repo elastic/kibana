@@ -15,8 +15,6 @@ import type {
   ESQLFieldWithMetadata,
 } from './types';
 
-type Command = Omit<ESQLCommand, 'type'> & { type: any };
-
 /**
  * Interface defining the methods that each ES|QL command should register.
  * These methods provide functionality specific to the command's behavior.
@@ -32,8 +30,8 @@ export interface ICommandMethods<TContext = any> {
    * @returns Return an array of validation errors/warnings.
    */
   validate?: (
-    command: Command,
-    ast: Command[],
+    command: ESQLAstAllCommands,
+    ast: ESQLCommand[],
     context?: TContext,
     callbacks?: ICommandCallbacks
   ) => ESQLMessage[];

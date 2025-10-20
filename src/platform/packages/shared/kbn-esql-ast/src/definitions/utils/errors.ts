@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type {
+  ESQLAstAllCommands,
   ESQLColumn,
   ESQLCommand,
   ESQLFunction,
@@ -509,10 +510,10 @@ export const errors = {
   dropTimestampWarning: ({ location }: ESQLColumn): ESQLMessage =>
     errors.byId('dropTimestampWarning', location, {}),
 
-  forkTooManyBranches: (command: ESQLCommand): ESQLMessage =>
+  forkTooManyBranches: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkTooManyBranches', command.location, {}),
 
-  forkTooFewBranches: (command: ESQLCommand): ESQLMessage =>
+  forkTooFewBranches: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkTooFewBranches', command.location, {}),
 };
 
