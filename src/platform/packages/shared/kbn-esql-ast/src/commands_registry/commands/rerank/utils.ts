@@ -6,7 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand, ESQLAstRerankCommand, ESQLMap, ESQLSingleAstItem } from '../../../types';
+import type {
+  ESQLAstRerankCommand,
+  ESQLMap,
+  ESQLSingleAstItem,
+  ESQLAstAllCommands,
+} from '../../../types';
 import { isAssignment, isFunctionExpression } from '../../../ast/is';
 import { within } from '../../../ast/location';
 import {
@@ -39,7 +44,7 @@ export enum CaretPosition {
  */
 export function getPosition(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   cursorPosition: number
 ): RerankPosition {
   const rerankCommand = command as ESQLAstRerankCommand;
