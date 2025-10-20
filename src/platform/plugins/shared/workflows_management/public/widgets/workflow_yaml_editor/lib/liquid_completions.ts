@@ -84,12 +84,6 @@ export const LIQUID_FILTERS = [
     example: '{{ "HELLO" | downcase }} => hello',
   },
   {
-    name: 'dump',
-    description: 'Converts an object to a JSON string',
-    insertText: 'dump',
-    example: '{{ object | dump }}',
-  },
-  {
     name: 'escape',
     description: 'Escapes a string by replacing characters with escape sequences',
     insertText: 'escape',
@@ -115,9 +109,15 @@ export const LIQUID_FILTERS = [
   },
   {
     name: 'json',
-    description: 'Converts a value to JSON',
+    description: 'Converts an object to a JSON string',
     insertText: 'json',
-    example: '{{ object | json }}',
+    example: '{{ object | json: 2 }}',
+  },
+  {
+    name: 'json_parse',
+    description: 'Converts a JSON string to an object',
+    insertText: 'json_parse',
+    example: '{{ "{"name": "John", "age": 30}" | json_parse }} => {name: "John", age: 30}',
   },
   {
     name: 'last',
