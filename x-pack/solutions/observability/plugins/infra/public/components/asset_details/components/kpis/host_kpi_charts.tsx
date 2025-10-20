@@ -36,7 +36,7 @@ export const HostKpiCharts = ({
   schema,
 }: HostKpiChartsProps) => {
   const charts = useHostKpiCharts({
-    dataViewId: dataView?.id,
+    indexPattern: dataView?.getIndexPattern(),
     getSubtitle,
     schema,
   });
