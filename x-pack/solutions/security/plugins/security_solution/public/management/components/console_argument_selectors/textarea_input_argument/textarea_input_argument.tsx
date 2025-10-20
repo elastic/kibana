@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiFormRow,
   EuiTextArea,
   EuiText,
   htmlIdGenerator,
   EuiIcon,
+  EuiTitle,
+  EuiPanel,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -76,11 +78,15 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
     textareaPlaceholderLabel = TEXTAREA_PLACEHOLDER_TEXT,
     width,
     textareaLabel,
-    helpContent,
+    // FIXME:PT DELETE default value ... dev testing only
+    helpContent = `some help content here\n\nsome other content down here\n`.repeat(100),
   }) => {
     const testId = useTestIdGenerator(
       `textareaInputArgument-${command.commandDefinition.name}-${argName}-${argIndex}`
     );
+    const { euiTheme } = useEuiTheme();
+
+    const [showHelpContent, setShowHelpContent] = useState(false);
 
     const textAreaHtmlId = useMemo(() => {
       return htmlIdGenerator('textarea')();
@@ -88,10 +94,25 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
 
     const textareaContainerCss = useMemo(() => {
       return css`
-        width: ${width ?? '20vw'};
-        min-width: 275px;
+        --height: 15rem;
+
+        .textarea-container {
+          textarea {
+            min-width: 275px;
+            width: ${width ?? '20vw'};
+            height: var(--height);
+            box-shadow: none;
+            border: ${euiTheme.border.thin};
+          }
+        }
+
+        .help-container {
+          width: 25rem;
+          word-break: break-word;
+          height: var(--height);
+        }
       `;
-    }, [width]);
+    }, [euiTheme.border.thin, width]);
 
     // Because the console supports multiple instances of the same argument, we need to ensure that
     // if the command was defined to now allow multiples, that we only render the first one.
@@ -134,6 +155,10 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
       [onChange, state, valueText]
     );
 
+    const handleHelpOnClick = useCallback(() => {
+      setShowHelpContent((prev) => !prev);
+    }, []);
+
     return shouldRender ? (
       <EuiPopover
         isOpen={state.isPopoverOpen}
@@ -143,7 +168,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
         initialFocus={`textarea.${textAreaHtmlId}`}
         panelProps={{ 'data-test-subj': testId('popoverPanel') }}
         button={
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>
               <div className="eui-textTruncate">
                 {valueText || (
@@ -166,27 +191,68 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
           </EuiFlexGroup>
         }
       >
-        {
-          // FIXME:PT implement `help` below
-          state.isPopoverOpen && (
-            <div css={textareaContainerCss}>
-              <EuiFormRow
-                fullWidth
-                label={textareaLabel ?? argName}
-                labelAppend={<div>{'help'}</div>}
+        {state.isPopoverOpen && (
+          <div css={textareaContainerCss}>
+            <EuiPanel paddingSize="xs" hasShadow={false} hasBorder={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="none">
+                <EuiFlexItem>
+                  <EuiTitle size="xxxs">
+                    <h5>{textareaLabel ?? argName}</h5>
+                  </EuiTitle>
+                </EuiFlexItem>
+                {helpContent && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="help"
+                      size="xs"
+                      onClick={handleHelpOnClick}
+                      isSelected={showHelpContent}
+                      aria-label={i18n.translate(
+                        'xpack.securitySolution.textareaInputArgument.textAreaInputArgument.showHelpContentLabel',
+                        { defaultMessage: 'Show instructions' }
+                      )}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiPanel>
+            <div>
+              <EuiFlexGroup
+                responsive={false}
+                wrap={false}
+                alignItems="flexStart"
+                justifyContent="spaceEvenly"
+                gutterSize="xs"
+                className="eui-fullHeight"
               >
-                <EuiTextArea
-                  value={value}
-                  placeholder={textareaPlaceholderLabel}
-                  onChange={handleTextAreaOnChange}
-                  className={textAreaHtmlId}
-                  resize="none"
-                  fullWidth
-                />
-              </EuiFormRow>
+                <EuiFlexItem className="textarea-container">
+                  <EuiTextArea
+                    value={value}
+                    placeholder={textareaPlaceholderLabel}
+                    onChange={handleTextAreaOnChange}
+                    className={textAreaHtmlId}
+                    resize="none"
+                    fullWidth
+                  />
+                </EuiFlexItem>
+                {showHelpContent && (
+                  <EuiFlexItem grow={false} className="help-container">
+                    <EuiPanel
+                      paddingSize="s"
+                      hasShadow={false}
+                      hasBorder={true}
+                      className="eui-fullHeight"
+                    >
+                      <EuiText size="s" className="eui-scrollBar eui-yScroll">
+                        {helpContent}
+                      </EuiText>
+                    </EuiPanel>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </div>
-          )
-        }
+          </div>
+        )}
       </EuiPopover>
     ) : (
       <EuiText size="s" color="subdued" data-test-subj={testId('noMultipleArgs')}>
