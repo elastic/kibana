@@ -91,10 +91,13 @@ export const createAttackDiscoverySchedulesRoute = (
           }
 
           // Transform API format create properties to internal format
-          const internalScheduleData = transformAttackDiscoveryScheduleCreatePropsFromApi({
-            ...request.body,
-            enabled: request.body.enabled ?? false, // Default to disabled for security
-          });
+          const internalScheduleData = transformAttackDiscoveryScheduleCreatePropsFromApi(
+            {
+              ...request.body,
+              enabled: request.body.enabled ?? false, // Default to disabled for security
+            },
+            dataClient.options.actionsClient
+          );
 
           const schedule = await dataClient.createSchedule(internalScheduleData);
 

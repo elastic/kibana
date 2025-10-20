@@ -6,6 +6,7 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { CreateAttackDiscoverySchedulesRequestBody } from '@kbn/elastic-assistant-common';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
@@ -39,6 +40,9 @@ const mockSchedulingDataClient = {
   deleteSchedule: jest.fn(),
   enableSchedule: jest.fn(),
   disableSchedule: jest.fn(),
+  options: {
+    actionsClient: actionsClientMock.create(),
+  },
 } as unknown as AttackDiscoveryScheduleDataClient;
 const mockApiConfig = {
   connectorId: 'connector-id',
