@@ -10,14 +10,19 @@
 import type { IAggConfig } from '@kbn/data-plugin/common';
 import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import type { CounterRateColumn, GenericLensColumnWithMeta } from '@kbn/lens-common';
-import type { SchemaConfig, SupportedAggregation } from '../../common';
+import type {
+  CounterRateColumn,
+  GenericColumnWithMeta,
+  SchemaConfig,
+  SupportedAggregation,
+} from '../../common';
 import type {
   AvgColumn,
   CountColumn,
   MaxColumn,
   DateHistogramColumn,
   Meta,
+  AggBasedColumn,
 } from '../../common/convert_to_lens/lib';
 import {
   getBucketCollapseFn,
@@ -74,7 +79,7 @@ describe('getColumnsWithoutReferenced', () => {
     meta: { aggId: 'some id' },
   };
 
-  const columnWithReference: GenericLensColumnWithMeta<CounterRateColumn, Meta> = {
+  const columnWithReference: GenericColumnWithMeta<CounterRateColumn, Meta> = {
     references: [referencedColumn.columnId],
     columnId: 'col2',
     operationType: 'counter_rate',

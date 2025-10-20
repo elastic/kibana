@@ -10,11 +10,8 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { LensInspector } from '../../../lens_inspector_service';
-import type { TypedLensSerializedState } from '../../../react_embeddable/types';
-import type { IndexPatternServiceAPI } from '../../../data_views_service/service';
-
 import type {
+  TypedLensSerializedState,
   Visualization,
   FramePublicAPI,
   DatasourceDimensionEditorProps,
@@ -26,7 +23,9 @@ import type {
   StateSetter,
   DragDropOperation,
   VisualizationDimensionGroupConfig,
-} from '../../../types';
+} from '@kbn/lens-common';
+import type { LensInspector } from '@kbn/lens-common';
+import type { IndexPatternServiceAPI } from '../../../data_views_service/service';
 
 export interface ConfigPanelWrapperProps {
   framePublicAPI: FramePublicAPI;

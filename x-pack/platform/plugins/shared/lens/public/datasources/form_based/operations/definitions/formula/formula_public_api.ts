@@ -6,9 +6,8 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { FormulaPublicApi } from '@kbn/lens-common';
+import type { FormulaPublicApi, IndexPattern } from '@kbn/lens-common';
 import { convertDataViewIntoLensIndexPattern } from '../../../../../data_views_service/loader';
-import type { IndexPattern } from '../../../../../types';
 
 import { insertOrReplaceFormulaColumn } from './parse';
 

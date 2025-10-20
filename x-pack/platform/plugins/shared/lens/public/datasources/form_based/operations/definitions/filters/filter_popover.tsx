@@ -12,12 +12,11 @@ import type { Query } from '@kbn/es-query';
 // import { QueryInput } from '../../../../shared_components/query_input';
 import { isQueryValid, QueryInput } from '@kbn/visualization-ui-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { LensAggFilterValue as FilterValue } from '@kbn/lens-common';
+import type { LensAggFilterValue as FilterValue, IndexPattern } from '@kbn/lens-common';
+import type { LensAppServices } from '@kbn/lens-common/lens/types';
 import { LENS_APP_NAME } from '../../../../../../common/constants';
-import type { IndexPattern } from '../../../../../types';
 import { defaultLabel } from './filters';
 import { LabelInput } from '../shared_components';
-import type { LensAppServices } from '../../../../../app_plugin/types';
 
 export const FilterPopover = ({
   filter,

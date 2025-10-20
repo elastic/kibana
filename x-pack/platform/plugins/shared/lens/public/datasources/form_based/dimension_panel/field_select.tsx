@@ -19,7 +19,7 @@ import { getFieldIconType } from '@kbn/field-utils';
 import type { OperationType } from '../form_based';
 import type { OperationSupportMatrix } from './operation_support';
 import { fieldContainsData } from '../../../shared_components';
-import type { IndexPattern } from '../../../types';
+import type { IndexPattern } from '@kbn/lens-common';
 
 export type FieldChoiceWithOperationType = FieldOptionValue & {
   operationType: OperationType;

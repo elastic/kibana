@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import { ToolbarPopover } from '../../../shared_components';
 import { TitlePositionOptions } from './title_position_option';
-import type { FramePublicAPI } from '../../../types';
-import type { LegacyMetricState } from '../../../../common/types';
+import type { FramePublicAPI } from '@kbn/lens-common';
+import { LegacyMetricState } from '@kbn/lens-common';
 import { TextFormattingOptions } from './text_formatting_options';
 
 export interface TitlesAndTextPopoverProps {

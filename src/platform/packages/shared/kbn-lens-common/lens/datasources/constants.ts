@@ -20,7 +20,7 @@ export const AUTO_BARS = 'auto';
 export const MIN_HISTOGRAM_BARS = 1;
 export const SLICES = 6;
 
-export const MODES = {
+export const LENS_RANGE_MODES = {
   Range: 'range',
   Histogram: 'histogram',
 } as const;

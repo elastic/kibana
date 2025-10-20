@@ -11,11 +11,11 @@
 // import type { SavedQuery } from '@kbn/data-plugin/public';
 // import type { $Values } from 'utility-types';
 // import type { MainHistoryLocationState } from '../../common/locator/locator';
-// import type { LensDocument } from '../persistence';
+// import type { LensDocument  } from '@kbn/lens-common';
 
 // import type { TableInspectorAdapter } from '../editor_frame_service/types';
 // import type { DateRange } from '../../common/types';
-// import type { LensAppServices } from '../app_plugin/types';
+// import type { LensAppServices  } from '@kbn/lens-common';
 // import type {
 //   DatasourceMap,
 //   VisualizationMap,

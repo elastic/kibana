@@ -29,7 +29,7 @@ import {
 } from './utils';
 import { Operations } from '../constants';
 import type { AggBasedColumn } from './convert/types';
-import type { LensColumnWithMeta } from '@kbn/lens-common';
+import type { ColumnWithMeta } from '../types';
 
 describe('getLabel', () => {
   const label = 'some label';
@@ -186,7 +186,7 @@ describe('isColumnWithMeta', () => {
     dataType: 'string',
   } as AggBasedColumn;
 
-  const columnWithMeta: LensColumnWithMeta = {
+  const columnWithMeta: ColumnWithMeta = {
     sourceField: '',
     columnId: '',
     operationType: 'average',

@@ -16,10 +16,14 @@ import {
   cloneLayer,
   getUnsupportedOperationsWarningMessage,
 } from './utils';
-import type { FormBasedPrivateState, GenericIndexPatternColumn } from './types';
-import type { FramePublicAPI, IndexPattern } from '../../types';
-import type { TermsIndexPatternColumn } from './operations';
-import type { FormBasedLayer } from './types';
+import type {
+  FormBasedPrivateState,
+  GenericIndexPatternColumn,
+  FramePublicAPI,
+  IndexPattern,
+  TermsIndexPatternColumn,
+  FormBasedLayer,
+} from '@kbn/lens-common';
 import { createMockedIndexPatternWithAdditionalFields } from './mocks';
 import { getLongMessage } from '../../user_messages_utils';
 

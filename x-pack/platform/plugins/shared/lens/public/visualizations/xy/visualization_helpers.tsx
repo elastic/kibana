@@ -15,7 +15,7 @@ import type {
   OperationMetadata,
   UserMessage,
   VisualizationType,
-} from '../../types';
+} from '@kbn/lens-common';
 import type {
   State,
   XYState,

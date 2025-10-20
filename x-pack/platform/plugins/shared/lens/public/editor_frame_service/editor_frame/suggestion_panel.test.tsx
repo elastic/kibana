@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Visualization, Suggestion } from '../../types';
+import type { Visualization, Suggestion }  from '@kbn/lens-common';
 import type { DatasourceMock } from '../../mocks';
 import {
   createMockVisualization,
@@ -26,7 +26,7 @@ import { IconChartDatatable } from '@kbn/chart-icons';
 import { mountWithReduxStore } from '../../mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 
-import type { LensAppState, PreviewState, VisualizationState } from '../../state_management';
+import type { LensAppState, PreviewState, VisualizationState }  from '@kbn/lens-common';
 import { applyChanges, setState, setToggleFullscreen } from '../../state_management';
 import { setChangesApplied } from '../../state_management/lens_slice';
 import { userEvent } from '@testing-library/user-event';

@@ -8,19 +8,21 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
-import { DataGridDensity, RowHeightSettings, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
-import { ToolbarPopover } from '../../../shared_components';
-import type { VisualizationToolbarProps } from '../../../types';
-import type { DatatableVisualizationState } from '../visualization';
-import { RowHeightMode } from '../../../../common/types';
-import { DEFAULT_PAGE_SIZE } from './table_basic';
+import type { DataGridDensity } from '@kbn/unified-data-table';
+import { RowHeightSettings, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
+import type { DatatableVisualizationState, RowHeightMode } from '@kbn/lens-common';
 import {
+  LENS_ROW_HEIGHT_MODE,
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
   DEFAULT_ROW_HEIGHT,
   DEFAULT_ROW_HEIGHT_LINES,
   ROW_HEIGHT_LINES_KEYS,
-} from './constants';
+  LENS_DATAGRID_DENSITY,
+} from '@kbn/lens-common';
+import { ToolbarPopover } from '../../../shared_components';
+import { DEFAULT_PAGE_SIZE } from './table_basic';
 import { DensitySettings } from './density_settings';
 
 type LineCounts = {
@@ -50,7 +52,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
       heightLinesProperty: keyof typeof ROW_HEIGHT_LINES_KEYS
     ) => {
       const newRowHeightLines =
-        newHeightMode === RowHeightMode.auto
+        newHeightMode === LENS_ROW_HEIGHT_MODE.auto
           ? ROWS_HEIGHT_OPTIONS.auto
           : lineCounts[heightLinesProperty];
 
@@ -109,7 +111,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
         data-test-subj="lnsVisualOptionsPopover"
       >
         <DensitySettings
-          dataGridDensity={state.density ?? DataGridDensity.NORMAL}
+          dataGridDensity={state.density ?? LENS_DATAGRID_DENSITY.NORMAL}
           onChange={onChangeDensity}
         />
         <RowHeightSettings
@@ -131,7 +133,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
           rowHeight={
             // @ts-ignore - saved state can contain legacy row height mode
             state.rowHeight === LEGACY_SINGLE_ROW_HEIGHT_MODE
-              ? RowHeightMode.custom
+              ? LENS_ROW_HEIGHT_MODE.custom
               : state.rowHeight ?? DEFAULT_ROW_HEIGHT
           }
           label={i18n.translate('xpack.lens.table.visualOptionsFitRowToContentLabel', {

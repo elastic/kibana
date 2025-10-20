@@ -66,8 +66,8 @@
 // import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 // import type { CanAddNewPanel } from '@kbn/presentation-containers';
 // import type { LegacyMetricState } from '../../common';
-// import type { LensDocument } from '../persistence';
-// import type { LensInspector } from '../lens_inspector_service';
+// import type { LensDocument  } from '@kbn/lens-common';
+// import type { LensInspector } from '@kbn/lens-common';
 // import type { LensAttributesService } from '../lens_attribute_service';
 // import type {
 //   DatatableVisualizationState,
@@ -86,9 +86,24 @@
 //   VisualizationDisplayOptions,
 //   VisualizationMap,
 // } from '../types';
-// import type { LensPluginStartDependencies } from '../plugin';
+import type { Simplify } from '@kbn/chart-expressions-common';
+import type { HttpSetup } from '@kbn/core/public';
+import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import type { Capabilities } from '@kbn/core/types';
+import type { TimefilterContract, FilterManager } from '@kbn/data-plugin/public';
+import type { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
+import type {
+  VisualizationMap,
+  DatasourceMap,
+  DocumentToExpressionReturnType,
+} from '@kbn/lens-common';
+import type { LensDocument } from '@kbn/lens-common/lens/types';
+import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { LensAttributesService } from '../lens_attribute_service';
+import type { LensPluginStartDependencies } from '../plugin';
 // import type { TableInspectorAdapter } from '../editor_frame_service/types';
-// import type { PieVisualizationState } from '../../common/types';
+// import type { LensPartitionVisualizationState  } from '../../common/types';
 // import type { FormBasedPersistedState } from '..';
 // import type { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
 // import type { GaugeVisualizationState } from '../visualizations/gauge/constants';
@@ -127,25 +142,25 @@
 //   columns: string[];
 // }
 
-// export type LensEmbeddableStartServices = Simplify<
-//   LensPluginStartDependencies & {
-//     timefilter: TimefilterContract;
-//     coreHttp: HttpSetup;
-//     coreStart: CoreStart;
-//     capabilities: RecursiveReadonly<Capabilities>;
-//     expressionRenderer: ReactExpressionRendererType;
-//     documentToExpression: (
-//       doc: LensDocument,
-//       forceDSL?: boolean
-//     ) => Promise<DocumentToExpressionReturnType>;
-//     injectFilterReferences: FilterManager['inject'];
-//     visualizationMap: VisualizationMap;
-//     datasourceMap: DatasourceMap;
-//     theme: ThemeServiceStart;
-//     uiSettings: IUiSettingsClient;
-//     attributeService: LensAttributesService;
-//   }
-// >;
+export type LensEmbeddableStartServices = Simplify<
+  LensPluginStartDependencies & {
+    timefilter: TimefilterContract;
+    coreHttp: HttpSetup;
+    coreStart: CoreStart;
+    capabilities: RecursiveReadonly<Capabilities>;
+    expressionRenderer: ReactExpressionRendererType;
+    documentToExpression: (
+      doc: LensDocument,
+      forceDSL?: boolean
+    ) => Promise<DocumentToExpressionReturnType>;
+    injectFilterReferences: FilterManager['inject'];
+    visualizationMap: VisualizationMap;
+    datasourceMap: DatasourceMap;
+    theme: ThemeServiceStart;
+    uiSettings: IUiSettingsClient;
+    attributeService: LensAttributesService;
+  }
+>;
 
 // export interface PreventableEvent {
 //   preventDefault(): void;
@@ -518,7 +533,7 @@
 //   Omit<LensSerializedState, 'attributes'> & {
 //     attributes:
 //       | TypedLensAttributes<'lnsXY', XYState>
-//       | TypedLensAttributes<'lnsPie', PieVisualizationState>
+//       | TypedLensAttributes<'lnsPie', LensPartitionVisualizationState >
 //       | TypedLensAttributes<'lnsHeatmap', HeatmapVisualizationState>
 //       | TypedLensAttributes<'lnsGauge', GaugeVisualizationState>
 //       | TypedLensAttributes<'lnsDatatable', DatatableVisualizationState>

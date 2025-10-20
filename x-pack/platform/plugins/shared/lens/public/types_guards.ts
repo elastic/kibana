@@ -5,6 +5,20 @@
  * 2.0.
  */
 
+import type {
+  ClickTriggerEvent,
+  MultiClickTriggerEvent,
+  BrushTriggerEvent,
+} from '@kbn/charts-plugin/public';
+import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
+import type {
+  DragDropOperation,
+  LensEditSupportedActions,
+  LensEditEvent,
+  LensTableRowContextMenuEvent,
+  LensAlertRulesEvent,
+} from '@kbn/lens-common';
+
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is ClickTriggerEvent {
   return event.name === 'filter';
 }

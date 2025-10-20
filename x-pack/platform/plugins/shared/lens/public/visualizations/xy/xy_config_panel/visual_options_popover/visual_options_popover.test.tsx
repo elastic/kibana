@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Position } from '@elastic/charts';
-import type { FramePublicAPI } from '../../../../types';
+import type { FramePublicAPI, XYDataLayerConfig } from '@kbn/lens-common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../../mocks';
 import type { SeriesType, State } from '../../types';
 import type { VisualOptionsPopoverProps } from '.';
@@ -15,7 +15,6 @@ import { VisualOptionsPopover } from '.';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { XYDataLayerConfig } from '@kbn/visualizations-plugin/common';
 
 describe('Visual options popover', () => {
   let frame: FramePublicAPI;

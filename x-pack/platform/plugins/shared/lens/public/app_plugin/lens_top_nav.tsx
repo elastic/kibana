@@ -24,10 +24,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { SerializedStyles } from '@emotion/react';
 import { css } from '@emotion/react';
 import { LENS_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { LensAppState, LensAppServices } from '@kbn/lens-common';
 import { LENS_APP_NAME } from '../../common/constants';
-import type { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
+import type { LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
-import type { LensAppState } from '../state_management';
 import {
   setState,
   useLensSelector,
@@ -916,7 +916,7 @@ export const LensTopNavMenu = ({
         },
       },
     });
-    return [...(additionalMenuEntries || []), ...baseMenuEntries];
+    return (additionalMenuEntries || []).concat(baseMenuEntries);
   }, [
     initialContext,
     initialInput?.savedObjectId,

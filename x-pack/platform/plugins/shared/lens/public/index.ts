@@ -20,7 +20,7 @@ export type {
   LensEmbeddableOutput,
   LensSavedObjectAttributes,
   LensRendererProps as EmbeddableComponentProps,
-} from './react_embeddable/types';
+} from '@kbn/lens-common';
 
 export type {
   XYState,
@@ -43,21 +43,21 @@ export type {
   VisualizationSuggestion,
   Suggestion,
   UserMessage,
-} from './types';
+} from '@kbn/lens-common';
 export type {
   LegacyMetricState as MetricState,
   ValueLabelConfig,
-  PieVisualizationState,
-  PieLayerState,
-  SharedPieLayerState,
-  LayerType,
-} from '../common/types';
+  LensPartitionVisualizationState,
+  LensPartitionLayerState,
+  SharedPartitionLayerState as SharedLensPartitionLayerState,
+  LensLayerType as LayerType,
+} from '@kbn/lens-common';
 
-export type { DatatableVisualizationState } from './visualizations/datatable/visualization';
-export type { HeatmapVisualizationState } from './visualizations/heatmap/types';
-export type { GaugeVisualizationState } from './visualizations/gauge/constants';
-export type { MetricVisualizationState } from './visualizations/metric/types';
-export type { TagcloudState } from './visualizations/tagcloud/types';
+export type { DatatableVisualizationState } from '@kbn/lens-common';
+export type { HeatmapVisualizationState } from '@kbn/lens-common';
+export type { GaugeVisualizationState } from '@kbn/lens-common';
+export type { MetricVisualizationState } from '@kbn/lens-common';
+export type { LensTagcloudState as TagcloudState } from '@kbn/lens-common';
 export type {
   FormBasedPersistedState,
   PersistedIndexPatternLayer,
@@ -91,8 +91,8 @@ export type {
   StaticValueIndexPatternColumn,
   TimeScaleIndexPatternColumn,
   FormBasedLayer,
-} from './datasources/form_based/types';
-export type { TextBasedPersistedState } from './datasources/form_based/esql_layer/types';
+} from '@kbn/lens-common';
+export type { TextBasedPersistedState } from '@kbn/lens-common';
 export type {
   XYArgs,
   XYRender,
@@ -122,7 +122,7 @@ export type { InlineEditLensEmbeddableContext } from './trigger_actions/open_len
 
 export type { ChartInfo } from './chart_info_api';
 
-export { layerTypes } from '../common/layer_types';
+export { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
 export { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 
 export type { LensPublicStart, LensPublicSetup, LensSuggestionsApi } from './plugin';

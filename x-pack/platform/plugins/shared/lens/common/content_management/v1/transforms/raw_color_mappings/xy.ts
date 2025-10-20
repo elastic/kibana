@@ -6,7 +6,7 @@
  */
 
 import type { XYDataLayerConfig, XYLayerConfig, XYState } from '../../../../../public';
-import type { GeneralDatasourceStates } from '../../../../../public/state_management';
+import type { GeneralDatasourceStates } from '@kbn/lens-common';
 import {
   convertToRawColorMappings,
   getColumnMetaFn,

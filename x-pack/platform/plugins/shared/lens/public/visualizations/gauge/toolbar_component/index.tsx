@@ -25,7 +25,7 @@ import {
   IconChartGaugeSemiCircleSimple,
   IconChartLinearSimple,
 } from '@kbn/chart-icons';
-import type { VisualizationToolbarProps } from '../../../types';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import { ToolbarPopover, VisLabel } from '../../../shared_components';
 import { gaugeTitlesByType, type GaugeVisualizationState } from '../constants';
 

@@ -8,9 +8,12 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import type { GenericIndexPatternColumn, StaticValueIndexPatternColumn } from '@kbn/lens-common';
+import type {
+  GenericIndexPatternColumn,
+  StaticValueIndexPatternColumn,
+  IndexPattern,
+} from '@kbn/lens-common';
 import type { OperationDefinition } from '.';
-import type { IndexPattern } from '../../../../types';
 import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
 import { getColumnOrder } from '../layer_helpers';
 import { STATIC_VALUE_NOT_VALID_NUMBER } from '../../../../user_messages_ids';

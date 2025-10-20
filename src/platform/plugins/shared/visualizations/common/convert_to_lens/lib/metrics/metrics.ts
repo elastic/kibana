@@ -8,7 +8,7 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import type { PercentageModeConfig } from '../../..';
+import type { PercentageModeConfig } from '../../types';
 import type { AggBasedColumn, ExtendedColumnConverterArgs } from '../convert';
 import {
   convertMetricAggregationColumnWithoutSpecialParams,

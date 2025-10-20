@@ -24,8 +24,8 @@ import type {
   LensAggFilter as Filter,
   LensAggFilterValue as FilterValue,
   TermsIndexPatternColumn,
+  IndexPattern,
 } from '@kbn/lens-common';
-import type { IndexPattern } from '../../../../../types';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
 import { FilterPopover } from './filter_popover';

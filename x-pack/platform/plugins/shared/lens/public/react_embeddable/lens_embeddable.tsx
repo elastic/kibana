@@ -10,13 +10,9 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { merge } from 'rxjs';
+import type { LensApi, LensRuntimeState, LensSerializedState } from '@kbn/lens-common';
 import { DOC_TYPE } from '../../common/constants';
-import type {
-  LensApi,
-  LensEmbeddableStartServices,
-  LensRuntimeState,
-  LensSerializedState,
-} from './types';
+import type { LensEmbeddableStartServices } from './types';
 
 import { loadEmbeddableData } from './data_loader';
 import { isTextBasedLanguage, deserializeState } from './helper';

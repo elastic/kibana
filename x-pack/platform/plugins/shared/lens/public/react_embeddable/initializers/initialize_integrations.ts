@@ -18,14 +18,14 @@ import {
   type SerializedPanelState,
 } from '@kbn/presentation-publishing';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import { isTextBasedLanguage } from '../helper';
 import type {
   GetStateType,
-  LensEmbeddableStartServices,
+  IntegrationCallbacks,
   LensInternalApi,
   LensRuntimeState,
-} from '../types';
-import type { IntegrationCallbacks } from '../types';
+} from '@kbn/lens-common';
+import { isTextBasedLanguage } from '../helper';
+import type { LensEmbeddableStartServices } from '../types';
 import { DOC_TYPE } from '../../../common/constants';
 
 function cleanupSerializedState({

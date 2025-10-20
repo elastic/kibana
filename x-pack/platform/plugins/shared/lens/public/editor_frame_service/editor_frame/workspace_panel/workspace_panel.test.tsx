@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { UserMessage } from '../../../types';
+import type { UserMessage } from '@kbn/lens-common';
 import { fireEvent, screen, act } from '@testing-library/react';
 import {
   createMockVisualization,

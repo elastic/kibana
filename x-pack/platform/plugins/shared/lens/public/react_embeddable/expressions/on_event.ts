@@ -8,6 +8,7 @@
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { type AggregateQuery, type Query, isOfAggregateQueryType } from '@kbn/es-query';
+import type { GetStateType, LensApi, LensPublicCallbacks } from '@kbn/lens-common';
 import {
   isLensAlertRule,
   isLensBrushEvent,
@@ -15,16 +16,12 @@ import {
   isLensFilterEvent,
   isLensMultiFilterEvent,
   isLensTableRowContextMenuClickEvent,
-} from '../../types';
+} from '../../types_guards';
 import { inferTimeField } from '../../utils';
-import type {
-  GetStateType,
-  LensApi,
-  LensEmbeddableStartServices,
-  LensPublicCallbacks,
-} from '../types';
+
 import { isTextBasedLanguage } from '../helper';
 import { addLog } from '../logger';
+import type { LensEmbeddableStartServices } from '../types';
 
 export const prepareEventHandler =
   (

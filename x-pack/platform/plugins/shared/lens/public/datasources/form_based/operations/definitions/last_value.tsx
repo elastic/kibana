@@ -13,9 +13,13 @@ import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LAST_VALUE_ID, LAST_VALUE_NAME } from '@kbn/lens-formula-docs';
-import type { DataType, LastValueIndexPatternColumn } from '@kbn/lens-common';
+import type {
+  DataType,
+  LastValueIndexPatternColumn,
+  IndexPatternField,
+  IndexPattern,
+} from '@kbn/lens-common';
 import type { FieldBasedOperationErrorMessage, OperationDefinition } from '.';
-import type { IndexPatternField, IndexPattern } from '../../../../types';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,

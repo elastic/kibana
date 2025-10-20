@@ -8,15 +8,15 @@
 import type { PaletteOutput } from '@kbn/coloring';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { suggestions } from './suggestions';
-import type { DataType, SuggestionRequest } from '../../types';
-import type { PieLayerState, PieVisualizationState } from '../../../common/types';
+import type { DataType, SuggestionRequest }  from '@kbn/lens-common';
+import type { LensPartitionLayerState , LensPartitionVisualizationState  }  from '@kbn/lens-common';
 import {
   CategoryDisplay,
   LegendDisplay,
   NumberDisplay,
   PieChartTypes,
 } from '../../../common/constants';
-import { layerTypes } from '../../../common/layer_types';
+import { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
 
 describe('suggestions', () => {
   describe('pie', () => {
@@ -188,7 +188,7 @@ describe('suggestions', () => {
           },
           state: {
             shape: PieChartTypes.MOSAIC,
-            layers: [{} as PieLayerState],
+            layers: [{} as LensPartitionLayerState ],
           },
           keptLayerIds: ['first'],
         }).length
@@ -363,7 +363,7 @@ describe('suggestions', () => {
             ],
             changeType: 'initial',
           },
-          state: {} as PieVisualizationState,
+          state: {} as LensPartitionVisualizationState ,
           keptLayerIds: ['first'],
         })
       ).toHaveLength(0);
@@ -383,7 +383,7 @@ describe('suggestions', () => {
             ],
             changeType: 'initial',
           },
-          state: {} as PieVisualizationState,
+          state: {} as LensPartitionVisualizationState ,
           keptLayerIds: ['first'],
         })
       ).toHaveLength(0);
@@ -520,7 +520,7 @@ describe('suggestions', () => {
     });
 
     it('should score higher for more groups', () => {
-      const config: SuggestionRequest<PieVisualizationState> = {
+      const config: SuggestionRequest<LensPartitionVisualizationState > = {
         table: {
           layerId: 'first',
           isMultiRow: true,
@@ -553,7 +553,7 @@ describe('suggestions', () => {
     });
 
     it('should score higher for more groups for each subvis with passed-in subvis id', () => {
-      const config: SuggestionRequest<PieVisualizationState> = {
+      const config: SuggestionRequest<LensPartitionVisualizationState > = {
         table: {
           layerId: 'first',
           isMultiRow: true,
@@ -816,7 +816,7 @@ describe('suggestions', () => {
           ],
         },
         keptLayerIds: ['first'],
-      } as SuggestionRequest<PieVisualizationState>;
+      } as SuggestionRequest<LensPartitionVisualizationState >;
 
       // no suggestions if multiple metrics are not allowed
       expect(suggestions(props)).toHaveLength(0);
@@ -828,7 +828,7 @@ describe('suggestions', () => {
           state: {
             ...props.state,
             layers: [{ ...props.state!.layers[0], allowMultipleMetrics: true }],
-          } as PieVisualizationState,
+          } as LensPartitionVisualizationState ,
         })
       ).toHaveLength(2);
     });

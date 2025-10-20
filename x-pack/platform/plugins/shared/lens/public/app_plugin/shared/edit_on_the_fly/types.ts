@@ -6,16 +6,16 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
-import type { TypedLensSerializedState } from '../../../react_embeddable/types';
-import type { LensPluginStartDependencies } from '../../../plugin';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
 import type {
   DatasourceMap,
   VisualizationMap,
   FramePublicAPI,
   UserMessagesGetter,
-} from '../../../types';
-import type { LensInspector } from '../../../lens_inspector_service';
-import type { LensDocument } from '../../../persistence';
+  LensDocument,
+} from '@kbn/lens-common';
+import type { LensPluginStartDependencies } from '../../../plugin';
+import type { LensInspector } from '@kbn/lens-common';
 
 export interface FlyoutWrapperProps {
   children: JSX.Element;

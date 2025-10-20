@@ -15,5 +15,15 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/lens-formula-docs",
+    "@kbn/event-annotation-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/expression-xy-plugin",
+    "@kbn/expression-heatmap-plugin",
+    "@kbn/expression-gauge-plugin",
+    "@kbn/expression-partition-vis-plugin",
+    "@kbn/embeddable-enhanced-plugin",
+    "@kbn/expression-legacy-metric-vis-plugin"
+  ]
 }

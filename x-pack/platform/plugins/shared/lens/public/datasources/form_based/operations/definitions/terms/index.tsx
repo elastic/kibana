@@ -33,6 +33,7 @@ import {
   type GenericIndexPatternColumn,
   type IncompleteColumn,
   type TermsIndexPatternColumn,
+  type IndexPatternField,
 } from '@kbn/lens-common';
 import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
@@ -43,7 +44,6 @@ import {
   FieldInput as FieldInputBase,
   getErrorMessage,
 } from '../../../dimension_panel/field_input';
-import type { IndexPatternField } from '../../../../../types';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,

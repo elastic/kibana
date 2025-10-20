@@ -22,7 +22,6 @@ export { TypesService } from './vis_types/types_service';
 export { VIS_EVENT_TO_TRIGGER } from './embeddable/events';
 export { apiHasVisualizeConfig } from './embeddable/interfaces/has_visualize_config';
 export { getVisSchemas } from './vis_schemas';
-export { XYCurveTypes } from '../common/convert_to_lens/constants';
 export { urlFor, getFullPath } from './utils/url_utils';
 
 /** @public types */

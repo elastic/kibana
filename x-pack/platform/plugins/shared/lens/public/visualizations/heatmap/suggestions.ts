@@ -10,7 +10,7 @@ import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { IconChartHeatmap } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { Visualization } from '../../types';
+import type { Visualization } from '@kbn/lens-common';
 import type { HeatmapVisualizationState } from './types';
 import { CHART_SHAPES, HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
 

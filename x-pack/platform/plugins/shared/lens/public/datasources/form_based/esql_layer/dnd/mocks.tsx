@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { DatasourceDimensionDropHandlerProps } from '../../../../types';
-import type { TextBasedPrivateState } from '../types';
+import type { DatasourceDimensionDropHandlerProps } from '@kbn/lens-common';
+import type { TextBasedPrivateState }  from '@kbn/lens-common';
 
 export const column1 = {
   columnId: 'columnId1',

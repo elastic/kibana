@@ -6,7 +6,7 @@
  */
 
 import { initializeTitleManager } from '@kbn/presentation-publishing';
-import type { LensRuntimeState } from '../types';
+import type { LensRuntimeState } from '@kbn/lens-common';
 import { getLensRuntimeStateMock, getLensInternalApiMock, makeEmbeddableServices } from '../mocks';
 import { initializeStateManagement } from './initialize_state_management';
 import { initializeDashboardServices } from './initialize_dashboard_services';

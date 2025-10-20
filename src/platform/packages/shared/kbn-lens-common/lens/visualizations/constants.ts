@@ -44,3 +44,5 @@ export const LENS_LEGEND_LAYOUT = {
   Table: 'table',
   List: 'list',
 } as const;
+
+export const LENS_COLLAPSE_FUNCTIONS = ['sum', 'avg', 'min', 'max'] as const;

@@ -9,7 +9,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { DataType, FormatParams } from '../../types';
+import type { DataType } from '@kbn/lens-common';
+import type { FormatParams } from '../../types';
 import type { SchemaConfig } from '../../../types';
 import type { AggId, ExtraColumnFields, GeneralColumnWithMeta } from './types';
 import { getLabel } from '../utils';

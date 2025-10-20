@@ -7,10 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LensColumn } from './datasources/operations';
+import type { GenericIndexPatternColumn } from './datasources/types';
 import type { LensConfiguration } from './visualizations/types';
 
-export type NavigateToLensSortingHint = 'version';
+// Need to duplicate this type here from the visualization plugin to avoid circular dependency
+type ToBaseColumnFormat<Col extends GenericIndexPatternColumn> = {
+  columnId: string;
+  isSplit: boolean;
+} & Omit<Col, 'label'> & { label?: string };
+
+type LensColumn = ToBaseColumnFormat<GenericIndexPatternColumn> & {
+  params: Record<string, unknown>;
+};
 
 export interface NavigateToLensLayer {
   indexPatternId: string;

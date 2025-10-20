@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { Operations } from '@kbn/visualizations-plugin/common/convert_to_lens/constants';
 import { createColumn, getFormat } from './column';
 import type { CommonColumnsConverterArgs, CounterRateColumn, MaxColumn } from './types';
 

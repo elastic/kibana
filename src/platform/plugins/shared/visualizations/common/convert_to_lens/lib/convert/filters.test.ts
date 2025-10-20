@@ -19,6 +19,7 @@ describe('convertToFiltersColumn', () => {
     filters,
   };
 
+  // @ts-expect-error
   test.each<[string, Parameters<typeof convertToFiltersColumn>, Partial<FiltersColumn> | null]>([
     [
       'filters column if filters are provided',

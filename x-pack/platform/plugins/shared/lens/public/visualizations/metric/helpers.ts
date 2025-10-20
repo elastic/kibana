@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { KbnPalette, getKbnPalettes } from '@kbn/palettes';
 import type { CoreTheme } from '@kbn/core/public';
+import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
 import type { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
-import type { VisualizationDimensionEditorProps } from '../../types';
 import { SECONDARY_DEFAULT_STATIC_COLOR } from './constants';
 
 export function getColorMode(

@@ -12,10 +12,10 @@ import type {
   GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
   StaticValueIndexPatternColumn,
+  FormBasedLayer,
 } from '@kbn/lens-common';
 import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
 import type { GenericOperationDefinition } from '..';
-import type { FormBasedLayer } from '../../../types';
 import { unquotedStringRegex } from './util';
 import { isColumnOfType } from '../helpers';
 

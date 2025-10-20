@@ -20,14 +20,16 @@ import type {
   FormBasedPrivateState,
   TermsIndexPatternColumn,
 } from '@kbn/lens-common';
-import { nonNullable } from '../../../utils';
 import type {
-  DatasourceFixAction,
   FramePublicAPI,
   IndexPattern,
   IndexPatternField,
   VisualizationDimensionGroupConfig,
-} from '../../../types';
+} from '@kbn/lens-common';
+import type { FormulaIndexPatternColumn } from '@kbn/lens-common';
+import type { BaseIndexPatternColumn } from '@kbn/lens-common';
+import type { DatasourceFixAction } from '@kbn/lens-common/lens/types';
+import { nonNullable } from '../../../utils';
 import {
   operationDefinitionMap,
   operationDefinitions,
@@ -40,12 +42,10 @@ import {
 import type { DataViewDragDropOperation } from '../types';
 import { getSortScoreByPriorityForField } from './operations';
 import { generateId } from '../../../id_generator';
-import type { FormulaIndexPatternColumn } from './definitions/formula';
 import { insertOrReplaceFormulaColumn } from './definitions/formula';
 import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';
 import type { DataType, OperationMetadata } from '../../..';
-import type { BaseIndexPatternColumn } from '.';
 
 export interface ColumnAdvancedParams {
   filter?: Query | undefined;

@@ -7,9 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import type { BaseIndexPatternColumn, FormulaIndexPatternColumn } from '@kbn/lens-common';
+import type {
+  BaseIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  IndexPattern,
+} from '@kbn/lens-common';
 import type { FieldBasedOperationErrorMessage, OperationDefinition } from '..';
-import type { IndexPattern } from '../../../../../types';
 import { runASTValidation, tryToParse } from './validation';
 import { WrappedFormulaEditor } from './editor';
 import { insertOrReplaceFormulaColumn } from './parse';

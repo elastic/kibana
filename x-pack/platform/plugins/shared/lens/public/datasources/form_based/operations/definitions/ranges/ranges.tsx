@@ -14,17 +14,18 @@ import { extendedBoundsToAst, numericalRangeToAst } from '@kbn/data-plugin/commo
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import type {
   FullRangeTypeLens,
-  MODES_TYPES,
+  LENS_RANGE_MODES_TYPES,
   RangeIndexPatternColumn,
   RangeType,
   RangeTypeLens,
+  IndexPattern,
+  IndexPatternField,
 } from '@kbn/lens-common';
 import { RangeEditor } from './range_editor';
 import type { OperationDefinition } from '..';
 import { updateColumnParam } from '../../layer_helpers';
 import { supportedFormats } from '../../../../../../common/expressions/defs/format_column/supported_formats';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
-import type { IndexPattern, IndexPatternField } from '../../../../../types';
 import { getInvalidFieldMessage, isValidNumber } from '../helpers';
 
 export type RangeColumnParams = RangeIndexPatternColumn['params'];
@@ -212,7 +213,7 @@ export const rangeOperation: OperationDefinition<
     };
 
     // Useful to change more params at once
-    const onChangeMode = (newMode: MODES_TYPES) => {
+    const onChangeMode = (newMode: LENS_RANGE_MODES_TYPES) => {
       const scale = newMode === MODES.Range ? 'ordinal' : 'interval';
       const dataType = newMode === MODES.Range ? 'string' : 'number';
       const parentFormat =

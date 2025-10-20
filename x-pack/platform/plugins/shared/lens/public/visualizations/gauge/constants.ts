@@ -11,7 +11,7 @@ import type {
 } from '@kbn/expression-gauge-plugin/common';
 import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { LayerType } from '../../../common/types';
+import type { LensLayerType as LayerType } from '@kbn/lens-common';
 
 export const LENS_GAUGE_ID = 'lnsGauge';
 

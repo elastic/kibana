@@ -14,14 +14,14 @@ import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
 import { css } from '@emotion/react';
-import { Easteregg } from './easteregg';
 import type {
   StateSetter,
   DatasourceDataPanelProps,
   DatasourceMap,
   FramePublicAPI,
   VisualizationMap,
-} from '../../types';
+} from '@kbn/lens-common';
+import { Easteregg } from './easteregg';
 import {
   useLensDispatch,
   updateDatasourceState,

@@ -13,9 +13,8 @@ import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { COUNT_ID, COUNT_NAME } from '@kbn/lens-formula-docs';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import type { CountIndexPatternColumn, TimeScaleUnit } from '@kbn/lens-common';
+import type { CountIndexPatternColumn, TimeScaleUnit, IndexPatternField } from '@kbn/lens-common';
 import type { OperationDefinition, ParamEditorProps } from '.';
-import type { IndexPatternField } from '../../../../types';
 import {
   getInvalidFieldMessage,
   getFilter,

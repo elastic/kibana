@@ -6,10 +6,10 @@
  */
 import { useMemo } from 'react';
 import { createEmptyLensState } from '../../../react_embeddable/helper';
-import type { TypedLensSerializedState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState }  from '@kbn/lens-common';
 import { useLensSelector } from '../../../state_management';
 import { extractReferencesFromState } from '../../../utils';
-import type { DatasourceMap, VisualizationMap } from '../../../types';
+import type { DatasourceMap, VisualizationMap } from '@kbn/lens-common';
 
 export const useCurrentAttributes = ({
   textBasedMode,

@@ -22,6 +22,7 @@ import type {
   LensSerializedState,
   UserMessagesGetter,
   VisualizationMap,
+  LensStartServices as StartServices,
 } from '@kbn/lens-common';
 import type {
   EditorFrameInstance,
@@ -29,8 +30,7 @@ import type {
   LensTopNavMenuEntryGenerator,
   LensDocument,
 } from '@kbn/lens-common/lens/types';
-import type { StartServices } from '@kbn/saved-objects-tagging-plugin/public/types';
-import type { LensInspector } from '../lens_inspector_service';
+import type { LensInspector } from '@kbn/lens-common';
 import type { IndexPatternServiceAPI } from '../data_views_service/service';
 
 export interface RedirectToOriginProps {

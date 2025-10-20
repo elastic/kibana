@@ -15,6 +15,7 @@ import {
 } from '@reduxjs/toolkit';
 import type { TypedUseSelectorHook } from 'react-redux';
 import { useDispatch, useSelector } from 'react-redux';
+import type { LensState, LensStoreDeps } from '@kbn/lens-common';
 import { makeLensReducer, lensActions, getPreloadedState } from './lens_slice';
 // import type { LensState, LensStoreDeps } from './types';
 import { initMiddleware } from './init_middleware';

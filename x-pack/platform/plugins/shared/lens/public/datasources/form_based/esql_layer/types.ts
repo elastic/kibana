@@ -14,7 +14,7 @@
 // import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 // import type { AggregateQuery } from '@kbn/es-query';
 // import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-// import type { ValueFormatConfig } from '../../../../common/types';
+// import type { ValueFormatConfig } from '@kbn/lens-common';
 // import type { VisualizeEditorContext } from '../../../types';
 
 // export interface TextBasedLayerColumn {

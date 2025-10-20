@@ -52,7 +52,7 @@ export type { FormatFactory } from '@kbn/visualization-ui-components';
 //   LARGE = 0.7,
 // }
 
-// export interface SharedPieLayerState {
+// export interface SharedLensPartitionLayerState  {
 //   metrics: string[];
 //   primaryGroups: string[];
 //   secondaryGroups?: string[];
@@ -73,14 +73,14 @@ export type { FormatFactory } from '@kbn/visualization-ui-components';
 //   colorMapping?: ColorMapping.Config;
 // }
 
-// export type PieLayerState = SharedPieLayerState & {
+// export type LensPartitionLayerState  = SharedLensPartitionLayerState  & {
 //   layerId: string;
 //   layerType: LayerType;
 // };
 
-// export interface PieVisualizationState {
+// export interface LensPartitionVisualizationState  {
 //   shape: $Values<typeof PieChartTypes>;
-//   layers: PieLayerState[];
+//   layers: LensPartitionLayerState [];
 //   /**
 //    * @deprecated use `layer.colorMapping` config
 //    */

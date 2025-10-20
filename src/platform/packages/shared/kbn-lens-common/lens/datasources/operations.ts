@@ -33,7 +33,7 @@ import type {
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './types';
-import type { AUTO_BARS, MODES } from './constants';
+import type { AUTO_BARS, LENS_RANGE_MODES } from './constants';
 
 // Basic operations
 export type CountIndexPatternColumn = FieldBasedIndexPatternColumn & {
@@ -242,12 +242,12 @@ export type RangeTypeLens = (RangeType | { from: Range['from'] | null; to: Range
 };
 export type FullRangeTypeLens = Extract<RangeTypeLens, NonNullable<RangeType>>;
 
-export type MODES_TYPES = (typeof MODES)[keyof typeof MODES];
+export type LENS_RANGE_MODES_TYPES = (typeof LENS_RANGE_MODES)[keyof typeof LENS_RANGE_MODES];
 
 export interface RangeIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'range';
   params: {
-    type: MODES_TYPES;
+    type: LENS_RANGE_MODES_TYPES;
     maxBars: typeof AUTO_BARS | number;
     ranges: RangeTypeLens[];
     format?: { id: string; params?: { decimals: number; compact?: boolean } };
@@ -277,41 +277,3 @@ export interface FiltersIndexPatternColumn extends BaseIndexPatternColumn {
     filters: LensAggFilter[];
   };
 }
-
-// Some utility types used for the Visualize -> Lens conversion
-export type AnyLensColumnWithSourceField =
-  | RangeIndexPatternColumn
-  | TermsIndexPatternColumn
-  | DateHistogramIndexPatternColumn
-  | MinIndexPatternColumn
-  | MaxIndexPatternColumn
-  | AvgIndexPatternColumn
-  | SumIndexPatternColumn
-  | MedianIndexPatternColumn
-  | StandardDeviationIndexPatternColumn
-  | CardinalityIndexPatternColumn
-  | PercentileIndexPatternColumn
-  | PercentileRanksIndexPatternColumn
-  | CountIndexPatternColumn
-  | LastValueIndexPatternColumn;
-
-export type AnyLensColumnWithReferences =
-  | CumulativeSumIndexPatternColumn
-  | CounterRateIndexPatternColumn
-  | DerivativeIndexPatternColumn
-  | MovingAverageIndexPatternColumn
-  | FormulaIndexPatternColumn
-  | StaticValueIndexPatternColumn;
-
-export type LensColumn = (
-  | AnyLensColumnWithReferences
-  | AnyLensColumnWithSourceField
-  | FiltersIndexPatternColumn
-) & { columnId: string; isSplit?: boolean };
-
-export type GenericLensColumnWithMeta<
-  Col extends LensColumn | {},
-  Meta extends {} | unknown = undefined
-> = Col & (Meta extends undefined ? undefined : { meta: Meta });
-
-export type LensColumnWithMeta = GenericLensColumnWithMeta<LensColumn, unknown>;

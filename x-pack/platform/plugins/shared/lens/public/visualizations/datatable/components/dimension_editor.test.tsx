@@ -18,8 +18,8 @@ import type {
   DatasourcePublicAPI,
   OperationDescriptor,
   DataType,
-} from '../../../types';
-import type { DatatableVisualizationState } from '../visualization';
+} from '@kbn/lens-common';
+import type { DatatableVisualizationState } from '@kbn/lens-common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import type { TableDimensionEditorProps } from './dimension_editor';
 import { TableDimensionEditor } from './dimension_editor';

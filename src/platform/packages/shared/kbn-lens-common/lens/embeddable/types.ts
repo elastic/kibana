@@ -14,19 +14,9 @@ import type {
   Query,
   TimeRange,
 } from '@kbn/es-query';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
 import type { Simplify } from '@kbn/chart-expressions-common';
-import type { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
-import type {
-  Capabilities,
-  CoreStart,
-  HttpSetup,
-  IUiSettingsClient,
-  KibanaExecutionContext,
-  OverlayRef,
-  ThemeServiceStart,
-} from '@kbn/core/public';
-import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import type {
   ExpressionRendererEvent,
   ReactExpressionRendererProps,
@@ -72,18 +62,14 @@ import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plug
 import type { CanAddNewPanel } from '@kbn/presentation-containers';
 import type { Ast } from '@kbn/interpreter';
 import type {
-  DatasourceMap,
   IndexPatternMap,
   IndexPatternRef,
-  LensAttributesService,
   LensDocument,
   LensInspector,
-  LensPluginStartDependencies,
   SharingSavedObjectProps,
   TableInspectorAdapter,
   UserMessage,
   VisualizationDisplayOptions,
-  VisualizationMap,
 } from '../types';
 import type { FormBasedPersistedState, TextBasedPersistedState } from '../datasources/types';
 import type { XYState } from '../visualizations/xy/types';
@@ -135,26 +121,6 @@ export interface DocumentToExpressionReturnType {
   activeVisualizationState: unknown;
   activeDatasourceState: unknown;
 }
-
-export type LensEmbeddableStartServices = Simplify<
-  LensPluginStartDependencies & {
-    timefilter: TimefilterContract;
-    coreHttp: HttpSetup;
-    coreStart: CoreStart;
-    capabilities: RecursiveReadonly<Capabilities>;
-    expressionRenderer: ReactExpressionRendererType;
-    documentToExpression: (
-      doc: LensDocument,
-      forceDSL?: boolean
-    ) => Promise<DocumentToExpressionReturnType>;
-    injectFilterReferences: FilterManager['inject'];
-    visualizationMap: VisualizationMap;
-    datasourceMap: DatasourceMap;
-    theme: ThemeServiceStart;
-    uiSettings: IUiSettingsClient;
-    attributeService: LensAttributesService;
-  }
->;
 
 export interface PreventableEvent {
   preventDefault(): void;

@@ -13,8 +13,8 @@ import type {
   GenericIndexPatternColumn,
   IndexPattern,
   IndexPatternField,
+  VisualizationDimensionGroupConfig,
 } from '@kbn/lens-common';
-import type { VisualizationDimensionGroupConfig } from '../../types';
 
 /**
  * Normalizes the specified operation type. (e.g. document operations

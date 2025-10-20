@@ -40,9 +40,8 @@ import {
 } from '@kbn/chart-icons';
 import type { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
 
+import type { VisualizationType, ValueLabelConfig } from '@kbn/lens-common';
 import type { CollapseFunction } from '../../../common/expressions';
-import type { VisualizationType } from '../../types';
-import type { ValueLabelConfig } from '../../../common/types';
 
 export const YAxisModes = {
   AUTO: 'auto',

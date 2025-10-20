@@ -15,14 +15,14 @@ import type {
   DateHistogramIndexPatternColumn,
   DateRange,
   FormBasedLayer,
+  IndexPattern,
   ValueFormatConfig,
 } from '@kbn/lens-common';
 import { isColumnOfType } from './operations/definitions/helpers';
 import { convertToAbsoluteDateRange } from '../../utils';
 import type { OriginalColumn } from '../../../common/types';
-import type { GenericIndexPatternColumn } from './form_based';
+import type { GenericIndexPatternColumn } from '@kbn/lens-common';
 import { operationDefinitionMap } from './operations';
-import type { IndexPattern } from '../../types';
 import { resolveTimeShift } from './time_shift_utils';
 
 // esAggs column ID manipulation functions

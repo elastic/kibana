@@ -29,13 +29,14 @@ import type {
   FormBasedPrivateState,
   FormattedIndexPatternColumn,
   GenericIndexPatternColumn,
+  IndexPattern,
+  IndexPatternMap,
   RangeIndexPatternColumn,
 } from '@kbn/lens-common';
 import { getESQLForLayer } from './to_esql';
 import { convertToAbsoluteDateRange } from '../../utils';
 import { operationDefinitionMap } from './operations';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
-import type { IndexPattern, IndexPatternMap } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
 import { resolveTimeShift } from './time_shift_utils';
 import { getSamplingValue } from './utils';

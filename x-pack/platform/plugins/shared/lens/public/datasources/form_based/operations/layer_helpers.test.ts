@@ -33,6 +33,7 @@ import type {
   FormBasedLayer,
   OperationMetadata,
   FormBasedPrivateState,
+  IndexPattern,
 } from '@kbn/lens-common';
 import { operationDefinitionMap } from '.';
 import { documentField } from '../document_field';
@@ -41,7 +42,6 @@ import { generateId } from '../../../id_generator';
 import { createMockedFullReference, createMockedManagedReference } from './mocks';
 import type { OperationDefinition } from './definitions';
 import type { TinymathAST } from '@kbn/tinymath';
-import type { IndexPattern } from '../../../types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createCoreStartMock } from '@kbn/core-lifecycle-browser-mocks/src/core_start.mock';
 

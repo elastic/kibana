@@ -22,12 +22,15 @@ import { LegendValue } from '@elastic/charts';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { type PartitionLegendValue } from '@kbn/expression-partition-vis-plugin/common';
+import type {
+  LensPartitionVisualizationState,
+  SharedPartitionLayerState as SharedLensPartitionLayerState,
+} from '@kbn/lens-common';
+import type { VisualizationToolbarProps } from '@kbn/lens-common';
+import { PARTITION_EMPTY_SIZE_RADIUS as EmptySizeRatios } from '@kbn/lens-common';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import type { PieVisualizationState, SharedPieLayerState } from '../../../common/types';
-import { EmptySizeRatios } from '../../../common/types';
 import { LegendDisplay, NumberDisplay } from '../../../common/constants';
-import type { VisualizationToolbarProps } from '../../types';
 import { ToolbarPopover, LegendSettingsPopover } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { getLegendStats } from './render_helpers';
@@ -42,7 +45,7 @@ const partitionLegendValues = [
 ];
 
 const legendOptions: Array<{
-  value: SharedPieLayerState['legendDisplay'];
+  value: SharedLensPartitionLayerState['legendDisplay'];
   label: string;
   id: string;
 }> = [
@@ -77,7 +80,7 @@ const emptySizeRatioLabel = i18n.translate('xpack.lens.pieChart.donutHole', {
   defaultMessage: 'Donut hole',
 });
 
-export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
+export function PieToolbar(props: VisualizationToolbarProps<LensPartitionVisualizationState>) {
   const { state, setState, frame } = props;
   const layer = state.layers[0];
   const {

@@ -20,8 +20,9 @@ import type {
   LastValueIndexPatternColumn,
   FormBasedLayer,
   FormBasedPersistedState,
+  IndexPattern,
+  IndexPatternField,
 } from '@kbn/lens-common';
-import type { IndexPattern, IndexPatternField } from '../../../../types';
 import { type FieldBasedOperationErrorMessage, operationDefinitionMap } from '.';
 import { hasField } from '../../pure_utils';
 import { FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../../../../user_messages_ids';

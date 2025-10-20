@@ -11,6 +11,7 @@ import type { Direction } from '@elastic/eui';
 import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { $Values } from '@kbn/utility-types';
 import type { CollapseFunction, LensEditEvent, LensLayerType } from '../types';
 import type { SortingHint } from '../../types';
 import type {
@@ -23,8 +24,8 @@ import type {
   LENS_TOGGLE_ACTION,
 } from './constants';
 
-export type RowHeightMode = typeof LENS_ROW_HEIGHT_MODE;
-export type DataGridDensity = typeof LENS_DATAGRID_DENSITY;
+export type RowHeightMode = $Values<typeof LENS_ROW_HEIGHT_MODE>;
+export type DataGridDensity = $Values<typeof LENS_DATAGRID_DENSITY>;
 
 export interface LensDatatableSortingState {
   columnId: string | undefined;

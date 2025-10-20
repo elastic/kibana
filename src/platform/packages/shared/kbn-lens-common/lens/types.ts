@@ -9,6 +9,7 @@
 
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { Query, AggregateQuery } from '@kbn/es-query';
+import { type DataView } from '@kbn/data-plugin/common';
 import type {
   DataPublicPluginStart,
   IndexPatternAggRestrictions,
@@ -18,7 +19,6 @@ import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Filter, FilterMeta, TimeRange } from '@kbn/es-query/src/filters';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
-import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type {
   Datatable,
   ExpressionAstExpression,
@@ -28,14 +28,12 @@ import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plug
 import type {
   CellValueContext,
   EmbeddableEditorState,
-  EmbeddableStart,
   EmbeddableStateTransfer,
 } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
 import type {
   BrushTriggerEvent,
   ChartsPluginSetup,
-  ChartsPluginStart,
   ClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
@@ -58,7 +56,6 @@ import type {
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/discover-utils';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { LayerType } from '@kbn/expression-xy-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-components';
@@ -75,17 +72,11 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { SpacesApi, SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { InspectorOptions } from '@kbn/inspector-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
-import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
 import type { NavigateToLensContext } from './convert_to_lens_types';
 import type { LensAppLocator, MainHistoryLocationState } from './locator_types';
 import type {
@@ -98,41 +89,13 @@ import type {
   LensConfiguration,
   LensEditEvent,
   LensEditSupportedActions,
+  LensLayerType,
   LensTableRowContextMenuEvent,
   Visualization,
   VisualizationState,
 } from './visualizations/types';
 import type { DatasourceStates, GeneralDatasourceState } from './datasources/types';
 import type { LENS_ITEM_LATEST_VERSION } from './content_management/constants';
-
-export interface LensPluginStartDependencies {
-  data: DataPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
-  fieldFormats: FieldFormatsStart;
-  expressions: ExpressionsStart;
-  navigation: NavigationPublicPluginStart;
-  uiActions: UiActionsStart;
-  visualizations: VisualizationsStart;
-  embeddable: EmbeddableStart;
-  charts: ChartsPluginStart;
-  eventAnnotation: EventAnnotationPluginStart;
-  savedObjectsTagging?: SavedObjectTaggingPluginStart;
-  presentationUtil: PresentationUtilPluginStart;
-  dataViewFieldEditor: IndexPatternFieldEditorStart;
-  dataViewEditor: DataViewEditorStart;
-  inspector: InspectorStartContract;
-  spaces?: SpacesPluginStart;
-  usageCollection?: UsageCollectionStart;
-  docLinks: DocLinksStart;
-  share?: SharePluginStart;
-  eventAnnotationService: EventAnnotationServiceType;
-  contentManagement: ContentManagementPublicStart;
-  serverless?: ServerlessPluginStart;
-  licensing?: LicensingPluginStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
-  fieldsMetadata?: FieldsMetadataPublicStart;
-}
 
 export interface LensInspector {
   getInspectorAdapters: () => Adapters;
@@ -1054,7 +1017,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   toggleFullscreen: () => void;
   isFullscreen: boolean;
   isMetricDimension?: boolean;
-  layerType: LayerType | undefined;
+  layerType: LensLayerType | undefined;
   supportStaticValue: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector: boolean;
@@ -1125,7 +1088,7 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   accessor: string;
   datasource: DatasourcePublicAPI | undefined;
   setState(newState: T | ((currState: T) => T)): void;
-  addLayer: (layerType: LayerType) => void;
+  addLayer: (layerType: LensLayerType) => void;
   removeLayer: (layerId: string) => void;
   panelRef: MutableRefObject<HTMLDivElement | null>;
   isInlineEditing?: boolean;
@@ -1385,8 +1348,6 @@ export interface LensCellValueAction {
 export type GetCompatibleCellValueActions = (
   data: CellValueContext['data']
 ) => Promise<LensCellValueAction[]>;
-
-export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
 export interface DataViewsState {
   indexPatternRefs: IndexPatternRef[];

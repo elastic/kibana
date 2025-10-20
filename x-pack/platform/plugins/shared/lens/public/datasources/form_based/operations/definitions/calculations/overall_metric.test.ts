@@ -6,7 +6,7 @@
  */
 
 import { createMockedIndexPattern } from '../../../mocks';
-import type { FormBasedLayer } from '../../../types';
+import type { FormBasedLayer } from '@kbn/lens-common';
 import {
   overallAverageOperation,
   overallMaxOperation,

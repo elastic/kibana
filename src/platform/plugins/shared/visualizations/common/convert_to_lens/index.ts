@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// export type { AggBasedColumn } from './lib/convert/types';
-// export * from './types';
+export type { AggBasedColumn } from './lib/convert/types';
+export * from './types';
 // export * from './constants';
 export * from './utils';

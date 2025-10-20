@@ -9,13 +9,9 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/public';
-import type {
-  AggBasedColumn,
-  CollapseFunction,
-  SchemaConfig,
-  SupportedAggregation,
-} from '../../common';
-import { isCollapseFunction } from '../../common';
+import type { CollapseFunction } from '@kbn/lens-common';
+import { isCollapseFunction } from '../../common/convert_to_lens';
+import type { AggBasedColumn, SchemaConfig, SupportedAggregation } from '../../common';
 import { convertBucketToColumns } from '../../common/convert_to_lens/lib/buckets';
 import { isSiblingPipeline } from '../../common/convert_to_lens/lib/utils';
 import type { BucketColumn } from '../../common/convert_to_lens/lib';

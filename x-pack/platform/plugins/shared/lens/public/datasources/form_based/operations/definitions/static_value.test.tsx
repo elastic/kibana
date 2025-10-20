@@ -15,11 +15,13 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMockedIndexPattern } from '../../mocks';
-import { staticValueOperation } from '.';
-import type { FormBasedLayer } from '../../types';
-import type { IndexPattern } from '../../../../types';
-import type { StaticValueIndexPatternColumn } from './static_value';
-import type { TermsIndexPatternColumn } from './terms';
+import { staticValueOperation } from './static_value';
+import type {
+  FormBasedLayer,
+  IndexPattern,
+  StaticValueIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from '@kbn/lens-common';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 const dateRange = {

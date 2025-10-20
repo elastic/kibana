@@ -14,8 +14,11 @@ import {
   sections as formulasSections,
 } from '@kbn/lens-formula-docs';
 import { groupBy } from 'lodash';
-import type { FormulaIndexPatternColumn, GenericIndexPatternColumn } from '@kbn/lens-common';
-import type { IndexPattern } from '../../../../../../types';
+import type {
+  FormulaIndexPatternColumn,
+  GenericIndexPatternColumn,
+  IndexPattern,
+} from '@kbn/lens-common';
 import { getPossibleFunctions } from './math_completion';
 import { hasFunctionFieldArgument } from '../validation';
 

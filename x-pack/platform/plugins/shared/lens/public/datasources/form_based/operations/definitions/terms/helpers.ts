@@ -24,10 +24,10 @@ import type {
   PercentileIndexPatternColumn,
   PercentileRanksIndexPatternColumn,
   TermsIndexPatternColumn,
+  FramePublicAPI,
 } from '@kbn/lens-common';
-import type { FramePublicAPI } from '../../../../../types';
 import { operationDefinitionMap } from '..';
-import { defaultLabel } from '../filters';
+import { defaultLabel } from '../filters/filters';
 import { isReferenced } from '../../layer_helpers';
 
 import type { FieldBasedOperationErrorMessage } from '..';

@@ -31,9 +31,3 @@ export const getLensInspectorService = (inspector: InspectorStartContract) => {
     closeInspector: async () => overlayRef?.close(),
   };
 };
-
-export interface LensInspector {
-  getInspectorAdapters: () => Adapters;
-  inspect: (options?: InspectorOptions) => OverlayRef;
-  closeInspector: () => Promise<void | undefined>;
-}

@@ -10,9 +10,9 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { type DatatableUtilitiesService, parseTimeShift } from '@kbn/data-plugin/common';
-import type { GenericIndexPatternColumn } from '../operations';
+import type { GenericIndexPatternColumn } from '@kbn/lens-common';
 import { adjustTimeScaleLabelSuffix, operationDefinitionMap } from '../operations';
-import type { FormBasedLayer } from '../types';
+import type { FormBasedLayer }  from '@kbn/lens-common';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import {
   getDateHistogramInterval,
@@ -20,7 +20,7 @@ import {
   timeShiftOptions,
   getColumnTimeShiftWarnings,
 } from '../time_shift_utils';
-import type { IndexPattern } from '../../../types';
+import type { IndexPattern } from '@kbn/lens-common';
 
 export function setTimeShift(
   columnId: string,

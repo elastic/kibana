@@ -8,7 +8,7 @@
 import React from 'react';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { IgnoreGlobalFilterRowControl } from '../../shared_components/ignore_global_filter';
-import type { VisualizationLayerSettingsProps } from '../../types';
+import type { VisualizationLayerSettingsProps } from '@kbn/lens-common';
 import type { XYState } from './types';
 import { isAnnotationsLayer } from './visualization_helpers';
 

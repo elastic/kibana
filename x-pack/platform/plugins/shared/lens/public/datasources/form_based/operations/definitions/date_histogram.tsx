@@ -35,12 +35,15 @@ import {
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import type { DateHistogramIndexPatternColumn, DateRange } from '@kbn/lens-common';
-import type { IndexPattern } from '../../../../types';
+import type {
+  DateHistogramIndexPatternColumn,
+  DateRange,
+  IndexPattern,
+  FormBasedLayer,
+} from '@kbn/lens-common';
 import { updateColumnParam } from '../layer_helpers';
 import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
-import type { FormBasedLayer } from '../../types';
 import { TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS } from '../../../../user_messages_ids';
 
 const { isValidInterval } = search.aggs;

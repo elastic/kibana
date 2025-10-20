@@ -8,7 +8,7 @@
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { YScaleType, XScaleType } from '@kbn/expression-xy-plugin/common';
-import type { DatasourcePublicAPI } from '../../../types';
+import type { DatasourcePublicAPI } from '@kbn/lens-common';
 import type { UnifiedAxisExtentConfig } from './types';
 
 /**

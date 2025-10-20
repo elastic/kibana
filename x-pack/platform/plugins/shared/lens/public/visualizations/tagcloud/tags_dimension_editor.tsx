@@ -16,7 +16,7 @@ import type { FormatFactory } from '@kbn/visualization-ui-components';
 
 import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
 import { ColorMappingByTerms } from '../../shared_components/coloring/color_mapping_by_terms';
-import type { FramePublicAPI } from '../../types';
+import type {FramePublicAPI   } from '@kbn/lens-common';
 import type { TagcloudState } from './types';
 
 interface Props {

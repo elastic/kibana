@@ -23,21 +23,26 @@ import { getOriginalId } from '@kbn/transpose-utils';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { getSortingCriteria } from '@kbn/sort-predicates';
-import { DataGridDensity } from '@kbn/unified-data-table';
 import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-// import type { FormBasedPersistedState } from '../../datasources/form_based/types';
-// import type {
-//   SuggestionRequest,
-//   Visualization,
-//   VisualizationSuggestion,
-//   DatasourceLayers,
-//   Suggestion,
-// } from '../../types';
+import type {
+  DatasourceLayers,
+  FormBasedPersistedState,
+  Suggestion,
+  SuggestionRequest,
+  VisualizationSuggestion,
+} from '@kbn/lens-common';
+import { type DatatableVisualizationState, type Visualization } from '@kbn/lens-common';
+import {
+  DEFAULT_HEADER_ROW_HEIGHT,
+  DEFAULT_ROW_HEIGHT_LINES,
+  DEFAULT_HEADER_ROW_HEIGHT_LINES,
+  LENS_ROW_HEIGHT_MODE,
+  LENS_DATAGRID_DENSITY,
+} from '@kbn/lens-common/lens/visualizations/datatable/constants';
 import { TableDimensionDataExtraEditor, TableDimensionEditor } from './components/dimension_editor';
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
 import type { FormatFactory } from '../../../common/types';
-// import { RowHeightMode } from '../../../common/types';
 import { getDefaultSummaryLabel } from '../../../common/expressions/impl/datatable/summary';
 import {
   type ColumnState,
@@ -46,11 +51,6 @@ import {
   type DatatableExpressionFunction,
 } from '../../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
-// import {
-//   DEFAULT_HEADER_ROW_HEIGHT,
-//   DEFAULT_HEADER_ROW_HEIGHT_LINES,
-//   DEFAULT_ROW_HEIGHT_LINES,
-// } from './components/constants';
 import {
   defaultPaletteParams,
   findMinMaxByColumnId,
@@ -597,7 +597,7 @@ export const getDatatableVisualization = ({
             // rewrite colors and stops as two distinct arguments
             colors: stops?.map(({ color }) => color),
             stops:
-              column.palette?.params?.name === RowHeightMode.custom
+              column.palette?.params?.name === LENS_ROW_HEIGHT_MODE.custom
                 ? stops?.map(({ stop }) => stop)
                 : [],
             reverse: false, // managed at UI level
@@ -645,12 +645,12 @@ export const getDatatableVisualization = ({
         }),
       sortingColumnId: state.sorting?.columnId || '',
       sortingDirection: state.sorting?.direction || 'none',
-      fitRowToContent: state.rowHeight === RowHeightMode.auto,
+      fitRowToContent: state.rowHeight === LENS_ROW_HEIGHT_MODE.auto,
       headerRowHeight: state.headerRowHeight ?? DEFAULT_HEADER_ROW_HEIGHT,
       rowHeightLines: state.rowHeightLines ?? DEFAULT_ROW_HEIGHT_LINES,
       headerRowHeightLines: state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES,
       pageSize: state.paging?.enabled ? state.paging.size : undefined,
-      density: state.density ?? DataGridDensity.NORMAL,
+      density: state.density ?? LENS_DATAGRID_DENSITY.NORMAL,
     }).toAst();
 
     return {

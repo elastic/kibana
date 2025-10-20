@@ -6,9 +6,8 @@
  */
 
 import type { TinymathAST } from '@kbn/tinymath';
-import type { MathIndexPatternColumn } from '@kbn/lens-common';
+import type { MathIndexPatternColumn, IndexPattern } from '@kbn/lens-common';
 import type { OperationDefinition } from '..';
-import type { IndexPattern } from '../../../../../types';
 
 export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managedReference'> = {
   type: 'math',

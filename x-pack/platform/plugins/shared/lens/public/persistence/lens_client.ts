@@ -9,6 +9,7 @@ import type { HttpStart } from '@kbn/core/public';
 import type { Reference } from '@kbn/content-management-utils';
 
 import { omit } from 'lodash';
+import type { LensSavedObjectAttributes } from '@kbn/lens-common';
 import { LENS_API_VERSION, LENS_VIS_API_PATH } from '../../common/constants';
 import type { LensAttributes, LensItem } from '../../server/content_management';
 import { ConfigBuilderStub } from '../../common/transforms';
@@ -21,7 +22,6 @@ import {
   type LensSearchRequestQuery,
   type LensSearchResponseBody,
 } from '../../server';
-import type { LensSavedObjectAttributes } from '../react_embeddable/types';
 
 /**
  * This type is to allow `visualizationType` to be `null` in the public context.

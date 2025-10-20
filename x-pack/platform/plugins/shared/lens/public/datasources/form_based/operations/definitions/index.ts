@@ -26,6 +26,13 @@ import type {
   OperationMetadata,
   ReferenceBasedIndexPatternColumn,
 } from '@kbn/lens-common';
+import type {
+  FramePublicAPI,
+  IndexPattern,
+  IndexPatternField,
+  ParamEditorCustomProps,
+  UserMessage,
+} from '@kbn/lens-common';
 import { termsOperation } from './terms';
 import { filtersOperation } from './filters';
 import { cardinalityOperation } from './cardinality';
@@ -61,13 +68,6 @@ import {
 } from './formula';
 import { staticValueOperation } from './static_value';
 import { lastValueOperation } from './last_value';
-import type {
-  FramePublicAPI,
-  IndexPattern,
-  IndexPatternField,
-  ParamEditorCustomProps,
-  UserMessage,
-} from '../../../../types';
 // import type {
 //   BaseIndexPatternColumn,
 //   IncompleteColumn,

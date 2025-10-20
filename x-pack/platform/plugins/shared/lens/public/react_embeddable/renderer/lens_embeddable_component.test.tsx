@@ -12,7 +12,7 @@ import {
   getValidExpressionParams,
   makeEmbeddableServices,
 } from '../mocks';
-import type { LensApi, LensInternalApi } from '../types';
+import type { LensApi, LensInternalApi } from '@kbn/lens-common';
 import { BehaviorSubject } from 'rxjs';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import React from 'react';

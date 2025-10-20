@@ -11,10 +11,7 @@ import type { $Values } from '@kbn/utility-types';
 import type { IconType } from '@elastic/eui';
 import type { Ast } from '@kbn/interpreter';
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
-import type { LayerType } from '@kbn/expression-xy-plugin/common';
 import type { ExpressionAstExpression, Datatable } from '@kbn/expressions-plugin/common';
-import type { UserMessage } from '@kbn/inference-common';
-import type { Reference } from 'joi';
 import type { ReactElement } from 'react';
 import type { DataViewSpec } from '@kbn/data-plugin/common';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
@@ -27,11 +24,13 @@ import type {
   MultiClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
-import type {
-  LENS_CATEGORY_DISPLAY,
-  LENS_LEGEND_DISPLAY,
-  LENS_NUMBER_DISPLAY,
-  LENS_LAYER_TYPES,
+import type { Reference } from '@kbn/content-management-utils';
+import type { LENS_COLLAPSE_FUNCTIONS } from './constants';
+import {
+  type LENS_CATEGORY_DISPLAY,
+  type LENS_LEGEND_DISPLAY,
+  type LENS_NUMBER_DISPLAY,
+  type LENS_LAYER_TYPES,
 } from './constants';
 import type { SeriesType, XYState } from './xy/types';
 import type { LensTagcloudState } from './tagcloud/types';
@@ -72,6 +71,7 @@ import type {
   TableInspectorAdapter,
   VisualizeEditorContext,
   Suggestion,
+  UserMessage,
 } from '../types';
 import type {
   LENS_EDIT_PAGESIZE_ACTION,
@@ -86,7 +86,7 @@ export type LegendDisplayType = $Values<typeof LENS_LEGEND_DISPLAY>;
 
 export type LensLayerType = (typeof LENS_LAYER_TYPES)[keyof typeof LENS_LAYER_TYPES];
 
-export type CollapseFunction = 'sum' | 'avg' | 'min' | 'max';
+export type CollapseFunction = (typeof LENS_COLLAPSE_FUNCTIONS)[number];
 
 export type LensConfiguration =
   | XYState
@@ -286,7 +286,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   appendLayer?: (
     state: T,
     layerId: string,
-    type: LayerType,
+    type: LensLayerType,
     indexPatternId: string,
     extraArg?: ExtraAppendLayerArg,
     seriesType?: SeriesType

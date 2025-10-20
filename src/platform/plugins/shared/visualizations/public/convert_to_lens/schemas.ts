@@ -10,7 +10,8 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { IAggConfig, METRIC_TYPES, TimefilterContract } from '@kbn/data-plugin/public';
 import type { VisParams } from '@kbn/visualizations-common';
-import type { AggBasedColumn, PercentageModeConfig, SchemaConfig } from '../../common';
+import type { PercentageModeConfig } from '../../common/convert_to_lens';
+import type { AggBasedColumn, SchemaConfig } from '../../common';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
 import {
   getAggIdAndValue,

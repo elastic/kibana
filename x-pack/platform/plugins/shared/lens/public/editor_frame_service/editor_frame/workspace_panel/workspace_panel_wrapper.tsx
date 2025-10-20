@@ -19,10 +19,10 @@ import type {
   UserMessagesGetter,
   VisualizationMap,
   Visualization,
-} from '../../../types';
+  DatasourceStates,
+} from '@kbn/lens-common';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { MessageList } from './message_list';
-import type { DatasourceStates } from '../../../state_management';
 import {
   useLensDispatch,
   updateVisualizationState,
@@ -32,7 +32,7 @@ import {
   selectAutoApplyEnabled,
   selectVisualizationState,
 } from '../../../state_management';
-import type { LensInspector } from '../../../lens_inspector_service';
+import type { LensInspector } from '@kbn/lens-common';
 import { WorkspaceTitle } from './title';
 
 export const AUTO_APPLY_DISABLED_STORAGE_KEY = 'autoApplyDisabled';

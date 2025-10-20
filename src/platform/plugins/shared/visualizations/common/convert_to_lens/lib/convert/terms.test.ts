@@ -69,7 +69,7 @@ describe('convertToDateHistogramColumn', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-
+  // @ts-expect-error
   test.each<
     [string, Parameters<typeof convertToTermsColumn>, Partial<TermsColumn> | null, () => void]
   >([

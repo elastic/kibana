@@ -20,6 +20,7 @@ import type {
   FormBasedLayer,
   GenericIndexPatternColumn,
   DateHistogramIndexPatternColumn,
+  IndexPattern,
 } from '@kbn/lens-common';
 import type {
   ExpressionFunctionFormulaInterval,
@@ -31,7 +32,6 @@ import type {
   GenericOperationDefinition,
   OperationDefinition,
 } from '..';
-import type { IndexPattern } from '../../../../../types';
 import {
   INTERVAL_OP_MISSING_DATE_HISTOGRAM_TO_COMPUTE_INTERVAL,
   INTERVAL_OP_MISSING_TIME_RANGE,

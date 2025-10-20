@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
-import type { DataGridDensity } from '@kbn/unified-data-table';
+import type { DataGridDensity, PagingState, RowHeightMode, SortingState } from '@kbn/lens-common';
 import type { FormatFactory } from '../../../types';
 import type { DatatableColumnResult } from '../../impl/datatable/datatable_column';
 import type { DatatableExpressionFunction } from './types';

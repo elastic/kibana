@@ -5,8 +5,10 @@
  * 2.0.
  */
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
-import type { GenericIndexPatternColumn } from './operations';
-import type { IndexPattern, IndexPatternField, DragDropOperation } from '../../types';
+import type { IndexPattern, IndexPatternField } from '@kbn/lens-common';
+import type { DragDropOperation } from '@kbn/lens-common/lens/types';
+import type { GenericIndexPatternColumn } from '@kbn/lens-common';
+// import type { IndexPattern, IndexPatternField, DragDropOperation } from '../../types';
 
 // export type {
 //   GenericIndexPatternColumn,

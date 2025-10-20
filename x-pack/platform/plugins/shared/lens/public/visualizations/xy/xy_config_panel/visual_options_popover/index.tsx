@@ -26,7 +26,7 @@ import {
   isBarLayer,
   isHorizontalChart,
 } from '../../state_helpers';
-import type { FramePublicAPI } from '../../../../types';
+import type { FramePublicAPI }  from '@kbn/lens-common';
 import { getDataLayers } from '../../visualization_helpers';
 
 function getValueLabelDisableReason({

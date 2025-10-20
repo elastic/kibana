@@ -11,7 +11,7 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import { map } from 'rxjs';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
-import type { LensApi } from '../react_embeddable/types';
+import type { LensApi } from '@kbn/lens-common';
 
 const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';
 

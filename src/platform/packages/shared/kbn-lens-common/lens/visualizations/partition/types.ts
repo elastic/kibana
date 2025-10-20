@@ -11,6 +11,7 @@ import type { Position } from '@elastic/charts';
 import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type { PartitionLegendValue } from '@kbn/expression-partition-vis-plugin/common';
 import type { LegendSize } from '@kbn/chart-expressions-common';
+import type { $Values } from '@kbn/utility-types';
 import type {
   CategoryDisplayType,
   CollapseFunction,
@@ -18,9 +19,11 @@ import type {
   LegendDisplayType,
   NumberDisplayType,
 } from '../types';
-import type { PARTITION_CHART_TYPES } from './constants';
+import type { PARTITION_CHART_TYPES, PARTITION_EMPTY_SIZE_RADIUS } from './constants';
 
-export type PartitionChartType = typeof PARTITION_CHART_TYPES;
+export type PartitionChartType = $Values<typeof PARTITION_CHART_TYPES>;
+
+export type EmptySizeRatiosType = $Values<typeof PARTITION_EMPTY_SIZE_RADIUS>;
 
 export interface SharedPartitionLayerState {
   metrics: string[];

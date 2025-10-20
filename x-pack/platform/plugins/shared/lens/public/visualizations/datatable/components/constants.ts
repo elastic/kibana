@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// import { RowHeightMode } from '../../../../common/types';
+// import { LENS_ROW_HEIGHT_MODE as RowHeightMode } from '@kbn/lens-common';
 
 // export const LENS_EDIT_SORT_ACTION = 'sort';
 // export const LENS_EDIT_RESIZE_ACTION = 'resize';

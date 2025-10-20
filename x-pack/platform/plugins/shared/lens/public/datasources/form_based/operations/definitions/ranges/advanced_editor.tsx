@@ -28,8 +28,8 @@ import {
   NewBucketButton,
 } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
+import type { RangeTypeLens } from '@kbn/lens-common';
 import { useDebounceWithOptions } from '../../../../../shared_components';
-import type { RangeTypeLens } from './ranges';
 import { isValidRange } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 import { LabelInput } from '../shared_components';

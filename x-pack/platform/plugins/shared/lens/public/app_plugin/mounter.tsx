@@ -37,8 +37,7 @@ import type {
   LensAppServices,
   EditorFrameStart,
   LensTopNavMenuEntryGenerator,
-  LensPluginStartDependencies,
-} from '@kbn/lens-common/lens/types';
+} from '@kbn/lens-common';
 import { App } from './app';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { extract } from '../../common/embeddable_factory';
@@ -51,6 +50,7 @@ import { getLensInspectorService } from '../lens_inspector_service';
 import { LensDocumentService } from '../persistence';
 import type { LensSerializedState } from '..';
 import type { LensAttributesService } from '../lens_attribute_service';
+import type { LensPluginStartDependencies } from '../plugin';
 
 function getInitialContext(history: AppMountParameters['history']) {
   const historyLocationState = history.location.state as

@@ -9,8 +9,8 @@ import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 import type { Visualization } from '..';
-import type { DataViewsState } from '../state_management';
-import type { Datasource, UserMessage } from '../types';
+import type { DataViewsState }  from '@kbn/lens-common';
+import type { Datasource, UserMessage  } from '@kbn/lens-common';
 import type { UserMessageGetterProps } from './get_application_user_messages';
 import {
   filterAndSortUserMessages,
@@ -20,7 +20,7 @@ import {
 import { cleanup, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../user_messages_ids';
-import type { LensPublicCallbacks } from '../react_embeddable/types';
+import type { LensPublicCallbacks } from '@kbn/lens-common';
 import { getLongMessage } from '../user_messages_utils';
 
 jest.mock('@kbn/shared-ux-link-redirect-app', () => {

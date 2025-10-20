@@ -39,9 +39,6 @@ import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { css } from '@emotion/react';
 import chroma from 'chroma-js';
-import { getSuccessfulRequestTimings } from '../../../report_performance_metric_util';
-import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
-import { getSearchWarningMessages } from '../../../utils';
 import type {
   FramePublicAPI,
   VisualizationMap,
@@ -52,13 +49,22 @@ import type {
   UserMessagesGetter,
   AddUserMessages,
   VisualizationDisplayOptions,
-} from '../../../types';
+} from '@kbn/lens-common';
+import type {
+  VisualizationState,
+  DatasourceStates,
+  DataViewsState,
+  LensInspector,
+} from '@kbn/lens-common';
 import {
   isLensBrushEvent,
   isLensFilterEvent,
   isLensMultiFilterEvent,
   isLensEditEvent,
-} from '../../../types';
+} from '../../../types_guards';
+import { getSuccessfulRequestTimings } from '../../../report_performance_metric_util';
+import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
+import { getSearchWarningMessages } from '../../../utils';
 import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
@@ -66,11 +72,6 @@ import applyChangesIllustrationDark from '../../../assets/render_dark@2x.png';
 import applyChangesIllustrationLight from '../../../assets/render_light@2x.png';
 import { getOriginalRequestErrorMessages } from '../../error_helper';
 import { lnsExpressionRendererStyle } from '../../../expression_renderer_styles';
-import type {
-  VisualizationState,
-  DatasourceStates,
-  DataViewsState,
-} from '../../../state_management';
 import {
   onActiveDataChange,
   useLensDispatch,
@@ -89,7 +90,6 @@ import {
   selectChangesApplied,
   selectExecutionContextSearch,
 } from '../../../state_management';
-import type { LensInspector } from '../../../lens_inspector_service';
 import {
   inferTimeField,
   DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS,

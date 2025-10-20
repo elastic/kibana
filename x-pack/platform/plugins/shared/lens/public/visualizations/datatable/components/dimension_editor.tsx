@@ -21,8 +21,8 @@ import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getOriginalId } from '@kbn/transpose-utils';
 import type { KbnPalettes } from '@kbn/palettes';
 import { DatatableInspectorTables } from '../../../../common/expressions';
-import type { VisualizationDimensionEditorProps } from '../../../types';
-import type { DatatableVisualizationState } from '../visualization';
+import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
+import type {  DatatableVisualizationState } from '@kbn/lens-common';
 
 import {
   defaultPaletteParams,

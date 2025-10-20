@@ -13,12 +13,18 @@ import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public'
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { css } from '@emotion/react';
-import type { LensAppProps, LensAppServices } from './types';
+import type {
+  LensAppState,
+  LensAppServices,
+  LensDocument,
+  AddUserMessages,
+  EditorFrameInstance,
+  UserMessagesGetter,
+} from '@kbn/lens-common';
+import type { Simplify } from '@kbn/chart-expressions-common';
+import type { LensAppProps } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
-import type { AddUserMessages, EditorFrameInstance, Simplify, UserMessagesGetter } from '../types';
-import type { LensDocument } from '../persistence';
 
-import type { LensAppState } from '../state_management';
 import {
   setState,
   applyChanges,
@@ -31,7 +37,7 @@ import {
   selectIsManaged,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
-import type { LensInspector } from '../lens_inspector_service';
+import type { LensInspector } from '@kbn/lens-common';
 import { getEditPath } from '../../common/constants';
 import { isLensEqual } from './lens_document_equality';
 import {
