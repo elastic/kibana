@@ -7,19 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mockContext } from '../../../__tests__/context_fixtures';
+import { getMockCallbacks, mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
 import { Parser } from '../../../parser';
 import type { ESQLCommand, ESQLMessage } from '../../../types';
+import type { ICommandCallbacks } from '../../types';
 
-const setExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
+const setExpectErrors = (
+  query: string,
+  expectedErrors: string[],
+  context = mockContext,
+  callbacks: ICommandCallbacks = getMockCallbacks()
+) => {
   const { root } = Parser.parse(query);
   const command = root.header?.find((cmd) => cmd.name === 'set') as unknown as ESQLCommand;
   if (!command) {
     throw new Error(`SET command not found in the parsed query`);
   }
 
-  const result = validate(command, root.commands, context) as ESQLMessage[];
+  const result = validate(command, root.commands, context, callbacks) as ESQLMessage[];
 
   const errors: string[] = [];
   result.forEach((error) => {
@@ -32,33 +38,48 @@ describe('SET Validation', () => {
   describe('SET <setting> = <value>', () => {
     test('no errors on valid setting names', () => {
       // Test with the current valid setting
-      setExpectErrors('set project_routing = "value"', []);
-      setExpectErrors('SET project_routing = "value"', []);
-      setExpectErrors('set project_routing="value"', []);
+      setExpectErrors('set time_zone = "value"', []);
+      setExpectErrors('SET time_zone = "value"', []);
+      setExpectErrors('set time_zone="value"', []);
     });
 
     test('no errors on valid setting with different value types', () => {
-      setExpectErrors('set project_routing = "string_value"', []);
-      setExpectErrors('set project_routing = 123', []);
-      setExpectErrors('set project_routing = true', []);
+      setExpectErrors('set time_zone = "string_value"', []);
+      setExpectErrors('set time_zone = 123', []);
+      setExpectErrors('set time_zone = true', []);
     });
 
     test('errors on unknown setting names', () => {
       setExpectErrors('set unknown_setting = "value"', ['Unknown setting unknown_setting']);
+    });
+
+    test('errors on serverless-only settings in non-serverless mode', () => {
+      setExpectErrors('set project_routing = 10', [
+        'The setting project_routing is only available in serverless.',
+      ]);
+    });
+
+    test('serverless only setting should not throw error in serverless mode', () => {
+      const callbacks = {
+        ...getMockCallbacks(),
+        isServerless: true,
+      };
+
+      setExpectErrors('set project_routing = 10', [], mockContext, callbacks);
     });
   });
 
   describe('Case sensitivity', () => {
     test('setting names are case sensitive', () => {
       // Only exact case matches should work
-      setExpectErrors('set project_routing = "value"', []);
+      setExpectErrors('set time_zone = "value"', []);
 
       // Different cases should fail
+      setExpectErrors('set Time_Zone = "value"', ['Unknown setting Time_Zone']);
+
+      setExpectErrors('set TIME_ZONE = "value"', ['Unknown setting TIME_ZONE']);
+
       setExpectErrors('set Project_Routing = "value"', ['Unknown setting Project_Routing']);
-
-      setExpectErrors('set PROJECT_ROUTING = "value"', ['Unknown setting PROJECT_ROUTING']);
-
-      setExpectErrors('set project_Routing = "value"', ['Unknown setting project_Routing']);
     });
   });
 });

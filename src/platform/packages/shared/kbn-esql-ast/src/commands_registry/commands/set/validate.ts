@@ -9,33 +9,60 @@
 import { getMessageFromId } from '../../../definitions/utils';
 import { settings } from '../../../definitions/generated/settings';
 import { isBinaryExpression, isIdentifier } from '../../../ast/is';
-import type { ESQLAstAllCommands, ESQLCommand, ESQLMessage } from '../../../types';
-import type { ICommandContext } from '../../types';
-
-const validSettingNames = settings.map((s) => s.name);
+import type { ESQLAstAllCommands, ESQLCommand, ESQLIdentifier, ESQLMessage } from '../../../types';
+import type { ICommandCallbacks, ICommandContext } from '../../types';
 
 export const validate = (
   command: ESQLAstAllCommands,
   commands: ESQLCommand[],
-  context?: ICommandContext
+  context?: ICommandContext,
+  callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
-  const settingArg = command.args[0];
+  const settingNameIdentifier = getSettingNameIdentifier(command);
 
-  if (isBinaryExpression(settingArg)) {
-    const settingName = settingArg.args[0];
+  if (!settingNameIdentifier) {
+    return [];
+  }
 
-    if (isIdentifier(settingName) && !validSettingNames.includes(settingName.text)) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownSetting',
-          values: { name: settingName.text },
-          locations: settingName.location,
-        })
-      );
-    }
+  // Find the setting definition
+  const setting = settings.find((s) => s.name === settingNameIdentifier.text);
+
+  // Check if setting exists
+  if (!setting) {
+    messages.push(
+      getMessageFromId({
+        messageId: 'unknownSetting',
+        values: { name: settingNameIdentifier.text },
+        locations: settingNameIdentifier.location,
+      })
+    );
+    return messages;
+  }
+
+  // Check serverless-only restriction
+  if (setting.serverlessOnly && !callbacks?.isServerless) {
+    messages.push(
+      getMessageFromId({
+        messageId: 'serverlessSetting',
+        values: { name: settingNameIdentifier.text },
+        locations: settingNameIdentifier.location,
+      })
+    );
   }
 
   return messages;
 };
+
+function getSettingNameIdentifier(command: ESQLAstAllCommands): ESQLIdentifier | null {
+  const settingArg = command.args[0];
+  if (!isBinaryExpression(settingArg)) {
+    return null;
+  }
+  const settingName = settingArg.args[0];
+  if (!isIdentifier(settingName)) {
+    return null;
+  }
+  return settingName;
+}

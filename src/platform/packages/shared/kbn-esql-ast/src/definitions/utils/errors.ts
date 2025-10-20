@@ -65,6 +65,14 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           values: { name: out.name },
         }),
       };
+    case 'serverlessSetting':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.serverlessSetting', {
+          defaultMessage: 'The {name} setting is only available in serverless.',
+          values: { name: out.name },
+        }),
+        type: 'warning',
+      };
     case 'noMatchingCallSignature':
       const signatureList = (out.validSignatures as unknown as string[])
         .map((sig) => `- (${sig})`)
