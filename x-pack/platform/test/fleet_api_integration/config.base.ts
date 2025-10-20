@@ -88,7 +88,6 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(['endpointRbacEnabled'])}`,
         `--xpack.fleet.enableExperimental=${JSON.stringify([
           'enableAutomaticAgentUpgrades',
-          'enableAgentMigrations',
           'enablePackageRollback',
           'enableAgentStatusAlerting',
           'enableAgentPrivilegeLevelChange',
