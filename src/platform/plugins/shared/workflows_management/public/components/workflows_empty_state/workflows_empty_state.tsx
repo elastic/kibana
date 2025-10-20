@@ -38,7 +38,7 @@ export function WorkflowsEmptyState({
       icon={
         <EuiImage
           size="fullWidth"
-          src={http!.basePath.prepend('/plugins/workflowsManagement/assets/empty_state.svg')}
+          src={http?.basePath.prepend('/plugins/workflowsManagement/assets/empty_state.svg')}
           alt=""
         />
       }

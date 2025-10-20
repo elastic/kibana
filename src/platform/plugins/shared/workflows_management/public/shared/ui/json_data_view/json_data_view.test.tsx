@@ -19,14 +19,14 @@ const mockJsonDataCode = jest.fn();
 jest.mock('./json_data_table', () => ({
   JSONDataTable: (props: any) => {
     mockJSONDataTable(props);
-    return <div data-test-subj="mocked-json-data-table">Table View</div>;
+    return <div data-test-subj="mocked-json-data-table">{'Table View'}</div>;
   },
 }));
 
 jest.mock('./json_data_code', () => ({
   JsonDataCode: (props: any) => {
     mockJsonDataCode(props);
-    return <div data-test-subj="mocked-json-data-code">JSON View</div>;
+    return <div data-test-subj="mocked-json-data-code">{'JSON View'}</div>;
   },
 }));
 

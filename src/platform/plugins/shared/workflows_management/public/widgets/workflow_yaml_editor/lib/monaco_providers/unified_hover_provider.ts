@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type YAML from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';

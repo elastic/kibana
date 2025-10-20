@@ -67,3 +67,5 @@ export const YamlEditor = React.memo(({ value, onChange, ...props }: YamlEditorP
     <CodeEditor languageId="yaml" value={internalValue} onChange={onChangeInternal} {...props} />
   );
 });
+
+YamlEditor.displayName = 'YamlEditor';

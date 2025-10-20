@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -185,8 +187,13 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       <EuiEmptyPrompt
         iconType="error"
         color="danger"
-        title={<h2>Unable to load workflow</h2>}
-        body={<p>There was an error loading the workflow. {error.message}</p>}
+        title={<h2>{'Unable to load workflow'}</h2>}
+        body={
+          <p>
+            {'There was an error loading the workflow. '}
+            {error.message}
+          </p>
+        }
       />
     );
   }

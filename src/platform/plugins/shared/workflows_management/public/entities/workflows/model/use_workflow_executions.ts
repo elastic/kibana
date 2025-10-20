@@ -40,7 +40,7 @@ export function useWorkflowExecutions(
 
   const queryFn = useCallback(
     async ({ pageParam = 1 }: { pageParam?: number }) => {
-      return http!.get<WorkflowExecutionListDto>(`/api/workflowExecutions`, {
+      return http?.get<WorkflowExecutionListDto>(`/api/workflowExecutions`, {
         query: {
           workflowId: params.workflowId,
           statuses: params.statuses,

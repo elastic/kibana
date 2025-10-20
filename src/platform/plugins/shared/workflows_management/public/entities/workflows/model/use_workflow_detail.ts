@@ -20,7 +20,7 @@ export function useWorkflowDetail(id: string | null) {
     queryKey: ['workflows', id],
     refetchOnWindowFocus: false,
     queryFn: () => {
-      return http!.get<WorkflowDetailDto>(`/api/workflows/${id}`).then((res) => {
+      return http?.get<WorkflowDetailDto>(`/api/workflows/${id}`).then((res) => {
         return {
           ...res,
           lastUpdatedAt: new Date(res.lastUpdatedAt),

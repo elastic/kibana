@@ -29,7 +29,7 @@ export function generateBuiltInStepSnippet(
   { full, withStepsSection }: GenerateBuiltInStepSnippetOptions = {}
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
-  let parameters: Record<string, any>;
+  let parameters: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   switch (stepType) {
     case 'foreach':

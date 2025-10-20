@@ -66,12 +66,14 @@ export const useConnectorTypeDecorations = ({
         });
 
         if (!typePair || !isScalar(typePair.value)) {
+          // eslint-disable-next-line no-continue
           continue;
         }
 
         const connectorType = typePair.value.value;
 
         if (typeof connectorType !== 'string') {
+          // eslint-disable-next-line no-continue
           continue;
         }
 
@@ -81,16 +83,19 @@ export const useConnectorTypeDecorations = ({
         // allow "if" as a special case
         if (connectorType.length < 3 && connectorType !== 'if') {
           // console.log('🎨 Skipping short connector type:', connectorType);
+          // eslint-disable-next-line no-continue
           continue; // Skip this iteration
         }
 
         const typeRange = typePair.value.range;
 
         if (!typeRange || !Array.isArray(typeRange) || typeRange.length < 3) {
+          // eslint-disable-next-line no-continue
           continue;
         }
 
         if (!typeExists(connectorType)) {
+          // eslint-disable-next-line no-continue
           continue;
         }
 
@@ -112,6 +117,7 @@ export const useConnectorTypeDecorations = ({
 
           // Check if this line starts with "type:" (after whitespace)
           if (!trimmedLine.startsWith('type:')) {
+            // eslint-disable-next-line no-continue
             continue; // Skip this decoration
           }
 

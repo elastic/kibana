@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import {
   EuiBetaBadge,
   EuiButton,
@@ -89,7 +91,7 @@ export function WorkflowsPage() {
             'message' in error.body &&
             typeof error.body.message === 'string'
           ) {
-            (error as any).message = error.body.message;
+            (error as any).message = error.body.message; // eslint-disable-line @typescript-eslint/no-explicit-any
           }
 
           notifications!.toasts.addError(error, {

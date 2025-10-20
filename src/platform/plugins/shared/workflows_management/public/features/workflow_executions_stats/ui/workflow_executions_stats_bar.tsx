@@ -41,7 +41,7 @@ export function WorkflowExecutionStatsBar({ height }: WorkflowExecutionStatsBarP
     return null;
   }
 
-  const executionStats: any[] = [];
+  const executionStats: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
   data.executions.forEach((day, index) => {
     executionStats.push({
       timestamp: day.timestamp,

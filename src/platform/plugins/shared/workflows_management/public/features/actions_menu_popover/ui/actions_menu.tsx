@@ -93,6 +93,7 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
     );
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChange = (_: Array<ActionOptionData>, __: any, selectedOption: ActionOptionData) => {
     if (isActionGroup(selectedOption)) {
       setCurrentPath([...currentPath, selectedOption.id]);

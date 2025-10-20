@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import { v4 as generateUuid } from 'uuid';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';

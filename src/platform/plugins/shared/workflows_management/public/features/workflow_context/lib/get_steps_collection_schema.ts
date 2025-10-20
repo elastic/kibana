@@ -39,6 +39,7 @@ export function getStepsCollectionSchema(
   for (const node of predecessors) {
     // Excluding triggers from the context for now. Maybe they should be included under 'triggers' key?
     if (node.type === 'trigger') {
+      // eslint-disable-next-line no-continue
       continue;
     }
 

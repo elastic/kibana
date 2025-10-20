@@ -17,6 +17,7 @@ import type { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
 import type { NodeType } from './types';
 import { atomicNodes, mainScopeNodes, secondaryScopeNodes } from './types';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface WorkflowNodeData extends Record<string, any> {
   stepType: NodeType;
   label: string;

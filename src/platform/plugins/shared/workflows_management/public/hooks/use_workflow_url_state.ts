@@ -45,7 +45,7 @@ export function useWorkflowUrlState() {
       };
 
       // Remove undefined values to keep URL clean
-      const cleanParams: Record<string, any> = {};
+      const cleanParams: Record<string, any> = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
       Object.entries(newParams).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           cleanParams[key] = value;

@@ -153,6 +153,7 @@ export function WorkflowYAMLValidationErrors({
         <EuiFlexGroup direction="column" gutterSize="s">
           {sortedValidationErrors?.map((error, index) => (
             <button
+              type="button"
               key={`${error.startLineNumber}-${error.startColumn}-${error.message}-${index}-${error.severity}`}
               css={styles.validationError}
               onClick={() => onErrorClick?.(error)}
@@ -165,7 +166,9 @@ export function WorkflowYAMLValidationErrors({
               tabIndex={0}
             >
               <EuiFlexItem grow={false} css={styles.validationErrorLineNumber}>
-                <b>{error.startLineNumber}</b>:{error.startColumn}
+                <b>{error.startLineNumber}</b>
+                {':'}
+                {error.startColumn}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiIcon

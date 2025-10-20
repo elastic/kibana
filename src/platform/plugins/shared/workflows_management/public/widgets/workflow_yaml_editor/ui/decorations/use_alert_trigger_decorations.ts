@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import { useEffect, useRef } from 'react';
 import type { Document } from 'yaml';
 import { i18n } from '@kbn/i18n';

@@ -43,7 +43,7 @@ interface WorkflowOption {
   data?: {
     secondaryContent?: string;
   };
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<WorkflowsActionParams>> = ({
@@ -100,7 +100,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   );
 
   const onWorkflowChange = useCallback(
-    (newOptions: WorkflowOption[], event: any, changedOption: WorkflowOption) => {
+    (newOptions: WorkflowOption[], event: unknown, changedOption: WorkflowOption) => {
       setWorkflows(newOptions);
       setIsPopoverOpen(false);
 
@@ -349,8 +349,8 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
       ) : (
         <EuiSelectable
           aria-label="Select workflow"
-          options={workflowOptions as any}
-          onChange={onWorkflowChange as any}
+          options={workflowOptions as unknown}
+          onChange={onWorkflowChange as unknown}
           singleSelection
           searchable
           searchProps={{
@@ -389,7 +389,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               disableFocusTrap
               closeOnScroll
               isOpen={isPopoverOpen}
-              input={search!}
+              input={search}
               panelPaddingSize="none"
               fullWidth
             >

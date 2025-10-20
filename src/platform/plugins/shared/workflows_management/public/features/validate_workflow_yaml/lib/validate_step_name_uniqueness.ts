@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { collectAllStepNames } from './collect_all_step_names';
 import type { StepNameInfo, YamlValidationResult } from '../model/types';
 

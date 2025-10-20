@@ -61,7 +61,7 @@ export function useWorkflowExecutionLogs({
       sortOrder,
     ],
     queryFn: async () => {
-      const response = await http!.get<WorkflowExecutionLogsResponse>(
+      const response = await http?.get<WorkflowExecutionLogsResponse>(
         `/api/workflowExecutions/${executionId}/logs`,
         {
           query: {

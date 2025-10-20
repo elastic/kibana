@@ -24,34 +24,34 @@ export function kibanaFlatten(
 
   // recursively merge object
   (function flatten(_obj, keyPrefix = '') {
-    keyPrefix = keyPrefix ? `${keyPrefix}.` : '';
+    const normalizedKeyPrefix = keyPrefix ? `${keyPrefix}.` : '';
     _.forOwn(_obj, function (val, key) {
-      key = keyPrefix + key;
+      const normalizedKey = normalizedKeyPrefix + key;
 
       if (deep) {
         const isArrayOfObjects = Array.isArray(val) && _.isPlainObject(_.first(val));
         if (isArrayOfObjects) {
-          _.each(val, (v) => flatten(v, key));
+          _.each(val, (v) => flatten(v, normalizedKey));
           return;
         }
-      } else if (flat[key] !== void 0) {
+      } else if (flat[normalizedKey] !== void 0) {
         return;
       }
 
       const isValue = !_.isPlainObject(val);
 
       if (isValue) {
-        if (!flat[key]) {
-          flat[key] = val;
-        } else if (Array.isArray(flat[key])) {
-          (flat[key] as unknown[]).push(val);
+        if (!flat[normalizedKey]) {
+          flat[normalizedKey] = val;
+        } else if (Array.isArray(flat[normalizedKey])) {
+          (flat[normalizedKey] as unknown[]).push(val);
         } else {
-          flat[key] = [flat[key], val];
+          flat[normalizedKey] = [flat[normalizedKey], val];
         }
         return;
       }
 
-      flatten(val as Record<string, unknown>, key);
+      flatten(val as Record<string, unknown>, normalizedKey);
     });
   })(obj);
 

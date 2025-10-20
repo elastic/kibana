@@ -32,7 +32,7 @@ export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) 
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">
-            No triggers
+            {'No triggers'}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

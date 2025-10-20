@@ -31,7 +31,7 @@ export function WorkflowYAMLEditorShortcuts() {
             />
           </b>
           <EuiTextColor color="subdued">
-            <kbd>{commandKey}</kbd> + <kbd>K</kbd>
+            <kbd>{commandKey}</kbd> {'+'} <kbd>{'K'}</kbd>
           </EuiTextColor>
         </p>
       </EuiText>

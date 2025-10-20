@@ -17,7 +17,7 @@ export function useWorkflowExecution(workflowExecutionId: string | null) {
   return useQuery<WorkflowExecutionDto, Error>({
     networkMode: 'always',
     queryKey: ['stepExecutions', workflowExecutionId],
-    queryFn: () => http!.get(`/api/workflowExecutions/${workflowExecutionId}`),
+    queryFn: () => http?.get(`/api/workflowExecutions/${workflowExecutionId}`),
     enabled: workflowExecutionId !== null,
   });
 }

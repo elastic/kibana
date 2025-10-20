@@ -27,6 +27,7 @@ export function collectAllVariables(
   // TODO: remove if/when foreach uses mustache expressions
   for (const node of workflowGraph?.getAllNodes() ?? []) {
     if (!isEnterForeach(node)) {
+      // eslint-disable-next-line no-continue
       continue;
     }
     const yamlNode = getStepNode(yamlDocument, node.stepId);

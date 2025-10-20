@@ -58,7 +58,7 @@ export function createWorkflowTaskRunner({
       async run() {
         logger.info(`Running scheduled workflow task for workflow ${workflowId}`);
 
-        let rruleTriggers: any[] = [];
+        let rruleTriggers: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
 
         try {
           // Get the workflow
@@ -135,7 +135,7 @@ export function createWorkflowTaskRunner({
             : await workflowsExecutionEngine.executeWorkflow(
                 workflowExecutionModel,
                 executionContext,
-                {} as any // Fallback when no user context is available
+                {} as any // eslint-disable-line @typescript-eslint/no-explicit-any -- Fallback when no user context is available
               );
 
           const scheduleType = rruleTriggers.length > 0 ? 'RRule' : 'interval/cron';

@@ -131,3 +131,5 @@ export const JSONDataView = React.memo<JSONDataViewProps>(
     );
   }
 );
+
+JSONDataView.displayName = 'JSONDataView';

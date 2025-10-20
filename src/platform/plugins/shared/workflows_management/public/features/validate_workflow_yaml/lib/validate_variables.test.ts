@@ -9,15 +9,15 @@
 
 import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
-import { validateVariables } from './validate_variables';
-import type { VariableItem, YamlValidationResult } from '../model/types';
 
 // Mock the imports
 jest.mock('../../workflow_context/lib/get_context_for_path');
 jest.mock('./validate_variable');
 
-import { getContextSchemaForPath } from '../../workflow_context/lib/get_context_for_path';
 import { validateVariable } from './validate_variable';
+import { validateVariables } from './validate_variables';
+import { getContextSchemaForPath } from '../../workflow_context/lib/get_context_for_path';
+import type { VariableItem, YamlValidationResult } from '../model/types';
 
 const mockGetContextSchemaForPath = getContextSchemaForPath as jest.MockedFunction<
   typeof getContextSchemaForPath

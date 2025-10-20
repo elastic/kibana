@@ -67,23 +67,27 @@ export const useTriggerTypeDecorations = ({
             isPair(item) && isScalar(item.key) && isScalar(item.value) && item.key.value === 'type'
         );
         if (!typePair?.value?.value) {
+          // eslint-disable-next-line no-continue
           continue;
         }
 
         const triggerType = typePair.value.value;
 
         if (typeof triggerType !== 'string') {
+          // eslint-disable-next-line no-continue
           continue;
         }
 
         // Skip decoration for very short trigger types to avoid false matches
         if (triggerType.length < 3) {
+          // eslint-disable-next-line no-continue
           continue; // Skip this iteration
         }
 
         const typeRange = typePair.value.range;
 
         if (!typeRange || !Array.isArray(typeRange) || typeRange.length < 3) {
+          // eslint-disable-next-line no-continue
           continue;
         }
 
@@ -105,6 +109,7 @@ export const useTriggerTypeDecorations = ({
 
           // Check if this line contains "type:" (after whitespace and optional dash for array items)
           if (!trimmedLine.startsWith('type:') && !trimmedLine.startsWith('- type:')) {
+            // eslint-disable-next-line no-continue
             continue; // Skip this decoration
           }
 

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove the eslint-disable comments to use the proper types.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import dagre, { graphlib } from '@dagrejs/dagre';
 import { Position } from '@xyflow/react';
 import type { WorkflowYaml } from '@kbn/workflows';

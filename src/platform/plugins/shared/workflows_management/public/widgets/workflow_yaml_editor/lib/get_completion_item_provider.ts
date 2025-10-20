@@ -8,6 +8,9 @@
  */
 // TODO: refactor this file to be more composable, easier to read and test
 
+// TODO: Remove the eslint-disable comments to use the proper types.
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import moment from 'moment-timezone';
 import type { Document, Node, Pair, Scalar } from 'yaml';
 import { isMap, isPair, isScalar, parseDocument, visit, YAMLParseError } from 'yaml';
@@ -1453,6 +1456,7 @@ export function getCompletionItemProvider(
               // Skip if parameter already exists (unless it's an empty value)
               if (existingParams.has(key)) {
                 // Skipping existing parameter
+                // eslint-disable-next-line no-continue
                 continue;
               }
 
@@ -1463,6 +1467,7 @@ export function getCompletionItemProvider(
                 lastPathSegment && !key.startsWith(lastPathSegment) && !isManualTrigger;
 
               if (shouldSkip) {
+                // eslint-disable-next-line no-continue
                 continue;
               }
 
@@ -1525,6 +1530,7 @@ export function getCompletionItemProvider(
 
               // If it's kbn-xsrf, skip it since we don't need to suggest it
               if (key === 'kbn-xsrf') {
+                // eslint-disable-next-line no-continue
                 continue;
               }
 
@@ -1701,6 +1707,7 @@ export function getCompletionItemProvider(
             completionContext.triggerKind === monaco.languages.CompletionTriggerKind.Invoke;
 
           if (lastPathSegment && !key.startsWith(lastPathSegment) && !isManualTrigger) {
+            // eslint-disable-next-line no-continue
             continue;
           }
 

@@ -75,7 +75,7 @@ export const StepExecutionTimelineStateful = ({
           error instanceof Error ? (
             <EuiText>{error.message}</EuiText>
           ) : (
-            <EuiText>Unknown error</EuiText>
+            <EuiText>{'Unknown error'}</EuiText>
           )
         }
       />

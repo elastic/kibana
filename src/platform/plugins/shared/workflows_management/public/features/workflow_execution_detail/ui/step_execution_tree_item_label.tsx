@@ -57,7 +57,7 @@ export function StepExecutionTreeItemLabel({
         {status === ExecutionStatus.SKIPPED && (
           <>
             {' '}
-            <span>({getStatusLabel(status).toLowerCase()})</span>
+            <span>{`(${getStatusLabel(status).toLowerCase()})`}</span>
           </>
         )}
       </EuiFlexItem>

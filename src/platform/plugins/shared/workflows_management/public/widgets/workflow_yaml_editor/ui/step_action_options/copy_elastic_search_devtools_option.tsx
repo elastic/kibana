@@ -32,7 +32,7 @@ export const CopyElasticSearchDevToolsOption: React.FC<CopyElasticSearchDevTools
 
   function generateConsoleFormat(
     requestInfo: { method: string; url: string; data?: string[] },
-    withParams: Record<string, any>
+    withParams: Record<string, any> // eslint-disable-line @typescript-eslint/no-explicit-any
   ): string {
     const lines = [`${requestInfo.method} ${requestInfo.url}`];
 

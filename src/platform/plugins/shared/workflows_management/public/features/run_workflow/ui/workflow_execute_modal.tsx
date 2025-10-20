@@ -54,7 +54,7 @@ export function WorkflowExecuteModal({
 }: {
   definition: WorkflowYaml;
   onClose: () => void;
-  onSubmit: (data: Record<string, any>) => void;
+  onSubmit: (data: Record<string, any>) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
 }) {
   const modalTitleId = useGeneratedHtmlId();
   const enabledTriggers = ['alert', 'index', 'manual'];
@@ -128,7 +128,7 @@ export function WorkflowExecuteModal({
         style={{ width: '1200px', height: '100vh' }}
       >
         <EuiModalHeader>
-          <EuiModalHeaderTitle id={modalTitleId}>Run Workflow</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>{'Run Workflow'}</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <EuiFlexGroup direction="row" gutterSize="l">

@@ -95,7 +95,7 @@ export function useWorkflowActions() {
         body: JSON.stringify({ stepId, contextOverride, workflowYaml }),
       });
     },
-    onSuccess: ({ workflowExecutionId }, {}) => {
+    onSuccess: ({ workflowExecutionId }) => {
       queryClient.invalidateQueries({ queryKey: ['workflows', workflowExecutionId, 'executions'] });
     },
   });

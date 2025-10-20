@@ -27,3 +27,5 @@ export const FieldName = React.memo<FieldNameProps>(({ fieldName, fieldType, hig
     </EuiFlexItem>
   </EuiFlexGroup>
 ));
+
+FieldName.displayName = 'FieldName';

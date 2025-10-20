@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any, react/display-name */
+
 import type {
   copyToClipboard,
   EuiDataGrid,
@@ -235,6 +237,8 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
     );
   }
 );
+
+JSONDataTable.displayName = 'JSONDataTable';
 const componentStyles = {
   fieldsGrid: (themeContext: UseEuiTheme) => {
     const { euiTheme } = themeContext;
@@ -257,17 +261,23 @@ const getCopyCellActionComponent = (
   records: JSONDataTableRecord[],
   fieldPathPrefix: string,
   closePopover: () => void
-): EuiDataGridColumnCellAction =>
-  React.memo(({ rowIndex, Component }) => {
-    const row = records[rowIndex];
-    const copy = useCallback(() => {
-      copyToClipboard(`${fieldPathPrefix}.${row.flattened.field}`);
-      closePopover();
-    }, [row.flattened.field]);
+): EuiDataGridColumnCellAction => {
+  const CopyCellActionComponent = React.memo(
+    ({ rowIndex, Component }: { rowIndex: number; Component: React.ComponentType<any> }) => {
+      const row = records[rowIndex];
+      const copy = useCallback(() => {
+        copyToClipboard(`${fieldPathPrefix}.${row.flattened.field}`);
+        closePopover();
+      }, [row.flattened.field]);
 
-    return (
-      <Component onClick={copy} iconType="copyClipboard" aria-label={CopyFieldPathText}>
-        {CopyFieldPathText}
-      </Component>
-    );
-  });
+      return (
+        <Component onClick={copy} iconType="copyClipboard" aria-label={CopyFieldPathText}>
+          {CopyFieldPathText}
+        </Component>
+      );
+    }
+  );
+
+  CopyCellActionComponent.displayName = 'CopyCellActionComponent';
+  return CopyCellActionComponent;
+};

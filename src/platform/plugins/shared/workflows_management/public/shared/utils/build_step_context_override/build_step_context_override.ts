@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { StepContext } from '@kbn/workflows';
 import { StepContextSchema } from '@kbn/workflows';
 import {

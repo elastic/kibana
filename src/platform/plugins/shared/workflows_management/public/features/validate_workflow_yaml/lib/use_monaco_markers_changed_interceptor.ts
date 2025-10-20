@@ -49,7 +49,7 @@ export function useMonacoMarkersChangedInterceptor({
     ) => {
       return markers.map((marker) => {
         if (owner === 'yaml') {
-          marker = formatMonacoYamlMarker(
+          return formatMonacoYamlMarker(
             marker,
             editorModel,
             workflowYamlSchema,
@@ -72,6 +72,7 @@ export function useMonacoMarkersChangedInterceptor({
       for (const marker of markers) {
         if (!isYamlValidationMarkerOwner(owner)) {
           // console.log('skipping marker for unknown owner', owner);
+          // eslint-disable-next-line no-continue
           continue;
         }
 

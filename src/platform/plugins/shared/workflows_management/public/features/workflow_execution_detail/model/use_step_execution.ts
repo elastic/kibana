@@ -17,7 +17,7 @@ export function useStepExecution(workflowExecutionId: string, stepExecutionId: s
   return useQuery({
     queryKey: ['stepExecution', workflowExecutionId, stepExecutionId],
     queryFn: async () => {
-      const response = await http!.get<EsWorkflowStepExecution>(
+      const response = await http?.get<EsWorkflowStepExecution>(
         `/api/workflowExecutions/${workflowExecutionId}/steps/${stepExecutionId}`
       );
       return response;

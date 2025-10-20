@@ -97,6 +97,8 @@ const IgnoreWarning: React.FC<IgnoreWarningProps> = React.memo(({ rawValue, reas
   );
 });
 
+IgnoreWarning.displayName = 'IgnoreWarning';
+
 interface TableFieldValueProps {
   field: string;
   formattedValue: string;

@@ -39,7 +39,7 @@ describe('NextExecutionTime', () => {
     }));
   };
 
-  const TestChild = () => <div data-test-subj="test-child">Test Child</div>;
+  const TestChild = () => <div data-test-subj="test-child">{'Test Child'}</div>;
 
   describe('children rendering', () => {
     it('should always render children regardless of nextExecutionTime', () => {

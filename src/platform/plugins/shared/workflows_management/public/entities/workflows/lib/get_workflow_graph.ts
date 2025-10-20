@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 // TODO: remove eslint exceptions once we have a better way to handle this
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { graphlib } from '@dagrejs/dagre';
 import type { WorkflowYaml } from '@kbn/workflows';
@@ -39,8 +38,8 @@ function transformYamlToNodesAndEdges(
   triggers: WorkflowYaml['triggers'],
   steps: WorkflowYaml['steps']
 ) {
-  const nodes: any[] = [];
-  const edges: any[] = [];
+  const nodes: unknown[] = [];
+  const edges: unknown[] = [];
 
   const firstStepId = steps?.[0]?.name.toLowerCase().replace(/\s+/g, '-');
 
@@ -95,7 +94,7 @@ function transformYamlToNodesAndEdges(
     if (step.type === 'if' && 'steps' in step && step.steps) {
       const { nodes: ifNodes, edges: ifEdges } = transformYamlToNodesAndEdges(
         [],
-        step.steps as any
+        step.steps as unknown
       );
       nodes.push(...ifNodes);
       edges.push(...ifEdges);
@@ -114,7 +113,7 @@ function transformYamlToNodesAndEdges(
       if ('else' in step && step.else) {
         const { nodes: elseNodes, edges: elseEdges } = transformYamlToNodesAndEdges(
           [],
-          step.else as any
+          step.else as unknown
         );
         nodes.push(...elseNodes);
         edges.push(...elseEdges);
@@ -134,7 +133,7 @@ function transformYamlToNodesAndEdges(
     if (step.type === 'foreach' && 'steps' in step && step.steps) {
       const { nodes: foreachNodes, edges: foreachEdges } = transformYamlToNodesAndEdges(
         [],
-        step.steps as any
+        step.steps as unknown
       );
       nodes.push(...foreachNodes);
       edges.push(...foreachEdges);
@@ -153,14 +152,14 @@ function transformYamlToNodesAndEdges(
     if (step.type === 'atomic' && 'steps' in step && step.steps) {
       const { nodes: atomicNodes, edges: atomicEdges } = transformYamlToNodesAndEdges(
         [],
-        step.steps as any
+        step.steps as unknown
       );
       nodes.push(...atomicNodes);
       edges.push(...atomicEdges);
 
       // Create edge from atomic step to first nested step
-      if ((step.steps as any[]).length > 0) {
-        const firstNestedId = (step.steps as any[])[0].name.toLowerCase().replace(/\s+/g, '-');
+      if ((step.steps as unknown[]).length > 0) {
+        const firstNestedId = (step.steps as unknown[])[0].name.toLowerCase().replace(/\s+/g, '-');
         edges.push({
           id: `${id}:${firstNestedId}`,
           source: id,
@@ -173,7 +172,7 @@ function transformYamlToNodesAndEdges(
       for (const branch of step.branches) {
         const { nodes: branchNodes, edges: branchEdges } = transformYamlToNodesAndEdges(
           [],
-          branch.steps as any
+          branch.steps as unknown
         );
         nodes.push(...branchNodes);
         edges.push(...branchEdges);
@@ -193,7 +192,7 @@ function transformYamlToNodesAndEdges(
     if (step.type === 'merge' && 'steps' in step && step.steps) {
       const { nodes: mergeNodes, edges: mergeEdges } = transformYamlToNodesAndEdges(
         [],
-        step.steps as any
+        step.steps as unknown
       );
       nodes.push(...mergeNodes);
       edges.push(...mergeEdges);
