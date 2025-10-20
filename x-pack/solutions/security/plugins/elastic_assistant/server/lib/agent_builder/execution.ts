@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import type { Logger } from '@kbn/logging';
-import type { AnalyticsServiceSetup } from '@kbn/core/server';
-import type { ConversationRound, RoundCompleteEventData } from '@kbn/onechat-common';
+import type { RoundCompleteEventData } from '@kbn/onechat-common';
 import { isMessageChunkEvent, isRoundCompleteEvent, isToolCallEvent } from '@kbn/onechat-common';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { isEmpty } from 'lodash';
 import { pruneContentReferences } from '@kbn/elastic-assistant-common';
-import type { ExecuteConnectorRequestBody, Message } from '@kbn/elastic-assistant-common';
 import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../../lib/telemetry/event_based_telemetry';
 import type {
   StreamingExecutionParams,
@@ -85,7 +81,6 @@ export const executeStreaming = async ({
           'core.security.knowledge_base_write': 'KnowledgeBaseWriteTool',
           'core.security.open_and_acknowledged_alerts': 'OpenAndAcknowledgedAlertsTool',
           'core.security.alert_counts': 'AlertCountsTool',
-          'core.security.generate_esql': 'GenerateESQLTool',
           'core.security.ask_about_esql': 'AskAboutESQLTool',
           'core.security.entity_risk_score': 'EntityRiskScoreTool',
           'core.security.integration_knowledge': 'IntegrationKnowledgeTool',

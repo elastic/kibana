@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { ConversationRound } from '@kbn/onechat-common';
 import type { Message } from '@kbn/elastic-assistant-common';
 import type { ElasticAssistantRequestHandlerContext } from '../../types';
+import type { AwaitedProperties } from '@kbn/utility-types';
 
 // Helper function to generate conversation title
 export const generateConversationTitle = async (
@@ -17,13 +18,15 @@ export const generateConversationTitle = async (
   messages: Array<Pick<Message, 'content' | 'role'>>,
   request: KibanaRequest,
   connectorId: string,
-  context: Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>,
+  context: AwaitedProperties<
+    Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
+  >,
   logger: Logger
 ) => {
   if (!conversationId || messages.length === 0) return;
 
   try {
-    const assistantContext = await context.elasticAssistant;
+    const assistantContext = context.elasticAssistant;
     const onechatServices = assistantContext.getOnechatServices();
     const conversationsDataClient = await assistantContext.getAIAssistantConversationsDataClient();
 

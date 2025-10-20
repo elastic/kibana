@@ -19,7 +19,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   'core.security.security_labs_knowledge',
   'core.security.knowledge_base_write',
   'core.security.entity_risk_score',
-  'core.security.generate_esql',
   'core.security.ask_about_esql',
   'core.security.integration_knowledge',
 ];

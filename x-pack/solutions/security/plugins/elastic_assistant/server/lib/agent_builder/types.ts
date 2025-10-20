@@ -10,13 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { SavedObjectsClientContract, AnalyticsServiceSetup } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
-import type {
-  RoundInput,
-  ConversationRound,
-  ChatAgentEvent,
-  RoundCompleteEventData,
-} from '@kbn/onechat-common';
-import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
+import type { RoundInput, ConversationRound } from '@kbn/onechat-common';
 import type {
   Replacements,
   ContentReferencesStore,

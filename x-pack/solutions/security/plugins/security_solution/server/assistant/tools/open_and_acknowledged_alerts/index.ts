@@ -14,5 +14,4 @@ export {
 export {
   openAndAcknowledgedAlertsInternalTool,
   OPEN_AND_ACKNOWLEDGED_ALERTS_INTERNAL_TOOL_DESCRIPTION,
-  type OpenAndAcknowledgedAlertsInternalToolParams,
 } from './open_and_acknowledged_alerts_internal_tool';

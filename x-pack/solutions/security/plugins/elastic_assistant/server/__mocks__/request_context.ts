@@ -179,7 +179,7 @@ const createElasticAssistantRequestContextMock = (
     savedObjectsClient: clients.elasticAssistant.savedObjectsClient,
     telemetry: clients.elasticAssistant.telemetry,
     checkPrivileges: jest.fn(),
-    getOnechatAgents: jest.fn(),
+    getOnechatServices: jest.fn(),
   };
 };
 

@@ -105,7 +105,6 @@ import { knowledgeBaseRetrievalInternalTool } from './assistant/tools/knowledge_
 import { knowledgeBaseWriteInternalTool } from './assistant/tools/knowledge_base/knowledge_base_write_internal_tool';
 import { securityLabsKnowledgeInternalTool } from './assistant/tools/security_labs/security_labs_knowledge_internal_tool';
 import { assistantSettingsInternalTool } from './assistant/tools/assistant_settings/assistant_settings_internal_tool';
-import { generateEsqlInternalTool } from './assistant/tools/esql/generate_esql_internal_tool';
 import { askAboutEsqlInternalTool } from './assistant/tools/esql/ask_about_esql_internal_tool';
 import { integrationKnowledgeInternalTool } from './assistant/tools/integration_knowledge/integration_knowledge_internal_tool';
 import type {
@@ -291,9 +290,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       );
       plugins.onechat.tools.register(
         productDocumentationInternalTool(core.getStartServices, savedObjectsClient)
-      );
-      plugins.onechat.tools.register(
-        generateEsqlInternalTool(core.getStartServices, savedObjectsClient)
       );
       plugins.onechat.tools.register(
         askAboutEsqlInternalTool(core.getStartServices, savedObjectsClient)

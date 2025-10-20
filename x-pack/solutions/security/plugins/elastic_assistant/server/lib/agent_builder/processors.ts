@@ -40,7 +40,7 @@ export const registerCitationsFromToolResult = (
   result.data.citations.forEach((citation, index) => {
     // Register each citation in the store with the exact ID from the tool
     // This allows the frontend to resolve {reference(id)} placeholders
-    const registeredRef = contentReferencesStore.add((p) => {
+    contentReferencesStore.add((p) => {
       // Create the base reference object
       const baseRef: Record<string, unknown> = {
         id: citation.id,

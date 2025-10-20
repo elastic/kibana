@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { KibanaResponseFactory } from '@kbn/core-http-server';
-import type { Logger } from '@kbn/logging';
 import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import type { AgentBuilderExecuteParams } from './types';
 import { generateConversationTitle, convertMessagesToConversationRounds } from './helpers';

@@ -75,7 +75,7 @@ export const askAboutEsqlInternalTool = (
         }
 
         // Get connector ID from request params
-        const connectorId = context.request.params?.connectorId;
+        const connectorId = (context.request.params as { connectorId?: string })?.connectorId;
         if (!connectorId) {
           return {
             results: [
