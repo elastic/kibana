@@ -17,7 +17,11 @@ export function LoadingObservability() {
     <ObservabilityPageTemplate
       pageSectionProps={{ alignment: 'center' }}
       showSolutionNav={false}
-      style={{ height: '100vh', position: 'fixed', inset: 0 }}
+      css={css`
+        height: 100vh;
+        position: fixed;
+        inset: 0;
+      `}
     >
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
