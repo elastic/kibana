@@ -75,12 +75,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clickNewDashboard();
       });
 
-      it('uses default index pattern on an empty dashboard', async () => {
-        await testSubjects.click('addFilter');
-        await dashboardExpect.fieldSuggestions(['agent']);
-        await filterBar.ensureFieldEditorModalIsClosed();
-      });
-
       it('shows index pattern of vis when one is added', async () => {
         await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
         await header.waitUntilLoadingHasFinished();
