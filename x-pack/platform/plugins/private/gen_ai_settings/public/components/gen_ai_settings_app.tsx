@@ -46,7 +46,7 @@ interface GenAiSettingsAppProps {
 
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
-  const { application, http, docLinks, notifications, featureFlags } = services;
+  const { application, http, docLinks, featureFlags } = services;
   const {
     showSpacesIntegration,
     isPermissionsBased,
@@ -202,20 +202,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   ]);
 
   async function handleSave() {
-    try {
-      const needsReload = await saveAll();
-      if (needsReload) {
-        window.location.reload();
-      }
-    } catch (e) {
-      const error = e as Error;
-      notifications.toasts.addDanger({
-        title: i18n.translate('xpack.observabilityAiAssistantManagement.save.error', {
-          defaultMessage: 'An error occurred while saving the settings',
-        }),
-        text: error.message,
-      });
-      throw error;
+    const needsReload = await saveAll();
+    if (needsReload) {
+      window.location.reload();
     }
   }
 

@@ -229,15 +229,15 @@ class Package {
     } else if (dir.startsWith('x-pack/solutions/observability/')) {
       group = 'observability';
       visibility = 'private';
-    } else if (dir.startsWith('x-pack/solutions/chat/')) {
-      group = 'chat';
+    } else if (dir.startsWith('x-pack/solutions/workplace_ai/')) {
+      group = 'workplace_ai';
       visibility = 'private';
     } else {
       // this conditional branch is the only one that applies in production
       group = this.manifest.group ?? 'common';
       // if the group is 'private-only', enforce it
       //  BOOKMARK - List of Kibana solutions - FIXME we could use KIBANA_SOLUTIONS array here once we modernize this / get rid of Bazel
-      visibility = ['search', 'security', 'observability', 'chat'].includes(group)
+      visibility = ['search', 'security', 'observability', 'workplace_ai'].includes(group)
         ? 'private'
         : this.manifest.visibility ?? 'shared';
     }
