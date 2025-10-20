@@ -137,7 +137,7 @@ class ChatServiceImpl implements ChatService {
             agentEvents$,
           });
 
-          // Step 9: Merge all event streams
+          // Merge all event streams
           return merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
             handleCancellation(abortSignal),
             convertErrors({ logger: this.dependencies.logger }),
