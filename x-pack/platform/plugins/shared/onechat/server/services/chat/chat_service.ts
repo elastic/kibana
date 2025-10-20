@@ -12,12 +12,7 @@ import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import {
-  type ChatEvent,
-  type Conversation,
-  oneChatDefaultAgentId,
-  isRoundCompleteEvent,
-} from '@kbn/onechat-common';
+import { type ChatEvent, oneChatDefaultAgentId, isRoundCompleteEvent } from '@kbn/onechat-common';
 import { withConverseSpan } from '../../tracing';
 import type { ConversationService } from '../conversation';
 import type { ConversationClient } from '../conversation';
@@ -31,7 +26,7 @@ import {
   createConversation$,
   resolveServices,
   convertErrors,
-  type ConversationOperation,
+  type ConversationWithOperation,
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import type { ChatService, ChatConverseParams } from './types';
@@ -50,8 +45,7 @@ export const createChatService = (options: ChatServiceDeps): ChatService => {
 };
 
 interface ConversationContext {
-  operation: ConversationOperation;
-  conversation: Conversation;
+  conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
   chatModel: InferenceChatModel;
   selectedConnectorId: string;
@@ -87,7 +81,7 @@ class ChatServiceImpl implements ChatService {
         span?.setAttribute('elastic.connector.id', services.selectedConnectorId);
 
         // Get conversation and determine operation (CREATE or UPDATE)
-        const { operation, conversation } = await getConversation({
+        const conversation = await getConversation({
           agentId,
           conversationId,
           autoCreateConversationWithId,
@@ -96,7 +90,6 @@ class ChatServiceImpl implements ChatService {
 
         // Build conversation context
         const context: ConversationContext = {
-          operation,
           conversation,
           conversationClient: services.conversationClient,
           chatModel: services.chatModel,
@@ -108,7 +101,7 @@ class ChatServiceImpl implements ChatService {
         switchMap((context) => {
           // Emit conversation ID for new conversations
           const conversationIdEvent$ =
-            context.operation === 'CREATE'
+            context.conversation.operation === 'CREATE'
               ? of(createConversationIdSetEvent(context.conversation.id))
               : EMPTY;
 
@@ -126,7 +119,7 @@ class ChatServiceImpl implements ChatService {
 
           // Generate title (for CREATE) or use existing title (for UPDATE)
           const title$ =
-            context.operation === 'CREATE'
+            context.conversation.operation === 'CREATE'
               ? generateTitle({
                   chatModel: context.chatModel,
                   conversation: context.conversation,
@@ -137,7 +130,6 @@ class ChatServiceImpl implements ChatService {
           // Persist conversation
           const persistenceEvents$ = persistConversation({
             agentId,
-            operation: context.operation,
             conversation: context.conversation,
             conversationClient: context.conversationClient,
             conversationId,
@@ -162,7 +154,6 @@ class ChatServiceImpl implements ChatService {
  */
 const persistConversation = ({
   agentId,
-  operation,
   conversation,
   conversationClient,
   conversationId,
@@ -170,8 +161,7 @@ const persistConversation = ({
   agentEvents$,
 }: {
   agentId: string;
-  operation: ConversationOperation;
-  conversation: Conversation;
+  conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
   conversationId?: string;
   title$: Observable<string>;
@@ -179,7 +169,7 @@ const persistConversation = ({
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
-  if (operation === 'CREATE') {
+  if (conversation.operation === 'CREATE') {
     return createConversation$({
       agentId,
       conversationClient,

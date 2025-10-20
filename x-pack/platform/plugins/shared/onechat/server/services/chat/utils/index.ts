@@ -16,6 +16,7 @@ export {
   createConversation$,
   placeholderConversation,
   type ConversationOperation,
+  type ConversationWithOperation,
 } from './conversations';
 export { convertErrors } from './convert_errors';
 export { resolveServices } from './resolve_services';

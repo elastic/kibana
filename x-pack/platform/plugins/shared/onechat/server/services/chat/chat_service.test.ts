@@ -71,7 +71,7 @@ describe('ChatService', () => {
 
     const conversation = createEmptyConversation();
 
-    getConversationMock.mockResolvedValue({ conversation, operation: 'CREATE' });
+    getConversationMock.mockResolvedValue({ ...conversation, operation: 'CREATE' });
     generateTitleMock.mockReturnValue(of('generated title'));
 
     // Mock resolveServices to return all necessary services with a proper conversation client
@@ -129,7 +129,7 @@ describe('ChatService', () => {
   describe('autoCreateConversationWithId', () => {
     it('creates new conversation when autoCreateConversationWithId=true and conversation does not exist', async () => {
       getConversationMock.mockResolvedValue({
-        conversation: createEmptyConversation(),
+        ...createEmptyConversation(),
         operation: 'CREATE',
       });
 
@@ -157,7 +157,7 @@ describe('ChatService', () => {
 
     it('updates existing conversation when autoCreateConversationWithId=true and conversation exists', async () => {
       getConversationMock.mockResolvedValue({
-        conversation: createEmptyConversation(),
+        ...createEmptyConversation(),
         operation: 'UPDATE',
       });
 
@@ -184,7 +184,7 @@ describe('ChatService', () => {
 
     it('follows default behavior when autoCreateConversationWithId=false (default)', async () => {
       getConversationMock.mockResolvedValue({
-        conversation: createEmptyConversation(),
+        ...createEmptyConversation(),
         operation: 'UPDATE',
       });
 
@@ -211,7 +211,7 @@ describe('ChatService', () => {
 
     it('creates new conversation when no conversationId is provided regardless of autoCreateConversationWithId flag', async () => {
       const conversation = createEmptyConversation();
-      getConversationMock.mockResolvedValue({ conversation, operation: 'CREATE' });
+      getConversationMock.mockResolvedValue({ ...conversation, operation: 'CREATE' });
 
       const obs$ = chatService.converse({
         agentId: 'my-agent',
@@ -237,7 +237,7 @@ describe('ChatService', () => {
 
     it('passes autoCreateConversationWithId parameter to getConversation', async () => {
       getConversationMock.mockResolvedValue({
-        conversation: createEmptyConversation(),
+        ...createEmptyConversation(),
         operation: 'CREATE',
       });
 
@@ -265,7 +265,7 @@ describe('ChatService', () => {
   it('throws when no connector is available for chat execution', async () => {
     resolveServicesMock.mockRejectedValue(new Error('No connector available for chat execution'));
     getConversationMock.mockResolvedValue({
-      conversation: createEmptyConversation(),
+      ...createEmptyConversation(),
       operation: 'CREATE',
     });
 
@@ -281,7 +281,7 @@ describe('ChatService', () => {
   describe('conversationIdSetEvent', () => {
     it('emits conversationIdSetEvent for new conversations (no conversationId)', async () => {
       const conversation = createEmptyConversation();
-      getConversationMock.mockResolvedValue({ conversation, operation: 'CREATE' });
+      getConversationMock.mockResolvedValue({ ...conversation, operation: 'CREATE' });
 
       // Mock agent events to include a round complete event
       const mockRoundCompleteEvent = {
@@ -318,7 +318,7 @@ describe('ChatService', () => {
         id: providedId,
       };
       conversationExistsMock.mockResolvedValue(false);
-      getConversationMock.mockResolvedValue({ conversation, operation: 'CREATE' });
+      getConversationMock.mockResolvedValue({ ...conversation, operation: 'CREATE' });
 
       // Mock agent events to include a round complete event
       const mockRoundCompleteEvent = {
@@ -356,7 +356,7 @@ describe('ChatService', () => {
         ...createEmptyConversation(),
         id: existingConversationId, // ← Use the same ID
       };
-      getConversationMock.mockResolvedValue({ conversation, operation: 'UPDATE' });
+      getConversationMock.mockResolvedValue({ ...conversation, operation: 'UPDATE' });
 
       // Mock agent events to include a round complete event
       const mockRoundCompleteEvent = {
@@ -388,7 +388,7 @@ describe('ChatService', () => {
 
     it('emits conversationIdSetEvent before other events for new conversations', async () => {
       const conversation = createEmptyConversation();
-      getConversationMock.mockResolvedValue({ conversation, operation: 'CREATE' });
+      getConversationMock.mockResolvedValue({ ...conversation, operation: 'CREATE' });
 
       // Mock agent events to include multiple events
       const mockAgentEvents = [

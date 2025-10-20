@@ -92,6 +92,8 @@ export const conversationExists = async ({
 
 export type ConversationOperation = 'CREATE' | 'UPDATE';
 
+export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
+
 /**
  * Get a conversation by ID, or create a placeholder for new conversations
  * Also determines the operation type (CREATE or UPDATE) based on the same logic
@@ -106,11 +108,11 @@ export const getConversation = async ({
   conversationId: string | undefined;
   autoCreateConversationWithId?: boolean;
   conversationClient: ConversationClient;
-}): Promise<{ conversation: Conversation; operation: ConversationOperation }> => {
+}): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
     return {
-      conversation: placeholderConversation({ agentId }),
+      ...placeholderConversation({ agentId }),
       operation: 'CREATE',
     };
   }
@@ -118,7 +120,7 @@ export const getConversation = async ({
   // Case 2: Conversation ID specified and autoCreate is false - update existing
   if (!autoCreateConversationWithId) {
     return {
-      conversation: await conversationClient.get(conversationId),
+      ...(await conversationClient.get(conversationId)),
       operation: 'UPDATE',
     };
   }
@@ -127,12 +129,12 @@ export const getConversation = async ({
   const exists = await conversationExists({ conversationId, conversationClient });
   if (exists) {
     return {
-      conversation: await conversationClient.get(conversationId),
+      ...(await conversationClient.get(conversationId)),
       operation: 'UPDATE',
     };
   } else {
     return {
-      conversation: placeholderConversation({ conversationId, agentId }),
+      ...placeholderConversation({ conversationId, agentId }),
       operation: 'CREATE',
     };
   }
