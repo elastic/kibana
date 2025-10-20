@@ -9,7 +9,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import type { ElasticsearchGraphNode } from '@kbn/workflows/graph/types';
+import { isElasticsearch } from '@kbn/workflows/graph/types';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,11 +17,11 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { selectFocusedStepInfo, selectWorkflowGraph } from '../../lib/store';
 import { getElasticsearchRequestInfo } from '../../lib/elasticsearch_step_utils';
 
-export interface CopyElasticSearchDevToolsOptionProps {
+export interface CopyElasticsearchDevToolsOptionProps {
   onClick: () => void;
 }
 
-export const CopyElasticSearchDevToolsOption: React.FC<CopyElasticSearchDevToolsOptionProps> = ({
+export const CopyElasticsearchDevToolsOption: React.FC<CopyElasticsearchDevToolsOptionProps> = ({
   onClick,
 }) => {
   const workflowGraph = useSelector(selectWorkflowGraph);
@@ -50,9 +50,18 @@ export const CopyElasticSearchDevToolsOption: React.FC<CopyElasticSearchDevTools
 
     try {
       const stepGraph = workflowGraph.getStepGraph(focusedStepInfo.stepId);
-      const elasticSearchNode = stepGraph
-        .getAllNodes()
-        .find((node) => node.type.startsWith('kibana')) as ElasticsearchGraphNode;
+      const elasticSearchNode = stepGraph.getAllNodes().find((node) => isElasticsearch(node));
+      if (!elasticSearchNode || !isElasticsearch(elasticSearchNode)) {
+        notifications?.toasts.addError(new Error('Current step is not an Elasticsearch step'), {
+          title: i18n.translate(
+            'plugins.workflowsManagement.copyDevToolsSnippetToClipboard.notElasticsearchStepErrorTitle',
+            {
+              defaultMessage: 'Current step is not an Elasticsearch step',
+            }
+          ),
+        });
+        return;
+      }
       const stepType = elasticSearchNode.stepType;
       const requestInfo = getElasticsearchRequestInfo(
         stepType,
