@@ -22,6 +22,7 @@ import type { EntityType } from '../../../../common/entity_analytics/types';
 import { createGetAlertsById } from './get_alert_by_id';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
+import type { ToolCitation } from '../types';
 
 const entityRiskScoreInternalSchema = z.object({
   identifier_type: IdentifierType,
@@ -145,7 +146,25 @@ export const entityRiskScoreToolInternal = (
           }))
         );
 
-        const data = { ...latestRiskScore, inputs: enhancedInputs, id_value: identifier }; // Replace id_value for the anonymized identifier to avoid leaking user data
+        const citationId = `entity-risk-${identifierType}-${identifier}`;
+        const data = {
+          ...latestRiskScore,
+          inputs: enhancedInputs,
+          id_value: identifier,
+          citation: `{reference(${citationId})}`,
+        };
+
+        const citations: ToolCitation[] = [
+          {
+            id: citationId,
+            type: 'Href',
+            metadata: {
+              // Note: basePath will be added by agent execution layer
+              href: `/app/security/entity_analytics/hosts/${identifier}`,
+              title: `Entity Risk Score for ${identifier}`,
+            },
+          },
+        ];
 
         return {
           results: [
@@ -154,6 +173,7 @@ export const entityRiskScoreToolInternal = (
               data: {
                 riskScore: data,
                 replacements: {},
+                citations,
               },
             },
           ],

@@ -8,13 +8,13 @@
 import { z } from '@kbn/zod';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-// Content references are handled at the agent execution level, not at the tool level
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { ToolType } from '@kbn/onechat-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
+import type { ToolCitation } from '../types';
 
 const productDocumentationToolSchema = z.object({
   query: z.string().describe(
@@ -84,22 +84,33 @@ export const productDocumentationInternalTool = (
         inferenceId: defaultInferenceEndpoints.ELSER,
       });
 
-      // Use documents without content references
-      // Content references are handled at the agent execution level, not at the tool level
-      const enrichedDocuments = response.documents;
+      // Create citations for each document and embed them inline
+      const citedDocuments = response.documents.map((doc, index) => {
+        const citationId = `product-doc-${index}`;
+        return {
+          ...doc,
+          content: `{reference(${citationId})}\n${doc.content}`,
+          citationId,
+        };
+      });
 
-      // Format the result with references
-      const resultWithReference = {
-        content: {
-          documents: enrichedDocuments,
+      const citations: ToolCitation[] = citedDocuments.map((doc) => ({
+        id: doc.citationId,
+        type: 'ProductDocumentation',
+        metadata: {
+          title: doc.title || 'Product Documentation',
+          url: doc.url || '',
         },
-      };
+      }));
 
       return {
         results: [
           {
             type: ToolResultType.other,
-            data: resultWithReference,
+            data: {
+              content: { documents: citedDocuments },
+              citations,
+            },
           },
         ],
       };

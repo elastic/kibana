@@ -22,7 +22,6 @@ import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { isEmpty } from 'lodash';
 import {
   pruneContentReferences,
-  productDocumentationReference,
   contentReferenceBlock,
   type Replacements,
   type ContentReferencesStore,
@@ -151,44 +150,55 @@ const convertMessagesToConversationRounds = (
 // Helper function to process product documentation results
 const processProductDocumentationResults = (
   result: { data: { content: { documents: Array<{ url?: string; title?: string }> } } },
-  contentReferencesStore: ContentReferencesStore
+  contentReferencesStore: ContentReferencesStore,
+  assistantContext: { getServerBasePath: () => string },
+  logger: Logger
 ): string => {
-  let citations = '';
-  const documents = result.data.content.documents;
-  for (let i = 0; i < documents.length; i++) {
-    const doc = documents[i];
-    if (doc.url) {
-      const reference = contentReferencesStore.add((p) =>
-        productDocumentationReference(p.id, doc.title || 'Product Documentation', doc.url || '')
-      );
-      const citation = contentReferenceBlock(reference);
-      citations += ` ${citation}`;
-    }
-  }
-  return citations;
+  // Register any citations provided by the tool
+  logger.debug(
+    `🔍 [PROCESS_PRODUCT_DOCS] About to register citations for product documentation results`,
+    {
+      resultData: result.data,
+    } as Record<string, unknown>
+  );
+
+  registerCitationsFromToolResult(
+    result as {
+      data?: { citations?: Array<{ id: string; type: string; metadata: Record<string, unknown> }> };
+    },
+    contentReferencesStore,
+    assistantContext,
+    logger
+  );
+
+  // Citations are now handled by registerCitationsFromToolResult
+  // Tools embed citations inline, agent just registers them
+  return '';
 };
 
 // Helper function to process alert results
 const processAlertResults = (
   result: { data: { alerts: string[] } },
-  contentReferencesStore: ContentReferencesStore
+  contentReferencesStore: ContentReferencesStore,
+  assistantContext: { getServerBasePath: () => string },
+  logger: Logger
 ): string => {
-  const alerts = result.data.alerts || [];
+  // Register any citations provided by the tool
+  logger.debug(`🔍 [PROCESS_ALERT_RESULTS] About to register citations for alert results`, {
+    resultData: result.data,
+  } as Record<string, unknown>);
 
-  if (alerts.length === 0) {
-    return '';
-  }
+  registerCitationsFromToolResult(
+    result as {
+      data?: { citations?: Array<{ id: string; type: string; metadata: Record<string, unknown> }> };
+    },
+    contentReferencesStore,
+    assistantContext,
+    logger
+  );
 
-  // Create a single citation that links to the alerts page
-  // The SecurityAlertsPageContentReference will show open and acknowledged alerts
-  // which should include the alerts that were queried
-  const contentReference = contentReferencesStore.add((p) => ({
-    type: 'SecurityAlertsPage' as const,
-    id: p.id,
-  }));
-
-  const citation = `{reference(${contentReference?.id || ''})}`;
-  return ` ${citation}`;
+  // Citations are now handled by registerCitationsFromToolResult
+  return '';
 };
 
 // Helper function to process knowledge base retrieval results
@@ -202,89 +212,58 @@ const processKnowledgeBaseRetrievalResults = (
     };
   },
   contentReferencesStore: ContentReferencesStore,
+  assistantContext: { getServerBasePath: () => string },
   logger: Logger,
   aiResponseMessage: string
 ): string => {
-  // Parse the enriched documents from the tool result
-  let enrichedDocs: Array<{
-    id: string;
-    pageContent: string;
-    metadata: { name: string; citation: string };
-  }> = [];
+  // Register any citations provided by the tool
+  logger.debug(
+    `🔍 [PROCESS_KB_RETRIEVAL] About to register citations for knowledge base retrieval results`,
+    {
+      resultData: result.data,
+    } as Record<string, unknown>
+  );
 
-  if (result.data.content) {
-    try {
-      enrichedDocs = JSON.parse(result.data.content);
-    } catch (error) {
-      logger.error(`🔍 [KB_MATCHING] Failed to parse tool result content: ${error.message}`);
-      return '';
-    }
-  }
+  registerCitationsFromToolResult(
+    result as {
+      data?: { citations?: Array<{ id: string; type: string; metadata: Record<string, unknown> }> };
+    },
+    contentReferencesStore,
+    assistantContext,
+    logger
+  );
 
-  if (enrichedDocs.length === 0) {
-    return '';
-  }
-
-  // Pre-register content references for all entries so they can be found by pruneContentReferences
-  if (result.data.entries && result.data.entries.length > 0) {
-    result.data.entries.forEach((entry) => {
-      const placeholderId = `kb-${entry.id}`;
-      contentReferencesStore.add((p) => ({
-        type: 'KnowledgeBaseEntry' as const,
-        id: placeholderId,
-        knowledgeBaseEntryName: entry.name,
-        knowledgeBaseEntryId: entry.id,
-      }));
-    });
-  }
-
-  // Find which documents the AI actually used (conservative matching)
-  const usedDocuments = enrichedDocs.filter((doc) => {
-    // 1. Extract clean content from document (remove citation placeholder)
-    const docContent = doc.pageContent.replace(/\s*\{reference\(.*?\)\}\s*$/, '').trim();
-
-    // 2. Check if AI response contains the document content (exact substring match)
-    if (aiResponseMessage.includes(docContent)) {
-      return true;
-    }
-
-    // 3. For very short content, also check if entry name matches query context
-    // This handles cases like "ice cream" where the AI might say "Your favorite dessert is ice cream"
-    const entryNameWords = doc.metadata.name.toLowerCase().split(/\s+/);
-    const responseWords = aiResponseMessage.toLowerCase().split(/\s+/);
-    if (entryNameWords.every((word) => responseWords.includes(word))) {
-      return true;
-    }
-
-    return false;
-  });
-
-  // Append citations for matched documents
-  const citations = usedDocuments.map((doc) => doc.metadata.citation).join(' ');
-
-  return citations ? ` ${citations}` : '';
+  // Citations are now handled by registerCitationsFromToolResult
+  // The tool already embeds citations inline in the content
+  return '';
 };
 
 // Helper function to process knowledge base write results
 const processKnowledgeBaseWriteResults = (
   result: { data: { entryId?: string; name: string; query: string } },
-  contentReferencesStore: ContentReferencesStore
+  contentReferencesStore: ContentReferencesStore,
+  assistantContext: { getServerBasePath: () => string },
+  logger: Logger
 ): string => {
-  const { entryId, name } = result.data;
+  // Register any citations provided by the tool
+  logger.debug(
+    `🔍 [PROCESS_KB_WRITE] About to register citations for knowledge base write results`,
+    {
+      resultData: result.data,
+    } as Record<string, unknown>
+  );
 
-  if (!entryId) {
-    return '';
-  }
+  registerCitationsFromToolResult(
+    result as {
+      data?: { citations?: Array<{ id: string; type: string; metadata: Record<string, unknown> }> };
+    },
+    contentReferencesStore,
+    assistantContext,
+    logger
+  );
 
-  // Create a content reference to the specific knowledge base entry that was created
-  const reference = contentReferencesStore.add((p) => ({
-    type: 'KnowledgeBaseEntry' as const,
-    id: p.id,
-    knowledgeBaseEntryName: name,
-    knowledgeBaseEntryId: entryId,
-  }));
-  const citation = contentReferenceBlock(reference);
-  return ` ${citation}`;
+  // Citations are now handled by registerCitationsFromToolResult
+  return '';
 };
 
 // Helper function to process security labs knowledge results
@@ -297,19 +276,37 @@ const processSecurityLabsKnowledgeResults = (
       citations?: Array<{ id: string; slug: string; title: string }>;
     };
   },
-  contentReferencesStore: ContentReferencesStore
+  contentReferencesStore: ContentReferencesStore,
+  assistantContext: { getServerBasePath: () => string },
+  logger: Logger
 ): string => {
-  // Register all citations provided by the tool in the contentReferencesStore
-  // This makes them available for pruneContentReferences to find and format
+  // Register any citations provided by the tool
+  logger.debug(`🔍 [PROCESS_SECURITY_LABS] About to register citations for security labs results`, {
+    resultData: result.data,
+  } as Record<string, unknown>);
+
+  // Convert Security Labs citations to the standard format
   if (result.data.citations && result.data.citations.length > 0) {
-    result.data.citations.forEach((citation) => {
-      contentReferencesStore.add((p) => ({
-        type: 'Href' as const,
-        id: citation.id,
+    const standardCitations = result.data.citations.map((citation) => ({
+      id: citation.id,
+      type: 'Href' as const,
+      metadata: {
         href: `https://www.elastic.co/security-labs/${citation.slug}`,
         title: `Security Labs: ${citation.title}`,
-      }));
-    });
+      },
+    }));
+
+    // Use the standard citation registration function
+    registerCitationsFromToolResult(
+      {
+        data: {
+          citations: standardCitations,
+        },
+      },
+      contentReferencesStore,
+      assistantContext,
+      logger
+    );
   }
 
   // Return empty string - let the AI intelligently place citations based on the content
@@ -324,38 +321,127 @@ const processIntegrationKnowledgeResults = (
     data: { documents: Array<{ package_name: string; filename: string }>; question: string };
   },
   contentReferencesStore: ContentReferencesStore,
-  assistantContext: { getServerBasePath: () => string }
+  assistantContext: { getServerBasePath: () => string },
+  logger: Logger
 ): string => {
-  // Create references for each integration document
-  const citations = result.data.documents.map((doc) => {
-    const basePath = assistantContext.getServerBasePath();
-    const reference = contentReferencesStore.add((p) => ({
-      type: 'Href' as const,
-      id: p.id,
-      href: `${basePath}/app/integrations/detail/${doc.package_name}`,
-      title: `${doc.package_name} integration (${doc.filename})`,
-    }));
-    return contentReferenceBlock(reference);
-  });
-  return citations.length > 0 ? ` ${citations.join(' ')}` : '';
+  // Register any citations provided by the tool
+  logger.debug(
+    `🔍 [PROCESS_INTEGRATION_KNOWLEDGE] About to register citations for integration knowledge results`,
+    {
+      resultData: result.data,
+    } as Record<string, unknown>
+  );
+
+  registerCitationsFromToolResult(
+    result as {
+      data?: { citations?: Array<{ id: string; type: string; metadata: Record<string, unknown> }> };
+    },
+    contentReferencesStore,
+    assistantContext,
+    logger
+  );
+
+  // Citations are now handled by registerCitationsFromToolResult
+  return '';
 };
 
 // Helper function to process entity risk score results
 const processEntityRiskScoreResults = (
   result: { data: { riskScore: number; entityName: string } },
   contentReferencesStore: ContentReferencesStore,
-  assistantContext: { getServerBasePath: () => string }
+  assistantContext: { getServerBasePath: () => string },
+  logger: Logger
 ): string => {
-  // Create a reference to the entity details page
+  // Register any citations provided by the tool
+  logger.debug(
+    `🔍 [PROCESS_ENTITY_RISK] About to register citations for entity risk score results`,
+    {
+      resultData: result.data,
+    } as Record<string, unknown>
+  );
+
+  registerCitationsFromToolResult(
+    result as {
+      data?: { citations?: Array<{ id: string; type: string; metadata: Record<string, unknown> }> };
+    },
+    contentReferencesStore,
+    assistantContext,
+    logger
+  );
+
+  // Citations are now handled by registerCitationsFromToolResult
+  return '';
+};
+
+// Helper function to register citations from tool results
+const registerCitationsFromToolResult = (
+  result: {
+    data?: {
+      citations?: Array<{ id: string; type: string; metadata: Record<string, unknown> }>;
+    };
+  },
+  contentReferencesStore: ContentReferencesStore,
+  assistantContext: { getServerBasePath: () => string },
+  logger: Logger
+): void => {
+  logger.debug(`🔍 [CITATION_REGISTRATION] Checking for citations in result:`, {
+    hasData: !!result.data,
+    hasCitations: !!result.data?.citations,
+    citationsArray: result.data?.citations,
+    citationsLength: result.data?.citations?.length,
+  } as Record<string, unknown>);
+
+  if (!result.data?.citations || !Array.isArray(result.data.citations)) {
+    logger.debug(`🔍 [CITATION_REGISTRATION] No citations found or not an array`);
+    return;
+  }
+
   const basePath = assistantContext.getServerBasePath();
-  const reference = contentReferencesStore.add((p) => ({
-    type: 'Href' as const,
-    id: p.id,
-    href: `${basePath}/app/security/entity_analytics/hosts/${result.data.entityName}`,
-    title: `Entity Risk Score for ${result.data.entityName}`,
-  }));
-  const citation = contentReferenceBlock(reference);
-  return ` ${citation}`;
+  logger.debug(
+    `🔍 [CITATION_REGISTRATION] Processing ${result.data.citations.length} citations with basePath: ${basePath}`
+  );
+
+  result.data.citations.forEach((citation, index) => {
+    logger.debug(`🔍 [CITATION_REGISTRATION] Processing citation ${index + 1}:`, {
+      id: citation.id,
+      type: citation.type,
+      metadata: citation.metadata,
+    } as Record<string, unknown>);
+
+    // Register each citation in the store with the exact ID from the tool
+    // This allows the frontend to resolve {reference(id)} placeholders
+    const registeredRef = contentReferencesStore.add((p) => {
+      // Create the base reference object
+      const baseRef: Record<string, unknown> = {
+        id: citation.id,
+        type: citation.type,
+        ...citation.metadata,
+      };
+
+      // Add basePath to Href types if href is relative
+      if (
+        citation.type === 'Href' &&
+        typeof citation.metadata.href === 'string' &&
+        citation.metadata.href.startsWith('/')
+      ) {
+        baseRef.href = `${basePath}${citation.metadata.href}`;
+        logger.debug(`🔍 [CITATION_REGISTRATION] Added basePath to Href citation: ${baseRef.href}`);
+      }
+
+      return baseRef as Parameters<typeof contentReferencesStore.add>[0] extends (
+        p: infer P
+      ) => infer R
+        ? R
+        : never;
+    });
+
+    logger.debug(`🔍 [CITATION_REGISTRATION] Registered citation ${index + 1}:`, {
+      registeredRef,
+      citationId: citation.id,
+    } as Record<string, unknown>);
+  });
+
+  logger.debug(`🔍 [CITATION_REGISTRATION] Completed processing all citations`);
 };
 
 // Helper function to check if result is product documentation
@@ -579,7 +665,7 @@ const executeStreaming = async ({
           'core.security.ask_about_esql': 'AskAboutESQLTool',
           'core.security.entity_risk_score': 'EntityRiskScoreTool',
           'core.security.integration_knowledge': 'IntegrationKnowledgeTool',
-          'core.security.security_labs_knowledge_base': 'SecurityLabsKnowledgeBaseTool',
+          'core.security.security_labs_knowledge': 'SecurityLabsKnowledgeTool',
         };
         return toolMapping[toolName] || 'CustomTool';
       };
@@ -817,8 +903,16 @@ const processToolResult = (
   aiResponseMessage: string,
   assistantContext: { getServerBasePath: () => string }
 ): string => {
+  logger.debug(`🔍 [PROCESS_TOOL_RESULT] Processing tool: ${step.tool_id}`, {
+    stepType: step.type,
+    toolId: step.tool_id,
+    resultType: result.type,
+    hasData: !!result.data,
+  } as Record<string, unknown>);
+
   // Skip content references for assistant_settings tool
   if ('tool_id' in step && step.tool_id === 'core.security.assistant_settings') {
+    logger.debug(`🔍 [PROCESS_TOOL_RESULT] Skipping assistant_settings tool`);
     return '';
   }
 
@@ -826,7 +920,9 @@ const processToolResult = (
   if (isProductDocumentationResult(step, result)) {
     return processProductDocumentationResults(
       result as { data: { content: { documents: Array<{ url?: string; title?: string }> } } },
-      contentReferencesStore
+      contentReferencesStore,
+      assistantContext,
+      logger
     );
   }
 
@@ -840,7 +936,12 @@ const processToolResult = (
   }
 
   if (isOpenAndAcknowledgedAlertsResult(step, result)) {
-    return processAlertResults(result as { data: { alerts: string[] } }, contentReferencesStore);
+    return processAlertResults(
+      result as { data: { alerts: string[] } },
+      contentReferencesStore,
+      assistantContext,
+      logger
+    );
   }
 
   if (isKnowledgeBaseRetrievalResult(step, result, logger)) {
@@ -854,6 +955,7 @@ const processToolResult = (
         };
       },
       contentReferencesStore,
+      assistantContext,
       logger,
       aiResponseMessage
     );
@@ -862,7 +964,9 @@ const processToolResult = (
   if (isKnowledgeBaseWriteResult(step, result)) {
     return processKnowledgeBaseWriteResults(
       result as { data: { entryId?: string; name: string; query: string } },
-      contentReferencesStore
+      contentReferencesStore,
+      assistantContext,
+      logger
     );
   }
 
@@ -876,7 +980,9 @@ const processToolResult = (
           citations?: Array<{ id: string; slug: string; title: string }>;
         };
       },
-      contentReferencesStore
+      contentReferencesStore,
+      assistantContext,
+      logger
     );
   }
 
@@ -886,7 +992,8 @@ const processToolResult = (
         data: { documents: Array<{ package_name: string; filename: string }>; question: string };
       },
       contentReferencesStore,
-      assistantContext
+      assistantContext,
+      logger
     );
   }
 
@@ -894,11 +1001,27 @@ const processToolResult = (
     return processEntityRiskScoreResults(
       result as { data: { riskScore: number; entityName: string } },
       contentReferencesStore,
-      assistantContext
+      assistantContext,
+      logger
     );
   }
 
-  // Only create content references for known tools that provide meaningful references
+  // Register any citations provided by the tool
+  logger.debug(`🔍 [PROCESS_TOOL_RESULT] About to register citations for tool: ${step.tool_id}`, {
+    resultData: result.data,
+  } as Record<string, unknown>);
+
+  registerCitationsFromToolResult(
+    result as {
+      data?: { citations?: Array<{ id: string; type: string; metadata: Record<string, unknown> }> };
+    },
+    contentReferencesStore,
+    assistantContext,
+    logger
+  );
+
+  // Return empty string since citations are already inline in the content
+  // The agent should not append additional citation text
   return '';
 };
 

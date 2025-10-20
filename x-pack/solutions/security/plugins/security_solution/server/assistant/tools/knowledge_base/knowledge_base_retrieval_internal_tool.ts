@@ -15,6 +15,7 @@ import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
 import { getDataClientsProvider, initializeDataClients } from '../data_clients_provider';
+import type { ToolCitation } from '../types';
 
 const knowledgeBaseRetrievalToolSchema = z.object({
   query: z.string().describe(`Summary of items/things to search for in the knowledge base`),
@@ -144,6 +145,17 @@ export const knowledgeBaseRetrievalInternalTool = (
             })
           );
 
+          const citations: ToolCitation[] = docs.map(
+            (doc: { id: string; metadata: { name: string } }) => ({
+              id: `kb-${doc.id}`,
+              type: 'KnowledgeBaseEntry',
+              metadata: {
+                knowledgeBaseEntryName: doc.metadata.name,
+                knowledgeBaseEntryId: doc.id,
+              },
+            })
+          );
+
           return {
             results: [
               {
@@ -155,6 +167,7 @@ export const knowledgeBaseRetrievalInternalTool = (
                     id: doc.id,
                     name: doc.metadata.name,
                   })),
+                  citations,
                 },
               },
             ],

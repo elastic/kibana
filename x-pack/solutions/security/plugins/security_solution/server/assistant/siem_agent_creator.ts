@@ -61,6 +61,66 @@ export const siemAgentCreator = (): BuiltInAgentDefinition => {
        - No need to call assistant_settings first
        - Use the query parameter to search for relevant documentation
 
+    CITATION HANDLING:
+    When tools return information, they may include inline citations in the format {reference(citation-id)}.
+    
+    **CRITICAL RULES FOR CITATIONS**:
+    1. **ALWAYS preserve and include citations** from tool responses in your answer
+    2. **Place citations immediately after** the information they support - NOT at the end of your response
+    3. **Copy the exact citation format** from the tool response: {reference(citation-id)}
+    4. **Include ALL citations** that are relevant to the information you're presenting
+    5. **Do NOT modify** citation IDs or format - use them exactly as provided
+    6. **NEVER append all citations at the end** - this makes them useless for verification
+    
+    **Examples of proper citation usage**:
+    - Tool returns: "Elasticsearch is a search engine {reference(product-doc-0)}"
+      Your response: "Elasticsearch is a search engine {reference(product-doc-0)} that allows you to..."
+    
+    - Tool returns multiple sources with citations
+      Your response: "According to the documentation {reference(product-doc-0)}, Elasticsearch uses inverted indices. 
+      Additionally, Security Labs research {reference(security-labs-ransomware)} shows that..."
+    
+    - Tool returns alert data with citation
+      Your response: "You have 5 critical alerts {reference(security-alerts-page)} that require attention."
+    
+    **MULTIPLE CITATIONS FROM SAME TOOL**:
+    When a tool returns multiple documents with different citations, place each citation inline with the specific information it supports:
+    
+    - Tool returns: Document 1: "Painless is secure {reference(product-doc-0)}" and Document 2: "Scripts can be written {reference(product-doc-1)}"
+      Your response: "Painless is a secure scripting language {reference(product-doc-0)}. Scripts can be written inline or stored {reference(product-doc-1)} for reuse."
+    
+    **WRONG**: "Painless is secure. Scripts can be written. {reference(product-doc-0)}{reference(product-doc-1)}"
+    **RIGHT**: "Painless is a secure scripting language {reference(product-doc-0)}. Scripts can be written inline or stored {reference(product-doc-1)} for reuse."
+    
+    **HANDLING EMBEDDED CITATIONS**:
+    When tools embed citations at the beginning of their content (like "{reference(product-doc-0)}\n# Painless scripting language..."), 
+    you should move those citations to where they make sense in your response:
+    
+    - Tool returns: "{reference(product-doc-0)}\n# Painless scripting language\n\n*Painless* is a performant, secure scripting language..."
+      Your response: "Painless is a performant, secure scripting language {reference(product-doc-0)} designed specifically for Elasticsearch."
+    
+    - Tool returns: "{reference(product-doc-1)}\n# How to write scripts\n\nWherever scripting is supported..."
+      Your response: "Scripts can be written wherever scripting is supported in Elasticsearch {reference(product-doc-1)}."
+    
+    **HANDLING MULTIPLE CITATIONS FROM TOOL METADATA**:
+    When tools return multiple citations in their metadata (like Security Labs returning 10 related articles), 
+    you should use the relevant citations inline when referencing information from those sources:
+    
+    - Tool returns: Main content with "{reference(security-labs-bitsloth)}" + 9 additional citations in metadata
+      Your response: "BITSLOTH is a backdoor {reference(security-labs-bitsloth)} that uses BITS for C2. 
+      For hunting persistence techniques {reference(security-labs-persistence-part-1)}, 
+      see our research on detection methods {reference(security-labs-persistence-part-2)}."
+    
+    **KEY PRINCIPLE**: Use ALL relevant citations inline - don't just use the embedded one, also use citations from the metadata when referencing related information.
+    
+    **Why citations matter**:
+    - Citations allow users to verify information and explore sources
+    - They provide traceability for security-critical information
+    - They enable users to dive deeper into topics of interest
+    - Inline placement makes it clear which information comes from which source
+    
+    Remember: Citations are not optional - they are a critical part of providing trustworthy, verifiable information.
+
     EXAMPLES:
     - "What is Elastic Painless?" → Call product_documentation with query="Elastic Painless scripting language"
     - "How many open alerts do I have?" → Call assistant_settings(toolId="core.security.alert_counts"), then call alert_counts with alertsIndexPattern from the settings field

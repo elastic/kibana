@@ -15,6 +15,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
 import { getAlertsCountQuery } from './get_alert_counts_query';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
+import type { ToolCitation } from '../types';
 
 // Schema for configuration parameters
 const alertCountsToolSchema = z.object({
@@ -59,14 +60,24 @@ export const alertCountsInternalTool = (
       const query = getAlertsCountQuery(alertsIndexPattern);
       const result = await context.esClient.asCurrentUser.search<SearchResponse>(query);
 
-      // Return the result in the same format as the original tool
-      // Content references will be handled at the agent execution level
+      const citationId = 'security-alerts-page';
+
+      // Embed citation inline in the result content
+      const resultWithCitation = `{reference(${citationId})}\n${JSON.stringify(result)}`;
+
       return {
         results: [
           {
             type: ToolResultType.other,
             data: {
-              result: JSON.stringify(result),
+              result: resultWithCitation,
+              citations: [
+                {
+                  id: citationId,
+                  type: 'SecurityAlertsPage',
+                  metadata: {},
+                },
+              ] as ToolCitation[],
             },
           },
         ],

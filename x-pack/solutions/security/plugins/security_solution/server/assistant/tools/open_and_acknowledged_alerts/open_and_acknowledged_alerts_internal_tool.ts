@@ -22,6 +22,7 @@ import type { StartServicesAccessor } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
+import type { ToolCitation } from '../types';
 
 // Extended request type to store tool replacements temporarily
 interface ExtendedKibanaRequest {
@@ -166,6 +167,8 @@ export const openAndAcknowledgedAlertsInternalTool = (
         return Promise.resolve(localReplacements);
       };
 
+      const citationId = 'security-alerts-page';
+
       const content = result.hits?.hits?.map((hit) => {
         const rawData = getRawDataOrDefault(hit.fields);
 
@@ -182,12 +185,24 @@ export const openAndAcknowledgedAlertsInternalTool = (
         return transformed;
       });
 
+      // Embed citation in the content by prepending it to the alerts array
+      const contentWithCitation = content
+        ? [`{reference(${citationId})}`, ...content]
+        : [`{reference(${citationId})}`];
+
       const toolResult = {
         results: [
           {
             type: ToolResultType.other,
             data: {
-              alerts: content,
+              alerts: contentWithCitation,
+              citations: [
+                {
+                  id: citationId,
+                  type: 'SecurityAlertsPage',
+                  metadata: {},
+                },
+              ] as ToolCitation[],
               // Note: replacements are NOT included in the data sent to LLM
               // They are collected separately and used at the conversation level
             },

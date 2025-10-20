@@ -13,6 +13,7 @@ import type { StartServicesAccessor } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
+import type { ToolCitation } from '../types';
 
 // Schema for the integration knowledge tool parameters
 const integrationKnowledgeToolSchema = z.object({
@@ -98,14 +99,27 @@ export const integrationKnowledgeInternalTool = (
             version?: string;
           };
 
+          const citationId = `integration-${source.package_name}`;
+
           return {
             id: hit._id,
             package_name: source.package_name,
             package_version: source.version,
             filename: source.filename,
-            content: source.content,
+            content: `{reference(${citationId})}\n${source.content}`,
+            citationId,
           };
         });
+
+        const citations: ToolCitation[] = citedDocs.map((doc) => ({
+          id: doc.citationId,
+          type: 'Href',
+          metadata: {
+            // Note: basePath will be added by agent execution layer
+            href: `/app/integrations/detail/${doc.package_name}`,
+            title: `${doc.package_name} integration (${doc.filename})`,
+          },
+        }));
 
         // Limit the result size to prevent token overflow
         const result = JSON.stringify(citedDocs).substring(0, 20000);
@@ -118,6 +132,7 @@ export const integrationKnowledgeInternalTool = (
                 documents: JSON.parse(result),
                 question,
                 totalHits: response.hits.total,
+                citations,
               },
             },
           ],

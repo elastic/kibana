@@ -11,9 +11,11 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { ToolType } from '@kbn/onechat-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import { getLlmDescriptionHelper } from '../helpers/get_llm_description_helper';
 import { getDataClientsProvider, initializeDataClients } from '../data_clients_provider';
+import type { ToolCitation } from '../types';
 
 const knowledgeBaseWriteToolSchema = z.object({
   name: z.string().describe(`This is what the user will use to refer to the entry in the future.`),
@@ -130,6 +132,8 @@ export const knowledgeBaseWriteInternalTool = (
             telemetry: realTelemetry as any,
           });
 
+          const citationId = `kb-${result?.id}`;
+
           return {
             results: [
               {
@@ -139,6 +143,17 @@ export const knowledgeBaseWriteInternalTool = (
                   entryId: result?.id,
                   name,
                   query,
+                  citation: `{reference(${citationId})}`,
+                  citations: [
+                    {
+                      id: citationId,
+                      type: 'KnowledgeBaseEntry',
+                      metadata: {
+                        knowledgeBaseEntryName: name,
+                        knowledgeBaseEntryId: result?.id,
+                      },
+                    },
+                  ] as ToolCitation[],
                 },
               },
             ],
