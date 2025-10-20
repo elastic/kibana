@@ -259,7 +259,7 @@ export class AutomaticImportSavedObjectService {
     data: DataStreamAttributes,
     options?: SavedObjectsUpdateOptions<DataStreamAttributes>
   ): Promise<SavedObjectsUpdateResponse<DataStreamAttributes>> {
-    const { integration_id, data_stream_id, job_info, metadata = { sample_count: 0 }, result = {}, } = data;
+    const { integration_id, data_stream_id, job_info, metadata = { sample_count: 0 }, result = {} } = data;
 
 
     if (!integration_id) {

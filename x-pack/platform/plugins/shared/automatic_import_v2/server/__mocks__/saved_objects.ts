@@ -1,15 +1,16 @@
 import { SavedObject } from "@kbn/core/server";
-import { DATA_STREAM_SAVED_OBJECT_TYPE, DataStreamAttributes, INTEGRATION_SAVED_OBJECT_TYPE, IntegrationAttributes } from "../saved_objects";
+import type { DataStreamAttributes, IntegrationAttributes } from "../saved_objects/schemas/types";
+import { DATA_STREAM_SAVED_OBJECT_TYPE, INTEGRATION_SAVED_OBJECT_TYPE, TASK_STATUSES } from "../saved_objects/constants";
 
 export const mockIntegrationData: IntegrationAttributes = {
   integration_id: 'test-integration-id',
   data_stream_count: 2,
-  status: 'active',
+  status: TASK_STATUSES.pending,
   metadata: {
     title: 'Test Integration',
     description: 'A test integration',
     created_at: '2024-01-01T00:00:00.000Z',
-    version: 1,
+    version: 0,
   },
 };
 
@@ -19,11 +20,11 @@ export const mockDataStreamData: DataStreamAttributes = {
   job_info: {
     job_id: 'test-job-id',
     job_type: 'test-job-type',
-    status: 'pending',
+    status: TASK_STATUSES.pending,
   },
   metadata: {
     sample_count: 100,
-    version: 1,
+    version: 0,
     created_at: '2024-01-01T00:00:00.000Z',
   },
   result: {

@@ -13,6 +13,6 @@ export const DATA_STREAM_SAVED_OBJECT_TYPE = 'data_stream-config';
 export const TASK_STATUSES = {
   pending: 'pending',
   processing: 'processing',
-  compleded: 'completed',
+  completed: 'completed',
   failed: 'failed',
 };

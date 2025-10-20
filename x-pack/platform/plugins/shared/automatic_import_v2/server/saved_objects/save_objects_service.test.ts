@@ -165,9 +165,9 @@ describe('AutomaticImportSavedObjectService', () => {
           expect.objectContaining({
             integration_id: 'test-integration-id',
             data_stream_count: 2,
-            status: 'active',
+            status: TASK_STATUSES.pending,
             metadata: expect.objectContaining({
-              version: 2,
+              version: 1,
             }),
           }),
           expect.any(Object)
@@ -423,7 +423,7 @@ describe('AutomaticImportSavedObjectService', () => {
             job_info: mockDataStreamData.job_info,
             metadata: expect.objectContaining({
               sample_count: 100,
-              version: 2,
+              version: 1,
             }),
             result: mockDataStreamData.result,
           }),
