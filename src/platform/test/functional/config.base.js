@@ -125,14 +125,14 @@ export default async function ({ readConfigFile }) {
       settings: {
         pathname: '/app/management',
       },
-      spaceSelector: {
-        pathname: '/',
-      },
       snapshotRestore: {
         pathname: '/app/management/data/snapshot_restore',
       },
       spacesManagement: {
         pathname: '/app/management/kibana/spaces',
+      },
+      spaceSelector: {
+        pathname: '/',
       },
       status_page: {
         pathname: '/status',
