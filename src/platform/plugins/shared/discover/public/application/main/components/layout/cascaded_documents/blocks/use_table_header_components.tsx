@@ -73,9 +73,13 @@ export function useGetGroupBySelectorRenderer({
           listProps={{
             isVirtualized: false,
           }}
-          data-test-subj="discoverGroupBySelector"
+          data-test-subj="discoverGroupBySelectionList"
           options={[NONE_GROUP_OPTION].concat(availableColumns).map((field) => ({
             label: field,
+            'data-test-subj':
+              field === NONE_GROUP_OPTION
+                ? 'discoverCascadeLayoutOptOutButton'
+                : `${field}-cascadeLayoutOptionBtn`,
             checked:
               (field === NONE_GROUP_OPTION && !currentSelectedColumns.length) ||
               currentSelectedColumns.includes(field)

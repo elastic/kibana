@@ -18,7 +18,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('grouping selection', function () {
     it('should display grouping selector for valid supported ES|QL queries', async () => {
-      // write test here
+      await discover.selectTextBaseLang();
+      await discover.waitUntilTabIsLoaded();
+
+      // Type in an ESQL query that will trigger the cascade layout
+      const statsQuery =
+        'FROM logstash-* | STATS count = COUNT(bytes), average = AVG(memory) BY clientip, extension';
+      await monacoEditor.setCodeEditorValue(statsQuery);
+      await testSubjects.click('querySubmitButton');
+      await discover.waitUntilTabIsLoaded();
+
+      expect(await testSubjects.exists('data-cascade')).to.be(true);
+      expect(await testSubjects.exists('discoverEnableCascadeLayoutSwitch')).to.be(true);
+    });
+
+    it('should switch to back to classic mode from the grouped experience without any errors', async () => {
+      await discover.selectTextBaseLang();
+      await discover.waitUntilTabIsLoaded();
+
+      // Type in an ESQL query that will trigger the cascade layout
+      const statsQuery =
+        'FROM logstash-* | STATS count = COUNT(bytes), average = AVG(memory) BY clientip, extension';
+      await monacoEditor.setCodeEditorValue(statsQuery);
+      await testSubjects.click('querySubmitButton');
+      await discover.waitUntilTabIsLoaded();
+
+      expect(await testSubjects.exists('data-cascade')).to.be(true);
+      expect(await testSubjects.exists('discoverEnableCascadeLayoutSwitch')).to.be(true);
+
+      await testSubjects.click('switch-to-dataviews');
+    });
+
+    it('revert to the non-group experience when the none option is selected', async () => {
       await discover.selectTextBaseLang();
       await discover.waitUntilTabIsLoaded();
 
@@ -30,6 +61,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilTabIsLoaded();
 
       expect(await testSubjects.exists('discoverEnableCascadeLayoutSwitch')).to.be(true);
+
+      await testSubjects.click('discoverEnableCascadeLayoutSwitch');
+
+      expect(await testSubjects.exists('discoverGroupBySelectionList')).to.be(true);
+
+      await testSubjects.click('discoverCascadeLayoutOptOutButton');
+
+      await discover.waitUntilTabIsLoaded();
+
+      expect(await testSubjects.exists('data-cascade')).not.to.be(true);
     });
   });
 }
