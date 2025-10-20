@@ -7,4 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from '@kbn/data-views-plugin/public';
+import { withAutoSuggest } from '../../..';
+import type { ISuggestionItem } from '../../commands_registry/types';
+import { settings } from '../generated/settings';
+
+export function getSettingsCompletionItems(): ISuggestionItem[] {
+  return settings.map((setting) =>
+    withAutoSuggest({
+      label: setting.name,
+      text: `${setting.name} = `,
+      kind: 'Reference',
+      detail: setting.description,
+      sortText: '1',
+    })
+  );
+}
