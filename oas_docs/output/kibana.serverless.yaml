@@ -69142,14 +69142,6 @@ components:
           additionalProperties: false
         - $ref: '#/components/schemas/Security_AI_Assistant_API_InputTextInterruptValue'
           additionalProperties: false
-    Security_AI_Assistant_API_IntervalApiSchedule:
-      type: object
-      properties:
-        interval:
-          description: The schedule interval
-          type: string
-      required:
-        - interval
     Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipReason:
       description: Reason why a Knowledge Base Entry was skipped during the bulk action.
       enum:
