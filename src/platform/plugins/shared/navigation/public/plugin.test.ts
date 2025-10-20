@@ -197,7 +197,7 @@ describe('Navigation Plugin', () => {
       const { plugin, coreStart, unifiedSearch, cloud: cloudStart, spaces } = setup();
       const coreSetup = coreMock.createSetup();
       const cloudSetup = cloudMock.createSetup();
-      cloudSetup.trialEndDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30); // 30 days from now
+      cloudSetup.getInTrial.mockReturnValue(true);
       plugin.setup(coreSetup, { cloud: cloudSetup });
 
       for (const solution of ['es', 'oblt', 'security']) {
@@ -214,7 +214,7 @@ describe('Navigation Plugin', () => {
       const { plugin, coreStart, unifiedSearch, cloud: cloudStart, spaces } = setup();
       const coreSetup = coreMock.createSetup();
       const cloudSetup = cloudMock.createSetup();
-      cloudSetup.serverless = { organizationInTrial: true };
+      cloudSetup.getInTrial.mockReturnValue(true);
       plugin.setup(coreSetup, { cloud: cloudSetup });
 
       for (const solution of ['es', 'oblt', 'security']) {
