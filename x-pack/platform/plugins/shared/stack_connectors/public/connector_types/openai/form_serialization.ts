@@ -8,25 +8,6 @@
 import type { ConnectorFormSchema, InternalConnectorForm } from '@kbn/alerts-ui-shared';
 import { isEmpty } from 'lodash';
 
-export const formDeserializer = (data: ConnectorFormSchema): InternalConnectorForm => {
-  const configHeaders = Object.entries(data?.config?.headers ?? {}).map(([key, value]) => ({
-    key,
-    value,
-    type: 'config' as const,
-  }));
-
-  return {
-    ...data,
-    config: {
-      ...data.config,
-      headers: isEmpty(configHeaders) ? undefined : configHeaders,
-    },
-    __internal__: {
-      headers: configHeaders,
-    },
-  };
-};
-
 export const formSerializer = (formData: InternalConnectorForm): ConnectorFormSchema => {
   const webhookFormData = formData as {
     config: { headers?: Array<{ key: string; value: string }> };

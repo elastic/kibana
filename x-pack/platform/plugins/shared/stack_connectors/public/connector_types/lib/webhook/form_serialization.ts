@@ -21,8 +21,8 @@ import { isEmpty } from 'lodash';
 
 export const formDeserializer = (data: ConnectorFormSchema): InternalConnectorForm => {
   if (!data.actionTypeId) {
-    // Hook form lib calls deserializer *also* while editing the form (indicated by actionTypeId
-    // being still undefined). Changing the reference of form data subproperties causes problems
+    // Hook form lib can call deserializer *also* while editing the form (indicated by actionTypeId
+    // still being undefined). Changing the reference of form data subproperties causes problems
     // with the UseArray that is used to edit the headers. For this reason, we leave the data unchanged.
     return data;
   }

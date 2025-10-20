@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { formDeserializer, formSerializer } from './form_serialization';
+import { formSerializer } from './form_serialization';
 
 describe('formSerializer', () => {
   it('should correctly serialize form data', () => {
@@ -41,66 +41,6 @@ describe('formSerializer', () => {
       isMissingSecrets: false,
       secrets: {
         secretHeaders: undefined,
-      },
-    });
-  });
-});
-
-describe('formDeserializer', () => {
-  it('should correctly deserialize data', () => {
-    const data = {
-      actionTypeId: '.gen-ai',
-      isDeprecated: false,
-      config: {
-        headers: {
-          foo: 'bar',
-          an: 'tonio',
-        },
-      },
-      secrets: {
-        secretHeaders: {
-          not: 'relevant',
-        },
-      },
-      isMissingSecrets: false,
-    };
-
-    expect(formDeserializer(data)).toEqual({
-      actionTypeId: '.gen-ai',
-      config: {
-        headers: [
-          {
-            key: 'foo',
-            type: 'config',
-            value: 'bar',
-          },
-          {
-            key: 'an',
-            type: 'config',
-            value: 'tonio',
-          },
-        ],
-      },
-      __internal__: {
-        headers: [
-          {
-            key: 'foo',
-            type: 'config',
-            value: 'bar',
-          },
-          {
-            key: 'an',
-            type: 'config',
-            value: 'tonio',
-          },
-        ],
-      },
-      isDeprecated: false,
-      isMissingSecrets: false,
-      secrets: {
-        secretHeaders: {
-          not: 'relevant',
-        },
       },
     });
   });
