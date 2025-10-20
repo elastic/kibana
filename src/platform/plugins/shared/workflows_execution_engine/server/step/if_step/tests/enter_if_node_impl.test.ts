@@ -21,7 +21,9 @@ describe('EnterIfNodeImpl', () => {
   let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
   let impl: EnterIfNodeImpl;
   let workflowContextLoggerMock: IWorkflowEventLogger;
-  let mockContextManager: jest.Mocked<Pick<WorkflowContextManager, 'getContext'>>;
+  let mockContextManager: jest.Mocked<
+    Pick<WorkflowContextManager, 'getContext' | 'renderValueAccordingToContext'>
+  >;
   let workflowGraph: WorkflowGraph;
 
   beforeEach(() => {
@@ -32,6 +34,7 @@ describe('EnterIfNodeImpl', () => {
       getContext: jest.fn().mockReturnValue({
         event: { type: 'alert' },
       }),
+      renderValueAccordingToContext: jest.fn().mockImplementation((value) => value),
     };
 
     mockStepExecutionRuntime = {
@@ -57,7 +60,7 @@ describe('EnterIfNodeImpl', () => {
       {
         id: 'thenNode',
         type: 'enter-then-branch',
-        condition: 'true',
+        condition: 'event.type: alert',
       } as EnterConditionBranchNode,
       {
         id: 'elseNode',
@@ -73,9 +76,20 @@ describe('EnterIfNodeImpl', () => {
     );
   });
 
-  it('should start the step', async () => {
+  it('should start the step with condition rendered value and condition result', async () => {
+    mockContextManager.renderValueAccordingToContext = jest
+      .fn()
+      .mockImplementation(() => 'event.type: foo');
+
     await impl.run();
-    expect(mockStepExecutionRuntime.startStep).toHaveBeenCalledWith();
+
+    expect(mockContextManager.renderValueAccordingToContext).toHaveBeenCalledWith(
+      'event.type: alert'
+    );
+    expect(mockStepExecutionRuntime.startStep).toHaveBeenCalledWith({
+      condition: 'event.type: foo',
+      conditionResult: false,
+    });
   });
 
   describe('then branch', () => {
@@ -164,7 +178,7 @@ describe('EnterIfNodeImpl', () => {
       .fn()
       .mockReturnValueOnce([{ id: 'someOtherNode', type: 'some-other-type' }]);
     await expect(impl.run()).rejects.toThrow(
-      `EnterIfNode with id ${node.id} must have only 'enter-then-branch' or 'enter-else-branch' successors, but found: some-other-type.`
+      `EnterIfNode with id ${node.id} must have only 'enter-then-branch' or 'enter-else-branch' successors, but found: some-other-type`
     );
   });
 
@@ -176,6 +190,8 @@ describe('EnterIfNodeImpl', () => {
         condition: 'invalid""condition',
       } as EnterConditionBranchNode,
     ]);
-    await expect(impl.run()).rejects.toThrow();
+    await expect(impl.run()).rejects.toThrow(
+      `Syntax error in condition "invalid""condition" for step ${node.stepId}:`
+    );
   });
 });
