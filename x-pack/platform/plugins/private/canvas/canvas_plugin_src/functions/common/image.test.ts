@@ -30,11 +30,9 @@ describe('image', () => {
         expect(result).to.have.property('dataurl', elasticOutline);
       });
 
-      it.skip('sets the source of the image using url', async () => {
-        // This is skipped because functionWrapper doesn't use the actual
-        // interpreter and doesn't resolve aliases
-        const result = await fn(null, { url: elasticOutline }, {} as ExecutionContext);
-        expect(result).to.have.property('dataurl', elasticOutline);
+      it('has url as an alias for dataurl', () => {
+        const imageFunction = image();
+        expect(imageFunction.args.dataurl.aliases).to.contain('url');
       });
 
       it('defaults to the elasticLogo if not provided', async () => {

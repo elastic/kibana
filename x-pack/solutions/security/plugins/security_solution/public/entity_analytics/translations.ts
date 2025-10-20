@@ -7,27 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SHOW_USERS_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.users.show',
-  {
-    defaultMessage: 'Show users',
-  }
-);
-
-export const HIDE_USERS_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.users.hide',
-  {
-    defaultMessage: 'Hide users',
-  }
-);
-
-export const RISK_ENGINE_STATUS = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.status',
-  {
-    defaultMessage: 'Status',
-  }
-);
-
 export const RISK_ENGINE_STATUS_ON = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.statusOn',
   {
@@ -42,10 +21,25 @@ export const RISK_ENGINE_STATUS_OFF = i18n.translate(
   }
 );
 
-export const ENTITY_RISK_SCORING = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.entityRiskScoring',
+export const RISK_SCORE_GENERAL_SECTION = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.generalSection',
   {
-    defaultMessage: 'Entity risk score',
+    defaultMessage: 'General',
+  }
+);
+
+export const RISK_SCORE_RETAINMENT_CHECKBOX = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.generalSection.retainmentCheckbox',
+  {
+    defaultMessage: 'Retain last calculated risk scores',
+  }
+);
+
+export const RISK_SCORE_RETAINMENT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.generalSection.retainmentTooltip',
+  {
+    defaultMessage:
+      'When selected, entities keep their last calculated risk score until a new input (for example, an alert) triggers recalculation. When deselected, risk scores reset to zero if no new inputs are found.',
   }
 );
 
@@ -110,13 +104,6 @@ export const PREVIEW_ERROR_TRY_AGAIN = i18n.translate(
   }
 );
 
-export const PREVIEW_QUERY_ERROR_TITLE = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.queryErrorTitle',
-  {
-    defaultMessage: 'Invalid query',
-  }
-);
-
 export const ERROR_PANEL_TITLE = i18n.translate(
   'xpack.securitySolution.riskScore.errorPanel.title',
   {
@@ -135,20 +122,6 @@ export const ERROR_PANEL_ERRORS = i18n.translate(
   'xpack.securitySolution.riskScore.errorPanel.errors',
   {
     defaultMessage: 'Errors',
-  }
-);
-
-export const CHECK_PRIVILEGES = i18n.translate(
-  'xpack.securitySolution.riskScore.errors.privileges.check',
-  {
-    defaultMessage: 'Check privileges',
-  }
-);
-
-export const NEED_TO_HAVE = i18n.translate(
-  'xpack.securitySolution.riskScore.errors.privileges.needToHave',
-  {
-    defaultMessage: 'You need to have:',
   }
 );
 
@@ -177,6 +150,13 @@ export const RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS = i18n.translate(
   'xpack.securitySolution.riskScore.savedObject.configurationSuccess',
   {
     defaultMessage: 'Your configuration was updated.',
+  }
+);
+
+export const RISK_SCORE_ALERT_CONFIG = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.alertConfig',
+  {
+    defaultMessage: 'Alert configuration',
   }
 );
 

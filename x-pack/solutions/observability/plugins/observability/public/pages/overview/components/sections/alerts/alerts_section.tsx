@@ -91,7 +91,7 @@ export function AlertsSection({ bucketSize }: { bucketSize: BucketSize }) {
         ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
         consumers={observabilityAlertFeatureIds}
         query={esQuery}
-        initialPageSize={ALERTS_PER_PAGE}
+        pageSize={ALERTS_PER_PAGE}
         columns={tableColumns}
         showInspectButton
         services={{

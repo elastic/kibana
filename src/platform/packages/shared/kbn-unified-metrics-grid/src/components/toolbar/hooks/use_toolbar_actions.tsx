@@ -7,23 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
+import { useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
+import { css } from '@emotion/react';
 import { useMetricsGridState } from '../../../hooks';
 import { DimensionsSelector } from '../dimensions_selector';
 import { ValuesSelector } from '../values_selector';
+import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 
 interface UseToolbarActionsProps
   extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
   fields: MetricField[];
   indexPattern: string;
+  hideDimensionsSelector?: boolean;
 }
 export const useToolbarActions = ({
   fields,
   requestParams,
   indexPattern,
   renderToggleActions,
+  hideDimensionsSelector = false,
 }: UseToolbarActionsProps) => {
   const {
     dimensions,
@@ -32,31 +39,24 @@ export const useToolbarActions = ({
     onValuesChange,
     onClearValues,
     onClearAllDimensions,
-    onClearSearchTerm,
     isFullscreen,
     onToggleFullscreen,
   } = useMetricsGridState();
 
-  const [showSearchInput, setShowSearchInput] = useState(false);
-
-  const onShowSearch = useCallback(() => {
-    setShowSearchInput(true);
-  }, []);
-
-  const onClearSearch = useCallback(() => {
-    setShowSearchInput(false);
-    onClearSearchTerm();
-  }, [onClearSearchTerm]);
+  const { euiTheme } = useEuiTheme();
 
   const leftSideActions = useMemo(
     () => [
       isFullscreen ? null : renderToggleActions(),
-      <DimensionsSelector
-        fields={fields}
-        onChange={onDimensionsChange}
-        selectedDimensions={dimensions}
-        onClear={onClearAllDimensions}
-      />,
+      hideDimensionsSelector ? null : (
+        <DimensionsSelector
+          fields={fields}
+          onChange={onDimensionsChange}
+          selectedDimensions={dimensions}
+          onClear={onClearAllDimensions}
+          singleSelection={MAX_DIMENSIONS_SELECTIONS === 1}
+        />
+      ),
       dimensions.length > 0 ? (
         <ValuesSelector
           selectedDimensions={dimensions}
@@ -81,15 +81,40 @@ export const useToolbarActions = ({
       requestParams,
       valueFilters,
       isFullscreen,
+      hideDimensionsSelector,
     ]
   );
 
+  const rightSideActions: IconButtonGroupProps['buttons'] = useMemo(() => {
+    const fullscreenButtonLabel = isFullscreen
+      ? i18n.translate('metricsExperience.fullScreenExitButton', {
+          defaultMessage: 'Exit fullscreen (esc)',
+        })
+      : i18n.translate('metricsExperience.fullScreenButton', {
+          defaultMessage: 'Enter fullscreen',
+        });
+
+    return [
+      {
+        iconType: isFullscreen ? 'fullScreenExit' : 'fullScreen',
+        label: fullscreenButtonLabel,
+        title: fullscreenButtonLabel,
+        onClick: onToggleFullscreen,
+        'data-test-subj': 'metricsExperienceToolbarFullScreen',
+        css: css`
+          &.euiButtonGroupButton:first-of-type {
+            border: ${euiTheme.border.thin} !important;
+            border-left: none !important;
+            border-top-left-radius: 0px !important;
+            border-bottom-left-radius: 0px !important;
+          }
+        `,
+      },
+    ];
+  }, [isFullscreen, onToggleFullscreen, euiTheme.border.thin]);
+
   return {
     leftSideActions,
-    onClearSearch,
-    showSearchInput,
-    isFullscreen,
-    onToggleFullscreen,
-    onShowSearch,
+    rightSideActions,
   };
 };

@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StepContext, WorkflowContext } from '@kbn/workflows';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
+import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest, CoreStart } from '@kbn/core/server';
-import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { RunStepResult } from '../step/node_implementation';
 import { buildStepExecutionId } from '../utils';
@@ -20,8 +19,9 @@ import { WorkflowScopeStack } from './workflow_scope_stack';
 export interface ContextManagerInit {
   // New properties for logging
   workflowExecutionGraph: WorkflowGraph;
-  workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
   workflowExecutionState: WorkflowExecutionState;
+  node: GraphNodeUnion;
+  stackFrames: StackFrame[];
   // New properties for internal actions
   esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
   fakeRequest?: KibanaRequest;
@@ -30,28 +30,37 @@ export interface ContextManagerInit {
 
 export class WorkflowContextManager {
   private workflowExecutionGraph: WorkflowGraph;
-  private workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
   private workflowExecutionState: WorkflowExecutionState;
   private esClient: ElasticsearchClient;
   private fakeRequest?: KibanaRequest;
   private coreStart?: CoreStart;
 
+  private stackFrames: StackFrame[];
+  public readonly node: GraphNodeUnion;
+
+  public get scopeStack(): WorkflowScopeStack {
+    return WorkflowScopeStack.fromStackFrames(this.stackFrames);
+  }
+
   constructor(init: ContextManagerInit) {
     this.workflowExecutionGraph = init.workflowExecutionGraph;
-    this.workflowExecutionRuntime = init.workflowExecutionRuntime;
     this.workflowExecutionState = init.workflowExecutionState;
     this.esClient = init.esClient;
     this.fakeRequest = init.fakeRequest;
     this.coreStart = init.coreStart;
+    this.node = init.node;
+    this.stackFrames = init.stackFrames;
   }
 
+  // Any change here should be reflected in the 'getContextSchemaForPath' function for frontend validation to work
+  // src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_context_for_path.ts
   public getContext(): StepContext {
     const stepContext: StepContext = {
       ...this.buildWorkflowContext(),
       steps: {},
     };
 
-    const currentNode = this.workflowExecutionRuntime.getCurrentNode()!;
+    const currentNode = this.node;
     const currentNodeId = currentNode.id;
 
     const allPredecessors = this.workflowExecutionGraph.getAllPredecessors(currentNodeId);
@@ -77,8 +86,8 @@ export class WorkflowContextManager {
       }
     });
 
-    this.enrichStepContextWithMockedData(stepContext);
     this.enrichStepContextAccordingToStepScope(stepContext);
+    this.enrichStepContextWithMockedData(stepContext);
     return stepContext;
   }
 
@@ -158,7 +167,7 @@ export class WorkflowContextManager {
       stepContext.event = {
         ...stepContext.event,
         ...(contextOverride.event || {}),
-      };
+      } as StepContext['event'];
 
       stepContext.execution = {
         ...stepContext.execution,

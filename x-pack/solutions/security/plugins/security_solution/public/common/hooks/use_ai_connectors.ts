@@ -16,14 +16,14 @@ const QUERY_KEY = ['ai_connectors'];
 
 export const useAIConnectors = () => {
   const {
-    services: { http },
+    services: { http, settings },
   } = useKibana();
 
   const { addError } = useAppToasts();
 
   const { data, isLoading, error } = useQuery({
     queryKey: QUERY_KEY,
-    queryFn: () => loadAiConnectors(http),
+    queryFn: async () => loadAiConnectors({ http, settings }),
     onError: (err) => {
       addError(err, {
         title: i18n.ERROR_FETCH_AI_CONNECTORS,

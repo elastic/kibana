@@ -39,6 +39,21 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-management",
+        "id": "def-common.DATA_MANAGEMENT_NAV_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_MANAGEMENT_NAV_ID",
+        "description": [],
+        "signature": [
+          "\"data_management\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/management/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-management",
         "id": "def-common.DeepLinkId",
         "type": "Type",
         "tags": [],
@@ -76,6 +91,21 @@
         "description": [],
         "signature": [
           "\"monitoring\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/management/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-management",
+        "id": "def-common.STACK_MANAGEMENT_NAV_ID",
+        "type": "string",
+        "tags": [],
+        "label": "STACK_MANAGEMENT_NAV_ID",
+        "description": [],
+        "signature": [
+          "\"stack_management\""
         ],
         "path": "src/platform/packages/shared/deeplinks/management/constants.ts",
         "deprecated": false,

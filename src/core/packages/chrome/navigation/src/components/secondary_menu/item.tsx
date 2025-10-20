@@ -16,6 +16,7 @@ import { useScrollToActive } from '../../hooks/use_scroll_to_active';
 
 import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
+import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 
 export interface SecondaryMenuItemProps extends SecondaryMenuItem {
   children: ReactNode;
@@ -44,7 +45,11 @@ export const SecondaryMenuItemComponent = ({
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
-  const activeItemRef = useScrollToActive<HTMLLIElement>(isHighlighted);
+
+  // TODO: remove once the fix is available on EUI side
+  const highContrastModeStyles = useHighContrastModeStyles();
+  const activeItemRef = useScrollToActive<HTMLLIElement>(isCurrent);
+
   const iconSide = iconType ? 'left' : 'right';
   const iconProps = {
     iconSide: iconSide as 'left' | 'right',
@@ -53,7 +58,8 @@ export const SecondaryMenuItemComponent = ({
     ...(isExternal && { target: '_blank' }),
   };
 
-  const styles = css`
+  const buttonStyles = css`
+    font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
     // 6px comes from Figma, no token
     padding: 6px ${euiTheme.size.s};
     width: 100%;
@@ -65,6 +71,11 @@ export const SecondaryMenuItemComponent = ({
     svg:not(.euiBetaBadge__icon) {
       color: ${euiTheme.colors.textDisabled};
     }
+
+    --high-contrast-hover-indicator-color: ${isHighlighted
+      ? euiTheme.colors.textPrimary
+      : euiTheme.colors.textParagraph};
+    ${highContrastModeStyles};
   `;
 
   const labelAndBadgeStyles = css`
@@ -85,7 +96,7 @@ export const SecondaryMenuItemComponent = ({
       {isHighlighted ? (
         <EuiButton
           aria-current={isCurrent ? 'page' : undefined}
-          css={styles}
+          css={buttonStyles}
           data-highlighted="true"
           data-test-subj={`${testSubjPrefix}-${id}`}
           fullWidth
@@ -99,7 +110,7 @@ export const SecondaryMenuItemComponent = ({
       ) : (
         <EuiButtonEmpty
           aria-current={isCurrent ? 'page' : undefined}
-          css={styles}
+          css={buttonStyles}
           color="text"
           data-highlighted="false"
           data-test-subj={`${testSubjPrefix}-${id}`}

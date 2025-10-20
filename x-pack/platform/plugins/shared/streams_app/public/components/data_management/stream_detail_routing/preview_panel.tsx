@@ -10,42 +10,51 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiProgress,
   EuiLoadingElastic,
+  EuiProgress,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
-import React, { useState, useMemo } from 'react';
 import { isCondition } from '@kbn/streamlang';
+import { getSegments, MAX_NESTING_LEVEL } from '@kbn/streams-schema';
+import { isEmpty } from 'lodash';
+import React, { useMemo, useState } from 'react';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { AssetImage } from '../../asset_image';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
+import { MemoPreviewTable, PreviewFlyout } from '../shared';
+import { buildCellActions } from './cell_actions';
+import { DocumentMatchFilterControls } from './document_match_filter_controls';
 import {
   selectPreviewDocuments,
   useStreamRoutingEvents,
   useStreamSamplesSelector,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
-import { DocumentMatchFilterControls } from './document_match_filter_controls';
 import { processCondition, toDataTableRecordWithIndex } from './utils';
-import { MemoPreviewTable, PreviewFlyout } from '../shared';
+import { RowSelectionContext } from '../shared/preview_table';
 
 export function PreviewPanel() {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const { definition } = routingSnapshot.context;
+  const canCreateRoutingRules = routingSnapshot.can({ type: 'routingRule.create' });
+  const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
 
   let content;
 
   if (routingSnapshot.matches({ ready: 'idle' })) {
-    content = <SamplePreviewPanel />;
+    content = <SamplePreviewPanel enableActions={canCreateRoutingRules && !maxNestingLevel} />;
   } else if (
     routingSnapshot.matches({ ready: 'editingRule' }) ||
     routingSnapshot.matches({ ready: 'reorderingRules' })
   ) {
     content = <EditingPanel />;
-  } else if (routingSnapshot.matches({ ready: 'creatingNewRule' })) {
-    content = <SamplePreviewPanel />;
+  } else if (
+    routingSnapshot.matches({ ready: 'creatingNewRule' }) ||
+    routingSnapshot.matches({ ready: 'reviewSuggestedRule' })
+  ) {
+    content = <SamplePreviewPanel enableActions />;
   }
 
   return (
@@ -100,9 +109,9 @@ const EditingPanel = () => (
   />
 );
 
-const SamplePreviewPanel = () => {
+const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
   const samplesSnapshot = useStreamSamplesSelector((snapshot) => snapshot);
-  const { setDocumentMatchFilter } = useStreamRoutingEvents();
+  const { setDocumentMatchFilter, changeRule, createNewRule } = useStreamRoutingEvents();
   const isLoadingDocuments = samplesSnapshot.matches({ fetching: { documents: 'loading' } });
   const isUpdating =
     samplesSnapshot.matches('debouncingCondition') ||
@@ -120,9 +129,13 @@ const SamplePreviewPanel = () => {
   const isProcessedCondition = condition ? isCondition(condition) : true;
   const hasDocuments = !isEmpty(documents);
 
-  const matchedDocumentPercentage = isNaN(parseFloat(approximateMatchingPercentage ?? ''))
-    ? Number.NaN
-    : parseFloat(approximateMatchingPercentage!);
+  const cellActions = useMemo(() => {
+    if (!enableActions) {
+      return [];
+    }
+
+    return buildCellActions(documents, createNewRule, changeRule);
+  }, [enableActions, documents, createNewRule, changeRule]);
 
   const [sorting, setSorting] = useState<{
     fieldName?: string;
@@ -139,6 +152,11 @@ const SamplePreviewPanel = () => {
 
   const { currentDoc, selectedRowIndex, onRowSelected, setExpandedDoc } =
     useDocumentExpansion(hits);
+
+  const rowSelectionContextValue = useMemo(
+    () => ({ selectedRowIndex, onRowSelected }),
+    [selectedRowIndex, onRowSelected]
+  );
 
   let content: React.ReactNode | null = null;
 
@@ -181,16 +199,17 @@ const SamplePreviewPanel = () => {
   } else if (hasDocuments) {
     content = (
       <EuiFlexItem grow data-test-subj="routingPreviewPanelWithResults">
-        <MemoPreviewTable
-          documents={documents}
-          sorting={sorting}
-          setSorting={setSorting}
-          toolbarVisibility={true}
-          displayColumns={visibleColumns}
-          setVisibleColumns={setVisibleColumns}
-          selectedRowIndex={selectedRowIndex}
-          onRowSelected={onRowSelected}
-        />
+        <RowSelectionContext.Provider value={rowSelectionContextValue}>
+          <MemoPreviewTable
+            documents={documents}
+            sorting={sorting}
+            setSorting={setSorting}
+            toolbarVisibility={true}
+            displayColumns={visibleColumns}
+            setVisibleColumns={setVisibleColumns}
+            cellActions={cellActions}
+          />
+        </RowSelectionContext.Provider>
         <PreviewFlyout
           currentDoc={currentDoc}
           hits={hits}
@@ -206,14 +225,11 @@ const SamplePreviewPanel = () => {
     <>
       {isUpdating && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexGroup gutterSize="m" direction="column">
-        {!isNaN(matchedDocumentPercentage) && (
-          <DocumentMatchFilterControls
-            initialFilter={samplesSnapshot.context.documentMatchFilter}
-            onFilterChange={setDocumentMatchFilter}
-            matchedDocumentPercentage={Math.round(matchedDocumentPercentage)}
-            isDisabled={!!documentsError || !condition}
-          />
-        )}
+        <DocumentMatchFilterControls
+          onFilterChange={setDocumentMatchFilter}
+          matchedDocumentPercentage={approximateMatchingPercentage}
+          isDisabled={!!documentsError || !condition || (condition && !isProcessedCondition)}
+        />
         {content}
       </EuiFlexGroup>
     </>

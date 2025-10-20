@@ -16,6 +16,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from 'react';
+import useLatest from 'react-use/lib/useLatest';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DropResult } from '@elastic/eui';
@@ -32,11 +33,13 @@ import {
   keys,
 } from '@elastic/eui';
 import { Tab, type TabProps } from '../tab';
-import type { TabItem, TabsServices } from '../../types';
+import type { TabItem, TabsServices, TabsEBTEvent } from '../../types';
+import { TabsEventName } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
 import { TabsBarMenu, type TabsBarMenuProps } from '../tabs_bar_menu';
+import { TabsEventDataKeys } from '../../event_data_keys';
 
 const DROPPABLE_ID = 'unifiedTabsOrder';
 
@@ -50,6 +53,14 @@ const droppableCss = css`
   wrap: no-wrap;
 `;
 
+enum shortcutActions {
+  MOVE_LEFT = 'moveLeft',
+  MOVE_RIGHT = 'moveRight',
+  MOVE_HOME = 'moveHome',
+  MOVE_END = 'moveEnd',
+  CLOSE_TAB = 'closeTab',
+}
+
 export type TabsBarProps = Pick<
   TabProps,
   'getTabMenuItems' | 'getPreviewData' | 'onLabelEdited' | 'onSelect' | 'onClose' | 'tabContentId'
@@ -62,7 +73,9 @@ export type TabsBarProps = Pick<
   services: TabsServices;
   onAdd: () => Promise<void>;
   onSelectRecentlyClosed: TabsBarMenuProps['onSelectRecentlyClosed'];
-  onReorder: (items: TabItem[]) => void;
+  onReorder: (items: TabItem[], movedTabId: string) => void;
+  onEBTEvent: (event: TabsEBTEvent) => void;
+  onClearRecentlyClosed: TabsBarMenuProps['onClearRecentlyClosed'];
 };
 
 export interface TabsBarApi {
@@ -84,9 +97,11 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       onLabelEdited,
       onSelect,
       onSelectRecentlyClosed,
+      onClearRecentlyClosed,
       onReorder,
       onClose,
       getPreviewData,
+      onEBTEvent,
     },
     componentRef
   ) => {
@@ -98,6 +113,16 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
     tabsContainerRef.current = tabsContainerElement;
     const hasReachedMaxItemsCount = maxItemsCount ? items.length >= maxItemsCount : false;
     const moveFocusToItemIdRef = useRef<string | null>(null);
+
+    const emitOnKeyUsedEvent = useCallback(
+      (shortcut: string) => {
+        onEBTEvent({
+          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabsKeyboardShortcutsUsed,
+          [TabsEventDataKeys.SHORTCUT_USED]: shortcut,
+        });
+      },
+      [onEBTEvent]
+    );
 
     const moveFocusToNextSelectedItem = useCallback((item: TabItem) => {
       moveFocusToItemIdRef.current = item.id;
@@ -123,6 +148,16 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
         tabsContainerElement,
       });
 
+    const onTabsLimitReached = useLatest(() =>
+      onEBTEvent({ [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabsLimitReached })
+    );
+
+    useEffect(() => {
+      if (hasReachedMaxItemsCount) {
+        onTabsLimitReached.current();
+      }
+    }, [hasReachedMaxItemsCount, onTabsLimitReached]);
+
     useEffect(() => {
       if (selectedItem && tabsContainerRef.current) {
         const selectedTab = tabsContainerRef.current.querySelector(
@@ -143,8 +178,9 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       ({ source, destination }: DropResult) => {
         if (source && destination) {
           const reorderedItems = euiDragDropReorder(items, source.index, destination.index);
+          const movedTabId = items[source.index].id;
 
-          onReorder(reorderedItems);
+          onReorder(reorderedItems, movedTabId);
         }
       },
       [items, onReorder]
@@ -176,6 +212,8 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
           await selectAndMoveFocusToItemIndex(
             selectedItemIndex > 0 ? selectedItemIndex - 1 : lastItemIndex
           );
+          emitOnKeyUsedEvent(shortcutActions.MOVE_LEFT);
+
           return;
         }
 
@@ -183,16 +221,25 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
           await selectAndMoveFocusToItemIndex(
             selectedItemIndex < lastItemIndex ? selectedItemIndex + 1 : firstItemIndex
           );
+
+          emitOnKeyUsedEvent(shortcutActions.MOVE_RIGHT);
+
           return;
         }
 
         if (event.key === keys.HOME && items.length > 0) {
           await selectAndMoveFocusToItemIndex(0);
+
+          emitOnKeyUsedEvent(shortcutActions.MOVE_HOME);
+
           return;
         }
 
         if (event.key === keys.END && items.length > 0) {
           await selectAndMoveFocusToItemIndex(lastItemIndex);
+
+          emitOnKeyUsedEvent(shortcutActions.MOVE_END);
+
           return;
         }
 
@@ -202,10 +249,13 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
           items.length > 1
         ) {
           await onClose?.(selectedItem);
+
+          emitOnKeyUsedEvent(shortcutActions.CLOSE_TAB);
+
           return;
         }
       },
-      [items, selectedItem, selectAndMoveFocusToItemIndex, onClose]
+      [items, selectedItem, selectAndMoveFocusToItemIndex, onClose, emitOnKeyUsedEvent]
     );
 
     const mainTabsBarContent = (
@@ -288,6 +338,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
             recentlyClosedItems={recentlyClosedItems}
             onSelect={onSelect}
             onSelectRecentlyClosed={onSelectRecentlyClosed}
+            onClearRecentlyClosed={onClearRecentlyClosed}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

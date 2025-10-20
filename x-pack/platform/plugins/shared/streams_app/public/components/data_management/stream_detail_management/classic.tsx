@@ -6,8 +6,8 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import type { Streams } from '@kbn/streams-schema';
+import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
 import type { ManagementTabs } from './wrapper';
@@ -15,10 +15,11 @@ import { Wrapper } from './wrapper';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
-import { ClassicStreamBadge, LifecycleBadge, WiredStreamBadge } from '../../stream_badges';
+import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
+import { StreamDescription } from './stream_description';
 
 const classicStreamManagementSubTabs = [
   'processing',
@@ -66,13 +67,9 @@ export function ClassicStreamDetailManagement({
           bottomBorder="extended"
           pageTitle={
             <EuiFlexGroup gutterSize="s" alignItems="center">
-              {i18n.translate('xpack.streams.entityDetailViewWithoutParams.manageStreamTitle', {
-                defaultMessage: 'Manage stream {streamId}',
-                values: { streamId: key },
-              })}
+              {key}
               <EuiBadgeGroup gutterSize="s">
-                {Streams.ClassicStream.Definition.is(definition.stream) && <ClassicStreamBadge />}
-                {Streams.WiredStream.Definition.is(definition.stream) && <WiredStreamBadge />}
+                <ClassicStreamBadge />
                 <LifecycleBadge lifecycle={definition.effective_lifecycle} />
               </EuiBadgeGroup>
             </EuiFlexGroup>
@@ -92,7 +89,7 @@ export function ClassicStreamDetailManagement({
                 'xpack.streams.unmanagedStreamOverview.missingDatastream.description',
                 {
                   defaultMessage:
-                    'The underlying Elasticsearch data stream for this classic stream is missing. Recreate the data stream to restore the stream by sending data before using the management features.',
+                    'The underlying Elasticsearch data stream for this classic stream is missing or not accessible because the view_index_metadata privilege is missing. Make sure you have sufficient privileges and the data stream actually exists.',
                 }
               )}
             </p>
@@ -116,7 +113,7 @@ export function ClassicStreamDetailManagement({
               'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
           })}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
               defaultMessage: 'Retention',
             })}
@@ -127,6 +124,15 @@ export function ClassicStreamDetailManagement({
     tabs.processing = processing;
   }
 
+  tabs.schema = {
+    content: (
+      <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
+    ),
+    label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
+      defaultMessage: 'Schema',
+    }),
+  };
+
   tabs.dataQuality = {
     content: <StreamDetailDataQuality definition={definition} />,
     label: (
@@ -135,7 +141,7 @@ export function ClassicStreamDetailManagement({
           defaultMessage: 'View details about this classic stream’s data quality',
         })}
       >
-        <span>
+        <span data-test-subj="dataQualityTab" tabIndex={0}>
           {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
             defaultMessage: 'Data quality',
           })}
@@ -144,13 +150,25 @@ export function ClassicStreamDetailManagement({
     ),
   };
 
+  if (otherTabs.significantEvents) {
+    tabs.significantEvents = otherTabs.significantEvents;
+  }
+
   if (definition.privileges.manage) {
     tabs.advanced = {
       content: (
-        <UnmanagedElasticsearchAssets
-          definition={definition}
-          refreshDefinition={refreshDefinition}
-        />
+        <>
+          {otherTabs.significantEvents ? (
+            <>
+              <StreamDescription definition={definition} refreshDefinition={refreshDefinition} />
+              <EuiSpacer />
+            </>
+          ) : null}
+          <UnmanagedElasticsearchAssets
+            definition={definition}
+            refreshDefinition={refreshDefinition}
+          />
+        </>
       ),
       label: (
         <EuiToolTip
@@ -159,7 +177,7 @@ export function ClassicStreamDetailManagement({
               'View technical details about this classic stream’s underlying index setup',
           })}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.streams.streamDetailView.advancedTab', {
               defaultMessage: 'Advanced',
             })}
@@ -167,19 +185,8 @@ export function ClassicStreamDetailManagement({
         </EuiToolTip>
       ),
     };
-    tabs.schema = {
-      content: (
-        <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
-        defaultMessage: 'Schema',
-      }),
-    };
   }
 
-  if (otherTabs.significantEvents) {
-    tabs.significantEvents = otherTabs.significantEvents;
-  }
   if (isValidManagementSubTab(tab)) {
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }

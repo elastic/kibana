@@ -60,6 +60,7 @@ import {
 } from './steps';
 import type { StateMachineDefinition, StateMachineStates } from './state_machine';
 import { handleState } from './state_machine';
+import { stepCreateAlertingRules } from './steps/step_create_alerting_rules';
 
 export interface InstallContext extends StateContext<StateNames> {
   savedObjectsClient: SavedObjectsClientContract;
@@ -154,6 +155,11 @@ const regularStatesDefinition: StateMachineStates<StateNames> = {
   },
   resolve_kibana_promise: {
     onTransition: stepResolveKibanaPromise,
+    nextState: INSTALL_STATES.CREATE_ALERTING_RULES,
+    onPostTransition: updateLatestExecutedState,
+  },
+  create_alerting_rules: {
+    onTransition: stepCreateAlertingRules,
     nextState: INSTALL_STATES.UPDATE_SO,
     onPostTransition: updateLatestExecutedState,
   },

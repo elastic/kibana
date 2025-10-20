@@ -29,6 +29,7 @@ export interface FlyoutWrapperProps {
   onApply?: () => void;
   navigateToLensEditor?: () => void;
   isReadOnly?: boolean;
+  applyButtonLabel?: string;
 }
 
 export interface EditConfigPanelProps {
@@ -92,6 +93,8 @@ export interface EditConfigPanelProps {
   isReadOnly?: boolean;
   /** The dashboard api, important for creating controls from the ES|QL editor */
   parentApi?: unknown;
+  /** Text for the apply button. Defaults to "Apply and close" */
+  applyButtonLabel?: string;
 }
 
 export interface LayerConfigurationProps {

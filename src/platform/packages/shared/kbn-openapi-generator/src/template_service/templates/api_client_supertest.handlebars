@@ -11,14 +11,14 @@ import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '
 import { replaceParams } from '@kbn/openapi-common/shared';
 
 {{#each operations}}
-import type { 
+import type {
   {{operationId}}RequestQueryInput,
   {{operationId}}RequestParamsInput,
   {{operationId}}RequestBodyInput
 } from '{{replace sourcePath 'schema.yaml' 'gen'}}';
 {{/each}}
 
-import { FtrProviderContext } from 'x-pack/solutions/security/test/api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
@@ -40,7 +40,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         {{~#if requestBody}}.send(props.body as object){{/if}}
         {{~#if requestQuery}}.query(props.query){{/if}}
       },
-  {{/each}} 
+  {{/each}}
   }
 }
 

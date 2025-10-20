@@ -121,16 +121,15 @@ export function getTemplate({
     );
   }
 
-  const esBaseComponents = getBaseEsComponents(type, !!isIndexModeTimeSeries);
+  const esBaseComponents = getBaseEsComponents(type, !!isIndexModeTimeSeries, isOtelInputType);
 
   const isEventIngestedEnabled = (config?: FleetConfigType): boolean =>
     Boolean(!config?.agentIdVerificationEnabled && config?.eventIngestedEnabled);
 
   template.composed_of = [
     ...esBaseComponents,
-    ...(isOtelInputType ? getOtelBaseComponents(type) : []),
     ...(template.composed_of || []),
-    STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+    ...(isOtelInputType ? [] : [STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS]),
     FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ...(appContextService.getConfig()?.agentIdVerificationEnabled
       ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
@@ -144,7 +143,15 @@ export function getTemplate({
   return template;
 }
 
-const getBaseEsComponents = (type: string, isIndexModeTimeSeries: boolean): string[] => {
+const getBaseEsComponents = (
+  type: string,
+  isIndexModeTimeSeries: boolean,
+  isOTelInputType?: boolean
+): string[] => {
+  if (isOTelInputType) {
+    return getOtelBaseComponents(type);
+  }
+
   if (type === 'metrics') {
     if (isIndexModeTimeSeries) {
       return [STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS];
@@ -637,6 +644,12 @@ function _generateMappings(
               default_metric: field.default_metric,
               type: 'aggregate_metric_double',
             };
+            break;
+          case 'flattened':
+            fieldProps.type = type;
+            if (field.ignore_above) {
+              fieldProps.ignore_above = field.ignore_above;
+            }
             break;
           default:
             fieldProps.type = type;

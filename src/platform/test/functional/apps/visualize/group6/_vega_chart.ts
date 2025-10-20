@@ -315,7 +315,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should remove filter by calling "kibanaRemoveFilter" expression', async () => {
         // click on the breadcrumbs to dismiss the tooltip (prevents flakiness)
-        await testSubjects.click('breadcrumbs');
+        await testSubjects.click('breadcrumb last');
         await filterBar.addFilter({ field: 'response', operation: 'is', value: '200' });
 
         expect(await filterBar.getFilterCount()).to.be(1);

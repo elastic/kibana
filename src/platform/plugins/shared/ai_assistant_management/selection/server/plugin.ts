@@ -20,8 +20,6 @@ import type {
 } from './types';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 import { classicSetting } from './src/settings/classic_setting';
-import { observabilitySolutionSetting } from './src/settings/observability_setting';
-import { securitySolutionSetting } from './src/settings/security_setting';
 import { AIAssistantType } from '../common/ai_assistant_type';
 
 export class AIAssistantManagementSelectionPlugin
@@ -115,33 +113,14 @@ export class AIAssistantManagementSelectionPlugin
     const { cloud } = plugins;
     const serverlessProjectType = cloud?.serverless.projectType;
 
-    switch (serverlessProjectType) {
-      case 'observability':
-        core.uiSettings.register({
-          [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-            ...observabilitySolutionSetting,
-            value: this.config.preferredAIAssistantType,
-          },
-        });
-        return;
-      case 'security':
-        core.uiSettings.register({
-          [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-            ...securitySolutionSetting,
-            value: this.config.preferredAIAssistantType,
-          },
-        });
-        return;
-      // TODO: Add another case for search with the correct copy of the setting.
-      // see: https://github.com/elastic/kibana/issues/227695
-      default:
-        // This case is hit when in stateful Kibana
-        return core.uiSettings.register({
-          [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-            ...classicSetting,
-            value: this.config.preferredAIAssistantType ?? AIAssistantType.Default,
-          },
-        });
+    // Do not register the setting in a serverless project
+    if (!serverlessProjectType) {
+      core.uiSettings.register({
+        [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+          ...classicSetting,
+          value: this.config.preferredAIAssistantType ?? AIAssistantType.Default,
+        },
+      });
     }
   }
 

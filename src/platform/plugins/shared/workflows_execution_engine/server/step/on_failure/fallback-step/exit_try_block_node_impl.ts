@@ -9,22 +9,26 @@
 
 import type { NodeImplementation } from '../../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 
 export class ExitTryBlockNodeImpl implements NodeImplementation {
-  constructor(private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager) {}
+  constructor(
+    private stepExecutionRuntime: StepExecutionRuntime,
+    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
+  ) {}
 
   public async run(): Promise<void> {
-    const stepState = this.wfExecutionRuntimeManager.getCurrentStepState() || {};
+    const stepState = this.stepExecutionRuntime.getCurrentStepState() || {};
 
     if (stepState.error) {
       // if error is in state, that means failure path was executed
       // and we have to throw error
-      await this.wfExecutionRuntimeManager.failStep(stepState.error);
+      await this.stepExecutionRuntime.failStep(stepState.error);
       this.wfExecutionRuntimeManager.setWorkflowError(stepState.error);
       return;
     }
 
-    await this.wfExecutionRuntimeManager.finishStep();
+    await this.stepExecutionRuntime.finishStep();
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 }

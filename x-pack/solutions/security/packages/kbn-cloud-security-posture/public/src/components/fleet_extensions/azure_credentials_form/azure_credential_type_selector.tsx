@@ -10,6 +10,7 @@ import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ } from '@kbn/cloud-security-posture-common';
 import { i18n } from '@kbn/i18n';
 import type { AzureCredentialsType } from '../types';
+import { TechnicalPreviewText } from '../common';
 
 export const AzureCredentialTypeSelector = ({
   type,
@@ -36,6 +37,7 @@ export const AzureCredentialTypeSelector = ({
       onChange={(optionElem) => {
         onChange(optionElem.target.value as AzureCredentialsType);
       }}
+      append={type === 'cloud_connectors' ? <TechnicalPreviewText /> : undefined}
       data-test-subj={AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ}
     />
   </EuiFormRow>

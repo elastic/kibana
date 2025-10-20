@@ -18,6 +18,7 @@ export {
   type PublishesESQLVariables,
   apiPublishesESQLVariable,
   apiPublishesESQLVariables,
+  controlHasVariableName,
 } from './src/variables_types';
 
 export {
@@ -35,3 +36,5 @@ export {
 } from './src/inference_endpoint_autocomplete_types';
 
 export { REGISTRY_EXTENSIONS_ROUTE } from './src/constants';
+
+export { type ESQLTelemetryCallbacks } from './src/esql_telemetry_types';

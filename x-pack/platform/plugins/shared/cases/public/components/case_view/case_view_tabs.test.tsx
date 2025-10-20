@@ -80,7 +80,7 @@ describe('CaseViewTabs', () => {
   it('should render CaseViewTabs', async () => {
     const props = { activeTab: CASE_VIEW_PAGE_TABS.ACTIVITY, caseData };
     renderWithTestingProviders(<CaseViewTabs {...props} />, {
-      wrapperProps: { license: basicLicense },
+      wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
     });
 
     expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
@@ -132,7 +132,7 @@ describe('CaseViewTabs', () => {
     renderWithTestingProviders(
       <CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.EVENTS} />,
       {
-        wrapperProps: { license: basicLicense },
+        wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
       }
     );
 
@@ -245,7 +245,7 @@ describe('CaseViewTabs', () => {
   it('navigates to the events tab when the events tab is clicked', async () => {
     const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
     renderWithTestingProviders(<CaseViewTabs {...caseProps} />, {
-      wrapperProps: { license: basicLicense },
+      wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
     });
 
     await userEvent.click(await screen.findByTestId('case-view-tab-title-events'));
@@ -358,7 +358,10 @@ describe('CaseViewTabs', () => {
     renderWithTestingProviders(
       <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
       {
-        wrapperProps: { license: basicLicense, features: { observables: { enabled: false } } },
+        wrapperProps: {
+          license: basicLicense,
+          features: { observables: { enabled: false, autoExtract: false } },
+        },
       }
     );
 

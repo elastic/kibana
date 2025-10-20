@@ -59,6 +59,7 @@ interface BaseGenericEntityPanelProps {
   isPreviewMode?: boolean;
   /** this is because FlyoutPanelProps defined params as Record<string, unknown> {@link FlyoutPanelProps#params} */
   [key: string]: unknown;
+  isEngineMetadataExist?: boolean;
 }
 
 export type GenericEntityPanelProps = BaseGenericEntityPanelProps & UseGetGenericEntityParams;
@@ -71,7 +72,7 @@ export interface GenericEntityPanelExpandableFlyoutProps extends FlyoutPanelProp
 export const GENERIC_PANEL_RISK_SCORE_QUERY_ID = 'genericPanelRiskScoreQuery';
 
 export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
-  const { isPreviewMode, scopeId } = params;
+  const { isPreviewMode, scopeId, isEngineMetadataExist } = params;
 
   // When you destructuring params in the function signature TypeScript loses track
   // of the union type constraints and infers them as potentially undefined
@@ -130,6 +131,26 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
     }
   }, [getGenericEntity.data?._id]);
 
+  if (!isEngineMetadataExist) {
+    return (
+      <>
+        <EuiEmptyPrompt
+          color="danger"
+          iconType="warning"
+          data-test-subj="generic-right-flyout-error-prompt-missing-engineMetadataType"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.securitySolution.genericEntityFlyout.missingEngineMetadataType.errorTitle"
+                defaultMessage="Unable to load entity: 'EngineMetadata.Type' is missing or not set."
+              />
+            </h2>
+          }
+        />
+      </>
+    );
+  }
+
   if (getGenericEntity.isLoading || getAssetCriticality.isLoading) {
     return (
       <>
@@ -179,6 +200,8 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
 
   const source = getGenericEntity.data._source;
   const entity = getGenericEntity.data._source.entity;
+  const fields = getGenericEntity.data.fields || {};
+  const assetCriticalityLevel = getAssetCriticality.data?.criticality_level;
 
   return (
     <>
@@ -201,6 +224,8 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
         scopeId={scopeId}
         isPreviewMode={isPreviewMode ?? false}
         entityId={entity.id}
+        entityFields={fields}
+        assetCriticalityLevel={assetCriticalityLevel}
       />
     </>
   );

@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryApiAlert } from '@kbn/elastic-assistant-common';
 import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
 import { isEmpty } from 'lodash/fp';
 
@@ -18,14 +18,18 @@ import { transformSearchResponseToAlerts } from '../../transforms/transform_sear
 export const getCreatedAttackDiscoveryAlerts = async ({
   attackDiscoveryAlertsIndex,
   createdDocumentIds,
+  enableFieldRendering,
   logger,
   readDataClient,
+  withReplacements,
 }: {
   attackDiscoveryAlertsIndex: string;
   createdDocumentIds: string[];
+  enableFieldRendering: boolean;
   logger: Logger;
   readDataClient: IRuleDataReader;
-}): Promise<AttackDiscoveryAlert[]> => {
+  withReplacements: boolean;
+}): Promise<AttackDiscoveryApiAlert[]> => {
   if (isEmpty(createdDocumentIds)) {
     logger.debug(
       () =>
@@ -50,8 +54,10 @@ export const getCreatedAttackDiscoveryAlerts = async ({
     })) as unknown as estypes.SearchResponse<AttackDiscoveryAlertDocument>;
 
     const { data } = transformSearchResponseToAlerts({
+      enableFieldRendering,
       logger,
       response,
+      withReplacements,
     });
 
     return data;

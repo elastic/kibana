@@ -7,6 +7,7 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 
 interface InferenceConnectorsUsage {
   inference_count_by_provider: Record<string, number>;
@@ -21,6 +22,142 @@ interface SearchAggs {
   byProvider?: { buckets?: ByProviderBucket[] };
 }
 
+interface ProviderTelemetryField {
+  type: 'long';
+  _meta: { description: string };
+}
+
+// Keep in sync with ServiceProviderKeys
+const PROVIDER_SCHEMA: Record<ServiceProviderKeys, ProviderTelemetryField> = {
+  'alibabacloud-ai-search': {
+    type: 'long',
+    _meta: {
+      description:
+        'The number of inference connectors created using the AlibabaCloud AI Search provider.',
+    },
+  },
+  amazonbedrock: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inference connectors created using the Amazon Bedrock provider.',
+    },
+  },
+  amazon_sagemaker: {
+    type: 'long',
+    _meta: {
+      description:
+        'The number of inference connectors created using the Amazon SageMaker provider.',
+    },
+  },
+  anthropic: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inference connectors created using the Anthropic provider.',
+    },
+  },
+  azureaistudio: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inference connectors created using the Azure AI Studio provider.',
+    },
+  },
+  azureopenai: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inference connectors created using the Azure OpenAI provider.',
+    },
+  },
+  cohere: {
+    type: 'long',
+    _meta: { description: 'The number of inference connectors created using the Cohere provider.' },
+  },
+  deepseek: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inference connectors created using the DeepSeek provider.',
+    },
+  },
+  elastic: {
+    type: 'long',
+    _meta: {
+      description:
+        'The number of inference connectors created using the Elastic Inference Service provider.',
+    },
+  },
+  elasticsearch: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inference connectors created using the Elasticsearch provider.',
+    },
+  },
+  googleaistudio: {
+    type: 'long',
+    _meta: {
+      description:
+        'The number of inference connectors created using the Google AI Studio provider.',
+    },
+  },
+  googlevertexai: {
+    type: 'long',
+    _meta: {
+      description:
+        'The number of inference connectors created using the Google Vertex AI provider.',
+    },
+  },
+  hugging_face: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inference connectors created using the Hugging Face provider.',
+    },
+  },
+  jinaai: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inference connectors created using the Jina AI provider.',
+    },
+  },
+  mistral: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inference connectors created using the Mistral provider.',
+    },
+  },
+  openai: {
+    type: 'long',
+    _meta: { description: 'The number of inference connectors created using the OpenAI provider.' },
+  },
+  voyageai: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inference connectors created using the Voyage AI provider.',
+    },
+  },
+  watsonxai: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inference connectors created using the IBM Watsonx provider.',
+    },
+  },
+  ai21: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inference connectors created using the AI21 labs provider.',
+    },
+  },
+  llama: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inference connectors created using the Llama Stack provider.',
+    },
+  },
+  contextualai: {
+    type: 'long',
+    _meta: {
+      description: 'The number of inference connectors created using the Contextual AI provider.',
+    },
+  },
+};
+
 export function registerInferenceConnectorsUsageCollector(
   usageCollection: UsageCollectionSetup,
   core: CoreSetup
@@ -30,29 +167,7 @@ export function registerInferenceConnectorsUsageCollector(
     isReady: () => true,
     schema: {
       inference_count_by_provider: {
-        // Known providers from ServiceProviderKeys
-        'alibabacloud-ai-search': { type: 'long' },
-        amazonbedrock: { type: 'long' },
-        amazon_sagemaker: { type: 'long' },
-        anthropic: { type: 'long' },
-        azureaistudio: { type: 'long' },
-        azureopenai: { type: 'long' },
-        cohere: { type: 'long' },
-        deepseek: { type: 'long' },
-        elastic: { type: 'long' },
-        elasticsearch: { type: 'long' },
-        googleaistudio: { type: 'long' },
-        googlevertexai: { type: 'long' },
-        hugging_face: { type: 'long' },
-        jinaai: { type: 'long' },
-        mistral: { type: 'long' },
-        openai: { type: 'long' },
-        voyageai: { type: 'long' },
-        watsonxai: { type: 'long' },
-        ai21: { type: 'long' },
-        llama: { type: 'long' },
-        // Fallback for future additions
-        DYNAMIC_KEY: { type: 'long' },
+        ...PROVIDER_SCHEMA,
       },
     },
     fetch: async () => {

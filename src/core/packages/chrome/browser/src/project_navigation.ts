@@ -26,7 +26,6 @@ import type {
   EnterpriseSearchContentApp,
   EnterpriseSearchApplicationsApp,
   EnterpriseSearchAnalyticsApp,
-  ServerlessSearchApp,
   DeepLinkId as SearchLink,
 } from '@kbn/deeplinks-search';
 import type {
@@ -36,7 +35,7 @@ import type {
 import type { AppId as SecurityApp, DeepLinkId as SecurityLink } from '@kbn/deeplinks-security';
 import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
 import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplinks-shared';
-import type { WorkchatApp, DeepLinkId as ChatLink } from '@kbn/deeplinks-chat';
+import type { WorkplaceAIApp, DeepLinkId as ChatLink } from '@kbn/deeplinks-chat';
 import type { AppId as WorkflowsApp, DeepLinkId as WorkflowsLink } from '@kbn/deeplinks-workflows';
 import type { KibanaProject } from '@kbn/projects-solutions-groups';
 
@@ -55,12 +54,11 @@ export type AppId =
   | EnterpriseSearchContentApp
   | EnterpriseSearchApplicationsApp
   | EnterpriseSearchAnalyticsApp
-  | ServerlessSearchApp
   | ObservabilityApp
   | SecurityApp
   | FleetApp
   | SharedApp
-  | WorkchatApp
+  | WorkplaceAIApp
   | WorkflowsApp;
 
 /** @public */

@@ -29,6 +29,7 @@ import {
   RULE_ANALYSIS,
   DATA_QUALITY_ANALYSIS,
   ALERT_EVALUATION,
+  ENTITY_ANALYSIS,
   starterPromptTitle1,
   starterPromptDescription1,
   starterPromptIcon1,
@@ -56,7 +57,9 @@ export const promptGroupId = {
     incompatibleAntivirus: 'defendInsights-incompatibleAntivirus',
     policyResponseFailure: 'defendInsights-policyResponseFailure',
   },
+  // TODO remove after 1 week to ensure both versions are available while users upgrade
   aiForSoc: 'aiForSoc',
+  ease: 'ease',
 };
 
 export const promptDictionary = {
@@ -101,6 +104,7 @@ export const promptDictionary = {
     'defendInsights-policyResponseFailureRemediationLink',
   // context prompts
   alertEvaluation: `alertEvaluation`,
+  assetAnalysis: `assetAnalysis`,
   dataQualityAnalysis: 'dataQualityAnalysis',
   ruleAnalysis: 'ruleAnalysis',
   // starter prompts
@@ -410,10 +414,45 @@ export const localPrompts: Prompt[] = [
     },
   },
   {
+    promptId: promptDictionary.alertSummary,
+    promptGroupId: promptGroupId.ease,
+    prompt: {
+      default: ALERT_SUMMARY_500,
+    },
+  },
+  {
+    promptId: promptDictionary.alertSummarySystemPrompt,
+    promptGroupId: promptGroupId.ease,
+    prompt: {
+      default: ALERT_SUMMARY_SYSTEM_PROMPT,
+    },
+  },
+  {
+    promptId: promptDictionary.costSavingsInsightPart1,
+    promptGroupId: promptGroupId.ease,
+    prompt: {
+      default: costSavingsInsightPart1,
+    },
+  },
+  {
+    promptId: promptDictionary.costSavingsInsightPart2,
+    promptGroupId: promptGroupId.ease,
+    prompt: {
+      default: costSavingsInsightPart2,
+    },
+  },
+  {
     promptId: promptDictionary.alertEvaluation,
     promptGroupId: promptGroupId.aiAssistant,
     prompt: {
       default: ALERT_EVALUATION,
+    },
+  },
+  {
+    promptId: promptDictionary.assetAnalysis,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: {
+      default: ENTITY_ANALYSIS,
     },
   },
   {

@@ -1,19 +1,14 @@
 {
   "type": "plugin",
   "id": "@kbn/triggers-actions-ui-plugin",
-  "owner": [
-    "@elastic/response-ops"
-  ],
+  "owner": ["@elastic/response-ops"],
   "group": "platform",
   "visibility": "shared",
   "plugin": {
     "id": "triggersActionsUi",
     "browser": true,
     "server": true,
-    "configPath": [
-      "xpack",
-      "trigger_actions_ui"
-    ],
+    "configPath": ["xpack", "trigger_actions_ui"],
     "requiredPlugins": [
       "management",
       "charts",
@@ -33,26 +28,10 @@
       "embeddable",
       "fieldsMetadata",
       "uiActions",
-      "contentManagement",
+      "contentManagement"
     ],
-    "optionalPlugins": [
-      "cloud",
-      "features",
-      "home",
-      "spaces",
-      "serverless",
-      "share"
-    ],
-    "requiredBundles": [
-      "alerting",
-      "esUiShared",
-      "kibanaReact",
-      "kibanaUtils",
-      "actions"
-    ],
-    "extraPublicDirs": [
-      "public/common",
-      "public/common/constants"
-    ]
+    "optionalPlugins": ["cloud", "features", "home", "spaces", "serverless", "share"],
+    "requiredBundles": ["alerting", "esUiShared", "kibanaReact", "kibanaUtils", "actions"],
+    "extraPublicDirs": ["public/common", "public/common/constants"]
   }
 }

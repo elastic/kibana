@@ -173,6 +173,17 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     setUpdatedProviders(getUpdatedProviders(selectedFilter));
   };
 
+  const getOverrides = useCallback(
+    (providerService: string | undefined) => {
+      let overrides = INTERNAL_OVERRIDE_FIELDS[providerService ?? ''];
+      if (overrides?.serverlessOnly && !enforceAdaptiveAllocations) {
+        overrides = undefined;
+      }
+      return overrides;
+    },
+    [enforceAdaptiveAllocations]
+  );
+
   const providerName = useMemo(
     () =>
       Object.keys(SERVICE_PROVIDERS).includes(config?.provider)
@@ -194,10 +205,11 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         (p) => p.service === (config.provider === '' ? providerSelected : config.provider)
       );
       if (newProvider) {
+        const overrides = getOverrides(newProvider.service);
         const newProviderSchema: ConfigEntryView[] = mapProviderFields(
           taskType,
           newProvider,
-          enforceAdaptiveAllocations ? INTERNAL_OVERRIDE_FIELDS[newProvider.service] : undefined
+          overrides
         );
         setProviderSchema(newProviderSchema);
       }
@@ -235,7 +247,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         },
       });
     },
-    [config, enforceAdaptiveAllocations, secrets, updateFieldValues, updatedProviders]
+    [config, secrets, updateFieldValues, updatedProviders, getOverrides]
   );
 
   const onProviderChange = useCallback(
@@ -250,12 +262,10 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const defaultProviderConfig: Record<string, unknown> = {};
       const defaultProviderSecrets: Record<string, unknown> = {};
 
+      const overrides = getOverrides(newProvider?.service);
+
       const newProviderSchema: ConfigEntryView[] = newProvider
-        ? mapProviderFields(
-            newProvider.task_types[0],
-            newProvider,
-            enforceAdaptiveAllocations ? INTERNAL_OVERRIDE_FIELDS[newProvider.service] : undefined
-          )
+        ? mapProviderFields(newProvider.task_types[0], newProvider, overrides)
         : [];
       if (newProvider) {
         setProviderSchema(newProviderSchema);
@@ -290,13 +300,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         },
       });
     },
-    [
-      config,
-      enforceAdaptiveAllocations,
-      onTaskTypeOptionsSelect,
-      updateFieldValues,
-      updatedProviders,
-    ]
+    [config, onTaskTypeOptionsSelect, updateFieldValues, updatedProviders, getOverrides]
   );
 
   const onSetProviderConfigEntry = useCallback(
@@ -443,12 +447,9 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const newProvider = updatedProviders?.find((p) => p.service === config.provider);
       // Update connector providerSchema
 
+      const overrides = getOverrides(newProvider?.service);
       const newProviderSchema: ConfigEntryView[] = newProvider
-        ? mapProviderFields(
-            config.taskType,
-            newProvider,
-            enforceAdaptiveAllocations ? INTERNAL_OVERRIDE_FIELDS[newProvider.service] : undefined
-          )
+        ? mapProviderFields(config.taskType, newProvider, overrides)
         : [];
       if (newProvider) {
         setProviderSchema(newProviderSchema);
@@ -460,9 +461,9 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     config?.provider,
     config?.taskType,
     isEdit,
-    enforceAdaptiveAllocations,
     selectedTaskType,
     updatedProviders,
+    getOverrides,
   ]);
 
   useEffect(() => {

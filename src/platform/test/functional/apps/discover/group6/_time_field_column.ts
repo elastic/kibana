@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // check in Dashboard
       await common.navigateToApp('dashboard');
       await dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch(`${SEARCH_NO_COLUMNS}${savedSearchSuffix}`);
       await dashboardAddPanel.closeAddPanel();
       await header.waitUntilLoadingHasFinished();
@@ -121,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       if (!isTimestampUnavailableInSidebar) {
         await dashboardPanelActions.removePanelByTitle(`${SEARCH_NO_COLUMNS}${savedSearchSuffix}`);
         await header.waitUntilLoadingHasFinished();
-        await dashboardAddPanel.clickOpenAddPanel();
+        await dashboardAddPanel.clickAddFromLibrary();
         await dashboardAddPanel.addSavedSearch(`${SEARCH_WITH_ONLY_TIMESTAMP}${savedSearchSuffix}`);
         await dashboardAddPanel.closeAddPanel();
         await header.waitUntilLoadingHasFinished();
@@ -197,7 +197,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // check in Dashboard
       await common.navigateToApp('dashboard');
       await dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch(`${SEARCH_WITH_SELECTED_COLUMNS}${savedSearchSuffix}`);
       await dashboardAddPanel.closeAddPanel();
       await header.waitUntilLoadingHasFinished();
@@ -214,7 +214,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         `${SEARCH_WITH_SELECTED_COLUMNS}${savedSearchSuffix}`
       );
       await header.waitUntilLoadingHasFinished();
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch(
         `${SEARCH_WITH_SELECTED_COLUMNS_AND_TIMESTAMP}${savedSearchSuffix}`
       );
