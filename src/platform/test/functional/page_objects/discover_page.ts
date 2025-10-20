@@ -113,10 +113,15 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click('addFilter');
   }
 
+  public async isDataGridUpdating() {
+    return await this.testSubjects.exists('discoverDataGridUpdating');
+  }
+
   public async waitUntilSearchingHasFinished() {
     await this.testSubjects.missingOrFail('loadingSpinner', {
       timeout: this.defaultFindTimeout * 10,
     });
+    // FIXME: extend with discoverDataGridUpdating in a future PR
   }
 
   public async waitUntilTabIsLoaded() {

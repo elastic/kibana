@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -438,7 +438,9 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         savedSearchFetch$.next();
       });
-      expect(api.fetch).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        expect(api.fetch).toHaveBeenCalledTimes(1);
+      });
     });
   });
 
