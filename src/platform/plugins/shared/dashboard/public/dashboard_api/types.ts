@@ -73,7 +73,6 @@ export interface DashboardCreationOptions {
   useSearchSessionsIntegration?: boolean;
   searchSessionSettings?: {
     sessionIdToRestore?: string;
-    sessionIdUrlChangeObservable?: Observable<string | undefined>;
     getSearchSessionIdFromURL: () => string | undefined;
     removeSessionIdFromUrl: () => void;
     createSessionRestorationDataProvider: (

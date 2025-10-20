@@ -43,7 +43,6 @@ import { type DashboardEmbedSettings } from './types';
 import {
   createSessionRestorationDataProvider,
   getSearchSessionIdFromURL,
-  getSessionURLObservable,
   removeSearchSessionIdFromURL,
 } from './url/search_sessions_integration';
 import {
@@ -186,7 +185,6 @@ export function DashboardApp({
       searchSessionSettings: {
         createSessionRestorationDataProvider,
         sessionIdToRestore: searchSessionIdFromURL,
-        sessionIdUrlChangeObservable: getSessionURLObservable(history),
         getSearchSessionIdFromURL: () => getSearchSessionIdFromURL(history),
         removeSessionIdFromUrl: () => removeSearchSessionIdFromURL(kbnUrlStateStorage),
       },
