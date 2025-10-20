@@ -311,7 +311,7 @@ export class AttachmentGetter {
                 doc_count: number;
               };
               events: {
-                doc_count: number;
+                value: number;
               };
             };
           }>;
@@ -332,7 +332,7 @@ export class AttachmentGetter {
         acc.set(idBucket.key, {
           userComments: idBucket.reverse.comments.doc_count,
           alerts: idBucket.reverse.alerts.value,
-          events: idBucket.reverse.events.doc_count,
+          events: idBucket.reverse.events.value,
         });
         return acc;
       }, new Map<string, AttachmentTotals>()) ?? new Map()
@@ -370,10 +370,8 @@ export class AttachmentGetter {
                     },
                   },
                   events: {
-                    filter: {
-                      term: {
-                        [`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`]: AttachmentType.event,
-                      },
+                    cardinality: {
+                      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.eventId`,
                     },
                   },
                 },
