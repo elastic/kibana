@@ -11,7 +11,7 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Zod schema definitions extracted from the Kibana OpenAPI specification.
- * Generated at: 2025-10-16T16:02:59.523Z
+ * Generated at: 2025-10-17T16:51:08.625Z
  * Source: Kibana OpenAPI spec via openapi-zod-client (complete schemas)
  * 
  * To regenerate: npm run generate:kibana-connectors
@@ -5963,7 +5963,7 @@ export const Security_Detections_API_SetAlertsStatusByIdsBase = z
   })
   .passthrough();
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const Security_Detections_API_SetAlertsStatusByIds = z.discriminatedUnion('status', [
+export const Security_Detections_API_SetAlertsStatusByIds = z.union( [
   Security_Detections_API_CloseAlertsByIds,
   Security_Detections_API_SetAlertsStatusByIdsBase,
 ]);
@@ -5985,7 +5985,7 @@ export const Security_Detections_API_SetAlertsStatusByQueryBase = z
   })
   .passthrough();
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const Security_Detections_API_SetAlertsStatusByQuery = z.discriminatedUnion('status', [
+export const Security_Detections_API_SetAlertsStatusByQuery = z.union( [
   Security_Detections_API_CloseAlertsByQuery,
   Security_Detections_API_SetAlertsStatusByQueryBase,
 ]);
@@ -6695,7 +6695,7 @@ export const Security_Endpoint_Management_API_RunningProcesses =
       .passthrough()
   );
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const Security_Endpoint_Management_API_ActionDetailsResponse = z.discriminatedUnion('command', [
+export const Security_Endpoint_Management_API_ActionDetailsResponse = z.union( [
   Security_Endpoint_Management_API_KillProcess,
   Security_Endpoint_Management_API_GetFile,
   Security_Endpoint_Management_API_Execute,

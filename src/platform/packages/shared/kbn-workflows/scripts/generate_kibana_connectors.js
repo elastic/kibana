@@ -761,11 +761,11 @@ function extractTopLevelFieldsFromSchema(schemaName) {
   return topLevelFields;
 }
 
-// Note: Complex schema parsing functions removed - now using hardcoded mappings like ES connectors
-
 /**
  * Convert Kibana API endpoint to connector definition
  */
+
+// eslint-disable-next-line complexity
 function convertToConnectorDefinition(endpoint, index, tagDocs, summary) {
   const { method, path, operationId, parameters = [], examples = {} } = endpoint;
 
@@ -954,6 +954,7 @@ ${allFields.join(',\n')}
         if (nonBodyFields.length > 0) {
           // Check if this is a union schema by examining the schema structure
           // We'll use a runtime check to determine if it's a union and handle accordingly
+          // TODO: refactor this to be type safe
           paramsSchemaSection = `paramsSchema: (() => {
           const baseSchema = ${schemaName};
           const additionalFields = z.object({
@@ -961,13 +962,13 @@ ${nonBodyFields.join('\n')}
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -1091,8 +1092,8 @@ function copyClientAsSchemas() {
     let processedLine = line;
 
     // Patch 1: Replace problematic discriminatedUnion calls with regular union
-    if (processedLine.includes("z.discriminatedUnion('type',")) {
-      processedLine = processedLine.replace(/z\.discriminatedUnion\('type',/g, 'z.union(');
+    if (processedLine.includes('z.discriminatedUnion(')) {
+      processedLine = processedLine.replace(/z\.discriminatedUnion\([^,]+,/g, 'z.union(');
     }
 
     // Patch 2: Replace references to browser/Node built-in types that don't exist in zod
@@ -1205,6 +1206,7 @@ ${schemaLines.filter((line) => !line.includes("import { z } from '@kbn/zod';")).
 /**
  * Generate Kibana connectors from the temporary API client file
  */
+// eslint-disable-next-line complexity
 function generateKibanaConnectors() {
   try {
     console.log('🔄 Generating Kibana connectors from temporary API client file');
@@ -1350,8 +1352,6 @@ function generateKibanaConnectors() {
  * 
  * To regenerate: npm run generate:kibana-connectors
  */
-
-// @ts-nocheck
 
 import { z } from '@kbn/zod';
 import type { InternalConnectorContract } from '../../types/v1';${schemaImportsSection}

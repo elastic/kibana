@@ -11,13 +11,11 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Kibana connector definitions generated from the Kibana OpenAPI specification.
- * Generated at: 2025-10-16T16:03:01.100Z
+ * Generated at: 2025-10-17T16:51:09.981Z
  * Source: Kibana OpenAPI spec (498 APIs)
  * 
  * To regenerate: npm run generate:kibana-connectors
  */
-
-// @ts-nocheck
 
 import { z } from '@kbn/zod';
 import type { InternalConnectorContract } from '../../types/v1';
@@ -540,13 +538,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -584,13 +582,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -628,13 +626,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -803,13 +801,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -1046,13 +1044,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -1165,13 +1163,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -1209,13 +1207,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -1348,13 +1346,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -1473,13 +1471,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -1538,13 +1536,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -1645,13 +1643,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -1730,13 +1728,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -1817,13 +1815,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -2169,13 +2167,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -2388,13 +2386,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -2432,13 +2430,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -2555,13 +2553,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -2674,13 +2672,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -2848,13 +2846,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -2911,13 +2909,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -2955,13 +2953,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -3296,13 +3294,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -3404,13 +3402,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -3487,13 +3485,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -4328,13 +4326,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -4502,13 +4500,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -4603,13 +4601,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -4648,13 +4646,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -5107,13 +5105,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -5173,13 +5171,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -5253,13 +5251,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -5316,13 +5314,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -5579,13 +5577,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -5623,13 +5621,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -5667,13 +5665,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -5768,13 +5766,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -6184,13 +6182,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -6376,13 +6374,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -6483,13 +6481,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -6787,13 +6785,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -7000,13 +6998,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -7217,13 +7215,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -7373,13 +7371,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -7541,13 +7539,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -8154,13 +8152,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -8294,13 +8292,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -8631,13 +8629,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -8750,13 +8748,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -8907,13 +8905,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -8989,13 +8987,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -9126,13 +9124,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -9301,13 +9299,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -9456,13 +9454,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -9765,13 +9763,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -9936,13 +9934,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -9980,13 +9978,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -10043,13 +10041,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -10106,13 +10104,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -10150,13 +10148,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -10232,13 +10230,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -10296,13 +10294,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -10359,13 +10357,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -10423,13 +10421,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -10506,13 +10504,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -10575,13 +10573,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -10622,13 +10620,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -10782,13 +10780,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -10918,13 +10916,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -11202,13 +11200,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -11414,13 +11412,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -11458,13 +11456,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -11522,13 +11520,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -11566,13 +11564,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -11650,13 +11648,13 @@ export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
