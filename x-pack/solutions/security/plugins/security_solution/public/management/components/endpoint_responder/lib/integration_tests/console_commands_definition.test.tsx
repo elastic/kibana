@@ -89,7 +89,6 @@ describe('When displaying Endpoint Response Actions', () => {
     beforeEach(() => {
       (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
         responseActionsSentinelOneV1Enabled: true,
-        responseActionsSentinelOneKillProcessEnabled: true,
         responseActionsSentinelOneRunScriptEnabled: true,
       });
 
