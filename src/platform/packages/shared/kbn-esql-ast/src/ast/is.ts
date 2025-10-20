@@ -103,6 +103,9 @@ export const isOptionNode = (node: types.ESQLAstNode): node is types.ESQLCommand
   return !!node && typeof node === 'object' && !Array.isArray(node) && node.type === 'option';
 };
 
+export const isUnknownNode = (node: unknown): node is types.ESQLUnknownItem =>
+  isProperNode(node) && node.type === 'unknown';
+
 export const isInlineCast = (node: unknown): node is ESQLInlineCast =>
   isProperNode(node) && node.type === 'inlineCast';
 
