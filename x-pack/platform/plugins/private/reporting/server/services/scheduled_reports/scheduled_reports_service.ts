@@ -18,7 +18,7 @@ import type {
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { groupBy } from 'lodash';
+import { partition } from 'lodash';
 import type { ReportingCore } from '../..';
 import type { ListScheduledReportApiJSON, ReportingUser, ScheduledReportType } from '../../types';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -316,29 +316,26 @@ export class ScheduledReportsService {
         ids.map((id) => ({ id, type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE }))
       );
 
-      const {
-        readErrors = [],
-        unauthorizedSavedObjects = [],
-        authorizedSavedObjects = [],
-      } = groupBy(bulkGetResult.saved_objects, (so) =>
-        so.error
-          ? 'readErrors'
-          : so.attributes.createdBy !== username && !this.userCanManageReporting
-          ? 'unauthorizedSavedObjects'
-          : 'authorizedSavedObjects'
+      const [validSchedules, bulkGetErrors] = partition(
+        bulkGetResult.saved_objects,
+        (so) => so.error === undefined
+      );
+      const [authorizedSchedules, unauthorizedSchedules] = partition(
+        validSchedules,
+        (so) => so.attributes.createdBy === username || this.userCanManageReporting
       );
 
       const authErrors = this.formatAndAuditBulkDeleteAuthErrors({
-        readErrors,
-        unauthorizedSavedObjects,
+        bulkGetErrors,
+        unauthorizedSchedules,
         username,
       });
       this.auditBulkActionStart({
         action: ScheduledReportAuditAction.DELETE,
-        authorizedSavedObjects,
+        authorizedSchedules,
       });
 
-      if (authorizedSavedObjects.length === 0) {
+      if (authorizedSchedules.length === 0) {
         return transformBulkDeleteResponse({
           deletedSchedulesIds: [],
           errors: authErrors,
@@ -346,25 +343,24 @@ export class ScheduledReportsService {
       }
 
       const bulkDeleteResult = await this.savedObjectsClient.bulkDelete(
-        authorizedSavedObjects.map((so) => ({
+        authorizedSchedules.map((so) => ({
           id: so.id,
           type: so.type,
         }))
       );
-      const { deleteErrors = [], deletedSavedObjects = [] } = groupBy(
+      const [deletedSchedules, bulkDeleteErrors] = partition(
         bulkDeleteResult.statuses,
-        (status) => (status.error ? 'deleteErrors' : 'deletedSavedObjects')
+        (status) => status.error === undefined
       );
-      const executionErrors = this.formatAndAuditBulkDeleteSOErrors({
-        errorStatuses: deleteErrors,
+      const executionErrors = this.formatAndAuditBulkDeleteSchedulesErrors({
+        errorStatuses: bulkDeleteErrors,
       });
 
       const removeTasksResult = await this.taskManager.bulkRemove(
-        deletedSavedObjects.map((so) => so.id)
+        deletedSchedules.map((so) => so.id)
       );
-      const { removedTasks = [], erroredTasks = [] } = groupBy(
-        removeTasksResult.statuses,
-        (status) => (Boolean(status.success) ? 'removedTasks' : 'erroredTasks')
+      const [removedTasks, erroredTasks] = partition(removeTasksResult.statuses, (status) =>
+        Boolean(status.success)
       );
       const taskErrors = this.formatBulkDeleteTaskErrors({
         errorStatuses: erroredTasks,
@@ -384,12 +380,12 @@ export class ScheduledReportsService {
 
   private auditBulkActionStart({
     action,
-    authorizedSavedObjects,
+    authorizedSchedules,
   }: {
     action: ScheduledReportAuditAction;
-    authorizedSavedObjects: SavedObject<ScheduledReportType>[];
+    authorizedSchedules: SavedObject<ScheduledReportType>[];
   }) {
-    authorizedSavedObjects.forEach((so) => {
+    authorizedSchedules.forEach((so) => {
       this.auditLog({
         action,
         id: so.id,
@@ -400,16 +396,16 @@ export class ScheduledReportsService {
   }
 
   private formatAndAuditBulkDeleteAuthErrors({
-    readErrors,
-    unauthorizedSavedObjects,
+    bulkGetErrors,
+    unauthorizedSchedules,
     username,
   }: {
-    readErrors: SavedObject<ScheduledReportType>[];
-    unauthorizedSavedObjects: SavedObject<ScheduledReportType>[];
+    bulkGetErrors: SavedObject<ScheduledReportType>[];
+    unauthorizedSchedules: SavedObject<ScheduledReportType>[];
     username: string | boolean;
   }) {
     const bulkErrors: BulkOperationError[] = [];
-    readErrors.forEach((so) => {
+    bulkGetErrors.forEach((so) => {
       if (!so.error) {
         return;
       }
@@ -419,7 +415,7 @@ export class ScheduledReportsService {
         id: so.id,
       });
     });
-    unauthorizedSavedObjects.forEach((so) => {
+    unauthorizedSchedules.forEach((so) => {
       bulkErrors.push({
         message: `Not found.`,
         status: 404,
@@ -439,7 +435,7 @@ export class ScheduledReportsService {
     return bulkErrors;
   }
 
-  private formatAndAuditBulkDeleteSOErrors({
+  private formatAndAuditBulkDeleteSchedulesErrors({
     errorStatuses,
   }: {
     errorStatuses: SavedObjectsBulkDeleteStatus[];
