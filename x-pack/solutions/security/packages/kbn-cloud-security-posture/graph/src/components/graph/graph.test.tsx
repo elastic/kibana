@@ -61,7 +61,7 @@ const renderGraphPreview = (props: GraphProps) =>
 
 describe('<Graph />', () => {
   describe('basic rendering', () => {
-    it('should render empty graph', () => {
+    it('should render empty graph', async () => {
       const { container } = renderGraphPreview({
         nodes: [],
         edges: [],
@@ -69,11 +69,14 @@ describe('<Graph />', () => {
       });
 
       expect(container).not.toBeNull();
-      const nodes = container.querySelectorAll('.react-flow__nodes .react-flow__node');
-      expect(nodes).toHaveLength(0);
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__nodes .react-flow__node');
+        expect(nodes).toHaveLength(0);
+      });
     });
 
-    it('should render hexagon node', () => {
+    it('should render hexagon node', async () => {
       const { container } = renderGraphPreview({
         nodes: [
           {
@@ -87,12 +90,14 @@ describe('<Graph />', () => {
         interactive: false,
       });
 
-      const nodeEl = container.querySelector('[data-id="1"]');
-      expect(nodeEl).not.toBeNull();
-      expect(nodeEl).toHaveTextContent('Node 1');
+      await waitFor(() => {
+        const nodeEl = container.querySelector('[data-id="1"]');
+        expect(nodeEl).not.toBeNull();
+        expect(nodeEl).toHaveTextContent('Node 1');
+      });
     });
 
-    it('should render label node', () => {
+    it('should render label node', async () => {
       const { container } = renderGraphPreview({
         nodes: [
           {
@@ -106,12 +111,14 @@ describe('<Graph />', () => {
         interactive: false,
       });
 
-      const nodeEl = container.querySelector('[data-id="2"]');
-      expect(nodeEl).not.toBeNull();
-      expect(nodeEl).toHaveTextContent('Node 2');
+      await waitFor(() => {
+        const nodeEl = container.querySelector('[data-id="2"]');
+        expect(nodeEl).not.toBeNull();
+        expect(nodeEl).toHaveTextContent('Node 2');
+      });
     });
 
-    it('should render 2 nodes connected', () => {
+    it('should render 2 nodes connected', async () => {
       const { container } = renderGraphPreview({
         nodes: [
           {
@@ -138,13 +145,15 @@ describe('<Graph />', () => {
         interactive: false,
       });
 
-      const srcNodeEl = container.querySelector('[data-id="1"]');
-      expect(srcNodeEl).not.toBeNull();
-      expect(srcNodeEl).toHaveTextContent('Node 1');
+      await waitFor(() => {
+        const srcNodeEl = container.querySelector('[data-id="1"]');
+        expect(srcNodeEl).not.toBeNull();
+        expect(srcNodeEl).toHaveTextContent('Node 1');
 
-      const targetNodeEl = container.querySelector('[data-id="2"]');
-      expect(targetNodeEl).not.toBeNull();
-      expect(targetNodeEl).toHaveTextContent('Node 2');
+        const targetNodeEl = container.querySelector('[data-id="2"]');
+        expect(targetNodeEl).not.toBeNull();
+        expect(targetNodeEl).toHaveTextContent('Node 2');
+      });
 
       // TODO: Fix this test (currently it is not rendered in xyflow version 12) https://github.com/xyflow/xyflow/issues/716#issuecomment-2414721074
       // const edgeEl = container.querySelector('[data-id="a(1)-b(2)"]');
