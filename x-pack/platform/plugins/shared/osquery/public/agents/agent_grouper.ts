@@ -35,26 +35,15 @@ export const generateAgentOption = (
   options: data.map((agent) => {
     const availability = getAgentOsqueryAvailability(agent);
 
-    // NOTE: Agent availability is evaluated at UI render time. Agent status may change between
-    // dropdown selection and query execution. Queries will fail gracefully if the agent becomes
-    // unavailable during this time.
-
-    // Determine if agent should be disabled and its color based on availability
-    // Disabled: offline (not checking in) OR osquery_unavailable (Osquery component failed)
-    // Enabled: online OR degraded (with healthy Osquery)
     const isDisabled = availability === 'offline' || availability === 'osquery_unavailable';
 
-    // Color coding:
-    // - success (green): Agent fully healthy
-    // - warning (orange): Agent degraded but Osquery works (queries will succeed)
-    // - danger (red): Agent offline or Osquery unavailable (queries won't work)
     let color: string;
     if (availability === 'online') {
-      color = getColor(groupType); // Normal green
+      color = getColor(groupType);
     } else if (availability === 'degraded') {
-      color = AGENT_STATUS_COLORS.DEGRADED; // Orange for degraded but operational
+      color = AGENT_STATUS_COLORS.DEGRADED;
     } else {
-      color = AGENT_STATUS_COLORS.UNAVAILABLE; // Red for offline or osquery_unavailable
+      color = AGENT_STATUS_COLORS.UNAVAILABLE;
     }
 
     return {

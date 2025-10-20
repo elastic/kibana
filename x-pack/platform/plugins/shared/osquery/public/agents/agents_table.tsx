@@ -91,7 +91,6 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
   const [selectedOptions, setSelectedOptions] = useState<GroupOption[]>([]);
   const defaultValueInitialized = useRef(false);
 
-  // Create a memoized agent lookup map for O(1) access instead of O(n) find
   const agentMap = useMemo(() => {
     const map = new Map<string, Agent>();
     if (agentList?.agents) {
@@ -201,27 +200,23 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
       const { label, value } = option;
 
       if (value?.groupType === AGENT_GROUP_KEY.Agent) {
-        // For individual agents, determine health color based on Osquery availability
         let healthColor: 'success' | 'warning' | 'danger' = AGENT_STATUS_COLORS.UNAVAILABLE;
         let availability: 'online' | 'degraded' | 'osquery_unavailable' | 'offline' = 'offline';
 
-        // Validate that value.id exists before attempting lookup
         if (!value?.id) {
-          // If no ID, treat as offline/unavailable
           healthColor = AGENT_STATUS_COLORS.UNAVAILABLE;
           availability = 'offline';
         } else {
-          // Use O(1) Map lookup instead of O(n) array find
           const agent: Agent | undefined = agentMap.get(value.id);
 
           if (agent) {
             availability = getAgentOsqueryAvailability(agent);
             if (availability === 'online') {
-              healthColor = AGENT_STATUS_COLORS.ONLINE; // Green: fully healthy
+              healthColor = AGENT_STATUS_COLORS.ONLINE;
             } else if (availability === 'degraded') {
-              healthColor = AGENT_STATUS_COLORS.DEGRADED; // Orange: degraded but Osquery works
+              healthColor = AGENT_STATUS_COLORS.DEGRADED;
             } else {
-              healthColor = AGENT_STATUS_COLORS.UNAVAILABLE; // Red: offline or osquery_unavailable
+              healthColor = AGENT_STATUS_COLORS.UNAVAILABLE;
             }
           }
         }
@@ -239,7 +234,6 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
           </EuiHealth>
         );
 
-        // Add tooltip for degraded agents with healthy Osquery
         if (availability === 'degraded') {
           return (
             <EuiToolTip position="right" content={DEGRADED_AGENT_TOOLTIP}>
@@ -251,13 +245,11 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
         return healthContent;
       }
 
-      // For groups (platform, policy, all agents)
       const groupValue = value as GroupOptionValue;
 
       return (
         <span className={contentClassName}>
           <span>[{groupValue?.size ?? 0}]</span>
-          &nbsp;
           <EuiHighlight search={searchVal}>{label}</EuiHighlight>
         </span>
       );
