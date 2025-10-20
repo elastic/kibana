@@ -100,7 +100,7 @@ export function UnmanagedElasticsearchAssets({
         <p>
           {i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.description', {
             defaultMessage:
-              'The underlying Elasticsearch data stream for this classic stream is missing. Recreate the data stream to restore the stream by sending data before using the management features.',
+              'The underlying Elasticsearch data stream for this classic stream is missing or not accessible because the view_index_metadata privilege is missing. Make sure you have sufficient privileges and the data stream actually exists.',
           })}
         </p>
       </EuiCallOut>

@@ -8,11 +8,7 @@
  */
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  DiscoverFlyouts,
-  dismissAllFlyoutsExceptFor,
-  type TraceIndexes,
-} from '@kbn/discover-utils/src';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils/src';
 import { useFetch } from '@kbn/unified-histogram';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import React, { useEffect, useMemo } from 'react';
@@ -38,14 +34,13 @@ function TraceMetricsGrid({
   onBrushEnd,
   onFilter,
   abortController,
-  indexes,
   query,
   dataSource,
   renderToggleActions,
   chartToolbarCss,
   isComponentVisible,
+  dataView,
 }: ChartSectionProps & {
-  indexes: TraceIndexes;
   dataSource: DataSource;
 }) {
   const esqlQuery = useEsqlQueryInfo({
@@ -91,14 +86,16 @@ function TraceMetricsGrid({
     };
   }, []);
 
-  if (!indexes.apm.traces) {
+  const indexPattern = dataView?.getIndexPattern();
+
+  if (!indexPattern) {
     return undefined;
   }
 
   return (
     <Provider store={store}>
       <MetricsGridWrapper
-        indexPattern={indexes.apm.traces}
+        indexPattern={indexPattern}
         renderToggleActions={renderToggleActions}
         chartToolbarCss={chartToolbarCss}
         requestParams={requestParams}
@@ -110,7 +107,7 @@ function TraceMetricsGrid({
         <TraceMetricsProvider
           value={{
             dataSource,
-            indexes: indexes.apm.traces,
+            indexes: indexPattern,
             filters,
             requestParams,
             services,
