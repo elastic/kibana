@@ -14,7 +14,6 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 
-import { Subject } from 'rxjs';
 import { TEST_ES_HOST, TEST_ES_PORT, TEST_REMOTE_KIBANA_PORT } from '@kbn/test-services';
 import { applyFipsOverrides } from '../lib/fips_overrides';
 import { Config, readConfigFile } from '../../functional_test_runner';
@@ -28,31 +27,6 @@ import type { RunTestsOptions } from './flags';
  * Run servers and tests for each config
  */
 export async function runTests(log: ToolingLog, options: RunTestsOptions) {
-  const pause$ = new Subject<void>();
-  const releasePause = () => {
-    if (!pause$.closed) {
-      pause$.next();
-      pause$.complete();
-    }
-  };
-
-  let messageHandler: ((msg: unknown) => void) | undefined;
-  if (typeof process.on === 'function') {
-    messageHandler = (msg: unknown) => {
-      if (msg === 'FTR_CONTINUE') {
-        process.off('message', messageHandler!);
-        releasePause();
-      }
-    };
-    process.on('message', messageHandler);
-  }
-
-  function sendWarmupDoneSignal() {
-    if (typeof process.send === 'function') {
-      process.send('FTR_WARMUP_DONE');
-    }
-  }
-
   if (!process.env.CI) {
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
@@ -115,7 +89,6 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         log,
       });
       if (!hasTests) {
-        sendWarmupDoneSignal();
         // just run the FTR, no Kibana or ES, which will quickly report a skipped test group to ci-stats and continue
         await runFtr({
           log,
@@ -131,7 +104,6 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         const onEarlyExit = (msg: string) => {
           log.error(msg);
           abortCtrl.abort();
-          releasePause();
         };
 
         let shutdownEs;
@@ -202,28 +174,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             kibanaProcessNames.push(...remoteKibanaProcesses);
           }
 
-          sendWarmupDoneSignal();
-
           if (abortCtrl.signal.aborted) {
             return;
-          }
-
-          if (!pause$.closed) {
-            await new Promise<void>((resolve) => {
-              pause$.subscribe({
-                complete: () => {
-                  resolve();
-                },
-              });
-
-              abortCtrl.signal.addEventListener(
-                'abort',
-                () => {
-                  releasePause();
-                },
-                { once: true }
-              );
-            });
           }
 
           await runFtr({
@@ -261,9 +213,4 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       });
     });
   }
-  if (messageHandler) {
-    process.off('message', messageHandler);
-  }
-
-  releasePause();
 }
