@@ -26,24 +26,24 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useToggleWorkflow } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_toggle_workflow';
-import { setIsTestModalOpen } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
-import { useSaveYaml } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_save_yaml';
+import { PLUGIN_ID } from '../../../../common';
 import { useCapabilities } from '../../../hooks/use_capabilities';
+import { useKibana } from '../../../hooks/use_kibana';
+import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
+import { getRunWorkflowTooltipContent } from '../../../shared/ui';
+import { useSaveYaml } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_save_yaml';
+import { useToggleWorkflow } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_toggle_workflow';
 import {
   selectHasChanges,
   selectWorkflow,
 } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
-import { PLUGIN_ID } from '../../../../common';
-import { useKibana } from '../../../hooks/use_kibana';
+import { setIsTestModalOpen } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
 import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
-import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
-import { getRunWorkflowTooltipContent } from '../../../shared/ui';
 
 const buttonGroupOptions: EuiButtonGroupOptionProps[] = [
   {

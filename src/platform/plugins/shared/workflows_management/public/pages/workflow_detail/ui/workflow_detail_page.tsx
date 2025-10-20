@@ -7,23 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { WorkflowDetailEditor } from './workflow_detail_editor';
+import { WorkflowDetailHeader } from './workflow_detail_header';
+import { WorkflowEditorLayout } from './workflow_detail_layout';
+import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
+import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
+import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
+import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
+import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
+import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { useLoadWorkflow } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_load_workflow';
 import {
   selectWorkflowName,
   selectYamlString,
 } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
-import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
-import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
-import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
-import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
-import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { WorkflowDetailHeader } from './workflow_detail_header';
-import { WorkflowDetailEditor } from './workflow_detail_editor';
-import { WorkflowEditorLayout } from './workflow_detail_layout';
-import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 
 export function WorkflowDetailPage({ id }: { id: string }) {
   const { loadWorkflow, error, isLoading: isLoadingWorkflow } = useLoadWorkflow();
@@ -50,8 +51,23 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       <EuiEmptyPrompt
         iconType="error"
         color="danger"
-        title={<h2>Unable to load workflow</h2>}
-        body={<p>There was an error loading the workflow. {error}</p>}
+        title={
+          <h2>
+            <FormattedMessage
+              id="workflows.workflowDetail.error.title"
+              defaultMessage="Unable to load workflow"
+            />
+          </h2>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="workflows.workflowDetail.error.body"
+              defaultMessage="There was an error loading the workflow. {error}"
+              values={{ error }}
+            />
+          </p>
+        }
       />
     );
   }

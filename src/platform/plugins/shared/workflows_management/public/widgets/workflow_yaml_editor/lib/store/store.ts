@@ -8,9 +8,9 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
-import type { WorkflowsServices } from '../../../../types';
-import { workflowDetailReducer } from './slice';
 import { workflowComputationMiddleware } from './middleware';
+import { workflowDetailReducer } from './slice';
+import type { WorkflowsServices } from '../../../../types';
 
 // Store factory
 export const createWorkflowsStore = (services: WorkflowsServices) => {

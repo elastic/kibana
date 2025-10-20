@@ -8,20 +8,20 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { WorkflowYaml } from '@kbn/workflows';
 import { useDispatch, useSelector } from 'react-redux';
-import { setIsTestModalOpen } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import {
   getCachedDynamicConnectorTypes,
   getWorkflowZodSchemaLoose,
 } from '../../../../common/schema';
+import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
+import { useTestWorkflow } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_test_workflow';
 import {
   selectIsTestModalOpen,
   selectYamlString,
 } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
-import { useTestWorkflow } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_test_workflow';
+import { setIsTestModalOpen } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
 
 export const WorkflowDetailTestModal = () => {
   const dispatch = useDispatch();
@@ -31,7 +31,7 @@ export const WorkflowDetailTestModal = () => {
   const { testWorkflow } = useTestWorkflow();
 
   const handleRunWorkflow = useCallback(
-    (inputs: Record<string, any>) => {
+    (inputs: Record<string, unknown>) => {
       testWorkflow(inputs);
     },
     [testWorkflow]
