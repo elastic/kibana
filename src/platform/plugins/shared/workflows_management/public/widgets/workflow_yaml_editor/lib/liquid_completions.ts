@@ -259,6 +259,18 @@ export const LIQUID_FILTERS = [
     example: '{{ "Hello world" | remove_last: "l" }} => "Helo word"',
   },
   {
+    name: 'reject',
+    description: 'Removes items from an array that have a specific property value',
+    insertText: 'reject: "${1:property}", "${2:value}"',
+    example: '{{ products | reject: "type", "book" }} => [products without type="book"]',
+  },
+  {
+    name: 'reject_exp',
+    description: 'Removes items from an array that match an expression',
+    insertText: 'reject_exp: "${1:expression}"',
+    example: '{{ products | reject_exp: "item.price < 50" }} => [products where price >= 50]',
+  },
+  {
     name: 'replace',
     description:
       'Replaces every occurrence of the first argument in a string with the second argument',
