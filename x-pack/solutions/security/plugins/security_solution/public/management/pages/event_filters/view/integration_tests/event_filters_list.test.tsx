@@ -102,22 +102,7 @@ describe('When on the Event Filters list page', () => {
       };
     });
 
-    it('should not show indication if feature flag is disabled', async () => {
-      mockedContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: false });
-
-      await renderWithData();
-
-      expect(renderResult.getAllByTestId('EventFiltersListPage-card')).toHaveLength(3);
-      expect(
-        renderResult.queryAllByTestId(
-          'EventFiltersListPage-card-decorator-processDescendantIndication'
-        )
-      ).toHaveLength(0);
-    });
-
     it('should indicate to user if event filter filters process descendants', async () => {
-      mockedContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: true });
-
       await renderWithData();
 
       expect(renderResult.getAllByTestId('EventFiltersListPage-card')).toHaveLength(3);
@@ -129,7 +114,6 @@ describe('When on the Event Filters list page', () => {
     });
 
     it('should display additional `event.category is process` entry in tooltip', async () => {
-      mockedContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: true });
       const prefix = 'EventFiltersListPage-card-decorator-processDescendantIndicationTooltip';
 
       await renderWithData();
