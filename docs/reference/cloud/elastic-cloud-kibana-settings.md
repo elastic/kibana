@@ -496,7 +496,7 @@ Support for the The option `auto` was included here, when the config value is se
 
 
 `xpack.screenshotting.capture.timeouts.openUrl`
-:   Specify how long to allow the Reporting browser to wait for the "Loading…​" screen to dismiss and find the initial data for the Kibana page.  If the time is exceeded, a page screenshot is captured showing the current state, and the download link shows a warning message.
+:   Specify how long to allow the Reporting browser to wait for the "Loading…" screen to dismiss and find the initial data for the Kibana page.  If the time is exceeded, a page screenshot is captured showing the current state, and the download link shows a warning message.
 
     Defaults to `30000` (30 seconds).
 

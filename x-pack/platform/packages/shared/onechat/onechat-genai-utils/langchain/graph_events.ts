@@ -96,11 +96,15 @@ export const createMessageEvent = (
   };
 };
 
-export const createReasoningEvent = (reasoning: string): ReasoningEvent => {
+export const createReasoningEvent = (
+  reasoning: string,
+  { transient }: { transient?: boolean } = {}
+): ReasoningEvent => {
   return {
     type: ChatEventType.reasoning,
     data: {
       reasoning,
+      transient,
     },
   };
 };
