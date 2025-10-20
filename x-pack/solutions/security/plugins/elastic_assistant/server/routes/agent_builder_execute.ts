@@ -250,9 +250,7 @@ const executeStreaming = async ({
   actionTypeId,
   startTime,
   logger,
-  response,
   isEnabledKnowledgeBase,
-  conversationId,
 }: {
   onechatServices: OnechatPluginStart;
   connectorId: string;
@@ -271,9 +269,7 @@ const executeStreaming = async ({
   actionTypeId: string;
   startTime: number;
   logger: Logger;
-  response: KibanaResponseFactory;
   isEnabledKnowledgeBase: boolean;
-  conversationId?: string;
 }): Promise<StreamResponseWithHeaders> => {
   logger.debug(`🚀 [AGENT_BUILDER] Starting streaming agent execution`);
 
@@ -703,9 +699,7 @@ export async function agentBuilderExecute({
         actionTypeId,
         startTime,
         logger,
-        response,
         isEnabledKnowledgeBase,
-        conversationId,
       });
       return response.ok<StreamResponseWithHeaders['body']>(result);
     } else {

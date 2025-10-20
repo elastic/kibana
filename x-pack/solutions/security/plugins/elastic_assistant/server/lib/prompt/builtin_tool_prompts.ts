@@ -138,4 +138,28 @@ Use this tool when:
         "Call this for knowledge about the latest entity risk score and the inputs that contributed to the calculation (sorted by 'kibana.alert.risk_score') in the environment, or when answering questions about how critical or risky an entity is. When informing the risk score value for a entity you must use the normalized field 'calculated_score_norm'.\n\nWORKFLOW: This tool requires identifier_type and identifier parameters. You MUST follow this exact sequence:\n1. First call the assistant_settings tool with toolId=\"core.security.entity_risk_score\"\n2. Use the retrieved settings to call this tool with the required parameters",
     },
   },
+  {
+    promptId: 'GenerateESQLTool',
+    promptGroupId: builtinPromptGroupId,
+    prompt: {
+      default:
+        'You MUST use the "GenerateESQLTool" function when the user wants to:\n  - generate an ES|QL query\n  - convert queries from another language to ES|QL they can run on their cluster\n\n  ALWAYS use this tool to generate ES|QL queries and never generate ES|QL any other way.',
+    },
+  },
+  {
+    promptId: 'AskAboutESQLTool',
+    promptGroupId: builtinPromptGroupId,
+    prompt: {
+      default:
+        'You MUST use the "AskAboutESQLTool" function when the user:\n- asks for help with ES|QL\n- asks about ES|QL syntax\n- asks for ES|QL examples\n- asks for ES|QL documentation\n- asks for ES|QL best practices\n- asks for ES|QL optimization\n\nNever use this tool when the user wants to generate a ES|QL for their data.',
+    },
+  },
+  {
+    promptId: 'IntegrationKnowledgeTool',
+    promptGroupId: builtinPromptGroupId,
+    prompt: {
+      default:
+        'Call this for knowledge from Fleet-installed integrations, which contains information on how to configure and use integrations for data ingestion.',
+    },
+  },
 ];
