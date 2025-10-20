@@ -23,7 +23,7 @@ jest.mock('../../../../app_context', () => ({
       info: jest.fn(),
       debug: jest.fn(),
     }),
-    getConfig: jest.fn().mockReturnValue({
+    getExperimentalFeatures: jest.fn().mockReturnValue({
       installIntegrationsKnowledge: true,
     }),
   },
@@ -604,9 +604,9 @@ describe('stepSaveKnowledgeBase', () => {
     });
 
     it('should skip knowledge base processing when installIntegrationsKnowledge feature flag is disabled', async () => {
-      // Mock app context service to return config with feature flag disabled
+      // Mock app context service to return experimental features with flag disabled
       const { appContextService } = jest.requireMock('../../../../app_context');
-      appContextService.getConfig.mockReturnValue({
+      appContextService.getExperimentalFeatures.mockReturnValue({
         installIntegrationsKnowledge: false,
       });
 
@@ -630,15 +630,15 @@ describe('stepSaveKnowledgeBase', () => {
       expect(updateEsAssetReferences).not.toHaveBeenCalled();
 
       // Reset the mock back to enabled for other tests
-      appContextService.getConfig.mockReturnValue({
+      appContextService.getExperimentalFeatures.mockReturnValue({
         installIntegrationsKnowledge: true,
       });
     });
 
     it('should process knowledge base when installIntegrationsKnowledge feature flag is enabled', async () => {
-      // Ensure app context service returns config with feature flag enabled
+      // Ensure app context service returns experimental features with flag enabled
       const { appContextService } = jest.requireMock('../../../../app_context');
-      appContextService.getConfig.mockReturnValue({
+      appContextService.getExperimentalFeatures.mockReturnValue({
         installIntegrationsKnowledge: true,
       });
 

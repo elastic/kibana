@@ -69,11 +69,11 @@ export async function stepSaveKnowledgeBase(context: InstallContext): Promise<vo
     `Knowledge base step: Starting for package ${packageInfo.name}@${packageInfo.version}`
   );
 
-  // Check if knowledge base installation is enabled via feature flag
-  const config = appContextService.getConfig();
-  if (!config?.installIntegrationsKnowledge) {
+  // Check if knowledge base installation is enabled via experimental feature flag
+  const experimentalFeatures = appContextService.getExperimentalFeatures();
+  if (!experimentalFeatures.installIntegrationsKnowledge) {
     logger.debug(
-      `Knowledge base step: Skipping knowledge base save - installIntegrationsKnowledge feature flag is disabled`
+      `Knowledge base step: Skipping knowledge base save - installIntegrationsKnowledge experimental feature is disabled`
     );
     return;
   }
