@@ -35,8 +35,7 @@ export const ValidChannelIdParamsSchema = schema.object({
 export const PostMessageSubActionParamsSchema = schema.object({
   /**
    * @deprecated Use `channelNames` or `channelIds` instead
-   * Note:
-   * - `channelNames` takes priority over `channelIds` and `channels`
+   * `channelNames` takes priority over `channelIds` and `channels`
    */
   channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
   channelIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
@@ -70,8 +69,7 @@ export function validateChannelName(value?: string) {
 export const PostBlockkitSubActionParamsSchema = schema.object({
   /**
    * @deprecated Use `channelNames` or `channelIds` instead
-   * Note:
-   * - `channelNames` takes priority over `channelIds` and `channels`
+   *`channelNames` takes priority over `channelIds` and `channels`
    */
   channels: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
   channelIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1 })),
