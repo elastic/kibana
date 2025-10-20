@@ -20,7 +20,11 @@ import type { CommandArgDefinition } from '../../console/types';
 import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
 import { getRbacControl } from '../../../../../common/endpoint/service/response_actions/utils';
 import { UploadActionResult } from '../command_render_components/upload_action';
-import { ArgumentFileSelector } from '../../console_argument_selectors';
+import {
+  ArgumentFileSelector,
+  CrowdstrikeScriptInputParams,
+  MicrosoftScriptInputParams,
+} from '../../console_argument_selectors';
 import type { ParsedArgData } from '../../console/service/types';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
@@ -837,6 +841,8 @@ const adjustCommandsForCrowdstrike = ({
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.commandLine.about,
               mustHaveValue: 'non-empty-string',
+              selectorShowTextValue: true,
+              SelectorComponent: CrowdstrikeScriptInputParams,
             },
             HostPath: {
               required: false,
@@ -911,6 +917,8 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
               allowMultiples: false,
               about: MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS.runscript.args.args.about,
               mustHaveValue: 'non-empty-string',
+              selectorShowTextValue: true,
+              SelectorComponent: MicrosoftScriptInputParams,
             },
             ...commandCommentArgument(),
           },
