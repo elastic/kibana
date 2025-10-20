@@ -149,21 +149,22 @@ export class CstToAstConverter {
     const setCommandCtxs = ctx.setCommand_list();
     const singleStatement = ctx.singleStatement();
 
+    let header: ast.ESQLAstSetHeaderCommand[] | undefined;
+    // Process SET instructions and create header if they exist
+    if (setCommandCtxs && setCommandCtxs.length > 0) {
+      header = this.fromSetCommands(setCommandCtxs);
+    }
+
     // Get the main query from singleStatement
     const query = this.fromSingleStatement(singleStatement);
 
     if (!query) {
-      return undefined;
+      const emptyQuery = Builder.expression.query([], this.getParserFields(ctx), header);
+      emptyQuery.incomplete = true;
+      return emptyQuery;
     }
 
-    // Process SET instructions and create header if they exist
-    if (setCommandCtxs && setCommandCtxs.length > 0) {
-      const header = this.fromSetCommands(setCommandCtxs);
-
-      if (header && header.length > 0) {
-        query.header = header;
-      }
-    }
+    query.header = header;
 
     return query;
   }
@@ -271,18 +272,29 @@ export class CstToAstConverter {
 
   private fromSetCommand(ctx: cst.SetCommandContext): ast.ESQLAstSetHeaderCommand {
     const setFieldCtx = ctx.setField();
-    const arg = this.fromSetFieldContext(setFieldCtx);
-    const command = Builder.header.command.set([arg], {}, this.getParserFields(ctx));
+    const binaryExpression = this.fromSetFieldContext(setFieldCtx);
+
+    const args = binaryExpression ? [binaryExpression] : [];
+    const command = Builder.header.command.set(args, {}, this.getParserFields(ctx));
 
     return command;
   }
 
-  private fromSetFieldContext(ctx: cst.SetFieldContext): ast.ESQLBinaryExpression<'='> {
+  private fromSetFieldContext(ctx: cst.SetFieldContext): ast.ESQLBinaryExpression<'='> | null {
     const leftCtx = ctx.identifier();
     const rightCtx = ctx.constant();
+
+    if (!leftCtx || !rightCtx) {
+      return null;
+    }
+
     const left = this.toIdentifierFromContext(leftCtx);
     const right = this.fromConstant(rightCtx) as ast.ESQLLiteral;
     const expression = this.toBinaryExpression('=', ctx, [left, right]);
+
+    if (left.incomplete || right.incomplete) {
+      expression.incomplete = true;
+    }
 
     return expression;
   }
