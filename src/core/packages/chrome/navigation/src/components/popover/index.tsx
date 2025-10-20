@@ -12,7 +12,6 @@ import { css } from '@emotion/react';
 import type {
   ReactNode,
   ReactElement,
-  FocusEventHandler,
   KeyboardEventHandler,
   MouseEvent,
   KeyboardEvent,
@@ -183,23 +182,6 @@ export const SideNavPopover = ({
     [handleClose]
   );
 
-  const handleBlur: FocusEventHandler = useCallback(
-    (e) => {
-      clearTimeout();
-
-      const nextFocused = e.relatedTarget;
-      const isStayingInComponent =
-        nextFocused &&
-        (triggerRef.current?.contains(nextFocused) || popoverRef.current?.contains(nextFocused));
-      const isTrappedByFlyout = (nextFocused as HTMLElement)?.classList.contains('euiFlyout');
-
-      if (isStayingInComponent === false && isTrappedByFlyout === false) {
-        handleClose();
-      }
-    },
-    [clearTimeout, handleClose]
-  );
-
   // Clean up on unmount
   useEffect(() => {
     return () => {
@@ -246,7 +228,6 @@ export const SideNavPopover = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={handleMouseEnter}
-      onBlur={handleBlur}
     >
       <EuiPopover
         aria-label={label}
