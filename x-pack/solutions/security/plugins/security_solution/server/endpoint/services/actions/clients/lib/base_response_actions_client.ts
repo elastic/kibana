@@ -670,9 +670,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         : {}),
     };
 
-    if (isSpacesEnabled) {
-      await this.ensureActionRequestsIndexIsConfigured();
-    }
+    await this.ensureActionRequestsIndexIsConfigured();
 
     this.log.debug(() => `creating action request document:\n${stringify(doc)}`);
 

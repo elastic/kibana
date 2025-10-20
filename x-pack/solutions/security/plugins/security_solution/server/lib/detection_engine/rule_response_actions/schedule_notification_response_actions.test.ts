@@ -51,8 +51,6 @@ describe('ScheduleNotificationResponseActions', () => {
   describe('Osquery', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      // @ts-expect-error assignment to readonly property
-      endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
     });
     const simpleQuery = 'select * from uptime';
     const defaultQueryParams = {
@@ -108,8 +106,6 @@ describe('ScheduleNotificationResponseActions', () => {
     });
 
     it('should use default space id when space awareness is disabled', () => {
-      // @ts-expect-error assignment to readonly property
-      endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
       const signals = getSignals();
       scheduleNotificationResponseActions({
         signals,
@@ -425,8 +421,6 @@ describe('ScheduleNotificationResponseActions', () => {
 
     describe('and when space awareness is enabled', () => {
       beforeEach(() => {
-        // @ts-expect-error
-        endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
       });
 
       it('should initialize a response action client with the alert space id when space awareness is enabled', async () => {

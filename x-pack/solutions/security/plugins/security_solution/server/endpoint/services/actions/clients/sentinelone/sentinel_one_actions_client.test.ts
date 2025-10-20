@@ -2373,8 +2373,6 @@ describe('SentinelOneActionsClient class', () => {
 
   describe('and space awareness is enabled', () => {
     beforeEach(() => {
-      // @ts-expect-error assignment to readonly prop
-      classConstructorOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
         true;
 
       getActionDetailsByIdMock.mockResolvedValue({});

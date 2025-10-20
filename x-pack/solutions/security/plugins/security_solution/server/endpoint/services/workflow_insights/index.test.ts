@@ -509,8 +509,6 @@ describe('SecurityWorkflowInsightsService', () => {
     let request: KibanaRequest<unknown, unknown, DefendInsightsGetRequestQuery>;
 
     const setupWithMockFleet = () => {
-      // @ts-expect-error write to readonly property
-      mockEndpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
         true;
 
       const { ensureInCurrentSpace } = mockEndpointAppContextService.getInternalFleetServices();
@@ -535,9 +533,6 @@ describe('SecurityWorkflowInsightsService', () => {
 
     describe('ensureAgentIdsInCurrentSpace', () => {
       it('should not call fleetServices.ensureInCurrentSpace when the experimental feature is disabled', async () => {
-        // @ts-expect-error write to readonly property
-        mockEndpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-          false;
 
         await securityWorkflowInsightsService.ensureAgentIdsInCurrentSpace(request, ['agent-1']);
 

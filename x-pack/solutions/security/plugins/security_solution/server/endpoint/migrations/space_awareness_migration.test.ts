@@ -44,8 +44,6 @@ describe('Space awareness migration', () => {
 
   beforeEach(() => {
     endpointServiceMock = createMockEndpointAppContextService();
-    // @ts-expect-error
-    endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
     migrationsState = {
       [ARTIFACTS_MIGRATION_REF_DATA_ID]: {
         id: ARTIFACTS_MIGRATION_REF_DATA_ID,
@@ -83,8 +81,6 @@ describe('Space awareness migration', () => {
   });
 
   it('should do nothing if feature flag is disabled', async () => {
-    // @ts-expect-error
-    endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
 
     await expect(migrateEndpointDataToSupportSpaces(endpointServiceMock)).resolves.toBeUndefined();
     expect(endpointServiceMock.getInternalFleetServices).not.toHaveBeenCalled();

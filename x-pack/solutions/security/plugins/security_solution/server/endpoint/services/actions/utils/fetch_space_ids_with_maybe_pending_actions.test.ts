@@ -21,8 +21,6 @@ describe('fetchSpaceIdsWithMaybePendingActions()', () => {
   beforeEach(() => {
     endpointServiceMock = createMockEndpointAppContextService();
 
-    // @ts-expect-error
-    endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
 
     spaceIdsAggregation = { buckets: [{ key: 'foo' }, { key: 'bar' }] };
 
@@ -38,9 +36,6 @@ describe('fetchSpaceIdsWithMaybePendingActions()', () => {
   });
 
   it('should return array with default space id if space awareness feature is disabled', async () => {
-    // @ts-expect-error
-    endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
-
     await expect(
       fetchSpaceIdsWithMaybePendingActions(endpointServiceMock, 'endpoint')
     ).resolves.toEqual([DEFAULT_SPACE_ID]);

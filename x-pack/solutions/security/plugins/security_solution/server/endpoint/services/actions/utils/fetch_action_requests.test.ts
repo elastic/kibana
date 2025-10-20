@@ -408,8 +408,6 @@ describe('fetchActionRequests()', () => {
 
   describe('and space awareness feature is enabled', () => {
     beforeEach(() => {
-      // @ts-expect-error
-      fetchOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
         true;
     });
 

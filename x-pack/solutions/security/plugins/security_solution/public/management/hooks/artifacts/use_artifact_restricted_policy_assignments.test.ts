@@ -32,7 +32,6 @@ describe('useArtifactRestrictedPolicyAssignments()', () => {
       });
     };
 
-    testContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
 
     item = new ExceptionsListItemGenerator('seed').generateTrustedApp({
       tags: [buildPerPolicyTag('1'), buildPerPolicyTag('2'), buildPerPolicyTag('3')],
@@ -48,8 +47,7 @@ describe('useArtifactRestrictedPolicyAssignments()', () => {
     });
   });
 
-  it('should return empty array when feature flag is disabled', () => {
-    testContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: false });
+  it('should return empty array when no policies are inaccessible', () => {
     const { result } = renderHook();
 
     expect(result.current).toEqual({ isLoading: false, policyIds: [] });

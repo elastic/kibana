@@ -1735,8 +1735,6 @@ describe('ManifestManager', () => {
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
-      // @ts-expect-error
-      context.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
 
       const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);

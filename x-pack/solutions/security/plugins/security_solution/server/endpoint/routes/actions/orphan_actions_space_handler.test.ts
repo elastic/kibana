@@ -37,8 +37,6 @@ describe('Orphan response action APIs', () => {
     ({ httpHandlerContextMock, httpResponseMock } = apiTestSetup);
     endpointServiceMock = apiTestSetup.endpointAppContextMock.service;
 
-    // @ts-expect-error
-    endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
 
     registerOrphanActionsSpaceRoute(
       apiTestSetup.routerMock,
@@ -76,8 +74,6 @@ describe('Orphan response action APIs', () => {
     });
 
     it('should return not found error if feature flag is disabled', async () => {
-      // @ts-expect-error
-      endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
 
       await readHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
@@ -121,8 +117,6 @@ describe('Orphan response action APIs', () => {
     });
 
     it('should return not found error if feature flag is disabled', async () => {
-      // @ts-expect-error
-      endpointServiceMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
 
       await writeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 

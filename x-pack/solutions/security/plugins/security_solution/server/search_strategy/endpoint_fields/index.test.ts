@@ -92,8 +92,6 @@ describe('Endpoint fields', () => {
       getEndpointAuthzInitialStateMock()
     );
 
-    // @ts-expect-error write to readonly property
-    endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
   });
 
   afterAll(() => {
@@ -145,8 +143,6 @@ describe('Endpoint fields', () => {
       beforeEach(() => {
         // @ts-expect-error write to readonly property
         endpointAppContextService.experimentalFeatures = {
-          ...endpointAppContextService.experimentalFeatures,
-          endpointManagementSpaceAwarenessEnabled: true,
         };
       });
 

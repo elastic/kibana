@@ -110,7 +110,6 @@ describe('when calling the Suggestions route handler', () => {
       beforeEach(() => {
         mockEndpointContext.experimentalFeatures = {
           ...mockEndpointContext.experimentalFeatures,
-          endpointManagementSpaceAwarenessEnabled: false,
         };
         suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
           config$,
@@ -164,7 +163,6 @@ describe('when calling the Suggestions route handler', () => {
       beforeEach(() => {
         mockEndpointContext.experimentalFeatures = {
           ...mockEndpointContext.experimentalFeatures,
-          endpointManagementSpaceAwarenessEnabled: true,
         };
         suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
           config$,
@@ -354,7 +352,6 @@ describe('when calling the Suggestions route handler', () => {
       // Set up context without space awareness for this legacy test
       mockEndpointContext.experimentalFeatures = {
         ...mockEndpointContext.experimentalFeatures,
-        endpointManagementSpaceAwarenessEnabled: false,
       };
       suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(config$, mockEndpointContext);
 
@@ -422,7 +419,6 @@ describe('when calling the Suggestions route handler', () => {
         beforeEach(() => {
           mockEndpointContext.experimentalFeatures = {
             ...mockEndpointContext.experimentalFeatures,
-            endpointManagementSpaceAwarenessEnabled: false,
           };
           suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
             config$,
@@ -601,7 +597,6 @@ describe('when calling the Suggestions route handler', () => {
         beforeEach(() => {
           mockEndpointContext.experimentalFeatures = {
             ...mockEndpointContext.experimentalFeatures,
-            endpointManagementSpaceAwarenessEnabled: true,
           };
           suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
             config$,
@@ -914,7 +909,6 @@ describe('when calling the Suggestions route handler', () => {
       // Set up context without space awareness for this test
       mockEndpointContext.experimentalFeatures = {
         ...mockEndpointContext.experimentalFeatures,
-        endpointManagementSpaceAwarenessEnabled: false,
       };
       suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(config$, mockEndpointContext);
 

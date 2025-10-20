@@ -45,13 +45,9 @@ describe('Artifacts: setFindRequestFilterScopeToActiveSpace()', () => {
       sortOrder: undefined,
     };
 
-    // @ts-expect-error updating a readonly field
-    endpointAppContextServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
   });
 
   it('should nothing if feature flag is disabled', async () => {
-    // @ts-expect-error updating a readonly field
-    endpointAppContextServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
     await setFindRequestFilterScopeToActiveSpace(
       endpointAppContextServices,
       kibanaRequest,

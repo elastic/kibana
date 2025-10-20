@@ -15,7 +15,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   const securitySolutionEnableExperimental: Array<keyof SecuritySolutionExperimentalFeatures> = [
-    'endpointManagementSpaceAwarenessEnabled',
   ];
   const fleetEnableExperimental: Partial<FleetExperimentalFeatures> = {
     useSpaceAwareness: true,

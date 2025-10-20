@@ -134,7 +134,7 @@ export const getEndpointSuggestionsRequestHandler = (
           savedObjects.client,
           {
             kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:endpoint`,
-            spaceIds: isSpaceAwarenessEnabled ? [spaceId] : ['*'],
+            spaceIds: [spaceId],
           }
         );
         for await (const batch of endpointPackagePolicies) {

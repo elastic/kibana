@@ -323,7 +323,6 @@ describe.each([
     });
 
     beforeEach(() => {
-      appTestContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
       authzMock = appTestContext.getUserPrivilegesMockSetter(mockUserPrivileges);
       authzMock.set({ canManageGlobalArtifacts: false });
       (item as ExceptionListItemSchema).tags = [GLOBAL_ARTIFACT_TAG, buildSpaceOwnerIdTag('foo')];
@@ -333,8 +332,7 @@ describe.each([
       authzMock.reset();
     });
 
-    it('should render menu if feature flag is disabled', () => {
-      appTestContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: false });
+    it('should render menu', () => {
       render({ actions });
 
       expect(

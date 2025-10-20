@@ -218,8 +218,6 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
     const itemCanNotBeManagedInActiveSpaceErrorMessage =
       'EndpointArtifactError: Updates to this shared item can only be done from the following space ID: foo (or by someone having global artifact management privilege)';
     const setSpaceAwarenessFeatureFlag = (value: 'enabled' | 'disabled'): void => {
-      // @ts-expect-error updating a readonly field
-      endpointAppContextServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
         value === 'enabled';
     };
     let authzMock: EndpointAuthz;
