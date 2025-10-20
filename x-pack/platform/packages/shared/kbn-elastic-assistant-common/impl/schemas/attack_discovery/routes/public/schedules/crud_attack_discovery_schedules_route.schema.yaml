@@ -55,7 +55,22 @@ paths:
                "schedule": {
                  "interval": "24h"
                },
-               "actions": []
+               "actions": [
+                  {
+                     "action_type_id": ".cases",
+                     "id": "system-connector-.cases",
+                     "params": {
+                       "subAction": "run",
+                       "subActionParams": {
+                         "timeWindow": "7d",
+                         "reopenClosedCases": false,
+                         "groupingBy": [],
+                         "templateId": null
+                       }
+                     },
+                     "uuid": "12345678-1234-1234-1234-123456789012"
+                   }
+               ]
              }'
       x-labels: [ess, serverless]
       operationId: CreateAttackDiscoverySchedules
