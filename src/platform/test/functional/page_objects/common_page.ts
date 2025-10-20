@@ -278,8 +278,8 @@ export class CommonPageObject extends FtrService {
       insertTimestamp = true,
       retryOnFatalError = true,
     } = {}
-  ) {
-    // Phase 1: Get the app URL
+  ): Promise<void> {
+    // Phase 1: Get the app URL.
     // Check if app has custom config (for apps with special routing needs)
     const hasCustomConfig = this.config.has(['apps', appName]);
     const appConfig = hasCustomConfig ? this.config.get(['apps', appName]) : null;
@@ -301,15 +301,12 @@ export class CommonPageObject extends FtrService {
     // Check if we're already on the target URL
     const currentUrlBeforeNav = await this.browser.getCurrentUrl();
 
-    const normalizedCurrentUrl = decodeURIComponent(currentUrlBeforeNav)
-      .replace(/\/\/\w+:\w+@/, '//')
-      .replace(':80/', '/')
-      .replace(':443/', '/');
-    const normalizedAppUrl = decodeURIComponent(appUrl).replace(':80/', '/').replace(':443/', '/');
+    const normalizedCurrentUrl = this.normalizeUrlForComparison(currentUrlBeforeNav);
+    const normalizedAppUrl = this.normalizeUrlForComparison(appUrl);
 
     if (normalizedCurrentUrl.startsWith(normalizedAppUrl)) {
-      this.log.debug(`Already on target URL for ${appName}, skipping navigation`);
-      return currentUrlBeforeNav;
+      this.log.debug(`Already in the target app for ${appName}, skipping navigation.`);
+      return;
     }
 
     // Phase 2: Navigate to the app and verify it loaded successfully
@@ -331,32 +328,20 @@ export class CommonPageObject extends FtrService {
         ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
         : await this.browser.getCurrentUrl();
 
-      // If navigating to the `home` app, and we want to skip the Welcome page, but the chrome is still hidden,
-      // set the relevant localStorage key to skip the Welcome page and throw an error to try to navigate again.
-      if (
-        appName === 'home' &&
-        currentUrl.includes('app/home') &&
-        disableWelcomePrompt &&
-        (await this.isWelcomeScreen())
-      ) {
-        await this.browser.setLocalStorageItem('home:welcome:show', 'false');
-        const msg = `Failed to skip the Welcome page when navigating the app ${appName}`;
-        this.log.debug(msg);
-        throw new Error(msg);
-      }
+      // Check if home welcome screen needs to be disabled
+      await this.handleHomeWelcomeScreen(appName, currentUrl, disableWelcomePrompt);
 
-      currentUrl = (await this.browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
+      currentUrl = await this.browser.getCurrentUrl();
 
-      const decodedAppUrl = decodeURIComponent(appUrl);
-      const decodedCurrentUrl = decodeURIComponent(currentUrl);
+      const normalizedAppUrlForValidation = this.normalizeUrlForComparison(appUrl);
+      const normalizedCurrentUrlForValidation = this.normalizeUrlForComparison(currentUrl);
 
-      const navSuccessful = decodedCurrentUrl
-        .replace(':80/', '/')
-        .replace(':443/', '/')
-        .startsWith(decodedAppUrl.replace(':80/', '/').replace(':443/', '/'));
+      const navSuccessful = normalizedCurrentUrlForValidation.startsWith(
+        normalizedAppUrlForValidation
+      );
 
       if (!navSuccessful) {
-        const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${decodedAppUrl} currentUrl=${decodedCurrentUrl}`;
+        const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${normalizedAppUrlForValidation} currentUrl=${normalizedCurrentUrlForValidation}`;
         this.log.debug(msg);
         throw new Error(msg);
       }
@@ -370,7 +355,6 @@ export class CommonPageObject extends FtrService {
       return currentUrl;
     });
 
-    // Wait for URL to stabilize (no more redirects)
     let lastUrl = finalUrl;
 
     // Phase 3: Wait for URL to stabilize (no more redirects)
@@ -616,6 +600,41 @@ export class CommonPageObject extends FtrService {
 
   async unsetTime() {
     await this.kibanaServer.uiSettings.unset('timepicker:timeDefaults');
+  }
+
+  /**
+   * Normalizes a URL for comparison by:
+   * - Decoding URI components
+   * - Removing credentials (username:password@)
+   * - Removing default HTTP/HTTPS ports (:80 and :443)
+   */
+  private normalizeUrlForComparison(url: string): string {
+    return decodeURIComponent(url)
+      .replace(/\/\/\w+:\w+@/, '//')
+      .replace(':80/', '/')
+      .replace(':443/', '/');
+  }
+
+  /**
+   * Checks if navigating to the home app with welcome screen showing.
+   * If so, disables the welcome screen and throws an error to trigger a retry.
+   */
+  private async handleHomeWelcomeScreen(
+    appName: string,
+    currentUrl: string,
+    disableWelcomePrompt: boolean
+  ): Promise<void> {
+    if (
+      appName === 'home' &&
+      currentUrl.includes('app/home') &&
+      disableWelcomePrompt &&
+      (await this.isWelcomeScreen())
+    ) {
+      await this.browser.setLocalStorageItem('home:welcome:show', 'false');
+      const msg = `Failed to skip the Welcome page when navigating the app ${appName}`;
+      this.log.debug(msg);
+      throw new Error(msg);
+    }
   }
 }
 export interface TimeStrings extends Record<string, any> {
