@@ -65,20 +65,22 @@ export function makeFtrConfigProvider(
       journeyName: config.getName(),
     };
 
-    const allApmLabels = Object.entries({
+    const allApmLabels = {
       ...config.getExtraApmLabels(),
       testJobId,
       testBuildId,
       journeyName: config.getName(),
       ftrConfig: config.getRepoRelPath(),
       ...JOURNEY_APM_CONFIG.globalLabels,
-    })
-      .flatMap(([key, value]) => (value == null ? [] : `${key}=${value}`))
-      .join(',');
+    };
 
     Object.entries(allApmLabels).forEach(([key, value]) => {
       apm.setGlobalLabel(key, value);
     });
+
+    const allApmLabelsStringified = Object.entries(allApmLabels)
+      .flatMap(([key, value]) => (value == null ? [] : `${key}=${value}`))
+      .join(',');
 
     /**
      * This is used by CI to set the docker registry port
@@ -142,7 +144,7 @@ export function makeFtrConfigProvider(
           ELASTIC_APM_CAPTURE_BODY: JOURNEY_APM_CONFIG.captureBody,
           ELASTIC_APM_CAPTURE_HEADERS: JOURNEY_APM_CONFIG.captureRequestHeaders,
           ELASTIC_APM_LONG_FIELD_MAX_LENGTH: JOURNEY_APM_CONFIG.longFieldMaxLength,
-          ELASTIC_APM_GLOBAL_LABELS: allApmLabels,
+          ELASTIC_APM_GLOBAL_LABELS: allApmLabelsStringified,
         },
       },
     };
