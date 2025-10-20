@@ -514,6 +514,78 @@ describe('WorkflowContextManager', () => {
       const context = testContainer.underTest.getContext();
       expect(context.foreach).toBeUndefined();
     });
+
+    it('should override foreach context', () => {
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        scopeStack: [] as StackFrame[],
+        context: {
+          inputs: {
+            remainingKey: 'some string',
+            overridenKey: true,
+          },
+          contextOverride: {
+            foreach: {
+              item: 'fake',
+              index: 200,
+              total: 100500,
+            },
+          },
+        } as Record<string, any>,
+      } as EsWorkflowExecution);
+
+      const context = testContainer.underTest.getContext();
+      expect(context.foreach).toEqual({
+        item: 'fake',
+        index: 200,
+        total: 100500,
+      });
+    });
+
+    it('should not override foreach context if contextOverride.foreach is not present', () => {
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        scopeStack: [
+          {
+            stepId: 'outerForeachStep',
+            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
+          },
+        ] as StackFrame[],
+        context: {
+          contextOverride: {
+            foreach: {
+              item: 'fake',
+              index: 200,
+              total: 100500,
+            },
+          },
+        } as Record<string, any>,
+      } as EsWorkflowExecution);
+      testContainer.workflowExecutionState.getStepExecution = jest
+        .fn()
+        .mockImplementation((stepExecutionId) => {
+          if (stepExecutionId === 'outerForeachStep_generated') {
+            return {
+              stepType: 'foreach',
+              state: {
+                items: ['item1', 'item2', 'item3'],
+                index: 0,
+                item: 'item1',
+                total: 3,
+              },
+            };
+          }
+          return undefined;
+        });
+
+      const context = testContainer.underTest.getContext();
+      expect(context.foreach).toEqual({
+        items: ['item1', 'item2', 'item3'],
+        index: 0,
+        item: 'item1',
+        total: 3,
+      });
+    });
   });
 
   describe('steps context', () => {
