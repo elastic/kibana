@@ -15,7 +15,7 @@ export function getSettingsCompletionItems(isServerless?: boolean): ISuggestionI
   return (
     settings
       // Filter out serverless-only settings if not in serverless mode, if not flavour is provided don't return serverlessOnly settings.
-      .filter((setting) => !setting.serverlessOnly || isServerless)
+      .filter((setting) => (isServerless ? setting.serverlessOnly : !setting.serverlessOnly))
       .map((setting) =>
         withAutoSuggest({
           label: setting.name,

@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import type { MockedICommandCallbacks } from '../../../__tests__/context_fixtures';
 import { getMockCallbacks, mockContext } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
@@ -41,21 +40,24 @@ const testSetAutocomplete = async (
 describe('SET Autocomplete', () => {
   describe('Setting name suggestions -- Serverless', () => {
     const mockCallbacks = { ...getMockCallbacks(), isServerless: true };
+    const serverlessSettings = settings
+      .filter((s) => s.serverlessOnly)
+      .map((setting) => `${setting.name} = `);
 
     it('suggests available settings after SET command', async () => {
-      await testSetAutocomplete('SET ', ['project_routing = '], undefined, mockCallbacks);
+      await testSetAutocomplete('SET ', serverlessSettings, undefined, mockCallbacks);
     });
 
     it('suggests available settings with multiple spaces', async () => {
-      await testSetAutocomplete('SET   ', ['project_routing = '], undefined, mockCallbacks);
+      await testSetAutocomplete('SET   ', serverlessSettings, undefined, mockCallbacks);
     });
 
     it('suggests available settings with tab characters', async () => {
-      await testSetAutocomplete('SET\t', ['project_routing = '], undefined, mockCallbacks);
+      await testSetAutocomplete('SET\t', serverlessSettings, undefined, mockCallbacks);
     });
 
     it('suggests settings for partial setting name', async () => {
-      await testSetAutocomplete('SET project', ['project_routing = '], undefined, mockCallbacks);
+      await testSetAutocomplete('SET project', serverlessSettings, undefined, mockCallbacks);
     });
 
     it('suggests assignment operator after setting name', async () => {
@@ -64,8 +66,11 @@ describe('SET Autocomplete', () => {
   });
 
   describe('Setting name suggestions -- Traditional', () => {
+    const traditionalSettings = settings
+      .filter((s) => !s.serverlessOnly)
+      .map((setting) => `${setting.name} = `);
     it('suggests no settings after SET command as there is none available yet', async () => {
-      await testSetAutocomplete('SET ', []);
+      await testSetAutocomplete('SET ', traditionalSettings);
     });
   });
 
