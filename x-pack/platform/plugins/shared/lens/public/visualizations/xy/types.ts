@@ -38,7 +38,7 @@ import {
   IconChartBarPercentage,
   IconChartBarHorizontal,
 } from '@kbn/chart-icons';
-import type { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
+import type { AxesSettingsConfig } from '@kbn/lens-common';
 
 import type { VisualizationType, ValueLabelConfig } from '@kbn/lens-common';
 import type { CollapseFunction } from '../../../common/expressions';

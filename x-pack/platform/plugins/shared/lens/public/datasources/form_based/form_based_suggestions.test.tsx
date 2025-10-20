@@ -1588,7 +1588,7 @@ describe('IndexPattern Data Source suggestions', () => {
         indexPatternId: '1',
         ignoreGlobalFilters: false,
       },
-    ] as NavigateToLensLayer[];
+    ] as unknown as NavigateToLensLayer[];
     function stateWithoutLayer() {
       return {
         ...testInitialState(),

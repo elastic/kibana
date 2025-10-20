@@ -36,6 +36,7 @@ function buildVisualizationState(config: LensGaugeConfig): GaugeVisualizationSta
     shape: layer.shape || 'horizontalBullet',
     labelMajorMode: 'auto',
     metricAccessor: ACCESSOR,
+    colorMode: 'none',
     ...(layer.queryGoalValue
       ? {
           goalAccessor: getAccessorName('goal'),

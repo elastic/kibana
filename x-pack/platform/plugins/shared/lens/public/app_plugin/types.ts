@@ -108,41 +108,6 @@ export interface HistoryLocationState {
   originatingApp?: string;
 }
 
-// export interface LensAppServices extends StartServices {
-//   http: HttpStart;
-//   executionContext: ExecutionContextStart;
-//   chrome: ChromeStart;
-//   storage: IStorageWrapper;
-//   dataViews: DataViewsPublicPluginStart;
-//   fieldFormats: FieldFormatsStart;
-//   data: DataPublicPluginStart;
-//   eventAnnotationService: EventAnnotationServiceType;
-//   inspector: LensInspector;
-//   uiSettings: IUiSettingsClient;
-//   settings: SettingsStart;
-//   uiActions: UiActionsStart;
-//   application: ApplicationStart;
-//   notifications: NotificationsStart;
-//   usageCollection?: UsageCollectionStart;
-//   stateTransfer: EmbeddableStateTransfer;
-//   navigation: NavigationPublicPluginStart;
-//   attributeService: LensAttributesService;
-//   contentManagement: ContentManagementPublicStart;
-//   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-//   getOriginatingAppName: () => string | undefined;
-//   presentationUtil: PresentationUtilPluginStart;
-//   spaces?: SpacesApi;
-//   charts: ChartsPluginSetup;
-//   share?: SharePluginStart;
-//   unifiedSearch: UnifiedSearchPublicPluginStart;
-//   docLinks: DocLinksStart;
-//   dataViewEditor: DataViewEditorStart;
-//   dataViewFieldEditor: IndexPatternFieldEditorStart;
-//   locator?: LensAppLocator;
-//   lensDocumentService: LensDocumentService;
-//   serverless?: ServerlessPluginStart;
-// }
-
 interface TopNavAction {
   visible: boolean;
   enabled?: boolean;

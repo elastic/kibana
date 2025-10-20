@@ -54,7 +54,6 @@ import type {
   OverlayRef,
 } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { TopNavMenuData } from '@kbn/discover-utils';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
@@ -68,7 +67,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { NavigationPublicPluginStart, TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -77,6 +76,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { InspectorOptions } from '@kbn/inspector-plugin/public';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { NavigateToLensContext } from './convert_to_lens_types';
 import type { LensAppLocator, MainHistoryLocationState } from './locator_types';
 import type {
@@ -112,11 +112,18 @@ export interface CheckDuplicateTitleOptions {
   isTitleDuplicateConfirmed: boolean;
 }
 
-interface LensSaveResult {
+export type CheckDuplicateTitleProps = OnSaveProps & {
+  id?: string;
+  displayName: string;
+  lastSavedTitle: string;
+  copyOnSave: boolean;
+};
+
+export interface LensSaveResult {
   savedObjectId: string;
 }
 
-interface ILensDocumentService {
+export interface ILensDocumentService {
   save: (vis: LensDocument) => Promise<LensSaveResult>;
   load: (savedObjectId: string) => Promise<unknown>;
   checkForDuplicateTitle: (
@@ -136,7 +143,7 @@ export interface LensAttributesService {
     references: Reference[],
     savedObjectId?: string
   ) => Promise<string>;
-  checkForDuplicateTitle: (props: CheckDuplicateTitleOptions) => Promise<{ isDuplicate: boolean }>;
+  checkForDuplicateTitle: (props: CheckDuplicateTitleProps) => Promise<{ isDuplicate: boolean }>;
   injectReferences: (
     runtimeState: LensRuntimeState,
     references: Reference[] | undefined

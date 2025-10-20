@@ -12,7 +12,7 @@ import { LegendValue, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import type { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
+import type { AxesSettingsConfig } from '@kbn/lens-common';
 import type { XYLegendValue } from '@kbn/chart-expressions-common';
 import { LegendSize } from '@kbn/chart-expressions-common';
 import type { VisualizationToolbarProps, FramePublicAPI } from '@kbn/lens-common';

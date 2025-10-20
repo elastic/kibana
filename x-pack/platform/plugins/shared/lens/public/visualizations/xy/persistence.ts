@@ -8,8 +8,8 @@
 import type { Reference } from '@kbn/content-management-utils';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 
+import type { AnnotationGroups } from '@kbn/lens-common';
 import { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
-import type { AnnotationGroups } from '../../types';
 import type {
   XYLayerConfig,
   XYDataLayerConfig,

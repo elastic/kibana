@@ -12,6 +12,7 @@ import type { IconType } from '@elastic/eui';
 import type { Ast } from '@kbn/interpreter';
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type { ExpressionAstExpression, Datatable } from '@kbn/expressions-plugin/common';
+import type { AxesSettingsConfig as ExpressionAxesSettingsConfig } from '@kbn/expression-xy-plugin/common';
 import type { ReactElement } from 'react';
 import type { DataViewSpec } from '@kbn/data-plugin/common';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
@@ -533,3 +534,7 @@ export interface VisualizationState {
   activeId: string | null;
   state: unknown;
 }
+
+export type AxesSettingsConfig = ExpressionAxesSettingsConfig & {
+  x: boolean;
+};

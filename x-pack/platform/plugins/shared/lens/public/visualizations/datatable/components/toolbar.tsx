@@ -8,8 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
-import type { DataGridDensity } from '@kbn/unified-data-table';
-import { RowHeightSettings, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
+import type { DataGridDensity } from '@kbn/lens-common';
 import type { VisualizationToolbarProps } from '@kbn/lens-common';
 import type { DatatableVisualizationState, RowHeightMode } from '@kbn/lens-common';
 import {
@@ -21,6 +20,7 @@ import {
   ROW_HEIGHT_LINES_KEYS,
   LENS_DATAGRID_DENSITY,
 } from '@kbn/lens-common';
+import { RowHeightSettings } from '@kbn/unified-data-table';
 import { ToolbarPopover } from '../../../shared_components';
 import { DEFAULT_PAGE_SIZE } from './table_basic';
 import { DensitySettings } from './density_settings';
@@ -53,7 +53,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
     ) => {
       const newRowHeightLines =
         newHeightMode === LENS_ROW_HEIGHT_MODE.auto
-          ? ROWS_HEIGHT_OPTIONS.auto
+          ? LENS_ROW_HEIGHT_MODE.auto
           : lineCounts[heightLinesProperty];
 
       setState({

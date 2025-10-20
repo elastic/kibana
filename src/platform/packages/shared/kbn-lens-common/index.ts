@@ -87,6 +87,10 @@ export type {
   DatasourceDimensionProps,
   InitializationOptions,
   LensInspector,
+  ILensDocumentService,
+  CheckDuplicateTitleOptions,
+  CheckDuplicateTitleProps,
+  LensSaveResult,
 } from './lens/types';
 export type {
   FormBasedLayer,
@@ -168,6 +172,7 @@ export type {
   LensAlertRulesEvent,
   TriggerEvent,
   RegisterLibraryAnnotationGroupFunction,
+  AxesSettingsConfig,
 } from './lens/visualizations/types';
 export type {
   LensDatatableSortingState,

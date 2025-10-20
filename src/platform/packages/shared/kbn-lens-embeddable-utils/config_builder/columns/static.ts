@@ -8,7 +8,7 @@
  */
 
 import type { PersistedIndexPatternLayer, FormulaPublicApi } from '@kbn/lens-common';
-import type { ReferenceBasedIndexPatternColumn } from '@kbn/lens-common/datasources/form_based/operations/definitions/column_types';
+import type { ReferenceBasedIndexPatternColumn } from '@kbn/lens-common';
 
 export type LensFormula = Parameters<FormulaPublicApi['insertOrReplaceFormulaColumn']>[1];
 

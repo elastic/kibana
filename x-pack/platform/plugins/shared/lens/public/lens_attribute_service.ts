@@ -6,7 +6,6 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { noop } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
@@ -15,17 +14,11 @@ import type {
   SharingSavedObjectProps,
   LensRuntimeState,
   LensSavedObjectAttributes,
+  CheckDuplicateTitleProps,
 } from '@kbn/lens-common';
 import { extract, inject } from '../common/embeddable_factory';
 import { LensDocumentService } from './persistence';
 import { DOC_TYPE } from '../common/constants';
-
-type CheckDuplicateTitleProps = OnSaveProps & {
-  id?: string;
-  displayName: string;
-  lastSavedTitle: string;
-  copyOnSave: boolean;
-};
 
 export interface LensAttributesService {
   loadFromLibrary: (savedObjectId: string) => Promise<{

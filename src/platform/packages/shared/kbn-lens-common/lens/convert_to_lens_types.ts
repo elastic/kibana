@@ -17,7 +17,7 @@ type ToBaseColumnFormat<Col extends GenericIndexPatternColumn> = {
 } & Omit<Col, 'label'> & { label?: string };
 
 type LensColumn = ToBaseColumnFormat<GenericIndexPatternColumn> & {
-  params: Record<string, unknown>;
+  params?: Record<string, unknown>;
 };
 
 export interface NavigateToLensLayer {

@@ -20,7 +20,6 @@ import type {
   IconPosition,
   FillStyle,
   YAxisConfig,
-  AxesSettingsConfig,
 } from '@kbn/expression-xy-plugin/common';
 import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type {
@@ -30,7 +29,7 @@ import type {
 import type { YAxisModes } from './constants';
 import { SeriesTypes } from './constants';
 import type { ValueLabelConfig } from '../../types';
-import type { CollapseFunction } from '../types';
+import type { AxesSettingsConfig, CollapseFunction } from '../types';
 
 export const defaultSeriesType = SeriesTypes.BAR_STACKED;
 

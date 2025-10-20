@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FormBasedPersistedState, TagcloudState } from '@kbn/lens-common';
+import type { FormBasedPersistedState, LensTagcloudState } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { BuildDependencies, LensAttributes, LensTagCloudConfig } from '../types';
 import { DEFAULT_LAYER_ID } from '../types';
@@ -26,7 +26,7 @@ function getAccessorName(type: 'breakdown') {
   return `${ACCESSOR}_${type}`;
 }
 
-function buildVisualizationState(config: LensTagCloudConfig): TagcloudState {
+function buildVisualizationState(config: LensTagCloudConfig): LensTagcloudState {
   const layer = config;
 
   return {
