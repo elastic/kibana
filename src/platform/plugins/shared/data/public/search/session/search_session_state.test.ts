@@ -132,5 +132,16 @@ describe('Session state container', () => {
       state.transitions.start({ appName });
       expect(state.selectors.getState()).toBe(SearchSessionState.None);
     });
+
+    test('save sets isSaving: true and store sets isSaving: false', () => {
+      state.transitions.start({ appName });
+      expect(state.get().isSaving).toBe(false);
+
+      state.transitions.save();
+      expect(state.get().isSaving).toBe(true);
+
+      state.transitions.store(mockSavedObject);
+      expect(state.get().isSaving).toBe(false);
+    });
   });
 });
