@@ -389,6 +389,7 @@ export const config: PluginConfigDescriptor = {
       integrationsHomeOverride: schema.maybe(schema.string()),
       prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
       hideDashboards: schema.boolean({ defaultValue: false }),
+      installIntegrationsKnowledge: schema.boolean({ defaultValue: false }),
     },
     {
       validate: (configToValidate) => {
