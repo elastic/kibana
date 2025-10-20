@@ -6,7 +6,7 @@
  */
 
 import useAsync from 'react-use/lib/useAsync';
-import type { LensBreakdownConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensBreakdownConfig } from '@kbn/lens-embeddable-utils';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { PAGE_SIZE_OPTIONS } from '../constants';

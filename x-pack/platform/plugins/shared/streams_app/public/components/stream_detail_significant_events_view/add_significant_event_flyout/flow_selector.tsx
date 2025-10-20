@@ -37,7 +37,7 @@ export function FlowSelector({ selected, updateSelected, isSubmitting }: Props) 
         id={aiCheckableCardId}
         label={
           <EuiFlexGroup gutterSize="xs" direction="column">
-            <EuiTitle size="xs">
+            <EuiTitle size="xxs">
               <h3>
                 {i18n.translate(
                   'xpack.streams.streamDetailView.addSignificantEventFlyout.aiOptionLabel',
@@ -45,7 +45,7 @@ export function FlowSelector({ selected, updateSelected, isSubmitting }: Props) 
                 )}
               </h3>
             </EuiTitle>
-            <EuiText component="p" color="subdued" size="s">
+            <EuiText component="p" color="subdued" size="xs">
               {i18n.translate(
                 'xpack.streams.streamDetailView.addSignificantEventFlyout.aiOptionDescription',
                 {
@@ -66,7 +66,7 @@ export function FlowSelector({ selected, updateSelected, isSubmitting }: Props) 
         id={manualCheckableCardId}
         label={
           <EuiFlexGroup gutterSize="xs" direction="column">
-            <EuiTitle size="xs">
+            <EuiTitle size="xxs">
               <h3>
                 {i18n.translate(
                   'xpack.streams.streamDetailView.addSignificantEventFlyout.manualOptionLabel',
@@ -74,7 +74,7 @@ export function FlowSelector({ selected, updateSelected, isSubmitting }: Props) 
                 )}
               </h3>
             </EuiTitle>
-            <EuiText component="p" color="subdued" size="s">
+            <EuiText component="p" color="subdued" size="xs">
               {i18n.translate(
                 'xpack.streams.streamDetailView.addSignificantEventFlyout.manualOptionDescription',
                 {

@@ -27,6 +27,7 @@ jobs:
           ref: main
           path: ./kibana-operations
           token: ${{secrets.KIBANAMACHINE_TOKEN}}
+          persist-credentials: false
 
       - name: Run dependency health score script
         working-directory: ./kibana-operations/triage

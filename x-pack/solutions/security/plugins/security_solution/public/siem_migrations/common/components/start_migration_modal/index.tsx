@@ -35,7 +35,7 @@ import { useGetSecuritySolutionLinkProps } from '../../../../common/components/l
 import type { MigrationSettingsBase } from '../../types';
 import * as i18n from './translations';
 
-interface StartMigrationModalProps {
+export interface StartMigrationModalProps {
   /** Modals title */
   title: string;
   /** Modals description message */
@@ -141,7 +141,7 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
                 helpText={
                   <FormattedMessage
                     id="xpack.securitySolution.siemMigrations.reprocessFailedDialog.connectorHelpText"
-                    defaultMessage={'To setup other LLM connectors, visit {link}.'}
+                    defaultMessage={'To set up other LLM connectors, visit {link}.'}
                     values={{
                       link: (
                         /* eslint-disable-next-line @elastic/eui/href-or-on-click */
@@ -170,6 +170,7 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
+                    aria-label={i18n.START_MIGRATION_MODAL_CANCEL}
                     onClick={closeModal}
                     data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-Cancel`}
                   >

@@ -9,11 +9,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import type { TimeState } from '@kbn/es-query';
 import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
 import { IngestionCard } from './cards/ingestion_card';
 import { FailureStoreIngestionRate } from './ingestion_rate';
-import type { FailureStoreStats } from '../hooks/use_failure_store_stats';
+import type { StreamAggregations } from '../hooks/use_ingestion_rate';
+import type { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
 
 export const FailureStoreInfo = ({
   openModal,
@@ -22,13 +24,17 @@ export const FailureStoreInfo = ({
   isLoadingStats,
   stats,
   config,
+  timeState,
+  aggregations,
 }: {
   openModal: (show: boolean) => void;
   definition: Streams.ingest.all.GetResponse;
   statsError: Error | undefined;
   isLoadingStats: boolean;
-  stats?: FailureStoreStats;
+  stats?: EnhancedFailureStoreStats;
   config?: FailureStore;
+  timeState: TimeState;
+  aggregations?: StreamAggregations;
 }) => {
   return (
     <>
@@ -61,6 +67,9 @@ export const FailureStoreInfo = ({
         definition={definition}
         isLoadingStats={isLoadingStats}
         stats={stats}
+        timeState={timeState}
+        statsError={statsError}
+        aggregations={aggregations}
       />
     </>
   );

@@ -10,6 +10,7 @@
 import type { EuiButtonGroupOptionProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiConfirmModal,
@@ -38,6 +39,8 @@ import {
   selectHasChanges,
   selectWorkflow,
 } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
+import { PLUGIN_ID } from '../../../../common';
+import { useKibana } from '../../../hooks/use_kibana';
 import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
 import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
 import { getRunWorkflowTooltipContent } from '../../../shared/ui';
@@ -75,6 +78,7 @@ export const WorkflowDetailHeader = ({
   highlightDiff,
   setHighlightDiff,
 }: WorkflowDetailHeaderProps) => {
+  const { application } = useKibana().services;
   const styles = useMemoCss(componentStyles);
   const dispatch = useDispatch();
   const { canUpdateWorkflow, canExecuteWorkflow } = useCapabilities();
@@ -128,11 +132,26 @@ export const WorkflowDetailHeader = ({
     setShowRunConfirmation(false);
   }, []);
 
+  const backLinkLabel = i18n.translate('workflows.workflowDetailHeader.backLink', {
+    defaultMessage: 'Back to Workflows',
+  });
+
   return (
     <>
       <EuiPageTemplate offset={0} minHeight={0} grow={false} css={styles.pageTemplate}>
         <EuiPageTemplate.Header css={styles.header} restrictWidth={false} bottomBorder={false}>
           <EuiPageHeaderSection css={styles.headerSection}>
+            <EuiButtonEmpty
+              iconType="sortLeft"
+              size="s"
+              flush="left"
+              onClick={() => {
+                application.navigateToApp(PLUGIN_ID);
+              }}
+              aria-label={backLinkLabel}
+            >
+              {backLinkLabel}
+            </EuiButtonEmpty>
             <EuiFlexGroup
               alignItems="center"
               responsive={false}
@@ -147,7 +166,7 @@ export const WorkflowDetailHeader = ({
                   css={styles.skeletonTitle}
                 >
                   <EuiTitle size="m" css={styles.title}>
-                    <h1>{name}</h1>
+                    <h2>{name}</h2>
                   </EuiTitle>
                 </EuiSkeletonTitle>
               </EuiFlexItem>

@@ -11,6 +11,7 @@ servers:
 tags:
   - name: task manager
     x-displayName: Task manager
+    description: Task manager APIs enable you to check the health of the Kibana task manager, which is used by features such as alerting, actions, and reporting to run mission critical work as persistent background tasks.
     externalDocs:
       url: https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management
       description: Task manager

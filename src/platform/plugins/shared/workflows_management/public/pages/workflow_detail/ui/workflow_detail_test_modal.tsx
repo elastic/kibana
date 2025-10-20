@@ -13,7 +13,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setIsTestModalOpen } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
-import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import {
+  getCachedDynamicConnectorTypes,
+  getWorkflowZodSchemaLoose,
+} from '../../../../common/schema';
 import {
   selectIsTestModalOpen,
   selectYamlString,
@@ -39,17 +42,19 @@ export const WorkflowDetailTestModal = () => {
   }, [dispatch]);
 
   const definitionFromCurrentYaml: WorkflowYaml | null = useMemo(() => {
-    if (!isTestModalOpen || !workflowYaml) {
-      return null; // Avoid parsing the yaml if the modal is not open or the yaml is not available
-    }
-    const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
+    const dynamicConnectorTypes = getCachedDynamicConnectorTypes() || {};
+    const parsingResult = parseWorkflowYamlToJSON(
+      workflowYaml,
+      getWorkflowZodSchemaLoose(dynamicConnectorTypes)
+    );
+
     if (!parsingResult.success) {
       return null;
     }
     return parsingResult.data as WorkflowYaml;
-  }, [workflowYaml, isTestModalOpen]);
+  }, [workflowYaml]);
 
-  if (!isTestModalOpen) {
+  if (!isTestModalOpen || !definitionFromCurrentYaml) {
     return null;
   }
 

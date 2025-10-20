@@ -10,14 +10,15 @@
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type YAML from 'yaml';
 import type { EnhancedStore } from '@reduxjs/toolkit';
-import type { WorkflowDetailDto, WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { WorkflowDetailDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import type { LineCounter } from 'yaml';
 import type { WorkflowLookup } from './utils/build_workflow_lookup';
 
 export interface WorkflowDetailState {
+  /** The yaml string used by the workflow yaml editor */
+  yamlString: string;
   /** The persisted workflow detail data */
   workflow?: WorkflowDetailDto;
-  /** The yaml string used by the workflow yaml editor */
-  yamlString?: string;
   /** The computed data derived from the workflow yaml string, it is updated by the workflowComputationMiddleware */
   computed?: ComputedData;
   /** The step id that is focused in the workflow yaml editor */
@@ -31,9 +32,11 @@ export interface WorkflowDetailState {
 }
 
 export interface ComputedData {
-  yamlDocument?: YAML.Document;
+  yamlDocument?: YAML.Document; // This will be handled specially for serialization
+  yamlLineCounter?: LineCounter;
   workflowLookup?: WorkflowLookup;
-  workflowGraph?: WorkflowGraph;
+  workflowGraph?: WorkflowGraph; // This will be handled specially for serialization
+  workflowDefinition?: WorkflowYaml | null;
 }
 
 // Store types (will be properly typed when store.ts is imported)

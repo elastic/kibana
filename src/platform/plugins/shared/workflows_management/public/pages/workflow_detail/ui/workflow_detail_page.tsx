@@ -10,6 +10,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
+import { useLoadWorkflow } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_load_workflow';
 import {
   selectWorkflowName,
   selectYamlString,
@@ -23,7 +24,6 @@ import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
-import { useLoadWorkflow } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_load_workflow';
 
 export function WorkflowDetailPage({ id }: { id: string }) {
   const { loadWorkflow, error, isLoading: isLoadingWorkflow } = useLoadWorkflow();

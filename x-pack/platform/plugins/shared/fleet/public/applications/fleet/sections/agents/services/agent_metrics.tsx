@@ -15,7 +15,7 @@ import { MetricNonAvailable } from '../components';
 export function formatAgentCPU(metrics?: AgentMetrics, agentPolicy?: AgentPolicy) {
   return typeof metrics?.cpu_avg !== 'undefined' ? (
     <EuiToolTip content={`${(metrics.cpu_avg * 100).toFixed(4)} %`}>
-      <>{(metrics.cpu_avg * 100).toFixed(2)} %</>
+      <span tabIndex={0}>{(metrics.cpu_avg * 100).toFixed(2)} %</span>
     </EuiToolTip>
   ) : (
     <MetricNonAvailable agentPolicy={agentPolicy} />

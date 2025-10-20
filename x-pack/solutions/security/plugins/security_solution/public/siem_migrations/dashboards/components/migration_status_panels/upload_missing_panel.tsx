@@ -24,6 +24,7 @@ import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_t
 import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import type { DashboardMigrationStats } from '../../types';
+import { useKibana } from '../../../../common/lib/kibana/use_kibana';
 
 interface DashboardMigrationsUploadMissingPanelProps {
   migrationStats: DashboardMigrationStats;
@@ -67,7 +68,7 @@ const DashboardMigrationsUploadMissingPanelContent =
       const { data: translationStats, isLoading: isLoadingTranslationStats } =
         useGetMigrationTranslationStats(migrationStats.id);
       const { openFlyout } = useMigrationDataInputContext();
-
+      const { telemetry } = useKibana().services.siemMigrations.dashboards;
       const totalDashboardsToRetry = useMemo(() => {
         if (!translationStats) return 0;
 
@@ -80,7 +81,11 @@ const DashboardMigrationsUploadMissingPanelContent =
 
       const onOpenFlyout = useCallback(() => {
         openFlyout(migrationStats);
-      }, [migrationStats, openFlyout]);
+        telemetry.reportSetupMigrationOpenResources({
+          migrationId: migrationStats.id,
+          missingResourcesCount: missingResources.length,
+        });
+      }, [migrationStats, openFlyout, telemetry, missingResources.length]);
 
       return (
         <>
@@ -90,13 +95,14 @@ const DashboardMigrationsUploadMissingPanelContent =
             hasBorder
             paddingSize="s"
             css={{ backgroundColor: euiTheme.colors.backgroundBasePrimary }}
+            data-test-subj="uploadMissingPanel"
           >
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <AssistantIcon />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <PanelText size="s" semiBold>
+                <PanelText data-test-subj="uploadMissingPanelTitle" size="s" semiBold>
                   {i18n.DASHBOARD_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE}
                 </PanelText>
               </EuiFlexItem>
@@ -104,7 +110,7 @@ const DashboardMigrationsUploadMissingPanelContent =
                 {isLoadingTranslationStats ? (
                   <EuiLoadingSpinner size="s" />
                 ) : (
-                  <PanelText size="s" subdued>
+                  <PanelText data-test-subj="uploadMissingPanelDescription" size="s" subdued>
                     {i18n.DASHBOARD_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION(
                       totalDashboardsToRetry
                     )}
@@ -119,6 +125,7 @@ const DashboardMigrationsUploadMissingPanelContent =
                   iconType="download"
                   iconSide="right"
                   size="s"
+                  data-test-subj="uploadMissingPanelButton"
                 >
                   {i18n.DASHBOARD_MIGRATION_UPLOAD_BUTTON}
                 </EuiButton>

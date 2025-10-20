@@ -14,8 +14,8 @@ import { findStepByLine } from './utils/step_finder';
 
 // Initial state
 const initialState: WorkflowDetailState = {
+  yamlString: '',
   workflow: undefined,
-  yamlString: undefined,
   computed: undefined,
   focusedStepId: undefined,
   stepExecutions: undefined,
@@ -43,7 +43,7 @@ const workflowDetailSlice = createSlice({
     },
     // Internal action - not for external use
     _setComputedDataInternal: (state, action: { payload: ComputedData }) => {
-      state.computed = action.payload;
+      state.computed = { ...action.payload }; // make sure it's a new object
     },
     clearComputedData: (state) => {
       state.computed = undefined;

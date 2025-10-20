@@ -45,6 +45,12 @@ export const Label: React.FC<{ learnMoreUrl?: string }> = ({ learnMoreUrl }) => 
               onClick={() => {
                 setIsPopoverOpen((x) => !x);
               }}
+              aria-label={i18n.translate(
+                'cloud.connectionDetails.tab.endpoints.cloudIdField.helpButtonAriaLabel',
+                {
+                  defaultMessage: 'Cloud ID help',
+                }
+              )}
             />
           }
           isOpen={isPopoverOpen}
