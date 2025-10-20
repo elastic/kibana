@@ -1,0 +1,927 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ScoutPage } from '@kbn/scout';
+import { expect } from '@playwright/test';
+
+/**
+ * Page Object for the AI Assistant flyout in Kibana Security Solution
+ *
+ * The AI Assistant is a conversational interface that helps users with security tasks.
+ * It can be opened from the main navigation or from context (alerts, rules).
+ */
+export class AssistantPage {
+  constructor(private readonly page: ScoutPage) {}
+
+  // ========================================
+  // Locators - Main Elements
+  // ========================================
+
+  get assistantButton() {
+    return this.page.testSubj.locator('assistantNavLink');
+  }
+
+  get assistantChatBody() {
+    return this.page.testSubj.locator('assistantChat');
+  }
+
+  get closeFlyoutButton() {
+    return this.assistantChatBody.locator('[data-test-subj="euiFlyoutCloseButton"]');
+  }
+
+  get emptyConversation() {
+    return this.page.testSubj.locator('emptyConvo');
+  }
+
+  get welcomeSetup() {
+    return this.page.testSubj.locator('welcome-setup');
+  }
+
+  // ========================================
+  // Locators - Conversation Management
+  // ========================================
+
+  get conversationTitle() {
+    return this.page.testSubj.locator('conversationTitle');
+  }
+
+  get conversationTitleHeading() {
+    return this.conversationTitle.locator('h2');
+  }
+
+  get conversationTitleInput() {
+    return this.conversationTitle.locator('input');
+  }
+
+  get newChatButton() {
+    return this.page.testSubj.locator('newChatFromOverlay');
+  }
+
+  get newChatByTitleButton() {
+    return this.page.testSubj.locator('newChatByTitle');
+  }
+
+  get conversationSettingsMenu() {
+    return this.page.testSubj.locator('conversation-settings-menu');
+  }
+
+  get clearChatButton() {
+    return this.page.testSubj.locator('clear-chat');
+  }
+
+  get confirmClearChatButton() {
+    return this.page.testSubj.locator('confirmModalConfirmButton');
+  }
+
+  get flyoutNavToggle() {
+    return this.page.testSubj.locator('aiAssistantFlyoutNavigationToggle');
+  }
+
+  conversationSelectButton(conversationTitle: string) {
+    return this.page.testSubj.locator(`conversation-select-${conversationTitle}`);
+  }
+
+  conversationListIcon(conversationTitle: string) {
+    return this.page.testSubj.locator(`conversation-icon-${conversationTitle}`);
+  }
+
+  // ========================================
+  // Locators - Messaging
+  // ========================================
+
+  get userPromptTextarea() {
+    return this.page.testSubj.locator('prompt-textarea');
+  }
+
+  get submitChatButton() {
+    return this.page.testSubj.locator('submit-chat');
+  }
+
+  get conversationMessages() {
+    return this.page.testSubj.locator('messageText');
+  }
+
+  get conversationErrorMessages() {
+    return this.page.testSubj.locator('errorComment').locator('[data-test-subj="messageText"]');
+  }
+
+  get sendToTimelineButton() {
+    return this.page.testSubj.locator('sendToTimelineEmptyButton');
+  }
+
+  promptContextButton(index: number) {
+    return this.page.testSubj.locator(`selectedPromptContext-${index}-button`);
+  }
+
+  // ========================================
+  // Locators - Connectors
+  // ========================================
+
+  get connectorSelector() {
+    return this.page.testSubj.locator('connector-selector');
+  }
+
+  get connectorMissingCallout() {
+    return this.page.testSubj.locator('connectorMissingCallout');
+  }
+
+  get addNewConnectorButton() {
+    return this.page.testSubj.locator('addNewConnectorButton');
+  }
+
+  connectorOption(connectorName: string) {
+    return this.page.testSubj.locator(`connector-${connectorName}`);
+  }
+
+  get openAIConnectorOption() {
+    return this.page.testSubj.locator('action-option-OpenAI');
+  }
+
+  get connectorNameInput() {
+    return this.page.testSubj.locator('nameInput');
+  }
+
+  get secretsApiKeyInput() {
+    return this.page.testSubj.locator('secrets.apiKey-input');
+  }
+
+  get saveActionConnectorButton() {
+    return this.page.testSubj.locator('saveActionButtonModal');
+  }
+
+  // ========================================
+  // Locators - System Prompts
+  // ========================================
+
+  get systemPromptSelect() {
+    return this.page.testSubj.locator('promptSuperSelect');
+  }
+
+  get clearSystemPromptButton() {
+    return this.page.testSubj.locator('clearSystemPrompt');
+  }
+
+  get createSystemPromptButton() {
+    return this.page.testSubj.locator('addSystemPrompt');
+  }
+
+  get systemPromptTitleInput() {
+    return this.page.testSubj.locator('systemPromptSelector').locator('[data-test-subj="comboBoxSearchInput"]');
+  }
+
+  get systemPromptBodyInput() {
+    return this.page.testSubj.locator('systemPromptModalPromptText');
+  }
+
+  get conversationMultiSelector() {
+    return this.page.testSubj.locator('conversationMultiSelector').locator('[data-test-subj="comboBoxSearchInput"]');
+  }
+
+  systemPromptOption(promptName: string) {
+    return this.page.testSubj.locator(`systemPrompt-${promptName}`);
+  }
+
+  // ========================================
+  // Locators - Quick Prompts
+  // ========================================
+
+  get addQuickPromptButton() {
+    return this.page.testSubj.locator('addQuickPrompt');
+  }
+
+  get quickPromptTitleInput() {
+    return this.page.testSubj.locator('quickPromptSelector').locator('[data-test-subj="comboBoxSearchInput"]');
+  }
+
+  get quickPromptBodyInput() {
+    return this.page.testSubj.locator('quick-prompt-prompt');
+  }
+
+  get promptContextSelector() {
+    return this.page.testSubj.locator('promptContextSelector').locator('[data-test-subj="comboBoxSearchInput"]');
+  }
+
+  quickPromptBadge(promptName: string) {
+    return this.page.testSubj.locator(`quickPrompt-${promptName}`);
+  }
+
+  // ========================================
+  // Locators - Sharing
+  // ========================================
+
+  get shareBadgeButton() {
+    return this.page.testSubj.locator('shareBadgeButton');
+  }
+
+  get shareSelect() {
+    return this.page.testSubj.locator('shareSelect');
+  }
+
+  get privateSelectOption() {
+    return this.page.locator('li[data-test-subj="private"]');
+  }
+
+  get restrictedSelectOption() {
+    return this.page.locator('li[data-test-subj="restricted"]');
+  }
+
+  get sharedSelectOption() {
+    return this.page.locator('li[data-test-subj="shared"]');
+  }
+
+  get shareModal() {
+    return this.page.testSubj.locator('shareConversationModal');
+  }
+
+  get shareButton() {
+    return this.page.locator('button[data-test-subj="shareConversation"]');
+  }
+
+  get shareModalCloseButton() {
+    return this.shareModal.locator('button.euiModal__closeIcon');
+  }
+
+  get userProfilesSearch() {
+    return this.page.testSubj.locator('userProfilesSearch');
+  }
+
+  userProfileSelectOption(username: string) {
+    return this.page.testSubj.locator(`userProfileSelectableOption-${username}`);
+  }
+
+  get ownerSharedCallout() {
+    return this.page.testSubj.locator('ownerSharedConversationCallout');
+  }
+
+  get sharedCallout() {
+    return this.page.testSubj.locator('sharedConversationCallout');
+  }
+
+  get dismissCalloutButton() {
+    return this.page.testSubj.locator('euiDismissCalloutButton');
+  }
+
+  get duplicateConversationButton() {
+    return this.page.testSubj.locator('duplicateConversation');
+  }
+
+  get copyUrlButton() {
+    return this.page.testSubj.locator('copy-url');
+  }
+
+  get duplicateButton() {
+    return this.page.testSubj.locator('duplicate');
+  }
+
+  get convoContextMenuButton() {
+    return this.page.testSubj.locator('convo-context-menu-button');
+  }
+
+  get convoContextMenuCopyUrl() {
+    return this.page.testSubj.locator('convo-context-menu-item-copy');
+  }
+
+  get convoContextMenuDuplicate() {
+    return this.page.testSubj.locator('convo-context-menu-item-duplicate');
+  }
+
+  get shareModalCopyUrlButton() {
+    return this.page.testSubj.locator('copyConversationUrl');
+  }
+
+  // ========================================
+  // Locators - Licensing & Upgrade
+  // ========================================
+
+  get upgradeCallout() {
+    return this.page.testSubj.locator('upgradeLicenseCallToAction');
+  }
+
+  // ========================================
+  // Locators - Modal Actions
+  // ========================================
+
+  get modalSaveButton() {
+    return this.page.testSubj.locator('save-button');
+  }
+
+  get chatIcon() {
+    return this.page.testSubj.locator('newChat');
+  }
+
+  get chatIconSmall() {
+    return this.page.testSubj.locator('newChatByTitle');
+  }
+
+  get chatContextMenu() {
+    return this.page.testSubj.locator('chat-context-menu');
+  }
+
+  // ========================================
+  // Navigation
+  // ========================================
+
+  /**
+   * Opens the AI Assistant from the main navigation button
+   */
+  async open() {
+    await this.assistantButton.click();
+    await this.waitForAssistantLoaded();
+  }
+
+  /**
+   * Opens the AI Assistant from a rule context
+   * Requires being on a page with the rule chat icon
+   */
+  async openFromRule() {
+    await this.chatIcon.waitFor({ state: 'visible' });
+    await this.chatIcon.click();
+    await this.waitForAssistantLoaded();
+  }
+
+  /**
+   * Opens the AI Assistant from an alert context
+   * Requires being on a page with the alert chat icon
+   */
+  async openFromAlert() {
+    await this.chatIconSmall.waitFor({ state: 'visible' });
+    await this.chatIconSmall.click();
+    await this.waitForAssistantLoaded();
+  }
+
+  /**
+   * Closes the AI Assistant flyout
+   */
+  async close() {
+    await this.closeFlyoutButton.click();
+  }
+
+  // ========================================
+  // Conversation Management Actions
+  // ========================================
+
+  /**
+   * Creates a new conversation
+   */
+  async createNewChat() {
+    await this.newChatButton.click();
+    await this.emptyConversation.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Selects a conversation by title from the conversation list
+   */
+  async selectConversation(conversationTitle: string) {
+    await this.flyoutNavToggle.click();
+
+    // Wait for the conversation to appear in the list before clicking
+    const conversationButton = this.conversationSelectButton(conversationTitle);
+    await conversationButton.waitFor({ state: 'visible', timeout: 15000 });
+    await conversationButton.click();
+
+    await expect(this.conversationTitleHeading).toHaveText(conversationTitle);
+    await this.flyoutNavToggle.click();
+  }
+
+  /**
+   * Updates the title of the current conversation
+   */
+  async updateConversationTitle(newTitle: string) {
+    await this.conversationTitleHeading.click();
+    await this.conversationTitleInput.clear();
+    await this.conversationTitleInput.fill(newTitle);
+    await this.conversationTitleInput.press('Enter');
+    await expect(this.conversationTitleHeading).toHaveText(newTitle);
+  }
+
+  /**
+   * Resets/clears the current conversation
+   */
+  async resetConversation() {
+    await this.conversationSettingsMenu.click();
+    await this.clearChatButton.click();
+    await this.confirmClearChatButton.click();
+    await this.emptyConversation.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Creates a new conversation with a custom title
+   * Note: Message must be sent before title can be updated
+   */
+  async createAndTitleConversation(title: string, initialMessage = 'hello') {
+    await this.createNewChat();
+    await this.typeAndSendMessage(initialMessage);
+    // Wait for response (error is expected in test environment)
+    await this.conversationErrorMessages.first().waitFor({ state: 'visible' });
+    await this.updateConversationTitle(title);
+  }
+
+  /**
+   * Toggles the conversation side menu
+   */
+  async toggleConversationSideMenu() {
+    await this.flyoutNavToggle.click();
+  }
+
+  // ========================================
+  // Messaging Actions
+  // ========================================
+
+  /**
+   * Types a message in the user prompt textarea
+   */
+  async typeMessage(message: string) {
+    await this.userPromptTextarea.fill(message);
+  }
+
+  /**
+   * Submits the current message
+   */
+  async submitMessage() {
+    await this.submitChatButton.click();
+  }
+
+  /**
+   * Types a message and immediately sends it
+   */
+  async typeAndSendMessage(message: string) {
+    await this.typeMessage(message);
+    await this.submitMessage();
+  }
+
+  /**
+   * Sends a query to the timeline
+   */
+  async sendQueryToTimeline() {
+    await this.sendToTimelineButton.click();
+  }
+
+  // ========================================
+  // Connector Actions
+  // ========================================
+
+  /**
+   * Selects a connector by name
+   */
+  async selectConnector(connectorName: string) {
+    await this.connectorSelector.click();
+    await this.connectorOption(connectorName).click();
+    await expect(this.connectorSelector).toHaveText(connectorName);
+    // Wait for connector to be ready
+    await this.page.waitForTimeout(2000);
+  }
+
+  /**
+   * Creates a new OpenAI connector through the UI
+   */
+  async createOpenAIConnector(connectorName: string) {
+    await this.openAIConnectorOption.click();
+    await this.connectorNameInput.fill(connectorName);
+    await this.secretsApiKeyInput.fill('1234');
+    await this.saveActionConnectorButton.click();
+    await this.saveActionConnectorButton.waitFor({ state: 'detached' });
+  }
+
+  // ========================================
+  // System Prompt Actions
+  // ========================================
+
+  /**
+   * Selects a system prompt by name
+   */
+  async selectSystemPrompt(promptName: string) {
+    await this.systemPromptSelect.click();
+    await this.systemPromptOption(promptName).click();
+    await expect(this.systemPromptSelect).toHaveText(promptName);
+  }
+
+  /**
+   * Clears the current system prompt selection
+   */
+  async clearSystemPrompt() {
+    await this.clearSystemPromptButton.click();
+    await expect(this.systemPromptSelect).toHaveText('Select a system prompt');
+  }
+
+  /**
+   * Creates a new system prompt
+   * @param title - The prompt title
+   * @param content - The prompt content
+   * @param defaultConversations - Optional list of conversations to apply this prompt to
+   */
+  async createSystemPrompt(title: string, content: string, defaultConversations?: string[]) {
+    await this.systemPromptSelect.click();
+    await this.createSystemPromptButton.click();
+    await this.systemPromptTitleInput.fill(`${title}{enter}`);
+    await this.systemPromptBodyInput.fill(content);
+
+    if (defaultConversations && defaultConversations.length > 0) {
+      for (const conversation of defaultConversations) {
+        await this.conversationMultiSelector.fill(`${conversation}{enter}`);
+      }
+    }
+
+    await this.modalSaveButton.click();
+  }
+
+  // ========================================
+  // Quick Prompt Actions
+  // ========================================
+
+  /**
+   * Creates a new quick prompt
+   * @param title - The prompt title
+   * @param content - The prompt content
+   * @param contexts - Optional list of contexts where this prompt is available
+   */
+  async createQuickPrompt(title: string, content: string, contexts?: string[]) {
+    await this.addQuickPromptButton.click();
+    await this.quickPromptTitleInput.fill(`${title}{enter}`);
+    await this.quickPromptBodyInput.fill(content);
+
+    if (contexts && contexts.length > 0) {
+      for (const context of contexts) {
+        await this.promptContextSelector.fill(`${context}{enter}`);
+      }
+    }
+
+    await this.modalSaveButton.click();
+  }
+
+  /**
+   * Sends a quick prompt by clicking its badge
+   */
+  async sendQuickPrompt(promptName: string) {
+    await this.quickPromptBadge(promptName).click();
+    await this.submitMessage();
+  }
+
+  // ========================================
+  // Sharing Actions
+  // ========================================
+
+  /**
+   * Opens the share menu
+   */
+  async openShareMenu() {
+    await this.shareBadgeButton.click();
+    await this.shareSelect.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Selects the private sharing option
+   */
+  async selectPrivate() {
+    await this.privateSelectOption.click();
+  }
+
+  /**
+   * Selects the global sharing option
+   */
+  async selectGlobal() {
+    await this.sharedSelectOption.click();
+  }
+
+  /**
+   * Opens the share modal (restricted sharing)
+   */
+  async openShareModal() {
+    await this.restrictedSelectOption.click();
+    await this.shareModal.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Closes the share modal
+   */
+  async closeShareModal() {
+    await this.shareModalCloseButton.click();
+  }
+
+  /**
+   * Shares a conversation with a specific user
+   */
+  async shareConversationWithUser(username: string) {
+    const userOption = this.userProfilesSearch.locator(this.userProfileSelectOption(username));
+    await this.userProfilesSearch.locator('input').fill(username);
+    await expect(userOption).toHaveAttribute('aria-checked', 'false');
+    await userOption.click();
+    await expect(userOption).toHaveAttribute('aria-checked', 'true');
+  }
+
+  /**
+   * Submits the share modal
+   */
+  async submitShareModal() {
+    await this.shareModal.locator(this.shareButton).click();
+  }
+
+  /**
+   * Shares a conversation (global or with specific user)
+   * @param shareWith - Either 'global' or a username
+   */
+  async shareConversation(shareWith: string) {
+    await this.openShareMenu();
+
+    if (shareWith === 'global') {
+      await this.selectGlobal();
+      await this.expectCalloutState('shared-by-me');
+    } else {
+      await this.openShareModal();
+      await this.shareConversationWithUser(shareWith);
+      await this.submitShareModal();
+      await this.expectCalloutState('shared-by-me');
+    }
+  }
+
+  /**
+   * Duplicates the current conversation
+   */
+  async duplicateConversation(conversationTitle: string) {
+    await this.sharedCallout.locator(this.duplicateConversationButton).click();
+    await expect(this.conversationTitleHeading).toHaveText(`[Duplicate] ${conversationTitle}`);
+  }
+
+  /**
+   * Duplicates conversation from the conversation menu
+   */
+  async duplicateFromMenu(conversationTitle: string) {
+    await this.conversationSettingsMenu.click();
+    await this.duplicateButton.click();
+    await expect(this.conversationTitleHeading).toHaveText(`[Duplicate] ${conversationTitle}`);
+  }
+
+  /**
+   * Duplicates conversation from the conversation side menu
+   */
+  async duplicateFromConversationSideContextMenu(conversationTitle: string) {
+    await this.convoContextMenuButton.first().click();
+    await this.convoContextMenuDuplicate.click();
+    await expect(this.conversationTitleHeading).toHaveText(`[Duplicate] ${conversationTitle}`);
+  }
+
+  /**
+   * Copies the conversation URL from the menu
+   */
+  async copyUrlFromMenu() {
+    await this.conversationSettingsMenu.click();
+    await this.copyUrlButton.click();
+  }
+
+  /**
+   * Copies the conversation URL from the conversation side context menu
+   */
+  async copyUrlFromConversationSideContextMenu() {
+    await this.convoContextMenuButton.first().click();
+    await this.convoContextMenuCopyUrl.click();
+  }
+
+  /**
+   * Copies the conversation URL from the share modal
+   */
+  async copyUrlFromShareModal() {
+    await this.openShareMenu();
+    await this.openShareModal();
+    await this.shareModalCopyUrlButton.click();
+    await this.closeShareModal();
+  }
+
+  /**
+   * Dismisses the shared conversation callout
+   */
+  async dismissSharedCallout() {
+    await this.sharedCallout.locator(this.dismissCalloutButton).click();
+    await expect(this.sharedCallout).not.toBeVisible();
+  }
+
+  // ========================================
+  // Assertion Methods
+  // ========================================
+
+  /**
+   * Asserts that a new conversation is displayed
+   * @param isWelcome - Whether the welcome setup should be visible
+   * @param expectedTitle - The expected conversation title
+   */
+  async expectNewConversation(isWelcome: boolean, expectedTitle: string) {
+    if (isWelcome) {
+      await expect(this.welcomeSetup).toBeVisible();
+    } else {
+      await expect(this.emptyConversation).toBeVisible();
+    }
+    await expect(this.conversationTitleHeading).toHaveText(expectedTitle);
+  }
+
+  /**
+   * Asserts the conversation title
+   */
+  async expectConversationTitle(title: string) {
+    await expect(this.conversationTitleHeading).toHaveText(title);
+  }
+
+  /**
+   * Asserts the conversation title contains text
+   */
+  async expectConversationTitleContains(text: string) {
+    await expect(this.conversationTitleHeading).toContainText(text);
+  }
+
+  /**
+   * Asserts that a message was sent
+   * @param message - The expected message content
+   * @param afterSystemPrompt - Whether this message comes after a system prompt
+   */
+  async expectMessageSent(message: string, afterSystemPrompt = false) {
+    const index = afterSystemPrompt ? 1 : 0;
+    await expect(this.conversationMessages.nth(index)).toContainText(message);
+  }
+
+  /**
+   * Asserts that a system prompt was sent
+   */
+  async expectSystemPromptSent(promptContent: string) {
+    await expect(this.conversationMessages.first()).toContainText(promptContent);
+  }
+
+  /**
+   * Asserts that an error response is visible
+   */
+  async expectErrorResponse() {
+    await expect(this.conversationErrorMessages).toBeVisible();
+  }
+
+  /**
+   * Asserts that a connector is selected
+   */
+  async expectConnectorSelected(connectorName: string) {
+    await expect(this.connectorSelector).toHaveText(connectorName);
+  }
+
+  /**
+   * Asserts that a system prompt is selected
+   */
+  async expectSystemPromptSelected(promptName: string) {
+    await expect(this.systemPromptSelect).toHaveText(promptName);
+  }
+
+  /**
+   * Asserts that no system prompt is selected
+   */
+  async expectEmptySystemPrompt() {
+    await expect(this.systemPromptSelect).toHaveText('Select a system prompt');
+  }
+
+  /**
+   * Asserts the share menu status
+   * @param type - Expected status: 'Private', 'Shared', or 'Restricted'
+   */
+  async expectShareMenuStatus(type: 'Private' | 'Shared' | 'Restricted') {
+    await expect(this.shareBadgeButton).toHaveAttribute('title', new RegExp(type));
+
+    await expect(this.privateSelectOption).toHaveAttribute(
+      'aria-checked',
+      type === 'Private' ? 'true' : 'false'
+    );
+
+    await expect(this.restrictedSelectOption).toHaveAttribute(
+      'aria-checked',
+      type === 'Restricted' ? 'true' : 'false'
+    );
+
+    await expect(this.sharedSelectOption).toHaveAttribute(
+      'aria-checked',
+      type === 'Shared' ? 'true' : 'false'
+    );
+  }
+
+  /**
+   * Asserts the conversation callout state
+   * @param state - 'private', 'shared-by-me', or 'shared-with-me'
+   */
+  async expectCalloutState(state: 'private' | 'shared-by-me' | 'shared-with-me') {
+    if (state === 'private') {
+      await expect(this.ownerSharedCallout).not.toBeVisible();
+      await expect(this.sharedCallout).not.toBeVisible();
+      await expect(this.userPromptTextarea).toBeVisible();
+      await expect(this.submitChatButton).toBeVisible();
+    } else if (state === 'shared-by-me') {
+      await expect(this.ownerSharedCallout).toBeVisible();
+      await expect(this.sharedCallout).not.toBeVisible();
+      await expect(this.userPromptTextarea).toBeVisible();
+      await expect(this.submitChatButton).toBeVisible();
+    } else if (state === 'shared-with-me') {
+      await expect(this.sharedCallout).toBeVisible();
+      await expect(this.ownerSharedCallout).not.toBeVisible();
+      await expect(this.userPromptTextarea).not.toBeVisible();
+      await expect(this.submitChatButton).not.toBeVisible();
+    }
+  }
+
+  /**
+   * Asserts that a conversation has a shared icon in the list
+   */
+  async expectSharedConversationIcon(conversationTitle: string) {
+    await expect(this.conversationListIcon(conversationTitle)).toBeVisible();
+  }
+
+  /**
+   * Asserts that a conversation does not have a shared icon in the list
+   */
+  async expectNotSharedConversationIcon(conversationTitle: string) {
+    await expect(this.conversationListIcon(conversationTitle)).not.toBeVisible();
+  }
+
+  /**
+   * Asserts that no shared callout is visible
+   */
+  async expectNoSharedCallout() {
+    await expect(this.sharedCallout).not.toBeVisible();
+  }
+
+  /**
+   * Asserts that a user is shown as having access in the share modal
+   */
+  async expectShareUser(username: string) {
+    const userOption = this.userProfilesSearch.locator(this.userProfileSelectOption(username));
+    await expect(userOption).toHaveAttribute('aria-checked', 'true');
+  }
+
+  /**
+   * Asserts that the conversation is read-only (for license/permission restrictions)
+   */
+  async expectConversationReadOnly() {
+    // Title should not be editable
+    await this.conversationTitleHeading.click();
+    await expect(this.conversationTitleInput).not.toBeVisible();
+
+    // Controls should be disabled
+    await expect(this.addNewConnectorButton).toBeDisabled();
+    await expect(this.chatContextMenu).toBeDisabled();
+    await expect(this.flyoutNavToggle).toBeDisabled();
+    await expect(this.newChatButton).toBeDisabled();
+  }
+
+  /**
+   * Asserts that a message is from a specific user
+   */
+  async expectMessageUser(username: string, messageIndex: number) {
+    const userElement = this.page.locator('.euiCommentEvent__headerUsername').nth(messageIndex);
+    await expect(userElement).toHaveText(username);
+  }
+
+  /**
+   * Asserts that the upgrade callout is visible (for license checks)
+   */
+  async expectUpgradeCallout() {
+    await expect(this.upgradeCallout).toBeVisible();
+  }
+
+  /**
+   * Asserts that a prompt context button is visible with specific text
+   */
+  async expectPromptContext(index: number, expectedText: string) {
+    await expect(this.promptContextButton(index)).toHaveText(expectedText);
+  }
+
+  /**
+   * Asserts that the user prompt textarea has specific text
+   */
+  async expectUserPromptText(text: string) {
+    await expect(this.userPromptTextarea).toHaveText(text);
+  }
+
+  /**
+   * Asserts that the user prompt textarea is empty
+   */
+  async expectUserPromptEmpty() {
+    await expect(this.userPromptTextarea).not.toHaveText(/.+/);
+  }
+
+  /**
+   * Asserts that a quick prompt badge is visible
+   */
+  async expectQuickPromptVisible(promptName: string) {
+    await expect(this.quickPromptBadge(promptName)).toBeVisible();
+  }
+
+  /**
+   * Asserts that a quick prompt badge is not visible
+   */
+  async expectQuickPromptNotVisible(promptName: string) {
+    await expect(this.quickPromptBadge(promptName)).not.toBeVisible();
+  }
+
+  // ========================================
+  // Helper Methods (Private)
+  // ========================================
+
+  /**
+   * Waits for the assistant flyout to be fully loaded
+   */
+  private async waitForAssistantLoaded() {
+    await this.assistantChatBody.waitFor({ state: 'visible' });
+  }
+}

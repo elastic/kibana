@@ -7,3 +7,9 @@
 
 export { getDetectionRuleApiService } from './detection_rule';
 export type { DetectionRuleApiService } from './detection_rule';
+export { getAssistantCleanupService, getBrowserScopedAssistantService } from './assistant';
+export type { AssistantApiService, AssistantCleanupService } from './assistant';
+export { getConnectorsApiService } from './connectors';
+export type { ConnectorsApiService, ConnectorConfig } from './connectors';
+export { retryApiCall, pollUntilAvailable, pollUntilDocumentIndexed } from './utils';
+export type { RetryOptions, PollOptions, PollResult } from './utils';
