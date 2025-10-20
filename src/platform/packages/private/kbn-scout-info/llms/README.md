@@ -3,7 +3,7 @@
 This guide provides prompts to help you migrate existing FTR tests to the [Scout](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-scout) framework.
 
 > [!WARNING]
-> These prompts are experimental. Please carefully review all AI-generated code for mistakes before merging. We also highly encourage to make sure the tests you're migrating should be functional tests.
+> These prompts are experimental. Please carefully review all AI-generated code for mistakes before merging. We also highly encourage you to ensure the tests you're migrating should be functional tests.
 
 ## ⚠️ Before migrating a test
 
@@ -22,7 +22,7 @@ For best results, we recommend the tools below.
 
 ### Claude Code
 
-We recommend **Claude Code** (and the **Claude Sonnet 4.5** model). The [**VS Code extension**](https://docs.claude.com/en/docs/claude-code/vs-code) is a user-friendly way to use Claude Code. The prompts below use Claude's `@path/to/file.md` [syntax](https://docs.claude.com/en/docs/claude-code/memory) to reference specific files in the codebase. Check if your AI assitant of choice supports this syntax.
+We recommend **Claude Code** (and the **Claude Sonnet 4.5** model). The [**VS Code extension**](https://docs.claude.com/en/docs/claude-code/vs-code) is a user-friendly way to use Claude Code. The prompts below use Claude's `@path/to/file.md` [syntax](https://docs.claude.com/en/docs/claude-code/memory) to reference specific files in the codebase. Check if your AI assistant of choice supports this syntax.
 
 ### Semantic Code Search MCP server
 
@@ -82,13 +82,10 @@ Alternatively, you can search for these files manually. Then, use a similar prom
 ```
 Can you generate a Scout API helper based on these existing files:
 
-   * src/platform/test/api_integration/apis/data_views/data_views_crud/create_data_view/mai
-     n.ts
-   * src/platform/test/api_integration/apis/data_views/data_views_crud/get_data_view/main.t
-     s
-   * x-pack/platform/test/serverless/api_integration/test_suites/data_views/data_views_crud
-     /create_data_view/main.ts
-   * src/platform/plugins/shared/data_views/public/data_views/data_views_api_client.test.ts
+@src/platform/test/api_integration/apis/data_views/data_views_crud/create_data_view/main.ts
+@src/platform/test/api_integration/apis/data_views/data_views_crud/get_data_view/main.ts
+@x-pack/platform/test/serverless/api_integration/test_suites/data_views/data_views_crud/create_data_view/main.ts
+@src/platform/plugins/shared/data_views/public/data_views/data_views_api_client.test.ts
 
 Guidelines:
 
@@ -101,6 +98,8 @@ Instructions:
 @src/platform/packages/private/kbn-scout-info/llms/what-is-scout.md contains a high-level description of the Scout framework
 @src/platform/packages/private/kbn-scout-info/llms/scout-api-services.md contains a high-level overview of API services in Scout
 ```
+
+**Checkpoint**: the AI should now have generated or updated a Scout API service that your tests can use.
 
 ## Step 4: Implement the test logic
 
@@ -129,7 +128,7 @@ Guidelines:
 - The end goal is to create working tests. Pay special attention to semantics. You MUST use methods that exist. If you need an API helper, import it rather than creating it (unless absolutely necessary).
 - The TODO comments are guides, not prescriptive rules.
 
-**Checkpoint**: the LLM should now populate the Scout test files from Step 1 with implementation code based on the original FTR tests.
+**Checkpoint**: the AI should now populate the Scout test files from Step 1 with implementation code based on the original FTR tests.
 
 ## Step 5: Run your tests
 
