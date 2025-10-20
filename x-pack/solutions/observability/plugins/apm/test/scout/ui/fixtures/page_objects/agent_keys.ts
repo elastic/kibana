@@ -43,7 +43,6 @@ export class AgentKeysPage {
     await this.page.getByRole('button', { name: 'Delete' }).click();
     await this.page.getByTestId('confirmModalConfirmButton').click();
     const deletedConfirmationText = this.page.getByText(`Deleted APM agent key "${keyName}"`);
-    await deletedConfirmationText.waitFor({ timeout: 5000 });
-    await deletedConfirmationText.isVisible();
+    await deletedConfirmationText.waitFor({ state: 'visible', timeout: 5000 });
   }
 }
