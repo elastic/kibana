@@ -17,6 +17,7 @@ import {
 } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 import type { YamlValidationResult } from '../model/types';
 import { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
+import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
 import { collectAllVariables } from './collect_all_variables';
@@ -93,6 +94,7 @@ export function useYamlValidation(
     const validationResults: YamlValidationResult[] = [
       validateStepNameUniqueness(yamlDocument),
       validateVariablesInternal(variableItems, workflowGraph, workflowDefinition),
+      validateLiquidTemplate(model.getValue()),
       validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
     ].flat();
 
@@ -123,6 +125,31 @@ export function useYamlValidation(
               ? createMarkdownContent(validationResult.hoverMessage)
               : null,
             stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+          },
+        });
+      } else if (validationResult.owner === 'liquid-template-validation') {
+        markers.push({
+          severity: SEVERITY_MAP[validationResult.severity],
+          message: validationResult.message,
+          startLineNumber: validationResult.startLineNumber,
+          startColumn: validationResult.startColumn,
+          endLineNumber: validationResult.endLineNumber,
+          endColumn: validationResult.endColumn,
+          source: 'liquid-template-validation',
+        });
+        decorations.push({
+          range: new monaco.Range(
+            validationResult.startLineNumber,
+            validationResult.startColumn,
+            validationResult.endLineNumber,
+            validationResult.endColumn
+          ),
+          options: {
+            inlineClassName: `liquid-template-${validationResult.severity ?? 'valid'}`,
+            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+            hoverMessage: validationResult.hoverMessage
+              ? createMarkdownContent(validationResult.hoverMessage)
+              : null,
           },
         });
       } else if (validationResult.owner === 'step-name-validation') {
@@ -202,6 +229,11 @@ export function useYamlValidation(
       model,
       'step-name-validation',
       markers.filter((m) => m.source === 'step-name-validation')
+    );
+    monaco.editor.setModelMarkers(
+      model,
+      'liquid-template-validation',
+      markers.filter((m) => m.source === 'liquid-template-validation')
     );
     monaco.editor.setModelMarkers(
       model,
