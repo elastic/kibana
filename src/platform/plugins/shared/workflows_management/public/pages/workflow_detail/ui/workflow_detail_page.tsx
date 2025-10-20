@@ -11,10 +11,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { WorkflowYaml } from '@kbn/workflows';
 import { css } from '@emotion/react';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
@@ -26,10 +24,6 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditor } from './workflow_editor';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
-import {
-  getCachedDynamicConnectorTypes,
-  getWorkflowZodSchemaLoose,
-} from '../../../../common/schema';
 import { WorkflowEditorStoreProvider } from '../../../widgets/workflow_yaml_editor/lib/store';
 
 export function WorkflowDetailPage({ id }: { id: string }) {
@@ -85,19 +79,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     },
     [id, workflowYaml, updateWorkflow, notifications?.toasts]
   );
-
-  const definitionFromCurrentYaml: WorkflowYaml | null = useMemo(() => {
-    const dynamicConnectorTypes = getCachedDynamicConnectorTypes() || {};
-    const parsingResult = parseWorkflowYamlToJSON(
-      workflowYaml,
-      getWorkflowZodSchemaLoose(dynamicConnectorTypes)
-    );
-
-    if (!parsingResult.success) {
-      return null;
-    }
-    return parsingResult.data as WorkflowYaml;
-  }, [workflowYaml]);
 
   const handleRun = useCallback(() => {
     setWorkflowExecuteModalOpen(true);
@@ -250,12 +231,8 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           />
         </EuiFlexItem>
 
-        {workflowExecuteModalOpen && definitionFromCurrentYaml && (
-          <WorkflowExecuteModal
-            definition={definitionFromCurrentYaml}
-            onClose={closeModal}
-            onSubmit={handleRunWorkflow}
-          />
+        {workflowExecuteModalOpen && (
+          <WorkflowExecuteModal onClose={closeModal} onSubmit={handleRunWorkflow} />
         )}
       </EuiFlexGroup>
     </WorkflowEditorStoreProvider>
