@@ -104,6 +104,28 @@ describe('rollbackInstallation', () => {
     ).rejects.toThrow('test-package was not installed from the registry (install source: upload)');
   });
 
+  it('should throw an error if TTL expired', async () => {
+    (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue({
+      find: jest.fn().mockResolvedValue({
+        saved_objects: [
+          {
+            id: pkgName,
+            type: PACKAGES_SAVED_OBJECT_TYPE,
+            attributes: {
+              install_source: 'registry',
+              previous_version: oldPkgVersion,
+              install_started_at: '2023-01-01T00:00:00Z',
+            },
+          },
+        ],
+      }),
+    });
+
+    await expect(
+      rollbackInstallation({ esClient, currentUserPolicyIds: [], pkgName, spaceId })
+    ).rejects.toThrow('Rollback not allowed as TTL expired');
+  });
+
   it('should throw an error if at least one package policy does not have a previous version', async () => {
     (appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock).mockReturnValue({
       find: jest.fn().mockResolvedValue({

@@ -64,7 +64,7 @@ export async function rollbackInstallation(options: {
     throw new PackageRollbackError(`No previous version found for package ${pkgName}`);
   }
   if (isIntegrationRollbackTTLExpired(packageSO.attributes.install_started_at)) {
-    throw new PackageRollbackError(`Rollback not allowed as TTL expired for ${pkgName}`);
+    throw new PackageRollbackError(`Rollback not allowed as TTL expired`);
   }
   const previousVersion = packageSO.attributes.previous_version;
   if (packageSO.attributes.install_source !== 'registry') {
