@@ -298,14 +298,14 @@ export class CommonPageObject extends FtrService {
 
     this.log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
-    // Check if we're already on the target URL
+    // Check if we're already on the exact target URL
     const currentUrlBeforeNav = await this.browser.getCurrentUrl();
 
     const normalizedCurrentUrl = this.normalizeUrlForComparison(currentUrlBeforeNav);
     const normalizedAppUrl = this.normalizeUrlForComparison(appUrl);
 
-    if (normalizedCurrentUrl.startsWith(normalizedAppUrl)) {
-      this.log.debug(`Already in the target app for ${appName}, skipping navigation.`);
+    if (normalizedCurrentUrl === normalizedAppUrl) {
+      this.log.debug(`Already on exact target URL for ${appName}, skipping navigation.`);
       return;
     }
 
